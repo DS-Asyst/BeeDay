@@ -12,3 +12,4 @@ C:\DevOps\MyHub\LevelUp\LevelUp\obj\Debug\net10.0\refint\LevelUp.dll
 C:\DevOps\MyHub\LevelUp\LevelUp\obj\Debug\net10.0\LevelUp.pdb
 C:\DevOps\MyHub\LevelUp\LevelUp\obj\Debug\net10.0\LevelUp.genruntimeconfig.cache
 C:\DevOps\MyHub\LevelUp\LevelUp\obj\Debug\net10.0\ref\LevelUp.dll
+C:\DevOps\MyHub\LevelUp\LevelUp\obj\Debug\net10.0\LevelUp.sourcelink.json

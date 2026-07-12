@@ -1,52 +1,78 @@
 ﻿using System.Text.Json;
 using LevelUp.Models;
 
-namespace LevelUp.Services
+namespace LevelUp.Services;
+
+public class SaveService
 {
-    public class SaveService
+    private readonly string filePath;
+
+    public SaveService()
     {
-        private readonly string filePath;
+        string projectDirectory = FindProjectDirectory();
 
-        public SaveService()
+        string dataDirectory = Path.Combine(
+            projectDirectory,
+            "Data"
+        );
+
+        Directory.CreateDirectory(dataDirectory);
+
+        filePath = Path.Combine(
+            dataDirectory,
+            "save.json"
+        );
+    }
+
+    private static string FindProjectDirectory()
+    {
+        DirectoryInfo? directory = new DirectoryInfo(
+            AppContext.BaseDirectory
+        );
+
+        while (directory is not null)
         {
-            string dataDirectory = Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "Data"
-            );
+            bool hasProjectFile = directory
+                .GetFiles("*.csproj")
+                .Length > 0;
 
-            Directory.CreateDirectory(dataDirectory);
-
-            filePath = Path.Combine(
-                dataDirectory,
-                "save.json"
-            );
-        }
-
-        public void SaveGame(GameData gameData)
-        {
-            JsonSerializerOptions options = new JsonSerializerOptions
+            if (hasProjectFile)
             {
-                WriteIndented = true
-            };
-
-            string json = JsonSerializer.Serialize(
-                gameData,
-                options
-            );
-
-            File.WriteAllText(filePath, json);
-        }
-
-        public GameData? LoadGame()
-        {
-            if (!File.Exists(filePath))
-            {
-                return null;
+                return directory.FullName;
             }
 
-            string json = File.ReadAllText(filePath);
-
-            return JsonSerializer.Deserialize<GameData>(json);
+            directory = directory.Parent;
         }
+
+        throw new DirectoryNotFoundException(
+            "Não foi possível localizar a pasta do projeto."
+        );
+    }
+
+    public void SaveGame(GameData gameData)
+    {
+        JsonSerializerOptions options = new()
+        {
+            WriteIndented = true
+        };
+
+        string json = JsonSerializer.Serialize(
+            gameData,
+            options
+        );
+
+        File.WriteAllText(filePath, json);
+    }
+
+    public GameData? LoadGame()
+    {
+        if (!File.Exists(filePath))
+        {
+            return null;
+        }
+
+        string json = File.ReadAllText(filePath);
+
+        return JsonSerializer.Deserialize<GameData>(json);
     }
 }

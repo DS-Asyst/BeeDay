@@ -3,28 +3,8 @@
   "WorkspaceRootPath": "C:\\DevOps\\MyHub\\LevelUp\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{0A39E8BF-800D-485B-BA96-F048D055B90E}|LevelUp\\LevelUp.csproj|c:\\devops\\myhub\\levelup\\levelup\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0A39E8BF-800D-485B-BA96-F048D055B90E}|LevelUp\\LevelUp.csproj|solutionrelative:levelup\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0A39E8BF-800D-485B-BA96-F048D055B90E}|LevelUp\\LevelUp.csproj|c:\\devops\\myhub\\levelup\\levelup\\services\\saveservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0A39E8BF-800D-485B-BA96-F048D055B90E}|LevelUp\\LevelUp.csproj|solutionrelative:levelup\\services\\saveservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0A39E8BF-800D-485B-BA96-F048D055B90E}|LevelUp\\LevelUp.csproj|c:\\devops\\myhub\\levelup\\levelup\\ui\\consolemenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0A39E8BF-800D-485B-BA96-F048D055B90E}|LevelUp\\LevelUp.csproj|solutionrelative:levelup\\ui\\consolemenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0A39E8BF-800D-485B-BA96-F048D055B90E}|LevelUp\\LevelUp.csproj|c:\\devops\\myhub\\levelup\\levelup\\services\\habitsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0A39E8BF-800D-485B-BA96-F048D055B90E}|LevelUp\\LevelUp.csproj|solutionrelative:levelup\\services\\habitsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0A39E8BF-800D-485B-BA96-F048D055B90E}|LevelUp\\LevelUp.csproj|c:\\devops\\myhub\\levelup\\levelup\\models\\gamedata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0A39E8BF-800D-485B-BA96-F048D055B90E}|LevelUp\\LevelUp.csproj|solutionrelative:levelup\\models\\gamedata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0A39E8BF-800D-485B-BA96-F048D055B90E}|LevelUp\\LevelUp.csproj|c:\\devops\\myhub\\levelup\\levelup\\levelup.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{0A39E8BF-800D-485B-BA96-F048D055B90E}|LevelUp\\LevelUp.csproj|solutionrelative:levelup\\levelup.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+      "AbsoluteMoniker": "D:0:0:{F0533EA7-26FE-F8B9-2F4A-50E63B07B746}|LevelUp\\LevelUp.csproj|c:\\devops\\myhub\\levelup\\levelup\\services\\saveservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F0533EA7-26FE-F8B9-2F4A-50E63B07B746}|LevelUp\\LevelUp.csproj|solutionrelative:levelup\\services\\saveservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -34,84 +14,19 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "SaveService.cs",
               "DocumentMoniker": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\Services\\SaveService.cs",
               "RelativeDocumentMoniker": "LevelUp\\Services\\SaveService.cs",
               "ToolTip": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\Services\\SaveService.cs",
               "RelativeToolTip": "LevelUp\\Services\\SaveService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-12T17:42:46.418Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "GameData.cs",
-              "DocumentMoniker": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\Models\\GameData.cs",
-              "RelativeDocumentMoniker": "LevelUp\\Models\\GameData.cs",
-              "ToolTip": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\Models\\GameData.cs",
-              "RelativeToolTip": "LevelUp\\Models\\GameData.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-12T17:40:16.181Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ConsoleMenu.cs",
-              "DocumentMoniker": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\UI\\ConsoleMenu.cs",
-              "RelativeDocumentMoniker": "LevelUp\\UI\\ConsoleMenu.cs",
-              "ToolTip": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\UI\\ConsoleMenu.cs",
-              "RelativeToolTip": "LevelUp\\UI\\ConsoleMenu.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAPQAAAAsAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-12T17:28:40.455Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "LevelUp",
-              "DocumentMoniker": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\LevelUp.csproj",
-              "RelativeDocumentMoniker": "LevelUp\\LevelUp.csproj",
-              "ToolTip": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\LevelUp.csproj",
-              "RelativeToolTip": "LevelUp\\LevelUp.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-07-12T17:28:07.361Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "HabitsService.cs",
-              "DocumentMoniker": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\Services\\HabitsService.cs",
-              "RelativeDocumentMoniker": "LevelUp\\Services\\HabitsService.cs",
-              "ToolTip": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\Services\\HabitsService.cs",
-              "RelativeToolTip": "LevelUp\\Services\\HabitsService.cs",
-              "ViewState": "AgIAABAAAAAAAAAAAAAgwB4AAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-12T16:07:28.687Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\Program.cs",
-              "RelativeDocumentMoniker": "LevelUp\\Program.cs",
-              "ToolTip": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\Program.cs",
-              "RelativeToolTip": "LevelUp\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAEAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-12T15:57:46.187Z",
+              "WhenOpened": "2026-07-12T19:18:37.304Z",
               "EditorCaption": ""
             }
           ]
