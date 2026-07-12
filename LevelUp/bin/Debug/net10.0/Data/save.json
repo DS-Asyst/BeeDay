@@ -1,0 +1,27 @@
+{
+  "Character": {
+    "Name": "Tiago",
+    "Level": 1,
+    "Experience": 0.1,
+    "Attributes": {
+      "Strength": 1,
+      "Intelligence": 1,
+      "Vitality": 1,
+      "Agility": 1,
+      "Luck": 1,
+      "Dexterity": 1
+    },
+    "ExperienceToNextLevel": 100
+  },
+  "Habits": [
+    {
+      "Id": 1,
+      "Title": "Drink\u0027s 500ml of water",
+      "Description": "Stay hydrated throughout the day.",
+      "DurationInMinutes": 1,
+      "TimesCompleted": 1,
+      "ExperiencesPerMinute": 0.1,
+      "ExperienceReward": 0.1
+    }
+  ]
+}
