@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "C:\\DevOps\\MyHub\\LevelUp\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{F0533EA7-26FE-F8B9-2F4A-50E63B07B746}|LevelUp\\LevelUp.csproj|c:\\devops\\myhub\\levelup\\levelup\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{F0533EA7-26FE-F8B9-2F4A-50E63B07B746}|LevelUp\\LevelUp.csproj|solutionrelative:levelup\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F0533EA7-26FE-F8B9-2F4A-50E63B07B746}|LevelUp\\LevelUp.csproj|c:\\devops\\myhub\\levelup\\levelup\\readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{F0533EA7-26FE-F8B9-2F4A-50E63B07B746}|LevelUp\\LevelUp.csproj|solutionrelative:levelup\\readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{F0533EA7-26FE-F8B9-2F4A-50E63B07B746}|LevelUp\\LevelUp.csproj|c:\\devops\\myhub\\levelup\\levelup\\services\\saveservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F0533EA7-26FE-F8B9-2F4A-50E63B07B746}|LevelUp\\LevelUp.csproj|solutionrelative:levelup\\services\\saveservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
@@ -19,6 +27,32 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": ".gitignore",
+              "DocumentMoniker": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\.gitignore",
+              "RelativeDocumentMoniker": "LevelUp\\.gitignore",
+              "ToolTip": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\.gitignore",
+              "RelativeToolTip": "LevelUp\\.gitignore",
+              "ViewState": "AgIAAFcAAAAAAAAAAAAgwFkAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-07-12T19:28:53.912Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "README.md",
+              "DocumentMoniker": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\README.md",
+              "RelativeDocumentMoniker": "LevelUp\\README.md",
+              "ToolTip": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\README.md",
+              "RelativeToolTip": "LevelUp\\README.md",
+              "ViewState": "AgIAADMBAAAAAAAAAAAcwFQBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-07-12T19:28:02.351Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "SaveService.cs",
               "DocumentMoniker": "C:\\DevOps\\MyHub\\LevelUp\\LevelUp\\Services\\SaveService.cs",
               "RelativeDocumentMoniker": "LevelUp\\Services\\SaveService.cs",
