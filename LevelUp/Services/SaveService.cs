@@ -11,6 +11,7 @@ public class SaveService
     {
         string projectDirectory = FindProjectDirectory();
 
+
         string dataDirectory = Path.Combine(
             projectDirectory,
             "Data"
@@ -22,6 +23,9 @@ public class SaveService
             dataDirectory,
             "save.json"
         );
+
+
+
     }
 
     private static string FindProjectDirectory()
@@ -49,6 +53,35 @@ public class SaveService
         );
     }
 
+    private string CreateBackup()
+    {
+        string? dataDirectory =
+            Path.GetDirectoryName(filePath);
+
+        if (dataDirectory is null)
+        {
+            throw new DirectoryNotFoundException(
+                "Não foi possível localizar a pasta do arquivo de salvamento."
+            );
+        }
+
+        string backupFileName =
+            $"save_backup_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+
+        string backupPath = Path.Combine(
+            dataDirectory,
+            backupFileName
+        );
+
+        File.Copy(
+            filePath,
+            backupPath,
+            overwrite: true
+        );
+
+        return backupPath;
+    }
+
     public void SaveGame(GameData gameData)
     {
         JsonSerializerOptions options = new()
@@ -66,13 +99,39 @@ public class SaveService
 
     public GameData? LoadGame()
     {
+
         if (!File.Exists(filePath))
         {
             return null;
         }
 
-        string json = File.ReadAllText(filePath);
+        try
+        {
+            string json = File.ReadAllText(filePath);
 
-        return JsonSerializer.Deserialize<GameData>(json);
+            return JsonSerializer.Deserialize<GameData>(json);
+        }
+        catch (JsonException)
+        {
+            string backupPath = CreateBackup();
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+
+            Console.WriteLine(
+                "O arquivo de salvamento é incompatível ou está corrompido."
+            );
+
+            Console.WriteLine(
+                $"Um backup foi criado em: {backupPath}"
+            );
+
+            Console.WriteLine(
+                "Um novo jogo será iniciado."
+            );
+
+            Console.ResetColor();
+
+            return null;
+        }
     }
 }
