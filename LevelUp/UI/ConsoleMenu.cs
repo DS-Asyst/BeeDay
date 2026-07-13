@@ -10,19 +10,22 @@ namespace LevelUp.UI
         private readonly SaveService saveService;
         private readonly Character character;
         private readonly CharacterScreen characterScreen;
+        private readonly AttributeService attributeService;
 
         public ConsoleMenu(
             CharacterService characterService,
             HabitService habitService,
             SaveService saveService,
             Character character,
-            CharacterScreen characterScreen)
+            CharacterScreen characterScreen,
+            AttributeService attributeService)
         {
             this.characterService = characterService;
             this.habitService = habitService;
             this.saveService = saveService;
             this.character = character;
             this.characterScreen = characterScreen;
+            this.attributeService = attributeService;
         }
 
         public void Start()

@@ -46,7 +46,8 @@ ConsoleMenu menu = new(
     habitService,
     saveService,
     character,
-    characterScreen
+    characterScreen,
+    attributeService
 );
 
 menu.Start();
