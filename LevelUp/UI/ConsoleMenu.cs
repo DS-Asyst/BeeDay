@@ -7,22 +7,22 @@ namespace LevelUp.UI
     {
         private readonly CharacterService characterService;
         private readonly HabitService habitService;
-        private readonly Character character;
         private readonly SaveService saveService;
-        private readonly AttributeService attributeService;
+        private readonly Character character;
+        private readonly CharacterScreen characterScreen;
 
         public ConsoleMenu(
             CharacterService characterService,
             HabitService habitService,
             SaveService saveService,
             Character character,
-            AttributeService attributeService)
+            CharacterScreen characterScreen)
         {
             this.characterService = characterService;
             this.habitService = habitService;
-            this.character = character;
             this.saveService = saveService;
-            this.attributeService = attributeService;
+            this.character = character;
+            this.characterScreen = characterScreen;
         }
 
         public void Start()
@@ -40,7 +40,7 @@ namespace LevelUp.UI
                 switch (option)
                 {
                     case "1":
-                        ShowCharacter();
+                        characterScreen.Show(character);
                         break;
 
                     case "2":
@@ -87,18 +87,6 @@ namespace LevelUp.UI
             Console.WriteLine("0 - Sair");
             Console.WriteLine();
             Console.Write("Escolha uma opção: ");
-        }
-
-        private void ShowCharacter()
-        {
-            Console.Clear();
-
-            Console.WriteLine("===== PERSONAGEM =====");
-            Console.WriteLine($"Nome        : {character.Name}");
-            Console.WriteLine($"Nível       : {character.Level}");
-            Console.WriteLine(
-                $"Experiência : {character.Experience}/{character.ExperienceToNextLevel}"
-            );
         }
 
         private void CreateHabit()

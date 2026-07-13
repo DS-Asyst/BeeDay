@@ -6,6 +6,7 @@ using LevelUp.UI;
 HabitService habitService = new HabitService();
 SaveService saveService = new SaveService();
 ProgressionService progressionService = new();
+CharacterScreen characterScreen = new();
 
 CharacterService characterService =
     new(progressionService);
@@ -39,12 +40,13 @@ else
     saveService.SaveGame(newGameData);
 }
 
-ConsoleMenu menu = new ConsoleMenu(
+
+ConsoleMenu menu = new(
     characterService,
     habitService,
     saveService,
     character,
-    attributeService
+    characterScreen
 );
 
 menu.Start();
