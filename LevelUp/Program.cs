@@ -7,6 +7,7 @@ HabitService habitService = new HabitService();
 SaveService saveService = new SaveService();
 ProgressionService progressionService = new();
 CharacterScreen characterScreen = new();
+InputReader inputReader = new();
 
 CharacterService characterService =
     new(progressionService);
@@ -40,14 +41,22 @@ else
     saveService.SaveGame(newGameData);
 }
 
+TrainingScreen trainingScreen = new(
+    habitService,
+    characterService,
+    attributeService,
+    saveService,
+    inputReader,
+    character
+);
+
 
 ConsoleMenu menu = new(
-    characterService,
     habitService,
     saveService,
     character,
     characterScreen,
-    attributeService
+    trainingScreen
 );
 
 menu.Start();
