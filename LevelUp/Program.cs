@@ -24,7 +24,19 @@ if (loadedGame is not null)
 }
 else
 {
-    character = characterService.CreateCharacter("Tiago");
+    CharacterCreationScreen characterCreationScreen =
+        new(characterService);
+
+    character =
+        characterCreationScreen.CreateCharacter();
+
+    GameData newGameData = new()
+    {
+        Character = character,
+        Habits = habitService.GetAllHabits()
+    };
+
+    saveService.SaveGame(newGameData);
 }
 
 ConsoleMenu menu = new ConsoleMenu(
