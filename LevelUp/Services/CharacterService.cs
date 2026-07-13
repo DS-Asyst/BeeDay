@@ -4,6 +4,13 @@ namespace LevelUp.Services
 {
     public class CharacterService
     {
+        private readonly ProgressionService progressionService;
+
+        public CharacterService(
+            ProgressionService progressionService)
+        {
+            this.progressionService = progressionService;
+        }
         public Character CreateCharacter(string name)
         {
             Character character = new Character
@@ -14,17 +21,14 @@ namespace LevelUp.Services
             return character;
         }
 
-        public void AddExperience(Character character, decimal experienceEarned)
+        public void AddExperience(
+            Character character,
+            decimal experienceEarned)
         {
-            character.Experience += experienceEarned;
-
-            while (character.Experience >= character.ExperienceToNextLevel)
-            {
-                decimal requiredExperience = character.ExperienceToNextLevel;
-
-                character.Experience -= requiredExperience;
-                character.Level++;
-            }
+            progressionService.AddExperience(
+                character,
+                experienceEarned
+            );
         }
     }
 }

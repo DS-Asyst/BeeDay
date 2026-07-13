@@ -4,7 +4,7 @@ using System.Text;
 
 namespace LevelUp.Models
 {
-    public class Character
+    public class Character : ILevelProgress
     {
         public string Name { get; set; } = string.Empty;
         public int Level { get; set; } = 1;

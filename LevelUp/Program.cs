@@ -2,9 +2,16 @@
 using LevelUp.Services;
 using LevelUp.UI;
 
-CharacterService characterService = new CharacterService();
+
 HabitService habitService = new HabitService();
 SaveService saveService = new SaveService();
+ProgressionService progressionService = new();
+
+CharacterService characterService =
+    new(progressionService);
+
+AttributeService attributeService =
+    new(progressionService);
 
 GameData? loadedGame = saveService.LoadGame();
 
@@ -24,7 +31,8 @@ ConsoleMenu menu = new ConsoleMenu(
     characterService,
     habitService,
     saveService,
-    character
+    character,
+    attributeService
 );
 
 menu.Start();

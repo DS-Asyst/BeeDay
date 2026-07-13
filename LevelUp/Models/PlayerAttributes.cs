@@ -3,18 +3,37 @@ using System.Collections.Generic;
 using System.Text;
 
 
-namespace LevelUp.Models
+namespace LevelUp.Models;
+
+public class PlayerAttributes
 {
-    public class PlayerAttributes
+    public AttributeProgress Strength { get; set; } = new();
+
+    public AttributeProgress Intelligence { get; set; } = new();
+
+    public AttributeProgress Vitality { get; set; } = new();
+
+    public AttributeProgress Agility { get; set; } = new();
+
+    public AttributeProgress Luck { get; set; } = new();
+
+    public AttributeProgress Dexterity { get; set; } = new();
+
+    public AttributeProgress GetAttribute(AttributeType attributeType)
     {
+        return attributeType switch
+        {
+            AttributeType.Strength => Strength,
+            AttributeType.Intelligence => Intelligence,
+            AttributeType.Vitality => Vitality,
+            AttributeType.Agility => Agility,
+            AttributeType.Luck => Luck,
+            AttributeType.Dexterity => Dexterity,
 
-        public int Strength { get; set; } = 1;
-        public int Intelligence { get; set; } = 1;
-        public int Vitality { get; set; } = 1;
-        public int Agility { get; set; } = 1;
-        public int Luck { get; set; } = 1;
-        public int Dexterity { get; set; } = 1;
-
-
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(attributeType),
+                "Atributo inválido.")
+        };
     }
 }
+

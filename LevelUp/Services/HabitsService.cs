@@ -12,14 +12,16 @@ namespace LevelUp.Services
         public Habit CreateHabit(
             string title,
             string description,
-            int durationInMinutes)
+            int durationInMinutes,
+            AttributeType attributeType)
         {
             Habit habit = new Habit
             {
                 Id = habits.Count + 1,
                 Title = title,
                 Description = description,
-                DurationInMinutes = durationInMinutes
+                DurationInMinutes = durationInMinutes,
+                AttributeType = attributeType
             };
 
             habits.Add(habit);

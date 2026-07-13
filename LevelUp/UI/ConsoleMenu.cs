@@ -9,17 +9,20 @@ namespace LevelUp.UI
         private readonly HabitService habitService;
         private readonly Character character;
         private readonly SaveService saveService;
+        private readonly AttributeService attributeService;
 
         public ConsoleMenu(
             CharacterService characterService,
             HabitService habitService,
             SaveService saveService,
-            Character character)
+            Character character,
+            AttributeService attributeService)
         {
             this.characterService = characterService;
             this.habitService = habitService;
             this.character = character;
             this.saveService = saveService;
+            this.attributeService = attributeService;
         }
 
         public void Start()
@@ -129,10 +132,14 @@ namespace LevelUp.UI
                 return;
             }
 
+            AttributeType attributeType = SelectAttribute();
+
             Habit habit = habitService.CreateHabit(
                 title,
                 description,
-                durationInMinutes
+                durationInMinutes,
+                attributeType
+
             );
 
             Console.WriteLine();
@@ -140,6 +147,36 @@ namespace LevelUp.UI
             Console.WriteLine($"ID         : {habit.Id}");
             Console.WriteLine($"Título     : {habit.Title}");
             Console.WriteLine($"Recompensa : {habit.ExperienceReward} XP");
+        }
+
+        private AttributeType SelectAttribute()
+        {
+            Console.WriteLine();
+            Console.WriteLine("Escolha o atributo deste hábito:");
+            Console.WriteLine("1 - Strength");
+            Console.WriteLine("2 - Intelligence");
+            Console.WriteLine("3 - Vitality");
+            Console.WriteLine("4 - Agility");
+            Console.WriteLine("5 - Luck");
+            Console.WriteLine("6 - Dexterity");
+            Console.WriteLine();
+
+            Console.Write("Opção: ");
+
+            bool validOption = int.TryParse(
+                Console.ReadLine(),
+                out int option
+            );
+
+            if (!validOption ||
+                !Enum.IsDefined(typeof(AttributeType), option))
+            {
+                Console.WriteLine("Atributo inválido.");
+
+                return SelectAttribute();
+            }
+
+            return (AttributeType)option;
         }
 
         private void ListHabits()
@@ -223,6 +260,13 @@ namespace LevelUp.UI
                 character,
                 experienceEarned
             );
+
+            attributeService.AddExperience(
+                character.Attributes,
+                selectedHabit.AttributeType,
+                selectedHabit.AttributeExperienceReward
+            );
+
 
             Console.WriteLine();
             Console.WriteLine("Hábito concluído com sucesso.");
