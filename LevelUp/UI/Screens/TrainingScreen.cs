@@ -117,11 +117,11 @@ public class TrainingScreen
             "Treinamento cadastrado com sucesso."
         );
 
-        Console.WriteLine($"ID: {habit.Id}");
-        Console.WriteLine($"Título: {habit.Title}");
-        Console.WriteLine(
-            $"Recompensa: {habit.ExperienceReward} XP"
-        );
+        AnsiConsole.WriteLine();
+
+        TrainingCreatedCard createdCard = new(habit);
+
+        AnsiConsole.Write(createdCard.Build());
     }
 
     private AttributeType SelectAttribute()
@@ -155,7 +155,6 @@ public class TrainingScreen
 
     private void CompleteTraining()
     {
-        Console.Clear();
         ConsoleHelper.ShowHeader("Concluir treinamento");
 
         List<Habit> habits =
@@ -172,28 +171,23 @@ public class TrainingScreen
 
 
 
-        foreach (Habit habit in habits)
-        {
-            Console.WriteLine(
-                $"{habit.Id} - {habit.Title} " +
-                $"({habit.ExperienceReward} XP)"
-            );
-        }
-
-        Console.WriteLine();
-
-        int habitId = inputReader.ReadPositiveInteger(
-            "Digite o ID do treinamento concluído: "
+        Habit selectedHabit = inputReader.ReadSelection(
+            "Selecione o treinamento concluído:",
+            habits,
+            habit =>
+                $"{habit.Title} — " +
+                $"{habit.ExperienceReward:0.##} XP — " +
+                $"{habit.AttributeType}"
         );
 
-        Habit? selectedHabit = habits.FirstOrDefault(
-            habit => habit.Id == habitId
+        bool confirmed = inputReader.ReadConfirmation(
+            $"Concluir o treinamento '{selectedHabit.Title}'?"
         );
 
-        if (selectedHabit is null)
+        if (!confirmed)
         {
-            ConsoleHelper.ShowError(
-                "Treinamento não encontrado."
+            ConsoleHelper.ShowInformation(
+                "Conclusão do treinamento cancelada."
             );
 
             return;
@@ -216,31 +210,19 @@ public class TrainingScreen
         SaveGame();
 
         ConsoleHelper.ShowSuccess(
-        "Treinamento concluído com sucesso."
+            "Treinamento concluíd0o com sucesso."
         );
 
-        Console.WriteLine();
-        Console.WriteLine(
-            "Treinamento concluído com sucesso."
-        );
-        Console.WriteLine(
-            $"Treinamento: {selectedHabit.Title}"
-        );
-        Console.WriteLine(
-            $"XP recebida: {experienceEarned}"
-        );
-        Console.WriteLine(
-            $"Conclusões: {selectedHabit.TimesCompleted}"
+        AnsiConsole.WriteLine();
+
+        TrainingResultCard resultCard = new(
+            selectedHabit,
+            character,
+            experienceEarned
         );
 
-        Console.WriteLine();
-        Console.WriteLine(
-            $"Nível atual: {character.Level}"
-        );
-        Console.WriteLine(
-            $"Experiência: {character.Experience}/" +
-            $"{character.ExperienceToNextLevel}"
-        );
+        AnsiConsole.Write(resultCard.Build());
+
     }
 
     private void SaveGame()
