@@ -1,6 +1,9 @@
 using LevelUp.Models;
 using LevelUp.UI.Themes;
 using Spectre.Console;
+using CharacterModel = LevelUp.Models.Character;
+using LevelUp.UI.Layout;
+using LevelUp.UI.Builders;
 
 namespace LevelUp.UI.Components.Cards;
 
@@ -8,9 +11,9 @@ public sealed class CharacterCard
 {
     private const int ExperienceBarWidth = 30;
 
-    private readonly Character _character;
+    private readonly CharacterModel _character;
 
-    public CharacterCard(Character character)
+    public CharacterCard(CharacterModel character)
     {
         ArgumentNullException.ThrowIfNull(character);
 
@@ -28,21 +31,27 @@ public sealed class CharacterCard
         summary.AddColumn();
 
         summary.AddRow(
-            $"[bold {LevelUpTheme.MutedText}]Name[/]",
-            $"[bold {LevelUpTheme.Text}]" +
-            $"{Markup.Escape(_character.Name)}[/]"
+            StatisticRow.Build(
+                "Name",
+                _character.Name,
+                $"bold {LevelUpTheme.Text}"
+            )
         );
 
         summary.AddRow(
-            $"[bold {LevelUpTheme.MutedText}]Level[/]",
-            $"[bold {LevelUpTheme.Primary}]" +
-            $"{_character.Level}[/]"
+            StatisticRow.Build(
+                "Level",
+                _character.Level.ToString(),
+                $"bold {LevelUpTheme.Primary}"
+            )
         );
 
         summary.AddRow(
-            $"[bold {LevelUpTheme.MutedText}]Experience[/]",
-            $"{_character.Experience}/" +
-            $"{_character.ExperienceToNextLevel}"
+            StatisticRow.Build(
+                "Experience",
+                $"{_character.Experience}/" +
+                $"{_character.ExperienceToNextLevel}"
+            )
         );
 
         summary.AddRow(
@@ -52,15 +61,12 @@ public sealed class CharacterCard
             BuildExperienceBar()
         );
 
-        return new Panel(summary)
-        {
-            Header = new PanelHeader(
-                $"[bold {LevelUpTheme.Primary}]" +
-                $"{UIIcons.Character} Character Summary[/]"
-            ),
-            Border = BoxBorder.Rounded,
-            Padding = new Padding(1, 1)
-        };
+        return PanelBuilder.Build(
+            title: "Character",
+            content: summary,
+            icon: UIIcons.Character,
+            expand: false
+        );
     }
 
     private Markup BuildExperienceBar()

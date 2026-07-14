@@ -1,5 +1,6 @@
 ﻿using LevelUp.Models;
 using LevelUp.UI.Components.Cards;
+using LevelUp.UI.Components.Character;
 using Spectre.Console;
 
 namespace LevelUp.UI;
@@ -11,7 +12,12 @@ public class CharacterScreen
         ConsoleHelper.ShowHeader("Character");
 
         CharacterCard characterCard = new(character);
+        AttributeTable attributeTable = new(character.Attributes);
 
         AnsiConsole.Write(characterCard.Build());
+
+        AnsiConsole.WriteLine();
+
+        AnsiConsole.Write(attributeTable.Build());
     }
 }

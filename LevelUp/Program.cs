@@ -2,6 +2,9 @@
 using LevelUp.Services;
 using LevelUp.UI;
 
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.InputEncoding = System.Text.Encoding.UTF8;
+
 
 HabitService habitService = new HabitService();
 SaveService saveService = new SaveService();
