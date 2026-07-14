@@ -84,6 +84,8 @@ public class SaveService
 
     public void SaveGame(GameData gameData)
     {
+        ArgumentNullException.ThrowIfNull(gameData);
+
         JsonSerializerOptions options = new()
         {
             WriteIndented = true
@@ -109,7 +111,19 @@ public class SaveService
         {
             string json = File.ReadAllText(filePath);
 
-            return JsonSerializer.Deserialize<GameData>(json);
+            GameData? gameData =
+                JsonSerializer.Deserialize<GameData>(json);
+
+            if (gameData is null)
+            {
+                return null;
+            }
+
+            gameData.Character ??= new Character();
+            gameData.Habits ??= new List<Habit>();
+            gameData.Projects ??= new List<Project>();
+
+            return gameData;
         }
         catch (JsonException)
         {
