@@ -1,35 +1,38 @@
-﻿using LevelUp.Domain.Character;
-using CharacterModel = LevelUp.Domain.Character.Character;
+﻿using CharacterModel = LevelUp.Domain.Character.Character;
 
-namespace LevelUp.Services
+namespace LevelUp.Services.Character;
+
+public sealed class CharacterService
 {
-    public class CharacterService
+    private readonly ProgressionService progressionService;
+
+    public CharacterService(
+        ProgressionService progressionService
+    )
     {
-        private readonly ProgressionService progressionService;
+        this.progressionService = progressionService;
+    }
 
-        public CharacterService(
-            ProgressionService progressionService)
-        {
-            this.progressionService = progressionService;
-        }
-        public Character CreateCharacter(string name)
-        {
-            CharacterModel character = new Character
-            {
-                Name = name
-            };
+    public CharacterModel CreateCharacter(string name)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
-            return character;
-        }
-
-        public void AddExperience(
-            CharacterModel character,
-            decimal experienceEarned)
+        return new CharacterModel
         {
-            progressionService.AddExperience(
-                character,
-                experienceEarned
-            );
-        }
+            Name = name.Trim()
+        };
+    }
+
+    public void AddExperience(
+        CharacterModel character,
+        decimal experience
+    )
+    {
+        ArgumentNullException.ThrowIfNull(character);
+
+        progressionService.AddExperience(
+            character,
+            experience
+        );
     }
 }

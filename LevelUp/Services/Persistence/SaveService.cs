@@ -3,6 +3,7 @@ using LevelUp.Domain;
 using LevelUp.Domain.Character;
 using LevelUp.Domain.Habits;
 using LevelUp.Domain.Projects;
+using CharacterModel = LevelUp.Domain.Character.Character;
 
 namespace LevelUp.Services.Persistence;
 
@@ -122,7 +123,7 @@ public class SaveService
                 return null;
             }
 
-            gameData.Character ??= new Character();
+            gameData.Character ??= new CharacterModel();
             gameData.Habits ??= new List<Habit>();
             gameData.Projects ??= new List<Project>();
 

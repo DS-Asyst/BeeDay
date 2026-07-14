@@ -1,54 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using LevelUp.Domain.Attributes;
+﻿using LevelUp.Domain.Attributes;
 using LevelUp.Domain.Habits;
 
-namespace LevelUp.Services
+namespace LevelUp.Services.Habits;
+
+public class HabitService
 {
-    public class HabitService
+    private readonly List<Habit> habits = new();
+
+    public Habit CreateHabit(
+        string title,
+        string description,
+        int durationInMinutes,
+        AttributeType attributeType)
     {
-        private readonly List<Habit> habits = new();
-
-        public Habit CreateHabit(
-            string title,
-            string description,
-            int durationInMinutes,
-            AttributeType attributeType)
+        Habit habit = new Habit
         {
-            Habit habit = new Habit
-            {
-                Id = habits.Count + 1,
-                Title = title,
-                Description = description,
-                DurationInMinutes = durationInMinutes,
-                AttributeType = attributeType
-            };
+            Id = habits.Count + 1,
+            Title = title,
+            Description = description,
+            DurationInMinutes = durationInMinutes,
+            AttributeType = attributeType
+        };
 
-            habits.Add(habit);
+        habits.Add(habit);
 
-            return habit;
-        }
+        return habit;
+    }
 
-        public List<Habit> GetAllHabits()
-        {
-            return habits;
-        }
+    public List<Habit> GetAllHabits()
+    {
+        return habits;
+    }
 
-        public decimal CompleteHabit(Habit habit)
+    public decimal CompleteHabit(Habit habit)
 
 
-        {
-            habit.TimesCompleted++;
+    {
+        habit.TimesCompleted++;
 
-            return habit.ExperienceReward;
+        return habit.ExperienceReward;
 
-        }
+    }
 
-        public void LoadHabits(List<Habit> loadedHabits)
-        {
-            habits.Clear();
-            habits.AddRange(loadedHabits);
-        }
+    public void LoadHabits(List<Habit> loadedHabits)
+    {
+        habits.Clear();
+        habits.AddRange(loadedHabits);
     }
 }

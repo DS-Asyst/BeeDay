@@ -1,5 +1,5 @@
 ﻿using CharacterModel = LevelUp.Domain.Character.Character;
-using LevelUp.Services;
+using LevelUp.Services.Character;
 
 namespace LevelUp.UI;
 

@@ -1,7 +1,9 @@
-﻿using LevelUp.Domain;
+﻿using LevelUp.Services.Habits;
+using LevelUp.Services.Persistence;
+using LevelUp.Domain;
 using LevelUp.Domain.Habits;
 using CharacterModel = LevelUp.Domain.Character.Character;
-using LevelUp.Services;
+
 
 namespace LevelUp.UI;
 

@@ -1,7 +1,9 @@
 ﻿using LevelUp.Domain;
 using LevelUp.Domain.Attributes;
 using LevelUp.Domain.Habits;
-using LevelUp.Services;
+using LevelUp.Services.Character;
+using LevelUp.Services.Habits;
+using LevelUp.Services.Persistence;
 using LevelUp.UI.Components.Training;
 using Spectre.Console;
 using CharacterModel = LevelUp.Domain.Character.Character;

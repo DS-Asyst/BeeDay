@@ -2,7 +2,10 @@
 using LevelUp.Domain.Habits;
 using LevelUp.Domain.Projects;
 using CharacterModel = LevelUp.Domain.Character.Character;
-using LevelUp.Services;
+using LevelUp.Services.Character;
+using LevelUp.Services.Habits;
+using LevelUp.Services.Persistence;
+using LevelUp.Services.Projects;
 using LevelUp.UI;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
