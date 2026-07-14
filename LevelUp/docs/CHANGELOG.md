@@ -8,6 +8,16 @@ The project currently follows development phases rather than strict semantic rel
 
 ## Unreleased
 
+### Changed
+
+- replaced the flat Models directory with a feature-oriented Domain structure;
+- organized Character, Attributes, Habits and Projects into domain folders;
+- organized services by Character, Habits, Projects and Persistence;
+- aligned namespaces with the new directory structure;
+- introduced Project, ProjectStatus and ProjectService;
+- added Projects to GameData persistence;
+- preserved compatibility with older save files.
+
 ### Architecture Track
 
 Added:

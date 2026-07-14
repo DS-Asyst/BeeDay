@@ -9,8 +9,20 @@ The system uses real-world terminology in its domain model and RPG terminology i
 The current application is organized around four primary areas:
 
 ```text
-LevelUp
-├── Models
-├── Services
-├── UI
-└── Data
+LevelUp/
+├── Domain/
+│   ├── Attributes/
+│   ├── Character/
+│   ├── Habits/
+│   ├── Projects/
+│   └── GameData.cs
+│
+├── Services/
+│   ├── Character/
+│   ├── Habits/
+│   ├── Persistence/
+│   └── Projects/
+│
+├── UI/
+├── Data/
+└── docs/

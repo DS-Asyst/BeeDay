@@ -134,7 +134,19 @@ Prepare the codebase for long-term domain evolution.
 
 ## Phase 3 — Projects
 
-**Status:** Planned
+### Phase 3 progress
+
+- [x] Project domain model
+- [x] Project lifecycle
+- [x] ProjectStatus
+- [x] ProjectService foundation
+- [x] Project persistence
+- [x] Domain organization by feature
+- [x] Service organization by feature
+- [ ] Quest domain
+- [ ] Project progress calculation
+- [ ] Project workflows
+- [ ] Project UI
 
 ### Objective
 
