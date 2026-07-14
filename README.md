@@ -1,172 +1,107 @@
-# 🎮 LevelUp
+# LevelUp
 
-Transform your real life into an RPG.
+> Transform real-world productivity into RPG progression.
 
+[Badges]
 
-## About
+---
 
-LevelUp is a console RPG built with C# and .NET.
+## Overview
 
-The objective is to transform personal development into an RPG experience, where every completed training grants experience, levels, attribute progression and, in future versions, quests, bosses, gold and achievements.
+LevelUp is a productivity RPG built with C# and .NET.
 
-The project is also used as a study project to practice Clean Code, Object-Oriented Programming, Git, GitHub and Software Architecture.
+Instead of simply tracking habits and tasks, LevelUp transforms everyday progress into an RPG experience.
 
+The architecture models real-world concepts such as habits, quests and projects, while the UI presents them through RPG-inspired mechanics.
 
-## Current Features
+---
 
-- Character creation
+## Features
+
+### Current
+
 - Character progression
 - Experience system
-- Attribute system
-- Training management
+- Attribute progression
+- Habit management
 - JSON persistence
-- Input validation
-- Modular console UI
+- Spectre.Console UI
+- Interactive terminal interface
 
+### Planned
+
+- Projects
+- Quests
+- Milestones
+- Gold
+- Rewards
+- Achievements
+- Titles
+- Analytics
+
+---
+
+## Architecture
+
+LevelUp separates domain concepts from presentation.
+
+```text
+Presentation
+    ↓
+Application
+    ↓
+Domain
+    ↓
+Persistence
+```
+
+---
+
+## Documentation
+
+- Vision
+- Architecture
+- Game Terminology
+- Roadmap
+- Decision Log
+- Contributing Guide
+- Changelog
+
+---
 
 ## Project Structure
 
 ```text
 LevelUp/
-
-├── Data/
-│
-├── Models/
-│   ├── AttributeProgress
-│   ├── AttributeType
-│   ├── Character
-│   ├── GameData
-│   ├── Habit
-│   ├── ILevelProgress
-│   └── PlayerAttributes
-│
-├── Services/
-│   ├── AttributeService
-│   ├── CharacterService
-│   ├── HabitsService
-│   ├── ProgressionService
-│   └── SaveService
-│
-├── UI/
-│   ├── ProjectScreen
-│   ├── CharacterCreationScreen
-│   ├── CharacterScreen
-│   ├── ConsoleHelper
-│   ├── GoldScreen
-│   ├── InputReader
-│   ├── MainMenuScreen
-│   ├── QuestScreen
-│   └── TrainingScreen
-│
-└── Program.cs
+├── Models
+├── Services
+├── UI
+├── Data
+└── docs
 ```
 
+---
 
-## Technologies
-
-- C#
-- .NET 10
-- System.Text.Json
-- Git
-- GitHub
-
-
-## Running
-
-Clone the repository
+## Getting Started
 
 ```bash
-git clone https://github.com/tiagoarrigoni/LevelUp.git
-```
+git clone ...
 
-Enter the project
+dotnet restore
 
-```bash
-cd LevelUp
-```
+dotnet build
 
-Run
-
-```bash
 dotnet run
 ```
 
+---
 
 ## Roadmap
 
-### Phase 1
-- [x] Character creation
-- [x] Character progression
-- [x] JSON Save
-- [x] Training System
-- [x] Console UI Refactoring
+See `docs/Roadmap.md`
 
-### Phase 2
-- [ ] Rename Habit → Training
-- [ ] Edit trainings
-- [ ] Delete trainings
-- [ ] Training categories
-- [ ] Daily streak
+---
 
-### Phase 3
-- [ ] Quest System
-- [ ] Boss System
-- [ ] Gold System
-- [ ] Inventory
+## License
 
-### Phase 4
-- [ ] SQLite
-- [ ] ASP.NET Core API
-- [ ] Blazor UI
-
-
-## Architecture
-
-```text
-Program
-        │
-        ▼
-MainMenuScreen
-        │
-        ├── CharacterScreen
-        ├── TrainingScreen
-        ├── QuestScreen
-        ├── ProjectScreen
-        └── GoldScreen
-
-                │
-                ▼
-
-Services
-
-        │
-        ▼
-
-Models
-
-        │
-        ▼
-
-JSON Persistence
-```
-
-## Git Workflow
-
-develop
-
-↓
-
-feature/*
-
-↓
-
-develop
-
-↓
-
-main
-
-
-## Author
-
-Developed by Tiago Arrigoni
+MIT
