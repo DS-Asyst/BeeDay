@@ -1,7 +1,11 @@
 ﻿using System.Text.Json;
-using LevelUp.Models;
+using LevelUp.Domain;
+using LevelUp.Domain.Character;
+using LevelUp.Domain.Habits;
+using LevelUp.Domain.Projects;
+using CharacterModel = LevelUp.Domain.Character.Character;
 
-namespace LevelUp.Services;
+namespace LevelUp.Services.Persistence;
 
 public class SaveService
 {
@@ -84,6 +88,8 @@ public class SaveService
 
     public void SaveGame(GameData gameData)
     {
+        ArgumentNullException.ThrowIfNull(gameData);
+
         JsonSerializerOptions options = new()
         {
             WriteIndented = true
@@ -109,7 +115,19 @@ public class SaveService
         {
             string json = File.ReadAllText(filePath);
 
-            return JsonSerializer.Deserialize<GameData>(json);
+            GameData? gameData =
+                JsonSerializer.Deserialize<GameData>(json);
+
+            if (gameData is null)
+            {
+                return null;
+            }
+
+            gameData.Character ??= new CharacterModel();
+            gameData.Habits ??= new List<Habit>();
+            gameData.Projects ??= new List<Project>();
+
+            return gameData;
         }
         catch (JsonException)
         {

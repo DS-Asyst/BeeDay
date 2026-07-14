@@ -1,6 +1,6 @@
-﻿using LevelUp.Models;
+﻿using LevelUp.Domain.Character;
 
-namespace LevelUp.Services;
+namespace LevelUp.Services.Character;
 
 public class ProgressionService
 {

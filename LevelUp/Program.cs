@@ -1,5 +1,11 @@
-﻿using LevelUp.Models;
-using LevelUp.Services;
+﻿using LevelUp.Domain;
+using LevelUp.Domain.Habits;
+using LevelUp.Domain.Projects;
+using CharacterModel = LevelUp.Domain.Character.Character;
+using LevelUp.Services.Character;
+using LevelUp.Services.Habits;
+using LevelUp.Services.Persistence;
+using LevelUp.Services.Projects;
 using LevelUp.UI;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -22,7 +28,7 @@ AttributeService attributeService =
 
 GameData? loadedGame = saveService.LoadGame();
 
-Character character;
+CharacterModel character;
 
 if (loadedGame is not null)
 {

@@ -219,3 +219,25 @@ Habits and quests may eventually share reward or completion behavior, but quests
 - Habit remains independent;
 - Quest will be modeled based on real requirements;
 - a shared abstraction will only be introduced after duplication becomes clear.
+
+## 2026-07-14 — Organize domain and services by feature
+
+### Decision
+
+Replace the generic Models structure with a Domain structure organized by feature, and organize application services using the same domain boundaries.
+
+### Context
+
+The number of domain concepts was increasing with Projects, Quests, Titles, Achievements and Gold.
+
+Keeping all models and services in flat folders would make navigation and ownership unclear.
+
+### Consequences
+
+- domain types are grouped by business concept;
+- namespaces match the physical folder structure;
+- services are grouped by the feature they coordinate;
+- ProjectService belongs to Services/Projects;
+- SaveService belongs to Services/Persistence;
+- future Quest types and services will have dedicated folders;
+- references throughout Program, UI and services use the new namespaces.

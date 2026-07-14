@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 
-namespace LevelUp.Models;
+namespace LevelUp.Domain.Attributes;
 
 public class PlayerAttributes
 {

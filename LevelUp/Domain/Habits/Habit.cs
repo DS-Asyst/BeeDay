@@ -1,4 +1,7 @@
-﻿namespace LevelUp.Models;
+﻿using LevelUp.Domain.Attributes;
+
+namespace LevelUp.Domain.Habits;
+
 
 public class Habit
 {

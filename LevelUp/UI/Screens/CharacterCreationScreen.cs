@@ -1,5 +1,5 @@
-﻿using LevelUp.Models;
-using LevelUp.Services;
+﻿using CharacterModel = LevelUp.Domain.Character.Character;
+using LevelUp.Services.Character;
 
 namespace LevelUp.UI;
 
@@ -13,7 +13,7 @@ public class CharacterCreationScreen
         this.characterService = characterService;
     }
 
-    public Character CreateCharacter()
+    public CharacterModel CreateCharacter()
     {
         Console.Clear();
 
