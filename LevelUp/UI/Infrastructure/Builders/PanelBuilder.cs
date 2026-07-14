@@ -1,8 +1,8 @@
-using LevelUp.UI.Themes;
+using LevelUp.UI.Infrastructure.Themes;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
-namespace LevelUp.UI.Builders;
+namespace LevelUp.UI.Infrastructure.Builders;
 
 public static class PanelBuilder
 {

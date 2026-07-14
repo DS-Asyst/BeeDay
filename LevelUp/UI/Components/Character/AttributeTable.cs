@@ -1,5 +1,5 @@
 using LevelUp.Models;
-using LevelUp.UI.Themes;
+using LevelUp.UI.Infrastructure.Themes;
 using Spectre.Console;
 
 namespace LevelUp.UI.Components.Character;

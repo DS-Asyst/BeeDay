@@ -1,4 +1,4 @@
-namespace LevelUp.UI.Themes;
+namespace LevelUp.UI.Infrastructure.Themes;
 
 public static class UIIcons
 {

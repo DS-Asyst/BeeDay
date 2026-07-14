@@ -1,5 +1,4 @@
 ﻿using LevelUp.Models;
-using LevelUp.UI.Components.Cards;
 using LevelUp.UI.Components.Character;
 using Spectre.Console;
 

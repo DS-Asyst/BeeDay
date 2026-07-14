@@ -1,5 +1,5 @@
 ﻿using Spectre.Console;
-using LevelUp.UI.Themes;
+using LevelUp.UI.Infrastructure.Themes;
 
 namespace LevelUp.UI;
 

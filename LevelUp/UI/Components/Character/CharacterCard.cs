@@ -1,11 +1,11 @@
 using LevelUp.Models;
-using LevelUp.UI.Themes;
+using LevelUp.UI.Infrastructure.Themes;
 using Spectre.Console;
 using CharacterModel = LevelUp.Models.Character;
 using LevelUp.UI.Layout;
-using LevelUp.UI.Builders;
+using LevelUp.UI.Infrastructure.Builders;
 
-namespace LevelUp.UI.Components.Cards;
+namespace LevelUp.UI.Components.Character;
 
 public sealed class CharacterCard
 {
