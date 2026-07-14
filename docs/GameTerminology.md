@@ -1,44 +1,43 @@
-# LevelUp — Game Terminology
+## Purpose
 
-Este documento define o vocabulário oficial do LevelUp.
+This document defines the official vocabulary used by LevelUp.
 
-O projeto utiliza nomes reais e claros na arquitetura e nas regras de negócio, enquanto a interface apresenta esses conceitos com uma linguagem inspirada em RPG.
+The architecture uses real-world terminology.
 
-## Princípio
+The user interface may use RPG terminology to create an engaging experience without changing the meaning of the domain.
 
-A camada de domínio deve representar o significado real da funcionalidade.
+## Core Principle
 
-A camada de apresentação pode utilizar metáforas de RPG, desde que não altere o significado do domínio.
+> The domain represents reality.  
+> The presentation represents the RPG fantasy.
 
-## Terminologia oficial
+## Official Vocabulary
 
-| Conceito real | Código e domínio | Apresentação na UI |
+| Real-world concept | Domain name | UI terminology |
 |---|---|---|
-| Usuário e sua progressão | `Character` | Character |
-| Atividade recorrente | `Habit` | Training |
-| Tarefa com conclusão única | `Quest` | Quest |
-| Conjunto organizado de tarefas | `Project` | Project |
-| Marco importante de um projeto | `Milestone` | Boss |
-| Experiência global | `Experience` | XP |
-| Experiência de atributo | `AttributeExperience` | Attribute XP |
-| Característica evolutiva | `Attribute` | Attribute |
-| Moeda e recompensa | `Gold` | Gold |
-| Recompensa por uma ação | `Reward` | Reward |
-| Conquista desbloqueável | `Achievement` | Achievement |
-| Título concedido ao personagem | `Title` | Title |
+| User progression | `Character` | Character |
+| Recurring activity | `Habit` | Training |
+| One-time task | `Quest` | Quest |
+| Group of related tasks | `Project` | Project |
+| Important project stage | `Milestone` | Boss |
+| Global progression points | `Experience` | XP |
+| Attribute progression points | `AttributeExperience` | Attribute XP |
+| Evolving characteristic | `Attribute` | Attribute |
+| Application currency | `Gold` | Gold |
+| Action benefit | `Reward` | Reward |
+| Unlockable accomplishment | `Achievement` | Achievement |
+| Character designation | `Title` | Title |
 
-## Regras de nomenclatura
+## Character
 
-### Habit e Training
+`Character` represents the user inside the progression system.
 
-No código, uma atividade recorrente deve ser chamada de `Habit`.
+The term remains the same in the domain and presentation.
 
-Na interface, ela deve ser apresentada como `Training`.
-
-Exemplos:
+Examples:
 
 ```text
-Habit
-HabitService
-CreateHabit()
-CompleteHabit()
+Character
+CharacterService
+CharacterScreen
+CharacterCard
