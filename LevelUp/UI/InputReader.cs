@@ -17,7 +17,9 @@ public class InputReader
                 return input;
             }
 
-            ShowError("O valor informado não pode ficar vazio.");
+            ConsoleHelper.ShowError(
+                "O valor informado não pode ficar vazio."
+            );
         }
     }
 
@@ -39,7 +41,9 @@ public class InputReader
                 return value;
             }
 
-            ShowError("Informe um número inteiro maior que zero.");
+            ConsoleHelper.ShowError(
+                "Informe um número inteiro maior que zero."
+            );
         }
     }
 
@@ -63,7 +67,7 @@ public class InputReader
                 return value;
             }
 
-            ShowError("Informe um número decimal válido.");
+            ConsoleHelper.ShowError("Informe um número decimal válido.");
         }
     }
 
@@ -93,10 +97,9 @@ public class InputReader
                 return option;
             }
 
-            ShowError(
-                $"Escolha uma opção entre " +
-                $"{minimumOption} e {maximumOption}."
-            );
+            ConsoleHelper.ShowError(
+              $"Escolha uma opção entre {minimumOption} e {maximumOption}."
+          );
         }
     }
 
@@ -121,7 +124,7 @@ public class InputReader
                 return false;
             }
 
-            ShowError("Digite S para sim ou N para não.");
+            ConsoleHelper.ShowError("Digite S para sim ou N para não.");
         }
     }
 

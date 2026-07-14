@@ -34,9 +34,7 @@ public class TrainingScreen
 
         while (running)
         {
-            Console.Clear();
-
-            ShowMenu();
+            DisplayMenu();
 
             int option = inputReader.ReadOption(
                 "Escolha uma opção: ",
@@ -44,35 +42,41 @@ public class TrainingScreen
                 3
             );
 
-            switch (option)
-            {
-                case 1:
-                    CreateTraining();
-                    break;
-
-                case 2:
-                    ListTrainings();
-                    break;
-
-                case 3:
-                    CompleteTraining();
-                    break;
-
-                case 0:
-                    running = false;
-                    continue;
-            }
-
-            inputReader.WaitForContinue();
+            running = HandleOption(option);
         }
     }
 
-    private static void ShowMenu()
+    private bool HandleOption(int option)
     {
-        Console.WriteLine("================================");
-        Console.WriteLine("            TRAINING");
-        Console.WriteLine("================================");
-        Console.WriteLine();
+        switch (option)
+        {
+            case 1:
+                CreateTraining();
+                inputReader.WaitForContinue();
+                return true;
+
+            case 2:
+                ListTrainings();
+                inputReader.WaitForContinue();
+                return true;
+
+            case 3:
+                CompleteTraining();
+                inputReader.WaitForContinue();
+                return true;
+
+            case 0:
+                return false;
+
+            default:
+                return true;
+        }
+    }
+
+    private static void DisplayMenu()
+    {
+        ConsoleHelper.ShowHeader("Training");
+
         Console.WriteLine("1 - Cadastrar treinamento");
         Console.WriteLine("2 - Listar treinamentos");
         Console.WriteLine("3 - Concluir treinamento");
@@ -84,8 +88,7 @@ public class TrainingScreen
     {
         Console.Clear();
 
-        Console.WriteLine("===== CADASTRAR TREINAMENTO =====");
-        Console.WriteLine();
+        ConsoleHelper.ShowHeader("Cadastrar treinamento");
 
         string title = inputReader.ReadRequiredString(
             "Título: "
@@ -111,10 +114,10 @@ public class TrainingScreen
 
         SaveGame();
 
-        Console.WriteLine();
-        Console.WriteLine(
+        ConsoleHelper.ShowSuccess(
             "Treinamento cadastrado com sucesso."
         );
+
         Console.WriteLine($"ID: {habit.Id}");
         Console.WriteLine($"Título: {habit.Title}");
         Console.WriteLine(
@@ -147,15 +150,14 @@ public class TrainingScreen
     {
         Console.Clear();
 
-        Console.WriteLine("===== TREINAMENTOS =====");
-        Console.WriteLine();
+        ConsoleHelper.ShowHeader("Treinamentos");
 
         List<Habit> habits =
             habitService.GetAllHabits();
 
         if (habits.Count == 0)
         {
-            Console.WriteLine(
+            ConsoleHelper.ShowInformation(
                 "Nenhum treinamento foi cadastrado."
             );
 
@@ -194,21 +196,21 @@ public class TrainingScreen
     private void CompleteTraining()
     {
         Console.Clear();
-
-        Console.WriteLine("===== CONCLUIR TREINAMENTO =====");
-        Console.WriteLine();
+        ConsoleHelper.ShowHeader("Concluir treinamento");
 
         List<Habit> habits =
             habitService.GetAllHabits();
 
         if (habits.Count == 0)
         {
-            Console.WriteLine(
+            ConsoleHelper.ShowInformation(
                 "Nenhum treinamento foi cadastrado."
             );
 
             return;
         }
+
+
 
         foreach (Habit habit in habits)
         {
@@ -230,8 +232,7 @@ public class TrainingScreen
 
         if (selectedHabit is null)
         {
-            Console.WriteLine();
-            Console.WriteLine(
+            ConsoleHelper.ShowError(
                 "Treinamento não encontrado."
             );
 
@@ -253,6 +254,10 @@ public class TrainingScreen
         );
 
         SaveGame();
+
+        ConsoleHelper.ShowSuccess(
+        "Treinamento concluído com sucesso."
+        );
 
         Console.WriteLine();
         Console.WriteLine(

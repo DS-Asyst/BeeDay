@@ -6,12 +6,7 @@ public class CharacterScreen
 {
     public void Show(Character character)
     {
-        Console.Clear();
-
-        Console.WriteLine("================================");
-        Console.WriteLine("          CHARACTER");
-        Console.WriteLine("================================");
-        Console.WriteLine();
+        ConsoleHelper.ShowHeader("Character");
 
         Console.WriteLine($"Name  : {character.Name}");
         Console.WriteLine($"Level : {character.Level}");
@@ -22,7 +17,8 @@ public class CharacterScreen
 
         Console.WriteLine();
         Console.WriteLine("Attributes");
-        Console.WriteLine("--------------------------------");
+
+        ConsoleHelper.ShowSeparator();
 
         ShowAttributes(character);
     }

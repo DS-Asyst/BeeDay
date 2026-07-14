@@ -2,12 +2,21 @@
 
 public class GoldScreen
 {
+    private readonly InputReader inputReader;
+
+    public GoldScreen(InputReader inputReader)
+    {
+        this.inputReader = inputReader;
+    }
+
     public void Show()
     {
-        Console.Clear();
+        ConsoleHelper.ShowHeader("Gold");
 
-        Console.WriteLine("Gold");
-        Console.WriteLine();
-        Console.WriteLine("Em desenvolvimento...");
+        ConsoleHelper.ShowInformation(
+            "Esta funcionalidade ainda está em desenvolvimento."
+        );
+
+        inputReader.WaitForContinue();
     }
 }

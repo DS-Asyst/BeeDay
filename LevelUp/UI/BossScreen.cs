@@ -2,12 +2,21 @@
 
 public class BossScreen
 {
+    private readonly InputReader inputReader;
+
+    public BossScreen(InputReader inputReader)
+    {
+        this.inputReader = inputReader;
+    }
+
     public void Show()
     {
-        Console.Clear();
+        ConsoleHelper.ShowHeader("Bosses");
 
-        Console.WriteLine("Boss");
-        Console.WriteLine();
-        Console.WriteLine("Em desenvolvimento...");
+        ConsoleHelper.ShowInformation(
+            "Esta funcionalidade ainda está em desenvolvimento."
+        );
+
+        inputReader.WaitForContinue();
     }
 }

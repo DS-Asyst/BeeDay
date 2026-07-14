@@ -2,12 +2,21 @@
 
 public class QuestScreen
 {
+    private readonly InputReader inputReader;
+
+    public QuestScreen(InputReader inputReader)
+    {
+        this.inputReader = inputReader;
+    }
+
     public void Show()
     {
-        Console.Clear();
+        ConsoleHelper.ShowHeader("Quests");
 
-        Console.WriteLine("Quest");
-        Console.WriteLine();
-        Console.WriteLine("Em desenvolvimento...");
+        ConsoleHelper.ShowInformation(
+            "Esta funcionalidade ainda está em desenvolvimento."
+        );
+
+        inputReader.WaitForContinue();
     }
 }
