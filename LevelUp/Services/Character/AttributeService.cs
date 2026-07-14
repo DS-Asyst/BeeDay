@@ -4,7 +4,7 @@ using System.Text;
 
 using LevelUp.Domain.Attributes;
 
-namespace LevelUp.Services;
+namespace LevelUp.Services.Character;
 
 public class AttributeService
 {

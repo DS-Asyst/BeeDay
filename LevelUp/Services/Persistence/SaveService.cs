@@ -4,7 +4,7 @@ using LevelUp.Domain.Character;
 using LevelUp.Domain.Habits;
 using LevelUp.Domain.Projects;
 
-namespace LevelUp.Services;
+namespace LevelUp.Services.Persistence;
 
 public class SaveService
 {
