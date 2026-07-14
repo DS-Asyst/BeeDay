@@ -1,5 +1,7 @@
 ﻿using LevelUp.Models;
 using LevelUp.Services;
+using LevelUp.UI.Components.Training;
+using Spectre.Console;
 
 namespace LevelUp.UI;
 
@@ -34,38 +36,45 @@ public class TrainingScreen
 
         while (running)
         {
-            DisplayMenu();
+            ConsoleHelper.ShowHeader("Training");
 
-            int option = inputReader.ReadOption(
-                "Escolha uma opção: ",
-                0,
-                3
+            string option = inputReader.ReadSelection(
+                "Escolha uma opção:",
+                new[]
+                {
+                "Cadastrar treinamento",
+                "Listar treinamentos",
+                "Concluir treinamento",
+                "Voltar"
+                },
+                choice => choice
             );
 
             running = HandleOption(option);
         }
     }
 
-    private bool HandleOption(int option)
+
+    private bool HandleOption(string option)
     {
         switch (option)
         {
-            case 1:
+            case "Cadastrar treinamento":
                 CreateTraining();
                 inputReader.WaitForContinue();
                 return true;
 
-            case 2:
+            case "Listar treinamentos":
                 ListTrainings();
                 inputReader.WaitForContinue();
                 return true;
 
-            case 3:
+            case "Concluir treinamento":
                 CompleteTraining();
                 inputReader.WaitForContinue();
                 return true;
 
-            case 0:
+            case "Voltar":
                 return false;
 
             default:
@@ -73,16 +82,6 @@ public class TrainingScreen
         }
     }
 
-    private static void DisplayMenu()
-    {
-        ConsoleHelper.ShowHeader("Training");
-
-        Console.WriteLine("1 - Cadastrar treinamento");
-        Console.WriteLine("2 - Listar treinamentos");
-        Console.WriteLine("3 - Concluir treinamento");
-        Console.WriteLine("0 - Voltar");
-        Console.WriteLine();
-    }
 
     private void CreateTraining()
     {
@@ -127,33 +126,18 @@ public class TrainingScreen
 
     private AttributeType SelectAttribute()
     {
-        Console.WriteLine();
-        Console.WriteLine("Escolha o atributo:");
-        Console.WriteLine("1 - Strength");
-        Console.WriteLine("2 - Intelligence");
-        Console.WriteLine("3 - Vitality");
-        Console.WriteLine("4 - Agility");
-        Console.WriteLine("5 - Luck");
-        Console.WriteLine("6 - Dexterity");
-        Console.WriteLine();
-
-        int option = inputReader.ReadOption(
-            "Opção: ",
-            1,
-            6
+        return inputReader.ReadSelection(
+            "Escolha o atributo:",
+            Enum.GetValues<AttributeType>(),
+            attribute => attribute.ToString()
         );
-
-        return (AttributeType)option;
     }
 
     private void ListTrainings()
     {
-        Console.Clear();
+        ConsoleHelper.ShowHeader("Trainings");
 
-        ConsoleHelper.ShowHeader("Treinamentos");
-
-        List<Habit> habits =
-            habitService.GetAllHabits();
+        List<Habit> habits = habitService.GetAllHabits();
 
         if (habits.Count == 0)
         {
@@ -164,33 +148,9 @@ public class TrainingScreen
             return;
         }
 
-        foreach (Habit habit in habits)
-        {
-            Console.WriteLine($"ID: {habit.Id}");
-            Console.WriteLine($"Título: {habit.Title}");
-            Console.WriteLine(
-                $"Descrição: {habit.Description}"
-            );
-            Console.WriteLine(
-                $"Atributo: {habit.AttributeType}"
-            );
-            Console.WriteLine(
-                $"Duração: {habit.DurationInMinutes} minutos"
-            );
-            Console.WriteLine(
-                $"Recompensa: {habit.ExperienceReward} XP"
-            );
-            Console.WriteLine(
-                $"XP de atributo: " +
-                $"{habit.AttributeExperienceReward}"
-            );
-            Console.WriteLine(
-                $"Conclusões: {habit.TimesCompleted}"
-            );
-            Console.WriteLine(
-                "--------------------------------"
-            );
-        }
+        TrainingTable trainingTable = new(habits);
+
+        AnsiConsole.Write(trainingTable.Build());
     }
 
     private void CompleteTraining()
