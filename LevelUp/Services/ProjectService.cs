@@ -1,6 +1,7 @@
-using LevelUp.Models;
+using LevelUp.Domain.Projects;
 
 namespace LevelUp.Services;
+
 
 public sealed class ProjectService
 {

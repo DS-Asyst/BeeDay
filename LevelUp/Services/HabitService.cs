@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using LevelUp.Models;
+using LevelUp.Domain.Attributes;
+using LevelUp.Domain.Habits;
 
 namespace LevelUp.Services
 {

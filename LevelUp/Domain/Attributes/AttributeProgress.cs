@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using LevelUp.Domain.Character;
 
-namespace LevelUp.Models;
+namespace LevelUp.Domain.Attributes;
 
 public class AttributeProgress : ILevelProgress
 {

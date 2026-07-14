@@ -1,7 +1,7 @@
-using LevelUp.Models;
+
 using LevelUp.UI.Infrastructure.Themes;
 using Spectre.Console;
-using CharacterModel = LevelUp.Models.Character;
+using CharacterModel = LevelUp.Domain.Character.Character;
 using LevelUp.UI.Layout;
 using LevelUp.UI.Infrastructure.Builders;
 

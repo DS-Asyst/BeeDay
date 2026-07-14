@@ -1,7 +1,10 @@
-﻿using LevelUp.Models;
+﻿using LevelUp.Domain;
+using LevelUp.Domain.Attributes;
+using LevelUp.Domain.Habits;
 using LevelUp.Services;
 using LevelUp.UI.Components.Training;
 using Spectre.Console;
+using CharacterModel = LevelUp.Domain.Character.Character;
 
 namespace LevelUp.UI;
 
@@ -12,7 +15,7 @@ public class TrainingScreen
     private readonly AttributeService attributeService;
     private readonly SaveService saveService;
     private readonly InputReader inputReader;
-    private readonly Character character;
+    private readonly CharacterModel character;
 
     public TrainingScreen(
         HabitService habitService,
@@ -20,7 +23,7 @@ public class TrainingScreen
         AttributeService attributeService,
         SaveService saveService,
         InputReader inputReader,
-        Character character)
+        CharacterModel character)
     {
         this.habitService = habitService;
         this.characterService = characterService;

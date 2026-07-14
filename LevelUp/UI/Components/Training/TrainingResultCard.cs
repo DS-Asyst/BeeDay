@@ -1,9 +1,9 @@
-using LevelUp.Models;
+using LevelUp.Domain.Habits;
+using CharacterModel = LevelUp.Domain.Character.Character;
 using LevelUp.UI.Infrastructure.Builders;
 using LevelUp.UI.Infrastructure.Themes;
 using LevelUp.UI.Layout;
 using Spectre.Console;
-using CharacterModel = LevelUp.Models.Character;
 
 namespace LevelUp.UI.Components.Training;
 

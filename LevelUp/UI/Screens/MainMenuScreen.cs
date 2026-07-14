@@ -1,4 +1,6 @@
-﻿using LevelUp.Models;
+﻿using LevelUp.Domain;
+using LevelUp.Domain.Habits;
+using CharacterModel = LevelUp.Domain.Character.Character;
 using LevelUp.Services;
 
 namespace LevelUp.UI;
@@ -11,7 +13,7 @@ public class MainMenuScreen
     private readonly QuestScreen questScreen;
     private readonly ProjectScreen projectScreen;
     private readonly GoldScreen goldScreen;
-    private readonly Character character;
+    private readonly CharacterModel character;
     private readonly HabitService habitService;
     private readonly SaveService saveService;
 
@@ -22,7 +24,7 @@ public class MainMenuScreen
         QuestScreen questScreen,
         ProjectScreen projectScreen,
         GoldScreen goldScreen,
-        Character character,
+        CharacterModel character,
         HabitService habitService,
         SaveService saveService)
     {

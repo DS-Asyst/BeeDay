@@ -1,4 +1,4 @@
-namespace LevelUp.Models;
+namespace LevelUp.Domain.Projects;
 
 public sealed class Project
 {

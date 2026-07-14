@@ -1,4 +1,5 @@
-﻿using LevelUp.Models;
+﻿using LevelUp.Domain.Character;
+using CharacterModel = LevelUp.Domain.Character.Character;
 
 namespace LevelUp.Services
 {
@@ -13,7 +14,7 @@ namespace LevelUp.Services
         }
         public Character CreateCharacter(string name)
         {
-            Character character = new Character
+            CharacterModel character = new Character
             {
                 Name = name
             };
@@ -22,7 +23,7 @@ namespace LevelUp.Services
         }
 
         public void AddExperience(
-            Character character,
+            CharacterModel character,
             decimal experienceEarned)
         {
             progressionService.AddExperience(

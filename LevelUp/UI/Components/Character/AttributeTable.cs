@@ -1,4 +1,4 @@
-using LevelUp.Models;
+using LevelUp.Domain.Attributes;
 using LevelUp.UI.Infrastructure.Themes;
 using Spectre.Console;
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-using LevelUp.Models;
+using LevelUp.Domain.Attributes;
 
 namespace LevelUp.Services;
 

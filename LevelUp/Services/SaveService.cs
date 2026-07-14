@@ -1,5 +1,8 @@
 ﻿using System.Text.Json;
-using LevelUp.Models;
+using LevelUp.Domain;
+using LevelUp.Domain.Character;
+using LevelUp.Domain.Habits;
+using LevelUp.Domain.Projects;
 
 namespace LevelUp.Services;
 
