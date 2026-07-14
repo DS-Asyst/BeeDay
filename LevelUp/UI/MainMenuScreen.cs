@@ -43,40 +43,46 @@ public class MainMenuScreen
 
         while (running)
         {
-            Console.Clear();
+            ConsoleHelper.ShowHeader("Level Up");
 
-            DisplayMenu();
-
-            int option = inputReader.ReadOption(
-                "Escolha uma opção: ",
-                0,
-                5
+            string option = inputReader.ReadSelection(
+                "Escolha uma opção:",
+                new[]
+                {
+                "Character",
+                "Training",
+                "Quests",
+                "Bosses",
+                "Gold",
+                "Exit"
+                },
+                choice => choice
             );
 
             switch (option)
             {
-                case 1:
+                case "Character":
                     characterScreen.Show(character);
                     inputReader.WaitForContinue();
                     break;
 
-                case 2:
+                case "Training":
                     trainingScreen.Show();
                     break;
 
-                case 3:
+                case "Quests":
                     questScreen.Show();
                     break;
 
-                case 4:
+                case "Bosses":
                     bossScreen.Show();
                     break;
 
-                case 5:
+                case "Gold":
                     goldScreen.Show();
                     break;
 
-                case 0:
+                case "Exit":
                     SaveGame();
                     running = false;
                     break;
@@ -95,19 +101,6 @@ public class MainMenuScreen
         };
 
         saveService.SaveGame(gameData);
-    }
-
-    private static void DisplayMenu()
-    {
-        ConsoleHelper.ShowHeader("Level Up");
-
-        Console.WriteLine("1 - Character");
-        Console.WriteLine("2 - Training");
-        Console.WriteLine("3 - Quests");
-        Console.WriteLine("4 - Bosses");
-        Console.WriteLine("5 - Gold");
-        Console.WriteLine("0 - Exit");
-        Console.WriteLine();
     }
 
     private static void ShowExitMessage()
