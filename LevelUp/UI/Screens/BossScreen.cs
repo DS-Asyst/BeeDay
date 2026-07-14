@@ -1,4 +1,7 @@
-﻿namespace LevelUp.UI;
+﻿using LevelUp.UI.Components.Shared;
+using Spectre.Console;
+
+namespace LevelUp.UI;
 
 public class BossScreen
 {
@@ -11,10 +14,10 @@ public class BossScreen
 
     public void Show()
     {
-        ConsoleHelper.ShowHeader("Bosses");
+        ConsoleHelper.ShowHeader("Projects");
 
-        ConsoleHelper.ShowInformation(
-            "Esta funcionalidade ainda está em desenvolvimento."
+        AnsiConsole.Write(
+            new ComingSoonCard("Projects").Build()
         );
 
         inputReader.WaitForContinue();

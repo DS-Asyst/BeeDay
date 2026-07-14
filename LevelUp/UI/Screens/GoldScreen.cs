@@ -1,4 +1,7 @@
-﻿namespace LevelUp.UI;
+﻿using LevelUp.UI.Components.Shared;
+using Spectre.Console;
+
+namespace LevelUp.UI;
 
 public class GoldScreen
 {
@@ -13,8 +16,8 @@ public class GoldScreen
     {
         ConsoleHelper.ShowHeader("Gold");
 
-        ConsoleHelper.ShowInformation(
-            "Esta funcionalidade ainda está em desenvolvimento."
+        AnsiConsole.Write(
+            new ComingSoonCard("Gold").Build()
         );
 
         inputReader.WaitForContinue();
