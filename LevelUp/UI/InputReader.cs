@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Spectre.Console;
 
 namespace LevelUp.UI;
 
@@ -6,54 +7,53 @@ public class InputReader
 {
     public string ReadRequiredString(string message)
     {
-        while (true)
-        {
-            Console.Write(message);
-
-            string? input = Console.ReadLine()?.Trim();
-
-            if (!string.IsNullOrWhiteSpace(input))
+        return AnsiConsole.Prompt(
+            new TextPrompt<string>(
+                $"[yellow]{Markup.Escape(message)}[/]"
+            )
+            .PromptStyle("white")
+            .ValidationErrorMessage(
+                "[red]The value cannot be empty.[/]"
+            )
+            .Validate(input =>
             {
-                return input;
-            }
-
-            ConsoleHelper.ShowError(
-                "O valor informado não pode ficar vazio."
-            );
-        }
+                return string.IsNullOrWhiteSpace(input)
+                    ? ValidationResult.Error(
+                        "[red]The value cannot be empty.[/]"
+                    )
+                    : ValidationResult.Success();
+            })
+        ).Trim();
     }
 
     public int ReadPositiveInteger(string message)
     {
-        while (true)
-        {
-            Console.Write(message);
-
-            string? input = Console.ReadLine();
-
-            bool isValid = int.TryParse(
-                input,
-                out int value
-            );
-
-            if (isValid && value > 0)
+        return AnsiConsole.Prompt(
+            new TextPrompt<int>(
+                $"[yellow]{Markup.Escape(message)}[/]"
+            )
+            .PromptStyle("white")
+            .ValidationErrorMessage(
+                "[red]Enter an integer greater than zero.[/]"
+            )
+            .Validate(value =>
             {
-                return value;
-            }
-
-            ConsoleHelper.ShowError(
-                "Informe um número inteiro maior que zero."
-            );
-        }
+                return value > 0
+                    ? ValidationResult.Success()
+                    : ValidationResult.Error(
+                        "[red]Enter an integer greater than zero.[/]"
+                    );
+            })
+        );
     }
 
     public decimal ReadDecimal(string message)
     {
         while (true)
         {
-            Console.Write(message);
-
-            string? input = Console.ReadLine();
+            string input = AnsiConsole.Ask<string>(
+                $"[yellow]{Markup.Escape(message)}[/]"
+            );
 
             bool isValid = decimal.TryParse(
                 input,
@@ -67,7 +67,9 @@ public class InputReader
                 return value;
             }
 
-            ConsoleHelper.ShowError("Informe um número decimal válido.");
+            ConsoleHelper.ShowError(
+                "Enter a valid decimal number."
+            );
         }
     }
 
@@ -77,71 +79,62 @@ public class InputReader
         int maximumOption
     )
     {
-        while (true)
-        {
-            Console.Write(message);
-
-            string? input = Console.ReadLine();
-
-            bool isValid = int.TryParse(
-                input,
-                out int option
-            );
-
-            if (
-                isValid &&
-                option >= minimumOption &&
-                option <= maximumOption
+        return AnsiConsole.Prompt(
+            new TextPrompt<int>(
+                $"[yellow]{Markup.Escape(message)}[/]"
             )
+            .PromptStyle("white")
+            .ValidationErrorMessage(
+                $"[red]Choose an option between " +
+                $"{minimumOption} and {maximumOption}.[/]"
+            )
+            .Validate(option =>
             {
-                return option;
-            }
+                bool isValid =
+                    option >= minimumOption &&
+                    option <= maximumOption;
 
-            ConsoleHelper.ShowError(
-              $"Escolha uma opção entre {minimumOption} e {maximumOption}."
-          );
-        }
+                return isValid
+                    ? ValidationResult.Success()
+                    : ValidationResult.Error(
+                        $"[red]Choose an option between " +
+                        $"{minimumOption} and {maximumOption}.[/]"
+                    );
+            })
+        );
     }
 
     public bool ReadConfirmation(string message)
     {
-        while (true)
-        {
-            Console.Write($"{message} (S/N): ");
+        return AnsiConsole.Confirm(
+            $"[yellow]{Markup.Escape(message)}[/]",
+            defaultValue: false
+        );
+    }
 
-            string? input = Console
-                .ReadLine()?
-                .Trim()
-                .ToUpperInvariant();
-
-            if (input == "S")
-            {
-                return true;
-            }
-
-            if (input == "N")
-            {
-                return false;
-            }
-
-            ConsoleHelper.ShowError("Digite S para sim ou N para não.");
-        }
+    public T ReadSelection<T>(
+        string title,
+        IEnumerable<T> choices,
+        Func<T, string> converter
+    )
+        where T : notnull
+    {
+        return AnsiConsole.Prompt(
+            new SelectionPrompt<T>()
+                .Title(
+                    $"[yellow]{Markup.Escape(title)}[/]"
+                )
+                .PageSize(10)
+                .MoreChoicesText(
+                    "[grey](Move up and down to see more options)[/]"
+                )
+                .AddChoices(choices)
+                .UseConverter(converter)
+        );
     }
 
     public void WaitForContinue()
     {
-        Console.WriteLine();
-        Console.WriteLine(
-            "Pressione qualquer tecla para continuar..."
-        );
-
-        Console.ReadKey(intercept: true);
-    }
-
-    private static void ShowError(string message)
-    {
-        Console.WriteLine();
-        Console.WriteLine($"Erro: {message}");
-        Console.WriteLine();
+        ConsoleHelper.WaitForContinue();
     }
 }
