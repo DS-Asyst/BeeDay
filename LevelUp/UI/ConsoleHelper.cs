@@ -1,4 +1,5 @@
 ﻿using Spectre.Console;
+using LevelUp.UI.Themes;
 
 namespace LevelUp.UI;
 
@@ -8,10 +9,11 @@ public static class ConsoleHelper
     {
         AnsiConsole.Clear();
 
-        Rule rule = new($"[bold yellow]{Markup.Escape(title.ToUpperInvariant())}[/]")
+        Rule rule = new($"[bold {LevelUpTheme.Primary}]" +
+            $"{Markup.Escape(title.ToUpperInvariant())}[/]")
         {
             Justification = Justify.Center,
-            Style = Style.Parse("yellow")
+            Style = Style.Parse(LevelUpTheme.Primary)
         };
 
         AnsiConsole.Write(rule);
@@ -23,7 +25,9 @@ public static class ConsoleHelper
         AnsiConsole.WriteLine();
 
         AnsiConsole.MarkupLine(
-            $"[bold green]✓ Success:[/] {Markup.Escape(message)}"
+            $"[bold {LevelUpTheme.Success}]" +
+            $"{UIIcons.Success} Success:[/] " +
+            Markup.Escape(message)
         );
     }
 
@@ -32,7 +36,9 @@ public static class ConsoleHelper
         AnsiConsole.WriteLine();
 
         AnsiConsole.MarkupLine(
-            $"[bold red]✗ Error:[/] {Markup.Escape(message)}"
+            $"[bold {LevelUpTheme.Danger}]" +
+            $"{UIIcons.Error} Error:[/] " +
+            Markup.Escape(message)
         );
     }
 
@@ -41,7 +47,9 @@ public static class ConsoleHelper
         AnsiConsole.WriteLine();
 
         AnsiConsole.MarkupLine(
-            $"[blue]ℹ[/] {Markup.Escape(message)}"
+            $"[{LevelUpTheme.Information}]" +
+            $"{UIIcons.Information}[/] " +
+            Markup.Escape(message)
         );
     }
 
@@ -50,7 +58,9 @@ public static class ConsoleHelper
         AnsiConsole.WriteLine();
 
         AnsiConsole.MarkupLine(
-            $"[bold yellow]⚠ Warning:[/] {Markup.Escape(message)}"
+            $"[bold {LevelUpTheme.Warning}]" +
+            $"{UIIcons.Warning} Warning:[/] " +
+            Markup.Escape(message)
         );
     }
 
@@ -64,7 +74,8 @@ public static class ConsoleHelper
         )
         {
             Header = new PanelHeader(
-                $"[bold yellow]{Markup.Escape(title)}[/]"
+                $"[bold {LevelUpTheme.Primary}]" +
+                $"{Markup.Escape(title)}[/]"
             ),
             Border = BoxBorder.Rounded,
             Padding = new Padding(1, 1)
@@ -88,7 +99,8 @@ public static class ConsoleHelper
         AnsiConsole.WriteLine();
 
         AnsiConsole.MarkupLine(
-            "[grey]Press any key to continue...[/]"
+            $"[{LevelUpTheme.MutedText}]" +
+            "Press any key to continue...[/]"
         );
 
         Console.ReadKey(intercept: true);
