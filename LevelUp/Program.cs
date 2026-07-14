@@ -2,6 +2,9 @@
 using LevelUp.Services;
 using LevelUp.UI;
 
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.InputEncoding = System.Text.Encoding.UTF8;
+
 
 HabitService habitService = new HabitService();
 SaveService saveService = new SaveService();
@@ -54,7 +57,7 @@ TrainingScreen trainingScreen = new(
 );
 
 QuestScreen questScreen = new(inputReader);
-BossScreen bossScreen = new(inputReader);
+ProjectScreen projectScreen = new(inputReader);
 GoldScreen goldScreen = new(inputReader);
 
 MainMenuScreen mainMenuScreen = new(
@@ -62,7 +65,7 @@ MainMenuScreen mainMenuScreen = new(
     characterScreen,
     trainingScreen,
     questScreen,
-    bossScreen,
+    projectScreen,
     goldScreen,
     character,
     habitService,

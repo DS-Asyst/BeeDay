@@ -48,7 +48,7 @@ LevelUp/
 │   └── SaveService
 │
 ├── UI/
-│   ├── BossScreen
+│   ├── ProjectScreen
 │   ├── CharacterCreationScreen
 │   ├── CharacterScreen
 │   ├── ConsoleHelper
@@ -131,7 +131,7 @@ MainMenuScreen
         ├── CharacterScreen
         ├── TrainingScreen
         ├── QuestScreen
-        ├── BossScreen
+        ├── ProjectScreen
         └── GoldScreen
 
                 │
