@@ -6,8 +6,10 @@ using LevelUp.UI;
 HabitService habitService = new HabitService();
 SaveService saveService = new SaveService();
 ProgressionService progressionService = new();
-CharacterScreen characterScreen = new();
+
 InputReader inputReader = new();
+
+CharacterScreen characterScreen = new();
 
 CharacterService characterService =
     new(progressionService);
@@ -41,6 +43,7 @@ else
     saveService.SaveGame(newGameData);
 }
 
+
 TrainingScreen trainingScreen = new(
     habitService,
     characterService,
@@ -50,13 +53,20 @@ TrainingScreen trainingScreen = new(
     character
 );
 
+QuestScreen questScreen = new(inputReader);
+BossScreen bossScreen = new(inputReader);
+GoldScreen goldScreen = new(inputReader);
 
-ConsoleMenu menu = new(
-    habitService,
-    saveService,
-    character,
+MainMenuScreen mainMenuScreen = new(
+    inputReader,
     characterScreen,
-    trainingScreen
+    trainingScreen,
+    questScreen,
+    bossScreen,
+    goldScreen,
+    character,
+    habitService,
+    saveService
 );
 
-menu.Start();
+mainMenuScreen.Show();
