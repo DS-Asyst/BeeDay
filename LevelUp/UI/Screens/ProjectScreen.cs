@@ -3,11 +3,11 @@ using Spectre.Console;
 
 namespace LevelUp.UI;
 
-public class BossScreen
+public class ProjectScreen
 {
     private readonly InputReader inputReader;
 
-    public BossScreen(InputReader inputReader)
+    public ProjectScreen(InputReader inputReader)
     {
         this.inputReader = inputReader;
     }

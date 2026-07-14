@@ -57,7 +57,7 @@ TrainingScreen trainingScreen = new(
 );
 
 QuestScreen questScreen = new(inputReader);
-BossScreen bossScreen = new(inputReader);
+ProjectScreen projectScreen = new(inputReader);
 GoldScreen goldScreen = new(inputReader);
 
 MainMenuScreen mainMenuScreen = new(
@@ -65,7 +65,7 @@ MainMenuScreen mainMenuScreen = new(
     characterScreen,
     trainingScreen,
     questScreen,
-    bossScreen,
+    projectScreen,
     goldScreen,
     character,
     habitService,

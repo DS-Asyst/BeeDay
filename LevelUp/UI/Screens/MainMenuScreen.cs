@@ -9,7 +9,7 @@ public class MainMenuScreen
     private readonly CharacterScreen characterScreen;
     private readonly TrainingScreen trainingScreen;
     private readonly QuestScreen questScreen;
-    private readonly BossScreen bossScreen;
+    private readonly ProjectScreen projectScreen;
     private readonly GoldScreen goldScreen;
     private readonly Character character;
     private readonly HabitService habitService;
@@ -20,7 +20,7 @@ public class MainMenuScreen
         CharacterScreen characterScreen,
         TrainingScreen trainingScreen,
         QuestScreen questScreen,
-        BossScreen bossScreen,
+        ProjectScreen projectScreen,
         GoldScreen goldScreen,
         Character character,
         HabitService habitService,
@@ -30,7 +30,7 @@ public class MainMenuScreen
         this.characterScreen = characterScreen;
         this.trainingScreen = trainingScreen;
         this.questScreen = questScreen;
-        this.bossScreen = bossScreen;
+        this.projectScreen = projectScreen;
         this.goldScreen = goldScreen;
         this.character = character;
         this.habitService = habitService;
@@ -52,7 +52,7 @@ public class MainMenuScreen
                 "Character",
                 "Training",
                 "Quests",
-                "Bosses",
+                "Projects",
                 "Gold",
                 "Exit"
                 },
@@ -74,8 +74,8 @@ public class MainMenuScreen
                     questScreen.Show();
                     break;
 
-                case "Bosses":
-                    bossScreen.Show();
+                case "Projects":
+                    projectScreen.Show();
                     break;
 
                 case "Gold":
