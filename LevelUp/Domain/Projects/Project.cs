@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using QuestModel = LevelUp.Domain.Quests.Quest;
 
 namespace LevelUp.Domain.Projects;
 

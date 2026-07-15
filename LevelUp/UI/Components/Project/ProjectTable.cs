@@ -2,18 +2,19 @@ using LevelUp.Domain.Quests;
 using LevelUp.UI.Infrastructure.Themes;
 using Spectre.Console;
 using ProjectModel = LevelUp.Domain.Projects.Project;
+using QuestModel = LevelUp.Domain.Quests.Quest;
 
 namespace LevelUp.UI.Components.Project;
 
 public sealed class ProjectTable
 {
     private readonly IReadOnlyCollection<ProjectModel> projects;
-    private readonly Func<int, IReadOnlyList<Quest>> questResolver;
+    private readonly Func<int, IReadOnlyList<QuestModel>> questResolver;
     private readonly Func<ProjectModel, decimal> progressResolver;
 
     public ProjectTable(
         IEnumerable<ProjectModel> projects,
-        Func<int, IReadOnlyList<Quest>> questResolver,
+        Func<int, IReadOnlyList<QuestModel>> questResolver,
         Func<ProjectModel, decimal> progressResolver
     )
     {
@@ -46,7 +47,7 @@ public sealed class ProjectTable
 
         foreach (ProjectModel project in projects)
         {
-            IReadOnlyList<Quest> quests = questResolver(project.Id)
+            IReadOnlyList<QuestModel> quests = questResolver(project.Id)
                 .Where(quest => quest.Status != QuestStatus.Archived)
                 .ToList();
             int completed = quests.Count(

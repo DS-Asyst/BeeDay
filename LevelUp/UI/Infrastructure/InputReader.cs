@@ -117,20 +117,20 @@ public class InputReader
         IEnumerable<T> choices,
         Func<T, string> converter
     )
-        where T : notnull
     {
-        return AnsiConsole.Prompt(
-            new SelectionPrompt<T>()
-                .Title(
-                    $"[yellow]{Markup.Escape(title)}[/]"
+        ArgumentNullException.ThrowIfNull(choices);
+        ArgumentNullException.ThrowIfNull(converter);
+
+        SelectionPrompt<T> prompt = new SelectionPrompt<T>()
+            .Title(Markup.Escape(title))
+            .AddChoices(choices)
+            .UseConverter(
+                choice => Markup.Escape(
+                    converter(choice)
                 )
-                .PageSize(10)
-                .MoreChoicesText(
-                    "[grey](Move up and down to see more options)[/]"
-                )
-                .AddChoices(choices)
-                .UseConverter(converter)
-        );
+            );
+
+        return AnsiConsole.Prompt(prompt);
     }
 
     public void WaitForContinue()

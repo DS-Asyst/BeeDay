@@ -1,5 +1,6 @@
 using LevelUp.Domain.Projects;
 using LevelUp.Domain.Quests;
+using QuestModel = LevelUp.Domain.Quests.Quest;
 
 namespace LevelUp.Services.Projects;
 
@@ -91,7 +92,7 @@ public sealed class ProjectService
 
     public bool TryCompleteProject(
         Project project,
-        IEnumerable<Quest> quests
+        IEnumerable<QuestModel> quests
     )
     {
         EnsureManagedProject(project);
@@ -120,7 +121,7 @@ public sealed class ProjectService
 
     public decimal CalculateProgress(
         Project project,
-        IEnumerable<Quest> quests
+        IEnumerable<QuestModel> quests
     )
     {
         List<Quest> projectQuests = GetProgressQuests(
@@ -145,7 +146,7 @@ public sealed class ProjectService
 
     public bool HasCompletedAllQuests(
         Project project,
-        IEnumerable<Quest> quests
+        IEnumerable<QuestModel> quests
     )
     {
         List<Quest> projectQuests = GetProgressQuests(
@@ -167,7 +168,7 @@ public sealed class ProjectService
 
     private List<Quest> GetProgressQuests(
         Project project,
-        IEnumerable<Quest> quests
+        IEnumerable<QuestModel> quests
     )
     {
         EnsureManagedProject(project);
