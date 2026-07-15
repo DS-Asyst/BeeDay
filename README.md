@@ -45,7 +45,7 @@ The architecture models real-world concepts such as habits, quests and projects,
 
 LevelUp separates domain concepts from presentation.
 
-```text
+text
 Presentation
     ↓
 Application
@@ -53,7 +53,7 @@ Application
 Domain
     ↓
 Persistence
-```
+
 
 ---
 
@@ -71,20 +71,20 @@ Persistence
 
 ## Project Structure
 
-```text
+text
 LevelUp/
 ├── Models
 ├── Services
 ├── UI
 ├── Data
 └── docs
-```
+
 
 ---
 
 ## Getting Started
 
-```bash
+bash
 git clone ...
 
 dotnet restore
@@ -92,7 +92,7 @@ dotnet restore
 dotnet build
 
 dotnet run
-```
+
 
 ---
 

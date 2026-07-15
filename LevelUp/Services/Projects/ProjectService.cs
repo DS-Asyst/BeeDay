@@ -3,10 +3,10 @@ using LevelUp.Domain.Quests;
 
 namespace LevelUp.Services.Projects;
 
-
 public sealed class ProjectService
 {
     private readonly List<Project> projects = [];
+
 
     private int nextId = 1;
 
@@ -39,11 +39,14 @@ public sealed class ProjectService
 
         Project project = new()
         {
-            Id = nextId++,
-            Name = name.Trim(),
-            Description = description.Trim(),
-            UnlockedTitle = unlockedTitle.Trim()
+            Id = nextId++
         };
+
+        project.Configure(
+            name,
+            description,
+            unlockedTitle
+        );
 
         projects.Add(project);
 
@@ -64,6 +67,22 @@ public sealed class ProjectService
 
         return projects.FirstOrDefault(
             project => project.Id == id
+        );
+    }
+
+    public void UpdateProject(
+        Project project,
+        string name,
+        string description,
+        string unlockedTitle
+    )
+    {
+        EnsureManagedProject(project);
+
+        project.UpdateDetails(
+            name,
+            description,
+            unlockedTitle
         );
     }
 
@@ -176,4 +195,6 @@ public sealed class ProjectService
             );
         }
     }
+
+
 }

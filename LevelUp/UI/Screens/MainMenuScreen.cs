@@ -1,10 +1,5 @@
-﻿using LevelUp.Services.Habits;
-using LevelUp.Services.Persistence;
-using LevelUp.Domain;
-using LevelUp.Domain.Habits;
+﻿using LevelUp.Services.Persistence;
 using CharacterModel = LevelUp.Domain.Character.Character;
-using LevelUp.Services.Projects;
-using LevelUp.Services.Quests;
 
 namespace LevelUp.UI;
 
@@ -17,13 +12,10 @@ public class MainMenuScreen
     private readonly ProjectScreen projectScreen;
     private readonly GoldScreen goldScreen;
     private readonly CharacterModel character;
-    private readonly HabitService habitService;
-    private readonly SaveService saveService;
-    private readonly ProjectService projectService;
-    private readonly QuestService questService;
+    private readonly GameStateService gameStateService;
+
 
     public MainMenuScreen(
-
         InputReader inputReader,
         CharacterScreen characterScreen,
         TrainingScreen trainingScreen,
@@ -31,14 +23,9 @@ public class MainMenuScreen
         ProjectScreen projectScreen,
         GoldScreen goldScreen,
         CharacterModel character,
-        HabitService habitService,
-        ProjectService projectService,
-        QuestService questService,
-        SaveService saveService
-
-        )
+        GameStateService gameStateService
+    )
     {
-
         this.inputReader = inputReader;
         this.characterScreen = characterScreen;
         this.trainingScreen = trainingScreen;
@@ -46,12 +33,7 @@ public class MainMenuScreen
         this.projectScreen = projectScreen;
         this.goldScreen = goldScreen;
         this.character = character;
-        this.habitService = habitService;
-        this.projectService = projectService;
-        this.questService = questService;
-        this.saveService = saveService;
-
-
+        this.gameStateService = gameStateService;
     }
 
     public void Show()
@@ -100,7 +82,7 @@ public class MainMenuScreen
                     break;
 
                 case "Exit":
-                    SaveGame();
+                    gameStateService.Save();
                     running = false;
                     break;
             }
@@ -109,27 +91,6 @@ public class MainMenuScreen
         ShowExitMessage();
     }
 
-    private void SaveGame()
-    {
-        GameData gameData = new()
-        {
-            Character = character,
-
-            Habits = habitService
-                .GetAllHabits()
-                .ToList(),
-
-            Projects = projectService
-                .GetAllProjects()
-                .ToList(),
-
-            Quests = questService
-                .GetAllQuests()
-                .ToList()
-        };
-
-        saveService.SaveGame(gameData);
-    }
 
     private static void ShowExitMessage()
     {

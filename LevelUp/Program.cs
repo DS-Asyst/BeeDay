@@ -8,10 +8,10 @@ using LevelUp.UI;
 using CharacterModel = LevelUp.Domain.Character.Character;
 
 Console.OutputEncoding =
-    System.Text.Encoding.UTF8;
+System.Text.Encoding.UTF8;
 
 Console.InputEncoding =
-    System.Text.Encoding.UTF8;
+System.Text.Encoding.UTF8;
 
 HabitService habitService = new();
 SaveService saveService = new();
@@ -22,21 +22,24 @@ InputReader inputReader = new();
 CharacterScreen characterScreen = new();
 
 CharacterService characterService =
-    new(progressionService);
+new(progressionService);
 
 AttributeService attributeService =
-    new(progressionService);
+new(progressionService);
 
 GameData? loadedGame =
-    saveService.LoadGame();
+saveService.LoadGame();
 
 CharacterModel character;
 ProjectService projectService;
 QuestService questService;
 
+bool isNewGame = loadedGame is null;
+
 if (loadedGame is not null)
 {
     character = loadedGame.Character;
+
 
     habitService.LoadHabits(
         loadedGame.Habits
@@ -49,82 +52,73 @@ if (loadedGame is not null)
     questService = new QuestService(
         loadedGame.Quests
     );
+
+
 }
 else
 {
     CharacterCreationScreen characterCreationScreen =
-        new(characterService);
+    new(characterService);
+
 
     character =
         characterCreationScreen.CreateCharacter();
 
-    projectService =
-        new ProjectService();
+    projectService = new ProjectService();
+    questService = new QuestService();
 
-    questService =
-        new QuestService();
 
-    GameData newGameData = new()
-    {
-        Character = character,
+}
 
-        Habits = habitService
-            .GetAllHabits()
-            .ToList(),
+GameStateService gameStateService = new(
+saveService,
+habitService,
+projectService,
+questService,
+character
+);
 
-        Projects = projectService
-            .GetAllProjects()
-            .ToList(),
-
-        Quests = questService
-            .GetAllQuests()
-            .ToList()
-    };
-
-    saveService.SaveGame(newGameData);
+if (isNewGame)
+{
+    gameStateService.Save();
 }
 
 TrainingScreen trainingScreen = new(
-    habitService,
-    characterService,
-    attributeService,
-    saveService,
-    inputReader,
-    character,
-    projectService,
-    questService
+habitService,
+characterService,
+attributeService,
+inputReader,
+character,
+gameStateService
 );
 
 QuestScreen questScreen = new(
-    questService,
-    projectService,
-    habitService,
-    saveService,
-    inputReader,
-    character
+questService,
+projectService,
+inputReader,
+gameStateService
 );
 
 ProjectScreen projectScreen = new(
-    projectService,
-    questService
+projectService,
+questService,
+inputReader,
+gameStateService
 );
 
 GoldScreen goldScreen = new(
-    inputReader
+inputReader
 );
 
 MainMenuScreen mainMenuScreen = new(
-    inputReader,
-    characterScreen,
-    trainingScreen,
-    questScreen,
-    projectScreen,
-    goldScreen,
-    character,
-    habitService,
-    projectService,
-    questService,
-    saveService
+inputReader,
+characterScreen,
+trainingScreen,
+questScreen,
+projectScreen,
+goldScreen,
+character,
+gameStateService
 );
 
 mainMenuScreen.Show();

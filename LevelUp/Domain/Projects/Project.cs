@@ -6,15 +6,21 @@ public sealed class Project
 {
     public int Id { get; set; }
 
-    public string Name { get; set; } = string.Empty;
+    [JsonInclude]
+    public string Name { get; private set; } =
+        string.Empty;
 
-    public string Description { get; set; } = string.Empty;
+    [JsonInclude]
+    public string Description { get; private set; } =
+        string.Empty;
+
+    [JsonInclude]
+    public string UnlockedTitle { get; private set; } =
+        string.Empty;
 
     [JsonInclude]
     public ProjectStatus Status { get; private set; }
         = ProjectStatus.Created;
-
-    public string UnlockedTitle { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; init; }
         = DateTime.Now;
@@ -24,6 +30,40 @@ public sealed class Project
 
     [JsonInclude]
     public DateTime? ArchivedAt { get; private set; }
+
+
+    public void Configure(
+        string name,
+        string description,
+        string unlockedTitle
+    )
+    {
+        if (!string.IsNullOrWhiteSpace(Name))
+        {
+            throw new InvalidOperationException(
+                "The project has already been configured."
+            );
+        }
+
+        UpdateDetails(
+            name,
+            description,
+            unlockedTitle
+        );
+    }
+
+    public void UpdateDetails(
+        string name,
+        string description,
+        string unlockedTitle
+    )
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
+        Name = name.Trim();
+        Description = description.Trim();
+        UnlockedTitle = unlockedTitle.Trim();
+    }
 
     public void Activate()
     {
@@ -62,4 +102,5 @@ public sealed class Project
         Status = ProjectStatus.Archived;
         ArchivedAt = DateTime.Now;
     }
+
 }

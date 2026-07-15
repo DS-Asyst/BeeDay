@@ -17,30 +17,26 @@ public class TrainingScreen
     private readonly HabitService habitService;
     private readonly CharacterService characterService;
     private readonly AttributeService attributeService;
-    private readonly SaveService saveService;
     private readonly InputReader inputReader;
     private readonly CharacterModel character;
-    private readonly ProjectService projectService;
-    private readonly QuestService questService;
+    private readonly GameStateService gameStateService;
+
 
     public TrainingScreen(
     HabitService habitService,
     CharacterService characterService,
     AttributeService attributeService,
-    SaveService saveService,
     InputReader inputReader,
     CharacterModel character,
-    ProjectService projectService,
-    QuestService questService)
+    GameStateService gameStateService
+    )
     {
         this.habitService = habitService;
         this.characterService = characterService;
         this.attributeService = attributeService;
-        this.saveService = saveService;
         this.inputReader = inputReader;
         this.character = character;
-        this.projectService = projectService;
-        this.questService = questService;
+        this.gameStateService = gameStateService;
     }
 
     public void Show()
@@ -124,7 +120,7 @@ public class TrainingScreen
             attributeType
         );
 
-        SaveGame();
+        gameStateService.Save();
 
         ConsoleHelper.ShowSuccess(
             "Treinamento cadastrado com sucesso."
@@ -220,7 +216,7 @@ public class TrainingScreen
             selectedHabit.AttributeExperienceReward
         );
 
-        SaveGame();
+        gameStateService.Save();
 
         ConsoleHelper.ShowSuccess(
             "Treinamento concluíd0o com sucesso."
@@ -234,29 +230,10 @@ public class TrainingScreen
             experienceEarned
         );
 
-        AnsiConsole.Write(resultCard.Build());
+        AnsiConsole.Write(
+            resultCard.Build()
+        );
 
-    }
-
-    private void SaveGame()
-    {
-        GameData gameData = new()
-        {
-            Character = character,
-
-            Habits = habitService
-                .GetAllHabits()
-                .ToList(),
-
-            Projects = projectService
-                .GetAllProjects()
-                .ToList(),
-
-            Quests = questService
-                .GetAllQuests()
-                .ToList()
-        };
-
-        saveService.SaveGame(gameData);
+        gameStateService.Save();
     }
 }

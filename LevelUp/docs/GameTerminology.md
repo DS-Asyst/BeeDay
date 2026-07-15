@@ -36,7 +36,7 @@ The term remains the same in the domain and presentation.
 
 Examples:
 
-```text
+text
 Character
 CharacterService
 CharacterScreen

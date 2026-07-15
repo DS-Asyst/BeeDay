@@ -14,25 +14,21 @@ public sealed class QuestScreen
 {
     private readonly QuestService questService;
     private readonly ProjectService projectService;
-    private readonly HabitService habitService;
-    private readonly SaveService saveService;
     private readonly InputReader inputReader;
-    private readonly CharacterModel character;
+    private readonly GameStateService gameStateService;
+
 
     public QuestScreen(
         QuestService questService,
         ProjectService projectService,
-        HabitService habitService,
-        SaveService saveService,
         InputReader inputReader,
-        CharacterModel character)
+        GameStateService gameStateService
+    )
     {
         this.questService = questService;
         this.projectService = projectService;
-        this.habitService = habitService;
-        this.saveService = saveService;
         this.inputReader = inputReader;
-        this.character = character;
+        this.gameStateService = gameStateService;
     }
 
     public void Show()
@@ -108,7 +104,7 @@ public sealed class QuestScreen
 
         questService.ActivateQuest(quest);
 
-        SaveGame();
+        gameStateService.Save();
 
         ConsoleHelper.ShowSuccess(
             "Quest cadastrada com sucesso."
@@ -250,7 +246,7 @@ public sealed class QuestScreen
 
         questService.CompleteQuest(selectedQuest);
 
-        SaveGame();
+        gameStateService.Save();
 
         ConsoleHelper.ShowSuccess(
             "Quest concluída com sucesso."
@@ -305,25 +301,4 @@ public sealed class QuestScreen
             ?? "Project not found";
     }
 
-    private void SaveGame()
-    {
-        GameData gameData = new()
-        {
-            Character = character,
-
-            Habits = habitService
-                .GetAllHabits()
-                .ToList(),
-
-            Projects = projectService
-                .GetAllProjects()
-                .ToList(),
-
-            Quests = questService
-                .GetAllQuests()
-                .ToList()
-        };
-
-        saveService.SaveGame(gameData);
-    }
 }

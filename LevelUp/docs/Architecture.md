@@ -8,7 +8,7 @@ The system uses real-world terminology in its domain model and RPG terminology i
 
 The current application is organized around four primary areas:
 
-```text
+text
 LevelUp/
 ├── Domain/
 │   ├── Attributes/

@@ -17,6 +17,6 @@ The project is under active development. Conventions may evolve as the architect
 
 Clone the repository:
 
-```bash
+bash
 git clone <repository-url>
 cd LevelUp

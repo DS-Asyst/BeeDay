@@ -14,7 +14,7 @@ The presentation layer is responsible for transforming those concepts into an RP
 
 The domain is centered around the Character.
 
-```text
+text
 Character
 │
 ├── Habits
@@ -25,7 +25,7 @@ Character
 ├── Gold
 ├── Titles
 └── Achievements
-```
+
 
 The character evolves by completing activities.
 
@@ -119,15 +119,15 @@ Boss
 
 # Domain Relationships
 
-```text
+text
 Project
 │
 ├── Quest
 ├── Quest
 └── Quest
-```
 
-```text
+
+text
 Character
 
 ↑
@@ -137,7 +137,7 @@ Habit
 Quest
 
 Project
-```
+
 
 Habits and Quests improve the Character.
 
