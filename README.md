@@ -1,172 +1,90 @@
-# 🎮 LevelUp
+# LevelUp
 
-Transform your real life into an RPG.
+> Transform real-world productivity into RPG progression.
 
+## Overview
 
-## About
-
-LevelUp is a console RPG built with C# and .NET.
-
-The objective is to transform personal development into an RPG experience, where every completed training grants experience, levels, attribute progression and, in future versions, quests, bosses, gold and achievements.
-
-The project is also used as a study project to practice Clean Code, Object-Oriented Programming, Git, GitHub and Software Architecture.
-
+LevelUp is a productivity RPG built with C# and .NET. It models real-world concepts such as habits, quests and projects in the domain layer, while the terminal UI presents them through RPG-inspired feedback using Spectre.Console.
 
 ## Current Features
 
-- Character creation
-- Character progression
-- Experience system
-- Attribute system
-- Training management
-- JSON persistence
-- Input validation
-- Modular console UI
+- character creation and level progression;
+- attribute progression;
+- recurring habits presented as trainings;
+- one-time quests, independent or linked to projects;
+- project lifecycle and automatically calculated progress;
+- automatic project completion when all active project quests are completed;
+- contextual Project and Quest boards;
+- reusable cards, tables, themes and UI infrastructure;
+- centralized JSON persistence through `GameStateService`;
+- feature-oriented Domain and Services organization.
 
+## Architecture
+
+```text
+Presentation (Spectre.Console)
+        ↓
+Application Services
+        ↓
+Domain
+        ↓
+Persistence (JSON)
+```
+
+The domain remains independent from Spectre.Console so a future Blazor, API, desktop or mobile interface can reuse the same business rules.
 
 ## Project Structure
 
 ```text
 LevelUp/
-
-├── Data/
-│
-├── Models/
-│   ├── AttributeProgress
-│   ├── AttributeType
-│   ├── Character
-│   ├── GameData
-│   ├── Habit
-│   ├── ILevelProgress
-│   └── PlayerAttributes
-│
+├── Domain/
+│   ├── Attributes/
+│   ├── Character/
+│   ├── Habits/
+│   ├── Projects/
+│   └── Quests/
 ├── Services/
-│   ├── AttributeService
-│   ├── CharacterService
-│   ├── HabitsService
-│   ├── ProgressionService
-│   └── SaveService
-│
+│   ├── Character/
+│   ├── Habits/
+│   ├── Persistence/
+│   ├── Projects/
+│   └── Quests/
 ├── UI/
-│   ├── BossScreen
-│   ├── CharacterCreationScreen
-│   ├── CharacterScreen
-│   ├── ConsoleHelper
-│   ├── GoldScreen
-│   ├── InputReader
-│   ├── MainMenuScreen
-│   ├── QuestScreen
-│   └── TrainingScreen
-│
-└── Program.cs
+│   ├── Components/
+│   ├── Infrastructure/
+│   ├── Layout/
+│   └── Screens/
+├── Data/
+└── docs/
 ```
 
-
-## Technologies
-
-- C#
-- .NET 10
-- System.Text.Json
-- Git
-- GitHub
-
-
-## Running
-
-Clone the repository
+## Getting Started
 
 ```bash
-git clone https://github.com/tiagoarrigoni/LevelUp.git
-```
-
-Enter the project
-
-```bash
+git clone <repository-url>
 cd LevelUp
+dotnet restore
+dotnet build
+dotnet run --project LevelUp/LevelUp.csproj
 ```
 
-Run
+For the best Unicode rendering, use Windows Terminal or another modern terminal with a Unicode-capable font.
 
-```bash
-dotnet run
-```
+## Documentation
 
+- `docs/Vision.md`
+- `docs/Architecture.md`
+- `docs/Domain.md`
+- `docs/GameTerminology.md`
+- `docs/Roadmap.md`
+- `docs/DecisionLog.md`
+- `docs/Contributing.md`
+- `docs/CHANGELOG.md`
 
 ## Roadmap
 
-### Phase 1
-- [x] Character creation
-- [x] Character progression
-- [x] JSON Save
-- [x] Training System
-- [x] Console UI Refactoring
+Phase 3 — Projects and Quests is complete. The next product phase introduces milestones and boss encounters.
 
-### Phase 2
-- [ ] Rename Habit → Training
-- [ ] Edit trainings
-- [ ] Delete trainings
-- [ ] Training categories
-- [ ] Daily streak
+## License
 
-### Phase 3
-- [ ] Quest System
-- [ ] Boss System
-- [ ] Gold System
-- [ ] Inventory
-
-### Phase 4
-- [ ] SQLite
-- [ ] ASP.NET Core API
-- [ ] Blazor UI
-
-
-## Architecture
-
-```text
-Program
-        │
-        ▼
-MainMenuScreen
-        │
-        ├── CharacterScreen
-        ├── TrainingScreen
-        ├── QuestScreen
-        ├── BossScreen
-        └── GoldScreen
-
-                │
-                ▼
-
-Services
-
-        │
-        ▼
-
-Models
-
-        │
-        ▼
-
-JSON Persistence
-```
-
-## Git Workflow
-
-develop
-
-↓
-
-feature/*
-
-↓
-
-develop
-
-↓
-
-main
-
-
-## Author
-
-Developed by Tiago Arrigoni
+MIT
