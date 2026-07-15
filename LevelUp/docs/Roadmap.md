@@ -141,3 +141,15 @@ Current principles:
 3. Persistence is centralized through `GameStateService`.
 4. Abstractions are introduced only after concrete duplication appears.
 5. Documentation changes with the code and terminology.
+
+
+## Phase 4.0 — Architecture Hardening
+
+- [x] Add automated domain, service, and persistence tests.
+- [x] Extract quest-completion orchestration into a workflow service.
+- [x] Strengthen archived-entity and project-association invariants.
+- [x] Make JSON persistence path-injectable and presentation-agnostic.
+- [x] Add a storage abstraction and continuous-integration workflow.
+- [x] Add a UI error boundary for domain and storage failures.
+- [ ] Model milestones.
+- [ ] Model boss encounters.

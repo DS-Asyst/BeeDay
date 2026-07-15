@@ -1,111 +1,52 @@
 using System.Text.Json;
 using LevelUp.Domain;
-using LevelUp.Domain.Habits;
-using LevelUp.Domain.Projects;
-using LevelUp.Domain.Quests;
 using CharacterModel = LevelUp.Domain.Character.Character;
 
 namespace LevelUp.Services.Persistence;
 
-public class SaveService
+public sealed class SaveService : IGameDataStore
 {
+    private static readonly JsonSerializerOptions SerializerOptions = new()
+    {
+        WriteIndented = true
+    };
+
     private readonly string filePath;
 
     public SaveService()
+        : this(GetDefaultFilePath())
     {
-        string projectDirectory = FindProjectDirectory();
-
-
-        string dataDirectory = Path.Combine(
-            projectDirectory,
-            "Data"
-        );
-
-        Directory.CreateDirectory(dataDirectory);
-
-        filePath = Path.Combine(
-            dataDirectory,
-            "save.json"
-        );
-
-
-
     }
 
-    private static string FindProjectDirectory()
+    public SaveService(string filePath)
     {
-        DirectoryInfo? directory = new DirectoryInfo(
-            AppContext.BaseDirectory
-        );
+        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
 
-        while (directory is not null)
+        this.filePath = Path.GetFullPath(filePath);
+
+        string? directory = Path.GetDirectoryName(this.filePath);
+        if (directory is not null)
         {
-            bool hasProjectFile = directory
-                .GetFiles("*.csproj")
-                .Length > 0;
-
-            if (hasProjectFile)
-            {
-                return directory.FullName;
-            }
-
-            directory = directory.Parent;
+            Directory.CreateDirectory(directory);
         }
-
-        throw new DirectoryNotFoundException(
-            "Não foi possível localizar a pasta do projeto."
-        );
     }
 
-    private string CreateBackup()
-    {
-        string? dataDirectory =
-            Path.GetDirectoryName(filePath);
+    public string FilePath => filePath;
 
-        if (dataDirectory is null)
-        {
-            throw new DirectoryNotFoundException(
-                "Não foi possível localizar a pasta do arquivo de salvamento."
-            );
-        }
-
-        string backupFileName =
-            $"save_backup_{DateTime.Now:yyyyMMdd_HHmmss}.json";
-
-        string backupPath = Path.Combine(
-            dataDirectory,
-            backupFileName
-        );
-
-        File.Copy(
-            filePath,
-            backupPath,
-            overwrite: true
-        );
-
-        return backupPath;
-    }
-
-    public void SaveGame(GameData gameData)
+    public void Save(GameData gameData)
     {
         ArgumentNullException.ThrowIfNull(gameData);
 
-        JsonSerializerOptions options = new()
-        {
-            WriteIndented = true
-        };
-
         string json = JsonSerializer.Serialize(
             gameData,
-            options
+            SerializerOptions
         );
 
         File.WriteAllText(filePath, json);
     }
 
-    public GameData? LoadGame()
+    public GameData? Load()
     {
-
         if (!File.Exists(filePath))
         {
             return null;
@@ -114,9 +55,7 @@ public class SaveService
         try
         {
             string json = File.ReadAllText(filePath);
-
-            GameData? gameData =
-                JsonSerializer.Deserialize<GameData>(json);
+            GameData? gameData = JsonSerializer.Deserialize<GameData>(json);
 
             if (gameData is null)
             {
@@ -130,27 +69,55 @@ public class SaveService
 
             return gameData;
         }
-        catch (JsonException)
+        catch (JsonException exception)
         {
             string backupPath = CreateBackup();
-
-            Console.ForegroundColor = ConsoleColor.Yellow;
-
-            Console.WriteLine(
-                "O arquivo de salvamento é incompatível ou está corrompido."
-            );
-
-            Console.WriteLine(
-                $"Um backup foi criado em: {backupPath}"
-            );
-
-            Console.WriteLine(
-                "Um novo jogo será iniciado."
-            );
-
-            Console.ResetColor();
-
-            return null;
+            throw new CorruptedSaveException(backupPath, exception);
         }
+    }
+
+    // Compatibility wrappers for existing callers.
+    public void SaveGame(GameData gameData) => Save(gameData);
+    public GameData? LoadGame() => Load();
+
+    private string CreateBackup()
+    {
+        string directory = Path.GetDirectoryName(filePath)
+            ?? throw new DirectoryNotFoundException(
+                "The save directory could not be located."
+            );
+
+        string backupPath = Path.Combine(
+            directory,
+            $"save_backup_{DateTime.Now:yyyyMMdd_HHmmss}.json"
+        );
+
+        File.Copy(filePath, backupPath, overwrite: true);
+        return backupPath;
+    }
+
+    private static string GetDefaultFilePath()
+    {
+        string projectDirectory = FindProjectDirectory();
+        return Path.Combine(projectDirectory, "Data", "save.json");
+    }
+
+    private static string FindProjectDirectory()
+    {
+        DirectoryInfo? directory = new(AppContext.BaseDirectory);
+
+        while (directory is not null)
+        {
+            if (directory.GetFiles("*.csproj").Length > 0)
+            {
+                return directory.FullName;
+            }
+
+            directory = directory.Parent;
+        }
+
+        throw new DirectoryNotFoundException(
+            "The project directory could not be located."
+        );
     }
 }

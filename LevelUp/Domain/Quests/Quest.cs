@@ -6,22 +6,19 @@ public sealed class Quest
 {
     public int Id { get; set; }
 
-    public int? ProjectId { get; set; }
+    [JsonInclude]
+    public int? ProjectId { get; private set; }
 
     [JsonInclude]
-    public string Title { get; private set; } =
-        string.Empty;
+    public string Title { get; private set; } = string.Empty;
 
     [JsonInclude]
-    public string Description { get; private set; } =
-        string.Empty;
+    public string Description { get; private set; } = string.Empty;
 
     [JsonInclude]
-    public QuestStatus Status { get; private set; }
-        = QuestStatus.Created;
+    public QuestStatus Status { get; private set; } = QuestStatus.Created;
 
-    public DateTime CreatedAt { get; init; }
-        = DateTime.Now;
+    public DateTime CreatedAt { get; init; } = DateTime.Now;
 
     [JsonInclude]
     public DateTime? ActivatedAt { get; private set; }
@@ -31,6 +28,41 @@ public sealed class Quest
 
     [JsonInclude]
     public DateTime? ArchivedAt { get; private set; }
+
+    public void Configure(string title, string description)
+    {
+        if (!string.IsNullOrWhiteSpace(Title))
+        {
+            throw new InvalidOperationException(
+                "The quest has already been configured."
+            );
+        }
+
+        SetDetails(title, description);
+    }
+
+    public void UpdateDetails(string title, string description)
+    {
+        EnsureNotArchived();
+        SetDetails(title, description);
+    }
+
+    public void AssignToProject(int projectId)
+    {
+        EnsureNotArchived();
+
+        if (projectId <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(projectId));
+        }
+
+        ProjectId = projectId;
+    }
+
+    public void RemoveFromProject()
+    {
+        ProjectId = null;
+    }
 
     public void Activate()
     {
@@ -71,28 +103,7 @@ public sealed class Quest
         ArchivedAt = DateTime.Now;
     }
 
-    public void Configure(
-    string title,
-    string description
-    )
-    {
-        if (!string.IsNullOrWhiteSpace(Title))
-        {
-            throw new InvalidOperationException(
-                "The quest has already been configured."
-            );
-        }
-
-        UpdateDetails(
-            title,
-            description
-        );
-    }
-
-    public void UpdateDetails(
-    string title,
-    string description
-    )
+    private void SetDetails(string title, string description)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
 
@@ -100,4 +111,13 @@ public sealed class Quest
         Description = description.Trim();
     }
 
+    private void EnsureNotArchived()
+    {
+        if (Status == QuestStatus.Archived)
+        {
+            throw new InvalidOperationException(
+                "Archived quests cannot be changed."
+            );
+        }
+    }
 }

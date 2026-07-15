@@ -8,22 +8,21 @@ namespace LevelUp.Services.Persistence;
 
 public sealed class GameStateService
 {
-    private readonly SaveService saveService;
+    private readonly IGameDataStore dataStore;
     private readonly HabitService habitService;
     private readonly ProjectService projectService;
     private readonly QuestService questService;
     private readonly CharacterModel character;
 
-
     public GameStateService(
-        SaveService saveService,
+        IGameDataStore dataStore,
         HabitService habitService,
         ProjectService projectService,
         QuestService questService,
         CharacterModel character
     )
     {
-        this.saveService = saveService;
+        this.dataStore = dataStore;
         this.habitService = habitService;
         this.projectService = projectService;
         this.questService = questService;
@@ -35,27 +34,11 @@ public sealed class GameStateService
         return new GameData
         {
             Character = character,
-
-            Habits = habitService
-                .GetAllHabits()
-                .ToList(),
-
-            Projects = projectService
-                .GetAllProjects()
-                .ToList(),
-
-            Quests = questService
-                .GetAllQuests()
-                .ToList()
+            Habits = habitService.GetAllHabits().ToList(),
+            Projects = projectService.GetAllProjects().ToList(),
+            Quests = questService.GetAllQuests().ToList()
         };
     }
 
-    public void Save()
-    {
-        GameData gameData = CreateSnapshot();
-
-        saveService.SaveGame(gameData);
-    }
-
-
+    public void Save() => dataStore.Save(CreateSnapshot());
 }

@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet restore LevelUp.slnx
+      - run: dotnet format LevelUp.slnx --verify-no-changes --no-restore
+      - run: dotnet build LevelUp.slnx --no-restore --configuration Release
+      - run: dotnet test LevelUp.Tests/LevelUp.Tests.csproj --no-build --configuration Release

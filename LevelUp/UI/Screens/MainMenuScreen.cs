@@ -14,7 +14,6 @@ public class MainMenuScreen
     private readonly CharacterModel character;
     private readonly GameStateService gameStateService;
 
-
     public MainMenuScreen(
         InputReader inputReader,
         CharacterScreen characterScreen,
@@ -48,52 +47,61 @@ public class MainMenuScreen
                 "Escolha uma opção:",
                 new[]
                 {
-                "Character",
-                "Training",
-                "Quests",
-                "Projects",
-                "Gold",
-                "Exit"
+                    "Character",
+                    "Training",
+                    "Quests",
+                    "Projects",
+                    "Gold",
+                    "Exit"
                 },
                 choice => choice
             );
 
-            switch (option)
+            try
             {
-                case "Character":
-                    characterScreen.Show(character);
-                    inputReader.WaitForContinue();
-                    break;
+                switch (option)
+                {
+                    case "Character":
+                        characterScreen.Show(character);
+                        inputReader.WaitForContinue();
+                        break;
 
-                case "Training":
-                    trainingScreen.Show();
-                    break;
+                    case "Training":
+                        trainingScreen.Show();
+                        break;
 
-                case "Quests":
-                    questScreen.Show();
-                    break;
+                    case "Quests":
+                        questScreen.Show();
+                        break;
 
-                case "Projects":
-                    projectScreen.Show();
-                    break;
+                    case "Projects":
+                        projectScreen.Show();
+                        break;
 
-                case "Gold":
-                    goldScreen.Show();
-                    break;
+                    case "Gold":
+                        goldScreen.Show();
+                        break;
 
-                case "Exit":
-                    gameStateService.Save();
-                    running = false;
-                    break;
+                    case "Exit":
+                        gameStateService.Save();
+                        running = false;
+                        break;
+                }
+            }
+            catch (InvalidOperationException exception)
+            {
+                ConsoleHelper.ShowError(exception.Message);
+                inputReader.WaitForContinue();
+            }
+            catch (IOException exception)
+            {
+                ConsoleHelper.ShowError(
+                    $"A storage error occurred: {exception.Message}"
+                );
+                inputReader.WaitForContinue();
             }
         }
 
-        ShowExitMessage();
-    }
-
-
-    private static void ShowExitMessage()
-    {
         ConsoleHelper.ShowHeader("See you soon");
     }
 }

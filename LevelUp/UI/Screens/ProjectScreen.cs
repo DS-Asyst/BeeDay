@@ -3,6 +3,7 @@ using LevelUp.Domain.Quests;
 using LevelUp.Services.Persistence;
 using LevelUp.Services.Projects;
 using LevelUp.Services.Quests;
+using LevelUp.Services.Workflows;
 using LevelUp.UI.Components.Project;
 using LevelUp.UI.Components.Quest;
 using Spectre.Console;
@@ -16,18 +17,21 @@ public sealed class ProjectScreen
     private readonly QuestService questService;
     private readonly InputReader inputReader;
     private readonly GameStateService gameStateService;
+    private readonly ProjectWorkflowService projectWorkflowService;
 
     public ProjectScreen(
         ProjectService projectService,
         QuestService questService,
         InputReader inputReader,
-        GameStateService gameStateService
+        GameStateService gameStateService,
+        ProjectWorkflowService projectWorkflowService
     )
     {
         this.projectService = projectService;
         this.questService = questService;
         this.inputReader = inputReader;
         this.gameStateService = gameStateService;
+        this.projectWorkflowService = projectWorkflowService;
     }
 
     public void Show()
@@ -341,12 +345,7 @@ public sealed class ProjectScreen
             return false;
         }
 
-        foreach (Quest quest in linkedQuests)
-        {
-            questService.RemoveQuestFromProject(quest);
-        }
-
-        if (!projectService.DeleteProject(project.Id))
+        if (!projectWorkflowService.DeleteProject(project.Id))
         {
             ConsoleHelper.ShowError(
                 "Não foi possível excluir o projeto."
@@ -354,7 +353,6 @@ public sealed class ProjectScreen
             return false;
         }
 
-        gameStateService.Save();
         ConsoleHelper.ShowSuccess(
             "Projeto excluído com sucesso."
         );

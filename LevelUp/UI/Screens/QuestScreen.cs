@@ -3,6 +3,7 @@ using LevelUp.Domain.Quests;
 using LevelUp.Services.Persistence;
 using LevelUp.Services.Projects;
 using LevelUp.Services.Quests;
+using LevelUp.Services.Workflows;
 using LevelUp.UI.Components.Quest;
 using Spectre.Console;
 using QuestModel = LevelUp.Domain.Quests.Quest;
@@ -15,18 +16,21 @@ public sealed class QuestScreen
     private readonly ProjectService projectService;
     private readonly InputReader inputReader;
     private readonly GameStateService gameStateService;
+    private readonly QuestWorkflowService questWorkflowService;
 
     public QuestScreen(
         QuestService questService,
         ProjectService projectService,
         InputReader inputReader,
-        GameStateService gameStateService
+        GameStateService gameStateService,
+        QuestWorkflowService questWorkflowService
     )
     {
         this.questService = questService;
         this.projectService = projectService;
         this.inputReader = inputReader;
         this.gameStateService = gameStateService;
+        this.questWorkflowService = questWorkflowService;
     }
 
     public void Show()
@@ -370,43 +374,22 @@ public sealed class QuestScreen
             return;
         }
 
-        questService.CompleteQuest(quest);
-        bool projectCompleted = TryCompleteLinkedProject(
-            quest.ProjectId
-        );
-        gameStateService.Save();
+        QuestCompletionResult result =
+            questWorkflowService.CompleteQuest(quest.Id);
 
         ConsoleHelper.ShowSuccess(
             "Quest concluída com sucesso."
         );
 
-        ShowProjectProgress(quest.ProjectId);
+        ShowProjectProgress(result.Quest.ProjectId);
 
-        if (projectCompleted)
+        if (result.ProjectCompleted)
         {
             ConsoleHelper.ShowSuccess(
                 "Todas as quests foram concluídas. " +
                 "O projeto foi concluído automaticamente."
             );
         }
-    }
-
-    private bool TryCompleteLinkedProject(int? projectId)
-    {
-        if (projectId is null)
-        {
-            return false;
-        }
-
-        Project? project = projectService.GetProjectById(
-            projectId.Value
-        );
-
-        return project is not null &&
-            projectService.TryCompleteProject(
-                project,
-                questService.GetAllQuests()
-            );
     }
 
     private void ArchiveQuest(Quest quest)

@@ -89,3 +89,12 @@ Data/save.json
 ## Future Interfaces
 
 The domain and service layers are designed to be reused by future Blazor, API, desktop or mobile presentation layers.
+
+
+## Phase 4 application workflows
+
+Cross-feature use cases are coordinated by services under `Services/Workflows`. Screens collect input and render results; they do not decide how a completed quest affects its project or when state must be persisted.
+
+Persistence is accessed through `IGameDataStore`. `SaveService` is the JSON implementation and accepts an explicit file path for automated tests. Infrastructure errors are surfaced to the UI instead of writing directly to the console.
+
+The test project covers lifecycle transitions, project progress, archived-quest behavior, and JSON round trips.

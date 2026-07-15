@@ -42,13 +42,15 @@ LevelUp/
 │   ├── Character/
 │   ├── Habits/
 │   ├── Projects/
-│   └── Quests/
+│   ├── Quests/
+│   └── Workflows/
 ├── Services/
 │   ├── Character/
 │   ├── Habits/
 │   ├── Persistence/
 │   ├── Projects/
-│   └── Quests/
+│   ├── Quests/
+│   └── Workflows/
 ├── UI/
 │   ├── Components/
 │   ├── Infrastructure/
@@ -69,6 +71,16 @@ dotnet run --project LevelUp/LevelUp.csproj
 ```
 
 For the best Unicode rendering, use Windows Terminal or another modern terminal with a Unicode-capable font.
+
+## Quality Gates
+
+```bash
+dotnet format LevelUp.slnx --verify-no-changes
+dotnet build LevelUp.slnx
+dotnet test LevelUp.Tests/LevelUp.Tests.csproj
+```
+
+The repository includes automated tests and a GitHub Actions workflow covering formatting, build, and test execution.
 
 ## Documentation
 

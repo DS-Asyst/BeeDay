@@ -315,3 +315,8 @@ Operation-first CRUD menus become crowded as features grow and do not resemble t
 - top-level screens expose create, open, list and back;
 - edit, complete, archive, reassignment and deletion are contextual actions;
 - the interaction pattern can be reused by future modules.
+
+
+## 2026-07-15 — Introduce application workflows and a persistence boundary
+
+Cross-feature operations are coordinated under `Services/Workflows` so terminal screens remain presentation-focused. Persistence now depends on `IGameDataStore`, and the JSON implementation accepts an explicit path to support tests and future hosts such as Blazor.
