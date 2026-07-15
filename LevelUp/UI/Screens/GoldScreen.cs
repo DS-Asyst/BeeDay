@@ -1,4 +1,4 @@
-﻿using LevelUp.UI.Components.Shared;
+using LevelUp.UI.Components.Shared;
 using Spectre.Console;
 
 namespace LevelUp.UI;

@@ -241,3 +241,77 @@ Keeping all models and services in flat folders would make navigation and owners
 - SaveService belongs to Services/Persistence;
 - future Quest types and services will have dedicated folders;
 - references throughout Program, UI and services use the new namespaces.
+---
+
+## 2026-07-15 — Centralize complete game-state persistence
+
+### Decision
+
+Use `GameStateService` as the single creator and persistence entry point for complete `GameData` snapshots.
+
+### Context
+
+Multiple screens previously assembled partial snapshots, creating a risk that newer feature data could be overwritten.
+
+### Consequences
+
+- screens request `gameStateService.Save()`;
+- `SaveService` remains responsible for JSON serialization;
+- adding a persisted feature requires changing the snapshot in one place;
+- partial saves no longer remove unrelated data.
+
+---
+
+## 2026-07-15 — Derive project progress from non-archived quests
+
+### Decision
+
+Calculate project progress from linked quests whose status is not Archived.
+
+### Context
+
+Archived work should not block completion or reduce the meaningful progress of an active project.
+
+### Consequences
+
+- progress is never stored;
+- archived quests are excluded from numerator and denominator;
+- an active project completes automatically when all remaining valid quests are completed;
+- projects with no valid quests remain at zero percent.
+
+---
+
+## 2026-07-15 — Introduce shared EntityCard foundation
+
+### Decision
+
+Use `EntityCard` and explicit text/markup statistic rows as the shared foundation for domain cards.
+
+### Context
+
+Quest and Project cards repeated panel, grid, label and escaping behavior.
+
+### Consequences
+
+- feature cards focus on mapping domain data;
+- plain text is escaped exactly once;
+- trusted Spectre.Console markup is explicit;
+- future Achievement, Reward and Inventory cards can reuse the same structure.
+
+---
+
+## 2026-07-15 — Use entity-centered screen navigation
+
+### Decision
+
+Let users select a Project or Quest before choosing actions for that entity.
+
+### Context
+
+Operation-first CRUD menus become crowded as features grow and do not resemble the intended RPG board experience.
+
+### Consequences
+
+- top-level screens expose create, open, list and back;
+- edit, complete, archive, reassignment and deletion are contextual actions;
+- the interaction pattern can be reused by future modules.

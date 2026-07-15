@@ -1,4 +1,4 @@
-﻿using LevelUp.Services.Persistence;
+using LevelUp.Services.Persistence;
 using CharacterModel = LevelUp.Domain.Character.Character;
 
 namespace LevelUp.UI;

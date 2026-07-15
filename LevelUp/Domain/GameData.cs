@@ -1,4 +1,4 @@
-﻿using LevelUp.Domain.Habits;
+using LevelUp.Domain.Habits;
 using LevelUp.Domain.Projects;
 using LevelUp.Domain.Quests;
 using CharacterModel = LevelUp.Domain.Character.Character;

@@ -1,105 +1,47 @@
 # LevelUp Changelog
 
-All notable project milestones are documented in this file.
-
-The project currently follows development phases rather than strict semantic releases.
-
----
+All notable project milestones are documented here.
 
 ## Unreleased
 
-### Changed
+### Phase 3 — Projects and Quests
 
-- replaced the flat Models directory with a feature-oriented Domain structure;
-- organized Character, Attributes, Habits and Projects into domain folders;
-- organized services by Character, Habits, Projects and Persistence;
-- aligned namespaces with the new directory structure;
-- introduced Project, ProjectStatus and ProjectService;
-- added Projects to GameData persistence;
-- preserved compatibility with older save files.
+#### Added
 
-### Architecture Track
+- `Project`, `ProjectStatus` and full project lifecycle;
+- `Quest`, `QuestStatus` and full quest lifecycle;
+- `ProjectService` and `QuestService`;
+- optional Quest-to-Project association;
+- project progress calculated from completed, non-archived quests;
+- automatic completion of active projects;
+- Project and Quest persistence in `GameData`;
+- centralized `GameStateService` snapshots;
+- contextual Project and Quest boards;
+- `ProjectCard`, `ProjectTable`, `QuestCard` and `QuestTable`;
+- `EntityCard` shared UI foundation;
+- status formatters for Projects and Quests.
 
-Added:
+#### Changed
 
-- architecture documentation;
-- official game terminology;
-- roadmap documentation;
-- decision log;
-- contribution guidelines;
-- project vision;
-- changelog.
+- replaced the flat Models directory with feature-oriented Domain folders;
+- organized Services by feature;
+- changed Project and Quest screens from operation-first CRUD menus to entity-centered navigation;
+- updated `StatisticRow` to distinguish escaped text from trusted markup;
+- excluded archived quests from project progress;
+- restricted new Quest associations to created or active projects;
+- aligned README and documentation with the implemented architecture.
 
-Changed:
+#### Fixed
 
-- renamed `BossScreen` to `ProjectScreen`;
-- aligned project terminology across UI and documentation;
-- renamed `HabitsService.cs` to `HabitService.cs`;
-- removed unused placeholder component files;
-- clarified the distinction between domain terminology and RPG presentation.
-
----
+- prevented duplicate escaping in cards;
+- removed duplicate persistence calls in Quest project reassignment;
+- corrected Quest menu syntax;
+- preserved complete Projects and Quests when any screen saves the game.
 
 ## Phase 2 — Spectre.Console UI
 
-### Added
-
-- Spectre.Console dependency;
-- navigable main menu;
-- interactive training menu;
-- reusable theme;
-- reusable UI icons;
-- PanelBuilder;
-- ConsoleHelper improvements;
-- InputReader prompts and validation;
-- CharacterCard;
-- AttributeTable;
-- TrainingTable;
-- TrainingCreatedCard;
-- TrainingResultCard;
-- ComingSoonCard;
-- experience progress bar;
-- confirmation prompts;
-- interactive object selection.
-
-### Changed
-
-- replaced numeric menu navigation with SelectionPrompt;
-- replaced manual training ID input with interactive selection;
-- migrated character presentation to panels and tables;
-- migrated training workflows to Spectre.Console components;
-- organized UI into Screens, Components, Infrastructure and Layout;
-- standardized visual feedback.
-
----
+Added interactive navigation, reusable themes and icons, panels, cards, tables, prompts, validation and training presentation.
 
 ## Phase 1 — Core Foundation
 
-### Added
-
-- Character model;
-- player attributes;
-- attribute progression;
-- character experience;
-- level progression;
-- Habit model;
-- habit creation;
-- habit completion;
-- global and attribute-specific experience rewards;
-- CharacterService;
-- HabitService;
-- AttributeService;
-- ProgressionService;
-- SaveService;
-- JSON save and load;
-- initial console menus;
-- character creation;
-- training workflows.
-
-### Technical Foundation
-
-- C# console application;
-- .NET project structure;
-- models and services separation;
-- manual dependency composition in Program.cs;
-- local JSON persistence.
+Added Character, attributes, progression, Habits, core services and local JSON persistence.

@@ -2,105 +2,88 @@
 
 > Transform real-world productivity into RPG progression.
 
-[Badges]
-
----
-
 ## Overview
 
-LevelUp is a productivity RPG built with C# and .NET.
+LevelUp is a productivity RPG built with C# and .NET. It models real-world concepts such as habits, quests and projects in the domain layer, while the terminal UI presents them through RPG-inspired feedback using Spectre.Console.
 
-Instead of simply tracking habits and tasks, LevelUp transforms everyday progress into an RPG experience.
+## Current Features
 
-The architecture models real-world concepts such as habits, quests and projects, while the UI presents them through RPG-inspired mechanics.
-
----
-
-## Features
-
-### Current
-
-- Character progression
-- Experience system
-- Attribute progression
-- Habit management
-- JSON persistence
-- Spectre.Console UI
-- Interactive terminal interface
-
-### Planned
-
-- Projects
-- Quests
-- Milestones
-- Gold
-- Rewards
-- Achievements
-- Titles
-- Analytics
-
----
+- character creation and level progression;
+- attribute progression;
+- recurring habits presented as trainings;
+- one-time quests, independent or linked to projects;
+- project lifecycle and automatically calculated progress;
+- automatic project completion when all active project quests are completed;
+- contextual Project and Quest boards;
+- reusable cards, tables, themes and UI infrastructure;
+- centralized JSON persistence through `GameStateService`;
+- feature-oriented Domain and Services organization.
 
 ## Architecture
 
-LevelUp separates domain concepts from presentation.
-
-text
-Presentation
-    ↓
-Application
-    ↓
+```text
+Presentation (Spectre.Console)
+        ↓
+Application Services
+        ↓
 Domain
-    ↓
-Persistence
+        ↓
+Persistence (JSON)
+```
 
-
----
-
-## Documentation
-
-- Vision
-- Architecture
-- Game Terminology
-- Roadmap
-- Decision Log
-- Contributing Guide
-- Changelog
-
----
+The domain remains independent from Spectre.Console so a future Blazor, API, desktop or mobile interface can reuse the same business rules.
 
 ## Project Structure
 
-text
+```text
 LevelUp/
-├── Models
-├── Services
-├── UI
-├── Data
-└── docs
-
-
----
+├── Domain/
+│   ├── Attributes/
+│   ├── Character/
+│   ├── Habits/
+│   ├── Projects/
+│   └── Quests/
+├── Services/
+│   ├── Character/
+│   ├── Habits/
+│   ├── Persistence/
+│   ├── Projects/
+│   └── Quests/
+├── UI/
+│   ├── Components/
+│   ├── Infrastructure/
+│   ├── Layout/
+│   └── Screens/
+├── Data/
+└── docs/
+```
 
 ## Getting Started
 
-bash
-git clone ...
-
+```bash
+git clone <repository-url>
+cd LevelUp
 dotnet restore
-
 dotnet build
+dotnet run --project LevelUp/LevelUp.csproj
+```
 
-dotnet run
+For the best Unicode rendering, use Windows Terminal or another modern terminal with a Unicode-capable font.
 
+## Documentation
 
----
+- `docs/Vision.md`
+- `docs/Architecture.md`
+- `docs/Domain.md`
+- `docs/GameTerminology.md`
+- `docs/Roadmap.md`
+- `docs/DecisionLog.md`
+- `docs/Contributing.md`
+- `docs/CHANGELOG.md`
 
 ## Roadmap
 
-See `docs/Roadmap.md`
-
----
+Phase 3 — Projects and Quests is complete. The next product phase introduces milestones and boss encounters.
 
 ## License
 

@@ -6,11 +6,15 @@ public sealed class Quest
 {
     public int Id { get; set; }
 
-    public string Title { get; set; } = string.Empty;
-
-    public string Description { get; set; } = string.Empty;
-
     public int? ProjectId { get; set; }
+
+    [JsonInclude]
+    public string Title { get; private set; } =
+        string.Empty;
+
+    [JsonInclude]
+    public string Description { get; private set; } =
+        string.Empty;
 
     [JsonInclude]
     public QuestStatus Status { get; private set; }
@@ -18,6 +22,9 @@ public sealed class Quest
 
     public DateTime CreatedAt { get; init; }
         = DateTime.Now;
+
+    [JsonInclude]
+    public DateTime? ActivatedAt { get; private set; }
 
     [JsonInclude]
     public DateTime? CompletedAt { get; private set; }
@@ -35,6 +42,7 @@ public sealed class Quest
         }
 
         Status = QuestStatus.Active;
+        ActivatedAt = DateTime.Now;
     }
 
     public void Complete()
@@ -62,4 +70,34 @@ public sealed class Quest
         Status = QuestStatus.Archived;
         ArchivedAt = DateTime.Now;
     }
+
+    public void Configure(
+    string title,
+    string description
+    )
+    {
+        if (!string.IsNullOrWhiteSpace(Title))
+        {
+            throw new InvalidOperationException(
+                "The quest has already been configured."
+            );
+        }
+
+        UpdateDetails(
+            title,
+            description
+        );
+    }
+
+    public void UpdateDetails(
+    string title,
+    string description
+    )
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+
+        Title = title.Trim();
+        Description = description.Trim();
+    }
+
 }

@@ -8,7 +8,7 @@ The user interface may use RPG terminology to create an engaging experience with
 
 ## Core Principle
 
-> The domain represents reality.  
+> The domain represents reality.
 > The presentation represents the RPG fantasy.
 
 ## Official Vocabulary

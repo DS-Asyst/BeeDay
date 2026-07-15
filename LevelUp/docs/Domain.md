@@ -1,296 +1,69 @@
 # LevelUp Domain
 
-## Overview
+## Core Model
 
-The LevelUp domain models real-world productivity using RPG-inspired progression mechanics.
+LevelUp models real-world productivity with RPG-inspired presentation.
 
-The domain always represents real concepts.
-
-The presentation layer is responsible for transforming those concepts into an RPG experience.
-
----
-
-# Core Domain
-
-The domain is centered around the Character.
-
-text
+```text
 Character
-│
+├── Attributes
 ├── Habits
 ├── Quests
-├── Projects
-├── Experience
-├── Attributes
-├── Gold
-├── Titles
-└── Achievements
-
-
-The character evolves by completing activities.
-
----
-
-# Domain Entities
+└── Projects
+    └── Quests
+```
 
 ## Character
 
-Represents the user inside the progression system.
-
-Responsible for:
-
-- experience
-- level
-- attributes
-- unlocked titles
-- achievements
-- gold
-
----
+Represents user progression, including experience, level and attributes.
 
 ## Habit
 
-Represents a recurring activity.
-
-Characteristics
-
-- repeatable
-- optional project association (future)
-- grants experience
-- grants attribute experience
-
-Presentation
-
-Training
-
----
+Represents a repeatable activity. The UI presents a Habit as Training. Completing a habit may grant character and attribute experience.
 
 ## Quest
 
 Represents a one-time task.
 
-Characteristics
+Rules:
 
-- completed once
-- may belong to a project
-- grants experience
-- may grant gold
-- may unlock achievements
-
-Presentation
-
-Quest
-
----
+- may be independent or associated with one Project;
+- follows `Created → Active → Completed` lifecycle;
+- may be archived;
+- stores creation, activation, completion and archive timestamps;
+- can be edited while not archived;
+- completion contributes to project progress.
 
 ## Project
 
-Represents a long-term objective.
+Represents a long-term objective composed of zero or more quests.
 
-Characteristics
+Rules:
 
-- contains zero or more quests
-- progress is calculated
-- does not grant experience
-- unlocks titles
-- may unlock achievements
+- follows `Created → Active → Completed` lifecycle;
+- may be archived;
+- stores an unlocked title as its current reward metadata;
+- progress is derived and never persisted;
+- archived quests do not participate in progress;
+- a project with at least one valid quest completes automatically when every valid quest is completed;
+- only an active project can complete automatically.
 
-Presentation
+## Project Progress
 
-Project
+```text
+Completed non-archived quests / Total non-archived quests
+```
 
----
+Examples:
 
-## Milestone
+- 0 valid quests → 0%;
+- 1 of 4 completed → 25%;
+- 4 of 4 completed → 100% and automatic completion for an active project.
 
-Represents an important stage inside a project.
+## Associations
 
-Characteristics
+Quests store an optional `ProjectId` instead of a direct object reference. This keeps JSON persistence simple and avoids circular serialization graphs.
 
-- belongs to a project
-- groups multiple quests
-- represents a boss encounter in the UI
+## Domain and Presentation
 
-Presentation
-
-Boss
-
----
-
-# Domain Relationships
-
-text
-Project
-│
-├── Quest
-├── Quest
-└── Quest
-
-
-text
-Character
-
-↑
-
-Habit
-
-Quest
-
-Project
-
-
-Habits and Quests improve the Character.
-
-Projects unlock Titles and Achievements.
-
----
-
-# Progression
-
-Character progression occurs through three independent systems.
-
-## Habit Progression
-
-Habit Completed
-
-↓
-
-Character XP
-
-↓
-
-Attribute XP
-
-↓
-
-Level Check
-
----
-
-## Quest Progression
-
-Quest Completed
-
-↓
-
-Character XP
-
-↓
-
-Project Progress
-
-↓
-
-Project Completed?
-
----
-
-## Project Progression
-
-Project Completed
-
-↓
-
-Unlock Title
-
-↓
-
-Unlock Achievement
-
----
-
-# Project Progress
-
-Project progress is never stored.
-
-It is calculated.
-
-Formula
-
-Completed Quests / Total Quests
-
-Example
-
-2 / 10
-
-↓
-
-20%
-
-If additional quests are linked to the project, the percentage is recalculated automatically.
-
----
-
-# Domain Events
-
-The following events represent important business facts.
-
-Character Created
-
-Habit Created
-
-Habit Completed
-
-Quest Created
-
-Quest Completed
-
-Project Created
-
-Quest Linked To Project
-
-Project Completed
-
-Achievement Unlocked
-
-Title Unlocked
-
-Game Saved
-
----
-
-# Business Rules
-
-## Habits
-
-A habit may be completed multiple times.
-
----
-
-## Quests
-
-A quest may be completed only once.
-
----
-
-## Projects
-
-A project may exist without quests.
-
-A completed project may become archived.
-
-Progress is always calculated.
-
-Projects do not grant XP.
-
----
-
-# Future Evolution
-
-Future entities include:
-
-Reward
-
-Statistics
-
-Inventory
-
-Item
-
-Equipment
-
-Shop
-
-Event
-
-Reward will be introduced only when multiple domain concepts require a shared reward model.
+The domain uses real-world terminology. RPG metaphors belong to the UI. For example, Habit remains the domain entity while the UI calls it Training.

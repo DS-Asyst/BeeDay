@@ -1,4 +1,4 @@
-﻿using CharacterModel = LevelUp.Domain.Character.Character;
+using CharacterModel = LevelUp.Domain.Character.Character;
 
 namespace LevelUp.Services.Character;
 
