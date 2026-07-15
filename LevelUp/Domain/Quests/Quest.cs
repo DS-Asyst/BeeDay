@@ -1,20 +1,20 @@
 using System.Text.Json.Serialization;
 
-namespace LevelUp.Domain.Projects;
+namespace LevelUp.Domain.Quests;
 
-public sealed class Project
+public sealed class Quest
 {
     public int Id { get; set; }
 
-    public string Name { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
 
     public string Description { get; set; } = string.Empty;
 
-    [JsonInclude]
-    public ProjectStatus Status { get; private set; }
-        = ProjectStatus.Created;
+    public int? ProjectId { get; set; }
 
-    public string UnlockedTitle { get; set; } = string.Empty;
+    [JsonInclude]
+    public QuestStatus Status { get; private set; }
+        = QuestStatus.Created;
 
     public DateTime CreatedAt { get; init; }
         = DateTime.Now;
@@ -27,39 +27,39 @@ public sealed class Project
 
     public void Activate()
     {
-        if (Status != ProjectStatus.Created)
+        if (Status != QuestStatus.Created)
         {
             throw new InvalidOperationException(
-                "Only created projects can be activated."
+                "Only created quests can be activated."
             );
         }
 
-        Status = ProjectStatus.Active;
+        Status = QuestStatus.Active;
     }
 
     public void Complete()
     {
-        if (Status != ProjectStatus.Active)
+        if (Status != QuestStatus.Active)
         {
             throw new InvalidOperationException(
-                "Only active projects can be completed."
+                "Only active quests can be completed."
             );
         }
 
-        Status = ProjectStatus.Completed;
+        Status = QuestStatus.Completed;
         CompletedAt = DateTime.Now;
     }
 
     public void Archive()
     {
-        if (Status == ProjectStatus.Archived)
+        if (Status == QuestStatus.Archived)
         {
             throw new InvalidOperationException(
-                "The project is already archived."
+                "The quest is already archived."
             );
         }
 
-        Status = ProjectStatus.Archived;
+        Status = QuestStatus.Archived;
         ArchivedAt = DateTime.Now;
     }
 }

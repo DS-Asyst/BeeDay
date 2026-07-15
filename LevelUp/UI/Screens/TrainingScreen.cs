@@ -7,6 +7,8 @@ using LevelUp.Services.Persistence;
 using LevelUp.UI.Components.Training;
 using Spectre.Console;
 using CharacterModel = LevelUp.Domain.Character.Character;
+using LevelUp.Services.Projects;
+using LevelUp.Services.Quests;
 
 namespace LevelUp.UI;
 
@@ -18,14 +20,18 @@ public class TrainingScreen
     private readonly SaveService saveService;
     private readonly InputReader inputReader;
     private readonly CharacterModel character;
+    private readonly ProjectService projectService;
+    private readonly QuestService questService;
 
     public TrainingScreen(
-        HabitService habitService,
-        CharacterService characterService,
-        AttributeService attributeService,
-        SaveService saveService,
-        InputReader inputReader,
-        CharacterModel character)
+    HabitService habitService,
+    CharacterService characterService,
+    AttributeService attributeService,
+    SaveService saveService,
+    InputReader inputReader,
+    CharacterModel character,
+    ProjectService projectService,
+    QuestService questService)
     {
         this.habitService = habitService;
         this.characterService = characterService;
@@ -33,6 +39,8 @@ public class TrainingScreen
         this.saveService = saveService;
         this.inputReader = inputReader;
         this.character = character;
+        this.projectService = projectService;
+        this.questService = questService;
     }
 
     public void Show()
@@ -235,7 +243,18 @@ public class TrainingScreen
         GameData gameData = new()
         {
             Character = character,
-            Habits = habitService.GetAllHabits()
+
+            Habits = habitService
+                .GetAllHabits()
+                .ToList(),
+
+            Projects = projectService
+                .GetAllProjects()
+                .ToList(),
+
+            Quests = questService
+                .GetAllQuests()
+                .ToList()
         };
 
         saveService.SaveGame(gameData);

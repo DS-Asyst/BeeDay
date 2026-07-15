@@ -3,7 +3,8 @@ using LevelUp.Services.Persistence;
 using LevelUp.Domain;
 using LevelUp.Domain.Habits;
 using CharacterModel = LevelUp.Domain.Character.Character;
-
+using LevelUp.Services.Projects;
+using LevelUp.Services.Quests;
 
 namespace LevelUp.UI;
 
@@ -18,8 +19,11 @@ public class MainMenuScreen
     private readonly CharacterModel character;
     private readonly HabitService habitService;
     private readonly SaveService saveService;
+    private readonly ProjectService projectService;
+    private readonly QuestService questService;
 
     public MainMenuScreen(
+
         InputReader inputReader,
         CharacterScreen characterScreen,
         TrainingScreen trainingScreen,
@@ -28,8 +32,13 @@ public class MainMenuScreen
         GoldScreen goldScreen,
         CharacterModel character,
         HabitService habitService,
-        SaveService saveService)
+        ProjectService projectService,
+        QuestService questService,
+        SaveService saveService
+
+        )
     {
+
         this.inputReader = inputReader;
         this.characterScreen = characterScreen;
         this.trainingScreen = trainingScreen;
@@ -38,7 +47,11 @@ public class MainMenuScreen
         this.goldScreen = goldScreen;
         this.character = character;
         this.habitService = habitService;
+        this.projectService = projectService;
+        this.questService = questService;
         this.saveService = saveService;
+
+
     }
 
     public void Show()
@@ -101,7 +114,18 @@ public class MainMenuScreen
         GameData gameData = new()
         {
             Character = character,
-            Habits = habitService.GetAllHabits()
+
+            Habits = habitService
+                .GetAllHabits()
+                .ToList(),
+
+            Projects = projectService
+                .GetAllProjects()
+                .ToList(),
+
+            Quests = questService
+                .GetAllQuests()
+                .ToList()
         };
 
         saveService.SaveGame(gameData);

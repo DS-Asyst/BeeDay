@@ -1,19 +1,20 @@
 ﻿using LevelUp.Domain;
-using LevelUp.Domain.Habits;
-using LevelUp.Domain.Projects;
-using CharacterModel = LevelUp.Domain.Character.Character;
 using LevelUp.Services.Character;
 using LevelUp.Services.Habits;
 using LevelUp.Services.Persistence;
 using LevelUp.Services.Projects;
+using LevelUp.Services.Quests;
 using LevelUp.UI;
+using CharacterModel = LevelUp.Domain.Character.Character;
 
-Console.OutputEncoding = System.Text.Encoding.UTF8;
-Console.InputEncoding = System.Text.Encoding.UTF8;
+Console.OutputEncoding =
+    System.Text.Encoding.UTF8;
 
+Console.InputEncoding =
+    System.Text.Encoding.UTF8;
 
-HabitService habitService = new HabitService();
-SaveService saveService = new SaveService();
+HabitService habitService = new();
+SaveService saveService = new();
 ProgressionService progressionService = new();
 
 InputReader inputReader = new();
@@ -26,14 +27,28 @@ CharacterService characterService =
 AttributeService attributeService =
     new(progressionService);
 
-GameData? loadedGame = saveService.LoadGame();
+GameData? loadedGame =
+    saveService.LoadGame();
 
 CharacterModel character;
+ProjectService projectService;
+QuestService questService;
 
 if (loadedGame is not null)
 {
     character = loadedGame.Character;
-    habitService.LoadHabits(loadedGame.Habits);
+
+    habitService.LoadHabits(
+        loadedGame.Habits
+    );
+
+    projectService = new ProjectService(
+        loadedGame.Projects
+    );
+
+    questService = new QuestService(
+        loadedGame.Quests
+    );
 }
 else
 {
@@ -43,15 +58,31 @@ else
     character =
         characterCreationScreen.CreateCharacter();
 
+    projectService =
+        new ProjectService();
+
+    questService =
+        new QuestService();
+
     GameData newGameData = new()
     {
         Character = character,
-        Habits = habitService.GetAllHabits()
+
+        Habits = habitService
+            .GetAllHabits()
+            .ToList(),
+
+        Projects = projectService
+            .GetAllProjects()
+            .ToList(),
+
+        Quests = questService
+            .GetAllQuests()
+            .ToList()
     };
 
     saveService.SaveGame(newGameData);
 }
-
 
 TrainingScreen trainingScreen = new(
     habitService,
@@ -59,12 +90,28 @@ TrainingScreen trainingScreen = new(
     attributeService,
     saveService,
     inputReader,
+    character,
+    projectService,
+    questService
+);
+
+QuestScreen questScreen = new(
+    questService,
+    projectService,
+    habitService,
+    saveService,
+    inputReader,
     character
 );
 
-QuestScreen questScreen = new(inputReader);
-ProjectScreen projectScreen = new(inputReader);
-GoldScreen goldScreen = new(inputReader);
+ProjectScreen projectScreen = new(
+    projectService,
+    questService
+);
+
+GoldScreen goldScreen = new(
+    inputReader
+);
 
 MainMenuScreen mainMenuScreen = new(
     inputReader,
@@ -75,6 +122,8 @@ MainMenuScreen mainMenuScreen = new(
     goldScreen,
     character,
     habitService,
+    projectService,
+    questService,
     saveService
 );
 

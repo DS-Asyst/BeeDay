@@ -1,4 +1,5 @@
 using LevelUp.Domain.Projects;
+using LevelUp.Domain.Quests;
 
 namespace LevelUp.Services.Projects;
 
@@ -99,13 +100,56 @@ public sealed class ProjectService
         return projects.Remove(project);
     }
 
-    public decimal CalculateProgress(Project project)
+    public decimal CalculateProgress(
+        Project project,
+        IEnumerable<Quest> quests
+    )
     {
         EnsureManagedProject(project);
+        ArgumentNullException.ThrowIfNull(quests);
 
-        // Será calculado por meio das quests vinculadas
-        // quando o domínio de Quest for implementado.
-        return 0m;
+        List<Quest> projectQuests = quests
+            .Where(quest =>
+                quest.ProjectId == project.Id
+            )
+            .ToList();
+
+        if (projectQuests.Count == 0)
+        {
+            return 0m;
+        }
+
+        int completedQuests = projectQuests.Count(
+            quest =>
+                quest.Status == QuestStatus.Completed
+        );
+
+        return Math.Round(
+            completedQuests * 100m /
+            projectQuests.Count,
+            2
+        );
+    }
+
+    public bool HasCompletedAllQuests(
+        Project project,
+        IEnumerable<Quest> quests
+    )
+    {
+        EnsureManagedProject(project);
+        ArgumentNullException.ThrowIfNull(quests);
+
+        List<Quest> projectQuests = quests
+            .Where(quest =>
+                quest.ProjectId == project.Id
+            )
+            .ToList();
+
+        return projectQuests.Count > 0 &&
+            projectQuests.All(
+                quest =>
+                    quest.Status == QuestStatus.Completed
+            );
     }
 
     public bool IsCompleted(Project project)

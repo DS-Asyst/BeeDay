@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using LevelUp.Domain;
-using LevelUp.Domain.Character;
 using LevelUp.Domain.Habits;
 using LevelUp.Domain.Projects;
+using LevelUp.Domain.Quests;
 using CharacterModel = LevelUp.Domain.Character.Character;
 
 namespace LevelUp.Services.Persistence;
@@ -124,8 +124,9 @@ public class SaveService
             }
 
             gameData.Character ??= new CharacterModel();
-            gameData.Habits ??= new List<Habit>();
-            gameData.Projects ??= new List<Project>();
+            gameData.Habits ??= [];
+            gameData.Projects ??= [];
+            gameData.Quests ??= [];
 
             return gameData;
         }
