@@ -3,18 +3,19 @@ using LevelUp.UI.Components.Shared;
 using LevelUp.UI.Infrastructure.Themes;
 using Spectre.Console;
 using ProjectModel = LevelUp.Domain.Projects.Project;
+using QuestModel = LevelUp.Domain.Quests.Quest;
 
 namespace LevelUp.UI.Components.Project;
 
 public sealed class ProjectCard
 {
     private readonly ProjectModel project;
-    private readonly IReadOnlyCollection<Quest> quests;
+    private readonly IReadOnlyCollection<QuestModel> quests;
     private readonly decimal progress;
 
     public ProjectCard(
         ProjectModel project,
-        IEnumerable<Quest> quests,
+        IEnumerable<QuestModel> quests,
         decimal progress
     )
     {
