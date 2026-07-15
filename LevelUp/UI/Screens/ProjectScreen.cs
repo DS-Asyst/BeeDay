@@ -1,10 +1,11 @@
-﻿using LevelUp.Domain.Projects;
+using LevelUp.Domain.Projects;
 using LevelUp.Domain.Quests;
 using LevelUp.Services.Persistence;
 using LevelUp.Services.Projects;
 using LevelUp.Services.Quests;
+using LevelUp.UI.Components.Project;
+using LevelUp.UI.Components.Quest;
 using Spectre.Console;
-
 
 namespace LevelUp.UI;
 
@@ -14,7 +15,6 @@ public sealed class ProjectScreen
     private readonly QuestService questService;
     private readonly InputReader inputReader;
     private readonly GameStateService gameStateService;
-
 
     public ProjectScreen(
         ProjectService projectService,
@@ -35,419 +35,329 @@ public sealed class ProjectScreen
 
         while (running)
         {
-            ConsoleHelper.ShowHeader("Projects");
+            ConsoleHelper.ShowHeader("Project Board");
 
             string option = inputReader.ReadSelection(
-                "Choose an option:",
+                "Escolha uma opção:",
                 new[]
                 {
-                    "Create project",
-                    "View projects",
-                    "Activate project",
-                    "Edit project",
-                    "Archive project",
-                    "Delete project",
-                    "Back"
+                    "Novo projeto",
+                    "Abrir projeto",
+                    "Listar projetos",
+                    "Voltar"
                 },
                 choice => choice
             );
 
-            running = HandleOption(option);
-        }
-    }
+            switch (option)
+            {
+                case "Novo projeto":
+                    CreateProject();
+                    inputReader.WaitForContinue();
+                    break;
 
-    private bool HandleOption(string option)
-    {
-        switch (option)
-        {
-            case "Create project":
-                CreateProject();
-                inputReader.WaitForContinue();
-                return true;
+                case "Abrir projeto":
+                    OpenProject();
+                    break;
 
-            case "View projects":
-                ListProjects();
-                inputReader.WaitForContinue();
-                return true;
+                case "Listar projetos":
+                    ListProjects();
+                    inputReader.WaitForContinue();
+                    break;
 
-            case "Activate project":
-                ActivateProject();
-                inputReader.WaitForContinue();
-                return true;
-
-            case "Edit project":
-                EditProject();
-                inputReader.WaitForContinue();
-                return true;
-
-            case "Archive project":
-                ArchiveProject();
-                inputReader.WaitForContinue();
-                return true;
-
-            case "Delete project":
-                DeleteProject();
-                inputReader.WaitForContinue();
-                return true;
-
-            case "Back":
-                return false;
-
-            default:
-                return true;
+                case "Voltar":
+                    running = false;
+                    break;
+            }
         }
     }
 
     private void CreateProject()
     {
-        ConsoleHelper.ShowHeader("Create Project");
-
-        string name = inputReader.ReadRequiredString(
-            "Project name:"
-        );
-
-        string description = inputReader.ReadRequiredString(
-            "Description:"
-        );
-
-        string unlockedTitle = inputReader.ReadRequiredString(
-            "Unlocked title:"
-        );
+        ConsoleHelper.ShowHeader("Novo projeto");
 
         Project project = projectService.CreateProject(
-            name,
-            description,
-            unlockedTitle
+            inputReader.ReadRequiredString("Nome:"),
+            inputReader.ReadRequiredString("Descrição:"),
+            inputReader.ReadRequiredString(
+                "Título desbloqueado:"
+            )
         );
 
         gameStateService.Save();
-
         ConsoleHelper.ShowSuccess(
-            "Project created successfully."
+            "Projeto criado com sucesso."
         );
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(BuildProjectCard(project).Build());
+    }
 
-        ShowProjectDetails(project);
+    private void OpenProject()
+    {
+        IReadOnlyList<Project> projects =
+            projectService.GetAllProjects();
+
+        if (projects.Count == 0)
+        {
+            ConsoleHelper.ShowInformation(
+                "Nenhum projeto foi cadastrado."
+            );
+            inputReader.WaitForContinue();
+            return;
+        }
+
+        Project project = SelectProject(
+            "Selecione um projeto:",
+            projects
+        );
+        bool opened = true;
+
+        while (opened)
+        {
+            ConsoleHelper.ShowHeader("Projeto");
+            AnsiConsole.Write(BuildProjectCard(project).Build());
+            AnsiConsole.WriteLine();
+
+            string action = inputReader.ReadSelection(
+                "Escolha uma ação:",
+                BuildProjectActions(project),
+                choice => choice
+            );
+
+            switch (action)
+            {
+                case "Ativar":
+                    ActivateProject(project);
+                    inputReader.WaitForContinue();
+                    break;
+
+                case "Editar":
+                    EditProject(project);
+                    inputReader.WaitForContinue();
+                    break;
+
+                case "Ver quests":
+                    ShowProjectQuests(project);
+                    inputReader.WaitForContinue();
+                    break;
+
+                case "Arquivar":
+                    ArchiveProject(project);
+                    inputReader.WaitForContinue();
+                    break;
+
+                case "Excluir":
+                    opened = !DeleteProject(project);
+                    if (opened)
+                    {
+                        inputReader.WaitForContinue();
+                    }
+                    break;
+
+                case "Voltar":
+                    opened = false;
+                    break;
+            }
+        }
+    }
+
+    private List<string> BuildProjectActions(Project project)
+    {
+        List<string> actions = [];
+
+        if (project.Status == ProjectStatus.Created)
+        {
+            actions.Add("Ativar");
+        }
+
+        if (project.Status != ProjectStatus.Archived)
+        {
+            actions.Add("Editar");
+        }
+
+        actions.Add("Ver quests");
+
+        if (project.Status != ProjectStatus.Archived)
+        {
+            actions.Add("Arquivar");
+        }
+
+        actions.Add("Excluir");
+        actions.Add("Voltar");
+        return actions;
     }
 
     private void ListProjects()
     {
-        ConsoleHelper.ShowHeader("Projects");
-
         IReadOnlyList<Project> projects =
             projectService.GetAllProjects();
 
         if (projects.Count == 0)
         {
             ConsoleHelper.ShowInformation(
-                "No projects registered."
+                "Nenhum projeto foi cadastrado."
             );
-
             return;
         }
 
-        Table table = new();
+        ProjectTable table = new(
+            projects,
+            questService.GetQuestsByProjectId,
+            CalculateProgress
+        );
 
-        table.AddColumn("ID");
-        table.AddColumn("Name");
-        table.AddColumn("Status");
-        table.AddColumn("Quests");
-        table.AddColumn("Progress");
-        table.AddColumn("Unlocked Title");
-
-        foreach (Project project in projects)
-        {
-            IReadOnlyList<Quest> projectQuests =
-                questService.GetQuestsByProjectId(
-                    project.Id
-                );
-
-            int completedQuests = projectQuests.Count(
-                quest =>
-                    quest.Status == QuestStatus.Completed
-            );
-
-            decimal progress =
-                projectService.CalculateProgress(
-                    project,
-                    questService.GetAllQuests()
-                );
-
-            table.AddRow(
-                project.Id.ToString(),
-                Markup.Escape(project.Name),
-                project.Status.ToString(),
-                $"{completedQuests}/{projectQuests.Count}",
-                $"{progress:0.##}%",
-                Markup.Escape(project.UnlockedTitle)
-            );
-        }
-
-        AnsiConsole.Write(table);
+        AnsiConsole.Write(table.Build());
     }
 
-    private void ActivateProject()
+    private void ActivateProject(Project project)
     {
-        ConsoleHelper.ShowHeader("Activate Project");
-
-        List<Project> availableProjects = projectService
-            .GetAllProjects()
-            .Where(project =>
-                project.Status == ProjectStatus.Created
-            )
-            .ToList();
-
-        if (availableProjects.Count == 0)
+        if (!inputReader.ReadConfirmation(
+            $"Ativar '{project.Name}'?"
+        ))
         {
             ConsoleHelper.ShowInformation(
-                "There are no created projects to activate."
+                "Ativação cancelada."
             );
-
             return;
         }
 
-        Project selectedProject = SelectProject(
-            "Select a project to activate:",
-            availableProjects
-        );
-
-        bool confirmed = inputReader.ReadConfirmation(
-            $"Activate '{selectedProject.Name}'?"
-        );
-
-        if (!confirmed)
-        {
-            ConsoleHelper.ShowInformation(
-                "Project activation cancelled."
-            );
-
-            return;
-        }
-
-        projectService.ActivateProject(
-            selectedProject
-        );
-
+        projectService.ActivateProject(project);
         gameStateService.Save();
-
         ConsoleHelper.ShowSuccess(
-            "Project activated successfully."
+            "Projeto ativado com sucesso."
         );
     }
 
-    private void EditProject()
+    private void EditProject(Project project)
     {
-        ConsoleHelper.ShowHeader("Edit Project");
-
-        List<Project> availableProjects = projectService
-            .GetAllProjects()
-            .Where(project =>
-                project.Status != ProjectStatus.Archived
-            )
-            .ToList();
-
-        if (availableProjects.Count == 0)
-        {
-            ConsoleHelper.ShowInformation(
-                "There are no projects available to edit."
-            );
-
-            return;
-        }
-
-        Project selectedProject = SelectProject(
-            "Select a project to edit:",
-            availableProjects
-        );
-
         AnsiConsole.MarkupLine(
-            $"[grey]Current name:[/] " +
-            $"{Markup.Escape(selectedProject.Name)}"
+            $"[grey]Nome atual:[/] " +
+            $"{Markup.Escape(project.Name)}"
         );
-
         string name = inputReader.ReadRequiredString(
-            "New project name:"
+            "Novo nome:"
         );
 
         AnsiConsole.MarkupLine(
-            $"[grey]Current description:[/] " +
-            $"{Markup.Escape(selectedProject.Description)}"
+            $"[grey]Descrição atual:[/] " +
+            $"{Markup.Escape(project.Description)}"
         );
-
         string description = inputReader.ReadRequiredString(
-            "New description:"
+            "Nova descrição:"
         );
 
         AnsiConsole.MarkupLine(
-            $"[grey]Current unlocked title:[/] " +
-            $"{Markup.Escape(selectedProject.UnlockedTitle)}"
+            $"[grey]Título atual:[/] " +
+            $"{Markup.Escape(project.UnlockedTitle)}"
+        );
+        string unlockedTitle = inputReader.ReadRequiredString(
+            "Novo título desbloqueado:"
         );
 
-        string unlockedTitle =
-            inputReader.ReadRequiredString(
-                "New unlocked title:"
-            );
-
-        bool confirmed = inputReader.ReadConfirmation(
-            $"Save changes to '{selectedProject.Name}'?"
-        );
-
-        if (!confirmed)
+        if (!inputReader.ReadConfirmation(
+            $"Salvar alterações em '{project.Name}'?"
+        ))
         {
-            ConsoleHelper.ShowInformation(
-                "Project update cancelled."
-            );
-
+            ConsoleHelper.ShowInformation("Edição cancelada.");
             return;
         }
 
         projectService.UpdateProject(
-            selectedProject,
+            project,
             name,
             description,
             unlockedTitle
         );
-
         gameStateService.Save();
-
         ConsoleHelper.ShowSuccess(
-            "Project updated successfully."
+            "Projeto atualizado com sucesso."
         );
     }
 
-    private void ArchiveProject()
+    private void ShowProjectQuests(Project project)
     {
-        ConsoleHelper.ShowHeader("Archive Project");
+        IReadOnlyList<Quest> quests =
+            questService.GetQuestsByProjectId(project.Id);
 
-        List<Project> availableProjects = projectService
-            .GetAllProjects()
-            .Where(project =>
-                project.Status != ProjectStatus.Archived
-            )
-            .ToList();
-
-        if (availableProjects.Count == 0)
+        if (quests.Count == 0)
         {
             ConsoleHelper.ShowInformation(
-                "There are no projects available to archive."
+                "Este projeto ainda não possui quests."
             );
-
             return;
         }
 
-        Project selectedProject = SelectProject(
-            "Select a project to archive:",
-            availableProjects
+        QuestTable table = new(
+            quests,
+            _ => project.Name
         );
+        AnsiConsole.Write(table.Build());
+    }
 
-        bool confirmed = inputReader.ReadConfirmation(
-            $"Archive '{selectedProject.Name}'?"
-        );
-
-        if (!confirmed)
+    private void ArchiveProject(Project project)
+    {
+        if (!inputReader.ReadConfirmation(
+            $"Arquivar '{project.Name}'?"
+        ))
         {
             ConsoleHelper.ShowInformation(
-                "Project archive cancelled."
+                "Arquivamento cancelado."
             );
-
             return;
         }
 
-        projectService.ArchiveProject(
-            selectedProject
-        );
-
+        projectService.ArchiveProject(project);
         gameStateService.Save();
-
         ConsoleHelper.ShowSuccess(
-            "Project archived successfully."
+            "Projeto arquivado com sucesso."
         );
     }
 
-    private void DeleteProject()
+    private bool DeleteProject(Project project)
     {
-        ConsoleHelper.ShowHeader("Delete Project");
-
-        IReadOnlyList<Project> projects =
-            projectService.GetAllProjects();
-
-        if (projects.Count == 0)
-        {
-            ConsoleHelper.ShowInformation(
-                "There are no projects available to delete."
-            );
-
-            return;
-        }
-
-        Project selectedProject = SelectProject(
-            "Select a project to delete:",
-            projects
-        );
-
         IReadOnlyList<Quest> linkedQuests =
-            questService.GetQuestsByProjectId(
-                selectedProject.Id
-            );
+            questService.GetQuestsByProjectId(project.Id);
 
-        if (linkedQuests.Count > 0)
+        if (linkedQuests.Count > 0 &&
+            !inputReader.ReadConfirmation(
+                $"O projeto possui {linkedQuests.Count} quest(s). " +
+                "Torná-las independentes?"
+            ))
         {
             ConsoleHelper.ShowInformation(
-                $"This project has {linkedQuests.Count} linked quest(s)."
+                "Exclusão cancelada."
             );
-
-            bool removeAssociations =
-                inputReader.ReadConfirmation(
-                    "Remove the project association from these quests?"
-                );
-
-            if (!removeAssociations)
-            {
-                ConsoleHelper.ShowInformation(
-                    "Project deletion cancelled."
-                );
-
-                return;
-            }
-
-            foreach (Quest quest in linkedQuests)
-            {
-                questService.RemoveQuestFromProject(
-                    quest
-                );
-            }
+            return false;
         }
 
-        bool confirmed = inputReader.ReadConfirmation(
-            $"Permanently delete '{selectedProject.Name}'?"
-        );
-
-        if (!confirmed)
+        if (!inputReader.ReadConfirmation(
+            $"Excluir permanentemente '{project.Name}'?"
+        ))
         {
             ConsoleHelper.ShowInformation(
-                "Project deletion cancelled."
+                "Exclusão cancelada."
             );
-
-            return;
+            return false;
         }
 
-        bool deleted = projectService.DeleteProject(
-            selectedProject.Id
-        );
-
-        if (!deleted)
+        foreach (Quest quest in linkedQuests)
         {
-            ConsoleHelper.ShowInformation(
-                "The project could not be deleted."
-            );
+            questService.RemoveQuestFromProject(quest);
+        }
 
-            return;
+        if (!projectService.DeleteProject(project.Id))
+        {
+            ConsoleHelper.ShowError(
+                "Não foi possível excluir o projeto."
+            );
+            return false;
         }
 
         gameStateService.Save();
-
         ConsoleHelper.ShowSuccess(
-            "Project deleted successfully."
+            "Projeto excluído com sucesso."
         );
+        return true;
     }
 
     private Project SelectProject(
@@ -458,30 +368,24 @@ public sealed class ProjectScreen
         return inputReader.ReadSelection(
             prompt,
             projects,
-            project =>
-                $"{project.Name} — {project.Status}"
+            project => $"{project.Name} — {project.Status}"
         );
     }
 
-    private void ShowProjectDetails(Project project)
+    private decimal CalculateProgress(Project project)
     {
-        AnsiConsole.MarkupLine(
-            $"[grey]ID:[/] {project.Id}"
-        );
-
-        AnsiConsole.MarkupLine(
-            $"[grey]Name:[/] " +
-            $"{Markup.Escape(project.Name)}"
-        );
-
-        AnsiConsole.MarkupLine(
-            $"[grey]Status:[/] {project.Status}"
-        );
-
-        AnsiConsole.MarkupLine(
-            $"[grey]Unlocked title:[/] " +
-            $"{Markup.Escape(project.UnlockedTitle)}"
+        return projectService.CalculateProgress(
+            project,
+            questService.GetAllQuests()
         );
     }
 
+    private ProjectCard BuildProjectCard(Project project)
+    {
+        return new ProjectCard(
+            project,
+            questService.GetQuestsByProjectId(project.Id),
+            CalculateProgress(project)
+        );
+    }
 }

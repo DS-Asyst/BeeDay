@@ -1,4 +1,4 @@
-﻿using LevelUp.Domain.Character;
+using LevelUp.Domain.Character;
 
 namespace LevelUp.Services.Character;
 

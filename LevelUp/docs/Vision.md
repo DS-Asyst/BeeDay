@@ -28,7 +28,7 @@ The application should encourage consistency without punishing users for interru
 
 ## Core Principle
 
-> The domain represents reality.  
+> The domain represents reality.
 > The presentation creates the RPG experience.
 
 Examples:

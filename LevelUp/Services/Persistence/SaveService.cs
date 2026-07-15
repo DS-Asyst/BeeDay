@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using LevelUp.Domain;
 using LevelUp.Domain.Habits;
 using LevelUp.Domain.Projects;

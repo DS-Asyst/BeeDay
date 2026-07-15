@@ -29,20 +29,23 @@ public sealed class QuestService
     }
 
     public Quest CreateQuest(
-        string title,
-        string description,
-        Project? project = null
-    )
+    string title,
+    string description,
+    Project? project = null
+)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
 
         Quest quest = new()
         {
             Id = nextId++,
-            Title = title.Trim(),
-            Description = description.Trim(),
             ProjectId = project?.Id
         };
+
+        quest.Configure(
+            title,
+            description
+        );
 
         quests.Add(quest);
 
@@ -166,5 +169,19 @@ public sealed class QuestService
                 "The quest is not managed by this service."
             );
         }
+    }
+
+    public void UpdateQuest(
+        Quest quest,
+        string title,
+        string description
+    )
+    {
+        EnsureManagedQuest(quest);
+
+        quest.UpdateDetails(
+            title,
+            description
+        );
     }
 }

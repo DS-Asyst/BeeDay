@@ -6,8 +6,6 @@ namespace LevelUp.Services.Projects;
 public sealed class ProjectService
 {
     private readonly List<Project> projects = [];
-
-
     private int nextId = 1;
 
     public ProjectService(
@@ -35,8 +33,6 @@ public sealed class ProjectService
         string unlockedTitle
     )
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-
         Project project = new()
         {
             Id = nextId++
@@ -49,7 +45,6 @@ public sealed class ProjectService
         );
 
         projects.Add(project);
-
         return project;
     }
 
@@ -60,14 +55,11 @@ public sealed class ProjectService
 
     public Project? GetProjectById(int id)
     {
-        if (id <= 0)
-        {
-            return null;
-        }
-
-        return projects.FirstOrDefault(
-            project => project.Id == id
-        );
+        return id <= 0
+            ? null
+            : projects.FirstOrDefault(
+                project => project.Id == id
+            );
     }
 
     public void UpdateProject(
@@ -78,7 +70,6 @@ public sealed class ProjectService
     )
     {
         EnsureManagedProject(project);
-
         project.UpdateDetails(
             name,
             description,
@@ -89,34 +80,42 @@ public sealed class ProjectService
     public void ActivateProject(Project project)
     {
         EnsureManagedProject(project);
-
         project.Activate();
     }
 
     public void CompleteProject(Project project)
     {
         EnsureManagedProject(project);
+        project.Complete();
+    }
+
+    public bool TryCompleteProject(
+        Project project,
+        IEnumerable<Quest> quests
+    )
+    {
+        EnsureManagedProject(project);
+
+        if (project.Status != ProjectStatus.Active ||
+            !HasCompletedAllQuests(project, quests))
+        {
+            return false;
+        }
 
         project.Complete();
+        return true;
     }
 
     public void ArchiveProject(Project project)
     {
         EnsureManagedProject(project);
-
         project.Archive();
     }
 
     public bool DeleteProject(int id)
     {
         Project? project = GetProjectById(id);
-
-        if (project is null)
-        {
-            return false;
-        }
-
-        return projects.Remove(project);
+        return project is not null && projects.Remove(project);
     }
 
     public decimal CalculateProgress(
@@ -124,14 +123,10 @@ public sealed class ProjectService
         IEnumerable<Quest> quests
     )
     {
-        EnsureManagedProject(project);
-        ArgumentNullException.ThrowIfNull(quests);
-
-        List<Quest> projectQuests = quests
-            .Where(quest =>
-                quest.ProjectId == project.Id
-            )
-            .ToList();
+        List<Quest> projectQuests = GetProgressQuests(
+            project,
+            quests
+        );
 
         if (projectQuests.Count == 0)
         {
@@ -139,13 +134,11 @@ public sealed class ProjectService
         }
 
         int completedQuests = projectQuests.Count(
-            quest =>
-                quest.Status == QuestStatus.Completed
+            quest => quest.Status == QuestStatus.Completed
         );
 
         return Math.Round(
-            completedQuests * 100m /
-            projectQuests.Count,
+            completedQuests * 100m / projectQuests.Count,
             2
         );
     }
@@ -155,46 +148,50 @@ public sealed class ProjectService
         IEnumerable<Quest> quests
     )
     {
-        EnsureManagedProject(project);
-        ArgumentNullException.ThrowIfNull(quests);
-
-        List<Quest> projectQuests = quests
-            .Where(quest =>
-                quest.ProjectId == project.Id
-            )
-            .ToList();
+        List<Quest> projectQuests = GetProgressQuests(
+            project,
+            quests
+        );
 
         return projectQuests.Count > 0 &&
             projectQuests.All(
-                quest =>
-                    quest.Status == QuestStatus.Completed
+                quest => quest.Status == QuestStatus.Completed
             );
     }
 
     public bool IsCompleted(Project project)
     {
         ArgumentNullException.ThrowIfNull(project);
+        return project.Status == ProjectStatus.Completed;
+    }
 
-        return project.Status ==
-            ProjectStatus.Completed;
+    private List<Quest> GetProgressQuests(
+        Project project,
+        IEnumerable<Quest> quests
+    )
+    {
+        EnsureManagedProject(project);
+        ArgumentNullException.ThrowIfNull(quests);
+
+        return quests
+            .Where(quest =>
+                quest.ProjectId == project.Id &&
+                quest.Status != QuestStatus.Archived
+            )
+            .ToList();
     }
 
     private void EnsureManagedProject(Project project)
     {
         ArgumentNullException.ThrowIfNull(project);
 
-        bool projectExists = projects.Any(
-            existingProject =>
-                existingProject.Id == project.Id
-        );
-
-        if (!projectExists)
+        if (!projects.Any(
+            existingProject => existingProject.Id == project.Id
+        ))
         {
             throw new InvalidOperationException(
                 "The project is not managed by this service."
             );
         }
     }
-
-
 }

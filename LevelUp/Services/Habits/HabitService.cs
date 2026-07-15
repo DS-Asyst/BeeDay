@@ -1,4 +1,4 @@
-﻿using LevelUp.Domain.Attributes;
+using LevelUp.Domain.Attributes;
 using LevelUp.Domain.Habits;
 
 namespace LevelUp.Services.Habits;
