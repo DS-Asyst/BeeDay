@@ -67,3 +67,12 @@ Quests store an optional `ProjectId` instead of a direct object reference. This 
 ## Domain and Presentation
 
 The domain uses real-world terminology. RPG metaphors belong to the UI. For example, Habit remains the domain entity while the UI calls it Training.
+
+
+## Phase 4 hardening rules
+
+- Archived projects and quests cannot be edited.
+- Archived quests cannot be assigned to another project.
+- Project deletion may remove quest associations, including archived quests, to preserve referential integrity.
+- Quests may only be assigned to projects in Created or Active status.
+- Project progress ignores archived quests.

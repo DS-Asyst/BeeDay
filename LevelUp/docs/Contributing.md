@@ -55,3 +55,16 @@ refactor: introduce shared entity card
 fix: preserve project data during save
  docs: close phase 3 roadmap
 ```
+
+
+## Quality checks
+
+Before opening a pull request, run:
+
+```bash
+dotnet format LevelUp.slnx --verify-no-changes
+dotnet build LevelUp.slnx
+dotnet test LevelUp.Tests/LevelUp.Tests.csproj
+```
+
+Business rules should be covered by automated tests. Cross-feature orchestration belongs in `Services/Workflows`, not in UI screens.

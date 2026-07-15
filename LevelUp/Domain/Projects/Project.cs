@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using QuestModel = LevelUp.Domain.Quests.Quest;
 
 namespace LevelUp.Domain.Projects;
 
@@ -8,30 +7,24 @@ public sealed class Project
     public int Id { get; set; }
 
     [JsonInclude]
-    public string Name { get; private set; } =
-        string.Empty;
+    public string Name { get; private set; } = string.Empty;
 
     [JsonInclude]
-    public string Description { get; private set; } =
-        string.Empty;
+    public string Description { get; private set; } = string.Empty;
 
     [JsonInclude]
-    public string UnlockedTitle { get; private set; } =
-        string.Empty;
+    public string UnlockedTitle { get; private set; } = string.Empty;
 
     [JsonInclude]
-    public ProjectStatus Status { get; private set; }
-        = ProjectStatus.Created;
+    public ProjectStatus Status { get; private set; } = ProjectStatus.Created;
 
-    public DateTime CreatedAt { get; init; }
-        = DateTime.Now;
+    public DateTime CreatedAt { get; init; } = DateTime.Now;
 
     [JsonInclude]
     public DateTime? CompletedAt { get; private set; }
 
     [JsonInclude]
     public DateTime? ArchivedAt { get; private set; }
-
 
     public void Configure(
         string name,
@@ -46,11 +39,7 @@ public sealed class Project
             );
         }
 
-        UpdateDetails(
-            name,
-            description,
-            unlockedTitle
-        );
+        SetDetails(name, description, unlockedTitle);
     }
 
     public void UpdateDetails(
@@ -59,11 +48,8 @@ public sealed class Project
         string unlockedTitle
     )
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-
-        Name = name.Trim();
-        Description = description.Trim();
-        UnlockedTitle = unlockedTitle.Trim();
+        EnsureNotArchived();
+        SetDetails(name, description, unlockedTitle);
     }
 
     public void Activate()
@@ -104,4 +90,26 @@ public sealed class Project
         ArchivedAt = DateTime.Now;
     }
 
+    private void SetDetails(
+        string name,
+        string description,
+        string unlockedTitle
+    )
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
+        Name = name.Trim();
+        Description = description.Trim();
+        UnlockedTitle = unlockedTitle.Trim();
+    }
+
+    private void EnsureNotArchived()
+    {
+        if (Status == ProjectStatus.Archived)
+        {
+            throw new InvalidOperationException(
+                "Archived projects cannot be changed."
+            );
+        }
+    }
 }

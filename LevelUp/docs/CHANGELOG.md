@@ -45,3 +45,18 @@ Added interactive navigation, reusable themes and icons, panels, cards, tables, 
 ## Phase 1 — Core Foundation
 
 Added Character, attributes, progression, Habits, core services and local JSON persistence.
+
+
+## Unreleased — Phase 4 architecture hardening
+
+### Added
+- `LevelUp.Tests` with domain, progress, and persistence coverage.
+- `QuestWorkflowService` and `QuestCompletionResult`.
+- `IGameDataStore` and a GitHub Actions CI workflow.
+- Explicit corrupted-save exception with backup path.
+
+### Changed
+- Quest-project association is encapsulated by the quest domain model.
+- Archived quests and projects reject edits.
+- `SaveService` accepts an injectable path and no longer writes UI messages.
+- Quest completion orchestration was removed from `QuestScreen`.
