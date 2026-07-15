@@ -5,6 +5,7 @@ using LevelUp.Services.Projects;
 using LevelUp.Services.Quests;
 using LevelUp.UI.Components.Quest;
 using Spectre.Console;
+using QuestModel = LevelUp.Domain.Quests.Quest;
 
 namespace LevelUp.UI;
 
@@ -102,7 +103,7 @@ public sealed class QuestScreen
 
     private void OpenQuest()
     {
-        IReadOnlyList<Quest> quests =
+        IReadOnlyList<QuestModel> quests =
             questService.GetAllQuests();
 
         if (quests.Count == 0)
@@ -205,7 +206,7 @@ public sealed class QuestScreen
     {
         ConsoleHelper.ShowHeader("Quest Board");
 
-        IReadOnlyList<Quest> quests =
+        IReadOnlyList<QuestModel> quests =
             questService.GetAllQuests();
 
         if (quests.Count == 0)
@@ -491,7 +492,7 @@ public sealed class QuestScreen
 
     private Quest SelectQuest(
         string prompt,
-        IEnumerable<Quest> quests
+        IEnumerable<QuestModel> quests
     )
     {
         return inputReader.ReadSelection(

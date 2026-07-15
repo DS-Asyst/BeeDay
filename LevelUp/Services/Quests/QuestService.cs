@@ -1,5 +1,6 @@
 using LevelUp.Domain.Projects;
 using LevelUp.Domain.Quests;
+using QuestModel = LevelUp.Domain.Quests.Quest;
 
 namespace LevelUp.Services.Quests;
 
@@ -52,7 +53,7 @@ public sealed class QuestService
         return quest;
     }
 
-    public IReadOnlyList<Quest> GetAllQuests()
+    public IReadOnlyList<QuestModel> GetAllQuests()
     {
         return quests.AsReadOnly();
     }
@@ -69,7 +70,7 @@ public sealed class QuestService
         );
     }
 
-    public IReadOnlyList<Quest> GetQuestsByProjectId(
+    public IReadOnlyList<QuestModel> GetQuestsByProjectId(
         int projectId
     )
     {
@@ -86,7 +87,7 @@ public sealed class QuestService
             .AsReadOnly();
     }
 
-    public IReadOnlyList<Quest> GetIndependentQuests()
+    public IReadOnlyList<QuestModel> GetIndependentQuests()
     {
         return quests
             .Where(quest =>

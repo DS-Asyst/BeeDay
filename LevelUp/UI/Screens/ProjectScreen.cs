@@ -6,6 +6,7 @@ using LevelUp.Services.Quests;
 using LevelUp.UI.Components.Project;
 using LevelUp.UI.Components.Quest;
 using Spectre.Console;
+using QuestModel = LevelUp.Domain.Quests.Quest;
 
 namespace LevelUp.UI;
 
@@ -276,7 +277,7 @@ public sealed class ProjectScreen
 
     private void ShowProjectQuests(Project project)
     {
-        IReadOnlyList<Quest> quests =
+        IReadOnlyList<QuestModel> quests =
             questService.GetQuestsByProjectId(project.Id);
 
         if (quests.Count == 0)
@@ -315,7 +316,7 @@ public sealed class ProjectScreen
 
     private bool DeleteProject(Project project)
     {
-        IReadOnlyList<Quest> linkedQuests =
+        IReadOnlyList<QuestModel> linkedQuests =
             questService.GetQuestsByProjectId(project.Id);
 
         if (linkedQuests.Count > 0 &&
