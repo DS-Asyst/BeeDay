@@ -2,6 +2,7 @@ using LevelUp.Domain.Milestones;
 using LevelUp.Domain.Quests;
 using LevelUp.UI.Infrastructure.Themes;
 using Spectre.Console;
+using MilestoneModel = LevelUp.Domain.Milestones.Milestone;
 using ProjectModel = LevelUp.Domain.Projects.Project;
 using QuestModel = LevelUp.Domain.Quests.Quest;
 
@@ -12,13 +13,13 @@ public sealed class ProjectTable
     private readonly IReadOnlyCollection<ProjectModel> projects;
     private readonly Func<int, IReadOnlyList<QuestModel>> questResolver;
     private readonly Func<ProjectModel, decimal> progressResolver;
-    private readonly Func<int, IReadOnlyList<Milestone>> milestoneResolver;
+    private readonly Func<int, IReadOnlyList<MilestoneModel>> milestoneResolver;
 
     public ProjectTable(
         IEnumerable<ProjectModel> projects,
         Func<int, IReadOnlyList<QuestModel>> questResolver,
         Func<ProjectModel, decimal> progressResolver,
-        Func<int, IReadOnlyList<Milestone>> milestoneResolver
+        Func<int, IReadOnlyList<MilestoneModel>> milestoneResolver
     )
     {
         ArgumentNullException.ThrowIfNull(projects);
@@ -56,13 +57,15 @@ public sealed class ProjectTable
             IReadOnlyList<QuestModel> quests = questResolver(project.Id)
                 .Where(quest => quest.Status != QuestStatus.Archived)
                 .ToList();
-            int completed = quests.Count(
+
+            int completedQuests = quests.Count(
                 quest => quest.Status == QuestStatus.Completed
             );
 
-            IReadOnlyList<Milestone> milestones = milestoneResolver(project.Id)
+            IReadOnlyList<MilestoneModel> milestones = milestoneResolver(project.Id)
                 .Where(milestone => milestone.Status != MilestoneStatus.Archived)
                 .ToList();
+
             int completedMilestones = milestones.Count(
                 milestone => milestone.Status == MilestoneStatus.Completed
             );
@@ -71,7 +74,7 @@ public sealed class ProjectTable
                 project.Id.ToString(),
                 Markup.Escape(project.Name),
                 ProjectStatusFormatter.Format(project.Status),
-                $"{completed}/{quests.Count}",
+                $"{completedQuests}/{quests.Count}",
                 $"{progressResolver(project):0.##}%",
                 $"{completedMilestones}/{milestones.Count}",
                 Markup.Escape(project.UnlockedTitle)

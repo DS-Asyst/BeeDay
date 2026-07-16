@@ -3,6 +3,7 @@ using LevelUp.Domain.Quests;
 using LevelUp.UI.Components.Shared;
 using LevelUp.UI.Infrastructure.Themes;
 using Spectre.Console;
+using MilestoneModel = LevelUp.Domain.Milestones.Milestone;
 using ProjectModel = LevelUp.Domain.Projects.Project;
 using QuestModel = LevelUp.Domain.Quests.Quest;
 
@@ -13,13 +14,13 @@ public sealed class ProjectCard
     private readonly ProjectModel project;
     private readonly IReadOnlyCollection<QuestModel> quests;
     private readonly decimal progress;
-    private readonly IReadOnlyCollection<Milestone> milestones;
+    private readonly IReadOnlyCollection<MilestoneModel> milestones;
 
     public ProjectCard(
         ProjectModel project,
         IEnumerable<QuestModel> quests,
         decimal progress,
-        IEnumerable<Milestone>? milestones = null
+        IEnumerable<MilestoneModel>? milestones = null
     )
     {
         ArgumentNullException.ThrowIfNull(project);
@@ -33,8 +34,12 @@ public sealed class ProjectCard
 
     public Panel Build()
     {
-        int completed = quests.Count(
+        int completedQuests = quests.Count(
             quest => quest.Status == QuestStatus.Completed
+        );
+
+        int completedMilestones = milestones.Count(
+            milestone => milestone.Status == MilestoneStatus.Completed
         );
 
         EntityCard card = new(
@@ -53,11 +58,7 @@ public sealed class ProjectCard
             $"{progress:0.##}%",
             LevelUpTheme.Success
         );
-        card.AddText("Quests", $"{completed}/{quests.Count}");
-
-        int completedMilestones = milestones.Count(
-            milestone => milestone.Status == MilestoneStatus.Completed
-        );
+        card.AddText("Quests", $"{completedQuests}/{quests.Count}");
         card.AddText(
             "Milestones",
             $"{completedMilestones}/{milestones.Count}"
@@ -76,9 +77,7 @@ public sealed class ProjectCard
         {
             card.AddText(
                 "Completed",
-                project.CompletedAt.Value.ToString(
-                    "dd/MM/yyyy HH:mm"
-                ),
+                project.CompletedAt.Value.ToString("dd/MM/yyyy HH:mm"),
                 LevelUpTheme.Success
             );
         }
@@ -87,9 +86,7 @@ public sealed class ProjectCard
         {
             card.AddText(
                 "Archived",
-                project.ArchivedAt.Value.ToString(
-                    "dd/MM/yyyy HH:mm"
-                ),
+                project.ArchivedAt.Value.ToString("dd/MM/yyyy HH:mm"),
                 LevelUpTheme.MutedText
             );
         }
