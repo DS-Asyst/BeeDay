@@ -1,5 +1,6 @@
+using LevelUp.Domain.Bosses;
 using LevelUp.Domain.Projects;
-using LevelUp.Domain.Quests;
+using LevelUp.Services.Bosses;
 using LevelUp.Services.Milestones;
 using LevelUp.Services.Persistence;
 using LevelUp.Services.Projects;
@@ -7,9 +8,9 @@ using LevelUp.Services.Quests;
 using LevelUp.Services.Workflows;
 using LevelUp.UI.Components.Project;
 using LevelUp.UI.Components.Quest;
+using LevelUp.UI.Infrastructure;
 using Spectre.Console;
 using QuestModel = LevelUp.Domain.Quests.Quest;
-using LevelUp.UI.Infrastructure;
 
 namespace LevelUp.UI;
 
@@ -22,6 +23,8 @@ public sealed class ProjectScreen
     private readonly ProjectWorkflowService projectWorkflowService;
     private readonly MilestoneService milestoneService;
     private readonly MilestoneScreen milestoneScreen;
+    private readonly BossService bossService;
+    private readonly BossWorkflowService bossWorkflowService;
 
     public ProjectScreen(
         ProjectService projectService,
@@ -30,7 +33,9 @@ public sealed class ProjectScreen
         GameStateService gameStateService,
         ProjectWorkflowService projectWorkflowService,
         MilestoneService milestoneService,
-        MilestoneScreen milestoneScreen
+        MilestoneScreen milestoneScreen,
+        BossService bossService,
+        BossWorkflowService bossWorkflowService
     )
     {
         this.projectService = projectService;
@@ -40,47 +45,27 @@ public sealed class ProjectScreen
         this.projectWorkflowService = projectWorkflowService;
         this.milestoneService = milestoneService;
         this.milestoneScreen = milestoneScreen;
+        this.bossService = bossService;
+        this.bossWorkflowService = bossWorkflowService;
     }
 
     public void Show()
     {
         bool running = true;
-
         while (running)
         {
             ConsoleHelper.ShowHeader("Painel de Projetos");
-
             string option = inputReader.ReadSelection(
                 "Escolha uma opção:",
-                new[]
-                {
-                    "Novo projeto",
-                    "Abrir projeto",
-                    "Listar projetos",
-                    "Voltar"
-                },
+                new[] { "Novo projeto", "Abrir projeto", "Listar projetos", "Voltar" },
                 choice => choice
             );
-
             switch (option)
             {
-                case "Novo projeto":
-                    CreateProject();
-                    inputReader.WaitForContinue();
-                    break;
-
-                case "Abrir projeto":
-                    OpenProject();
-                    break;
-
-                case "Listar projetos":
-                    ListProjects();
-                    inputReader.WaitForContinue();
-                    break;
-
-                case "Voltar":
-                    running = false;
-                    break;
+                case "Novo projeto": CreateProject(); inputReader.WaitForContinue(); break;
+                case "Abrir projeto": OpenProject(); break;
+                case "Listar projetos": ListProjects(); inputReader.WaitForContinue(); break;
+                case "Voltar": running = false; break;
             }
         }
     }
@@ -89,105 +74,57 @@ public sealed class ProjectScreen
     {
         ConsoleHelper.ShowHeader("Novo projeto");
         inputReader.ShowCancellationHint();
-
         try
         {
             string name = inputReader.ReadRequiredStringOrCancel("Nome:");
             string description = inputReader.ReadRequiredStringOrCancel("Descrição:");
-            string unlockedTitle = inputReader.ReadRequiredStringOrCancel(
-                "Título desbloqueado:"
+            string bossName = inputReader.ReadRequiredStringOrCancel("Nome do chefe final:");
+            string bossDescription = inputReader.ReadRequiredStringOrCancel("Descrição do chefe final:");
+            string achievementPrefix = inputReader.ReadRequiredStringOrCancel(
+                "Prefixo da conquista (ex.: Desenvolvedor):"
             );
-
-            Project project = projectService.CreateProject(
-                name,
-                description,
-                unlockedTitle
+            Project project = projectWorkflowService.CreateProject(
+                name, description, bossName, bossDescription, achievementPrefix
             );
-
-            gameStateService.Save();
-            ConsoleHelper.ShowSuccess(
-                "Projeto criado com sucesso."
-            );
+            ConsoleHelper.ShowSuccess("Projeto e chefe final criados com sucesso.");
             AnsiConsole.WriteLine();
             AnsiConsole.Write(BuildProjectCard(project).Build());
         }
         catch (UserCancelledException)
         {
-            ConsoleHelper.ShowInformation(
-                "Criação do projeto cancelada."
-            );
+            ConsoleHelper.ShowInformation("Criação do projeto cancelada.");
         }
     }
 
     private void OpenProject()
     {
-        IReadOnlyList<Project> projects =
-            projectService.GetAllProjects();
-
+        var projects = projectService.GetAllProjects();
         if (projects.Count == 0)
         {
-            ConsoleHelper.ShowInformation(
-                "Nenhum projeto foi cadastrado."
-            );
+            ConsoleHelper.ShowInformation("Nenhum projeto foi cadastrado.");
             inputReader.WaitForContinue();
             return;
         }
-
-        Project project = SelectProject(
-            "Selecione um projeto:",
-            projects
-        );
+        Project project = SelectProject("Selecione um projeto:", projects);
         bool opened = true;
-
         while (opened)
         {
             ConsoleHelper.ShowHeader("Projeto");
             AnsiConsole.Write(BuildProjectCard(project).Build());
             AnsiConsole.WriteLine();
-
             string action = inputReader.ReadSelection(
-                "Escolha uma ação:",
-                BuildProjectActions(project),
-                choice => choice
+                "Escolha uma ação:", BuildProjectActions(project), choice => choice
             );
-
             switch (action)
             {
-                case "Ativar":
-                    ActivateProject(project);
-                    inputReader.WaitForContinue();
-                    break;
-
-                case "Editar":
-                    EditProject(project);
-                    inputReader.WaitForContinue();
-                    break;
-
-                case "Ver missões":
-                    ShowProjectQuests(project);
-                    inputReader.WaitForContinue();
-                    break;
-
-                case "Ver capítulos":
-                    milestoneScreen.ShowForProject(project);
-                    break;
-
-                case "Arquivar":
-                    ArchiveProject(project);
-                    inputReader.WaitForContinue();
-                    break;
-
-                case "Excluir":
-                    opened = !DeleteProject(project);
-                    if (opened)
-                    {
-                        inputReader.WaitForContinue();
-                    }
-                    break;
-
-                case "Voltar":
-                    opened = false;
-                    break;
+                case "Ativar": ActivateProject(project); inputReader.WaitForContinue(); break;
+                case "Editar": EditProject(project); inputReader.WaitForContinue(); break;
+                case "Ver missões": ShowProjectQuests(project); inputReader.WaitForContinue(); break;
+                case "Ver capítulos": milestoneScreen.ShowForProject(project); break;
+                case "Enfrentar chefe final": DefeatBoss(project); inputReader.WaitForContinue(); break;
+                case "Arquivar": ArchiveProject(project); inputReader.WaitForContinue(); break;
+                case "Excluir": opened = !DeleteProject(project); if (opened) inputReader.WaitForContinue(); break;
+                case "Voltar": opened = false; break;
             }
         }
     }
@@ -195,25 +132,13 @@ public sealed class ProjectScreen
     private List<string> BuildProjectActions(Project project)
     {
         List<string> actions = [];
-
-        if (project.Status == ProjectStatus.Created)
-        {
-            actions.Add("Ativar");
-        }
-
-        if (project.Status != ProjectStatus.Archived)
-        {
-            actions.Add("Editar");
-        }
-
+        if (project.Status == ProjectStatus.Created) actions.Add("Ativar");
+        if (project.Status != ProjectStatus.Archived) actions.Add("Editar");
         actions.Add("Ver missões");
         actions.Add("Ver capítulos");
-
-        if (project.Status != ProjectStatus.Archived)
-        {
-            actions.Add("Arquivar");
-        }
-
+        if (bossService.GetByProjectId(project.Id)?.Status == BossStatus.Available)
+            actions.Add("Enfrentar chefe final");
+        if (project.Status != ProjectStatus.Archived) actions.Add("Arquivar");
         actions.Add("Excluir");
         actions.Add("Voltar");
         return actions;
@@ -221,200 +146,119 @@ public sealed class ProjectScreen
 
     private void ListProjects()
     {
-        IReadOnlyList<Project> projects =
-            projectService.GetAllProjects();
-
+        var projects = projectService.GetAllProjects();
         if (projects.Count == 0)
         {
-            ConsoleHelper.ShowInformation(
-                "Nenhum projeto foi cadastrado."
-            );
+            ConsoleHelper.ShowInformation("Nenhum projeto foi cadastrado.");
             return;
         }
-
-        ProjectTable table = new(
+        AnsiConsole.Write(new ProjectTable(
             projects,
             questService.GetQuestsByProjectId,
             CalculateProgress,
             milestoneService.GetByProjectId
-        );
-
-        AnsiConsole.Write(table.Build());
+        ).Build());
     }
 
     private void ActivateProject(Project project)
     {
-        if (!inputReader.ReadConfirmation(
-            $"Ativar '{project.Name}'?"
-        ))
+        if (!inputReader.ReadConfirmation($"Ativar '{project.Name}'?"))
         {
-            ConsoleHelper.ShowInformation(
-                "Ativação cancelada."
-            );
+            ConsoleHelper.ShowInformation("Ativação cancelada.");
             return;
         }
-
         projectService.ActivateProject(project);
         milestoneService.TryActivateFirst(project);
         gameStateService.Save();
-        ConsoleHelper.ShowSuccess(
-            "Projeto ativado com sucesso."
-        );
+        ConsoleHelper.ShowSuccess("Projeto ativado com sucesso.");
     }
 
     private void EditProject(Project project)
     {
-        AnsiConsole.MarkupLine(
-            $"[grey]Nome atual:[/] " +
-            $"{Markup.Escape(project.Name)}"
-        );
-        string name = inputReader.ReadRequiredString(
-            "Novo nome:"
-        );
-
-        AnsiConsole.MarkupLine(
-            $"[grey]Descrição atual:[/] " +
-            $"{Markup.Escape(project.Description)}"
-        );
-        string description = inputReader.ReadRequiredString(
-            "Nova descrição:"
-        );
-
-        AnsiConsole.MarkupLine(
-            $"[grey]Título atual:[/] " +
-            $"{Markup.Escape(project.UnlockedTitle)}"
-        );
-        string unlockedTitle = inputReader.ReadRequiredString(
-            "Novo título desbloqueado:"
-        );
-
-        if (!inputReader.ReadConfirmation(
-            $"Salvar alterações em '{project.Name}'?"
-        ))
+        BossEncounter boss = bossService.GetByProjectId(project.Id)
+            ?? throw new InvalidOperationException("O projeto não possui chefe final.");
+        inputReader.ShowCancellationHint();
+        try
+        {
+            string name = inputReader.ReadRequiredStringOrCancel("Novo nome:");
+            string description = inputReader.ReadRequiredStringOrCancel("Nova descrição:");
+            string bossName = inputReader.ReadRequiredStringOrCancel("Novo nome do chefe final:");
+            string bossDescription = inputReader.ReadRequiredStringOrCancel("Nova descrição do chefe final:");
+            string prefix = inputReader.ReadRequiredStringOrCancel("Novo prefixo da conquista:");
+            if (!inputReader.ReadConfirmation($"Salvar alterações em '{project.Name}'?"))
+            {
+                ConsoleHelper.ShowInformation("Edição cancelada.");
+                return;
+            }
+            projectService.UpdateProject(project, name, description);
+            bossService.Update(boss, bossName, bossDescription, prefix);
+            gameStateService.Save();
+            ConsoleHelper.ShowSuccess("Projeto atualizado com sucesso.");
+        }
+        catch (UserCancelledException)
         {
             ConsoleHelper.ShowInformation("Edição cancelada.");
-            return;
         }
+    }
 
-        projectService.UpdateProject(
-            project,
-            name,
-            description,
-            unlockedTitle
-        );
-        gameStateService.Save();
+    private void DefeatBoss(Project project)
+    {
+        var result = bossWorkflowService.Defeat(project.Id);
         ConsoleHelper.ShowSuccess(
-            "Projeto atualizado com sucesso."
+            $"Chefe derrotado. Conquista desbloqueada: {result.Achievement.Name}."
         );
     }
 
     private void ShowProjectQuests(Project project)
     {
-        IReadOnlyList<QuestModel> quests =
-            questService.GetQuestsByProjectId(project.Id);
-
+        IReadOnlyList<QuestModel> quests = questService.GetQuestsByProjectId(project.Id);
         if (quests.Count == 0)
         {
-            ConsoleHelper.ShowInformation(
-                "Este projeto ainda não possui missões."
-            );
+            ConsoleHelper.ShowInformation("Este projeto ainda não possui missões.");
             return;
         }
-
-        QuestTable table = new(
-            quests,
-            _ => project.Name
-        );
-        AnsiConsole.Write(table.Build());
+        AnsiConsole.Write(new QuestTable(quests, _ => project.Name).Build());
     }
 
     private void ArchiveProject(Project project)
     {
-        if (!inputReader.ReadConfirmation(
-            $"Arquivar '{project.Name}'?"
-        ))
+        if (!inputReader.ReadConfirmation($"Arquivar '{project.Name}'?"))
         {
-            ConsoleHelper.ShowInformation(
-                "Arquivamento cancelado."
-            );
+            ConsoleHelper.ShowInformation("Arquivamento cancelado.");
             return;
         }
-
         projectService.ArchiveProject(project);
         gameStateService.Save();
-        ConsoleHelper.ShowSuccess(
-            "Projeto arquivado com sucesso."
-        );
+        ConsoleHelper.ShowSuccess("Projeto arquivado com sucesso.");
     }
 
     private bool DeleteProject(Project project)
     {
-        IReadOnlyList<QuestModel> linkedQuests =
-            questService.GetQuestsByProjectId(project.Id);
-
-        if (linkedQuests.Count > 0 &&
-            !inputReader.ReadConfirmation(
-                $"O projeto possui {linkedQuests.Count} missão(ões). " +
-                "Torná-las independentes?"
-            ))
-        {
-            ConsoleHelper.ShowInformation(
-                "Exclusão cancelada."
-            );
-            return false;
-        }
-
-        if (!inputReader.ReadConfirmation(
-            $"Excluir permanentemente '{project.Name}'?"
-        ))
-        {
-            ConsoleHelper.ShowInformation(
-                "Exclusão cancelada."
-            );
-            return false;
-        }
-
-        if (!projectWorkflowService.DeleteProject(project.Id))
-        {
-            ConsoleHelper.ShowError(
-                "Não foi possível excluir o projeto."
-            );
-            return false;
-        }
-
-        ConsoleHelper.ShowSuccess(
-            "Projeto excluído com sucesso."
-        );
-        return true;
+        var linkedQuests = questService.GetQuestsByProjectId(project.Id);
+        if (linkedQuests.Count > 0 && !inputReader.ReadConfirmation(
+            $"O projeto possui {linkedQuests.Count} missão(ões). Torná-las independentes?"
+        )) return false;
+        if (!inputReader.ReadConfirmation($"Excluir permanentemente '{project.Name}'?")) return false;
+        bool deleted = projectWorkflowService.DeleteProject(project.Id);
+        if (deleted) ConsoleHelper.ShowSuccess("Projeto excluído com sucesso.");
+        return deleted;
     }
 
-    private Project SelectProject(
-        string prompt,
-        IEnumerable<Project> projects
-    )
+    private Project SelectProject(string prompt, IEnumerable<Project> projects)
     {
         return inputReader.ReadSelection(
-            prompt,
-            projects,
-            project => $"{project.Name} — {DisplayText.For(project.Status)}"
+            prompt, projects, project => $"{project.Name} — {DisplayText.For(project.Status)}"
         );
     }
 
-    private decimal CalculateProgress(Project project)
-    {
-        return projectService.CalculateProgress(
-            project,
-            questService.GetAllQuests()
-        );
-    }
+    private decimal CalculateProgress(Project project) =>
+        projectService.CalculateProgress(project, questService.GetAllQuests());
 
-    private ProjectCard BuildProjectCard(Project project)
-    {
-        return new ProjectCard(
-            project,
-            questService.GetQuestsByProjectId(project.Id),
-            CalculateProgress(project),
-            milestoneService.GetByProjectId(project.Id)
-        );
-    }
+    private ProjectCard BuildProjectCard(Project project) => new(
+        project,
+        questService.GetQuestsByProjectId(project.Id),
+        CalculateProgress(project),
+        milestoneService.GetByProjectId(project.Id),
+        bossService.GetByProjectId(project.Id)
+    );
 }

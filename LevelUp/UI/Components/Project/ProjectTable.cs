@@ -50,7 +50,6 @@ public sealed class ProjectTable
         table.AddColumn(new TableColumn("[bold]Missões[/]").Centered());
         table.AddColumn(new TableColumn("[bold]Progresso[/]").Centered());
         table.AddColumn(new TableColumn("[bold]Capítulos[/]").Centered());
-        table.AddColumn(new TableColumn("[bold]Título desbloqueado[/]"));
 
         foreach (ProjectModel project in projects)
         {
@@ -76,8 +75,7 @@ public sealed class ProjectTable
                 ProjectStatusFormatter.Format(project.Status),
                 $"{completedQuests}/{quests.Count}",
                 $"{progressResolver(project):0.##}%",
-                $"{completedMilestones}/{milestones.Count}",
-                Markup.Escape(project.UnlockedTitle)
+                $"{completedMilestones}/{milestones.Count}"
             );
         }
 

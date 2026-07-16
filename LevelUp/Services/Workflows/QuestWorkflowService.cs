@@ -37,56 +37,39 @@ public sealed class QuestWorkflowService
     {
         Quest quest = questService.GetQuestById(questId)
             ?? throw new InvalidOperationException("A missão selecionada não foi encontrada.");
-
         questService.CompleteQuest(quest);
 
         Project? project = quest.ProjectId is null
             ? null
             : projectService.GetProjectById(quest.ProjectId.Value);
-
         Milestone? milestone = quest.MilestoneId is null
             ? null
             : milestoneService.GetById(quest.MilestoneId.Value);
 
-        BossEncounter? configuredBoss = milestone is null
-            ? null
-            : bossService.GetByMilestoneId(milestone.Id);
-
-        bool requirementsMet = milestone is not null &&
-            milestoneService.HasMetRequirements(milestone, questService.GetAllQuests());
-
         bool milestoneCompleted = milestone is not null &&
-            configuredBoss is null &&
             milestoneService.TryComplete(milestone, questService.GetAllQuests());
-
         Milestone? activatedMilestone = milestoneCompleted && milestone is not null
             ? milestoneService.UnlockAndActivateNext(milestone)
             : null;
 
         BossEncounter? unlockedBoss = null;
-        if (requirementsMet && configuredBoss is not null &&
-            bossService.TryUnlockForMilestoneRequirement(milestone!, requirementsMet))
+        if (project is not null && bossService.TryUnlockForProject(
+            project,
+            questService.GetAllQuests(),
+            milestoneService.GetByProjectId(project.Id)
+        ))
         {
-            unlockedBoss = configuredBoss;
+            unlockedBoss = bossService.GetByProjectId(project.Id);
         }
-
-        bool projectCompleted = project is not null &&
-            projectService.TryCompleteProject(
-                project,
-                questService.GetAllQuests(),
-                milestoneService.GetByProjectId(project.Id)
-            );
 
         decimal milestoneProgress = milestone is null
             ? 0m
             : milestoneService.CalculateProgress(milestone, questService.GetAllQuests());
-
         decimal projectProgress = project is null
             ? 0m
             : projectService.CalculateProgress(project, questService.GetAllQuests());
 
         gameStateService.Save();
-
         return new QuestCompletionResult(
             quest,
             project,
@@ -94,7 +77,7 @@ public sealed class QuestWorkflowService
             activatedMilestone,
             unlockedBoss,
             milestoneCompleted,
-            projectCompleted,
+            false,
             milestoneProgress,
             projectProgress
         );

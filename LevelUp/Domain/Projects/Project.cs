@@ -13,9 +13,6 @@ public sealed class Project
     public string Description { get; private set; } = string.Empty;
 
     [JsonInclude]
-    public string UnlockedTitle { get; private set; } = string.Empty;
-
-    [JsonInclude]
     public ProjectStatus Status { get; private set; } = ProjectStatus.Created;
 
     public DateTime CreatedAt { get; init; } = DateTime.Now;
@@ -26,39 +23,45 @@ public sealed class Project
     [JsonInclude]
     public DateTime? ArchivedAt { get; private set; }
 
-    public void Configure(
-        string name,
-        string description,
-        string unlockedTitle
-    )
+    public void Configure(string name, string description)
     {
         if (!string.IsNullOrWhiteSpace(Name))
         {
-            throw new InvalidOperationException(
-                "O projeto já foi configurado."
-            );
+            throw new InvalidOperationException("O projeto já foi configurado.");
         }
 
-        SetDetails(name, description, unlockedTitle);
+        SetDetails(name, description);
+    }
+
+    public void Configure(
+        string name,
+        string description,
+        string legacyUnlockedTitle
+    )
+    {
+        Configure(name, description);
+    }
+
+    public void UpdateDetails(string name, string description)
+    {
+        EnsureNotArchived();
+        SetDetails(name, description);
     }
 
     public void UpdateDetails(
         string name,
         string description,
-        string unlockedTitle
+        string legacyUnlockedTitle
     )
     {
-        EnsureNotArchived();
-        SetDetails(name, description, unlockedTitle);
+        UpdateDetails(name, description);
     }
 
     public void Activate()
     {
         if (Status != ProjectStatus.Created)
         {
-            throw new InvalidOperationException(
-                "Apenas projetos criados podem ser ativados."
-            );
+            throw new InvalidOperationException("Apenas projetos criados podem ser ativados.");
         }
 
         Status = ProjectStatus.Active;
@@ -68,9 +71,7 @@ public sealed class Project
     {
         if (Status != ProjectStatus.Active)
         {
-            throw new InvalidOperationException(
-                "Apenas projetos ativos podem ser concluídos."
-            );
+            throw new InvalidOperationException("Apenas projetos ativos podem ser concluídos.");
         }
 
         Status = ProjectStatus.Completed;
@@ -81,35 +82,25 @@ public sealed class Project
     {
         if (Status == ProjectStatus.Archived)
         {
-            throw new InvalidOperationException(
-                "O projeto já está arquivado."
-            );
+            throw new InvalidOperationException("O projeto já está arquivado.");
         }
 
         Status = ProjectStatus.Archived;
         ArchivedAt = DateTime.Now;
     }
 
-    private void SetDetails(
-        string name,
-        string description,
-        string unlockedTitle
-    )
+    private void SetDetails(string name, string description)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
-
         Name = name.Trim();
         Description = description.Trim();
-        UnlockedTitle = unlockedTitle.Trim();
     }
 
     private void EnsureNotArchived()
     {
         if (Status == ProjectStatus.Archived)
         {
-            throw new InvalidOperationException(
-                "Projetos arquivados não podem ser alterados."
-            );
+            throw new InvalidOperationException("Projetos arquivados não podem ser alterados.");
         }
     }
 }

@@ -1,3 +1,4 @@
+using LevelUp.Domain.Achievements;
 using LevelUp.Domain.Books;
 using LevelUp.Domain.Bosses;
 using LevelUp.Domain.Habits;
@@ -12,18 +13,12 @@ namespace LevelUp.Domain;
 public class GameData
 {
     public CharacterModel Character { get; set; } = new();
-
     public List<Habit> Habits { get; set; } = [];
-
     public List<Project> Projects { get; set; } = [];
-
     public List<Quest> Quests { get; set; } = [];
-
     public List<Milestone> Milestones { get; set; } = [];
-
     public List<BossEncounter> Bosses { get; set; } = [];
-
     public List<Book> Books { get; set; } = [];
-
     public List<WalletTransaction> WalletTransactions { get; set; } = [];
+    public List<Achievement> Achievements { get; set; } = [];
 }

@@ -1,54 +1,33 @@
-# LevelUp Roadmap
+# Roadmap
 
-## Completed
+## Concluído
 
-### Phase 1 — Core Foundation
-Character, attributes, experience, trainings, services, and JSON persistence.
+- Fase 1 — Personagem e hábitos
+- Fase 2 — Treinamentos e UI com Spectre.Console
+- Fase 3 — Projetos e Missões
+- Fase 4 — Capítulos, Chefes e consolidação arquitetural
+- Fase 5.1 — Diário, Biblioteca, Mochila e Carteira
+- Sprint 5.1.1 — Consolidação da navegação
+- Fase 5.2 — Classes, títulos e conquistas profissionais
 
-### Phase 2 — Spectre.Console UI
-Interactive navigation, components, themes, prompts, and validation.
+## Próximas etapas
 
-### Phase 3 — Projects and Quests
-Projects, missions, progress, workflows, cards, tables, and automatic completion.
+### Fase 5.3 — Conquistas sistêmicas
 
-### Phase 4 — Chapters and Bosses
-Ordered chapters, mission associations, bosses, progression workflows, tests, and Portuguese UX consolidation.
+- marcos de Missões;
+- marcos de Treinamentos;
+- marcos de leitura;
+- marcos financeiros positivos.
 
-## Phase 5 — Personal Progression Systems
+### Fase 6 — Vida, energia e recuperação
 
-**Status:** In Progress
+- modelo de vida e energia;
+- efeitos configuráveis;
+- distinção entre gastos necessários, planejados e impulsivos.
 
-### Phase 5.0 — Navigation and Personal Modules
+### Fase 7 — Aplicação web
 
-- [x] reorganize the main menu into Character, Diary, Library, and Backpack;
-- [x] group Trainings, Missions, Projects, and Chapters in Diary;
-- [x] add Library with reading history and XP;
-- [x] enforce a maximum of two books in progress;
-- [x] add Backpack as a resource hub;
-- [x] add Wallet for real-money tracking;
-- [x] add deposits, justified withdrawals, history, editing, deletion, and monthly summaries;
-- [x] persist Books and Wallet transactions;
-- [x] add domain and persistence tests.
-
-### Phase 5.1 — Recognition
-
-- [ ] character class selection;
-- [ ] level-based rank titles;
-- [ ] project completion achievements;
-- [ ] unlock history;
-- [ ] title and achievement UI.
-
-### Phase 5.2 — Financial Evolution
-
-- [ ] financial goals;
-- [ ] reserve categories or accounts;
-- [ ] monthly analytics;
-- [ ] financial achievements;
-- [ ] exports and reports.
-
-### Phase 5.3 — Life and Consequences
-
-- [ ] health or energy model;
-- [ ] configurable consequences;
-- [ ] recovery rules;
-- [ ] explicit distinction between planned and impulsive expenses.
+- ASP.NET Core;
+- Blazor;
+- banco de dados;
+- autenticação e múltiplos perfis.
