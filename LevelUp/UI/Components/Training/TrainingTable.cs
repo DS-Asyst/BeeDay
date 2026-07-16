@@ -1,4 +1,5 @@
 using LevelUp.Domain.Habits;
+using LevelUp.UI.Infrastructure;
 using LevelUp.UI.Infrastructure.Themes;
 using Spectre.Console;
 
@@ -21,7 +22,7 @@ public sealed class TrainingTable
         {
             Border = TableBorder.Rounded,
             Title = new TableTitle(
-                $"[bold {LevelUpTheme.Primary}]Trainings[/]"
+                $"[bold {LevelUpTheme.Primary}]Treinamentos[/]"
             )
         };
 
@@ -58,7 +59,7 @@ public sealed class TrainingTable
             table.AddRow(
                 habit.Id.ToString(),
                 Markup.Escape(habit.Title),
-                habit.AttributeType.ToString(),
+                DisplayText.For(habit.AttributeType),
                 $"{habit.DurationInMinutes} min",
                 habit.ExperienceReward.ToString("0.##"),
                 habit.AttributeExperienceReward.ToString("0.##"),

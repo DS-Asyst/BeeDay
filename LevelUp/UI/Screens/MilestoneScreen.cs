@@ -108,63 +108,154 @@ public sealed class MilestoneScreen
 
     private void Create(Project project)
     {
-        IReadOnlyList<Milestone> existing = milestoneService.GetByProjectId(project.Id);
-        int suggestedOrder = existing.Count == 0 ? 1 : existing.Max(item => item.Order) + 1;
+        ConsoleHelper.ShowHeader("Novo capítulo");
+        inputReader.ShowCancellationHint();
 
-        int requiredCompletedQuests = inputReader.ReadConfirmation(
-            "Usar uma quantidade específica de missões concluídas?"
-        )
-            ? inputReader.ReadPositiveInteger("Quantidade necessária de missões concluídas:")
-            : 0;
-
-        MilestoneReward reward = ReadOptionalReward();
-
-        Milestone milestone = milestoneService.CreateMilestone(
-            project,
-            inputReader.ReadRequiredString("Título:"),
-            inputReader.ReadRequiredString("Descrição:"),
-            suggestedOrder,
-            requiredCompletedQuests,
-            reward
-        );
-
-        if (project.Status == ProjectStatus.Active && existing.Count == 0)
+        try
         {
-            milestoneService.Activate(milestone);
-        }
+            IReadOnlyList<Milestone> existing =
+                milestoneService.GetByProjectId(project.Id);
+            int suggestedOrder = existing.Count == 0
+                ? 1
+                : existing.Max(item => item.Order) + 1;
 
-        if (inputReader.ReadConfirmation("Adicionar um chefe final ao projeto?"))
-        {
-            bossService.Create(
+            string title = inputReader.ReadRequiredStringOrCancel(
+                "Título:"
+            );
+            string description = inputReader.ReadRequiredStringOrCancel(
+                "Descrição:"
+            );
+
+            PromptDecision requirementDecision = inputReader.ReadDecision(
+                "Usar uma quantidade específica de missões concluídas?"
+            );
+            ThrowIfCancelled(requirementDecision);
+
+            int requiredCompletedQuests =
+                requirementDecision == PromptDecision.Yes
+                    ? inputReader.ReadPositiveIntegerOrCancel(
+                        "Quantidade necessária de missões concluídas:"
+                    )
+                    : 0;
+
+            MilestoneReward reward = ReadOptionalRewardOrCancel();
+            BossDraft? bossDraft = ReadOptionalBossOrCancel();
+
+            Milestone milestone = milestoneService.CreateMilestone(
                 project,
-                milestone,
-                inputReader.ReadRequiredString("Nome do chefe:"),
-                inputReader.ReadRequiredString("Descrição do chefe:"),
-                isFinalBoss: inputReader.ReadConfirmation("Este é o chefe final do projeto?")
+                title,
+                description,
+                suggestedOrder,
+                requiredCompletedQuests,
+                reward
+            );
+
+            if (project.Status == ProjectStatus.Active &&
+                existing.Count == 0)
+            {
+                milestoneService.Activate(milestone);
+            }
+
+            if (bossDraft is not null)
+            {
+                bossService.Create(
+                    project,
+                    milestone,
+                    bossDraft.Name,
+                    bossDraft.Description,
+                    bossDraft.IsFinalBoss
+                );
+            }
+
+            gameStateService.Save();
+            ConsoleHelper.ShowSuccess(
+                "Capítulo criado com sucesso."
+            );
+            AnsiConsole.Write(BuildCard(milestone).Build());
+        }
+        catch (UserCancelledException)
+        {
+            ConsoleHelper.ShowInformation(
+                "Criação do capítulo cancelada."
             );
         }
-
-        gameStateService.Save();
-        ConsoleHelper.ShowSuccess("Capítulo criado com sucesso.");
-        AnsiConsole.Write(BuildCard(milestone).Build());
     }
 
-    private MilestoneReward ReadOptionalReward()
+    private MilestoneReward ReadOptionalRewardOrCancel()
     {
-        if (!inputReader.ReadConfirmation("Configurar uma recompensa opcional?"))
+        PromptDecision rewardDecision = inputReader.ReadDecision(
+            "Configurar uma recompensa opcional?"
+        );
+        ThrowIfCancelled(rewardDecision);
+
+        if (rewardDecision == PromptDecision.No)
         {
             return new MilestoneReward();
         }
 
-        int experience = inputReader.ReadConfirmation("Adicionar recompensa de XP?")
-            ? inputReader.ReadPositiveInteger("Quantidade de XP:")
+        PromptDecision experienceDecision = inputReader.ReadDecision(
+            "Adicionar recompensa de XP?"
+        );
+        ThrowIfCancelled(experienceDecision);
+
+        int experience = experienceDecision == PromptDecision.Yes
+            ? inputReader.ReadPositiveIntegerOrCancel("Quantidade de XP:")
             : 0;
-        int gold = 0;
-        string? title = inputReader.ReadConfirmation("Adicionar um título desbloqueável?")
-            ? inputReader.ReadRequiredString("Título da recompensa:")
+
+        PromptDecision titleDecision = inputReader.ReadDecision(
+            "Adicionar um título desbloqueável?"
+        );
+        ThrowIfCancelled(titleDecision);
+
+        string? title = titleDecision == PromptDecision.Yes
+            ? inputReader.ReadRequiredStringOrCancel(
+                "Título da recompensa:"
+            )
             : null;
 
-        return new MilestoneReward(experience, gold, title);
+        return new MilestoneReward(
+            experience,
+            0,
+            title
+        );
+    }
+
+    private BossDraft? ReadOptionalBossOrCancel()
+    {
+        PromptDecision bossDecision = inputReader.ReadDecision(
+            "Adicionar um chefe ao capítulo?"
+        );
+        ThrowIfCancelled(bossDecision);
+
+        if (bossDecision == PromptDecision.No)
+        {
+            return null;
+        }
+
+        string name = inputReader.ReadRequiredStringOrCancel(
+            "Nome do chefe:"
+        );
+        string description = inputReader.ReadRequiredStringOrCancel(
+            "Descrição do chefe:"
+        );
+        PromptDecision finalDecision = inputReader.ReadDecision(
+            "Este é o chefe final do projeto?"
+        );
+        ThrowIfCancelled(finalDecision);
+
+        return new BossDraft(
+            name,
+            description,
+            finalDecision == PromptDecision.Yes
+        );
+    }
+
+    private static void ThrowIfCancelled(PromptDecision decision)
+    {
+        if (decision == PromptDecision.Cancel)
+        {
+            throw new UserCancelledException();
+        }
     }
 
     private void Open(Project project)
@@ -316,4 +407,11 @@ public sealed class MilestoneScreen
             milestoneService.CalculateProgress(milestone, questService.GetAllQuests())
         );
     }
+
+    private sealed record BossDraft(
+        string Name,
+        string Description,
+        bool IsFinalBoss
+    );
+
 }

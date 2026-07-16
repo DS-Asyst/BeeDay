@@ -88,21 +88,35 @@ public sealed class ProjectScreen
     private void CreateProject()
     {
         ConsoleHelper.ShowHeader("Novo projeto");
+        inputReader.ShowCancellationHint();
 
-        Project project = projectService.CreateProject(
-            inputReader.ReadRequiredString("Nome:"),
-            inputReader.ReadRequiredString("Descrição:"),
-            inputReader.ReadRequiredString(
+        try
+        {
+            string name = inputReader.ReadRequiredStringOrCancel("Nome:");
+            string description = inputReader.ReadRequiredStringOrCancel("Descrição:");
+            string unlockedTitle = inputReader.ReadRequiredStringOrCancel(
                 "Título desbloqueado:"
-            )
-        );
+            );
 
-        gameStateService.Save();
-        ConsoleHelper.ShowSuccess(
-            "Projeto criado com sucesso."
-        );
-        AnsiConsole.WriteLine();
-        AnsiConsole.Write(BuildProjectCard(project).Build());
+            Project project = projectService.CreateProject(
+                name,
+                description,
+                unlockedTitle
+            );
+
+            gameStateService.Save();
+            ConsoleHelper.ShowSuccess(
+                "Projeto criado com sucesso."
+            );
+            AnsiConsole.WriteLine();
+            AnsiConsole.Write(BuildProjectCard(project).Build());
+        }
+        catch (UserCancelledException)
+        {
+            ConsoleHelper.ShowInformation(
+                "Criação do projeto cancelada."
+            );
+        }
     }
 
     private void OpenProject()

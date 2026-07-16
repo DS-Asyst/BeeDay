@@ -55,7 +55,7 @@ public class MainMenuScreen
                     "Missões",
                     "Projetos",
                     "Capítulos",
-                    "Finanças",
+                    "Carteira",
                     "Sair"
                 },
                 choice => choice
@@ -86,7 +86,7 @@ public class MainMenuScreen
                         milestoneScreen.Show();
                         break;
 
-                    case "Finanças":
+                    case "Carteira":
                         goldScreen.Show();
                         break;
 
