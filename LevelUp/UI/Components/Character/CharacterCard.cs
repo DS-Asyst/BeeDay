@@ -32,7 +32,7 @@ public sealed class CharacterCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Name",
+                "Nome",
                 _character.Name,
                 $"bold {LevelUpTheme.Text}"
             )
@@ -40,7 +40,7 @@ public sealed class CharacterCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Level",
+                "Nível",
                 _character.Level.ToString(),
                 $"bold {LevelUpTheme.Primary}"
             )
@@ -48,7 +48,7 @@ public sealed class CharacterCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Experience",
+                "Experiência",
                 $"{_character.Experience}/" +
                 $"{_character.ExperienceToNextLevel}"
             )
@@ -62,7 +62,7 @@ public sealed class CharacterCard
         );
 
         return PanelBuilder.Build(
-            title: "Character",
+            title: "Personagem",
             content: summary,
             icon: UIIcons.Character,
             expand: false

@@ -86,7 +86,7 @@ public sealed class SaveService : IGameDataStore
     {
         string directory = Path.GetDirectoryName(filePath)
             ?? throw new DirectoryNotFoundException(
-                "The save directory could not be located."
+                "Não foi possível localizar a pasta de salvamento."
             );
 
         string backupPath = Path.Combine(
@@ -119,7 +119,7 @@ public sealed class SaveService : IGameDataStore
         }
 
         throw new DirectoryNotFoundException(
-            "The project directory could not be located."
+            "Não foi possível localizar a pasta do projeto."
         );
     }
 }

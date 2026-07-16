@@ -14,10 +14,10 @@ public class GoldScreen
 
     public void Show()
     {
-        ConsoleHelper.ShowHeader("Gold");
+        ConsoleHelper.ShowHeader("Finanças");
 
         AnsiConsole.Write(
-            new ComingSoonCard("Gold").Build()
+            new ComingSoonCard("Finanças").Build()
         );
 
         inputReader.WaitForContinue();

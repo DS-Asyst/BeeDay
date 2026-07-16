@@ -79,3 +79,12 @@ Added Character, attributes, progression, Habits, core services and local JSON p
 - Project cards and tables display quest and milestone progress separately;
 - completed or archived quests cannot change associations;
 - deletion workflows preserve completed history.
+
+## Phase 4 consolidation
+
+- localized all player-facing interface text to Brazilian Portuguese;
+- standardized Project, Chapter, Mission, Boss, Training, Character, and Finances terminology;
+- preserved English source-code identifiers;
+- separated recognition rewards from the future real-money Finances module;
+- added centralized plain-text status localization;
+- reviewed persistence-facing errors and Phase 4 product documentation.

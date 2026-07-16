@@ -9,6 +9,7 @@ using Spectre.Console;
 using CharacterModel = LevelUp.Domain.Character.Character;
 using LevelUp.Services.Projects;
 using LevelUp.Services.Quests;
+using LevelUp.UI.Infrastructure;
 
 namespace LevelUp.UI;
 
@@ -45,7 +46,7 @@ public class TrainingScreen
 
         while (running)
         {
-            ConsoleHelper.ShowHeader("Training");
+            ConsoleHelper.ShowHeader("Treinamentos");
 
             string option = inputReader.ReadSelection(
                 "Escolha uma opção:",
@@ -144,7 +145,7 @@ public class TrainingScreen
 
     private void ListTrainings()
     {
-        ConsoleHelper.ShowHeader("Trainings");
+        ConsoleHelper.ShowHeader("Treinamentos");
 
         List<Habit> habits = habitService.GetAllHabits();
 
@@ -186,7 +187,7 @@ public class TrainingScreen
             habit =>
                 $"{habit.Title} — " +
                 $"{habit.ExperienceReward:0.##} XP — " +
-                $"{habit.AttributeType}"
+                $"{DisplayText.For(habit.AttributeType)}"
         );
 
         bool confirmed = inputReader.ReadConfirmation(
@@ -219,7 +220,7 @@ public class TrainingScreen
         gameStateService.Save();
 
         ConsoleHelper.ShowSuccess(
-            "Treinamento concluíd0o com sucesso."
+            "Treinamento concluído com sucesso."
         );
 
         AnsiConsole.WriteLine();

@@ -8,7 +8,7 @@ public class CharacterScreen
 {
     public void Show(CharacterModel character)
     {
-        ConsoleHelper.ShowHeader("Character");
+        ConsoleHelper.ShowHeader("Personagem");
 
         CharacterCard characterCard = new(character);
         AttributeTable attributeTable = new(character.Attributes);

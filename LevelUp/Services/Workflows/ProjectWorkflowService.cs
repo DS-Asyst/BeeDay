@@ -44,7 +44,7 @@ public sealed class ProjectWorkflowService
         if (linkedQuests.Any(quest => quest.Status is QuestStatus.Completed or QuestStatus.Archived))
         {
             throw new InvalidOperationException(
-                "Projects with completed or archived quests cannot be deleted. Archive the project instead."
+                "Projetos com missões concluídas ou arquivadas não podem ser excluídos. Arquive o projeto."
             );
         }
 
@@ -63,7 +63,7 @@ public sealed class ProjectWorkflowService
             if (milestone.Status == MilestoneStatus.Completed)
             {
                 throw new InvalidOperationException(
-                    "Projects with completed milestones cannot be deleted. Archive the project instead."
+                    "Projetos com capítulos concluídos não podem ser excluídos. Arquive o projeto."
                 );
             }
 

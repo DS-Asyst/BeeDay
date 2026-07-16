@@ -37,14 +37,14 @@ public sealed class BossService
         if (milestone.ProjectId != project.Id)
         {
             throw new InvalidOperationException(
-                "The boss and milestone must belong to the same project."
+                "O chefe e o capítulo devem pertencer ao mesmo projeto."
             );
         }
 
         if (bosses.Any(boss => boss.MilestoneId == milestone.Id))
         {
             throw new InvalidOperationException(
-                "A milestone can have only one boss encounter."
+                "Um capítulo pode ter apenas um encontro com chefe."
             );
         }
 
@@ -114,7 +114,7 @@ public sealed class BossService
 
         if (!bosses.Any(existing => existing.Id == boss.Id))
         {
-            throw new InvalidOperationException("The boss is not managed by this service.");
+            throw new InvalidOperationException("O chefe não é gerenciado por este serviço.");
         }
     }
 }

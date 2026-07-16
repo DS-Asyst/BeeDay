@@ -1,52 +1,24 @@
-## Purpose
+# Game Terminology
 
-This document defines the official vocabulary used by LevelUp.
+LevelUp keeps technical identifiers in English while presenting the player experience in Brazilian Portuguese.
 
-The architecture uses real-world terminology.
+| Domain/code term | Player-facing term | Meaning |
+| --- | --- | --- |
+| Character | Personagem | The player's progression identity. |
+| Training | Treinamento | A recurring real-world activity that grants progression. |
+| Project | Projeto | A long-term journey or major objective. |
+| Milestone | Capítulo | An ordered section in a project's story and progression. |
+| Quest | Missão | A concrete action or task. |
+| Boss Encounter | Chefe | A major final challenge in the progression flow. |
+| Gold | Finanças | A future real-money reserve and financial tracking module, not a reward currency. |
 
-The user interface may use RPG terminology to create an engaging experience without changing the meaning of the domain.
+## Language boundary
 
-## Core Principle
+- Code: English.
+- Technical documentation: English or bilingual when useful.
+- Player-facing interface: Brazilian Portuguese.
+- Product terminology in the interface: Projeto, Capítulo, Missão, Chefe, Treinamento, Personagem, Finanças.
 
-> The domain represents reality.
-> The presentation represents the RPG fantasy.
+## Financial meaning
 
-## Official Vocabulary
-
-| Real-world concept | Domain name | UI terminology |
-|---|---|---|
-| User progression | `Character` | Character |
-| Recurring activity | `Habit` | Training |
-| One-time task | `Quest` | Quest |
-| Group of related tasks | `Project` | Project |
-| Important project stage | `Milestone` | Boss |
-| Global progression points | `Experience` | XP |
-| Attribute progression points | `AttributeExperience` | Attribute XP |
-| Evolving characteristic | `Attribute` | Attribute |
-| Application currency | `Gold` | Gold |
-| Action benefit | `Reward` | Reward |
-| Unlockable accomplishment | `Achievement` | Achievement |
-| Character designation | `Title` | Title |
-
-## Character
-
-`Character` represents the user inside the progression system.
-
-The term remains the same in the domain and presentation.
-
-Examples:
-
-text
-Character
-CharacterService
-CharacterScreen
-CharacterCard
-
-
-## Milestone
-
-An ordered, optional chapter inside a Project. Milestones may group Quests, define a completion requirement, expose reward metadata, and unlock sequentially.
-
-## Boss Encounter
-
-An optional challenge linked to one Milestone. Meeting the Milestone requirement unlocks the Boss; defeating it completes the Milestone. A Boss is not a full combat system in Phase 4.
+The Finances module will reflect real money. Deposits represent money the player actually reserved. Withdrawals will require a date and justification. Financial achievements and titles may be unlocked by real saving milestones. The system must not treat project completion rewards as money.

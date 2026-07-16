@@ -4,6 +4,7 @@ using LevelUp.UI.Infrastructure.Themes;
 using Spectre.Console;
 using MilestoneModel = LevelUp.Domain.Milestones.Milestone;
 using QuestModel = LevelUp.Domain.Quests.Quest;
+using LevelUp.UI.Infrastructure;
 
 namespace LevelUp.UI.Components.Milestone;
 
@@ -41,32 +42,31 @@ public sealed class MilestoneCard
             UIIcons.Milestone
         );
 
-        card.AddText("Order", milestone.Order.ToString());
+        card.AddText("Ordem", milestone.Order.ToString());
         card.AddMarkup(
             "Status",
             MilestoneStatusFormatter.Format(milestone.Status)
         );
-        card.AddText("Description", milestone.Description);
+        card.AddText("Descrição", milestone.Description);
         card.AddText(
-            "Progress",
+            "Progresso",
             $"{progress:0.##}%",
             LevelUpTheme.Success
         );
-        card.AddText("Quests", $"{completed}/{quests.Count}");
+        card.AddText("Missões", $"{completed}/{quests.Count}");
         card.AddText(
-            "Requirement",
+            "Requisito",
             milestone.RequiredCompletedQuests > 0
-                ? $"Complete {milestone.RequiredCompletedQuests} quest(s)"
-                : "Complete all linked quests"
+                ? $"Concluir {milestone.RequiredCompletedQuests} missão(ões)"
+                : "Concluir todas as missões vinculadas"
         );
 
         if (milestone.Reward.HasReward)
         {
             card.AddText(
-                "Reward",
+                "Recompensa",
                 $"XP {milestone.Reward.Experience}, " +
-                $"Gold {milestone.Reward.Gold}, " +
-                $"Title {milestone.Reward.Title ?? "—"}",
+                $"Título {milestone.Reward.Title ?? "—"}",
                 LevelUpTheme.Gold
             );
         }
@@ -74,8 +74,8 @@ public sealed class MilestoneCard
         if (boss is not null)
         {
             card.AddText(
-                "Boss",
-                $"{boss.Name} — {boss.Status}",
+                "Chefe",
+                $"{boss.Name} — {DisplayText.For(boss.Status)}",
                 LevelUpTheme.Boss
             );
         }

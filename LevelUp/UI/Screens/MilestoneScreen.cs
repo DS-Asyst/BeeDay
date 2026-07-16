@@ -9,6 +9,7 @@ using LevelUp.Services.Quests;
 using LevelUp.Services.Workflows;
 using LevelUp.UI.Components.Milestone;
 using Spectre.Console;
+using LevelUp.UI.Infrastructure;
 
 namespace LevelUp.UI;
 
@@ -52,15 +53,15 @@ public sealed class MilestoneScreen
 
         if (projects.Count == 0)
         {
-            ConsoleHelper.ShowInformation("Create a project before adding milestones.");
+            ConsoleHelper.ShowInformation("Crie um projeto antes de adicionar capítulos.");
             inputReader.WaitForContinue();
             return;
         }
 
         Project project = inputReader.ReadSelection(
-            "Select a project:",
+            "Selecione um projeto:",
             projects,
-            item => $"{item.Name} — {item.Status}"
+            item => $"{item.Name} — {DisplayText.For(item.Status)}"
         );
 
         ShowForProject(project);
@@ -72,33 +73,33 @@ public sealed class MilestoneScreen
 
         while (running)
         {
-            ConsoleHelper.ShowHeader($"Milestones — {project.Name}");
+            ConsoleHelper.ShowHeader($"Capítulos — {project.Name}");
             string option = inputReader.ReadSelection(
-                "Choose an option:",
+                "Escolha uma opção:",
                 new[]
                 {
-                    "New milestone",
-                    "Open milestone",
-                    "List milestones",
-                    "Back"
+                    "Novo capítulo",
+                    "Abrir capítulo",
+                    "Listar capítulos",
+                    "Voltar"
                 },
                 choice => choice
             );
 
             switch (option)
             {
-                case "New milestone":
+                case "Novo capítulo":
                     Create(project);
                     inputReader.WaitForContinue();
                     break;
-                case "Open milestone":
+                case "Abrir capítulo":
                     Open(project);
                     break;
-                case "List milestones":
+                case "Listar capítulos":
                     List(project);
                     inputReader.WaitForContinue();
                     break;
-                case "Back":
+                case "Voltar":
                     running = false;
                     break;
             }
@@ -111,17 +112,17 @@ public sealed class MilestoneScreen
         int suggestedOrder = existing.Count == 0 ? 1 : existing.Max(item => item.Order) + 1;
 
         int requiredCompletedQuests = inputReader.ReadConfirmation(
-            "Use a specific completed-quest target?"
+            "Usar uma quantidade específica de missões concluídas?"
         )
-            ? inputReader.ReadPositiveInteger("Required completed quests:")
+            ? inputReader.ReadPositiveInteger("Quantidade necessária de missões concluídas:")
             : 0;
 
         MilestoneReward reward = ReadOptionalReward();
 
         Milestone milestone = milestoneService.CreateMilestone(
             project,
-            inputReader.ReadRequiredString("Title:"),
-            inputReader.ReadRequiredString("Description:"),
+            inputReader.ReadRequiredString("Título:"),
+            inputReader.ReadRequiredString("Descrição:"),
             suggestedOrder,
             requiredCompletedQuests,
             reward
@@ -132,37 +133,35 @@ public sealed class MilestoneScreen
             milestoneService.Activate(milestone);
         }
 
-        if (inputReader.ReadConfirmation("Add an optional boss encounter?"))
+        if (inputReader.ReadConfirmation("Adicionar um chefe final ao projeto?"))
         {
             bossService.Create(
                 project,
                 milestone,
-                inputReader.ReadRequiredString("Boss name:"),
-                inputReader.ReadRequiredString("Boss description:"),
-                isFinalBoss: inputReader.ReadConfirmation("Is this the final project boss?")
+                inputReader.ReadRequiredString("Nome do chefe:"),
+                inputReader.ReadRequiredString("Descrição do chefe:"),
+                isFinalBoss: inputReader.ReadConfirmation("Este é o chefe final do projeto?")
             );
         }
 
         gameStateService.Save();
-        ConsoleHelper.ShowSuccess("Milestone created successfully.");
+        ConsoleHelper.ShowSuccess("Capítulo criado com sucesso.");
         AnsiConsole.Write(BuildCard(milestone).Build());
     }
 
     private MilestoneReward ReadOptionalReward()
     {
-        if (!inputReader.ReadConfirmation("Configure an optional reward?"))
+        if (!inputReader.ReadConfirmation("Configurar uma recompensa opcional?"))
         {
             return new MilestoneReward();
         }
 
-        int experience = inputReader.ReadConfirmation("Add an XP reward?")
-            ? inputReader.ReadPositiveInteger("XP amount:")
+        int experience = inputReader.ReadConfirmation("Adicionar recompensa de XP?")
+            ? inputReader.ReadPositiveInteger("Quantidade de XP:")
             : 0;
-        int gold = inputReader.ReadConfirmation("Add a Gold reward?")
-            ? inputReader.ReadPositiveInteger("Gold amount:")
-            : 0;
-        string? title = inputReader.ReadConfirmation("Add an unlockable title?")
-            ? inputReader.ReadRequiredString("Title reward:")
+        int gold = 0;
+        string? title = inputReader.ReadConfirmation("Adicionar um título desbloqueável?")
+            ? inputReader.ReadRequiredString("Título da recompensa:")
             : null;
 
         return new MilestoneReward(experience, gold, title);
@@ -173,96 +172,96 @@ public sealed class MilestoneScreen
         IReadOnlyList<Milestone> milestones = milestoneService.GetByProjectId(project.Id);
         if (milestones.Count == 0)
         {
-            ConsoleHelper.ShowInformation("This project has no milestones.");
+            ConsoleHelper.ShowInformation("Este projeto não possui capítulos.");
             inputReader.WaitForContinue();
             return;
         }
 
         Milestone milestone = inputReader.ReadSelection(
-            "Select a milestone:",
+            "Selecione um capítulo:",
             milestones,
             item => item.IsLocked
-                ? $"{item.Order}. Locked milestone — {item.Status}"
-                : $"{item.Order}. {item.Title} — {item.Status}"
+                ? $"{item.Order}. Capítulo bloqueado — {DisplayText.For(item.Status)}"
+                : $"{item.Order}. {item.Title} — {DisplayText.For(item.Status)}"
         );
 
         bool opened = true;
         while (opened)
         {
-            ConsoleHelper.ShowHeader("Milestone");
+            ConsoleHelper.ShowHeader("Capítulo");
             AnsiConsole.Write(BuildCard(milestone).Build());
             AnsiConsole.WriteLine();
 
-            List<string> actions = ["View quests"];
+            List<string> actions = ["Ver missões"];
             if (milestone.Status == MilestoneStatus.Created)
             {
-                actions.Add("Activate");
+                actions.Add("Ativar");
             }
             if (milestone.Status == MilestoneStatus.Active &&
                 questService.GetQuestsByMilestoneId(milestone.Id).Count == 0)
             {
-                actions.Add("Complete manually");
+                actions.Add("Concluir manualmente");
             }
             BossEncounter? boss = bossService.GetByMilestoneId(milestone.Id);
             if (boss?.Status == BossStatus.Available)
             {
-                actions.Add("Defeat boss");
+                actions.Add("Derrotar chefe");
             }
             if (milestone.Status is not (MilestoneStatus.Completed or MilestoneStatus.Archived))
             {
-                actions.Add("Edit");
+                actions.Add("Editar");
             }
             if (milestone.Status == MilestoneStatus.Completed &&
                 milestone.Reward.HasReward &&
                 milestone.RewardClaimedAt is null)
             {
-                actions.Add("Claim reward");
+                actions.Add("Resgatar recompensa");
             }
             if (milestone.Status != MilestoneStatus.Archived)
             {
-                actions.Add("Archive");
+                actions.Add("Arquivar");
             }
-            actions.Add("Delete");
-            actions.Add("Back");
+            actions.Add("Excluir");
+            actions.Add("Voltar");
 
-            string action = inputReader.ReadSelection("Choose an action:", actions, choice => choice);
+            string action = inputReader.ReadSelection("Escolha uma ação:", actions, choice => choice);
             switch (action)
             {
-                case "View quests":
+                case "Ver missões":
                     ShowQuests(milestone);
                     inputReader.WaitForContinue();
                     break;
-                case "Activate":
+                case "Ativar":
                     milestoneService.Activate(milestone);
                     gameStateService.Save();
                     break;
-                case "Complete manually":
+                case "Concluir manualmente":
                     milestoneWorkflowService.CompleteManualMilestone(milestone.Id);
                     break;
-                case "Defeat boss":
+                case "Derrotar chefe":
                     bossWorkflowService.Defeat(milestone.Id);
                     break;
-                case "Edit":
+                case "Editar":
                     milestoneService.Update(
                         milestone,
-                        inputReader.ReadRequiredString("New title:"),
-                        inputReader.ReadRequiredString("New description:")
+                        inputReader.ReadRequiredString("Novo título:"),
+                        inputReader.ReadRequiredString("Nova descrição:")
                     );
                     gameStateService.Save();
                     break;
-                case "Claim reward":
+                case "Resgatar recompensa":
                     milestone.ClaimReward();
                     gameStateService.Save();
-                    ConsoleHelper.ShowSuccess("Reward claimed. Delivery will be integrated with Gold and progression modules.");
+                    ConsoleHelper.ShowSuccess("Recompensa resgatada. A entrega será integrada aos módulos de progressão e finanças.");
                     break;
-                case "Archive":
+                case "Arquivar":
                     milestoneService.Archive(milestone);
                     gameStateService.Save();
                     break;
-                case "Delete":
+                case "Excluir":
                     opened = !milestoneWorkflowService.DeleteMilestone(milestone.Id);
                     break;
-                case "Back":
+                case "Voltar":
                     opened = false;
                     break;
             }
@@ -274,7 +273,7 @@ public sealed class MilestoneScreen
         IReadOnlyList<Milestone> milestones = milestoneService.GetByProjectId(project.Id);
         if (milestones.Count == 0)
         {
-            ConsoleHelper.ShowInformation("This project has no milestones.");
+            ConsoleHelper.ShowInformation("Este projeto não possui capítulos.");
             return;
         }
 
@@ -293,16 +292,16 @@ public sealed class MilestoneScreen
         var quests = questService.GetQuestsByMilestoneId(milestone.Id);
         if (quests.Count == 0)
         {
-            ConsoleHelper.ShowInformation("No quests are linked to this milestone.");
+            ConsoleHelper.ShowInformation("Nenhuma missão está vinculada a este capítulo.");
             return;
         }
 
         Table table = new();
-        table.AddColumn("Quest");
+        table.AddColumn("Missão");
         table.AddColumn("Status");
         foreach (var quest in quests)
         {
-            table.AddRow(Markup.Escape(quest.Title), quest.Status.ToString());
+            table.AddRow(Markup.Escape(quest.Title), DisplayText.For(quest.Status));
         }
         AnsiConsole.Write(table);
     }

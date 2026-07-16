@@ -9,6 +9,7 @@ using LevelUp.UI.Components.Project;
 using LevelUp.UI.Components.Quest;
 using Spectre.Console;
 using QuestModel = LevelUp.Domain.Quests.Quest;
+using LevelUp.UI.Infrastructure;
 
 namespace LevelUp.UI;
 
@@ -47,7 +48,7 @@ public sealed class ProjectScreen
 
         while (running)
         {
-            ConsoleHelper.ShowHeader("Project Board");
+            ConsoleHelper.ShowHeader("Painel de Projetos");
 
             string option = inputReader.ReadSelection(
                 "Escolha uma opção:",
@@ -148,12 +149,12 @@ public sealed class ProjectScreen
                     inputReader.WaitForContinue();
                     break;
 
-                case "Ver quests":
+                case "Ver missões":
                     ShowProjectQuests(project);
                     inputReader.WaitForContinue();
                     break;
 
-                case "Ver milestones":
+                case "Ver capítulos":
                     milestoneScreen.ShowForProject(project);
                     break;
 
@@ -191,8 +192,8 @@ public sealed class ProjectScreen
             actions.Add("Editar");
         }
 
-        actions.Add("Ver quests");
-        actions.Add("Ver milestones");
+        actions.Add("Ver missões");
+        actions.Add("Ver capítulos");
 
         if (project.Status != ProjectStatus.Archived)
         {
@@ -301,7 +302,7 @@ public sealed class ProjectScreen
         if (quests.Count == 0)
         {
             ConsoleHelper.ShowInformation(
-                "Este projeto ainda não possui quests."
+                "Este projeto ainda não possui missões."
             );
             return;
         }
@@ -339,7 +340,7 @@ public sealed class ProjectScreen
 
         if (linkedQuests.Count > 0 &&
             !inputReader.ReadConfirmation(
-                $"O projeto possui {linkedQuests.Count} quest(s). " +
+                $"O projeto possui {linkedQuests.Count} missão(ões). " +
                 "Torná-las independentes?"
             ))
         {
@@ -381,7 +382,7 @@ public sealed class ProjectScreen
         return inputReader.ReadSelection(
             prompt,
             projects,
-            project => $"{project.Name} — {project.Status}"
+            project => $"{project.Name} — {DisplayText.For(project.Status)}"
         );
     }
 

@@ -28,14 +28,14 @@ public sealed class MilestoneTable
             Border = TableBorder.Rounded,
             Title = new TableTitle(
                 $"[bold {LevelUpTheme.Quest}]" +
-                $"{UIIcons.Milestone} Milestones[/]"
+                $"{UIIcons.Milestone} Capítulos[/]"
             )
         };
 
-        table.AddColumn("Order");
-        table.AddColumn("Milestone");
+        table.AddColumn("Ordem");
+        table.AddColumn("Capítulo");
         table.AddColumn("Status");
-        table.AddColumn("Progress");
+        table.AddColumn("Progresso");
 
         foreach (MilestoneModel milestone in milestones.OrderBy(item => item.Order))
         {
@@ -43,7 +43,7 @@ public sealed class MilestoneTable
                 milestone.Order.ToString(),
                 Markup.Escape(
                     milestone.IsLocked
-                        ? "Locked Milestone"
+                        ? "Capítulo bloqueado"
                         : milestone.Title
                 ),
                 MilestoneStatusFormatter.Format(milestone.Status),
