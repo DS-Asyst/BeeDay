@@ -45,21 +45,26 @@ Delivered interactive navigation, centralized theme and icons, reusable panels, 
 
 ## Phase 4 — Milestones and Boss Encounters
 
-**Status:** Planned
+**Status:** In Progress
 
 ### Objective
 
-Represent important project stages as RPG boss encounters.
+Represent important project stages as ordered Milestones and optional RPG Boss Encounters.
 
-### Planned Features
+### Delivered Foundation
 
-- Milestone entity;
-- project milestone integration;
-- milestone requirements and rewards;
-- boss presentation components;
-- milestone completion;
-- final project boss;
-- progress gates.
+- [x] Milestone entity and lifecycle;
+- [x] ordered Project milestone integration;
+- [x] optional Quest-to-Milestone association;
+- [x] milestone requirements and reward metadata;
+- [x] Boss Encounter domain and unlocking workflow;
+- [x] milestone completion and sequential activation;
+- [x] final project Boss workflow;
+- [x] progress gates and persistence;
+- [x] Milestone cards, tables, and screen;
+- [x] automated domain, service, workflow, and persistence tests;
+- [ ] reward delivery through the Gold module;
+- [ ] richer Boss presentation and challenge templates.
 
 # Era IV — Economy and Progression
 
@@ -151,5 +156,5 @@ Current principles:
 - [x] Make JSON persistence path-injectable and presentation-agnostic.
 - [x] Add a storage abstraction and continuous-integration workflow.
 - [x] Add a UI error boundary for domain and storage failures.
-- [ ] Model milestones.
-- [ ] Model boss encounters.
+- [x] Model milestones.
+- [x] Model boss encounters.

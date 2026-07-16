@@ -60,3 +60,22 @@ Added Character, attributes, progression, Habits, core services and local JSON p
 - Archived quests and projects reject edits.
 - `SaveService` accepts an injectable path and no longer writes UI messages.
 - Quest completion orchestration was removed from `QuestScreen`.
+
+## Unreleased — Phase 4 Milestone Foundation
+
+### Added
+
+- ordered Milestones with locked, created, active, completed, and archived states;
+- optional quest-to-milestone association constrained to the same Project;
+- Milestone rewards metadata and explicit one-time claiming;
+- MilestoneService, BossService, and related workflow services;
+- optional Boss Encounters linked to Milestones;
+- automatic Milestone progression, Boss unlocking, and next-stage activation;
+- Milestone persistence, cards, tables, screen, tests, and Event Storming documentation.
+
+### Changed
+
+- Project completion now respects valid Milestones when they exist;
+- Project cards and tables display quest and milestone progress separately;
+- completed or archived quests cannot change associations;
+- deletion workflows preserve completed history.

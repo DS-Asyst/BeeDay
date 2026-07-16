@@ -1,5 +1,7 @@
 using Xunit;
 using LevelUp.Domain;
+using LevelUp.Domain.Bosses;
+using LevelUp.Domain.Milestones;
 using LevelUp.Domain.Projects;
 using LevelUp.Domain.Quests;
 using LevelUp.Services.Persistence;
@@ -23,16 +25,25 @@ public sealed class SaveServiceTests : IDisposable
         project.Configure("Project", "Description", "Reward");
         project.Activate();
 
+        Milestone milestone = new() { Id = 1 };
+        milestone.Configure(project.Id, "Milestone", "Description");
+
         Quest quest = new() { Id = 1 };
         quest.Configure("Quest", "Description");
         quest.AssignToProject(project.Id);
+        quest.AssignToMilestone(milestone.Id, project.Id);
         quest.Activate();
         quest.Complete();
+
+        BossEncounter boss = new() { Id = 1 };
+        boss.Configure(project.Id, milestone.Id, "Boss", "Description");
 
         store.Save(new GameData
         {
             Projects = [project],
-            Quests = [quest]
+            Quests = [quest],
+            Milestones = [milestone],
+            Bosses = [boss]
         });
 
         GameData? loaded = store.Load();
@@ -43,6 +54,9 @@ public sealed class SaveServiceTests : IDisposable
         Assert.Equal(project.Id, loaded.Quests.Single().ProjectId);
         Assert.Equal(QuestStatus.Completed, loaded.Quests.Single().Status);
         Assert.NotNull(loaded.Quests.Single().CompletedAt);
+        Assert.Equal(milestone.Id, loaded.Quests.Single().MilestoneId);
+        Assert.Equal("Milestone", loaded.Milestones.Single().Title);
+        Assert.Equal("Boss", loaded.Bosses.Single().Name);
     }
 
     public void Dispose()

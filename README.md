@@ -100,3 +100,8 @@ Phase 3 — Projects and Quests is complete. The next product phase introduces m
 ## License
 
 MIT
+
+
+## Phase 4 — Milestones and Boss Encounters
+
+LevelUp now supports ordered Project Milestones, optional Quest-to-Milestone links, automatic stage progression, reward metadata, and optional Boss Encounters. See `LevelUp/docs/Phase4EventStorming.md` for the accepted domain rules.

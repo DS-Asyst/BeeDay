@@ -10,6 +10,9 @@ public sealed class Quest
     public int? ProjectId { get; private set; }
 
     [JsonInclude]
+    public int? MilestoneId { get; private set; }
+
+    [JsonInclude]
     public string Title { get; private set; } = string.Empty;
 
     [JsonInclude]
@@ -49,11 +52,18 @@ public sealed class Quest
 
     public void AssignToProject(int projectId)
     {
-        EnsureNotArchived();
+        EnsureAssociationCanChange();
 
         if (projectId <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(projectId));
+        }
+
+        if (MilestoneId is not null && ProjectId != projectId)
+        {
+            throw new InvalidOperationException(
+                "Remove the milestone association before changing projects."
+            );
         }
 
         ProjectId = projectId;
@@ -61,7 +71,41 @@ public sealed class Quest
 
     public void RemoveFromProject()
     {
+        EnsureAssociationCanChange();
+
+        if (MilestoneId is not null)
+        {
+            throw new InvalidOperationException(
+                "Remove the milestone association before removing the project."
+            );
+        }
+
         ProjectId = null;
+    }
+
+    public void AssignToMilestone(int milestoneId, int projectId)
+    {
+        EnsureAssociationCanChange();
+
+        if (milestoneId <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(milestoneId));
+        }
+
+        if (ProjectId != projectId)
+        {
+            throw new InvalidOperationException(
+                "A quest and its milestone must belong to the same project."
+            );
+        }
+
+        MilestoneId = milestoneId;
+    }
+
+    public void RemoveFromMilestone()
+    {
+        EnsureAssociationCanChange();
+        MilestoneId = null;
     }
 
     public void Activate()
@@ -109,6 +153,16 @@ public sealed class Quest
 
         Title = title.Trim();
         Description = description.Trim();
+    }
+
+    private void EnsureAssociationCanChange()
+    {
+        if (Status is QuestStatus.Completed or QuestStatus.Archived)
+        {
+            throw new InvalidOperationException(
+                "Completed or archived quests cannot change associations."
+            );
+        }
     }
 
     private void EnsureNotArchived()
