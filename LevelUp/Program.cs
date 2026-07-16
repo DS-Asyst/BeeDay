@@ -1,4 +1,5 @@
 using LevelUp.Domain;
+using LevelUp.Services.Books;
 using LevelUp.Services.Bosses;
 using LevelUp.Services.Character;
 using LevelUp.Services.Habits;
@@ -6,6 +7,7 @@ using LevelUp.Services.Milestones;
 using LevelUp.Services.Persistence;
 using LevelUp.Services.Projects;
 using LevelUp.Services.Quests;
+using LevelUp.Services.Wallet;
 using LevelUp.Services.Workflows;
 using LevelUp.UI;
 using CharacterModel = LevelUp.Domain.Character.Character;
@@ -43,6 +45,8 @@ ProjectService projectService;
 QuestService questService;
 MilestoneService milestoneService;
 BossService bossService;
+BookService bookService;
+WalletService walletService;
 bool isNewGame = loadedGame is null;
 
 if (loadedGame is not null)
@@ -53,6 +57,8 @@ if (loadedGame is not null)
     questService = new QuestService(loadedGame.Quests);
     milestoneService = new MilestoneService(loadedGame.Milestones);
     bossService = new BossService(loadedGame.Bosses);
+    bookService = new BookService(loadedGame.Books);
+    walletService = new WalletService(loadedGame.WalletTransactions);
 }
 else
 {
@@ -62,6 +68,8 @@ else
     questService = new QuestService();
     milestoneService = new MilestoneService();
     bossService = new BossService();
+    bookService = new BookService();
+    walletService = new WalletService();
 }
 
 GameStateService gameStateService = new(
@@ -71,6 +79,8 @@ GameStateService gameStateService = new(
     questService,
     milestoneService,
     bossService,
+    bookService,
+    walletService,
     character
 );
 
@@ -151,16 +161,45 @@ ProjectScreen projectScreen = new(
 );
 
 
-GoldScreen goldScreen = new(inputReader);
+WalletScreen walletScreen = new(
+    walletService,
+    gameStateService,
+    inputReader
+);
+
+BackpackScreen backpackScreen = new(
+    inputReader,
+    walletScreen
+);
+
+ReadingWorkflowService readingWorkflowService = new(
+    bookService,
+    characterService,
+    character,
+    gameStateService
+);
+
+LibraryScreen libraryScreen = new(
+    bookService,
+    readingWorkflowService,
+    gameStateService,
+    inputReader
+);
+
+DiaryScreen diaryScreen = new(
+    inputReader,
+    trainingScreen,
+    questScreen,
+    projectScreen,
+    milestoneScreen
+);
 
 MainMenuScreen mainMenuScreen = new(
     inputReader,
     characterScreen,
-    trainingScreen,
-    questScreen,
-    projectScreen,
-    milestoneScreen,
-    goldScreen,
+    diaryScreen,
+    libraryScreen,
+    backpackScreen,
     character,
     gameStateService
 );

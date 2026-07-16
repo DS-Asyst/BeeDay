@@ -88,3 +88,21 @@ Added Character, attributes, progression, Habits, core services and local JSON p
 - separated recognition rewards from the future real-money Finances module;
 - added centralized plain-text status localization;
 - reviewed persistence-facing errors and Phase 4 product documentation.
+
+## Unreleased — Phase 5 foundation
+
+### Added
+- Diary hub for Trainings, Missions, Projects, and Chapters.
+- Backpack hub with Wallet.
+- Wallet domain and service for real deposits and withdrawals.
+- Required withdrawal justification, balance validation, transaction editing, deletion, history, and monthly summary.
+- Library domain with planned, reading, completed, and archived books.
+- Maximum of two simultaneous books in progress.
+- Reading progress history with dates and XP per page.
+- Persistence for books, reading history, and wallet transactions.
+- Wallet, Book, and persistence tests.
+
+### Changed
+- Main navigation now exposes Character, Diary, Library, and Backpack.
+- Removed the obsolete placeholder Gold screen.
+- Clarified that Wallet is not an in-game economy.

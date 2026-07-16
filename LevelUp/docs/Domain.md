@@ -85,3 +85,11 @@ A Milestone is an ordered, optional Project chapter. It always belongs to a Proj
 ## Boss Encounters
 
 A Boss Encounter is an optional challenge linked to one Milestone. Completing the Milestone requirements unlocks the Boss. Defeating it completes the Milestone; a final Boss may complete the Project. Phase 4 intentionally does not introduce a full combat engine.
+
+## Books
+
+A Book is independent from Projects and Quests. It stores title, author, total pages, current page, lifecycle status, and dated reading progress entries. At most two Books may be in the Reading state at the same time. Newly registered pages grant character XP through `ReadingWorkflowService`.
+
+## Wallet
+
+Wallet uses a transaction ledger. Deposits increase the balance; withdrawals decrease it and require a justification. Transactions preserve their occurrence date and update timestamp. The service rejects withdrawals beyond the available balance and mutations that would result in a negative balance.

@@ -1,9 +1,11 @@
 using Xunit;
 using LevelUp.Domain;
+using LevelUp.Domain.Books;
 using LevelUp.Domain.Bosses;
 using LevelUp.Domain.Milestones;
 using LevelUp.Domain.Projects;
 using LevelUp.Domain.Quests;
+using LevelUp.Domain.Wallet;
 using LevelUp.Services.Persistence;
 
 namespace LevelUp.Tests;
@@ -38,12 +40,28 @@ public sealed class SaveServiceTests : IDisposable
         BossEncounter boss = new() { Id = 1 };
         boss.Configure(project.Id, milestone.Id, "Boss", "Description");
 
+        Book book = new() { Id = 1 };
+        book.Configure("Book", "Author", 100);
+        book.Start();
+        book.RecordProgress(25, new DateTime(2026, 7, 1));
+
+        WalletTransaction transaction = new() { Id = 1 };
+        transaction.Configure(
+            WalletTransactionType.Deposit,
+            500m,
+            "Reserve",
+            string.Empty,
+            new DateTime(2026, 7, 1)
+        );
+
         store.Save(new GameData
         {
             Projects = [project],
             Quests = [quest],
             Milestones = [milestone],
-            Bosses = [boss]
+            Bosses = [boss],
+            Books = [book],
+            WalletTransactions = [transaction]
         });
 
         GameData? loaded = store.Load();
@@ -57,6 +75,14 @@ public sealed class SaveServiceTests : IDisposable
         Assert.Equal(milestone.Id, loaded.Quests.Single().MilestoneId);
         Assert.Equal("Milestone", loaded.Milestones.Single().Title);
         Assert.Equal("Boss", loaded.Bosses.Single().Name);
+        Assert.Equal("Book", loaded.Books.Single().Title);
+        Assert.Equal(25, loaded.Books.Single().CurrentPage);
+        Assert.Single(loaded.Books.Single().ProgressHistory);
+        Assert.Equal(500m, loaded.WalletTransactions.Single().Amount);
+        Assert.Equal(
+            WalletTransactionType.Deposit,
+            loaded.WalletTransactions.Single().Type
+        );
     }
 
     public void Dispose()
