@@ -117,18 +117,20 @@ public class InputReader
         IEnumerable<T> choices,
         Func<T, string> converter
     )
+    where T : notnull
     {
         ArgumentNullException.ThrowIfNull(choices);
         ArgumentNullException.ThrowIfNull(converter);
 
-        SelectionPrompt<T> prompt = new SelectionPrompt<T>()
-            .Title(Markup.Escape(title))
-            .AddChoices(choices)
-            .UseConverter(
-                choice => Markup.Escape(
-                    converter(choice)
-                )
-            );
+        SelectionPrompt<T> prompt =
+            new SelectionPrompt<T>()
+                .Title(Markup.Escape(title))
+                .AddChoices(choices)
+                .UseConverter(
+                    choice => Markup.Escape(
+                        converter(choice)
+                    )
+                );
 
         return AnsiConsole.Prompt(prompt);
     }
