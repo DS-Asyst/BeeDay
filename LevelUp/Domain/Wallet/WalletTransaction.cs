@@ -26,6 +26,18 @@ public sealed class WalletTransaction
     [JsonInclude]
     public DateTime? UpdatedAt { get; private set; }
 
+    [JsonInclude]
+    public int? ReversalOfTransactionId { get; private set; }
+
+    [JsonInclude]
+    public DateTime? ReversedAt { get; private set; }
+
+    [JsonInclude]
+    public string ReversalReason { get; private set; } = string.Empty;
+
+    public bool IsReversal => ReversalOfTransactionId is not null;
+    public bool IsReversed => ReversedAt is not null;
+
     public void Configure(
         WalletTransactionType type,
         decimal amount,
@@ -54,6 +66,42 @@ public sealed class WalletTransaction
     {
         Apply(type, amount, description, justification, occurredAt);
         UpdatedAt = DateTime.Now;
+    }
+
+
+    public void ConfigureReversal(
+        WalletTransaction original,
+        string reason,
+        DateTime occurredAt
+    )
+    {
+        ArgumentNullException.ThrowIfNull(original);
+        ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+
+        WalletTransactionType reversalType = original.Type == WalletTransactionType.Deposit
+            ? WalletTransactionType.Withdrawal
+            : WalletTransactionType.Deposit;
+
+        Apply(
+            reversalType,
+            original.Amount,
+            $"Estorno: {original.Description}",
+            reason,
+            occurredAt
+        );
+        ReversalOfTransactionId = original.Id;
+        ReversalReason = reason.Trim();
+        original.MarkReversed(occurredAt);
+    }
+
+    private void MarkReversed(DateTime reversedAt)
+    {
+        if (IsReversed)
+        {
+            throw new InvalidOperationException("A movimentação já foi estornada.");
+        }
+
+        ReversedAt = reversedAt;
     }
 
     private void Apply(

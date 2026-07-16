@@ -55,6 +55,7 @@ public sealed class MainMenuScreen
                 },
                 choice => choice
             );
+
             try
             {
                 switch (option)
@@ -69,7 +70,10 @@ public sealed class MainMenuScreen
                         ConsoleHelper.ShowSuccess("Jogo salvo com sucesso.");
                         inputReader.WaitForContinue();
                         break;
-                    case "Sair": gameStateService.Save(); running = false; break;
+                    case "Sair":
+                        gameStateService.Save();
+                        running = false;
+                        break;
                 }
             }
             catch (InvalidOperationException exception)
@@ -83,6 +87,7 @@ public sealed class MainMenuScreen
                 inputReader.WaitForContinue();
             }
         }
+
         ConsoleHelper.ShowHeader("Até breve");
     }
 }

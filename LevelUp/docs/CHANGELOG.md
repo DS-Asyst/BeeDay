@@ -1,5 +1,20 @@
 # Changelog
 
+## Fase 8.5 — Simplificação da experiência
+
+### Removed
+
+- tela Visão geral e serviços exclusivos de dashboard;
+- tela separada Progressão no módulo Personagem;
+- domínio, serviço, tela, testes e persistência do módulo Mundo/Metas.
+
+### Changed
+
+- progressão por nível incorporada à Ficha do personagem;
+- `GameSession`, `GameData` e `GameStateService` simplificados;
+- schema do save elevado para a versão 4;
+- documentação e roadmap atualizados conforme as decisões de produto.
+
 ## Unreleased — Fase 5.2
 
 ### Added
@@ -18,3 +33,49 @@
 - o campo legado de título do Projeto foi substituído por prefixo de conquista do Chefe;
 - cartões de Projeto e Capítulo refletem a nova progressão;
 - documentação consolidada e relatórios redundantes removidos.
+
+## Fase 6 — Inteligência e confiabilidade
+
+- adicionada versão do schema e infraestrutura de migração;
+- adicionada validação de integridade de saves;
+- salvamento alterado para escrita atômica com snapshot anterior;
+- introduzidos `GameSession` e `ApplicationBootstrap`;
+- adicionado dashboard de visão geral;
+- Carteira passa a oferecer estorno auditável na interface;
+- livros novos iniciam na página zero;
+- cobertura e documentação de persistência, testes e privacidade adicionadas.
+
+## Fases 7 e 8
+
+- adicionada visualização da progressão completa do personagem;
+- schema do save elevado para a versão 3;
+- adicionada migração da versão 2 para a versão 3;
+- corrigida persistência de `Milestone.ProjectId`;
+- adicionada avaliação sobre migração para SQLite após a Fase 8.
+
+## Fase 8.5 — Consolidação e polimento
+
+### Fixed
+
+- preservada a validação de relacionamentos de Capítulos e Projetos.
+
+### Changed
+
+- seleção de Projetos, Capítulos e Missões extraída para `QuestSelectionFlow`;
+- `QuestScreen` deixa de depender diretamente de `MilestoneService` para seleções;
+- roadmap consolidado, removendo fases duplicadas e a migração prematura para banco de dados;
+- artefatos locais removidos do pacote de código-fonte.
+
+### Added
+
+- testes para IDs duplicados e Capítulos sem Projeto válido;
+- documentação da Fase 8.5;
+- plano de prontidão e implementação para a Fase 9.
+## Fase 8.5 — Ajustes de experiência
+
+- progressão por nível removida da interface da Ficha do Personagem;
+- tabela de atributos compactada;
+- Capítulos removidos do Diário e mantidos exclusivamente dentro de Projetos;
+- Carteira passa a usar os termos Entrada e Saída na interface;
+- saldo negativo permitido para representar dívidas e valores emprestados;
+- Configurações simplificadas para idioma e versão do save.

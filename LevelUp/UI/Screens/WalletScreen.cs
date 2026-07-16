@@ -37,8 +37,8 @@ public sealed class WalletScreen
                 "Escolha uma opção:",
                 new[]
                 {
-                    "Registrar depósito",
-                    "Registrar retirada",
+                    "Registrar entrada",
+                    "Registrar saída",
                     "Abrir movimentação",
                     "Ver histórico",
                     "Resumo mensal",
@@ -49,12 +49,12 @@ public sealed class WalletScreen
 
             switch (option)
             {
-                case "Registrar depósito":
+                case "Registrar entrada":
                     CreateDeposit();
                     inputReader.WaitForContinue();
                     break;
 
-                case "Registrar retirada":
+                case "Registrar saída":
                     CreateWithdrawal();
                     inputReader.WaitForContinue();
                     break;
@@ -82,7 +82,7 @@ public sealed class WalletScreen
 
     private void CreateDeposit()
     {
-        ConsoleHelper.ShowHeader("Novo depósito");
+        ConsoleHelper.ShowHeader("Nova entrada");
         inputReader.ShowCancellationHint();
 
         try
@@ -94,32 +94,32 @@ public sealed class WalletScreen
                 "Descrição:"
             );
             DateTime date = inputReader.ReadDateOrCancel(
-                "Data do depósito (dd/MM/aaaa):"
+                "Data da entrada (dd/MM/aaaa):"
             );
 
             PromptDecision decision = inputReader.ReadDecision(
-                "Confirmar depósito?"
+                "Confirmar entrada?"
             );
 
             if (decision != PromptDecision.Yes)
             {
-                ConsoleHelper.ShowInformation("Depósito cancelado.");
+                ConsoleHelper.ShowInformation("Entrada cancelada.");
                 return;
             }
 
             walletService.AddDeposit(amount, description, date);
             gameStateService.Save();
-            ConsoleHelper.ShowSuccess("Depósito registrado com sucesso.");
+            ConsoleHelper.ShowSuccess("Entrada registrada com sucesso.");
         }
         catch (UserCancelledException)
         {
-            ConsoleHelper.ShowInformation("Depósito cancelado.");
+            ConsoleHelper.ShowInformation("Entrada cancelada.");
         }
     }
 
     private void CreateWithdrawal()
     {
-        ConsoleHelper.ShowHeader("Nova retirada");
+        ConsoleHelper.ShowHeader("Nova saída");
         inputReader.ShowCancellationHint();
 
         try
@@ -131,19 +131,19 @@ public sealed class WalletScreen
                 "Descrição:"
             );
             string justification = inputReader.ReadRequiredStringOrCancel(
-                "Justificativa da retirada:"
+                "Justificativa da saída:"
             );
             DateTime date = inputReader.ReadDateOrCancel(
-                "Data da retirada (dd/MM/aaaa):"
+                "Data da saída (dd/MM/aaaa):"
             );
 
             PromptDecision decision = inputReader.ReadDecision(
-                "Confirmar retirada?"
+                "Confirmar saída?"
             );
 
             if (decision != PromptDecision.Yes)
             {
-                ConsoleHelper.ShowInformation("Retirada cancelada.");
+                ConsoleHelper.ShowInformation("Saída cancelada.");
                 return;
             }
 
@@ -154,11 +154,11 @@ public sealed class WalletScreen
                 date
             );
             gameStateService.Save();
-            ConsoleHelper.ShowSuccess("Retirada registrada com sucesso.");
+            ConsoleHelper.ShowSuccess("Saída registrada com sucesso.");
         }
         catch (UserCancelledException)
         {
-            ConsoleHelper.ShowInformation("Retirada cancelada.");
+            ConsoleHelper.ShowInformation("Saída cancelada.");
         }
     }
 
@@ -184,23 +184,18 @@ public sealed class WalletScreen
 
             string action = inputReader.ReadSelection(
                 "Escolha uma ação:",
-                new[] { "Editar", "Excluir", "Voltar" },
+                transaction.IsReversed || transaction.IsReversal
+                    ? new[] { "Voltar" }
+                    : new[] { "Estornar", "Voltar" },
                 choice => choice
             );
 
             switch (action)
             {
-                case "Editar":
-                    EditTransaction(transaction);
+                case "Estornar":
+                    ReverseTransaction(transaction);
+                    opened = false;
                     inputReader.WaitForContinue();
-                    break;
-
-                case "Excluir":
-                    opened = !DeleteTransaction(transaction);
-                    if (opened)
-                    {
-                        inputReader.WaitForContinue();
-                    }
                     break;
 
                 case "Voltar":
@@ -210,84 +205,34 @@ public sealed class WalletScreen
         }
     }
 
-    private void EditTransaction(WalletTransaction transaction)
+    private void ReverseTransaction(WalletTransaction transaction)
     {
+        ConsoleHelper.ShowHeader("Estornar movimentação");
         inputReader.ShowCancellationHint();
 
         try
         {
-            string typeText = inputReader.ReadSelection(
-                "Tipo da movimentação:",
-                new[] { "Depósito", "Retirada", "Cancelar" },
-                choice => choice
+            string reason = inputReader.ReadRequiredStringOrCancel(
+                "Motivo do estorno:"
             );
-
-            if (typeText == "Cancelar")
-            {
-                throw new UserCancelledException();
-            }
-
-            WalletTransactionType type = typeText == "Depósito"
-                ? WalletTransactionType.Deposit
-                : WalletTransactionType.Withdrawal;
-
-            decimal amount = inputReader.ReadPositiveDecimalOrCancel(
-                "Novo valor:"
-            );
-            string description = inputReader.ReadRequiredStringOrCancel(
-                "Nova descrição:"
-            );
-            string justification = type == WalletTransactionType.Withdrawal
-                ? inputReader.ReadRequiredStringOrCancel(
-                    "Nova justificativa:"
-                )
-                : string.Empty;
             DateTime date = inputReader.ReadDateOrCancel(
-                "Nova data (dd/MM/aaaa):"
+                "Data do estorno (dd/MM/aaaa):"
             );
 
-            if (!inputReader.ReadConfirmation("Salvar alterações?"))
+            if (!inputReader.ReadConfirmation("Confirmar estorno?"))
             {
-                ConsoleHelper.ShowInformation("Edição cancelada.");
+                ConsoleHelper.ShowInformation("Estorno cancelado.");
                 return;
             }
 
-            walletService.UpdateTransaction(
-                transaction,
-                type,
-                amount,
-                description,
-                justification,
-                date
-            );
+            walletService.ReverseTransaction(transaction, reason, date);
             gameStateService.Save();
-            ConsoleHelper.ShowSuccess("Movimentação atualizada com sucesso.");
+            ConsoleHelper.ShowSuccess("Movimentação estornada com sucesso.");
         }
         catch (UserCancelledException)
         {
-            ConsoleHelper.ShowInformation("Edição cancelada.");
+            ConsoleHelper.ShowInformation("Estorno cancelado.");
         }
-    }
-
-    private bool DeleteTransaction(WalletTransaction transaction)
-    {
-        if (!inputReader.ReadConfirmation(
-            $"Excluir a movimentação '{transaction.Description}'?"
-        ))
-        {
-            ConsoleHelper.ShowInformation("Exclusão cancelada.");
-            return false;
-        }
-
-        if (!walletService.DeleteTransaction(transaction.Id))
-        {
-            ConsoleHelper.ShowError("Não foi possível excluir a movimentação.");
-            return false;
-        }
-
-        gameStateService.Save();
-        ConsoleHelper.ShowSuccess("Movimentação excluída com sucesso.");
-        return true;
     }
 
     private void ShowHistory()

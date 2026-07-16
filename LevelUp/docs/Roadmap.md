@@ -1,33 +1,54 @@
 # Roadmap
 
-## Concluído
+## Fases concluídas
 
 - Fase 1 — Personagem e hábitos
-- Fase 2 — Treinamentos e UI com Spectre.Console
+- Fase 2 — Treinamentos e interface Spectre.Console
 - Fase 3 — Projetos e Missões
-- Fase 4 — Capítulos, Chefes e consolidação arquitetural
-- Fase 5.1 — Diário, Biblioteca, Mochila e Carteira
-- Sprint 5.1.1 — Consolidação da navegação
-- Fase 5.2 — Classes, títulos e conquistas profissionais
+- Fase 4 — Capítulos, Chefes e consolidação de UX
+- Fase 5 — Diário, Biblioteca, Mochila, Carteira e reconhecimento
+- Fase 6 — Confiabilidade, composição e persistência versionada
+- Fase 7 — Progressão narrativa do personagem na Ficha
+- Fase 8.5 — Consolidação e polimento
 
-## Próximas etapas
+## Decisões de produto consolidadas
 
-### Fase 5.3 — Conquistas sistêmicas
+- a progressão do personagem aparece exclusivamente na Ficha;
+- não existe tela Visão geral no menu principal;
+- o módulo Mundo/Metas foi removido;
+- JSON versionado permanece como persistência oficial;
+- banco de dados só será adotado com motivação concreta.
 
-- marcos de Missões;
-- marcos de Treinamentos;
-- marcos de leitura;
-- marcos financeiros positivos.
+## Próximos incrementos de polimento
 
-### Fase 6 — Vida, energia e recuperação
+- [ ] extrair flows adicionais de Missões;
+- [ ] modularizar Treinamentos, Biblioteca e Carteira;
+- [ ] encapsular mutabilidade de `Character` e `Habit`;
+- [ ] introduzir `TimeProvider` e avaliar `DateTimeOffset`;
+- [ ] criar códigos de erro de domínio localizáveis;
+- [ ] revisar política única de salvamento;
+- [ ] ampliar cobertura de workflows críticos;
+- [ ] adicionar contas, reservas e categorias à Carteira.
 
-- modelo de vida e energia;
-- efeitos configuráveis;
-- distinção entre gastos necessários, planejados e impulsivos.
+## Fase 9 — Persistência relacional
 
-### Fase 7 — Aplicação web
+A Fase 9 depende dos critérios registrados em `Phase9Plan.md`.
 
-- ASP.NET Core;
-- Blazor;
-- banco de dados;
-- autenticação e múltiplos perfis.
+### Etapas planejadas
+
+- [ ] preparar fronteiras e DTOs de persistência;
+- [ ] criar infraestrutura SQLite + EF Core;
+- [ ] mapear agregados e constraints;
+- [ ] criar importador do JSON;
+- [ ] validar paridade e migração;
+- [ ] manter exportação JSON;
+- [ ] preparar a arquitetura para Blazor e API.
+
+## Fases futuras
+
+- vida, energia e recuperação com regras orientadas por dados;
+- interface web com Blazor;
+- API em ASP.NET Core;
+- PostgreSQL para cenário multiusuário;
+- sincronização entre dispositivos;
+- cliente móvel.

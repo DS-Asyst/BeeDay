@@ -165,10 +165,6 @@ public sealed class Book
         Author = author.Trim();
         TotalPages = totalPages;
 
-        if (CurrentPage == 0)
-        {
-            CurrentPage = 1;
-        }
     }
 
     private void EnsureNotArchived()

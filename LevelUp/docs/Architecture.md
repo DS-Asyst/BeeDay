@@ -35,3 +35,22 @@ Telas, componentes, prompts, temas e tradução da experiência para português.
 ## Compatibilidade
 
 Algumas sobrecargas antigas permanecem temporariamente para leitura de testes e saves anteriores. Novos fluxos devem usar chefes por Projeto e conquistas persistidas.
+
+
+## Fase 6
+
+A composição da aplicação foi movida para `ApplicationBootstrap`. `GameSession` reúne o estado em memória e reduz o crescimento do construtor de `GameStateService`. A persistência possui migrações e validação antes de materializar a sessão.
+
+```text
+Program
+  -> ApplicationBootstrap
+      -> GameSession
+      -> Workflows
+      -> Screens
+
+SaveService
+  -> Normalize
+  -> GameDataMigrator
+  -> GameDataValidator
+  -> GameSession
+```

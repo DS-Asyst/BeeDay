@@ -44,13 +44,6 @@ public sealed class WalletService
         DateTime occurredAt
     )
     {
-        if (amount > Balance)
-        {
-            throw new InvalidOperationException(
-                "A retirada não pode ser maior que o saldo disponível."
-            );
-        }
-
         return CreateTransaction(
             WalletTransactionType.Withdrawal,
             amount,
@@ -87,17 +80,6 @@ public sealed class WalletService
     {
         EnsureManaged(transaction);
 
-        decimal balanceWithoutTransaction =
-            Balance - GetSignedAmount(transaction);
-
-        if (type == WalletTransactionType.Withdrawal &&
-            amount > balanceWithoutTransaction)
-        {
-            throw new InvalidOperationException(
-                "A retirada não pode ser maior que o saldo disponível."
-            );
-        }
-
         transaction.UpdateDetails(
             type,
             amount,
@@ -116,16 +98,33 @@ public sealed class WalletService
             return false;
         }
 
-        decimal resultingBalance = Balance - GetSignedAmount(transaction);
+        return transactions.Remove(transaction);
+    }
 
-        if (resultingBalance < 0)
+
+    public WalletTransaction ReverseTransaction(
+        WalletTransaction transaction,
+        string reason,
+        DateTime occurredAt
+    )
+    {
+        EnsureManaged(transaction);
+        ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+
+        if (transaction.IsReversal)
         {
-            throw new InvalidOperationException(
-                "Esta movimentação não pode ser excluída porque deixaria o saldo negativo."
-            );
+            throw new InvalidOperationException("Uma movimentação de estorno não pode ser estornada novamente.");
         }
 
-        return transactions.Remove(transaction);
+        if (transaction.IsReversed)
+        {
+            throw new InvalidOperationException("A movimentação já foi estornada.");
+        }
+
+        WalletTransaction reversal = new() { Id = nextId++ };
+        reversal.ConfigureReversal(transaction, reason, occurredAt);
+        transactions.Add(reversal);
+        return reversal;
     }
 
     public decimal GetMonthlyBalance(int year, int month)

@@ -17,8 +17,8 @@ public sealed class WalletTransactionCard
     public Panel Build()
     {
         string type = transaction.Type == WalletTransactionType.Deposit
-            ? "Depósito"
-            : "Retirada";
+            ? "Entrada"
+            : "Saída";
 
         EntityCard card = new EntityCard(
             transaction.Description,
@@ -31,6 +31,23 @@ public sealed class WalletTransactionCard
         if (!string.IsNullOrWhiteSpace(transaction.Justification))
         {
             card.AddText("Justificativa", transaction.Justification);
+        }
+
+        if (transaction.IsReversal)
+        {
+            card.AddText(
+                "Movimentação original",
+                $"#{transaction.ReversalOfTransactionId}"
+            );
+            card.AddText("Motivo do estorno", transaction.ReversalReason);
+        }
+
+        if (transaction.IsReversed)
+        {
+            card.AddText(
+                "Estornada em",
+                transaction.ReversedAt?.ToString("dd/MM/yyyy") ?? "—"
+            );
         }
 
         return card.Build();

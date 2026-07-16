@@ -25,12 +25,13 @@ public sealed class WalletTransactionTable
         table.AddColumn("Descrição");
         table.AddColumn(new TableColumn("Valor").RightAligned());
         table.AddColumn("Justificativa");
+        table.AddColumn("Situação");
 
         foreach (WalletTransaction transaction in transactions)
         {
             string type = transaction.Type == WalletTransactionType.Deposit
-                ? "Depósito"
-                : "Retirada";
+                ? "Entrada"
+                : "Saída";
             string amount = transaction.Type == WalletTransactionType.Deposit
                 ? $"[green]+ R$ {transaction.Amount:N2}[/]"
                 : $"[red]- R$ {transaction.Amount:N2}[/]";
@@ -44,7 +45,12 @@ public sealed class WalletTransactionTable
                     string.IsNullOrWhiteSpace(transaction.Justification)
                         ? "—"
                         : transaction.Justification
-                )
+                ),
+                transaction.IsReversal
+                    ? "Estorno"
+                    : transaction.IsReversed
+                        ? "Estornada"
+                        : "Confirmada"
             );
         }
 

@@ -50,11 +50,11 @@ public sealed class BookServiceTests
             new DateTime(2026, 7, 2)
         );
 
-        Assert.Equal(9, firstSession);
+        Assert.Equal(10, firstSession);
         Assert.Equal(20, secondSession);
         Assert.Equal(BookStatus.Completed, book.Status);
         Assert.Equal(2, book.ProgressHistory.Count);
-        Assert.Equal(29, book.ProgressHistory.Sum(entry => entry.PagesRead));
+        Assert.Equal(30, book.ProgressHistory.Sum(entry => entry.PagesRead));
     }
 
     [Fact]

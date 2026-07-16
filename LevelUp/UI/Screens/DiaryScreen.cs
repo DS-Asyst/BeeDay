@@ -6,21 +6,18 @@ public sealed class DiaryScreen
     private readonly TrainingScreen trainingScreen;
     private readonly QuestScreen questScreen;
     private readonly ProjectScreen projectScreen;
-    private readonly MilestoneScreen milestoneScreen;
 
     public DiaryScreen(
         InputReader inputReader,
         TrainingScreen trainingScreen,
         QuestScreen questScreen,
-        ProjectScreen projectScreen,
-        MilestoneScreen milestoneScreen
+        ProjectScreen projectScreen
     )
     {
         this.inputReader = inputReader;
         this.trainingScreen = trainingScreen;
         this.questScreen = questScreen;
         this.projectScreen = projectScreen;
-        this.milestoneScreen = milestoneScreen;
     }
 
     public void Show()
@@ -38,7 +35,6 @@ public sealed class DiaryScreen
                     "Treinamentos",
                     "Missões",
                     "Projetos",
-                    "Capítulos",
                     "Voltar"
                 },
                 choice => choice
@@ -56,10 +52,6 @@ public sealed class DiaryScreen
 
                 case "Projetos":
                     projectScreen.Show();
-                    break;
-
-                case "Capítulos":
-                    milestoneScreen.Show();
                     break;
 
                 case "Voltar":

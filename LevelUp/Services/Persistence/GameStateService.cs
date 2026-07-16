@@ -1,3 +1,4 @@
+using LevelUp.Application;
 using LevelUp.Domain;
 using LevelUp.Services.Achievements;
 using LevelUp.Services.Books;
@@ -14,82 +15,88 @@ namespace LevelUp.Services.Persistence;
 public sealed class GameStateService
 {
     private readonly IGameDataStore dataStore;
-    private readonly HabitService habitService;
-    private readonly ProjectService projectService;
-    private readonly QuestService questService;
-    private readonly MilestoneService milestoneService;
-    private readonly BossService bossService;
-    private readonly BookService bookService;
-    private readonly WalletService walletService;
-    private readonly AchievementService achievementService;
-    private readonly CharacterModel character;
+    private readonly GameSession session;
+
+    public GameStateService(IGameDataStore dataStore, GameSession session)
+    {
+        this.dataStore = dataStore;
+        this.session = session;
+    }
 
     public GameStateService(
         IGameDataStore dataStore,
-        HabitService habitService,
-        ProjectService projectService,
-        QuestService questService,
-        MilestoneService milestoneService,
-        BossService bossService,
-        BookService bookService,
-        WalletService walletService,
+        HabitService habits,
+        ProjectService projects,
+        QuestService quests,
+        MilestoneService milestones,
+        BossService bosses,
+        BookService books,
+        WalletService wallet,
         CharacterModel character
-    )
-        : this(
-            dataStore,
-            habitService,
-            projectService,
-            questService,
-            milestoneService,
-            bossService,
-            bookService,
-            walletService,
-            new AchievementService(),
-            character
+    ) : this(
+        dataStore,
+        new GameSession(
+            character,
+            habits,
+            projects,
+            quests,
+            milestones,
+            bosses,
+            books,
+            wallet,
+            new AchievementService()
         )
+    )
     {
     }
 
     public GameStateService(
         IGameDataStore dataStore,
-        HabitService habitService,
-        ProjectService projectService,
-        QuestService questService,
-        MilestoneService milestoneService,
-        BossService bossService,
-        BookService bookService,
-        WalletService walletService,
-        AchievementService achievementService,
+        HabitService habits,
+        ProjectService projects,
+        QuestService quests,
+        MilestoneService milestones,
+        BossService bosses,
+        BookService books,
+        WalletService wallet,
+        AchievementService achievements,
         CharacterModel character
+    ) : this(
+        dataStore,
+        new GameSession(
+            character,
+            habits,
+            projects,
+            quests,
+            milestones,
+            bosses,
+            books,
+            wallet,
+            achievements
+        )
     )
     {
-        this.dataStore = dataStore;
-        this.habitService = habitService;
-        this.projectService = projectService;
-        this.questService = questService;
-        this.milestoneService = milestoneService;
-        this.bossService = bossService;
-        this.bookService = bookService;
-        this.walletService = walletService;
-        this.achievementService = achievementService;
-        this.character = character;
     }
 
     public GameData CreateSnapshot()
     {
         return new GameData
         {
-            Character = character,
-            Habits = habitService.GetAllHabits().ToList(),
-            Projects = projectService.GetAllProjects().ToList(),
-            Quests = questService.GetAllQuests().ToList(),
-            Milestones = milestoneService.GetAll().ToList(),
-            Bosses = bossService.GetAll().ToList(),
-            Books = bookService.GetAll().ToList(),
-            WalletTransactions = walletService.GetAll().ToList(),
-            Achievements = achievementService.GetAll().ToList()
+            SchemaVersion = GameData.CurrentSchemaVersion,
+            Character = session.Character,
+            Habits = session.Habits.GetAllHabits().ToList(),
+            Projects = session.Projects.GetAllProjects().ToList(),
+            Quests = session.Quests.GetAllQuests().ToList(),
+            Milestones = session.Milestones.GetAll().ToList(),
+            Bosses = session.Bosses.GetAll().ToList(),
+            Books = session.Books.GetAll().ToList(),
+            WalletTransactions = session.Wallet.GetAll().ToList(),
+            Achievements = session.Achievements.GetAll().ToList()
         };
     }
 
-    public void Save() => dataStore.Save(CreateSnapshot());
+    public void Save()
+    {
+        dataStore.Save(CreateSnapshot());
+    }
 }

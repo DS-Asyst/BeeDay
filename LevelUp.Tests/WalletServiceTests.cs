@@ -7,7 +7,7 @@ namespace LevelUp.Tests;
 public sealed class WalletServiceTests
 {
     [Fact]
-    public void DepositAndWithdrawal_ShouldCalculateBalance()
+    public void EntryAndExit_ShouldCalculateBalance()
     {
         WalletService service = new();
 
@@ -27,39 +27,34 @@ public sealed class WalletServiceTests
     }
 
     [Fact]
-    public void Withdrawal_ShouldRequireAvailableBalance()
+    public void Exit_ShouldAllowNegativeBalance()
     {
         WalletService service = new();
+
         service.AddDeposit(
             100m,
-            "Reserva",
+            "Entrada inicial",
             new DateTime(2026, 7, 1)
         );
-
-        Assert.Throws<InvalidOperationException>(
-            () => service.AddWithdrawal(
-                101m,
-                "Retirada",
-                "Teste",
-                new DateTime(2026, 7, 2)
-            )
+        service.AddWithdrawal(
+            150m,
+            "Pagamento ao irmão",
+            "Valor emprestado",
+            new DateTime(2026, 7, 2)
         );
+
+        Assert.Equal(-50m, service.Balance);
     }
 
     [Fact]
-    public void Withdrawal_ShouldRequireJustification()
+    public void Exit_ShouldRequireJustification()
     {
         WalletService service = new();
-        service.AddDeposit(
-            100m,
-            "Reserva",
-            new DateTime(2026, 7, 1)
-        );
 
         Assert.Throws<ArgumentException>(
             () => service.AddWithdrawal(
                 50m,
-                "Retirada",
+                "Saída",
                 string.Empty,
                 new DateTime(2026, 7, 2)
             )
@@ -67,23 +62,24 @@ public sealed class WalletServiceTests
     }
 
     [Fact]
-    public void DeleteDeposit_ShouldRejectNegativeResultingBalance()
+    public void DeletingEntry_ShouldAllowNegativeResultingBalance()
     {
         WalletService service = new();
-        WalletTransaction deposit = service.AddDeposit(
+        WalletTransaction entry = service.AddDeposit(
             100m,
-            "Reserva",
+            "Entrada",
             new DateTime(2026, 7, 1)
         );
         service.AddWithdrawal(
             50m,
-            "Retirada",
+            "Saída",
             "Teste",
             new DateTime(2026, 7, 2)
         );
 
-        Assert.Throws<InvalidOperationException>(
-            () => service.DeleteTransaction(deposit.Id)
-        );
+        bool deleted = service.DeleteTransaction(entry.Id);
+
+        Assert.True(deleted);
+        Assert.Equal(-50m, service.Balance);
     }
 }

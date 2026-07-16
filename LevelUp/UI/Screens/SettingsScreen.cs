@@ -14,13 +14,18 @@ public sealed class SettingsScreen
     public void Show()
     {
         ConsoleHelper.ShowHeader("Configurações");
-        Table table = new Table().Border(TableBorder.Rounded);
+
+        Table table = new Table()
+            .Border(TableBorder.Rounded);
+
         table.AddColumn("Configuração");
         table.AddColumn("Valor");
-        table.AddRow("Idioma da interface", "Português (Brasil)");
-        table.AddRow("Idioma do código", "Inglês");
-        table.AddRow("Salvamento", "Automático e manual");
-        table.AddRow("Comando de cancelamento", "cancel");
+        table.AddRow("Idioma", "Português (Brasil)");
+        table.AddRow(
+            "Versão do save",
+            LevelUp.Domain.GameData.CurrentSchemaVersion.ToString()
+        );
+
         AnsiConsole.Write(table);
         inputReader.WaitForContinue();
     }

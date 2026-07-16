@@ -6,13 +6,12 @@ namespace LevelUp.UI.Components.Character;
 
 public sealed class AttributeTable
 {
-    private readonly PlayerAttributes _attributes;
+    private readonly PlayerAttributes attributes;
 
     public AttributeTable(PlayerAttributes attributes)
     {
         ArgumentNullException.ThrowIfNull(attributes);
-
-        _attributes = attributes;
+        this.attributes = attributes;
     }
 
     public Table Build()
@@ -21,49 +20,35 @@ public sealed class AttributeTable
         {
             Border = TableBorder.Rounded,
             Title = new TableTitle(
-                $"[bold {LevelUpTheme.Primary}]Attributes[/]"
+                $"[bold {LevelUpTheme.Primary}]Atributos[/]"
             )
         };
 
-        table.AddColumn(
-            new TableColumn("[bold]Atributo[/]")
-        );
-
-        table.AddColumn(
-            new TableColumn("[bold]Nível[/]").Centered()
-        );
+        table.AddColumn(new TableColumn("[bold]Atributo[/]"));
+        table.AddColumn(new TableColumn("[bold]Nível[/]").Centered());
+        table.AddColumn(new TableColumn("[bold]Atributo[/]"));
+        table.AddColumn(new TableColumn("[bold]Nível[/]").Centered());
 
         table.AddRow(
             $"{UIIcons.Strength} Força",
-            FormatLevel(_attributes.Strength.Level)
-        );
-
-        table.AddRow(
+            FormatLevel(attributes.Strength.Level),
             $"{UIIcons.Intelligence} Inteligência",
-            FormatLevel(_attributes.Intelligence.Level)
+            FormatLevel(attributes.Intelligence.Level)
         );
 
         table.AddRow(
             $"{UIIcons.Vitality} Vitalidade",
-            FormatLevel(_attributes.Vitality.Level)
-        );
-
-        table.AddRow(
+            FormatLevel(attributes.Vitality.Level),
             $"{UIIcons.Agility} Agilidade",
-            FormatLevel(_attributes.Agility.Level)
+            FormatLevel(attributes.Agility.Level)
         );
 
         table.AddRow(
             $"{UIIcons.Dexterity} Destreza",
-            FormatLevel(_attributes.Dexterity.Level)
-        );
-
-        table.AddRow(
+            FormatLevel(attributes.Dexterity.Level),
             $"{UIIcons.Luck} Sorte",
-            FormatLevel(_attributes.Luck.Level)
+            FormatLevel(attributes.Luck.Level)
         );
-
-        table.Expand();
 
         return table;
     }

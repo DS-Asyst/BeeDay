@@ -28,7 +28,12 @@
 
 ## Carteira
 
-- depósitos e retiradas representam dinheiro real;
-- retiradas exigem justificativa;
-- operações não podem produzir saldo negativo;
+- entradas e saídas representam dinheiro real;
+- saídas exigem justificativa;
+- o saldo pode ficar negativo para representar dívidas ou valores emprestados;
 - a Carteira não concede moeda fictícia.
+
+
+## Confiabilidade do estado
+
+`GameData` é um snapshot versionado. Relacionamentos entre Projeto, Capítulo, Missão e Chefe são validados no carregamento. A Carteira adota estorno como operação de correção, preservando a movimentação original. Livros novos começam sem páginas registradas (`CurrentPage = 0`).
