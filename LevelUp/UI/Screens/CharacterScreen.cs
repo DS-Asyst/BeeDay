@@ -54,51 +54,6 @@ public sealed class CharacterScreen
         AnsiConsole.Write(new CharacterCard(character).Build());
         AnsiConsole.WriteLine();
         AnsiConsole.Write(new AttributeTable(character.Attributes).Build());
-        AnsiConsole.WriteLine();
-        AnsiConsole.Write(BuildProgressionTable(character));
-    }
-
-    private static Table BuildProgressionTable(CharacterModel character)
-    {
-        Table table = new Table()
-            .Border(TableBorder.Rounded)
-            .Expand();
-
-        table.Title = new TableTitle("[bold]Progressão por nível[/]");
-        table.AddColumn("Faixa de nível");
-        table.AddColumn("Título");
-        table.AddColumn("Situação");
-
-        var ranks = new (string Range, string Name, int Minimum, int? Maximum)[]
-        {
-            ("1–9", "Aprendiz", 1, 9),
-            ("10–19", "Aventureiro", 10, 19),
-            ("20–29", "Discípulo", 20, 29),
-            ("30–39", "Adepto", 30, 39),
-            ("40–49", "Especialista", 40, 49),
-            ("50–59", "Mestre", 50, 59),
-            ("60+", "Lenda", 60, null)
-        };
-
-        foreach (var rank in ranks)
-        {
-            bool isCurrent = character.Level >= rank.Minimum &&
-                (rank.Maximum is null || character.Level <= rank.Maximum.Value);
-            bool isUnlocked = character.Level >= rank.Minimum;
-            string situation = isCurrent
-                ? "[bold green]Atual[/]"
-                : isUnlocked
-                    ? "[green]Desbloqueado[/]"
-                    : "[grey]Bloqueado[/]";
-
-            table.AddRow(
-                rank.Range,
-                rank.Name,
-                situation
-            );
-        }
-
-        return table;
     }
 
     private void ShowAchievements()

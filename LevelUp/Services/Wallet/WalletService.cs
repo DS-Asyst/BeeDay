@@ -44,13 +44,6 @@ public sealed class WalletService
         DateTime occurredAt
     )
     {
-        if (amount > Balance)
-        {
-            throw new InvalidOperationException(
-                "A retirada não pode ser maior que o saldo disponível."
-            );
-        }
-
         return CreateTransaction(
             WalletTransactionType.Withdrawal,
             amount,
@@ -87,17 +80,6 @@ public sealed class WalletService
     {
         EnsureManaged(transaction);
 
-        decimal balanceWithoutTransaction =
-            Balance - GetSignedAmount(transaction);
-
-        if (type == WalletTransactionType.Withdrawal &&
-            amount > balanceWithoutTransaction)
-        {
-            throw new InvalidOperationException(
-                "A retirada não pode ser maior que o saldo disponível."
-            );
-        }
-
         transaction.UpdateDetails(
             type,
             amount,
@@ -114,15 +96,6 @@ public sealed class WalletService
         if (transaction is null)
         {
             return false;
-        }
-
-        decimal resultingBalance = Balance - GetSignedAmount(transaction);
-
-        if (resultingBalance < 0)
-        {
-            throw new InvalidOperationException(
-                "Esta movimentação não pode ser excluída porque deixaria o saldo negativo."
-            );
         }
 
         return transactions.Remove(transaction);
@@ -146,13 +119,6 @@ public sealed class WalletService
         if (transaction.IsReversed)
         {
             throw new InvalidOperationException("A movimentação já foi estornada.");
-        }
-
-        if (transaction.Type == WalletTransactionType.Deposit && transaction.Amount > Balance)
-        {
-            throw new InvalidOperationException(
-                "O depósito não pode ser estornado porque o saldo atual é insuficiente."
-            );
         }
 
         WalletTransaction reversal = new() { Id = nextId++ };

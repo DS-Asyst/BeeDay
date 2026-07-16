@@ -7,7 +7,7 @@ O save pode conter:
 - nome e progresso do personagem;
 - hábitos, projetos, missões e leituras;
 - movimentações financeiras reais;
-- justificativas de retiradas;
+- justificativas de saídas;
 - histórico de conquistas.
 
 ## Regras atuais

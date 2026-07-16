@@ -30,8 +30,8 @@ public sealed class WalletTransactionTable
         foreach (WalletTransaction transaction in transactions)
         {
             string type = transaction.Type == WalletTransactionType.Deposit
-                ? "Depósito"
-                : "Retirada";
+                ? "Entrada"
+                : "Saída";
             string amount = transaction.Type == WalletTransactionType.Deposit
                 ? $"[green]+ R$ {transaction.Amount:N2}[/]"
                 : $"[red]- R$ {transaction.Amount:N2}[/]";

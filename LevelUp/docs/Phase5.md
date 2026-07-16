@@ -4,7 +4,7 @@
 
 - menu principal organizado por domínio;
 - Personagem como hub da ficha e das conquistas;
-- Diário agrupando Projetos, Capítulos, Missões e Treinamentos;
+- Diário agrupando Projetos, Missões e Treinamentos; Capítulos são acessados dentro de cada Projeto;
 - Biblioteca independente;
 - Mochila contendo a Carteira;
 - Configurações e salvamento manual explícito.

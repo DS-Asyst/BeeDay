@@ -4,12 +4,12 @@ LevelUp é uma plataforma de evolução pessoal gamificada desenvolvida em C# e 
 
 ## Estado atual
 
-- personagem com classe, nível, experiência, atributos e título de progressão;
-- diário com treinamentos, missões, projetos e capítulos;
+- personagem com classe, nível, experiência, atributos e título atual; as faixas de progressão permanecem como regra interna;
+- diário com treinamentos, missões e projetos; capítulos são administrados dentro de cada projeto;
 - projetos com um chefe final obrigatório;
 - conquistas profissionais desbloqueadas ao derrotar o chefe final;
 - biblioteca com histórico de leitura e experiência por páginas;
-- mochila com carteira financeira real;
+- mochila com carteira financeira real, entradas, saídas e possibilidade de saldo negativo;
 - persistência JSON, workflows, componentes reutilizáveis e testes automatizados.
 
 ## Navegação principal

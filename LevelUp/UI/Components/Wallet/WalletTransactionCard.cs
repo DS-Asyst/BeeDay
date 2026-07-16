@@ -17,8 +17,8 @@ public sealed class WalletTransactionCard
     public Panel Build()
     {
         string type = transaction.Type == WalletTransactionType.Deposit
-            ? "Depósito"
-            : "Retirada";
+            ? "Entrada"
+            : "Saída";
 
         EntityCard card = new EntityCard(
             transaction.Description,

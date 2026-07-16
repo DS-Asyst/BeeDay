@@ -28,9 +28,9 @@
 
 ## Carteira
 
-- depósitos e retiradas representam dinheiro real;
-- retiradas exigem justificativa;
-- operações não podem produzir saldo negativo;
+- entradas e saídas representam dinheiro real;
+- saídas exigem justificativa;
+- o saldo pode ficar negativo para representar dívidas ou valores emprestados;
 - a Carteira não concede moeda fictícia.
 
 

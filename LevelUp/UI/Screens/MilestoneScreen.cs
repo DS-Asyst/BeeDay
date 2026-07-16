@@ -2,7 +2,6 @@ using LevelUp.Domain.Milestones;
 using LevelUp.Domain.Projects;
 using LevelUp.Services.Milestones;
 using LevelUp.Services.Persistence;
-using LevelUp.Services.Projects;
 using LevelUp.Services.Quests;
 using LevelUp.Services.Workflows;
 using LevelUp.UI.Components.Milestone;
@@ -13,7 +12,6 @@ namespace LevelUp.UI;
 
 public sealed class MilestoneScreen
 {
-    private readonly ProjectService projectService;
     private readonly QuestService questService;
     private readonly MilestoneService milestoneService;
     private readonly MilestoneWorkflowService milestoneWorkflowService;
@@ -21,7 +19,6 @@ public sealed class MilestoneScreen
     private readonly InputReader inputReader;
 
     public MilestoneScreen(
-        ProjectService projectService,
         QuestService questService,
         MilestoneService milestoneService,
         MilestoneWorkflowService milestoneWorkflowService,
@@ -29,29 +26,11 @@ public sealed class MilestoneScreen
         InputReader inputReader
     )
     {
-        this.projectService = projectService;
         this.questService = questService;
         this.milestoneService = milestoneService;
         this.milestoneWorkflowService = milestoneWorkflowService;
         this.gameStateService = gameStateService;
         this.inputReader = inputReader;
-    }
-
-    public void Show()
-    {
-        var projects = projectService.GetAllProjects();
-        if (projects.Count == 0)
-        {
-            ConsoleHelper.ShowInformation("Cadastre um projeto antes de criar capítulos.");
-            inputReader.WaitForContinue();
-            return;
-        }
-        Project project = inputReader.ReadSelection(
-            "Selecione um projeto:",
-            projects,
-            item => $"{item.Name} — {DisplayText.For(item.Status)}"
-        );
-        ShowForProject(project);
     }
 
     public void ShowForProject(Project project)

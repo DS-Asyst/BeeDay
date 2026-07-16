@@ -71,3 +71,11 @@
 - testes para IDs duplicados e Capítulos sem Projeto válido;
 - documentação da Fase 8.5;
 - plano de prontidão e implementação para a Fase 9.
+## Fase 8.5 — Ajustes de experiência
+
+- progressão por nível removida da interface da Ficha do Personagem;
+- tabela de atributos compactada;
+- Capítulos removidos do Diário e mantidos exclusivamente dentro de Projetos;
+- Carteira passa a usar os termos Entrada e Saída na interface;
+- saldo negativo permitido para representar dívidas e valores emprestados;
+- Configurações simplificadas para idioma e versão do save.

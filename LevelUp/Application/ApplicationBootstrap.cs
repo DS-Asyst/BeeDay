@@ -102,13 +102,13 @@ public static class ApplicationBootstrap
         TrainingScreen training = new(habitService, characterService, attributeService, inputReader, character, state);
         QuestSelectionFlow questSelection = new(projects, milestones, inputReader);
         QuestScreen questScreen = new(quests, projects, inputReader, state, questWorkflow, questSelection);
-        MilestoneScreen milestoneScreen = new(projects, quests, milestones, milestoneWorkflow, state, inputReader);
+        MilestoneScreen milestoneScreen = new(quests, milestones, milestoneWorkflow, state, inputReader);
         ProjectScreen projectScreen = new(projects, quests, inputReader, state, projectWorkflow, milestones, milestoneScreen, bosses, bossWorkflow);
         WalletScreen walletScreen = new(wallet, state, inputReader);
         BackpackScreen backpack = new(inputReader, walletScreen);
         ReadingWorkflowService readingWorkflow = new(books, characterService, character, state);
         LibraryScreen library = new(books, readingWorkflow, state, inputReader);
-        DiaryScreen diary = new(inputReader, training, questScreen, projectScreen, milestoneScreen);
+        DiaryScreen diary = new(inputReader, training, questScreen, projectScreen);
         CharacterScreen characterScreen = new(inputReader, achievements);
         SettingsScreen settings = new(inputReader);
 
