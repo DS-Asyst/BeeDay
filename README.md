@@ -22,7 +22,7 @@ LevelUp is a productivity RPG built with C# and .NET. It models real-world conce
 
 ## Language and product terminology
 
-Source code remains in English. The complete player-facing experience is presented in Brazilian Portuguese. In the interface, `Milestone` is shown as **Capítulo**, `Quest` as **Missão**, `BossEncounter` as **Chefe**, and `Gold` as **Finanças**. The Finances module represents real money and is not used as an in-game reward currency.
+Source code remains in English. The complete player-facing experience is presented in Brazilian Portuguese. In the interface, `Milestone` is shown as **Capítulo**, `Quest` as **Missão**, `BossEncounter` as **Chefe**, and `Gold` as **Carteira**. The Wallet module represents real money and is not used as an in-game reward currency.
 
 ## Architecture
 
@@ -97,6 +97,9 @@ The repository includes automated tests and a GitHub Actions workflow covering f
 - `docs/DecisionLog.md`
 - `docs/Contributing.md`
 - `docs/CHANGELOG.md`
+
+- `docs/PHASE_4_UX_CONSOLIDATION.md`
+- `docs/PHASE_4_UX_CONSOLIDATION_REPORT.md`
 
 ## Roadmap
 

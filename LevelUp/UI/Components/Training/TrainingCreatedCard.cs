@@ -1,4 +1,5 @@
 using LevelUp.Domain.Habits;
+using LevelUp.UI.Infrastructure;
 using LevelUp.UI.Infrastructure.Builders;
 using LevelUp.UI.Infrastructure.Themes;
 using LevelUp.UI.Layout;
@@ -52,7 +53,7 @@ public sealed class TrainingCreatedCard
         summary.AddRow(
             StatisticRow.Build(
                 "Atributo",
-                _habit.AttributeType.ToString(),
+                DisplayText.For(_habit.AttributeType),
                 LevelUpTheme.Accent
             )
         );

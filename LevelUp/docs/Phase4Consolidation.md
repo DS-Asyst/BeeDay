@@ -20,7 +20,7 @@ This sprint closes Phase 4 without introducing Phase 5 features. It consolidates
 | `BossEncounter` | Chefe |
 | `Training` | Treinamento |
 | `Character` | Personagem |
-| `Gold` | Finanças |
+| `Gold` | Carteira |
 
 ## Product rules confirmed
 
@@ -29,7 +29,7 @@ This sprint closes Phase 4 without introducing Phase 5 features. It consolidates
 - Missions can be associated with a project and optionally with one of its chapters.
 - A boss represents a final challenge in the project progression experience.
 - Project and chapter rewards are recognition-based, such as experience and titles.
-- The Finances module represents real money reserved by the player. It is not an in-game reward currency.
+- The Wallet module represents real money reserved by the player. It is not an in-game reward currency.
 - Financial deposits, withdrawals, justifications, health consequences, and financial achievements remain future work.
 
 ## Technical changes

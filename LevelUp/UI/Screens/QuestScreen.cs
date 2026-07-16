@@ -85,39 +85,45 @@ public sealed class QuestScreen
     private void CreateQuest()
     {
         ConsoleHelper.ShowHeader("Nova missão");
+        inputReader.ShowCancellationHint();
 
-        string title = inputReader.ReadRequiredString("Título:");
-        string description = inputReader.ReadRequiredString(
-            "Descrição:"
-        );
-        Project? project = SelectOptionalProject();
-
-        Quest quest = questService.CreateQuest(
-            title,
-            description,
-            project
-        );
-
-        if (project is not null)
+        try
         {
-            Milestone? milestone = SelectOptionalMilestone(project);
+            string title = inputReader.ReadRequiredStringOrCancel("Título:");
+            string description = inputReader.ReadRequiredStringOrCancel(
+                "Descrição:"
+            );
+            Project? project = SelectOptionalProjectForCreation();
+            Milestone? milestone = project is null
+                ? null
+                : SelectOptionalMilestoneForCreation(project);
+
+            Quest quest = questService.CreateQuest(
+                title,
+                description,
+                project
+            );
+
             if (milestone is not null)
             {
                 questService.AssignQuestToMilestone(quest, milestone);
             }
+
+            questService.ActivateQuest(quest);
+            gameStateService.Save();
+
+            ConsoleHelper.ShowSuccess(
+                "Missão cadastrada com sucesso."
+            );
+            AnsiConsole.WriteLine();
+            AnsiConsole.Write(BuildQuestCard(quest).Build());
         }
-
-        questService.ActivateQuest(quest);
-        gameStateService.Save();
-
-        ConsoleHelper.ShowSuccess(
-            "Missão cadastrada com sucesso."
-        );
-
-        AnsiConsole.WriteLine();
-        AnsiConsole.Write(
-            BuildQuestCard(quest).Build()
-        );
+        catch (UserCancelledException)
+        {
+            ConsoleHelper.ShowInformation(
+                "Criação da missão cancelada."
+            );
+        }
     }
 
     private void OpenQuest()
@@ -597,6 +603,99 @@ public sealed class QuestScreen
         );
     }
 
+    private Project? SelectOptionalProjectForCreation()
+    {
+        List<Project> projects = projectService
+            .GetAllProjects()
+            .Where(project =>
+                project.Status is ProjectStatus.Created or
+                    ProjectStatus.Active
+            )
+            .ToList();
+
+        if (projects.Count == 0)
+        {
+            ConsoleHelper.ShowInformation(
+                "Nenhum projeto disponível. A missão será independente."
+            );
+            return null;
+        }
+
+        PromptDecision decision = inputReader.ReadDecision(
+            "Deseja associar esta missão a um projeto?"
+        );
+
+        if (decision == PromptDecision.Cancel)
+        {
+            throw new UserCancelledException();
+        }
+
+        if (decision == PromptDecision.No)
+        {
+            return null;
+        }
+
+        List<ProjectCreationChoice> choices = projects
+            .Select(project => new ProjectCreationChoice(
+                project,
+                $"{project.Name} — {DisplayText.For(project.Status)}"
+            ))
+            .ToList();
+        choices.Add(new ProjectCreationChoice(null, "Cancelar"));
+
+        ProjectCreationChoice selected = inputReader.ReadSelection(
+            "Selecione o projeto:",
+            choices,
+            choice => choice.Label
+        );
+
+        return selected.Project ?? throw new UserCancelledException();
+    }
+
+    private Milestone? SelectOptionalMilestoneForCreation(Project project)
+    {
+        List<Milestone> milestones = milestoneService
+            .GetByProjectId(project.Id)
+            .Where(milestone => milestone.CanAcceptQuests)
+            .ToList();
+
+        if (milestones.Count == 0)
+        {
+            return null;
+        }
+
+        PromptDecision decision = inputReader.ReadDecision(
+            "Deseja associar esta missão a um capítulo?"
+        );
+
+        if (decision == PromptDecision.Cancel)
+        {
+            throw new UserCancelledException();
+        }
+
+        if (decision == PromptDecision.No)
+        {
+            return null;
+        }
+
+        List<MilestoneCreationChoice> choices = milestones
+            .Select(milestone => new MilestoneCreationChoice(
+                milestone,
+                $"{milestone.Order}. {milestone.Title} — " +
+                    DisplayText.For(milestone.Status)
+            ))
+            .ToList();
+        choices.Add(new MilestoneCreationChoice(null, "Cancelar"));
+
+        MilestoneCreationChoice selected = inputReader.ReadSelection(
+            "Selecione o capítulo:",
+            choices,
+            choice => choice.Label
+        );
+
+        return selected.Milestone ?? throw new UserCancelledException();
+    }
+
     private Quest SelectQuest(
         string prompt,
         IEnumerable<QuestModel> quests
@@ -658,4 +757,15 @@ public sealed class QuestScreen
             $"[green]{progress:0.##}%[/]"
         );
     }
+
+    private sealed record ProjectCreationChoice(
+        Project? Project,
+        string Label
+    );
+
+    private sealed record MilestoneCreationChoice(
+        Milestone? Milestone,
+        string Label
+    );
+
 }
