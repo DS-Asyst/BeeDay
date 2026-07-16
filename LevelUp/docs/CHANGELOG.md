@@ -39,3 +39,23 @@
 - adicionada migração da versão 2 para a versão 3;
 - corrigida persistência de `Milestone.ProjectId`;
 - adicionada avaliação sobre migração para SQLite após a Fase 8.
+
+## Fase 8.5 — Consolidação e polimento
+
+### Fixed
+
+- corrigida a criação de `GameSession` no teste de metas usando argumento nomeado para `GoalService`;
+- preservada a validação de relacionamentos de Capítulos e Projetos.
+
+### Changed
+
+- seleção de Projetos, Capítulos e Missões extraída para `QuestSelectionFlow`;
+- `QuestScreen` deixa de depender diretamente de `MilestoneService` para seleções;
+- roadmap consolidado, removendo fases duplicadas e a migração prematura para banco de dados;
+- artefatos locais removidos do pacote de código-fonte.
+
+### Added
+
+- testes para IDs duplicados e Capítulos sem Projeto válido;
+- documentação da Fase 8.5;
+- plano de prontidão e implementação para a Fase 9.

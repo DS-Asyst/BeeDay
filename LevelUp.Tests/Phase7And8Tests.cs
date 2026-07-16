@@ -55,7 +55,7 @@ public sealed class Phase7And8Tests
 
         GoalService goals = new();
         Goal goal = goals.Create("Primeira missão", "Concluir uma missão", GoalMetric.CompletedQuests, 1m);
-        GameSession session = CreateSession(projects, quests, goals);
+        GameSession session = CreateSession(projects, quests, goals: goals);
 
         IReadOnlyList<Goal> completed = goals.EvaluateAll(session);
 

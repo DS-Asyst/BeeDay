@@ -3,68 +3,56 @@
 ## Fases concluídas
 
 - Fase 1 — Personagem e hábitos
-- Fase 2 — Treinamentos e UI com Spectre.Console
-- Fase 3 — Projetos e missões
+- Fase 2 — Treinamentos e interface Spectre.Console
+- Fase 3 — Projetos e Missões
 - Fase 4 — Capítulos, Chefes e consolidação de UX
 - Fase 5 — Diário, Biblioteca, Mochila, Carteira e reconhecimento
+- Fase 6 — Inteligência, confiabilidade e visão integrada
+- Fase 7 — Progressão narrativa do personagem
+- Fase 8 — Mundo, metas e desafios
 
-## Fase 6 — Inteligência, confiabilidade e visão integrada
+## Fase 8.5 — Consolidação e polimento
 
 ### Entrega atual
 
-- [x] hygiene e baseline
-- [x] `GameSession` e composição fora do `Program.cs`
-- [x] schema versionado e migrações
-- [x] validação de integridade
-- [x] escrita atômica e snapshot anterior
-- [x] dashboard inicial
-- [x] estorno auditável na Carteira
-- [x] cobertura configurada
-- [x] documentação de persistência, testes e privacidade
+- [x] corrigir testes incompatíveis com `GameSession`;
+- [x] extrair seleção contextual da `QuestScreen`;
+- [x] ampliar testes de integridade do save;
+- [x] limpar artefatos locais do pacote;
+- [x] consolidar documentação e roadmap;
+- [x] definir critérios de prontidão para banco de dados.
 
-### Próximos incrementos
+### Próximos incrementos de polimento
 
-- [ ] extrair flows das screens grandes
-- [ ] contas, reservas e categorias da Carteira
-- [ ] relatórios por período
-- [ ] estatísticas de leitura e diário
-- [ ] conquistas sistêmicas
-- [ ] `TimeProvider` e `DateTimeOffset`
-- [ ] códigos de erro de domínio localizáveis
+- [ ] extrair flows adicionais de Missões;
+- [ ] modularizar Treinamentos, Biblioteca e Carteira;
+- [ ] encapsular mutabilidade de `Character` e `Habit`;
+- [ ] introduzir `TimeProvider` e avaliar `DateTimeOffset`;
+- [ ] criar códigos de erro de domínio localizáveis;
+- [ ] revisar política única de salvamento;
+- [ ] ampliar cobertura de workflows críticos;
+- [ ] adicionar contas, reservas e categorias à Carteira;
+- [ ] validar produto e UX do módulo Mundo.
 
-## Fase 7 — Vida, energia e recuperação
+## Fase 9 — Persistência relacional
 
-A modelagem será definida somente após a camada de estatísticas oferecer dados suficientes para regras equilibradas.
+A Fase 9 não começa automaticamente após a Fase 8.5. Ela depende dos critérios registrados em `Phase9Plan.md`.
+
+### Etapas planejadas
+
+- [ ] preparar fronteiras e DTOs de persistência;
+- [ ] criar infraestrutura SQLite + EF Core;
+- [ ] mapear agregados e constraints;
+- [ ] criar importador do JSON;
+- [ ] validar paridade e migração;
+- [ ] manter exportação JSON;
+- [ ] preparar a arquitetura para Blazor e API.
 
 ## Fases futuras
 
-- API em ASP.NET Core
-- interface em Blazor
-- banco de dados
-- sincronização entre dispositivos
-- cliente móvel
-
-## Fase 7 — Progressão do personagem
-
-- [x] Visualização da trilha de títulos
-- [x] Faixas de nível consolidadas
-- [x] Testes da progressão
-- [ ] Histórico de evolução por data
-- [ ] Especializações opcionais
-
-## Fase 8 — Mundo, metas e desafios
-
-- [x] Domínio de metas
-- [x] Indicadores derivados do estado real
-- [x] Persistência e migração
-- [x] Tela Mundo
-- [x] Testes de metas
-- [ ] Desafios recorrentes
-- [ ] Temporadas e eventos narrativos
-
-## Fase 9 — Persistência relacional e plataforma
-
-- [ ] SQLite e Entity Framework Core
-- [ ] Importação do save JSON
-- [ ] Repositórios por agregado
-- [ ] Preparação para Blazor
+- vida, energia e recuperação com regras orientadas por dados;
+- interface web com Blazor;
+- API em ASP.NET Core;
+- PostgreSQL para cenário multiusuário;
+- sincronização entre dispositivos;
+- cliente móvel.

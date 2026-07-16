@@ -13,6 +13,7 @@ using LevelUp.Services.Quests;
 using LevelUp.Services.Wallet;
 using LevelUp.Services.Workflows;
 using LevelUp.UI;
+using LevelUp.UI.Flows.Quests;
 using CharacterModel = LevelUp.Domain.Character.Character;
 
 namespace LevelUp.Application;
@@ -92,7 +93,8 @@ public static class ApplicationBootstrap
         BossWorkflowService bossWorkflow = new(bosses, achievements, projects, quests, milestones, state);
 
         TrainingScreen training = new(habitService, characterService, attributeService, inputReader, character, state);
-        QuestScreen questScreen = new(quests, projects, inputReader, state, questWorkflow, milestones);
+        QuestSelectionFlow questSelection = new(projects, milestones, inputReader);
+        QuestScreen questScreen = new(quests, projects, inputReader, state, questWorkflow, questSelection);
         MilestoneScreen milestoneScreen = new(projects, quests, milestones, milestoneWorkflow, state, inputReader);
         ProjectScreen projectScreen = new(projects, quests, inputReader, state, projectWorkflow, milestones, milestoneScreen, bosses, bossWorkflow);
         WalletScreen walletScreen = new(wallet, state, inputReader);
