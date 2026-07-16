@@ -16,7 +16,7 @@ public sealed class WalletTransactionTable
 
     public Table Build()
     {
-        Table table = new()
+        Table table = new Table()
             .Border(TableBorder.Rounded)
             .Expand();
 

@@ -20,7 +20,7 @@ public sealed class WalletTransactionCard
             ? "Depósito"
             : "Retirada";
 
-        EntityCard card = new(
+        EntityCard card = new EntityCard(
             transaction.Description,
             UIIcons.Gold
         )

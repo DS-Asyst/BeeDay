@@ -15,7 +15,7 @@ public sealed class BookTable
 
     public Table Build()
     {
-        Table table = new()
+        Table table = new Table()
             .Border(TableBorder.Rounded)
             .Expand();
 
