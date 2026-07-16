@@ -29,3 +29,13 @@
 - Carteira passa a oferecer estorno auditável na interface;
 - livros novos iniciam na página zero;
 - cobertura e documentação de persistência, testes e privacidade adicionadas.
+
+## Fases 7 e 8
+
+- adicionada visualização da progressão completa do personagem;
+- adicionado módulo Mundo;
+- adicionadas metas persistentes baseadas em indicadores reais;
+- schema do save elevado para a versão 3;
+- adicionada migração da versão 2 para a versão 3;
+- corrigida persistência de `Milestone.ProjectId`;
+- adicionada avaliação sobre migração para SQLite após a Fase 8.

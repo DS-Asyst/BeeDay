@@ -9,7 +9,7 @@ public sealed class GameDataMigrator
     public GameDataMigrator(IEnumerable<IGameDataMigration>? migrations = null)
     {
         IEnumerable<IGameDataMigration> configured = migrations ??
-            [new MigrationV1ToV2()];
+            [new MigrationV1ToV2(), new MigrationV2ToV3()];
         this.migrations = configured.ToDictionary(item => item.SourceVersion);
     }
 

@@ -43,3 +43,28 @@ A modelagem será definida somente após a camada de estatísticas oferecer dado
 - banco de dados
 - sincronização entre dispositivos
 - cliente móvel
+
+## Fase 7 — Progressão do personagem
+
+- [x] Visualização da trilha de títulos
+- [x] Faixas de nível consolidadas
+- [x] Testes da progressão
+- [ ] Histórico de evolução por data
+- [ ] Especializações opcionais
+
+## Fase 8 — Mundo, metas e desafios
+
+- [x] Domínio de metas
+- [x] Indicadores derivados do estado real
+- [x] Persistência e migração
+- [x] Tela Mundo
+- [x] Testes de metas
+- [ ] Desafios recorrentes
+- [ ] Temporadas e eventos narrativos
+
+## Fase 9 — Persistência relacional e plataforma
+
+- [ ] SQLite e Entity Framework Core
+- [ ] Importação do save JSON
+- [ ] Repositórios por agregado
+- [ ] Preparação para Blazor

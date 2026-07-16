@@ -6,6 +6,7 @@ using LevelUp.Services.Analytics;
 using LevelUp.Services.Books;
 using LevelUp.Services.Bosses;
 using LevelUp.Services.Habits;
+using LevelUp.Services.Goals;
 using LevelUp.Services.Milestones;
 using LevelUp.Services.Projects;
 using LevelUp.Services.Quests;
@@ -39,7 +40,8 @@ public sealed class DashboardServiceTests
             new BossService(),
             new BookService(),
             wallet,
-            new AchievementService()
+            new AchievementService(),
+            new GoalService()
         );
 
         DashboardSnapshot snapshot = new DashboardService(session)

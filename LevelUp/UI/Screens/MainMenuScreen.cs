@@ -12,6 +12,7 @@ public sealed class MainMenuScreen
     private readonly LibraryScreen libraryScreen;
     private readonly BackpackScreen backpackScreen;
     private readonly SettingsScreen settingsScreen;
+    private readonly WorldScreen worldScreen;
     private readonly CharacterModel character;
     private readonly GameStateService gameStateService;
 
@@ -23,6 +24,7 @@ public sealed class MainMenuScreen
         LibraryScreen libraryScreen,
         BackpackScreen backpackScreen,
         SettingsScreen settingsScreen,
+        WorldScreen worldScreen,
         CharacterModel character,
         GameStateService gameStateService
     )
@@ -34,6 +36,7 @@ public sealed class MainMenuScreen
         this.libraryScreen = libraryScreen;
         this.backpackScreen = backpackScreen;
         this.settingsScreen = settingsScreen;
+        this.worldScreen = worldScreen;
         this.character = character;
         this.gameStateService = gameStateService;
     }
@@ -53,6 +56,7 @@ public sealed class MainMenuScreen
                     "Diário",
                     "Biblioteca",
                     "Mochila",
+                    "Mundo",
                     "Configurações",
                     "Salvar jogo",
                     "Sair"
@@ -68,6 +72,7 @@ public sealed class MainMenuScreen
                     case "Diário": diaryScreen.Show(); break;
                     case "Biblioteca": libraryScreen.Show(); break;
                     case "Mochila": backpackScreen.Show(); break;
+                    case "Mundo": worldScreen.Show(); break;
                     case "Configurações": settingsScreen.Show(); break;
                     case "Salvar jogo":
                         gameStateService.Save();

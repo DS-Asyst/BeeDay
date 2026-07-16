@@ -48,3 +48,11 @@ A documentação oficial está em `LevelUp/docs`:
 ## Fase 6
 
 A Fase 6 introduz confiabilidade de persistência, schema versionado, dashboard, analytics iniciais e composição centralizada. Consulte [`LevelUp/docs/Phase6.md`](LevelUp/docs/Phase6.md).
+
+## Progressão e Mundo
+
+O personagem possui uma trilha de títulos automática por nível. O módulo **Mundo** permite criar metas baseadas em missões, treinamentos, projetos, leitura e Carteira. Consulte `docs/Phase7.md`, `docs/Phase8.md` e `docs/DatabaseRoadmap.md`.
+
+## Progressão e Mundo
+
+O personagem possui uma trilha de títulos automática por nível. O módulo **Mundo** permite criar metas baseadas em missões, treinamentos, projetos, leitura e Carteira. Consulte `LevelUp/docs/Phase7.md`, `LevelUp/docs/Phase8.md` e `LevelUp/docs/DatabaseRoadmap.md`.

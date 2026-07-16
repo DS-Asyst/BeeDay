@@ -5,6 +5,7 @@ namespace LevelUp.Domain.Milestones;
 public sealed class Milestone
 {
     public int Id { get; set; }
+    [JsonInclude]
     public int ProjectId { get; private set; }
 
     [JsonInclude]

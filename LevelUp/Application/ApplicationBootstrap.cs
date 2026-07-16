@@ -5,6 +5,7 @@ using LevelUp.Services.Books;
 using LevelUp.Services.Bosses;
 using LevelUp.Services.Character;
 using LevelUp.Services.Habits;
+using LevelUp.Services.Goals;
 using LevelUp.Services.Milestones;
 using LevelUp.Services.Persistence;
 using LevelUp.Services.Projects;
@@ -49,6 +50,7 @@ public static class ApplicationBootstrap
         BookService books;
         WalletService wallet;
         AchievementService achievements;
+        GoalService goals;
         bool isNewGame = loadedGame is null;
 
         if (loadedGame is not null)
@@ -62,6 +64,7 @@ public static class ApplicationBootstrap
             books = new BookService(loadedGame.Books);
             wallet = new WalletService(loadedGame.WalletTransactions);
             achievements = new AchievementService(loadedGame.Achievements);
+            goals = new GoalService(loadedGame.Goals);
         }
         else
         {
@@ -74,10 +77,11 @@ public static class ApplicationBootstrap
             books = new BookService();
             wallet = new WalletService();
             achievements = new AchievementService();
+            goals = new GoalService();
         }
 
         GameSession session = new(
-            character, habitService, projects, quests, milestones, bosses, books, wallet, achievements
+            character, habitService, projects, quests, milestones, bosses, books, wallet, achievements, goals
         );
         GameStateService state = new(saveService, session);
         if (isNewGame) state.Save();
@@ -99,9 +103,10 @@ public static class ApplicationBootstrap
         CharacterScreen characterScreen = new(inputReader, achievements);
         SettingsScreen settings = new(inputReader);
         DashboardScreen dashboard = new(new DashboardService(session), inputReader);
+        WorldScreen world = new(goals, session, state, inputReader);
 
         return new MainMenuScreen(
-            inputReader, dashboard, characterScreen, diary, library, backpack, settings, character, state
+            inputReader, dashboard, characterScreen, diary, library, backpack, settings, world, character, state
         );
     }
 }
