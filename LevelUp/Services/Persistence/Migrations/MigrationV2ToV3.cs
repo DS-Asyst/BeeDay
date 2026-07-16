@@ -9,7 +9,6 @@ public sealed class MigrationV2ToV3 : IGameDataMigration
 
     public void Apply(GameData gameData)
     {
-        gameData.Goals ??= [];
         gameData.SchemaVersion = TargetVersion;
     }
 }

@@ -27,7 +27,7 @@ public sealed class CharacterScreen
             ConsoleHelper.ShowHeader("Personagem");
             string option = inputReader.ReadSelection(
                 "Escolha uma opção:",
-                new[] { "Ficha do personagem", "Progressão", "Conquistas", "Voltar" },
+                new[] { "Ficha do personagem", "Conquistas", "Voltar" },
                 choice => choice
             );
 
@@ -35,10 +35,6 @@ public sealed class CharacterScreen
             {
                 case "Ficha do personagem":
                     ShowProfile(character);
-                    inputReader.WaitForContinue();
-                    break;
-                case "Progressão":
-                    ShowProgression(character);
                     inputReader.WaitForContinue();
                     break;
                 case "Conquistas":
@@ -58,31 +54,51 @@ public sealed class CharacterScreen
         AnsiConsole.Write(new CharacterCard(character).Build());
         AnsiConsole.WriteLine();
         AnsiConsole.Write(new AttributeTable(character.Attributes).Build());
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(BuildProgressionTable(character));
     }
 
-    private static void ShowProgression(CharacterModel character)
+    private static Table BuildProgressionTable(CharacterModel character)
     {
-        ConsoleHelper.ShowHeader("Progressão do personagem");
-        Table table = new Table().Border(TableBorder.Rounded).Expand();
+        Table table = new Table()
+            .Border(TableBorder.Rounded)
+            .Expand();
+
+        table.Title = new TableTitle("[bold]Progressão por nível[/]");
         table.AddColumn("Faixa de nível");
         table.AddColumn("Título");
         table.AddColumn("Situação");
-        var ranks = new (string Range, string Name, int Minimum)[]
+
+        var ranks = new (string Range, string Name, int Minimum, int? Maximum)[]
         {
-            ("1–9", "Aprendiz", 1),
-            ("10–19", "Aventureiro", 10),
-            ("20–29", "Discípulo", 20),
-            ("30–39", "Adepto", 30),
-            ("40–49", "Especialista", 40),
-            ("50–59", "Mestre", 50),
-            ("60+", "Lenda", 60)
+            ("1–9", "Aprendiz", 1, 9),
+            ("10–19", "Aventureiro", 10, 19),
+            ("20–29", "Discípulo", 20, 29),
+            ("30–39", "Adepto", 30, 39),
+            ("40–49", "Especialista", 40, 49),
+            ("50–59", "Mestre", 50, 59),
+            ("60+", "Lenda", 60, null)
         };
+
         foreach (var rank in ranks)
         {
-            string situation = character.Level >= rank.Minimum ? "Desbloqueado" : "Bloqueado";
-            table.AddRow(rank.Range, rank.Name, situation);
+            bool isCurrent = character.Level >= rank.Minimum &&
+                (rank.Maximum is null || character.Level <= rank.Maximum.Value);
+            bool isUnlocked = character.Level >= rank.Minimum;
+            string situation = isCurrent
+                ? "[bold green]Atual[/]"
+                : isUnlocked
+                    ? "[green]Desbloqueado[/]"
+                    : "[grey]Bloqueado[/]";
+
+            table.AddRow(
+                rank.Range,
+                rank.Name,
+                situation
+            );
         }
-        AnsiConsole.Write(table);
+
+        return table;
     }
 
     private void ShowAchievements()

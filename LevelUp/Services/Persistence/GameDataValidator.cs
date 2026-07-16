@@ -13,7 +13,6 @@ public sealed class GameDataValidator
         EnsureUniqueIds(gameData.Bosses.Select(item => item.Id), "chefes");
         EnsureUniqueIds(gameData.Books.Select(item => item.Id), "livros");
         EnsureUniqueIds(gameData.WalletTransactions.Select(item => item.Id), "movimentações");
-        EnsureUniqueIds(gameData.Goals.Select(item => item.Id), "metas");
 
         HashSet<int> projectIds = gameData.Projects.Select(item => item.Id).ToHashSet();
         HashSet<int> milestoneIds = gameData.Milestones.Select(item => item.Id).ToHashSet();

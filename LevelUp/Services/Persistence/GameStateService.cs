@@ -4,7 +4,6 @@ using LevelUp.Services.Achievements;
 using LevelUp.Services.Books;
 using LevelUp.Services.Bosses;
 using LevelUp.Services.Habits;
-using LevelUp.Services.Goals;
 using LevelUp.Services.Milestones;
 using LevelUp.Services.Projects;
 using LevelUp.Services.Quests;
@@ -25,19 +24,57 @@ public sealed class GameStateService
     }
 
     public GameStateService(
-        IGameDataStore dataStore, HabitService habits, ProjectService projects,
-        QuestService quests, MilestoneService milestones, BossService bosses,
-        BookService books, WalletService wallet, CharacterModel character
-    ) : this(dataStore, new GameSession(character, habits, projects, quests, milestones, bosses, books, wallet, new AchievementService(), new GoalService()))
+        IGameDataStore dataStore,
+        HabitService habits,
+        ProjectService projects,
+        QuestService quests,
+        MilestoneService milestones,
+        BossService bosses,
+        BookService books,
+        WalletService wallet,
+        CharacterModel character
+    ) : this(
+        dataStore,
+        new GameSession(
+            character,
+            habits,
+            projects,
+            quests,
+            milestones,
+            bosses,
+            books,
+            wallet,
+            new AchievementService()
+        )
+    )
     {
     }
 
     public GameStateService(
-        IGameDataStore dataStore, HabitService habits, ProjectService projects,
-        QuestService quests, MilestoneService milestones, BossService bosses,
-        BookService books, WalletService wallet, AchievementService achievements,
+        IGameDataStore dataStore,
+        HabitService habits,
+        ProjectService projects,
+        QuestService quests,
+        MilestoneService milestones,
+        BossService bosses,
+        BookService books,
+        WalletService wallet,
+        AchievementService achievements,
         CharacterModel character
-    ) : this(dataStore, new GameSession(character, habits, projects, quests, milestones, bosses, books, wallet, achievements, new GoalService()))
+    ) : this(
+        dataStore,
+        new GameSession(
+            character,
+            habits,
+            projects,
+            quests,
+            milestones,
+            bosses,
+            books,
+            wallet,
+            achievements
+        )
+    )
     {
     }
 
@@ -54,10 +91,12 @@ public sealed class GameStateService
             Bosses = session.Bosses.GetAll().ToList(),
             Books = session.Books.GetAll().ToList(),
             WalletTransactions = session.Wallet.GetAll().ToList(),
-            Achievements = session.Achievements.GetAll().ToList(),
-            Goals = session.Goals.GetAll().ToList()
+            Achievements = session.Achievements.GetAll().ToList()
         };
     }
 
-    public void Save() => dataStore.Save(CreateSnapshot());
+    public void Save()
+    {
+        dataStore.Save(CreateSnapshot());
+    }
 }

@@ -47,5 +47,11 @@ Sobrecargas antigas permanecem apenas para facilitar testes e leitura de saves a
 - A Fase 6 prioriza inteligência, confiabilidade e relatórios antes de Vida e Energia.
 - Saves são versionados e migrados fora do bootstrap.
 - A Carteira é tratada como ledger: correções usam estorno.
-- O dashboard é uma consulta e nunca altera o estado.
 - `ApplicationBootstrap` e `GameSession` organizam composição e estado.
+
+## Simplificação da Fase 8.5
+
+- A tela Visão geral foi removida do menu principal.
+- A progressão fica exclusivamente na Ficha do personagem.
+- O módulo Mundo/Metas foi removido integralmente.
+- O schema 4 registra a retirada desse módulo da persistência oficial.

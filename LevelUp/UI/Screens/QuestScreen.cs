@@ -541,5 +541,52 @@ public sealed class QuestScreen
         return true;
     }
 
+    private QuestCard BuildQuestCard(Quest quest)
+    {
+        return new QuestCard(
+            quest,
+            selectionFlow.GetProjectName(
+                quest.ProjectId
+            )
+        );
+    }
+
+    private string GetProjectName(int? projectId)
+    {
+        return selectionFlow.GetProjectName(
+            projectId
+        );
+    }
+
+    private void ShowProjectProgress(int? projectId)
+    {
+        if (projectId is null)
+        {
+            return;
+        }
+
+        Project? project =
+            projectService.GetProjectById(
+                projectId.Value
+            );
+
+        if (project is null)
+        {
+            return;
+        }
+
+        decimal progress =
+            projectService.CalculateProgress(
+                project,
+                questService.GetAllQuests()
+            );
+
+        AnsiConsole.MarkupLine(
+            $"[grey]Progresso de " +
+            $"{Markup.Escape(project.Name)}:[/] " +
+            $"[green]{progress:0.##}%[/]"
+        );
+    }
+
 
 }

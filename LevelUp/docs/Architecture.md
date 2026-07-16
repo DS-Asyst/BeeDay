@@ -39,7 +39,7 @@ Algumas sobrecargas antigas permanecem temporariamente para leitura de testes e 
 
 ## Fase 6
 
-A composição da aplicação foi movida para `ApplicationBootstrap`. `GameSession` reúne o estado em memória e reduz o crescimento do construtor de `GameStateService`. O dashboard usa serviços de consulta em `Services/Analytics` e não altera estado. A persistência possui migrações e validação antes de materializar a sessão.
+A composição da aplicação foi movida para `ApplicationBootstrap`. `GameSession` reúne o estado em memória e reduz o crescimento do construtor de `GameStateService`. A persistência possui migrações e validação antes de materializar a sessão.
 
 ```text
 Program

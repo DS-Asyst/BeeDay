@@ -23,7 +23,6 @@ O JSON não é criptografado. Qualquer pessoa com acesso ao computador pode ler 
 
 ## Evolução planejada
 
-- opção de ocultar valores no dashboard;
 - criptografia local opcional;
 - proteção por senha;
 - exportação e exclusão controladas;

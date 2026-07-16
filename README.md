@@ -47,7 +47,7 @@ A documentação oficial está em `LevelUp/docs`:
 
 ## Fase 6
 
-A Fase 6 introduz confiabilidade de persistência, schema versionado, dashboard, analytics iniciais e composição centralizada. Consulte [`LevelUp/docs/Phase6.md`](LevelUp/docs/Phase6.md).
+A Fase 6 introduz confiabilidade de persistência, schema versionado e composição centralizada. Consulte [`LevelUp/docs/Phase6.md`](LevelUp/docs/Phase6.md).
 
 ## Fase 8.5
 

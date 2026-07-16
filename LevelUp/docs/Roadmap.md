@@ -7,22 +7,19 @@
 - Fase 3 — Projetos e Missões
 - Fase 4 — Capítulos, Chefes e consolidação de UX
 - Fase 5 — Diário, Biblioteca, Mochila, Carteira e reconhecimento
-- Fase 6 — Inteligência, confiabilidade e visão integrada
-- Fase 7 — Progressão narrativa do personagem
-- Fase 8 — Mundo, metas e desafios
+- Fase 6 — Confiabilidade, composição e persistência versionada
+- Fase 7 — Progressão narrativa do personagem na Ficha
+- Fase 8.5 — Consolidação e polimento
 
-## Fase 8.5 — Consolidação e polimento
+## Decisões de produto consolidadas
 
-### Entrega atual
+- a progressão do personagem aparece exclusivamente na Ficha;
+- não existe tela Visão geral no menu principal;
+- o módulo Mundo/Metas foi removido;
+- JSON versionado permanece como persistência oficial;
+- banco de dados só será adotado com motivação concreta.
 
-- [x] corrigir testes incompatíveis com `GameSession`;
-- [x] extrair seleção contextual da `QuestScreen`;
-- [x] ampliar testes de integridade do save;
-- [x] limpar artefatos locais do pacote;
-- [x] consolidar documentação e roadmap;
-- [x] definir critérios de prontidão para banco de dados.
-
-### Próximos incrementos de polimento
+## Próximos incrementos de polimento
 
 - [ ] extrair flows adicionais de Missões;
 - [ ] modularizar Treinamentos, Biblioteca e Carteira;
@@ -31,12 +28,11 @@
 - [ ] criar códigos de erro de domínio localizáveis;
 - [ ] revisar política única de salvamento;
 - [ ] ampliar cobertura de workflows críticos;
-- [ ] adicionar contas, reservas e categorias à Carteira;
-- [ ] validar produto e UX do módulo Mundo.
+- [ ] adicionar contas, reservas e categorias à Carteira.
 
 ## Fase 9 — Persistência relacional
 
-A Fase 9 não começa automaticamente após a Fase 8.5. Ela depende dos critérios registrados em `Phase9Plan.md`.
+A Fase 9 depende dos critérios registrados em `Phase9Plan.md`.
 
 ### Etapas planejadas
 

@@ -51,4 +51,21 @@ public sealed class Phase85PolishTests
 
         Assert.Contains("IDs duplicados", exception.Message);
     }
+    [Fact]
+    public void Migrator_ShouldUpgradeSchemaThreeToCurrentVersion()
+    {
+        GameData data = new()
+        {
+            SchemaVersion = 3
+        };
+
+        new LevelUp.Services.Persistence.Migrations.GameDataMigrator()
+            .Migrate(data);
+
+        Assert.Equal(
+            GameData.CurrentSchemaVersion,
+            data.SchemaVersion
+        );
+    }
+
 }

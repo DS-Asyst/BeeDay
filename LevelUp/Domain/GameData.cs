@@ -2,7 +2,6 @@ using LevelUp.Domain.Achievements;
 using LevelUp.Domain.Books;
 using LevelUp.Domain.Bosses;
 using LevelUp.Domain.Habits;
-using LevelUp.Domain.Goals;
 using LevelUp.Domain.Milestones;
 using LevelUp.Domain.Projects;
 using LevelUp.Domain.Quests;
@@ -13,7 +12,7 @@ namespace LevelUp.Domain;
 
 public class GameData
 {
-    public const int CurrentSchemaVersion = 3;
+    public const int CurrentSchemaVersion = 4;
 
     public int SchemaVersion { get; set; }
     public CharacterModel Character { get; set; } = new();
@@ -25,5 +24,4 @@ public class GameData
     public List<Book> Books { get; set; } = [];
     public List<WalletTransaction> WalletTransactions { get; set; } = [];
     public List<Achievement> Achievements { get; set; } = [];
-    public List<Goal> Goals { get; set; } = [];
 }

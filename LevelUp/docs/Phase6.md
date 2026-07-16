@@ -1,15 +1,15 @@
-# Fase 6 — Inteligência, confiabilidade e visão integrada
+# Fase 6 — Confiabilidade e composição
 
 ## Objetivo
 
-A Fase 6 transforma os dados acumulados pelo LevelUp em informação confiável e útil, sem iniciar ainda Vida, Energia, combate ou economia fictícia.
+Fortalecer a base do LevelUp sem introduzir Vida, Energia, combate ou economia fictícia.
 
 ## Entregas implementadas
 
 ### 6.0 — Baseline e higiene
 
-- branch dedicada `feature/phase-6-intelligence-reliability`;
-- remoção de artefatos `.vs`, `bin` e `obj` do pacote de entrega;
+- branch dedicada;
+- remoção de artefatos `.vs`, `bin` e `obj` dos pacotes de entrega;
 - cobertura configurada com Coverlet;
 - CI preparado para coletar cobertura.
 
@@ -17,7 +17,7 @@ A Fase 6 transforma os dados acumulados pelo LevelUp em informação confiável 
 
 - `GameSession` agrupa o estado e os serviços da sessão;
 - `ApplicationBootstrap` centraliza a composição;
-- `Program.cs` contém somente inicialização de encoding e execução;
+- `Program.cs` contém somente inicialização e execução;
 - `GameStateService` passa a depender de `GameSession`.
 
 ### 6.2 — Persistência confiável
@@ -31,18 +31,12 @@ A Fase 6 transforma os dados acumulados pelo LevelUp em informação confiável 
 
 ### 6.3 — Carteira auditável
 
-- lançamentos continuam preservados no histórico;
-- correções passam a usar estorno;
+- lançamentos permanecem no histórico;
+- correções usam estorno;
 - estornos referenciam a movimentação original;
-- a interface deixa de oferecer edição e exclusão de lançamentos confirmados.
+- a interface não oferece edição ou exclusão de lançamentos confirmados.
 
-### 6.4 — Visão geral
-
-- novo dashboard no menu principal;
-- resumo de personagem, diário, biblioteca, carteira e reconhecimento;
-- cálculos realizados por `DashboardService`, sem lógica duplicada na UI.
-
-### 6.5 — Biblioteca
+### 6.4 — Biblioteca
 
 - livros novos começam na página zero;
 - o primeiro registro contabiliza todas as páginas efetivamente lidas;
@@ -53,15 +47,14 @@ A Fase 6 transforma os dados acumulados pelo LevelUp em informação confiável 
 - restore, format, build e testes sem erros;
 - saves antigos migrados automaticamente;
 - falha durante escrita não destrói o último save válido;
-- dashboard não altera estado;
 - estorno mantém movimentação original e compensação;
 - documentação e CI atualizados.
 
-## Itens planejados para os próximos incrementos
+## Itens planejados
 
 - extração dos fluxos das telas com mais de 300 linhas;
 - categorias e contas da Carteira;
-- relatórios por período;
+- relatórios sob demanda, sem uma tela geral obrigatória;
 - conquistas sistêmicas;
 - substituição gradual de mensagens de domínio por códigos de erro;
 - adoção ampla de `TimeProvider` e `DateTimeOffset`.

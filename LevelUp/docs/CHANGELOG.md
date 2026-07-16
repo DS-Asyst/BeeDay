@@ -1,5 +1,20 @@
 # Changelog
 
+## Fase 8.5 — Simplificação da experiência
+
+### Removed
+
+- tela Visão geral e serviços exclusivos de dashboard;
+- tela separada Progressão no módulo Personagem;
+- domínio, serviço, tela, testes e persistência do módulo Mundo/Metas.
+
+### Changed
+
+- progressão por nível incorporada à Ficha do personagem;
+- `GameSession`, `GameData` e `GameStateService` simplificados;
+- schema do save elevado para a versão 4;
+- documentação e roadmap atualizados conforme as decisões de produto.
+
 ## Unreleased — Fase 5.2
 
 ### Added
@@ -33,8 +48,6 @@
 ## Fases 7 e 8
 
 - adicionada visualização da progressão completa do personagem;
-- adicionado módulo Mundo;
-- adicionadas metas persistentes baseadas em indicadores reais;
 - schema do save elevado para a versão 3;
 - adicionada migração da versão 2 para a versão 3;
 - corrigida persistência de `Milestone.ProjectId`;
@@ -44,7 +57,6 @@
 
 ### Fixed
 
-- corrigida a criação de `GameSession` no teste de metas usando argumento nomeado para `GoalService`;
 - preservada a validação de relacionamentos de Capítulos e Projetos.
 
 ### Changed

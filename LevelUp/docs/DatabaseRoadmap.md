@@ -2,11 +2,11 @@
 
 ## Decisão
 
-Após a Fase 8, iniciar a preparação para banco de dados é recomendado. A migração completa deve ocorrer em uma fase própria, depois que o modelo de metas e progressão estiver estabilizado.
+A preparação para banco de dados deve ocorrer apenas quando consultas, volume de histórico, sincronização ou uma interface web criarem necessidade concreta.
 
 ## Por que o momento é adequado
 
-O LevelUp já possui múltiplos agregados, relacionamentos, histórico de leitura, ledger financeiro, conquistas, metas e necessidade crescente de consultas e relatórios.
+O LevelUp possui múltiplos agregados, relacionamentos, histórico de leitura, ledger financeiro e conquistas. A adoção de banco deve ser guiada por volume e requisitos reais de consulta.
 
 O JSON continua útil para desenvolvimento local, mas passa a limitar consultas por período, integridade referencial, volume de histórico, migrações complexas, filtros e futura sincronização.
 

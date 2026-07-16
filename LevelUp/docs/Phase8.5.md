@@ -2,40 +2,43 @@
 
 ## Objetivo
 
-Estabilizar a base construída até a Fase 8 antes de introduzir persistência relacional ou uma nova interface. Esta fase não adiciona novos módulos de produto; ela reduz risco, melhora a manutenção e prepara decisões futuras.
+Estabilizar a base antes de persistência relacional ou nova interface, reduzindo risco e eliminando experiências que não agregaram valor ao produto.
 
-## Entregas desta versão
+## Entregas
 
-- correção do teste de metas que utilizava argumentos posicionais incompatíveis com `GameSession`;
-- extração de `QuestSelectionFlow`, retirando seleção de Projetos, Capítulos e Missões da `QuestScreen`;
-- redução do acoplamento direto de `QuestScreen` com `MilestoneService`;
-- testes adicionais para IDs duplicados e Capítulos órfãos;
-- limpeza de artefatos locais de build e saves temporários do pacote;
-- consolidação do roadmap e remoção de fases duplicadas na documentação;
-- definição de critérios objetivos para iniciar a Fase 9.
+- correção de testes incompatíveis com `GameSession`;
+- extração de `QuestSelectionFlow`;
+- redução do acoplamento da `QuestScreen`;
+- testes adicionais de integridade;
+- remoção de artefatos locais de build;
+- remoção da tela **Visão geral** e dos serviços exclusivos do dashboard;
+- remoção completa do módulo **Mundo/Metas**;
+- remoção da tela separada **Progressão**;
+- progressão incorporada à **Ficha do personagem**;
+- schema do save elevado para a versão 4 para registrar a retirada do módulo de metas;
+- documentação e roadmap consolidados.
 
-## Princípios adotados
+## Princípios
 
-1. Não reescrever a aplicação inteira durante uma fase de polimento.
-2. Extrair fluxos com responsabilidade clara e alto volume de código.
-3. Preservar regras de domínio e comportamento já validados.
-4. Aumentar testes em torno de persistência e relacionamentos.
-5. Adiar banco de dados até existir motivação mensurável.
+1. Não manter módulos apenas porque já foram implementados.
+2. A interface deve refletir necessidades reais do usuário.
+3. A Ficha do personagem é a fonte única da progressão pessoal.
+4. A remoção de módulos inclui domínio, serviços, persistência, testes e documentação.
+5. Banco de dados permanece adiado até existir motivação mensurável.
 
-## Dívidas ainda conhecidas
+## Dívidas conhecidas
 
 - `QuestScreen`, `TrainingScreen`, `LibraryScreen` e `WalletScreen` ainda podem ser divididas em flows menores;
 - o domínio usa `DateTime.Now` diretamente;
 - mensagens de exceção do domínio ainda estão em português;
 - `Character` e `Habit` ainda permitem mutabilidade excessiva;
-- a Carteira precisa evoluir para contas, reservas e categorias antes da migração relacional;
-- o módulo de metas precisa ser validado como produto antes de ganhar desafios recorrentes e temporadas.
+- a Carteira precisa evoluir para contas, reservas e categorias antes da migração relacional.
 
 ## Critérios de conclusão
 
 - build sem warnings;
 - todos os testes passando;
-- saves antigos carregando após migrações;
-- nenhum artefato `bin`, `obj`, `.vs` ou save local no pacote de código-fonte;
-- documentação oficial coerente com a implementação;
-- branch da Fase 9 criada apenas após a validação dos critérios de prontidão.
+- saves anteriores migrando para o schema 4;
+- menu sem Visão geral ou Mundo;
+- Personagem sem opção separada de Progressão;
+- documentação coerente com a implementação.

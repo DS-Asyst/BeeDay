@@ -2,7 +2,6 @@ using LevelUp.Services.Achievements;
 using LevelUp.Services.Books;
 using LevelUp.Services.Bosses;
 using LevelUp.Services.Habits;
-using LevelUp.Services.Goals;
 using LevelUp.Services.Milestones;
 using LevelUp.Services.Projects;
 using LevelUp.Services.Quests;
@@ -22,8 +21,7 @@ public sealed class GameSession
         BossService bosses,
         BookService books,
         WalletService wallet,
-        AchievementService achievements,
-        GoalService goals
+        AchievementService achievements
     )
     {
         Character = character;
@@ -35,7 +33,6 @@ public sealed class GameSession
         Books = books;
         Wallet = wallet;
         Achievements = achievements;
-        Goals = goals;
     }
 
     public CharacterModel Character { get; }
@@ -47,5 +44,4 @@ public sealed class GameSession
     public BookService Books { get; }
     public WalletService Wallet { get; }
     public AchievementService Achievements { get; }
-    public GoalService Goals { get; }
 }

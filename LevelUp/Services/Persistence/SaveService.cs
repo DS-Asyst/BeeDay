@@ -97,7 +97,6 @@ public sealed class SaveService : IGameDataStore
         gameData.Books ??= [];
         gameData.WalletTransactions ??= [];
         gameData.Achievements ??= [];
-        gameData.Goals ??= [];
 
         foreach (var book in gameData.Books)
         {
