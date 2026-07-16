@@ -10,6 +10,7 @@ public class MainMenuScreen
     private readonly TrainingScreen trainingScreen;
     private readonly QuestScreen questScreen;
     private readonly ProjectScreen projectScreen;
+    private readonly MilestoneScreen milestoneScreen;
     private readonly GoldScreen goldScreen;
     private readonly CharacterModel character;
     private readonly GameStateService gameStateService;
@@ -20,6 +21,7 @@ public class MainMenuScreen
         TrainingScreen trainingScreen,
         QuestScreen questScreen,
         ProjectScreen projectScreen,
+        MilestoneScreen milestoneScreen,
         GoldScreen goldScreen,
         CharacterModel character,
         GameStateService gameStateService
@@ -30,6 +32,7 @@ public class MainMenuScreen
         this.trainingScreen = trainingScreen;
         this.questScreen = questScreen;
         this.projectScreen = projectScreen;
+        this.milestoneScreen = milestoneScreen;
         this.goldScreen = goldScreen;
         this.character = character;
         this.gameStateService = gameStateService;
@@ -51,6 +54,7 @@ public class MainMenuScreen
                     "Training",
                     "Quests",
                     "Projects",
+                    "Milestones",
                     "Gold",
                     "Exit"
                 },
@@ -76,6 +80,10 @@ public class MainMenuScreen
 
                     case "Projects":
                         projectScreen.Show();
+                        break;
+
+                    case "Milestones":
+                        milestoneScreen.Show();
                         break;
 
                     case "Gold":

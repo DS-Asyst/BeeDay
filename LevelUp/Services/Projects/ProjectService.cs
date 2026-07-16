@@ -1,3 +1,4 @@
+using LevelUp.Domain.Milestones;
 using LevelUp.Domain.Projects;
 using LevelUp.Domain.Quests;
 using QuestModel = LevelUp.Domain.Quests.Quest;
@@ -105,6 +106,30 @@ public sealed class ProjectService
 
         project.Complete();
         return true;
+    }
+
+
+    public bool TryCompleteProject(
+        Project project,
+        IEnumerable<QuestModel> quests,
+        IEnumerable<Milestone> milestones
+    )
+    {
+        EnsureManagedProject(project);
+        ArgumentNullException.ThrowIfNull(milestones);
+
+        bool milestonesCompleted = milestones
+            .Where(milestone =>
+                milestone.ProjectId == project.Id &&
+                milestone.Status != MilestoneStatus.Archived)
+            .All(milestone => milestone.Status == MilestoneStatus.Completed);
+
+        if (!milestonesCompleted)
+        {
+            return false;
+        }
+
+        return TryCompleteProject(project, quests);
     }
 
     public void ArchiveProject(Project project)

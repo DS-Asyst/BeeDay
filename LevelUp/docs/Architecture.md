@@ -98,3 +98,11 @@ Cross-feature use cases are coordinated by services under `Services/Workflows`. 
 Persistence is accessed through `IGameDataStore`. `SaveService` is the JSON implementation and accepts an explicit file path for automated tests. Infrastructure errors are surfaced to the UI instead of writing directly to the console.
 
 The test project covers lifecycle transitions, project progress, archived-quest behavior, and JSON round trips.
+
+
+## Phase 4 Workflows
+
+- `QuestWorkflowService` recalculates Project and Milestone progress after Quest completion.
+- `MilestoneWorkflowService` coordinates manual completion and safe deletion.
+- `BossWorkflowService` completes the linked Milestone, activates the next stage, and attempts Project completion.
+- `GameStateService` persists Projects, Quests, Milestones, Boss Encounters, Habits, and Character state as one snapshot.

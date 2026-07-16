@@ -1,5 +1,7 @@
+using LevelUp.Domain.Milestones;
 using LevelUp.Domain.Projects;
 using LevelUp.Domain.Quests;
+using LevelUp.Services.Milestones;
 using LevelUp.Services.Persistence;
 using LevelUp.Services.Projects;
 using LevelUp.Services.Quests;
@@ -17,13 +19,15 @@ public sealed class QuestScreen
     private readonly InputReader inputReader;
     private readonly GameStateService gameStateService;
     private readonly QuestWorkflowService questWorkflowService;
+    private readonly MilestoneService milestoneService;
 
     public QuestScreen(
         QuestService questService,
         ProjectService projectService,
         InputReader inputReader,
         GameStateService gameStateService,
-        QuestWorkflowService questWorkflowService
+        QuestWorkflowService questWorkflowService,
+        MilestoneService milestoneService
     )
     {
         this.questService = questService;
@@ -31,6 +35,7 @@ public sealed class QuestScreen
         this.inputReader = inputReader;
         this.gameStateService = gameStateService;
         this.questWorkflowService = questWorkflowService;
+        this.milestoneService = milestoneService;
     }
 
     public void Show()
@@ -91,6 +96,15 @@ public sealed class QuestScreen
             description,
             project
         );
+
+        if (project is not null)
+        {
+            Milestone? milestone = SelectOptionalMilestone(project);
+            if (milestone is not null)
+            {
+                questService.AssignQuestToMilestone(quest, milestone);
+            }
+        }
 
         questService.ActivateQuest(quest);
         gameStateService.Save();
@@ -156,6 +170,11 @@ public sealed class QuestScreen
                     inputReader.WaitForContinue();
                     break;
 
+                case "Alterar milestone":
+                    ChangeQuestMilestone(selectedQuest);
+                    inputReader.WaitForContinue();
+                    break;
+
                 case "Concluir":
                     CompleteQuest(selectedQuest);
                     inputReader.WaitForContinue();
@@ -185,10 +204,11 @@ public sealed class QuestScreen
     {
         List<string> actions = [];
 
-        if (quest.Status != QuestStatus.Archived)
+        if (quest.Status is QuestStatus.Created or QuestStatus.Active)
         {
             actions.Add("Editar");
             actions.Add("Alterar projeto");
+            actions.Add("Alterar milestone");
         }
 
         if (quest.Status == QuestStatus.Active)
@@ -335,6 +355,11 @@ public sealed class QuestScreen
             project => $"{project.Name} — {project.Status}"
         );
 
+        if (quest.MilestoneId is not null)
+        {
+            questService.RemoveQuestFromMilestone(quest);
+        }
+
         questService.AssignQuestToProject(
             quest,
             selectedProject
@@ -355,11 +380,90 @@ public sealed class QuestScreen
             return false;
         }
 
+        if (quest.MilestoneId is not null)
+        {
+            questService.RemoveQuestFromMilestone(quest);
+        }
+
         questService.RemoveQuestFromProject(quest);
         ConsoleHelper.ShowSuccess(
             "A associação com o projeto foi removida."
         );
         return true;
+    }
+
+    private void ChangeQuestMilestone(Quest quest)
+    {
+        if (quest.ProjectId is null)
+        {
+            ConsoleHelper.ShowInformation(
+                "Associate the quest with a project before selecting a milestone."
+            );
+            return;
+        }
+
+        Project? project = projectService.GetProjectById(quest.ProjectId.Value);
+        if (project is null)
+        {
+            return;
+        }
+
+        string option = inputReader.ReadSelection(
+            "Choose an action:",
+            new[] { "Associate with milestone", "Remove milestone", "Cancel" },
+            choice => choice
+        );
+
+        if (option == "Associate with milestone")
+        {
+            Milestone? milestone = SelectOptionalMilestone(project, requireConfirmation: false);
+            if (milestone is not null)
+            {
+                if (quest.MilestoneId is not null)
+                {
+                    questService.RemoveQuestFromMilestone(quest);
+                }
+
+                questService.AssignQuestToMilestone(quest, milestone);
+                gameStateService.Save();
+                ConsoleHelper.ShowSuccess("Milestone association updated.");
+            }
+        }
+        else if (option == "Remove milestone" && quest.MilestoneId is not null)
+        {
+            questService.RemoveQuestFromMilestone(quest);
+            gameStateService.Save();
+            ConsoleHelper.ShowSuccess("Milestone association removed.");
+        }
+    }
+
+    private Milestone? SelectOptionalMilestone(
+        Project project,
+        bool requireConfirmation = true
+    )
+    {
+        List<Milestone> milestones = milestoneService
+            .GetByProjectId(project.Id)
+            .Where(milestone => milestone.CanAcceptQuests)
+            .ToList();
+
+        if (milestones.Count == 0)
+        {
+            return null;
+        }
+
+        if (requireConfirmation && !inputReader.ReadConfirmation(
+            "Associate this quest with a milestone?"
+        ))
+        {
+            return null;
+        }
+
+        return inputReader.ReadSelection(
+            "Select the milestone:",
+            milestones,
+            milestone => $"{milestone.Order}. {milestone.Title} — {milestone.Status}"
+        );
     }
 
     private void CompleteQuest(Quest quest)
@@ -383,11 +487,30 @@ public sealed class QuestScreen
 
         ShowProjectProgress(result.Quest.ProjectId);
 
+        if (result.MilestoneCompleted)
+        {
+            ConsoleHelper.ShowSuccess("The milestone was completed automatically.");
+        }
+
+        if (result.UnlockedBoss is not null)
+        {
+            ConsoleHelper.ShowSuccess(
+                $"Boss unlocked: {result.UnlockedBoss.Name}."
+            );
+        }
+
+        if (result.ActivatedMilestone is not null)
+        {
+            ConsoleHelper.ShowSuccess(
+                $"Next milestone activated: {result.ActivatedMilestone.Title}."
+            );
+        }
+
         if (result.ProjectCompleted)
         {
             ConsoleHelper.ShowSuccess(
-                "Todas as quests foram concluídas. " +
-                "O projeto foi concluído automaticamente."
+                "All valid quests and milestones were completed. " +
+                "The project was completed automatically."
             );
         }
     }

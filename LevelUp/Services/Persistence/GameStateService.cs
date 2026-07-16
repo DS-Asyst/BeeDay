@@ -1,5 +1,7 @@
 using LevelUp.Domain;
+using LevelUp.Services.Bosses;
 using LevelUp.Services.Habits;
+using LevelUp.Services.Milestones;
 using LevelUp.Services.Projects;
 using LevelUp.Services.Quests;
 using CharacterModel = LevelUp.Domain.Character.Character;
@@ -12,6 +14,8 @@ public sealed class GameStateService
     private readonly HabitService habitService;
     private readonly ProjectService projectService;
     private readonly QuestService questService;
+    private readonly MilestoneService milestoneService;
+    private readonly BossService bossService;
     private readonly CharacterModel character;
 
     public GameStateService(
@@ -19,6 +23,8 @@ public sealed class GameStateService
         HabitService habitService,
         ProjectService projectService,
         QuestService questService,
+        MilestoneService milestoneService,
+        BossService bossService,
         CharacterModel character
     )
     {
@@ -26,6 +32,8 @@ public sealed class GameStateService
         this.habitService = habitService;
         this.projectService = projectService;
         this.questService = questService;
+        this.milestoneService = milestoneService;
+        this.bossService = bossService;
         this.character = character;
     }
 
@@ -36,7 +44,9 @@ public sealed class GameStateService
             Character = character,
             Habits = habitService.GetAllHabits().ToList(),
             Projects = projectService.GetAllProjects().ToList(),
-            Quests = questService.GetAllQuests().ToList()
+            Quests = questService.GetAllQuests().ToList(),
+            Milestones = milestoneService.GetAll().ToList(),
+            Bosses = bossService.GetAll().ToList()
         };
     }
 

@@ -1,5 +1,6 @@
 using LevelUp.Domain.Projects;
 using LevelUp.Domain.Quests;
+using LevelUp.Services.Milestones;
 using LevelUp.Services.Persistence;
 using LevelUp.Services.Projects;
 using LevelUp.Services.Quests;
@@ -18,13 +19,17 @@ public sealed class ProjectScreen
     private readonly InputReader inputReader;
     private readonly GameStateService gameStateService;
     private readonly ProjectWorkflowService projectWorkflowService;
+    private readonly MilestoneService milestoneService;
+    private readonly MilestoneScreen milestoneScreen;
 
     public ProjectScreen(
         ProjectService projectService,
         QuestService questService,
         InputReader inputReader,
         GameStateService gameStateService,
-        ProjectWorkflowService projectWorkflowService
+        ProjectWorkflowService projectWorkflowService,
+        MilestoneService milestoneService,
+        MilestoneScreen milestoneScreen
     )
     {
         this.projectService = projectService;
@@ -32,6 +37,8 @@ public sealed class ProjectScreen
         this.inputReader = inputReader;
         this.gameStateService = gameStateService;
         this.projectWorkflowService = projectWorkflowService;
+        this.milestoneService = milestoneService;
+        this.milestoneScreen = milestoneScreen;
     }
 
     public void Show()
@@ -146,6 +153,10 @@ public sealed class ProjectScreen
                     inputReader.WaitForContinue();
                     break;
 
+                case "Ver milestones":
+                    milestoneScreen.ShowForProject(project);
+                    break;
+
                 case "Arquivar":
                     ArchiveProject(project);
                     inputReader.WaitForContinue();
@@ -181,6 +192,7 @@ public sealed class ProjectScreen
         }
 
         actions.Add("Ver quests");
+        actions.Add("Ver milestones");
 
         if (project.Status != ProjectStatus.Archived)
         {
@@ -208,7 +220,8 @@ public sealed class ProjectScreen
         ProjectTable table = new(
             projects,
             questService.GetQuestsByProjectId,
-            CalculateProgress
+            CalculateProgress,
+            milestoneService.GetByProjectId
         );
 
         AnsiConsole.Write(table.Build());
@@ -227,6 +240,7 @@ public sealed class ProjectScreen
         }
 
         projectService.ActivateProject(project);
+        milestoneService.TryActivateFirst(project);
         gameStateService.Save();
         ConsoleHelper.ShowSuccess(
             "Projeto ativado com sucesso."
@@ -384,7 +398,8 @@ public sealed class ProjectScreen
         return new ProjectCard(
             project,
             questService.GetQuestsByProjectId(project.Id),
-            CalculateProgress(project)
+            CalculateProgress(project),
+            milestoneService.GetByProjectId(project.Id)
         );
     }
 }

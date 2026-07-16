@@ -1,3 +1,4 @@
+using LevelUp.Domain.Milestones;
 using LevelUp.Domain.Projects;
 using LevelUp.Domain.Quests;
 
@@ -65,6 +66,16 @@ public sealed class QuestService
                 .AsReadOnly();
     }
 
+    public IReadOnlyList<Quest> GetQuestsByMilestoneId(int milestoneId)
+    {
+        return milestoneId <= 0
+            ? []
+            : quests
+                .Where(quest => quest.MilestoneId == milestoneId)
+                .ToList()
+                .AsReadOnly();
+    }
+
     public IReadOnlyList<Quest> GetIndependentQuests()
     {
         return quests
@@ -113,6 +124,27 @@ public sealed class QuestService
     {
         EnsureManagedQuest(quest);
         quest.RemoveFromProject();
+    }
+
+    public void AssignQuestToMilestone(Quest quest, Milestone milestone)
+    {
+        EnsureManagedQuest(quest);
+        ArgumentNullException.ThrowIfNull(milestone);
+
+        if (!milestone.CanAcceptQuests)
+        {
+            throw new InvalidOperationException(
+                "Quests can only be assigned to created or active milestones."
+            );
+        }
+
+        quest.AssignToMilestone(milestone.Id, milestone.ProjectId);
+    }
+
+    public void RemoveQuestFromMilestone(Quest quest)
+    {
+        EnsureManagedQuest(quest);
+        quest.RemoveFromMilestone();
     }
 
     public bool DeleteQuest(int id)

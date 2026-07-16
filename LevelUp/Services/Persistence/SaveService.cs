@@ -66,6 +66,8 @@ public sealed class SaveService : IGameDataStore
             gameData.Habits ??= [];
             gameData.Projects ??= [];
             gameData.Quests ??= [];
+            gameData.Milestones ??= [];
+            gameData.Bosses ??= [];
 
             return gameData;
         }

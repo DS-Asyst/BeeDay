@@ -41,3 +41,12 @@ Character
 CharacterService
 CharacterScreen
 CharacterCard
+
+
+## Milestone
+
+An ordered, optional chapter inside a Project. Milestones may group Quests, define a completion requirement, expose reward metadata, and unlock sequentially.
+
+## Boss Encounter
+
+An optional challenge linked to one Milestone. Meeting the Milestone requirement unlocks the Boss; defeating it completes the Milestone. A Boss is not a full combat system in Phase 4.

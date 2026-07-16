@@ -1,4 +1,6 @@
+using LevelUp.Domain.Bosses;
 using LevelUp.Domain.Habits;
+using LevelUp.Domain.Milestones;
 using LevelUp.Domain.Projects;
 using LevelUp.Domain.Quests;
 using CharacterModel = LevelUp.Domain.Character.Character;
@@ -14,4 +16,8 @@ public class GameData
     public List<Project> Projects { get; set; } = [];
 
     public List<Quest> Quests { get; set; } = [];
+
+    public List<Milestone> Milestones { get; set; } = [];
+
+    public List<BossEncounter> Bosses { get; set; } = [];
 }

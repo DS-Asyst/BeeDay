@@ -320,3 +320,11 @@ Operation-first CRUD menus become crowded as features grow and do not resemble t
 ## 2026-07-15 — Introduce application workflows and a persistence boundary
 
 Cross-feature operations are coordinated under `Services/Workflows` so terminal screens remain presentation-focused. Persistence now depends on `IGameDataStore`, and the JSON implementation accepts an explicit path to support tests and future hosts such as Blazor.
+
+## ADR-009 — Ordered Milestones and Optional Boss Encounters
+
+**Decision:** Projects may contain ordered Milestones. A Quest may optionally belong to one Milestone in the same Project. Only one Milestone may be active per Project. Boss Encounters are separate optional entities linked to a Milestone.
+
+**Reasoning:** Milestones provide a chapter-like progression without forcing complexity on small Projects. Bosses remain presentation and workflow concepts rather than introducing a premature turn-based combat system.
+
+**Consequences:** Quest completion can trigger Milestone completion, Boss unlocks, next-Milestone activation, and Project completion. Domain events remain conceptual until a real event consumer exists.

@@ -76,3 +76,12 @@ The domain uses real-world terminology. RPG metaphors belong to the UI. For exam
 - Project deletion may remove quest associations, including archived quests, to preserve referential integrity.
 - Quests may only be assigned to projects in Created or Active status.
 - Project progress ignores archived quests.
+
+
+## Milestones
+
+A Milestone is an ordered, optional Project chapter. It always belongs to a Project, may contain Quests, may define a quest-count requirement, and may expose reward metadata. Only one Milestone can be active per Project.
+
+## Boss Encounters
+
+A Boss Encounter is an optional challenge linked to one Milestone. Completing the Milestone requirements unlocks the Boss. Defeating it completes the Milestone; a final Boss may complete the Project. Phase 4 intentionally does not introduce a full combat engine.

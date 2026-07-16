@@ -1,3 +1,4 @@
+using LevelUp.Domain.Milestones;
 using LevelUp.Domain.Quests;
 using LevelUp.UI.Components.Shared;
 using LevelUp.UI.Infrastructure.Themes;
@@ -12,11 +13,13 @@ public sealed class ProjectCard
     private readonly ProjectModel project;
     private readonly IReadOnlyCollection<QuestModel> quests;
     private readonly decimal progress;
+    private readonly IReadOnlyCollection<Milestone> milestones;
 
     public ProjectCard(
         ProjectModel project,
         IEnumerable<QuestModel> quests,
-        decimal progress
+        decimal progress,
+        IEnumerable<Milestone>? milestones = null
     )
     {
         ArgumentNullException.ThrowIfNull(project);
@@ -25,6 +28,7 @@ public sealed class ProjectCard
         this.project = project;
         this.quests = quests.ToList();
         this.progress = progress;
+        this.milestones = milestones?.ToList() ?? [];
     }
 
     public Panel Build()
@@ -50,6 +54,14 @@ public sealed class ProjectCard
             LevelUpTheme.Success
         );
         card.AddText("Quests", $"{completed}/{quests.Count}");
+
+        int completedMilestones = milestones.Count(
+            milestone => milestone.Status == MilestoneStatus.Completed
+        );
+        card.AddText(
+            "Milestones",
+            $"{completedMilestones}/{milestones.Count}"
+        );
         card.AddText(
             "Unlocked title",
             project.UnlockedTitle,

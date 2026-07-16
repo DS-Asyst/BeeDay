@@ -1,6 +1,8 @@
 using LevelUp.Domain;
+using LevelUp.Services.Bosses;
 using LevelUp.Services.Character;
 using LevelUp.Services.Habits;
+using LevelUp.Services.Milestones;
 using LevelUp.Services.Persistence;
 using LevelUp.Services.Projects;
 using LevelUp.Services.Quests;
@@ -39,6 +41,8 @@ catch (CorruptedSaveException exception)
 CharacterModel character;
 ProjectService projectService;
 QuestService questService;
+MilestoneService milestoneService;
+BossService bossService;
 bool isNewGame = loadedGame is null;
 
 if (loadedGame is not null)
@@ -47,6 +51,8 @@ if (loadedGame is not null)
     habitService.LoadHabits(loadedGame.Habits);
     projectService = new ProjectService(loadedGame.Projects);
     questService = new QuestService(loadedGame.Quests);
+    milestoneService = new MilestoneService(loadedGame.Milestones);
+    bossService = new BossService(loadedGame.Bosses);
 }
 else
 {
@@ -54,6 +60,8 @@ else
     character = characterCreationScreen.CreateCharacter();
     projectService = new ProjectService();
     questService = new QuestService();
+    milestoneService = new MilestoneService();
+    bossService = new BossService();
 }
 
 GameStateService gameStateService = new(
@@ -61,6 +69,8 @@ GameStateService gameStateService = new(
     habitService,
     projectService,
     questService,
+    milestoneService,
+    bossService,
     character
 );
 
@@ -72,10 +82,30 @@ if (isNewGame)
 QuestWorkflowService questWorkflowService = new(
     questService,
     projectService,
+    milestoneService,
+    bossService,
     gameStateService
 );
 
 ProjectWorkflowService projectWorkflowService = new(
+    projectService,
+    questService,
+    milestoneService,
+    bossService,
+    gameStateService
+);
+
+MilestoneWorkflowService milestoneWorkflowService = new(
+    milestoneService,
+    questService,
+    bossService,
+    gameStateService
+);
+
+
+BossWorkflowService bossWorkflowService = new(
+    bossService,
+    milestoneService,
     projectService,
     questService,
     gameStateService
@@ -95,7 +125,19 @@ QuestScreen questScreen = new(
     projectService,
     inputReader,
     gameStateService,
-    questWorkflowService
+    questWorkflowService,
+    milestoneService
+);
+
+MilestoneScreen milestoneScreen = new(
+    projectService,
+    questService,
+    milestoneService,
+    bossService,
+    milestoneWorkflowService,
+    bossWorkflowService,
+    gameStateService,
+    inputReader
 );
 
 ProjectScreen projectScreen = new(
@@ -103,8 +145,11 @@ ProjectScreen projectScreen = new(
     questService,
     inputReader,
     gameStateService,
-    projectWorkflowService
+    projectWorkflowService,
+    milestoneService,
+    milestoneScreen
 );
+
 
 GoldScreen goldScreen = new(inputReader);
 
@@ -114,6 +159,7 @@ MainMenuScreen mainMenuScreen = new(
     trainingScreen,
     questScreen,
     projectScreen,
+    milestoneScreen,
     goldScreen,
     character,
     gameStateService
