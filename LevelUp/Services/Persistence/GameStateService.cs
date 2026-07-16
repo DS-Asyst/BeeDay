@@ -1,4 +1,5 @@
 using LevelUp.Domain;
+using LevelUp.Services.Achievements;
 using LevelUp.Services.Books;
 using LevelUp.Services.Bosses;
 using LevelUp.Services.Habits;
@@ -20,6 +21,7 @@ public sealed class GameStateService
     private readonly BossService bossService;
     private readonly BookService bookService;
     private readonly WalletService walletService;
+    private readonly AchievementService achievementService;
     private readonly CharacterModel character;
 
     public GameStateService(
@@ -33,6 +35,33 @@ public sealed class GameStateService
         WalletService walletService,
         CharacterModel character
     )
+        : this(
+            dataStore,
+            habitService,
+            projectService,
+            questService,
+            milestoneService,
+            bossService,
+            bookService,
+            walletService,
+            new AchievementService(),
+            character
+        )
+    {
+    }
+
+    public GameStateService(
+        IGameDataStore dataStore,
+        HabitService habitService,
+        ProjectService projectService,
+        QuestService questService,
+        MilestoneService milestoneService,
+        BossService bossService,
+        BookService bookService,
+        WalletService walletService,
+        AchievementService achievementService,
+        CharacterModel character
+    )
     {
         this.dataStore = dataStore;
         this.habitService = habitService;
@@ -42,6 +71,7 @@ public sealed class GameStateService
         this.bossService = bossService;
         this.bookService = bookService;
         this.walletService = walletService;
+        this.achievementService = achievementService;
         this.character = character;
     }
 
@@ -56,7 +86,8 @@ public sealed class GameStateService
             Milestones = milestoneService.GetAll().ToList(),
             Bosses = bossService.GetAll().ToList(),
             Books = bookService.GetAll().ToList(),
-            WalletTransactions = walletService.GetAll().ToList()
+            WalletTransactions = walletService.GetAll().ToList(),
+            Achievements = achievementService.GetAll().ToList()
         };
     }
 

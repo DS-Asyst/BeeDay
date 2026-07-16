@@ -5,8 +5,13 @@ namespace LevelUp.Domain.Bosses;
 public sealed class BossEncounter
 {
     public int Id { get; set; }
+
+    [JsonInclude]
     public int ProjectId { get; private set; }
-    public int MilestoneId { get; private set; }
+
+    // Mantido para leitura de saves antigos. Novos chefes pertencem ao Projeto.
+    [JsonInclude]
+    public int? MilestoneId { get; private set; }
 
     [JsonInclude]
     public string Name { get; private set; } = string.Empty;
@@ -15,7 +20,10 @@ public sealed class BossEncounter
     public string Description { get; private set; } = string.Empty;
 
     [JsonInclude]
-    public bool IsFinalBoss { get; private set; }
+    public string AchievementPrefix { get; private set; } = string.Empty;
+
+    [JsonInclude]
+    public bool IsFinalBoss { get; private set; } = true;
 
     [JsonInclude]
     public BossStatus Status { get; private set; } = BossStatus.Locked;
@@ -33,13 +41,12 @@ public sealed class BossEncounter
 
     public void Configure(
         int projectId,
-        int milestoneId,
         string name,
         string description,
-        bool isFinalBoss = false
+        string achievementPrefix
     )
     {
-        if (ProjectId > 0 || MilestoneId > 0)
+        if (ProjectId > 0)
         {
             throw new InvalidOperationException("O encontro com o chefe já foi configurado.");
         }
@@ -49,18 +56,47 @@ public sealed class BossEncounter
             throw new ArgumentOutOfRangeException(nameof(projectId));
         }
 
-        if (milestoneId <= 0)
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(achievementPrefix);
+
+        ProjectId = projectId;
+        MilestoneId = null;
+        Name = name.Trim();
+        Description = description.Trim();
+        AchievementPrefix = achievementPrefix.Trim();
+        IsFinalBoss = true;
+    }
+
+
+    public void Configure(
+        int projectId,
+        int milestoneId,
+        string name,
+        string description,
+        bool isFinalBoss = false
+    )
+    {
+        Configure(projectId, name, description, "Especialista em");
+        MilestoneId = milestoneId;
+        IsFinalBoss = isFinalBoss;
+    }
+
+    public void UpdateDetails(
+        string name,
+        string description,
+        string achievementPrefix
+    )
+    {
+        if (Status is BossStatus.Defeated or BossStatus.Archived)
         {
-            throw new ArgumentOutOfRangeException(nameof(milestoneId));
+            throw new InvalidOperationException("Chefes derrotados ou arquivados não podem ser alterados.");
         }
 
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
-
-        ProjectId = projectId;
-        MilestoneId = milestoneId;
+        ArgumentException.ThrowIfNullOrWhiteSpace(achievementPrefix);
         Name = name.Trim();
         Description = description.Trim();
-        IsFinalBoss = isFinalBoss;
+        AchievementPrefix = achievementPrefix.Trim();
     }
 
     public void Unlock()

@@ -1,116 +1,37 @@
-# LevelUp Architecture
+# Arquitetura
 
-## Overview
-
-LevelUp is a C# and .NET console application with a feature-oriented domain and a Spectre.Console presentation layer.
-
-```text
-LevelUp/
-├── Domain/
-│   ├── Attributes/
-│   ├── Character/
-│   ├── Habits/
-│   ├── Projects/
-│   ├── Quests/
-│   └── GameData.cs
-├── Services/
-│   ├── Character/
-│   ├── Habits/
-│   ├── Persistence/
-│   ├── Projects/
-│   └── Quests/
-├── UI/
-│   ├── Components/
-│   │   ├── Character/
-│   │   ├── Project/
-│   │   ├── Quest/
-│   │   ├── Shared/
-│   │   └── Training/
-│   ├── Infrastructure/
-│   ├── Layout/
-│   └── Screens/
-├── Data/
-└── docs/
-```
-
-## Layers
+## Camadas
 
 ### Domain
-
-Contains entities, state and business invariants. It does not depend on Spectre.Console, JSON files or screens.
+Entidades, estados, invariantes e cálculos sem dependência da interface.
 
 ### Services
-
-Coordinates domain operations. Services are grouped by feature. `ProjectService` calculates progress and controls automatic completion; `QuestService` manages quest lifecycle and associations.
-
-### Persistence
-
-`SaveService` serializes and loads `GameData`. `GameStateService` is the only component responsible for creating a complete snapshot and requesting persistence.
+Serviços por feature e workflows que coordenam múltiplos domínios.
 
 ### UI
+Telas, componentes, prompts, temas e tradução da experiência para português.
 
-- **Screens** coordinate navigation and user workflows.
-- **Components** render cards and tables.
-- **Infrastructure** centralizes input, messages, themes, icons and panel construction.
-- **Layout** provides reusable low-level layouts such as `StatisticRow`.
+### Persistence
+`IGameDataStore`, `SaveService` e `GameStateService` persistem um snapshot completo em JSON.
 
-## UI Foundation
+## Módulos
 
-`EntityCard` provides the common card structure used by feature-specific components. `StatisticRow` explicitly separates escaped plain text from trusted Spectre.Console markup.
+- Character
+- Habits / Training
+- Projects / Quests / Milestones / Bosses
+- Achievements
+- Books
+- Wallet
 
-```text
-QuestCard / ProjectCard
-          ↓
-      EntityCard
-          ↓
-     StatisticRow
-          ↓
-      PanelBuilder
-```
+## Fluxo de conclusão de projeto
 
-## Dependency Composition
+1. O usuário cria um Projeto com um Chefe final e um prefixo de conquista.
+2. Capítulos e Missões representam o progresso da jornada.
+3. Ao concluir todas as Missões e Capítulos, o Chefe final é desbloqueado.
+4. Ao derrotar o Chefe, o Projeto é concluído.
+5. `AchievementService` gera uma conquista profissional, como `Desenvolvedor ASP.NET Core`.
+6. `GameStateService` persiste o novo estado.
 
-Dependencies are composed manually in `Program.cs`. This keeps the current application simple while preserving clear constructor dependencies. A dependency-injection container may be introduced when additional application hosts are created.
+## Compatibilidade
 
-## Persistence Flow
-
-```text
-Screen action
-    ↓
-Domain service mutation
-    ↓
-GameStateService.Save()
-    ↓
-SaveService.SaveGame()
-    ↓
-Data/save.json
-```
-
-## Future Interfaces
-
-The domain and service layers are designed to be reused by future Blazor, API, desktop or mobile presentation layers.
-
-
-## Phase 4 application workflows
-
-Cross-feature use cases are coordinated by services under `Services/Workflows`. Screens collect input and render results; they do not decide how a completed quest affects its project or when state must be persisted.
-
-Persistence is accessed through `IGameDataStore`. `SaveService` is the JSON implementation and accepts an explicit file path for automated tests. Infrastructure errors are surfaced to the UI instead of writing directly to the console.
-
-The test project covers lifecycle transitions, project progress, archived-quest behavior, and JSON round trips.
-
-
-## Phase 4 Workflows
-
-- `QuestWorkflowService` recalculates Project and Milestone progress after Quest completion.
-- `MilestoneWorkflowService` coordinates manual completion and safe deletion.
-- `BossWorkflowService` completes the linked Milestone, activates the next stage, and attempts Project completion.
-- `GameStateService` persists Projects, Quests, Milestones, Boss Encounters, Habits, and Character state as one snapshot.
-
-## Phase 5 personal modules
-
-`DiaryScreen` groups existing journey features without changing their domain boundaries. `BackpackScreen` acts as a presentation hub and currently delegates to `WalletScreen`.
-
-The Library is independent from Projects and Quests. `ReadingWorkflowService` coordinates book progress, character XP, and persistence. The Wallet is modeled as an appendable transaction ledger with explicit editing and deletion rules and remains independent from game rewards.
-
-`GameStateService` snapshots Books and Wallet transactions alongside the existing state.
+Algumas sobrecargas antigas permanecem temporariamente para leitura de testes e saves anteriores. Novos fluxos devem usar chefes por Projeto e conquistas persistidas.

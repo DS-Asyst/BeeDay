@@ -32,6 +32,25 @@ public sealed class ProjectWorkflowService
         this.gameStateService = gameStateService;
     }
 
+    public Project CreateProject(
+        string name,
+        string description,
+        string bossName,
+        string bossDescription,
+        string achievementPrefix
+    )
+    {
+        Project project = projectService.CreateProject(name, description);
+        bossService.CreateFinalBoss(
+            project,
+            bossName,
+            bossDescription,
+            achievementPrefix
+        );
+        gameStateService.Save();
+        return project;
+    }
+
     public bool DeleteProject(int projectId)
     {
         Project? project = projectService.GetProjectById(projectId);
@@ -54,7 +73,6 @@ public sealed class ProjectWorkflowService
             {
                 questService.RemoveQuestFromMilestone(quest);
             }
-
             questService.RemoveQuestFromProject(quest);
         }
 
@@ -66,18 +84,15 @@ public sealed class ProjectWorkflowService
                     "Projetos com capítulos concluídos não podem ser excluídos. Arquive o projeto."
                 );
             }
-
             milestoneService.Delete(milestone.Id);
         }
 
         bossService.DeleteByProjectId(projectId);
-
         bool deleted = projectService.DeleteProject(projectId);
         if (deleted)
         {
             gameStateService.Save();
         }
-
         return deleted;
     }
 }

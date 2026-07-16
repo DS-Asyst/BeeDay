@@ -1,6 +1,7 @@
+using LevelUp.Domain.Achievements;
 using LevelUp.Domain.Bosses;
-using LevelUp.Domain.Milestones;
 using LevelUp.Domain.Projects;
+using LevelUp.Services.Achievements;
 using LevelUp.Services.Bosses;
 using LevelUp.Services.Milestones;
 using LevelUp.Services.Persistence;
@@ -12,46 +13,55 @@ namespace LevelUp.Services.Workflows;
 public sealed class BossWorkflowService
 {
     private readonly BossService bossService;
-    private readonly MilestoneService milestoneService;
+    private readonly AchievementService achievementService;
     private readonly ProjectService projectService;
     private readonly QuestService questService;
+    private readonly MilestoneService milestoneService;
     private readonly GameStateService gameStateService;
 
     public BossWorkflowService(
         BossService bossService,
-        MilestoneService milestoneService,
+        AchievementService achievementService,
         ProjectService projectService,
         QuestService questService,
+        MilestoneService milestoneService,
         GameStateService gameStateService
     )
     {
         this.bossService = bossService;
-        this.milestoneService = milestoneService;
+        this.achievementService = achievementService;
         this.projectService = projectService;
         this.questService = questService;
+        this.milestoneService = milestoneService;
         this.gameStateService = gameStateService;
     }
 
-    public BossDefeatResult Defeat(int milestoneId)
+    public BossDefeatResult Defeat(int projectId)
     {
-        Milestone milestone = milestoneService.GetById(milestoneId)
-            ?? throw new InvalidOperationException("O capítulo não foi encontrado.");
-        BossEncounter boss = bossService.GetByMilestoneId(milestoneId)
-            ?? throw new InvalidOperationException("O capítulo não possui encontro com chefe.");
-        Project project = projectService.GetProjectById(milestone.ProjectId)
+        Project project = projectService.GetProjectById(projectId)
             ?? throw new InvalidOperationException("O projeto não foi encontrado.");
+        BossEncounter boss = bossService.GetByProjectId(projectId)
+            ?? throw new InvalidOperationException("O projeto não possui chefe final.");
 
-        bossService.Defeat(boss);
-        milestone.Complete();
-        Milestone? next = milestoneService.UnlockAndActivateNext(milestone);
-
-        bool projectCompleted = projectService.TryCompleteProject(
-                project,
-                questService.GetAllQuests(),
-                milestoneService.GetByProjectId(project.Id)
+        if (!projectService.AreCompletionRequirementsMet(
+            project,
+            questService.GetAllQuests(),
+            milestoneService.GetByProjectId(project.Id)
+        ))
+        {
+            throw new InvalidOperationException(
+                "Conclua todas as missões e capítulos antes de enfrentar o chefe final."
             );
+        }
 
+        if (boss.Status == BossStatus.Locked)
+        {
+            boss.Unlock();
+        }
+        bossService.Defeat(boss);
+        projectService.CompleteProject(project);
+        Achievement achievement = achievementService.UnlockProjectAchievement(project, boss);
         gameStateService.Save();
-        return new BossDefeatResult(boss, milestone, next, project, projectCompleted);
+        return new BossDefeatResult(boss, project, achievement, true);
     }
 }

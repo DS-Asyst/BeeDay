@@ -10,6 +10,7 @@ public sealed class MainMenuScreen
     private readonly DiaryScreen diaryScreen;
     private readonly LibraryScreen libraryScreen;
     private readonly BackpackScreen backpackScreen;
+    private readonly SettingsScreen settingsScreen;
     private readonly CharacterModel character;
     private readonly GameStateService gameStateService;
 
@@ -19,6 +20,7 @@ public sealed class MainMenuScreen
         DiaryScreen diaryScreen,
         LibraryScreen libraryScreen,
         BackpackScreen backpackScreen,
+        SettingsScreen settingsScreen,
         CharacterModel character,
         GameStateService gameStateService
     )
@@ -28,6 +30,7 @@ public sealed class MainMenuScreen
         this.diaryScreen = diaryScreen;
         this.libraryScreen = libraryScreen;
         this.backpackScreen = backpackScreen;
+        this.settingsScreen = settingsScreen;
         this.character = character;
         this.gameStateService = gameStateService;
     }
@@ -35,11 +38,9 @@ public sealed class MainMenuScreen
     public void Show()
     {
         bool running = true;
-
         while (running)
         {
             ConsoleHelper.ShowHeader("Level Up");
-
             string option = inputReader.ReadSelection(
                 "Escolha uma opção:",
                 new[]
@@ -48,36 +49,27 @@ public sealed class MainMenuScreen
                     "Diário",
                     "Biblioteca",
                     "Mochila",
+                    "Configurações",
+                    "Salvar jogo",
                     "Sair"
                 },
                 choice => choice
             );
-
             try
             {
                 switch (option)
                 {
-                    case "Personagem":
-                        characterScreen.Show(character);
+                    case "Personagem": characterScreen.Show(character); break;
+                    case "Diário": diaryScreen.Show(); break;
+                    case "Biblioteca": libraryScreen.Show(); break;
+                    case "Mochila": backpackScreen.Show(); break;
+                    case "Configurações": settingsScreen.Show(); break;
+                    case "Salvar jogo":
+                        gameStateService.Save();
+                        ConsoleHelper.ShowSuccess("Jogo salvo com sucesso.");
                         inputReader.WaitForContinue();
                         break;
-
-                    case "Diário":
-                        diaryScreen.Show();
-                        break;
-
-                    case "Biblioteca":
-                        libraryScreen.Show();
-                        break;
-
-                    case "Mochila":
-                        backpackScreen.Show();
-                        break;
-
-                    case "Sair":
-                        gameStateService.Save();
-                        running = false;
-                        break;
+                    case "Sair": gameStateService.Save(); running = false; break;
                 }
             }
             catch (InvalidOperationException exception)
@@ -87,13 +79,10 @@ public sealed class MainMenuScreen
             }
             catch (IOException exception)
             {
-                ConsoleHelper.ShowError(
-                    $"Ocorreu um erro de armazenamento: {exception.Message}"
-                );
+                ConsoleHelper.ShowError($"Ocorreu um erro de armazenamento: {exception.Message}");
                 inputReader.WaitForContinue();
             }
         }
-
         ConsoleHelper.ShowHeader("Até breve");
     }
 }

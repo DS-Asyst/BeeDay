@@ -1,6 +1,8 @@
 using LevelUp.Domain;
+using LevelUp.Domain.Achievements;
 using LevelUp.Domain.Bosses;
 using LevelUp.Domain.Milestones;
+using LevelUp.Services.Achievements;
 using LevelUp.Services.Books;
 using LevelUp.Services.Bosses;
 using LevelUp.Services.Habits;
@@ -20,231 +22,79 @@ public sealed class MilestoneWorkflowTests
     public void CompletingLastQuestCompletesMilestoneAndActivatesNext()
     {
         TestContext context = new();
-
-        var project = context.Projects.CreateProject(
-            "Project",
-            "Description",
-            "Reward"
-        );
-
+        var project = context.Projects.CreateProject("Project", "Description");
         context.Projects.ActivateProject(project);
-
-        var first = context.Milestones.CreateMilestone(
-            project,
-            "First",
-            "Description",
-            1
-        );
-
-        var second = context.Milestones.CreateMilestone(
-            project,
-            "Second",
-            "Description",
-            2
-        );
-
+        context.Bosses.CreateFinalBoss(project, "Boss", "Description", "Developer");
+        var first = context.Milestones.CreateMilestone(project, "First", "Description", 1);
+        var second = context.Milestones.CreateMilestone(project, "Second", "Description", 2);
         context.Milestones.Activate(first);
-
-        var quest = context.Quests.CreateQuest(
-            "Quest",
-            "Description",
-            project
-        );
-
-        context.Quests.AssignQuestToMilestone(
-            quest,
-            first
-        );
-
+        var quest = context.Quests.CreateQuest("Quest", "Description", project);
+        context.Quests.AssignQuestToMilestone(quest, first);
         context.Quests.ActivateQuest(quest);
 
-        var result =
-            context.QuestWorkflow.CompleteQuest(
-                quest.Id
-            );
+        var result = context.QuestWorkflow.CompleteQuest(quest.Id);
 
         Assert.True(result.MilestoneCompleted);
-
-        Assert.Equal(
-            MilestoneStatus.Completed,
-            first.Status
-        );
-
-        Assert.Equal(
-            MilestoneStatus.Active,
-            second.Status
-        );
-
-        Assert.Equal(
-            second.Id,
-            result.ActivatedMilestone?.Id
-        );
+        Assert.Equal(MilestoneStatus.Completed, first.Status);
+        Assert.Equal(MilestoneStatus.Active, second.Status);
     }
 
     [Fact]
-    public void CompletingBossMilestoneRequirementsUnlocksBossWithoutCompletingMilestone()
+    public void CompletingAllRequirementsUnlocksFinalBoss()
     {
         TestContext context = new();
-
-        var project = context.Projects.CreateProject(
-            "Project",
-            "Description",
-            "Reward"
-        );
-
+        var project = context.Projects.CreateProject("Project", "Description");
         context.Projects.ActivateProject(project);
-
-        var milestone =
-            context.Milestones.CreateMilestone(
-                project,
-                "Milestone",
-                "Description",
-                1
-            );
-
+        var boss = context.Bosses.CreateFinalBoss(project, "Boss", "Description", "Developer");
+        var milestone = context.Milestones.CreateMilestone(project, "Chapter", "Description", 1);
         context.Milestones.Activate(milestone);
-
-        var boss = context.Bosses.Create(
-            project,
-            milestone,
-            "Boss",
-            "Description",
-            true
-        );
-
-        var quest = context.Quests.CreateQuest(
-            "Quest",
-            "Description",
-            project
-        );
-
-        context.Quests.AssignQuestToMilestone(
-            quest,
-            milestone
-        );
-
+        var quest = context.Quests.CreateQuest("Quest", "Description", project);
+        context.Quests.AssignQuestToMilestone(quest, milestone);
         context.Quests.ActivateQuest(quest);
 
-        var result =
-            context.QuestWorkflow.CompleteQuest(
-                quest.Id
-            );
+        var result = context.QuestWorkflow.CompleteQuest(quest.Id);
 
-        Assert.False(result.MilestoneCompleted);
-
-        Assert.Equal(
-            MilestoneStatus.Active,
-            milestone.Status
-        );
-
-        Assert.Equal(
-            BossStatus.Available,
-            boss.Status
-        );
-
-        Assert.Equal(
-            boss.Id,
-            result.UnlockedBoss?.Id
-        );
+        Assert.Equal(BossStatus.Available, boss.Status);
+        Assert.Equal(boss.Id, result.UnlockedBoss?.Id);
     }
 
     [Fact]
-    public void DefeatingAvailableBossCompletesMilestoneAndProject()
+    public void DefeatingFinalBossCompletesProjectAndUnlocksAchievement()
     {
         TestContext context = new();
-
-        var project = context.Projects.CreateProject(
-            "Project",
-            "Description",
-            "Reward"
-        );
-
+        var project = context.Projects.CreateProject("ASP.NET Roadmap", "Description");
         context.Projects.ActivateProject(project);
-
-        var milestone =
-            context.Milestones.CreateMilestone(
-                project,
-                "Milestone",
-                "Description",
-                1
-            );
-
-        context.Milestones.Activate(milestone);
-
-        var boss = context.Bosses.Create(
+        var boss = context.Bosses.CreateFinalBoss(
             project,
-            milestone,
-            "Boss",
+            "ASP.NET Core",
             "Description",
-            true
+            "Desenvolvedor"
         );
-
-        var quest = context.Quests.CreateQuest(
-            "Quest",
-            "Description",
-            project
-        );
-
-        context.Quests.AssignQuestToMilestone(
-            quest,
-            milestone
-        );
-
+        var milestone = context.Milestones.CreateMilestone(project, "Chapter", "Description", 1);
+        context.Milestones.Activate(milestone);
+        var quest = context.Quests.CreateQuest("Quest", "Description", project);
+        context.Quests.AssignQuestToMilestone(quest, milestone);
         context.Quests.ActivateQuest(quest);
+        context.QuestWorkflow.CompleteQuest(quest.Id);
 
-        context.QuestWorkflow.CompleteQuest(
-            quest.Id
-        );
+        var result = context.BossWorkflow.Defeat(project.Id);
 
-        var result =
-            context.BossWorkflow.Defeat(
-                milestone.Id
-            );
-
-        Assert.Equal(
-            BossStatus.Defeated,
-            boss.Status
-        );
-
-        Assert.Equal(
-            MilestoneStatus.Completed,
-            milestone.Status
-        );
-
+        Assert.Equal(BossStatus.Defeated, boss.Status);
         Assert.True(result.ProjectCompleted);
+        Assert.Equal(AchievementStatus.Unlocked, result.Achievement.Status);
+        Assert.Equal("Desenvolvedor ASP.NET Core", result.Achievement.Name);
     }
 
     private sealed class TestContext
     {
         private readonly InMemoryStore store = new();
-
-        public ProjectService Projects { get; } =
-            new();
-
-        public QuestService Quests { get; } =
-            new();
-
-        public MilestoneService Milestones { get; } =
-            new();
-
-        public BossService Bosses { get; } =
-            new();
-
-        public BookService Books { get; } =
-            new();
-
-        public WalletService Wallet { get; } =
-            new();
-
-        public QuestWorkflowService QuestWorkflow
-        {
-            get;
-        }
-
-        public BossWorkflowService BossWorkflow
-        {
-            get;
-        }
+        public ProjectService Projects { get; } = new();
+        public QuestService Quests { get; } = new();
+        public MilestoneService Milestones { get; } = new();
+        public BossService Bosses { get; } = new();
+        public AchievementService Achievements { get; } = new();
+        public QuestWorkflowService QuestWorkflow { get; }
+        public BossWorkflowService BossWorkflow { get; }
 
         public TestContext()
         {
@@ -255,44 +105,33 @@ public sealed class MilestoneWorkflowTests
                 Quests,
                 Milestones,
                 Bosses,
-                Books,
-                Wallet,
+                new BookService(),
+                new WalletService(),
+                Achievements,
                 new LevelUp.Domain.Character.Character()
             );
-
-            QuestWorkflow =
-                new QuestWorkflowService(
-                    Quests,
-                    Projects,
-                    Milestones,
-                    Bosses,
-                    state
-                );
-
-            BossWorkflow =
-                new BossWorkflowService(
-                    Bosses,
-                    Milestones,
-                    Projects,
-                    Quests,
-                    state
-                );
+            QuestWorkflow = new QuestWorkflowService(
+                Quests,
+                Projects,
+                Milestones,
+                Bosses,
+                state
+            );
+            BossWorkflow = new BossWorkflowService(
+                Bosses,
+                Achievements,
+                Projects,
+                Quests,
+                Milestones,
+                state
+            );
         }
     }
 
-    private sealed class InMemoryStore
-        : IGameDataStore
+    private sealed class InMemoryStore : IGameDataStore
     {
         public GameData? Data { get; private set; }
-
-        public GameData? Load()
-        {
-            return Data;
-        }
-
-        public void Save(GameData gameData)
-        {
-            Data = gameData;
-        }
+        public GameData? Load() => Data;
+        public void Save(GameData gameData) => Data = gameData;
     }
 }

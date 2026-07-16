@@ -1,95 +1,34 @@
-# LevelUp Domain
+# Domínio
 
-## Core Model
+## Personagem
 
-LevelUp models real-world productivity with RPG-inspired presentation.
+- `CharacterClass`: identidade escolhida na criação e sem efeito mecânico nesta fase.
+- `CharacterRank`: título automático derivado do nível.
+- faixas: Aprendiz, Aventureiro, Discípulo, Adepto, Especialista, Mestre e Lenda.
 
-```text
-Character
-├── Attributes
-├── Habits
-├── Quests
-└── Projects
-    └── Quests
-```
+## Reconhecimento
 
-## Character
+- `Achievement`: conquista persistida e histórica.
+- conquistas de Projeto são únicas pelo identificador do Projeto.
+- o nome é composto por `AchievementPrefix + Boss.Name`.
 
-Represents user progression, including experience, level and attributes.
+## Projetos
 
-## Habit
+- todo novo Projeto possui um Chefe final obrigatório;
+- Capítulos não possuem Chefes;
+- Missões podem pertencer opcionalmente a um Projeto e a um Capítulo compatível;
+- o Chefe é desbloqueado somente depois de todos os requisitos do Projeto;
+- derrotar o Chefe conclui o Projeto.
 
-Represents a repeatable activity. The UI presents a Habit as Training. Completing a habit may grant character and attribute experience.
+## Biblioteca
 
-## Quest
+- máximo de dois livros em andamento;
+- progresso por página e histórico por data;
+- experiência concedida somente por avanço positivo.
 
-Represents a one-time task.
+## Carteira
 
-Rules:
-
-- may be independent or associated with one Project;
-- follows `Created → Active → Completed` lifecycle;
-- may be archived;
-- stores creation, activation, completion and archive timestamps;
-- can be edited while not archived;
-- completion contributes to project progress.
-
-## Project
-
-Represents a long-term objective composed of zero or more quests.
-
-Rules:
-
-- follows `Created → Active → Completed` lifecycle;
-- may be archived;
-- stores an unlocked title as its current reward metadata;
-- progress is derived and never persisted;
-- archived quests do not participate in progress;
-- a project with at least one valid quest completes automatically when every valid quest is completed;
-- only an active project can complete automatically.
-
-## Project Progress
-
-```text
-Completed non-archived quests / Total non-archived quests
-```
-
-Examples:
-
-- 0 valid quests → 0%;
-- 1 of 4 completed → 25%;
-- 4 of 4 completed → 100% and automatic completion for an active project.
-
-## Associations
-
-Quests store an optional `ProjectId` instead of a direct object reference. This keeps JSON persistence simple and avoids circular serialization graphs.
-
-## Domain and Presentation
-
-The domain uses real-world terminology. RPG metaphors belong to the UI. For example, Habit remains the domain entity while the UI calls it Training.
-
-
-## Phase 4 hardening rules
-
-- Archived projects and quests cannot be edited.
-- Archived quests cannot be assigned to another project.
-- Project deletion may remove quest associations, including archived quests, to preserve referential integrity.
-- Quests may only be assigned to projects in Created or Active status.
-- Project progress ignores archived quests.
-
-
-## Milestones
-
-A Milestone is an ordered, optional Project chapter. It always belongs to a Project, may contain Quests, may define a quest-count requirement, and may expose reward metadata. Only one Milestone can be active per Project.
-
-## Boss Encounters
-
-A Boss Encounter is an optional challenge linked to one Milestone. Completing the Milestone requirements unlocks the Boss. Defeating it completes the Milestone; a final Boss may complete the Project. Phase 4 intentionally does not introduce a full combat engine.
-
-## Books
-
-A Book is independent from Projects and Quests. It stores title, author, total pages, current page, lifecycle status, and dated reading progress entries. At most two Books may be in the Reading state at the same time. Newly registered pages grant character XP through `ReadingWorkflowService`.
-
-## Wallet
-
-Wallet uses a transaction ledger. Deposits increase the balance; withdrawals decrease it and require a justification. Transactions preserve their occurrence date and update timestamp. The service rejects withdrawals beyond the available balance and mutations that would result in a negative balance.
+- depósitos e retiradas representam dinheiro real;
+- retiradas exigem justificativa;
+- operações não podem produzir saldo negativo;
+- a Carteira não concede moeda fictícia.

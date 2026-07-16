@@ -3,6 +3,7 @@ using LevelUp.Domain.Quests;
 using LevelUp.Services.Bosses;
 using LevelUp.Services.Milestones;
 using LevelUp.Services.Persistence;
+using LevelUp.Services.Projects;
 using LevelUp.Services.Quests;
 
 namespace LevelUp.Services.Workflows;
@@ -12,18 +13,21 @@ public sealed class MilestoneWorkflowService
     private readonly MilestoneService milestoneService;
     private readonly QuestService questService;
     private readonly BossService bossService;
+    private readonly ProjectService projectService;
     private readonly GameStateService gameStateService;
 
     public MilestoneWorkflowService(
         MilestoneService milestoneService,
         QuestService questService,
         BossService bossService,
+        ProjectService projectService,
         GameStateService gameStateService
     )
     {
         this.milestoneService = milestoneService;
         this.questService = questService;
         this.bossService = bossService;
+        this.projectService = projectService;
         this.gameStateService = gameStateService;
     }
 
@@ -31,23 +35,17 @@ public sealed class MilestoneWorkflowService
     {
         Milestone milestone = milestoneService.GetById(milestoneId)
             ?? throw new InvalidOperationException("O capítulo não foi encontrado.");
+        milestoneService.CompleteManually(milestone, questService.GetAllQuests());
+        milestoneService.UnlockAndActivateNext(milestone);
 
-        var boss = bossService.GetByMilestoneId(milestone.Id);
-        if (boss is not null)
+        var project = projectService.GetProjectById(milestone.ProjectId);
+        if (project is not null)
         {
-            if (milestone.Status != MilestoneStatus.Active)
-            {
-                throw new InvalidOperationException(
-                    "O capítulo precisa estar ativo antes que seu chefe seja desbloqueado."
-                );
-            }
-
-            bossService.TryUnlockForMilestoneRequirement(milestone, requirementsMet: true);
-        }
-        else
-        {
-            milestoneService.CompleteManually(milestone, questService.GetAllQuests());
-            milestoneService.UnlockAndActivateNext(milestone);
+            bossService.TryUnlockForProject(
+                project,
+                questService.GetAllQuests(),
+                milestoneService.GetByProjectId(project.Id)
+            );
         }
 
         gameStateService.Save();
@@ -74,14 +72,11 @@ public sealed class MilestoneWorkflowService
             questService.RemoveQuestFromMilestone(quest);
         }
 
-        bossService.DeleteByMilestoneId(milestoneId);
         bool deleted = milestoneService.Delete(milestoneId);
-
         if (deleted)
         {
             gameStateService.Save();
         }
-
         return deleted;
     }
 }
