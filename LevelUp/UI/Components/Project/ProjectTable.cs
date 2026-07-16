@@ -40,17 +40,17 @@ public sealed class ProjectTable
             Border = TableBorder.Rounded,
             Title = new TableTitle(
                 $"[bold {LevelUpTheme.Boss}]" +
-                $"{UIIcons.Project} Project Board[/]"
+                $"{UIIcons.Project} Painel de Projetos[/]"
             )
         };
 
         table.AddColumn(new TableColumn("[bold]ID[/]").Centered());
-        table.AddColumn(new TableColumn("[bold]Project[/]"));
+        table.AddColumn(new TableColumn("[bold]Projeto[/]"));
         table.AddColumn(new TableColumn("[bold]Status[/]"));
-        table.AddColumn(new TableColumn("[bold]Quests[/]").Centered());
-        table.AddColumn(new TableColumn("[bold]Progress[/]").Centered());
-        table.AddColumn(new TableColumn("[bold]Milestones[/]").Centered());
-        table.AddColumn(new TableColumn("[bold]Unlocked Title[/]"));
+        table.AddColumn(new TableColumn("[bold]Missões[/]").Centered());
+        table.AddColumn(new TableColumn("[bold]Progresso[/]").Centered());
+        table.AddColumn(new TableColumn("[bold]Capítulos[/]").Centered());
+        table.AddColumn(new TableColumn("[bold]Título desbloqueado[/]"));
 
         foreach (ProjectModel project in projects)
         {

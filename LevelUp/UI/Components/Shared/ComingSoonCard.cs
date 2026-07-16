@@ -23,7 +23,7 @@ public sealed class ComingSoonCard
         );
 
         return PanelBuilder.Build(
-            title: "Coming Soon",
+            title: "Em breve",
             content: content,
             icon: UIIcons.Information,
             expand: true

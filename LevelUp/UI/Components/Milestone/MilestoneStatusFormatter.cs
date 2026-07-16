@@ -9,11 +9,11 @@ public static class MilestoneStatusFormatter
     {
         return status switch
         {
-            MilestoneStatus.Locked => $"[{LevelUpTheme.MutedText}]× Locked[/]",
-            MilestoneStatus.Created => $"[{LevelUpTheme.MutedText}]{UIIcons.Created} Created[/]",
-            MilestoneStatus.Active => $"[{LevelUpTheme.Information}]{UIIcons.Active} Active[/]",
-            MilestoneStatus.Completed => $"[{LevelUpTheme.Success}]{UIIcons.Completed} Completed[/]",
-            MilestoneStatus.Archived => $"[{LevelUpTheme.MutedText}]{UIIcons.Archived} Archived[/]",
+            MilestoneStatus.Locked => $"[{LevelUpTheme.MutedText}]× Bloqueado[/]",
+            MilestoneStatus.Created => $"[{LevelUpTheme.MutedText}]{UIIcons.Created} Criado[/]",
+            MilestoneStatus.Active => $"[{LevelUpTheme.Information}]{UIIcons.Active} Ativo[/]",
+            MilestoneStatus.Completed => $"[{LevelUpTheme.Success}]{UIIcons.Completed} Concluído[/]",
+            MilestoneStatus.Archived => $"[{LevelUpTheme.MutedText}]{UIIcons.Archived} Arquivado[/]",
             _ => status.ToString()
         };
     }

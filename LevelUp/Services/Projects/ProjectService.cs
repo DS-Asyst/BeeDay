@@ -216,7 +216,7 @@ public sealed class ProjectService
         ))
         {
             throw new InvalidOperationException(
-                "The project is not managed by this service."
+                "O projeto não é gerenciado por este serviço."
             );
         }
     }

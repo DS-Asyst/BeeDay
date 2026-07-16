@@ -30,15 +30,15 @@ public sealed class TrainingTable
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Title[/]")
+            new TableColumn("[bold]Título[/]")
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Attribute[/]")
+            new TableColumn("[bold]Atributo[/]")
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Duration[/]").Centered()
+            new TableColumn("[bold]Duração[/]").Centered()
         );
 
         table.AddColumn(
@@ -46,11 +46,11 @@ public sealed class TrainingTable
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Attribute XP[/]").Centered()
+            new TableColumn("[bold]XP do atributo[/]").Centered()
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Completions[/]").Centered()
+            new TableColumn("[bold]Conclusões[/]").Centered()
         );
 
         foreach (Habit habit in _habits)

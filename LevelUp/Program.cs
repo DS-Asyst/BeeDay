@@ -31,8 +31,8 @@ try
 catch (CorruptedSaveException exception)
 {
     ConsoleHelper.ShowWarning(
-        "The save file was corrupted. " +
-        $"A backup was created at: {exception.BackupPath}"
+        "O arquivo de salvamento estava corrompido. " +
+        $"Um backup foi criado em: {exception.BackupPath}"
     );
 
     loadedGame = null;

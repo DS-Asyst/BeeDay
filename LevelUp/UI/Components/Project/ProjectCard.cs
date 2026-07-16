@@ -52,31 +52,31 @@ public sealed class ProjectCard
             "Status",
             ProjectStatusFormatter.Format(project.Status)
         );
-        card.AddText("Description", project.Description);
+        card.AddText("Descrição", project.Description);
         card.AddText(
-            "Progress",
+            "Progresso",
             $"{progress:0.##}%",
             LevelUpTheme.Success
         );
-        card.AddText("Quests", $"{completedQuests}/{quests.Count}");
+        card.AddText("Missões", $"{completedQuests}/{quests.Count}");
         card.AddText(
-            "Milestones",
+            "Capítulos",
             $"{completedMilestones}/{milestones.Count}"
         );
         card.AddText(
-            "Unlocked title",
+            "Título desbloqueado",
             project.UnlockedTitle,
             LevelUpTheme.Gold
         );
         card.AddText(
-            "Created",
+            "Criado em",
             project.CreatedAt.ToString("dd/MM/yyyy HH:mm")
         );
 
         if (project.CompletedAt is not null)
         {
             card.AddText(
-                "Completed",
+                "Concluído em",
                 project.CompletedAt.Value.ToString("dd/MM/yyyy HH:mm"),
                 LevelUpTheme.Success
             );
@@ -85,7 +85,7 @@ public sealed class ProjectCard
         if (project.ArchivedAt is not null)
         {
             card.AddText(
-                "Archived",
+                "Arquivado em",
                 project.ArchivedAt.Value.ToString("dd/MM/yyyy HH:mm"),
                 LevelUpTheme.MutedText
             );

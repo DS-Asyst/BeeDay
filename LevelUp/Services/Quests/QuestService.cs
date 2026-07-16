@@ -134,7 +134,7 @@ public sealed class QuestService
         if (!milestone.CanAcceptQuests)
         {
             throw new InvalidOperationException(
-                "Quests can only be assigned to created or active milestones."
+                "Missões só podem ser associadas a capítulos criados ou ativos."
             );
         }
 
@@ -166,7 +166,7 @@ public sealed class QuestService
         if (!quests.Any(existingQuest => existingQuest.Id == quest.Id))
         {
             throw new InvalidOperationException(
-                "The quest is not managed by this service."
+                "A missão não é gerenciada por este serviço."
             );
         }
     }
@@ -176,7 +176,7 @@ public sealed class QuestService
         if (project.Status is not (ProjectStatus.Created or ProjectStatus.Active))
         {
             throw new InvalidOperationException(
-                "Quests can only be assigned to created or active projects."
+                "Missões só podem ser associadas a projetos criados ou ativos."
             );
         }
     }

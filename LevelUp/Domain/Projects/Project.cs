@@ -35,7 +35,7 @@ public sealed class Project
         if (!string.IsNullOrWhiteSpace(Name))
         {
             throw new InvalidOperationException(
-                "The project has already been configured."
+                "O projeto já foi configurado."
             );
         }
 
@@ -57,7 +57,7 @@ public sealed class Project
         if (Status != ProjectStatus.Created)
         {
             throw new InvalidOperationException(
-                "Only created projects can be activated."
+                "Apenas projetos criados podem ser ativados."
             );
         }
 
@@ -69,7 +69,7 @@ public sealed class Project
         if (Status != ProjectStatus.Active)
         {
             throw new InvalidOperationException(
-                "Only active projects can be completed."
+                "Apenas projetos ativos podem ser concluídos."
             );
         }
 
@@ -82,7 +82,7 @@ public sealed class Project
         if (Status == ProjectStatus.Archived)
         {
             throw new InvalidOperationException(
-                "The project is already archived."
+                "O projeto já está arquivado."
             );
         }
 
@@ -108,7 +108,7 @@ public sealed class Project
         if (Status == ProjectStatus.Archived)
         {
             throw new InvalidOperationException(
-                "Archived projects cannot be changed."
+                "Projetos arquivados não podem ser alterados."
             );
         }
     }

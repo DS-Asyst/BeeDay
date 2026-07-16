@@ -41,7 +41,7 @@ public sealed class BossEncounter
     {
         if (ProjectId > 0 || MilestoneId > 0)
         {
-            throw new InvalidOperationException("The boss encounter has already been configured.");
+            throw new InvalidOperationException("O encontro com o chefe já foi configurado.");
         }
 
         if (projectId <= 0)
@@ -67,7 +67,7 @@ public sealed class BossEncounter
     {
         if (Status != BossStatus.Locked)
         {
-            throw new InvalidOperationException("Only locked bosses can be unlocked.");
+            throw new InvalidOperationException("Apenas chefes bloqueados podem ser desbloqueados.");
         }
 
         Status = BossStatus.Available;
@@ -78,7 +78,7 @@ public sealed class BossEncounter
     {
         if (Status != BossStatus.Available)
         {
-            throw new InvalidOperationException("Only available bosses can be defeated.");
+            throw new InvalidOperationException("Apenas chefes disponíveis podem ser derrotados.");
         }
 
         Status = BossStatus.Defeated;
@@ -89,7 +89,7 @@ public sealed class BossEncounter
     {
         if (Status == BossStatus.Archived)
         {
-            throw new InvalidOperationException("The boss is already archived.");
+            throw new InvalidOperationException("O chefe já está arquivado.");
         }
 
         Status = BossStatus.Archived;

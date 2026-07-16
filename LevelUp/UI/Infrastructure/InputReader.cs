@@ -13,13 +13,13 @@ public class InputReader
             )
             .PromptStyle("white")
             .ValidationErrorMessage(
-                "[red]The value cannot be empty.[/]"
+                "[red]O valor não pode ficar vazio.[/]"
             )
             .Validate(input =>
             {
                 return string.IsNullOrWhiteSpace(input)
                     ? ValidationResult.Error(
-                        "[red]The value cannot be empty.[/]"
+                        "[red]O valor não pode ficar vazio.[/]"
                     )
                     : ValidationResult.Success();
             })
@@ -34,14 +34,14 @@ public class InputReader
             )
             .PromptStyle("white")
             .ValidationErrorMessage(
-                "[red]Enter an integer greater than zero.[/]"
+                "[red]Digite um número inteiro maior que zero.[/]"
             )
             .Validate(value =>
             {
                 return value > 0
                     ? ValidationResult.Success()
                     : ValidationResult.Error(
-                        "[red]Enter an integer greater than zero.[/]"
+                        "[red]Digite um número inteiro maior que zero.[/]"
                     );
             })
         );
@@ -68,7 +68,7 @@ public class InputReader
             }
 
             ConsoleHelper.ShowError(
-                "Enter a valid decimal number."
+                "Digite um número decimal válido."
             );
         }
     }
@@ -85,8 +85,8 @@ public class InputReader
             )
             .PromptStyle("white")
             .ValidationErrorMessage(
-                $"[red]Choose an option between " +
-                $"{minimumOption} and {maximumOption}.[/]"
+                $"[red]Escolha uma opção entre " +
+                $"{minimumOption} e {maximumOption}.[/]"
             )
             .Validate(option =>
             {
@@ -97,8 +97,8 @@ public class InputReader
                 return isValid
                     ? ValidationResult.Success()
                     : ValidationResult.Error(
-                        $"[red]Choose an option between " +
-                        $"{minimumOption} and {maximumOption}.[/]"
+                        $"[red]Escolha uma opção entre " +
+                        $"{minimumOption} e {maximumOption}.[/]"
                     );
             })
         );

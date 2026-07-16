@@ -7,7 +7,7 @@ public sealed class CorruptedSaveException : Exception
         Exception innerException
     )
         : base(
-            "The save file is incompatible or corrupted.",
+            "O arquivo de salvamento é incompatível ou está corrompido.",
             innerException
         )
     {

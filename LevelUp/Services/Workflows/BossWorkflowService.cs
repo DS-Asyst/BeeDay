@@ -35,11 +35,11 @@ public sealed class BossWorkflowService
     public BossDefeatResult Defeat(int milestoneId)
     {
         Milestone milestone = milestoneService.GetById(milestoneId)
-            ?? throw new InvalidOperationException("The milestone was not found.");
+            ?? throw new InvalidOperationException("O capítulo não foi encontrado.");
         BossEncounter boss = bossService.GetByMilestoneId(milestoneId)
-            ?? throw new InvalidOperationException("The milestone has no boss encounter.");
+            ?? throw new InvalidOperationException("O capítulo não possui encontro com chefe.");
         Project project = projectService.GetProjectById(milestone.ProjectId)
-            ?? throw new InvalidOperationException("The project was not found.");
+            ?? throw new InvalidOperationException("O projeto não foi encontrado.");
 
         bossService.Defeat(boss);
         milestone.Complete();

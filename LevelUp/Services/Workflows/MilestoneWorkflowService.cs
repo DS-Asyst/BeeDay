@@ -30,7 +30,7 @@ public sealed class MilestoneWorkflowService
     public void CompleteManualMilestone(int milestoneId)
     {
         Milestone milestone = milestoneService.GetById(milestoneId)
-            ?? throw new InvalidOperationException("The milestone was not found.");
+            ?? throw new InvalidOperationException("O capítulo não foi encontrado.");
 
         var boss = bossService.GetByMilestoneId(milestone.Id);
         if (boss is not null)
@@ -38,7 +38,7 @@ public sealed class MilestoneWorkflowService
             if (milestone.Status != MilestoneStatus.Active)
             {
                 throw new InvalidOperationException(
-                    "The milestone must be active before its boss can be unlocked."
+                    "O capítulo precisa estar ativo antes que seu chefe seja desbloqueado."
                 );
             }
 
@@ -65,7 +65,7 @@ public sealed class MilestoneWorkflowService
         if (linkedQuests.Any(quest => quest.Status is QuestStatus.Completed or QuestStatus.Archived))
         {
             throw new InvalidOperationException(
-                "Milestones with completed or archived quests cannot be deleted. Archive the milestone instead."
+                "Capítulos com missões concluídas ou arquivadas não podem ser excluídos. Arquive o capítulo."
             );
         }
 

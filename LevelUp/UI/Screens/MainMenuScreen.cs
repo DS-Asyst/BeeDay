@@ -50,13 +50,13 @@ public class MainMenuScreen
                 "Escolha uma opção:",
                 new[]
                 {
-                    "Character",
-                    "Training",
-                    "Quests",
-                    "Projects",
-                    "Milestones",
-                    "Gold",
-                    "Exit"
+                    "Personagem",
+                    "Treinamentos",
+                    "Missões",
+                    "Projetos",
+                    "Capítulos",
+                    "Finanças",
+                    "Sair"
                 },
                 choice => choice
             );
@@ -65,32 +65,32 @@ public class MainMenuScreen
             {
                 switch (option)
                 {
-                    case "Character":
+                    case "Personagem":
                         characterScreen.Show(character);
                         inputReader.WaitForContinue();
                         break;
 
-                    case "Training":
+                    case "Treinamentos":
                         trainingScreen.Show();
                         break;
 
-                    case "Quests":
+                    case "Missões":
                         questScreen.Show();
                         break;
 
-                    case "Projects":
+                    case "Projetos":
                         projectScreen.Show();
                         break;
 
-                    case "Milestones":
+                    case "Capítulos":
                         milestoneScreen.Show();
                         break;
 
-                    case "Gold":
+                    case "Finanças":
                         goldScreen.Show();
                         break;
 
-                    case "Exit":
+                    case "Sair":
                         gameStateService.Save();
                         running = false;
                         break;
@@ -104,12 +104,12 @@ public class MainMenuScreen
             catch (IOException exception)
             {
                 ConsoleHelper.ShowError(
-                    $"A storage error occurred: {exception.Message}"
+                    $"Ocorreu um erro de armazenamento: {exception.Message}"
                 );
                 inputReader.WaitForContinue();
             }
         }
 
-        ConsoleHelper.ShowHeader("See you soon");
+        ConsoleHelper.ShowHeader("Até breve");
     }
 }

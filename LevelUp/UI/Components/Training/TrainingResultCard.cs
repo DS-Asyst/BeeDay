@@ -39,7 +39,7 @@ public sealed class TrainingResultCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Training",
+                "Treinamentos",
                 _habit.Title,
                 $"bold {LevelUpTheme.Text}"
             )
@@ -47,7 +47,7 @@ public sealed class TrainingResultCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Experience earned",
+                "Experiência obtida",
                 $"+{_experienceEarned:0.##} XP",
                 $"bold {LevelUpTheme.Success}"
             )
@@ -55,7 +55,7 @@ public sealed class TrainingResultCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Attribute",
+                "Atributo",
                 _habit.AttributeType.ToString(),
                 LevelUpTheme.Accent
             )
@@ -63,7 +63,7 @@ public sealed class TrainingResultCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Attribute experience",
+                "Experiência do atributo",
                 $"+{_habit.AttributeExperienceReward:0.##} XP",
                 $"bold {LevelUpTheme.Success}"
             )
@@ -71,14 +71,14 @@ public sealed class TrainingResultCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Completions",
+                "Conclusões",
                 _habit.TimesCompleted.ToString()
             )
         );
 
         summary.AddRow(
             StatisticRow.Build(
-                "Character level",
+                "Nível do personagem",
                 _character.Level.ToString(),
                 $"bold {LevelUpTheme.Primary}"
             )
@@ -86,14 +86,14 @@ public sealed class TrainingResultCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Character experience",
+                "Experiência do personagem",
                 $"{_character.Experience:0.##}/" +
                 $"{_character.ExperienceToNextLevel:0.##}"
             )
         );
 
         return PanelBuilder.Build(
-            title: "Training Completed",
+            title: "Treinamento concluído",
             content: summary,
             icon: UIIcons.Success,
             expand: false
