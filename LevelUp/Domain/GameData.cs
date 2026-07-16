@@ -12,6 +12,9 @@ namespace LevelUp.Domain;
 
 public class GameData
 {
+    public const int CurrentSchemaVersion = 2;
+
+    public int SchemaVersion { get; set; }
     public CharacterModel Character { get; set; } = new();
     public List<Habit> Habits { get; set; } = [];
     public List<Project> Projects { get; set; } = [];

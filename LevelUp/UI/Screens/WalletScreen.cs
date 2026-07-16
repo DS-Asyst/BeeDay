@@ -184,23 +184,18 @@ public sealed class WalletScreen
 
             string action = inputReader.ReadSelection(
                 "Escolha uma ação:",
-                new[] { "Editar", "Excluir", "Voltar" },
+                transaction.IsReversed || transaction.IsReversal
+                    ? new[] { "Voltar" }
+                    : new[] { "Estornar", "Voltar" },
                 choice => choice
             );
 
             switch (action)
             {
-                case "Editar":
-                    EditTransaction(transaction);
+                case "Estornar":
+                    ReverseTransaction(transaction);
+                    opened = false;
                     inputReader.WaitForContinue();
-                    break;
-
-                case "Excluir":
-                    opened = !DeleteTransaction(transaction);
-                    if (opened)
-                    {
-                        inputReader.WaitForContinue();
-                    }
                     break;
 
                 case "Voltar":
@@ -288,6 +283,36 @@ public sealed class WalletScreen
         gameStateService.Save();
         ConsoleHelper.ShowSuccess("Movimentação excluída com sucesso.");
         return true;
+    }
+
+    private void ReverseTransaction(WalletTransaction transaction)
+    {
+        ConsoleHelper.ShowHeader("Estornar movimentação");
+        inputReader.ShowCancellationHint();
+
+        try
+        {
+            string reason = inputReader.ReadRequiredStringOrCancel(
+                "Motivo do estorno:"
+            );
+            DateTime date = inputReader.ReadDateOrCancel(
+                "Data do estorno (dd/MM/aaaa):"
+            );
+
+            if (!inputReader.ReadConfirmation("Confirmar estorno?"))
+            {
+                ConsoleHelper.ShowInformation("Estorno cancelado.");
+                return;
+            }
+
+            walletService.ReverseTransaction(transaction, reason, date);
+            gameStateService.Save();
+            ConsoleHelper.ShowSuccess("Movimentação estornada com sucesso.");
+        }
+        catch (UserCancelledException)
+        {
+            ConsoleHelper.ShowInformation("Estorno cancelado.");
+        }
     }
 
     private void ShowHistory()

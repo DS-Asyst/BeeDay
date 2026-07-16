@@ -25,6 +25,7 @@ public sealed class WalletTransactionTable
         table.AddColumn("Descrição");
         table.AddColumn(new TableColumn("Valor").RightAligned());
         table.AddColumn("Justificativa");
+        table.AddColumn("Situação");
 
         foreach (WalletTransaction transaction in transactions)
         {
@@ -44,7 +45,12 @@ public sealed class WalletTransactionTable
                     string.IsNullOrWhiteSpace(transaction.Justification)
                         ? "—"
                         : transaction.Justification
-                )
+                ),
+                transaction.IsReversal
+                    ? "Estorno"
+                    : transaction.IsReversed
+                        ? "Estornada"
+                        : "Confirmada"
             );
         }
 

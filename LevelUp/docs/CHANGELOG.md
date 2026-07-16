@@ -18,3 +18,14 @@
 - o campo legado de título do Projeto foi substituído por prefixo de conquista do Chefe;
 - cartões de Projeto e Capítulo refletem a nova progressão;
 - documentação consolidada e relatórios redundantes removidos.
+
+## Fase 6 — Inteligência e confiabilidade
+
+- adicionada versão do schema e infraestrutura de migração;
+- adicionada validação de integridade de saves;
+- salvamento alterado para escrita atômica com snapshot anterior;
+- introduzidos `GameSession` e `ApplicationBootstrap`;
+- adicionado dashboard de visão geral;
+- Carteira passa a oferecer estorno auditável na interface;
+- livros novos iniciam na página zero;
+- cobertura e documentação de persistência, testes e privacidade adicionadas.

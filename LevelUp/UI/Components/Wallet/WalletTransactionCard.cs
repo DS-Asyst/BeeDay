@@ -33,6 +33,23 @@ public sealed class WalletTransactionCard
             card.AddText("Justificativa", transaction.Justification);
         }
 
+        if (transaction.IsReversal)
+        {
+            card.AddText(
+                "Movimentação original",
+                $"#{transaction.ReversalOfTransactionId}"
+            );
+            card.AddText("Motivo do estorno", transaction.ReversalReason);
+        }
+
+        if (transaction.IsReversed)
+        {
+            card.AddText(
+                "Estornada em",
+                transaction.ReversedAt?.ToString("dd/MM/yyyy") ?? "—"
+            );
+        }
+
         return card.Build();
     }
 }

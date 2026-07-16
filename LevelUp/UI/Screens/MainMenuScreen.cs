@@ -6,6 +6,7 @@ namespace LevelUp.UI;
 public sealed class MainMenuScreen
 {
     private readonly InputReader inputReader;
+    private readonly DashboardScreen dashboardScreen;
     private readonly CharacterScreen characterScreen;
     private readonly DiaryScreen diaryScreen;
     private readonly LibraryScreen libraryScreen;
@@ -16,6 +17,7 @@ public sealed class MainMenuScreen
 
     public MainMenuScreen(
         InputReader inputReader,
+        DashboardScreen dashboardScreen,
         CharacterScreen characterScreen,
         DiaryScreen diaryScreen,
         LibraryScreen libraryScreen,
@@ -26,6 +28,7 @@ public sealed class MainMenuScreen
     )
     {
         this.inputReader = inputReader;
+        this.dashboardScreen = dashboardScreen;
         this.characterScreen = characterScreen;
         this.diaryScreen = diaryScreen;
         this.libraryScreen = libraryScreen;
@@ -45,6 +48,7 @@ public sealed class MainMenuScreen
                 "Escolha uma opção:",
                 new[]
                 {
+                    "Visão geral",
                     "Personagem",
                     "Diário",
                     "Biblioteca",
@@ -59,6 +63,7 @@ public sealed class MainMenuScreen
             {
                 switch (option)
                 {
+                    case "Visão geral": dashboardScreen.Show(); break;
                     case "Personagem": characterScreen.Show(character); break;
                     case "Diário": diaryScreen.Show(); break;
                     case "Biblioteca": libraryScreen.Show(); break;

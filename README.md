@@ -44,3 +44,7 @@ A documentação oficial está em `LevelUp/docs`:
 - `DecisionLog.md`
 - `CHANGELOG.md`
 - `Contributing.md`
+
+## Fase 6
+
+A Fase 6 introduz confiabilidade de persistência, schema versionado, dashboard, analytics iniciais e composição centralizada. Consulte [`LevelUp/docs/Phase6.md`](LevelUp/docs/Phase6.md).

@@ -128,6 +128,39 @@ public sealed class WalletService
         return transactions.Remove(transaction);
     }
 
+
+    public WalletTransaction ReverseTransaction(
+        WalletTransaction transaction,
+        string reason,
+        DateTime occurredAt
+    )
+    {
+        EnsureManaged(transaction);
+        ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+
+        if (transaction.IsReversal)
+        {
+            throw new InvalidOperationException("Uma movimentação de estorno não pode ser estornada novamente.");
+        }
+
+        if (transaction.IsReversed)
+        {
+            throw new InvalidOperationException("A movimentação já foi estornada.");
+        }
+
+        if (transaction.Type == WalletTransactionType.Deposit && transaction.Amount > Balance)
+        {
+            throw new InvalidOperationException(
+                "O depósito não pode ser estornado porque o saldo atual é insuficiente."
+            );
+        }
+
+        WalletTransaction reversal = new() { Id = nextId++ };
+        reversal.ConfigureReversal(transaction, reason, occurredAt);
+        transactions.Add(reversal);
+        return reversal;
+    }
+
     public decimal GetMonthlyBalance(int year, int month)
     {
         return transactions

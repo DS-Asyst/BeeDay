@@ -32,3 +32,8 @@
 - retiradas exigem justificativa;
 - operações não podem produzir saldo negativo;
 - a Carteira não concede moeda fictícia.
+
+
+## Confiabilidade do estado
+
+`GameData` é um snapshot versionado. Relacionamentos entre Projeto, Capítulo, Missão e Chefe são validados no carregamento. A Carteira adota estorno como operação de correção, preservando a movimentação original. Livros novos começam sem páginas registradas (`CurrentPage = 0`).

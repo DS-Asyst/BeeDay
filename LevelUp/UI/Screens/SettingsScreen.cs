@@ -21,6 +21,8 @@ public sealed class SettingsScreen
         table.AddRow("Idioma do código", "Inglês");
         table.AddRow("Salvamento", "Automático e manual");
         table.AddRow("Comando de cancelamento", "cancel");
+        table.AddRow("Privacidade da Carteira", "Dados locais em JSON não criptografado");
+        table.AddRow("Versão do save", LevelUp.Domain.GameData.CurrentSchemaVersion.ToString());
         AnsiConsole.Write(table);
         inputReader.WaitForContinue();
     }

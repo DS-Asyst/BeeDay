@@ -41,3 +41,11 @@ Ao criar um Projeto, o usuário informa o nome do Chefe e um prefixo. A conquist
 ## Compatibilidade temporária
 
 Sobrecargas antigas permanecem apenas para facilitar testes e leitura de saves anteriores. Novas funcionalidades devem usar a arquitetura atual.
+
+## Fase 6
+
+- A Fase 6 prioriza inteligência, confiabilidade e relatórios antes de Vida e Energia.
+- Saves são versionados e migrados fora do bootstrap.
+- A Carteira é tratada como ledger: correções usam estorno.
+- O dashboard é uma consulta e nunca altera o estado.
+- `ApplicationBootstrap` e `GameSession` organizam composição e estado.
