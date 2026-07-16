@@ -22,3 +22,18 @@ LevelUp keeps technical identifiers in English while presenting the player exper
 ## Financial meaning
 
 The Wallet module will reflect real money. Deposits represent money the player actually reserved. Withdrawals will require a date and justification. Financial achievements and titles may be unlocked by real saving milestones. The system must not treat project completion rewards as money.
+
+## Phase 5 navigation
+
+| Code term | Player-facing term |
+| --- | --- |
+| `Diary` | Diário |
+| `Library` | Biblioteca |
+| `Book` | Livro |
+| `Backpack` | Mochila |
+| `Wallet` | Carteira |
+| `WalletTransaction` | Movimentação |
+| `Deposit` | Depósito |
+| `Withdrawal` | Retirada |
+
+The Wallet represents real money. It is never translated or presented as fictional Gold rewards.

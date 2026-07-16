@@ -1,115 +1,68 @@
 # LevelUp
 
-> Transform real-world productivity into RPG progression.
+> Transforme evolução pessoal real em progressão de RPG.
 
-## Overview
+## Visão geral
 
-LevelUp is a productivity RPG built with C# and .NET. It models real-world concepts such as habits, quests and projects in the domain layer, while the terminal UI presents them through RPG-inspired feedback using Spectre.Console.
+LevelUp é uma aplicação de produtividade gamificada construída com C# e .NET. O código permanece em inglês; toda a experiência do jogador é apresentada em português brasileiro.
 
-## Current Features
+## Funcionalidades atuais
 
-- character creation and level progression;
-- attribute progression;
-- recurring habits presented as trainings;
-- one-time quests, independent or linked to projects;
-- project lifecycle and automatically calculated progress;
-- automatic project completion when all active project quests are completed;
-- contextual Project and Quest boards;
-- reusable cards, tables, themes and UI infrastructure;
-- centralized JSON persistence through `GameStateService`;
-- feature-oriented Domain and Services organization.
+- personagem, níveis, experiência e atributos;
+- treinamentos recorrentes;
+- projetos, capítulos, missões e chefes;
+- Diário como central da jornada;
+- Biblioteca com até dois livros simultaneamente em andamento;
+- histórico de leitura, progresso por páginas e XP de leitura;
+- Mochila como hub de recursos pessoais;
+- Carteira para controle de dinheiro real;
+- depósitos, retiradas justificadas, saldo, histórico e resumo mensal;
+- persistência JSON centralizada;
+- testes automatizados e CI.
 
+## Navegação principal
 
-## Language and product terminology
+```text
+Personagem
+Diário
+├── Treinamentos
+├── Missões
+├── Projetos
+└── Capítulos
+Biblioteca
+Mochila
+└── Carteira
+```
 
-Source code remains in English. The complete player-facing experience is presented in Brazilian Portuguese. In the interface, `Milestone` is shown as **Capítulo**, `Quest` as **Missão**, `BossEncounter` as **Chefe**, and `Gold` as **Carteira**. The Wallet module represents real money and is not used as an in-game reward currency.
-
-## Architecture
+## Arquitetura
 
 ```text
 Presentation (Spectre.Console)
         ↓
-Application Services
+Application Workflows
+        ↓
+Domain Services
         ↓
 Domain
         ↓
 Persistence (JSON)
 ```
 
-The domain remains independent from Spectre.Console so a future Blazor, API, desktop or mobile interface can reuse the same business rules.
-
-## Project Structure
-
-```text
-LevelUp/
-├── Domain/
-│   ├── Attributes/
-│   ├── Character/
-│   ├── Habits/
-│   ├── Projects/
-│   ├── Quests/
-│   └── Workflows/
-├── Services/
-│   ├── Character/
-│   ├── Habits/
-│   ├── Persistence/
-│   ├── Projects/
-│   ├── Quests/
-│   └── Workflows/
-├── UI/
-│   ├── Components/
-│   ├── Infrastructure/
-│   ├── Layout/
-│   └── Screens/
-├── Data/
-└── docs/
-```
-
-## Getting Started
+## Qualidade
 
 ```bash
-git clone <repository-url>
-cd LevelUp
-dotnet restore
-dotnet build
-dotnet run --project LevelUp/LevelUp.csproj
-```
-
-For the best Unicode rendering, use Windows Terminal or another modern terminal with a Unicode-capable font.
-
-## Quality Gates
-
-```bash
+dotnet restore LevelUp.slnx
 dotnet format LevelUp.slnx --verify-no-changes
 dotnet build LevelUp.slnx
 dotnet test LevelUp.Tests/LevelUp.Tests.csproj
+dotnet run --project LevelUp/LevelUp.csproj
 ```
 
-The repository includes automated tests and a GitHub Actions workflow covering formatting, build, and test execution.
+## Princípios de produto
 
-## Documentation
-
-- `docs/Vision.md`
-- `docs/Architecture.md`
-- `docs/Domain.md`
-- `docs/GameTerminology.md`
-- `docs/Roadmap.md`
-- `docs/DecisionLog.md`
-- `docs/Contributing.md`
-- `docs/CHANGELOG.md`
-
-- `docs/PHASE_4_UX_CONSOLIDATION.md`
-- `docs/PHASE_4_UX_CONSOLIDATION_REPORT.md`
-
-## Roadmap
-
-Phase 3 — Projects and Quests is complete. The next product phase introduces milestones and boss encounters.
-
-## License
-
-MIT
-
-
-## Phase 4 — Milestones and Boss Encounters
-
-LevelUp now supports ordered Project Milestones, optional Quest-to-Milestone links, automatic stage progression, reward metadata, and optional Boss Encounters. See `LevelUp/docs/Phase4EventStorming.md` for the accepted domain rules.
+- dinheiro da Carteira representa patrimônio real, não moeda fictícia;
+- gastos não afetam vida ou energia nesta fase;
+- Biblioteca é independente de Projetos e Missões;
+- no máximo dois livros podem permanecer em andamento;
+- cada avanço de leitura fica registrado por data;
+- todo texto visível ao jogador permanece em português.

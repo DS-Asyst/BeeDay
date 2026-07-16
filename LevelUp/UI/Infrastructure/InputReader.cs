@@ -38,6 +38,53 @@ public class InputReader
         return ReadDecimalCore(message, allowCancellation: true);
     }
 
+    public decimal ReadPositiveDecimalOrCancel(string message)
+    {
+        while (true)
+        {
+            decimal value = ReadDecimalCore(
+                message,
+                allowCancellation: true
+            );
+
+            if (value > 0)
+            {
+                return value;
+            }
+
+            ConsoleHelper.ShowError(
+                "Digite um valor maior que zero."
+            );
+        }
+    }
+
+    public DateTime ReadDateOrCancel(string message)
+    {
+        while (true)
+        {
+            string input = AnsiConsole.Ask<string>(
+                $"[yellow]{Markup.Escape(message)}[/]"
+            );
+
+            ThrowIfCancelled(input, allowCancellation: true);
+
+            if (DateTime.TryParseExact(
+                input.Trim(),
+                "dd/MM/yyyy",
+                CultureInfo.GetCultureInfo("pt-BR"),
+                DateTimeStyles.None,
+                out DateTime value
+            ))
+            {
+                return value.Date;
+            }
+
+            ConsoleHelper.ShowError(
+                "Digite uma data válida no formato dd/MM/aaaa."
+            );
+        }
+    }
+
     public int ReadOption(
         string message,
         int minimumOption,

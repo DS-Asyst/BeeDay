@@ -3,37 +3,31 @@ using CharacterModel = LevelUp.Domain.Character.Character;
 
 namespace LevelUp.UI;
 
-public class MainMenuScreen
+public sealed class MainMenuScreen
 {
     private readonly InputReader inputReader;
     private readonly CharacterScreen characterScreen;
-    private readonly TrainingScreen trainingScreen;
-    private readonly QuestScreen questScreen;
-    private readonly ProjectScreen projectScreen;
-    private readonly MilestoneScreen milestoneScreen;
-    private readonly GoldScreen goldScreen;
+    private readonly DiaryScreen diaryScreen;
+    private readonly LibraryScreen libraryScreen;
+    private readonly BackpackScreen backpackScreen;
     private readonly CharacterModel character;
     private readonly GameStateService gameStateService;
 
     public MainMenuScreen(
         InputReader inputReader,
         CharacterScreen characterScreen,
-        TrainingScreen trainingScreen,
-        QuestScreen questScreen,
-        ProjectScreen projectScreen,
-        MilestoneScreen milestoneScreen,
-        GoldScreen goldScreen,
+        DiaryScreen diaryScreen,
+        LibraryScreen libraryScreen,
+        BackpackScreen backpackScreen,
         CharacterModel character,
         GameStateService gameStateService
     )
     {
         this.inputReader = inputReader;
         this.characterScreen = characterScreen;
-        this.trainingScreen = trainingScreen;
-        this.questScreen = questScreen;
-        this.projectScreen = projectScreen;
-        this.milestoneScreen = milestoneScreen;
-        this.goldScreen = goldScreen;
+        this.diaryScreen = diaryScreen;
+        this.libraryScreen = libraryScreen;
+        this.backpackScreen = backpackScreen;
         this.character = character;
         this.gameStateService = gameStateService;
     }
@@ -51,11 +45,9 @@ public class MainMenuScreen
                 new[]
                 {
                     "Personagem",
-                    "Treinamentos",
-                    "Missões",
-                    "Projetos",
-                    "Capítulos",
-                    "Carteira",
+                    "Diário",
+                    "Biblioteca",
+                    "Mochila",
                     "Sair"
                 },
                 choice => choice
@@ -70,24 +62,16 @@ public class MainMenuScreen
                         inputReader.WaitForContinue();
                         break;
 
-                    case "Treinamentos":
-                        trainingScreen.Show();
+                    case "Diário":
+                        diaryScreen.Show();
                         break;
 
-                    case "Missões":
-                        questScreen.Show();
+                    case "Biblioteca":
+                        libraryScreen.Show();
                         break;
 
-                    case "Projetos":
-                        projectScreen.Show();
-                        break;
-
-                    case "Capítulos":
-                        milestoneScreen.Show();
-                        break;
-
-                    case "Carteira":
-                        goldScreen.Show();
+                    case "Mochila":
+                        backpackScreen.Show();
                         break;
 
                     case "Sair":

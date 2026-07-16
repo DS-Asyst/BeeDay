@@ -106,3 +106,11 @@ The test project covers lifecycle transitions, project progress, archived-quest 
 - `MilestoneWorkflowService` coordinates manual completion and safe deletion.
 - `BossWorkflowService` completes the linked Milestone, activates the next stage, and attempts Project completion.
 - `GameStateService` persists Projects, Quests, Milestones, Boss Encounters, Habits, and Character state as one snapshot.
+
+## Phase 5 personal modules
+
+`DiaryScreen` groups existing journey features without changing their domain boundaries. `BackpackScreen` acts as a presentation hub and currently delegates to `WalletScreen`.
+
+The Library is independent from Projects and Quests. `ReadingWorkflowService` coordinates book progress, character XP, and persistence. The Wallet is modeled as an appendable transaction ledger with explicit editing and deletion rules and remains independent from game rewards.
+
+`GameStateService` snapshots Books and Wallet transactions alongside the existing state.

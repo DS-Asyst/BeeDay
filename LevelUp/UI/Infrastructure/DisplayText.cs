@@ -1,4 +1,5 @@
 using LevelUp.Domain.Attributes;
+using LevelUp.Domain.Books;
 using LevelUp.Domain.Bosses;
 using LevelUp.Domain.Milestones;
 using LevelUp.Domain.Projects;
@@ -42,6 +43,15 @@ public static class DisplayText
         BossStatus.Available => "Disponível",
         BossStatus.Defeated => "Derrotado",
         BossStatus.Archived => "Arquivado",
+        _ => status.ToString()
+    };
+
+    public static string For(BookStatus status) => status switch
+    {
+        BookStatus.Locked => "Bloqueado",
+        BookStatus.Reading => "Em andamento",
+        BookStatus.Completed => "Concluído",
+        BookStatus.Archived => "Arquivado",
         _ => status.ToString()
     };
 
