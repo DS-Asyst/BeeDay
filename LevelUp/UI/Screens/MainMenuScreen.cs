@@ -3,35 +3,31 @@ using CharacterModel = LevelUp.Domain.Character.Character;
 
 namespace LevelUp.UI;
 
-public class MainMenuScreen
+public sealed class MainMenuScreen
 {
     private readonly InputReader inputReader;
     private readonly CharacterScreen characterScreen;
-    private readonly TrainingScreen trainingScreen;
-    private readonly QuestScreen questScreen;
-    private readonly ProjectScreen projectScreen;
-    private readonly GoldScreen goldScreen;
+    private readonly DiaryScreen diaryScreen;
+    private readonly InventoryScreen inventoryScreen;
+    private readonly SettingsScreen settingsScreen;
     private readonly CharacterModel character;
     private readonly GameStateService gameStateService;
-
 
     public MainMenuScreen(
         InputReader inputReader,
         CharacterScreen characterScreen,
-        TrainingScreen trainingScreen,
-        QuestScreen questScreen,
-        ProjectScreen projectScreen,
-        GoldScreen goldScreen,
+        DiaryScreen diaryScreen,
+        InventoryScreen inventoryScreen,
+        SettingsScreen settingsScreen,
         CharacterModel character,
         GameStateService gameStateService
     )
     {
         this.inputReader = inputReader;
         this.characterScreen = characterScreen;
-        this.trainingScreen = trainingScreen;
-        this.questScreen = questScreen;
-        this.projectScreen = projectScreen;
-        this.goldScreen = goldScreen;
+        this.diaryScreen = diaryScreen;
+        this.inventoryScreen = inventoryScreen;
+        this.settingsScreen = settingsScreen;
         this.character = character;
         this.gameStateService = gameStateService;
     }
@@ -39,61 +35,54 @@ public class MainMenuScreen
     public void Show()
     {
         bool running = true;
-
         while (running)
         {
             ConsoleHelper.ShowHeader("Level Up");
-
             string option = inputReader.ReadSelection(
                 "Escolha uma opção:",
                 new[]
                 {
-                "Character",
-                "Training",
-                "Quests",
-                "Projects",
-                "Gold",
-                "Exit"
+                    "Personagem",
+                    "Diário",
+                    "Inventário",
+                    "Configurações",
+                    "Salvar jogo",
+                    "Sair"
                 },
                 choice => choice
             );
 
-            switch (option)
+            try
             {
-                case "Character":
-                    characterScreen.Show(character);
-                    inputReader.WaitForContinue();
-                    break;
-
-                case "Training":
-                    trainingScreen.Show();
-                    break;
-
-                case "Quests":
-                    questScreen.Show();
-                    break;
-
-                case "Projects":
-                    projectScreen.Show();
-                    break;
-
-                case "Gold":
-                    goldScreen.Show();
-                    break;
-
-                case "Exit":
-                    gameStateService.Save();
-                    running = false;
-                    break;
+                switch (option)
+                {
+                    case "Personagem": characterScreen.Show(character); break;
+                    case "Diário": diaryScreen.Show(); break;
+                    case "Inventário": inventoryScreen.Show(); break;
+                    case "Configurações": settingsScreen.Show(); break;
+                    case "Salvar jogo":
+                        gameStateService.Save();
+                        ConsoleHelper.ShowSuccess("Jogo salvo com sucesso.");
+                        inputReader.WaitForContinue();
+                        break;
+                    case "Sair":
+                        gameStateService.Save();
+                        running = false;
+                        break;
+                }
+            }
+            catch (InvalidOperationException exception)
+            {
+                ConsoleHelper.ShowError(exception.Message);
+                inputReader.WaitForContinue();
+            }
+            catch (IOException exception)
+            {
+                ConsoleHelper.ShowError($"Ocorreu um erro de armazenamento: {exception.Message}");
+                inputReader.WaitForContinue();
             }
         }
 
-        ShowExitMessage();
-    }
-
-
-    private static void ShowExitMessage()
-    {
-        ConsoleHelper.ShowHeader("See you soon");
+        ConsoleHelper.ShowHeader("Até breve");
     }
 }

@@ -33,7 +33,7 @@ public sealed class QuestTable
             Border = TableBorder.Rounded,
             Title = new TableTitle(
                 $"[bold {LevelUpTheme.Quest}]" +
-                $"{UIIcons.Quest} Quest Board[/]"
+                $"{UIIcons.Quest} Painel de Missões[/]"
             )
         };
 
@@ -43,7 +43,7 @@ public sealed class QuestTable
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Quest[/]")
+            new TableColumn("[bold]Missão[/]")
         );
 
         table.AddColumn(
@@ -51,16 +51,16 @@ public sealed class QuestTable
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Project[/]")
+            new TableColumn("[bold]Projeto[/]")
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Created[/]")
+            new TableColumn("[bold]Criada em[/]")
                 .Centered()
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Completed[/]")
+            new TableColumn("[bold]Concluída em[/]")
                 .Centered()
         );
 

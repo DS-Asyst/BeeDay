@@ -26,7 +26,7 @@ public static class ConsoleHelper
 
         AnsiConsole.MarkupLine(
             $"[bold {LevelUpTheme.Success}]" +
-            $"{UIIcons.Success} Success:[/] " +
+            $"{UIIcons.Success} Sucesso:[/] " +
             Markup.Escape(message)
         );
     }
@@ -37,7 +37,7 @@ public static class ConsoleHelper
 
         AnsiConsole.MarkupLine(
             $"[bold {LevelUpTheme.Danger}]" +
-            $"{UIIcons.Error} Error:[/] " +
+            $"{UIIcons.Error} Erro:[/] " +
             Markup.Escape(message)
         );
     }
@@ -59,7 +59,7 @@ public static class ConsoleHelper
 
         AnsiConsole.MarkupLine(
             $"[bold {LevelUpTheme.Warning}]" +
-            $"{UIIcons.Warning} Warning:[/] " +
+            $"{UIIcons.Warning} Aviso:[/] " +
             Markup.Escape(message)
         );
     }
@@ -100,7 +100,7 @@ public static class ConsoleHelper
 
         AnsiConsole.MarkupLine(
             $"[{LevelUpTheme.MutedText}]" +
-            "Press any key to continue...[/]"
+            "Pressione qualquer tecla para continuar...[/]"
         );
 
         Console.ReadKey(intercept: true);

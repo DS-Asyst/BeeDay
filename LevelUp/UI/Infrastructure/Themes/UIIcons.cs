@@ -8,6 +8,10 @@ public static class UIIcons
     public const string Boss = "■";
     public const string Gold = "$";
     public const string Project = "■";
+    public const string Milestone = "◇";
+    public const string Book = "B";
+    public const string Backpack = "M";
+    public const string Diary = "D";
 
     public const string Strength = "STR";
     public const string Intelligence = "INT";

@@ -1,91 +1,82 @@
-# LevelUp Architecture
+# Arquitetura
 
-## Overview
+## Visão geral
 
-LevelUp is a C# and .NET console application with a feature-oriented domain and a Spectre.Console presentation layer.
-
-```text
-LevelUp/
-├── Domain/
-│   ├── Attributes/
-│   ├── Character/
-│   ├── Habits/
-│   ├── Projects/
-│   ├── Quests/
-│   └── GameData.cs
-├── Services/
-│   ├── Character/
-│   ├── Habits/
-│   ├── Persistence/
-│   ├── Projects/
-│   └── Quests/
-├── UI/
-│   ├── Components/
-│   │   ├── Character/
-│   │   ├── Project/
-│   │   ├── Quest/
-│   │   ├── Shared/
-│   │   └── Training/
-│   ├── Infrastructure/
-│   ├── Layout/
-│   └── Screens/
-├── Data/
-└── docs/
-```
-
-## Layers
-
-### Domain
-
-Contains entities, state and business invariants. It does not depend on Spectre.Console, JSON files or screens.
-
-### Services
-
-Coordinates domain operations. Services are grouped by feature. `ProjectService` calculates progress and controls automatic completion; `QuestService` manages quest lifecycle and associations.
-
-### Persistence
-
-`SaveService` serializes and loads `GameData`. `GameStateService` is the only component responsible for creating a complete snapshot and requesting persistence.
-
-### UI
-
-- **Screens** coordinate navigation and user workflows.
-- **Components** render cards and tables.
-- **Infrastructure** centralizes input, messages, themes, icons and panel construction.
-- **Layout** provides reusable low-level layouts such as `StatisticRow`.
-
-## UI Foundation
-
-`EntityCard` provides the common card structure used by feature-specific components. `StatisticRow` explicitly separates escaped plain text from trusted Spectre.Console markup.
+O LevelUp adota separação entre núcleo, infraestrutura e cliente executável.
 
 ```text
-QuestCard / ProjectCard
-          ↓
-      EntityCard
-          ↓
-     StatisticRow
-          ↓
-      PanelBuilder
+LevelUp.Console
+  ├── LevelUp
+  └── LevelUp.Infrastructure
+          └── LevelUp
+
+LevelUp.Tests
+  ├── LevelUp
+  └── LevelUp.Infrastructure
 ```
 
-## Dependency Composition
+A dependência sempre aponta para dentro: a infraestrutura conhece as interfaces do núcleo; o núcleo não conhece EF Core, SQLite ou detalhes do sistema operacional.
 
-Dependencies are composed manually in `Program.cs`. This keeps the current application simple while preserving clear constructor dependencies. A dependency-injection container may be introduced when additional application hosts are created.
+## Camada central — `LevelUp`
 
-## Persistence Flow
+Responsabilidades:
+
+- entidades e regras de domínio;
+- `Reward` e progressão;
+- workflows transacionais em nível de aplicação;
+- serviços de hábitos, projetos, missões, capítulos, livros e carteira;
+- abstração `IGameDataStore`;
+- interface de console reutilizável.
+
+Restrições:
+
+- nenhuma referência a `Microsoft.EntityFrameworkCore`;
+- nenhuma SQL;
+- nenhuma dependência de caminho físico de banco;
+- regras de negócio não podem ser implementadas no projeto Infrastructure.
+
+## Infraestrutura — `LevelUp.Infrastructure`
+
+Responsabilidades:
+
+- conexão SQLite;
+- `LevelUpDbContext`;
+- migrations;
+- repositórios de agregados;
+- transações;
+- aplicação automática de migrations;
+- persistência exclusiva no banco SQLite.
+
+A infraestrutura implementa `IGameDataStore`. O armazenamento relacional é intercambiável sem alterar workflows ou telas.
+
+## Cliente — `LevelUp.Console`
+
+É o composition root. Ele:
+
+1. configura codificação do terminal;
+2. cria o `SqliteGameDataStore`;
+3. injeta o armazenamento no `ApplicationBootstrap`;
+4. inicia o menu.
+
+Nenhuma regra de negócio deve ser adicionada ao cliente.
+
+## Estratégia de dados
+
+A Fase 9 usa tabelas por agregado com payload serializado. Essa é uma etapa intermediária consciente:
+
+- fornece transações, migrations, índices e inspeção por SQLite;
+- preserva compatibilidade com o domínio atual;
+- evita anemizar entidades apenas para atender ao ORM;
+- permite normalização seletiva futura quando consultas Blazor exigirem projeções SQL.
+
+## Fluxo de gravação
 
 ```text
-Screen action
-    ↓
-Domain service mutation
-    ↓
-GameStateService.Save()
-    ↓
-SaveService.SaveGame()
-    ↓
-Data/save.json
+Tela → Serviço/Workflow → GameStateService → IGameDataStore → transação SQLite
 ```
 
-## Future Interfaces
+O snapshot inteiro é confirmado atomicamente. `Character.ApplyReward()` permanece como único ponto autorizado a alterar XP, atributos e títulos.
 
-The domain and service layers are designed to be reused by future Blazor, API, desktop or mobile presentation layers.
+## Preparação para Blazor
+
+Uma interface Blazor futura deverá referenciar `LevelUp` e usar casos de uso da aplicação. Ela não deverá acessar o `DbContext` diretamente. Consultas específicas poderão ser introduzidas por interfaces de leitura na camada central e implementadas na infraestrutura.

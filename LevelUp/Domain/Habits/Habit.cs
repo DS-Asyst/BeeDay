@@ -11,19 +11,14 @@ public class Habit
 
     public string Description { get; set; } = string.Empty;
 
+    // Mantido apenas para compatibilidade com saves anteriores; não influencia recompensas.
     public int DurationInMinutes { get; set; }
 
     public AttributeType AttributeType { get; set; }
 
     public int TimesCompleted { get; set; }
 
-    public decimal ExperiencePerMinute { get; set; } = 0.1m;
+    public decimal ExperienceReward => 0.5m;
 
-    public decimal AttributeExperiencePerMinute { get; set; } = 0.05m;
-
-    public decimal ExperienceReward =>
-        DurationInMinutes * ExperiencePerMinute;
-
-    public decimal AttributeExperienceReward =>
-        DurationInMinutes * AttributeExperiencePerMinute;
+    public decimal AttributeExperienceReward => 0.5m;
 }

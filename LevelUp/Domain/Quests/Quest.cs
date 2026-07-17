@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+using LevelUp.Domain.Attributes;
 
 namespace LevelUp.Domain.Quests;
 
@@ -6,38 +6,128 @@ public sealed class Quest
 {
     public int Id { get; set; }
 
-    public int? ProjectId { get; set; }
+    public int? ProjectId { get; private set; }
 
-    [JsonInclude]
-    public string Title { get; private set; } =
-        string.Empty;
+    public int? MilestoneId { get; private set; }
 
-    [JsonInclude]
-    public string Description { get; private set; } =
-        string.Empty;
+    public string Title { get; private set; } = string.Empty;
 
-    [JsonInclude]
-    public QuestStatus Status { get; private set; }
-        = QuestStatus.Created;
+    public string Description { get; private set; } = string.Empty;
 
-    public DateTime CreatedAt { get; init; }
-        = DateTime.Now;
+    public AttributeType AttributeType { get; private set; } = AttributeType.Intelligence;
 
-    [JsonInclude]
+    public QuestStatus Status { get; private set; } = QuestStatus.Created;
+
+    public DateTime CreatedAt { get; init; } = DateTime.Now;
+
     public DateTime? ActivatedAt { get; private set; }
 
-    [JsonInclude]
     public DateTime? CompletedAt { get; private set; }
 
-    [JsonInclude]
     public DateTime? ArchivedAt { get; private set; }
+
+    public void Configure(string title, string description)
+        => Configure(title, description, AttributeType.Intelligence);
+
+    public void Configure(string title, string description, AttributeType attributeType)
+    {
+        if (!string.IsNullOrWhiteSpace(Title))
+        {
+            throw new InvalidOperationException(
+                "A missão já foi configurada."
+            );
+        }
+
+        AttributeType = attributeType;
+        SetDetails(title, description);
+    }
+
+    public void SetIndependentAttribute(AttributeType attributeType)
+    {
+        EnsureAssociationCanChange();
+        if (ProjectId is not null)
+        {
+            throw new InvalidOperationException("Apenas missões independentes podem selecionar atributo manualmente.");
+        }
+        AttributeType = attributeType;
+    }
+
+    public void InheritAttribute(AttributeType attributeType)
+    {
+        EnsureAssociationCanChange();
+        AttributeType = attributeType;
+    }
+
+    public void UpdateDetails(string title, string description)
+    {
+        EnsureNotArchived();
+        SetDetails(title, description);
+    }
+
+    public void AssignToProject(int projectId)
+    {
+        EnsureAssociationCanChange();
+
+        if (projectId <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(projectId));
+        }
+
+        if (MilestoneId is not null && ProjectId != projectId)
+        {
+            throw new InvalidOperationException(
+                "Remova a associação com o capítulo antes de alterar o projeto."
+            );
+        }
+
+        ProjectId = projectId;
+    }
+
+    public void RemoveFromProject()
+    {
+        EnsureAssociationCanChange();
+
+        if (MilestoneId is not null)
+        {
+            throw new InvalidOperationException(
+                "Remova a associação com o capítulo antes de remover o projeto."
+            );
+        }
+
+        ProjectId = null;
+    }
+
+    public void AssignToMilestone(int milestoneId, int projectId)
+    {
+        EnsureAssociationCanChange();
+
+        if (milestoneId <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(milestoneId));
+        }
+
+        if (ProjectId != projectId)
+        {
+            throw new InvalidOperationException(
+                "A missão e seu capítulo devem pertencer ao mesmo projeto."
+            );
+        }
+
+        MilestoneId = milestoneId;
+    }
+
+    public void RemoveFromMilestone()
+    {
+        EnsureAssociationCanChange();
+        MilestoneId = null;
+    }
 
     public void Activate()
     {
         if (Status != QuestStatus.Created)
         {
             throw new InvalidOperationException(
-                "Only created quests can be activated."
+                "Apenas missões criadas podem ser ativadas."
             );
         }
 
@@ -50,7 +140,7 @@ public sealed class Quest
         if (Status != QuestStatus.Active)
         {
             throw new InvalidOperationException(
-                "Only active quests can be completed."
+                "Apenas missões ativas podem ser concluídas."
             );
         }
 
@@ -63,7 +153,7 @@ public sealed class Quest
         if (Status == QuestStatus.Archived)
         {
             throw new InvalidOperationException(
-                "The quest is already archived."
+                "A missão já está arquivada."
             );
         }
 
@@ -71,28 +161,7 @@ public sealed class Quest
         ArchivedAt = DateTime.Now;
     }
 
-    public void Configure(
-    string title,
-    string description
-    )
-    {
-        if (!string.IsNullOrWhiteSpace(Title))
-        {
-            throw new InvalidOperationException(
-                "The quest has already been configured."
-            );
-        }
-
-        UpdateDetails(
-            title,
-            description
-        );
-    }
-
-    public void UpdateDetails(
-    string title,
-    string description
-    )
+    private void SetDetails(string title, string description)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
 
@@ -100,4 +169,23 @@ public sealed class Quest
         Description = description.Trim();
     }
 
+    private void EnsureAssociationCanChange()
+    {
+        if (Status is QuestStatus.Completed or QuestStatus.Archived)
+        {
+            throw new InvalidOperationException(
+                "Missões concluídas ou arquivadas não podem alterar associações."
+            );
+        }
+    }
+
+    private void EnsureNotArchived()
+    {
+        if (Status == QuestStatus.Archived)
+        {
+            throw new InvalidOperationException(
+                "Missões arquivadas não podem ser alteradas."
+            );
+        }
+    }
 }

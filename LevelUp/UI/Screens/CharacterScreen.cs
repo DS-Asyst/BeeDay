@@ -1,22 +1,71 @@
-using CharacterModel = LevelUp.Domain.Character.Character;
+using LevelUp.Services.Achievements;
 using LevelUp.UI.Components.Character;
 using Spectre.Console;
+using CharacterModel = LevelUp.Domain.Character.Character;
 
 namespace LevelUp.UI;
 
-public class CharacterScreen
+public sealed class CharacterScreen
 {
+    private readonly InputReader inputReader;
+    private readonly AchievementService achievementService;
+
+    public CharacterScreen(
+        InputReader inputReader,
+        AchievementService achievementService
+    )
+    {
+        this.inputReader = inputReader;
+        this.achievementService = achievementService;
+    }
+
     public void Show(CharacterModel character)
     {
-        ConsoleHelper.ShowHeader("Character");
+        bool running = true;
+        while (running)
+        {
+            ConsoleHelper.ShowHeader("Personagem");
+            string option = inputReader.ReadSelection(
+                "Escolha uma opção:",
+                new[] { "Perfil", "Conquistas", "Voltar" },
+                choice => choice
+            );
 
-        CharacterCard characterCard = new(character);
-        AttributeTable attributeTable = new(character.Attributes);
+            switch (option)
+            {
+                case "Perfil":
+                    ShowProfile(character);
+                    inputReader.WaitForContinue();
+                    break;
+                case "Conquistas":
+                    ShowAchievements();
+                    inputReader.WaitForContinue();
+                    break;
+                case "Voltar":
+                    running = false;
+                    break;
+            }
+        }
+    }
 
-        AnsiConsole.Write(characterCard.Build());
-
+    private static void ShowProfile(CharacterModel character)
+    {
+        ConsoleHelper.ShowHeader("Perfil");
+        AnsiConsole.Write(new CharacterCard(character).Build());
         AnsiConsole.WriteLine();
+        AnsiConsole.Write(new AttributeTable(character.Attributes).Build());
+    }
 
-        AnsiConsole.Write(attributeTable.Build());
+    private void ShowAchievements()
+    {
+        ConsoleHelper.ShowHeader("Conquistas");
+        var achievements = achievementService.GetUnlocked();
+        if (achievements.Count == 0)
+        {
+            ConsoleHelper.ShowInformation("Nenhuma conquista foi desbloqueada ainda.");
+            return;
+        }
+
+        AnsiConsole.Write(new AchievementTable(achievements).Build());
     }
 }

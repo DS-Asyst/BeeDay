@@ -6,13 +6,12 @@ namespace LevelUp.UI.Components.Character;
 
 public sealed class AttributeTable
 {
-    private readonly PlayerAttributes _attributes;
+    private readonly PlayerAttributes attributes;
 
     public AttributeTable(PlayerAttributes attributes)
     {
         ArgumentNullException.ThrowIfNull(attributes);
-
-        _attributes = attributes;
+        this.attributes = attributes;
     }
 
     public Table Build()
@@ -21,49 +20,35 @@ public sealed class AttributeTable
         {
             Border = TableBorder.Rounded,
             Title = new TableTitle(
-                $"[bold {LevelUpTheme.Primary}]Attributes[/]"
+                $"[bold {LevelUpTheme.Primary}]Atributos[/]"
             )
         };
 
-        table.AddColumn(
-            new TableColumn("[bold]Attribute[/]")
-        );
+        table.AddColumn(new TableColumn("[bold]Atributo[/]"));
+        table.AddColumn(new TableColumn("[bold]Nível[/]").Centered());
+        table.AddColumn(new TableColumn("[bold]Atributo[/]"));
+        table.AddColumn(new TableColumn("[bold]Nível[/]").Centered());
 
-        table.AddColumn(
-            new TableColumn("[bold]Level[/]").Centered()
+        table.AddRow(
+            $"{UIIcons.Strength} Força",
+            FormatLevel(attributes.Strength.Level),
+            $"{UIIcons.Intelligence} Inteligência",
+            FormatLevel(attributes.Intelligence.Level)
         );
 
         table.AddRow(
-            $"{UIIcons.Strength} Strength",
-            FormatLevel(_attributes.Strength.Level)
+            $"{UIIcons.Vitality} Vitalidade",
+            FormatLevel(attributes.Vitality.Level),
+            $"{UIIcons.Agility} Agilidade",
+            FormatLevel(attributes.Agility.Level)
         );
 
         table.AddRow(
-            $"{UIIcons.Intelligence} Intelligence",
-            FormatLevel(_attributes.Intelligence.Level)
+            $"{UIIcons.Dexterity} Destreza",
+            FormatLevel(attributes.Dexterity.Level),
+            $"{UIIcons.Luck} Sorte",
+            FormatLevel(attributes.Luck.Level)
         );
-
-        table.AddRow(
-            $"{UIIcons.Vitality} Vitality",
-            FormatLevel(_attributes.Vitality.Level)
-        );
-
-        table.AddRow(
-            $"{UIIcons.Agility} Agility",
-            FormatLevel(_attributes.Agility.Level)
-        );
-
-        table.AddRow(
-            $"{UIIcons.Dexterity} Dexterity",
-            FormatLevel(_attributes.Dexterity.Level)
-        );
-
-        table.AddRow(
-            $"{UIIcons.Luck} Luck",
-            FormatLevel(_attributes.Luck.Level)
-        );
-
-        table.Expand();
 
         return table;
     }

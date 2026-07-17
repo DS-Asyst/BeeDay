@@ -1,4 +1,5 @@
 using LevelUp.Domain.Habits;
+using LevelUp.UI.Infrastructure;
 using LevelUp.UI.Infrastructure.Themes;
 using Spectre.Console;
 
@@ -21,7 +22,7 @@ public sealed class TrainingTable
         {
             Border = TableBorder.Rounded,
             Title = new TableTitle(
-                $"[bold {LevelUpTheme.Primary}]Trainings[/]"
+                $"[bold {LevelUpTheme.Primary}]Treinamentos[/]"
             )
         };
 
@@ -30,15 +31,11 @@ public sealed class TrainingTable
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Title[/]")
+            new TableColumn("[bold]Título[/]")
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Attribute[/]")
-        );
-
-        table.AddColumn(
-            new TableColumn("[bold]Duration[/]").Centered()
+            new TableColumn("[bold]Atributo[/]")
         );
 
         table.AddColumn(
@@ -46,11 +43,11 @@ public sealed class TrainingTable
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Attribute XP[/]").Centered()
+            new TableColumn("[bold]XP do atributo[/]").Centered()
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Completions[/]").Centered()
+            new TableColumn("[bold]Conclusões[/]").Centered()
         );
 
         foreach (Habit habit in _habits)
@@ -58,8 +55,7 @@ public sealed class TrainingTable
             table.AddRow(
                 habit.Id.ToString(),
                 Markup.Escape(habit.Title),
-                habit.AttributeType.ToString(),
-                $"{habit.DurationInMinutes} min",
+                DisplayText.For(habit.AttributeType),
                 habit.ExperienceReward.ToString("0.##"),
                 habit.AttributeExperienceReward.ToString("0.##"),
                 habit.TimesCompleted.ToString()

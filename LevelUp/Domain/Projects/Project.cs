@@ -1,5 +1,4 @@
-using System.Text.Json.Serialization;
-using QuestModel = LevelUp.Domain.Quests.Quest;
+using LevelUp.Domain.Attributes;
 
 namespace LevelUp.Domain.Projects;
 
@@ -7,72 +6,63 @@ public sealed class Project
 {
     public int Id { get; set; }
 
-    [JsonInclude]
-    public string Name { get; private set; } =
-        string.Empty;
+    public string Name { get; private set; } = string.Empty;
 
-    [JsonInclude]
-    public string Description { get; private set; } =
-        string.Empty;
+    public string Description { get; private set; } = string.Empty;
 
-    [JsonInclude]
-    public string UnlockedTitle { get; private set; } =
-        string.Empty;
+    public AttributeType PrimaryAttribute { get; private set; } = AttributeType.Intelligence;
 
-    [JsonInclude]
-    public ProjectStatus Status { get; private set; }
-        = ProjectStatus.Created;
+    public ProjectStatus Status { get; private set; } = ProjectStatus.Created;
 
-    public DateTime CreatedAt { get; init; }
-        = DateTime.Now;
+    public DateTime CreatedAt { get; init; } = DateTime.Now;
 
-    [JsonInclude]
     public DateTime? CompletedAt { get; private set; }
 
-    [JsonInclude]
     public DateTime? ArchivedAt { get; private set; }
 
+    public void Configure(string name, string description)
+        => Configure(name, description, AttributeType.Intelligence);
+
+    public void Configure(string name, string description, AttributeType primaryAttribute)
+    {
+        if (!string.IsNullOrWhiteSpace(Name))
+        {
+            throw new InvalidOperationException("O projeto já foi configurado.");
+        }
+
+        PrimaryAttribute = primaryAttribute;
+        SetDetails(name, description);
+    }
 
     public void Configure(
         string name,
         string description,
-        string unlockedTitle
+        string legacyUnlockedTitle
     )
     {
-        if (!string.IsNullOrWhiteSpace(Name))
-        {
-            throw new InvalidOperationException(
-                "The project has already been configured."
-            );
-        }
+        Configure(name, description);
+    }
 
-        UpdateDetails(
-            name,
-            description,
-            unlockedTitle
-        );
+    public void UpdateDetails(string name, string description)
+    {
+        EnsureNotArchived();
+        SetDetails(name, description);
     }
 
     public void UpdateDetails(
         string name,
         string description,
-        string unlockedTitle
+        string legacyUnlockedTitle
     )
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-
-        Name = name.Trim();
-        Description = description.Trim();
-        UnlockedTitle = unlockedTitle.Trim();
+        UpdateDetails(name, description);
     }
 
     public void Activate()
     {
         if (Status != ProjectStatus.Created)
         {
-            throw new InvalidOperationException(
-                "Only created projects can be activated."
-            );
+            throw new InvalidOperationException("Apenas projetos criados podem ser ativados.");
         }
 
         Status = ProjectStatus.Active;
@@ -82,9 +72,7 @@ public sealed class Project
     {
         if (Status != ProjectStatus.Active)
         {
-            throw new InvalidOperationException(
-                "Only active projects can be completed."
-            );
+            throw new InvalidOperationException("Apenas projetos ativos podem ser concluídos.");
         }
 
         Status = ProjectStatus.Completed;
@@ -95,13 +83,25 @@ public sealed class Project
     {
         if (Status == ProjectStatus.Archived)
         {
-            throw new InvalidOperationException(
-                "The project is already archived."
-            );
+            throw new InvalidOperationException("O projeto já está arquivado.");
         }
 
         Status = ProjectStatus.Archived;
         ArchivedAt = DateTime.Now;
     }
 
+    private void SetDetails(string name, string description)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        Name = name.Trim();
+        Description = description.Trim();
+    }
+
+    private void EnsureNotArchived()
+    {
+        if (Status == ProjectStatus.Archived)
+        {
+            throw new InvalidOperationException("Projetos arquivados não podem ser alterados.");
+        }
+    }
 }

@@ -1,4 +1,5 @@
 using LevelUp.Domain.Habits;
+using LevelUp.UI.Infrastructure;
 using LevelUp.UI.Infrastructure.Builders;
 using LevelUp.UI.Infrastructure.Themes;
 using LevelUp.UI.Layout;
@@ -36,7 +37,7 @@ public sealed class TrainingCreatedCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Title",
+                "Título",
                 _habit.Title,
                 $"bold {LevelUpTheme.Text}"
             )
@@ -44,29 +45,22 @@ public sealed class TrainingCreatedCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Description",
+                "Descrição",
                 _habit.Description
             )
         );
 
         summary.AddRow(
             StatisticRow.Build(
-                "Attribute",
-                _habit.AttributeType.ToString(),
+                "Atributo",
+                DisplayText.For(_habit.AttributeType),
                 LevelUpTheme.Accent
             )
         );
 
         summary.AddRow(
             StatisticRow.Build(
-                "Duration",
-                $"{_habit.DurationInMinutes} min"
-            )
-        );
-
-        summary.AddRow(
-            StatisticRow.Build(
-                "Experience reward",
+                "Recompensa de experiência",
                 $"{_habit.ExperienceReward:0.##} XP",
                 $"bold {LevelUpTheme.Success}"
             )
@@ -74,14 +68,14 @@ public sealed class TrainingCreatedCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Attribute experience",
+                "Experiência do atributo",
                 $"{_habit.AttributeExperienceReward:0.##} XP",
                 $"bold {LevelUpTheme.Success}"
             )
         );
 
         return PanelBuilder.Build(
-            title: "Training Created",
+            title: "Treinamento criado",
             content: summary,
             icon: UIIcons.Success,
             expand: false

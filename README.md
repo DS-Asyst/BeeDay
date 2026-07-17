@@ -1,90 +1,108 @@
 # LevelUp
 
-> Transform real-world productivity into RPG progression.
+Aplicação console em .NET 10 que transforma hábitos, missões, projetos, leitura e finanças pessoais em um sistema de progressão inspirado em RPG.
 
-## Overview
+## Estado atual
 
-LevelUp is a productivity RPG built with C# and .NET. It models real-world concepts such as habits, quests and projects in the domain layer, while the terminal UI presents them through RPG-inspired feedback using Spectre.Console.
+A Fase 9 introduz persistência operacional com SQLite e Entity Framework Core. O domínio permanece independente da infraestrutura e o console passa a ser um cliente separado.
 
-## Current Features
+## Projetos
 
-- character creation and level progression;
-- attribute progression;
-- recurring habits presented as trainings;
-- one-time quests, independent or linked to projects;
-- project lifecycle and automatically calculated progress;
-- automatic project completion when all active project quests are completed;
-- contextual Project and Quest boards;
-- reusable cards, tables, themes and UI infrastructure;
-- centralized JSON persistence through `GameStateService`;
-- feature-oriented Domain and Services organization.
+- `LevelUp`: domínio, aplicação, workflows, serviços e UI compartilhada;
+- `LevelUp.Infrastructure`: SQLite, EF Core, migrations e repositórios;
+- `LevelUp.Console`: executável e composition root;
+- `LevelUp.Tests`: testes automatizados.
 
-## Architecture
+## Pré-requisitos
 
-```text
-Presentation (Spectre.Console)
-        ↓
-Application Services
-        ↓
-Domain
-        ↓
-Persistence (JSON)
-```
+- .NET SDK 10;
+- Git;
+- opcional: DB Browser for SQLite ou o comando `sqlite3` para inspeção manual.
 
-The domain remains independent from Spectre.Console so a future Blazor, API, desktop or mobile interface can reuse the same business rules.
+O `dotnet-ef` é fornecido por manifesto local e não precisa ser instalado globalmente.
 
-## Project Structure
-
-```text
-LevelUp/
-├── Domain/
-│   ├── Attributes/
-│   ├── Character/
-│   ├── Habits/
-│   ├── Projects/
-│   └── Quests/
-├── Services/
-│   ├── Character/
-│   ├── Habits/
-│   ├── Persistence/
-│   ├── Projects/
-│   └── Quests/
-├── UI/
-│   ├── Components/
-│   ├── Infrastructure/
-│   ├── Layout/
-│   └── Screens/
-├── Data/
-└── docs/
-```
-
-## Getting Started
+## Preparação
 
 ```bash
-git clone <repository-url>
-cd LevelUp
 dotnet restore
+dotnet tool restore
 dotnet build
-dotnet run --project LevelUp/LevelUp.csproj
+dotnet test
 ```
 
-For the best Unicode rendering, use Windows Terminal or another modern terminal with a Unicode-capable font.
+## Executar
 
-## Documentation
+```bash
+dotnet run --project LevelUp.Console
+```
 
-- `docs/Vision.md`
-- `docs/Architecture.md`
-- `docs/Domain.md`
-- `docs/GameTerminology.md`
-- `docs/Roadmap.md`
-- `docs/DecisionLog.md`
-- `docs/Contributing.md`
-- `docs/CHANGELOG.md`
+Na primeira execução, a aplicação cria o banco automaticamente. Se não houver personagem persistido, o fluxo de criação do primeiro personagem é iniciado. Nenhum arquivo JSON é importado.
 
-## Roadmap
+## Local do banco
 
-Phase 3 — Projects and Quests is complete. The next product phase introduces milestones and boss encounters.
+Windows:
 
-## License
+```text
+%LOCALAPPDATA%\LevelUp\levelup.db
+```
 
-MIT
+Para usar outra pasta:
+
+Git Bash:
+
+```bash
+export LEVELUP_DATA_DIR="/c/DevOps/LevelUpData"
+dotnet run --project LevelUp.Console
+```
+
+PowerShell:
+
+```powershell
+$env:LEVELUP_DATA_DIR = "C:\DevOps\LevelUpData"
+dotnet run --project LevelUp.Console
+```
+
+## Inspecionar o SQLite
+
+Com `sqlite3` instalado:
+
+```bash
+sqlite3 "$LOCALAPPDATA/LevelUp/levelup.db"
+.tables
+SELECT * FROM GameMetadata;
+SELECT Id, UpdatedAtUtc FROM Books ORDER BY Id;
+.quit
+```
+
+Também é possível abrir `levelup.db` no DB Browser for SQLite.
+
+## Migrations
+
+```bash
+dotnet ef migrations list --project LevelUp.Infrastructure --startup-project LevelUp.Console
+dotnet ef database update --project LevelUp.Infrastructure --startup-project LevelUp.Console
+```
+
+Nova migration:
+
+```bash
+dotnet ef migrations add NomeDaMigration \
+  --project LevelUp.Infrastructure \
+  --startup-project LevelUp.Console \
+  --output-dir Persistence/Migrations
+```
+
+## Persistência exclusiva
+
+O arquivo `%LOCALAPPDATA%\LevelUp\levelup.db` é a única fonte de verdade da aplicação. Não existe importação automática, exportação automática ou fallback para arquivos JSON. Atualizações de estrutura devem ser feitas por migrations do EF Core; ajustes controlados de dados podem ser realizados por scripts SQLite.
+
+Os arquivos `.db`, `-wal` e `-shm` são dados locais do usuário e permanecem fora do Git.
+
+## Validação antes do merge
+
+```bash
+dotnet format --verify-no-changes
+dotnet build -c Release
+dotnet test -c Release
+git status
+```

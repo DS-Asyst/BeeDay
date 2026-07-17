@@ -1,6 +1,8 @@
+using LevelUp.Domain.Milestones;
 using LevelUp.Domain.Quests;
 using LevelUp.UI.Infrastructure.Themes;
 using Spectre.Console;
+using MilestoneModel = LevelUp.Domain.Milestones.Milestone;
 using ProjectModel = LevelUp.Domain.Projects.Project;
 using QuestModel = LevelUp.Domain.Quests.Quest;
 
@@ -11,20 +13,24 @@ public sealed class ProjectTable
     private readonly IReadOnlyCollection<ProjectModel> projects;
     private readonly Func<int, IReadOnlyList<QuestModel>> questResolver;
     private readonly Func<ProjectModel, decimal> progressResolver;
+    private readonly Func<int, IReadOnlyList<MilestoneModel>> milestoneResolver;
 
     public ProjectTable(
         IEnumerable<ProjectModel> projects,
         Func<int, IReadOnlyList<QuestModel>> questResolver,
-        Func<ProjectModel, decimal> progressResolver
+        Func<ProjectModel, decimal> progressResolver,
+        Func<int, IReadOnlyList<MilestoneModel>> milestoneResolver
     )
     {
         ArgumentNullException.ThrowIfNull(projects);
         ArgumentNullException.ThrowIfNull(questResolver);
         ArgumentNullException.ThrowIfNull(progressResolver);
+        ArgumentNullException.ThrowIfNull(milestoneResolver);
 
         this.projects = projects.ToList();
         this.questResolver = questResolver;
         this.progressResolver = progressResolver;
+        this.milestoneResolver = milestoneResolver;
     }
 
     public Table Build()
@@ -34,33 +40,42 @@ public sealed class ProjectTable
             Border = TableBorder.Rounded,
             Title = new TableTitle(
                 $"[bold {LevelUpTheme.Boss}]" +
-                $"{UIIcons.Project} Project Board[/]"
+                $"{UIIcons.Project} Painel de Projetos[/]"
             )
         };
 
         table.AddColumn(new TableColumn("[bold]ID[/]").Centered());
-        table.AddColumn(new TableColumn("[bold]Project[/]"));
+        table.AddColumn(new TableColumn("[bold]Projeto[/]"));
         table.AddColumn(new TableColumn("[bold]Status[/]"));
-        table.AddColumn(new TableColumn("[bold]Quests[/]").Centered());
-        table.AddColumn(new TableColumn("[bold]Progress[/]").Centered());
-        table.AddColumn(new TableColumn("[bold]Unlocked Title[/]"));
+        table.AddColumn(new TableColumn("[bold]Missões[/]").Centered());
+        table.AddColumn(new TableColumn("[bold]Progresso[/]").Centered());
+        table.AddColumn(new TableColumn("[bold]Capítulos[/]").Centered());
 
         foreach (ProjectModel project in projects)
         {
             IReadOnlyList<QuestModel> quests = questResolver(project.Id)
                 .Where(quest => quest.Status != QuestStatus.Archived)
                 .ToList();
-            int completed = quests.Count(
+
+            int completedQuests = quests.Count(
                 quest => quest.Status == QuestStatus.Completed
+            );
+
+            IReadOnlyList<MilestoneModel> milestones = milestoneResolver(project.Id)
+                .Where(milestone => milestone.Status != MilestoneStatus.Archived)
+                .ToList();
+
+            int completedMilestones = milestones.Count(
+                milestone => milestone.Status == MilestoneStatus.Completed
             );
 
             table.AddRow(
                 project.Id.ToString(),
                 Markup.Escape(project.Name),
                 ProjectStatusFormatter.Format(project.Status),
-                $"{completed}/{quests.Count}",
+                $"{completedQuests}/{quests.Count}",
                 $"{progressResolver(project):0.##}%",
-                Markup.Escape(project.UnlockedTitle)
+                $"{completedMilestones}/{milestones.Count}"
             );
         }
 
