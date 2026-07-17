@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 
 namespace LevelUp.Domain.Bosses;
 
@@ -6,37 +5,27 @@ public sealed class BossEncounter
 {
     public int Id { get; set; }
 
-    [JsonInclude]
     public int ProjectId { get; private set; }
 
     // Mantido para leitura de saves antigos. Novos chefes pertencem ao Projeto.
-    [JsonInclude]
     public int? MilestoneId { get; private set; }
 
-    [JsonInclude]
     public string Name { get; private set; } = string.Empty;
 
-    [JsonInclude]
     public string Description { get; private set; } = string.Empty;
 
-    [JsonInclude]
     public string AchievementPrefix { get; private set; } = string.Empty;
 
-    [JsonInclude]
     public bool IsFinalBoss { get; private set; } = true;
 
-    [JsonInclude]
     public BossStatus Status { get; private set; } = BossStatus.Locked;
 
     public DateTime CreatedAt { get; init; } = DateTime.Now;
 
-    [JsonInclude]
     public DateTime? UnlockedAt { get; private set; }
 
-    [JsonInclude]
     public DateTime? DefeatedAt { get; private set; }
 
-    [JsonInclude]
     public DateTime? ArchivedAt { get; private set; }
 
     public void Configure(

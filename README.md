@@ -1,45 +1,108 @@
 # LevelUp
 
-Aplicação console em .NET para organizar hábitos, projetos, capítulos, quests, chefes, leitura e carteira como uma jornada de progressão pessoal.
+Aplicação console em .NET 10 que transforma hábitos, missões, projetos, leitura e finanças pessoais em um sistema de progressão inspirado em RPG.
 
 ## Estado atual
 
-A consolidação 8.5 centraliza recompensas e progressão antes da adoção de SQLite/EF Core.
+A Fase 9 introduz persistência operacional com SQLite e Entity Framework Core. O domínio permanece independente da infraestrutura e o console passa a ser um cliente separado.
 
-- Hábito concluído: **0,5 XP**.
-- Quest concluída: **1 XP**.
-- Capítulo concluído: bônus equivalente à soma do XP de suas quests.
-- Toda atividade produz um `Reward`.
-- Somente `Character.ApplyReward()` altera XP, atributos e títulos.
-- Projetos possuem atributo principal; quests vinculadas o herdam.
-- Quests independentes podem escolher atributo próprio.
-- Carteira usa movimentação assinada: valor, descrição, tag e data automática.
-- Ativações e transições são orquestradas pelos serviços/workflows.
+## Projetos
+
+- `LevelUp`: domínio, aplicação, workflows, serviços e UI compartilhada;
+- `LevelUp.Infrastructure`: SQLite, EF Core, migrations e repositórios;
+- `LevelUp.Console`: executável e composition root;
+- `LevelUp.Tests`: testes automatizados.
+
+## Pré-requisitos
+
+- .NET SDK 10;
+- Git;
+- opcional: DB Browser for SQLite ou o comando `sqlite3` para inspeção manual.
+
+O `dotnet-ef` é fornecido por manifesto local e não precisa ser instalado globalmente.
+
+## Preparação
+
+```bash
+dotnet restore
+dotnet tool restore
+dotnet build
+dotnet test
+```
 
 ## Executar
 
 ```bash
-dotnet restore
-dotnet build LevelUp.slnx
-dotnet test LevelUp.slnx
-cd LevelUp
-dotnet run
+dotnet run --project LevelUp.Console
 ```
 
-O arquivo `LevelUp/Data/save.json` contém um Roadmap ASP.NET Core limpo para testar a progressão completa.
+Na primeira execução, a aplicação cria o banco automaticamente. Se não houver personagem persistido, o fluxo de criação do primeiro personagem é iniciado. Nenhum arquivo JSON é importado.
 
-## Documentação mantida
+## Local do banco
 
-- `LevelUp/docs/Architecture.md`
-- `LevelUp/docs/DecisionLog.md`
-- `LevelUp/docs/TestingStrategy.md`
-- `LevelUp/docs/Phase9Plan.md`
+Windows:
 
+```text
+%LOCALAPPDATA%\LevelUp\levelup.db
+```
 
-## Navegação atual
+Para usar outra pasta:
 
-- **Personagem:** Perfil e Conquistas.
-- **Diário:** Treinamentos, Missões e Projetos.
-- **Inventário:** Biblioteca e Carteira.
+Git Bash:
 
-Na Biblioteca, o progresso solicita somente a página atual. A conclusão do livro concede XP uma única vez: 1 XP abaixo de 100 páginas ou 10% do total de páginas, arredondado para baixo, a partir de 100 páginas.
+```bash
+export LEVELUP_DATA_DIR="/c/DevOps/LevelUpData"
+dotnet run --project LevelUp.Console
+```
+
+PowerShell:
+
+```powershell
+$env:LEVELUP_DATA_DIR = "C:\DevOps\LevelUpData"
+dotnet run --project LevelUp.Console
+```
+
+## Inspecionar o SQLite
+
+Com `sqlite3` instalado:
+
+```bash
+sqlite3 "$LOCALAPPDATA/LevelUp/levelup.db"
+.tables
+SELECT * FROM GameMetadata;
+SELECT Id, UpdatedAtUtc FROM Books ORDER BY Id;
+.quit
+```
+
+Também é possível abrir `levelup.db` no DB Browser for SQLite.
+
+## Migrations
+
+```bash
+dotnet ef migrations list --project LevelUp.Infrastructure --startup-project LevelUp.Console
+dotnet ef database update --project LevelUp.Infrastructure --startup-project LevelUp.Console
+```
+
+Nova migration:
+
+```bash
+dotnet ef migrations add NomeDaMigration \
+  --project LevelUp.Infrastructure \
+  --startup-project LevelUp.Console \
+  --output-dir Persistence/Migrations
+```
+
+## Persistência exclusiva
+
+O arquivo `%LOCALAPPDATA%\LevelUp\levelup.db` é a única fonte de verdade da aplicação. Não existe importação automática, exportação automática ou fallback para arquivos JSON. Atualizações de estrutura devem ser feitas por migrations do EF Core; ajustes controlados de dados podem ser realizados por scripts SQLite.
+
+Os arquivos `.db`, `-wal` e `-shm` são dados locais do usuário e permanecem fora do Git.
+
+## Validação antes do merge
+
+```bash
+dotnet format --verify-no-changes
+dotnet build -c Release
+dotnet test -c Release
+git status
+```

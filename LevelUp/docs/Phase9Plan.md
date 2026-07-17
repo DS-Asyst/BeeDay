@@ -1,33 +1,31 @@
-# Fase 9 — Persistência relacional
+# Fase 9 — Persistência SQLite exclusiva
 
-## Objetivo
+## Estado
 
-Migrar a persistência operacional de JSON para SQLite com Entity Framework Core somente depois que o domínio e os fluxos atuais estiverem estabilizados.
+Implementada. O SQLite é a única fonte de verdade do LevelUp.
 
-## Pré-requisitos
+## Regras operacionais
 
-- build sem avisos e suíte de testes verde;
-- serviços sem dependência de UI;
-- regras de progressão centralizadas em workflows e serviços;
-- carteira usando movimentações assinadas e tags;
-- schema JSON versionado e validado;
-- política de backup e importação definida.
+1. O banco padrão fica em `%LOCALAPPDATA%\LevelUp\levelup.db`.
+2. A pasta e o banco são criados automaticamente.
+3. As migrations do EF Core são aplicadas na inicialização.
+4. Banco sem personagem inicia o fluxo de criação do primeiro personagem.
+5. Não existe importação automática de `save.json`.
+6. Não existe exportação automática de backup JSON.
+7. Não existe fallback de persistência na camada de aplicação.
+8. Evoluções de esquema usam migrations; correções controladas de dados podem usar scripts SQLite.
 
-## Etapas propostas
+## Estrutura histórica
 
-1. Criar o projeto `LevelUp.Infrastructure`.
-2. Introduzir interfaces de repositório por agregado.
-3. Adicionar EF Core e SQLite.
-4. Criar `LevelUpDbContext` e configurações Fluent API.
-5. Mapear Personagem, Hábitos, Projetos, Capítulos, Missões e Chefes.
-6. Mapear Biblioteca, Carteira, Tags e Conquistas.
-7. Criar constraints, índices e políticas de exclusão.
-8. Criar importador idempotente do `save.json`.
-9. Testar paridade JSON × SQLite.
-10. Manter exportação JSON como backup.
-11. Tornar SQLite o armazenamento padrão após validação real.
-12. Preparar comandos e consultas para a futura interface Blazor.
+Na Fase 9, cada agregado era armazenado como documento dentro do SQLite. Essa implementação foi substituída na Fase 10 pelo modelo totalmente relacional descrito em `Phase10Plan.md`.
 
-## Banco recomendado
+## Validação esperada
 
-SQLite + Entity Framework Core enquanto o LevelUp for local e de usuário único. PostgreSQL passa a ser considerado apenas quando houver API, sincronização ou múltiplos usuários.
+```bash
+dotnet restore
+dotnet build
+dotnet test
+dotnet run --project LevelUp.Console
+```
+
+Fluxo manual mínimo: criar personagem, criar e concluir missão, fechar o programa, abrir novamente e confirmar a persistência.

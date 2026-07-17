@@ -1,25 +1,82 @@
-# Architecture
+# Arquitetura
 
-## Camadas
+## Visão geral
 
-- **Domain**: entidades e regras locais. `Character.ApplyReward()` é o único ponto autorizado a alterar progressão.
-- **Services**: gerenciamento de coleções, validações e transições de estado.
-- **Workflows**: coordenação de casos de uso que atravessam entidades, aplicação de recompensas e persistência.
-- **UI**: entrada e apresentação; não concede XP nem ativa entidades diretamente.
-- **Persistence**: serialização, validação e migração do estado.
+O LevelUp adota separação entre núcleo, infraestrutura e cliente executável.
 
-## Recompensas
+```text
+LevelUp.Console
+  ├── LevelUp
+  └── LevelUp.Infrastructure
+          └── LevelUp
 
-Toda atividade retorna `Reward`. O objeto pode transportar XP geral, atributo associado, XP de atributo e títulos. Workflows aplicam o resultado ao personagem e persistem a sessão.
+LevelUp.Tests
+  ├── LevelUp
+  └── LevelUp.Infrastructure
+```
 
-## Progressão de projeto
+A dependência sempre aponta para dentro: a infraestrutura conhece as interfaces do núcleo; o núcleo não conhece EF Core, SQLite ou detalhes do sistema operacional.
 
-Projeto → Capítulos → Quests → Boss final. O projeto define `PrimaryAttribute`; quests vinculadas herdam esse valor. A ativação ocorre por `ProjectWorkflowService`, `MilestoneWorkflowService`, `QuestWorkflowService` e `BossWorkflowService`.
+## Camada central — `LevelUp`
 
-## Limite arquitetural da Fase 8.5
+Responsabilidades:
 
-O armazenamento permanece em JSON. As regras de negócio não dependem do mecanismo de persistência, permitindo substituir o `IGameDataStore` por EF Core na Fase 9.
+- entidades e regras de domínio;
+- `Reward` e progressão;
+- workflows transacionais em nível de aplicação;
+- serviços de hábitos, projetos, missões, capítulos, livros e carteira;
+- abstração `IGameDataStore`;
+- interface de console reutilizável.
 
-## Fluxo de leitura
+Restrições:
 
-`LibraryScreen` coleta apenas a página atual. `ReadingWorkflowService` coordena o registro, detecta a transição para concluído, cria o `Reward`, aplica-o por `Character.ApplyReward()`, avalia conquistas de leitura e persiste o estado. Nenhum XP é aplicado durante progresso parcial.
+- nenhuma referência a `Microsoft.EntityFrameworkCore`;
+- nenhuma SQL;
+- nenhuma dependência de caminho físico de banco;
+- regras de negócio não podem ser implementadas no projeto Infrastructure.
+
+## Infraestrutura — `LevelUp.Infrastructure`
+
+Responsabilidades:
+
+- conexão SQLite;
+- `LevelUpDbContext`;
+- migrations;
+- repositórios de agregados;
+- transações;
+- aplicação automática de migrations;
+- persistência exclusiva no banco SQLite.
+
+A infraestrutura implementa `IGameDataStore`. O armazenamento relacional é intercambiável sem alterar workflows ou telas.
+
+## Cliente — `LevelUp.Console`
+
+É o composition root. Ele:
+
+1. configura codificação do terminal;
+2. cria o `SqliteGameDataStore`;
+3. injeta o armazenamento no `ApplicationBootstrap`;
+4. inicia o menu.
+
+Nenhuma regra de negócio deve ser adicionada ao cliente.
+
+## Estratégia de dados
+
+A Fase 9 usa tabelas por agregado com payload serializado. Essa é uma etapa intermediária consciente:
+
+- fornece transações, migrations, índices e inspeção por SQLite;
+- preserva compatibilidade com o domínio atual;
+- evita anemizar entidades apenas para atender ao ORM;
+- permite normalização seletiva futura quando consultas Blazor exigirem projeções SQL.
+
+## Fluxo de gravação
+
+```text
+Tela → Serviço/Workflow → GameStateService → IGameDataStore → transação SQLite
+```
+
+O snapshot inteiro é confirmado atomicamente. `Character.ApplyReward()` permanece como único ponto autorizado a alterar XP, atributos e títulos.
+
+## Preparação para Blazor
+
+Uma interface Blazor futura deverá referenciar `LevelUp` e usar casos de uso da aplicação. Ela não deverá acessar o `DbContext` diretamente. Consultas específicas poderão ser introduzidas por interfaces de leitura na camada central e implementadas na infraestrutura.

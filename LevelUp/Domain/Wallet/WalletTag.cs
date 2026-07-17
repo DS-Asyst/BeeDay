@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 
 namespace LevelUp.Domain.Wallet;
 
@@ -6,12 +5,10 @@ public sealed class WalletTag
 {
     public int Id { get; set; }
 
-    [JsonInclude]
     public string Name { get; private set; } = string.Empty;
 
     public DateTime CreatedAt { get; init; } = DateTime.Now;
 
-    [JsonInclude]
     public DateTime? UpdatedAt { get; private set; }
 
     public void Configure(string name)

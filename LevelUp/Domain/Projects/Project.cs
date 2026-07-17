@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using LevelUp.Domain.Attributes;
 
 namespace LevelUp.Domain.Projects;
@@ -7,24 +6,18 @@ public sealed class Project
 {
     public int Id { get; set; }
 
-    [JsonInclude]
     public string Name { get; private set; } = string.Empty;
 
-    [JsonInclude]
     public string Description { get; private set; } = string.Empty;
 
-    [JsonInclude]
     public AttributeType PrimaryAttribute { get; private set; } = AttributeType.Intelligence;
 
-    [JsonInclude]
     public ProjectStatus Status { get; private set; } = ProjectStatus.Created;
 
     public DateTime CreatedAt { get; init; } = DateTime.Now;
 
-    [JsonInclude]
     public DateTime? CompletedAt { get; private set; }
 
-    [JsonInclude]
     public DateTime? ArchivedAt { get; private set; }
 
     public void Configure(string name, string description)

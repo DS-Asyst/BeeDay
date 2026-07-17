@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using LevelUp.Domain.Attributes;
 
 namespace LevelUp.Domain.Quests;
@@ -7,33 +6,24 @@ public sealed class Quest
 {
     public int Id { get; set; }
 
-    [JsonInclude]
     public int? ProjectId { get; private set; }
 
-    [JsonInclude]
     public int? MilestoneId { get; private set; }
 
-    [JsonInclude]
     public string Title { get; private set; } = string.Empty;
 
-    [JsonInclude]
     public string Description { get; private set; } = string.Empty;
 
-    [JsonInclude]
     public AttributeType AttributeType { get; private set; } = AttributeType.Intelligence;
 
-    [JsonInclude]
     public QuestStatus Status { get; private set; } = QuestStatus.Created;
 
     public DateTime CreatedAt { get; init; } = DateTime.Now;
 
-    [JsonInclude]
     public DateTime? ActivatedAt { get; private set; }
 
-    [JsonInclude]
     public DateTime? CompletedAt { get; private set; }
 
-    [JsonInclude]
     public DateTime? ArchivedAt { get; private set; }
 
     public void Configure(string title, string description)

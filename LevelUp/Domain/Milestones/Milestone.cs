@@ -1,46 +1,33 @@
-using System.Text.Json.Serialization;
 
 namespace LevelUp.Domain.Milestones;
 
 public sealed class Milestone
 {
     public int Id { get; set; }
-    [JsonInclude]
     public int ProjectId { get; private set; }
 
-    [JsonInclude]
     public int Order { get; private set; }
 
-    [JsonInclude]
     public int RequiredCompletedQuests { get; private set; }
 
-    [JsonInclude]
     public string Title { get; private set; } = string.Empty;
 
-    [JsonInclude]
     public string Description { get; private set; } = string.Empty;
 
-    [JsonInclude]
     public MilestoneReward Reward { get; private set; } = new();
 
-    [JsonInclude]
     public MilestoneStatus Status { get; private set; } = MilestoneStatus.Created;
 
     public DateTime CreatedAt { get; init; } = DateTime.Now;
 
-    [JsonInclude]
     public DateTime? UnlockedAt { get; private set; }
 
-    [JsonInclude]
     public DateTime? ActivatedAt { get; private set; }
 
-    [JsonInclude]
     public DateTime? CompletedAt { get; private set; }
 
-    [JsonInclude]
     public DateTime? ArchivedAt { get; private set; }
 
-    [JsonInclude]
     public DateTime? RewardClaimedAt { get; private set; }
 
     public bool IsLocked => Status == MilestoneStatus.Locked;
