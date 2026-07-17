@@ -47,18 +47,22 @@ public sealed class WalletServiceTests
     }
 
     [Fact]
-    public void Exit_ShouldRequireJustification()
+    public void Exit_ShouldUseSelectedTag()
     {
         WalletService service = new();
 
-        Assert.Throws<ArgumentException>(
-            () => service.AddWithdrawal(
+        WalletTag tag =
+            service.CreateTag("Empréstimo");
+
+        WalletTransaction transaction =
+            service.AddExit(
                 50m,
-                "Saída",
-                string.Empty,
+                "Pagamento ao irmão",
+                tag,
                 new DateTime(2026, 7, 2)
-            )
-        );
+            );
+
+        Assert.Equal(tag.Id, transaction.TagId);
     }
 
     [Fact]

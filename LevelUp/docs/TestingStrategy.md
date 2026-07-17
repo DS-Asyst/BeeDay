@@ -1,28 +1,23 @@
-# Estratégia de testes
+# Testing Strategy
+
+Os testes são organizados por funcionalidade, não por fases históricas.
 
 ## Prioridades
 
-1. transições de estado do domínio;
-2. workflows que alteram mais de um módulo;
-3. persistência, migração e validação;
-4. consultas analíticas;
-5. componentes de texto e cancelamento de entrada.
+1. Recompensas: XP de hábito, quest e bônus de capítulo; aplicação única em `Character.ApplyReward()`.
+2. Progressão: ativação sequencial de projetos, capítulos, quests e boss.
+3. Regressão: quest concluída sempre concede 1 XP antes de persistir.
+4. Atributos: herança do projeto e bloqueio de seleção manual em quests vinculadas.
+5. Persistência: round-trip, validação, recuperação de corrupção e compatibilidade de schema.
+6. Carteira: valores assinados, data automática, tags ordenadas e saldo.
 
-## Cobertura
-
-A cobertura é coletada por:
+## Comandos
 
 ```bash
-dotnet test LevelUp.Tests/LevelUp.Tests.csproj \
-  --collect:"XPlat Code Coverage" \
-  --settings coverlet.runsettings
+dotnet test LevelUp.slnx
+dotnet test LevelUp.slnx --collect:"XPlat Code Coverage" --settings coverlet.runsettings
 ```
 
-A meta inicial é 75% global, sem perseguir cobertura artificial. Workflows críticos e migrações devem ter cobertura integral de cenários relevantes.
+## Regressões de leitura
 
-## Convenções
-
-- testes não gravam no diretório real da aplicação;
-- datas devem ser fixas;
-- testes de persistência usam diretórios temporários;
-- uma falha deve indicar a regra de negócio quebrada, não detalhes da UI.
+Os testes de livros cobrem registro automático, conclusão, rejeição de regressão de páginas, cálculo inteiro da recompensa de conclusão e idempotência das conquistas por marcos de leitura.

@@ -12,9 +12,11 @@ namespace LevelUp.Domain;
 
 public class GameData
 {
-    public const int CurrentSchemaVersion = 4;
+    public const int CurrentSchemaVersion = 6;
 
     public int SchemaVersion { get; set; }
+    public int SaveRevision { get; set; }
+    public DateTime? LastSavedAt { get; set; }
     public CharacterModel Character { get; set; } = new();
     public List<Habit> Habits { get; set; } = [];
     public List<Project> Projects { get; set; } = [];
@@ -22,6 +24,7 @@ public class GameData
     public List<Milestone> Milestones { get; set; } = [];
     public List<BossEncounter> Bosses { get; set; } = [];
     public List<Book> Books { get; set; } = [];
+    public List<WalletTag> WalletTags { get; set; } = [];
     public List<WalletTransaction> WalletTransactions { get; set; } = [];
     public List<Achievement> Achievements { get; set; } = [];
 }

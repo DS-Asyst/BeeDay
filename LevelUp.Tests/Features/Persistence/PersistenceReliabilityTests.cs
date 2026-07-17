@@ -7,9 +7,9 @@ using Xunit;
 
 namespace LevelUp.Tests;
 
-public sealed class Phase6ReliabilityTests : IDisposable
+public sealed class PersistenceReliabilityTests : IDisposable
 {
-    private readonly string directory = Path.Combine(Path.GetTempPath(), $"LevelUpPhase6_{Guid.NewGuid():N}");
+    private readonly string directory = Path.Combine(Path.GetTempPath(), $"LevelUpPersistence_{Guid.NewGuid():N}");
 
     [Fact]
     public void Load_ShouldMigrateLegacySaveAndCreateFinalBoss()

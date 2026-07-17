@@ -6,12 +6,15 @@ namespace LevelUp.UI.Components.Wallet;
 public sealed class WalletTransactionTable
 {
     private readonly IEnumerable<WalletTransaction> transactions;
+    private readonly Func<int?, string> tagNameResolver;
 
     public WalletTransactionTable(
-        IEnumerable<WalletTransaction> transactions
+        IEnumerable<WalletTransaction> transactions,
+        Func<int?, string> tagNameResolver
     )
     {
         this.transactions = transactions;
+        this.tagNameResolver = tagNameResolver;
     }
 
     public Table Build()
@@ -21,31 +24,22 @@ public sealed class WalletTransactionTable
             .Expand();
 
         table.AddColumn("Data");
-        table.AddColumn("Tipo");
         table.AddColumn("Descrição");
+        table.AddColumn("Tag");
         table.AddColumn(new TableColumn("Valor").RightAligned());
-        table.AddColumn("Justificativa");
         table.AddColumn("Situação");
 
         foreach (WalletTransaction transaction in transactions)
         {
-            string type = transaction.Type == WalletTransactionType.Deposit
-                ? "Entrada"
-                : "Saída";
-            string amount = transaction.Type == WalletTransactionType.Deposit
+            string amount = transaction.Amount > 0
                 ? $"[green]+ R$ {transaction.Amount:N2}[/]"
-                : $"[red]- R$ {transaction.Amount:N2}[/]";
+                : $"[red]- R$ {Math.Abs(transaction.Amount):N2}[/]";
 
             table.AddRow(
                 transaction.OccurredAt.ToString("dd/MM/yyyy"),
-                type,
                 Markup.Escape(transaction.Description),
+                Markup.Escape(tagNameResolver(transaction.TagId)),
                 amount,
-                Markup.Escape(
-                    string.IsNullOrWhiteSpace(transaction.Justification)
-                        ? "—"
-                        : transaction.Justification
-                ),
                 transaction.IsReversal
                     ? "Estorno"
                     : transaction.IsReversed

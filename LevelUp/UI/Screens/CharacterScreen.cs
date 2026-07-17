@@ -27,13 +27,13 @@ public sealed class CharacterScreen
             ConsoleHelper.ShowHeader("Personagem");
             string option = inputReader.ReadSelection(
                 "Escolha uma opção:",
-                new[] { "Ficha do personagem", "Conquistas", "Voltar" },
+                new[] { "Perfil", "Conquistas", "Voltar" },
                 choice => choice
             );
 
             switch (option)
             {
-                case "Ficha do personagem":
+                case "Perfil":
                     ShowProfile(character);
                     inputReader.WaitForContinue();
                     break;
@@ -50,7 +50,7 @@ public sealed class CharacterScreen
 
     private static void ShowProfile(CharacterModel character)
     {
-        ConsoleHelper.ShowHeader("Ficha do personagem");
+        ConsoleHelper.ShowHeader("Perfil");
         AnsiConsole.Write(new CharacterCard(character).Build());
         AnsiConsole.WriteLine();
         AnsiConsole.Write(new AttributeTable(character.Attributes).Build());

@@ -1,56 +1,25 @@
-# Arquitetura
+# Architecture
 
 ## Camadas
 
-### Domain
-Entidades, estados, invariantes e cálculos sem dependência da interface.
+- **Domain**: entidades e regras locais. `Character.ApplyReward()` é o único ponto autorizado a alterar progressão.
+- **Services**: gerenciamento de coleções, validações e transições de estado.
+- **Workflows**: coordenação de casos de uso que atravessam entidades, aplicação de recompensas e persistência.
+- **UI**: entrada e apresentação; não concede XP nem ativa entidades diretamente.
+- **Persistence**: serialização, validação e migração do estado.
 
-### Services
-Serviços por feature e workflows que coordenam múltiplos domínios.
+## Recompensas
 
-### UI
-Telas, componentes, prompts, temas e tradução da experiência para português.
+Toda atividade retorna `Reward`. O objeto pode transportar XP geral, atributo associado, XP de atributo e títulos. Workflows aplicam o resultado ao personagem e persistem a sessão.
 
-### Persistence
-`IGameDataStore`, `SaveService` e `GameStateService` persistem um snapshot completo em JSON.
+## Progressão de projeto
 
-## Módulos
+Projeto → Capítulos → Quests → Boss final. O projeto define `PrimaryAttribute`; quests vinculadas herdam esse valor. A ativação ocorre por `ProjectWorkflowService`, `MilestoneWorkflowService`, `QuestWorkflowService` e `BossWorkflowService`.
 
-- Character
-- Habits / Training
-- Projects / Quests / Milestones / Bosses
-- Achievements
-- Books
-- Wallet
+## Limite arquitetural da Fase 8.5
 
-## Fluxo de conclusão de projeto
+O armazenamento permanece em JSON. As regras de negócio não dependem do mecanismo de persistência, permitindo substituir o `IGameDataStore` por EF Core na Fase 9.
 
-1. O usuário cria um Projeto com um Chefe final e um prefixo de conquista.
-2. Capítulos e Missões representam o progresso da jornada.
-3. Ao concluir todas as Missões e Capítulos, o Chefe final é desbloqueado.
-4. Ao derrotar o Chefe, o Projeto é concluído.
-5. `AchievementService` gera uma conquista profissional, como `Desenvolvedor ASP.NET Core`.
-6. `GameStateService` persiste o novo estado.
+## Fluxo de leitura
 
-## Compatibilidade
-
-Algumas sobrecargas antigas permanecem temporariamente para leitura de testes e saves anteriores. Novos fluxos devem usar chefes por Projeto e conquistas persistidas.
-
-
-## Fase 6
-
-A composição da aplicação foi movida para `ApplicationBootstrap`. `GameSession` reúne o estado em memória e reduz o crescimento do construtor de `GameStateService`. A persistência possui migrações e validação antes de materializar a sessão.
-
-```text
-Program
-  -> ApplicationBootstrap
-      -> GameSession
-      -> Workflows
-      -> Screens
-
-SaveService
-  -> Normalize
-  -> GameDataMigrator
-  -> GameDataValidator
-  -> GameSession
-```
+`LibraryScreen` coleta apenas a página atual. `ReadingWorkflowService` coordena o registro, detecta a transição para concluído, cria o `Reward`, aplica-o por `Character.ApplyReward()`, avalia conquistas de leitura e persiste o estado. Nenhum XP é aplicado durante progresso parcial.

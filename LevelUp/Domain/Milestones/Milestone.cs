@@ -44,7 +44,10 @@ public sealed class Milestone
     public DateTime? RewardClaimedAt { get; private set; }
 
     public bool IsLocked => Status == MilestoneStatus.Locked;
-    public bool CanAcceptQuests => Status is MilestoneStatus.Created or MilestoneStatus.Active;
+    public bool CanAcceptQuests =>
+    Status is MilestoneStatus.Locked
+        or MilestoneStatus.Created
+        or MilestoneStatus.Active;
 
     public void Configure(
         int projectId,

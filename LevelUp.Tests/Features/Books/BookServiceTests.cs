@@ -39,16 +39,8 @@ public sealed class BookServiceTests
         BookService service = new();
         Book book = service.CreateBook("Livro", "Autor", 30);
 
-        int firstSession = service.RecordProgress(
-            book,
-            10,
-            new DateTime(2026, 7, 1)
-        );
-        int secondSession = service.RecordProgress(
-            book,
-            30,
-            new DateTime(2026, 7, 2)
-        );
+        int firstSession = service.RecordProgress(book, 10);
+        int secondSession = service.RecordProgress(book, 30);
 
         Assert.Equal(10, firstSession);
         Assert.Equal(20, secondSession);
@@ -62,10 +54,10 @@ public sealed class BookServiceTests
     {
         BookService service = new();
         Book book = service.CreateBook("Livro", "Autor", 100);
-        service.RecordProgress(book, 30, DateTime.Today);
+        service.RecordProgress(book, 30);
 
         Assert.Throws<InvalidOperationException>(
-            () => service.RecordProgress(book, 20, DateTime.Today)
+            () => service.RecordProgress(book, 20)
         );
     }
 }

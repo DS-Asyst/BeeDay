@@ -21,7 +21,9 @@ public sealed class GameSession
         BossService bosses,
         BookService books,
         WalletService wallet,
-        AchievementService achievements
+        AchievementService achievements,
+        int saveRevision = 0,
+        DateTime? lastSavedAt = null
     )
     {
         Character = character;
@@ -33,6 +35,8 @@ public sealed class GameSession
         Books = books;
         Wallet = wallet;
         Achievements = achievements;
+        SaveRevision = saveRevision;
+        LastSavedAt = lastSavedAt;
     }
 
     public CharacterModel Character { get; }
@@ -44,4 +48,6 @@ public sealed class GameSession
     public BookService Books { get; }
     public WalletService Wallet { get; }
     public AchievementService Achievements { get; }
+    public int SaveRevision { get; internal set; }
+    public DateTime? LastSavedAt { get; internal set; }
 }

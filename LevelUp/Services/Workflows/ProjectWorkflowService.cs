@@ -1,4 +1,5 @@
 using LevelUp.Domain.Milestones;
+using LevelUp.Domain.Attributes;
 using LevelUp.Domain.Projects;
 using LevelUp.Domain.Quests;
 using LevelUp.Services.Bosses;
@@ -38,9 +39,18 @@ public sealed class ProjectWorkflowService
         string bossName,
         string bossDescription,
         string achievementPrefix
+    ) => CreateProject(name, description, bossName, bossDescription, achievementPrefix, AttributeType.Intelligence);
+
+    public Project CreateProject(
+        string name,
+        string description,
+        string bossName,
+        string bossDescription,
+        string achievementPrefix,
+        AttributeType primaryAttribute
     )
     {
-        Project project = projectService.CreateProject(name, description);
+        Project project = projectService.CreateProject(name, description, primaryAttribute);
         bossService.CreateFinalBoss(
             project,
             bossName,
@@ -49,6 +59,33 @@ public sealed class ProjectWorkflowService
         );
         gameStateService.Save();
         return project;
+    }
+
+
+    public void ActivateProject(int projectId)
+    {
+        Project project = projectService.GetProjectById(projectId)
+            ?? throw new InvalidOperationException("O projeto não foi encontrado.");
+
+        projectService.ActivateProject(project);
+        bool milestoneActivated = milestoneService.TryActivateFirst(project);
+
+        if (milestoneActivated)
+        {
+            Milestone? active = milestoneService.GetByProjectId(project.Id)
+                .FirstOrDefault(item => item.Status == MilestoneStatus.Active);
+
+            if (active is not null)
+            {
+                questService.ActivateFirstQuestForMilestone(active.Id);
+            }
+        }
+        else
+        {
+            questService.ActivateFirstProjectQuest(project.Id);
+        }
+
+        gameStateService.Save();
     }
 
     public bool DeleteProject(int projectId)

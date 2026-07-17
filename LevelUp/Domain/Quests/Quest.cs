@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using LevelUp.Domain.Attributes;
 
 namespace LevelUp.Domain.Quests;
 
@@ -19,6 +20,9 @@ public sealed class Quest
     public string Description { get; private set; } = string.Empty;
 
     [JsonInclude]
+    public AttributeType AttributeType { get; private set; } = AttributeType.Intelligence;
+
+    [JsonInclude]
     public QuestStatus Status { get; private set; } = QuestStatus.Created;
 
     public DateTime CreatedAt { get; init; } = DateTime.Now;
@@ -33,6 +37,9 @@ public sealed class Quest
     public DateTime? ArchivedAt { get; private set; }
 
     public void Configure(string title, string description)
+        => Configure(title, description, AttributeType.Intelligence);
+
+    public void Configure(string title, string description, AttributeType attributeType)
     {
         if (!string.IsNullOrWhiteSpace(Title))
         {
@@ -41,7 +48,24 @@ public sealed class Quest
             );
         }
 
+        AttributeType = attributeType;
         SetDetails(title, description);
+    }
+
+    public void SetIndependentAttribute(AttributeType attributeType)
+    {
+        EnsureAssociationCanChange();
+        if (ProjectId is not null)
+        {
+            throw new InvalidOperationException("Apenas missões independentes podem selecionar atributo manualmente.");
+        }
+        AttributeType = attributeType;
+    }
+
+    public void InheritAttribute(AttributeType attributeType)
+    {
+        EnsureAssociationCanChange();
+        AttributeType = attributeType;
     }
 
     public void UpdateDetails(string title, string description)

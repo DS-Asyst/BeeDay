@@ -91,12 +91,34 @@ public sealed class GameStateService
             Bosses = session.Bosses.GetAll().ToList(),
             Books = session.Books.GetAll().ToList(),
             WalletTransactions = session.Wallet.GetAll().ToList(),
-            Achievements = session.Achievements.GetAll().ToList()
+            Achievements = session.Achievements.GetAll().ToList(),
+            WalletTags = session.Wallet.GetAllTags().ToList(),
+            SaveRevision = session.SaveRevision,
+            LastSavedAt = session.LastSavedAt
         };
     }
 
+    public int CurrentSaveRevision => session.SaveRevision;
+
+    public DateTime? LastSavedAt => session.LastSavedAt;
+
     public void Save()
     {
-        dataStore.Save(CreateSnapshot());
+        int previousRevision = session.SaveRevision;
+        DateTime? previousSavedAt = session.LastSavedAt;
+
+        session.SaveRevision++;
+        session.LastSavedAt = DateTime.Now;
+
+        try
+        {
+            dataStore.Save(CreateSnapshot());
+        }
+        catch
+        {
+            session.SaveRevision = previousRevision;
+            session.LastSavedAt = previousSavedAt;
+            throw;
+        }
     }
 }

@@ -21,6 +21,7 @@ public sealed class AchievementTable
             .Expand();
         table.Title = new TableTitle("[bold]Conquistas[/]");
         table.AddColumn("Conquista");
+        table.AddColumn("Descrição");
         table.AddColumn("Categoria");
         table.AddColumn("Desbloqueada em");
 
@@ -28,6 +29,7 @@ public sealed class AchievementTable
         {
             table.AddRow(
                 Markup.Escape(achievement.Name),
+                Markup.Escape(achievement.Description),
                 DisplayText.For(achievement.Category),
                 achievement.UnlockedAt?.ToString("dd/MM/yyyy HH:mm") ?? "—"
             );

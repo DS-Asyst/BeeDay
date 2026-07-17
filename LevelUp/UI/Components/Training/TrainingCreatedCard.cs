@@ -60,13 +60,6 @@ public sealed class TrainingCreatedCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Duração",
-                $"{_habit.DurationInMinutes} min"
-            )
-        );
-
-        summary.AddRow(
-            StatisticRow.Build(
                 "Recompensa de experiência",
                 $"{_habit.ExperienceReward:0.##} XP",
                 $"bold {LevelUpTheme.Success}"

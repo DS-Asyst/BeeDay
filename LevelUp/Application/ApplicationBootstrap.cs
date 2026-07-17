@@ -60,7 +60,7 @@ public static class ApplicationBootstrap
             milestones = new MilestoneService(loadedGame.Milestones);
             bosses = new BossService(loadedGame.Bosses);
             books = new BookService(loadedGame.Books);
-            wallet = new WalletService(loadedGame.WalletTransactions);
+            wallet = new WalletService(loadedGame.WalletTransactions, loadedGame.WalletTags);
             achievements = new AchievementService(loadedGame.Achievements);
         }
         else
@@ -85,7 +85,9 @@ public static class ApplicationBootstrap
             bosses,
             books,
             wallet,
-            achievements
+            achievements,
+            loadedGame?.SaveRevision ?? 0,
+            loadedGame?.LastSavedAt
         );
 
         GameStateService state = new(saveService, session);
@@ -94,7 +96,7 @@ public static class ApplicationBootstrap
             state.Save();
         }
 
-        QuestWorkflowService questWorkflow = new(quests, projects, milestones, bosses, state);
+        QuestWorkflowService questWorkflow = new(quests, projects, milestones, bosses, state, character);
         ProjectWorkflowService projectWorkflow = new(projects, quests, milestones, bosses, state);
         MilestoneWorkflowService milestoneWorkflow = new(milestones, quests, bosses, projects, state);
         BossWorkflowService bossWorkflow = new(bosses, achievements, projects, quests, milestones, state);
@@ -105,19 +107,18 @@ public static class ApplicationBootstrap
         MilestoneScreen milestoneScreen = new(quests, milestones, milestoneWorkflow, state, inputReader);
         ProjectScreen projectScreen = new(projects, quests, inputReader, state, projectWorkflow, milestones, milestoneScreen, bosses, bossWorkflow);
         WalletScreen walletScreen = new(wallet, state, inputReader);
-        BackpackScreen backpack = new(inputReader, walletScreen);
-        ReadingWorkflowService readingWorkflow = new(books, characterService, character, state);
+        ReadingWorkflowService readingWorkflow = new(books, achievements, character, state);
         LibraryScreen library = new(books, readingWorkflow, state, inputReader);
+        InventoryScreen inventory = new(inputReader, library, walletScreen);
         DiaryScreen diary = new(inputReader, training, questScreen, projectScreen);
         CharacterScreen characterScreen = new(inputReader, achievements);
-        SettingsScreen settings = new(inputReader);
+        SettingsScreen settings = new(inputReader, state);
 
         return new MainMenuScreen(
             inputReader,
             characterScreen,
             diary,
-            library,
-            backpack,
+            inventory,
             settings,
             character,
             state

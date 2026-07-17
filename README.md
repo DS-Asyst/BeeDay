@@ -1,60 +1,45 @@
 # LevelUp
 
-LevelUp é uma plataforma de evolução pessoal gamificada desenvolvida em C# e .NET 10. A aplicação usa uma interface de terminal com Spectre.Console, mantém todo o código em inglês e apresenta a experiência do usuário em português.
+Aplicação console em .NET para organizar hábitos, projetos, capítulos, quests, chefes, leitura e carteira como uma jornada de progressão pessoal.
 
 ## Estado atual
 
-- personagem com classe, nível, experiência, atributos e título atual; as faixas de progressão permanecem como regra interna;
-- diário com treinamentos, missões e projetos; capítulos são administrados dentro de cada projeto;
-- projetos com um chefe final obrigatório;
-- conquistas profissionais desbloqueadas ao derrotar o chefe final;
-- biblioteca com histórico de leitura e experiência por páginas;
-- mochila com carteira financeira real, entradas, saídas e possibilidade de saldo negativo;
-- persistência JSON, workflows, componentes reutilizáveis e testes automatizados.
+A consolidação 8.5 centraliza recompensas e progressão antes da adoção de SQLite/EF Core.
 
-## Navegação principal
-
-- Personagem
-- Diário
-- Biblioteca
-- Mochila
-- Configurações
-- Salvar jogo
-- Sair
+- Hábito concluído: **0,5 XP**.
+- Quest concluída: **1 XP**.
+- Capítulo concluído: bônus equivalente à soma do XP de suas quests.
+- Toda atividade produz um `Reward`.
+- Somente `Character.ApplyReward()` altera XP, atributos e títulos.
+- Projetos possuem atributo principal; quests vinculadas o herdam.
+- Quests independentes podem escolher atributo próprio.
+- Carteira usa movimentação assinada: valor, descrição, tag e data automática.
+- Ativações e transições são orquestradas pelos serviços/workflows.
 
 ## Executar
 
 ```bash
-dotnet restore LevelUp.slnx
+dotnet restore
 dotnet build LevelUp.slnx
-dotnet test LevelUp.Tests/LevelUp.Tests.csproj
-dotnet run --project LevelUp/LevelUp.csproj
+dotnet test LevelUp.slnx
+cd LevelUp
+dotnet run
 ```
 
-## Documentação
+O arquivo `LevelUp/Data/save.json` contém um Roadmap ASP.NET Core limpo para testar a progressão completa.
 
-A documentação oficial está em `LevelUp/docs`:
+## Documentação mantida
 
-- `Vision.md`
-- `Architecture.md`
-- `Domain.md`
-- `GameTerminology.md`
-- `Roadmap.md`
-- `Phase5.md`
-- `DecisionLog.md`
-- `CHANGELOG.md`
-- `Contributing.md`
-
-## Fase 6
-
-A Fase 6 introduz confiabilidade de persistência, schema versionado e composição centralizada. Consulte [`LevelUp/docs/Phase6.md`](LevelUp/docs/Phase6.md).
-
-## Fase 8.5
-
-A Fase 8.5 consolida a base antes de qualquer migração para banco de dados. Ela corrige testes, reduz responsabilidades das telas, amplia validações e define critérios objetivos para a Fase 9.
-
-Consulte:
-
-- `LevelUp/docs/Phase8.5.md`
+- `LevelUp/docs/Architecture.md`
+- `LevelUp/docs/DecisionLog.md`
+- `LevelUp/docs/TestingStrategy.md`
 - `LevelUp/docs/Phase9Plan.md`
-- `LevelUp/docs/Roadmap.md`
+
+
+## Navegação atual
+
+- **Personagem:** Perfil e Conquistas.
+- **Diário:** Treinamentos, Missões e Projetos.
+- **Inventário:** Biblioteca e Carteira.
+
+Na Biblioteca, o progresso solicita somente a página atual. A conclusão do livro concede XP uma única vez: 1 XP abaixo de 100 páginas ou 10% do total de páginas, arredondado para baixo, a partir de 100 páginas.

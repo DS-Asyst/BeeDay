@@ -1,4 +1,5 @@
 using LevelUp.Domain.Milestones;
+using LevelUp.Domain.Attributes;
 using LevelUp.Domain.Projects;
 using LevelUp.Domain.Quests;
 using LevelUp.Services.Persistence;
@@ -97,11 +98,19 @@ public sealed class QuestScreen
             Milestone? milestone = project is null
                 ? null
                 : selectionFlow.SelectOptionalMilestoneForCreation(project);
+            AttributeType independentAttribute = project is null
+                ? inputReader.ReadSelection(
+                    "Atributo da missão:",
+                    Enum.GetValues<AttributeType>(),
+                    DisplayText.For
+                )
+                : project.PrimaryAttribute;
 
             Quest quest = questService.CreateQuest(
                 title,
                 description,
-                project
+                project,
+                independentAttribute
             );
 
             if (milestone is not null)
@@ -481,6 +490,13 @@ public sealed class QuestScreen
         {
             ConsoleHelper.ShowSuccess(
                 $"Próximo capítulo ativado: {result.ActivatedMilestone.Title}."
+            );
+        }
+
+        if (result.ActivatedQuest is not null)
+        {
+            ConsoleHelper.ShowSuccess(
+                $"Próxima missão ativada: {result.ActivatedQuest.Title}."
             );
         }
 

@@ -1,68 +1,36 @@
-# Registro de Decisões
+# Decision Log
 
-## Código em inglês e interface em português
+## ADR-001 — Reward como resultado universal
 
-Classes, métodos, namespaces e propriedades permanecem em inglês. Todo texto apresentado ao usuário deve estar em português do Brasil.
+**Decisão:** atividades retornam `Reward`; somente `Character.ApplyReward()` modifica XP, atributos e títulos.
 
-## Cancelamento explícito
+**Motivo:** eliminar concessões duplicadas ou esquecidas e corrigir definitivamente quests concluídas sem XP.
 
-Fluxos de criação e edição aceitam o comando `cancel`. Confirmações usam opções explícitas em vez de abreviações.
+## ADR-002 — XP fixo por atividade
 
-## Organização do menu por domínio
+- Hábito: 0,5 XP.
+- Quest: 1 XP.
+- Capítulo: bônus igual à soma do XP das quests do capítulo.
 
-O menu principal é composto por Personagem, Diário, Biblioteca, Mochila, Configurações, Salvar jogo e Sair.
+O tempo do hábito deixa de influenciar recompensa.
 
-## Carteira representa dinheiro real
+## ADR-003 — Atributo principal do projeto
 
-A Carteira registra reservas e saídas reais. Ela não é moeda fictícia, não é recompensa e não deve ser misturada com XP ou conquistas.
+Projetos possuem `PrimaryAttribute`. Quests de projeto ou capítulo herdam esse atributo; seleção manual é permitida apenas para quests independentes.
 
-## Biblioteca independente
+## ADR-004 — Workflows controlam progressão
 
-Livros e leituras não pertencem a Projetos. A Biblioteca limita o foco a dois livros simultaneamente em andamento e mantém histórico por data.
+Ativação e transições de Quest, Capítulo, Boss e Projeto pertencem à camada de serviços/workflows. A UI apenas solicita operações.
 
-## Capítulos ordenam Projetos
+## ADR-005 — Persistência relacional adiada
 
-`Milestone` é apresentado como Capítulo. Missões podem pertencer opcionalmente a um Capítulo do mesmo Projeto. Apenas um Capítulo fica ativo por Projeto.
+A Fase 8.5 estabiliza regras e contratos. SQLite/EF Core será introduzido na Fase 9 sem redesenhar o domínio.
 
-## Um Chefe final por Projeto
+## 2026-07-16 — Progressão de leitura e navegação de inventário
 
-Capítulos não possuem Chefes. Cada novo Projeto exige um Chefe final. Quando todas as Missões e Capítulos válidos terminam, o Chefe é desbloqueado. Derrotá-lo conclui o Projeto.
-
-## Separação entre classe, título e conquista
-
-- Classe: identidade escolhida ao criar o Personagem e sem efeito mecânico nesta fase.
-- Título: progressão automática baseada no nível.
-- Conquista: feito histórico persistido, como a conclusão de um Projeto.
-
-## Conquista profissional composta
-
-Ao criar um Projeto, o usuário informa o nome do Chefe e um prefixo. A conquista é formada pela combinação, como `Desenvolvedor ASP.NET Core`.
-
-## Compatibilidade temporária
-
-Sobrecargas antigas permanecem apenas para facilitar testes e leitura de saves anteriores. Novas funcionalidades devem usar a arquitetura atual.
-
-## Fase 6
-
-- A Fase 6 prioriza inteligência, confiabilidade e relatórios antes de Vida e Energia.
-- Saves são versionados e migrados fora do bootstrap.
-- A Carteira é tratada como ledger: correções usam estorno.
-- `ApplicationBootstrap` e `GameSession` organizam composição e estado.
-
-## Simplificação da Fase 8.5
-
-- A tela Visão geral foi removida do menu principal.
-- A progressão fica exclusivamente na Ficha do personagem.
-- O módulo Mundo/Metas foi removido integralmente.
-- O schema 4 registra a retirada desse módulo da persistência oficial.
-## Capítulos pertencem ao contexto do Projeto
-
-Capítulos não aparecem como seção independente do Diário. O gerenciamento de capítulos é iniciado ao abrir um Projeto, reforçando a associação obrigatória entre os dois conceitos.
-
-## Carteira aceita saldo negativo
-
-A interface usa os termos Entrada e Saída. O saldo pode ficar negativo para representar dívidas, empréstimos e compromissos financeiros reais. Saídas continuam exigindo justificativa.
-
-## Progressão por nível não é exibida
-
-As faixas de título permanecem como regra interna do domínio. A Ficha do personagem apresenta somente o título e o nível atuais, sem revelar a tabela completa de progressão.
+- Registrar progresso de leitura exige somente a página atual; data e hora são capturadas automaticamente.
+- Progresso parcial de livros não concede XP.
+- A conclusão concede uma única recompensa: 1 XP para livros com menos de 100 páginas; para livros com 100 páginas ou mais, `floor(totalPages * 0,10)` XP.
+- Marcos de 1, 5, 10, 25 e 50 livros concluídos desbloqueiam conquistas temáticas de leitura.
+- A navegação principal passa a expor Inventário, contendo Biblioteca e Carteira. Mochila fica fora da navegação até existir um sistema de itens.
+- "Ficha do personagem" passa a ser apresentada como "Perfil".

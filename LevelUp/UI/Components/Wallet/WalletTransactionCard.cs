@@ -8,30 +8,30 @@ namespace LevelUp.UI.Components.Wallet;
 public sealed class WalletTransactionCard
 {
     private readonly WalletTransaction transaction;
+    private readonly string tagName;
 
-    public WalletTransactionCard(WalletTransaction transaction)
+    public WalletTransactionCard(
+        WalletTransaction transaction,
+        string tagName
+    )
     {
         this.transaction = transaction;
+        this.tagName = tagName;
     }
 
     public Panel Build()
     {
-        string type = transaction.Type == WalletTransactionType.Deposit
-            ? "Entrada"
-            : "Saída";
+        string signedValue = transaction.Amount > 0
+            ? $"+ R$ {transaction.Amount:N2}"
+            : $"- R$ {Math.Abs(transaction.Amount):N2}";
 
         EntityCard card = new EntityCard(
             transaction.Description,
             UIIcons.Gold
         )
-            .AddText("Tipo", type)
-            .AddText("Valor", $"R$ {transaction.Amount:N2}")
+            .AddText("Tag", tagName)
+            .AddText("Valor", signedValue)
             .AddText("Data", transaction.OccurredAt.ToString("dd/MM/yyyy"));
-
-        if (!string.IsNullOrWhiteSpace(transaction.Justification))
-        {
-            card.AddText("Justificativa", transaction.Justification);
-        }
 
         if (transaction.IsReversal)
         {
