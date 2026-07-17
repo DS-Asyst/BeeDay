@@ -259,16 +259,8 @@ public sealed class LibraryScreen
             int currentPage = inputReader.ReadPositiveIntegerOrCancel(
                 "Página atual:"
             );
-            DateTime date = inputReader.ReadDateOrCancel(
-                "Data da leitura (dd/MM/aaaa):"
-            );
-
             ReadingProgressResult result =
-                readingWorkflowService.RecordProgress(
-                    book,
-                    currentPage,
-                    date
-                );
+                readingWorkflowService.RecordProgress(book, currentPage);
 
             if (result.PagesRead == 0)
             {
@@ -278,14 +270,13 @@ public sealed class LibraryScreen
                 return;
             }
 
-            ConsoleHelper.ShowSuccess(
-                $"{result.PagesRead} páginas registradas. " +
-                $"Você ganhou {result.ExperienceEarned:0.##} XP."
-            );
+            ConsoleHelper.ShowSuccess($"{result.PagesRead} páginas registradas.");
 
             if (result.BookCompleted)
             {
-                ConsoleHelper.ShowSuccess("Livro concluído.");
+                ConsoleHelper.ShowSuccess(
+                    $"Livro concluído. Você ganhou {result.ExperienceEarned:0.##} XP."
+                );
             }
         }
         catch (UserCancelledException)

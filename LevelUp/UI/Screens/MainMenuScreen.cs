@@ -8,8 +8,7 @@ public sealed class MainMenuScreen
     private readonly InputReader inputReader;
     private readonly CharacterScreen characterScreen;
     private readonly DiaryScreen diaryScreen;
-    private readonly LibraryScreen libraryScreen;
-    private readonly BackpackScreen backpackScreen;
+    private readonly InventoryScreen inventoryScreen;
     private readonly SettingsScreen settingsScreen;
     private readonly CharacterModel character;
     private readonly GameStateService gameStateService;
@@ -18,8 +17,7 @@ public sealed class MainMenuScreen
         InputReader inputReader,
         CharacterScreen characterScreen,
         DiaryScreen diaryScreen,
-        LibraryScreen libraryScreen,
-        BackpackScreen backpackScreen,
+        InventoryScreen inventoryScreen,
         SettingsScreen settingsScreen,
         CharacterModel character,
         GameStateService gameStateService
@@ -28,8 +26,7 @@ public sealed class MainMenuScreen
         this.inputReader = inputReader;
         this.characterScreen = characterScreen;
         this.diaryScreen = diaryScreen;
-        this.libraryScreen = libraryScreen;
-        this.backpackScreen = backpackScreen;
+        this.inventoryScreen = inventoryScreen;
         this.settingsScreen = settingsScreen;
         this.character = character;
         this.gameStateService = gameStateService;
@@ -47,8 +44,7 @@ public sealed class MainMenuScreen
                 {
                     "Personagem",
                     "Diário",
-                    "Biblioteca",
-                    "Mochila",
+                    "Inventário",
                     "Configurações",
                     "Salvar jogo",
                     "Sair"
@@ -62,8 +58,7 @@ public sealed class MainMenuScreen
                 {
                     case "Personagem": characterScreen.Show(character); break;
                     case "Diário": diaryScreen.Show(); break;
-                    case "Biblioteca": libraryScreen.Show(); break;
-                    case "Mochila": backpackScreen.Show(); break;
+                    case "Inventário": inventoryScreen.Show(); break;
                     case "Configurações": settingsScreen.Show(); break;
                     case "Salvar jogo":
                         gameStateService.Save();

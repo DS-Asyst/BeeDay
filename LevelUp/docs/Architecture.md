@@ -19,3 +19,7 @@ Projeto → Capítulos → Quests → Boss final. O projeto define `PrimaryAttri
 ## Limite arquitetural da Fase 8.5
 
 O armazenamento permanece em JSON. As regras de negócio não dependem do mecanismo de persistência, permitindo substituir o `IGameDataStore` por EF Core na Fase 9.
+
+## Fluxo de leitura
+
+`LibraryScreen` coleta apenas a página atual. `ReadingWorkflowService` coordena o registro, detecta a transição para concluído, cria o `Reward`, aplica-o por `Character.ApplyReward()`, avalia conquistas de leitura e persiste o estado. Nenhum XP é aplicado durante progresso parcial.

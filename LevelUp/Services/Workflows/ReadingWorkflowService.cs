@@ -1,7 +1,7 @@
 using LevelUp.Domain.Books;
 using LevelUp.Domain.Rewards;
+using LevelUp.Services.Achievements;
 using LevelUp.Services.Books;
-using LevelUp.Services.Character;
 using LevelUp.Services.Persistence;
 using CharacterModel = LevelUp.Domain.Character.Character;
 
@@ -9,52 +9,39 @@ namespace LevelUp.Services.Workflows;
 
 public sealed class ReadingWorkflowService
 {
-    public const decimal ExperiencePerPage = 0.5m;
-
     private readonly BookService bookService;
-    private readonly CharacterService characterService;
+    private readonly AchievementService achievementService;
     private readonly CharacterModel character;
     private readonly GameStateService gameStateService;
 
-    public ReadingWorkflowService(
-        BookService bookService,
-        CharacterService characterService,
-        CharacterModel character,
-        GameStateService gameStateService
-    )
+    public ReadingWorkflowService(BookService bookService, AchievementService achievementService, CharacterModel character, GameStateService gameStateService)
     {
         this.bookService = bookService;
-        this.characterService = characterService;
+        this.achievementService = achievementService;
         this.character = character;
         this.gameStateService = gameStateService;
     }
 
-    public ReadingProgressResult RecordProgress(
-        Book book,
-        int currentPage,
-        DateTime recordedAt
-    )
+    public ReadingProgressResult RecordProgress(Book book, int currentPage)
     {
-        int pagesRead = bookService.RecordProgress(
-            book,
-            currentPage,
-            recordedAt
-        );
-
-        decimal experience = pagesRead * ExperiencePerPage;
-
-        if (experience > 0)
+        bool wasCompleted = book.Status == BookStatus.Completed;
+        int pagesRead = bookService.RecordProgress(book, currentPage);
+        bool completedNow = !wasCompleted && book.Status == BookStatus.Completed;
+        Reward reward = completedNow ? CreateCompletionReward(book.TotalPages) : Reward.None;
+        character.ApplyReward(reward);
+        if (completedNow)
         {
-            character.ApplyReward(new Reward(Experience: experience));
+            int completedBooks = bookService.GetAll().Count(item => item.Status == BookStatus.Completed);
+            achievementService.UnlockReadingAchievements(completedBooks);
         }
-
         gameStateService.Save();
+        return new ReadingProgressResult(book, pagesRead, reward, completedNow);
+    }
 
-        return new ReadingProgressResult(
-            book,
-            pagesRead,
-            experience,
-            book.Status == BookStatus.Completed
-        );
+    public static Reward CreateCompletionReward(int totalPages)
+    {
+        if (totalPages <= 0) throw new ArgumentOutOfRangeException(nameof(totalPages));
+        decimal experience = totalPages < 100 ? 1m : Math.Floor(totalPages * 0.10m);
+        return new Reward(Experience: experience);
     }
 }

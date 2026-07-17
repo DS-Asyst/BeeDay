@@ -34,3 +34,12 @@ O arquivo `LevelUp/Data/save.json` contém um Roadmap ASP.NET Core limpo para te
 - `LevelUp/docs/DecisionLog.md`
 - `LevelUp/docs/TestingStrategy.md`
 - `LevelUp/docs/Phase9Plan.md`
+
+
+## Navegação atual
+
+- **Personagem:** Perfil e Conquistas.
+- **Diário:** Treinamentos, Missões e Projetos.
+- **Inventário:** Biblioteca e Carteira.
+
+Na Biblioteca, o progresso solicita somente a página atual. A conclusão do livro concede XP uma única vez: 1 XP abaixo de 100 páginas ou 10% do total de páginas, arredondado para baixo, a partir de 100 páginas.

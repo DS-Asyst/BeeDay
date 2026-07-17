@@ -17,3 +17,7 @@ Os testes são organizados por funcionalidade, não por fases históricas.
 dotnet test LevelUp.slnx
 dotnet test LevelUp.slnx --collect:"XPlat Code Coverage" --settings coverlet.runsettings
 ```
+
+## Regressões de leitura
+
+Os testes de livros cobrem registro automático, conclusão, rejeição de regressão de páginas, cálculo inteiro da recompensa de conclusão e idempotência das conquistas por marcos de leitura.

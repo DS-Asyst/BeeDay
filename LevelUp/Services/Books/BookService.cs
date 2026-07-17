@@ -87,14 +87,10 @@ public sealed class BookService
         book.UpdateDetails(title, author, totalPages);
     }
 
-    public int RecordProgress(
-        Book book,
-        int currentPage,
-        DateTime recordedAt
-    )
+    public int RecordProgress(Book book, int currentPage)
     {
         EnsureManaged(book);
-        return book.RecordProgress(currentPage, recordedAt);
+        return book.RecordProgress(currentPage, DateTime.Now);
     }
 
     public void ArchiveBook(Book book)
