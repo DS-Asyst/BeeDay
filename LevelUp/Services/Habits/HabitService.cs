@@ -1,5 +1,6 @@
 using LevelUp.Domain.Attributes;
 using LevelUp.Domain.Habits;
+using LevelUp.Domain.Rewards;
 
 namespace LevelUp.Services.Habits;
 
@@ -11,18 +12,21 @@ public class HabitService
     public Habit CreateHabit(
         string title,
         string description,
+        AttributeType attributeType
+    ) => CreateHabit(title, description, 0, attributeType);
+
+    public Habit CreateHabit(
+        string title,
+        string description,
         int durationInMinutes,
         AttributeType attributeType
     )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
 
-        if (durationInMinutes <= 0)
+        if (durationInMinutes < 0)
         {
-            throw new ArgumentOutOfRangeException(
-                nameof(durationInMinutes),
-                "A duração deve ser maior que zero."
-            );
+            throw new ArgumentOutOfRangeException(nameof(durationInMinutes));
         }
 
         Habit habit = new()
@@ -52,6 +56,13 @@ public class HabitService
         Habit habit,
         string title,
         string description,
+        AttributeType attributeType
+    ) => UpdateHabit(habit, title, description, habit.DurationInMinutes, attributeType);
+
+    public void UpdateHabit(
+        Habit habit,
+        string title,
+        string description,
         int durationInMinutes,
         AttributeType attributeType
     )
@@ -59,12 +70,9 @@ public class HabitService
         EnsureManagedHabit(habit);
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
 
-        if (durationInMinutes <= 0)
+        if (durationInMinutes < 0)
         {
-            throw new ArgumentOutOfRangeException(
-                nameof(durationInMinutes),
-                "A duração deve ser maior que zero."
-            );
+            throw new ArgumentOutOfRangeException(nameof(durationInMinutes));
         }
 
         habit.Title = title.Trim();
@@ -79,12 +87,19 @@ public class HabitService
         return habit is not null && habits.Remove(habit);
     }
 
-    public decimal CompleteHabit(Habit habit)
+    public Reward CompleteHabit(Habit habit)
     {
         EnsureManagedHabit(habit);
         habit.TimesCompleted++;
-        return habit.ExperienceReward;
+        return new Reward(
+            Experience: HabitExperienceReward,
+            Attribute: habit.AttributeType,
+            AttributeExperience: HabitAttributeExperienceReward
+        );
     }
+
+    public const decimal HabitExperienceReward = 0.5m;
+    public const decimal HabitAttributeExperienceReward = 0.5m;
 
     public void LoadHabits(List<Habit> loadedHabits)
     {

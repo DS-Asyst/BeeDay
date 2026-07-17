@@ -3,7 +3,7 @@ using Xunit;
 
 namespace LevelUp.Tests;
 
-public sealed class Phase7And8Tests
+public sealed class CharacterRankTests
 {
     [Theory]
     [InlineData(1, CharacterRank.Apprentice)]

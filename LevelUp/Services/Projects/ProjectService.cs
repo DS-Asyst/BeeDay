@@ -1,5 +1,6 @@
 using LevelUp.Domain.Milestones;
 using LevelUp.Domain.Projects;
+using LevelUp.Domain.Attributes;
 using LevelUp.Domain.Quests;
 using QuestModel = LevelUp.Domain.Quests.Quest;
 
@@ -25,9 +26,16 @@ public sealed class ProjectService
     }
 
     public Project CreateProject(string name, string description)
+        => CreateProject(name, description, AttributeType.Intelligence);
+
+    public Project CreateProject(
+        string name,
+        string description,
+        AttributeType primaryAttribute
+    )
     {
         Project project = new() { Id = nextId++ };
-        project.Configure(name, description);
+        project.Configure(name, description, primaryAttribute);
         projects.Add(project);
         return project;
     }

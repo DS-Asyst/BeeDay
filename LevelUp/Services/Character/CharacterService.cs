@@ -1,4 +1,5 @@
 using LevelUp.Domain.Character;
+using LevelUp.Domain.Rewards;
 using CharacterModel = LevelUp.Domain.Character.Character;
 
 namespace LevelUp.Services.Character;
@@ -33,6 +34,6 @@ public sealed class CharacterService
     public void AddExperience(CharacterModel character, decimal experience)
     {
         ArgumentNullException.ThrowIfNull(character);
-        progressionService.AddExperience(character, experience);
+        character.ApplyReward(new Reward(Experience: experience));
     }
 }

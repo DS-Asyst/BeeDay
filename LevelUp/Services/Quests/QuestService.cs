@@ -1,4 +1,5 @@
 using LevelUp.Domain.Milestones;
+using LevelUp.Domain.Attributes;
 using LevelUp.Domain.Projects;
 using LevelUp.Domain.Quests;
 
@@ -28,6 +29,13 @@ public sealed class QuestService
         string title,
         string description,
         Project? project = null
+    ) => CreateQuest(title, description, project, AttributeType.Intelligence);
+
+    public Quest CreateQuest(
+        string title,
+        string description,
+        Project? project,
+        AttributeType independentAttribute
     )
     {
         Quest quest = new()
@@ -35,7 +43,7 @@ public sealed class QuestService
             Id = nextId++
         };
 
-        quest.Configure(title, description);
+        quest.Configure(title, description, project?.PrimaryAttribute ?? independentAttribute);
 
         if (project is not null)
         {
@@ -106,10 +114,14 @@ public sealed class QuestService
         quest.Complete();
     }
 
-    public void ArchiveQuest(Quest quest)
+    public Quest? ArchiveQuest(Quest quest)
     {
         EnsureManagedQuest(quest);
+        int? projectId = quest.ProjectId;
+        int? milestoneId = quest.MilestoneId;
+        bool wasActive = quest.Status == QuestStatus.Active;
         quest.Archive();
+        return wasActive ? ActivateFirstAvailableQuest(projectId, milestoneId) : null;
     }
 
     public void AssignQuestToProject(Quest quest, Project project)
@@ -118,6 +130,7 @@ public sealed class QuestService
         ArgumentNullException.ThrowIfNull(project);
         EnsureAssignableProject(project);
         quest.AssignToProject(project.Id);
+        quest.InheritAttribute(project.PrimaryAttribute);
     }
 
     public void RemoveQuestFromProject(Quest quest)
@@ -134,7 +147,7 @@ public sealed class QuestService
         if (!milestone.CanAcceptQuests)
         {
             throw new InvalidOperationException(
-                "Missões só podem ser associadas a capítulos criados ou ativos."
+                "Missões não podem ser associadas a capítulos concluídos ou arquivados."
             );
         }
 
@@ -147,10 +160,145 @@ public sealed class QuestService
         quest.RemoveFromMilestone();
     }
 
+
+    public Quest? ActivateNextQuest(Quest completedQuest)
+    {
+        EnsureManagedQuest(completedQuest);
+
+        if (completedQuest.Status != QuestStatus.Completed)
+        {
+            throw new InvalidOperationException(
+                "A próxima missão só pode ser ativada após a conclusão da missão atual."
+            );
+        }
+
+        IEnumerable<Quest> sequence = completedQuest.MilestoneId is int milestoneId
+            ? quests.Where(quest => quest.MilestoneId == milestoneId)
+            : completedQuest.ProjectId is int projectId
+                ? quests.Where(quest =>
+                    quest.ProjectId == projectId &&
+                    quest.MilestoneId is null)
+                : quests.Where(quest => quest.ProjectId is null);
+
+        Quest? next = sequence
+            .Where(quest =>
+                quest.Id > completedQuest.Id &&
+                quest.Status == QuestStatus.Created)
+            .OrderBy(quest => quest.Id)
+            .FirstOrDefault();
+
+        if (next is not null)
+        {
+            next.Activate();
+        }
+
+        return next;
+    }
+
+    public Quest? ActivateFirstQuestForMilestone(int milestoneId)
+    {
+        if (milestoneId <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(milestoneId));
+        }
+
+        if (quests.Any(quest =>
+            quest.MilestoneId == milestoneId &&
+            quest.Status == QuestStatus.Active))
+        {
+            return null;
+        }
+
+        Quest? first = quests
+            .Where(quest =>
+                quest.MilestoneId == milestoneId &&
+                quest.Status == QuestStatus.Created)
+            .OrderBy(quest => quest.Id)
+            .FirstOrDefault();
+
+        if (first is not null)
+        {
+            first.Activate();
+        }
+
+        return first;
+    }
+
+    public Quest? ActivateFirstProjectQuest(int projectId)
+    {
+        if (projectId <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(projectId));
+        }
+
+        if (quests.Any(quest =>
+            quest.ProjectId == projectId &&
+            quest.Status == QuestStatus.Active))
+        {
+            return null;
+        }
+
+        Quest? first = quests
+            .Where(quest =>
+                quest.ProjectId == projectId &&
+                quest.MilestoneId is null &&
+                quest.Status == QuestStatus.Created)
+            .OrderBy(quest => quest.Id)
+            .FirstOrDefault();
+
+        if (first is not null)
+        {
+            first.Activate();
+        }
+
+        return first;
+    }
+
     public bool DeleteQuest(int id)
     {
         Quest? quest = GetQuestById(id);
-        return quest is not null && quests.Remove(quest);
+        if (quest is null)
+        {
+            return false;
+        }
+
+        int? projectId = quest.ProjectId;
+        int? milestoneId = quest.MilestoneId;
+        bool shouldReconcile = quest.Status is QuestStatus.Active or QuestStatus.Completed;
+        bool removed = quests.Remove(quest);
+
+        if (removed && shouldReconcile)
+        {
+            ActivateFirstAvailableQuest(projectId, milestoneId);
+        }
+
+        return removed;
+    }
+
+    public Quest? ActivateFirstAvailableQuest(int? projectId, int? milestoneId)
+    {
+        IEnumerable<Quest> sequence = milestoneId is int chapterId
+            ? quests.Where(quest => quest.MilestoneId == chapterId)
+            : projectId is int parentProjectId
+                ? quests.Where(quest => quest.ProjectId == parentProjectId && quest.MilestoneId is null)
+                : quests.Where(quest => quest.ProjectId is null);
+
+        if (sequence.Any(quest => quest.Status == QuestStatus.Active))
+        {
+            return null;
+        }
+
+        Quest? next = sequence
+            .Where(quest => quest.Status == QuestStatus.Created)
+            .OrderBy(quest => quest.Id)
+            .FirstOrDefault();
+
+        if (next is not null)
+        {
+            next.Activate();
+        }
+
+        return next;
     }
 
     public bool IsCompleted(Quest quest)

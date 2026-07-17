@@ -39,10 +39,6 @@ public sealed class TrainingTable
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Duração[/]").Centered()
-        );
-
-        table.AddColumn(
             new TableColumn("[bold]XP[/]").Centered()
         );
 
@@ -60,7 +56,6 @@ public sealed class TrainingTable
                 habit.Id.ToString(),
                 Markup.Escape(habit.Title),
                 DisplayText.For(habit.AttributeType),
-                $"{habit.DurationInMinutes} min",
                 habit.ExperienceReward.ToString("0.##"),
                 habit.AttributeExperienceReward.ToString("0.##"),
                 habit.TimesCompleted.ToString()

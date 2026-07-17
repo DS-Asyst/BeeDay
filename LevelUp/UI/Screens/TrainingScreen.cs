@@ -1,5 +1,6 @@
 using LevelUp.Domain.Attributes;
 using LevelUp.Domain.Habits;
+using LevelUp.Domain.Rewards;
 using LevelUp.Services.Character;
 using LevelUp.Services.Habits;
 using LevelUp.Services.Persistence;
@@ -92,10 +93,6 @@ public class TrainingScreen
             string description = inputReader.ReadRequiredStringOrCancel(
                 "Descrição:"
             );
-            int durationInMinutes =
-                inputReader.ReadPositiveIntegerOrCancel(
-                    "Duração em minutos:"
-                );
             AttributeType attributeType = SelectAttribute(
                 includeCancellation: true
             );
@@ -103,7 +100,6 @@ public class TrainingScreen
             Habit habit = habitService.CreateHabit(
                 title,
                 description,
-                durationInMinutes,
                 attributeType
             );
 
@@ -230,14 +226,6 @@ public class TrainingScreen
                 "Nova descrição:"
             );
 
-            AnsiConsole.MarkupLine(
-                $"[grey]Duração atual:[/] " +
-                $"{habit.DurationInMinutes} minutos"
-            );
-            int duration = inputReader.ReadPositiveIntegerOrCancel(
-                "Nova duração em minutos:"
-            );
-
             AttributeType attributeType = SelectAttribute(
                 includeCancellation: true
             );
@@ -256,7 +244,6 @@ public class TrainingScreen
                 habit,
                 title,
                 description,
-                duration,
                 attributeType
             );
             gameStateService.Save();
@@ -284,19 +271,9 @@ public class TrainingScreen
             return;
         }
 
-        decimal experienceEarned =
-            habitService.CompleteHabit(habit);
-
-        characterService.AddExperience(
-            character,
-            experienceEarned
-        );
-
-        attributeService.AddExperience(
-            character.Attributes,
-            habit.AttributeType,
-            habit.AttributeExperienceReward
-        );
+        Reward reward = habitService.CompleteHabit(habit);
+        character.ApplyReward(reward);
+        decimal experienceEarned = reward.Experience;
 
         gameStateService.Save();
         ConsoleHelper.ShowSuccess(

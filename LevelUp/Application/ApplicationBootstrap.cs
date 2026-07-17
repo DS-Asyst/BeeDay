@@ -60,7 +60,7 @@ public static class ApplicationBootstrap
             milestones = new MilestoneService(loadedGame.Milestones);
             bosses = new BossService(loadedGame.Bosses);
             books = new BookService(loadedGame.Books);
-            wallet = new WalletService(loadedGame.WalletTransactions);
+            wallet = new WalletService(loadedGame.WalletTransactions, loadedGame.WalletTags);
             achievements = new AchievementService(loadedGame.Achievements);
         }
         else
@@ -85,7 +85,9 @@ public static class ApplicationBootstrap
             bosses,
             books,
             wallet,
-            achievements
+            achievements,
+            loadedGame?.SaveRevision ?? 0,
+            loadedGame?.LastSavedAt
         );
 
         GameStateService state = new(saveService, session);
@@ -94,7 +96,7 @@ public static class ApplicationBootstrap
             state.Save();
         }
 
-        QuestWorkflowService questWorkflow = new(quests, projects, milestones, bosses, state);
+        QuestWorkflowService questWorkflow = new(quests, projects, milestones, bosses, state, character);
         ProjectWorkflowService projectWorkflow = new(projects, quests, milestones, bosses, state);
         MilestoneWorkflowService milestoneWorkflow = new(milestones, quests, bosses, projects, state);
         BossWorkflowService bossWorkflow = new(bosses, achievements, projects, quests, milestones, state);
@@ -110,7 +112,7 @@ public static class ApplicationBootstrap
         LibraryScreen library = new(books, readingWorkflow, state, inputReader);
         DiaryScreen diary = new(inputReader, training, questScreen, projectScreen);
         CharacterScreen characterScreen = new(inputReader, achievements);
-        SettingsScreen settings = new(inputReader);
+        SettingsScreen settings = new(inputReader, state);
 
         return new MainMenuScreen(
             inputReader,

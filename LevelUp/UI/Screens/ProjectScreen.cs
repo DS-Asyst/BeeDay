@@ -1,4 +1,5 @@
 using LevelUp.Domain.Bosses;
+using LevelUp.Domain.Attributes;
 using LevelUp.Domain.Projects;
 using LevelUp.Services.Bosses;
 using LevelUp.Services.Milestones;
@@ -78,13 +79,18 @@ public sealed class ProjectScreen
         {
             string name = inputReader.ReadRequiredStringOrCancel("Nome:");
             string description = inputReader.ReadRequiredStringOrCancel("Descrição:");
+            AttributeType primaryAttribute = inputReader.ReadSelection(
+                "Atributo principal:",
+                Enum.GetValues<AttributeType>(),
+                DisplayText.For
+            );
             string bossName = inputReader.ReadRequiredStringOrCancel("Nome do chefe final:");
             string bossDescription = inputReader.ReadRequiredStringOrCancel("Descrição do chefe final:");
             string achievementPrefix = inputReader.ReadRequiredStringOrCancel(
                 "Prefixo da conquista (ex.: Desenvolvedor):"
             );
             Project project = projectWorkflowService.CreateProject(
-                name, description, bossName, bossDescription, achievementPrefix
+                name, description, bossName, bossDescription, achievementPrefix, primaryAttribute
             );
             ConsoleHelper.ShowSuccess("Projeto e chefe final criados com sucesso.");
             AnsiConsole.WriteLine();
@@ -167,9 +173,7 @@ public sealed class ProjectScreen
             ConsoleHelper.ShowInformation("Ativação cancelada.");
             return;
         }
-        projectService.ActivateProject(project);
-        milestoneService.TryActivateFirst(project);
-        gameStateService.Save();
+        projectWorkflowService.ActivateProject(project.Id);
         ConsoleHelper.ShowSuccess("Projeto ativado com sucesso.");
     }
 

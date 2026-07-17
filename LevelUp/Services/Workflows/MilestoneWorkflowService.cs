@@ -36,7 +36,11 @@ public sealed class MilestoneWorkflowService
         Milestone milestone = milestoneService.GetById(milestoneId)
             ?? throw new InvalidOperationException("O capítulo não foi encontrado.");
         milestoneService.CompleteManually(milestone, questService.GetAllQuests());
-        milestoneService.UnlockAndActivateNext(milestone);
+        Milestone? next = milestoneService.UnlockAndActivateNext(milestone);
+        if (next is not null)
+        {
+            questService.ActivateFirstQuestForMilestone(next.Id);
+        }
 
         var project = projectService.GetProjectById(milestone.ProjectId);
         if (project is not null)

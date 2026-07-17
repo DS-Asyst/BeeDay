@@ -6,7 +6,7 @@ using Xunit;
 
 namespace LevelUp.Tests;
 
-public sealed class Phase85PolishTests
+public sealed class GameDataValidatorTests
 {
     [Fact]
     public void Validator_ShouldRejectMilestoneWithoutExistingProject()

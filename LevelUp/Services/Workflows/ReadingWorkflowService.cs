@@ -1,4 +1,5 @@
 using LevelUp.Domain.Books;
+using LevelUp.Domain.Rewards;
 using LevelUp.Services.Books;
 using LevelUp.Services.Character;
 using LevelUp.Services.Persistence;
@@ -44,7 +45,7 @@ public sealed class ReadingWorkflowService
 
         if (experience > 0)
         {
-            characterService.AddExperience(character, experience);
+            character.ApplyReward(new Reward(Experience: experience));
         }
 
         gameStateService.Save();

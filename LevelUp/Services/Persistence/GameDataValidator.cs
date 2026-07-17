@@ -12,10 +12,12 @@ public sealed class GameDataValidator
         EnsureUniqueIds(gameData.Milestones.Select(item => item.Id), "capítulos");
         EnsureUniqueIds(gameData.Bosses.Select(item => item.Id), "chefes");
         EnsureUniqueIds(gameData.Books.Select(item => item.Id), "livros");
+        EnsureUniqueIds(gameData.WalletTags.Select(item => item.Id), "tags da carteira");
         EnsureUniqueIds(gameData.WalletTransactions.Select(item => item.Id), "movimentações");
 
         HashSet<int> projectIds = gameData.Projects.Select(item => item.Id).ToHashSet();
         HashSet<int> milestoneIds = gameData.Milestones.Select(item => item.Id).ToHashSet();
+        HashSet<int> walletTagIds = gameData.WalletTags.Select(item => item.Id).ToHashSet();
 
         foreach (var quest in gameData.Quests)
         {
@@ -42,6 +44,24 @@ public sealed class GameDataValidator
             if (!projectIds.Contains(boss.ProjectId))
             {
                 throw new InvalidDataException($"O chefe {boss.Id} não possui um projeto válido.");
+            }
+        }
+
+
+        foreach (var transaction in gameData.WalletTransactions)
+        {
+            if (transaction.Amount == 0)
+            {
+                throw new InvalidDataException(
+                    $"A movimentação {transaction.Id} possui valor zero."
+                );
+            }
+
+            if (transaction.TagId is int tagId && !walletTagIds.Contains(tagId))
+            {
+                throw new InvalidDataException(
+                    $"A movimentação {transaction.Id} aponta para uma tag inexistente."
+                );
             }
         }
 
