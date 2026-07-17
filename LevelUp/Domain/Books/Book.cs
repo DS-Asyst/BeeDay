@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 
 namespace LevelUp.Domain.Books;
 
@@ -6,30 +5,22 @@ public sealed class Book
 {
     public int Id { get; set; }
 
-    [JsonInclude]
     public string Title { get; private set; } = string.Empty;
 
-    [JsonInclude]
     public string Author { get; private set; } = string.Empty;
 
-    [JsonInclude]
     public int TotalPages { get; private set; }
 
-    [JsonInclude]
     public int CurrentPage { get; private set; }
 
-    [JsonInclude]
     public BookStatus Status { get; private set; } = BookStatus.Locked;
 
     public DateTime CreatedAt { get; init; } = DateTime.Now;
 
-    [JsonInclude]
     public DateTime? StartedAt { get; private set; }
 
-    [JsonInclude]
     public DateTime? CompletedAt { get; private set; }
 
-    [JsonInclude]
     public DateTime? ArchivedAt { get; private set; }
 
     public List<ReadingProgressEntry> ProgressHistory { get; set; } = [];

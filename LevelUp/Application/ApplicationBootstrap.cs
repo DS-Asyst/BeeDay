@@ -18,10 +18,12 @@ namespace LevelUp.Application;
 
 public static class ApplicationBootstrap
 {
-    public static MainMenuScreen Build()
+    public static MainMenuScreen Build(IGameDataStore dataStore)
     {
+        ArgumentNullException.ThrowIfNull(dataStore);
+
         HabitService habitService = new();
-        SaveService saveService = new();
+        IGameDataStore persistence = dataStore;
         ProgressionService progressionService = new();
         InputReader inputReader = new();
         CharacterService characterService = new(progressionService);
@@ -30,15 +32,14 @@ public static class ApplicationBootstrap
         GameData? loadedGame;
         try
         {
-            loadedGame = saveService.Load();
+            loadedGame = persistence.Load();
         }
-        catch (CorruptedSaveException exception)
+        catch (Exception exception)
         {
-            ConsoleHelper.ShowWarning(
-                "O arquivo de salvamento estava corrompido. " +
-                $"Um backup foi criado em: {exception.BackupPath}"
+            throw new InvalidOperationException(
+                "Não foi possível carregar os dados do banco SQLite.",
+                exception
             );
-            loadedGame = null;
         }
 
         CharacterModel character;
@@ -90,7 +91,7 @@ public static class ApplicationBootstrap
             loadedGame?.LastSavedAt
         );
 
-        GameStateService state = new(saveService, session);
+        GameStateService state = new(persistence, session);
         if (isNewGame)
         {
             state.Save();

@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 
 namespace LevelUp.Domain.Wallet;
 
@@ -7,36 +6,26 @@ public sealed class WalletTransaction
     public int Id { get; set; }
 
     // Mantido para compatibilidade com saves anteriores. Novas regras usam Amount assinado.
-    [JsonInclude]
     public WalletTransactionType Type { get; private set; }
 
-    [JsonInclude]
     public decimal Amount { get; private set; }
 
-    [JsonInclude]
     public string Description { get; private set; } = string.Empty;
 
-    [JsonInclude]
     public int? TagId { get; private set; }
 
-    [JsonInclude]
     public string Justification { get; private set; } = string.Empty;
 
-    [JsonInclude]
     public DateTime OccurredAt { get; private set; }
 
     public DateTime CreatedAt { get; init; } = DateTime.Now;
 
-    [JsonInclude]
     public DateTime? UpdatedAt { get; private set; }
 
-    [JsonInclude]
     public int? ReversalOfTransactionId { get; private set; }
 
-    [JsonInclude]
     public DateTime? ReversedAt { get; private set; }
 
-    [JsonInclude]
     public string ReversalReason { get; private set; } = string.Empty;
 
     public bool IsReversal => ReversalOfTransactionId is not null;

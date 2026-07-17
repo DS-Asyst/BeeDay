@@ -34,3 +34,25 @@ A Fase 8.5 estabiliza regras e contratos. SQLite/EF Core será introduzido na Fa
 - Marcos de 1, 5, 10, 25 e 50 livros concluídos desbloqueiam conquistas temáticas de leitura.
 - A navegação principal passa a expor Inventário, contendo Biblioteca e Carteira. Mochila fica fora da navegação até existir um sistema de itens.
 - "Ficha do personagem" passa a ser apresentada como "Perfil".
+
+## ADR — SQLite como persistência operacional da Fase 9
+
+**Decisão:** usar SQLite com Entity Framework Core e migrations como única persistência oficial. Não há importação, exportação ou fallback automático em JSON.
+
+**Motivos:** aplicação local e monousuário, implantação simples, transações ACID, inspeção fácil e caminho natural para EF Core.
+
+**Consequências:** o banco fica fora do repositório, migrations passam a ser obrigatórias e o executável depende do projeto Infrastructure.
+
+## ADR — Tabelas por agregado com payload serializado
+
+**Decisão:** persistir cada agregado em tabela própria, mantendo seu payload completo serializado na primeira iteração relacional.
+
+**Motivos:** preservar invariantes e encapsulamento do domínio, reduzir risco de regressão e permitir migração gradual para um modelo relacional mais granular.
+
+**Consequências:** consultas analíticas dentro do payload não são o foco desta fase. Colunas e read models normalizados deverão ser adicionados quando houver requisitos concretos da interface Blazor.
+
+## ADR — Composition root separado
+
+**Decisão:** transformar o projeto central em biblioteca e criar `LevelUp.Console` como executável.
+
+**Motivos:** impedir dependência circular entre núcleo e infraestrutura e permitir outros clientes no futuro.
