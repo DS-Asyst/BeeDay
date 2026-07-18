@@ -4,10 +4,7 @@
 <PageTitle>Dashboard | LevelUp</PageTitle>
 
 <section class="dashboard-page levelup-fade-in">
-    <DashboardHeader CharacterName="@ViewModel.CharacterName"
-                     Level="@ViewModel.Level"
-                     Experience="@ViewModel.Experience"
-                     ExperienceToNextLevel="@ViewModel.ExperienceToNextLevel" />
+    <DashboardHeader Character="@ViewModel.Character" />
 
     <FilterBar />
     <DashboardGrid />

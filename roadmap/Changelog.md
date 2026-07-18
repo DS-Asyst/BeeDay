@@ -22,3 +22,22 @@
 
 - Current Git branch and complete `.git` directory.
 - Existing domain, services, infrastructure and persistence behavior.
+
+## Sprint 3.2 - Character Summary
+
+### Added
+
+- CharacterSummaryViewModel.
+- Reusable CharacterSummaryCard component.
+- Character level, experience progress and gold presentation.
+- Responsive character summary layout.
+
+### Changed
+
+- DashboardHeader now delegates character presentation to CharacterSummaryCard.
+- DashboardViewModel now composes CharacterSummaryViewModel.
+
+### Notes
+
+- Character values still use preview data.
+- Domain service integration remains scheduled for the integration sprint.
