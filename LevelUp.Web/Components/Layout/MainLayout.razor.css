@@ -2,53 +2,27 @@
     min-height: 100vh;
 }
 
-.levelup-topbar {
-    min-height: 64px;
-    background: var(--levelup-color-primary);
-    color: #ffffff;
-    box-shadow: var(--levelup-shadow-sm);
-}
-
-.levelup-topbar__content {
-    min-height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--levelup-spacing-md);
-}
-
-.levelup-brand {
-    color: inherit;
-    font-size: 1.25rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-decoration: none;
-}
-
-.levelup-foundation-label {
-    color: rgb(255 255 255 / 75%);
-    font-size: 0.875rem;
-}
-
 .levelup-main {
     padding-block: var(--levelup-spacing-xl);
 }
 
 #blazor-error-ui {
-    background: #fff3cd;
-    bottom: 0;
-    box-shadow: 0 -1px 4px rgb(0 0 0 / 20%);
-    display: none;
-    left: 0;
-    padding: 0.75rem 1.25rem;
     position: fixed;
-    width: 100%;
     z-index: 1000;
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
+    display: none;
+    padding: .75rem 1.25rem;
+    border: 1px solid #e5c76b;
+    border-radius: var(--levelup-radius-md);
+    background: #fff3cd;
+    box-shadow: var(--levelup-shadow-md);
 }
 
 #blazor-error-ui .dismiss {
-    cursor: pointer;
     position: absolute;
-    right: 0.75rem;
-    top: 0.5rem;
+    top: .5rem;
+    right: .75rem;
+    cursor: pointer;
 }

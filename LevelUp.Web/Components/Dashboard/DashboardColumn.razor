@@ -1,0 +1,20 @@
+<section class="dashboard-column" aria-labelledby="@HeadingId">
+    <header class="dashboard-column__header">
+        <h2 id="@HeadingId">@Title</h2>
+        <span>@Count</span>
+    </header>
+
+    <EmptyStateCard Title="@EmptyTitle"
+                    Description="@EmptyDescription"
+                    Symbol="@Symbol" />
+</section>
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string EmptyTitle { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string EmptyDescription { get; set; } = string.Empty;
+    [Parameter] public string Symbol { get; set; } = "○";
+    [Parameter] public int Count { get; set; }
+
+    private string HeadingId => $"dashboard-{Title.ToLowerInvariant().Replace(" ", "-")}";
+}

@@ -1,0 +1,29 @@
+.placeholder-page {
+    max-width: 48rem;
+    padding: var(--levelup-spacing-xl);
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-xl);
+    background: var(--levelup-color-surface);
+    box-shadow: var(--levelup-shadow-sm);
+}
+
+.placeholder-page__eyebrow {
+    color: var(--levelup-color-primary);
+    font-size: .75rem;
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.placeholder-page h1 {
+    margin-block: var(--levelup-spacing-xs) var(--levelup-spacing-sm);
+}
+
+.placeholder-page p {
+    color: var(--levelup-color-text-secondary);
+}
+
+.placeholder-page a {
+    color: var(--levelup-color-primary);
+    font-weight: 800;
+}

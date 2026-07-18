@@ -1,0 +1,35 @@
+.filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--levelup-spacing-md);
+    padding: var(--levelup-spacing-md) var(--levelup-spacing-lg);
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-lg);
+    background: var(--levelup-color-surface);
+    box-shadow: var(--levelup-shadow-sm);
+}
+
+.filter-bar__button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--levelup-spacing-sm);
+    min-height: 2.65rem;
+    padding-inline: var(--levelup-spacing-md);
+    border: 1px solid var(--levelup-color-border-strong);
+    border-radius: var(--levelup-radius-md);
+    background: var(--levelup-color-surface);
+    color: var(--levelup-color-text-primary);
+    font-weight: 800;
+}
+
+.filter-bar__button--primary {
+    border-color: var(--levelup-color-primary);
+    background: var(--levelup-color-primary);
+    color: #fff;
+}
+
+.filter-bar__button:disabled {
+    cursor: default;
+    opacity: 1;
+}

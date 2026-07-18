@@ -1,78 +1,20 @@
 @page "/"
 @inject LevelUpSession Session
 
-<PageTitle>LevelUp</PageTitle>
+<PageTitle>Dashboard | LevelUp</PageTitle>
 
-<section class="design-system-page levelup-fade-in">
-    <header class="design-system-page__header">
-        <div>
-            <span class="design-system-page__eyebrow">
-                Design System
-            </span>
+<section class="dashboard-page levelup-fade-in">
+    <DashboardHeader CharacterName="@ViewModel.CharacterName"
+                     Level="@ViewModel.Level"
+                     Experience="@ViewModel.Experience"
+                     ExperienceToNextLevel="@ViewModel.ExperienceToNextLevel" />
 
-            <h1>LevelUp Web</h1>
-
-            <p>
-                Reusable components for the LevelUp Blazor interface.
-            </p>
-        </div>
-
-        <LevelUpBadge Variant="LevelUpBadgeVariant.Success">
-            Foundation ready
-        </LevelUpBadge>
-    </header>
-
-    <div class="design-system-grid">
-        <LevelUpCard Title="Character progression"
-                     Subtitle="Example of a reusable LevelUp card">
-            <LevelUpProgressBar Label="Experience"
-                                Value="640"
-                                Maximum="1000" />
-        </LevelUpCard>
-
-        <LevelUpCard Title="Actions"
-                     Subtitle="Button variants">
-            <div class="design-system-actions">
-                <LevelUpButton>
-                    Primary
-                </LevelUpButton>
-
-                <LevelUpButton Variant="LevelUpButtonVariant.Secondary">
-                    Secondary
-                </LevelUpButton>
-
-                <LevelUpButton Variant="LevelUpButtonVariant.Ghost">
-                    Ghost
-                </LevelUpButton>
-            </div>
-        </LevelUpCard>
-
-        <LevelUpCard Title="Statuses"
-                     Subtitle="Badge variants">
-            <div class="design-system-badges">
-                <LevelUpBadge Variant="LevelUpBadgeVariant.Primary">
-                    Active
-                </LevelUpBadge>
-
-                <LevelUpBadge Variant="LevelUpBadgeVariant.Success">
-                    Completed
-                </LevelUpBadge>
-
-                <LevelUpBadge Variant="LevelUpBadgeVariant.Warning">
-                    Pending
-                </LevelUpBadge>
-
-                <LevelUpBadge Variant="LevelUpBadgeVariant.Danger">
-                    Blocked
-                </LevelUpBadge>
-            </div>
-        </LevelUpCard>
-    </div>
+    <FilterBar />
+    <DashboardGrid />
 </section>
 
 @code {
-    protected override Task OnInitializedAsync()
-    {
-        return Session.InitializeAsync();
-    }
+    private DashboardViewModel ViewModel { get; } = DashboardViewModel.Preview;
+
+    protected override Task OnInitializedAsync() => Session.InitializeAsync();
 }

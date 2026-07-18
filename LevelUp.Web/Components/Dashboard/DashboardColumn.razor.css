@@ -1,0 +1,38 @@
+.dashboard-column {
+    min-width: 0;
+    padding: var(--levelup-spacing-md);
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-lg);
+    background: var(--levelup-color-surface);
+    box-shadow: var(--levelup-shadow-sm);
+}
+
+.dashboard-column__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--levelup-spacing-md);
+    padding: var(--levelup-spacing-xs) var(--levelup-spacing-xs) var(--levelup-spacing-md);
+}
+
+.dashboard-column__header h2 {
+    margin: 0;
+    color: var(--levelup-color-text-primary);
+    font-size: .8rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.dashboard-column__header span {
+    display: grid;
+    place-items: center;
+    min-width: 1.7rem;
+    height: 1.7rem;
+    padding-inline: .4rem;
+    border-radius: 999px;
+    background: var(--levelup-color-primary-soft);
+    color: var(--levelup-color-primary-dark);
+    font-size: .75rem;
+    font-weight: 900;
+}

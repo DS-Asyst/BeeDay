@@ -1,0 +1,88 @@
+.top-navigation {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--levelup-color-primary-dark);
+    color: #fff;
+    box-shadow: var(--levelup-shadow-sm);
+}
+
+.top-navigation__inner {
+    width: min(calc(100% - 2rem), var(--levelup-content-width));
+    min-height: 4rem;
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--levelup-spacing-xl);
+}
+
+.top-navigation__brand {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-decoration: none;
+}
+
+.top-navigation__links {
+    display: flex;
+    align-items: stretch;
+    height: 4rem;
+}
+
+.top-navigation__links ::deep a {
+    display: inline-flex;
+    align-items: center;
+    padding-inline: var(--levelup-spacing-md);
+    border-bottom: 3px solid transparent;
+    color: rgb(255 255 255 / 78%);
+    font-size: .94rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: color var(--levelup-transition-fast), background var(--levelup-transition-fast), border-color var(--levelup-transition-fast);
+}
+
+.top-navigation__links ::deep a:hover,
+.top-navigation__links ::deep a.active {
+    border-bottom-color: var(--levelup-color-primary-light);
+    background: rgb(255 255 255 / 8%);
+    color: #fff;
+}
+
+.top-navigation__gold {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--levelup-spacing-sm);
+    color: #fff2b3;
+    font-size: .9rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.top-navigation__gold-icon {
+    color: var(--levelup-color-gold);
+    font-size: 1rem;
+}
+
+@media (max-width: 760px) {
+    .top-navigation__inner {
+        grid-template-columns: 1fr auto;
+        gap: var(--levelup-spacing-md);
+        padding-block: .75rem;
+    }
+
+    .top-navigation__links {
+        grid-column: 1 / -1;
+        order: 3;
+        width: 100%;
+        height: auto;
+        overflow-x: auto;
+    }
+
+    .top-navigation__links ::deep a {
+        min-height: 2.75rem;
+        padding-inline: .9rem;
+        white-space: nowrap;
+    }
+}

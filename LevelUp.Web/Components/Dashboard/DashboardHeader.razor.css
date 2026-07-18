@@ -1,0 +1,97 @@
+.dashboard-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(19rem, .7fr);
+    align-items: center;
+    gap: var(--levelup-spacing-2xl);
+    padding: var(--levelup-spacing-xl);
+    border-radius: var(--levelup-radius-xl);
+    background: linear-gradient(135deg, var(--levelup-color-primary-dark), var(--levelup-color-primary));
+    box-shadow: var(--levelup-shadow-md);
+    color: #fff;
+}
+
+.dashboard-header__eyebrow {
+    display: block;
+    margin-bottom: var(--levelup-spacing-xs);
+    color: #d9c8f3;
+    font-size: .72rem;
+    font-weight: 900;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.dashboard-header h1 {
+    margin-bottom: var(--levelup-spacing-sm);
+    color: #fff;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    line-height: 1.12;
+}
+
+.dashboard-header p {
+    max-width: 43rem;
+    margin: 0;
+    color: rgb(255 255 255 / 78%);
+}
+
+.dashboard-header__progress {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--levelup-spacing-lg);
+    padding: var(--levelup-spacing-lg);
+    border: 1px solid rgb(255 255 255 / 14%);
+    border-radius: var(--levelup-radius-lg);
+    background: rgb(255 255 255 / 9%);
+}
+
+.dashboard-header__level {
+    display: grid;
+    place-items: center;
+    min-width: 4.5rem;
+    padding-right: var(--levelup-spacing-lg);
+    border-right: 1px solid rgb(255 255 255 / 18%);
+}
+
+.dashboard-header__level span {
+    color: rgb(255 255 255 / 70%);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.dashboard-header__level strong {
+    font-size: 2rem;
+    line-height: 1.05;
+}
+
+@media (max-width: 860px) {
+    .dashboard-header {
+        grid-template-columns: 1fr;
+        gap: var(--levelup-spacing-xl);
+    }
+}
+
+@media (max-width: 520px) {
+    .dashboard-header {
+        padding: var(--levelup-spacing-lg);
+    }
+
+    .dashboard-header__progress {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-header__level {
+        grid-template-columns: auto auto;
+        justify-content: start;
+        gap: var(--levelup-spacing-sm);
+        padding-right: 0;
+        padding-bottom: var(--levelup-spacing-md);
+        border-right: 0;
+        border-bottom: 1px solid rgb(255 255 255 / 18%);
+    }
+
+    .dashboard-header__level strong {
+        font-size: 1.4rem;
+    }
+}

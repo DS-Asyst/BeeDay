@@ -1,0 +1,11 @@
+<div class="empty-state-card">
+    <div class="empty-state-card__symbol" aria-hidden="true">@Symbol</div>
+    <strong>@Title</strong>
+    <p>@Description</p>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Description { get; set; } = string.Empty;
+    [Parameter] public string Symbol { get; set; } = "○";
+}

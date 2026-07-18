@@ -1,0 +1,25 @@
+<section class="dashboard-header" aria-labelledby="dashboard-title">
+    <div class="dashboard-header__welcome">
+        <span class="dashboard-header__eyebrow">Today</span>
+        <h1 id="dashboard-title">Welcome back, @CharacterName</h1>
+        <p>Keep moving forward. Every completed action builds your progress.</p>
+    </div>
+
+    <div class="dashboard-header__progress">
+        <div class="dashboard-header__level">
+            <span>Level</span>
+            <strong>@Level</strong>
+        </div>
+
+        <LevelUpProgressBar Label="Experience"
+                            Value="Experience"
+                            Maximum="ExperienceToNextLevel" />
+    </div>
+</section>
+
+@code {
+    [Parameter] public string CharacterName { get; set; } = "Tiago";
+    [Parameter] public int Level { get; set; } = 8;
+    [Parameter] public decimal Experience { get; set; } = 640;
+    [Parameter] public decimal ExperienceToNextLevel { get; set; } = 1000;
+}
