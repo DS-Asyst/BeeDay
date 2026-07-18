@@ -1,3 +1,4 @@
+using LevelUp.Application;
 using LevelUp.Domain;
 using LevelUp.Domain.Milestones;
 using LevelUp.Domain.Quests;
@@ -8,6 +9,8 @@ using LevelUp.Services.Habits;
 using LevelUp.Services.Milestones;
 using LevelUp.Services.Persistence;
 using LevelUp.Services.Projects;
+using LevelUp.Services.Tasks;
+using LevelUp.Services.Todos;
 using LevelUp.Services.Quests;
 using LevelUp.Services.Wallet;
 using LevelUp.Services.Workflows;
@@ -164,18 +167,19 @@ public sealed class ProgressionAutomationTests
 
         public TestContext()
         {
-            GameStateService state = new(
-                store,
+            GameSession session = new(
+                new LevelUp.Domain.Character.Character(),
                 new HabitService(),
+                new TaskService(),
                 Projects,
-                Quests,
+                new ProjectTodoService(),
                 Milestones,
                 Bosses,
                 new BookService(),
                 new WalletService(),
-                new AchievementService(),
-                new LevelUp.Domain.Character.Character()
+                new AchievementService()
             );
+            GameStateService state = new(store, session);
 
             QuestWorkflow = new QuestWorkflowService(
                 Quests,

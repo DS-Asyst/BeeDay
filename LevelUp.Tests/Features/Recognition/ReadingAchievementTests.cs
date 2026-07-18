@@ -14,7 +14,7 @@ public sealed class ReadingAchievementTests
         var repeated = service.UnlockReadingAchievements(1);
         Assert.Single(first);
         Assert.Empty(repeated);
-        Assert.Equal("Primeiras Páginas", service.GetUnlocked().Single().Name);
+        Assert.Equal("First Pages", service.GetUnlocked().Single().Name);
     }
 
     [Fact]

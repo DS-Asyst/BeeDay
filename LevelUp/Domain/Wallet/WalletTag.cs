@@ -15,7 +15,7 @@ public sealed class WalletTag
     {
         if (!string.IsNullOrWhiteSpace(Name))
         {
-            throw new InvalidOperationException("A tag já foi configurada.");
+            throw new InvalidOperationException("The tag has already been configured.");
         }
 
         SetName(name);

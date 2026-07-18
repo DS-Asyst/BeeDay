@@ -46,37 +46,37 @@ public sealed class QuestScreen
 
         while (running)
         {
-            ConsoleHelper.ShowHeader("Painel de Missões");
+            ConsoleHelper.ShowHeader("Task Board");
 
             string option = inputReader.ReadSelection(
-                "Escolha uma opção:",
+                "Choose an option:",
                 new[]
                 {
-                    "Nova missão",
-                    "Abrir missão",
-                    "Listar missões",
-                    "Voltar"
+                    "New Task",
+                    "Open Task",
+                    "List Tasks",
+                    "Back"
                 },
                 choice => choice
             );
 
             switch (option)
             {
-                case "Nova missão":
+                case "New Task":
                     CreateQuest();
                     inputReader.WaitForContinue();
                     break;
 
-                case "Abrir missão":
+                case "Open Task":
                     OpenQuest();
                     break;
 
-                case "Listar missões":
+                case "List Tasks":
                     ListQuests();
                     inputReader.WaitForContinue();
                     break;
 
-                case "Voltar":
+                case "Back":
                     running = false;
                     break;
             }
@@ -85,14 +85,14 @@ public sealed class QuestScreen
 
     private void CreateQuest()
     {
-        ConsoleHelper.ShowHeader("Nova missão");
+        ConsoleHelper.ShowHeader("New Task");
         inputReader.ShowCancellationHint();
 
         try
         {
-            string title = inputReader.ReadRequiredStringOrCancel("Título:");
+            string title = inputReader.ReadRequiredStringOrCancel("Title:");
             string description = inputReader.ReadRequiredStringOrCancel(
-                "Descrição:"
+                "Description:"
             );
             Project? project = selectionFlow.SelectOptionalProjectForCreation();
             Milestone? milestone = project is null
@@ -100,7 +100,7 @@ public sealed class QuestScreen
                 : selectionFlow.SelectOptionalMilestoneForCreation(project);
             AttributeType independentAttribute = project is null
                 ? inputReader.ReadSelection(
-                    "Atributo da missão:",
+                    "Task attribute:",
                     Enum.GetValues<AttributeType>(),
                     DisplayText.For
                 )
@@ -122,7 +122,7 @@ public sealed class QuestScreen
             gameStateService.Save();
 
             ConsoleHelper.ShowSuccess(
-                "Missão cadastrada com sucesso."
+                "Task created successfully."
             );
             AnsiConsole.WriteLine();
             AnsiConsole.Write(BuildQuestCard(quest).Build());
@@ -130,7 +130,7 @@ public sealed class QuestScreen
         catch (UserCancelledException)
         {
             ConsoleHelper.ShowInformation(
-                "Criação da missão cancelada."
+                "Task creation cancelled."
             );
         }
     }
@@ -143,14 +143,14 @@ public sealed class QuestScreen
         if (quests.Count == 0)
         {
             ConsoleHelper.ShowInformation(
-                "Nenhuma missão foi cadastrada."
+                "No tasks have been created."
             );
             inputReader.WaitForContinue();
             return;
         }
 
         Quest selectedQuest = selectionFlow.SelectQuest(
-            "Selecione uma missão:",
+            "Select a task:",
             quests
         );
 
@@ -158,7 +158,7 @@ public sealed class QuestScreen
 
         while (opened)
         {
-            ConsoleHelper.ShowHeader("Missão");
+            ConsoleHelper.ShowHeader("Task");
             AnsiConsole.Write(
                 BuildQuestCard(selectedQuest).Build()
             );
@@ -169,39 +169,39 @@ public sealed class QuestScreen
             );
 
             string action = inputReader.ReadSelection(
-                "Escolha uma ação:",
+                "Choose an action:",
                 actions,
                 choice => choice
             );
 
             switch (action)
             {
-                case "Editar":
+                case "Edit":
                     EditQuest(selectedQuest);
                     inputReader.WaitForContinue();
                     break;
 
-                case "Alterar projeto":
+                case "Change Project":
                     ChangeQuestProject(selectedQuest);
                     inputReader.WaitForContinue();
                     break;
 
-                case "Alterar capítulo":
+                case "Change Milestone":
                     ChangeQuestMilestone(selectedQuest);
                     inputReader.WaitForContinue();
                     break;
 
-                case "Concluir":
+                case "Score Positive":
                     CompleteQuest(selectedQuest);
                     inputReader.WaitForContinue();
                     break;
 
-                case "Arquivar":
+                case "Archive":
                     ArchiveQuest(selectedQuest);
                     inputReader.WaitForContinue();
                     break;
 
-                case "Excluir":
+                case "Delete":
                     opened = !DeleteQuest(selectedQuest);
                     if (opened)
                     {
@@ -209,7 +209,7 @@ public sealed class QuestScreen
                     }
                     break;
 
-                case "Voltar":
+                case "Back":
                     opened = false;
                     break;
             }
@@ -222,29 +222,29 @@ public sealed class QuestScreen
 
         if (quest.Status is QuestStatus.Created or QuestStatus.Active)
         {
-            actions.Add("Editar");
-            actions.Add("Alterar projeto");
-            actions.Add("Alterar capítulo");
+            actions.Add("Edit");
+            actions.Add("Change Project");
+            actions.Add("Change Milestone");
         }
 
         if (quest.Status == QuestStatus.Active)
         {
-            actions.Add("Concluir");
+            actions.Add("Score Positive");
         }
 
         if (quest.Status != QuestStatus.Archived)
         {
-            actions.Add("Arquivar");
+            actions.Add("Archive");
         }
 
-        actions.Add("Excluir");
-        actions.Add("Voltar");
+        actions.Add("Delete");
+        actions.Add("Back");
         return actions;
     }
 
     private void ListQuests()
     {
-        ConsoleHelper.ShowHeader("Painel de Missões");
+        ConsoleHelper.ShowHeader("Task Board");
 
         IReadOnlyList<QuestModel> quests =
             questService.GetAllQuests();
@@ -252,7 +252,7 @@ public sealed class QuestScreen
         if (quests.Count == 0)
         {
             ConsoleHelper.ShowInformation(
-                "Nenhuma missão foi cadastrada."
+                "No tasks have been created."
             );
             return;
         }
@@ -268,28 +268,28 @@ public sealed class QuestScreen
     private void EditQuest(Quest quest)
     {
         AnsiConsole.MarkupLine(
-            $"[grey]Título atual:[/] " +
+            $"[grey]Current title:[/] " +
             $"{Markup.Escape(quest.Title)}"
         );
 
         string title = inputReader.ReadRequiredString(
-            "Novo título:"
+            "New title:"
         );
 
         AnsiConsole.MarkupLine(
-            $"[grey]Descrição atual:[/] " +
+            $"[grey]Current description:[/] " +
             $"{Markup.Escape(quest.Description)}"
         );
 
         string description = inputReader.ReadRequiredString(
-            "Nova descrição:"
+            "New description:"
         );
 
         if (!inputReader.ReadConfirmation(
-            $"Salvar alterações em '{quest.Title}'?"
+            $"Save changes to '{quest.Title}'?"
         ))
         {
-            ConsoleHelper.ShowInformation("Edição cancelada.");
+            ConsoleHelper.ShowInformation("Edit cancelled.");
             return;
         }
 
@@ -300,7 +300,7 @@ public sealed class QuestScreen
         );
         gameStateService.Save();
         ConsoleHelper.ShowSuccess(
-            "Missão atualizada com sucesso."
+            "Task updated successfully."
         );
     }
 
@@ -311,24 +311,24 @@ public sealed class QuestScreen
         );
 
         AnsiConsole.MarkupLine(
-            $"[grey]Projeto atual:[/] " +
+            $"[grey]Current project:[/] " +
             $"{Markup.Escape(currentProject)}"
         );
 
         string option = inputReader.ReadSelection(
-            "Escolha uma ação:",
+            "Choose an action:",
             new[]
             {
-                "Associar a um projeto",
+                "Assign to a Project",
                 "Tornar independente",
-                "Cancelar"
+                "Cancel"
             },
             choice => choice
         );
 
         bool changed = option switch
         {
-            "Associar a um projeto" =>
+            "Assign to a Project" =>
                 AssignQuestToProject(quest),
             "Tornar independente" =>
                 RemoveQuestFromProject(quest),
@@ -339,10 +339,10 @@ public sealed class QuestScreen
         {
             gameStateService.Save();
         }
-        else if (option == "Cancelar")
+        else if (option == "Cancel")
         {
             ConsoleHelper.ShowInformation(
-                "Alteração cancelada."
+                "Change cancelled."
             );
         }
     }
@@ -360,13 +360,13 @@ public sealed class QuestScreen
         if (availableProjects.Count == 0)
         {
             ConsoleHelper.ShowInformation(
-                "Não existem projetos disponíveis."
+                "No projects are available."
             );
             return false;
         }
 
         Project selectedProject = inputReader.ReadSelection(
-            "Selecione o projeto:",
+            "Select a project:",
             availableProjects,
             project => $"{project.Name} — {DisplayText.For(project.Status)}"
         );
@@ -381,7 +381,7 @@ public sealed class QuestScreen
             selectedProject
         );
         ConsoleHelper.ShowSuccess(
-            "Missão associada ao projeto com sucesso."
+            "Task assigned to the project successfully."
         );
         return true;
     }
@@ -391,7 +391,7 @@ public sealed class QuestScreen
         if (quest.ProjectId is null)
         {
             ConsoleHelper.ShowInformation(
-                "A missão já é independente."
+                "The task is already independent."
             );
             return false;
         }
@@ -403,7 +403,7 @@ public sealed class QuestScreen
 
         questService.RemoveQuestFromProject(quest);
         ConsoleHelper.ShowSuccess(
-            "A associação com o projeto foi removida."
+            "The project association was removed."
         );
         return true;
     }
@@ -413,7 +413,7 @@ public sealed class QuestScreen
         if (quest.ProjectId is null)
         {
             ConsoleHelper.ShowInformation(
-                "Associe a missão a um projeto antes de selecionar um capítulo."
+                "Associate the task with a project before selecting a milestone."
             );
             return;
         }
@@ -425,12 +425,12 @@ public sealed class QuestScreen
         }
 
         string option = inputReader.ReadSelection(
-            "Escolha uma ação:",
-            new[] { "Associar a um capítulo", "Remover capítulo", "Cancelar" },
+            "Choose an action:",
+            new[] { "Associate with a Milestone", "Remove Milestone", "Cancel" },
             choice => choice
         );
 
-        if (option == "Associar a um capítulo")
+        if (option == "Associate with a Milestone")
         {
             Milestone? milestone = selectionFlow.SelectOptionalMilestone(project, requireConfirmation: false);
             if (milestone is not null)
@@ -442,25 +442,25 @@ public sealed class QuestScreen
 
                 questService.AssignQuestToMilestone(quest, milestone);
                 gameStateService.Save();
-                ConsoleHelper.ShowSuccess("Associação com o capítulo atualizada.");
+                ConsoleHelper.ShowSuccess("Milestone association updated.");
             }
         }
-        else if (option == "Remover capítulo" && quest.MilestoneId is not null)
+        else if (option == "Remove Milestone" && quest.MilestoneId is not null)
         {
             questService.RemoveQuestFromMilestone(quest);
             gameStateService.Save();
-            ConsoleHelper.ShowSuccess("Associação com o capítulo removida.");
+            ConsoleHelper.ShowSuccess("Milestone association removed.");
         }
     }
 
     private void CompleteQuest(Quest quest)
     {
         if (!inputReader.ReadConfirmation(
-            $"Concluir a missão '{quest.Title}'?"
+            $"Complete the task '{quest.Title}'?"
         ))
         {
             ConsoleHelper.ShowInformation(
-                "Conclusão da missão cancelada."
+                "Task completion cancelled."
             );
             return;
         }
@@ -469,42 +469,42 @@ public sealed class QuestScreen
             questWorkflowService.CompleteQuest(quest.Id);
 
         ConsoleHelper.ShowSuccess(
-            "Missão concluída com sucesso."
+            "Task completed successfully."
         );
 
         ShowProjectProgress(result.Quest.ProjectId);
 
         if (result.MilestoneCompleted)
         {
-            ConsoleHelper.ShowSuccess("O capítulo foi concluído automaticamente.");
+            ConsoleHelper.ShowSuccess("The milestone was completed automatically.");
         }
 
         if (result.UnlockedBoss is not null)
         {
             ConsoleHelper.ShowSuccess(
-                $"Chefe desbloqueado: {result.UnlockedBoss.Name}."
+                $"Boss unlocked: {result.UnlockedBoss.Name}."
             );
         }
 
         if (result.ActivatedMilestone is not null)
         {
             ConsoleHelper.ShowSuccess(
-                $"Próximo capítulo ativado: {result.ActivatedMilestone.Title}."
+                $"Next milestone activated: {result.ActivatedMilestone.Title}."
             );
         }
 
         if (result.ActivatedQuest is not null)
         {
             ConsoleHelper.ShowSuccess(
-                $"Próxima missão ativada: {result.ActivatedQuest.Title}."
+                $"Next task activated: {result.ActivatedQuest.Title}."
             );
         }
 
         if (result.ProjectCompleted)
         {
             ConsoleHelper.ShowSuccess(
-                "Todas as missões e capítulos válidos foram concluídos. " +
-                "O projeto foi concluído automaticamente."
+                "All valid tasks and milestones were completed. " +
+                "The project was completed automatically."
             );
         }
     }
@@ -512,11 +512,11 @@ public sealed class QuestScreen
     private void ArchiveQuest(Quest quest)
     {
         if (!inputReader.ReadConfirmation(
-            $"Arquivar a missão '{quest.Title}'?"
+            $"Archive the task '{quest.Title}'?"
         ))
         {
             ConsoleHelper.ShowInformation(
-                "Arquivamento cancelado."
+                "Archiving canceled."
             );
             return;
         }
@@ -524,18 +524,18 @@ public sealed class QuestScreen
         questService.ArchiveQuest(quest);
         gameStateService.Save();
         ConsoleHelper.ShowSuccess(
-            "Missão arquivada com sucesso."
+            "Task archived successfully."
         );
     }
 
     private bool DeleteQuest(Quest quest)
     {
         if (!inputReader.ReadConfirmation(
-            $"Excluir permanentemente '{quest.Title}'?"
+            $"Permanently delete '{quest.Title}'?"
         ))
         {
             ConsoleHelper.ShowInformation(
-                "Exclusão cancelada."
+                "Deletion cancelled."
             );
             return false;
         }
@@ -545,14 +545,14 @@ public sealed class QuestScreen
         if (!deleted)
         {
             ConsoleHelper.ShowError(
-                "Não foi possível excluir a missão."
+                "The task could not be deleted."
             );
             return false;
         }
 
         gameStateService.Save();
         ConsoleHelper.ShowSuccess(
-            "Missão excluída com sucesso."
+            "Task deleted successfully."
         );
         return true;
     }
@@ -598,7 +598,7 @@ public sealed class QuestScreen
             );
 
         AnsiConsole.MarkupLine(
-            $"[grey]Progresso de " +
+            $"[grey]Progress for " +
             $"{Markup.Escape(project.Name)}:[/] " +
             $"[green]{progress:0.##}%[/]"
         );

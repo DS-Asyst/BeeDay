@@ -26,7 +26,7 @@ public sealed class BookCard
             UIIcons.Book
         )
             .AddText(
-                "Autor",
+                "Author",
                 book.Author
             )
             .AddText(
@@ -34,15 +34,15 @@ public sealed class BookCard
                 DisplayText.For(book.Status)
             )
             .AddText(
-                "Página atual",
+                "Current Page",
                 $"{book.CurrentPage} de {book.TotalPages}"
             )
             .AddRenderable(
-                "Progresso",
+                "Progress",
                 BuildProgressBar()
             )
             .AddText(
-                "Páginas registradas",
+                "Pages Recorded",
                 book.ProgressHistory
                     .Sum(entry => entry.PagesRead)
                     .ToString()

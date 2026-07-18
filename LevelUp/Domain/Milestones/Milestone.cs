@@ -48,7 +48,7 @@ public sealed class Milestone
     {
         if (ProjectId > 0)
         {
-            throw new InvalidOperationException("O capítulo já foi configurado.");
+            throw new InvalidOperationException("The milestone has already been configured.");
         }
 
         if (projectId <= 0)
@@ -89,7 +89,7 @@ public sealed class Milestone
     {
         if (Status != MilestoneStatus.Locked)
         {
-            throw new InvalidOperationException("Apenas capítulos bloqueados podem ser desbloqueados.");
+            throw new InvalidOperationException("Only locked milestones can be unlocked.");
         }
 
         Status = MilestoneStatus.Created;
@@ -100,7 +100,7 @@ public sealed class Milestone
     {
         if (Status != MilestoneStatus.Created)
         {
-            throw new InvalidOperationException("Apenas capítulos criados podem ser ativados.");
+            throw new InvalidOperationException("Only created milestones can be activated.");
         }
 
         Status = MilestoneStatus.Active;
@@ -111,7 +111,7 @@ public sealed class Milestone
     {
         if (Status != MilestoneStatus.Active)
         {
-            throw new InvalidOperationException("Apenas capítulos ativos podem ser concluídos.");
+            throw new InvalidOperationException("Only active milestones can be completed.");
         }
 
         Status = MilestoneStatus.Completed;
@@ -122,17 +122,17 @@ public sealed class Milestone
     {
         if (CompletedAt is null)
         {
-            throw new InvalidOperationException("Apenas capítulos concluídos podem conceder recompensas.");
+            throw new InvalidOperationException("Only completed milestones can grant rewards.");
         }
 
         if (!Reward.HasReward)
         {
-            throw new InvalidOperationException("Este capítulo não possui recompensa configurada.");
+            throw new InvalidOperationException("This milestone has no configured reward.");
         }
 
         if (RewardClaimedAt is not null)
         {
-            throw new InvalidOperationException("A recompensa deste capítulo já foi resgatada.");
+            throw new InvalidOperationException("This milestone reward has already been claimed.");
         }
 
         RewardClaimedAt = DateTime.Now;
@@ -142,7 +142,7 @@ public sealed class Milestone
     {
         if (Status == MilestoneStatus.Archived)
         {
-            throw new InvalidOperationException("O capítulo já está arquivado.");
+            throw new InvalidOperationException("The milestone is already archived.");
         }
 
         Status = MilestoneStatus.Archived;
@@ -153,7 +153,7 @@ public sealed class Milestone
     {
         if (Status is MilestoneStatus.Completed or MilestoneStatus.Archived)
         {
-            throw new InvalidOperationException("Capítulos concluídos ou arquivados não podem ser alterados.");
+            throw new InvalidOperationException("Completed or archived milestones cannot be changed.");
         }
     }
 }

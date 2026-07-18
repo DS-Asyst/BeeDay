@@ -26,7 +26,7 @@ public static class ConsoleHelper
 
         AnsiConsole.MarkupLine(
             $"[bold {LevelUpTheme.Success}]" +
-            $"{UIIcons.Success} Sucesso:[/] " +
+            $"{UIIcons.Success} Success:[/] " +
             Markup.Escape(message)
         );
     }
@@ -37,7 +37,7 @@ public static class ConsoleHelper
 
         AnsiConsole.MarkupLine(
             $"[bold {LevelUpTheme.Danger}]" +
-            $"{UIIcons.Error} Erro:[/] " +
+            $"{UIIcons.Error} Error:[/] " +
             Markup.Escape(message)
         );
     }

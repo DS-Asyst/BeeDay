@@ -39,9 +39,9 @@ public sealed class BossWorkflowService
     public BossDefeatResult Defeat(int projectId)
     {
         Project project = projectService.GetProjectById(projectId)
-            ?? throw new InvalidOperationException("O projeto não foi encontrado.");
+            ?? throw new InvalidOperationException("The project was not found.");
         BossEncounter boss = bossService.GetByProjectId(projectId)
-            ?? throw new InvalidOperationException("O projeto não possui chefe final.");
+            ?? throw new InvalidOperationException("The project does not have a final boss.");
 
         if (!projectService.AreCompletionRequirementsMet(
             project,
@@ -50,7 +50,7 @@ public sealed class BossWorkflowService
         ))
         {
             throw new InvalidOperationException(
-                "Conclua todas as missões e capítulos antes de enfrentar o chefe final."
+                "Complete all tasks and milestones before facing the final boss."
             );
         }
 

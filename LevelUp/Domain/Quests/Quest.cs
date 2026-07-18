@@ -34,7 +34,7 @@ public sealed class Quest
         if (!string.IsNullOrWhiteSpace(Title))
         {
             throw new InvalidOperationException(
-                "A missão já foi configurada."
+                "The task has already been configured."
             );
         }
 
@@ -47,7 +47,7 @@ public sealed class Quest
         EnsureAssociationCanChange();
         if (ProjectId is not null)
         {
-            throw new InvalidOperationException("Apenas missões independentes podem selecionar atributo manualmente.");
+            throw new InvalidOperationException("Only independent tasks can select an attribute manually.");
         }
         AttributeType = attributeType;
     }
@@ -76,7 +76,7 @@ public sealed class Quest
         if (MilestoneId is not null && ProjectId != projectId)
         {
             throw new InvalidOperationException(
-                "Remova a associação com o capítulo antes de alterar o projeto."
+                "Remove the milestone association before changing the project."
             );
         }
 
@@ -90,7 +90,7 @@ public sealed class Quest
         if (MilestoneId is not null)
         {
             throw new InvalidOperationException(
-                "Remova a associação com o capítulo antes de remover o projeto."
+                "Remove the milestone association before removing the project."
             );
         }
 
@@ -109,7 +109,7 @@ public sealed class Quest
         if (ProjectId != projectId)
         {
             throw new InvalidOperationException(
-                "A missão e seu capítulo devem pertencer ao mesmo projeto."
+                "The task and its milestone must belong to the same project."
             );
         }
 
@@ -127,7 +127,7 @@ public sealed class Quest
         if (Status != QuestStatus.Created)
         {
             throw new InvalidOperationException(
-                "Apenas missões criadas podem ser ativadas."
+                "Only created tasks can be activated."
             );
         }
 
@@ -140,7 +140,7 @@ public sealed class Quest
         if (Status != QuestStatus.Active)
         {
             throw new InvalidOperationException(
-                "Apenas missões ativas podem ser concluídas."
+                "Only active tasks can be completed."
             );
         }
 
@@ -153,7 +153,7 @@ public sealed class Quest
         if (Status == QuestStatus.Archived)
         {
             throw new InvalidOperationException(
-                "A missão já está arquivada."
+                "The task is already archived."
             );
         }
 
@@ -174,7 +174,7 @@ public sealed class Quest
         if (Status is QuestStatus.Completed or QuestStatus.Archived)
         {
             throw new InvalidOperationException(
-                "Missões concluídas ou arquivadas não podem alterar associações."
+                "Completed or archived tasks cannot change associations."
             );
         }
     }
@@ -184,7 +184,7 @@ public sealed class Quest
         if (Status == QuestStatus.Archived)
         {
             throw new InvalidOperationException(
-                "Missões arquivadas não podem ser alteradas."
+                "Archived tasks cannot be changed."
             );
         }
     }

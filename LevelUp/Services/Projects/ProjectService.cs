@@ -177,7 +177,7 @@ public sealed class ProjectService
         ArgumentNullException.ThrowIfNull(project);
         if (!projects.Any(existing => existing.Id == project.Id))
         {
-            throw new InvalidOperationException("O projeto não é gerenciado por este serviço.");
+            throw new InvalidOperationException("The project is not managed by this service.");
         }
     }
 }

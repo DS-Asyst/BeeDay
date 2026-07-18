@@ -58,7 +58,7 @@ public sealed class QuestWorkflowService
     public QuestCompletionResult CompleteQuest(int questId)
     {
         Quest quest = questService.GetQuestById(questId)
-            ?? throw new InvalidOperationException("A missão selecionada não foi encontrada.");
+            ?? throw new InvalidOperationException("The selected task was not found.");
         questService.CompleteQuest(quest);
 
         Project? project = quest.ProjectId is null

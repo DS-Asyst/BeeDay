@@ -34,7 +34,7 @@ public sealed class MilestoneWorkflowService
     public void CompleteManualMilestone(int milestoneId)
     {
         Milestone milestone = milestoneService.GetById(milestoneId)
-            ?? throw new InvalidOperationException("O capítulo não foi encontrado.");
+            ?? throw new InvalidOperationException("The milestone was not found.");
         milestoneService.CompleteManually(milestone, questService.GetAllQuests());
         Milestone? next = milestoneService.UnlockAndActivateNext(milestone);
         if (next is not null)
@@ -67,7 +67,7 @@ public sealed class MilestoneWorkflowService
         if (linkedQuests.Any(quest => quest.Status is QuestStatus.Completed or QuestStatus.Archived))
         {
             throw new InvalidOperationException(
-                "Capítulos com missões concluídas ou arquivadas não podem ser excluídos. Arquive o capítulo."
+                "Milestones with completed or archived tasks cannot be deleted. Archive the milestone instead."
             );
         }
 

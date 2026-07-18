@@ -43,7 +43,7 @@ public sealed class WalletService
             StringComparison.OrdinalIgnoreCase
         )))
         {
-            throw new InvalidOperationException("Já existe uma tag com esse nome.");
+            throw new InvalidOperationException("A tag with this name already exists.");
         }
 
         WalletTag tag = new() { Id = nextTagId++ };
@@ -61,7 +61,7 @@ public sealed class WalletService
             existing.Id != tag.Id &&
             string.Equals(existing.Name, name.Trim(), StringComparison.OrdinalIgnoreCase)))
         {
-            throw new InvalidOperationException("Já existe uma tag com esse nome.");
+            throw new InvalidOperationException("A tag with this name already exists.");
         }
 
         tag.UpdateName(name);
@@ -78,7 +78,7 @@ public sealed class WalletService
         if (transactions.Any(transaction => transaction.TagId == id))
         {
             throw new InvalidOperationException(
-                "Tags utilizadas em movimentações não podem ser excluídas."
+                "Tags used by transactions cannot be deleted."
             );
         }
 
@@ -97,10 +97,10 @@ public sealed class WalletService
     {
         if (tagId is null)
         {
-            return "Sem tag";
+            return "No tag";
         }
 
-        return GetTagById(tagId.Value)?.Name ?? "Tag não encontrada";
+        return GetTagById(tagId.Value)?.Name ?? "Tag not found";
     }
 
     public WalletTransaction AddTransaction(
@@ -186,13 +186,13 @@ public sealed class WalletService
         if (transaction.IsReversal)
         {
             throw new InvalidOperationException(
-                "Uma movimentação de estorno não pode ser estornada novamente."
+                "A reversal transaction cannot be reversed again."
             );
         }
 
         if (transaction.IsReversed)
         {
-            throw new InvalidOperationException("A movimentação já foi estornada.");
+            throw new InvalidOperationException("The transaction has already been reversed.");
         }
 
         WalletTransaction reversal = new() { Id = nextTransactionId++ };
@@ -210,9 +210,9 @@ public sealed class WalletService
     private WalletTag GetOrCreateLegacyTag()
     {
         WalletTag? existing = tags.FirstOrDefault(tag =>
-            string.Equals(tag.Name, "Sem tag", StringComparison.OrdinalIgnoreCase));
+            string.Equals(tag.Name, "No tag", StringComparison.OrdinalIgnoreCase));
 
-        return existing ?? CreateTag("Sem tag");
+        return existing ?? CreateTag("No tag");
     }
 
     private void EnsureManaged(WalletTransaction transaction)
@@ -222,7 +222,7 @@ public sealed class WalletService
         if (!transactions.Any(existing => existing.Id == transaction.Id))
         {
             throw new InvalidOperationException(
-                "A movimentação não é gerenciada por este serviço."
+                "The transaction is not managed by this service."
             );
         }
     }
@@ -233,7 +233,7 @@ public sealed class WalletService
 
         if (!tags.Any(existing => existing.Id == tag.Id))
         {
-            throw new InvalidOperationException("A tag não é gerenciada por este serviço.");
+            throw new InvalidOperationException("The tag is not managed by this service.");
         }
     }
 }

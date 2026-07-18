@@ -19,11 +19,11 @@ public sealed class BookTable
             .Border(TableBorder.Rounded)
             .Expand();
 
-        table.AddColumn("Livro");
-        table.AddColumn("Autor");
+        table.AddColumn("Book");
+        table.AddColumn("Author");
         table.AddColumn("Status");
-        table.AddColumn("Página");
-        table.AddColumn("Progresso");
+        table.AddColumn("Page");
+        table.AddColumn("Progress");
 
         foreach (LevelUp.Domain.Books.Book book in books)
         {

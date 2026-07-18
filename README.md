@@ -1,5 +1,10 @@
 # LevelUp
 
+## Current domain refactor (Schema 7)
+
+The source of truth is now: **Habits**, independent recurring **Tasks**, project **To-dos**, Projects and Milestones. Habit duration was removed. See `LevelUp/docs/DomainRefactorV7.md`.
+
+
 Aplicação console em .NET 10 que transforma hábitos, missões, projetos, leitura e finanças pessoais em um sistema de progressão inspirado em RPG.
 
 ## Estado atual

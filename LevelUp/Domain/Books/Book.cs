@@ -38,7 +38,7 @@ public sealed class Book
         if (!string.IsNullOrWhiteSpace(Title))
         {
             throw new InvalidOperationException(
-                "O livro já foi configurado."
+                "The book has already been configured."
             );
         }
 
@@ -56,7 +56,7 @@ public sealed class Book
         if (totalPages < CurrentPage)
         {
             throw new InvalidOperationException(
-                "O total de páginas não pode ser menor que a página atual."
+                "Total pages cannot be less than the current page."
             );
         }
 
@@ -68,7 +68,7 @@ public sealed class Book
         if (Status != BookStatus.Locked)
         {
             throw new InvalidOperationException(
-                "Apenas livros bloqueados podem ser iniciados."
+                "Only locked books can be started."
             );
         }
 
@@ -81,14 +81,14 @@ public sealed class Book
         if (Status != BookStatus.Reading)
         {
             throw new InvalidOperationException(
-                "O progresso só pode ser registrado em livros em andamento."
+                "Progress can only be recorded for books in progress."
             );
         }
 
         if (currentPage < CurrentPage)
         {
             throw new InvalidOperationException(
-                "A página atual não pode ser menor que a última página registrada."
+                "The current page cannot be less than the last recorded page."
             );
         }
 
@@ -96,7 +96,7 @@ public sealed class Book
         {
             throw new ArgumentOutOfRangeException(
                 nameof(currentPage),
-                "A página atual não pode ultrapassar o total do livro."
+                "The current page cannot exceed the total number of pages."
             );
         }
 
@@ -127,7 +127,7 @@ public sealed class Book
         if (Status == BookStatus.Archived)
         {
             throw new InvalidOperationException(
-                "O livro já está arquivado."
+                "The book is already archived."
             );
         }
 
@@ -148,7 +148,7 @@ public sealed class Book
         {
             throw new ArgumentOutOfRangeException(
                 nameof(totalPages),
-                "O livro deve possuir pelo menos uma página."
+                "The book must have at least one page."
             );
         }
 
@@ -163,7 +163,7 @@ public sealed class Book
         if (Status == BookStatus.Archived)
         {
             throw new InvalidOperationException(
-                "Livros arquivados não podem ser modificados."
+                "Archived books cannot be changed."
             );
         }
     }

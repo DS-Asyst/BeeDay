@@ -38,38 +38,38 @@ public sealed class MilestoneScreen
         bool running = true;
         while (running)
         {
-            ConsoleHelper.ShowHeader($"Capítulos — {project.Name}");
+            ConsoleHelper.ShowHeader($"Milestones — {project.Name}");
             string option = inputReader.ReadSelection(
-                "Escolha uma opção:",
-                new[] { "Novo capítulo", "Abrir capítulo", "Listar capítulos", "Voltar" },
+                "Choose an option:",
+                new[] { "New Milestone", "Open Milestone", "List Milestones", "Back" },
                 choice => choice
             );
             switch (option)
             {
-                case "Novo capítulo": Create(project); inputReader.WaitForContinue(); break;
-                case "Abrir capítulo": Open(project); break;
-                case "Listar capítulos": List(project); inputReader.WaitForContinue(); break;
-                case "Voltar": running = false; break;
+                case "New Milestone": Create(project); inputReader.WaitForContinue(); break;
+                case "Open Milestone": Open(project); break;
+                case "List Milestones": List(project); inputReader.WaitForContinue(); break;
+                case "Back": running = false; break;
             }
         }
     }
 
     private void Create(Project project)
     {
-        ConsoleHelper.ShowHeader("Novo capítulo");
+        ConsoleHelper.ShowHeader("New Milestone");
         inputReader.ShowCancellationHint();
         try
         {
             var existing = milestoneService.GetByProjectId(project.Id);
             int suggestedOrder = existing.Count == 0 ? 1 : existing.Max(item => item.Order) + 1;
-            string title = inputReader.ReadRequiredStringOrCancel("Título:");
-            string description = inputReader.ReadRequiredStringOrCancel("Descrição:");
+            string title = inputReader.ReadRequiredStringOrCancel("Title:");
+            string description = inputReader.ReadRequiredStringOrCancel("Description:");
             PromptDecision decision = inputReader.ReadDecision(
-                "Usar uma quantidade específica de missões concluídas?"
+                "Require a specific number of completed tasks?"
             );
             if (decision == PromptDecision.Cancel) throw new UserCancelledException();
             int required = decision == PromptDecision.Yes
-                ? inputReader.ReadPositiveIntegerOrCancel("Quantidade necessária de missões concluídas:")
+                ? inputReader.ReadPositiveIntegerOrCancel("Required completed tasks:")
                 : 0;
             Milestone milestone = milestoneService.CreateMilestone(
                 project, title, description, suggestedOrder, required
@@ -79,12 +79,12 @@ public sealed class MilestoneScreen
                 milestoneService.Activate(milestone);
             }
             gameStateService.Save();
-            ConsoleHelper.ShowSuccess("Capítulo criado com sucesso.");
+            ConsoleHelper.ShowSuccess("Milestone created successfully.");
             AnsiConsole.Write(BuildCard(milestone).Build());
         }
         catch (UserCancelledException)
         {
-            ConsoleHelper.ShowInformation("Criação do capítulo cancelada.");
+            ConsoleHelper.ShowInformation("Milestone creation cancelled.");
         }
     }
 
@@ -93,50 +93,50 @@ public sealed class MilestoneScreen
         var milestones = milestoneService.GetByProjectId(project.Id);
         if (milestones.Count == 0)
         {
-            ConsoleHelper.ShowInformation("Este projeto não possui capítulos.");
+            ConsoleHelper.ShowInformation("This project has no milestones.");
             inputReader.WaitForContinue();
             return;
         }
         Milestone milestone = inputReader.ReadSelection(
-            "Selecione um capítulo:",
+            "Select a milestone:",
             milestones,
             item => item.IsLocked
-                ? $"{item.Order}. Capítulo bloqueado — {DisplayText.For(item.Status)}"
+                ? $"{item.Order}. Locked milestone — {DisplayText.For(item.Status)}"
                 : $"{item.Order}. {item.Title} — {DisplayText.For(item.Status)}"
         );
         bool opened = true;
         while (opened)
         {
-            ConsoleHelper.ShowHeader("Capítulo");
+            ConsoleHelper.ShowHeader("Milestone");
             AnsiConsole.Write(BuildCard(milestone).Build());
             AnsiConsole.WriteLine();
-            List<string> actions = ["Ver missões"];
-            if (milestone.Status == MilestoneStatus.Created) actions.Add("Ativar");
+            List<string> actions = ["Ver tasks"];
+            if (milestone.Status == MilestoneStatus.Created) actions.Add("Activer");
             if (milestone.Status == MilestoneStatus.Active &&
                 questService.GetQuestsByMilestoneId(milestone.Id).Count == 0)
-                actions.Add("Concluir manualmente");
+                actions.Add("Score Positive manualmente");
             if (milestone.Status is not (MilestoneStatus.Completed or MilestoneStatus.Archived))
-                actions.Add("Editar");
-            if (milestone.Status != MilestoneStatus.Archived) actions.Add("Arquivar");
-            actions.Add("Excluir");
-            actions.Add("Voltar");
-            string action = inputReader.ReadSelection("Escolha uma ação:", actions, choice => choice);
+                actions.Add("Edit");
+            if (milestone.Status != MilestoneStatus.Archived) actions.Add("Archive");
+            actions.Add("Delete");
+            actions.Add("Back");
+            string action = inputReader.ReadSelection("Choose an action:", actions, choice => choice);
             switch (action)
             {
-                case "Ver missões": ShowQuests(milestone); inputReader.WaitForContinue(); break;
-                case "Ativar": milestoneService.Activate(milestone); gameStateService.Save(); break;
-                case "Concluir manualmente": milestoneWorkflowService.CompleteManualMilestone(milestone.Id); break;
-                case "Editar":
+                case "Ver tasks": ShowQuests(milestone); inputReader.WaitForContinue(); break;
+                case "Activer": milestoneService.Activate(milestone); gameStateService.Save(); break;
+                case "Score Positive manualmente": milestoneWorkflowService.CompleteManualMilestone(milestone.Id); break;
+                case "Edit":
                     milestoneService.Update(
                         milestone,
-                        inputReader.ReadRequiredString("Novo título:"),
-                        inputReader.ReadRequiredString("Nova descrição:")
+                        inputReader.ReadRequiredString("New title:"),
+                        inputReader.ReadRequiredString("New description:")
                     );
                     gameStateService.Save();
                     break;
-                case "Arquivar": milestoneService.Archive(milestone); gameStateService.Save(); break;
-                case "Excluir": opened = !milestoneWorkflowService.DeleteMilestone(milestone.Id); break;
-                case "Voltar": opened = false; break;
+                case "Archive": milestoneService.Archive(milestone); gameStateService.Save(); break;
+                case "Delete": opened = !milestoneWorkflowService.DeleteMilestone(milestone.Id); break;
+                case "Back": opened = false; break;
             }
         }
     }
@@ -146,7 +146,7 @@ public sealed class MilestoneScreen
         var milestones = milestoneService.GetByProjectId(project.Id);
         if (milestones.Count == 0)
         {
-            ConsoleHelper.ShowInformation("Este projeto não possui capítulos.");
+            ConsoleHelper.ShowInformation("This project has no milestones.");
             return;
         }
         AnsiConsole.Write(new MilestoneTable(
@@ -160,11 +160,11 @@ public sealed class MilestoneScreen
         var quests = questService.GetQuestsByMilestoneId(milestone.Id);
         if (quests.Count == 0)
         {
-            ConsoleHelper.ShowInformation("Nenhuma missão está vinculada a este capítulo.");
+            ConsoleHelper.ShowInformation("No tasks are linked to this milestone.");
             return;
         }
         Table table = new Table();
-        table.AddColumn("Missão");
+        table.AddColumn("Task");
         table.AddColumn("Status");
         foreach (var quest in quests)
             table.AddRow(Markup.Escape(quest.Title), DisplayText.For(quest.Status));

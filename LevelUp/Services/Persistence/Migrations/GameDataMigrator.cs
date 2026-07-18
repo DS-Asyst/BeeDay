@@ -9,7 +9,7 @@ public sealed class GameDataMigrator
     public GameDataMigrator(IEnumerable<IGameDataMigration>? migrations = null)
     {
         IEnumerable<IGameDataMigration> configured = migrations ??
-            [new MigrationV1ToV2(), new MigrationV2ToV3(), new MigrationV3ToV4(), new MigrationV4ToV5(), new MigrationV5ToV6()];
+            [new MigrationV1ToV2(), new MigrationV2ToV3(), new MigrationV3ToV4(), new MigrationV4ToV5(), new MigrationV5ToV6(), new MigrationV6ToV7()];
         this.migrations = configured.ToDictionary(item => item.SourceVersion);
     }
 
@@ -32,7 +32,7 @@ public sealed class GameDataMigrator
             if (!migrations.TryGetValue(gameData.SchemaVersion, out var migration))
             {
                 throw new InvalidOperationException(
-                    $"Não existe migração para o schema {gameData.SchemaVersion}."
+                    $"No migration exists for schema {gameData.SchemaVersion}."
                 );
             }
 

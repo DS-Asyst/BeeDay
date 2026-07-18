@@ -36,7 +36,7 @@ public sealed class MigrationV4ToV5 : IGameDataMigration
             : gameData.WalletTags.Max(tag => tag.Id) + 1;
 
         WalletTag tag = new() { Id = nextId };
-        tag.Configure("Sem tag");
+        tag.Configure("No tag");
         gameData.WalletTags.Add(tag);
         return tag;
     }

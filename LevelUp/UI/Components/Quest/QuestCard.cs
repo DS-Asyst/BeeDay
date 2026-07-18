@@ -37,20 +37,20 @@ public sealed class QuestCard
             QuestStatusFormatter.Format(quest.Status)
         );
         card.AddText(
-            "Projeto",
+            "Project",
             projectName,
             LevelUpTheme.Accent
         );
-        card.AddText("Descrição", quest.Description);
+        card.AddText("Description", quest.Description);
         card.AddText(
-            "Criada em",
+            "Created em",
             quest.CreatedAt.ToString("dd/MM/yyyy HH:mm")
         );
 
         if (quest.ActivatedAt is not null)
         {
             card.AddText(
-                "Ativada em",
+                "Activeda em",
                 quest.ActivatedAt.Value.ToString(
                     "dd/MM/yyyy HH:mm"
                 )
@@ -60,7 +60,7 @@ public sealed class QuestCard
         if (quest.CompletedAt is not null)
         {
             card.AddText(
-                "Concluída em",
+                "Completed em",
                 quest.CompletedAt.Value.ToString(
                     "dd/MM/yyyy HH:mm"
                 ),
@@ -71,7 +71,7 @@ public sealed class QuestCard
         if (quest.ArchivedAt is not null)
         {
             card.AddText(
-                "Arquivada em",
+                "Archived em",
                 quest.ArchivedAt.Value.ToString(
                     "dd/MM/yyyy HH:mm"
                 ),

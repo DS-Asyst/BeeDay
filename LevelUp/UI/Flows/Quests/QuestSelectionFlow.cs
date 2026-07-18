@@ -32,19 +32,19 @@ public sealed class QuestSelectionFlow
         if (projects.Count == 0)
         {
             ConsoleHelper.ShowInformation(
-                "Nenhum projeto disponível. A missão será independente."
+                "No projects are available. The task will be independent."
             );
             return null;
         }
 
         if (!inputReader.ReadConfirmation(
-            "Deseja associar esta missão a um projeto?"
+            "Associate this task with a project?"
         ))
         {
             return null;
         }
 
-        return SelectProject("Selecione o projeto:", projects);
+        return SelectProject("Select a project:", projects);
     }
 
     public Project? SelectOptionalProjectForCreation()
@@ -54,13 +54,13 @@ public sealed class QuestSelectionFlow
         if (projects.Count == 0)
         {
             ConsoleHelper.ShowInformation(
-                "Nenhum projeto disponível. A missão será independente."
+                "No projects are available. The task will be independent."
             );
             return null;
         }
 
         PromptDecision decision = inputReader.ReadDecision(
-            "Deseja associar esta missão a um projeto?"
+            "Associate this task with a project?"
         );
 
         if (decision == PromptDecision.Cancel)
@@ -80,10 +80,10 @@ public sealed class QuestSelectionFlow
             ))
             .ToList();
 
-        choices.Add(new ProjectCreationChoice(null, "Cancelar"));
+        choices.Add(new ProjectCreationChoice(null, "Cancel"));
 
         ProjectCreationChoice selected = inputReader.ReadSelection(
-            "Selecione o projeto:",
+            "Select a project:",
             choices,
             choice => choice.Label
         );
@@ -104,14 +104,14 @@ public sealed class QuestSelectionFlow
         }
 
         if (requireConfirmation && !inputReader.ReadConfirmation(
-            "Associar esta missão a um capítulo?"
+            "Associate this task with a milestone?"
         ))
         {
             return null;
         }
 
         return inputReader.ReadSelection(
-            "Selecione o capítulo:",
+            "Select a milestone:",
             milestones,
             FormatMilestone
         );
@@ -127,7 +127,7 @@ public sealed class QuestSelectionFlow
         }
 
         PromptDecision decision = inputReader.ReadDecision(
-            "Deseja associar esta missão a um capítulo?"
+            "Associate this task with a milestone?"
         );
 
         if (decision == PromptDecision.Cancel)
@@ -147,10 +147,10 @@ public sealed class QuestSelectionFlow
             ))
             .ToList();
 
-        choices.Add(new MilestoneCreationChoice(null, "Cancelar"));
+        choices.Add(new MilestoneCreationChoice(null, "Cancel"));
 
         MilestoneCreationChoice selected = inputReader.ReadSelection(
-            "Selecione o capítulo:",
+            "Select a milestone:",
             choices,
             choice => choice.Label
         );
@@ -192,7 +192,7 @@ public sealed class QuestSelectionFlow
         }
 
         return projectService.GetProjectById(projectId.Value)?.Name
-            ?? "Projeto não encontrado";
+            ?? "Project not found";
     }
 
     private List<Project> GetAvailableProjects()

@@ -36,7 +36,7 @@ public sealed class BossService
         ArgumentNullException.ThrowIfNull(project);
         if (GetByProjectId(project.Id) is not null)
         {
-            throw new InvalidOperationException("Um projeto pode possuir apenas um chefe final.");
+            throw new InvalidOperationException("A project can have only one final boss.");
         }
 
         BossEncounter boss = new() { Id = nextId++ };
@@ -165,7 +165,7 @@ public sealed class BossService
         ArgumentNullException.ThrowIfNull(boss);
         if (!bosses.Any(existing => existing.Id == boss.Id))
         {
-            throw new InvalidOperationException("O chefe não é gerenciado por este serviço.");
+            throw new InvalidOperationException("The boss is not managed by this service.");
         }
     }
 }

@@ -29,6 +29,9 @@ public sealed class SqliteGameDataStoreTests : IDisposable
         Assert.Equal(expected.Character.Name, actual.Character.Name);
         Assert.Single(actual.Habits);
         Assert.Equal("Estudar arquitetura", actual.Habits[0].Title);
+        Assert.Equal(HabitDirection.Both, actual.Habits[0].Direction);
+        Assert.Equal(4, actual.Habits[0].PositiveCount);
+        Assert.Equal(2, actual.Habits[0].NegativeCount);
     }
 
     [Fact]
@@ -66,6 +69,19 @@ public sealed class SqliteGameDataStoreTests : IDisposable
         Assert.Contains("Name", columns);
         Assert.Contains("PrimaryAttribute", columns);
         Assert.DoesNotContain("Payload", columns);
+
+        using SqliteCommand habitColumnsCommand = connection.CreateCommand();
+        habitColumnsCommand.CommandText = "PRAGMA table_info(Habits)";
+        using SqliteDataReader habitColumnsReader = habitColumnsCommand.ExecuteReader();
+        List<string> habitColumns = [];
+        while (habitColumnsReader.Read()) habitColumns.Add(habitColumnsReader.GetString(1));
+
+        Assert.DoesNotContain("DurationInMinutes", habitColumns);
+        Assert.DoesNotContain("TimesCompleted", habitColumns);
+        Assert.Contains("Direction", habitColumns);
+        Assert.Contains("PositiveCount", habitColumns);
+        Assert.Contains("NegativeCount", habitColumns);
+        Assert.Contains("LastScoredAt", habitColumns);
     }
 
     [Fact]
@@ -91,7 +107,18 @@ public sealed class SqliteGameDataStoreTests : IDisposable
             SaveRevision = 3,
             LastSavedAt = DateTime.Now,
             Character = new LevelUp.Domain.Character.Character { Name = characterName },
-            Habits = [new Habit { Id = 1, Title = "Estudar arquitetura" }]
+            Habits =
+            [
+                new Habit
+                {
+                    Id = 1,
+                    Title = "Estudar arquitetura",
+                    Direction = HabitDirection.Both,
+                    PositiveCount = 4,
+                    NegativeCount = 2,
+                    LastScoredAt = DateTime.Now
+                }
+            ]
         };
     }
 }

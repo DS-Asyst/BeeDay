@@ -2,61 +2,34 @@ namespace LevelUp.UI;
 
 public sealed class DiaryScreen
 {
-    private readonly InputReader inputReader;
-    private readonly TrainingScreen trainingScreen;
-    private readonly QuestScreen questScreen;
-    private readonly ProjectScreen projectScreen;
+    private readonly InputReader input;
+    private readonly HabitScreen habits;
+    private readonly TaskScreen tasks;
+    private readonly TodoScreen todos;
+    private readonly ProjectScreen projects;
 
-    public DiaryScreen(
-        InputReader inputReader,
-        TrainingScreen trainingScreen,
-        QuestScreen questScreen,
-        ProjectScreen projectScreen
-    )
+    public DiaryScreen(InputReader input, HabitScreen habits, TaskScreen tasks, TodoScreen todos, ProjectScreen projects)
     {
-        this.inputReader = inputReader;
-        this.trainingScreen = trainingScreen;
-        this.questScreen = questScreen;
-        this.projectScreen = projectScreen;
+        this.input = input;
+        this.habits = habits;
+        this.tasks = tasks;
+        this.todos = todos;
+        this.projects = projects;
     }
 
     public void Show()
     {
-        bool running = true;
-
-        while (running)
+        while (true)
         {
-            ConsoleHelper.ShowHeader("Diário");
-
-            string option = inputReader.ReadSelection(
-                "Escolha uma seção:",
-                new[]
-                {
-                    "Treinamentos",
-                    "Missões",
-                    "Projetos",
-                    "Voltar"
-                },
-                choice => choice
-            );
-
+            ConsoleHelper.ShowHeader("Diary");
+            string option = input.ReadSelection("Choose a section:", new[] { "Habits", "Tasks", "To-Dos", "Projects", "Back" }, x => x);
             switch (option)
             {
-                case "Treinamentos":
-                    trainingScreen.Show();
-                    break;
-
-                case "Missões":
-                    questScreen.Show();
-                    break;
-
-                case "Projetos":
-                    projectScreen.Show();
-                    break;
-
-                case "Voltar":
-                    running = false;
-                    break;
+                case "Habits": habits.Show(); break;
+                case "Tasks": tasks.Show(); break;
+                case "To-Dos": todos.Show(); break;
+                case "Projects": projects.Show(); break;
+                case "Back": return;
             }
         }
     }

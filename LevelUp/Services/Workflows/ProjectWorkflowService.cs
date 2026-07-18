@@ -65,7 +65,7 @@ public sealed class ProjectWorkflowService
     public void ActivateProject(int projectId)
     {
         Project project = projectService.GetProjectById(projectId)
-            ?? throw new InvalidOperationException("O projeto não foi encontrado.");
+            ?? throw new InvalidOperationException("The project was not found.");
 
         projectService.ActivateProject(project);
         bool milestoneActivated = milestoneService.TryActivateFirst(project);
@@ -100,7 +100,7 @@ public sealed class ProjectWorkflowService
         if (linkedQuests.Any(quest => quest.Status is QuestStatus.Completed or QuestStatus.Archived))
         {
             throw new InvalidOperationException(
-                "Projetos com missões concluídas ou arquivadas não podem ser excluídos. Arquive o projeto."
+                "Projects with completed or archived tasks cannot be deleted. Archive the project instead."
             );
         }
 
@@ -118,7 +118,7 @@ public sealed class ProjectWorkflowService
             if (milestone.Status == MilestoneStatus.Completed)
             {
                 throw new InvalidOperationException(
-                    "Projetos com capítulos concluídos não podem ser excluídos. Arquive o projeto."
+                    "Projects with completed milestones cannot be deleted. Archive the project instead."
                 );
             }
             milestoneService.Delete(milestone.Id);

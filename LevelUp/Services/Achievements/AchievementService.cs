@@ -41,11 +41,11 @@ public sealed class AchievementService
     {
         var definitions = new (int Count, string Code, string Name, string Description)[]
         {
-            (1, "reading:1", "Primeiras Páginas", "Uma nova história começou: seu primeiro livro foi concluído."),
-            (5, "reading:5", "Virando Capítulos", "Cinco livros concluídos e muitas páginas já fazem parte da sua jornada."),
-            (10, "reading:10", "Entre Histórias", "Dez livros concluídos: sua coleção de experiências continua crescendo."),
-            (25, "reading:25", "Colecionador de Histórias", "Vinte e cinco livros concluídos, cada um deixando uma nova perspectiva."),
-            (50, "reading:50", "Biblioteca Viva", "Cinquenta livros concluídos: histórias e conhecimento já fazem parte de quem você é.")
+            (1, "reading:1", "First Pages", "A new story began: your first book was completed."),
+            (5, "reading:5", "Turning Pages", "Five completed books and many pages are now part of your journey."),
+            (10, "reading:10", "Between Stories", "Ten completed books: your collection of experiences keeps growing."),
+            (25, "reading:25", "Story Collector", "Twenty-five completed books, each leaving a new perspective."),
+            (50, "reading:50", "Living Library", "Fifty completed books: stories and knowledge are now part of who you are.")
         };
         List<Achievement> unlocked = [];
         foreach (var definition in definitions.Where(item => completedBooks >= item.Count))
@@ -88,7 +88,7 @@ public sealed class AchievementService
         achievement.Configure(
             code,
             name,
-            $"Conquista obtida ao concluir o projeto {project.Name}.",
+            $"Achievement earned by completing the project {project.Name}.",
             AchievementCategory.Project,
             project.Id
         );

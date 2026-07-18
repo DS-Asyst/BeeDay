@@ -43,31 +43,31 @@ public sealed class ProjectCard
         EntityCard card = new(project.Name, UIIcons.Project);
         card.AddText("ID", project.Id.ToString());
         card.AddMarkup("Status", ProjectStatusFormatter.Format(project.Status));
-        card.AddText("Descrição", project.Description);
-        card.AddText("Progresso das missões", $"{progress:0.##}%", LevelUpTheme.Success);
-        card.AddText("Missões", $"{completedQuests}/{quests.Count}");
-        card.AddText("Capítulos", $"{completedMilestones}/{milestones.Count}");
+        card.AddText("Description", project.Description);
+        card.AddText("Task progress", $"{progress:0.##}%", LevelUpTheme.Success);
+        card.AddText("Tasks", $"{completedQuests}/{quests.Count}");
+        card.AddText("Milestones", $"{completedMilestones}/{milestones.Count}");
         card.AddText(
-            "Chefe final",
-            boss is null ? "Não configurado" : $"{boss.Name} — {DisplayText.For(boss.Status)}",
+            "Final Boss",
+            boss is null ? "No configurado" : $"{boss.Name} — {DisplayText.For(boss.Status)}",
             LevelUpTheme.Boss
         );
         if (boss is not null)
         {
             card.AddText(
-                "Conquista",
+                "Achievement",
                 $"{boss.AchievementPrefix} {boss.Name}",
                 LevelUpTheme.Gold
             );
         }
-        card.AddText("Criado em", project.CreatedAt.ToString("dd/MM/yyyy HH:mm"));
+        card.AddText("Created em", project.CreatedAt.ToString("dd/MM/yyyy HH:mm"));
         if (project.CompletedAt is not null)
         {
-            card.AddText("Concluído em", project.CompletedAt.Value.ToString("dd/MM/yyyy HH:mm"), LevelUpTheme.Success);
+            card.AddText("Completed em", project.CompletedAt.Value.ToString("dd/MM/yyyy HH:mm"), LevelUpTheme.Success);
         }
         if (project.ArchivedAt is not null)
         {
-            card.AddText("Arquivado em", project.ArchivedAt.Value.ToString("dd/MM/yyyy HH:mm"), LevelUpTheme.MutedText);
+            card.AddText("Archived em", project.ArchivedAt.Value.ToString("dd/MM/yyyy HH:mm"), LevelUpTheme.MutedText);
         }
         return card.Build();
     }

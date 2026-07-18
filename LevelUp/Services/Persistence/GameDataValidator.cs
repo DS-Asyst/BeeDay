@@ -7,27 +7,27 @@ public sealed class GameDataValidator
     public void Validate(GameData gameData)
     {
         ArgumentNullException.ThrowIfNull(gameData);
-        EnsureUniqueIds(gameData.Projects.Select(item => item.Id), "projetos");
-        EnsureUniqueIds(gameData.Quests.Select(item => item.Id), "missões");
-        EnsureUniqueIds(gameData.Milestones.Select(item => item.Id), "capítulos");
-        EnsureUniqueIds(gameData.Bosses.Select(item => item.Id), "chefes");
-        EnsureUniqueIds(gameData.Books.Select(item => item.Id), "livros");
-        EnsureUniqueIds(gameData.WalletTags.Select(item => item.Id), "tags da carteira");
-        EnsureUniqueIds(gameData.WalletTransactions.Select(item => item.Id), "movimentações");
+        EnsureUniqueIds(gameData.Projects.Select(item => item.Id), "projects");
+        EnsureUniqueIds(gameData.LegacyQuests.Select(item => item.Id), "tasks");
+        EnsureUniqueIds(gameData.Milestones.Select(item => item.Id), "milestones");
+        EnsureUniqueIds(gameData.Bosses.Select(item => item.Id), "bosses");
+        EnsureUniqueIds(gameData.Books.Select(item => item.Id), "books");
+        EnsureUniqueIds(gameData.WalletTags.Select(item => item.Id), "wallet tags");
+        EnsureUniqueIds(gameData.WalletTransactions.Select(item => item.Id), "transactions");
 
         HashSet<int> projectIds = gameData.Projects.Select(item => item.Id).ToHashSet();
         HashSet<int> milestoneIds = gameData.Milestones.Select(item => item.Id).ToHashSet();
         HashSet<int> walletTagIds = gameData.WalletTags.Select(item => item.Id).ToHashSet();
 
-        foreach (var quest in gameData.Quests)
+        foreach (var quest in gameData.LegacyQuests)
         {
             if (quest.ProjectId is int projectId && !projectIds.Contains(projectId))
             {
-                throw new InvalidDataException($"A missão {quest.Id} aponta para um projeto inexistente.");
+                throw new InvalidDataException($"The task {quest.Id} references a missing project.");
             }
             if (quest.MilestoneId is int milestoneId && !milestoneIds.Contains(milestoneId))
             {
-                throw new InvalidDataException($"A missão {quest.Id} aponta para um capítulo inexistente.");
+                throw new InvalidDataException($"The task {quest.Id} references a missing milestone.");
             }
         }
 
@@ -35,7 +35,7 @@ public sealed class GameDataValidator
         {
             if (!projectIds.Contains(milestone.ProjectId))
             {
-                throw new InvalidDataException($"O capítulo {milestone.Id} não possui um projeto válido.");
+                throw new InvalidDataException($"The milestone {milestone.Id} does not have a valid project.");
             }
         }
 
@@ -43,7 +43,7 @@ public sealed class GameDataValidator
         {
             if (!projectIds.Contains(boss.ProjectId))
             {
-                throw new InvalidDataException($"O chefe {boss.Id} não possui um projeto válido.");
+                throw new InvalidDataException($"The boss {boss.Id} does not have a valid project.");
             }
         }
 
@@ -53,14 +53,14 @@ public sealed class GameDataValidator
             if (transaction.Amount == 0)
             {
                 throw new InvalidDataException(
-                    $"A movimentação {transaction.Id} possui valor zero."
+                    $"The transaction {transaction.Id} has a zero value."
                 );
             }
 
             if (transaction.TagId is int tagId && !walletTagIds.Contains(tagId))
             {
                 throw new InvalidDataException(
-                    $"A movimentação {transaction.Id} aponta para uma tag inexistente."
+                    $"The transaction {transaction.Id} references a missing tag."
                 );
             }
         }
@@ -69,7 +69,7 @@ public sealed class GameDataValidator
         {
             if (book.CurrentPage < 0 || book.CurrentPage > book.TotalPages)
             {
-                throw new InvalidDataException($"O progresso do livro {book.Id} é inválido.");
+                throw new InvalidDataException($"The book progress {book.Id} is invalid.");
             }
         }
     }
@@ -79,7 +79,7 @@ public sealed class GameDataValidator
         int[] values = ids.Where(id => id > 0).ToArray();
         if (values.Length != values.Distinct().Count())
         {
-            throw new InvalidDataException($"Existem IDs duplicados em {collectionName}.");
+            throw new InvalidDataException($"Duplicate IDs were found in {collectionName}.");
         }
     }
 }
