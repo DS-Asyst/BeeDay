@@ -3,23 +3,70 @@
 
 <PageTitle>LevelUp</PageTitle>
 
-<section class="foundation-page levelup-fade-in">
-    <div class="foundation-card levelup-surface">
-        <span class="foundation-card__eyebrow">
-            Migration foundation
-        </span>
+<section class="design-system-page levelup-fade-in">
+    <header class="design-system-page__header">
+        <div>
+            <span class="design-system-page__eyebrow">
+                Design System
+            </span>
 
-        <h1>LevelUp Web</h1>
+            <h1>LevelUp Web</h1>
 
-        <p>
-            The Blazor application shell is ready to receive the LevelUp
-            features incrementally.
-        </p>
-
-        <div class="foundation-status">
-            <span class="foundation-status__indicator"></span>
-            Application state initialized
+            <p>
+                Reusable components for the LevelUp Blazor interface.
+            </p>
         </div>
+
+        <LevelUpBadge Variant="LevelUpBadgeVariant.Success">
+            Foundation ready
+        </LevelUpBadge>
+    </header>
+
+    <div class="design-system-grid">
+        <LevelUpCard Title="Character progression"
+                     Subtitle="Example of a reusable LevelUp card">
+            <LevelUpProgressBar Label="Experience"
+                                Value="640"
+                                Maximum="1000" />
+        </LevelUpCard>
+
+        <LevelUpCard Title="Actions"
+                     Subtitle="Button variants">
+            <div class="design-system-actions">
+                <LevelUpButton>
+                    Primary
+                </LevelUpButton>
+
+                <LevelUpButton Variant="LevelUpButtonVariant.Secondary">
+                    Secondary
+                </LevelUpButton>
+
+                <LevelUpButton Variant="LevelUpButtonVariant.Ghost">
+                    Ghost
+                </LevelUpButton>
+            </div>
+        </LevelUpCard>
+
+        <LevelUpCard Title="Statuses"
+                     Subtitle="Badge variants">
+            <div class="design-system-badges">
+                <LevelUpBadge Variant="LevelUpBadgeVariant.Primary">
+                    Active
+                </LevelUpBadge>
+
+                <LevelUpBadge Variant="LevelUpBadgeVariant.Success">
+                    Completed
+                </LevelUpBadge>
+
+                <LevelUpBadge Variant="LevelUpBadgeVariant.Warning">
+                    Pending
+                </LevelUpBadge>
+
+                <LevelUpBadge Variant="LevelUpBadgeVariant.Danger">
+                    Blocked
+                </LevelUpBadge>
+            </div>
+        </LevelUpCard>
     </div>
 </section>
 

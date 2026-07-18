@@ -1,46 +1,71 @@
-.foundation-page {
+.design-system-page {
     display: grid;
-    min-height: calc(100vh - 128px);
-    place-items: center;
+    gap: var(--levelup-spacing-xl);
 }
 
-.foundation-card {
-    width: min(100%, 680px);
-    padding: clamp(1.5rem, 5vw, 3rem);
+.design-system-page__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--levelup-spacing-xl);
+    padding: var(--levelup-spacing-xl) var(--levelup-spacing-xl);
+    background: linear-gradient( 135deg, var(--levelup-color-primary-dark), var(--levelup-color-primary) );
+    border-radius: var(--levelup-radius-xl);
+    box-shadow: var(--levelup-shadow-md);
+    color: #ffffff;
 }
 
-.foundation-card__eyebrow {
-    color: var(--levelup-color-primary-light);
+.design-system-page__eyebrow {
+    display: inline-block;
+    color: #d9c8f3;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: 0.12em;
     text-transform: uppercase;
 }
 
-.foundation-card h1 {
-    margin: var(--levelup-spacing-sm) 0;
-    color: var(--levelup-color-primary-dark);
-    font-size: clamp(2rem, 6vw, 3.5rem);
+.design-system-page h1 {
+    margin: var(--levelup-spacing-xs) 0;
+    color: #ffffff;
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.1;
 }
 
-.foundation-card p {
-    margin-bottom: var(--levelup-spacing-lg);
-    color: var(--levelup-color-text-secondary);
-    font-size: 1.05rem;
-    line-height: 1.7;
+.design-system-page__header p {
+    max-width: 52rem;
+    margin: 0;
+    color: #e7def3;
 }
 
-.foundation-status {
+.design-system-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--levelup-spacing-lg);
+}
+
+    .design-system-grid > :first-child {
+        grid-column: 1 / -1;
+    }
+
+.design-system-actions,
+.design-system-badges {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--levelup-spacing-sm);
-    font-size: 0.875rem;
-    font-weight: 600;
 }
 
-.foundation-status__indicator {
-    width: 0.625rem;
-    height: 0.625rem;
-    background: var(--levelup-color-success);
-    border-radius: 50%;
+@media (max-width: 720px) {
+    .design-system-page__header {
+        flex-direction: column;
+        padding: var(--levelup-spacing-lg);
+    }
+
+    .design-system-grid {
+        grid-template-columns: 1fr;
+    }
+
+        .design-system-grid > :first-child {
+            grid-column: auto;
+        }
 }

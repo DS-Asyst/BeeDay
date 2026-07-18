@@ -1,0 +1,32 @@
+.levelup-progress {
+    display: grid;
+    gap: 0.625rem;
+}
+
+.levelup-progress__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--levelup-spacing-md);
+    color: var(--levelup-color-text-secondary);
+    font-size: 0.8125rem;
+    font-weight: 650;
+}
+
+.levelup-progress__track {
+    width: 100%;
+    height: 14px;
+    overflow: hidden;
+    background: #e7e0eb;
+    border: 1px solid #d7cddd;
+    border-radius: 999px;
+    box-shadow: inset 0 1px 2px rgb(47 36 56 / 10%);
+}
+
+.levelup-progress__value {
+    height: 100%;
+    background: linear-gradient( 90deg, var(--levelup-color-primary), var(--levelup-color-primary-light) );
+    border-radius: inherit;
+    box-shadow: 0 0 8px rgb(97 61 154 / 24%);
+    transition: width 250ms ease;
+}

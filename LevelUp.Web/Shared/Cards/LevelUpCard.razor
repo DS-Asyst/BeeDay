@@ -1,0 +1,43 @@
+<article class="levelup-card @CssClass">
+    @if (!string.IsNullOrWhiteSpace(Title))
+    {
+        <header class="levelup-card__header">
+            <div>
+                <h2 class="levelup-card__title">@Title</h2>
+
+                @if (!string.IsNullOrWhiteSpace(Subtitle))
+                {
+                    <p class="levelup-card__subtitle">@Subtitle</p>
+                }
+            </div>
+
+            @if (HeaderContent is not null)
+            {
+                <div class="levelup-card__header-content">
+                    @HeaderContent
+                </div>
+            }
+        </header>
+    }
+
+    <div class="levelup-card__content">
+        @ChildContent
+    </div>
+</article>
+
+@code {
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public string? Subtitle { get; set; }
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    [Parameter]
+    public RenderFragment? HeaderContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

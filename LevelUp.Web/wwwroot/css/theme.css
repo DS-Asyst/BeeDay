@@ -1,5 +1,6 @@
 html {
     min-height: 100%;
+    background: var(--levelup-color-background);
 }
 
 body {
@@ -7,26 +8,52 @@ body {
     margin: 0;
     background: var(--levelup-color-background);
     color: var(--levelup-color-text-primary);
-    font-family:
-        Inter,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
+    font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
 }
 
-* {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
 button,
 input,
-textarea,
-select {
+select,
+textarea {
     font: inherit;
 }
 
 a {
     color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+    margin-top: 0;
+}
+
+.levelup-app {
+    min-height: 100vh;
+    background: var(--levelup-color-background);
+}
+
+.levelup-main {
+    width: min( calc(100% - 2rem), var(--levelup-content-width) );
+    margin-inline: auto;
+    padding-block: var(--levelup-spacing-xl);
+}
+
+@media (min-width: 768px) {
+    .levelup-main {
+        width: min( calc(100% - 3rem), var(--levelup-content-width) );
+        padding-block: var(--levelup-spacing-2xl);
+    }
 }

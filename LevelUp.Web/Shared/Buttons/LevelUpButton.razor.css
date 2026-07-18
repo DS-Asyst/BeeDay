@@ -1,0 +1,74 @@
+.levelup-button {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--levelup-spacing-sm);
+    padding: 0.6875rem 1rem;
+    border: 1px solid transparent;
+    border-radius: var(--levelup-radius-md);
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color var(--levelup-transition-fast), border-color var(--levelup-transition-fast), box-shadow var(--levelup-transition-fast), color var(--levelup-transition-fast), transform var(--levelup-transition-fast);
+}
+
+    .levelup-button:hover:not(:disabled) {
+        transform: translateY(-1px);
+    }
+
+    .levelup-button:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
+    .levelup-button:focus-visible {
+        outline: 3px solid rgb(97 61 154 / 24%);
+        outline-offset: 2px;
+    }
+
+    .levelup-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+
+.levelup-button--primary {
+    background: var(--levelup-color-primary);
+    box-shadow: 0 4px 10px rgb(97 61 154 / 18%);
+    color: #ffffff;
+}
+
+    .levelup-button--primary:hover:not(:disabled) {
+        background: var(--levelup-color-primary-dark);
+        box-shadow: 0 6px 14px rgb(67 40 116 / 24%);
+    }
+
+.levelup-button--secondary {
+    background: var(--levelup-color-surface);
+    border-color: var(--levelup-color-primary);
+    color: var(--levelup-color-primary);
+}
+
+    .levelup-button--secondary:hover:not(:disabled) {
+        background: var(--levelup-color-primary-soft);
+    }
+
+.levelup-button--ghost {
+    background: transparent;
+    color: var(--levelup-color-primary);
+}
+
+    .levelup-button--ghost:hover:not(:disabled) {
+        background: var(--levelup-color-primary-soft);
+    }
+
+.levelup-button--danger {
+    background: var(--levelup-color-danger);
+    color: #ffffff;
+}
+
+.levelup-button__icon {
+    display: inline-flex;
+    line-height: 1;
+}
