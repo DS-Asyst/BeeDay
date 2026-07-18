@@ -11,65 +11,34 @@ public sealed class HabitServiceTests
     public void UpdateHabit_ShouldChangeEditableData()
     {
         HabitService service = new();
-        Habit habit = service.CreateHabit(
-            "Treino",
-            "Descrição",
-            30,
-            AttributeType.Strength
-        );
-
-        service.UpdateHabit(
-            habit,
-            "Treino atualizado",
-            "Nova descrição",
-            45,
-            AttributeType.Vitality
-        );
-
-        Assert.Equal("Treino atualizado", habit.Title);
-        Assert.Equal("Nova descrição", habit.Description);
-        Assert.Equal(45, habit.DurationInMinutes);
-        Assert.Equal(AttributeType.Vitality, habit.AttributeType);
+        Habit habit = service.CreateHabit("Read", "Read technical material", AttributeType.Intelligence, HabitDirection.Both);
+        service.UpdateHabit(habit, "Read daily", "Updated", AttributeType.Intelligence, HabitDirection.Positive);
+        Assert.Equal("Read daily", habit.Title);
+        Assert.Equal(HabitDirection.Positive, habit.Direction);
     }
 
     [Fact]
-    public void DeleteHabit_ShouldRemoveManagedHabit()
+    public void ScorePositive_ShouldIncrementPositiveCounter()
     {
         HabitService service = new();
-        Habit habit = service.CreateHabit(
-            "Treino",
-            "Descrição",
-            30,
-            AttributeType.Strength
-        );
+        Habit habit = service.CreateHabit("Exercise", "", AttributeType.Strength);
+        service.ScorePositive(habit);
+        Assert.Equal(1, habit.PositiveCount);
+    }
 
-        bool deleted = service.DeleteHabit(habit.Id);
-
-        Assert.True(deleted);
-        Assert.Empty(service.GetAllHabits());
+    [Fact]
+    public void NegativeOnlyHabit_ShouldRejectPositiveScore()
+    {
+        HabitService service = new();
+        Habit habit = service.CreateHabit("Avoid sugar", "", AttributeType.Vitality, HabitDirection.Negative);
+        Assert.Throws<InvalidOperationException>(() => service.ScorePositive(habit));
     }
 
     [Fact]
     public void LoadHabits_ShouldContinueIdSequence()
     {
-        HabitService service = new();
-        service.LoadHabits(
-        [
-            new Habit
-            {
-                Id = 7,
-                Title = "Existente",
-                DurationInMinutes = 20
-            }
-        ]);
-
-        Habit created = service.CreateHabit(
-            "Novo",
-            "Descrição",
-            30,
-            AttributeType.Intelligence
-        );
-
+        HabitService service = new([new Habit { Id = 7, Title = "Existing" }]);
+        Habit created = service.CreateHabit("New", "", AttributeType.Intelligence);
         Assert.Equal(8, created.Id);
     }
 }

@@ -53,7 +53,7 @@ public class InputReader
             }
 
             ConsoleHelper.ShowError(
-                "Digite um valor maior que zero."
+                "Enter a value greater than zero."
             );
         }
     }
@@ -80,7 +80,7 @@ public class InputReader
             }
 
             ConsoleHelper.ShowError(
-                "Digite uma data válida no formato dd/MM/aaaa."
+                "Enter a valid date in dd/MM/yyyy format."
             );
         }
     }
@@ -97,8 +97,8 @@ public class InputReader
             )
             .PromptStyle("white")
             .ValidationErrorMessage(
-                $"[red]Escolha uma opção entre " +
-                $"{minimumOption} e {maximumOption}.[/]"
+                $"[red]Choose an option between " +
+                $"{minimumOption} and {maximumOption}.[/]"
             )
             .Validate(option =>
             {
@@ -109,8 +109,8 @@ public class InputReader
                 return isValid
                     ? ValidationResult.Success()
                     : ValidationResult.Error(
-                        $"[red]Escolha uma opção entre " +
-                        $"{minimumOption} e {maximumOption}.[/]"
+                        $"[red]Choose an option between " +
+                        $"{minimumOption} and {maximumOption}.[/]"
                     );
             })
         );
@@ -120,23 +120,23 @@ public class InputReader
     {
         return ReadSelection(
             message,
-            new[] { "Sim", "Não" },
+            new[] { "Yes", "No" },
             choice => choice
-        ) == "Sim";
+        ) == "Yes";
     }
 
     public PromptDecision ReadDecision(string message)
     {
         string answer = ReadSelection(
             message,
-            new[] { "Sim", "Não", "Cancelar" },
+            new[] { "Yes", "No", "Cancel" },
             choice => choice
         );
 
         return answer switch
         {
-            "Sim" => PromptDecision.Yes,
-            "Não" => PromptDecision.No,
+            "Yes" => PromptDecision.Yes,
+            "No" => PromptDecision.No,
             _ => PromptDecision.Cancel
         };
     }
@@ -167,8 +167,8 @@ public class InputReader
     public void ShowCancellationHint()
     {
         AnsiConsole.MarkupLine(
-            $"[grey]Digite [bold]{CancellationCommand}[/] " +
-            "a qualquer momento para cancelar.[/]"
+            $"[grey]Type [bold]{CancellationCommand}[/] " +
+            "at any time to cancel.[/]"
         );
         AnsiConsole.WriteLine();
     }
@@ -206,7 +206,7 @@ public class InputReader
             }
 
             ConsoleHelper.ShowError(
-                "O valor não pode ficar vazio."
+                "The value cannot be empty."
             );
         }
     }
@@ -230,7 +230,7 @@ public class InputReader
             }
 
             ConsoleHelper.ShowError(
-                "Digite um número inteiro maior que zero."
+                "Enter an integer greater than zero."
             );
         }
     }
@@ -261,7 +261,7 @@ public class InputReader
             }
 
             ConsoleHelper.ShowError(
-                "Digite um número decimal válido."
+                "Enter a valid decimal number."
             );
         }
     }

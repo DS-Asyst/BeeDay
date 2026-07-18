@@ -35,37 +35,37 @@ public sealed class LibraryScreen
 
         while (running)
         {
-            ConsoleHelper.ShowHeader("Biblioteca");
+            ConsoleHelper.ShowHeader("Library");
 
             string option = inputReader.ReadSelection(
-                "Escolha uma opção:",
+                "Choose an option:",
                 new[]
                 {
-                    "Cadastrar livro",
-                    "Abrir livro",
-                    "Meus livros",
-                    "Voltar"
+                    "Add Book",
+                    "Open Book",
+                    "My Books",
+                    "Back"
                 },
                 choice => choice
             );
 
             switch (option)
             {
-                case "Cadastrar livro":
+                case "Add Book":
                     CreateBook();
                     inputReader.WaitForContinue();
                     break;
 
-                case "Abrir livro":
+                case "Open Book":
                     OpenBook();
                     break;
 
-                case "Meus livros":
+                case "My Books":
                     ListBooks();
                     inputReader.WaitForContinue();
                     break;
 
-                case "Voltar":
+                case "Back":
                     running = false;
                     break;
             }
@@ -74,24 +74,24 @@ public sealed class LibraryScreen
 
     private void CreateBook()
     {
-        ConsoleHelper.ShowHeader("Novo livro");
+        ConsoleHelper.ShowHeader("New Book");
         inputReader.ShowCancellationHint();
 
         try
         {
-            string title = inputReader.ReadRequiredStringOrCancel("Título:");
-            string author = inputReader.ReadRequiredStringOrCancel("Autor:");
+            string title = inputReader.ReadRequiredStringOrCancel("Title:");
+            string author = inputReader.ReadRequiredStringOrCancel("Author:");
             int totalPages = inputReader.ReadPositiveIntegerOrCancel(
-                "Total de páginas:"
+                "Total pages:"
             );
 
             PromptDecision decision = inputReader.ReadDecision(
-                "Confirmar cadastro do livro?"
+                "Add this book?"
             );
 
             if (decision != PromptDecision.Yes)
             {
-                ConsoleHelper.ShowInformation("Cadastro cancelado.");
+                ConsoleHelper.ShowInformation("Book creation canceled.");
                 return;
             }
 
@@ -103,8 +103,8 @@ public sealed class LibraryScreen
             gameStateService.Save();
 
             string message = book.Status == BookStatus.Reading
-                ? "Livro cadastrado e iniciado com sucesso."
-                : "Livro cadastrado como bloqueado. Conclua ou arquive uma leitura em andamento para iniciá-lo.";
+                ? "Book created and started successfully."
+                : "Book created as locked. Complete or archive the current reading to start it.";
 
             ConsoleHelper.ShowSuccess(message);
             AnsiConsole.WriteLine();
@@ -112,7 +112,7 @@ public sealed class LibraryScreen
         }
         catch (UserCancelledException)
         {
-            ConsoleHelper.ShowInformation("Cadastro do livro cancelado.");
+            ConsoleHelper.ShowInformation("Book creation canceled.");
         }
     }
 
@@ -122,7 +122,7 @@ public sealed class LibraryScreen
 
         if (books.Count == 0)
         {
-            ConsoleHelper.ShowInformation("Nenhum livro foi cadastrado.");
+            ConsoleHelper.ShowInformation("No books have been created.");
             inputReader.WaitForContinue();
             return;
         }
@@ -132,59 +132,59 @@ public sealed class LibraryScreen
 
         while (opened)
         {
-            ConsoleHelper.ShowHeader("Livro");
+            ConsoleHelper.ShowHeader("Book");
             AnsiConsole.Write(new BookCard(book).Build());
             AnsiConsole.WriteLine();
 
-            List<string> actions = ["Editar"];
+            List<string> actions = ["Edit"];
 
             if (book.Status == BookStatus.Locked)
             {
-                actions.Add("Iniciar leitura");
+                actions.Add("Start Reading");
             }
 
             if (book.Status == BookStatus.Reading)
             {
-                actions.Add("Registrar progresso");
+                actions.Add("Record Progress");
             }
 
             if (book.Status != BookStatus.Archived)
             {
-                actions.Add("Arquivar");
+                actions.Add("Archive");
             }
 
-            actions.Add("Excluir");
-            actions.Add("Voltar");
+            actions.Add("Delete");
+            actions.Add("Back");
 
             string action = inputReader.ReadSelection(
-                "Escolha uma ação:",
+                "Choose an action:",
                 actions,
                 choice => choice
             );
 
             switch (action)
             {
-                case "Editar":
+                case "Edit":
                     EditBook(book);
                     inputReader.WaitForContinue();
                     break;
 
-                case "Iniciar leitura":
+                case "Start Reading":
                     StartBook(book);
                     inputReader.WaitForContinue();
                     break;
 
-                case "Registrar progresso":
+                case "Record Progress":
                     RecordProgress(book);
                     inputReader.WaitForContinue();
                     break;
 
-                case "Arquivar":
+                case "Archive":
                     ArchiveBook(book);
                     inputReader.WaitForContinue();
                     break;
 
-                case "Excluir":
+                case "Delete":
                     opened = !DeleteBook(book);
                     if (opened)
                     {
@@ -192,7 +192,7 @@ public sealed class LibraryScreen
                     }
                     break;
 
-                case "Voltar":
+                case "Back":
                     opened = false;
                     break;
             }
@@ -206,44 +206,44 @@ public sealed class LibraryScreen
         try
         {
             string title = inputReader.ReadRequiredStringOrCancel(
-                "Novo título:"
+                "New title:"
             );
             string author = inputReader.ReadRequiredStringOrCancel(
-                "Novo autor:"
+                "New author:"
             );
             int totalPages = inputReader.ReadPositiveIntegerOrCancel(
-                "Novo total de páginas:"
+                "New total pages:"
             );
 
-            if (!inputReader.ReadConfirmation("Salvar alterações?"))
+            if (!inputReader.ReadConfirmation("Save changes?"))
             {
-                ConsoleHelper.ShowInformation("Edição cancelada.");
+                ConsoleHelper.ShowInformation("Edit cancelled.");
                 return;
             }
 
             bookService.UpdateBook(book, title, author, totalPages);
             gameStateService.Save();
-            ConsoleHelper.ShowSuccess("Livro atualizado com sucesso.");
+            ConsoleHelper.ShowSuccess("Book updated successfully.");
         }
         catch (UserCancelledException)
         {
-            ConsoleHelper.ShowInformation("Edição cancelada.");
+            ConsoleHelper.ShowInformation("Edit cancelled.");
         }
     }
 
     private void StartBook(BookModel book)
     {
         if (!inputReader.ReadConfirmation(
-            $"Iniciar a leitura de '{book.Title}'?"
+            $"Start reading '{book.Title}'?"
         ))
         {
-            ConsoleHelper.ShowInformation("Ação cancelada.");
+            ConsoleHelper.ShowInformation("Action cancelled.");
             return;
         }
 
         bookService.StartBook(book);
         gameStateService.Save();
-        ConsoleHelper.ShowSuccess("Leitura iniciada com sucesso.");
+        ConsoleHelper.ShowSuccess("Reading started successfully.");
     }
 
     private void RecordProgress(BookModel book)
@@ -253,11 +253,11 @@ public sealed class LibraryScreen
         try
         {
             AnsiConsole.MarkupLine(
-                $"[grey]Última página registrada:[/] {book.CurrentPage}"
+                $"[grey]Last recorded page:[/] {book.CurrentPage}"
             );
 
             int currentPage = inputReader.ReadPositiveIntegerOrCancel(
-                "Página atual:"
+                "Current page:"
             );
             ReadingProgressResult result =
                 readingWorkflowService.RecordProgress(book, currentPage);
@@ -265,70 +265,70 @@ public sealed class LibraryScreen
             if (result.PagesRead == 0)
             {
                 ConsoleHelper.ShowInformation(
-                    "Nenhuma nova página foi registrada."
+                    "No new pages were recorded."
                 );
                 return;
             }
 
-            ConsoleHelper.ShowSuccess($"{result.PagesRead} páginas registradas.");
+            ConsoleHelper.ShowSuccess($"{result.PagesRead} pages recorded.");
 
             if (result.BookCompleted)
             {
                 ConsoleHelper.ShowSuccess(
-                    $"Livro concluído. Você ganhou {result.ExperienceEarned:0.##} XP."
+                    $"Book completed. You earned {result.ExperienceEarned:0.##} XP."
                 );
             }
         }
         catch (UserCancelledException)
         {
-            ConsoleHelper.ShowInformation("Registro de leitura cancelado.");
+            ConsoleHelper.ShowInformation("Reading update canceled.");
         }
     }
 
     private void ArchiveBook(BookModel book)
     {
         if (!inputReader.ReadConfirmation(
-            $"Arquivar o livro '{book.Title}'?"
+            $"Archive the book '{book.Title}'?"
         ))
         {
-            ConsoleHelper.ShowInformation("Arquivamento cancelado.");
+            ConsoleHelper.ShowInformation("Archiving canceled.");
             return;
         }
 
         bookService.ArchiveBook(book);
         gameStateService.Save();
-        ConsoleHelper.ShowSuccess("Livro arquivado com sucesso.");
+        ConsoleHelper.ShowSuccess("Book archived successfully.");
     }
 
     private bool DeleteBook(BookModel book)
     {
         if (!inputReader.ReadConfirmation(
-            $"Excluir permanentemente o livro '{book.Title}'?"
+            $"Permanently delete the book '{book.Title}'?"
         ))
         {
-            ConsoleHelper.ShowInformation("Exclusão cancelada.");
+            ConsoleHelper.ShowInformation("Deletion cancelled.");
             return false;
         }
 
         if (!bookService.DeleteBook(book.Id))
         {
-            ConsoleHelper.ShowError("Não foi possível excluir o livro.");
+            ConsoleHelper.ShowError("The book could not be deleted.");
             return false;
         }
 
         gameStateService.Save();
-        ConsoleHelper.ShowSuccess("Livro excluído com sucesso.");
+        ConsoleHelper.ShowSuccess("Book deleted successfully.");
         return true;
     }
 
     private void ListBooks()
     {
-        ConsoleHelper.ShowHeader("Meus livros");
+        ConsoleHelper.ShowHeader("My Books");
         IReadOnlyList<BookModel> books = bookService.GetAll();
 
         if (books.Count == 0)
         {
-            ConsoleHelper.ShowInformation("Nenhum livro foi cadastrado.");
+            ConsoleHelper.ShowInformation("No books have been created.");
             return;
         }
 
@@ -338,7 +338,7 @@ public sealed class LibraryScreen
     private BookModel SelectBook(IEnumerable<BookModel> books)
     {
         return inputReader.ReadSelection(
-            "Selecione um livro:",
+            "Select a book:",
             books,
             book =>
                 $"{book.Title} — {DisplayText.For(book.Status)} — " +

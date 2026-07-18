@@ -44,7 +44,7 @@ public class Character : ILevelProgress
     {
         if (experience < 0m)
         {
-            throw new ArgumentOutOfRangeException(nameof(experience), "A recompensa não pode remover experiência.");
+            throw new ArgumentOutOfRangeException(nameof(experience), "A reward cannot remove experience.");
         }
 
         progress.Experience += experience;

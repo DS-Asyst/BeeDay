@@ -32,14 +32,14 @@ public sealed class MilestoneCard
         EntityCard card = new(milestone.Title, UIIcons.Milestone);
         card.AddText("Ordem", milestone.Order.ToString());
         card.AddMarkup("Status", MilestoneStatusFormatter.Format(milestone.Status));
-        card.AddText("Descrição", milestone.Description);
-        card.AddText("Progresso", $"{progress:0.##}%", LevelUpTheme.Success);
-        card.AddText("Missões", $"{completed}/{quests.Count}");
+        card.AddText("Description", milestone.Description);
+        card.AddText("Progress", $"{progress:0.##}%", LevelUpTheme.Success);
+        card.AddText("Tasks", $"{completed}/{quests.Count}");
         card.AddText(
             "Requisito",
             milestone.RequiredCompletedQuests > 0
-                ? $"Concluir {milestone.RequiredCompletedQuests} missão(ões)"
-                : "Concluir todas as missões vinculadas"
+                ? $"Score Positive {milestone.RequiredCompletedQuests} task(s)"
+                : "Score Positive todas as tasks vinculadas"
         );
         return card.Build();
     }

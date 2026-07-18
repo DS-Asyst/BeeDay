@@ -30,44 +30,44 @@ public sealed class WalletScreen
 
         while (running)
         {
-            ConsoleHelper.ShowHeader("Carteira");
+            ConsoleHelper.ShowHeader("Wallet");
             ShowBalance();
 
             string option = inputReader.ReadSelection(
-                "Escolha uma opção:",
+                "Choose an option:",
                 new[]
                 {
-                    "Registrar movimentação",
-                    "Abrir movimentação",
-                    "Ver histórico",
-                    "Resumo mensal",
-                    "Gerenciar tags",
-                    "Voltar"
+                    "Record Transaction",
+                    "Open Transaction",
+                    "View History",
+                    "Monthly Summary",
+                    "Manage Tags",
+                    "Back"
                 },
                 choice => choice
             );
 
             switch (option)
             {
-                case "Registrar movimentação":
+                case "Record Transaction":
                     CreateTransaction();
                     inputReader.WaitForContinue();
                     break;
-                case "Abrir movimentação":
+                case "Open Transaction":
                     OpenTransaction();
                     break;
-                case "Ver histórico":
+                case "View History":
                     ShowHistory();
                     inputReader.WaitForContinue();
                     break;
-                case "Resumo mensal":
+                case "Monthly Summary":
                     ShowMonthlySummary();
                     inputReader.WaitForContinue();
                     break;
-                case "Gerenciar tags":
+                case "Manage Tags":
                     ManageTags();
                     break;
-                case "Voltar":
+                case "Back":
                     running = false;
                     break;
             }
@@ -76,37 +76,37 @@ public sealed class WalletScreen
 
     private void CreateTransaction()
     {
-        ConsoleHelper.ShowHeader("Nova movimentação");
+        ConsoleHelper.ShowHeader("New Transaction");
         inputReader.ShowCancellationHint();
 
         try
         {
             decimal amount = inputReader.ReadDecimalOrCancel(
-                "Valor (positivo para crédito, negativo para débito):"
+                "Amount (positive for credit, negative for debit):"
             );
 
             if (amount == 0)
             {
-                ConsoleHelper.ShowError("O valor não pode ser zero.");
+                ConsoleHelper.ShowError("The amount cannot be zero.");
                 return;
             }
 
-            string description = inputReader.ReadRequiredStringOrCancel("Descrição:");
+            string description = inputReader.ReadRequiredStringOrCancel("Description:");
             WalletTag tag = SelectTagForTransaction();
 
-            if (inputReader.ReadDecision("Confirmar movimentação?") != PromptDecision.Yes)
+            if (inputReader.ReadDecision("Confirm transaction?") != PromptDecision.Yes)
             {
-                ConsoleHelper.ShowInformation("Movimentação cancelada.");
+                ConsoleHelper.ShowInformation("Transaction cancelled.");
                 return;
             }
 
             walletService.AddTransaction(amount, description, tag);
             gameStateService.Save();
-            ConsoleHelper.ShowSuccess("Movimentação registrada com sucesso.");
+            ConsoleHelper.ShowSuccess("Transaction recorded successfully.");
         }
         catch (UserCancelledException)
         {
-            ConsoleHelper.ShowInformation("Movimentação cancelada.");
+            ConsoleHelper.ShowInformation("Transaction cancelled.");
         }
     }
 
@@ -116,16 +116,16 @@ public sealed class WalletScreen
         if (tags.Count == 0)
         {
             ConsoleHelper.ShowInformation(
-                "Nenhuma tag foi cadastrada. Crie uma tag para continuar."
+                "No tags have been created. Create a tag to continue."
             );
-            string name = inputReader.ReadRequiredStringOrCancel("Nome da nova tag:");
+            string name = inputReader.ReadRequiredStringOrCancel("New tag name:");
             WalletTag created = walletService.CreateTag(name);
             gameStateService.Save();
             return created;
         }
 
         return inputReader.ReadSelection(
-            "Selecione uma tag:",
+            "Select a tag:",
             tags,
             tag => tag.Name
         );
@@ -137,39 +137,39 @@ public sealed class WalletScreen
 
         while (running)
         {
-            ConsoleHelper.ShowHeader("Tags da Carteira");
+            ConsoleHelper.ShowHeader("Tags da Wallet");
             string option = inputReader.ReadSelection(
-                "Escolha uma opção:",
+                "Choose an option:",
                 new[]
                 {
-                    "Criar tag",
-                    "Editar tag",
-                    "Excluir tag",
-                    "Listar tags",
-                    "Voltar"
+                    "Create Tag",
+                    "Edit Tag",
+                    "Delete Tag",
+                    "List Tags",
+                    "Back"
                 },
                 choice => choice
             );
 
             switch (option)
             {
-                case "Criar tag":
+                case "Create Tag":
                     CreateTag();
                     inputReader.WaitForContinue();
                     break;
-                case "Editar tag":
+                case "Edit Tag":
                     EditTag();
                     inputReader.WaitForContinue();
                     break;
-                case "Excluir tag":
+                case "Delete Tag":
                     DeleteTag();
                     inputReader.WaitForContinue();
                     break;
-                case "Listar tags":
+                case "List Tags":
                     ListTags();
                     inputReader.WaitForContinue();
                     break;
-                case "Voltar":
+                case "Back":
                     running = false;
                     break;
             }
@@ -181,14 +181,14 @@ public sealed class WalletScreen
         inputReader.ShowCancellationHint();
         try
         {
-            string name = inputReader.ReadRequiredStringOrCancel("Nome da tag:");
+            string name = inputReader.ReadRequiredStringOrCancel("Tag name:");
             walletService.CreateTag(name);
             gameStateService.Save();
-            ConsoleHelper.ShowSuccess("Tag criada com sucesso.");
+            ConsoleHelper.ShowSuccess("Tag created successfully.");
         }
         catch (UserCancelledException)
         {
-            ConsoleHelper.ShowInformation("Criação da tag cancelada.");
+            ConsoleHelper.ShowInformation("Tag creation cancelled.");
         }
     }
 
@@ -203,14 +203,14 @@ public sealed class WalletScreen
         inputReader.ShowCancellationHint();
         try
         {
-            string name = inputReader.ReadRequiredStringOrCancel("Novo nome:");
+            string name = inputReader.ReadRequiredStringOrCancel("New name:");
             walletService.UpdateTag(tag, name);
             gameStateService.Save();
-            ConsoleHelper.ShowSuccess("Tag atualizada com sucesso.");
+            ConsoleHelper.ShowSuccess("Tag updated successfully.");
         }
         catch (UserCancelledException)
         {
-            ConsoleHelper.ShowInformation("Edição da tag cancelada.");
+            ConsoleHelper.ShowInformation("Tag edit cancelled.");
         }
     }
 
@@ -222,15 +222,15 @@ public sealed class WalletScreen
             return;
         }
 
-        if (!inputReader.ReadConfirmation($"Excluir a tag '{tag.Name}'?"))
+        if (!inputReader.ReadConfirmation($"Delete the tag '{tag.Name}'?"))
         {
-            ConsoleHelper.ShowInformation("Exclusão cancelada.");
+            ConsoleHelper.ShowInformation("Deletion cancelled.");
             return;
         }
 
         walletService.DeleteTag(tag.Id);
         gameStateService.Save();
-        ConsoleHelper.ShowSuccess("Tag excluída com sucesso.");
+        ConsoleHelper.ShowSuccess("Tag deleted successfully.");
     }
 
     private void ListTags()
@@ -238,7 +238,7 @@ public sealed class WalletScreen
         IReadOnlyList<WalletTag> tags = walletService.GetAllTags();
         if (tags.Count == 0)
         {
-            ConsoleHelper.ShowInformation("Nenhuma tag foi cadastrada.");
+            ConsoleHelper.ShowInformation("No tags have been created.");
             return;
         }
 
@@ -257,12 +257,12 @@ public sealed class WalletScreen
         IReadOnlyList<WalletTag> tags = walletService.GetAllTags();
         if (tags.Count == 0)
         {
-            ConsoleHelper.ShowInformation("Nenhuma tag foi cadastrada.");
+            ConsoleHelper.ShowInformation("No tags have been created.");
             return null;
         }
 
         return inputReader.ReadSelection(
-            "Selecione uma tag:",
+            "Select a tag:",
             tags,
             tag => tag.Name
         );
@@ -273,13 +273,13 @@ public sealed class WalletScreen
         IReadOnlyList<WalletTransaction> transactions = walletService.GetAll();
         if (transactions.Count == 0)
         {
-            ConsoleHelper.ShowInformation("Nenhuma movimentação foi registrada.");
+            ConsoleHelper.ShowInformation("No transactions have been recorded.");
             inputReader.WaitForContinue();
             return;
         }
 
         WalletTransaction transaction = SelectTransaction(transactions);
-        ConsoleHelper.ShowHeader("Movimentação");
+        ConsoleHelper.ShowHeader("Transaction");
         AnsiConsole.Write(
             new WalletTransactionCard(
                 transaction,
@@ -289,7 +289,7 @@ public sealed class WalletScreen
         AnsiConsole.WriteLine();
 
         if (!transaction.IsReversed && !transaction.IsReversal &&
-            inputReader.ReadConfirmation("Estornar esta movimentação?"))
+            inputReader.ReadConfirmation("Reverse this transaction?"))
         {
             ReverseTransaction(transaction);
         }
@@ -302,24 +302,24 @@ public sealed class WalletScreen
         inputReader.ShowCancellationHint();
         try
         {
-            string reason = inputReader.ReadRequiredStringOrCancel("Motivo do estorno:");
+            string reason = inputReader.ReadRequiredStringOrCancel("Reversal reason:");
             walletService.ReverseTransaction(transaction, reason);
             gameStateService.Save();
-            ConsoleHelper.ShowSuccess("Movimentação estornada com sucesso.");
+            ConsoleHelper.ShowSuccess("Transaction reversed successfully.");
         }
         catch (UserCancelledException)
         {
-            ConsoleHelper.ShowInformation("Estorno cancelado.");
+            ConsoleHelper.ShowInformation("Reversal canceled.");
         }
     }
 
     private void ShowHistory()
     {
-        ConsoleHelper.ShowHeader("Histórico da carteira");
+        ConsoleHelper.ShowHeader("Wallet History");
         IReadOnlyList<WalletTransaction> transactions = walletService.GetAll();
         if (transactions.Count == 0)
         {
-            ConsoleHelper.ShowInformation("Nenhuma movimentação foi registrada.");
+            ConsoleHelper.ShowInformation("No transactions have been recorded.");
             return;
         }
 
@@ -333,17 +333,17 @@ public sealed class WalletScreen
 
     private void ShowMonthlySummary()
     {
-        ConsoleHelper.ShowHeader("Resumo mensal");
+        ConsoleHelper.ShowHeader("Monthly Summary");
         inputReader.ShowCancellationHint();
 
         try
         {
-            int month = inputReader.ReadPositiveIntegerOrCancel("Mês:");
+            int month = inputReader.ReadPositiveIntegerOrCancel("Month:");
             int year = inputReader.ReadPositiveIntegerOrCancel("Ano:");
 
             if (month > 12)
             {
-                ConsoleHelper.ShowError("O mês deve estar entre 1 e 12.");
+                ConsoleHelper.ShowError("The month must be between 1 and 12.");
                 return;
             }
 
@@ -354,7 +354,7 @@ public sealed class WalletScreen
         }
         catch (UserCancelledException)
         {
-            ConsoleHelper.ShowInformation("Consulta cancelada.");
+            ConsoleHelper.ShowInformation("Query canceled.");
         }
     }
 
@@ -362,7 +362,7 @@ public sealed class WalletScreen
     {
         string style = walletService.Balance >= 0 ? "green" : "red";
         AnsiConsole.MarkupLine(
-            $"[bold]Saldo atual:[/] [{style}]R$ {walletService.Balance:N2}[/]"
+            $"[bold]Current balance:[/] [{style}]R$ {walletService.Balance:N2}[/]"
         );
         AnsiConsole.WriteLine();
     }
@@ -372,7 +372,7 @@ public sealed class WalletScreen
     )
     {
         return inputReader.ReadSelection(
-            "Selecione uma movimentação:",
+            "Select a transaction:",
             transactions,
             transaction =>
                 $"{transaction.OccurredAt:dd/MM/yyyy} — " +

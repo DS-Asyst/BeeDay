@@ -29,8 +29,8 @@ public sealed class MigrationV1ToV2 : IGameDataMigration
             boss.Configure(
                 project.Id,
                 project.Name,
-                "Chefe final migrado de uma versão anterior.",
-                "Especialista em"
+                "Final boss migrated from an earlier version.",
+                "Specialist em"
             );
             gameData.Bosses.Add(boss);
         }

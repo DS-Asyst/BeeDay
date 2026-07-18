@@ -38,7 +38,7 @@ public sealed class WalletTagTests
         WalletTag tag = service.CreateTag("Educação");
         service.AddExit(
             50m,
-            "Livro",
+            "Book",
             tag,
             new DateTime(2026, 7, 1)
         );

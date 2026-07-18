@@ -23,18 +23,18 @@ public sealed class CharacterCard
         Grid summary = new();
         summary.AddColumn(new GridColumn().NoWrap());
         summary.AddColumn();
-        summary.AddRow(StatisticRow.Build("Nome", character.Name, $"bold {LevelUpTheme.Text}"));
+        summary.AddRow(StatisticRow.Build("Name", character.Name, $"bold {LevelUpTheme.Text}"));
         summary.AddRow(StatisticRow.Build("Classe", DisplayText.For(character.Class), LevelUpTheme.Accent));
-        summary.AddRow(StatisticRow.Build("Título", DisplayText.For(character.Rank), LevelUpTheme.Gold));
-        summary.AddRow(StatisticRow.Build("Nível", character.Level.ToString(), $"bold {LevelUpTheme.Primary}"));
-        summary.AddRow(StatisticRow.Build("Experiência", $"{character.Experience}/{character.ExperienceToNextLevel}"));
+        summary.AddRow(StatisticRow.Build("Title", DisplayText.For(character.Rank), LevelUpTheme.Gold));
+        summary.AddRow(StatisticRow.Build("Level", character.Level.ToString(), $"bold {LevelUpTheme.Primary}"));
+        summary.AddRow(StatisticRow.Build("Experience", $"{character.Experience}/{character.ExperienceToNextLevel}"));
         summary.AddRow(
-            new Markup($"[bold {LevelUpTheme.MutedText}]Progresso[/]"),
+            new Markup($"[bold {LevelUpTheme.MutedText}]Progress[/]"),
             BuildExperienceBar()
         );
 
         return PanelBuilder.Build(
-            title: "Personagem",
+            title: "Character",
             content: summary,
             icon: UIIcons.Character,
             expand: false

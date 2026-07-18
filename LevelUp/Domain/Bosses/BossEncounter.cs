@@ -7,7 +7,7 @@ public sealed class BossEncounter
 
     public int ProjectId { get; private set; }
 
-    // Mantido para leitura de saves antigos. Novos chefes pertencem ao Projeto.
+    // Mantido para leitura de saves antigos. Novos chefes pertencem ao Project.
     public int? MilestoneId { get; private set; }
 
     public string Name { get; private set; } = string.Empty;
@@ -37,7 +37,7 @@ public sealed class BossEncounter
     {
         if (ProjectId > 0)
         {
-            throw new InvalidOperationException("O encontro com o chefe já foi configurado.");
+            throw new InvalidOperationException("The boss encounter has already been configured.");
         }
 
         if (projectId <= 0)
@@ -65,7 +65,7 @@ public sealed class BossEncounter
         bool isFinalBoss = false
     )
     {
-        Configure(projectId, name, description, "Especialista em");
+        Configure(projectId, name, description, "Specialist em");
         MilestoneId = milestoneId;
         IsFinalBoss = isFinalBoss;
     }
@@ -78,7 +78,7 @@ public sealed class BossEncounter
     {
         if (Status is BossStatus.Defeated or BossStatus.Archived)
         {
-            throw new InvalidOperationException("Chefes derrotados ou arquivados não podem ser alterados.");
+            throw new InvalidOperationException("Defeated or archived bosses cannot be changed.");
         }
 
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -92,7 +92,7 @@ public sealed class BossEncounter
     {
         if (Status != BossStatus.Locked)
         {
-            throw new InvalidOperationException("Apenas chefes bloqueados podem ser desbloqueados.");
+            throw new InvalidOperationException("Only locked bosses can be unlocked.");
         }
 
         Status = BossStatus.Available;
@@ -103,7 +103,7 @@ public sealed class BossEncounter
     {
         if (Status != BossStatus.Available)
         {
-            throw new InvalidOperationException("Apenas chefes disponíveis podem ser derrotados.");
+            throw new InvalidOperationException("Only available bosses can be defeated.");
         }
 
         Status = BossStatus.Defeated;
@@ -114,7 +114,7 @@ public sealed class BossEncounter
     {
         if (Status == BossStatus.Archived)
         {
-            throw new InvalidOperationException("O chefe já está arquivado.");
+            throw new InvalidOperationException("The boss is already archived.");
         }
 
         Status = BossStatus.Archived;

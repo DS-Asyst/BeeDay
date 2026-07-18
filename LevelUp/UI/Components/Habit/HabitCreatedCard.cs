@@ -1,17 +1,17 @@
-using LevelUp.Domain.Habits;
+using DomainHabit = LevelUp.Domain.Habits.Habit;
 using LevelUp.UI.Infrastructure;
 using LevelUp.UI.Infrastructure.Builders;
 using LevelUp.UI.Infrastructure.Themes;
 using LevelUp.UI.Layout;
 using Spectre.Console;
 
-namespace LevelUp.UI.Components.Training;
+namespace LevelUp.UI.Components.Habit;
 
-public sealed class TrainingCreatedCard
+public sealed class HabitCreatedCard
 {
-    private readonly Habit _habit;
+    private readonly DomainHabit _habit;
 
-    public TrainingCreatedCard(Habit habit)
+    public HabitCreatedCard(DomainHabit habit)
     {
         ArgumentNullException.ThrowIfNull(habit);
 
@@ -37,7 +37,7 @@ public sealed class TrainingCreatedCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Título",
+                "Title",
                 _habit.Title,
                 $"bold {LevelUpTheme.Text}"
             )
@@ -45,14 +45,14 @@ public sealed class TrainingCreatedCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Descrição",
+                "Description",
                 _habit.Description
             )
         );
 
         summary.AddRow(
             StatisticRow.Build(
-                "Atributo",
+                "Attribute",
                 DisplayText.For(_habit.AttributeType),
                 LevelUpTheme.Accent
             )
@@ -60,7 +60,7 @@ public sealed class TrainingCreatedCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Recompensa de experiência",
+                "Experience reward",
                 $"{_habit.ExperienceReward:0.##} XP",
                 $"bold {LevelUpTheme.Success}"
             )
@@ -68,14 +68,14 @@ public sealed class TrainingCreatedCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Experiência do atributo",
+                "Attribute experience",
                 $"{_habit.AttributeExperienceReward:0.##} XP",
                 $"bold {LevelUpTheme.Success}"
             )
         );
 
         return PanelBuilder.Build(
-            title: "Treinamento criado",
+            title: "Habit created",
             content: summary,
             icon: UIIcons.Success,
             expand: false

@@ -21,10 +21,10 @@ public sealed class CharacterCreationScreen
 
     public CharacterModel CreateCharacter()
     {
-        ConsoleHelper.ShowHeader("Criação do personagem");
-        string name = inputReader.ReadRequiredString("Nome do personagem:");
+        ConsoleHelper.ShowHeader("Character Creation");
+        string name = inputReader.ReadRequiredString("Character name:");
         CharacterClass characterClass = inputReader.ReadSelection(
-            "Escolha uma classe:",
+            "Choose a class:",
             Enum.GetValues<CharacterClass>(),
             value => DisplayText.For(value)
         );

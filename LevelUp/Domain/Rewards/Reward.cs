@@ -21,7 +21,7 @@ public sealed record Reward(
         ArgumentNullException.ThrowIfNull(other);
         if (Attribute is not null && other.Attribute is not null && Attribute != other.Attribute)
         {
-            throw new InvalidOperationException("Recompensas de atributos diferentes não podem ser combinadas.");
+            throw new InvalidOperationException("Rewards for different attributes cannot be combined.");
         }
 
         return new Reward(

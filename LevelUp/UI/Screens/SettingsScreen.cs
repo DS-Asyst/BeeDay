@@ -19,26 +19,26 @@ public sealed class SettingsScreen
 
     public void Show()
     {
-        ConsoleHelper.ShowHeader("Configurações");
+        ConsoleHelper.ShowHeader("Settings");
 
         Table table = new Table()
             .Border(TableBorder.Rounded);
 
-        table.AddColumn("Configuração");
-        table.AddColumn("Valor");
-        table.AddRow("Idioma", "Português (Brasil)");
+        table.AddColumn("Setting");
+        table.AddColumn("Value");
+        table.AddRow("Language", "English");
         table.AddRow(
-            "Versão do schema",
+            "Schema version",
             LevelUp.Domain.GameData.CurrentSchemaVersion.ToString()
         );
         table.AddRow(
-            "Revisão do save",
+            "Save revision",
             gameStateService.CurrentSaveRevision.ToString()
         );
         table.AddRow(
-            "Último salvamento",
+            "Last saved",
             gameStateService.LastSavedAt?.ToString("dd/MM/yyyy HH:mm:ss")
-                ?? "Ainda não salvo"
+                ?? "Not saved yet"
         );
 
         AnsiConsole.Write(table);

@@ -24,24 +24,24 @@ public sealed class CharacterScreen
         bool running = true;
         while (running)
         {
-            ConsoleHelper.ShowHeader("Personagem");
+            ConsoleHelper.ShowHeader("Character");
             string option = inputReader.ReadSelection(
-                "Escolha uma opção:",
-                new[] { "Perfil", "Conquistas", "Voltar" },
+                "Choose an option:",
+                new[] { "Profile", "Achievements", "Back" },
                 choice => choice
             );
 
             switch (option)
             {
-                case "Perfil":
+                case "Profile":
                     ShowProfile(character);
                     inputReader.WaitForContinue();
                     break;
-                case "Conquistas":
+                case "Achievements":
                     ShowAchievements();
                     inputReader.WaitForContinue();
                     break;
-                case "Voltar":
+                case "Back":
                     running = false;
                     break;
             }
@@ -50,7 +50,7 @@ public sealed class CharacterScreen
 
     private static void ShowProfile(CharacterModel character)
     {
-        ConsoleHelper.ShowHeader("Perfil");
+        ConsoleHelper.ShowHeader("Profile");
         AnsiConsole.Write(new CharacterCard(character).Build());
         AnsiConsole.WriteLine();
         AnsiConsole.Write(new AttributeTable(character.Attributes).Build());
@@ -58,11 +58,11 @@ public sealed class CharacterScreen
 
     private void ShowAchievements()
     {
-        ConsoleHelper.ShowHeader("Conquistas");
+        ConsoleHelper.ShowHeader("Achievements");
         var achievements = achievementService.GetUnlocked();
         if (achievements.Count == 0)
         {
-            ConsoleHelper.ShowInformation("Nenhuma conquista foi desbloqueada ainda.");
+            ConsoleHelper.ShowInformation("No achievements have been unlocked yet.");
             return;
         }
 

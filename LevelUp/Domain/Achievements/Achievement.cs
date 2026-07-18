@@ -29,7 +29,7 @@ public sealed class Achievement
     {
         if (!string.IsNullOrWhiteSpace(Code))
         {
-            throw new InvalidOperationException("A conquista já foi configurada.");
+            throw new InvalidOperationException("The achievement has already been configured.");
         }
 
         ArgumentException.ThrowIfNullOrWhiteSpace(code);

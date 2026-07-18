@@ -69,7 +69,7 @@ public sealed class BookService
         if (GetReadingBooks().Count >= MaximumActiveBooks)
         {
             throw new InvalidOperationException(
-                "Apenas dois livros podem ficar em andamento ao mesmo tempo."
+                "Only two books can be in progress at the same time."
             );
         }
 
@@ -112,7 +112,7 @@ public sealed class BookService
         if (!books.Any(existing => existing.Id == book.Id))
         {
             throw new InvalidOperationException(
-                "O livro não é gerenciado por este serviço."
+                "The book is not managed by this service."
             );
         }
     }

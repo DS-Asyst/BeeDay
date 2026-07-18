@@ -4,14 +4,14 @@ using LevelUp.Domain.Rewards;
 using LevelUp.Services.Character;
 using LevelUp.Services.Habits;
 using LevelUp.Services.Persistence;
-using LevelUp.UI.Components.Training;
+using LevelUp.UI.Components.Habit;
 using LevelUp.UI.Infrastructure;
 using Spectre.Console;
 using CharacterModel = LevelUp.Domain.Character.Character;
 
 namespace LevelUp.UI;
 
-public class TrainingScreen
+public class HabitScreen
 {
     private readonly HabitService habitService;
     private readonly CharacterService characterService;
@@ -20,7 +20,7 @@ public class TrainingScreen
     private readonly CharacterModel character;
     private readonly GameStateService gameStateService;
 
-    public TrainingScreen(
+    public HabitScreen(
         HabitService habitService,
         CharacterService characterService,
         AttributeService attributeService,
@@ -43,199 +43,201 @@ public class TrainingScreen
 
         while (running)
         {
-            ConsoleHelper.ShowHeader("Painel de Treinamentos");
+            ConsoleHelper.ShowHeader("Habits");
 
             string option = inputReader.ReadSelection(
-                "Escolha uma opção:",
+                "Choose an option:",
                 new[]
                 {
-                    "Novo treinamento",
-                    "Abrir treinamento",
-                    "Listar treinamentos",
-                    "Voltar"
+                    "New Habit",
+                    "Open Habit",
+                    "List Habits",
+                    "Back"
                 },
                 choice => choice
             );
 
             switch (option)
             {
-                case "Novo treinamento":
-                    CreateTraining();
+                case "New Habit":
+                    CreateHabit();
                     inputReader.WaitForContinue();
                     break;
 
-                case "Abrir treinamento":
-                    OpenTraining();
+                case "Open Habit":
+                    OpenHabit();
                     break;
 
-                case "Listar treinamentos":
-                    ListTrainings();
+                case "List Habits":
+                    ListHabits();
                     inputReader.WaitForContinue();
                     break;
 
-                case "Voltar":
+                case "Back":
                     running = false;
                     break;
             }
         }
     }
 
-    private void CreateTraining()
+    private void CreateHabit()
     {
-        ConsoleHelper.ShowHeader("Novo treinamento");
+        ConsoleHelper.ShowHeader("New Habit");
         inputReader.ShowCancellationHint();
 
         try
         {
             string title = inputReader.ReadRequiredStringOrCancel(
-                "Título:"
+                "Title:"
             );
             string description = inputReader.ReadRequiredStringOrCancel(
-                "Descrição:"
+                "Description:"
             );
             AttributeType attributeType = SelectAttribute(
                 includeCancellation: true
             );
+            HabitDirection direction = SelectDirection();
 
             Habit habit = habitService.CreateHabit(
                 title,
                 description,
-                attributeType
+                attributeType,
+                direction
             );
 
             gameStateService.Save();
             ConsoleHelper.ShowSuccess(
-                "Treinamento cadastrado com sucesso."
+                "Habit created successfully."
             );
             AnsiConsole.WriteLine();
             AnsiConsole.Write(
-                new TrainingCreatedCard(habit).Build()
+                new HabitCreatedCard(habit).Build()
             );
         }
         catch (UserCancelledException)
         {
             ConsoleHelper.ShowInformation(
-                "Criação do treinamento cancelada."
+                "Habit creation cancelled."
             );
         }
     }
 
-    private void OpenTraining()
+    private void OpenHabit()
     {
-        List<Habit> habits = habitService.GetAllHabits();
+        IReadOnlyList<Habit> habits = habitService.GetAllHabits();
 
         if (habits.Count == 0)
         {
             ConsoleHelper.ShowInformation(
-                "Nenhum treinamento foi cadastrado."
+                "No habits have been created."
             );
             inputReader.WaitForContinue();
             return;
         }
 
-        Habit habit = SelectTraining(
-            "Selecione um treinamento:",
+        Habit habit = SelectHabit(
+            "Select a habit:",
             habits
         );
         bool opened = true;
 
         while (opened)
         {
-            ConsoleHelper.ShowHeader("Treinamento");
+            ConsoleHelper.ShowHeader("Habit");
             AnsiConsole.Write(
-                new TrainingCreatedCard(habit).Build()
+                new HabitCreatedCard(habit).Build()
             );
             AnsiConsole.WriteLine();
 
             string action = inputReader.ReadSelection(
-                "Escolha uma ação:",
-                new[]
-                {
-                    "Editar",
-                    "Concluir",
-                    "Excluir",
-                    "Voltar"
-                },
+                "Choose an action:",
+                BuildHabitActions(habit),
                 choice => choice
             );
 
             switch (action)
             {
-                case "Editar":
-                    EditTraining(habit);
+                case "Edit":
+                    EditHabit(habit);
                     inputReader.WaitForContinue();
                     break;
 
-                case "Concluir":
-                    CompleteTraining(habit);
+                case "Score Positive":
+                    ScorePositive(habit);
                     inputReader.WaitForContinue();
                     break;
 
-                case "Excluir":
-                    opened = !DeleteTraining(habit);
+                case "Score Negative":
+                    ScoreNegative(habit);
+                    inputReader.WaitForContinue();
+                    break;
+
+                case "Delete":
+                    opened = !DeleteHabit(habit);
                     if (opened)
                     {
                         inputReader.WaitForContinue();
                     }
                     break;
 
-                case "Voltar":
+                case "Back":
                     opened = false;
                     break;
             }
         }
     }
 
-    private void ListTrainings()
+    private void ListHabits()
     {
-        ConsoleHelper.ShowHeader("Treinamentos");
+        ConsoleHelper.ShowHeader("Habits");
 
-        List<Habit> habits = habitService.GetAllHabits();
+        IReadOnlyList<Habit> habits = habitService.GetAllHabits();
 
         if (habits.Count == 0)
         {
             ConsoleHelper.ShowInformation(
-                "Nenhum treinamento foi cadastrado."
+                "No habits have been created."
             );
             return;
         }
 
         AnsiConsole.Write(
-            new TrainingTable(habits).Build()
+            new HabitTable(habits).Build()
         );
     }
 
-    private void EditTraining(Habit habit)
+    private void EditHabit(Habit habit)
     {
         inputReader.ShowCancellationHint();
 
         try
         {
             AnsiConsole.MarkupLine(
-                $"[grey]Título atual:[/] {Markup.Escape(habit.Title)}"
+                $"[grey]Current title:[/] {Markup.Escape(habit.Title)}"
             );
             string title = inputReader.ReadRequiredStringOrCancel(
-                "Novo título:"
+                "New title:"
             );
 
             AnsiConsole.MarkupLine(
-                $"[grey]Descrição atual:[/] " +
+                $"[grey]Current description:[/] " +
                 Markup.Escape(habit.Description)
             );
             string description = inputReader.ReadRequiredStringOrCancel(
-                "Nova descrição:"
+                "New description:"
             );
 
             AttributeType attributeType = SelectAttribute(
                 includeCancellation: true
             );
+            HabitDirection direction = SelectDirection();
 
             if (!inputReader.ReadConfirmation(
-                $"Salvar alterações em '{habit.Title}'?"
+                $"Save changes to '{habit.Title}'?"
             ))
             {
                 ConsoleHelper.ShowInformation(
-                    "Edição cancelada."
+                    "Edit cancelled."
                 );
                 return;
             }
@@ -244,44 +246,45 @@ public class TrainingScreen
                 habit,
                 title,
                 description,
-                attributeType
+                attributeType,
+                direction
             );
             gameStateService.Save();
             ConsoleHelper.ShowSuccess(
-                "Treinamento atualizado com sucesso."
+                "Habit updated successfully."
             );
         }
         catch (UserCancelledException)
         {
             ConsoleHelper.ShowInformation(
-                "Edição do treinamento cancelada."
+                "Habit edit cancelled."
             );
         }
     }
 
-    private void CompleteTraining(Habit habit)
+    private void ScorePositive(Habit habit)
     {
         if (!inputReader.ReadConfirmation(
-            $"Concluir o treinamento '{habit.Title}'?"
+            $"Score '{habit.Title}' positively?"
         ))
         {
             ConsoleHelper.ShowInformation(
-                "Conclusão do treinamento cancelada."
+                "Habit scoring cancelled."
             );
             return;
         }
 
-        Reward reward = habitService.CompleteHabit(habit);
+        Reward reward = habitService.ScorePositive(habit);
         character.ApplyReward(reward);
         decimal experienceEarned = reward.Experience;
 
         gameStateService.Save();
         ConsoleHelper.ShowSuccess(
-            "Treinamento concluído com sucesso."
+            "Habit scored successfully."
         );
         AnsiConsole.WriteLine();
         AnsiConsole.Write(
-            new TrainingResultCard(
+            new HabitResultCard(
                 habit,
                 character,
                 experienceEarned
@@ -289,14 +292,45 @@ public class TrainingScreen
         );
     }
 
-    private bool DeleteTraining(Habit habit)
+    private void ScoreNegative(Habit habit)
+    {
+        if (!inputReader.ReadConfirmation($"Score '{habit.Title}' negatively?"))
+        {
+            ConsoleHelper.ShowInformation("Negative scoring cancelled.");
+            return;
+        }
+
+        habitService.ScoreNegative(habit);
+        gameStateService.Save();
+        ConsoleHelper.ShowSuccess("Habit scored negatively.");
+    }
+
+    private static string[] BuildHabitActions(Habit habit)
+    {
+        List<string> actions = ["Edit"];
+        if (habit.AllowsPositive) actions.Add("Score Positive");
+        if (habit.AllowsNegative) actions.Add("Score Negative");
+        actions.Add("Delete");
+        actions.Add("Back");
+        return actions.ToArray();
+    }
+
+    private HabitDirection SelectDirection()
+    {
+        return inputReader.ReadSelection(
+            "Direction:",
+            Enum.GetValues<HabitDirection>(),
+            direction => direction.ToString());
+    }
+
+    private bool DeleteHabit(Habit habit)
     {
         if (!inputReader.ReadConfirmation(
-            $"Excluir permanentemente '{habit.Title}'?"
+            $"Permanently delete '{habit.Title}'?"
         ))
         {
             ConsoleHelper.ShowInformation(
-                "Exclusão cancelada."
+                "Deletion cancelled."
             );
             return false;
         }
@@ -304,14 +338,14 @@ public class TrainingScreen
         if (!habitService.DeleteHabit(habit.Id))
         {
             ConsoleHelper.ShowError(
-                "Não foi possível excluir o treinamento."
+                "The habit could not be deleted."
             );
             return false;
         }
 
         gameStateService.Save();
         ConsoleHelper.ShowSuccess(
-            "Treinamento excluído com sucesso."
+            "Habit deleted successfully."
         );
         return true;
     }
@@ -325,16 +359,16 @@ public class TrainingScreen
 
         if (includeCancellation)
         {
-            choices.Add("Cancelar");
+            choices.Add("Cancel");
         }
 
         string selected = inputReader.ReadSelection(
-            "Escolha o atributo:",
+            "Choose an attribute:",
             choices,
             choice => choice
         );
 
-        if (selected == "Cancelar")
+        if (selected == "Cancel")
         {
             throw new UserCancelledException();
         }
@@ -344,7 +378,7 @@ public class TrainingScreen
             .First(attribute => DisplayText.For(attribute) == selected);
     }
 
-    private Habit SelectTraining(
+    private Habit SelectHabit(
         string prompt,
         IEnumerable<Habit> habits
     )

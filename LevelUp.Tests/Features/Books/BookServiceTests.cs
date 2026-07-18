@@ -11,9 +11,9 @@ public sealed class BookServiceTests
     {
         BookService service = new();
 
-        Book first = service.CreateBook("Livro 1", "Autor", 100);
-        Book second = service.CreateBook("Livro 2", "Autor", 100);
-        Book third = service.CreateBook("Livro 3", "Autor", 100);
+        Book first = service.CreateBook("Book 1", "Autor", 100);
+        Book second = service.CreateBook("Book 2", "Autor", 100);
+        Book third = service.CreateBook("Book 3", "Autor", 100);
 
         Assert.Equal(BookStatus.Reading, first.Status);
         Assert.Equal(BookStatus.Reading, second.Status);
@@ -24,9 +24,9 @@ public sealed class BookServiceTests
     public void StartBook_ShouldRejectThirdReadingBook()
     {
         BookService service = new();
-        service.CreateBook("Livro 1", "Autor", 100);
-        service.CreateBook("Livro 2", "Autor", 100);
-        Book third = service.CreateBook("Livro 3", "Autor", 100);
+        service.CreateBook("Book 1", "Autor", 100);
+        service.CreateBook("Book 2", "Autor", 100);
+        Book third = service.CreateBook("Book 3", "Autor", 100);
 
         Assert.Throws<InvalidOperationException>(
             () => service.StartBook(third)
@@ -37,7 +37,7 @@ public sealed class BookServiceTests
     public void RecordProgress_ShouldStorePagesReadAndCompleteBook()
     {
         BookService service = new();
-        Book book = service.CreateBook("Livro", "Autor", 30);
+        Book book = service.CreateBook("Book", "Autor", 30);
 
         int firstSession = service.RecordProgress(book, 10);
         int secondSession = service.RecordProgress(book, 30);
@@ -53,7 +53,7 @@ public sealed class BookServiceTests
     public void RecordProgress_ShouldRejectPageRegression()
     {
         BookService service = new();
-        Book book = service.CreateBook("Livro", "Autor", 100);
+        Book book = service.CreateBook("Book", "Autor", 100);
         service.RecordProgress(book, 30);
 
         Assert.Throws<InvalidOperationException>(

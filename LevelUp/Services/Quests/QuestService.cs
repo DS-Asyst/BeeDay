@@ -147,7 +147,7 @@ public sealed class QuestService
         if (!milestone.CanAcceptQuests)
         {
             throw new InvalidOperationException(
-                "Missões não podem ser associadas a capítulos concluídos ou arquivados."
+                "Tasks cannot be associated with completed or archived milestones."
             );
         }
 
@@ -168,7 +168,7 @@ public sealed class QuestService
         if (completedQuest.Status != QuestStatus.Completed)
         {
             throw new InvalidOperationException(
-                "A próxima missão só pode ser ativada após a conclusão da missão atual."
+                "The next task can only be activated after the current task is completed."
             );
         }
 
@@ -314,7 +314,7 @@ public sealed class QuestService
         if (!quests.Any(existingQuest => existingQuest.Id == quest.Id))
         {
             throw new InvalidOperationException(
-                "A missão não é gerenciada por este serviço."
+                "The task is not managed by this service."
             );
         }
     }
@@ -324,7 +324,7 @@ public sealed class QuestService
         if (project.Status is not (ProjectStatus.Created or ProjectStatus.Active))
         {
             throw new InvalidOperationException(
-                "Missões só podem ser associadas a projetos criados ou ativos."
+                "Tasks can only be associated with created or active projects."
             );
         }
     }

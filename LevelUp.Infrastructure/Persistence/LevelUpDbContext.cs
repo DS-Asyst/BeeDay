@@ -6,6 +6,8 @@ using LevelUp.Domain.Milestones;
 using LevelUp.Domain.Projects;
 using LevelUp.Domain.Quests;
 using LevelUp.Domain.Wallet;
+using LevelUp.Domain.Tasks;
+using LevelUp.Domain.Todos;
 using LevelUp.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +21,8 @@ public sealed class LevelUpDbContext(DbContextOptions<LevelUpDbContext> options)
     public DbSet<Habit> Habits => Set<Habit>();
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<Quest> Quests => Set<Quest>();
+    public DbSet<TaskItem> Tasks => Set<TaskItem>();
+    public DbSet<ProjectTodo> Todos => Set<ProjectTodo>();
     public DbSet<Milestone> Milestones => Set<Milestone>();
     public DbSet<BossEncounter> Bosses => Set<BossEncounter>();
     public DbSet<Book> Books => Set<Book>();
@@ -67,8 +71,15 @@ public sealed class LevelUpDbContext(DbContextOptions<LevelUpDbContext> options)
             entity.Property(x => x.Title).HasMaxLength(200).IsRequired();
             entity.Property(x => x.Description).HasMaxLength(2000);
             entity.Property(x => x.AttributeType).HasConversion<string>().HasMaxLength(40);
+            entity.Property(x => x.Direction).HasConversion<string>().HasMaxLength(40);
+            entity.Property(x => x.PositiveCount).IsRequired();
+            entity.Property(x => x.NegativeCount).IsRequired();
+            entity.Property(x => x.CreatedAt).IsRequired();
+            entity.Property(x => x.LastScoredAt);
             entity.Ignore(x => x.ExperienceReward);
             entity.Ignore(x => x.AttributeExperienceReward);
+            entity.Ignore(x => x.AllowsPositive);
+            entity.Ignore(x => x.AllowsNegative);
         });
 
         modelBuilder.Entity<Project>(entity =>
@@ -110,6 +121,29 @@ public sealed class LevelUpDbContext(DbContextOptions<LevelUpDbContext> options)
             entity.Property(x => x.AttributeType).HasConversion<string>().HasMaxLength(40);
             entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(40);
             entity.HasOne<Project>().WithMany().HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne<Milestone>().WithMany().HasForeignKey(x => x.MilestoneId).OnDelete(DeleteBehavior.SetNull);
+        });
+
+
+        modelBuilder.Entity<TaskItem>(entity =>
+        {
+            entity.ToTable("Tasks"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.Title).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Description).HasMaxLength(4000);
+            entity.Property(x => x.AttributeType).HasConversion<string>().HasMaxLength(40);
+            entity.Property(x => x.Recurrence).HasConversion<string>().HasMaxLength(40);
+            entity.Property(x => x.RepeatOn).HasConversion<int>();
+            entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(40);
+        });
+
+        modelBuilder.Entity<ProjectTodo>(entity =>
+        {
+            entity.ToTable("Todos"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.Title).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Description).HasMaxLength(4000);
+            entity.Property(x => x.AttributeType).HasConversion<string>().HasMaxLength(40);
+            entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(40);
+            entity.HasOne<Project>().WithMany().HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne<Milestone>().WithMany().HasForeignKey(x => x.MilestoneId).OnDelete(DeleteBehavior.SetNull);
         });
 

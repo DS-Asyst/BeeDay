@@ -28,7 +28,7 @@ public sealed class SchemaFiveMigrationTests
 
         Assert.Equal(GameData.CurrentSchemaVersion, data.SchemaVersion);
         WalletTag tag = Assert.Single(data.WalletTags);
-        Assert.Equal("Sem tag", tag.Name);
+        Assert.Equal("No tag", tag.Name);
         Assert.Equal(tag.Id, transaction.TagId);
     }
 }

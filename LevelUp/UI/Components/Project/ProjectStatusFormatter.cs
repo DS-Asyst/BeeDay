@@ -11,19 +11,19 @@ public static class ProjectStatusFormatter
         {
             ProjectStatus.Created =>
                 $"[{LevelUpTheme.MutedText}]" +
-                $"{UIIcons.Created} Criado[/]",
+                $"{UIIcons.Created} Created[/]",
 
             ProjectStatus.Active =>
                 $"[{LevelUpTheme.Information}]" +
-                $"{UIIcons.Active} Ativo[/]",
+                $"{UIIcons.Active} Active[/]",
 
             ProjectStatus.Completed =>
                 $"[{LevelUpTheme.Success}]" +
-                $"{UIIcons.Completed} Concluído[/]",
+                $"{UIIcons.Completed} Completed[/]",
 
             ProjectStatus.Archived =>
                 $"[{LevelUpTheme.MutedText}]" +
-                $"{UIIcons.Archived} Arquivado[/]",
+                $"{UIIcons.Archived} Archived[/]",
 
             _ => status.ToString()
         };

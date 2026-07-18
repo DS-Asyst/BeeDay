@@ -38,7 +38,7 @@ public sealed class MilestoneService
         if (GetByProjectId(project.Id).Any(item => item.Order == order))
         {
             throw new InvalidOperationException(
-                "Um projeto não pode conter dois capítulos com a mesma ordem."
+                "A project cannot contain two milestones with the same order."
             );
         }
 
@@ -118,7 +118,7 @@ public sealed class MilestoneService
             .Any(item => item.Id != milestone.Id && item.Status == MilestoneStatus.Active))
         {
             throw new InvalidOperationException(
-                "Apenas um capítulo pode estar ativo por projeto."
+                "Only one milestone can be active per project."
             );
         }
 
@@ -182,7 +182,7 @@ public sealed class MilestoneService
         if (GetProgressQuests(milestone, quests).Count > 0)
         {
             throw new InvalidOperationException(
-                "Capítulos com missões são concluídos automaticamente."
+                "Milestones with tasks are completed automatically."
             );
         }
 
@@ -223,7 +223,7 @@ public sealed class MilestoneService
         if (milestone.Status is MilestoneStatus.Completed or MilestoneStatus.Archived)
         {
             throw new InvalidOperationException(
-                "Capítulos concluídos ou arquivados fazem parte do histórico do projeto e não podem ser excluídos."
+                "Completed or archived milestones are part of the project history and cannot be deleted."
             );
         }
 
@@ -258,7 +258,7 @@ public sealed class MilestoneService
         if (!milestones.Any(existing => existing.Id == milestone.Id))
         {
             throw new InvalidOperationException(
-                "O capítulo não é gerenciado por este serviço."
+                "The milestone is not managed by this service."
             );
         }
     }
@@ -268,7 +268,7 @@ public sealed class MilestoneService
         if (project.Status is ProjectStatus.Completed or ProjectStatus.Archived)
         {
             throw new InvalidOperationException(
-                "Projetos concluídos ou arquivados não podem receber capítulos."
+                "Completed or archived projects cannot receive milestones."
             );
         }
     }

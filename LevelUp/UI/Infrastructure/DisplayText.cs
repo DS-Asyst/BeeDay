@@ -14,99 +14,99 @@ public static class DisplayText
 {
     public static string For(ProjectStatus status) => status switch
     {
-        ProjectStatus.Created => "Criado",
-        ProjectStatus.Active => "Ativo",
-        ProjectStatus.Completed => "Concluído",
-        ProjectStatus.Archived => "Arquivado",
+        ProjectStatus.Created => "Created",
+        ProjectStatus.Active => "Active",
+        ProjectStatus.Completed => "Completed",
+        ProjectStatus.Archived => "Archived",
         _ => status.ToString()
     };
 
     public static string For(QuestStatus status) => status switch
     {
-        QuestStatus.Created => "Criada",
-        QuestStatus.Active => "Ativa",
-        QuestStatus.Completed => "Concluída",
-        QuestStatus.Archived => "Arquivada",
+        QuestStatus.Created => "Created",
+        QuestStatus.Active => "Active",
+        QuestStatus.Completed => "Completed",
+        QuestStatus.Archived => "Archived",
         _ => status.ToString()
     };
 
     public static string For(MilestoneStatus status) => status switch
     {
-        MilestoneStatus.Locked => "Bloqueado",
-        MilestoneStatus.Created => "Criado",
-        MilestoneStatus.Active => "Ativo",
-        MilestoneStatus.Completed => "Concluído",
-        MilestoneStatus.Archived => "Arquivado",
+        MilestoneStatus.Locked => "Locked",
+        MilestoneStatus.Created => "Created",
+        MilestoneStatus.Active => "Active",
+        MilestoneStatus.Completed => "Completed",
+        MilestoneStatus.Archived => "Archived",
         _ => status.ToString()
     };
 
     public static string For(BossStatus status) => status switch
     {
-        BossStatus.Locked => "Bloqueado",
-        BossStatus.Available => "Disponível",
-        BossStatus.Defeated => "Derrotado",
-        BossStatus.Archived => "Arquivado",
+        BossStatus.Locked => "Locked",
+        BossStatus.Available => "Available",
+        BossStatus.Defeated => "Defeated",
+        BossStatus.Archived => "Archived",
         _ => status.ToString()
     };
 
     public static string For(BookStatus status) => status switch
     {
-        BookStatus.Locked => "Bloqueado",
-        BookStatus.Reading => "Em andamento",
-        BookStatus.Completed => "Concluído",
-        BookStatus.Archived => "Arquivado",
+        BookStatus.Locked => "Locked",
+        BookStatus.Reading => "In Progress",
+        BookStatus.Completed => "Completed",
+        BookStatus.Archived => "Archived",
         _ => status.ToString()
     };
 
     public static string For(AttributeType value) => value switch
     {
-        AttributeType.Strength => "Força",
-        AttributeType.Intelligence => "Inteligência",
-        AttributeType.Vitality => "Vitalidade",
-        AttributeType.Agility => "Agilidade",
-        AttributeType.Dexterity => "Destreza",
-        AttributeType.Luck => "Sorte",
+        AttributeType.Strength => "Strength",
+        AttributeType.Intelligence => "Intelligence",
+        AttributeType.Vitality => "Vitality",
+        AttributeType.Agility => "Agility",
+        AttributeType.Dexterity => "Dexterity",
+        AttributeType.Luck => "Luck",
         _ => value.ToString()
     };
 
     public static string For(CharacterClass value) => value switch
     {
-        CharacterClass.Warrior => "Guerreiro",
-        CharacterClass.Mage => "Mago",
-        CharacterClass.Hunter => "Caçador",
-        CharacterClass.Priest => "Sacerdote",
-        CharacterClass.Paladin => "Paladino",
-        CharacterClass.Rogue => "Ladino",
+        CharacterClass.Warrior => "Warrior",
+        CharacterClass.Mage => "Mage",
+        CharacterClass.Hunter => "Hunter",
+        CharacterClass.Priest => "Priest",
+        CharacterClass.Paladin => "Paladin",
+        CharacterClass.Rogue => "Rogue",
         _ => value.ToString()
     };
 
     public static string For(CharacterRank value) => value switch
     {
-        CharacterRank.Apprentice => "Aprendiz",
-        CharacterRank.Adventurer => "Aventureiro",
-        CharacterRank.Disciple => "Discípulo",
-        CharacterRank.Adept => "Adepto",
-        CharacterRank.Specialist => "Especialista",
-        CharacterRank.Master => "Mestre",
-        CharacterRank.Legend => "Lenda",
+        CharacterRank.Apprentice => "Apprentice",
+        CharacterRank.Adventurer => "Adventurer",
+        CharacterRank.Disciple => "Disciple",
+        CharacterRank.Adept => "Adept",
+        CharacterRank.Specialist => "Specialist",
+        CharacterRank.Master => "Master",
+        CharacterRank.Legend => "Legend",
         _ => value.ToString()
     };
 
     public static string For(AchievementStatus value) => value switch
     {
-        AchievementStatus.Locked => "Bloqueada",
-        AchievementStatus.Unlocked => "Desbloqueada",
+        AchievementStatus.Locked => "Locked",
+        AchievementStatus.Unlocked => "Unlocked",
         _ => value.ToString()
     };
 
     public static string For(AchievementCategory value) => value switch
     {
-        AchievementCategory.Project => "Projeto",
-        AchievementCategory.Mission => "Missão",
-        AchievementCategory.Training => "Treinamento",
-        AchievementCategory.Reading => "Leitura",
-        AchievementCategory.Wallet => "Carteira",
-        AchievementCategory.General => "Geral",
+        AchievementCategory.Project => "Project",
+        AchievementCategory.Mission => "Task",
+        AchievementCategory.Training => "Habit",
+        AchievementCategory.Reading => "Reading",
+        AchievementCategory.Wallet => "Wallet",
+        AchievementCategory.General => "General",
         _ => value.ToString()
     };
 }

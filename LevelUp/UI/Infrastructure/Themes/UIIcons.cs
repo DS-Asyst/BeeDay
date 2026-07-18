@@ -3,7 +3,7 @@ namespace LevelUp.UI.Infrastructure.Themes;
 public static class UIIcons
 {
     public const string Character = "◆";
-    public const string Training = "▲";
+    public const string Habit = "▲";
     public const string Quest = "□";
     public const string Boss = "■";
     public const string Gold = "$";

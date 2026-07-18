@@ -23,11 +23,11 @@ public sealed class WalletTransactionTable
             .Border(TableBorder.Rounded)
             .Expand();
 
-        table.AddColumn("Data");
-        table.AddColumn("Descrição");
+        table.AddColumn("Date");
+        table.AddColumn("Description");
         table.AddColumn("Tag");
-        table.AddColumn(new TableColumn("Valor").RightAligned());
-        table.AddColumn("Situação");
+        table.AddColumn(new TableColumn("Amount").RightAligned());
+        table.AddColumn("Status");
 
         foreach (WalletTransaction transaction in transactions)
         {
@@ -41,7 +41,7 @@ public sealed class WalletTransactionTable
                 Markup.Escape(tagNameResolver(transaction.TagId)),
                 amount,
                 transaction.IsReversal
-                    ? "Estorno"
+                    ? "Reversal"
                     : transaction.IsReversed
                         ? "Estornada"
                         : "Confirmada"

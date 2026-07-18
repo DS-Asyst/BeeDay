@@ -1,20 +1,20 @@
-using LevelUp.Domain.Habits;
+using DomainHabit = LevelUp.Domain.Habits.Habit;
 using CharacterModel = LevelUp.Domain.Character.Character;
 using LevelUp.UI.Infrastructure.Builders;
 using LevelUp.UI.Infrastructure.Themes;
 using LevelUp.UI.Layout;
 using Spectre.Console;
 
-namespace LevelUp.UI.Components.Training;
+namespace LevelUp.UI.Components.Habit;
 
-public sealed class TrainingResultCard
+public sealed class HabitResultCard
 {
-    private readonly Habit _habit;
+    private readonly DomainHabit _habit;
     private readonly CharacterModel _character;
     private readonly decimal _experienceEarned;
 
-    public TrainingResultCard(
-        Habit habit,
+    public HabitResultCard(
+        DomainHabit habit,
         CharacterModel character,
         decimal experienceEarned
     )
@@ -39,7 +39,7 @@ public sealed class TrainingResultCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Treinamentos",
+                "Habits",
                 _habit.Title,
                 $"bold {LevelUpTheme.Text}"
             )
@@ -47,7 +47,7 @@ public sealed class TrainingResultCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Experiência obtida",
+                "Experience earned",
                 $"+{_experienceEarned:0.##} XP",
                 $"bold {LevelUpTheme.Success}"
             )
@@ -55,7 +55,7 @@ public sealed class TrainingResultCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Atributo",
+                "Attribute",
                 _habit.AttributeType.ToString(),
                 LevelUpTheme.Accent
             )
@@ -63,7 +63,7 @@ public sealed class TrainingResultCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Experiência do atributo",
+                "Attribute experience",
                 $"+{_habit.AttributeExperienceReward:0.##} XP",
                 $"bold {LevelUpTheme.Success}"
             )
@@ -71,14 +71,14 @@ public sealed class TrainingResultCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Conclusões",
-                _habit.TimesCompleted.ToString()
+                "Positive scores",
+                _habit.PositiveCount.ToString()
             )
         );
 
         summary.AddRow(
             StatisticRow.Build(
-                "Nível do personagem",
+                "Character level",
                 _character.Level.ToString(),
                 $"bold {LevelUpTheme.Primary}"
             )
@@ -86,14 +86,14 @@ public sealed class TrainingResultCard
 
         summary.AddRow(
             StatisticRow.Build(
-                "Experiência do personagem",
+                "Character experience",
                 $"{_character.Experience:0.##}/" +
                 $"{_character.ExperienceToNextLevel:0.##}"
             )
         );
 
         return PanelBuilder.Build(
-            title: "Treinamento concluído",
+            title: "Habit scored",
             content: summary,
             icon: UIIcons.Success,
             expand: false

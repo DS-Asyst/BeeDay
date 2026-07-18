@@ -1,15 +1,15 @@
-using LevelUp.Domain.Habits;
+using DomainHabit = LevelUp.Domain.Habits.Habit;
 using LevelUp.UI.Infrastructure;
 using LevelUp.UI.Infrastructure.Themes;
 using Spectre.Console;
 
-namespace LevelUp.UI.Components.Training;
+namespace LevelUp.UI.Components.Habit;
 
-public sealed class TrainingTable
+public sealed class HabitTable
 {
-    private readonly IReadOnlyCollection<Habit> _habits;
+    private readonly IReadOnlyCollection<DomainHabit> _habits;
 
-    public TrainingTable(IEnumerable<Habit> habits)
+    public HabitTable(IEnumerable<DomainHabit> habits)
     {
         ArgumentNullException.ThrowIfNull(habits);
 
@@ -22,7 +22,7 @@ public sealed class TrainingTable
         {
             Border = TableBorder.Rounded,
             Title = new TableTitle(
-                $"[bold {LevelUpTheme.Primary}]Treinamentos[/]"
+                $"[bold {LevelUpTheme.Primary}]Habits[/]"
             )
         };
 
@@ -31,11 +31,11 @@ public sealed class TrainingTable
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Título[/]")
+            new TableColumn("[bold]Title[/]")
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Atributo[/]")
+            new TableColumn("[bold]Attribute[/]")
         );
 
         table.AddColumn(
@@ -43,14 +43,14 @@ public sealed class TrainingTable
         );
 
         table.AddColumn(
-            new TableColumn("[bold]XP do atributo[/]").Centered()
+            new TableColumn("[bold]Attribute XP[/]").Centered()
         );
 
         table.AddColumn(
-            new TableColumn("[bold]Conclusões[/]").Centered()
+            new TableColumn("[bold]Positive scores[/]").Centered()
         );
 
-        foreach (Habit habit in _habits)
+        foreach (DomainHabit habit in _habits)
         {
             table.AddRow(
                 habit.Id.ToString(),
@@ -58,7 +58,7 @@ public sealed class TrainingTable
                 DisplayText.For(habit.AttributeType),
                 habit.ExperienceReward.ToString("0.##"),
                 habit.AttributeExperienceReward.ToString("0.##"),
-                habit.TimesCompleted.ToString()
+                habit.PositiveCount.ToString()
             );
         }
 

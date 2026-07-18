@@ -11,19 +11,19 @@ public static class QuestStatusFormatter
         {
             QuestStatus.Created =>
                 $"[{LevelUpTheme.MutedText}]" +
-                $"{UIIcons.Created} Criada[/]",
+                $"{UIIcons.Created} Created[/]",
 
             QuestStatus.Active =>
                 $"[{LevelUpTheme.Information}]" +
-                $"{UIIcons.Active} Ativa[/]",
+                $"{UIIcons.Active} Active[/]",
 
             QuestStatus.Completed =>
                 $"[{LevelUpTheme.Success}]" +
-                $"{UIIcons.Completed} Concluída[/]",
+                $"{UIIcons.Completed} Completed[/]",
 
             QuestStatus.Archived =>
                 $"[{LevelUpTheme.MutedText}]" +
-                $"{UIIcons.Archived} Arquivada[/]",
+                $"{UIIcons.Archived} Archived[/]",
 
             _ => status.ToString()
         };

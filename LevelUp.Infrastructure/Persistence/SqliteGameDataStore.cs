@@ -1,5 +1,6 @@
 using LevelUp.Domain;
 using LevelUp.Infrastructure.Persistence.Entities;
+using LevelUp.Domain.Habits;
 using LevelUp.Services.Persistence;
 using Microsoft.EntityFrameworkCore;
 using CharacterModel = LevelUp.Domain.Character.Character;
@@ -43,9 +44,25 @@ public sealed class SqliteGameDataStore : IGameDataStore, IDisposable
             SaveRevision = metadata.SaveRevision,
             LastSavedAt = metadata.LastSavedAt,
             Character = ToDomain(characterEntity, titles),
-            Habits = dbContext.Habits.AsNoTracking().OrderBy(x => x.Id).ToList(),
+            Habits = dbContext.Habits.AsNoTracking()
+                .OrderBy(x => x.Id)
+                .Select(x => new Habit
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    Description = x.Description,
+                    AttributeType = x.AttributeType,
+                    Direction = x.Direction,
+                    PositiveCount = x.PositiveCount,
+                    NegativeCount = x.NegativeCount,
+                    CreatedAt = x.CreatedAt,
+                    LastScoredAt = x.LastScoredAt
+                })
+                .ToList(),
             Projects = dbContext.Projects.AsNoTracking().OrderBy(x => x.Id).ToList(),
-            Quests = dbContext.Quests.AsNoTracking().OrderBy(x => x.Id).ToList(),
+            LegacyQuests = dbContext.Quests.AsNoTracking().OrderBy(x => x.Id).ToList(),
+            Tasks = dbContext.Tasks.AsNoTracking().OrderBy(x => x.Id).ToList(),
+            Todos = dbContext.Todos.AsNoTracking().OrderBy(x => x.Id).ToList(),
             Milestones = dbContext.Milestones.AsNoTracking().OrderBy(x => x.Id).ToList(),
             Bosses = dbContext.Bosses.AsNoTracking().OrderBy(x => x.Id).ToList(),
             Books = dbContext.Books.AsNoTracking().Include(x => x.ProgressHistory).OrderBy(x => x.Id).ToList(),
@@ -70,6 +87,8 @@ public sealed class SqliteGameDataStore : IGameDataStore, IDisposable
         dbContext.CharacterTitles.ExecuteDelete();
         dbContext.Books.ExecuteDelete();
         dbContext.Bosses.ExecuteDelete();
+        dbContext.Todos.ExecuteDelete();
+        dbContext.Tasks.ExecuteDelete();
         dbContext.Quests.ExecuteDelete();
         dbContext.Milestones.ExecuteDelete();
         dbContext.WalletTransactions.ExecuteDelete();
@@ -98,9 +117,11 @@ public sealed class SqliteGameDataStore : IGameDataStore, IDisposable
 
         dbContext.Projects.AddRange(gameData.Projects);
         dbContext.Milestones.AddRange(gameData.Milestones);
-        dbContext.Quests.AddRange(gameData.Quests);
+        dbContext.Quests.AddRange(gameData.LegacyQuests);
+        dbContext.Tasks.AddRange(gameData.Tasks);
+        dbContext.Todos.AddRange(gameData.Todos);
         dbContext.Bosses.AddRange(gameData.Bosses);
-        dbContext.Habits.AddRange(gameData.Habits);
+        dbContext.Habits.AddRange(gameData.Habits.Select(ToPersistenceHabit));
         dbContext.Books.AddRange(gameData.Books);
         dbContext.WalletTags.AddRange(gameData.WalletTags);
         dbContext.WalletTransactions.AddRange(gameData.WalletTransactions);
@@ -113,6 +134,20 @@ public sealed class SqliteGameDataStore : IGameDataStore, IDisposable
     public void Dispose() { }
 
     private LevelUpDbContext CreateContext() => new(options);
+
+
+    private static Habit ToPersistenceHabit(Habit habit) => new()
+    {
+        Id = habit.Id,
+        Title = habit.Title,
+        Description = habit.Description,
+        AttributeType = habit.AttributeType,
+        Direction = habit.Direction,
+        PositiveCount = habit.PositiveCount,
+        NegativeCount = habit.NegativeCount,
+        CreatedAt = habit.CreatedAt,
+        LastScoredAt = habit.LastScoredAt
+    };
 
     private static CharacterEntity ToEntity(CharacterModel character) => new()
     {

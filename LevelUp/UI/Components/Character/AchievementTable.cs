@@ -19,11 +19,11 @@ public sealed class AchievementTable
         Table table = new Table()
             .Border(TableBorder.Rounded)
             .Expand();
-        table.Title = new TableTitle("[bold]Conquistas[/]");
-        table.AddColumn("Conquista");
-        table.AddColumn("Descrição");
+        table.Title = new TableTitle("[bold]Achievements[/]");
+        table.AddColumn("Achievement");
+        table.AddColumn("Description");
         table.AddColumn("Categoria");
-        table.AddColumn("Desbloqueada em");
+        table.AddColumn("Unlocked em");
 
         foreach (Achievement achievement in achievements)
         {

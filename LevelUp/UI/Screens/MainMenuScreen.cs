@@ -39,15 +39,15 @@ public sealed class MainMenuScreen
         {
             ConsoleHelper.ShowHeader("Level Up");
             string option = inputReader.ReadSelection(
-                "Escolha uma opção:",
+                "Choose an option:",
                 new[]
                 {
-                    "Personagem",
-                    "Diário",
-                    "Inventário",
-                    "Configurações",
-                    "Salvar jogo",
-                    "Sair"
+                    "Character",
+                    "Journal",
+                    "Inventory",
+                    "Settings",
+                    "Save Game",
+                    "Exit"
                 },
                 choice => choice
             );
@@ -56,16 +56,16 @@ public sealed class MainMenuScreen
             {
                 switch (option)
                 {
-                    case "Personagem": characterScreen.Show(character); break;
-                    case "Diário": diaryScreen.Show(); break;
-                    case "Inventário": inventoryScreen.Show(); break;
-                    case "Configurações": settingsScreen.Show(); break;
-                    case "Salvar jogo":
+                    case "Character": characterScreen.Show(character); break;
+                    case "Journal": diaryScreen.Show(); break;
+                    case "Inventory": inventoryScreen.Show(); break;
+                    case "Settings": settingsScreen.Show(); break;
+                    case "Save Game":
                         gameStateService.Save();
-                        ConsoleHelper.ShowSuccess("Jogo salvo com sucesso.");
+                        ConsoleHelper.ShowSuccess("Game saved successfully.");
                         inputReader.WaitForContinue();
                         break;
-                    case "Sair":
+                    case "Exit":
                         gameStateService.Save();
                         running = false;
                         break;
@@ -78,11 +78,11 @@ public sealed class MainMenuScreen
             }
             catch (IOException exception)
             {
-                ConsoleHelper.ShowError($"Ocorreu um erro de armazenamento: {exception.Message}");
+                ConsoleHelper.ShowError($"A storage error occurred: {exception.Message}");
                 inputReader.WaitForContinue();
             }
         }
 
-        ConsoleHelper.ShowHeader("Até breve");
+        ConsoleHelper.ShowHeader("See you soon");
     }
 }

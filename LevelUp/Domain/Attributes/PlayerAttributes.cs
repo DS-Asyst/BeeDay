@@ -32,7 +32,7 @@ public class PlayerAttributes
 
             _ => throw new ArgumentOutOfRangeException(
                 nameof(attributeType),
-                "Atributo inválido.")
+                "Invalid attribute.")
         };
     }
 }

@@ -42,7 +42,7 @@ public sealed class WalletTransaction
     {
         if (Amount != 0)
         {
-            throw new InvalidOperationException("A movimentação já foi configurada.");
+            throw new InvalidOperationException("The transaction has already been configured.");
         }
 
         Apply(amount, description, tagId, occurredAt);
@@ -58,7 +58,7 @@ public sealed class WalletTransaction
     {
         if (Amount != 0)
         {
-            throw new InvalidOperationException("A movimentação já foi configurada.");
+            throw new InvalidOperationException("The transaction has already been configured.");
         }
 
         if (amount <= 0)
@@ -123,7 +123,7 @@ public sealed class WalletTransaction
 
         Apply(
             -original.Amount,
-            $"Estorno: {original.Description}",
+            $"Reversal: {original.Description}",
             original.TagId,
             occurredAt
         );
@@ -137,7 +137,7 @@ public sealed class WalletTransaction
     {
         if (IsReversed)
         {
-            throw new InvalidOperationException("A movimentação já foi estornada.");
+            throw new InvalidOperationException("The transaction has already been reversed.");
         }
 
         ReversedAt = reversedAt;
@@ -154,7 +154,7 @@ public sealed class WalletTransaction
         {
             throw new ArgumentOutOfRangeException(
                 nameof(amount),
-                "O valor da movimentação não pode ser zero."
+                "The transaction amount cannot be zero."
             );
         }
 

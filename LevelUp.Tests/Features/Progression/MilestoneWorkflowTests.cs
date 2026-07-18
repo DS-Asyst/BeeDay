@@ -1,3 +1,4 @@
+using LevelUp.Application;
 using LevelUp.Domain;
 using LevelUp.Domain.Achievements;
 using LevelUp.Domain.Bosses;
@@ -9,6 +10,8 @@ using LevelUp.Services.Habits;
 using LevelUp.Services.Milestones;
 using LevelUp.Services.Persistence;
 using LevelUp.Services.Projects;
+using LevelUp.Services.Tasks;
+using LevelUp.Services.Todos;
 using LevelUp.Services.Quests;
 using LevelUp.Services.Wallet;
 using LevelUp.Services.Workflows;
@@ -98,18 +101,19 @@ public sealed class MilestoneWorkflowTests
 
         public TestContext()
         {
-            GameStateService state = new(
-                store,
+            GameSession session = new(
+                new LevelUp.Domain.Character.Character(),
                 new HabitService(),
+                new TaskService(),
                 Projects,
-                Quests,
+                new ProjectTodoService(),
                 Milestones,
                 Bosses,
                 new BookService(),
                 new WalletService(),
-                Achievements,
-                new LevelUp.Domain.Character.Character()
+                Achievements
             );
+            GameStateService state = new(store, session);
             QuestWorkflow = new QuestWorkflowService(
                 Quests,
                 Projects,

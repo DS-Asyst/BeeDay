@@ -30,16 +30,16 @@ public sealed class WalletTransactionCard
             UIIcons.Gold
         )
             .AddText("Tag", tagName)
-            .AddText("Valor", signedValue)
-            .AddText("Data", transaction.OccurredAt.ToString("dd/MM/yyyy"));
+            .AddText("Amount", signedValue)
+            .AddText("Date", transaction.OccurredAt.ToString("dd/MM/yyyy"));
 
         if (transaction.IsReversal)
         {
             card.AddText(
-                "Movimentação original",
+                "Transaction original",
                 $"#{transaction.ReversalOfTransactionId}"
             );
-            card.AddText("Motivo do estorno", transaction.ReversalReason);
+            card.AddText("Reversal Reason", transaction.ReversalReason);
         }
 
         if (transaction.IsReversed)

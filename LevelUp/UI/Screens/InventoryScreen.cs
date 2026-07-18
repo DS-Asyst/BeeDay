@@ -18,13 +18,13 @@ public sealed class InventoryScreen
         bool running = true;
         while (running)
         {
-            ConsoleHelper.ShowHeader("Inventário");
-            string option = inputReader.ReadSelection("Escolha uma opção:", new[] { "Biblioteca", "Carteira", "Voltar" }, choice => choice);
+            ConsoleHelper.ShowHeader("Inventory");
+            string option = inputReader.ReadSelection("Choose an option:", new[] { "Library", "Wallet", "Back" }, choice => choice);
             switch (option)
             {
-                case "Biblioteca": libraryScreen.Show(); break;
-                case "Carteira": walletScreen.Show(); break;
-                case "Voltar": running = false; break;
+                case "Library": libraryScreen.Show(); break;
+                case "Wallet": walletScreen.Show(); break;
+                case "Back": running = false; break;
             }
         }
     }

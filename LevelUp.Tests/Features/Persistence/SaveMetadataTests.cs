@@ -7,7 +7,8 @@ using LevelUp.Services.Habits;
 using LevelUp.Services.Milestones;
 using LevelUp.Services.Persistence;
 using LevelUp.Services.Projects;
-using LevelUp.Services.Quests;
+using LevelUp.Services.Tasks;
+using LevelUp.Services.Todos;
 using LevelUp.Services.Wallet;
 using Xunit;
 
@@ -22,8 +23,9 @@ public sealed class SaveMetadataTests
         GameSession session = new(
             new LevelUp.Domain.Character.Character(),
             new HabitService(),
+            new TaskService(),
             new ProjectService(),
-            new QuestService(),
+            new ProjectTodoService(),
             new MilestoneService(),
             new BossService(),
             new BookService(),

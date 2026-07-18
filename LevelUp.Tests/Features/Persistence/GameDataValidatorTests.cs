@@ -14,8 +14,8 @@ public sealed class GameDataValidatorTests
         Milestone milestone = new() { Id = 1 };
         milestone.Configure(
             projectId: 99,
-            title: "Capítulo órfão",
-            description: "Relacionamento inválido.",
+            title: "Orphan milestone",
+            description: "Invalid relationship.",
             order: 1
         );
 
@@ -28,17 +28,17 @@ public sealed class GameDataValidatorTests
             () => new GameDataValidator().Validate(data)
         );
 
-        Assert.Contains("projeto válido", exception.Message);
+        Assert.Contains("valid project", exception.Message);
     }
 
     [Fact]
     public void Validator_ShouldRejectDuplicateProjectIds()
     {
         Project first = new() { Id = 1 };
-        first.Configure("Primeiro", "Descrição");
+        first.Configure("First", "Description");
 
         Project second = new() { Id = 1 };
-        second.Configure("Segundo", "Descrição");
+        second.Configure("Second", "Description");
 
         GameData data = new()
         {
@@ -49,7 +49,7 @@ public sealed class GameDataValidatorTests
             () => new GameDataValidator().Validate(data)
         );
 
-        Assert.Contains("IDs duplicados", exception.Message);
+        Assert.Contains("Duplicate IDs", exception.Message);
     }
     [Fact]
     public void Migrator_ShouldUpgradeSchemaThreeToCurrentVersion()

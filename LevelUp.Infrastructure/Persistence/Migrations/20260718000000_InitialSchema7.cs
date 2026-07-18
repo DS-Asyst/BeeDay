@@ -6,15 +6,26 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LevelUp.Infrastructure.Persistence.Migrations;
 
 [DbContext(typeof(LevelUpDbContext))]
-[Migration("20260717031000_Phase10RelationalSqlite")]
-public partial class Phase10RelationalSqlite : Migration
+[Migration("20260718000000_InitialSchema7")]
+public partial class InitialSchema7 : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)
     {
-        foreach (string table in LegacyTables)
-        {
-            migrationBuilder.DropTable(name: table);
-        }
+        migrationBuilder.CreateTable(
+            name: "GameMetadata",
+            columns: table => new
+            {
+                Id = table.Column<int>(type: "INTEGER", nullable: false),
+                SchemaVersion = table.Column<int>(type: "INTEGER", nullable: false),
+                SaveRevision = table.Column<int>(type: "INTEGER", nullable: false),
+                LastSavedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
+                UpdatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_GameMetadata", x => x.Id);
+                table.CheckConstraint("CK_GameMetadata_Singleton", "Id = 1");
+            });
 
         migrationBuilder.CreateTable(
             name: "Characters",
@@ -49,9 +60,12 @@ public partial class Phase10RelationalSqlite : Migration
             Id = table.Column<int>("INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
             Title = table.Column<string>("TEXT", maxLength: 200, nullable: false),
             Description = table.Column<string>("TEXT", maxLength: 2000, nullable: false),
-            DurationInMinutes = table.Column<int>("INTEGER", nullable: false),
             AttributeType = table.Column<string>("TEXT", maxLength: 40, nullable: false),
-            TimesCompleted = table.Column<int>("INTEGER", nullable: false)
+            Direction = table.Column<string>("TEXT", maxLength: 40, nullable: false),
+            PositiveCount = table.Column<int>("INTEGER", nullable: false),
+            NegativeCount = table.Column<int>("INTEGER", nullable: false),
+            CreatedAt = table.Column<DateTime>("TEXT", nullable: false),
+            LastScoredAt = table.Column<DateTime>("TEXT", nullable: true)
         }, constraints: table => table.PrimaryKey("PK_Habits", x => x.Id));
 
         migrationBuilder.CreateTable("Projects", table => new
@@ -189,6 +203,39 @@ public partial class Phase10RelationalSqlite : Migration
             table.ForeignKey("FK_Quests_Milestones_MilestoneId", x => x.MilestoneId, "Milestones", "Id", onDelete: ReferentialAction.SetNull);
         });
 
+        migrationBuilder.CreateTable("Tasks", table => new
+        {
+            Id = table.Column<int>("INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
+            Title = table.Column<string>("TEXT", maxLength: 200, nullable: false),
+            Description = table.Column<string>("TEXT", maxLength: 4000, nullable: false),
+            AttributeType = table.Column<string>("TEXT", maxLength: 40, nullable: false),
+            Recurrence = table.Column<string>("TEXT", maxLength: 40, nullable: false),
+            RepeatOn = table.Column<int>("INTEGER", nullable: false),
+            Status = table.Column<string>("TEXT", maxLength: 40, nullable: false),
+            CreatedAt = table.Column<DateTime>("TEXT", nullable: false),
+            LastCompletedAt = table.Column<DateTime>("TEXT", nullable: true),
+            CompletionCount = table.Column<int>("INTEGER", nullable: false)
+        }, constraints: table => table.PrimaryKey("PK_Tasks", x => x.Id));
+
+        migrationBuilder.CreateTable("Todos", table => new
+        {
+            Id = table.Column<int>("INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
+            ProjectId = table.Column<int>("INTEGER", nullable: false),
+            MilestoneId = table.Column<int>("INTEGER", nullable: true),
+            Title = table.Column<string>("TEXT", maxLength: 200, nullable: false),
+            Description = table.Column<string>("TEXT", maxLength: 4000, nullable: false),
+            AttributeType = table.Column<string>("TEXT", maxLength: 40, nullable: false),
+            Status = table.Column<string>("TEXT", maxLength: 40, nullable: false),
+            CreatedAt = table.Column<DateTime>("TEXT", nullable: false),
+            ActivatedAt = table.Column<DateTime>("TEXT", nullable: true),
+            CompletedAt = table.Column<DateTime>("TEXT", nullable: true)
+        }, constraints: table =>
+        {
+            table.PrimaryKey("PK_Todos", x => x.Id);
+            table.ForeignKey("FK_Todos_Projects_ProjectId", x => x.ProjectId, "Projects", "Id", onDelete: ReferentialAction.Cascade);
+            table.ForeignKey("FK_Todos_Milestones_MilestoneId", x => x.MilestoneId, "Milestones", "Id", onDelete: ReferentialAction.SetNull);
+        });
+
         migrationBuilder.CreateTable("Bosses", table => new
         {
             Id = table.Column<int>("INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
@@ -210,6 +257,8 @@ public partial class Phase10RelationalSqlite : Migration
             table.ForeignKey("FK_Bosses_Milestones_MilestoneId", x => x.MilestoneId, "Milestones", "Id", onDelete: ReferentialAction.SetNull);
         });
 
+        migrationBuilder.CreateIndex("IX_Todos_MilestoneId", "Todos", "MilestoneId");
+        migrationBuilder.CreateIndex("IX_Todos_ProjectId", "Todos", "ProjectId");
         migrationBuilder.CreateIndex("IX_Achievements_Code", "Achievements", "Code", unique: true);
         migrationBuilder.CreateIndex("IX_BookProgressEntries_BookId_RecordedAt", "BookProgressEntries", new[] { "BookId", "RecordedAt" });
         migrationBuilder.CreateIndex("IX_Bosses_MilestoneId", "Bosses", "MilestoneId");
@@ -231,30 +280,14 @@ public partial class Phase10RelationalSqlite : Migration
         migrationBuilder.DropTable("CharacterTitles");
         migrationBuilder.DropTable("Habits");
         migrationBuilder.DropTable("Quests");
+        migrationBuilder.DropTable("Tasks");
+        migrationBuilder.DropTable("Todos");
         migrationBuilder.DropTable("WalletTransactions");
         migrationBuilder.DropTable("Books");
         migrationBuilder.DropTable("Characters");
         migrationBuilder.DropTable("Milestones");
         migrationBuilder.DropTable("WalletTags");
         migrationBuilder.DropTable("Projects");
-
-        foreach (string tableName in LegacyTables)
-        {
-            migrationBuilder.CreateTable(
-                name: tableName,
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "TEXT", maxLength: 64, nullable: false),
-                    Payload = table.Column<string>(type: "TEXT", nullable: false),
-                    UpdatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false)
-                },
-                constraints: table => table.PrimaryKey($"PK_{tableName}", x => x.Id));
-        }
+        migrationBuilder.DropTable("GameMetadata");
     }
-
-    private static readonly string[] LegacyTables =
-    [
-        "Characters", "Habits", "Projects", "Quests", "Milestones", "Bosses", "Books",
-        "WalletTags", "WalletTransactions", "Achievements"
-    ];
 }

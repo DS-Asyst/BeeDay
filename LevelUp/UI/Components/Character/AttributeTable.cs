@@ -25,28 +25,28 @@ public sealed class AttributeTable
         };
 
         table.AddColumn(new TableColumn("[bold]Atributo[/]"));
-        table.AddColumn(new TableColumn("[bold]Nível[/]").Centered());
+        table.AddColumn(new TableColumn("[bold]Level[/]").Centered());
         table.AddColumn(new TableColumn("[bold]Atributo[/]"));
-        table.AddColumn(new TableColumn("[bold]Nível[/]").Centered());
+        table.AddColumn(new TableColumn("[bold]Level[/]").Centered());
 
         table.AddRow(
-            $"{UIIcons.Strength} Força",
+            $"{UIIcons.Strength} Strength",
             FormatLevel(attributes.Strength.Level),
-            $"{UIIcons.Intelligence} Inteligência",
+            $"{UIIcons.Intelligence} Intelligence",
             FormatLevel(attributes.Intelligence.Level)
         );
 
         table.AddRow(
-            $"{UIIcons.Vitality} Vitalidade",
+            $"{UIIcons.Vitality} Vitality",
             FormatLevel(attributes.Vitality.Level),
-            $"{UIIcons.Agility} Agilidade",
+            $"{UIIcons.Agility} Agility",
             FormatLevel(attributes.Agility.Level)
         );
 
         table.AddRow(
-            $"{UIIcons.Dexterity} Destreza",
+            $"{UIIcons.Dexterity} Dexterity",
             FormatLevel(attributes.Dexterity.Level),
-            $"{UIIcons.Luck} Sorte",
+            $"{UIIcons.Luck} Luck",
             FormatLevel(attributes.Luck.Level)
         );
 
