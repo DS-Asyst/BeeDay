@@ -1,23 +1,27 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<div class="levelup-app">
+    <header class="levelup-topbar">
+        <div class="levelup-container levelup-topbar__content">
+            <a class="levelup-brand" href="/">
+                LEVELUP
+            </a>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            <span class="levelup-foundation-label">
+                Blazor Foundation
+            </span>
         </div>
+    </header>
 
-        <article class="content px-4">
+    <main class="levelup-main">
+        <div class="levelup-container">
             @Body
-        </article>
+        </div>
     </main>
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
+    An unexpected error occurred.
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>

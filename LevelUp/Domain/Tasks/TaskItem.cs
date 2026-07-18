@@ -32,16 +32,21 @@ public sealed class TaskItem
     public void Resume() => Status = TaskStatus.Active;
     public bool IsScheduledFor(DayOfWeek day) => Recurrence == TaskRecurrence.Daily || RepeatOn.HasFlag(ToWeekDay(day));
 
-    private void SetDetails(string title,string description) { ArgumentException.ThrowIfNullOrWhiteSpace(title); Title=title.Trim(); Description=description.Trim(); }
+    private void SetDetails(string title, string description) { ArgumentException.ThrowIfNullOrWhiteSpace(title); Title = title.Trim(); Description = description.Trim(); }
     private void SetSchedule(TaskRecurrence recurrence, WeekDays repeatOn)
     {
         if (recurrence == TaskRecurrence.Weekly && repeatOn == WeekDays.None) throw new ArgumentException("Weekly tasks must repeat on at least one day.", nameof(repeatOn));
-        Recurrence=recurrence; RepeatOn=recurrence==TaskRecurrence.Daily?WeekDays.EveryDay:repeatOn;
+        Recurrence = recurrence; RepeatOn = recurrence == TaskRecurrence.Daily ? WeekDays.EveryDay : repeatOn;
     }
     private static WeekDays ToWeekDay(DayOfWeek day) => day switch
     {
-        DayOfWeek.Monday=>WeekDays.Monday, DayOfWeek.Tuesday=>WeekDays.Tuesday, DayOfWeek.Wednesday=>WeekDays.Wednesday,
-        DayOfWeek.Thursday=>WeekDays.Thursday, DayOfWeek.Friday=>WeekDays.Friday, DayOfWeek.Saturday=>WeekDays.Saturday,
-        DayOfWeek.Sunday=>WeekDays.Sunday, _=>WeekDays.None
+        DayOfWeek.Monday => WeekDays.Monday,
+        DayOfWeek.Tuesday => WeekDays.Tuesday,
+        DayOfWeek.Wednesday => WeekDays.Wednesday,
+        DayOfWeek.Thursday => WeekDays.Thursday,
+        DayOfWeek.Friday => WeekDays.Friday,
+        DayOfWeek.Saturday => WeekDays.Saturday,
+        DayOfWeek.Sunday => WeekDays.Sunday,
+        _ => WeekDays.None
     };
 }

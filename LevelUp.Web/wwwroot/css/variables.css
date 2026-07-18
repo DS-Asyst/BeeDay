@@ -1,0 +1,29 @@
+:root {
+    --levelup-color-primary: #432874;
+    --levelup-color-primary-dark: #36205d;
+    --levelup-color-primary-light: #613d9a;
+
+    --levelup-color-background: #f5f3f7;
+    --levelup-color-surface: #ffffff;
+
+    --levelup-color-text-primary: #34313a;
+    --levelup-color-text-secondary: #686270;
+    --levelup-color-border: #ddd8e3;
+
+    --levelup-color-success: #24a148;
+    --levelup-color-warning: #f1c21b;
+    --levelup-color-danger: #da1e28;
+
+    --levelup-spacing-xs: 0.25rem;
+    --levelup-spacing-sm: 0.5rem;
+    --levelup-spacing-md: 1rem;
+    --levelup-spacing-lg: 1.5rem;
+    --levelup-spacing-xl: 2rem;
+
+    --levelup-radius-sm: 0.25rem;
+    --levelup-radius-md: 0.5rem;
+    --levelup-radius-lg: 0.75rem;
+
+    --levelup-shadow-sm: 0 1px 3px rgb(0 0 0 / 10%);
+    --levelup-shadow-md: 0 4px 12px rgb(0 0 0 / 12%);
+}

@@ -1,0 +1,46 @@
+.foundation-page {
+    display: grid;
+    min-height: calc(100vh - 128px);
+    place-items: center;
+}
+
+.foundation-card {
+    width: min(100%, 680px);
+    padding: clamp(1.5rem, 5vw, 3rem);
+}
+
+.foundation-card__eyebrow {
+    color: var(--levelup-color-primary-light);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.foundation-card h1 {
+    margin: var(--levelup-spacing-sm) 0;
+    color: var(--levelup-color-primary-dark);
+    font-size: clamp(2rem, 6vw, 3.5rem);
+}
+
+.foundation-card p {
+    margin-bottom: var(--levelup-spacing-lg);
+    color: var(--levelup-color-text-secondary);
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+.foundation-status {
+    display: flex;
+    align-items: center;
+    gap: var(--levelup-spacing-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.foundation-status__indicator {
+    width: 0.625rem;
+    height: 0.625rem;
+    background: var(--levelup-color-success);
+    border-radius: 50%;
+}
