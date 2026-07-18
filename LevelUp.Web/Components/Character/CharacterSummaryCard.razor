@@ -1,50 +1,62 @@
 @using LevelUp.Web.ViewModels.Character
 
-<section class="character-summary" aria-labelledby="character-summary-title">
-    <div class="character-summary__welcome">
-        <span class="character-summary__eyebrow">Character overview</span>
+<section class="character-summary"
+         aria-labelledby="character-summary-title">
 
-        <h1 id="character-summary-title" class="character-summary__title">
-            Welcome back, @Character.Name
-        </h1>
-
-        <p class="character-summary__description">
-            Keep completing your activities to advance your character.
-        </p>
+    <div class="character-summary__avatar"
+         aria-hidden="true">
+        TA
     </div>
 
-    <div class="character-summary__progress">
-        <div class="character-summary__metrics">
-            <div class="character-summary__metric">
-                <span class="character-summary__metric-label">Level</span>
-                <strong class="character-summary__metric-value">@Character.Level</strong>
-            </div>
+    <div class="character-summary__identity">
+        <span class="character-summary__eyebrow">
+            Character
+        </span>
 
-            <div class="character-summary__metric">
-                <span class="character-summary__metric-label">Gold</span>
-                <strong class="character-summary__metric-value character-summary__gold">
-                    @Character.GoldLabel
-                </strong>
-            </div>
+        <h1 id="character-summary-title"
+            class="character-summary__title">
+            @Character.Name
+        </h1>
+
+        <span class="character-summary__subtitle">
+            Level @Character.Level
+        </span>
+    </div>
+
+    <div class="character-summary__experience">
+        <div class="character-summary__experience-header">
+            <span>Experience</span>
+
+            <strong>
+                @Character.ExperienceLabel
+            </strong>
         </div>
 
-        <div class="character-summary__experience">
-            <div class="character-summary__experience-header">
-                <span>Experience</span>
-                <strong>@Character.ExperienceLabel</strong>
-            </div>
+        <div class="character-summary__progress-track"
+             role="progressbar"
+             aria-label="Character experience"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             aria-valuenow="@Character.ExperiencePercentage.ToString("0")">
 
-            <div class="character-summary__progress-track"
-                 role="progressbar"
-                 aria-label="Character experience"
-                 aria-valuemin="0"
-                 aria-valuemax="100"
-                 aria-valuenow="@Character.ExperiencePercentage.ToString("0")">
-                <div class="character-summary__progress-value"
-                     style="width: @($"{Character.ExperiencePercentage:0.##}%")">
-                </div>
+            <div class="character-summary__progress-value"
+                 style="width: @($"{Character.ExperiencePercentage:0.##}%")">
             </div>
         </div>
+    </div>
+
+    <div class="character-summary__level">
+        <span>Level</span>
+        <strong>@Character.Level</strong>
+    </div>
+
+    <div class="character-summary__gold">
+        <span>Gold</span>
+
+        <strong>
+            <span aria-hidden="true">●</span>
+            @Character.GoldLabel
+        </strong>
     </div>
 </section>
 

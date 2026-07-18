@@ -1,35 +1,83 @@
 .filter-bar {
+    display: grid;
+    grid-template-columns: minmax(16rem, 1fr) auto auto;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+    background: var(--levelup-color-surface);
+    border-bottom: 1px solid var(--levelup-color-border);
+}
+
+.filter-bar__search {
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--levelup-spacing-md);
-    padding: var(--levelup-spacing-md) var(--levelup-spacing-lg);
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-lg);
-    background: var(--levelup-color-surface);
-    box-shadow: var(--levelup-shadow-sm);
+    max-width: 44rem;
+    justify-self: center;
+    width: 100%;
 }
+
+.filter-bar__search-icon {
+    position: absolute;
+    left: 0.8rem;
+    color: var(--levelup-color-text-muted);
+    pointer-events: none;
+}
+
+.filter-bar__search input {
+    width: 100%;
+    min-height: 2.25rem;
+    padding: 0.45rem 0.75rem 0.45rem 2.25rem;
+    border: 1px solid var(--levelup-color-border-strong);
+    border-radius: 0.2rem;
+    color: var(--levelup-color-text-primary);
+    background: #fff;
+    font-size: 0.8rem;
+    outline: none;
+}
+
+    .filter-bar__search input:focus {
+        border-color: var(--levelup-color-primary-light);
+        box-shadow: 0 0 0 2px rgb(97 61 154 / 14%);
+    }
 
 .filter-bar__button {
     display: inline-flex;
     align-items: center;
-    gap: var(--levelup-spacing-sm);
-    min-height: 2.65rem;
-    padding-inline: var(--levelup-spacing-md);
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 2.25rem;
+    padding-inline: 0.85rem;
     border: 1px solid var(--levelup-color-border-strong);
-    border-radius: var(--levelup-radius-md);
-    background: var(--levelup-color-surface);
+    border-radius: 0.2rem;
     color: var(--levelup-color-text-primary);
+    background: #fff;
+    font-size: 0.75rem;
     font-weight: 800;
+    cursor: pointer;
 }
 
 .filter-bar__button--primary {
     border-color: var(--levelup-color-primary);
-    background: var(--levelup-color-primary);
     color: #fff;
+    background: var(--levelup-color-primary);
 }
 
-.filter-bar__button:disabled {
-    cursor: default;
-    opacity: 1;
+.filter-bar__button:hover {
+    background: var(--levelup-color-surface-muted);
+}
+
+.filter-bar__button--primary:hover {
+    background: var(--levelup-color-primary-dark);
+}
+
+@media (max-width: 700px) {
+    .filter-bar {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .filter-bar__search {
+        grid-column: 1 / -1;
+        max-width: none;
+    }
 }

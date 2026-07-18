@@ -1,4 +1,6 @@
 .dashboard-page {
-    display: grid;
-    gap: var(--levelup-spacing-lg);
+    display: block;
+    width: 100%;
+    min-height: 100vh;
+    background: var(--levelup-color-dashboard-column);
 }

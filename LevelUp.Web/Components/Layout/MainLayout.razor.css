@@ -3,7 +3,9 @@
 }
 
 .levelup-main {
-    padding-block: var(--levelup-spacing-xl);
+    width: 100%;
+    min-height: calc(100vh - 3.25rem);
+    padding: 0;
 }
 
 #blazor-error-ui {

@@ -1,20 +1,58 @@
-<section class="dashboard-column" aria-labelledby="@HeadingId">
+<section class="dashboard-column"
+         aria-labelledby="@HeadingId">
+
     <header class="dashboard-column__header">
-        <h2 id="@HeadingId">@Title</h2>
-        <span>@Count</span>
+        <div class="dashboard-column__title">
+            <h2 id="@HeadingId">@Title</h2>
+
+            <span class="dashboard-column__count">
+                @Count
+            </span>
+        </div>
+
+        <div class="dashboard-column__tabs">
+            <button type="button"
+                    class="active">
+                All
+            </button>
+
+            <button type="button">
+                Active
+            </button>
+        </div>
     </header>
 
-    <EmptyStateCard Title="@EmptyTitle"
-                    Description="@EmptyDescription"
-                    Symbol="@Symbol" />
+    <button class="dashboard-column__create"
+            type="button">
+        Add a @SingularTitle
+    </button>
+
+    <div class="dashboard-column__content">
+        <EmptyStateCard Title="@EmptyTitle"
+                        Description="@EmptyDescription"
+                        Symbol="@Symbol" />
+    </div>
 </section>
 
 @code {
-    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
-    [Parameter, EditorRequired] public string EmptyTitle { get; set; } = string.Empty;
-    [Parameter, EditorRequired] public string EmptyDescription { get; set; } = string.Empty;
-    [Parameter] public string Symbol { get; set; } = "○";
-    [Parameter] public int Count { get; set; }
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
 
-    private string HeadingId => $"dashboard-{Title.ToLowerInvariant().Replace(" ", "-")}";
+    [Parameter, EditorRequired]
+    public string SingularTitle { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public string EmptyTitle { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public string EmptyDescription { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Symbol { get; set; } = "○";
+
+    [Parameter]
+    public int Count { get; set; }
+
+    private string HeadingId =>
+        $"dashboard-{Title.ToLowerInvariant().Replace(" ", "-")}";
 }
