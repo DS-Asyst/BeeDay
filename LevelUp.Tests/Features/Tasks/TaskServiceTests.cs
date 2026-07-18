@@ -4,7 +4,6 @@ using LevelUp.Services.Tasks;
 using Xunit;
 
 namespace LevelUp.Tests;
-
 public sealed class TaskServiceTests
 {
     [Fact]

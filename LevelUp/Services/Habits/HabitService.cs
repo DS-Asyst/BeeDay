@@ -19,12 +19,8 @@ public sealed class HabitService
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
         Habit habit = new()
         {
-            Id = nextId++,
-            Title = title.Trim(),
-            Description = description.Trim(),
-            AttributeType = attributeType,
-            Direction = direction,
-            CreatedAt = DateTime.Now
+            Id = nextId++, Title = title.Trim(), Description = description.Trim(),
+            AttributeType = attributeType, Direction = direction, CreatedAt = DateTime.Now
         };
         habits.Add(habit);
         return habit;
