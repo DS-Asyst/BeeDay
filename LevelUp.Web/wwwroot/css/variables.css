@@ -36,3 +36,32 @@
     --levelup-color-dashboard-create: #e7e5e8;
     --levelup-color-dashboard-border: #d7d4d9;
 }
+
+/* Sprint 3.3 - Habitica-inspired dashboard refinement */
+:root {
+    --levelup-navigation-background: #4d2d7f;
+
+    --levelup-character-background-start: #34205f;
+    --levelup-character-background-end: #3c226c;
+    --levelup-character-muted-text: rgb(255 255 255 / 58%);
+
+    --levelup-primary: #613ca2;
+    --levelup-primary-dark: #4b2d80;
+    --levelup-primary-light: #8056c7;
+    --levelup-primary-soft: #eee7fb;
+
+    --levelup-experience-start: #f3b82f;
+    --levelup-experience-end: #ffd052;
+    --levelup-gold: #f4c43a;
+
+    --levelup-text-primary: #2f2737;
+    --levelup-text-secondary: #62596c;
+    --levelup-text-muted: #8e8498;
+
+    --levelup-dashboard-column: #f3f2f4;
+    --levelup-dashboard-create: #e8e6e9;
+    --levelup-dashboard-border: #dad7dd;
+    --levelup-dashboard-border-strong: #cfcbd3;
+
+    --levelup-surface-hover: #f7f4fa;
+}

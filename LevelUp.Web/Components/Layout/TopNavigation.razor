@@ -1,39 +1,58 @@
 <header class="top-navigation">
-    <div class="top-navigation__inner">
+    <div class="top-navigation__content">
         <NavLink class="top-navigation__brand"
                  href="/"
-                 Match="NavLinkMatch.All">
-            <span class="top-navigation__brand-mark">L</span>
-            <span>LEVELUP</span>
+                 Match="NavLinkMatch.All"
+                 aria-label="LevelUp Dashboard">
+            <span class="top-navigation__brand-symbol"
+                  aria-hidden="true">
+                L
+            </span>
+
+            <span class="top-navigation__brand-name">
+                LEVELUP
+            </span>
         </NavLink>
 
         <nav class="top-navigation__links"
              aria-label="Primary navigation">
-            <NavLink href="/character">Character</NavLink>
-            <NavLink href="/journal">Journal</NavLink>
-            <NavLink href="/inventory">Inventory</NavLink>
-            <NavLink href="/settings">Settings</NavLink>
+            <NavLink href="/character">
+                Character
+            </NavLink>
+
+            <NavLink href="/journal">
+                Journal
+            </NavLink>
+
+            <NavLink href="/inventory">
+                Inventory
+            </NavLink>
+
+            <NavLink href="/settings">
+                Settings
+            </NavLink>
         </nav>
 
-        <div class="top-navigation__status">
+        <div class="top-navigation__account">
             <div class="top-navigation__gold"
-                 aria-label="Current gold balance">
-                <span class="top-navigation__gold-icon"
+                 title="Current gold">
+                <span class="top-navigation__gold-dot"
                       aria-hidden="true">
-                    ●
                 </span>
 
-                <span>@Gold.ToString("N0")</span>
+                <strong>@Gold.ToString("N0")</strong>
             </div>
 
-            <button class="top-navigation__icon-button"
+            <button class="top-navigation__action"
                     type="button"
+                    title="Notifications"
                     aria-label="Notifications">
-                ♢
+                ◇
             </button>
 
             <button class="top-navigation__avatar"
                     type="button"
+                    title="Account"
                     aria-label="Open account menu">
                 TA
             </button>

@@ -3,96 +3,96 @@
     grid-template-rows: auto auto 1fr;
     min-width: 0;
     min-height: calc(100vh - 15rem);
-    border-right: 1px solid var(--levelup-color-dashboard-border);
-    background: var(--levelup-color-dashboard-column);
+    border-right: 1px solid #d8d5db;
+    background: #f2f1f3;
 }
 
-    .dashboard-column:last-child {
-        border-right: 0;
-    }
+.dashboard-column:last-child { border-right: 0; }
 
 .dashboard-column__header {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    gap: 0.75rem;
-    min-height: 3.3rem;
-    padding: 0.75rem 0.8rem 0.45rem;
-    background: var(--levelup-color-surface);
+    gap: 0.6rem;
+    min-height: 2.75rem;
+    padding: 0.6rem 0.65rem 0.35rem;
+    background: #fff;
 }
 
-.dashboard-column__title {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-}
+.dashboard-column__heading { display: flex; align-items: center; gap: 0.38rem; min-width: 0; }
 
-    .dashboard-column__title h2 {
-        margin: 0;
-        color: var(--levelup-color-text-primary);
-        font-size: 0.9rem;
-        font-weight: 900;
-    }
+.dashboard-column__heading h2 {
+    margin: 0;
+    overflow: hidden;
+    color: #302638;
+    font-size: 0.82rem;
+    font-weight: 900;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
 .dashboard-column__count {
     display: grid;
     place-items: center;
-    min-width: 1.25rem;
-    height: 1.25rem;
-    padding-inline: 0.3rem;
+    min-width: 1.18rem;
+    height: 1.18rem;
+    padding: 0 0.28rem;
     border-radius: 999px;
     color: #fff;
-    background: var(--levelup-color-primary-light);
-    font-size: 0.65rem;
+    background: #8056c7;
+    font-size: 0.59rem;
     font-weight: 900;
 }
 
-.dashboard-column__tabs {
-    display: flex;
-    gap: 0.5rem;
-}
+.dashboard-column__tabs { display: flex; align-items: center; gap: 0.45rem; }
 
-    .dashboard-column__tabs button {
-        padding: 0.25rem 0.15rem;
-        border: 0;
-        border-bottom: 2px solid transparent;
-        color: var(--levelup-color-text-secondary);
-        background: transparent;
-        font-size: 0.62rem;
-        font-weight: 800;
-        cursor: pointer;
-    }
-
-        .dashboard-column__tabs button.active {
-            color: var(--levelup-color-primary);
-            border-bottom-color: var(--levelup-color-primary);
-        }
-
-.dashboard-column__create {
-    min-height: 2.4rem;
-    margin: 0 0.65rem 0.35rem;
-    padding-inline: 0.75rem;
+.dashboard-column__tabs button {
+    min-height: 1.6rem;
+    padding: 0.15rem 0.05rem;
     border: 0;
-    color: var(--levelup-color-text-secondary);
-    background: var(--levelup-color-dashboard-create);
-    font-size: 0.72rem;
-    text-align: left;
+    border-bottom: 2px solid transparent;
+    color: #62596c;
+    background: transparent;
+    font-size: 0.57rem;
+    font-weight: 800;
     cursor: pointer;
 }
 
-    .dashboard-column__create:hover {
-        color: var(--levelup-color-primary-dark);
-        background: #dedbe0;
-    }
+.dashboard-column__tabs button:hover,
+.dashboard-column__tabs button.active { color: #613ca2; }
+.dashboard-column__tabs button.active { border-bottom-color: #613ca2; }
+
+.dashboard-column__create {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 2.25rem;
+    margin: 0 0.5rem 0.35rem;
+    padding: 0 0.65rem;
+    border: 1px solid transparent;
+    border-radius: 0.1rem;
+    color: #62596c;
+    background: #e7e5e8;
+    font-size: 0.65rem;
+    text-align: left;
+    cursor: pointer;
+    transition: color 140ms ease, background-color 140ms ease, border-color 140ms ease;
+}
+
+.dashboard-column__create:hover {
+    border-color: #cfcbd3;
+    color: #4b2d80;
+    background: #dfdce2;
+}
 
 .dashboard-column__content {
-    padding: 0.4rem 0.65rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0 0.5rem 1rem;
 }
 
 @media (max-width: 650px) {
-    .dashboard-column {
-        min-height: 28rem;
-        border-right: 0;
-        border-bottom: 1px solid var(--levelup-color-dashboard-border);
-    }
+    .dashboard-column { min-height: 25rem; border-right: 0; border-bottom: 1px solid #d8d5db; }
 }

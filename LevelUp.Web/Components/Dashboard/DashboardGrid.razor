@@ -1,29 +1,59 @@
 <div class="dashboard-grid">
-    <DashboardColumn Title="Habits"
-                     SingularTitle="Habit"
-                     Count="0"
-                     EmptyTitle="No habits yet"
-                     EmptyDescription="Create your first habit and start building consistency."
-                     Symbol="↻" />
+    <DashboardColumn Title="Habits" SingularTitle="Habit" Count="3">
+        <ActivityPreviewCard Title="Drink 500ml of water"
+                             Description="Stay hydrated throughout the day."
+                             Meta="+2 XP"
+                             Variant="habit"
+                             ActionSymbol="＋" />
+        <ActivityPreviewCard Title="Avoid drinking coffee"
+                             Description="Build healthier energy habits."
+                             Variant="habit"
+                             ActionSymbol="＋" />
+        <ActivityPreviewCard Title="Exercise for 30 minutes"
+                             Description="Every workout makes you stronger."
+                             Variant="habit"
+                             ActionSymbol="＋"
+                             Featured="true" />
+    </DashboardColumn>
 
-    <DashboardColumn Title="Tasks"
-                     SingularTitle="Task"
-                     Count="0"
-                     EmptyTitle="No tasks yet"
-                     EmptyDescription="Create a recurring task for your routine."
-                     Symbol="✓" />
+    <DashboardColumn Title="Tasks" SingularTitle="Task" Count="3">
+        <ActivityPreviewCard Title="Wake up before 5:00 AM"
+                             Description="Start the day before the world wakes up."
+                             Meta="Daily"
+                             Variant="task"
+                             ActionSymbol="□"
+                             Featured="true" />
+        <ActivityPreviewCard Title="Morning routine"
+                             Description="Prayer, preparation and planning."
+                             Meta="0 / 3"
+                             Variant="task"
+                             ActionSymbol="□" />
+        <ActivityPreviewCard Title="Study ASP.NET Core"
+                             Description="Spend focused time becoming a better .NET developer."
+                             Meta="30 minutes"
+                             Variant="task"
+                             ActionSymbol="□" />
+    </DashboardColumn>
 
-    <DashboardColumn Title="To-Dos"
-                     SingularTitle="To-Do"
-                     Count="0"
-                     EmptyTitle="No to-dos yet"
-                     EmptyDescription="Capture the next action you need to complete."
-                     Symbol="□" />
+    <DashboardColumn Title="To-Dos" SingularTitle="To-Do" Count="1">
+        <ActivityPreviewCard Title="Review sprint notes"
+                             Description="Confirm acceptance criteria before closing the sprint."
+                             Meta="Today"
+                             Variant="todo"
+                             ActionSymbol="✓" />
+    </DashboardColumn>
 
-    <DashboardColumn Title="Projects"
-                     SingularTitle="Project"
-                     Count="0"
-                     EmptyTitle="No projects yet"
-                     EmptyDescription="Create a project and organize its larger goals."
-                     Symbol="◇" />
+    <DashboardColumn Title="Projects" SingularTitle="Project" Count="2">
+        <ActivityPreviewCard Title="LevelUp Web"
+                             Description="Build a focused, Habitica-inspired productivity experience."
+                             Meta="3 quests"
+                             Variant="project"
+                             ActionSymbol="◇"
+                             Featured="true" />
+        <ActivityPreviewCard Title="ASP.NET Core Roadmap"
+                             Description="Advance through the backend development roadmap."
+                             Meta="In progress"
+                             Variant="project"
+                             ActionSymbol="◇" />
+    </DashboardColumn>
 </div>

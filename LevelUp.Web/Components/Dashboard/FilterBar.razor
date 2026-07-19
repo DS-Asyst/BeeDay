@@ -1,28 +1,23 @@
-<div class="filter-bar"
-     aria-label="Dashboard actions">
+<div class="filter-bar" aria-label="Dashboard controls">
+    <div class="filter-bar__spacer" aria-hidden="true"></div>
 
-    <div class="filter-bar__search">
-        <span class="filter-bar__search-icon"
-              aria-hidden="true">
-            ⌕
-        </span>
+    <label class="filter-bar__search">
+        <span class="filter-bar__search-icon" aria-hidden="true">⌕</span>
+        <span class="visually-hidden">Search activities</span>
+        <input type="search" placeholder="Search habits, tasks, to-dos and projects..." />
+    </label>
 
-        <input type="search"
-               placeholder="Search activities..."
-               aria-label="Search activities" />
+    <div class="filter-bar__actions">
+        <button class="filter-bar__button" type="button">
+            <span aria-hidden="true">☷</span>
+            Filters
+            <span class="filter-bar__chevron" aria-hidden="true">▾</span>
+        </button>
+
+        <button class="filter-bar__button filter-bar__button--primary" type="button">
+            <span aria-hidden="true">＋</span>
+            Create
+            <span class="filter-bar__chevron" aria-hidden="true">▾</span>
+        </button>
     </div>
-
-    <button class="filter-bar__button"
-            type="button">
-        <span aria-hidden="true">☷</span>
-        Filters
-        <span aria-hidden="true">⌄</span>
-    </button>
-
-    <button class="filter-bar__button filter-bar__button--primary"
-            type="button">
-        <span aria-hidden="true">＋</span>
-        Create
-        <span aria-hidden="true">⌄</span>
-    </button>
 </div>

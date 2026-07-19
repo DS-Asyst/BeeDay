@@ -46,14 +46,7 @@ p {
 }
 
 .levelup-main {
-    width: min( calc(100% - 2rem), var(--levelup-content-width) );
-    margin-inline: auto;
-    padding-block: var(--levelup-spacing-xl);
-}
-
-@media (min-width: 768px) {
-    .levelup-main {
-        width: min( calc(100% - 3rem), var(--levelup-content-width) );
-        padding-block: var(--levelup-spacing-2xl);
-    }
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
