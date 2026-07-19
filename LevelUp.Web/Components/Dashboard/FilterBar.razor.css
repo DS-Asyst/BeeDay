@@ -1,0 +1,66 @@
+.filter-bar {
+    display: grid;
+    grid-template-columns: minmax(8rem, 1fr) minmax(24rem, 38rem) minmax(11rem, 1fr);
+    align-items: center;
+    gap: 1rem;
+    min-height: 3.55rem;
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid #d8d5db;
+    background: #fff;
+    box-shadow: 0 1px 2px rgb(38 24 54 / 5%);
+}
+
+.filter-bar__search { position: relative; display: flex; align-items: center; width: 100%; }
+.filter-bar__search-icon { position: absolute; left: 0.8rem; color: #8e8498; font-size: 0.8rem; pointer-events: none; }
+
+.filter-bar__search input {
+    width: 100%;
+    min-height: 2.2rem;
+    padding: 0.45rem 0.75rem 0.45rem 2.25rem;
+    border: 1px solid #cfcbd3;
+    border-radius: 0.16rem;
+    outline: none;
+    color: #2f2737;
+    background: #fff;
+    font: inherit;
+    font-size: 0.7rem;
+    transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.filter-bar__search input::placeholder { color: #8e8498; }
+.filter-bar__search input:focus { border-color: #8056c7; box-shadow: 0 0 0 2px rgb(102 65 166 / 14%); }
+.filter-bar__actions { display: flex; justify-content: flex-end; gap: 0.45rem; }
+
+.filter-bar__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-height: 2.2rem;
+    padding: 0 0.78rem;
+    border: 1px solid #cfcbd3;
+    border-radius: 0.16rem;
+    color: #2f2737;
+    background: #fff;
+    font-size: 0.67rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: border-color 140ms ease, color 140ms ease, background-color 140ms ease, transform 140ms ease;
+}
+
+.filter-bar__button:hover { border-color: #8056c7; color: #613ca2; background: #f7f4fa; }
+.filter-bar__button:active { transform: translateY(1px); }
+.filter-bar__button--primary { border-color: #613ca2; color: #fff; background: #613ca2; box-shadow: 0 2px 4px rgb(62 35 104 / 18%); }
+.filter-bar__button--primary:hover { border-color: #4b2d80; color: #fff; background: #4b2d80; }
+.filter-bar__chevron { margin-left: 0.15rem; font-size: 0.55rem; }
+
+@media (max-width: 840px) {
+    .filter-bar { grid-template-columns: minmax(0, 1fr) auto; }
+    .filter-bar__spacer { display: none; }
+}
+
+@media (max-width: 580px) {
+    .filter-bar { grid-template-columns: 1fr; }
+    .filter-bar__actions { justify-content: stretch; }
+    .filter-bar__button { flex: 1; }
+}

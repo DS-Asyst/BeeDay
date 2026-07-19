@@ -1,0 +1,2 @@
+.levelup-app { width: 100%; min-height: 100vh; background: #f2f1f3; }
+.levelup-main { width: 100%; min-width: 0; min-height: calc(100vh - 3rem); margin: 0; padding: 0; }

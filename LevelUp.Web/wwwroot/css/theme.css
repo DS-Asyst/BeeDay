@@ -1,0 +1,52 @@
+html {
+    min-height: 100%;
+    background: var(--levelup-color-background);
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    background: var(--levelup-color-background);
+    color: var(--levelup-color-text-primary);
+    font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+a {
+    color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+    margin-top: 0;
+}
+
+.levelup-app {
+    min-height: 100vh;
+    background: var(--levelup-color-background);
+}
+
+.levelup-main {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}

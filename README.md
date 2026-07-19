@@ -111,3 +111,5 @@ dotnet build -c Release
 dotnet test -c Release
 git status
 ```
+
+> **Build a better life, one task at a time.**

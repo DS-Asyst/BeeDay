@@ -1,0 +1,17 @@
+@page "/"
+@inject LevelUpSession Session
+
+<PageTitle>Dashboard | LevelUp</PageTitle>
+
+<section class="dashboard-page levelup-fade-in">
+    <DashboardHeader Character="@ViewModel.Character" />
+
+    <FilterBar />
+    <DashboardGrid />
+</section>
+
+@code {
+    private DashboardViewModel ViewModel { get; } = DashboardViewModel.Preview;
+
+    protected override Task OnInitializedAsync() => Session.InitializeAsync();
+}

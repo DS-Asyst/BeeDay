@@ -1,0 +1,25 @@
+<div class="empty-state">
+    <div class="empty-state__symbol"
+         aria-hidden="true">
+        @Symbol
+    </div>
+
+    <strong class="empty-state__title">
+        @Title
+    </strong>
+
+    <p class="empty-state__description">
+        @Description
+    </p>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public string Description { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Symbol { get; set; } = "○";
+}

@@ -1,0 +1,38 @@
+.levelup-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 26px;
+    padding: 0.25rem 0.6875rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 750;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.levelup-badge--neutral {
+    background: #ece8ef;
+    color: var(--levelup-color-text-secondary);
+}
+
+.levelup-badge--primary {
+    background: var(--levelup-color-primary-soft);
+    color: var(--levelup-color-primary-dark);
+}
+
+.levelup-badge--success {
+    background: #ddf6e6;
+    color: #176f38;
+}
+
+.levelup-badge--warning {
+    background: #fff1c9;
+    color: #7b5700;
+}
+
+.levelup-badge--danger {
+    background: #fde3e3;
+    color: #932d2d;
+}
