@@ -14,5 +14,3 @@ logs/
 *.tmp
 *.temp
 LevelUp.Web/Data/Backups/
-# Application data
-src/LevelUp.Web/Data/

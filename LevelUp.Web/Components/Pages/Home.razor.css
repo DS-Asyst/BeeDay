@@ -1,8 +1,0 @@
-.dashboard-page {
-    display: block;
-    width: 100%;
-    min-width: 0;
-    min-height: calc(100vh - 3rem);
-    overflow-x: hidden;
-    background: #f2f1f3;
-}
