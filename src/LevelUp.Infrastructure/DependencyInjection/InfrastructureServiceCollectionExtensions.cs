@@ -1,0 +1,48 @@
+using LevelUp.Application.Common.Contracts;
+using LevelUp.Infrastructure.Configuration;
+using LevelUp.Infrastructure.HealthChecks;
+using LevelUp.Infrastructure.Persistence.Json;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace LevelUp.Infrastructure.DependencyInjection;
+
+public static class InfrastructureServiceCollectionExtensions
+{
+    public static IServiceCollection AddLevelUpInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        services
+            .AddOptions<JsonStorageOptions>()
+            .Bind(configuration.GetSection(JsonStorageOptions.SectionName))
+            .Validate(options => !string.IsNullOrWhiteSpace(options.Directory), "Storage directory is required.")
+            .Validate(options => IsJsonFile(options.FileName), "Storage file name must be a JSON file.")
+            .Validate(options => IsSimpleDirectoryName(options.BackupDirectory), "Backup directory must be a simple relative directory name.")
+            .Validate(options => options.BackupRetention is >= 1 and <= 100, "Backup retention must be between 1 and 100.")
+            .ValidateOnStart();
+
+        services.AddSingleton<JsonStoragePaths>();
+        services.AddSingleton<JsonSerializerOptionsFactory>();
+        services.AddSingleton<JsonFileReader>();
+        services.AddSingleton<JsonFileWriter>();
+        services.AddSingleton<JsonBackupService>();
+        services.AddSingleton<ILevelUpRepository, JsonLevelUpRepository>();
+        services.AddHealthChecks().AddCheck<JsonStorageHealthCheck>("json-storage");
+
+        return services;
+    }
+
+    private static bool IsJsonFile(string? name) =>
+        !string.IsNullOrWhiteSpace(name)
+        && string.Equals(Path.GetExtension(name), ".json", StringComparison.OrdinalIgnoreCase)
+        && string.Equals(Path.GetFileName(name), name, StringComparison.Ordinal);
+
+    private static bool IsSimpleDirectoryName(string? name) =>
+        !string.IsNullOrWhiteSpace(name)
+        && string.Equals(Path.GetFileName(name), name, StringComparison.Ordinal)
+        && name.IndexOfAny(Path.GetInvalidFileNameChars()) < 0;
+}

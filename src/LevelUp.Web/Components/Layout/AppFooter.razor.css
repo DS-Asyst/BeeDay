@@ -1,0 +1,130 @@
+.app-footer {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #e7e6e9;
+    border-top: 1px solid #d3d0d6;
+    box-sizing: border-box;
+}
+
+.app-footer__content {
+    width: 100%;
+    padding: 1.25rem 2rem 1rem;
+    box-sizing: border-box;
+}
+
+.app-footer__columns {
+    display: grid;
+    grid-template-columns: max-content max-content 1fr;
+    align-items: start;
+    column-gap: 5rem;
+    width: 100%;
+    margin: 0;
+    padding: 0 0 1rem;
+}
+
+.app-footer__column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    gap: 0.45rem;
+}
+
+    .app-footer__column:last-child {
+        justify-self: end;
+    }
+
+    .app-footer__column strong {
+        color: #242124;
+        font-size: 0.95rem;
+        font-weight: 700;
+    }
+
+    .app-footer__column a {
+        color: #514858;
+        font-size: 0.85rem;
+        text-decoration: none;
+    }
+
+        .app-footer__column a:hover {
+            color: #673ab7;
+            text-decoration: underline;
+        }
+
+/* Linha inferior ocupando toda a largura disponível */
+.app-footer__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0.75rem 0 0;
+    margin: 0;
+    border-top: 1px solid #cbc7cf;
+    box-sizing: border-box;
+    color: #514858;
+    font-size: 0.8rem;
+}
+
+/* Links posicionados no extremo direito */
+.app-footer__legal {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-left: auto;
+}
+
+    .app-footer__legal a {
+        color: #514858;
+        text-decoration: none;
+    }
+
+        .app-footer__legal a:hover {
+            color: #673ab7;
+            text-decoration: underline;
+        }
+
+@media (max-width: 700px) {
+    .app-footer__columns {
+        grid-template-columns: 1fr;
+        row-gap: 2rem;
+    }
+
+    .app-footer__column:last-child {
+        justify-self: start;
+    }
+}
+
+.app-footer__social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .48rem;
+}
+
+.app-footer__social-link svg {
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 auto;
+    fill: currentColor;
+    filter: grayscale(1);
+    transition:
+        color 160ms ease,
+        filter 160ms ease,
+        transform 160ms ease;
+}
+
+.app-footer__social-link:hover svg,
+.app-footer__social-link:focus-visible svg {
+    filter: grayscale(0);
+    transform: translateY(-1px);
+}
+
+.app-footer__social-link--linkedin:hover,
+.app-footer__social-link--linkedin:focus-visible {
+    color: #0a66c2;
+}
+
+.app-footer__social-link--github:hover,
+.app-footer__social-link--github:focus-visible {
+    color: #181717;
+}
