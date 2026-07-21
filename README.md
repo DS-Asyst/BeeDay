@@ -1,85 +1,372 @@
-# LevelUp
+# 🚀 LevelUp
 
-Aplicação Blazor Server em .NET 10 para gerenciamento de hábitos, tarefas recorrentes, afazeres e projetos, com persistência local em JSON.
+> A modern productivity application built with **ASP.NET Core**, **Blazor Server** and **Clean Architecture** that transforms your daily habits, tasks and projects into an organized personal management system.
 
-## Estrutura da solução
+---
+
+## Overview
+
+LevelUp is a modern productivity platform designed to centralize the management of personal activities through a clean, lightweight and maintainable architecture.
+
+Unlike traditional task managers, LevelUp was designed from the beginning to be:
+
+- Clean and modular
+- Easy to maintain
+- Easy to extend
+- Independent of relational databases
+- Focused on performance
+- Ready for future cloud synchronization
+
+The project currently stores all information in a local JSON database while maintaining a layered architecture that allows future migration to SQL Server, PostgreSQL or any other persistence provider.
+
+---
+
+## Features
+
+### Productivity
+
+- ✅ Habits
+- ✅ Tasks
+- ✅ To-Dos
+- ✅ Projects
+- ✅ Dashboard
+- ✅ Search
+- ✅ User Profile
+
+### Storage
+
+- ✅ JSON persistence
+- ✅ Atomic writes
+- ✅ Automatic recovery
+- ✅ Rotating backups
+- ✅ Data validation
+
+### Architecture
+
+- ✅ Clean Architecture
+- ✅ Dependency Injection
+- ✅ Feature-oriented organization
+- ✅ Strong separation of concerns
+- ✅ Unit Tests
+- ✅ Health Checks
+
+---
+
+# Solution Architecture
+
+```text
+                    Browser
+                        │
+                        ▼
+               Blazor Server UI
+                        │
+                        ▼
+                 Application Layer
+                        │
+                        ▼
+                  Domain Layer
+                        │
+                        ▼
+             Infrastructure Layer
+                        │
+                        ▼
+                 LevelUpBD.json
+```
+
+---
+
+# Project Structure
 
 ```text
 LevelUp/
-├── docs/
-├── roadmap/
+
 ├── src/
+│
 │   ├── LevelUp.Domain/
+│   │
 │   ├── LevelUp.Application/
+│   │
 │   ├── LevelUp.Infrastructure/
+│   │
 │   └── LevelUp.Web/
+│
 ├── tests/
+│
 │   ├── LevelUp.Domain.Tests/
 │   ├── LevelUp.Application.Tests/
 │   └── LevelUp.Infrastructure.Tests/
+│
 ├── .editorconfig
 ├── .gitignore
 ├── Directory.Build.props
 ├── Directory.Packages.props
+├── LICENSE
+├── README.md
 └── LevelUp.slnx
 ```
 
-Existe apenas um projeto web ativo: `src/LevelUp.Web`.
+---
 
-## Responsabilidades
+# Project Layers
 
-- **LevelUp.Domain**: entidades, value objects, enums, invariantes e validações de domínio.
-- **LevelUp.Application**: casos de uso, contratos, requests e responses organizados por feature.
-- **LevelUp.Infrastructure**: persistência JSON, backups, recuperação, configuração e health checks.
-- **LevelUp.Web**: interface Blazor, componentes, estados de tela e adaptação para os casos de uso.
-- **tests**: testes automatizados separados por camada.
+## Domain
 
-## Frontend
+Responsible for the business rules.
 
-O frontend está organizado por feature em `src/LevelUp.Web/Components/Features`.
+Contains:
 
-- `Dashboard`: página principal, componentes e estado do painel.
-- `Habits`, `Tasks`, `Todos`, `Projects`: editores e modelos específicos.
-- `Profile`: criação e estado do perfil.
-- `Common`: tipos compartilhados apenas pela apresentação.
-- `Layout` e `Shared`: estrutura global e componentes reutilizáveis.
+- Entities
+- Value Objects
+- Enums
+- Domain Validations
+- Domain Services
 
-Os estados `DashboardState` e `ProfileState` são registrados como `Scoped`, acompanhando o circuito do Blazor Server. O frontend acessa os casos de uso por meio de `LevelUpWebService`.
+This layer has **no external dependencies**.
 
-## Persistência
+---
 
-O arquivo principal é:
+## Application
+
+Coordinates the application's use cases.
+
+Contains:
+
+- Use Cases
+- Requests
+- Responses
+- Service Contracts
+- Feature Organization
+
+Business rules remain isolated from the presentation layer.
+
+---
+
+## Infrastructure
+
+Responsible for technical concerns.
+
+Contains:
+
+- JSON persistence
+- Storage services
+- Backup system
+- Recovery
+- Health checks
+- Configuration
+
+The persistence provider can be replaced without affecting the application layer.
+
+---
+
+## Web
+
+Presentation layer built with Blazor Server.
+
+Contains:
+
+- Pages
+- Components
+- Layouts
+- Feature modules
+- State Management
+
+The frontend communicates only with the Application layer.
+
+---
+
+# Frontend Organization
+
+The frontend follows a **Feature First** organization.
 
 ```text
+Components/
+
+Features/
+
+Dashboard/
+
+Habits/
+
+Tasks/
+
+Todos/
+
+Projects/
+
+Profile/
+
+Shared/
+
+Layout/
+```
+
+Each feature contains its own:
+
+- Components
+- Models
+- State
+- Services
+- UI logic
+
+This keeps the project modular and scalable.
+
+---
+
+# JSON Persistence
+
+The application currently uses a local JSON database.
+
+```
 src/LevelUp.Web/Data/LevelUpBD.json
 ```
 
-A infraestrutura realiza gravação atômica, backups rotativos, recuperação de arquivos válidos e validação do estado de domínio.
+Features include:
 
-## Execução
+- Atomic writes
+- Backup rotation
+- Automatic recovery
+- Validation
+- Health monitoring
 
-No diretório raiz:
+No external database server is required.
+
+---
+
+# Technology Stack
+
+- .NET 10
+- ASP.NET Core
+- Blazor Server
+- C#
+- System.Text.Json
+- Dependency Injection
+- xUnit
+- Clean Architecture
+
+---
+
+# Running the Project
+
+Clone the repository.
 
 ```bash
-dotnet clean
+git clone https://github.com/tiagoarrigoni/LevelUp.git
+
+cd LevelUp
+```
+
+Restore packages.
+
+```bash
 dotnet restore
+```
+
+Build.
+
+```bash
 dotnet build
+```
+
+Run tests.
+
+```bash
 dotnet test
+```
+
+Run the application.
+
+```bash
 dotnet run --project src/LevelUp.Web/LevelUp.Web.csproj
 ```
 
-Endereços definidos no perfil local:
+Local URLs:
 
-```text
+```
 https://localhost:7245
+
 http://localhost:5059
 ```
 
-O endpoint `GET /health` valida a aplicação e o armazenamento JSON.
+Health endpoint:
 
-## Estado atual
+```
+GET /health
+```
 
-- Etapas 1 a 4 concluídas.
-- Sprint 5.1 concluída: fundação e organização do frontend.
-- Sprint 5.2 concluída: gerenciamento de estado do frontend.
-- Build e 19 testes foram validados localmente após a Sprint 5.1.
+---
+
+# Testing
+
+The solution contains independent test projects for each application layer.
+
+```text
+tests/
+
+LevelUp.Domain.Tests
+
+LevelUp.Application.Tests
+
+LevelUp.Infrastructure.Tests
+```
+
+Run all tests:
+
+```bash
+dotnet test
+```
+
+---
+
+# Design Principles
+
+The project follows modern software engineering practices.
+
+- Clean Architecture
+- SOLID Principles
+- Separation of Concerns
+- Dependency Injection
+- Feature-oriented organization
+- Testability
+- Maintainability
+- Scalability
+
+---
+
+# Roadmap
+
+Current progress:
+
+- ✅ Solution restructuring
+- ✅ Domain separation
+- ✅ Application refactoring
+- ✅ JSON persistence
+- ✅ Frontend foundation
+- ✅ Frontend state management
+
+Future goals:
+
+- Authentication
+- Statistics
+- Themes
+- Achievements
+- Notifications
+- Cloud Synchronization
+- Docker support
+- REST API
+- Progressive Web App (PWA)
+
+---
+
+# License
+
+This project is distributed under the MIT License.
+
+---
+
+# Author
+
+Developed by **Tiago Arrigoni**.
+
+GitHub:
+
+https://github.com/tiagoarrigoni
