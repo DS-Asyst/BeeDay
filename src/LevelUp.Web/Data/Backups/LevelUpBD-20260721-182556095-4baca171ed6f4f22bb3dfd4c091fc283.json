@@ -8,16 +8,16 @@
   "habits": [
     {
       "direction": "Both",
-      "difficulty": "Easy",
+      "difficulty": "Hard",
       "resetCounter": "Daily",
-      "positiveCount": 8,
-      "negativeCount": 0,
+      "positiveCount": 17,
+      "negativeCount": 2,
       "title": "Habito [1]",
       "description": "teste",
       "featured": false,
       "completed": false,
       "createdAtUtc": "2026-07-21T17:52:40.6402641+00:00",
-      "updatedAtUtc": "2026-07-21T17:53:11.6875387+00:00",
+      "updatedAtUtc": "2026-07-21T18:25:55.9735933+00:00",
       "id": "f95e50b7-acfa-4ce1-bdcc-0d7355cd4e0c"
     }
   ],
