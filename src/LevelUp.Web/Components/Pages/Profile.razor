@@ -1,0 +1,228 @@
+@page "/profile"
+@rendermode InteractiveServer
+@inject LevelUpWebService Store
+@inject NavigationManager Navigation
+
+<PageTitle>Create character | LevelUp</PageTitle>
+
+<section class="character-page levelup-fade-in">
+    <div class="character-panel character-panel--@CurrentStepClass">
+        @if (step == CharacterCreationStep.Name)
+        {
+            <span class="character-panel__brand">LEVELUP</span>
+            <h1>Create your character</h1>
+            <p class="character-panel__intro">Choose a name and nickname to begin your journey.</p>
+
+            <EditForm Model="model" OnValidSubmit="ContinueToClasses">
+                <DataAnnotationsValidator />
+
+                <label class="character-field" for="character-name">
+                    <span>Character name</span>
+                    <input id="character-name"
+                           class="character-field__input"
+                           @bind="model.Name"
+                           @bind:event="oninput"
+                           placeholder="Enter your character name"
+                           maxlength="80"
+                           autocomplete="off"
+                           autofocus />
+                </label>
+                <ValidationMessage For="@(() => model.Name)" />
+
+                <label class="character-field" for="character-nickname">
+                    <span>Nickname</span>
+                    <div class="character-nickname-field">
+                        <span class="character-nickname-field__prefix" aria-hidden="true">@@</span>
+                        <input id="character-nickname"
+                               class="character-field__input character-nickname-field__input"
+                               @bind="model.Nickname"
+                               @bind:event="oninput"
+                               placeholder="your.nickname"
+                               maxlength="24"
+                               autocomplete="off" />
+                    </div>
+                </label>
+                <ValidationMessage For="@(() => model.Nickname)" />
+
+                <button class="character-primary-button"
+                        type="submit"
+                        disabled="@(!CanContinue)">
+                    Create Character
+                </button>
+            </EditForm>
+        }
+        else
+        {
+            <div class="character-selection-header">
+                <button class="character-back-button" type="button" @onclick="BackToName">
+                    <span aria-hidden="true">←</span>
+                    Back
+                </button>
+
+                <span class="character-panel__brand character-panel__brand--right">LEVELUP</span>
+            </div>
+
+            <h1>Choose your class</h1>
+            <p class="character-panel__intro">Every class follows a different path. Choose carefully.</p>
+
+            <div class="class-grid" role="list" aria-label="Available character classes">
+                @foreach (var option in ClassOptions)
+                {
+                    <button class="class-card"
+                            type="button"
+                            role="listitem"
+                            aria-label="Choose @option.DisplayName"
+                            @onclick="() => RequestClassConfirmation(option)">
+                        <span class="class-card__image-frame">
+                            <img src="@option.ImagePath" alt="" />
+                        </span>
+                        <strong>@option.DisplayName</strong>
+                        <span>@option.Description</span>
+                    </button>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+@if (showConfirmation && selectedClass is not null)
+{
+    <div class="class-confirmation-backdrop"
+         tabindex="-1"
+         @onclick="CloseConfirmation"
+         @onkeydown="HandleConfirmationKeyDown">
+        <section class="class-confirmation"
+                 role="alertdialog"
+                 aria-modal="true"
+                 aria-labelledby="class-confirmation-title"
+                 @onclick:stopPropagation>
+            <div class="class-confirmation__icon">
+                <img src="@selectedClass.ImagePath" alt="" />
+            </div>
+
+            <span class="character-panel__brand">CLASS SELECTION</span>
+            <h2 id="class-confirmation-title">
+                Are you sure you want to be a <strong>@selectedClass.DisplayName</strong>?
+            </h2>
+            <p><strong>@model.Name</strong> will be known as <strong>@($"@{NormalizedNickname}")</strong>.</p>
+
+            <div class="class-confirmation__actions">
+                <button class="class-confirmation__cancel" type="button" @onclick="CloseConfirmation">
+                    CANCEL
+                </button>
+                <button class="class-confirmation__confirm" type="button" @onclick="ConfirmClassAsync">
+                    YES, BECOME @selectedClass.DisplayName.ToUpperInvariant()
+                </button>
+            </div>
+        </section>
+    </div>
+}
+
+@code {
+    private readonly ProfileForm model = new();
+    private CharacterCreationStep step = CharacterCreationStep.Name;
+    private CharacterClassOption? selectedClass;
+    private bool showConfirmation;
+
+    private static readonly IReadOnlyList<CharacterClassOption> ClassOptions =
+    [
+        new(CharacterClass.Warrior, "Warrior", "/images/classes/classicon_warrior.jpg", "Strong and resilient in battle."),
+        new(CharacterClass.Hunter, "Hunter", "/images/classes/classicon_hunter.jpg", "Precise and resourceful at a distance."),
+        new(CharacterClass.Rogue, "Rogue", "/images/classes/classicon_rogue.jpg", "Fast, subtle and strategically lethal."),
+        new(CharacterClass.Priest, "Priest", "/images/classes/classicon_priest.jpg", "A devoted protector and healer."),
+        new(CharacterClass.Druid, "Druid", "/images/classes/classicon_druid.jpg", "Adapts through the strength of nature.")
+    ];
+
+    private bool HasValidName => !string.IsNullOrWhiteSpace(model.Name);
+    private bool HasValidNickname => !string.IsNullOrWhiteSpace(NormalizedNickname) &&
+                                     NormalizedNickname.Length >= 3 &&
+                                     NormalizedNickname.All(character => char.IsLetterOrDigit(character) || character is '.' or '_' or '-');
+    private bool CanContinue => HasValidName && HasValidNickname;
+    private string NormalizedNickname => model.Nickname.Trim().TrimStart('@');
+    private string CurrentStepClass => step == CharacterCreationStep.Name ? "name" : "classes";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var current = await Store.LoadAsync();
+        if (current.Profile is not null)
+        {
+            Navigation.NavigateTo("/", replace: true);
+        }
+    }
+
+    private void ContinueToClasses()
+    {
+        if (!CanContinue)
+        {
+            return;
+        }
+
+        model.Name = model.Name.Trim();
+        model.Nickname = NormalizedNickname;
+        step = CharacterCreationStep.Class;
+    }
+
+    private void BackToName()
+    {
+        selectedClass = null;
+        showConfirmation = false;
+        step = CharacterCreationStep.Name;
+    }
+
+    private void RequestClassConfirmation(CharacterClassOption option)
+    {
+        selectedClass = option;
+        showConfirmation = true;
+    }
+
+    private void CloseConfirmation()
+    {
+        showConfirmation = false;
+        selectedClass = null;
+    }
+
+    private async Task ConfirmClassAsync()
+    {
+        if (selectedClass is null)
+        {
+            return;
+        }
+
+        await Store.CreateProfileAsync(model.Name, NormalizedNickname, selectedClass.Value);
+        Navigation.NavigateTo("/", forceLoad: true);
+    }
+
+    private Task HandleConfirmationKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Escape")
+        {
+            CloseConfirmation();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private enum CharacterCreationStep
+    {
+        Name,
+        Class
+    }
+
+    private sealed class ProfileForm
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Character name is required.")]
+        [System.ComponentModel.DataAnnotations.StringLength(80)]
+        public string Name { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Nickname is required.")]
+        [System.ComponentModel.DataAnnotations.StringLength(24, MinimumLength = 3, ErrorMessage = "Nickname must contain between 3 and 24 characters.")]
+        [System.ComponentModel.DataAnnotations.RegularExpression(@"^@?[A-Za-z0-9._-]+$", ErrorMessage = "Use only letters, numbers, dots, underscores or hyphens.")]
+        public string Nickname { get; set; } = string.Empty;
+    }
+
+    private sealed record CharacterClassOption(
+        CharacterClass Value,
+        string DisplayName,
+        string ImagePath,
+        string Description);
+}

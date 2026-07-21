@@ -1,0 +1,100 @@
+@using LevelUp.Web.Models
+
+<div class="editor-modal-backdrop" @onclick="Cancel" @onkeydown="HandleKeyDown" tabindex="-1">
+    <section class="editor-modal" role="dialog" aria-modal="true" aria-labelledby="habit-editor-title" @onclick:stopPropagation>
+        <EditForm Model="Model" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+            <header class="editor-modal__header">
+                <h2 id="habit-editor-title">@(IsEditing ? "Edit Habit" : "Create Habit")</h2>
+                <div class="editor-modal__actions">
+                    <button type="button" class="editor-modal__cancel" @onclick="Cancel">CANCEL</button>
+                    <button type="submit" class="editor-modal__save">@(IsEditing ? "SAVE" : "CREATE")</button>
+                </div>
+            </header>
+            <div class="editor-modal__hero">
+                <label><span class="editor-modal__label-line"><strong>Title*</strong></span>
+                    <InputText @bind-Value="Model.Title" placeholder="Add a title" autofocus maxlength="100" />
+                </label>
+                <ValidationMessage For="@(() => Model.Title)" />
+                <label><span class="editor-modal__label-line"><strong>Notes</strong></span>
+                    <InputTextArea @bind-Value="Model.Description" placeholder="Add notes" maxlength="500" />
+                </label>
+                <ValidationMessage For="@(() => Model.Description)" />
+                <small class="editor-modal__counter">@Model.Description.Length / 500</small>
+            </div>
+            <div class="editor-modal__body">
+                <div class="habit-editor__direction" aria-label="Habit direction">
+                    <button type="button" class="habit-editor__direction-button @(AllowsPositive ? "active" : string.Empty)" @onclick="TogglePositive"><span>+</span><strong>Positive</strong></button>
+                    <button type="button" class="habit-editor__direction-button @(AllowsNegative ? "active" : string.Empty)" @onclick="ToggleNegative"><span>−</span><strong>Negative</strong></button>
+                </div>
+                <label class="editor-modal__field"><span>Difficulty</span>
+                    <InputSelect @bind-Value="Model.Difficulty">
+                        @foreach (var option in Enum.GetValues<HabitDifficulty>()) { <option value="@option">@option</option> }
+                    </InputSelect>
+                </label>
+                <label class="editor-modal__field"><span>Reset counter</span>
+                    <InputSelect @bind-Value="Model.ResetCounter">
+                        @foreach (var option in Enum.GetValues<HabitResetCounter>()) { <option value="@option">@option</option> }
+                    </InputSelect>
+                </label>
+            </div>
+            @if (IsEditing)
+            {
+                <footer class="editor-modal__footer">
+                    <button type="button" class="editor-modal__delete" @onclick="RequestDelete">DELETE</button>
+                </footer>
+            }
+        </EditForm>
+    </section>
+</div>
+
+<DeleteConfirmationModal IsOpen="showDeleteConfirmation"
+                         ItemType="Habit"
+                         ItemTitle="@Model.Title"
+                         OnConfirm="ConfirmDelete"
+                         OnCancel="CloseDeleteConfirmation" />
+
+@code {
+    [Parameter, EditorRequired] public HabitEditorModel Model { get; set; } = new();
+    [Parameter] public bool IsEditing { get; set; }
+    [Parameter] public EventCallback<HabitEditorModel> OnSave { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+    private bool showDeleteConfirmation;
+    private bool AllowsPositive => Model.Direction is HabitDirection.Positive or HabitDirection.Both;
+    private bool AllowsNegative => Model.Direction is HabitDirection.Negative or HabitDirection.Both;
+    private void TogglePositive() => Model.Direction = (AllowsPositive, AllowsNegative) switch { (true, true) => HabitDirection.Negative, (true, false) => HabitDirection.Positive, _ => HabitDirection.Both };
+    private void ToggleNegative() => Model.Direction = (AllowsPositive, AllowsNegative) switch { (true, true) => HabitDirection.Positive, (false, true) => HabitDirection.Negative, _ => HabitDirection.Both };
+    private Task Save() => OnSave.InvokeAsync(Model);
+    private Task Cancel()
+    {
+        showDeleteConfirmation = false;
+        return OnCancel.InvokeAsync();
+    }
+
+    private void RequestDelete() => showDeleteConfirmation = true;
+
+    private void CloseDeleteConfirmation() => showDeleteConfirmation = false;
+
+    private async Task ConfirmDelete()
+    {
+        showDeleteConfirmation = false;
+        await OnDelete.InvokeAsync();
+    }
+
+    private Task HandleKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key != "Escape")
+        {
+            return Task.CompletedTask;
+        }
+
+        if (showDeleteConfirmation)
+        {
+            showDeleteConfirmation = false;
+            return Task.CompletedTask;
+        }
+
+        return Cancel();
+    }
+}

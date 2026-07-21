@@ -1,0 +1,11 @@
+.levelup-container {
+    width: min(100% - 2rem, 1440px);
+    margin-inline: auto;
+}
+
+.levelup-surface {
+    background: var(--levelup-color-surface);
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-md);
+    box-shadow: var(--levelup-shadow-sm);
+}

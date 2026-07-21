@@ -1,0 +1,44 @@
+.activity-card{--activity-accent:#335f71;--activity-accent-dark:#244554;position:relative;display:grid;grid-template-columns:2.45rem minmax(0,1fr) 2.25rem;min-height:5.35rem;overflow:hidden;border:1px solid #cbc6cf;border-radius:.25rem;background:#fff;box-shadow:0 1px 2px rgb(40 27 52 / 8%);transition:transform 140ms ease,box-shadow 140ms ease,border-color 140ms ease}.activity-card--task{--activity-accent:#335f71;--activity-accent-dark:#244554}.activity-card--todo{--activity-accent:#bf2ec7;--activity-accent-dark:#92239a}.activity-card--project{--activity-accent:#8056c7;--activity-accent-dark:#613ca2}.activity-card:hover{z-index:2;border-color:#b9b1c2;box-shadow:0 4px 12px rgb(45 28 66 / 13%);transform:translateY(-1px)}
+.activity-card__rail{display:flex;align-items:flex-start;justify-content:center;padding-top:.5rem;background:var(--activity-accent)}.activity-card__checkbox{display:grid;place-items:center;width:1.55rem;height:1.55rem;padding:0;border:2px solid rgb(255 255 255 / 88%);border-radius:.14rem;background:rgb(255 255 255 / 88%);color:var(--activity-accent-dark);font-size:.95rem;font-weight:900;cursor:pointer;box-shadow:0 1px 2px rgb(50 30 20 / 12%);transition:transform .12s ease,background-color .12s ease,color .12s ease}.activity-card__checkbox span{opacity:0;transform:scale(.7);transition:opacity .12s ease,transform .12s ease}.activity-card__checkbox:hover{transform:scale(1.06);background:#fff}.activity-card__checkbox:hover span{opacity:.62;transform:scale(1)}.activity-card__checkbox:active{transform:scale(.96)}
+.activity-card__body{min-width:0;padding:.66rem .72rem .55rem}.activity-card__title-row{display:flex;align-items:center;gap:.3rem}.activity-card h3{margin:0;overflow:hidden;color:#302638;font-size:.82rem;font-weight:650;line-height:1.25;text-overflow:ellipsis;white-space:nowrap}.activity-card p{display:-webkit-box;margin:.22rem 0 0;overflow:hidden;color:#786f80;font-size:.64rem;line-height:1.4;-webkit-box-orient:vertical;-webkit-line-clamp:2}.activity-card__star{color:#f3b82f;font-size:.74rem}.activity-card__meta{display:inline-block;margin-top:.42rem;padding:.12rem .35rem;border-radius:.15rem;color:#665d70;background:#f0edf2;font-size:.55rem;font-weight:700}
+.activity-card__menu{align-self:start;justify-self:center;width:1.35rem;height:1.55rem;margin-top:.48rem;padding:0;border:0;color:#756c7d;background:transparent;font-size:1.15rem;font-weight:800;line-height:1;cursor:pointer}.activity-card__menu:hover{color:#523384}.activity-card--completed{opacity:.66}.activity-card--completed h3{text-decoration:line-through}.activity-card--completed .activity-card__checkbox{background:#fff}.activity-card--completed .activity-card__checkbox span{opacity:1;transform:scale(1)}
+@media(max-width:650px){.activity-card{grid-template-columns:2.65rem minmax(0,1fr) 2.4rem}}
+
+.activity-card__actions {
+    align-self: start;
+    justify-self: center;
+    margin-top: .48rem;
+}
+
+
+/* Menu visibility and clipping */
+.activity-card--menu-open {
+    z-index: 30;
+    overflow: visible;
+}
+
+.activity-card__menu {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-2px);
+    transition: opacity .14s ease, visibility .14s ease, transform .14s ease, color .14s ease;
+}
+
+.activity-card:hover .activity-card__menu,
+.activity-card:focus-within .activity-card__menu,
+.activity-card--menu-open .activity-card__menu {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+@media (hover: none) {
+    .activity-card__menu {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: none;
+    }
+}

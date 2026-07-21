@@ -1,0 +1,38 @@
+<section class="profile-summary" aria-labelledby="profile-summary-title">
+    <div class="profile-summary__profile">
+        <div class="profile-summary__class-icon" aria-hidden="true">
+            <img src="@ClassImagePath" alt="" />
+        </div>
+
+        <div class="profile-summary__identity">
+            <span class="profile-summary__eyebrow">Character</span>
+            <h1 id="profile-summary-title" class="profile-summary__name">@Name</h1>
+            <span class="profile-summary__subtitle">@($"@{DisplayNickname} · {Class}")</span>
+        </div>
+    </div>
+
+    <div class="profile-summary__metrics" aria-label="Activity overview">
+        <div class="profile-summary__metric">
+            <span class="profile-summary__metric-label">Active items</span>
+            <strong>@ActiveItems</strong>
+        </div>
+        <div class="profile-summary__metric">
+            <span class="profile-summary__metric-label">Completed</span>
+            <strong>@CompletedItems</strong>
+        </div>
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public string Name { get; set; } = string.Empty;
+    [Parameter] public string Nickname { get; set; } = string.Empty;
+    [Parameter] public CharacterClass Class { get; set; } = CharacterClass.Warrior;
+    [Parameter] public int ActiveItems { get; set; }
+    [Parameter] public int CompletedItems { get; set; }
+
+    private string DisplayNickname => string.IsNullOrWhiteSpace(Nickname)
+        ? Name.Replace(" ", string.Empty, StringComparison.Ordinal).ToLowerInvariant()
+        : Nickname.Trim().TrimStart('@');
+
+    private string ClassImagePath => $"/images/classes/classicon_{Class.ToString().ToLowerInvariant()}.jpg";
+}

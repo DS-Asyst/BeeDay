@@ -1,0 +1,137 @@
+@using LevelUp.Web.Models
+
+<article class="@CardCssClass @(showMenu ? "habit-card--menu-open" : string.Empty)">
+    <div class="habit-card__side">
+        @if (AllowsPositive)
+        {
+            <button type="button"
+                    class="habit-card__score-button"
+                    title="Register positive behavior"
+                    aria-label="Register positive for @Title"
+                    @onclick="OnPositive">+</button>
+        }
+    </div>
+
+    <div class="habit-card__body">
+        <div class="habit-card__header">
+            <div class="habit-card__title">
+                @if (Featured)
+                {
+                    <span class="habit-card__featured" aria-label="Featured">★</span>
+                }
+                <h3>@Title</h3>
+            </div>
+
+            <div class="card-action-menu">
+                <button type="button"
+                        class="habit-card__menu"
+                        title="Habit options"
+                        aria-label="Options for @Title"
+                        aria-expanded="@showMenu"
+                        @onclick="ToggleMenu"
+                        @onclick:stopPropagation>
+                    ⋮
+                </button>
+
+                @if (showMenu)
+                {
+                    <button type="button"
+                            class="card-action-menu__dismiss"
+                            aria-label="Close options"
+                            @onclick="CloseMenu"></button>
+
+                    <div class="card-action-menu__panel" role="menu">
+                        <button type="button"
+                                class="card-action-menu__item"
+                                role="menuitem"
+                                @onclick="Edit">
+                            <span aria-hidden="true">✎</span>
+                            <span>EDIT</span>
+                        </button>
+
+                        <button type="button"
+                                class="card-action-menu__item card-action-menu__item--delete"
+                                role="menuitem"
+                                @onclick="Delete">
+                            <span aria-hidden="true">⌫</span>
+                            <span>DELETE</span>
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Description))
+        {
+            <p>@Description</p>
+        }
+
+        <div class="habit-card__footer">
+            <span aria-hidden="true">▶▶</span>
+            <span>@Balance</span>
+            <span class="habit-card__direction" title="@DirectionText">◇</span>
+        </div>
+    </div>
+
+    <div class="habit-card__side">
+        @if (AllowsNegative)
+        {
+            <button type="button"
+                    class="habit-card__score-button"
+                    title="Register negative behavior"
+                    aria-label="Register negative for @Title"
+                    @onclick="OnNegative">−</button>
+        }
+    </div>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter] public string Description { get; set; } = string.Empty;
+    [Parameter] public HabitDirection Direction { get; set; } = HabitDirection.Both;
+    [Parameter] public int PositiveCount { get; set; }
+    [Parameter] public int NegativeCount { get; set; }
+    [Parameter] public bool Featured { get; set; }
+    [Parameter] public EventCallback OnPositive { get; set; }
+    [Parameter] public EventCallback OnNegative { get; set; }
+    [Parameter] public EventCallback OnEdit { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+
+    private bool showMenu;
+    private int Balance => PositiveCount - NegativeCount;
+    private bool AllowsPositive => Direction is HabitDirection.Positive or HabitDirection.Both;
+    private bool AllowsNegative => Direction is HabitDirection.Negative or HabitDirection.Both;
+
+    private void ToggleMenu() => showMenu = !showMenu;
+    private void CloseMenu() => showMenu = false;
+
+    private async Task Edit()
+    {
+        showMenu = false;
+        await OnEdit.InvokeAsync();
+    }
+
+    private async Task Delete()
+    {
+        showMenu = false;
+        await OnDelete.InvokeAsync();
+    }
+
+    private string DirectionText => Direction switch
+    {
+        HabitDirection.Positive => "Positive habit",
+        HabitDirection.Negative => "Negative habit",
+        _ => "Positive and negative habit"
+    };
+
+    private string CardCssClass => Balance switch
+    {
+        >= 21 => "habit-card habit-card--sky",
+        >= 14 => "habit-card habit-card--green",
+        >= 7 => "habit-card habit-card--yellow",
+        <= -14 => "habit-card habit-card--red-strong",
+        <= -7 => "habit-card habit-card--red-medium",
+        <= -1 => "habit-card habit-card--red-light",
+        _ => "habit-card habit-card--white"
+    };
+}

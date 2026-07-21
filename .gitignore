@@ -1,113 +1,18 @@
-# Compilação do .NET
-
-bin/
-obj/
-[Bb]uild/
-[Dd]ebug/
-[Rr]elease/
-x64/
-x86/
-artifacts/
-
-# Visual Studio
-
+**/bin/
+**/obj/
 .vs/
 *.user
 *.suo
 *.userosscache
 *.sln.docstates
-*.rsuser
-*.VC.db
-*.VC.opendb
-
-# Visual Studio Code
-
-.vscode/
-!.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-
-# JetBrains Rider
-
 .idea/
-*.sln.iml
-
-# Resultados de testes
-
-TestResults/
-*.trx
-*.coverage
-*.coveragexml
-coverage/
-coverage.json
-coverage.xml
-coverage.cobertura.xml
-
-# Pacotes NuGet
-
-*.nupkg
-*.snupkg
-packages/
-.nuget/
-
-# Arquivos temporários
-
-*.tmp
-*.temp
-*.log
-*.bak
-*.swp
-*.lock
-~$*
-
-# Arquivos do sistema operacional
-
+.vscode/
 .DS_Store
 Thumbs.db
-Desktop.ini
-
-# Dados locais da aplicação
-
-LevelUp/Data/save.json
-LevelUp/Data/*.json
-
-# Manter a pasta Data no repositório
-
-!LevelUp/Data/.gitkeep
-
-# Variáveis de ambiente e segredos
-
-.env
-.env.*
-!.env.example
-appsettings.Development.json
-appsettings.Local.json
-secrets.json
-
-# Certificados e chaves
-
-*.pfx
-*.p12
-*.key
-*.pem
-
-# Bancos de dados locais
-
-*.db
-*.db-shm
-*.db-wal
-*.sqlite
-*.sqlite3
-
-# Publicação
-
-publish/
-PublishProfiles/
-*.pubxml
-*.pubxml.user
-
-# Logs
-
+*.log
 logs/
-Logs/
+*.tmp
+*.temp
+LevelUp.Web/Data/Backups/
+# Application data
+src/LevelUp.Web/Data/
