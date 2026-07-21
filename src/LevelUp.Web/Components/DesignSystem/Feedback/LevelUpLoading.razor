@@ -1,0 +1,12 @@
+@if (IsVisible)
+{
+    <div class="levelup-loading-overlay" role="status" aria-live="polite" aria-label="@Label">
+        <span class="levelup-loading-spinner" aria-hidden="true"></span>
+        <span class="levelup-loading-label">@Label</span>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public string Label { get; set; } = "Saving changes...";
+}

@@ -15,6 +15,7 @@
     <Project Path="tests/LevelUp.Domain.Tests/LevelUp.Domain.Tests.csproj" />
     <Project Path="tests/LevelUp.Application.Tests/LevelUp.Application.Tests.csproj" />
     <Project Path="tests/LevelUp.Infrastructure.Tests/LevelUp.Infrastructure.Tests.csproj" />
+    <Project Path="tests/LevelUp.Web.Tests/LevelUp.Web.Tests.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />

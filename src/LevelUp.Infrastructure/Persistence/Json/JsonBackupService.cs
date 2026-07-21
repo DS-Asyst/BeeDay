@@ -1,4 +1,5 @@
 using LevelUp.Infrastructure.Configuration;
+using LevelUp.Infrastructure.Diagnostics;
 using LevelUp.Infrastructure.Persistence.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -45,7 +46,10 @@ public sealed class JsonBackupService(
             // Validate only after both streams have been disposed.
             await reader.ReadAsync(backupPath, cancellationToken);
 
-            logger.LogInformation("JSON backup created at {BackupPath}.", backupPath);
+            logger.LogDebug(
+                InfrastructureEventIds.BackupCreated,
+                "JSON backup created. BackupPath: {BackupPath}",
+                backupPath);
             Prune();
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or PersistenceException)
@@ -76,7 +80,11 @@ public sealed class JsonBackupService(
             catch (PersistenceException exception)
             {
                 failures.Add(exception);
-                logger.LogWarning(exception, "Skipping invalid JSON backup {BackupPath}.", backup.FullName);
+                logger.LogWarning(
+                    InfrastructureEventIds.BackupInvalid,
+                    exception,
+                    "Skipping invalid JSON backup. BackupPath: {BackupPath}",
+                    backup.FullName);
             }
         }
 
@@ -94,7 +102,10 @@ public sealed class JsonBackupService(
                      .Skip(retention))
         {
             oldBackup.Delete();
-            logger.LogInformation("Expired JSON backup removed from {BackupPath}.", oldBackup.FullName);
+            logger.LogDebug(
+                InfrastructureEventIds.BackupRemoved,
+                "Expired JSON backup removed. BackupPath: {BackupPath}",
+                oldBackup.FullName);
         }
     }
 }

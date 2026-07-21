@@ -1,0 +1,18 @@
+<section class="dashboard-column" aria-labelledby="@HeadingId">
+    <header class="dashboard-column__header">
+        <div class="dashboard-column__heading">
+            <h2 id="@HeadingId">@Title</h2>
+            <span class="dashboard-column__count">@Count</span>
+        </div>
+    </header>
+    <div class="dashboard-column__content">
+        @if (Count == 0)
+        {
+            <LevelUpEmptyState Class="dashboard-column__empty" Message="@($"No {EmptyLabel.ToLowerInvariant()} created yet.")" />
+        }
+        else
+        {
+            @ChildContent
+        }
+    </div>
+</section>

@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using LevelUp.Application.Common.Contracts;
 using LevelUp.Domain.Entities;
 using LevelUp.Infrastructure.Configuration;
+using LevelUp.Infrastructure.Diagnostics;
 using LevelUp.Infrastructure.Persistence.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -49,19 +51,29 @@ public sealed class JsonLevelUpRepository(
         {
             var initialData = new LevelUpData();
             await SaveInternalAsync(initialData, cancellationToken);
-            logger.LogInformation("Initial JSON persistence file created at {Path}.", paths.DataFile);
+            logger.LogInformation(
+                InfrastructureEventIds.DataFileCreated,
+                "Initial JSON persistence file created. DataFilePath: {DataFilePath}",
+                paths.DataFile);
             return initialData;
         }
 
         try
         {
             var data = await reader.ReadAsync(paths.DataFile, cancellationToken);
-            logger.LogDebug("JSON persistence file loaded from {Path}.", paths.DataFile);
+            logger.LogDebug(
+                InfrastructureEventIds.DataFileLoaded,
+                "JSON persistence file loaded. DataFilePath: {DataFilePath}",
+                paths.DataFile);
             return data;
         }
         catch (DataFileCorruptedException originalException) when (options.Value.RecoverFromBackup)
         {
-            logger.LogError(originalException, "Primary JSON file is invalid. Backup recovery will be attempted.");
+            logger.LogError(
+                InfrastructureEventIds.DataFileInvalid,
+                originalException,
+                "Primary JSON file is invalid. Backup recovery will be attempted. DataFilePath: {DataFilePath}",
+                paths.DataFile);
             return await RestoreLatestBackupAsync(originalException, cancellationToken);
         }
     }
@@ -86,8 +98,10 @@ public sealed class JsonLevelUpRepository(
             }
 
             logger.LogWarning(
-                "Primary JSON persistence file restored from backup {BackupPath}.",
-                recovered.Path);
+                InfrastructureEventIds.BackupRestored,
+                "Primary JSON persistence file restored from backup. BackupPath: {BackupPath}, DataFilePath: {DataFilePath}",
+                recovered.Path,
+                paths.DataFile);
             return recovered.Data;
         }
         catch (Exception backupException) when (backupException is PersistenceException or IOException)
@@ -104,6 +118,7 @@ public sealed class JsonLevelUpRepository(
         EnsureDirectories();
 
         var temporaryFile = paths.CreateTemporaryFile();
+        var stopwatch = Stopwatch.StartNew();
         try
         {
             await writer.WriteAsync(temporaryFile, data, cancellationToken);
@@ -111,7 +126,12 @@ public sealed class JsonLevelUpRepository(
             await backupService.CreateAsync(cancellationToken);
             File.Move(temporaryFile, paths.DataFile, overwrite: true);
 
-            logger.LogInformation("JSON persistence file saved atomically at {Path}.", paths.DataFile);
+            stopwatch.Stop();
+            logger.LogInformation(
+                InfrastructureEventIds.DataFileSaved,
+                "JSON persistence file saved atomically. DataFilePath: {DataFilePath}, DurationMs: {DurationMs}",
+                paths.DataFile,
+                stopwatch.ElapsedMilliseconds);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {

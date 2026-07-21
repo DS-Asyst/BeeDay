@@ -1,6 +1,7 @@
 using System.Text.Json;
 using LevelUp.Domain.Entities;
 using LevelUp.Domain.Exceptions;
+using LevelUp.Infrastructure.Diagnostics;
 using LevelUp.Infrastructure.Persistence.Exceptions;
 using Microsoft.Extensions.Logging;
 
@@ -32,7 +33,11 @@ public sealed class JsonFileReader(
         }
         catch (Exception exception) when (exception is JsonException or DomainException or InvalidDataException)
         {
-            logger.LogError(exception, "Invalid JSON persistence file detected at {Path}.", path);
+            logger.LogError(
+                InfrastructureEventIds.DataFileInvalid,
+                exception,
+                "Invalid JSON persistence file detected. DataFilePath: {DataFilePath}",
+                path);
             throw new DataFileCorruptedException(path, exception);
         }
         catch (Exception exception) when (exception is UnauthorizedAccessException or IOException)

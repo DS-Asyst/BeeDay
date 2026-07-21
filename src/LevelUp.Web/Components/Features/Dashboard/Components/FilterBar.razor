@@ -1,0 +1,56 @@
+<div class="filter-bar" aria-label="Dashboard controls">
+    <div class="filter-bar__spacer" aria-hidden="true"></div>
+
+    <div class="filter-bar__search" role="search">
+        <span class="filter-bar__search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+                <circle cx="11" cy="11" r="6.5"></circle>
+                <path d="m16 16 4 4"></path>
+            </svg>
+        </span>
+
+        <label class="visually-hidden" for="dashboard-search">Search activities</label>
+        <input id="dashboard-search"
+               class="filter-bar__input"
+               type="search"
+               placeholder="Search activities..."
+               value="@inputValue"
+               @oninput="OnInput" />
+        <span class="filter-bar__results" role="status" aria-live="polite">@ResultSummary</span>
+    </div>
+
+    <div class="filter-bar__actions">
+        <div class="filter-bar__create">
+            <button class="filter-bar__button filter-bar__button--primary"
+                    type="button"
+                    aria-haspopup="menu"
+                    aria-expanded="@showCreateMenu"
+                    @onclick="ToggleCreateMenu">
+                <span class="filter-bar__plus" aria-hidden="true">＋</span>
+                Add activity
+            </button>
+
+            @if (showCreateMenu)
+            {
+                <div class="filter-bar__menu" role="menu" aria-label="Choose activity type">
+                    <button type="button" role="menuitem" @onclick="CreateHabitAsync">
+                        <span class="filter-bar__menu-icon filter-bar__menu-icon--habit" aria-hidden="true"><b>+</b><b>−</b></span>
+                        <span>Habit</span>
+                    </button>
+                    <button type="button" role="menuitem" @onclick="CreateTaskAsync">
+                        <span class="filter-bar__menu-icon filter-bar__menu-icon--task" aria-hidden="true">▦</span>
+                        <span>Task</span>
+                    </button>
+                    <button type="button" role="menuitem" @onclick="CreateTodoAsync">
+                        <span class="filter-bar__menu-icon filter-bar__menu-icon--todo" aria-hidden="true">✓</span>
+                        <span>To-Do</span>
+                    </button>
+                    <button type="button" role="menuitem" @onclick="CreateProjectAsync">
+                        <span class="filter-bar__menu-icon filter-bar__menu-icon--project" aria-hidden="true">▤</span>
+                        <span>Project</span>
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>

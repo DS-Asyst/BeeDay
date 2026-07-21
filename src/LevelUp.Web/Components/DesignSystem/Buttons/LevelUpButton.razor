@@ -1,0 +1,12 @@
+<button type="@Type"
+        class="@CssClasses"
+        disabled="@Disabled"
+        aria-busy="@IsLoading.ToString().ToLowerInvariant()"
+        @onclick="OnClick"
+        @attributes="AdditionalAttributes">
+    @if (IsLoading)
+    {
+        <span class="levelup-button__loader" aria-hidden="true"></span>
+    }
+    @ChildContent
+</button>

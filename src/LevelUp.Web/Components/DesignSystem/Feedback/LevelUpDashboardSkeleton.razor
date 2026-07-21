@@ -1,0 +1,20 @@
+<section class="dashboard-skeleton" aria-label="Loading dashboard" aria-busy="true">
+    <div class="dashboard-skeleton__summary">
+        <LevelUpSkeleton Lines="3" />
+    </div>
+    <div class="dashboard-skeleton__toolbar"></div>
+    <div class="dashboard-skeleton__grid">
+        @for (var column = 0; column < 4; column++)
+        {
+            <div class="dashboard-skeleton__column">
+                <div class="dashboard-skeleton__heading"></div>
+                @for (var card = 0; card < 3; card++)
+                {
+                    <div class="dashboard-skeleton__card">
+                        <LevelUpSkeleton Lines="3" />
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>

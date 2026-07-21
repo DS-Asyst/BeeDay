@@ -50,3 +50,13 @@ p {
     margin: 0;
     padding: 0;
 }
+
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+    outline: none;
+    box-shadow: var(--levelup-focus-ring);
+}
+
+::selection {
+    background: var(--levelup-color-primary-soft);
+    color: var(--levelup-color-text-primary);
+}

@@ -1,0 +1,16 @@
+@using System.Linq.Expressions
+
+<label class="@FieldCssClass" for="@Id">
+    <InputCheckbox id="@Id"
+                   class="@InputCssClass"
+                   Value="Value"
+                   ValueChanged="ValueChanged"
+                   ValueExpression="ValueExpression"
+                   disabled="@Disabled"
+                   @attributes="AdditionalAttributes" />
+    <span class="@LabelCssClass">@Label</span>
+</label>
+@if (ShowValidationMessage)
+{
+    <ValidationMessage For="ValueExpression" />
+}

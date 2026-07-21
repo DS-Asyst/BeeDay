@@ -10,15 +10,71 @@
       "direction": "Both",
       "difficulty": "Hard",
       "resetCounter": "Daily",
-      "positiveCount": 17,
-      "negativeCount": 6,
+      "positiveCount": 37,
+      "negativeCount": 14,
       "title": "Habito [1]",
       "description": "teste",
       "featured": false,
       "completed": false,
       "createdAtUtc": "2026-07-21T17:52:40.6402641+00:00",
-      "updatedAtUtc": "2026-07-21T18:25:56.4909831+00:00",
+      "updatedAtUtc": "2026-07-21T21:54:41.4152602+00:00",
       "id": "f95e50b7-acfa-4ce1-bdcc-0d7355cd4e0c"
+    },
+    {
+      "direction": "Both",
+      "difficulty": "Easy",
+      "resetCounter": "Daily",
+      "positiveCount": 0,
+      "negativeCount": 0,
+      "title": "teste",
+      "description": "teste [2]",
+      "featured": false,
+      "completed": false,
+      "createdAtUtc": "2026-07-21T21:54:32.1884306+00:00",
+      "updatedAtUtc": "2026-07-21T21:54:32.1891699+00:00",
+      "id": "eb6f2fd5-c280-47b4-a2c8-6334832c9d02"
+    },
+    {
+      "direction": "Negative",
+      "difficulty": "Hard",
+      "resetCounter": "Daily",
+      "positiveCount": 0,
+      "negativeCount": 9,
+      "title": "Task",
+      "description": "teasd",
+      "featured": false,
+      "completed": false,
+      "createdAtUtc": "2026-07-21T23:17:40.318398+00:00",
+      "updatedAtUtc": "2026-07-21T23:17:44.2096254+00:00",
+      "id": "6d32da77-9201-424f-8a47-fea855d326f3"
+    },
+    {
+      "direction": "Both",
+      "difficulty": "Easy",
+      "resetCounter": "Daily",
+      "positiveCount": 0,
+      "negativeCount": 0,
+      "title": "teste4",
+      "description": "",
+      "featured": false,
+      "completed": false,
+      "createdAtUtc": "2026-07-21T21:54:51.2336603+00:00",
+      "updatedAtUtc": "2026-07-21T21:54:51.2336628+00:00",
+      "id": "c3638977-fd9b-481d-8f9c-fab380854e74"
+    },
+    {
+      "direction": "Both",
+      "difficulty": "Easy",
+      "resetCounter": "Daily",
+      "positiveCount": 23,
+      "negativeCount": 0,
+      "title": "teste3",
+      "description": "",
+      "featured": false,
+      "completed": false,
+      "createdAtUtc": "2026-07-21T21:54:46.7325563+00:00",
+      "updatedAtUtc": "2026-07-21T23:17:48.4080748+00:00",
+      "id": "cb288550-9dfc-4079-9c23-bf2c0a3996e5"
     }
   ],
   "tasks": [
@@ -29,8 +85,18 @@
       "featured": false,
       "completed": true,
       "createdAtUtc": "2026-07-21T17:52:46.9494975+00:00",
-      "updatedAtUtc": "2026-07-21T17:53:06.6411573+00:00",
+      "updatedAtUtc": "2026-07-21T19:16:41.0319901+00:00",
       "id": "802bcee5-154d-46b8-ab38-c0048de98d75"
+    },
+    {
+      "repeat": "Daily",
+      "title": "asdsad",
+      "description": "asdasdas",
+      "featured": false,
+      "completed": false,
+      "createdAtUtc": "2026-07-21T21:55:00.2518625+00:00",
+      "updatedAtUtc": "2026-07-21T21:55:00.2519324+00:00",
+      "id": "ea5428a2-f31b-4380-9a9a-fb2d0d0b178f"
     }
   ],
   "todos": [
@@ -41,7 +107,7 @@
       "featured": false,
       "completed": true,
       "createdAtUtc": "2026-07-21T17:52:56.3760871+00:00",
-      "updatedAtUtc": "2026-07-21T17:53:07.4684867+00:00",
+      "updatedAtUtc": "2026-07-21T19:16:43.9239104+00:00",
       "id": "3aaf3d44-3a9a-454a-a3bd-ce0e6f28de7b"
     }
   ],

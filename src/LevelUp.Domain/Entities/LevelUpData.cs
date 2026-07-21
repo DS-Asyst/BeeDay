@@ -29,6 +29,11 @@ public sealed class LevelUpData
     public void AddTodo(Todo todo) => Todos.Add(todo ?? throw new ArgumentNullException(nameof(todo)));
     public void AddProject(Project project) => Projects.Add(project ?? throw new ArgumentNullException(nameof(project)));
 
+    public void ReorderHabits(IReadOnlyList<Guid> orderedIds) => ReorderVisibleItems(Habits, orderedIds);
+    public void ReorderTasks(IReadOnlyList<Guid> orderedIds) => ReorderVisibleItems(Tasks, orderedIds);
+    public void ReorderTodos(IReadOnlyList<Guid> orderedIds) => ReorderVisibleItems(Todos, orderedIds);
+    public void ReorderProjects(IReadOnlyList<Guid> orderedIds) => ReorderVisibleItems(Projects, orderedIds);
+
     public void EnsureValidState()
     {
         SchemaVersion = Math.Max(1, SchemaVersion);
@@ -41,6 +46,38 @@ public sealed class LevelUpData
         EnsureUniqueIds(Tasks);
         EnsureUniqueIds(Todos);
         EnsureUniqueIds(Projects);
+    }
+
+    private static void ReorderVisibleItems<T>(List<T> items, IReadOnlyList<Guid> orderedIds)
+        where T : Activity
+    {
+        ArgumentNullException.ThrowIfNull(orderedIds);
+
+        if (orderedIds.Count < 2)
+        {
+            return;
+        }
+
+        var requestedIds = orderedIds.ToHashSet();
+        if (requestedIds.Count != orderedIds.Count)
+        {
+            throw new ArgumentException("The reorder request contains duplicate identifiers.", nameof(orderedIds));
+        }
+
+        var itemsById = items.ToDictionary(item => item.Id);
+        if (orderedIds.Any(id => !itemsById.ContainsKey(id)))
+        {
+            throw new ArgumentException("The reorder request contains an unknown activity identifier.", nameof(orderedIds));
+        }
+
+        var orderedItems = new Queue<T>(orderedIds.Select(id => itemsById[id]));
+        for (var index = 0; index < items.Count; index++)
+        {
+            if (requestedIds.Contains(items[index].Id))
+            {
+                items[index] = orderedItems.Dequeue();
+            }
+        }
     }
 
     private static void EnsureUniqueIds<T>(IEnumerable<T> activities) where T : Activity

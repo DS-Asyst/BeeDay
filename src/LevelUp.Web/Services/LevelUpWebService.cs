@@ -1,81 +1,35 @@
-using LevelUp.Application.Features.Dashboard.Contracts;
-using LevelUp.Application.Features.Habits.Contracts;
-using LevelUp.Application.Features.Habits.Requests;
-using LevelUp.Application.Features.Profiles.Contracts;
-using LevelUp.Application.Features.Profiles.Requests;
-using LevelUp.Application.Features.Projects.Contracts;
-using LevelUp.Application.Features.Projects.Requests;
-using LevelUp.Application.Features.Tasks.Contracts;
-using LevelUp.Application.Features.Tasks.Requests;
-using LevelUp.Application.Features.Todos.Contracts;
-using LevelUp.Application.Features.Todos.Requests;
+using LevelUp.Application.Features.Dashboard.Queries;
+using LevelUp.Application.Features.Habits.Commands;
+using LevelUp.Application.Features.Ordering.Commands;
+using LevelUp.Application.Features.Ordering.Requests;
+using LevelUp.Application.Features.Profiles.Commands;
+using LevelUp.Application.Features.Projects.Commands;
+using LevelUp.Application.Features.Tasks.Commands;
+using LevelUp.Application.Features.Todos.Commands;
 using LevelUp.Domain.Entities;
 using LevelUp.Domain.Enums;
-using LevelUp.Web.Models;
-
+using LevelUp.Web.Components.Features.Habits.Models;
+using LevelUp.Web.Components.Features.Projects.Models;
+using LevelUp.Web.Components.Features.Tasks.Models;
+using LevelUp.Web.Components.Features.Todos.Models;
+using MediatR;
 namespace LevelUp.Web.Services;
 
-public sealed class LevelUpWebService(
-    ILevelUpQueryService queryService,
-    IProfileService profileService,
-    IHabitService habitService,
-    ITaskService taskService,
-    ITodoService todoService,
-    IProjectService projectService)
+public sealed class LevelUpWebService(ISender sender)
 {
-    public async Task<LevelUpData> LoadAsync()
-    {
-        var response = await queryService.GetAsync();
-        return response.Data;
-    }
-
-    public Task CreateProfileAsync(string name, string nickname, CharacterClass characterClass) =>
-        profileService.SaveAsync(new SaveProfileRequest(name, nickname, characterClass));
-
-    public Task AddHabitAsync(HabitEditorModel model) =>
-        habitService.AddAsync(new SaveHabitRequest(
-            model.Title,
-            model.Description,
-            model.Direction,
-            model.Difficulty,
-            model.ResetCounter));
-
-    public Task UpdateHabitAsync(Guid id, HabitEditorModel model) =>
-        habitService.UpdateAsync(id, new SaveHabitRequest(
-            model.Title,
-            model.Description,
-            model.Direction,
-            model.Difficulty,
-            model.ResetCounter));
-
-    public Task AddTaskAsync(ActivityEditorModel model) =>
-        taskService.AddAsync(new SaveTaskRequest(model.Title, model.Description, model.Repeat));
-
-    public Task UpdateTaskAsync(Guid id, ActivityEditorModel model) =>
-        taskService.UpdateAsync(id, new SaveTaskRequest(model.Title, model.Description, model.Repeat));
-
-    public Task AddTodoAsync(ActivityEditorModel model) =>
-        todoService.AddAsync(new SaveTodoRequest(model.Title, model.Description, ToDateOnly(model.DueDate)));
-
-    public Task UpdateTodoAsync(Guid id, ActivityEditorModel model) =>
-        todoService.UpdateAsync(id, new SaveTodoRequest(model.Title, model.Description, ToDateOnly(model.DueDate)));
-
-    public Task AddProjectAsync(ActivityEditorModel model) =>
-        projectService.AddAsync(new SaveProjectRequest(model.Title, model.Description, model.ProjectStatus));
-
-    public Task UpdateProjectAsync(Guid id, ActivityEditorModel model) =>
-        projectService.UpdateAsync(id, new SaveProjectRequest(model.Title, model.Description, model.ProjectStatus));
-
-    public Task RegisterHabitPositiveAsync(Guid id) => habitService.RegisterPositiveAsync(id);
-    public Task RegisterHabitNegativeAsync(Guid id) => habitService.RegisterNegativeAsync(id);
-    public Task ToggleTaskAsync(Guid id) => taskService.ToggleAsync(id);
-    public Task ToggleTodoAsync(Guid id) => todoService.ToggleAsync(id);
-    public Task ToggleProjectAsync(Guid id) => projectService.ToggleAsync(id);
-    public Task DeleteHabitAsync(Guid id) => habitService.DeleteAsync(id);
-    public Task DeleteTaskAsync(Guid id) => taskService.DeleteAsync(id);
-    public Task DeleteTodoAsync(Guid id) => todoService.DeleteAsync(id);
-    public Task DeleteProjectAsync(Guid id) => projectService.DeleteAsync(id);
-
-    private static DateOnly? ToDateOnly(DateTime? value) =>
-        value is null ? null : DateOnly.FromDateTime(value.Value);
+    public async Task<LevelUpData> LoadAsync() => (await sender.Send(new GetLevelUpQuery())).Data;
+    public Task CreateProfileAsync(string n, string k, CharacterClass c) => sender.Send(new SaveProfileCommand(new(n, k, c)));
+    public Task AddHabitAsync(HabitEditorModel m) => sender.Send(new CreateHabitCommand(new(m.Title, m.Description, m.Direction, m.Difficulty, m.ResetCounter)));
+    public Task UpdateHabitAsync(Guid id, HabitEditorModel m) => sender.Send(new UpdateHabitCommand(id, new(m.Title, m.Description, m.Direction, m.Difficulty, m.ResetCounter)));
+    public Task AddTaskAsync(TaskEditorModel m) => sender.Send(new CreateTaskCommand(new(m.Title, m.Description, m.Repeat)));
+    public Task UpdateTaskAsync(Guid id, TaskEditorModel m) => sender.Send(new UpdateTaskCommand(id, new(m.Title, m.Description, m.Repeat)));
+    public Task AddTodoAsync(TodoEditorModel m) => sender.Send(new CreateTodoCommand(new(m.Title, m.Description, ToDateOnly(m.DueDate))));
+    public Task UpdateTodoAsync(Guid id, TodoEditorModel m) => sender.Send(new UpdateTodoCommand(id, new(m.Title, m.Description, ToDateOnly(m.DueDate))));
+    public Task AddProjectAsync(ProjectEditorModel m) => sender.Send(new CreateProjectCommand(new(m.Title, m.Description, m.Status)));
+    public Task UpdateProjectAsync(Guid id, ProjectEditorModel m) => sender.Send(new UpdateProjectCommand(id, new(m.Title, m.Description, m.Status)));
+    public Task RegisterHabitPositiveAsync(Guid id) => sender.Send(new RegisterHabitPositiveCommand(id)); public Task RegisterHabitNegativeAsync(Guid id) => sender.Send(new RegisterHabitNegativeCommand(id));
+    public Task ToggleTaskAsync(Guid id) => sender.Send(new ToggleTaskCommand(id)); public Task ToggleTodoAsync(Guid id) => sender.Send(new ToggleTodoCommand(id)); public Task ToggleProjectAsync(Guid id) => sender.Send(new ToggleProjectCommand(id));
+    public Task DeleteHabitAsync(Guid id) => sender.Send(new DeleteHabitCommand(id)); public Task DeleteTaskAsync(Guid id) => sender.Send(new DeleteTaskCommand(id)); public Task DeleteTodoAsync(Guid id) => sender.Send(new DeleteTodoCommand(id)); public Task DeleteProjectAsync(Guid id) => sender.Send(new DeleteProjectCommand(id));
+    public Task ReorderAsync(ActivityCollection c, IReadOnlyList<Guid> ids) => sender.Send(new ReorderActivitiesCommand(new(c, ids)));
+    private static DateOnly? ToDateOnly(DateTime? value) => value is null ? null : DateOnly.FromDateTime(value.Value);
 }

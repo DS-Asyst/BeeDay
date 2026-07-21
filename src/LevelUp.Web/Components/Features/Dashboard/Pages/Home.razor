@@ -1,0 +1,95 @@
+@page "/"
+@rendermode InteractiveServer
+@inject LevelUp.Web.Components.Features.Dashboard.State.DashboardState State
+@inject NavigationManager Navigation
+
+<PageTitle>Dashboard | LevelUp</PageTitle>
+
+@if (State.IsLoading)
+{
+    <LevelUpDashboardSkeleton />
+}
+else if (State.Data?.Profile is not null)
+{
+    <section class="dashboard-page levelup-fade-in">
+        <ProfileSummaryCard Name="@State.Data.Profile.Name" Nickname="@State.Data.Profile.Nickname" Class="@State.Data.Profile.Class" ActiveItems="@State.ActiveItems" CompletedItems="@State.CompletedItems" />
+        <div class="dashboard-page__content">
+            <FilterBar Value="@State.Search" ValueChanged="@(value => State.Search = value)" ResultCount="@State.FilteredItems" TotalCount="@State.TotalItems" OnCreate="State.OpenCreate" />
+            <div class="dashboard-grid">
+                @{ var habits = State.FilteredHabits.ToList(); }
+                <DashboardColumn Title="Habits" EmptyLabel="habits" Count="@habits.Count">
+                    <LevelUpSortable ItemIds="@habits.Select(item => item.Id).ToList()"
+                                     CollectionKey="habits"
+                                     AriaLabel="Reorder habits"
+                                     RemovingItemId="@State.RemovingItemId"
+                                     OnReorder="State.ReorderHabitsAsync">
+                        <ItemTemplate Context="itemId">
+                            @{ var item = habits.First(candidate => candidate.Id == itemId); }
+                            <HabitCard Title="@item.Title" Description="@item.Description" Direction="@item.Direction" PositiveCount="@item.PositiveCount" NegativeCount="@item.NegativeCount" Featured="@item.Featured" SearchTerm="@State.Search" OnPositive="@(() => State.RegisterPositiveAsync(item.Id))" OnNegative="@(() => State.RegisterNegativeAsync(item.Id))" OnEdit="@(() => State.OpenHabitEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Habit, item.Title))" />
+                        </ItemTemplate>
+                    </LevelUpSortable>
+                </DashboardColumn>
+
+                @{ var tasks = State.FilteredTasks.ToList(); }
+                <DashboardColumn Title="Tasks" EmptyLabel="tasks" Count="@tasks.Count">
+                    <LevelUpSortable ItemIds="@tasks.Select(item => item.Id).ToList()"
+                                     CollectionKey="tasks"
+                                     AriaLabel="Reorder tasks"
+                                     RemovingItemId="@State.RemovingItemId"
+                                     OnReorder="State.ReorderTasksAsync">
+                        <ItemTemplate Context="itemId">
+                            @{ var item = tasks.First(candidate => candidate.Id == itemId); }
+                            <ActivityPreviewCard Title="@item.Title" Description="@item.Description" Meta="@State.FormatRepeat(item.Repeat)" Variant="task" Completed="@item.Completed" Featured="@item.Featured" SearchTerm="@State.Search" OnToggle="@(() => State.ToggleTaskAsync(item.Id))" OnEdit="@(() => State.OpenTaskEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Task, item.Title))" />
+                        </ItemTemplate>
+                    </LevelUpSortable>
+                </DashboardColumn>
+
+                @{ var todos = State.FilteredTodos.ToList(); }
+                <DashboardColumn Title="To-Dos" EmptyLabel="to-dos" Count="@todos.Count">
+                    <LevelUpSortable ItemIds="@todos.Select(item => item.Id).ToList()"
+                                     CollectionKey="todos"
+                                     AriaLabel="Reorder to-dos"
+                                     RemovingItemId="@State.RemovingItemId"
+                                     OnReorder="State.ReorderTodosAsync">
+                        <ItemTemplate Context="itemId">
+                            @{ var item = todos.First(candidate => candidate.Id == itemId); }
+                            <ActivityPreviewCard Title="@item.Title" Description="@item.Description" Meta="@State.FormatDueDate(item.DueDate)" Variant="todo" Completed="@item.Completed" Featured="@item.Featured" SearchTerm="@State.Search" OnToggle="@(() => State.ToggleTodoAsync(item.Id))" OnEdit="@(() => State.OpenTodoEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Todo, item.Title))" />
+                        </ItemTemplate>
+                    </LevelUpSortable>
+                </DashboardColumn>
+
+                @{ var projects = State.FilteredProjects.ToList(); }
+                <DashboardColumn Title="Projects" EmptyLabel="projects" Count="@projects.Count">
+                    <LevelUpSortable ItemIds="@projects.Select(item => item.Id).ToList()"
+                                     CollectionKey="projects"
+                                     AriaLabel="Reorder projects"
+                                     RemovingItemId="@State.RemovingItemId"
+                                     OnReorder="State.ReorderProjectsAsync">
+                        <ItemTemplate Context="itemId">
+                            @{ var item = projects.First(candidate => candidate.Id == itemId); }
+                            <ActivityPreviewCard Title="@item.Title" Description="@item.Description" Meta="@State.FormatProjectStatus(item.Status)" Variant="project" Completed="@item.Completed" Featured="@item.Featured" SearchTerm="@State.Search" OnToggle="@(() => State.ToggleProjectAsync(item.Id))" OnEdit="@(() => State.OpenProjectEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Project, item.Title))" />
+                        </ItemTemplate>
+                    </LevelUpSortable>
+                </DashboardColumn>
+            </div>
+        </div>
+    </section>
+
+    @if (State.Modals.IsHabitEditorOpen) { <HabitEditorModal Model="State.Modals.HabitForm" IsEditing="State.Modals.IsEditing" OnSave="State.SaveHabitAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentHabitAsync" /> }
+    @if (State.Modals.IsTaskEditorOpen) { <TaskEditorModal Model="State.Modals.TaskForm" IsEditing="State.Modals.IsEditing" OnSave="State.SaveTaskAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentTaskAsync" /> }
+    @if (State.Modals.IsTodoEditorOpen) { <TodoEditorModal Model="State.Modals.TodoForm" IsEditing="State.Modals.IsEditing" OnSave="State.SaveTodoAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentTodoAsync" /> }
+    @if (State.Modals.IsProjectEditorOpen) { <ProjectEditorModal Model="State.Modals.ProjectForm" IsEditing="State.Modals.IsEditing" OnSave="State.SaveProjectAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentProjectAsync" /> }
+
+    <LevelUpConfirmDialog IsOpen="State.Modals.IsDeleteConfirmationOpen"
+                          IsBusy="State.IsBusy"
+                          Title="@($"Delete {State.Modals.DeleteItemDisplayName}")"
+                          Message="@($"Are you sure you want to delete this {State.Modals.DeleteItemDisplayName.ToLowerInvariant()}?")"
+                          ItemTitle="@State.Modals.PendingDeleteTitle"
+                          Warning="This action cannot be undone."
+                          WarningDetails="All information will be permanently removed."
+                          ConfirmLabel="@($"Delete {State.Modals.DeleteItemDisplayName}")"
+                          OnConfirm="State.ConfirmDeleteAsync"
+                          OnCancel="State.CancelDelete" />
+
+    <LevelUpLoading IsVisible="State.IsBusy" Label="Saving..." />
+}

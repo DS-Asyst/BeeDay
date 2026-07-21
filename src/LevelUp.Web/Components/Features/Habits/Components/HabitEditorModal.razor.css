@@ -1,0 +1,51 @@
+.habit-editor__direction {
+    display: flex;
+    justify-content: center;
+    gap: 2.35rem;
+    padding: 0.1rem 0 0.15rem;
+}
+
+.habit-editor__direction-button {
+    display: grid;
+    justify-items: center;
+    gap: 0.32rem;
+    min-width: 4rem;
+    border: 0;
+    background: transparent;
+    color: var(--levelup-color-primary);
+    cursor: pointer;
+}
+
+.habit-editor__direction-button span {
+    display: grid;
+    place-items: center;
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: 50%;
+    background: #d9d4df;
+    color: var(--levelup-color-surface);
+    font-size: 1.35rem;
+    font-weight: 900;
+    transition: transform 140ms ease, background-color 140ms ease;
+}
+
+.habit-editor__direction-button:hover span { transform: scale(1.05); }
+
+.habit-editor__direction-button strong {
+    font: var(--levelup-type-small);
+    font-weight: var(--levelup-font-weight-bold);
+}
+
+.habit-editor__direction-button.active span { background: var(--levelup-color-primary); }
+
+.habit-editor__error {
+    margin: 0;
+    color: var(--levelup-color-danger-hover);
+    font: var(--levelup-type-small);
+    font-weight: var(--levelup-font-weight-bold);
+    text-align: center;
+}
+
+@media (max-width: 520px) {
+    .habit-editor__direction { gap: 1.5rem; }
+}

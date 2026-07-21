@@ -1,41 +1,32 @@
 # LevelUp.Web
 
-Blazor frontend for the LevelUp dashboard.
+Aplicação Blazor Server e camada de apresentação do LevelUp.
 
-## Project structure
+## Organização
 
-```text
-Components/
-  Activities/   Task, To-Do and Project editor modal
-  Dashboard/    Dashboard columns, cards and filters
-  Habits/       Habit editor modal
-  Layout/       Navigation, main layout, footer and reconnect UI
-  Profile/      Profile summary panel
-  Pages/        Routable pages
-Data/           JSON persistence in LevelUpBD.json
-Models/         Form and persistence models
-Services/       JSON data store
-wwwroot/css/    Global design tokens, utilities and animations
+O frontend é organizado por feature em `Components/Features`:
+
+- `Dashboard`: página, componentes e estados do painel.
+- `Habits`, `Tasks`, `Todos`, `Projects`: editores e modelos de formulário.
+- `Profile`: página, modelo e estado de criação do perfil.
+- `Common`: tipos compartilhados pela apresentação.
+- `Layout`: estrutura global da aplicação.
+- `Shared`: componentes reutilizáveis entre features.
+
+## Estado
+
+- `DashboardState`: dados e operações do dashboard.
+- `DashboardModalState`: editores e exclusão.
+- `ProfileState`: fluxo de criação de perfil.
+
+Os estados principais são registrados como `Scoped` em `Program.cs`.
+
+## Integração
+
+A interface chama a camada Application somente por `LevelUpWebService`. A persistência JSON é responsabilidade exclusiva de `LevelUp.Infrastructure`.
+
+## Execução
+
+```bash
+dotnet run --project src/LevelUp.Web/LevelUp.Web.csproj
 ```
-
-## Domain
-
-The dashboard supports independent registration and management of:
-
-- Habits
-- Tasks
-- To-Dos
-- Projects
-
-To-Dos do not depend on Projects. Habits support direction, difficulty and reset counter. XP, levels, attributes, Gold, Wallet, Books, Bosses and Milestones are not part of this frontend.
-
-## Persistence
-
-`JsonLevelUpRepository` uses `Data/LevelUpBD.json`, creates a backup before replacement, writes through a temporary file and returns cloned state objects to components. The current service is intended for a single shared local data source.
-
-## Styling convention
-
-- Global tokens and utilities belong in `wwwroot/css`.
-- Page layout belongs in the page `.razor.css` file.
-- Component-specific styles stay beside their `.razor` component.
-- The footer was intentionally preserved for future link configuration.

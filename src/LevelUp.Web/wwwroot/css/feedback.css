@@ -1,0 +1,402 @@
+.delete-confirmation-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgb(47 27 72 / 78%);
+    backdrop-filter: blur(2px);
+}
+
+.delete-confirmation {
+    position: relative;
+    width: min(29rem, calc(100vw - 2rem));
+    overflow: hidden;
+    border-radius: 0.7rem;
+    background: var(--levelup-color-surface);
+    box-shadow:
+        0 1.75rem 5rem rgb(20 10 34 / 45%),
+        0 0.4rem 1rem rgb(20 10 34 / 14%);
+    animation: delete-confirmation-enter var(--levelup-transition-normal)-out;
+    font-family: var(--levelup-font-family);
+}
+
+.delete-confirmation__top-border {
+    width: 100%;
+    height: 0.38rem;
+    background: #e53935;
+}
+
+.delete-confirmation__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1.8rem 1.65rem;
+    text-align: center;
+}
+
+.delete-confirmation__icon {
+    display: grid;
+    place-items: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    margin-bottom: 1rem;
+    border: 0.25rem solid #e53935;
+    border-radius: 50%;
+    color: #e53935;
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.delete-confirmation h2 {
+    margin: 0;
+    color: var(--levelup-color-text-primary);
+    font-size: 1.45rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.delete-confirmation__question {
+    margin: 1rem 0 0.35rem;
+    color: #554d5b;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.delete-confirmation__item-title {
+    max-width: 100%;
+    margin: 0 0 1.25rem;
+    overflow: hidden;
+    color: var(--levelup-color-text-primary);
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.delete-confirmation__warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 1.45rem;
+    padding: 0.95rem 1rem;
+    border: 1px solid #f1c4c6;
+    border-radius: 0.45rem;
+    background: var(--levelup-color-surface)0f1;
+    color: #ba2530;
+    text-align: left;
+}
+
+.delete-confirmation__warning-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.05rem;
+    border: 2px solid #e53935;
+    border-radius: 50%;
+    color: #e53935;
+    font-size: 0.78rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.delete-confirmation__warning strong {
+    display: block;
+    margin-bottom: 0.18rem;
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+
+.delete-confirmation__warning p {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.delete-confirmation__delete-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 11rem;
+    min-height: 3rem;
+    padding: 0 1.25rem;
+    border: 1px solid #d92f38;
+    border-radius: 0.35rem;
+    background: #e53935;
+    color: var(--levelup-color-surface);
+    box-shadow: 0 0.25rem 0.7rem rgb(185 31 42 / 28%);
+    font: var(--levelup-type-button);
+    font-weight: 800;
+    cursor: pointer;
+    transition:
+        background-color var(--levelup-transition-fast),
+        border-color var(--levelup-transition-fast),
+        box-shadow var(--levelup-transition-fast),
+        transform var(--levelup-transition-fast);
+}
+
+.delete-confirmation__delete-button:hover,
+.delete-confirmation__delete-button:focus-visible {
+    border-color: #ba1f29;
+    background: #c62828;
+    transform: translateY(-1px);
+    box-shadow: 0 0.4rem 1rem rgb(185 31 42 / 35%);
+}
+
+.delete-confirmation__trash-icon {
+    font-size: 1.05rem;
+    font-weight: 900;
+}
+
+.delete-confirmation__cancel-button {
+    margin-top: 1rem;
+    padding: 0.4rem 1rem;
+    border: 0;
+    background: transparent;
+    color: var(--levelup-color-primary);
+    font: var(--levelup-type-button);
+    font-weight: 700;
+    cursor: pointer;
+    transition: color var(--levelup-transition-fast), transform var(--levelup-transition-fast);
+}
+
+.delete-confirmation__cancel-button:hover,
+.delete-confirmation__cancel-button:focus-visible {
+    color: var(--levelup-color-primary-active);
+    text-decoration: underline;
+    text-underline-offset: 0.2rem;
+    transform: scale(1.04);
+}
+
+@keyframes delete-confirmation-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-0.75rem) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 520px) {
+    .delete-confirmation-backdrop { padding: 0.65rem; }
+    .delete-confirmation { width: calc(100vw - 1.3rem); }
+    .delete-confirmation__content { padding: 1.65rem 1.1rem 1.35rem; }
+    .delete-confirmation__warning { padding: 0.85rem; }
+    .delete-confirmation__delete-button { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .delete-confirmation { animation: none; }
+}
+
+/* Toast notifications */
+.levelup-toast-region {
+    position: fixed;
+    top: 5.25rem;
+    right: 1rem;
+    z-index: var(--levelup-z-toast);
+    display: grid;
+    gap: .75rem;
+    width: min(24rem, calc(100vw - 2rem));
+    pointer-events: none;
+}
+
+.levelup-toast {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: start;
+    gap: .8rem;
+    padding: .95rem 1rem;
+    border: 1px solid var(--levelup-color-border);
+    border-left-width: .3rem;
+    border-radius: var(--levelup-radius-md);
+    background: var(--levelup-color-surface);
+    box-shadow: var(--levelup-shadow-md);
+    pointer-events: auto;
+    animation: levelup-toast-enter var(--levelup-transition-normal)-out;
+}
+
+.levelup-toast--success { border-left-color: var(--levelup-color-success); }
+.levelup-toast--error { border-left-color: var(--levelup-color-danger); }
+.levelup-toast--info { border-left-color: var(--levelup-color-primary); }
+
+.levelup-toast__icon {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: var(--levelup-color-primary-soft);
+    color: var(--levelup-color-primary-dark);
+    font-weight: 900;
+}
+
+.levelup-toast--success .levelup-toast__icon { background: #e2f5e9; color: var(--levelup-color-success); }
+.levelup-toast--error .levelup-toast__icon { background: #fde8e8; color: var(--levelup-color-danger); }
+
+.levelup-toast__content strong {
+    display: block;
+    color: var(--levelup-color-text-primary);
+    font-size: .9rem;
+}
+
+.levelup-toast__content p {
+    margin: .2rem 0 0;
+    color: var(--levelup-color-text-secondary);
+    font-size: .82rem;
+    line-height: 1.45;
+}
+
+.levelup-toast__close {
+    border: 0;
+    background: transparent;
+    color: var(--levelup-color-text-muted);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+/* Loading: compact, non-blocking and delayed to avoid flicker on fast operations. */
+.levelup-loading-overlay {
+    position: fixed;
+    left: 50%;
+    bottom: 1.25rem;
+    z-index: var(--levelup-z-loading);
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem .75rem;
+    border: 1px solid var(--levelup-color-border);
+    border-radius: 999px;
+    background: rgb(255 255 255 / 92%);
+    color: var(--levelup-color-text-primary);
+    box-shadow: var(--levelup-shadow-sm);
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, .5rem);
+    animation: levelup-loading-reveal .16s ease .35s forwards;
+}
+
+.levelup-loading-spinner {
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 auto;
+    border: .14rem solid var(--levelup-color-primary-soft);
+    border-top-color: var(--levelup-color-primary);
+    border-radius: 50%;
+    animation: levelup-spin .75s linear infinite;
+}
+
+.levelup-loading-label {
+    font-size: .75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* Skeletons */
+.levelup-skeleton {
+    display: grid;
+    gap: .65rem;
+}
+
+.levelup-skeleton__line,
+.dashboard-skeleton__toolbar,
+.dashboard-skeleton__heading {
+    display: block;
+    height: .75rem;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #ebe7ef 25%, var(--levelup-color-surface-muted) 50%, #ebe7ef 75%);
+    background-size: 200% 100%;
+    animation: levelup-shimmer 1.35s infinite linear;
+}
+
+.levelup-skeleton__line--title { width: 55%; height: 1rem; }
+.levelup-skeleton__line--wide { width: 92%; }
+.levelup-skeleton__line--medium { width: 72%; }
+
+.dashboard-skeleton {
+    width: 100%;
+    padding: 1rem 2rem 2rem;
+}
+
+.dashboard-skeleton__summary,
+.dashboard-skeleton__card {
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-md);
+    background: var(--levelup-color-surface);
+    box-shadow: var(--levelup-shadow-sm);
+}
+
+.dashboard-skeleton__summary {
+    padding: 1.5rem;
+}
+
+.dashboard-skeleton__toolbar {
+    width: 16rem;
+    height: 2.5rem;
+    margin: 1.5rem 0;
+}
+
+.dashboard-skeleton__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.dashboard-skeleton__column {
+    display: grid;
+    align-content: start;
+    gap: .8rem;
+}
+
+.dashboard-skeleton__heading {
+    width: 45%;
+    height: 1rem;
+}
+
+.dashboard-skeleton__card {
+    padding: 1rem;
+}
+
+@keyframes levelup-toast-enter {
+    from { opacity: 0; transform: translateX(1rem); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes levelup-spin { to { transform: rotate(360deg); } }
+
+@keyframes levelup-shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+}
+
+@media (max-width: 900px) {
+    .dashboard-skeleton__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 560px) {
+    .levelup-toast-region { top: .75rem; right: .75rem; width: calc(100vw - 1.5rem); }
+    .dashboard-skeleton { padding: 1rem; }
+    .dashboard-skeleton__grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .levelup-toast,
+    .levelup-loading-spinner,
+    .levelup-skeleton__line,
+    .dashboard-skeleton__toolbar,
+    .dashboard-skeleton__heading {
+        animation: none;
+    }
+}

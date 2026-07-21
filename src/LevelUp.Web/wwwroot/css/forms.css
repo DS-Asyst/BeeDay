@@ -1,0 +1,62 @@
+.levelup-field {
+    display: grid;
+    gap: 0.38rem;
+}
+
+.levelup-field__label {
+    font: var(--levelup-type-label);
+}
+
+.levelup-field__control {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 2.35rem;
+    padding: 0.55rem 0.72rem;
+    border: 1px solid var(--levelup-color-border);
+    border-radius: 0.28rem;
+    background: var(--levelup-color-surface);
+    color: var(--levelup-color-text-secondary);
+    font: var(--levelup-type-body);
+    box-shadow: 0 1px 2px rgb(33 22 43 / 7%);
+    outline: none;
+}
+
+.levelup-field__control--textarea {
+    min-height: 4.3rem;
+    resize: vertical;
+}
+
+.levelup-field__control:focus {
+    border-color: var(--levelup-color-primary-light);
+    box-shadow: 0 0 0 2px rgb(103 58 183 / 16%);
+}
+
+.levelup-field__control:disabled,
+.levelup-field__control[readonly] {
+    cursor: not-allowed;
+    background: #f2f0f3;
+    color: #82788a;
+}
+
+.levelup-field__counter {
+    justify-self: end;
+    color: inherit;
+    font: var(--levelup-type-small);
+}
+
+.levelup-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    cursor: pointer;
+}
+
+.levelup-checkbox__control {
+    width: 1.05rem;
+    height: 1.05rem;
+    accent-color: var(--levelup-color-primary);
+}
+
+.levelup-checkbox__label {
+    font: var(--levelup-type-label);
+}

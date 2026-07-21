@@ -1,0 +1,110 @@
+.levelup-sortable {
+    display: flex;
+    flex-direction: column;
+    gap: .18rem;
+    min-height: 2rem;
+}
+
+.levelup-sortable__item {
+    position: relative;
+    border-radius: var(--levelup-radius-sm);
+    cursor: grab;
+    touch-action: pan-y;
+    transition: opacity var(--levelup-transition-fast), transform var(--levelup-transition-fast), box-shadow var(--levelup-transition-fast);
+}
+
+.levelup-sortable__item:active,
+.levelup-sortable__item.is-drag-armed,
+.levelup-sortable__item.is-dragging {
+    cursor: grabbing;
+}
+
+.levelup-sortable__item:focus-visible {
+    outline: var(--levelup-focus-ring);
+    outline-offset: 2px;
+}
+
+.levelup-sortable__item button,
+.levelup-sortable__item a,
+.levelup-sortable__item input,
+.levelup-sortable__item textarea,
+.levelup-sortable__item select,
+.levelup-sortable__item label,
+.levelup-sortable__item [role="button"] {
+    cursor: pointer;
+}
+
+.levelup-sortable__item.is-drag-armed {
+    transform: scale(.995);
+}
+
+.levelup-sortable__item.is-dragging {
+    opacity: .42;
+    transform: scale(.985);
+}
+
+.levelup-sortable__item.is-drop-before::before,
+.levelup-sortable__item.is-drop-after::after {
+    position: absolute;
+    right: .1rem;
+    left: .1rem;
+    z-index: 40;
+    height: 3px;
+    border-radius: 999px;
+    background: var(--levelup-color-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--levelup-color-primary) 18%, transparent);
+    content: "";
+}
+
+.levelup-sortable__item.is-drop-before::before {
+    top: -.18rem;
+}
+
+.levelup-sortable__item.is-drop-after::after {
+    bottom: -.18rem;
+}
+
+.levelup-sortable__touch-clone {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--levelup-z-modal);
+    width: min(22rem, calc(100vw - 2rem));
+    pointer-events: none;
+    opacity: .9;
+    filter: drop-shadow(var(--levelup-shadow-lg));
+    will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .levelup-sortable__item {
+        transition: none;
+    }
+}
+
+.levelup-sortable__drag-clone {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--levelup-z-modal);
+    pointer-events: none;
+    opacity: .92;
+    filter: drop-shadow(var(--levelup-shadow-lg));
+    will-change: transform;
+}
+
+body.levelup-is-sorting,
+body.levelup-is-sorting * {
+    cursor: grabbing !important;
+    user-select: none !important;
+}
+
+.levelup-sortable--virtualized {
+    min-height: 100%;
+    overflow-y: auto;
+    contain: layout paint;
+}
+
+.levelup-sortable--virtualized > div[style*="height"] {
+    flex: 0 0 auto;
+}

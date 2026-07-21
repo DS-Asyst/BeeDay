@@ -1,0 +1,28 @@
+<div class="editor-modal-backdrop" @onclick="Cancel" @onkeydown="HandleKeyDown" tabindex="-1">
+    <section class="editor-modal"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="@TitleId"
+             @onclick:stopPropagation>
+        <EditForm Model="Model" OnValidSubmit="Submit">
+            <DataAnnotationsValidator />
+            <header class="editor-modal__header">
+                <h2 id="@TitleId">@Title</h2>
+                <div class="editor-modal__actions">
+                    <LevelUpButton Variant="LevelUpButtonVariant.Secondary" OnClick="Cancel">CANCEL</LevelUpButton>
+                    <LevelUpButton Type="submit" Variant="LevelUpButtonVariant.Primary">@SubmitLabel</LevelUpButton>
+                </div>
+            </header>
+
+            @HeroContent
+            @BodyContent
+
+            @if (ShowDelete)
+            {
+                <footer class="editor-modal__footer">
+                    <LevelUpButton Variant="LevelUpButtonVariant.Danger" OnClick="OnDelete">DELETE</LevelUpButton>
+                </footer>
+            }
+        </EditForm>
+    </section>
+</div>

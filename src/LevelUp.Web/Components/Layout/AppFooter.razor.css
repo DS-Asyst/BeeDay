@@ -42,13 +42,13 @@
     }
 
     .app-footer__column a {
-        color: #514858;
+        color: var(--levelup-color-text-secondary);
         font-size: 0.85rem;
         text-decoration: none;
     }
 
         .app-footer__column a:hover {
-            color: #673ab7;
+            color: var(--levelup-color-primary);
             text-decoration: underline;
         }
 
@@ -62,7 +62,7 @@
     margin: 0;
     border-top: 1px solid #cbc7cf;
     box-sizing: border-box;
-    color: #514858;
+    color: var(--levelup-color-text-secondary);
     font-size: 0.8rem;
 }
 
@@ -75,12 +75,12 @@
 }
 
     .app-footer__legal a {
-        color: #514858;
+        color: var(--levelup-color-text-secondary);
         text-decoration: none;
     }
 
         .app-footer__legal a:hover {
-            color: #673ab7;
+            color: var(--levelup-color-primary);
             text-decoration: underline;
         }
 
@@ -108,9 +108,9 @@
     fill: currentColor;
     filter: grayscale(1);
     transition:
-        color 160ms ease,
-        filter 160ms ease,
-        transform 160ms ease;
+        color var(--levelup-transition-normal),
+        filter var(--levelup-transition-normal),
+        transform var(--levelup-transition-normal);
 }
 
 .app-footer__social-link:hover svg,

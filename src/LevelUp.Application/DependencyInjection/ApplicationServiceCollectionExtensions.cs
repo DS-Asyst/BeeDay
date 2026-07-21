@@ -1,15 +1,6 @@
-using LevelUp.Application.Features.Dashboard.Contracts;
-using LevelUp.Application.Features.Dashboard.Services;
-using LevelUp.Application.Features.Habits.Contracts;
-using LevelUp.Application.Features.Habits.Services;
-using LevelUp.Application.Features.Profiles.Contracts;
-using LevelUp.Application.Features.Profiles.Services;
-using LevelUp.Application.Features.Projects.Contracts;
-using LevelUp.Application.Features.Projects.Services;
-using LevelUp.Application.Features.Tasks.Contracts;
-using LevelUp.Application.Features.Tasks.Services;
-using LevelUp.Application.Features.Todos.Contracts;
-using LevelUp.Application.Features.Todos.Services;
+using FluentValidation;
+using LevelUp.Application.Common.Behaviors;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LevelUp.Application.DependencyInjection;
@@ -20,12 +11,14 @@ public static class ApplicationServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddScoped<ILevelUpQueryService, LevelUpQueryService>();
-        services.AddScoped<IProfileService, ProfileService>();
-        services.AddScoped<IHabitService, HabitService>();
-        services.AddScoped<ITaskService, TaskService>();
-        services.AddScoped<ITodoService, TodoService>();
-        services.AddScoped<IProjectService, ProjectService>();
+        services.AddValidatorsFromAssemblyContaining<ApplicationAssemblyMarker>();
+        services.AddMediatR(configuration =>
+            configuration.RegisterServicesFromAssemblyContaining<ApplicationAssemblyMarker>());
+
+        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>));
+        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(DomainEventBehavior<,>));
 
         return services;
     }

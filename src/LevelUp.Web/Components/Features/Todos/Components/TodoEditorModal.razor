@@ -1,0 +1,51 @@
+<EditorModalShell Model="Model"
+                  Title="@(IsEditing ? "Edit To-Do" : "Create To-Do")"
+                  TitleId="todo-editor-title"
+                  SubmitLabel="@(IsEditing ? "SAVE" : "CREATE")"
+                  ShowDelete="IsEditing"
+                  OnSubmit="Save"
+                  OnCancel="Cancel"
+                  OnDelete="RequestDelete">
+    <HeroContent>
+        <div class="editor-modal__hero">
+            <LevelUpInput Id="todo-title"
+                          Label="Title"
+                          Required="true"
+                          @bind-Value="Model.Title"
+                          Placeholder="Add a title"
+                          MaxLength="100"
+                          FieldCssClass="editor-modal__hero-field"
+                          LabelCssClass="editor-modal__label-line"
+                          autofocus />
+            <LevelUpTextArea Id="todo-notes"
+                             Label="Notes"
+                             @bind-Value="Model.Description"
+                             Placeholder="Add notes"
+                             MaxLength="500"
+                             ShowCounter="true"
+                             FieldCssClass="editor-modal__hero-field"
+                             LabelCssClass="editor-modal__label-line"
+                             CounterCssClass="editor-modal__counter" />
+        </div>
+    </HeroContent>
+    <BodyContent>
+        <div class="editor-modal__body">
+            <div class="editor-modal__type-summary"><span class="editor-modal__type-icon" aria-hidden="true">✓</span><div><strong>To-Do</strong><p>A one-time action that does not depend on a project.</p></div></div>
+            <LevelUpDateInput TValue="DateTime?"
+                              Id="todo-due-date"
+                              Label="Due date"
+                              @bind-Value="Model.DueDate"
+                              FieldCssClass="editor-modal__field" />
+        </div>
+    </BodyContent>
+</EditorModalShell>
+
+<LevelUpConfirmDialog IsOpen="showDeleteConfirmation"
+                      Title="Delete To-Do"
+                      Message="Are you sure you want to delete this to-do?"
+                      ItemTitle="@Model.Title"
+                      Warning="This action cannot be undone."
+                      WarningDetails="All information will be permanently removed."
+                      ConfirmLabel="Delete To-Do"
+                      OnConfirm="ConfirmDelete"
+                      OnCancel="CloseDeleteConfirmation" />

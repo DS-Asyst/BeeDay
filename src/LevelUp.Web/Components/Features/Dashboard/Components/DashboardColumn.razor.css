@@ -1,0 +1,119 @@
+.dashboard-column {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    min-height: 36rem;
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid #dedbe1;
+    background: #ebe9ec;
+    box-sizing: border-box;
+}
+
+.dashboard-column__header {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.6rem;
+    min-height: 2.55rem;
+    padding: 0.55rem 0.35rem 0.3rem;
+    border-bottom: 1px solid #ddd9e0;
+    background: var(--levelup-color-surface);
+    box-sizing: border-box;
+}
+
+.dashboard-column__heading {
+    display: flex;
+    align-items: center;
+    gap: 0.38rem;
+    min-width: 0;
+}
+
+.dashboard-column__heading h2 {
+    margin: 0;
+    overflow: hidden;
+    color: #302638;
+    font-size: 0.82rem;
+    font-weight: 900;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dashboard-column__count {
+    display: grid;
+    place-items: center;
+    min-width: 1.18rem;
+    height: 1.18rem;
+    padding: 0 0.28rem;
+    border-radius: 999px;
+    color: var(--levelup-color-surface);
+    background: var(--levelup-color-project);
+    font-size: 0.59rem;
+    font-weight: 900;
+}
+
+.dashboard-column__tabs {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.dashboard-column__tabs button {
+    min-height: 1.6rem;
+    padding: 0.15rem 0.05rem;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: #62596c;
+    background: transparent;
+    font-size: 0.57rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.dashboard-column__tabs button:hover,
+.dashboard-column__tabs button.active {
+    color: var(--levelup-color-project-dark);
+}
+
+.dashboard-column__tabs button.active {
+    border-bottom-color: var(--levelup-color-project-dark);
+}
+
+.dashboard-column__content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.18rem;
+    min-height: 0;
+    margin: 0;
+    padding: 0.35rem;
+    background: #ebe9ec;
+}
+
+.dashboard-column__empty {
+    margin: .75rem;
+    color: var(--levelup-color-text-muted);
+    font-size: .72rem;
+    text-align: center;
+}
+
+/* Stronger dashboard section titles */
+.dashboard-column__heading h2 {
+    color: #17121d;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-size: 1.42rem;
+    font-weight: 800;
+    letter-spacing: -.035em;
+    line-height: 1.1;
+}
+
+.dashboard-column__count {
+    min-width: 1.65rem;
+    height: 1.65rem;
+    padding: 0 .42rem;
+    font-size: .75rem;
+    font-weight: 800;
+}

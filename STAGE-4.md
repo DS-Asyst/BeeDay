@@ -1,18 +1,16 @@
-# Stage 4 — Robust JSON Persistence
+# Etapa 4 — Persistência JSON
 
-This stage separates JSON persistence into focused components and adds operational safety.
+## Entregue
 
-## Implemented
+- Gravações atômicas por arquivo temporário validado.
+- Backups com timestamp e retenção configurável.
+- Recuperação automática pelo backup válido mais recente.
+- Validação do estado de domínio após desserialização.
+- Controle assíncrono de concorrência.
+- Logs estruturados.
+- Configuração em `appsettings.json`.
+- Health check disponível em `/health`.
+- Exceções específicas de persistência.
+- Testes de leitura, gravação, retenção, recuperação e health check.
 
-- Atomic writes through validated temporary files.
-- Timestamped backups with configurable retention.
-- Automatic recovery from the latest valid backup.
-- Domain-state validation after every deserialization.
-- Asynchronous concurrency control in the repository.
-- Structured logs without logging user data.
-- Storage configuration through `appsettings.json`.
-- Read/write/validity health check exposed at `/health`.
-- Persistence-specific exceptions.
-- Infrastructure tests for save/load, backup retention, corruption recovery and health checks.
-
-The primary data file remains `LevelUpBD.json`; no data migration is required.
+O arquivo principal permanece `LevelUpBD.json`; não é necessária migração de dados.

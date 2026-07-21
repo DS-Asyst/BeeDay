@@ -1,0 +1,52 @@
+<LevelUpCard Class="@CardCssClass">
+    <div class="habit-card__side">
+        @if (AllowsPositive)
+        {
+            <button type="button"
+                    class="habit-card__score-button"
+                    title="Register positive behavior"
+                    aria-label="Register positive for @Title"
+                    @onclick="OnPositive">+</button>
+        }
+    </div>
+
+    <div class="habit-card__body">
+        <div class="habit-card__header">
+            <div class="habit-card__title">
+                @if (Featured)
+                {
+                    <span class="habit-card__featured" aria-label="Featured">★</span>
+                }
+                <h3><SearchHighlight Text="@Title" SearchTerm="@SearchTerm" /></h3>
+            </div>
+
+            <LevelUpCardMenu TriggerClass="habit-card__menu"
+                             Title="@Title"
+                             OnEdit="@OnEdit"
+                             OnDelete="@OnDelete"
+                             OpenChanged="HandleMenuOpenChanged" />
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Description))
+        {
+            <p><SearchHighlight Text="@Description" SearchTerm="@SearchTerm" /></p>
+        }
+
+        <div class="habit-card__footer">
+            <span aria-hidden="true">▶▶</span>
+            <span>@Balance</span>
+            <span class="habit-card__direction" title="@DirectionText">◇</span>
+        </div>
+    </div>
+
+    <div class="habit-card__side">
+        @if (AllowsNegative)
+        {
+            <button type="button"
+                    class="habit-card__score-button"
+                    title="Register negative behavior"
+                    aria-label="Register negative for @Title"
+                    @onclick="OnNegative">−</button>
+        }
+    </div>
+</LevelUpCard>

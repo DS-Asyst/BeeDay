@@ -1,0 +1,37 @@
+<div class="@MenuCssClass">
+    <button type="button"
+            class="@TriggerCssClass"
+            title="@Title"
+            aria-label="@AriaLabel"
+            aria-expanded="@isOpen.ToString().ToLowerInvariant()"
+            @onclick="ToggleMenu"
+            @onclick:stopPropagation>
+        ⋮
+    </button>
+
+    @if (isOpen)
+    {
+        <button type="button"
+                class="card-action-menu__dismiss"
+                aria-label="Close options"
+                @onclick="CloseMenu"></button>
+
+        <div class="card-action-menu__panel" role="menu">
+            <button type="button"
+                    class="card-action-menu__item"
+                    role="menuitem"
+                    @onclick="EditAsync">
+                <span aria-hidden="true">✎</span>
+                <span>EDIT</span>
+            </button>
+
+            <button type="button"
+                    class="card-action-menu__item card-action-menu__item--delete"
+                    role="menuitem"
+                    @onclick="DeleteAsync">
+                <span aria-hidden="true">⌫</span>
+                <span>DELETE</span>
+            </button>
+        </div>
+    }
+</div>

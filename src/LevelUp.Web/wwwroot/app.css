@@ -38,13 +38,13 @@ h1:focus {
 }
 
 .validation-message {
-    color: #b32121;
+    color: var(--levelup-color-danger-hover);
 }
 
 .blazor-error-boundary {
     padding: 1rem;
-    color: #fff;
-    background: #b32121;
+    color: var(--levelup-color-surface);
+    background: var(--levelup-color-danger-hover);
 }
 
 .blazor-error-boundary::after {
@@ -76,7 +76,7 @@ h1:focus {
     overflow: hidden;
     border: 1px solid #ded9e2;
     border-radius: .4rem;
-    background: #fff;
+    background: var(--levelup-color-surface);
     box-shadow: 0 .65rem 1.8rem rgb(39 23 57 / 22%);
     animation: card-menu-enter 130ms ease-out;
 }
@@ -90,7 +90,7 @@ h1:focus {
     height: .65rem;
     border-top: 1px solid #ded9e2;
     border-left: 1px solid #ded9e2;
-    background: #fff;
+    background: var(--levelup-color-surface);
     transform: rotate(45deg);
 }
 
@@ -105,7 +105,7 @@ h1:focus {
     padding: 0 .9rem;
     border: 0;
     border-bottom: 1px solid #eeeaf0;
-    background: #fff;
+    background: var(--levelup-color-surface);
     color: #342b3b;
     font-size: .82rem;
     font-weight: 600;
@@ -132,7 +132,7 @@ h1:focus {
 
 .card-action-menu__item--delete:hover,
 .card-action-menu__item--delete:focus-visible {
-    background: #fff0f1;
+    background: var(--levelup-color-surface)0f1;
     color: #bd202a;
 }
 
@@ -161,5 +161,5 @@ h1:focus {
 .card-action-menu__panel .card-action-menu__item--delete:hover,
 .card-action-menu__panel .card-action-menu__item--delete:focus-visible {
     color: #bd202a;
-    background: #fff1f2;
+    background: var(--levelup-color-surface)1f2;
 }

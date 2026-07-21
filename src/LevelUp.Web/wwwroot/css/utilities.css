@@ -9,3 +9,20 @@
     border-radius: var(--levelup-radius-md);
     box-shadow: var(--levelup-shadow-sm);
 }
+
+.levelup-text-muted { color: var(--levelup-color-text-muted); }
+.levelup-text-danger { color: var(--levelup-color-danger); }
+.levelup-stack-sm { display: grid; gap: var(--levelup-spacing-sm); }
+.levelup-stack-md { display: grid; gap: var(--levelup-spacing-md); }
+.levelup-cluster { display: flex; flex-wrap: wrap; align-items: center; gap: var(--levelup-spacing-sm); }
+.levelup-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

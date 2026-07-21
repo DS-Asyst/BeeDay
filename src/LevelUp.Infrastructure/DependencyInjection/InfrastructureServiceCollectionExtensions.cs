@@ -1,4 +1,7 @@
 using LevelUp.Application.Common.Contracts;
+using LevelUp.Infrastructure.Auditing;
+using LevelUp.Infrastructure.Background;
+using LevelUp.Infrastructure.Caching;
 using LevelUp.Infrastructure.Configuration;
 using LevelUp.Infrastructure.HealthChecks;
 using LevelUp.Infrastructure.Persistence.Json;
@@ -31,7 +34,18 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<JsonFileWriter>();
         services.AddSingleton<JsonBackupService>();
         services.AddSingleton<ILevelUpRepository, JsonLevelUpRepository>();
-        services.AddHealthChecks().AddCheck<JsonStorageHealthCheck>("json-storage");
+        services.AddMemoryCache();
+        services.AddSingleton<MemoryApplicationCache>();
+        services.AddSingleton<LevelUp.Application.Common.Caching.IApplicationCache>(sp => sp.GetRequiredService<MemoryApplicationCache>());
+        services.AddSingleton<JsonEventJournal>();
+        services.AddSingleton<LevelUp.Application.Common.Auditing.IEventJournal>(sp => sp.GetRequiredService<JsonEventJournal>());
+        services.AddSingleton<BackgroundTaskQueue>();
+        services.AddSingleton<LevelUp.Application.Common.Background.IBackgroundTaskQueue>(sp => sp.GetRequiredService<BackgroundTaskQueue>());
+        services.AddHostedService<BackgroundTaskWorker>();
+        services.AddHealthChecks()
+            .AddCheck<JsonStorageHealthCheck>(
+                "json-storage",
+                tags: ["ready", "storage"]);
 
         return services;
     }

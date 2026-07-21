@@ -1,0 +1,55 @@
+.profile-summary {
+    display: grid;
+    grid-template-columns: minmax(15rem, 1fr) auto;
+    align-items: center;
+    gap: clamp(1.25rem, 3vw, 3.5rem);
+    width: 100%;
+    min-height: 7rem;
+    padding: 1rem 1.5rem;
+    box-sizing: border-box;
+    color: var(--levelup-color-surface);
+    background: radial-gradient(circle at 74% -35%, rgb(130 83 201 / 26%), transparent 42%), linear-gradient(112deg, #301b59 0%, #3a2167 55%, #34205f 100%);
+    border-bottom: 1px solid rgb(20 8 48 / 45%);
+}
+
+.profile-summary__profile {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: .8rem;
+}
+
+.profile-summary__class-icon {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    overflow: hidden;
+    border: 2px solid rgb(255 255 255 / 78%);
+    border-radius: 50%;
+    background: var(--levelup-color-surface);
+    box-shadow: 0 .25rem .8rem rgb(14 5 35 / 30%);
+}
+
+.profile-summary__class-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-summary__identity { min-width: 0; }
+.profile-summary__eyebrow,
+.profile-summary__metric-label { display: block; color: rgb(255 255 255 / 58%); font-size: .62rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.profile-summary__name { margin: .18rem 0 0; overflow: hidden; color: var(--levelup-color-surface); font-size: clamp(1rem, 1.35vw, 1.22rem); text-overflow: ellipsis; white-space: nowrap; }
+.profile-summary__subtitle { display: block; margin-top: .28rem; color: rgb(255 255 255 / 76%); font-size: .72rem; font-weight: 700; }
+.profile-summary__metrics { display: grid; grid-template-columns: repeat(2, minmax(6rem, auto)); align-self: stretch; }
+.profile-summary__metric { display: flex; min-width: 6rem; flex-direction: column; justify-content: center; gap: .35rem; padding: 0 1rem; border-left: 1px solid rgb(255 255 255 / 12%); }
+.profile-summary__metric strong { color: var(--levelup-color-surface); font-size: 1rem; }
+
+@media (max-width: 650px) {
+    .profile-summary { grid-template-columns: 1fr; gap: 1rem; }
+    .profile-summary__metrics { grid-template-columns: repeat(2, 1fr); border-top: 1px solid rgb(255 255 255 / 10%); }
+    .profile-summary__metric { min-height: 3rem; border-left: 0; }
+    .profile-summary__metric + .profile-summary__metric { border-left: 1px solid rgb(255 255 255 / 10%); }
+}
