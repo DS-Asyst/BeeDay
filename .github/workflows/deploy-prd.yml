@@ -1,0 +1,139 @@
+name: LevelUp Production Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+concurrency:
+  group: levelup-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Production Build
+
+    runs-on: windows-latest
+
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore dependencies
+        shell: powershell
+        run: dotnet restore LevelUp.slnx
+
+      - name: Build solution
+        shell: powershell
+        run: |
+          dotnet build LevelUp.slnx `
+            --configuration Release `
+            --no-restore
+
+      - name: Run tests
+        shell: powershell
+        run: |
+          dotnet test LevelUp.slnx `
+            --configuration Release `
+            --no-build `
+            --verbosity normal
+
+  deploy:
+    name: Deploy to SERV3-WEB1
+
+    needs:
+      - validate
+
+    runs-on:
+      - self-hosted
+      - Windows
+      - X64
+
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore dependencies
+        shell: powershell
+        run: dotnet restore LevelUp.slnx
+
+      - name: Build solution
+        shell: powershell
+        run: |
+          dotnet build LevelUp.slnx `
+            --configuration Release `
+            --no-restore
+
+      - name: Prepare publish directory
+        shell: powershell
+        run: |
+          $publishPath = Join-Path "${{ runner.temp }}" "LevelUpPublish"
+
+          if (Test-Path -LiteralPath $publishPath) {
+              Remove-Item `
+                  -LiteralPath $publishPath `
+                  -Recurse `
+                  -Force
+          }
+
+          New-Item `
+              -ItemType Directory `
+              -Path $publishPath `
+              -Force |
+              Out-Null
+
+      - name: Publish LevelUp
+        shell: powershell
+        run: |
+          dotnet publish `
+            ".\src\LevelUp.Web\LevelUp.Web.csproj" `
+            --configuration Release `
+            --no-restore `
+            --output "${{ runner.temp }}\LevelUpPublish"
+
+      - name: Validate published files
+        shell: powershell
+        run: |
+          $publishPath = Join-Path "${{ runner.temp }}" "LevelUpPublish"
+
+          $requiredFiles = @(
+              "LevelUp.Web.dll",
+              "web.config"
+          )
+
+          foreach ($file in $requiredFiles) {
+              $fullPath = Join-Path $publishPath $file
+
+              if (-not (Test-Path -LiteralPath $fullPath)) {
+                  throw "Arquivo obrigatorio nao encontrado: $fullPath"
+              }
+          }
+
+          Write-Host "Publicacao validada com sucesso."
+
+      - name: Deploy to IIS
+        shell: powershell
+        run: |
+          $publishPath = Join-Path "${{ runner.temp }}" "LevelUpPublish"
+
+          & ".\scripts\Deploy-LevelUp.ps1" `
+              -PublishPath $publishPath
