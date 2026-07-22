@@ -13,11 +13,24 @@
     transition: opacity var(--levelup-transition-fast), transform var(--levelup-transition-fast), box-shadow var(--levelup-transition-fast);
 }
 
-.levelup-sortable__item:active,
-.levelup-sortable__item.is-drag-armed,
-.levelup-sortable__item.is-dragging {
-    cursor: grabbing;
-}
+    /*
+ * Mantém o card que possui um menu aberto acima dos demais cards.
+ *
+ * Cada item do sortable cria um contexto de empilhamento por causa das
+ * animações com transform. Sem este z-index, os cards seguintes encobrem
+ * a parte inferior do menu, fazendo a opção DELETE aparecer somente no
+ * último card da lista.
+ */
+    .levelup-sortable__item:has(.activity-card--menu-open),
+    .levelup-sortable__item:has(.habit-card--menu-open) {
+        z-index: 100;
+    }
+
+    .levelup-sortable__item:active,
+    .levelup-sortable__item.is-drag-armed,
+    .levelup-sortable__item.is-dragging {
+        cursor: grabbing;
+    }
 
 .levelup-sortable__item:focus-visible {
     outline: var(--levelup-focus-ring);
