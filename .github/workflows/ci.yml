@@ -1,0 +1,56 @@
+name: LevelUp CI
+
+on:
+  push:
+    branches:
+      - develop
+
+  pull_request:
+    branches:
+      - develop
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and Test
+
+    runs-on: windows-latest
+
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Show .NET information
+        shell: powershell
+        run: dotnet --info
+
+      - name: Restore dependencies
+        shell: powershell
+        run: dotnet restore LevelUp.slnx
+
+      - name: Build solution
+        shell: powershell
+        run: |
+          dotnet build LevelUp.slnx `
+            --configuration Release `
+            --no-restore
+
+      - name: Run tests
+        shell: powershell
+        run: |
+          dotnet test LevelUp.slnx `
+            --configuration Release `
+            --no-build `
+            --verbosity normal
