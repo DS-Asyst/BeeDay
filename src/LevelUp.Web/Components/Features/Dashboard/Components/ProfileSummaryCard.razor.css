@@ -10,7 +10,7 @@
     color: var(--levelup-color-surface);
     background: radial-gradient( circle at 74% -35%, rgb(130 83 201 / 26%), transparent 42% ), linear-gradient( 112deg, #301b59 0%, #3a2167 55%, #34205f 100% );
     border-bottom: 1px solid rgb(20 8 48 / 45%);
-    font-family: "Pixelify Sans", sans-serif;
+    font-family: var(--levelup-font-family);
 }
 
 .profile-summary__profile {
@@ -47,7 +47,7 @@
 .profile-summary__metric-label {
     display: block;
     color: rgb(255 255 255 / 64%);
-    font-family: "Pixelify Sans", sans-serif;
+    font-family: var(--levelup-font-family);
     font-size: .72rem;
     font-weight: 700;
     letter-spacing: .08em;
@@ -59,7 +59,7 @@
     margin: .18rem 0 0;
     overflow: hidden;
     color: var(--levelup-color-surface);
-    font-family: "Pixelify Sans", sans-serif;
+    font-family: var(--levelup-font-family);
     font-size: clamp(1.25rem, 1.65vw, 1.6rem);
     font-weight: 700;
     line-height: 1.05;
@@ -71,7 +71,7 @@
     display: block;
     margin-top: .32rem;
     color: rgb(255 255 255 / 78%);
-    font-family: "Pixelify Sans", sans-serif;
+    font-family: var(--levelup-font-family);
     font-size: .85rem;
     font-weight: 500;
     letter-spacing: .015em;
@@ -95,7 +95,7 @@
 
     .profile-summary__metric strong {
         color: var(--levelup-color-surface);
-        font-family: "Pixelify Sans", sans-serif;
+        font-family: var(--levelup-font-family);
         font-size: 1.3rem;
         font-weight: 700;
         line-height: 1;

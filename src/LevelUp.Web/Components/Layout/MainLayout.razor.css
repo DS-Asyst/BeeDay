@@ -1,17 +1,109 @@
 .levelup-app {
+    --levelup-top-navigation-height: 3.75rem;
+    --levelup-left-panel-width: 17rem;
+    --levelup-right-panel-width: 24rem;
+    --levelup-collapsed-panel-width: 1.35rem;
+
     display: flex;
-    flex-direction: column;
     width: 100%;
-    min-height: 100vh;
+    min-height: 100dvh;
+    flex-direction: column;
+    padding-top: var(--levelup-top-navigation-height);
+    overflow-x: clip;
     background: #f4f3f5;
+}
+
+.levelup-workspace {
+    display: grid;
+    grid-template-columns:
+        var(--levelup-collapsed-panel-width)
+        minmax(0, 1fr)
+        var(--levelup-collapsed-panel-width);
+    flex: 1 0 auto;
+    min-height: calc(100dvh - var(--levelup-top-navigation-height));
+    margin-top: 0;
+    transition: grid-template-columns 260ms cubic-bezier(.22, .8, .24, 1);
+}
+
+.levelup-workspace.has-left-panel {
+    grid-template-columns:
+        var(--levelup-left-panel-width)
+        minmax(0, 1fr)
+        var(--levelup-collapsed-panel-width);
+}
+
+.levelup-workspace.has-right-panel {
+    grid-template-columns:
+        var(--levelup-collapsed-panel-width)
+        minmax(0, 1fr)
+        var(--levelup-right-panel-width);
+}
+
+.levelup-side-slot {
+    position: relative;
+    min-width: 0;
+    height: calc(100dvh - var(--levelup-top-navigation-height));
+    overflow: hidden;
+    align-self: start;
+    position: sticky;
+    top: var(--levelup-top-navigation-height);
+    z-index: 20;
+}
+
+.levelup-side-slot--left {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.levelup-side-slot--right {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.levelup-content-shell {
+    display: flex;
+    min-width: 0;
+    min-height: calc(100dvh - var(--levelup-top-navigation-height));
+    flex-direction: column;
+    overflow-x: hidden;
 }
 
 .levelup-main {
     display: flex;
     flex: 1;
-    flex-direction: column;
-    width: 100%;
     min-width: 0;
+    flex-direction: column;
     margin: 0;
     padding: 0;
+}
+
+@media (max-width: 760px) {
+    .levelup-workspace,
+    .levelup-workspace.has-left-panel,
+    .levelup-workspace.has-right-panel {
+        grid-template-columns: 0 minmax(0, 1fr) 0;
+    }
+
+    .levelup-side-slot {
+        position: fixed;
+        top: var(--levelup-top-navigation-height);
+        bottom: 0;
+        width: 0;
+        height: auto;
+        overflow: visible;
+    }
+
+    .levelup-side-slot--left {
+        left: 0;
+    }
+
+    .levelup-side-slot--right {
+        right: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .levelup-workspace {
+        transition: none;
+    }
 }

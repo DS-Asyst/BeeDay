@@ -21,8 +21,13 @@ a {
 button,
 input,
 select,
-textarea {
-    font: inherit;
+textarea,
+option,
+optgroup {
+    font-family: var(--levelup-font-family);
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
 }
 
 h1:focus {

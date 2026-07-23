@@ -1,12 +1,58 @@
 @inherits LayoutComponentBase
 
 <div class="levelup-app">
-    <TopNavigation />
+    <TopNavigation IsCharacterPanelOpen="@_isCharacterPanelOpen"
+                   IsMenuPanelOpen="@_isMenuPanelOpen"
+                   OnToggleCharacterPanel="ToggleCharacterPanel"
+                   OnToggleMenuPanel="ToggleMenuPanel" />
 
-    <main class="levelup-main">
-        @Body
-    </main>
+    <div class="levelup-workspace @GetWorkspaceClass()">
+        <div class="levelup-side-slot levelup-side-slot--left">
+            <CharacterSidePanel IsOpen="@_isCharacterPanelOpen" OnClose="ClosePanels" />
+        </div>
 
-    <AppFooter />
+        <div class="levelup-content-shell">
+            <main class="levelup-main">
+                @Body
+            </main>
+
+            <AppFooter />
+        </div>
+
+        <div class="levelup-side-slot levelup-side-slot--right">
+            <AccountSidePanel IsOpen="@_isMenuPanelOpen" OnClose="ClosePanels" />
+        </div>
+    </div>
+
     <LevelUpToastHost />
 </div>
+
+@code {
+    private bool _isCharacterPanelOpen;
+    private bool _isMenuPanelOpen;
+
+    private void ToggleCharacterPanel()
+    {
+        _isCharacterPanelOpen = !_isCharacterPanelOpen;
+        _isMenuPanelOpen = false;
+    }
+
+    private void ToggleMenuPanel()
+    {
+        _isMenuPanelOpen = !_isMenuPanelOpen;
+        _isCharacterPanelOpen = false;
+    }
+
+    private void ClosePanels()
+    {
+        _isCharacterPanelOpen = false;
+        _isMenuPanelOpen = false;
+    }
+
+    private string GetWorkspaceClass() =>
+        _isCharacterPanelOpen
+            ? "has-left-panel"
+            : _isMenuPanelOpen
+                ? "has-right-panel"
+                : string.Empty;
+}

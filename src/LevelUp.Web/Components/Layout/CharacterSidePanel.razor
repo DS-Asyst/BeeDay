@@ -1,0 +1,80 @@
+@implements IDisposable
+@inject LevelUp.Web.Components.Features.Dashboard.State.DashboardState State
+
+<aside class="side-drawer side-drawer--left @(IsOpen ? "is-open" : null)"
+       aria-label="Painel do personagem"
+       aria-hidden="@(!IsOpen)">
+    <section class="character-drawer">
+        @if (State.IsLoading)
+        {
+            <div class="character-drawer__loading">Carregando personagem...</div>
+        }
+        else if (State.Data?.Profile is not null)
+        {
+            var profile = State.Data.Profile;
+
+            <div class="character-drawer__profile">
+                <div class="character-drawer__avatar">
+                    <img src="@GetClassImage(profile.Class)" alt="Classe @profile.Class" />
+                </div>
+
+                <div class="character-drawer__identity">
+                    <span>Personagem</span>
+                    <h2>@profile.Name</h2>
+                    <p>@($"@{GetNickname(profile.Name, profile.Nickname)} · {profile.Class}")</p>
+                </div>
+            </div>
+
+            <div class="character-drawer__statistics" aria-label="Resumo de atividades">
+                <div>
+                    <span>Ativos</span>
+                    <strong>@State.ActiveItems</strong>
+                </div>
+                <div>
+                    <span>Concluídos</span>
+                    <strong>@State.CompletedItems</strong>
+                </div>
+            </div>
+
+            <NavLink href="/profile" class="character-drawer__link" @onclick="OnClose">
+                Ver personagem
+            </NavLink>
+        }
+        else
+        {
+            <div class="character-drawer__empty">
+                <strong>Nenhum personagem criado</strong>
+                <span>Crie seu personagem para acompanhar sua evolução.</span>
+                <NavLink href="/profile" class="character-drawer__link" @onclick="OnClose">
+                    Criar personagem
+                </NavLink>
+            </div>
+        }
+    </section>
+</aside>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        State.Changed += HandleStateChanged;
+        if (State.Data is null)
+        {
+            await State.InitializeAsync();
+        }
+    }
+
+    private void HandleStateChanged() => InvokeAsync(StateHasChanged);
+
+    private static string GetClassImage(CharacterClass characterClass) =>
+        $"/images/classes/classicon_{characterClass.ToString().ToLowerInvariant()}.jpg";
+
+    private static string GetNickname(string name, string nickname) =>
+        string.IsNullOrWhiteSpace(nickname)
+            ? name.Replace(" ", string.Empty, StringComparison.Ordinal).ToLowerInvariant()
+            : nickname.Trim().TrimStart('@');
+
+    public void Dispose() => State.Changed -= HandleStateChanged;
+}

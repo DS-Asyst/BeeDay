@@ -103,7 +103,7 @@
 /* Stronger dashboard section titles */
 .dashboard-column__heading h2 {
     color: #17121d;
-    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-family: var(--levelup-font-family);
     font-size: 1.42rem;
     font-weight: 800;
     letter-spacing: -.035em;
