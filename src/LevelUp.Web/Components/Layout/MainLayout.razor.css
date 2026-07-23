@@ -22,7 +22,10 @@
     flex: 1 0 auto;
     min-height: calc(100dvh - var(--levelup-top-navigation-height));
     margin-top: 0;
-    transition: grid-template-columns 260ms cubic-bezier(.22, .8, .24, 1);
+}
+
+.levelup-workspace {
+    transition: grid-template-columns 300ms cubic-bezier(.2, .8, .2, 1);
 }
 
 .levelup-workspace.has-left-panel {
