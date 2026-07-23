@@ -1,9 +1,9 @@
 .top-navigation {
     position: fixed;
     top: 0;
-    z-index: 100;
     right: 0;
     left: 0;
+    z-index: 100;
     width: 100%;
     color: #fff;
     background: #5b1095;
@@ -12,7 +12,7 @@
 
 .top-navigation__content {
     display: grid;
-    grid-template-columns: auto auto minmax(12rem, 1fr) auto;
+    grid-template-columns: 17rem auto minmax(12rem, 1fr) auto;
     align-items: stretch;
     min-height: 3.75rem;
     padding: 0 .8rem 0 0;
@@ -21,27 +21,28 @@
 }
 
 .top-navigation__brand-button {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: .45rem;
     min-width: 17rem;
-    padding: 0;
+    padding: 0 1.25rem;
     color: #fff;
     background: transparent;
     border: 0;
-    box-shadow: none;
     font: inherit;
     cursor: pointer;
+    transition: background-color 180ms ease, transform 180ms cubic-bezier(.2, .8, .2, 1);
 }
 
-.top-navigation__brand-button:hover,
-.top-navigation__brand-button[aria-expanded="true"] {
-    background: transparent;
+.top-navigation__brand-button:active {
+    transform: scale(.985);
 }
 
-.top-navigation__brand-button[aria-expanded="true"] {
-    box-shadow: none;
+.top-navigation__brand-button:focus-visible {
+    outline: 2px solid rgb(255 255 255 / 90%);
+    outline-offset: -4px;
 }
 
 .top-navigation__brand-text {
@@ -49,7 +50,6 @@
     align-items: center;
     justify-content: center;
     gap: .2rem;
-    padding-left: 0;
 }
 
 .top-navigation__brand-level,
@@ -59,22 +59,33 @@
     letter-spacing: .02em;
 }
 
-.top-navigation__brand-level {
-    color: #fff;
+.top-navigation__brand-level { color: #fff; }
+.top-navigation__brand-up { color: #ffc800; }
+
+.top-navigation__brand-level,
+.top-navigation__brand-up {
+    transition:
+        font-size 180ms cubic-bezier(.2, .8, .2, 1),
+        font-weight 180ms ease,
+        letter-spacing 180ms ease;
 }
 
-.top-navigation__brand-up {
-    color: #ffc800;
+.top-navigation__brand-button:hover .top-navigation__brand-level,
+.top-navigation__brand-button:hover .top-navigation__brand-up,
+.top-navigation__brand-button:focus-visible .top-navigation__brand-level,
+.top-navigation__brand-button:focus-visible .top-navigation__brand-up {
+    font-size: 1.55rem;
+    font-weight: 900;
+    letter-spacing: .035em;
 }
 
 .top-navigation__panel-arrow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: auto;
-    height: auto;
-    border: none;
-    margin-left: .2rem;
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    margin-left: .1rem;
+    transition: transform 220ms cubic-bezier(.2, .8, .2, 1);
 }
 
 .top-navigation__panel-arrow svg {
@@ -85,6 +96,19 @@
     stroke-width: 3;
     stroke-linecap: round;
     stroke-linejoin: round;
+    transition: transform 260ms cubic-bezier(.2, .9, .25, 1);
+}
+
+.top-navigation__brand-button:hover .top-navigation__panel-arrow {
+    transform: translateX(.2rem);
+}
+
+.top-navigation__brand-button[aria-expanded="true"] .top-navigation__panel-arrow svg {
+    transform: rotate(180deg);
+}
+
+.top-navigation__brand-button[aria-expanded="true"]:hover .top-navigation__panel-arrow {
+    transform: translateX(-.2rem);
 }
 
 .top-navigation__links {
@@ -93,28 +117,38 @@
 }
 
 .top-navigation__links ::deep a {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     min-width: 7.2rem;
     padding: 0 1rem;
+    overflow: hidden;
     color: rgb(255 255 255 / 82%);
-    border-bottom: 3px solid transparent;
+    background: transparent;
     font-size: 1.05rem;
     font-weight: 600;
     text-decoration: none;
-    box-sizing: border-box;
+    transition:
+        color 160ms ease,
+        background-color 180ms ease,
+        transform 150ms ease,
+        font-size 180ms cubic-bezier(.2, .8, .2, 1),
+        font-weight 180ms ease,
+        letter-spacing 180ms ease;
 }
 
 .top-navigation__links ::deep a:hover,
-.top-navigation__links ::deep a.active {
+.top-navigation__links ::deep a:focus-visible {
     color: #fff;
     background: rgb(255 255 255 / 7%);
+    font-size: 1.16rem;
+    font-weight: 900;
+    letter-spacing: .025em;
+    text-transform: uppercase;
 }
 
-.top-navigation__links ::deep a.active {
-    border-bottom-color: #ffc800;
-}
+.top-navigation__links ::deep a:active { transform: scale(.97); }
 
 .top-navigation__slogan {
     display: flex;
@@ -136,79 +170,79 @@
     min-width: 3rem;
 }
 
-.top-navigation__actions.is-menu-open {
-    width: auto;
-}
-
 .top-navigation__menu-button {
-    color: rgb(255 255 255 / 82%);
-    background: transparent;
-    border: 0;
-    font: inherit;
-    cursor: pointer;
-}
-
-.top-navigation__menu-button {
+    position: relative;
     display: grid;
-    width: 2.4rem;
-    height: 2.4rem;
+    width: 2.65rem;
+    height: 2.65rem;
     place-items: center;
     padding: 0;
-    border-radius: .35rem;
+    color: rgb(255 255 255 / 86%);
+    background: transparent;
+    border: 0;
+    border-radius: .45rem;
+    font: inherit;
+    cursor: pointer;
+    transition: color 160ms ease, background-color 180ms ease, transform 140ms ease, box-shadow 180ms ease;
 }
 
-.top-navigation__menu-button:hover,
-.top-navigation__menu-button[aria-expanded="true"] {
+.top-navigation__menu-button:hover {
     color: #fff;
-    background: rgb(255 255 255 / 9%);
+    background: rgb(255 255 255 / 10%);
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 8%);
+    transform: translateY(-1px);
 }
 
-.top-navigation__menu-button svg {
-    width: 1.35rem;
-    height: 1.35rem;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2.2;
-    stroke-linecap: round;
+.top-navigation__menu-button:active { transform: scale(.92); }
+.top-navigation__menu-button:focus-visible { outline: 2px solid #ffc800; outline-offset: 2px; }
+
+.top-navigation__menu-icon {
+    position: relative;
+    display: block;
+    width: 1.4rem;
+    height: 1.1rem;
 }
+
+.top-navigation__menu-icon span {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: currentColor;
+    border-radius: 999px;
+    transform-origin: center;
+    transition: top 240ms cubic-bezier(.2, .8, .2, 1), transform 240ms cubic-bezier(.2, .8, .2, 1), opacity 150ms ease, width 180ms ease;
+}
+
+.top-navigation__menu-icon span:nth-child(1) { top: 0; }
+.top-navigation__menu-icon span:nth-child(2) { top: calc(50% - 1px); }
+.top-navigation__menu-icon span:nth-child(3) { top: calc(100% - 2px); }
+.top-navigation__menu-button:hover .top-navigation__menu-icon span:nth-child(2) { width: 72%; }
+.top-navigation__menu-button[aria-expanded="true"] .top-navigation__menu-icon span:nth-child(1) { top: calc(50% - 1px); transform: rotate(45deg); }
+.top-navigation__menu-button[aria-expanded="true"] .top-navigation__menu-icon span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.top-navigation__menu-button[aria-expanded="true"] .top-navigation__menu-icon span:nth-child(3) { top: calc(50% - 1px); transform: rotate(-45deg); }
 
 @media (max-width: 920px) {
-    .top-navigation__brand-button {
-        min-width: 13rem;
-    }
+    .top-navigation__content { grid-template-columns: 13rem auto minmax(8rem, 1fr) auto; }
+    .top-navigation__brand-button { min-width: 13rem; }
 }
 
 @media (max-width: 680px) {
-    .top-navigation__content {
-        grid-template-columns: 1fr auto auto;
-    }
-
-    .top-navigation__brand-button {
-        min-width: 0;
-    }
-
-    .top-navigation__brand-text {
-        padding-left: 2.4rem;
-    }
-
-    .top-navigation__panel-arrow {
-        width: 2.4rem;
-    }
-
-    .top-navigation__brand-level,
-    .top-navigation__brand-up {
-        font-size: 1.05rem;
-    }
-
-    .top-navigation__links,
-    .top-navigation__slogan {
-        display: none;
-    }
+    .top-navigation__content { grid-template-columns: 1fr auto; padding-left: .4rem; }
+    .top-navigation__brand-button { min-width: 0; justify-content: flex-start; }
+    .top-navigation__links, .top-navigation__slogan { display: none; }
+    .top-navigation__brand-level, .top-navigation__brand-up { font-size: 1.05rem; }
 }
 
-.top-navigation__menu-button[aria-expanded="true"] .top-navigation__close-icon {
-    width: 1.55rem;
-    height: 1.55rem;
-    stroke-width: 2.8;
+@media (prefers-reduced-motion: reduce) {
+    .top-navigation__brand-button,
+    .top-navigation__panel-arrow,
+    .top-navigation__panel-arrow svg,
+    .top-navigation__menu-button,
+    .top-navigation__menu-icon span,
+    .top-navigation__links ::deep a,
+    .top-navigation__links ::deep a {
+        transition: none;
+        animation: none;
+    }
 }
-
