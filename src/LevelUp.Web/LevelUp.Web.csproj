@@ -4,6 +4,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Ignore obsolete Profile UI files that may remain after an in-place extraction. -->
+    <Compile Remove="Components\Features\Profile\**\*.cs" />
+    <Compile Remove="Components\Features\Profiles\**\*.cs" />
+    <Content Remove="Components\Features\Profile\**\*" />
+    <Content Remove="Components\Features\Profiles\**\*" />
+    <None Remove="Components\Features\Profile\**\*" />
+    <None Remove="Components\Features\Profiles\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../LevelUp.Application/LevelUp.Application.csproj" />
     <ProjectReference Include="../LevelUp.Domain/LevelUp.Domain.csproj" />
     <ProjectReference Include="../LevelUp.Infrastructure/LevelUp.Infrastructure.csproj" />

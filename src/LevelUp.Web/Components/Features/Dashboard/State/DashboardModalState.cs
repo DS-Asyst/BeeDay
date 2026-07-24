@@ -57,6 +57,14 @@ public sealed class DashboardModalState
         }
     }
 
+
+    public void OpenTodoForProject(Guid projectId)
+    {
+        EditingId = null;
+        TodoForm = new TodoEditorModel { ProjectId = projectId };
+        ActiveEditor = ActivityType.Todo;
+    }
+
     public void OpenHabit(Habit item)
     {
         EditingId = item.Id;
@@ -90,7 +98,8 @@ public sealed class DashboardModalState
         {
             Title = item.Title,
             Description = item.Description,
-            DueDate = item.DueDate?.ToDateTime(TimeOnly.MinValue)
+            DueDate = item.DueDate?.ToDateTime(TimeOnly.MinValue),
+            ProjectId = item.ProjectId
         };
         ActiveEditor = ActivityType.Todo;
     }
@@ -102,7 +111,9 @@ public sealed class DashboardModalState
         {
             Title = item.Title,
             Description = item.Description,
-            Status = item.Status
+            Color = item.Color,
+            ExpectedDate = item.ExpectedDate?.ToDateTime(TimeOnly.MinValue),
+            Archived = item.Archived
         };
         ActiveEditor = ActivityType.Project;
     }

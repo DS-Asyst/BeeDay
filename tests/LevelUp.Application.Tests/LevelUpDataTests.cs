@@ -8,6 +8,29 @@ namespace LevelUp.Application.Tests;
 public sealed class LevelUpDataTests
 {
     [Fact]
+    public void NewData_StartsWithoutUserOrCharacter()
+    {
+        var data = new LevelUpData();
+
+        data.EnsureValidState();
+
+        Assert.Empty(data.Users);
+        Assert.Empty(data.Characters);
+        Assert.Null(data.CurrentUserId);
+        Assert.Null(data.CurrentUser);
+        Assert.Null(data.CurrentCharacter);
+    }
+
+    [Fact]
+    public void ActivityCreation_RequiresCurrentUser()
+    {
+        var data = new LevelUpData();
+
+        Assert.Throws<InvalidDomainStateException>(() =>
+            data.AddHabit(Habit.Create("Study", null, LevelUp.Domain.Enums.HabitDirection.Positive, LevelUp.Domain.Enums.HabitDifficulty.Easy, LevelUp.Domain.Enums.HabitResetCounter.Daily)));
+    }
+
+    [Fact]
     public void EnsureValidState_RejectsDuplicateIds()
     {
         var id = Guid.NewGuid();

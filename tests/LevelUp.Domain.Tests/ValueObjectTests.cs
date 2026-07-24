@@ -21,9 +21,9 @@ public sealed class ValueObjectTests
     }
 
     [Fact]
-    public void ProfileNickname_RemovesAtPrefix()
+    public void CharacterNickname_RemovesAtPrefix()
     {
-        var nickname = ProfileNickname.Create("  @tiago  ");
+        var nickname = CharacterNickname.Create("  @tiago  ");
         Assert.Equal("tiago", nickname.Value);
     }
 }

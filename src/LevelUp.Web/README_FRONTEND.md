@@ -8,7 +8,7 @@ O frontend é organizado por feature em `Components/Features`:
 
 - `Dashboard`: página, componentes e estados do painel.
 - `Habits`, `Tasks`, `Todos`, `Projects`: editores e modelos de formulário.
-- `Profile`: página, modelo e estado de criação do perfil.
+- `CharacterCreation`: page, model and state for character creation.
 - `Common`: tipos compartilhados pela apresentação.
 - `Layout`: estrutura global da aplicação.
 - `Shared`: componentes reutilizáveis entre features.
@@ -17,7 +17,7 @@ O frontend é organizado por feature em `Components/Features`:
 
 - `DashboardState`: dados e operações do dashboard.
 - `DashboardModalState`: editores e exclusão.
-- `ProfileState`: fluxo de criação de perfil.
+- `CharacterCreationState`: fluxo de criação de perfil.
 
 Os estados principais são registrados como `Scoped` em `Program.cs`.
 

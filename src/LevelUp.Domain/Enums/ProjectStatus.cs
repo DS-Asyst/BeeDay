@@ -1,3 +1,8 @@
 namespace LevelUp.Domain.Enums;
 
-public enum ProjectStatus { Planned, InProgress, OnHold, Completed }
+public enum ProjectStatus
+{
+    Planned,
+    InProgress,
+    Completed
+}

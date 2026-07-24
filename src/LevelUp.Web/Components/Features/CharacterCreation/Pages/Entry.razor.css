@@ -1,0 +1,20 @@
+.entry-loading {
+    min-height: 100vh;
+    display: grid;
+    place-content: center;
+    gap: .75rem;
+    text-align: center;
+    color: #fff;
+}
+
+.entry-loading span {
+    font-family: "Pixelify Sans", sans-serif;
+    font-size: clamp(2rem, 6vw, 4rem);
+    font-weight: 700;
+    letter-spacing: .18em;
+}
+
+.entry-loading p {
+    margin: 0;
+    opacity: .75;
+}

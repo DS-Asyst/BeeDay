@@ -11,7 +11,7 @@
 }
 
 .levelup-fade-in {
-    animation: levelup-fade-in var(--levelup-transition-normal)-out;
+    animation: levelup-fade-in var(--levelup-duration-normal) var(--levelup-easing-standard) both;
 }
 
 @media (prefers-reduced-motion: reduce) {

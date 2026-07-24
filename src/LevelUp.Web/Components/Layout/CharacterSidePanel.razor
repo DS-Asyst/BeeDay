@@ -9,19 +9,20 @@
         {
             <div class="character-drawer__loading">Carregando personagem...</div>
         }
-        else if (State.Data?.Profile is not null)
+        else if (State.Data?.CurrentCharacter is not null && State.Data.CurrentUser is not null)
         {
-            var profile = State.Data.Profile;
+            var character = State.Data.CurrentCharacter;
+            var user = State.Data.CurrentUser;
 
             <div class="character-drawer__profile">
                 <div class="character-drawer__avatar">
-                    <img src="@GetClassImage(profile.Class)" alt="Classe @profile.Class" />
+                    <img src="@GetClassImage(character.Class)" alt="Classe @character.Class" />
                 </div>
 
                 <div class="character-drawer__identity">
                     <span>Personagem</span>
-                    <h2>@profile.Name</h2>
-                    <p>@($"@{GetNickname(profile.Name, profile.Nickname)} · {profile.Class}")</p>
+                    <h2>@user.Name</h2>
+                    <p>@($"@{character.Nickname} · {character.Class}")</p>
                 </div>
             </div>
 
@@ -36,7 +37,7 @@
                 </div>
             </div>
 
-            <NavLink href="/profile" class="character-drawer__link" @onclick="OnClose">
+            <NavLink href="/character/create" class="character-drawer__link" @onclick="OnClose">
                 Ver personagem
             </NavLink>
         }
@@ -45,7 +46,7 @@
             <div class="character-drawer__empty">
                 <strong>Nenhum personagem criado</strong>
                 <span>Crie seu personagem para acompanhar sua evolução.</span>
-                <NavLink href="/profile" class="character-drawer__link" @onclick="OnClose">
+                <NavLink href="/character/create" class="character-drawer__link" @onclick="OnClose">
                     Criar personagem
                 </NavLink>
             </div>
@@ -70,11 +71,6 @@
 
     private static string GetClassImage(CharacterClass characterClass) =>
         $"/images/classes/classicon_{characterClass.ToString().ToLowerInvariant()}.jpg";
-
-    private static string GetNickname(string name, string nickname) =>
-        string.IsNullOrWhiteSpace(nickname)
-            ? name.Replace(" ", string.Empty, StringComparison.Ordinal).ToLowerInvariant()
-            : nickname.Trim().TrimStart('@');
 
     public void Dispose() => State.Changed -= HandleStateChanged;
 }

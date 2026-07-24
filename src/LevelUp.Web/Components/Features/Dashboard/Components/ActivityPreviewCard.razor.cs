@@ -14,6 +14,7 @@ public partial class ActivityPreviewCard
     [Parameter] public EventCallback OnToggle { get; set; }
     [Parameter] public EventCallback OnEdit { get; set; }
     [Parameter] public EventCallback OnDelete { get; set; }
+    [Parameter] public EventCallback OnOpen { get; set; }
 
     private bool menuOpen;
 

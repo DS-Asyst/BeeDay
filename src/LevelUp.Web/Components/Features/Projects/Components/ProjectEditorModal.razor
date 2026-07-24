@@ -31,16 +31,18 @@
     <BodyContent>
         <div class="editor-modal__body">
             <div class="editor-modal__type-summary"><span class="editor-modal__type-icon" aria-hidden="true">▤</span><div><strong>Project</strong><p>A larger goal used to organize work.</p></div></div>
-            <LevelUpSelect TValue="ProjectStatus"
-                           Id="project-status"
-                           Label="Project status"
-                           @bind-Value="Model.Status"
-                           FieldCssClass="editor-modal__field">
-                @foreach (var option in Enum.GetValues<ProjectStatus>())
-                {
-                    <option value="@option">@FormatEnum(option.ToString())</option>
-                }
-            </LevelUpSelect>
+            <LevelUpInput Id="project-color"
+                          Label="Color"
+                          Required="true"
+                          @bind-Value="Model.Color"
+                          Placeholder="#7A4FCB"
+                          MaxLength="7"
+                          FieldCssClass="editor-modal__field" />
+            <LevelUpDateInput TValue="DateTime?"
+                              Id="project-expected-date"
+                              Label="Expected date"
+                              @bind-Value="Model.ExpectedDate"
+                              FieldCssClass="editor-modal__field" />
         </div>
     </BodyContent>
 </EditorModalShell>

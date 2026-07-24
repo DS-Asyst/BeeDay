@@ -1,0 +1,54 @@
+.welcome {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 4rem 2rem;
+    color: #fff;
+    text-align: center;
+}
+
+.welcome span {
+    font-weight: 800;
+    letter-spacing: .2em;
+}
+
+.welcome h1 {
+    margin: 1rem 0;
+    font-size: clamp(2.5rem, 8vw, 6rem);
+}
+
+.welcome p {
+    margin: 0;
+    font-size: 1.2rem;
+    opacity: .85;
+}
+
+.welcome .welcome__start {
+    display: inline-flex;
+    min-width: 12rem;
+    min-height: 3.2rem;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2rem;
+    padding: 0 1.5rem;
+    border: 2px solid #fff;
+    border-radius: .4rem;
+    color: #4b087d;
+    background: #fff;
+    font-weight: 900;
+    text-decoration: none;
+    box-shadow: 0 .65rem 1.5rem rgb(20 4 42 / 24%);
+    transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.welcome .welcome__start:hover,
+.welcome .welcome__start:focus-visible {
+    color: #fff;
+    background: transparent;
+    outline: none;
+    box-shadow: 0 .8rem 1.8rem rgb(20 4 42 / 32%);
+    transform: translateY(-2px);
+}

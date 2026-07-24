@@ -2,8 +2,9 @@ using LevelUp.Application.Features.Habits.Requests;
 using LevelUp.Application.Features.Habits.Validation;
 using LevelUp.Application.Features.Ordering.Requests;
 using LevelUp.Application.Features.Ordering.Validation;
-using LevelUp.Application.Features.Profiles.Requests;
-using LevelUp.Application.Features.Profiles.Validation;
+using LevelUp.Application.Features.Characters.Commands;
+using LevelUp.Application.Features.Characters.Requests;
+using LevelUp.Application.Features.Characters.Validation;
 using LevelUp.Application.Features.Projects.Requests;
 using LevelUp.Application.Features.Projects.Validation;
 using LevelUp.Application.Features.Tasks.Requests;
@@ -40,7 +41,7 @@ public sealed class RequestValidatorTests
     public async Task SaveTodo_AcceptsOptionalDueDate()
     {
         var result = await new SaveTodoRequestValidator().ValidateAsync(
-            new SaveTodoRequest("To-do", string.Empty, null),
+            new SaveTodoRequest(Guid.NewGuid(), "To-do", string.Empty, null),
             TestContext.Current.CancellationToken);
         Assert.True(result.IsValid);
     }
@@ -49,7 +50,7 @@ public sealed class RequestValidatorTests
     public async Task SaveProject_RejectsLongDescription()
     {
         var result = await new SaveProjectRequestValidator().ValidateAsync(
-            new SaveProjectRequest("Project", new string('x', 501), ProjectStatus.Planned),
+            new SaveProjectRequest("Project", new string('x', 501), "#7A4FCB", null, false),
             TestContext.Current.CancellationToken);
         Assert.False(result.IsValid);
     }
@@ -58,10 +59,10 @@ public sealed class RequestValidatorTests
     [InlineData("")]
     [InlineData("ab")]
     [InlineData("invalid nickname")]
-    public async Task SaveProfile_RejectsInvalidNickname(string nickname)
+    public async Task CreateCharacter_RejectsInvalidNickname(string nickname)
     {
-        var result = await new SaveProfileRequestValidator().ValidateAsync(
-            new SaveProfileRequest("Tiago", nickname, CharacterClass.Warrior),
+        var result = await new CreateCharacterCommandValidator().ValidateAsync(
+            new CreateCharacterCommand(new CreateCharacterRequest("Tiago", nickname, CharacterClass.Warrior)),
             TestContext.Current.CancellationToken);
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, error => error.PropertyName == "Nickname");

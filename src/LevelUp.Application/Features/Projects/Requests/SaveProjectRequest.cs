@@ -1,8 +1,8 @@
-using LevelUp.Domain.Enums;
-
 namespace LevelUp.Application.Features.Projects.Requests;
 
 public sealed record SaveProjectRequest(
-    string Title,
+    string Name,
     string Description,
-    ProjectStatus Status);
+    string Color,
+    DateOnly? ExpectedDate,
+    bool Archived);

@@ -137,7 +137,7 @@ h1:focus {
 
 .card-action-menu__item--delete:hover,
 .card-action-menu__item--delete:focus-visible {
-    background: var(--levelup-color-surface)0f1;
+    background: var(--levelup-color-danger-soft);
     color: #bd202a;
 }
 
@@ -166,5 +166,212 @@ h1:focus {
 .card-action-menu__panel .card-action-menu__item--delete:hover,
 .card-action-menu__panel .card-action-menu__item--delete:focus-visible {
     color: #bd202a;
-    background: var(--levelup-color-surface)1f2;
+    background: var(--levelup-color-danger-soft);
+}
+
+/* Sprint 1.7 — global interaction polish */
+html {
+    scroll-behavior: smooth;
+    scrollbar-color: #aea5b5 transparent;
+    scrollbar-width: thin;
+}
+
+body {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+    color: var(--levelup-color-text-primary);
+    background: var(--levelup-color-primary-soft);
+}
+
+:where(button, a, input, select, textarea, [role="button"]):focus-visible {
+    outline: 2px solid var(--levelup-color-primary);
+    outline-offset: 2px;
+    box-shadow: var(--levelup-focus-ring);
+}
+
+:where(button, [role="button"]):not(:disabled) {
+    -webkit-tap-highlight-color: transparent;
+}
+
+:where(button):disabled {
+    cursor: not-allowed;
+    opacity: .58;
+}
+
+*::-webkit-scrollbar {
+    width: .6rem;
+    height: .6rem;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    border: .14rem solid transparent;
+    border-radius: var(--levelup-radius-pill);
+    background: #aea5b5;
+    background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: var(--levelup-color-primary-light);
+    background-clip: padding-box;
+}
+
+.card-action-menu__panel {
+    transform-origin: top right;
+    animation: card-menu-enter var(--levelup-duration-fast) var(--levelup-easing-emphasized) both;
+}
+
+.card-action-menu__item:active {
+    transform: scale(.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+}
+
+/* =========================================================
+   LevelUp RPG UI v1
+   Pixel-console visual language inspired by GBA/SNES/RPG UI.
+   ========================================================= */
+
+body {
+    background:
+        linear-gradient(rgb(255 255 255 / 72%), rgb(255 255 255 / 72%)),
+        repeating-linear-gradient(0deg, transparent 0 3px, rgb(103 58 183 / 3%) 3px 4px),
+        #f1eef6;
+}
+
+.levelup-button,
+.editor-modal__save,
+.editor-modal__cancel,
+.editor-modal__delete,
+.delete-confirmation__delete-button,
+.delete-confirmation__cancel-button,
+.character-primary-button,
+.class-confirmation__actions button {
+    position: relative;
+    min-height: 2.75rem;
+    border: var(--levelup-game-border) !important;
+    border-radius: .2rem !important;
+    font-weight: 900 !important;
+    letter-spacing: .035em;
+    text-transform: uppercase;
+    box-shadow: var(--levelup-game-shadow-sm) !important;
+    transform: translateY(0);
+    transition: transform 90ms ease, box-shadow 90ms ease, filter 120ms ease !important;
+}
+
+.levelup-button:not(:disabled):hover,
+.editor-modal__save:not(:disabled):hover,
+.editor-modal__cancel:not(:disabled):hover,
+.editor-modal__delete:not(:disabled):hover,
+.delete-confirmation__delete-button:not(:disabled):hover,
+.delete-confirmation__cancel-button:not(:disabled):hover,
+.character-primary-button:not(:disabled):hover,
+.class-confirmation__actions button:not(:disabled):hover {
+    filter: brightness(1.04) saturate(1.06);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 var(--levelup-game-ink) !important;
+}
+
+.levelup-button:not(:disabled):active,
+.editor-modal__save:not(:disabled):active,
+.editor-modal__cancel:not(:disabled):active,
+.editor-modal__delete:not(:disabled):active,
+.delete-confirmation__delete-button:not(:disabled):active,
+.delete-confirmation__cancel-button:not(:disabled):active,
+.character-primary-button:not(:disabled):active,
+.class-confirmation__actions button:not(:disabled):active {
+    transform: translateY(3px);
+    box-shadow: 0 0 0 var(--levelup-game-ink) !important;
+}
+
+.editor-modal__save,
+.character-primary-button,
+.class-confirmation__confirm {
+    color: #07131a !important;
+    background: var(--levelup-game-yellow) !important;
+}
+
+.editor-modal__cancel,
+.delete-confirmation__cancel-button,
+.class-confirmation__cancel {
+    color: var(--levelup-game-ink) !important;
+    background: var(--levelup-game-paper) !important;
+}
+
+.editor-modal__delete,
+.delete-confirmation__delete-button {
+    color: #fff !important;
+    background: var(--levelup-game-red) !important;
+}
+
+.levelup-field__control,
+.character-field input,
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+    border: 2px solid #7d8ca8 !important;
+    border-radius: .18rem !important;
+    background: #fbfcff;
+    box-shadow: inset 0 -2px 0 rgb(23 19 33 / 8%);
+}
+
+.levelup-field__control:focus,
+.character-field input:focus,
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+    border-color: var(--levelup-game-blue) !important;
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--levelup-game-ink) !important;
+}
+
+.activity-card,
+.habit-card,
+.levelup-card,
+.profile-summary-card,
+.character-summary-card,
+.dashboard-column,
+.settings-card {
+    border: 2px solid var(--levelup-game-ink) !important;
+    border-radius: .18rem !important;
+    box-shadow: var(--levelup-game-shadow-sm) !important;
+}
+
+.activity-card:hover,
+.habit-card:hover,
+.levelup-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: var(--levelup-game-shadow-md) !important;
+}
+
+.card-action-menu__panel {
+    border: 2px solid var(--levelup-game-ink) !important;
+    border-radius: .18rem !important;
+    box-shadow: var(--levelup-game-shadow-md) !important;
+}
+
+.card-action-menu__item {
+    font-weight: 800;
+}
+
+.levelup-checkbox__control,
+.activity-card__checkbox {
+    accent-color: var(--levelup-game-blue);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .levelup-button,
+    .editor-modal__save,
+    .editor-modal__cancel,
+    .editor-modal__delete,
+    .character-primary-button {
+        transition: none !important;
+    }
 }

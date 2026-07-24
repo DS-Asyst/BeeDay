@@ -22,7 +22,11 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
     public bool IsBusy { get; private set; }
     public Guid? RemovingItemId { get; private set; }
     public event Action? Changed;
-    public bool HasProfile => data?.Profile is not null;
+    public Task<LevelUpData> GetDataAsync() => store.LoadAsync();
+
+    public bool HasCharacter => data?.CurrentCharacter is not null;
+    public Guid? OpenProjectId { get; private set; }
+    public Project? OpenProject => OpenProjectId is Guid id ? data?.Projects.FirstOrDefault(project => project.Id == id) : null;
 
     public string Search
     {
@@ -72,6 +76,16 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
     public void OpenTaskEditor(RecurringTask item) => Modals.OpenTask(item);
     public void OpenTodoEditor(Todo item) => Modals.OpenTodo(item);
     public void OpenProjectEditor(Project item) => Modals.OpenProject(item);
+    public void OpenProjectWorkspace(Project item) { OpenProjectId = item.Id; Changed?.Invoke(); }
+    public void CloseProjectWorkspace() { OpenProjectId = null; Changed?.Invoke(); }
+    public void OpenTodoForProject()
+    {
+        if (OpenProjectId is Guid projectId)
+        {
+            Modals.OpenTodoForProject(projectId);
+            Changed?.Invoke();
+        }
+    }
     public void CloseEditor() => Modals.CloseEditor();
     public void RequestDelete(Guid id, ActivityType type, string title) => Modals.RequestDelete(id, type, title);
     public void CancelDelete() => Modals.CancelDelete();
@@ -90,6 +104,17 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
         SaveEditorAsync(
             () => Modals.EditingId is Guid id ? store.UpdateTodoAsync(id, model) : store.AddTodoAsync(model),
             Modals.IsEditing ? "To-Do updated successfully." : "To-Do created successfully.");
+
+
+    public Task SaveTodoFromProjectAsync(TodoEditorModel model) =>
+        ExecuteAsync(
+            async () =>
+            {
+                await store.AddTodoAsync(model);
+                await ReloadAsync();
+            },
+            "To-Do created successfully.",
+            "The To-Do could not be created.");
 
     public Task SaveProjectAsync(ProjectEditorModel model) =>
         SaveEditorAsync(
@@ -134,9 +159,6 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
     public Task ToggleTodoAsync(Guid id) =>
         ExecuteAsync(async () => { await store.ToggleTodoAsync(id); await ReloadAsync(); });
 
-    public Task ToggleProjectAsync(Guid id) =>
-        ExecuteAsync(async () => { await store.ToggleProjectAsync(id); await ReloadAsync(); });
-
     public Task ReorderHabitsAsync(SortableReorderEvent reorder) =>
         ReorderAsync(ActivityCollection.Habits, FilteredHabits.Select(item => item.Id).ToList(), reorder);
 
@@ -158,7 +180,6 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
     public string FormatProjectStatus(ProjectStatus status) => status switch
     {
         ProjectStatus.InProgress => "In progress",
-        ProjectStatus.OnHold => "On hold",
         _ => status.ToString()
     };
 

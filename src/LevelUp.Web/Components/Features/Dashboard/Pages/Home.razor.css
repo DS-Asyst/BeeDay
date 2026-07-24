@@ -1,9 +1,11 @@
 .dashboard-page {
     display: flex;
-    flex: 1;
+    flex: 0 0 auto;
     flex-direction: column;
     width: 100%;
     min-width: 0;
+    min-height: 0;
+    height: calc(100dvh - var(--levelup-top-navigation-height, 3.75rem));
     margin: 0;
     padding: 0;
     overflow: hidden;
@@ -13,11 +15,13 @@
 
 .dashboard-page__content {
     display: flex;
-    flex: 1;
+    flex: 1 1 auto;
     flex-direction: column;
     width: 100%;
     min-width: 0;
+    min-height: 0;
     padding: 0.75rem 0.9rem 1rem;
+    overflow: hidden;
     background: var(--levelup-color-surface);
     box-sizing: border-box;
 }
@@ -33,23 +37,25 @@
 
 .dashboard-grid {
     display: grid;
-    flex: 1;
+    flex: 1 1 auto;
     grid-template-columns: repeat(4, minmax(17rem, 1fr));
     align-items: stretch;
     gap: 0.65rem;
     width: 100%;
     min-width: 0;
-    min-height: 36rem;
+    min-height: 0;
     margin-top: 0.65rem;
     overflow-x: auto;
-    overflow-y: visible;
+    overflow-y: hidden;
     background: transparent;
     box-sizing: border-box;
     scrollbar-width: thin;
+    overscroll-behavior: contain;
 }
 
 .dashboard-grid > * {
     min-width: 17rem;
+    min-height: 0;
     height: 100%;
 }
 
@@ -66,5 +72,65 @@
 
     .dashboard-grid {
         gap: 0.5rem;
+    }
+}
+
+/* Sprint 1.7 — responsive Daily canvas */
+.dashboard-grid {
+    scrollbar-color: #aaa2b1 transparent;
+    scroll-snap-type: x proximity;
+    padding-bottom: .2rem;
+}
+
+.dashboard-grid > * {
+    scroll-snap-align: start;
+}
+
+.dashboard-grid::-webkit-scrollbar {
+    height: .65rem;
+}
+
+@media (min-width: 1101px) {
+    .dashboard-grid {
+        overflow-x: hidden;
+    }
+}
+
+@media (max-width: 900px) {
+    .dashboard-page {
+        height: auto;
+        min-height: calc(100dvh - var(--levelup-top-navigation-height, 3.75rem));
+        overflow: visible;
+    }
+
+    .dashboard-page__content {
+        overflow: visible;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(16rem, 1fr));
+        overflow: visible;
+    }
+
+    .dashboard-grid > * {
+        min-height: 28rem;
+        height: min(42rem, 68dvh);
+    }
+}
+
+@media (max-width: 620px) {
+    .dashboard-page__content {
+        padding: var(--levelup-spacing-sm);
+    }
+
+    .dashboard-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--levelup-spacing-sm);
+        margin-top: var(--levelup-spacing-sm);
+    }
+
+    .dashboard-grid > * {
+        min-width: 0;
+        height: min(38rem, 72dvh);
     }
 }

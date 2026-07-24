@@ -7,6 +7,8 @@ namespace LevelUp.Domain.Entities;
 public abstract class Activity : Entity
 {
     [JsonInclude]
+    public Guid UserId { get; private set; }
+    [JsonInclude]
     public string Title { get; private set; } = string.Empty;
 
     [JsonInclude]
@@ -16,13 +18,19 @@ public abstract class Activity : Entity
     public bool Featured { get; private set; }
 
     [JsonInclude]
-    public bool Completed { get; protected set; }
+    public virtual bool Completed { get; protected set; }
 
     [JsonInclude]
     public DateTimeOffset CreatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
 
     [JsonInclude]
     public DateTimeOffset UpdatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
+
+    public void AssignOwner(Guid userId)
+    {
+        if (userId == Guid.Empty) throw new ArgumentException("User identifier is required.", nameof(userId));
+        UserId = userId;
+    }
 
     protected void UpdateDetails(string title, string? description)
     {
