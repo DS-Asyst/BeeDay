@@ -23,12 +23,12 @@ public sealed class LevelUpWebService(ISender sender)
     public Task UpdateHabitAsync(Guid id, HabitEditorModel m) => sender.Send(new UpdateHabitCommand(id, new(m.Title, m.Description, m.Direction, m.Difficulty, m.ResetCounter)));
     public Task AddTaskAsync(TaskEditorModel m) => sender.Send(new CreateTaskCommand(new(m.Title, m.Description, m.Repeat)));
     public Task UpdateTaskAsync(Guid id, TaskEditorModel m) => sender.Send(new UpdateTaskCommand(id, new(m.Title, m.Description, m.Repeat)));
-    public Task AddTodoAsync(TodoEditorModel m) => sender.Send(new CreateTodoCommand(new(m.Title, m.Description, ToDateOnly(m.DueDate))));
-    public Task UpdateTodoAsync(Guid id, TodoEditorModel m) => sender.Send(new UpdateTodoCommand(id, new(m.Title, m.Description, ToDateOnly(m.DueDate))));
-    public Task AddProjectAsync(ProjectEditorModel m) => sender.Send(new CreateProjectCommand(new(m.Title, m.Description, m.Status)));
-    public Task UpdateProjectAsync(Guid id, ProjectEditorModel m) => sender.Send(new UpdateProjectCommand(id, new(m.Title, m.Description, m.Status)));
+    public Task AddTodoAsync(TodoEditorModel m) => sender.Send(new CreateTodoCommand(new(m.ProjectId ?? Guid.Empty, m.Title, m.Description, ToDateOnly(m.DueDate))));
+    public Task UpdateTodoAsync(Guid id, TodoEditorModel m) => sender.Send(new UpdateTodoCommand(id, new(m.ProjectId ?? Guid.Empty, m.Title, m.Description, ToDateOnly(m.DueDate))));
+    public Task AddProjectAsync(ProjectEditorModel m) => sender.Send(new CreateProjectCommand(new(m.Title, m.Description, m.Color, ToDateOnly(m.ExpectedDate), m.Archived)));
+    public Task UpdateProjectAsync(Guid id, ProjectEditorModel m) => sender.Send(new UpdateProjectCommand(id, new(m.Title, m.Description, m.Color, ToDateOnly(m.ExpectedDate), m.Archived)));
     public Task RegisterHabitPositiveAsync(Guid id) => sender.Send(new RegisterHabitPositiveCommand(id)); public Task RegisterHabitNegativeAsync(Guid id) => sender.Send(new RegisterHabitNegativeCommand(id));
-    public Task ToggleTaskAsync(Guid id) => sender.Send(new ToggleTaskCommand(id)); public Task ToggleTodoAsync(Guid id) => sender.Send(new ToggleTodoCommand(id)); public Task ToggleProjectAsync(Guid id) => sender.Send(new ToggleProjectCommand(id));
+    public Task ToggleTaskAsync(Guid id) => sender.Send(new ToggleTaskCommand(id)); public Task ToggleTodoAsync(Guid id) => sender.Send(new ToggleTodoCommand(id));
     public Task DeleteHabitAsync(Guid id) => sender.Send(new DeleteHabitCommand(id)); public Task DeleteTaskAsync(Guid id) => sender.Send(new DeleteTaskCommand(id)); public Task DeleteTodoAsync(Guid id) => sender.Send(new DeleteTodoCommand(id)); public Task DeleteProjectAsync(Guid id) => sender.Send(new DeleteProjectCommand(id));
     public Task ReorderAsync(ActivityCollection c, IReadOnlyList<Guid> ids) => sender.Send(new ReorderActivitiesCommand(new(c, ids)));
     private static DateOnly? ToDateOnly(DateTime? value) => value is null ? null : DateOnly.FromDateTime(value.Value);

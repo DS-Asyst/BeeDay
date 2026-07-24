@@ -8,6 +8,7 @@ public sealed class SaveTodoRequestValidator : AbstractValidator<SaveTodoRequest
 {
     public SaveTodoRequestValidator()
     {
+        RuleFor(request => request.ProjectId).NotEmpty().WithMessage("Project is required.");
         RuleFor(request => request.Title)
             .NotEmpty().WithMessage("Title is required.")
             .MaximumLength(ActivityTitle.MaximumLength)

@@ -2,7 +2,7 @@
 .editor-modal-backdrop {
     position: fixed;
     inset: 0;
-    z-index: var(--levelup-z-modal);
+    z-index: 1200;
     display: grid;
     place-items: center;
     padding: 1rem;

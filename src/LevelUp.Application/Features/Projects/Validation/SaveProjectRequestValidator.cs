@@ -8,13 +8,15 @@ public sealed class SaveProjectRequestValidator : AbstractValidator<SaveProjectR
 {
     public SaveProjectRequestValidator()
     {
-        RuleFor(request => request.Title)
-            .NotEmpty().WithMessage("Title is required.")
+        RuleFor(request => request.Name)
+            .NotEmpty().WithMessage("Name is required.")
             .MaximumLength(ActivityTitle.MaximumLength)
-            .WithMessage($"Title cannot exceed {ActivityTitle.MaximumLength} characters.");
+            .WithMessage($"Name cannot exceed {ActivityTitle.MaximumLength} characters.");
         RuleFor(request => request.Description)
             .MaximumLength(ActivityDescription.MaximumLength)
             .WithMessage($"Description cannot exceed {ActivityDescription.MaximumLength} characters.");
-        RuleFor(request => request.Status).IsInEnum();
+        RuleFor(request => request.Color)
+            .Matches("^#[0-9A-Fa-f]{6}$")
+            .WithMessage("Color must use the #RRGGBB format.");
     }
 }

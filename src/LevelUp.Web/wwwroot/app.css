@@ -137,7 +137,7 @@ h1:focus {
 
 .card-action-menu__item--delete:hover,
 .card-action-menu__item--delete:focus-visible {
-    background: var(--levelup-color-surface)0f1;
+    background: var(--levelup-color-danger-soft);
     color: #bd202a;
 }
 
@@ -166,5 +166,71 @@ h1:focus {
 .card-action-menu__panel .card-action-menu__item--delete:hover,
 .card-action-menu__panel .card-action-menu__item--delete:focus-visible {
     color: #bd202a;
-    background: var(--levelup-color-surface)1f2;
+    background: var(--levelup-color-danger-soft);
+}
+
+/* Sprint 1.7 — global interaction polish */
+html {
+    scroll-behavior: smooth;
+    scrollbar-color: #aea5b5 transparent;
+    scrollbar-width: thin;
+}
+
+body {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+    color: var(--levelup-color-text-primary);
+    background: var(--levelup-color-primary-soft);
+}
+
+:where(button, a, input, select, textarea, [role="button"]):focus-visible {
+    outline: 2px solid var(--levelup-color-primary);
+    outline-offset: 2px;
+    box-shadow: var(--levelup-focus-ring);
+}
+
+:where(button, [role="button"]):not(:disabled) {
+    -webkit-tap-highlight-color: transparent;
+}
+
+:where(button):disabled {
+    cursor: not-allowed;
+    opacity: .58;
+}
+
+*::-webkit-scrollbar {
+    width: .6rem;
+    height: .6rem;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    border: .14rem solid transparent;
+    border-radius: var(--levelup-radius-pill);
+    background: #aea5b5;
+    background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: var(--levelup-color-primary-light);
+    background-clip: padding-box;
+}
+
+.card-action-menu__panel {
+    transform-origin: top right;
+    animation: card-menu-enter var(--levelup-duration-fast) var(--levelup-easing-emphasized) both;
+}
+
+.card-action-menu__item:active {
+    transform: scale(.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
 }

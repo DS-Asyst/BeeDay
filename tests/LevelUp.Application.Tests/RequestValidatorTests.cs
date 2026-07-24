@@ -40,7 +40,7 @@ public sealed class RequestValidatorTests
     public async Task SaveTodo_AcceptsOptionalDueDate()
     {
         var result = await new SaveTodoRequestValidator().ValidateAsync(
-            new SaveTodoRequest("To-do", string.Empty, null),
+            new SaveTodoRequest(Guid.NewGuid(), "To-do", string.Empty, null),
             TestContext.Current.CancellationToken);
         Assert.True(result.IsValid);
     }
@@ -49,7 +49,7 @@ public sealed class RequestValidatorTests
     public async Task SaveProject_RejectsLongDescription()
     {
         var result = await new SaveProjectRequestValidator().ValidateAsync(
-            new SaveProjectRequest("Project", new string('x', 501), ProjectStatus.Planned),
+            new SaveProjectRequest("Project", new string('x', 501), "#7A4FCB", null, false),
             TestContext.Current.CancellationToken);
         Assert.False(result.IsValid);
     }

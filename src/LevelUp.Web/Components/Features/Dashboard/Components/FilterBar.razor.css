@@ -218,3 +218,40 @@
         min-width: auto;
     }
 }
+
+/* Sprint 1.7 — filter microinteractions */
+.filter-bar__input,
+.filter-bar__button,
+.filter-bar__menu button {
+    transition:
+        transform var(--levelup-transition-fast),
+        color var(--levelup-transition-fast),
+        background-color var(--levelup-transition-fast),
+        border-color var(--levelup-transition-fast),
+        box-shadow var(--levelup-transition-fast);
+}
+
+.filter-bar__button:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--levelup-shadow-sm);
+}
+
+.filter-bar__button:active {
+    transform: translateY(0) scale(.985);
+}
+
+.filter-bar__menu {
+    transform-origin: top right;
+    animation: levelup-fade-in var(--levelup-duration-fast) var(--levelup-easing-emphasized) both;
+}
+
+@media (max-width: 580px) {
+    .filter-bar {
+        gap: var(--levelup-spacing-sm);
+        padding: var(--levelup-spacing-sm);
+    }
+
+    .filter-bar__search {
+        gap: var(--levelup-spacing-sm);
+    }
+}

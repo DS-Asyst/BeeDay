@@ -16,7 +16,7 @@ public abstract class Activity : Entity
     public bool Featured { get; private set; }
 
     [JsonInclude]
-    public bool Completed { get; protected set; }
+    public virtual bool Completed { get; protected set; }
 
     [JsonInclude]
     public DateTimeOffset CreatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;

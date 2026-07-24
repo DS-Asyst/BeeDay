@@ -46,6 +46,7 @@
     --levelup-spacing-2xs: .125rem;
     --levelup-spacing-xs: .25rem;
     --levelup-spacing-sm: .5rem;
+    --levelup-spacing-smd: .75rem;
     --levelup-spacing-md: 1rem;
     --levelup-spacing-lg: 1.5rem;
     --levelup-spacing-xl: 2rem;
@@ -78,6 +79,7 @@
     --levelup-easing-emphasized: cubic-bezier(.2, .8, .2, 1);
     --levelup-transition-fast: var(--levelup-duration-fast) var(--levelup-easing-standard);
     --levelup-transition-normal: var(--levelup-duration-normal) var(--levelup-easing-standard);
+    --levelup-transition-emphasized: var(--levelup-duration-slow) var(--levelup-easing-emphasized);
 
     /* Layout and layers */
     --levelup-content-width: 100%;

@@ -1,14 +1,24 @@
 <LevelUpCard Class="@CardCssClass">
     <div class="activity-card__rail">
-        <button class="activity-card__checkbox"
-                type="button"
-                aria-label="@(Completed ? $"Mark {Title} as incomplete" : $"Complete {Title}")"
-                @onclick="OnToggle">
-            <span aria-hidden="true">✓</span>
-        </button>
+        @if (OnToggle.HasDelegate)
+        {
+            <button class="activity-card__checkbox"
+                    type="button"
+                    aria-label="@(Completed ? $"Mark {Title} as incomplete" : $"Complete {Title}")"
+                    @onclick="OnToggle">
+                <span aria-hidden="true">✓</span>
+            </button>
+        }
+        else
+        {
+            <span class="activity-card__project-status" aria-label="Project progress is calculated automatically">▤</span>
+        }
     </div>
 
-    <div class="activity-card__body">
+    <div class="activity-card__body @(OnOpen.HasDelegate ? "activity-card__body--openable" : string.Empty)"
+         role="@(OnOpen.HasDelegate ? "button" : null)"
+         tabindex="@(OnOpen.HasDelegate ? "0" : null)"
+         @onclick="OnOpen">
         <div class="activity-card__title-row">
             @if (Featured)
             {

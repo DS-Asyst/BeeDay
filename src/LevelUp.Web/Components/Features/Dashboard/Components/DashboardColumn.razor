@@ -2,17 +2,64 @@
     <header class="dashboard-column__header">
         <div class="dashboard-column__heading">
             <h2 id="@HeadingId">@Title</h2>
-            <span class="dashboard-column__count">@Count</span>
+            <span class="dashboard-column__count" aria-label="@($"{ActiveCount} active {EmptyLabel}")">@ActiveCount</span>
         </div>
+
+        @if (ShowCreateButton)
+        {
+            <button class="dashboard-column__add"
+                    type="button"
+                    aria-label="@($"Add {ResolvedSingularLabel}")"
+                    title="@($"Add {ResolvedSingularLabel}")"
+                    @onclick="OnCreate">
+                <span aria-hidden="true">+</span>
+            </button>
+        }
     </header>
-    <div class="dashboard-column__content">
-        @if (Count == 0)
-        {
-            <LevelUpEmptyState Class="dashboard-column__empty" Message="@($"No {EmptyLabel.ToLowerInvariant()} created yet.")" />
-        }
-        else
-        {
-            @ChildContent
-        }
+
+    <div class="dashboard-column__viewport">
+        <div class="dashboard-column__content">
+            @if (ShowCompletedSection)
+            {
+                <section class="dashboard-column__completed" aria-labelledby="@CompletedHeadingId">
+                    <button class="dashboard-column__completed-toggle"
+                            type="button"
+                            aria-expanded="@showCompleted"
+                            aria-controls="@CompletedContentId"
+                            @onclick="ToggleCompleted">
+                        <span class="dashboard-column__completed-summary">
+                            <span id="@CompletedHeadingId" class="dashboard-column__completed-label">Done</span>
+                        </span>
+                        <span class="dashboard-column__completed-action">
+                            <span class="dashboard-column__chevron" aria-hidden="true">@(showCompleted ? "▼" : "▶")</span>
+                            @(showCompleted ? "Hide" : "Show")
+                        </span>
+                    </button>
+
+                    @if (showCompleted)
+                    {
+                        <div id="@CompletedContentId" class="dashboard-column__completed-content">
+                            @if (CompletedCount == 0)
+                            {
+                                <p class="dashboard-column__completed-empty">No completed @EmptyLabel.ToLowerInvariant().</p>
+                            }
+                            else
+                            {
+                                @CompletedContent
+                            }
+                        </div>
+                    }
+                </section>
+            }
+
+            @if (ActiveCount == 0)
+            {
+                <LevelUpEmptyState Class="dashboard-column__empty" Message="@($"No active {EmptyLabel.ToLowerInvariant()}.")" />
+            }
+            else
+            {
+                @ActiveContent
+            }
+        </div>
     </div>
 </section>

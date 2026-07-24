@@ -1,0 +1,71 @@
+@if (Project is not null)
+{
+    <div class="project-workspace" role="dialog" aria-modal="true" aria-labelledby="project-workspace-title" @onclick="OnClose">
+        <section class="project-workspace__panel" @onclick:stopPropagation="true">
+            <header class="project-workspace__header">
+                <div>
+                    <span class="project-workspace__eyebrow">Project</span>
+                    <h2 id="project-workspace-title">@Project.Title</h2>
+                    @if (!string.IsNullOrWhiteSpace(Project.Description))
+                    {
+                        <p>@Project.Description</p>
+                    }
+                </div>
+                <button type="button" class="project-workspace__close" aria-label="Close project" @onclick="OnClose">×</button>
+            </header>
+
+            <div class="project-workspace__summary">
+                <div><span>Status</span><strong>@StatusLabel</strong></div>
+                <div><span>Progress</span><strong>@Project.CompletedTodos / @Project.TotalTodos</strong></div>
+            </div>
+
+            <div class="project-workspace__progress" aria-label="@($"Project progress {Project.Progress:0}%")">
+                <span style="width:@($"{Project.Progress:0.##}%")"></span>
+            </div>
+
+            <div class="project-workspace__toolbar">
+                <div>
+                    <h3>To-Dos</h3>
+                    <p>Break this project into clear, executable steps.</p>
+                </div>
+                <button type="button" class="project-workspace__add" aria-label="Add To-Do" title="Add To-Do" @onclick="OnAddTodo">+</button>
+            </div>
+
+            <div class="project-workspace__body">
+                @if (Project.Todos.Count > 0)
+                {
+                    <div class="project-workspace__list-toggle-row">
+                        <button type="button" class="project-workspace__list-toggle" aria-expanded="@showTodos" @onclick="ToggleTodos">
+                            <span>@(showTodos ? "Hide" : "Show")</span>
+                            <span class="project-workspace__list-chevron">@(showTodos ? "▲" : "▼")</span>
+                        </button>
+                    </div>
+                }
+
+                @if (showTodos)
+                {
+                    <div class="project-workspace__todos">
+                        @if (Project.Todos.Count == 0)
+                        {
+                            <div class="project-workspace__empty">
+                                <strong>No To-Dos yet</strong>
+                                <span>Add the first step to move this project from Planned to In Progress.</span>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var todo in Project.Todos.OrderBy(todo => todo.Completed).ThenBy(todo => todo.DueDate))
+                            {
+                                <article class="project-workspace__todo @(todo.Completed ? "project-workspace__todo--done" : string.Empty)">
+                                    <div class="project-workspace__todo-body">
+                                        <strong title="@todo.Title">@todo.Title</strong>
+                                    </div>
+                                </article>
+                            }
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+    </div>
+}
