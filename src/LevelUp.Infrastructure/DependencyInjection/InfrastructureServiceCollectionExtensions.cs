@@ -5,6 +5,7 @@ using LevelUp.Infrastructure.Caching;
 using LevelUp.Infrastructure.Configuration;
 using LevelUp.Infrastructure.HealthChecks;
 using LevelUp.Infrastructure.Persistence.Json;
+using LevelUp.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -34,6 +35,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<JsonFileWriter>();
         services.AddSingleton<JsonBackupService>();
         services.AddSingleton<ILevelUpRepository, JsonLevelUpRepository>();
+        services.AddSingleton<LevelUp.Application.Common.Security.IPasswordService, Pbkdf2PasswordService>();
         services.AddMemoryCache();
         services.AddSingleton<MemoryApplicationCache>();
         services.AddSingleton<LevelUp.Application.Common.Caching.IApplicationCache>(sp => sp.GetRequiredService<MemoryApplicationCache>());

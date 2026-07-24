@@ -40,7 +40,12 @@ public sealed class User : Entity
         Theme = EnumValidation.Defined(theme, nameof(theme));
         Touch();
     }
-    public void SetPasswordHash(string passwordHash) { PasswordHash = (passwordHash ?? string.Empty).Trim(); Touch(); }
+    public void SetPasswordHash(string passwordHash)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);
+        PasswordHash = passwordHash.Trim();
+        Touch();
+    }
     public void RegisterLogin() { LastLoginAtUtc = DateTimeOffset.UtcNow; Touch(); }
     public void SetActive(bool active) { IsActive = active; Touch(); }
     private void Touch() => UpdatedAtUtc = DateTimeOffset.UtcNow;

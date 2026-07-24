@@ -37,7 +37,7 @@
                    class="character-password-hint @(State.IsPasswordValid ? "character-password-hint--valid" : string.Empty)">
                     @(State.IsPasswordValid
                         ? "✓ Password valid"
-                        : "Use at least 8 characters, including 2 letters.")
+                        : "Use at least 8 characters, one letter and one number.")
                 </p>
 
                 @if (State.ShouldShowConfirmPassword)

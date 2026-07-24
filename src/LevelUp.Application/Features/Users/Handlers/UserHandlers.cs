@@ -1,5 +1,6 @@
 using LevelUp.Application.Common.Contracts;
 using LevelUp.Application.Common.Messaging;
+using LevelUp.Application.Common.Security;
 using LevelUp.Application.Features.Users.Commands;
 using LevelUp.Application.Features.Users.Queries;
 using LevelUp.Application.Features.Users.Responses;
@@ -9,14 +10,20 @@ using MediatR;
 
 namespace LevelUp.Application.Features.Users.Handlers;
 
-public sealed class CreateUserCommandHandler(ILevelUpRepository repository) : IRequestHandler<CreateUserCommand, Guid>
+public sealed class CreateUserCommandHandler(
+    ILevelUpRepository repository,
+    IPasswordService passwordService) : IRequestHandler<CreateUserCommand, Guid>
 {
     public async Task<Guid> Handle(CreateUserCommand command, CancellationToken cancellationToken)
     {
         Guid id = Guid.Empty;
         await repository.UpdateAsync(data =>
         {
-            var user = User.Create(command.Request.Name, command.Request.Email, command.Request.PasswordHash);
+            var passwordHash = string.IsNullOrWhiteSpace(command.Request.Password)
+                ? null
+                : passwordService.Hash(command.Request.Password);
+
+            var user = User.Create(command.Request.Name, command.Request.Email, passwordHash);
             data.AddUser(user);
             data.SetCurrentUser(user.Id);
             id = user.Id;
@@ -49,6 +56,31 @@ public sealed class UpdateCurrentUserAccountCommandHandler(ILevelUpRepository re
                 throw new InvalidDomainStateException($"Email '{command.Request.Email}' is already registered.");
             }
             user.UpdateAccount(command.Request.Name, command.Request.Email);
+        }, cancellationToken);
+}
+
+public sealed class ChangeCurrentUserPasswordCommandHandler(
+    ILevelUpRepository repository,
+    IPasswordService passwordService)
+    : RequestHandlerBase(repository), IRequestHandler<ChangeCurrentUserPasswordCommand>
+{
+    public Task Handle(ChangeCurrentUserPasswordCommand command, CancellationToken cancellationToken) =>
+        MutateAsync(data =>
+        {
+            var user = data.CurrentUser ?? throw new InvalidDomainStateException("Current User was not found.");
+
+            if (string.IsNullOrWhiteSpace(user.PasswordHash) ||
+                !passwordService.Verify(command.Request.CurrentPassword, user.PasswordHash))
+            {
+                throw new InvalidDomainStateException("The current password is incorrect.");
+            }
+
+            if (passwordService.Verify(command.Request.NewPassword, user.PasswordHash))
+            {
+                throw new InvalidDomainStateException("The new password must be different from the current password.");
+            }
+
+            user.SetPasswordHash(passwordService.Hash(command.Request.NewPassword));
         }, cancellationToken);
 }
 

@@ -1,0 +1,38 @@
+@using LevelUp.Web.Components.Features.Account.Models
+
+<LevelUpCard Class="account-section">
+    <header class="account-section__header">
+        <div>
+            <span class="account-section__eyebrow">PROTECTION</span>
+            <h2>Security</h2>
+            <p>Change your password using your current credentials.</p>
+        </div>
+    </header>
+
+    <EditForm Model="Model" OnValidSubmit="SubmitAsync" FormName="account-security">
+        <DataAnnotationsValidator />
+        <fieldset class="account-form" disabled="@IsBusy">
+            <LevelUpInput Id="current-password" Label="Current password" Required="true"
+                          @bind-Value="Model.CurrentPassword" type="password" autocomplete="current-password" />
+            <div class="account-form__grid">
+                <LevelUpInput Id="new-password" Label="New password" Required="true"
+                              @bind-Value="Model.NewPassword" type="password" autocomplete="new-password" />
+                <LevelUpInput Id="confirm-password" Label="Confirm new password" Required="true"
+                              @bind-Value="Model.ConfirmNewPassword" type="password" autocomplete="new-password" />
+            </div>
+            <p class="account-form__hint">Use at least 8 characters, including one letter and one number.</p>
+            <div class="account-form__actions">
+                <LevelUpButton Type="submit" IsLoading="@IsBusy" Disabled="@IsBusy">
+                    CHANGE PASSWORD
+                </LevelUpButton>
+            </div>
+        </fieldset>
+    </EditForm>
+</LevelUpCard>
+
+@code {
+    [Parameter, EditorRequired] public SecurityFormModel Model { get; set; } = default!;
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+    private Task SubmitAsync() => OnSave.InvokeAsync();
+}

@@ -24,14 +24,13 @@ public sealed class CreateCharacterCommandValidator : AbstractValidator<CreateCh
     }
 }
 
-public sealed class UpdateCurrentCharacterCommandValidator : AbstractValidator<UpdateCurrentCharacterCommand>
+public sealed class UpdateCurrentCharacterAvatarCommandValidator : AbstractValidator<UpdateCurrentCharacterAvatarCommand>
 {
-    public UpdateCurrentCharacterCommandValidator()
+    private const int MaximumAvatarLength = 2048;
+
+    public UpdateCurrentCharacterAvatarCommandValidator()
     {
-        RuleFor(command => command.Request.Nickname)
-            .NotEmpty()
-            .MinimumLength(CharacterNickname.MinimumLength)
-            .MaximumLength(CharacterNickname.MaximumLength)
-            .Matches("^[A-Za-z0-9._-]+$");
+        RuleFor(command => command.Request.Avatar)
+            .MaximumLength(MaximumAvatarLength);
     }
 }

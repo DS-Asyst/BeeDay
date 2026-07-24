@@ -30,9 +30,8 @@ public sealed class Character : Entity
         };
     }
 
-    public void UpdateNicknameAndAvatar(string nickname, string? avatar)
+    public void UpdateAvatar(string? avatar)
     {
-        Nickname = CharacterNickname.Create(nickname).Value;
         Avatar = (avatar ?? string.Empty).Trim();
         UpdatedAtUtc = DateTimeOffset.UtcNow;
     }

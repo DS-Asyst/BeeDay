@@ -40,19 +40,14 @@ public sealed class CreateCharacterCommandHandler(ILevelUpRepository repository)
         }, cancellationToken);
 }
 
-public sealed class UpdateCurrentCharacterCommandHandler(ILevelUpRepository repository)
-    : RequestHandlerBase(repository), IRequestHandler<UpdateCurrentCharacterCommand>
+public sealed class UpdateCurrentCharacterAvatarCommandHandler(ILevelUpRepository repository)
+    : RequestHandlerBase(repository), IRequestHandler<UpdateCurrentCharacterAvatarCommand>
 {
-    public Task Handle(UpdateCurrentCharacterCommand command, CancellationToken cancellationToken) =>
+    public Task Handle(UpdateCurrentCharacterAvatarCommand command, CancellationToken cancellationToken) =>
         MutateAsync(data =>
         {
             var character = data.CurrentCharacter
                 ?? throw new InvalidDomainStateException("Current Character was not found.");
-            if (data.Characters.Any(candidate => candidate.Id != character.Id &&
-                string.Equals(candidate.Nickname, command.Request.Nickname, StringComparison.OrdinalIgnoreCase)))
-            {
-                throw new InvalidDomainStateException($"Nickname '@{command.Request.Nickname}' is already in use.");
-            }
-            character.UpdateNicknameAndAvatar(command.Request.Nickname, command.Request.Avatar);
+            character.UpdateAvatar(command.Request.Avatar);
         }, cancellationToken);
 }

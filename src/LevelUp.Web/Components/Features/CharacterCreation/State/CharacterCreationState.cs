@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using LevelUp.Domain.Enums;
 using LevelUp.Web.Components.Features.CharacterCreation.Models;
 using LevelUp.Web.Services;
@@ -29,7 +28,8 @@ public sealed class CharacterCreationState(LevelUpWebService store, ToastService
 
     public bool IsPasswordValid =>
         Model.Password.Length >= 8 &&
-        Model.Password.Count(char.IsLetter) >= 2;
+        Model.Password.Any(char.IsLetter) &&
+        Model.Password.Any(char.IsDigit);
 
     public bool ShouldShowConfirmPassword => IsPasswordValid;
 
@@ -81,7 +81,7 @@ public sealed class CharacterCreationState(LevelUpWebService store, ToastService
 
         if (!IsPasswordValid)
         {
-            ValidationError = "Password must contain at least 8 characters and at least 2 letters.";
+            ValidationError = "Password must contain at least 8 characters, one letter and one number.";
             return false;
         }
 
@@ -152,7 +152,7 @@ public sealed class CharacterCreationState(LevelUpWebService store, ToastService
                 await store.CreateUserAsync(
                     NormalizedNickname,
                     Model.Email.Trim(),
-                    HashPassword(Model.Password));
+                    Model.Password);
             }
 
             await store.CreateCharacterAsync(
@@ -186,18 +186,7 @@ public sealed class CharacterCreationState(LevelUpWebService store, ToastService
         return Task.CompletedTask;
     }
 
-    private static string HashPassword(string password)
-    {
-        var salt = RandomNumberGenerator.GetBytes(16);
-        var hash = Rfc2898DeriveBytes.Pbkdf2(
-            password,
-            salt,
-            120_000,
-            HashAlgorithmName.SHA256,
-            32);
 
-        return $"PBKDF2-SHA256$120000${Convert.ToBase64String(salt)}${Convert.ToBase64String(hash)}";
-    }
 }
 
 public enum CharacterCreationStep

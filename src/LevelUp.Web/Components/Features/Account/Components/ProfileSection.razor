@@ -1,0 +1,49 @@
+@using LevelUp.Web.Components.Features.Account.Models
+
+<LevelUpCard Class="account-section">
+    <header class="account-section__header">
+        <div>
+            <span class="account-section__eyebrow">IDENTITY</span>
+            <h2>Profile</h2>
+            <p>Manage the personal information shown across LevelUp.</p>
+        </div>
+    </header>
+
+    <EditForm Model="Model" OnValidSubmit="SubmitAsync" FormName="account-profile">
+        <DataAnnotationsValidator />
+        <fieldset class="account-form" disabled="@IsBusy">
+            <div class="account-form__grid">
+                <LevelUpInput Id="account-name" Label="Name" Required="true" MaxLength="100"
+                              @bind-Value="Model.Name" />
+                <LevelUpInput Id="account-email" Label="Email" Required="true" MaxLength="254"
+                              @bind-Value="Model.Email" />
+                <LevelUpInput Id="account-nickname" Label="Nickname" ReadOnly="true"
+                              Value="Model.Nickname" ValueChanged="IgnoreStringAsync"
+                              ValueExpression="@(() => Model.Nickname)" />
+                <LevelUpInput Id="account-class" Label="Class" Disabled="true"
+                              Value="Model.CharacterClass" ValueChanged="IgnoreStringAsync"
+                              ValueExpression="@(() => Model.CharacterClass)" />
+            </div>
+
+            <LevelUpInput Id="account-avatar" Label="Avatar URL" Placeholder="https://..."
+                          @bind-Value="Model.Avatar" />
+
+            <p class="account-form__hint">Your nickname is permanent after character creation.</p>
+
+            <div class="account-form__actions">
+                <LevelUpButton Type="submit" IsLoading="@IsBusy" Disabled="@IsBusy">
+                    SAVE PROFILE
+                </LevelUpButton>
+            </div>
+        </fieldset>
+    </EditForm>
+</LevelUpCard>
+
+@code {
+    [Parameter, EditorRequired] public ProfileFormModel Model { get; set; } = default!;
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+
+    private Task SubmitAsync() => OnSave.InvokeAsync();
+    private static Task IgnoreStringAsync(string? _) => Task.CompletedTask;
+}

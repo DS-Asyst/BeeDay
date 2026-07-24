@@ -1,0 +1,137 @@
+@page "/account"
+@rendermode InteractiveServer
+@using LevelUp.Web.Components.Features.Account.Components
+@using LevelUp.Web.Components.Features.Account.Models
+@inject LevelUpWebService Store
+@inject ToastService Toast
+@inject NavigationManager Navigation
+
+<PageTitle>My Account | LevelUp</PageTitle>
+
+<main class="account-page" aria-busy="@IsAnyBusy.ToString().ToLowerInvariant()">
+    <header class="account-page__hero">
+        <div>
+            <span class="account-page__eyebrow">PLAYER SETTINGS</span>
+            <h1>My Account</h1>
+            <p>Keep your profile, security and experience preferences up to date.</p>
+        </div>
+    </header>
+
+    @if (_isLoading)
+    {
+        <div class="account-page__loading">
+            <LevelUpSkeleton Lines="2" />
+            <LevelUpSkeleton Lines="5" />
+            <LevelUpSkeleton Lines="4" />
+        </div>
+    }
+    else
+    {
+        <div class="account-page__content">
+            <ProfileSection Model="_profile" IsBusy="_profileBusy" OnSave="SaveProfileAsync" />
+            <SecuritySection Model="_security" IsBusy="_securityBusy" OnSave="ChangePasswordAsync" />
+            <PreferencesSection Model="_preferences" IsBusy="_preferencesBusy" OnSave="SavePreferencesAsync" />
+        </div>
+    }
+</main>
+
+<LevelUpLoading IsVisible="@IsAnyBusy" Label="Saving your account..." />
+
+@code {
+    private readonly ProfileFormModel _profile = new();
+    private readonly SecurityFormModel _security = new();
+    private readonly PreferencesFormModel _preferences = new();
+    private bool _isLoading = true;
+    private bool _profileBusy;
+    private bool _securityBusy;
+    private bool _preferencesBusy;
+    private bool IsAnyBusy => _profileBusy || _securityBusy || _preferencesBusy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var data = await Store.LoadAsync();
+            if (data.CurrentUser is null || data.CurrentCharacter is null)
+            {
+                Navigation.NavigateTo("/character/create", true);
+                return;
+            }
+
+            _profile.Name = data.CurrentUser.Name;
+            _profile.Email = data.CurrentUser.Email;
+            _profile.Nickname = data.CurrentCharacter.Nickname;
+            _profile.Avatar = data.CurrentCharacter.Avatar;
+            _profile.CharacterClass = data.CurrentCharacter.Class.ToString();
+            _preferences.Language = data.CurrentUser.Language;
+            _preferences.Theme = data.CurrentUser.Theme;
+        }
+        catch (Exception ex)
+        {
+            Toast.ShowError(ex.Message, "Account could not be loaded");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task SaveProfileAsync()
+    {
+        if (IsAnyBusy) return;
+        _profileBusy = true;
+        try
+        {
+            await Store.UpdateUserAsync(_profile.Name.Trim(), _profile.Email.Trim());
+            await Store.UpdateCharacterAvatarAsync(string.IsNullOrWhiteSpace(_profile.Avatar) ? null : _profile.Avatar.Trim());
+            Toast.ShowSuccess("Your profile has been updated.", "Profile saved");
+        }
+        catch (Exception ex)
+        {
+            Toast.ShowError(ex.Message, "Profile was not saved");
+        }
+        finally
+        {
+            _profileBusy = false;
+        }
+    }
+
+    private async Task ChangePasswordAsync()
+    {
+        if (IsAnyBusy) return;
+        _securityBusy = true;
+        try
+        {
+            await Store.ChangePasswordAsync(_security.CurrentPassword, _security.NewPassword, _security.ConfirmNewPassword);
+            _security.Clear();
+            Toast.ShowSuccess("Your password has been changed.", "Password updated");
+        }
+        catch (Exception ex)
+        {
+            Toast.ShowError(ex.Message, "Password was not changed");
+        }
+        finally
+        {
+            _securityBusy = false;
+        }
+    }
+
+    private async Task SavePreferencesAsync()
+    {
+        if (IsAnyBusy) return;
+        _preferencesBusy = true;
+        try
+        {
+            await Store.UpdatePreferencesAsync(_preferences.Language, _preferences.Theme);
+            Toast.ShowSuccess("Your preferences have been updated.", "Preferences saved");
+        }
+        catch (Exception ex)
+        {
+            Toast.ShowError(ex.Message, "Preferences were not saved");
+        }
+        finally
+        {
+            _preferencesBusy = false;
+        }
+    }
+}
