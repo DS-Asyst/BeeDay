@@ -12,9 +12,13 @@ public readonly record struct UserName
     {
         var normalized = (value ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(normalized))
+        {
             throw new DomainValidationException("name", "Name is required.");
+        }
         if (normalized.Length > MaximumLength)
+        {
             throw new DomainValidationException("name", $"Name cannot exceed {MaximumLength} characters.");
+        }
         return new UserName(normalized);
     }
 

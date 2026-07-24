@@ -21,7 +21,9 @@ public sealed class Todo : Activity
     public void Update(Guid projectId, string title, string? description, DateOnly? dueDate)
     {
         if (projectId == Guid.Empty)
+        {
             throw new DomainValidationException("ProjectId", "A To-Do must belong to a Project.");
+        }
 
         ProjectId = projectId;
         UpdateDetails(title, description);
@@ -31,7 +33,9 @@ public sealed class Todo : Activity
     internal void AssignTo(Guid projectId)
     {
         if (projectId == Guid.Empty)
+        {
             throw new DomainValidationException("ProjectId", "A To-Do must belong to a Project.");
+        }
         ProjectId = projectId;
         Touch();
     }

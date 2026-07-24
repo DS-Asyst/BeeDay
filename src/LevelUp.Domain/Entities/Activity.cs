@@ -28,7 +28,10 @@ public abstract class Activity : Entity
 
     public void AssignOwner(Guid userId)
     {
-        if (userId == Guid.Empty) throw new ArgumentException("User identifier is required.", nameof(userId));
+        if (userId == Guid.Empty)
+        {
+            throw new ArgumentException("User identifier is required.", nameof(userId));
+        }
         UserId = userId;
     }
 

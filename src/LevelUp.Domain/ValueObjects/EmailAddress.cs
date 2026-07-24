@@ -12,9 +12,13 @@ public readonly record struct EmailAddress
     {
         var normalized = (value ?? string.Empty).Trim().ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(normalized))
+        {
             throw new DomainValidationException("email", "Email is required.");
+        }
         if (normalized.Length > MaximumLength || !System.Net.Mail.MailAddress.TryCreate(normalized, out _))
+        {
             throw new DomainValidationException("email", "Email is invalid.");
+        }
         return new EmailAddress(normalized);
     }
 

@@ -13,9 +13,13 @@ public readonly record struct CharacterNickname
     {
         var normalized = (value ?? string.Empty).Trim().TrimStart('@');
         if (normalized.Length is < MinimumLength or > MaximumLength)
+        {
             throw new DomainValidationException("nickname", $"Nickname must contain between {MinimumLength} and {MaximumLength} characters.");
+        }
         if (!normalized.All(character => char.IsLetterOrDigit(character) || character is '.' or '_' or '-'))
+        {
             throw new DomainValidationException("nickname", "Nickname may contain only letters, numbers, dots, underscores and hyphens.");
+        }
         return new CharacterNickname(normalized);
     }
 

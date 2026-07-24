@@ -16,7 +16,9 @@ public readonly record struct ProjectColor
     {
         var normalized = string.IsNullOrWhiteSpace(value) ? Default : value.Trim();
         if (!HexPattern.IsMatch(normalized))
+        {
             throw new DomainValidationException("Color", "Project color must use the #RRGGBB format.");
+        }
         return new ProjectColor(normalized);
     }
 

@@ -129,3 +129,20 @@ Recommended additions:
 5. Add secret scanning and dependency/security scanning to CI.
 6. Protect the `main` environment and self-hosted deployment runner.
 7. Keep roadmap/sprint planning outside the repository root or under a clearly archival project-management location.
+
+## Correções posteriores à revisão
+
+- O módulo legado `Application/Features/Profiles` foi removido definitivamente.
+- Não existem mais referências a `ProfileCommandHandlers`, `LevelUpData.Profile` ou `SetProfile`.
+- A conta foi consolidada nos agregados `User` e `Character`.
+- As 33 ocorrências `IDE0011` registradas no build de 24 de julho de 2026 foram corrigidas com chaves explícitas em estruturas de controle.
+
+### Validação local recomendada
+
+```bash
+dotnet clean
+dotnet build
+dotnet test
+```
+
+O ambiente usado para preparar este pacote não possui o SDK do .NET; por isso, a validação compilada deve ser executada em uma estação com .NET 10 instalado.

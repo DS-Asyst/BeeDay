@@ -48,24 +48,38 @@ public sealed class LevelUpData
     {
         ArgumentNullException.ThrowIfNull(user);
         if (Users.Any(existing => string.Equals(existing.Email, user.Email, StringComparison.OrdinalIgnoreCase)))
+        {
             throw new InvalidDomainStateException($"Email '{user.Email}' is already registered.");
+        }
         Users.Add(user);
         CurrentUserId ??= user.Id;
     }
 
     public void SetCurrentUser(Guid userId)
     {
-        if (Users.All(user => user.Id != userId)) throw new InvalidDomainStateException($"User '{userId}' was not found.");
+        if (Users.All(user => user.Id != userId))
+        {
+            throw new InvalidDomainStateException($"User '{userId}' was not found.");
+        }
         CurrentUserId = userId;
     }
 
     public void AddCharacter(Character character)
     {
         ArgumentNullException.ThrowIfNull(character);
-        if (Users.All(user => user.Id != character.UserId)) throw new InvalidDomainStateException("Character must belong to an existing User.");
-        if (Characters.Any(existing => existing.UserId == character.UserId)) throw new InvalidDomainStateException("A User can have only one Character.");
+        if (Users.All(user => user.Id != character.UserId))
+        {
+            throw new InvalidDomainStateException("Character must belong to an existing User.");
+        }
+
+        if (Characters.Any(existing => existing.UserId == character.UserId))
+        {
+            throw new InvalidDomainStateException("A User can have only one Character.");
+        }
         if (Characters.Any(existing => string.Equals(existing.Nickname, character.Nickname, StringComparison.OrdinalIgnoreCase)))
+        {
             throw new InvalidDomainStateException($"Nickname '@{character.Nickname}' is already in use.");
+        }
         Characters.Add(character);
     }
 
@@ -81,7 +95,10 @@ public sealed class LevelUpData
         foreach (var project in Projects)
         {
             var todo = project.Todos.FirstOrDefault(item => item.Id == todoId);
-            if (todo is not null) return (project, todo);
+            if (todo is not null)
+            {
+                return (project, todo);
+            }
         }
         throw new InvalidDomainStateException($"To-Do '{todoId}' was not found.");
     }
@@ -98,9 +115,16 @@ public sealed class LevelUpData
 
     public void ReorderTodos(IReadOnlyList<Guid> orderedIds)
     {
-        if (orderedIds.Count < 2) return;
+        if (orderedIds.Count < 2)
+        {
+            return;
+        }
+
         var grouped = orderedIds.Select(FindTodo).GroupBy(x => x.Project.Id);
-        foreach (var group in grouped) ReorderVisibleItems(group.First().Project.Todos, group.Select(x => x.Todo.Id).ToList());
+        foreach (var group in grouped)
+        {
+            ReorderVisibleItems(group.First().Project.Todos, group.Select(x => x.Todo.Id).ToList());
+        }
     }
 
     public void EnsureValidState()
@@ -138,7 +162,10 @@ public sealed class LevelUpData
         if (LegacyTodos.Count > 0)
         {
             var migrationProject = Projects.FirstOrDefault() ?? Project.Create("Imported To-Dos", "Project created automatically during the Daily domain migration.");
-            if (!Projects.Contains(migrationProject)) Projects.Add(migrationProject);
+            if (!Projects.Contains(migrationProject))
+            {
+                Projects.Add(migrationProject);
+            }
             foreach (var todo in LegacyTodos)
             {
                 if (todo.UserId == Guid.Empty && ownerId is Guid id)
@@ -183,19 +210,36 @@ public sealed class LevelUpData
         }
 
         foreach (var character in Characters)
-            if (Users.All(user => user.Id != character.UserId)) throw new InvalidDomainStateException("A Character references an unknown User.");
+        {
+            if (Users.All(user => user.Id != character.UserId))
+            {
+                throw new InvalidDomainStateException("A Character references an unknown User.");
+            }
+        }
+
         if (Characters.GroupBy(character => character.UserId).Any(group => group.Count() > 1))
+        {
             throw new InvalidDomainStateException("A User cannot have more than one Character.");
+        }
 
         EnsureUniqueIds(Projects.SelectMany(project => project.Todos));
     }
 
     private void MigrateLegacyProfile()
     {
-        if (LegacyProfile is null) return;
+        if (LegacyProfile is null)
+        {
+            return;
+        }
         var user = Users.FirstOrDefault() ?? User.Create(LegacyProfile.Name, MigrationEmail);
-        if (!Users.Contains(user)) Users.Add(user);
-        else user.UpdateName(LegacyProfile.Name);
+        if (!Users.Contains(user))
+        {
+            Users.Add(user);
+        }
+        else
+        {
+            user.UpdateName(LegacyProfile.Name);
+        }
         CurrentUserId ??= user.Id;
         if (Characters.All(character => character.UserId != user.Id))
         {
@@ -241,19 +285,37 @@ public sealed class LevelUpData
     private static void ReorderVisibleItems<T>(List<T> items, IReadOnlyList<Guid> orderedIds) where T : Activity
     {
         ArgumentNullException.ThrowIfNull(orderedIds);
-        if (orderedIds.Count < 2) return;
+        if (orderedIds.Count < 2)
+        {
+            return;
+        }
         var requestedIds = orderedIds.ToHashSet();
-        if (requestedIds.Count != orderedIds.Count) throw new ArgumentException("The reorder request contains duplicate identifiers.", nameof(orderedIds));
+        if (requestedIds.Count != orderedIds.Count)
+        {
+            throw new ArgumentException("The reorder request contains duplicate identifiers.", nameof(orderedIds));
+        }
         var itemsById = items.ToDictionary(item => item.Id);
-        if (orderedIds.Any(id => !itemsById.ContainsKey(id))) throw new ArgumentException("The reorder request contains an unknown activity identifier.", nameof(orderedIds));
+        if (orderedIds.Any(id => !itemsById.ContainsKey(id)))
+        {
+            throw new ArgumentException("The reorder request contains an unknown activity identifier.", nameof(orderedIds));
+        }
         var orderedItems = new Queue<T>(orderedIds.Select(id => itemsById[id]));
-        for (var index = 0; index < items.Count; index++) if (requestedIds.Contains(items[index].Id)) items[index] = orderedItems.Dequeue();
+        for (var index = 0; index < items.Count; index++)
+        {
+            if (requestedIds.Contains(items[index].Id))
+            {
+                items[index] = orderedItems.Dequeue();
+            }
+        }
     }
 
     private static void EnsureUniqueIds<T>(IEnumerable<T> entities) where T : LevelUp.Domain.Abstractions.Entity
     {
         var duplicate = entities.GroupBy(entity => entity.Id).FirstOrDefault(group => group.Key == Guid.Empty || group.Count() > 1);
-        if (duplicate is not null) throw new InvalidDomainStateException("The data file contains empty or duplicate entity identifiers.");
+        if (duplicate is not null)
+        {
+            throw new InvalidDomainStateException("The data file contains empty or duplicate entity identifiers.");
+        }
     }
 
     private sealed class LegacyProfileSnapshot
@@ -271,6 +333,8 @@ public sealed class LevelUpData
     private static void EnsureUniqueValues(IEnumerable<string> values, string label)
     {
         if (values.GroupBy(value => value, StringComparer.OrdinalIgnoreCase).Any(group => string.IsNullOrWhiteSpace(group.Key) || group.Count() > 1))
+        {
             throw new InvalidDomainStateException($"The data file contains an empty or duplicate {label}.");
+        }
     }
 }

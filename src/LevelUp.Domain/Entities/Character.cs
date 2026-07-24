@@ -17,7 +17,10 @@ public sealed class Character : Entity
 
     public static Character Create(Guid userId, string nickname, CharacterClass characterClass, string? avatar = null)
     {
-        if (userId == Guid.Empty) throw new ArgumentException("User identifier is required.", nameof(userId));
+        if (userId == Guid.Empty)
+        {
+            throw new ArgumentException("User identifier is required.", nameof(userId));
+        }
         return new Character
         {
             UserId = userId,
