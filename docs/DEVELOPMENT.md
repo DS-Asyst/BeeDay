@@ -108,5 +108,5 @@ The writable data directory should preferably live outside the publish directory
 4. Merge `develop` into `main`.
 5. Observe the production workflow.
 6. Check `/health/live`, `/health/ready` and `/health`.
-7. Verify onboarding, Daily, project and settings flows.
+7. Verify onboarding, Daily, project and My Account flows.
 8. Confirm runtime data and backup rotation.

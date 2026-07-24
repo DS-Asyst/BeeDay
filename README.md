@@ -174,7 +174,8 @@ Main routes:
 /welcome          User onboarding
 /character/create Character creation
 /daily            Daily dashboard
-/settings         User settings
+/account          User account, security and preferences
+/settings         Legacy alias for /account
 ```
 
 ## Tests
