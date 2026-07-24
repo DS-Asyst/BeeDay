@@ -2,7 +2,8 @@ using LevelUp.Application.Features.Dashboard.Queries;
 using LevelUp.Application.Features.Habits.Commands;
 using LevelUp.Application.Features.Ordering.Commands;
 using LevelUp.Application.Features.Ordering.Requests;
-using LevelUp.Application.Features.Profiles.Commands;
+using LevelUp.Application.Features.Characters.Commands;
+using LevelUp.Application.Features.Users.Commands;
 using LevelUp.Application.Features.Projects.Commands;
 using LevelUp.Application.Features.Tasks.Commands;
 using LevelUp.Application.Features.Todos.Commands;
@@ -18,7 +19,11 @@ namespace LevelUp.Web.Services;
 public sealed class LevelUpWebService(ISender sender)
 {
     public async Task<LevelUpData> LoadAsync() => (await sender.Send(new GetLevelUpQuery())).Data;
-    public Task CreateProfileAsync(string n, string k, CharacterClass c) => sender.Send(new SaveProfileCommand(new(n, k, c)));
+    public Task<Guid> CreateUserAsync(string name, string email, string passwordHash) => sender.Send(new CreateUserCommand(new(name, email, passwordHash)));
+    public Task CreateCharacterAsync(string n, string k, CharacterClass c, string? avatar = null) => sender.Send(new CreateCharacterCommand(new(n, k, c, avatar)));
+    public Task UpdateUserAsync(string name, string email) => sender.Send(new UpdateCurrentUserAccountCommand(new(name, email)));
+    public Task UpdatePreferencesAsync(UserLanguage language, UserTheme theme) => sender.Send(new UpdateCurrentUserPreferencesCommand(new(language, theme)));
+    public Task UpdateCharacterAsync(string nickname, string? avatar) => sender.Send(new UpdateCurrentCharacterCommand(new(nickname, avatar)));
     public Task AddHabitAsync(HabitEditorModel m) => sender.Send(new CreateHabitCommand(new(m.Title, m.Description, m.Direction, m.Difficulty, m.ResetCounter)));
     public Task UpdateHabitAsync(Guid id, HabitEditorModel m) => sender.Send(new UpdateHabitCommand(id, new(m.Title, m.Description, m.Direction, m.Difficulty, m.ResetCounter)));
     public Task AddTaskAsync(TaskEditorModel m) => sender.Send(new CreateTaskCommand(new(m.Title, m.Description, m.Repeat)));

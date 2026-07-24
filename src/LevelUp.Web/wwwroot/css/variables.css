@@ -88,3 +88,21 @@
     --levelup-z-loading: 1500;
     --levelup-z-toast: 1700;
 }
+
+/* LevelUp RPG UI — Game Boy Advance / SNES inspired tokens */
+:root {
+    --levelup-game-ink: #171321;
+    --levelup-game-ink-soft: #332b43;
+    --levelup-game-paper: #fffdf7;
+    --levelup-game-panel: #ffffff;
+    --levelup-game-blue: #27a8e8;
+    --levelup-game-blue-dark: #0879b5;
+    --levelup-game-yellow: #ffc928;
+    --levelup-game-yellow-dark: #d69100;
+    --levelup-game-red: #ef4455;
+    --levelup-game-green: #45c46b;
+    --levelup-game-border: 2px solid var(--levelup-game-ink);
+    --levelup-game-shadow-sm: 0 3px 0 var(--levelup-game-ink);
+    --levelup-game-shadow-md: 0 5px 0 var(--levelup-game-ink);
+    --levelup-game-shadow-lg: 0 7px 0 var(--levelup-game-ink), 0 16px 32px rgb(23 19 33 / 18%);
+}

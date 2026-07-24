@@ -1,4 +1,4 @@
-@page "/"
+@page "/daily"
 @rendermode InteractiveServer
 @inject LevelUp.Web.Components.Features.Dashboard.State.DashboardState State
 @inject NavigationManager Navigation
@@ -9,7 +9,7 @@
 {
     <LevelUpDashboardSkeleton />
 }
-else if (State.Data?.Profile is not null)
+else if (State.Data?.CurrentCharacter is not null)
 {
     <section class="dashboard-page levelup-fade-in">
         <div class="dashboard-page__content">

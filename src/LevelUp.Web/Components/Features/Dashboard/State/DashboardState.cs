@@ -22,7 +22,9 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
     public bool IsBusy { get; private set; }
     public Guid? RemovingItemId { get; private set; }
     public event Action? Changed;
-    public bool HasProfile => data?.Profile is not null;
+    public Task<LevelUpData> GetDataAsync() => store.LoadAsync();
+
+    public bool HasCharacter => data?.CurrentCharacter is not null;
     public Guid? OpenProjectId { get; private set; }
     public Project? OpenProject => OpenProjectId is Guid id ? data?.Projects.FirstOrDefault(project => project.Id == id) : null;
 

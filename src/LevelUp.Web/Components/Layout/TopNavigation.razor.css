@@ -246,3 +246,28 @@
         animation: none;
     }
 }
+
+/* RPG navigation skin */
+.top-navigation {
+    border-bottom: 3px solid #171321;
+    background: linear-gradient(180deg, #6814a6 0%, #4f0b83 100%);
+    box-shadow: 0 3px 0 #2a0745, 0 8px 18px rgb(23 19 33 / 24%);
+}
+
+.top-navigation__links ::deep a:hover,
+.top-navigation__links ::deep a:focus-visible {
+    background: rgb(255 201 40 / 14%);
+    box-shadow: inset 0 -3px 0 #ffc928;
+}
+
+.top-navigation__menu-button {
+    border: 2px solid transparent;
+    border-radius: .18rem;
+}
+
+.top-navigation__menu-button:hover,
+.top-navigation__menu-button:focus-visible {
+    border-color: #fff;
+    background: rgb(0 0 0 / 14%);
+    box-shadow: 0 2px 0 #171321;
+}

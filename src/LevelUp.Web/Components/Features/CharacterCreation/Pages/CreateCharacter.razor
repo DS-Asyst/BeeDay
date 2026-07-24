@@ -1,0 +1,161 @@
+@page "/character/create"
+@layout LevelUp.Web.Components.Layout.OnboardingLayout
+@inject LevelUp.Web.Components.Features.CharacterCreation.State.CharacterCreationState State
+@inject NavigationManager Navigation
+
+<PageTitle>Get started | LevelUp</PageTitle>
+
+<section class="character-page levelup-fade-in">
+    <div class="character-panel character-panel--@State.CurrentStepClass">
+        @if (State.Step == LevelUp.Web.Components.Features.CharacterCreation.State.CharacterCreationStep.Account)
+        {
+            <span class="character-panel__brand">LEVELUP</span>
+            <h1>Create your account</h1>
+            <p class="character-panel__intro">Start your LevelUp journey.</p>
+
+            <div class="character-form">
+                <label class="character-field">
+                    <span>Email</span>
+                    <input type="email"
+                           class="character-field__input"
+                           autocomplete="email"
+                           @bind="State.Model.Email"
+                           @bind:event="oninput" />
+                </label>
+
+                <label class="character-field">
+                    <span>Password</span>
+                    <input type="password"
+                           class="character-field__input"
+                           autocomplete="new-password"
+                           aria-describedby="password-requirements"
+                           @bind="State.Model.Password"
+                           @bind:event="oninput" />
+                </label>
+
+                <p id="password-requirements"
+                   class="character-password-hint @(State.IsPasswordValid ? "character-password-hint--valid" : string.Empty)">
+                    @(State.IsPasswordValid
+                        ? "✓ Password valid"
+                        : "Use at least 8 characters, including 2 letters.")
+                </p>
+
+                @if (State.ShouldShowConfirmPassword)
+                {
+                    <label class="character-field levelup-fade-in">
+                        <span>Confirm password</span>
+                        <input type="password"
+                               class="character-field__input"
+                               autocomplete="new-password"
+                               @bind="State.Model.ConfirmPassword"
+                               @bind:event="oninput" />
+                    </label>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(State.ValidationError))
+                {
+                    <p class="character-validation" role="alert">@State.ValidationError</p>
+                }
+
+                <button class="character-primary-button"
+                        type="button"
+                        disabled="@(!State.CanContinueAccount)"
+                        @onclick="ContinueToCharacter">
+                    CONTINUE
+                </button>
+            </div>
+        }
+        else if (State.Step == LevelUp.Web.Components.Features.CharacterCreation.State.CharacterCreationStep.Character)
+        {
+            <button class="character-back-button" type="button" @onclick="Back">← Back</button>
+            <h1>Create your character</h1>
+            <p class="character-panel__intro">Choose the identity shown in LevelUp.</p>
+
+            <div class="character-form">
+                <label class="character-field">
+                    <span>Nickname</span>
+                    <div class="character-nickname-field">
+                        <span class="character-nickname-field__prefix">@@</span>
+                        <input class="character-field__input character-nickname-field__input"
+                               autocomplete="nickname"
+                               maxlength="24"
+                               @bind="State.Model.Nickname"
+                               @bind:event="oninput" />
+                    </div>
+                </label>
+
+
+                @if (!string.IsNullOrWhiteSpace(State.ValidationError))
+                {
+                    <p class="character-validation" role="alert">@State.ValidationError</p>
+                }
+
+                <button class="character-primary-button"
+                        type="button"
+                        @onclick="ContinueToClasses">
+                    CHOOSE CLASS
+                </button>
+            </div>
+        }
+        else
+        {
+            <button class="character-back-button" type="button" @onclick="Back">← Back</button>
+            <h1>Choose your class</h1>
+            <p class="character-panel__intro">This choice is permanent.</p>
+
+            <div class="class-grid">
+                @foreach (var option in LevelUp.Web.Components.Features.CharacterCreation.State.CharacterCreationState.ClassOptions)
+                {
+                    <button class="class-card"
+                            type="button"
+                            @onclick="() => RequestClassConfirmation(option)">
+                        <span class="class-card__image-frame">
+                            <img src="@option.ImagePath" alt="" />
+                        </span>
+                        <strong>@option.DisplayName</strong>
+                        <span>@option.Description</span>
+                    </button>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+@if (State.ShowConfirmation && State.SelectedClass is not null)
+{
+    <div class="class-confirmation-backdrop"
+         @onclick="CloseConfirmation"
+         @onkeydown="State.HandleConfirmationKeyDownAsync">
+        <section class="class-confirmation"
+                 role="alertdialog"
+                 aria-modal="true"
+                 @onclick:stopPropagation>
+            <div class="class-confirmation__icon">
+                <img src="@State.SelectedClass.ImagePath" alt="" />
+            </div>
+            <span class="character-panel__brand">CLASS SELECTION</span>
+            <h2>Become a <strong>@State.SelectedClass.DisplayName</strong>?</h2>
+            <p>Your LevelUp identity will be <strong>@@@State.NormalizedNickname</strong>.</p>
+
+            @if (!string.IsNullOrWhiteSpace(State.ValidationError))
+            {
+                <p class="character-validation" role="alert">@State.ValidationError</p>
+            }
+
+            <div class="class-confirmation__actions">
+                <button class="class-confirmation__cancel"
+                        type="button"
+                        disabled="@State.IsBusy"
+                        @onclick="CloseConfirmation">
+                    CANCEL
+                </button>
+                <button class="class-confirmation__confirm"
+                        type="button"
+                        disabled="@State.IsBusy"
+                        @onclick="ConfirmClassAsync">
+                    @(State.IsBusy ? "CREATING..." : "CONFIRM")
+                </button>
+            </div>
+        </section>
+    </div>
+}

@@ -7,9 +7,13 @@ public partial class Home : IDisposable
         State.Changed += HandleStateChanged;
         await State.InitializeAsync();
 
-        if (!State.HasProfile)
+        if (!State.HasCharacter)
         {
-            Navigation.NavigateTo("/profile", replace: true);
+            var data = await State.GetDataAsync();
+            Navigation.NavigateTo(
+                data.CurrentUser is null ? "/welcome" : "/character/create",
+                forceLoad: true,
+                replace: true);
         }
     }
     private void HandleStateChanged() => InvokeAsync(StateHasChanged);

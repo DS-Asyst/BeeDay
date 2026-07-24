@@ -2,8 +2,9 @@ using LevelUp.Application.Features.Habits.Requests;
 using LevelUp.Application.Features.Habits.Validation;
 using LevelUp.Application.Features.Ordering.Requests;
 using LevelUp.Application.Features.Ordering.Validation;
-using LevelUp.Application.Features.Profiles.Requests;
-using LevelUp.Application.Features.Profiles.Validation;
+using LevelUp.Application.Features.Characters.Commands;
+using LevelUp.Application.Features.Characters.Requests;
+using LevelUp.Application.Features.Characters.Validation;
 using LevelUp.Application.Features.Projects.Requests;
 using LevelUp.Application.Features.Projects.Validation;
 using LevelUp.Application.Features.Tasks.Requests;
@@ -58,10 +59,10 @@ public sealed class RequestValidatorTests
     [InlineData("")]
     [InlineData("ab")]
     [InlineData("invalid nickname")]
-    public async Task SaveProfile_RejectsInvalidNickname(string nickname)
+    public async Task CreateCharacter_RejectsInvalidNickname(string nickname)
     {
-        var result = await new SaveProfileRequestValidator().ValidateAsync(
-            new SaveProfileRequest("Tiago", nickname, CharacterClass.Warrior),
+        var result = await new CreateCharacterCommandValidator().ValidateAsync(
+            new CreateCharacterCommand(new CreateCharacterRequest("Tiago", nickname, CharacterClass.Warrior)),
             TestContext.Current.CancellationToken);
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, error => error.PropertyName == "Nickname");

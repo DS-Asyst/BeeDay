@@ -27,7 +27,7 @@ public partial class LevelUpButton
                 _ => string.Empty
             };
 
-            return string.Join(' ', new[] { variantClass, Class }.Where(value => !string.IsNullOrWhiteSpace(value)));
+            return string.Join(' ', new[] { "levelup-button", variantClass, Class }.Where(value => !string.IsNullOrWhiteSpace(value)));
         }
     }
 }

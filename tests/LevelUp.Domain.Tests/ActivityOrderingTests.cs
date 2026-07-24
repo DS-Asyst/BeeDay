@@ -9,7 +9,7 @@ public sealed class ActivityOrderingTests
     [Fact]
     public void ReorderTasksChangesPersistedListOrder()
     {
-        var data = new LevelUpData();
+        var data = CreateDataWithUser();
         var first = RecurringTask.Create("First", string.Empty, TaskRepeat.None);
         var second = RecurringTask.Create("Second", string.Empty, TaskRepeat.None);
         var third = RecurringTask.Create("Third", string.Empty, TaskRepeat.None);
@@ -25,7 +25,7 @@ public sealed class ActivityOrderingTests
     [Fact]
     public void ReorderVisibleTasksPreservesHiddenItemSlots()
     {
-        var data = new LevelUpData();
+        var data = CreateDataWithUser();
         var visibleFirst = RecurringTask.Create("Visible first", string.Empty, TaskRepeat.None);
         var hidden = RecurringTask.Create("Hidden", string.Empty, TaskRepeat.None);
         var visibleSecond = RecurringTask.Create("Visible second", string.Empty, TaskRepeat.None);
@@ -41,10 +41,17 @@ public sealed class ActivityOrderingTests
     [Fact]
     public void ReorderRejectsUnknownIdentifier()
     {
-        var data = new LevelUpData();
+        var data = CreateDataWithUser();
         var task = RecurringTask.Create("Task", string.Empty, TaskRepeat.None);
         data.AddTask(task);
 
         Assert.Throws<ArgumentException>(() => data.ReorderTasks([task.Id, Guid.NewGuid()]));
     }
+    private static LevelUpData CreateDataWithUser()
+    {
+        var data = new LevelUpData();
+        data.AddUser(User.Create("Test User", $"test-{Guid.NewGuid():N}@levelup.test"));
+        return data;
+    }
+
 }

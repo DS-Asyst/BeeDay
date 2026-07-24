@@ -144,6 +144,7 @@ public sealed class JsonPersistenceTests : IDisposable
     private static LevelUpData CreateData(string title)
     {
         var data = new LevelUpData();
+        data.AddUser(User.Create("Persistence Test User", $"persistence-{Guid.NewGuid():N}@levelup.test"));
         data.AddHabit(Habit.Create(
             title,
             null,

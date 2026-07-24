@@ -2,7 +2,7 @@ using LevelUp.Application.DependencyInjection;
 using LevelUp.Infrastructure.DependencyInjection;
 using LevelUp.Web.Components;
 using LevelUp.Web.Components.Features.Dashboard.State;
-using LevelUp.Web.Components.Features.Profile.State;
+using LevelUp.Web.Components.Features.CharacterCreation.State;
 using LevelUp.Web.Diagnostics;
 using LevelUp.Web.HealthChecks;
 using LevelUp.Web.Services;
@@ -38,7 +38,7 @@ builder.Services.AddLevelUpInfrastructure(builder.Configuration);
 builder.Services.AddScoped<LevelUpWebService>();
 builder.Services.AddScoped<ToastService>();
 builder.Services.AddScoped<DashboardState>();
-builder.Services.AddScoped<ProfileState>();
+builder.Services.AddScoped<CharacterCreationState>();
 
 var app = builder.Build();
 

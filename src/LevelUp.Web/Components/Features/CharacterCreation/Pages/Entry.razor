@@ -1,0 +1,35 @@
+@page "/"
+@rendermode InteractiveServer
+@layout LevelUp.Web.Components.Layout.OnboardingLayout
+@inject LevelUp.Web.Services.LevelUpWebService Store
+@inject NavigationManager Navigation
+
+<PageTitle>LevelUp</PageTitle>
+
+<div class="entry-loading" role="status" aria-live="polite">
+    <span>LEVELUP</span>
+    <p>Loading your journey...</p>
+</div>
+
+@code {
+    private bool _navigationStarted;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _navigationStarted)
+        {
+            return;
+        }
+
+        _navigationStarted = true;
+        var data = await Store.LoadAsync();
+
+        var destination = data.CurrentUser is null
+            ? "/welcome"
+            : data.CurrentCharacter is null
+                ? "/character/create"
+                : "/daily";
+
+        Navigation.NavigateTo(destination, forceLoad: true, replace: true);
+    }
+}
