@@ -1,10 +1,12 @@
 @page "/account"
+@attribute [Authorize]
 @rendermode InteractiveServer
 @using LevelUp.Web.Components.Features.Account.Components
 @using LevelUp.Web.Components.Features.Account.Models
 @inject LevelUpWebService Store
 @inject ToastService Toast
 @inject NavigationManager Navigation
+@inject AuthenticatedUserInitializer UserInitializer
 
 <PageTitle>My Account | LevelUp</PageTitle>
 
@@ -51,6 +53,7 @@
     {
         try
         {
+            await UserInitializer.EnsureInitializedAsync();
             var data = await Store.LoadAsync();
             if (data.CurrentUser is null || data.CurrentCharacter is null)
             {

@@ -1,0 +1,106 @@
+@page "/onboarding/tutorial"
+@attribute [Authorize]
+@layout LevelUp.Web.Components.Layout.OnboardingLayout
+@inject LevelUpWebService Store
+@inject NavigationManager Navigation
+
+<PageTitle>Getting started | LevelUp</PageTitle>
+
+<section class="tutorial-page levelup-fade-in">
+    <div class="tutorial-shell">
+        <header class="tutorial-header">
+            <span class="tutorial-brand">LEVELUP</span>
+            <span class="tutorial-progress">STEP @(_step + 1) OF @Slides.Length</span>
+        </header>
+
+        <div class="tutorial-progress-bar" aria-hidden="true">
+            <span style="width: @ProgressPercent%"></span>
+        </div>
+
+        <article class="tutorial-card">
+            <div class="tutorial-icon" aria-hidden="true">@Slides[_step].Icon</div>
+            <p class="tutorial-eyebrow">@Slides[_step].Eyebrow</p>
+            <h1>@Slides[_step].Title</h1>
+            <p class="tutorial-copy">@Slides[_step].Description</p>
+
+            <div class="tutorial-preview">
+                @foreach (var item in Slides[_step].Items)
+                {
+                    <div class="tutorial-preview__item">
+                        <span>✓</span>
+                        <p>@item</p>
+                    </div>
+                }
+            </div>
+        </article>
+
+        <footer class="tutorial-actions">
+            <button class="tutorial-button tutorial-button--secondary" type="button" disabled="@(_step == 0 || _busy)" @onclick="Previous">BACK</button>
+            <button class="tutorial-button tutorial-button--primary" type="button" disabled="@_busy" @onclick="NextAsync">
+                @(_busy ? "SAVING..." : _step == Slides.Length - 1 ? "ENTER DAILY" : "NEXT")
+            </button>
+        </footer>
+    </div>
+</section>
+
+@code {
+    private int _step;
+    private bool _busy;
+    private int ProgressPercent => (int)Math.Round((_step + 1d) / Slides.Length * 100d);
+
+    private static readonly TutorialSlide[] Slides =
+    [
+        new("01 — DAILY", "Your command center", "☀", "Daily keeps the actions that move your life forward in one place.",
+            ["Review today before starting", "Keep each item small and actionable", "Return throughout the day"]),
+        new("02 — HABITS", "Build your rhythm", "↻", "Habits are recurring behaviors. Register progress consistently and watch momentum grow.",
+            ["Use positive habits to reinforce progress", "Use negative actions when accountability helps", "Let streaks reveal consistency"]),
+        new("03 — TASKS", "Handle recurring work", "✓", "Tasks can repeat daily, weekly or monthly and are completed manually.",
+            ["Choose a recurrence that matches reality", "Complete the task when the cycle is done", "Keep tasks independent from projects"]),
+        new("04 — PROJECTS", "Turn goals into progress", "◆", "Projects represent objectives. Their To-Dos define the work and calculate completion.",
+            ["Create the project first", "Add focused To-Dos", "Finish every To-Do to complete the project"]),
+        new("05 — READY", "Begin your journey", "★", "Your account, character and class are ready. The Daily is now yours.",
+            ["Start with one habit", "Add one meaningful task", "Create one project you care about"])
+    ];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var data = await Store.LoadAsync();
+        if (data.CurrentCharacter is null)
+        {
+            Navigation.NavigateTo("/character/create", forceLoad: true, replace: true);
+            return;
+        }
+
+        if (data.CurrentUser?.HasCompletedOnboarding == true)
+        {
+            Navigation.NavigateTo("/daily", forceLoad: true, replace: true);
+        }
+    }
+
+    private void Previous()
+    {
+        if (_step > 0) _step--;
+    }
+
+    private async Task NextAsync()
+    {
+        if (_step < Slides.Length - 1)
+        {
+            _step++;
+            return;
+        }
+
+        _busy = true;
+        try
+        {
+            await Store.CompleteOnboardingAsync();
+            Navigation.NavigateTo("/daily", forceLoad: true, replace: true);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private sealed record TutorialSlide(string Eyebrow, string Title, string Icon, string Description, string[] Items);
+}

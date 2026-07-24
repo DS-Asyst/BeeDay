@@ -95,6 +95,19 @@ public sealed class UserAccountHandlersTests
         Assert.Equal(UserTheme.Dark, repository.Data.CurrentUser.Theme);
     }
 
+    [Fact]
+    public async Task CompleteOnboarding_MarksCurrentUserAsCompleted()
+    {
+        var repository = CreateRepository("hash:Current123");
+        var handler = new CompleteCurrentUserOnboardingCommandHandler(repository);
+
+        await handler.Handle(
+            new CompleteCurrentUserOnboardingCommand(),
+            TestContext.Current.CancellationToken);
+
+        Assert.True(repository.Data.CurrentUser!.HasCompletedOnboarding);
+    }
+
     private static TestRepository CreateRepository(string passwordHash)
     {
         var repository = new TestRepository();

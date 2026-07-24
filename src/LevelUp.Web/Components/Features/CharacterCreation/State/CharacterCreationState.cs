@@ -13,6 +13,9 @@ public sealed class CharacterCreationState(LevelUpWebService store, ToastService
     public bool ShowConfirmation { get; private set; }
     public bool IsBusy { get; private set; }
     public string? ValidationError { get; private set; }
+    public bool HasAuthenticatedSession { get; private set; }
+
+    public Task<LevelUp.Domain.Entities.LevelUpData> LoadDataAsync() => store.LoadAsync();
 
     public static IReadOnlyList<CharacterClassOption> ClassOptions { get; } =
     [
@@ -45,15 +48,27 @@ public sealed class CharacterCreationState(LevelUpWebService store, ToastService
         NormalizedNickname.All(character =>
             char.IsLetterOrDigit(character) || character is '.' or '_' or '-');
 
-    public async Task<OnboardingStatus> InitializeAsync()
+    public async Task<OnboardingStatus> InitializeAsync(bool hasAuthenticatedSession)
     {
+        HasAuthenticatedSession = hasAuthenticatedSession;
         var data = await store.LoadAsync();
 
-        if (data.CurrentUser is not null)
+        if (hasAuthenticatedSession && data.CurrentUser is not null)
         {
             Model.Name = data.CurrentUser.Name;
             Model.Email = data.CurrentUser.Email;
             Step = CharacterCreationStep.Character;
+        }
+
+        if (!hasAuthenticatedSession)
+        {
+            Step = CharacterCreationStep.Account;
+            Model.Name = string.Empty;
+            Model.Email = string.Empty;
+            Model.Password = string.Empty;
+            Model.ConfirmPassword = string.Empty;
+            Model.Nickname = string.Empty;
+            return new OnboardingStatus(false, false);
         }
 
         return new OnboardingStatus(
@@ -145,9 +160,7 @@ public sealed class CharacterCreationState(LevelUpWebService store, ToastService
 
         try
         {
-            var status = await GetStatusAsync();
-
-            if (!status.HasUser)
+            if (!HasAuthenticatedSession)
             {
                 await store.CreateUserAsync(
                     NormalizedNickname,

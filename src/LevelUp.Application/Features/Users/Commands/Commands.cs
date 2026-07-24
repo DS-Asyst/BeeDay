@@ -7,3 +7,4 @@ public sealed record CreateUserCommand(CreateUserRequest Request) : IRequest<Gui
 public sealed record UpdateCurrentUserPreferencesCommand(UpdateUserPreferencesRequest Request) : IRequest;
 public sealed record UpdateCurrentUserAccountCommand(UpdateUserAccountRequest Request) : IRequest;
 public sealed record ChangeCurrentUserPasswordCommand(ChangeUserPasswordRequest Request) : IRequest;
+public sealed record CompleteCurrentUserOnboardingCommand : IRequest;

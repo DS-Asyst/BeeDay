@@ -24,6 +24,7 @@ public sealed class LevelUpWebService(ISender sender)
     public Task UpdateUserAsync(string name, string email) => sender.Send(new UpdateCurrentUserAccountCommand(new(name, email)));
     public Task UpdatePreferencesAsync(UserLanguage language, UserTheme theme) => sender.Send(new UpdateCurrentUserPreferencesCommand(new(language, theme)));
     public Task UpdateCharacterAvatarAsync(string? avatar) => sender.Send(new UpdateCurrentCharacterAvatarCommand(new(avatar)));
+    public Task CompleteOnboardingAsync() => sender.Send(new CompleteCurrentUserOnboardingCommand());
     public Task ChangePasswordAsync(string currentPassword, string newPassword, string confirmNewPassword) => sender.Send(new ChangeCurrentUserPasswordCommand(new(currentPassword, newPassword, confirmNewPassword)));
     public Task AddHabitAsync(HabitEditorModel m) => sender.Send(new CreateHabitCommand(new(m.Title, m.Description, m.Direction, m.Difficulty, m.ResetCounter)));
     public Task UpdateHabitAsync(Guid id, HabitEditorModel m) => sender.Send(new UpdateHabitCommand(id, new(m.Title, m.Description, m.Direction, m.Difficulty, m.ResetCounter)));

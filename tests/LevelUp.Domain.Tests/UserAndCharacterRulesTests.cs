@@ -52,4 +52,14 @@ public sealed class UserAndCharacterRulesTests
         Assert.Equal(UserLanguage.Portuguese, user.Language);
         Assert.Equal(UserTheme.Dark, user.Theme);
     }
+
+    [Fact]
+    public void CompleteOnboarding_IsPersistedOnUser()
+    {
+        var user = User.Create("Test User", "test@levelup.invalid");
+
+        user.CompleteOnboarding();
+
+        Assert.True(user.HasCompletedOnboarding);
+    }
 }

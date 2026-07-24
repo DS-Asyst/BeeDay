@@ -1,0 +1,77 @@
+@page "/login"
+@attribute [AllowAnonymous]
+@layout LevelUp.Web.Components.Layout.OnboardingLayout
+@inject NavigationManager Navigation
+
+<PageTitle>Login | LevelUp</PageTitle>
+
+<section class="auth-page levelup-fade-in">
+    <div class="auth-card">
+        <span class="auth-card__brand">LEVELUP</span>
+        <h1>Welcome back</h1>
+        <p>Sign in to continue your journey.</p>
+
+        @if (HasInvalidCredentials)
+        {
+            <div class="auth-feedback auth-feedback--error" role="alert">
+                Invalid email or password.
+            </div>
+        }
+
+        @if (WasRegistered)
+        {
+            <div class="auth-feedback auth-feedback--success" role="status">
+                Account created. Sign in to continue.
+            </div>
+        }
+
+        <form method="post" action="/auth/login" class="auth-form">
+            <input type="hidden" name="returnUrl" value="@ReturnUrl" />
+
+            <label class="auth-field">
+                <span>Email</span>
+                <input type="email"
+                       name="email"
+                       value="@Email"
+                       autocomplete="email"
+                       required
+                       autofocus />
+            </label>
+
+            <label class="auth-field">
+                <span>Password</span>
+                <input type="password"
+                       name="password"
+                       autocomplete="current-password"
+                       required />
+            </label>
+
+            <button type="submit" class="auth-submit">SIGN IN</button>
+        </form>
+
+        <p class="auth-card__footer">
+            New to LevelUp? <a href="/character/create">Create account</a>
+        </p>
+    </div>
+</section>
+
+@code {
+    [SupplyParameterFromQuery(Name = "error")]
+    public string? Error { get; set; }
+
+    [SupplyParameterFromQuery(Name = "registered")]
+    public bool Registered { get; set; }
+
+    [SupplyParameterFromQuery(Name = "email")]
+    public string? Email { get; set; }
+
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string? RequestedReturnUrl { get; set; }
+
+    private bool HasInvalidCredentials => string.Equals(Error, "invalid", StringComparison.OrdinalIgnoreCase);
+    private bool WasRegistered => Registered;
+    private string ReturnUrl => IsLocalPath(RequestedReturnUrl) ? RequestedReturnUrl! : "/daily";
+
+    private static bool IsLocalPath(string? value) =>
+        !string.IsNullOrWhiteSpace(value) && value.StartsWith('/') && !value.StartsWith("//");
+}

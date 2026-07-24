@@ -45,6 +45,25 @@ p {
     margin-top: 0;
 }
 
+h1,
+h2,
+h3,
+h4,
+.page-title,
+.section-title,
+.modal-title {
+    font-family: var(--levelup-font-display);
+    font-weight: 400;
+}
+
+.levelup-brand,
+.brand,
+.logo,
+.loading-title {
+    font-family: var(--levelup-font-brand);
+    font-weight: 400;
+}
+
 .levelup-app {
     min-height: 100vh;
     background: var(--levelup-color-background);

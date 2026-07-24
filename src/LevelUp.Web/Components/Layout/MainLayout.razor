@@ -1,3 +1,4 @@
+@inject AuthenticatedUserInitializer AuthenticatedUserInitializer
 @inherits LayoutComponentBase
 
 <div class="levelup-app">
@@ -28,6 +29,11 @@
 </div>
 
 @code {
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthenticatedUserInitializer.EnsureInitializedAsync();
+    }
+
     private bool _isCharacterPanelOpen;
     private bool _isMenuPanelOpen;
 

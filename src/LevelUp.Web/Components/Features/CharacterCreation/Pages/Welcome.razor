@@ -1,10 +1,21 @@
 @page "/welcome"
+@attribute [AllowAnonymous]
 @layout LevelUp.Web.Components.Layout.OnboardingLayout
-<PageTitle>Welcome | LevelUp</PageTitle>
-<section class="welcome">
-    <span>LEVELUP</span>
-    <h1>Gamifying your life.</h1>
-    <p>Build habits, complete goals and evolve your character.</p>
-    <a class="welcome__start" href="/character/create">CREATE ACCOUNT</a>
-</section>
+@inject NavigationManager Navigation
 
+<PageTitle>Login | LevelUp</PageTitle>
+
+<div class="entry-loading" role="status" aria-live="polite">
+    <span>LEVELUP</span>
+    <p>Redirecting to login...</p>
+</div>
+
+@code {
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Navigation.NavigateTo("/login", forceLoad: true, replace: true);
+        }
+    }
+}

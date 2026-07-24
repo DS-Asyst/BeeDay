@@ -1,5 +1,7 @@
 @page "/daily"
+@attribute [Authorize]
 @rendermode InteractiveServer
+@inject AuthenticatedUserInitializer UserInitializer
 @inject LevelUp.Web.Components.Features.Dashboard.State.DashboardState State
 @inject NavigationManager Navigation
 

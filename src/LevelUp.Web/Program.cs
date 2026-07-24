@@ -7,6 +7,14 @@ using LevelUp.Web.Diagnostics;
 using LevelUp.Web.HealthChecks;
 using LevelUp.Web.Services;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
+using LevelUp.Application.Features.Authentication.Commands;
+using LevelUp.Application.Common.Contracts;
+using LevelUp.Application.Features.Authentication.Requests;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +38,41 @@ builder.Services.AddProblemDetails(options =>
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/login";
+        options.AccessDeniedPath = "/login";
+        options.Cookie.Name = "LevelUp.Auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.SlidingExpiration = true;
+        options.ExpireTimeSpan = TimeSpan.FromDays(14);
+        options.Events.OnValidatePrincipal = async context =>
+        {
+            var value = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(value, out var userId))
+            {
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return;
+            }
+
+            var repository = context.HttpContext.RequestServices.GetRequiredService<ILevelUpRepository>();
+            var data = await repository.LoadAsync(context.HttpContext.RequestAborted);
+            var user = data.Users.FirstOrDefault(candidate => candidate.Id == userId);
+
+            if (user is null || !user.IsActive)
+            {
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            }
+        };
+    });
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
+
+builder.Services
     .AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -37,6 +80,7 @@ builder.Services.AddLevelUpApplication();
 builder.Services.AddLevelUpInfrastructure(builder.Configuration);
 builder.Services.AddScoped<LevelUpWebService>();
 builder.Services.AddScoped<ToastService>();
+builder.Services.AddScoped<AuthenticatedUserInitializer>();
 builder.Services.AddScoped<DashboardState>();
 builder.Services.AddScoped<CharacterCreationState>();
 
@@ -51,6 +95,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 app.MapStaticAssets();
 
@@ -76,6 +122,64 @@ app.MapHealthChecks("/health", new HealthCheckOptions
         [HealthStatus.Degraded] = StatusCodes.Status200OK,
         [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
     }
+});
+
+
+app.MapPost("/auth/login", async (
+    HttpContext httpContext,
+    ISender sender,
+    [FromForm] string email,
+    [FromForm] string password,
+    [FromForm] string? returnUrl) =>
+{
+    try
+    {
+        var user = await sender.Send(new AuthenticateUserCommand(new AuthenticateUserRequest(email, password)));
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Name),
+            new Claim(ClaimTypes.Email, user.Email)
+        };
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+
+        await httpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            principal,
+            new AuthenticationProperties
+            {
+                IsPersistent = true,
+                AllowRefresh = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(14)
+            });
+
+        var defaultDestination = !user.HasCharacter
+            ? "/character/create"
+            : user.HasCompletedOnboarding ? "/daily" : "/onboarding/tutorial";
+
+        var destination = !string.IsNullOrWhiteSpace(returnUrl) && returnUrl.StartsWith('/') && !returnUrl.StartsWith("//")
+            ? returnUrl
+            : defaultDestination;
+
+        return Results.LocalRedirect(destination);
+    }
+    catch
+    {
+        var encodedEmail = Uri.EscapeDataString(email ?? string.Empty);
+        return Results.LocalRedirect($"/login?error=invalid&email={encodedEmail}");
+    }
+}).DisableAntiforgery();
+
+app.MapGet("/auth/logout", async (HttpContext httpContext, [FromQuery] string? returnUrl) =>
+{
+    await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    var destination = !string.IsNullOrWhiteSpace(returnUrl) &&
+                      returnUrl.StartsWith('/') &&
+                      !returnUrl.StartsWith("//")
+        ? returnUrl
+        : "/login";
+    return Results.LocalRedirect(destination);
 });
 
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();

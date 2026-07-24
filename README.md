@@ -231,3 +231,17 @@ Do not publish runtime JSON data, logs, backup directories, IIS secrets or runne
 ## Author
 
 Developed by [Tiago Arrigoni](https://github.com/tiagoarrigoni).
+
+## Authentication
+
+LevelUp uses ASP.NET Core Cookie Authentication for persistent user sessions.
+
+- `/login` authenticates registered users.
+- `/auth/logout` clears the current session.
+- `/daily` and `/account` require authentication.
+- Credentials are verified in the Application layer through `IPasswordService`.
+- The authenticated user identifier is stored as a `NameIdentifier` claim and synchronized with the current domain context at the start of each protected page.
+
+### Sprint 2.3 — Onboarding
+
+The authenticated onboarding flow is now Welcome → Account → Character → Class → Tutorial → Daily. Completion is persisted per user so the tutorial appears only on the first journey. Official typography uses Jersey 15 for brand/display text and Pixelify Sans for interface text.

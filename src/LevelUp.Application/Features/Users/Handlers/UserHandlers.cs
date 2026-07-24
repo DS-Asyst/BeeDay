@@ -84,13 +84,25 @@ public sealed class ChangeCurrentUserPasswordCommandHandler(
         }, cancellationToken);
 }
 
+
+public sealed class CompleteCurrentUserOnboardingCommandHandler(ILevelUpRepository repository)
+    : RequestHandlerBase(repository), IRequestHandler<CompleteCurrentUserOnboardingCommand>
+{
+    public Task Handle(CompleteCurrentUserOnboardingCommand command, CancellationToken cancellationToken) =>
+        MutateAsync(data =>
+        {
+            var user = data.CurrentUser ?? throw new InvalidDomainStateException("Current User was not found.");
+            user.CompleteOnboarding();
+        }, cancellationToken);
+}
+
 public sealed class GetCurrentUserQueryHandler(ILevelUpRepository repository)
     : IRequestHandler<GetCurrentUserQuery, CurrentUserResponse?>
 {
     public async Task<CurrentUserResponse?> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
         var user = (await repository.LoadAsync(cancellationToken)).CurrentUser;
-        return user is null ? null : new(user.Id, user.Name, user.Email, user.Language, user.Theme, user.IsActive);
+        return user is null ? null : new(user.Id, user.Name, user.Email, user.Language, user.Theme, user.IsActive, user.HasCompletedOnboarding);
     }
 }
 

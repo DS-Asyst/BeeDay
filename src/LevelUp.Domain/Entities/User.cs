@@ -17,6 +17,7 @@ public sealed class User : Entity
     [JsonInclude] public DateTimeOffset UpdatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
     [JsonInclude] public DateTimeOffset? LastLoginAtUtc { get; private set; }
     [JsonInclude] public bool IsActive { get; private set; } = true;
+    [JsonInclude] public bool HasCompletedOnboarding { get; private set; }
 
     public static User Create(string name, string email, string? passwordHash = null)
     {
@@ -48,5 +49,6 @@ public sealed class User : Entity
     }
     public void RegisterLogin() { LastLoginAtUtc = DateTimeOffset.UtcNow; Touch(); }
     public void SetActive(bool active) { IsActive = active; Touch(); }
+    public void CompleteOnboarding() { HasCompletedOnboarding = true; Touch(); }
     private void Touch() => UpdatedAtUtc = DateTimeOffset.UtcNow;
 }
