@@ -49,7 +49,7 @@ logs/
 # Application Data
 #####################################################
 
-src/LevelUp.Web/Data/
+src/LevelUp.Web/Data/*
 !src/LevelUp.Web/Data/.gitkeep
 
 #####################################################

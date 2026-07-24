@@ -3,11 +3,6 @@
     <ProjectReference Include="../LevelUp.Domain/LevelUp.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- Prevent stale Sprint 1 Profile handlers from being compiled when this
-         project is extracted over an older working directory. -->
-    <Compile Remove="Features\Profiles\**\*.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
