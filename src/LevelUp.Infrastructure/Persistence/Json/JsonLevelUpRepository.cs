@@ -14,25 +14,27 @@ public sealed class JsonLevelUpRepository(
     JsonFileReader reader,
     JsonFileWriter writer,
     JsonBackupService backupService,
+    JsonStorageGate storageGate,
+    JsonStorageInitializer storageInitializer,
+    JsonAtomicFileCommitter fileCommitter,
     IOptions<JsonStorageOptions> options,
-    ILogger<JsonLevelUpRepository> logger) : ILevelUpRepository, IDisposable
+    ILogger<JsonLevelUpRepository> logger) : ILevelUpRepository
 {
-    private readonly SemaphoreSlim gate = new(1, 1);
 
     public Task<LevelUpData> LoadAsync(CancellationToken cancellationToken = default) =>
-        ExecuteLockedAsync(LoadInternalAsync, cancellationToken);
+        storageGate.ExecuteAsync(LoadInternalAsync, cancellationToken);
 
     public Task SaveAsync(LevelUpData data, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(data);
-        return ExecuteLockedAsync(token => SaveInternalAsync(data, token), cancellationToken);
+        return storageGate.ExecuteAsync(token => SaveInternalAsync(data, token), cancellationToken);
     }
 
     public Task UpdateAsync(Action<LevelUpData> mutation, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(mutation);
 
-        return ExecuteLockedAsync(async token =>
+        return storageGate.ExecuteAsync(async token =>
         {
             var data = await LoadInternalAsync(token);
             mutation(data);
@@ -41,11 +43,10 @@ public sealed class JsonLevelUpRepository(
         }, cancellationToken);
     }
 
-    public void Dispose() => gate.Dispose();
 
     private async Task<LevelUpData> LoadInternalAsync(CancellationToken cancellationToken)
     {
-        EnsureDirectories();
+        storageInitializer.EnsureCreated();
 
         if (!File.Exists(paths.DataFile))
         {
@@ -90,11 +91,11 @@ public sealed class JsonLevelUpRepository(
             try
             {
                 await writer.WriteAsync(recoveryFile, recovered.Data, cancellationToken);
-                File.Move(recoveryFile, paths.DataFile, overwrite: true);
+                fileCommitter.Commit(recoveryFile, paths.DataFile);
             }
             finally
             {
-                DeleteIfExists(recoveryFile);
+                fileCommitter.DeleteTemporaryFile(recoveryFile);
             }
 
             logger.LogWarning(
@@ -115,7 +116,7 @@ public sealed class JsonLevelUpRepository(
     private async Task SaveInternalAsync(LevelUpData data, CancellationToken cancellationToken)
     {
         data.EnsureValidState();
-        EnsureDirectories();
+        storageInitializer.EnsureCreated();
 
         var temporaryFile = paths.CreateTemporaryFile();
         var stopwatch = Stopwatch.StartNew();
@@ -124,7 +125,7 @@ public sealed class JsonLevelUpRepository(
             await writer.WriteAsync(temporaryFile, data, cancellationToken);
             await reader.ReadAsync(temporaryFile, cancellationToken);
             await backupService.CreateAsync(cancellationToken);
-            File.Move(temporaryFile, paths.DataFile, overwrite: true);
+            fileCommitter.Commit(temporaryFile, paths.DataFile);
 
             stopwatch.Stop();
             logger.LogInformation(
@@ -139,51 +140,7 @@ public sealed class JsonLevelUpRepository(
         }
         finally
         {
-            DeleteIfExists(temporaryFile);
-        }
-    }
-
-    private void EnsureDirectories()
-    {
-        Directory.CreateDirectory(paths.StorageDirectory);
-        Directory.CreateDirectory(paths.BackupDirectory);
-    }
-
-    private static void DeleteIfExists(string path)
-    {
-        if (File.Exists(path))
-        {
-            File.Delete(path);
-        }
-    }
-
-    private async Task ExecuteLockedAsync(
-        Func<CancellationToken, Task> operation,
-        CancellationToken cancellationToken)
-    {
-        await gate.WaitAsync(cancellationToken);
-        try
-        {
-            await operation(cancellationToken);
-        }
-        finally
-        {
-            gate.Release();
-        }
-    }
-
-    private async Task<T> ExecuteLockedAsync<T>(
-        Func<CancellationToken, Task<T>> operation,
-        CancellationToken cancellationToken)
-    {
-        await gate.WaitAsync(cancellationToken);
-        try
-        {
-            return await operation(cancellationToken);
-        }
-        finally
-        {
-            gate.Release();
+            fileCommitter.DeleteTemporaryFile(temporaryFile);
         }
     }
 }

@@ -53,6 +53,9 @@ public static class InfrastructureServiceCollectionExtensions
             .ValidateOnStart();
 
         services.AddSingleton<JsonStoragePaths>();
+        services.AddSingleton<JsonStorageGate>();
+        services.AddSingleton<JsonStorageInitializer>();
+        services.AddSingleton<JsonAtomicFileCommitter>();
         services.AddSingleton<JsonSerializerOptionsFactory>();
         services.AddSingleton<JsonFileReader>();
         services.AddSingleton<JsonFileWriter>();

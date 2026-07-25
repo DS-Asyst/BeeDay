@@ -256,3 +256,8 @@ Daily and Inventory operations are scoped to the authenticated user's claim (`Na
 ### Registration reliability
 
 Anonymous account creation no longer executes authenticated dashboard queries. User and character creation are persisted in one atomic application command, preventing orphaned accounts when character validation fails.
+
+
+## Persistence
+
+The JSON persistence architecture, compatibility policy, backup flow and test strategy are documented in [`docs/PERSISTENCE.md`](docs/PERSISTENCE.md).

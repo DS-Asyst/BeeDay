@@ -82,6 +82,92 @@ public sealed class JsonPersistenceTests : IDisposable
             () => fixture.Repository.LoadAsync(cancellationToken));
     }
 
+
+    [Fact]
+    public async Task LoadAsync_CreatesInitialVersionedDocument_WhenFileDoesNotExist()
+    {
+        var fixture = CreateFixture();
+
+        var loaded = await fixture.Repository.LoadAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(5, loaded.SchemaVersion);
+        Assert.Empty(loaded.Users);
+        Assert.True(File.Exists(fixture.Paths.DataFile));
+    }
+
+    [Fact]
+    public async Task LoadAsync_NormalizesMissingCollections_FromCompatibleOlderDocument()
+    {
+        var fixture = CreateFixture();
+        Directory.CreateDirectory(fixture.Paths.StorageDirectory);
+        await File.WriteAllTextAsync(
+            fixture.Paths.DataFile,
+            "{\"schemaVersion\":5,\"users\":[],\"habits\":null,\"unknownFutureField\":true}",
+            TestContext.Current.CancellationToken);
+
+        var loaded = await fixture.Repository.LoadAsync(TestContext.Current.CancellationToken);
+
+        Assert.NotNull(loaded.Habits);
+        Assert.Empty(loaded.Habits);
+        Assert.NotNull(loaded.Tasks);
+        Assert.NotNull(loaded.Projects);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_SerializesConcurrentMutations_WithoutLostUpdates()
+    {
+        var fixture = CreateFixture();
+        await fixture.Repository.SaveAsync(CreateData("Initial"), TestContext.Current.CancellationToken);
+
+        var updates = Enumerable.Range(0, 20).Select(index =>
+            fixture.Repository.UpdateAsync(data =>
+                data.AddHabit(Habit.Create(
+                    $"Concurrent {index}",
+                    null,
+                    HabitDirection.Positive,
+                    HabitDifficulty.Easy,
+                    HabitResetCounter.Daily)),
+                TestContext.Current.CancellationToken));
+
+        await Task.WhenAll(updates);
+        var loaded = await fixture.Repository.LoadAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(21, loaded.Habits.Count);
+        Assert.Equal(20, loaded.Habits.Count(habit => habit.Title.StartsWith("Concurrent ", StringComparison.Ordinal)));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ReleasesGate_WhenMutationThrows()
+    {
+        var fixture = CreateFixture();
+        await fixture.Repository.SaveAsync(CreateData("Before failure"), TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            fixture.Repository.UpdateAsync(_ => throw new InvalidOperationException("Expected test failure."), TestContext.Current.CancellationToken));
+
+        await fixture.Repository.UpdateAsync(data =>
+            data.AddHabit(Habit.Create(
+                "After failure",
+                null,
+                HabitDirection.Positive,
+                HabitDifficulty.Easy,
+                HabitResetCounter.Daily)),
+            TestContext.Current.CancellationToken);
+
+        var loaded = await fixture.Repository.LoadAsync(TestContext.Current.CancellationToken);
+        Assert.Contains(loaded.Habits, habit => habit.Title == "After failure");
+    }
+
+    [Fact]
+    public async Task SaveAsync_RemovesTemporaryFiles_AfterSuccessfulCommit()
+    {
+        var fixture = CreateFixture();
+
+        await fixture.Repository.SaveAsync(CreateData("No leftovers"), TestContext.Current.CancellationToken);
+
+        Assert.Empty(Directory.GetFiles(fixture.Paths.StorageDirectory, "*.tmp"));
+    }
+
     [Fact]
     public async Task HealthCheck_ReturnsHealthy_WhenStorageIsWritableAndValid()
     {
@@ -135,6 +221,9 @@ public sealed class JsonPersistenceTests : IDisposable
             reader,
             writer,
             backups,
+            new JsonStorageGate(),
+            new JsonStorageInitializer(paths),
+            new JsonAtomicFileCommitter(),
             options,
             NullLogger<JsonLevelUpRepository>.Instance);
 
