@@ -30,6 +30,12 @@ public static class InfrastructureServiceCollectionExtensions
             .ValidateOnStart();
 
         services
+            .AddOptions<DevelopmentEmailOptions>()
+            .Bind(configuration.GetSection(DevelopmentEmailOptions.SectionName))
+            .Validate(options => !options.Enabled || !string.IsNullOrWhiteSpace(options.Directory), "Development email directory is required when capture is enabled.")
+            .ValidateOnStart();
+
+        services
             .AddOptions<ResendOptions>()
             .Bind(configuration.GetSection(ResendOptions.SectionName))
             .Validate(options => !options.Enabled || !string.IsNullOrWhiteSpace(options.ApiKey), "Resend API key is required when email delivery is enabled.")
@@ -56,11 +62,19 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<LevelUp.Application.Common.Identity.IClock, SystemClock>();
         services.AddSingleton<LevelUp.Application.Common.Identity.IUserTokenService, SecureUserTokenService>();
         services.AddSingleton<LevelUp.Application.Common.Identity.IIdentityEmailComposer, IdentityEmailComposer>();
-        services.AddHttpClient<LevelUp.Application.Common.Identity.IEmailSender, ResendEmailSender>(client =>
+        var resendEnabled = configuration.GetValue<bool>($"{ResendOptions.SectionName}:Enabled");
+        if (resendEnabled)
         {
-            client.BaseAddress = new Uri("https://api.resend.com/");
-            client.Timeout = TimeSpan.FromSeconds(30);
-        });
+            services.AddHttpClient<LevelUp.Application.Common.Identity.IEmailSender, ResendEmailSender>(client =>
+            {
+                client.BaseAddress = new Uri("https://api.resend.com/");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+        }
+        else
+        {
+            services.AddSingleton<LevelUp.Application.Common.Identity.IEmailSender, DevelopmentEmailSender>();
+        }
         services.AddMemoryCache();
         services.AddSingleton<MemoryApplicationCache>();
         services.AddSingleton<LevelUp.Application.Common.Caching.IApplicationCache>(sp => sp.GetRequiredService<MemoryApplicationCache>());

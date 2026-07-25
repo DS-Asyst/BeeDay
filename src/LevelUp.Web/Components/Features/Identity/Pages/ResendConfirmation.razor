@@ -1,0 +1,24 @@
+@page "/account/resend-confirmation"
+@attribute [AllowAnonymous]
+@layout OnboardingLayout
+@inject MediatR.ISender Sender
+
+<PageTitle>Resend confirmation | LevelUp</PageTitle>
+<section class="identity-page levelup-fade-in"><div class="identity-card"><div class="identity-card__content">
+<span class="identity-brand"><span>LEVEL</span><span>UP</span></span>
+<header class="identity-header"><h1>Resend confirmation</h1><p>Enter the email used to create your account.</p></header>
+@if (_submitted) { <div class="identity-feedback identity-feedback--success" role="status">If the account is eligible, a new confirmation message was generated.</div> }
+<EditForm Model="_model" OnValidSubmit="SubmitAsync" class="identity-form">
+<DataAnnotationsValidator />
+<label class="identity-field"><span>Email</span><InputText type="email" @bind-Value="_model.Email" autocomplete="email" /><ValidationMessage For="() => _model.Email" /></label>
+<button class="identity-primary" type="submit" disabled="@_busy">@(_busy ? "SENDING..." : "RESEND EMAIL")</button>
+</EditForm>
+<a class="identity-secondary" href="/login">BACK TO SIGN IN</a>
+</div></div></section>
+@code {
+    [SupplyParameterFromQuery(Name = "email")] public string? Email { get; set; }
+    private readonly EmailForm _model = new(); private bool _busy; private bool _submitted;
+    protected override void OnParametersSet() { if (!string.IsNullOrWhiteSpace(Email) && string.IsNullOrWhiteSpace(_model.Email)) _model.Email = Email.Trim(); }
+    private async Task SubmitAsync() { _busy=true; try { await Sender.Send(new LevelUp.Application.Features.Identity.Commands.ResendEmailConfirmationCommand(new(_model.Email))); _submitted=true; } finally { _busy=false; } }
+    private sealed class EmailForm { [System.ComponentModel.DataAnnotations.Required, System.ComponentModel.DataAnnotations.EmailAddress] public string Email { get; set; } = string.Empty; }
+}

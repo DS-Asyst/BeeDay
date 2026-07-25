@@ -24,10 +24,20 @@
                 </div>
             }
 
-            @if (WasRegistered)
+            @if (WasConfirmed)
             {
-                <div class="auth-feedback auth-feedback--success" role="status">
-                    Account created. Sign in to continue.
+                <div class="auth-feedback auth-feedback--success" role="status">Email confirmed. Sign in to continue.</div>
+            }
+
+            @if (WasReset)
+            {
+                <div class="auth-feedback auth-feedback--success" role="status">Password updated. Sign in with your new password.</div>
+            }
+
+            @if (NeedsConfirmation)
+            {
+                <div class="auth-feedback auth-feedback--error" role="alert">
+                    Confirm your email before signing in. <a href="@ResendUrl">Resend confirmation</a>
                 </div>
             }
 
@@ -52,6 +62,8 @@
                            required />
                 </label>
 
+                <p class="auth-form__help"><a href="/account/forgot-password">Forgot password?</a></p>
+
                 <LevelUpButton Type="submit" FullWidth="true" Class="auth-submit">
                     Sign in
                 </LevelUpButton>
@@ -68,8 +80,11 @@
     [SupplyParameterFromQuery(Name = "error")]
     public string? Error { get; set; }
 
-    [SupplyParameterFromQuery(Name = "registered")]
-    public bool Registered { get; set; }
+    [SupplyParameterFromQuery(Name = "confirmed")]
+    public bool Confirmed { get; set; }
+
+    [SupplyParameterFromQuery(Name = "reset")]
+    public bool Reset { get; set; }
 
     [SupplyParameterFromQuery(Name = "email")]
     public string? Email { get; set; }
@@ -78,8 +93,11 @@
     public string? RequestedReturnUrl { get; set; }
 
     private bool HasInvalidCredentials => string.Equals(Error, "invalid", StringComparison.OrdinalIgnoreCase);
-    private bool WasRegistered => Registered;
-    private string ReturnUrl => IsLocalPath(RequestedReturnUrl) ? RequestedReturnUrl! : "/daily";
+    private bool WasConfirmed => Confirmed;
+    private bool WasReset => Reset;
+    private bool NeedsConfirmation => string.Equals(Error, "unconfirmed", StringComparison.OrdinalIgnoreCase);
+    private string ResendUrl => $"/account/resend-confirmation?email={Uri.EscapeDataString(Email ?? string.Empty)}";
+    private string ReturnUrl => IsLocalPath(RequestedReturnUrl) ? RequestedReturnUrl! : string.Empty;
 
     private static bool IsLocalPath(string? value) =>
         !string.IsNullOrWhiteSpace(value) && value.StartsWith('/') && !value.StartsWith("//");

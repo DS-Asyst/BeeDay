@@ -1,0 +1,58 @@
+@page "/account/email-confirmation-sent"
+@attribute [AllowAnonymous]
+@layout OnboardingLayout
+@inject MediatR.ISender Sender
+
+<PageTitle>Confirm your email | LevelUp</PageTitle>
+
+<section class="identity-page levelup-fade-in">
+    <div class="identity-card">
+        <div class="identity-card__content">
+            <span class="identity-brand"><span>LEVEL</span><span>UP</span></span>
+            <header class="identity-header">
+                <h1>Check your email</h1>
+                <p>We created your account, but you must confirm your email before signing in.</p>
+            </header>
+
+            @if (_resent)
+            {
+                <div class="identity-feedback identity-feedback--success" role="status">
+                    If the account is eligible, a new confirmation message was generated.
+                </div>
+            }
+
+            <div class="identity-note">
+                <strong>@DisplayEmail</strong>
+                <span>Development mode saves the message in <code>src/LevelUp.Web/Data/Emails</code>.</span>
+            </div>
+
+            <button class="identity-primary" type="button" disabled="@_busy" @onclick="ResendAsync">
+                @(_busy ? "SENDING..." : "RESEND CONFIRMATION")
+            </button>
+
+            <a class="identity-secondary" href="/login">BACK TO SIGN IN</a>
+        </div>
+    </div>
+</section>
+
+@code {
+    [SupplyParameterFromQuery(Name = "email")]
+    public string? Email { get; set; }
+
+    private bool _busy;
+    private bool _resent;
+    private string DisplayEmail => string.IsNullOrWhiteSpace(Email) ? "your email address" : Email.Trim();
+
+    private async Task ResendAsync()
+    {
+        if (_busy || string.IsNullOrWhiteSpace(Email)) return;
+        _busy = true;
+        try
+        {
+            await Sender.Send(new LevelUp.Application.Features.Identity.Commands.ResendEmailConfirmationCommand(
+                new LevelUp.Application.Features.Identity.Requests.ResendEmailConfirmationRequest(Email.Trim())));
+            _resent = true;
+        }
+        finally { _busy = false; }
+    }
+}

@@ -1,0 +1,135 @@
+@page "/account/confirm-email"
+@attribute [AllowAnonymous]
+@layout OnboardingLayout
+@inject MediatR.ISender Sender
+
+<PageTitle>Email confirmation | LevelUp</PageTitle>
+
+<section class="identity-page levelup-fade-in">
+    <div class="identity-card">
+        <div class="identity-card__content">
+            <span class="identity-brand"><span>LEVEL</span><span>UP</span></span>
+
+            @switch (_state)
+            {
+                case ConfirmationPageState.Processing:
+                    <header class="identity-header">
+                        <h1>Confirming email</h1>
+                        <p>Validating your confirmation link...</p>
+                    </header>
+                    break;
+
+                case ConfirmationPageState.Confirmed:
+                    <header class="identity-header">
+                        <h1>Email confirmed</h1>
+                        <p>Your account is ready. Sign in to begin your journey.</p>
+                    </header>
+                    <div class="identity-feedback identity-feedback--success" role="status">
+                        Confirmation completed successfully.
+                    </div>
+                    <a class="identity-primary identity-link-button" href="/login?confirmed=true">SIGN IN</a>
+                    break;
+
+                case ConfirmationPageState.AlreadyConfirmed:
+                    <header class="identity-header">
+                        <h1>Email already confirmed</h1>
+                        <p>This confirmation link has already been used. Your account remains active.</p>
+                    </header>
+                    <div class="identity-feedback identity-feedback--success" role="status">
+                        You can sign in normally.
+                    </div>
+                    <a class="identity-primary identity-link-button" href="/login">SIGN IN</a>
+                    break;
+
+                case ConfirmationPageState.Expired:
+                    <header class="identity-header">
+                        <h1>Confirmation link expired</h1>
+                        <p>This link is no longer valid. Request a new confirmation email.</p>
+                    </header>
+                    <div class="identity-feedback identity-feedback--error" role="alert">@_error</div>
+                    <a class="identity-secondary" href="/account/resend-confirmation">REQUEST A NEW LINK</a>
+                    break;
+
+                case ConfirmationPageState.Replaced:
+                    <header class="identity-header">
+                        <h1>Confirmation link replaced</h1>
+                        <p>A newer confirmation link was generated for this account.</p>
+                    </header>
+                    <div class="identity-feedback identity-feedback--error" role="alert">
+                        Use the most recent email or request another confirmation link.
+                    </div>
+                    <a class="identity-secondary" href="/account/resend-confirmation">REQUEST A NEW LINK</a>
+                    break;
+
+                default:
+                    <header class="identity-header">
+                        <h1>Invalid confirmation link</h1>
+                        <p>This link is incomplete or does not belong to a valid confirmation request.</p>
+                    </header>
+                    <div class="identity-feedback identity-feedback--error" role="alert">@_error</div>
+                    <a class="identity-secondary" href="/account/resend-confirmation">REQUEST A NEW LINK</a>
+                    break;
+            }
+        </div>
+    </div>
+</section>
+
+@code {
+    [SupplyParameterFromQuery(Name = "token")]
+    public string? Token { get; set; }
+
+    private ConfirmationPageState _state = ConfirmationPageState.Processing;
+    private string _error = "Unable to confirm this email.";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Token))
+        {
+            _state = ConfirmationPageState.Invalid;
+            _error = "The confirmation token is missing.";
+            return;
+        }
+
+        try
+        {
+            await Sender.Send(new LevelUp.Application.Features.Identity.Commands.ConfirmEmailCommand(
+                new LevelUp.Application.Features.Identity.Requests.ConfirmEmailRequest(Token)));
+            _state = ConfirmationPageState.Confirmed;
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+            _state = Classify(exception.Message);
+        }
+    }
+
+    private static ConfirmationPageState Classify(string message)
+    {
+        if (message.Contains("already been used", StringComparison.OrdinalIgnoreCase))
+        {
+            return ConfirmationPageState.AlreadyConfirmed;
+        }
+
+        if (message.Contains("expired", StringComparison.OrdinalIgnoreCase))
+        {
+            return ConfirmationPageState.Expired;
+        }
+
+        if (message.Contains("revoked", StringComparison.OrdinalIgnoreCase))
+        {
+            return ConfirmationPageState.Replaced;
+        }
+
+        return ConfirmationPageState.Invalid;
+    }
+
+    private enum ConfirmationPageState
+    {
+        Processing,
+        Confirmed,
+        AlreadyConfirmed,
+        Expired,
+        Replaced,
+        Invalid
+    }
+}

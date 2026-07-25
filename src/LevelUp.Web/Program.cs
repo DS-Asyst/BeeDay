@@ -3,6 +3,7 @@ using LevelUp.Application.Common.Contracts;
 using LevelUp.Application.DependencyInjection;
 using LevelUp.Application.Features.Authentication.Commands;
 using LevelUp.Application.Features.Authentication.Requests;
+using LevelUp.Domain.Exceptions;
 using LevelUp.Infrastructure.DependencyInjection;
 using LevelUp.Web.Components;
 using LevelUp.Web.Components.Features.CharacterCreation.State;
@@ -10,6 +11,7 @@ using LevelUp.Web.Components.Features.Dashboard.State;
 using LevelUp.Web.Diagnostics;
 using LevelUp.Web.HealthChecks;
 using LevelUp.Web.Services;
+using LevelUp.Web.Services.Authentication;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -156,20 +158,20 @@ app.MapPost("/auth/login", async (
                 ExpiresUtc = DateTimeOffset.UtcNow.AddDays(14)
             });
 
-        var defaultDestination = !user.HasCharacter
-            ? "/character/create"
-            : user.HasCompletedOnboarding ? "/daily" : "/onboarding/tutorial";
-
-        var destination = !string.IsNullOrWhiteSpace(returnUrl) && returnUrl.StartsWith('/') && !returnUrl.StartsWith("//")
-            ? returnUrl
-            : defaultDestination;
+        var destination = LoginDestinationResolver.Resolve(
+            user.HasCharacter,
+            user.HasCompletedOnboarding,
+            returnUrl);
 
         return Results.LocalRedirect(destination);
     }
-    catch
+    catch (InvalidDomainStateException exception)
     {
         var encodedEmail = Uri.EscapeDataString(email ?? string.Empty);
-        return Results.LocalRedirect($"/login?error=invalid&email={encodedEmail}");
+        var error = exception.Message.Contains("confirm your email", StringComparison.OrdinalIgnoreCase)
+            ? "unconfirmed"
+            : "invalid";
+        return Results.LocalRedirect($"/login?error={error}&email={encodedEmail}");
     }
 }).DisableAntiforgery();
 

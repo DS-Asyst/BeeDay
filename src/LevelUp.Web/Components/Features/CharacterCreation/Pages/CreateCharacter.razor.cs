@@ -58,7 +58,7 @@ public partial class CreateCharacter
         }
 
         Navigation.NavigateTo(
-            $"/login?registered=true&email={Uri.EscapeDataString(State.Model.Email.Trim())}",
+            $"/account/email-confirmation-sent?email={Uri.EscapeDataString(State.Model.Email.Trim())}",
             forceLoad: true,
             replace: true);
     }

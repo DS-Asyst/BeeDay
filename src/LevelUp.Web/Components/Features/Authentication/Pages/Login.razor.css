@@ -165,3 +165,6 @@
         padding: 1.35rem;
     }
 }
+
+.auth-form__help { margin: -.25rem 0 0; text-align: right; }
+.auth-form__help a, .auth-feedback a { color: var(--levelup-color-primary); font-weight: 700; }
