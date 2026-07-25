@@ -38,7 +38,7 @@
     color: #17121d;
     font-family: var(--levelup-font-family);
     font-size: 1.42rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: -.035em;
     line-height: 1.1;
     text-overflow: ellipsis;
@@ -55,7 +55,7 @@
     color: var(--levelup-color-surface);
     background: var(--levelup-color-project);
     font-size: .75rem;
-    font-weight: 800;
+    font-weight: 700;
     box-sizing: border-box;
 }
 
@@ -72,7 +72,7 @@
     background: #f8f7f9;
     font-family: var(--levelup-font-family);
     font-size: 1.35rem;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1;
     cursor: pointer;
     transition: transform .12s ease, color .12s ease, border-color .12s ease, background-color .12s ease;
@@ -241,4 +241,73 @@
 
 .dashboard-column__completed-content {
     animation: levelup-fade-in var(--levelup-duration-normal) var(--levelup-easing-standard) both;
+}
+
+/* Dashboard hierarchy and readability pass — 2026-07-25 */
+.dashboard-column__header {
+    min-height: 3.65rem;
+    padding: .65rem .75rem;
+}
+
+.dashboard-column__heading h2 {
+    font-family: var(--levelup-font-display);
+    font-size: 1.65rem;
+    font-weight: var(--levelup-font-weight-regular);
+    letter-spacing: -.015em;
+    line-height: 1;
+}
+
+.dashboard-column__count {
+    min-width: 1.85rem;
+    height: 1.85rem;
+    padding: 0 .5rem;
+    font-family: var(--levelup-font-display);
+    font-size: .95rem;
+    font-weight: var(--levelup-font-weight-regular);
+}
+
+.dashboard-column__add {
+    width: 2.15rem;
+    height: 2.15rem;
+    font-size: 1.45rem;
+}
+
+.dashboard-column__content,
+.dashboard-column__completed-content {
+    gap: .4rem;
+    padding: .5rem;
+}
+
+.dashboard-column__completed-toggle {
+    min-height: 2.85rem;
+    padding: .58rem .7rem;
+    font-size: 1.05rem;
+}
+
+.dashboard-column__completed-summary,
+.dashboard-column__completed-action {
+    font-size: 1.05rem;
+}
+
+.dashboard-column__empty,
+.dashboard-column__completed-empty {
+    font-size: .9rem;
+    line-height: 1.4;
+}
+
+
+/* Refined column depth — approved visual pass */
+.dashboard-column {
+    border: 1px solid #c9c5cd !important;
+    border-radius: .28rem !important;
+    box-shadow: 0 1px 2px rgb(47 36 56 / 8%), 0 4px 12px rgb(47 36 56 / 7%) !important;
+}
+
+.dashboard-column:focus-within {
+    border-color: #b8b1c0 !important;
+    box-shadow: 0 1px 2px rgb(47 36 56 / 9%), 0 5px 14px rgb(47 36 56 / 9%) !important;
+}
+
+.dashboard-column__header {
+    border-bottom-color: #d8d4dc;
 }

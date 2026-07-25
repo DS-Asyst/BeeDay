@@ -33,7 +33,7 @@
 .project-workspace__eyebrow {
     color: var(--levelup-color-primary);
     font-size: .68rem;
-    font-weight: 800;
+    font-weight: 700;
     text-transform: uppercase;
 }
 
@@ -137,7 +137,7 @@
     background: #fff;
     font-family: var(--levelup-font-family);
     font-size: 1.3rem;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1;
     cursor: pointer;
     transition: color .12s ease, background-color .12s ease, transform .12s ease;
@@ -174,7 +174,7 @@
     background: #fff;
     font-family: var(--levelup-font-family);
     font-size: .68rem;
-    font-weight: 800;
+    font-weight: 700;
     cursor: pointer;
     transition: color .12s ease, border-color .12s ease, background-color .12s ease;
 }
@@ -248,7 +248,7 @@
     border-right: 1px solid #e4dfe6;
     color: transparent;
     background: transparent;
-    font-weight: 900;
+    font-weight: 700;
     cursor: pointer;
 }
 
@@ -342,7 +342,7 @@
     border-radius: .3rem;
     color: #554a5c;
     background: transparent;
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: -.08em;
     opacity: 0;
     cursor: pointer;

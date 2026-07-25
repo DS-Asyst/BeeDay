@@ -110,3 +110,43 @@
         transition: none;
     }
 }
+
+/* Collapsed side rails follow the Top Navigation identity. */
+.levelup-side-slot {
+    background: #5b1095;
+}
+
+.levelup-side-slot--left {
+    border-right: 1px solid rgb(255 255 255 / 10%);
+}
+
+.levelup-side-slot--right {
+    border-left: 1px solid rgb(255 255 255 / 10%);
+}
+
+.levelup-workspace.has-left-panel .levelup-side-slot--left,
+.levelup-workspace.has-right-panel .levelup-side-slot--right {
+    background: transparent;
+    border-color: transparent;
+}
+
+@media (max-width: 760px) {
+    .levelup-side-slot {
+        background: transparent;
+        border: 0;
+    }
+}
+
+/* The collapsed rails and open drawers visually continue the Top Navigation. */
+.levelup-side-slot,
+.levelup-side-slot--left,
+.levelup-side-slot--right {
+    background: #5b1095;
+    border: 0;
+}
+
+.levelup-workspace.has-left-panel .levelup-side-slot--left,
+.levelup-workspace.has-right-panel .levelup-side-slot--right {
+    background: #5b1095;
+    border: 0;
+}

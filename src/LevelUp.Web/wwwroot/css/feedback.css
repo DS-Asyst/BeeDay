@@ -46,7 +46,7 @@
     border-radius: 50%;
     color: #e53935;
     font-size: 2rem;
-    font-weight: 900;
+    font-weight: 700;
     line-height: 1;
 }
 
@@ -54,7 +54,7 @@
     margin: 0;
     color: var(--levelup-color-text-primary);
     font-size: 1.45rem;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.2;
 }
 
@@ -72,7 +72,7 @@
     overflow: hidden;
     color: var(--levelup-color-text-primary);
     font-size: 0.9rem;
-    font-weight: 800;
+    font-weight: 700;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -103,7 +103,7 @@
     border-radius: 50%;
     color: #e53935;
     font-size: 0.78rem;
-    font-weight: 900;
+    font-weight: 700;
     line-height: 1;
 }
 
@@ -111,7 +111,7 @@
     display: block;
     margin-bottom: 0.18rem;
     font-size: 0.88rem;
-    font-weight: 800;
+    font-weight: 700;
 }
 
 .delete-confirmation__warning p {
@@ -134,7 +134,7 @@
     color: var(--levelup-color-surface);
     box-shadow: 0 0.25rem 0.7rem rgb(185 31 42 / 28%);
     font: var(--levelup-type-button);
-    font-weight: 800;
+    font-weight: 700;
     cursor: pointer;
     transition:
         background-color var(--levelup-transition-fast),
@@ -153,7 +153,7 @@
 
 .delete-confirmation__trash-icon {
     font-size: 1.05rem;
-    font-weight: 900;
+    font-weight: 700;
 }
 
 .delete-confirmation__cancel-button {
@@ -239,7 +239,7 @@
     border-radius: 50%;
     background: var(--levelup-color-primary-soft);
     color: var(--levelup-color-primary-dark);
-    font-weight: 900;
+    font-weight: 700;
 }
 
 .levelup-toast--success .levelup-toast__icon { background: #e2f5e9; color: var(--levelup-color-success); }

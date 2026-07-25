@@ -11,7 +11,7 @@
 }
 
 .welcome span {
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: .2em;
 }
 
@@ -38,7 +38,7 @@
     border-radius: .4rem;
     color: #4b087d;
     background: #fff;
-    font-weight: 900;
+    font-weight: 700;
     text-decoration: none;
     box-shadow: 0 .65rem 1.5rem rgb(20 4 42 / 24%);
     transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;

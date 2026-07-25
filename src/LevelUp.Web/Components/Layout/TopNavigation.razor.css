@@ -12,7 +12,7 @@
 
 .top-navigation__content {
     display: grid;
-    grid-template-columns: 17rem auto minmax(12rem, 1fr) auto;
+    grid-template-columns: 17rem auto minmax(0, 1fr) auto;
     align-items: stretch;
     min-height: 3.75rem;
     padding: 0 .8rem 0 0;
@@ -55,7 +55,7 @@
 .top-navigation__brand-level,
 .top-navigation__brand-up {
     font-size: 1.45rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: .02em;
 }
 
@@ -75,7 +75,7 @@
 .top-navigation__brand-button:focus-visible .top-navigation__brand-level,
 .top-navigation__brand-button:focus-visible .top-navigation__brand-up {
     font-size: 1.55rem;
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: .035em;
 }
 
@@ -143,25 +143,13 @@
     color: #fff;
     background: rgb(255 255 255 / 7%);
     font-size: 1.16rem;
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: .025em;
     text-transform: uppercase;
 }
 
 .top-navigation__links ::deep a:active { transform: scale(.97); }
 
-.top-navigation__slogan {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 0;
-    padding: 0 1rem;
-    color: rgb(255 255 255 / 90%);
-    font-size: 1.2rem;
-    font-weight: 700;
-    text-align: center;
-    white-space: nowrap;
-}
 
 .top-navigation__actions {
     display: flex;
@@ -223,14 +211,14 @@
 .top-navigation__menu-button[aria-expanded="true"] .top-navigation__menu-icon span:nth-child(3) { top: calc(50% - 1px); transform: rotate(-45deg); }
 
 @media (max-width: 920px) {
-    .top-navigation__content { grid-template-columns: 13rem auto minmax(8rem, 1fr) auto; }
+    .top-navigation__content { grid-template-columns: 13rem auto minmax(0, 1fr) auto; }
     .top-navigation__brand-button { min-width: 13rem; }
 }
 
 @media (max-width: 680px) {
     .top-navigation__content { grid-template-columns: 1fr auto; padding-left: .4rem; }
     .top-navigation__brand-button { min-width: 0; justify-content: flex-start; }
-    .top-navigation__links, .top-navigation__slogan { display: none; }
+    .top-navigation__links { display: none; }
     .top-navigation__brand-level, .top-navigation__brand-up { font-size: 1.05rem; }
 }
 
@@ -247,11 +235,11 @@
     }
 }
 
-/* RPG navigation skin */
+/* Refined navigation depth */
 .top-navigation {
-    border-bottom: 3px solid #171321;
+    border-bottom: 1px solid rgb(255 255 255 / 10%);
     background: linear-gradient(180deg, #6814a6 0%, #4f0b83 100%);
-    box-shadow: 0 3px 0 #2a0745, 0 8px 18px rgb(23 19 33 / 24%);
+    box-shadow: 0 2px 8px rgb(52 20 75 / 16%);
 }
 
 .top-navigation__links ::deep a:hover,
@@ -270,4 +258,31 @@
     border-color: #fff;
     background: rgb(0 0 0 / 14%);
     box-shadow: 0 2px 0 #171321;
+}
+
+/* Unified navigation and side-panel treatment. */
+.top-navigation {
+    background: #5b1095;
+    border-bottom: 0;
+    box-shadow: 0 2px 7px rgb(39 9 66 / 14%);
+}
+
+/* Navigation states use the established yellow/black LevelUp treatment. */
+.top-navigation__links ::deep a:hover,
+.top-navigation__links ::deep a:focus-visible,
+.top-navigation__links ::deep a.active {
+    color: #24152f;
+    background: #ffc928;
+    box-shadow: inset 0 -3px 0 #171321;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: .025em;
+    text-transform: uppercase;
+}
+
+.top-navigation__links ::deep a.active:hover,
+.top-navigation__links ::deep a.active:focus-visible {
+    color: #24152f;
+    background: #ffd34f;
+    box-shadow: inset 0 -3px 0 #171321;
 }

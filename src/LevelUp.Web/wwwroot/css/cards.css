@@ -1,7 +1,7 @@
 .activity-card{--activity-accent:var(--levelup-color-task);--activity-accent-dark:var(--levelup-color-task-dark);position:relative;display:grid;grid-template-columns:2.45rem minmax(0,1fr) 2.25rem;min-height:5.35rem;overflow:hidden;border:1px solid #cbc6cf;border-radius:.25rem;background:var(--levelup-color-surface);box-shadow:0 1px 2px rgb(40 27 52 / 8%);transition:transform 140ms ease,box-shadow 140ms ease,border-color 140ms ease}.activity-card--task{--activity-accent:var(--levelup-color-task);--activity-accent-dark:var(--levelup-color-task-dark)}.activity-card--todo{--activity-accent:var(--levelup-color-todo);--activity-accent-dark:var(--levelup-color-todo-dark)}.activity-card--project{--activity-accent:var(--levelup-color-project);--activity-accent-dark:var(--levelup-color-project-dark)}.activity-card:hover{z-index:2;border-color:#b9b1c2;box-shadow:0 4px 12px rgb(45 28 66 / 13%);transform:translateY(-1px)}
-.activity-card__rail{display:flex;align-items:flex-start;justify-content:center;padding-top:.5rem;background:var(--activity-accent)}.activity-card__checkbox{display:grid;place-items:center;width:1.55rem;height:1.55rem;padding:0;border:2px solid rgb(255 255 255 / 88%);border-radius:.14rem;background:rgb(255 255 255 / 88%);color:var(--activity-accent-dark);font-size:.95rem;font-weight:900;cursor:pointer;box-shadow:0 1px 2px rgb(50 30 20 / 12%);transition:transform .12s ease,background-color .12s ease,color .12s ease}.activity-card__checkbox span{opacity:0;transform:scale(.7);transition:opacity .12s ease,transform .12s ease}.activity-card__checkbox:hover{transform:scale(1.06);background:var(--levelup-color-surface)}.activity-card__checkbox:hover span{opacity:.62;transform:scale(1)}.activity-card__checkbox:active{transform:scale(.96)}
+.activity-card__rail{display:flex;align-items:flex-start;justify-content:center;padding-top:.5rem;background:var(--activity-accent)}.activity-card__checkbox{display:grid;place-items:center;width:1.55rem;height:1.55rem;padding:0;border:2px solid rgb(255 255 255 / 88%);border-radius:.14rem;background:rgb(255 255 255 / 88%);color:var(--activity-accent-dark);font-size:.95rem;font-weight:700;cursor:pointer;box-shadow:0 1px 2px rgb(50 30 20 / 12%);transition:transform .12s ease,background-color .12s ease,color .12s ease}.activity-card__checkbox span{opacity:0;transform:scale(.7);transition:opacity .12s ease,transform .12s ease}.activity-card__checkbox:hover{transform:scale(1.06);background:var(--levelup-color-surface)}.activity-card__checkbox:hover span{opacity:.62;transform:scale(1)}.activity-card__checkbox:active{transform:scale(.96)}
 .activity-card__body{min-width:0;padding:.66rem .72rem .55rem}.activity-card__title-row{display:flex;align-items:center;gap:.3rem}.activity-card h3{margin:0;overflow:hidden;color:#302638;font-size:.82rem;font-weight:650;line-height:1.25;text-overflow:ellipsis;white-space:nowrap}.activity-card p{display:-webkit-box;margin:.22rem 0 0;overflow:hidden;color:#786f80;font-size:.64rem;line-height:1.4;-webkit-box-orient:vertical;-webkit-line-clamp:2}.activity-card__star{color:#f3b82f;font-size:.74rem}.activity-card__meta{display:inline-block;margin-top:.42rem;padding:.12rem .35rem;border-radius:.15rem;color:#665d70;background:#f0edf2;font-size:.55rem;font-weight:700}
-.activity-card__menu{align-self:start;justify-self:center;width:1.35rem;height:1.55rem;margin-top:.48rem;padding:0;border:0;color:#756c7d;background:transparent;font-size:1.15rem;font-weight:800;line-height:1;cursor:pointer}.activity-card__menu:hover{color:var(--levelup-color-primary-hover)}.activity-card--completed{opacity:.66}.activity-card--completed h3{text-decoration:line-through}.activity-card--completed .activity-card__checkbox{background:var(--levelup-color-surface)}.activity-card--completed .activity-card__checkbox span{opacity:1;transform:scale(1)}
+.activity-card__menu{align-self:start;justify-self:center;width:1.35rem;height:1.55rem;margin-top:.48rem;padding:0;border:0;color:#756c7d;background:transparent;font-size:1.15rem;font-weight:700;line-height:1;cursor:pointer}.activity-card__menu:hover{color:var(--levelup-color-primary-hover)}.activity-card--completed{opacity:.66}.activity-card--completed h3{text-decoration:line-through}.activity-card--completed .activity-card__checkbox{background:var(--levelup-color-surface)}.activity-card--completed .activity-card__checkbox span{opacity:1;transform:scale(1)}
 @media(max-width:650px){.activity-card{grid-template-columns:2.65rem minmax(0,1fr) 2.4rem}}
 
 .activity-card__actions {
@@ -50,8 +50,8 @@
 .habit-card--red-light{--habit-side:#ffb3b8;--habit-button-bg:#e98189;--habit-button-border:rgb(255 255 255 / 62%);--habit-button-text:var(--levelup-color-surface)}
 .habit-card--red-medium{--habit-side:#ff5a62;--habit-button-bg:#d93640;--habit-button-border:rgb(255 255 255 / 62%);--habit-button-text:var(--levelup-color-surface)}
 .habit-card--red-strong{--habit-side:#d71920;--habit-button-bg:#a90f15;--habit-button-border:rgb(255 255 255 / 68%);--habit-button-text:var(--levelup-color-surface)}
-.habit-card__side{display:flex;align-items:flex-start;justify-content:center;padding-top:.5rem;background:var(--habit-side);transition:background-color .18s ease}.habit-card__score-button{display:grid;place-items:center;width:1.65rem;height:1.65rem;padding:0;border:1px solid var(--habit-button-border);border-radius:50%;background:var(--habit-button-bg);color:var(--habit-button-text);font-size:1.12rem;font-weight:900;line-height:1;cursor:pointer;transition:transform .12s ease,filter .12s ease}.habit-card__score-button:hover{transform:scale(1.08);filter:brightness(.96)}.habit-card__score-button:active{transform:scale(.95)}
-.habit-card__body{min-width:0;padding:.65rem .72rem .5rem}.habit-card__header{display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem}.habit-card__title{display:flex;min-width:0;align-items:center;gap:.25rem}.habit-card__title h3{margin:0;overflow:hidden;color:#302638;font-size:.82rem;font-weight:500;line-height:1.25;text-overflow:ellipsis;white-space:nowrap}.habit-card__featured{color:#f2b62d;font-size:.78rem}.habit-card__body p{margin:.22rem 0 0;color:#786f80;font-size:.64rem;line-height:1.4}.habit-card__menu{width:1.35rem;height:1.55rem;flex:0 0 auto;padding:0;border:0;background:transparent;color:#756c7d;font-size:1.15rem;font-weight:800;line-height:1;cursor:pointer}.habit-card__menu:hover{color:var(--levelup-color-primary-hover)}.habit-card__footer{display:flex;align-items:center;justify-content:flex-end;gap:.22rem;margin-top:.62rem;color:#756c7d;font-size:.58rem;font-weight:700}.habit-card__direction{font-size:.72rem}@media(max-width:650px){.habit-card{grid-template-columns:2.65rem minmax(0,1fr) 2.65rem}}
+.habit-card__side{display:flex;align-items:flex-start;justify-content:center;padding-top:.5rem;background:var(--habit-side);transition:background-color .18s ease}.habit-card__score-button{display:grid;place-items:center;width:1.65rem;height:1.65rem;padding:0;border:1px solid var(--habit-button-border);border-radius:50%;background:var(--habit-button-bg);color:var(--habit-button-text);font-size:1.12rem;font-weight:700;line-height:1;cursor:pointer;transition:transform .12s ease,filter .12s ease}.habit-card__score-button:hover{transform:scale(1.08);filter:brightness(.96)}.habit-card__score-button:active{transform:scale(.95)}
+.habit-card__body{display:grid;grid-template-rows:auto auto minmax(0,1fr);min-width:0;padding:.58rem .72rem .62rem}.habit-card__header{display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem}.habit-card__title{display:flex;min-width:0;align-items:center;gap:.25rem}.habit-card__title h3{margin:0;overflow:hidden;color:#302638;font-size:.82rem;font-weight:500;line-height:1.2;text-overflow:ellipsis;white-space:nowrap}.habit-card__featured{color:#f2b62d;font-size:.78rem}.habit-card__body p{margin:.08rem 0 0;color:#786f80;font-size:.64rem;line-height:1.3}.habit-card__menu{width:1.35rem;height:1.55rem;flex:0 0 auto;padding:0;border:0;background:transparent;color:#756c7d;font-size:1.15rem;font-weight:700;line-height:1;cursor:pointer}.habit-card__menu:hover{color:var(--levelup-color-primary-hover)}.habit-card__footer{display:flex;align-self:end;align-items:center;justify-content:flex-end;gap:.22rem;margin-top:.18rem;color:#756c7d;font-size:.58rem;font-weight:700;line-height:1}.habit-card__direction{font-size:.72rem}@media(max-width:650px){.habit-card{grid-template-columns:2.65rem minmax(0,1fr) 2.65rem}}
 
 
 /* Menu visibility and clipping */
@@ -87,7 +87,7 @@
     }
 }
 
-.activity-card__project-status{display:grid;place-items:center;width:1.55rem;height:1.55rem;margin:0;border:2px solid rgb(255 255 255 / 72%);border-radius:.14rem;color:var(--activity-accent-dark);background:rgb(255 255 255 / 72%);font-size:.88rem;font-weight:900;line-height:1;box-sizing:border-box}
+.activity-card__project-status{display:grid;place-items:center;width:1.55rem;height:1.55rem;margin:0;border:2px solid rgb(255 255 255 / 72%);border-radius:.14rem;color:var(--activity-accent-dark);background:rgb(255 255 255 / 72%);font-size:.88rem;font-weight:700;line-height:1;box-sizing:border-box}
 
 .activity-card__body--openable{cursor:pointer}.activity-card__body--openable:hover h3{color:var(--levelup-color-primary);text-decoration:underline}
 
@@ -146,5 +146,295 @@
     .habit-card:hover {
         transform: none;
         box-shadow: var(--levelup-shadow-xs);
+    }
+}
+
+/* Dashboard card proportions — compact layout based on the visual reference.
+   Keeps text readable without increasing the physical card footprint. */
+.activity-card,
+.habit-card {
+    min-height: 4.65rem;
+    height: 4.65rem;
+}
+
+.activity-card {
+    grid-template-columns: 2.35rem minmax(0, 1fr) 2.15rem;
+}
+
+.habit-card {
+    grid-template-columns: 2.35rem minmax(0, 1fr) 2.35rem;
+}
+
+.activity-card__body,
+.habit-card__body {
+    padding: .58rem .72rem .48rem;
+}
+
+.activity-card h3,
+.habit-card__title h3 {
+    font-family: var(--levelup-font-ui);
+    font-size: .95rem;
+    font-weight: var(--levelup-font-weight-semibold);
+    line-height: 1.15;
+    letter-spacing: .01em;
+}
+
+.activity-card p,
+.habit-card__body p {
+    margin-top: .18rem;
+    font-family: var(--levelup-font-ui);
+    font-size: .78rem;
+    line-height: 1.25;
+}
+
+.activity-card__meta {
+    margin-top: .28rem;
+    padding: .1rem .3rem;
+    font-family: var(--levelup-font-ui);
+    font-size: .68rem;
+    font-weight: var(--levelup-font-weight-semibold);
+    line-height: 1.1;
+}
+
+.habit-card__footer {
+    margin-top: .35rem;
+    gap: .22rem;
+    font-family: var(--levelup-font-ui);
+    font-size: .68rem;
+    font-weight: var(--levelup-font-weight-semibold);
+}
+
+.habit-card__direction { font-size: .76rem; }
+.activity-card__star,
+.habit-card__featured { font-size: .8rem; }
+
+.activity-card__checkbox,
+.activity-card__project-status,
+.habit-card__score-button {
+    width: 1.55rem;
+    height: 1.55rem;
+    font-size: .95rem;
+}
+
+.activity-card__rail,
+.habit-card__side { padding-top: .48rem; }
+
+.activity-card__menu,
+.habit-card__menu {
+    width: 1.35rem;
+    height: 1.55rem;
+    margin-top: .42rem;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 650px) {
+    .activity-card,
+    .habit-card {
+        min-height: 4.5rem;
+        height: 4.5rem;
+    }
+
+    .activity-card__body,
+    .habit-card__body { padding: .52rem .62rem .42rem; }
+
+    .activity-card h3,
+    .habit-card__title h3 { font-size: .9rem; }
+
+    .activity-card p,
+    .habit-card__body p { font-size: .75rem; }
+}
+
+/* Card refinement — softer depth and Inter content typography. */
+.activity-card,
+.habit-card {
+    border: 1px solid #cbc7cf !important;
+    box-shadow: 0 1px 2px rgb(42 31 50 / 10%), 0 2px 5px rgb(42 31 50 / 6%) !important;
+}
+
+.activity-card:hover,
+.habit-card:hover {
+    border-color: #b9b3bf !important;
+    box-shadow: 0 2px 5px rgb(42 31 50 / 12%), 0 5px 12px rgb(42 31 50 / 7%) !important;
+}
+
+.activity-card:focus-within,
+.habit-card:focus-within {
+    border-color: #a99db5 !important;
+    box-shadow: 0 0 0 2px rgb(91 16 149 / 13%), 0 3px 9px rgb(42 31 50 / 10%) !important;
+}
+
+.activity-card__body,
+.habit-card__body {
+    font-family: var(--levelup-font-card);
+}
+
+.activity-card h3,
+.habit-card__title h3 {
+    font-family: var(--levelup-font-card);
+    font-size: .88rem;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: 0;
+}
+
+.activity-card p,
+.habit-card__body p {
+    margin-top: .12rem;
+    font-family: var(--levelup-font-card);
+    font-size: .78rem;
+    font-weight: 400;
+    line-height: 1.3;
+    letter-spacing: 0;
+}
+
+.activity-card__meta,
+.habit-card__footer {
+    font-family: var(--levelup-font-card);
+    font-weight: 500;
+}
+
+/* Habit footer stability: preserve counters inside the compact card height. */
+.habit-card__body {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    overflow: hidden;
+    padding-top: .5rem;
+    padding-bottom: .38rem;
+}
+
+.habit-card__header,
+.habit-card__title,
+.habit-card__body p {
+    flex: 0 0 auto;
+}
+
+.habit-card__footer {
+    min-height: .9rem;
+    flex: 0 0 auto;
+    margin-top: auto;
+    padding-top: .16rem;
+    overflow: visible;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* Habit card vertical rhythm — keep title/description grouped and lift counters from the edge. */
+.habit-card__body {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    align-content: stretch;
+    min-height: 0;
+    padding: .48rem .72rem .62rem;
+    overflow: hidden;
+}
+
+.habit-card__header {
+    align-self: start;
+}
+
+.habit-card__body > p {
+    align-self: start;
+    margin: .06rem 0 0;
+    line-height: 1.18;
+}
+
+.habit-card__footer {
+    align-self: end;
+    min-height: auto;
+    margin: 0 0 .08rem;
+    padding: 0;
+    line-height: 1.1;
+}
+
+@media (max-width: 650px) {
+    .habit-card__body {
+        padding: .44rem .62rem .56rem;
+    }
+}
+
+/* Habit card alignment — match the Task card visual rhythm while retaining the balance counter. */
+.habit-card__body {
+    position: relative;
+    display: block;
+    min-width: 0;
+    min-height: 0;
+    padding: .58rem .72rem .48rem;
+    overflow: visible;
+    font-family: var(--levelup-font-card);
+}
+
+.habit-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .3rem;
+}
+
+.habit-card__title {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: .3rem;
+}
+
+.habit-card__title h3 {
+    margin: 0;
+    overflow: hidden;
+    color: #302638;
+    font-family: var(--levelup-font-card);
+    font-size: .88rem;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.habit-card__body > p {
+    display: -webkit-box;
+    margin: .12rem 0 0;
+    overflow: hidden;
+    color: #786f80;
+    font-family: var(--levelup-font-card);
+    font-size: .78rem;
+    font-weight: 400;
+    line-height: 1.3;
+    letter-spacing: 0;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+}
+
+.habit-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .22rem;
+    min-height: 0;
+    margin: .28rem 0 0;
+    padding: 0;
+    overflow: visible;
+    color: #756c7d;
+    font-family: var(--levelup-font-card);
+    font-size: .68rem;
+    font-weight: 500;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.habit-card__menu {
+    align-self: start;
+    flex: 0 0 auto;
+    margin-top: -.08rem;
+}
+
+.habit-card--menu-open,
+.habit-card--menu-open .habit-card__body {
+    overflow: visible;
+}
+
+@media (max-width: 650px) {
+    .habit-card__body {
+        padding: .52rem .62rem .42rem;
     }
 }

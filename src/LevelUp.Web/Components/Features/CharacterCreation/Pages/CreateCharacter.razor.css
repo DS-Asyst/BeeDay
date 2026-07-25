@@ -25,7 +25,7 @@
 .character-panel__brand {
     color: #65409f;
     font-size: .7rem;
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: .14em;
 }
 
@@ -55,7 +55,7 @@
 .character-field span {
     color: #4a4052;
     font-size: .75rem;
-    font-weight: 800;
+    font-weight: 700;
 }
 
 .character-field input {
@@ -84,14 +84,14 @@
 
 .character-password-hint--valid {
     color: #237a3b;
-    font-weight: 900;
+    font-weight: 700;
 }
 
 .character-validation {
     margin: .15rem 0;
     color: #b3261e;
     font-size: .75rem;
-    font-weight: 800;
+    font-weight: 700;
 }
 
 .character-primary-button {
@@ -106,7 +106,7 @@
     background: #65409f;
     font: inherit;
     font-size: .8rem;
-    font-weight: 900;
+    font-weight: 700;
     cursor: pointer;
     transition: background-color var(--levelup-transition-fast), box-shadow var(--levelup-transition-fast), transform var(--levelup-transition-fast);
 }
@@ -136,7 +136,7 @@
     background: transparent;
     font: inherit;
     font-size: .8rem;
-    font-weight: 800;
+    font-weight: 700;
     cursor: pointer;
 }
 
@@ -286,7 +286,7 @@
     border-radius: .3rem;
     font: inherit;
     font-size: .75rem;
-    font-weight: 900;
+    font-weight: 700;
     cursor: pointer;
 }
 
@@ -363,7 +363,7 @@
     color: #65409f;
     background: #f3eef9;
     font-size: .9rem !important;
-    font-weight: 900 !important;
+    font-weight: 700 !important;
 }
 
 .character-field .character-nickname-field__input {

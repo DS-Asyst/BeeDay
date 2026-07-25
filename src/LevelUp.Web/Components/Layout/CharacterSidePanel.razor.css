@@ -173,3 +173,10 @@
             transform: translateX(0);
         }
 }
+
+/* Seamless connection with the Top Navigation. */
+.side-drawer,
+.side-drawer.is-open {
+    background: #5b1095;
+    border: 0;
+}

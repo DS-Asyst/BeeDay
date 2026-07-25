@@ -163,7 +163,7 @@
     background: var(--levelup-color-primary);
     color: var(--levelup-color-surface);
     font-size: 1.1rem;
-    font-weight: 900;
+    font-weight: 700;
 }
 
 .editor-modal__type-summary strong {

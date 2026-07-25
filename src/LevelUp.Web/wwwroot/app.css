@@ -259,7 +259,7 @@ body {
     min-height: 2.75rem;
     border: var(--levelup-game-border) !important;
     border-radius: .2rem !important;
-    font-weight: 900 !important;
+    font-weight: 700 !important;
     letter-spacing: .035em;
     text-transform: uppercase;
     box-shadow: var(--levelup-game-shadow-sm) !important;
@@ -358,7 +358,7 @@ textarea:focus {
 }
 
 .card-action-menu__item {
-    font-weight: 800;
+    font-weight: 700;
 }
 
 .levelup-checkbox__control,

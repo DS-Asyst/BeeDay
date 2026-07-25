@@ -7,51 +7,60 @@
 
 <section class="auth-page levelup-fade-in">
     <div class="auth-card">
-        <span class="auth-card__brand">LEVELUP</span>
-        <h1>Welcome back</h1>
-        <p>Sign in to continue your journey.</p>
+        <div class="auth-card__content">
+            <span class="auth-card__brand" aria-label="Level Up">
+                <span>LEVEL</span><span class="auth-card__brand-accent">UP</span>
+            </span>
 
-        @if (HasInvalidCredentials)
-        {
-            <div class="auth-feedback auth-feedback--error" role="alert">
-                Invalid email or password.
-            </div>
-        }
+            <header class="auth-card__header">
+                <h1>Welcome back</h1>
+                <p>Sign in to continue your journey.</p>
+            </header>
 
-        @if (WasRegistered)
-        {
-            <div class="auth-feedback auth-feedback--success" role="status">
-                Account created. Sign in to continue.
-            </div>
-        }
+            @if (HasInvalidCredentials)
+            {
+                <div class="auth-feedback auth-feedback--error" role="alert">
+                    Invalid email or password.
+                </div>
+            }
 
-        <form method="post" action="/auth/login" class="auth-form">
-            <input type="hidden" name="returnUrl" value="@ReturnUrl" />
+            @if (WasRegistered)
+            {
+                <div class="auth-feedback auth-feedback--success" role="status">
+                    Account created. Sign in to continue.
+                </div>
+            }
 
-            <label class="auth-field">
-                <span>Email</span>
-                <input type="email"
-                       name="email"
-                       value="@Email"
-                       autocomplete="email"
-                       required
-                       autofocus />
-            </label>
+            <form method="post" action="/auth/login" class="auth-form">
+                <input type="hidden" name="returnUrl" value="@ReturnUrl" />
 
-            <label class="auth-field">
-                <span>Password</span>
-                <input type="password"
-                       name="password"
-                       autocomplete="current-password"
-                       required />
-            </label>
+                <label class="auth-field">
+                    <span>Email</span>
+                    <input type="email"
+                           name="email"
+                           value="@Email"
+                           autocomplete="email"
+                           required
+                           autofocus />
+                </label>
 
-            <button type="submit" class="auth-submit">SIGN IN</button>
-        </form>
+                <label class="auth-field">
+                    <span>Password</span>
+                    <input type="password"
+                           name="password"
+                           autocomplete="current-password"
+                           required />
+                </label>
 
-        <p class="auth-card__footer">
-            New to LevelUp? <a href="/character/create">Create account</a>
-        </p>
+                <LevelUpButton Type="submit" FullWidth="true" Class="auth-submit">
+                    Sign in
+                </LevelUpButton>
+            </form>
+
+            <p class="auth-card__footer">
+                New to LevelUp? <a href="/character/create">Create account</a>
+            </p>
+        </div>
     </div>
 </section>
 

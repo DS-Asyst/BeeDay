@@ -70,7 +70,7 @@
     background: transparent;
     border: 0;
     border-radius: .3rem;
-    font: 700 2rem/1 Arial, Helvetica, sans-serif;
+    font: 700 2rem/1 var(--levelup-font-family);
     cursor: pointer;
 }
 
@@ -228,7 +228,7 @@
         margin: 0 0 .12rem;
         font-family: var(--levelup-font-family);
         font-size: 1.7rem;
-        font-weight: 800;
+        font-weight: 700;
         line-height: .95;
         letter-spacing: -.02em;
         white-space: nowrap;
@@ -251,7 +251,7 @@
         margin: 0 0 1rem;
         font-family: var(--levelup-font-family);
         font-size: 1.72rem;
-        font-weight: 800;
+        font-weight: 700;
         line-height: .82;
         letter-spacing: -.03em;
     }
@@ -351,4 +351,11 @@
     .support-drawer__social-links a {
         transition: none;
     }
+}
+
+/* Seamless connection with the Top Navigation. */
+.side-drawer,
+.side-drawer.is-open {
+    background: #5b1095;
+    border: 0;
 }

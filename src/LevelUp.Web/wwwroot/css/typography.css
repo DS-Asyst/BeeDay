@@ -1,25 +1,27 @@
 :root {
-    --levelup-font-family: "Pixelify Sans", "Segoe UI", sans-serif;
-    --levelup-font-display: "Jersey 15", "Pixelify Sans", sans-serif;
-    --levelup-font-brand: "Jersey 15", "Pixelify Sans", sans-serif;
+    --levelup-font-ui: "Jersey 25", "Segoe UI", sans-serif;
+    --levelup-font-display: "Jersey 15", "Jersey 25", sans-serif;
+    --levelup-font-brand: "Jersey 15", "Jersey 25", sans-serif;
+    --levelup-font-family: var(--levelup-font-ui);
+    --levelup-font-card: "Inter", "Segoe UI", sans-serif;
     --font-brand: var(--levelup-font-brand);
     --font-title: var(--levelup-font-display);
     --font-ui: var(--levelup-font-family);
 
-    --levelup-font-size-xs: .68rem;
-    --levelup-font-size-sm: .75rem;
-    --levelup-font-size-md: .875rem;
+    --levelup-font-size-xs: .75rem;
+    --levelup-font-size-sm: .85rem;
+    --levelup-font-size-md: .95rem;
     --levelup-font-size-base: 1rem;
     --levelup-font-size-lg: 1.125rem;
-    --levelup-font-size-xl: 1.35rem;
-    --levelup-font-size-2xl: 1.65rem;
-    --levelup-font-size-3xl: 2rem;
+    --levelup-font-size-xl: 1.5rem;
+    --levelup-font-size-2xl: 1.8rem;
+    --levelup-font-size-3xl: 2.2rem;
 
     --levelup-font-weight-regular: 400;
     --levelup-font-weight-medium: 500;
     --levelup-font-weight-semibold: 600;
     --levelup-font-weight-bold: 700;
-    --levelup-font-weight-extrabold: 800;
+    --levelup-font-weight-extrabold: 700;
 
     --levelup-line-height-tight: 1.2;
     --levelup-line-height-normal: 1.5;
