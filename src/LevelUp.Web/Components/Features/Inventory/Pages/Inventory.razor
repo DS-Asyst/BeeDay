@@ -27,7 +27,7 @@ else
                 <h1>Inventory</h1>
                 <p>Track your wallet, organize transactions and understand where your money goes.</p>
             </div>
-            <button type="button" class="inventory-button inventory-button--primary" @onclick="OpenCreateTransaction">+ New transaction</button>
+            <button type="button" class="inventory-button inventory-button--cta" @onclick="OpenCreateTransaction">+ New transaction</button>
         </header>
 
         @if (!string.IsNullOrWhiteSpace(_errorMessage))
@@ -86,7 +86,7 @@ else
                         <p>@(HasFilters ? "Change or clear your filters to see more results." : "Create your first transaction to start tracking your wallet.")</p>
                         @if (!HasFilters)
                         {
-                            <button type="button" class="inventory-button" @onclick="OpenCreateTransaction">Create transaction</button>
+                            <button type="button" class="inventory-button inventory-button--cta" @onclick="OpenCreateTransaction">Create transaction</button>
                         }
                         else
                         {

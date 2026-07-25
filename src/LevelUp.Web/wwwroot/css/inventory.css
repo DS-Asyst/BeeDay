@@ -33,3 +33,624 @@
 .inventory-button:focus-visible,.inventory-pagination button:focus-visible,.inventory-link-button:focus-visible,.inventory-icon-button:focus-visible{outline:3px solid rgba(216,188,255,.75);outline-offset:2px}
 @media(max-width:720px){.inventory-transaction-list{max-height:none}.inventory-transaction-card{grid-template-columns:4px minmax(0,1fr)}.inventory-transaction-card__actions{grid-column:2;justify-content:flex-end}.inventory-transaction-card__heading{display:block}.inventory-transaction-card__amount{display:block;margin-top:.4rem}.inventory-pagination{flex-wrap:wrap}.inventory-pagination span{order:-1;width:100%;text-align:center}}
 @media(prefers-reduced-motion:reduce){.inventory-transaction-card,.inventory-button,.inventory-modal-backdrop,.inventory-modal,.inventory-summary__card--updated{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Inventory visual alignment with My Account — static RPG panels */
+.inventory-page {
+    width: min(76rem, 100%);
+    padding: 2rem clamp(1rem, 3vw, 2.5rem) 4rem;
+    color: var(--color-text, #2f2835);
+}
+
+.inventory-page__header {
+    margin-bottom: 1.5rem;
+    padding: 0;
+    align-items: flex-end;
+}
+
+.inventory-page__header h1 {
+    color: #2f2835;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: 1;
+}
+
+.inventory-page__header p {
+    color: var(--color-text-muted, #726b78);
+}
+
+.inventory-eyebrow {
+    color: #7a4fcb;
+}
+
+.inventory-summary {
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.inventory-summary__card,
+.inventory-main-panel,
+.inventory-tags-panel,
+.inventory-modal {
+    border: 1px solid var(--color-border, #ded8e5);
+    border-radius: 0;
+    background: var(--color-surface, #fff);
+    color: var(--color-text, #2f2835);
+    box-shadow: 0 4px 0 #201a24, 0 .4rem 1.3rem rgb(49 28 64 / 8%);
+    transform: none !important;
+    filter: none !important;
+}
+
+.inventory-summary__card {
+    padding: 1.2rem 1.25rem;
+}
+
+.inventory-summary__card span,
+.inventory-summary__card small,
+.inventory-result-count,
+.inventory-empty-state p,
+.inventory-empty-copy,
+.inventory-muted,
+.inventory-transaction-card__title-wrap small,
+.inventory-transaction-card__meta,
+.inventory-tag-item small {
+    color: var(--color-text-muted, #726b78);
+}
+
+.inventory-summary__card strong {
+    color: #2f2835;
+}
+
+.inventory-summary__card--income strong,
+.inventory-amount--income {
+    color: #16885d;
+}
+
+.inventory-summary__card--expense strong,
+.inventory-amount--expense {
+    color: #c53f4d;
+}
+
+.inventory-workspace {
+    gap: 1rem;
+}
+
+.inventory-main-panel,
+.inventory-tags-panel {
+    overflow: visible;
+}
+
+.inventory-tags-panel {
+    padding: 0;
+}
+
+.inventory-panel-header,
+.inventory-panel-header--transactions {
+    padding: 1.35rem 1.5rem;
+    border-bottom: 1px solid var(--color-border, #e5e0e9);
+    background: linear-gradient(180deg, rgb(122 79 203 / 7%), transparent);
+}
+
+.inventory-tags-panel > .inventory-panel-header {
+    margin: 0;
+}
+
+.inventory-tags-panel > :not(.inventory-panel-header) {
+    margin-left: 1.25rem;
+    margin-right: 1.25rem;
+}
+
+.inventory-tags-panel > :last-child {
+    margin-bottom: 1.25rem;
+}
+
+.inventory-panel-header h2,
+.inventory-modal h2 {
+    color: #2f2835;
+}
+
+.inventory-filters {
+    border-bottom: 1px solid var(--color-border, #e5e0e9);
+    background: #fff;
+}
+
+.inventory-filters input,
+.inventory-filters select,
+.inventory-field input,
+.inventory-field select,
+.inventory-field textarea {
+    border: 1px solid #8795b5;
+    border-radius: 0;
+    background: #fff;
+    color: #2f2835;
+}
+
+.inventory-filters input:focus,
+.inventory-filters select:focus,
+.inventory-field input:focus,
+.inventory-field select:focus,
+.inventory-field textarea:focus {
+    outline: 2px solid rgb(122 79 203 / 45%);
+}
+
+.inventory-table th {
+    color: #625b69;
+    background: rgb(122 79 203 / 5%);
+}
+
+.inventory-table td {
+    border-top: 1px solid var(--color-border, #e5e0e9);
+}
+
+.inventory-empty-state {
+    color: #2f2835;
+}
+
+.inventory-tag-item,
+.inventory-transaction-card {
+    border: 1px solid var(--color-border, #ded8e5);
+    border-radius: 0;
+    background: #fff;
+    color: #2f2835;
+    box-shadow: 0 3px 0 #201a24;
+    transition: none;
+}
+
+.inventory-transaction-card:hover,
+.inventory-transaction-card:focus,
+.inventory-transaction-card:focus-within,
+.inventory-tag-item:hover,
+.inventory-tag-item:focus-within,
+.inventory-summary__card:hover,
+.inventory-summary__card:focus,
+.inventory-summary__card:focus-within,
+.inventory-main-panel:hover,
+.inventory-main-panel:focus-within,
+.inventory-tags-panel:hover,
+.inventory-tags-panel:focus-within {
+    transform: none !important;
+    filter: none !important;
+    background: #fff;
+    border-color: var(--color-border, #ded8e5);
+}
+
+.inventory-transaction-card:hover,
+.inventory-transaction-card:focus,
+.inventory-transaction-card:focus-within,
+.inventory-tag-item:hover,
+.inventory-tag-item:focus-within {
+    box-shadow: 0 3px 0 #201a24;
+}
+
+.inventory-summary__card:hover,
+.inventory-summary__card:focus,
+.inventory-summary__card:focus-within,
+.inventory-main-panel:hover,
+.inventory-main-panel:focus-within,
+.inventory-tags-panel:hover,
+.inventory-tags-panel:focus-within {
+    box-shadow: 0 4px 0 #201a24, 0 .4rem 1.3rem rgb(49 28 64 / 8%);
+}
+
+.inventory-pagination {
+    border-top: 1px solid var(--color-border, #e5e0e9);
+}
+
+.inventory-pagination button {
+    border: 1px solid var(--color-border, #ded8e5);
+    border-radius: 0;
+    background: #fff;
+    color: #2f2835;
+}
+
+.inventory-link-button,
+.inventory-row-actions button,
+.inventory-transaction-card__actions button {
+    color: #6a3caf;
+}
+
+.inventory-modal-backdrop {
+    background: rgb(32 26 36 / 65%);
+}
+
+.inventory-modal > header,
+.inventory-modal__actions,
+.inventory-tag-form {
+    border-color: var(--color-border, #e5e0e9);
+}
+
+.inventory-icon-button {
+    color: #2f2835;
+}
+
+.inventory-field {
+    color: #4d4652;
+}
+
+@keyframes inventory-balance-pulse {
+    0%, 100% { box-shadow: 0 4px 0 #201a24, 0 .4rem 1.3rem rgb(49 28 64 / 8%); }
+    45% { box-shadow: 0 4px 0 #201a24, 0 0 0 3px rgb(122 79 203 / 28%), 0 .4rem 1.3rem rgb(49 28 64 / 8%); }
+}
+
+/* Inventory interaction alignment with the Daily design system */
+.inventory-button--cta {
+    border: 2px solid #201a24;
+    border-radius: 0;
+    background: #ffc82e;
+    color: #201a24;
+    box-shadow: 0 4px 0 #201a24;
+    text-transform: uppercase;
+    letter-spacing: .035em;
+}
+
+.inventory-button--cta:hover,
+.inventory-button--cta:focus-visible {
+    transform: translateY(-1px);
+    background: #ffd454;
+    box-shadow: 0 5px 0 #201a24;
+}
+
+.inventory-button--cta:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #201a24;
+}
+
+.inventory-transaction-card {
+    grid-template-columns: 4px minmax(0, 1fr) auto;
+    overflow: visible;
+}
+
+.inventory-transaction-card__actions {
+    position: relative;
+    align-self: start;
+}
+
+.inventory-transaction-card__menu {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border: 0;
+    background: transparent;
+    color: #5d5364;
+    cursor: pointer;
+    font: 700 1.25rem/1 var(--levelup-font-ui);
+}
+
+.inventory-transaction-card__menu:hover,
+.inventory-transaction-card__menu:focus-visible {
+    background: rgb(122 79 203 / 10%);
+    color: #4f238f;
+    outline: 2px solid rgb(122 79 203 / 30%);
+    outline-offset: 1px;
+}
+
+.inventory-transaction-card__actions .card-action-menu__panel {
+    right: 0;
+    left: auto;
+    z-index: 20;
+}
+
+.inventory-transaction-card__actions .card-action-menu__item {
+    min-width: 9rem;
+}
+
+.inventory-tag-item {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+}
+
+.inventory-tag-action {
+    min-height: 2rem;
+    padding: .38rem .62rem;
+    border: 2px solid #201a24;
+    border-radius: 0;
+    cursor: pointer;
+    font: 700 .78rem/1 var(--levelup-font-ui);
+    text-transform: uppercase;
+    box-shadow: 0 3px 0 #201a24;
+}
+
+.inventory-tag-action:hover,
+.inventory-tag-action:focus-visible {
+    transform: translateY(-1px);
+    outline: none;
+    box-shadow: 0 4px 0 #201a24;
+}
+
+.inventory-tag-action:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #201a24;
+}
+
+.inventory-tag-action--edit {
+    background: #d94c57;
+    color: #fff;
+}
+
+.inventory-tag-action--edit:hover,
+.inventory-tag-action--edit:focus-visible {
+    background: #c63c48;
+}
+
+.inventory-tag-action--delete {
+    background: #fff;
+    color: #201a24;
+}
+
+.inventory-tag-action--delete:hover,
+.inventory-tag-action--delete:focus-visible {
+    background: #f4eff7;
+}
+
+.inventory-editor-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.inventory-editor-grid__wide {
+    grid-column: 1 / -1;
+}
+
+.inventory-editor-grid .editor-modal__field {
+    margin: 0;
+}
+
+.inventory-editor-grid .editor-modal__field > span {
+    display: block;
+    margin-bottom: .45rem;
+    color: var(--levelup-color-text, #2f2835);
+    font-weight: 700;
+}
+
+.inventory-editor-grid .editor-modal__field input {
+    width: 100%;
+    min-height: 2.6rem;
+    box-sizing: border-box;
+    border: 1px solid #8795b5;
+    border-radius: 0;
+    background: #fff;
+    color: #2f2835;
+    padding: .65rem .75rem;
+    font: inherit;
+}
+
+@media (max-width: 720px) {
+    .inventory-editor-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .inventory-editor-grid__wide {
+        grid-column: auto;
+    }
+
+    .inventory-tag-item {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .inventory-tag-action {
+        grid-column: auto;
+    }
+}
+
+
+/* Inventory final refinement — compact transactions, page flow and tag actions */
+.inventory-transaction-list {
+    max-height: none !important;
+    overflow: visible !important;
+    padding: .75rem 1rem 1rem;
+    scrollbar-gutter: auto;
+    overscroll-behavior: auto;
+}
+
+.inventory-main-panel {
+    min-height: 0;
+    overflow: visible;
+}
+
+.inventory-transaction-card {
+    grid-template-columns: 3px minmax(0, 1fr) 1.9rem;
+    gap: .65rem;
+    min-height: 4.3rem;
+    padding: .58rem .65rem .55rem .45rem;
+    align-items: start;
+}
+
+.inventory-transaction-card__marker {
+    min-height: 3.15rem;
+}
+
+.inventory-transaction-card__heading {
+    gap: .65rem;
+}
+
+.inventory-transaction-card__title-wrap strong {
+    font-size: .86rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.inventory-transaction-card__title-wrap small {
+    margin-top: .08rem;
+    font-size: .72rem;
+    line-height: 1.2;
+}
+
+.inventory-transaction-card__amount {
+    font-size: .84rem;
+    line-height: 1.2;
+}
+
+.inventory-transaction-card__meta {
+    gap: .25rem .55rem;
+    margin-top: .28rem;
+    font-size: .68rem;
+    line-height: 1.15;
+}
+
+.inventory-tag-badge--solid {
+    padding: .16rem .42rem;
+    font-size: .65rem;
+}
+
+.inventory-transaction-card__actions {
+    align-self: start;
+    justify-self: end;
+    margin-top: 0;
+    z-index: 30;
+}
+
+.inventory-transaction-card__menu {
+    width: 1.35rem;
+    height: 1.55rem;
+    padding: 0;
+    opacity: 1;
+    visibility: visible;
+    border: 0;
+    background: transparent;
+    color: #756c7d;
+    font: 700 1.15rem/1 var(--levelup-font-ui);
+    transform: none;
+}
+
+.inventory-transaction-card__menu:hover,
+.inventory-transaction-card__menu:focus-visible {
+    background: transparent;
+    color: var(--levelup-color-primary-hover);
+    outline: none;
+}
+
+.inventory-transaction-card__actions .card-action-menu__panel {
+    top: calc(100% + .18rem);
+    right: -.15rem;
+    left: auto;
+    width: 9.75rem;
+    min-width: 9.75rem;
+    z-index: 90;
+}
+
+.inventory-transaction-card__actions .card-action-menu__item {
+    min-width: 0;
+}
+
+.inventory-tag-action {
+    background: #fff;
+    color: #201a24;
+}
+
+.inventory-tag-action--edit,
+.inventory-tag-action--delete {
+    background: #fff;
+    color: #201a24;
+}
+
+.inventory-tag-action--edit:hover,
+.inventory-tag-action--edit:focus-visible {
+    background: #58a8e8;
+    color: #201a24;
+}
+
+.inventory-tag-action--delete:hover,
+.inventory-tag-action--delete:focus-visible {
+    background: #d94c57;
+    color: #fff;
+}
+
+.inventory-tag-form__actions .inventory-button[type="submit"] {
+    border: 2px solid #201a24;
+    border-radius: 0;
+    background: #ffc82e;
+    color: #201a24;
+    box-shadow: 0 4px 0 #201a24;
+    text-transform: uppercase;
+    letter-spacing: .035em;
+}
+
+.inventory-tag-form__actions .inventory-button[type="submit"]:hover,
+.inventory-tag-form__actions .inventory-button[type="submit"]:focus-visible {
+    transform: translateY(-1px);
+    background: #ffd454;
+    box-shadow: 0 5px 0 #201a24;
+    outline: none;
+}
+
+.inventory-tag-form__actions .inventory-button[type="submit"]:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #201a24;
+}
+
+@media (max-width: 720px) {
+    .inventory-transaction-card {
+        grid-template-columns: 3px minmax(0, 1fr) 1.9rem;
+    }
+
+    .inventory-transaction-card__actions {
+        grid-column: auto;
+    }
+}
+
+/* Inventory transaction polish — Inter typography and Daily-style actions */
+.inventory-transaction-card,
+.inventory-transaction-card button,
+.inventory-transaction-card time,
+.inventory-transaction-card .inventory-tag-badge,
+.inventory-transaction-card .inventory-muted {
+    font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.inventory-transaction-card__title-wrap strong {
+    font-family: "Inter", "Segoe UI", sans-serif;
+    font-weight: 500;
+}
+
+.inventory-transaction-card__title-wrap small,
+.inventory-transaction-card__meta,
+.inventory-transaction-card__amount {
+    font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+/* Match the three-dot trigger behavior used by Daily cards. */
+.inventory-transaction-card__menu {
+    display: inline-grid;
+    place-items: center;
+    border-radius: .2rem;
+    cursor: pointer;
+    transition: color 130ms ease, background-color 130ms ease, transform 130ms ease;
+}
+
+.inventory-transaction-card__menu:hover,
+.inventory-transaction-card__menu:focus-visible,
+.inventory-transaction-card__actions:focus-within .inventory-transaction-card__menu {
+    background: #f1ecf6;
+    color: var(--levelup-color-primary-hover);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+.inventory-transaction-card__menu:active {
+    transform: translateY(1px);
+}
+
+.inventory-transaction-card__actions .card-action-menu__item {
+    font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.inventory-transaction-card__actions .card-action-menu__item:hover,
+.inventory-transaction-card__actions .card-action-menu__item:focus-visible {
+    background: #eaf3fb;
+    color: #201a24;
+}
+
+.inventory-transaction-card__actions .card-action-menu__item--delete:hover,
+.inventory-transaction-card__actions .card-action-menu__item--delete:focus-visible {
+    background: #d94c57;
+    color: #fff;
+}
+
+.inventory-transaction-card__actions .card-action-menu__item--delete:hover span,
+.inventory-transaction-card__actions .card-action-menu__item--delete:focus-visible span {
+    color: #fff;
+}
+
+/* Empty-state action follows the same yellow CTA used by New transaction. */
+.inventory-empty-state .inventory-button--cta {
+    min-width: 10.5rem;
+}

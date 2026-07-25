@@ -7,7 +7,7 @@
             <span class="inventory-eyebrow">Organization</span>
             <h2>Tags</h2>
         </div>
-        <button type="button" class="inventory-button inventory-button--small" @onclick="StartCreate">New tag</button>
+        <button type="button" class="inventory-button inventory-button--cta inventory-button--small" @onclick="StartCreate">New tag</button>
     </header>
 
     @if (Tags.Count == 0)
@@ -25,8 +25,8 @@
                         <strong>@tag.Name</strong>
                         <small>@tag.TransactionCount transaction@(tag.TransactionCount == 1 ? string.Empty : "s")</small>
                     </div>
-                    <button type="button" class="inventory-link-button" @onclick="() => StartEdit(tag)">Edit</button>
-                    <button type="button" class="inventory-link-button inventory-link-button--danger" @onclick="() => OnDelete.InvokeAsync(tag)">Delete</button>
+                    <button type="button" class="inventory-tag-action inventory-tag-action--edit" @onclick="() => StartEdit(tag)">Edit</button>
+                    <button type="button" class="inventory-tag-action inventory-tag-action--delete" @onclick="() => OnDelete.InvokeAsync(tag)">Delete</button>
                 </div>
             }
         </div>
@@ -49,7 +49,7 @@
             </label>
             <div class="inventory-tag-form__actions">
                 <button type="button" class="inventory-button inventory-button--ghost inventory-button--small" @onclick="Cancel">Cancel</button>
-                <button type="submit" class="inventory-button inventory-button--small" disabled="@IsBusy">Save tag</button>
+                <button type="submit" class="inventory-button inventory-button--cta inventory-button--small" disabled="@IsBusy">Save tag</button>
             </div>
         </EditForm>
     }

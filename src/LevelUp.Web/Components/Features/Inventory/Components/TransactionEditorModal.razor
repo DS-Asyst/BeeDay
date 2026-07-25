@@ -3,70 +3,78 @@
 
 @if (IsOpen)
 {
-    <div class="inventory-modal-backdrop" role="presentation" @onclick="CancelAsync">
-        <section class="inventory-modal" role="dialog" aria-modal="true" aria-labelledby="transaction-modal-title" @onclick:stopPropagation="true">
-            <header>
-                <div>
-                    <span class="inventory-eyebrow">Wallet</span>
-                    <h2 id="transaction-modal-title">@(IsEditing ? "Edit transaction" : "New transaction")</h2>
-                </div>
-                <button type="button" class="inventory-icon-button" aria-label="Close" @onclick="CancelAsync">×</button>
-            </header>
-
-            <EditForm Model="Model" OnValidSubmit="SaveAsync">
-                <DataAnnotationsValidator />
-                <ValidationSummary class="inventory-validation" />
-
-                <div class="inventory-form-grid">
-                    <label class="inventory-field inventory-field--wide">
-                        <span>Description</span>
-                        <InputText @bind-Value="Model.Description" maxlength="120" />
-                        <ValidationMessage For="@(() => Model.Description)" />
-                    </label>
-
-                    <label class="inventory-field">
-                        <span>Type</span>
-                        <InputSelect @bind-Value="Model.Type">
-                            <option value="@TransactionType.Income">Income</option>
-                            <option value="@TransactionType.Expense">Expense</option>
-                        </InputSelect>
-                    </label>
-
-                    <label class="inventory-field">
-                        <span>Amount</span>
-                        <InputNumber @bind-Value="Model.Amount" step="0.01" min="0.01" />
-                        <ValidationMessage For="@(() => Model.Amount)" />
-                    </label>
-
-                    <label class="inventory-field">
-                        <span>Date</span>
-                        <InputDate @bind-Value="Model.TransactionDate" />
-                    </label>
-
-                    <label class="inventory-field">
-                        <span>Tag</span>
-                        <InputSelect @bind-Value="Model.InventoryTagId">
-                            <option value="">No tag</option>
-                            @foreach (var tag in Tags)
-                            {
-                                <option value="@tag.Id">@tag.Name</option>
-                            }
-                        </InputSelect>
-                    </label>
-
-                    <label class="inventory-field inventory-field--wide">
-                        <span>Notes</span>
-                        <InputTextArea @bind-Value="Model.Notes" maxlength="500" rows="3" />
-                    </label>
+    <EditorModalShell Model="Model"
+                      Title="@(IsEditing ? "Edit Transaction" : "Create Transaction")"
+                      TitleId="transaction-editor-title"
+                      SubmitLabel="@(IsEditing ? "SAVE" : "CREATE")"
+                      OnSubmit="SaveAsync"
+                      OnCancel="CancelAsync">
+        <HeroContent>
+            <div class="editor-modal__hero">
+                <LevelUpInput Id="transaction-description"
+                              Label="Description"
+                              Required="true"
+                              @bind-Value="Model.Description"
+                              Placeholder="Add a description"
+                              MaxLength="120"
+                              FieldCssClass="editor-modal__hero-field"
+                              LabelCssClass="editor-modal__label-line"
+                              autofocus />
+                <LevelUpTextArea Id="transaction-notes"
+                                 Label="Notes"
+                                 @bind-Value="Model.Notes"
+                                 Placeholder="Add notes"
+                                 MaxLength="500"
+                                 ShowCounter="true"
+                                 FieldCssClass="editor-modal__hero-field"
+                                 LabelCssClass="editor-modal__label-line"
+                                 CounterCssClass="editor-modal__counter" />
+            </div>
+        </HeroContent>
+        <BodyContent>
+            <div class="editor-modal__body inventory-editor-grid">
+                <div class="editor-modal__type-summary inventory-editor-grid__wide">
+                    <span class="editor-modal__type-icon" aria-hidden="true">◇</span>
+                    <div>
+                        <strong>Transaction</strong>
+                        <p>Record income or expenses in your wallet.</p>
+                    </div>
                 </div>
 
-                <footer class="inventory-modal__actions">
-                    <button type="button" class="inventory-button inventory-button--ghost" disabled="@IsBusy" @onclick="CancelAsync">Cancel</button>
-                    <button type="submit" class="inventory-button inventory-button--primary" disabled="@IsBusy">@(IsBusy ? "Saving..." : "Save transaction")</button>
-                </footer>
-            </EditForm>
-        </section>
-    </div>
+                <LevelUpSelect TValue="TransactionType"
+                               Id="transaction-type"
+                               Label="Type"
+                               @bind-Value="Model.Type"
+                               FieldCssClass="editor-modal__field">
+                    <option value="@TransactionType.Income">Income</option>
+                    <option value="@TransactionType.Expense">Expense</option>
+                </LevelUpSelect>
+
+                <label class="editor-modal__field">
+                    <span>Amount</span>
+                    <InputNumber @bind-Value="Model.Amount" step="0.01" min="0.01" />
+                    <ValidationMessage For="@(() => Model.Amount)" />
+                </label>
+
+                <label class="editor-modal__field">
+                    <span>Date</span>
+                    <InputDate @bind-Value="Model.TransactionDate" />
+                </label>
+
+                <LevelUpSelect TValue="Guid?"
+                               Id="transaction-tag"
+                               Label="Tag"
+                               @bind-Value="Model.InventoryTagId"
+                               FieldCssClass="editor-modal__field">
+                    <option value="">No tag</option>
+                    @foreach (var tag in Tags)
+                    {
+                        <option value="@tag.Id">@tag.Name</option>
+                    }
+                </LevelUpSelect>
+            </div>
+        </BodyContent>
+    </EditorModalShell>
 }
 
 @code {
@@ -78,6 +86,6 @@
     [Parameter] public EventCallback OnSave { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
 
-    private Task SaveAsync() => OnSave.InvokeAsync();
-    private Task CancelAsync() => OnCancel.InvokeAsync();
+    private Task SaveAsync() => IsBusy ? Task.CompletedTask : OnSave.InvokeAsync();
+    private Task CancelAsync() => IsBusy ? Task.CompletedTask : OnCancel.InvokeAsync();
 }

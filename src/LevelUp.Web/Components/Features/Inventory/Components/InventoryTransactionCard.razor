@@ -2,7 +2,7 @@
 @using LevelUp.Domain.Enums
 @using LevelUp.Web.Components.Features.Inventory.Services
 
-<article class="inventory-transaction-card" tabindex="0" aria-label="@($"{Transaction.Description}, {SignedAmount}")">
+<article class="inventory-transaction-card" aria-label="@($"{Transaction.Description}, {SignedAmount}")">
     <div class="inventory-transaction-card__marker inventory-transaction-card__marker--@TypeClass" aria-hidden="true"></div>
     <div class="inventory-transaction-card__content">
         <div class="inventory-transaction-card__heading">
@@ -31,10 +31,12 @@
             <span>@(Transaction.Type == TransactionType.Income ? "Income" : "Expense")</span>
         </div>
     </div>
-    <div class="inventory-transaction-card__actions">
-        <button type="button" aria-label="Edit @Transaction.Description" title="Edit transaction" @onclick="EditAsync">Edit</button>
-        <button type="button" class="danger" aria-label="Delete @Transaction.Description" title="Delete transaction" @onclick="DeleteAsync">Delete</button>
-    </div>
+
+    <LevelUpCardMenu Class="inventory-transaction-card__actions"
+                     TriggerClass="inventory-transaction-card__menu"
+                     Title="@Transaction.Description"
+                     OnEdit="EditAsync"
+                     OnDelete="DeleteAsync" />
 </article>
 
 @code {
