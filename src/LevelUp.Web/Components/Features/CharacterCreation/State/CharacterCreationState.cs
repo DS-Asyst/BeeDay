@@ -51,17 +51,10 @@ public sealed class CharacterCreationState(LevelUpWebService store, ToastService
     public async Task<OnboardingStatus> InitializeAsync(bool hasAuthenticatedSession)
     {
         HasAuthenticatedSession = hasAuthenticatedSession;
-        var data = await store.LoadAsync();
-
-        if (hasAuthenticatedSession && data.CurrentUser is not null)
-        {
-            Model.Name = data.CurrentUser.Name;
-            Model.Email = data.CurrentUser.Email;
-            Step = CharacterCreationStep.Character;
-        }
 
         if (!hasAuthenticatedSession)
         {
+            // Anonymous registration must not execute the authenticated Dashboard query.
             Step = CharacterCreationStep.Account;
             Model.Name = string.Empty;
             Model.Email = string.Empty;
@@ -69,6 +62,14 @@ public sealed class CharacterCreationState(LevelUpWebService store, ToastService
             Model.ConfirmPassword = string.Empty;
             Model.Nickname = string.Empty;
             return new OnboardingStatus(false, false);
+        }
+
+        var data = await store.LoadAsync();
+        if (data.CurrentUser is not null)
+        {
+            Model.Name = data.CurrentUser.Name;
+            Model.Email = data.CurrentUser.Email;
+            Step = CharacterCreationStep.Character;
         }
 
         return new OnboardingStatus(
@@ -162,17 +163,22 @@ public sealed class CharacterCreationState(LevelUpWebService store, ToastService
         {
             if (!HasAuthenticatedSession)
             {
-                await store.CreateUserAsync(
+                await store.CreateAccountAsync(
                     NormalizedNickname,
                     Model.Email.Trim(),
-                    Model.Password);
+                    Model.Password,
+                    NormalizedNickname,
+                    SelectedClass.Value,
+                    string.Empty);
             }
-
-            await store.CreateCharacterAsync(
-                NormalizedNickname,
-                NormalizedNickname,
-                SelectedClass.Value,
-                string.Empty);
+            else
+            {
+                await store.CreateCharacterAsync(
+                    NormalizedNickname,
+                    NormalizedNickname,
+                    SelectedClass.Value,
+                    string.Empty);
+            }
 
             toastService.ShowSuccess("Welcome to LevelUp.");
             return true;

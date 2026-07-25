@@ -32,24 +32,24 @@ public sealed class CreateUserCommandHandler(
     }
 }
 
-public sealed class UpdateCurrentUserPreferencesCommandHandler(ILevelUpRepository repository)
+public sealed class UpdateCurrentUserPreferencesCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
     : RequestHandlerBase(repository), IRequestHandler<UpdateCurrentUserPreferencesCommand>
 {
     public Task Handle(UpdateCurrentUserPreferencesCommand command, CancellationToken cancellationToken) =>
         MutateAsync(data =>
         {
-            var user = data.CurrentUser ?? throw new InvalidDomainStateException("Current User was not found.");
+            var user = data.FindUser(CurrentUserGuard.RequireUserId(data, currentUser));
             user.UpdatePreferences(command.Request.Language, command.Request.Theme);
         }, cancellationToken);
 }
 
-public sealed class UpdateCurrentUserAccountCommandHandler(ILevelUpRepository repository)
+public sealed class UpdateCurrentUserAccountCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
     : RequestHandlerBase(repository), IRequestHandler<UpdateCurrentUserAccountCommand>
 {
     public Task Handle(UpdateCurrentUserAccountCommand command, CancellationToken cancellationToken) =>
         MutateAsync(data =>
         {
-            var user = data.CurrentUser ?? throw new InvalidDomainStateException("Current User was not found.");
+            var user = data.FindUser(CurrentUserGuard.RequireUserId(data, currentUser));
             if (data.Users.Any(candidate => candidate.Id != user.Id &&
                 string.Equals(candidate.Email, command.Request.Email, StringComparison.OrdinalIgnoreCase)))
             {
@@ -61,13 +61,14 @@ public sealed class UpdateCurrentUserAccountCommandHandler(ILevelUpRepository re
 
 public sealed class ChangeCurrentUserPasswordCommandHandler(
     ILevelUpRepository repository,
-    IPasswordService passwordService)
+    IPasswordService passwordService,
+    ICurrentUserContext? currentUser = null)
     : RequestHandlerBase(repository), IRequestHandler<ChangeCurrentUserPasswordCommand>
 {
     public Task Handle(ChangeCurrentUserPasswordCommand command, CancellationToken cancellationToken) =>
         MutateAsync(data =>
         {
-            var user = data.CurrentUser ?? throw new InvalidDomainStateException("Current User was not found.");
+            var user = data.FindUser(CurrentUserGuard.RequireUserId(data, currentUser));
 
             if (string.IsNullOrWhiteSpace(user.PasswordHash) ||
                 !passwordService.Verify(command.Request.CurrentPassword, user.PasswordHash))
@@ -85,33 +86,37 @@ public sealed class ChangeCurrentUserPasswordCommandHandler(
 }
 
 
-public sealed class CompleteCurrentUserOnboardingCommandHandler(ILevelUpRepository repository)
+public sealed class CompleteCurrentUserOnboardingCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
     : RequestHandlerBase(repository), IRequestHandler<CompleteCurrentUserOnboardingCommand>
 {
     public Task Handle(CompleteCurrentUserOnboardingCommand command, CancellationToken cancellationToken) =>
         MutateAsync(data =>
         {
-            var user = data.CurrentUser ?? throw new InvalidDomainStateException("Current User was not found.");
+            var user = data.FindUser(CurrentUserGuard.RequireUserId(data, currentUser));
             user.CompleteOnboarding();
         }, cancellationToken);
 }
 
-public sealed class GetCurrentUserQueryHandler(ILevelUpRepository repository)
+public sealed class GetCurrentUserQueryHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
     : IRequestHandler<GetCurrentUserQuery, CurrentUserResponse?>
 {
     public async Task<CurrentUserResponse?> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
-        var user = (await repository.LoadAsync(cancellationToken)).CurrentUser;
-        return user is null ? null : new(user.Id, user.Name, user.Email, user.Language, user.Theme, user.IsActive, user.HasCompletedOnboarding);
+        var data = await repository.LoadAsync(cancellationToken);
+        var userId = CurrentUserGuard.RequireUserId(data, currentUser);
+        var user = data.FindUser(userId);
+        return new(user.Id, user.Name, user.Email, user.Language, user.Theme, user.IsActive, user.HasCompletedOnboarding);
     }
 }
 
-public sealed class GetCurrentCharacterQueryHandler(ILevelUpRepository repository)
+public sealed class GetCurrentCharacterQueryHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
     : IRequestHandler<GetCurrentCharacterQuery, CurrentCharacterResponse?>
 {
     public async Task<CurrentCharacterResponse?> Handle(GetCurrentCharacterQuery request, CancellationToken cancellationToken)
     {
-        var character = (await repository.LoadAsync(cancellationToken)).CurrentCharacter;
+        var data = await repository.LoadAsync(cancellationToken);
+        var userId = CurrentUserGuard.RequireUserId(data, currentUser);
+        var character = data.FindCharacterForUser(userId);
         return character is null ? null : new(character.Id, character.UserId, character.Nickname, character.Class, character.Avatar);
     }
 }

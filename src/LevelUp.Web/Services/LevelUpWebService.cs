@@ -19,6 +19,8 @@ namespace LevelUp.Web.Services;
 public sealed class LevelUpWebService(ISender sender)
 {
     public async Task<LevelUpData> LoadAsync() => (await sender.Send(new GetLevelUpQuery())).Data;
+    public Task<Guid> CreateAccountAsync(string name, string email, string password, string nickname, CharacterClass characterClass, string? avatar = null) =>
+        sender.Send(new CreateAccountCommand(new(name, email, password, nickname, characterClass, avatar)));
     public Task<Guid> CreateUserAsync(string name, string email, string password) => sender.Send(new CreateUserCommand(new(name, email, password)));
     public Task CreateCharacterAsync(string n, string k, CharacterClass c, string? avatar = null) => sender.Send(new CreateCharacterCommand(new(n, k, c, avatar)));
     public Task UpdateUserAsync(string name, string email) => sender.Send(new UpdateCurrentUserAccountCommand(new(name, email)));

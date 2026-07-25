@@ -1,7 +1,6 @@
 using System.Text.Json;
 using LevelUp.Domain.Entities;
 using LevelUp.Domain.Exceptions;
-using Xunit;
 
 namespace LevelUp.Application.Tests;
 

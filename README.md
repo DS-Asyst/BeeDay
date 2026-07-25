@@ -248,3 +248,11 @@ LevelUp uses ASP.NET Core Cookie Authentication for persistent user sessions.
 ### Sprint 2.3 — Onboarding
 
 The authenticated onboarding flow is now Welcome → Account → Character → Class → Tutorial → Daily. Completion is persisted per user so the tutorial appears only on the first journey. Official typography uses Jersey 15 for brand/display text and Pixelify Sans for interface text.
+
+## Multi-user isolation
+
+Daily and Inventory operations are scoped to the authenticated user's claim (`NameIdentifier`). Dashboard responses are projected into user-specific snapshots, and commands validate ownership before reading, updating, deleting, toggling, or reordering data. The persisted `CurrentUserId` remains only as a legacy migration/test fallback and is no longer changed during normal authenticated session initialization or login.
+
+### Registration reliability
+
+Anonymous account creation no longer executes authenticated dashboard queries. User and character creation are persisted in one atomic application command, preventing orphaned accounts when character validation fails.

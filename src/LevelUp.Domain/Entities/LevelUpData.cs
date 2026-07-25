@@ -53,6 +53,75 @@ public sealed class LevelUpData
     [JsonIgnore]
     public List<Todo> Todos => Projects.SelectMany(project => project.Todos).ToList();
 
+    public User FindUser(Guid userId) => Users.FirstOrDefault(user => user.Id == userId)
+        ?? throw new InvalidDomainStateException($"User '{userId}' was not found.");
+
+    public Character? FindCharacterForUser(Guid userId) =>
+        Characters.FirstOrDefault(character => character.UserId == userId);
+
+    public LevelUpData CreateUserSnapshot(Guid userId)
+    {
+        var user = FindUser(userId);
+        var projects = Projects.Where(project => project.UserId == userId).ToList();
+        return new LevelUpData
+        {
+            SchemaVersion = SchemaVersion,
+            CurrentUserId = userId,
+            Users = [user],
+            Characters = Characters.Where(character => character.UserId == userId).ToList(),
+            Habits = Habits.Where(habit => habit.UserId == userId).ToList(),
+            Tasks = Tasks.Where(task => task.UserId == userId).ToList(),
+            Projects = projects,
+            Wallets = Wallets.Where(wallet => wallet.UserId == userId).ToList(),
+            InventoryTags = InventoryTags.Where(tag => tag.UserId == userId).ToList(),
+            Transactions = Transactions.Where(transaction =>
+                Wallets.Any(wallet => wallet.Id == transaction.WalletId && wallet.UserId == userId)).ToList()
+        };
+    }
+
+    public void AddHabit(Guid userId, Habit habit) { AssignOwner(userId, habit); Habits.Add(habit); }
+    public void AddTask(Guid userId, RecurringTask task) { AssignOwner(userId, task); Tasks.Add(task); }
+    public void AddProject(Guid userId, Project project) { AssignOwner(userId, project); Projects.Add(project); }
+
+    public Habit FindHabit(Guid userId, Guid habitId) => Habits.FirstOrDefault(item => item.Id == habitId && item.UserId == userId)
+        ?? throw new InvalidDomainStateException($"Habit '{habitId}' was not found for the authenticated User.");
+
+    public RecurringTask FindTask(Guid userId, Guid taskId) => Tasks.FirstOrDefault(item => item.Id == taskId && item.UserId == userId)
+        ?? throw new InvalidDomainStateException($"Task '{taskId}' was not found for the authenticated User.");
+
+    public Project FindProject(Guid userId, Guid projectId) => Projects.FirstOrDefault(project => project.Id == projectId && project.UserId == userId)
+        ?? throw new InvalidDomainStateException($"Project '{projectId}' was not found for the authenticated User.");
+
+    public (Project Project, Todo Todo) FindTodo(Guid userId, Guid todoId)
+    {
+        foreach (var project in Projects.Where(project => project.UserId == userId))
+        {
+            var todo = project.Todos.FirstOrDefault(item => item.Id == todoId && item.UserId == userId);
+            if (todo is not null)
+            {
+                return (project, todo);
+            }
+        }
+        throw new InvalidDomainStateException($"To-Do '{todoId}' was not found for the authenticated User.");
+    }
+
+    public void ReorderHabits(Guid userId, IReadOnlyList<Guid> ids) => ReorderOwnedItems(Habits, userId, ids);
+    public void ReorderTasks(Guid userId, IReadOnlyList<Guid> ids) => ReorderOwnedItems(Tasks, userId, ids);
+    public void ReorderProjects(Guid userId, IReadOnlyList<Guid> ids) => ReorderOwnedItems(Projects, userId, ids);
+
+    public void ReorderTodos(Guid userId, IReadOnlyList<Guid> orderedIds)
+    {
+        if (orderedIds.Count < 2)
+        {
+            return;
+        }
+        var grouped = orderedIds.Select(id => FindTodo(userId, id)).GroupBy(x => x.Project.Id);
+        foreach (var group in grouped)
+        {
+            ReorderVisibleItems(group.First().Project.Todos, group.Select(x => x.Todo.Id).ToList());
+        }
+    }
+
     public void AddUser(User user)
     {
         ArgumentNullException.ThrowIfNull(user);
@@ -382,6 +451,31 @@ public sealed class LevelUpData
         activity.AssignOwner(userId);
     }
 
+
+    private void AssignOwner(Guid userId, Activity activity)
+    {
+        FindUser(userId);
+        activity.AssignOwner(userId);
+    }
+
+    private static void ReorderOwnedItems<T>(List<T> allItems, Guid userId, IReadOnlyList<Guid> orderedIds) where T : Activity
+    {
+        var ownedItems = allItems.Where(item => item.UserId == userId).ToList();
+        if (orderedIds.Any(id => ownedItems.All(item => item.Id != id)))
+        {
+            throw new InvalidDomainStateException("The reorder request contains an activity owned by another User.");
+        }
+
+        ReorderVisibleItems(ownedItems, orderedIds);
+        var reordered = new Queue<T>(ownedItems);
+        for (var index = 0; index < allItems.Count; index++)
+        {
+            if (allItems[index].UserId == userId)
+            {
+                allItems[index] = reordered.Dequeue();
+            }
+        }
+    }
 
     private void ValidateTransactionTagOwnership(Transaction transaction, Wallet wallet)
     {

@@ -3,7 +3,6 @@ using LevelUp.Application.Features.Inventory.Queries;
 using LevelUp.Application.Features.Inventory.Requests;
 using LevelUp.Application.Features.Inventory.Validation;
 using LevelUp.Domain.Enums;
-using Xunit;
 
 namespace LevelUp.Application.Tests;
 

@@ -1,7 +1,6 @@
 using LevelUp.Application.Common.Caching;
 using LevelUp.Application.Common.Events;
 using LevelUp.Domain.Events;
-using Xunit;
 
 namespace LevelUp.Application.Tests;
 

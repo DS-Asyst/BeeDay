@@ -1,4 +1,5 @@
 using LevelUp.Application.Common.Contracts;
+using LevelUp.Application.Common.Security;
 using LevelUp.Application.Features.Inventory.Queries;
 using LevelUp.Application.Features.Inventory.Responses;
 using LevelUp.Domain.Entities;
@@ -6,17 +7,13 @@ using MediatR;
 
 namespace LevelUp.Application.Features.Inventory.Handlers;
 
-public sealed class GetWalletSummaryQueryHandler(ILevelUpRepository repository)
+public sealed class GetWalletSummaryQueryHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
     : IRequestHandler<GetWalletSummaryQuery, WalletSummaryResponse?>
 {
     public async Task<WalletSummaryResponse?> Handle(GetWalletSummaryQuery request, CancellationToken cancellationToken)
     {
         var data = await repository.LoadAsync(cancellationToken);
-        var user = data.CurrentUser;
-        if (user is null)
-        {
-            return null;
-        }
+        var user = data.FindUser(CurrentUserGuard.RequireUserId(data, currentUser));
         var wallet = data.Wallets.FirstOrDefault(candidate => candidate.UserId == user.Id);
         if (wallet is null)
         {
@@ -33,17 +30,13 @@ public sealed class GetWalletSummaryQueryHandler(ILevelUpRepository repository)
     }
 }
 
-public sealed class GetInventoryTagsQueryHandler(ILevelUpRepository repository)
+public sealed class GetInventoryTagsQueryHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
     : IRequestHandler<GetInventoryTagsQuery, IReadOnlyList<InventoryTagResponse>>
 {
     public async Task<IReadOnlyList<InventoryTagResponse>> Handle(GetInventoryTagsQuery request, CancellationToken cancellationToken)
     {
         var data = await repository.LoadAsync(cancellationToken);
-        var user = data.CurrentUser;
-        if (user is null)
-        {
-            return [];
-        }
+        var user = data.FindUser(CurrentUserGuard.RequireUserId(data, currentUser));
         return data.InventoryTags
             .Where(tag => tag.UserId == user.Id)
             .OrderBy(tag => tag.Name, StringComparer.OrdinalIgnoreCase)
@@ -58,17 +51,13 @@ public sealed class GetInventoryTagsQueryHandler(ILevelUpRepository repository)
     }
 }
 
-public sealed class GetTransactionByIdQueryHandler(ILevelUpRepository repository)
+public sealed class GetTransactionByIdQueryHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
     : IRequestHandler<GetTransactionByIdQuery, TransactionResponse?>
 {
     public async Task<TransactionResponse?> Handle(GetTransactionByIdQuery request, CancellationToken cancellationToken)
     {
         var data = await repository.LoadAsync(cancellationToken);
-        var user = data.CurrentUser;
-        if (user is null)
-        {
-            return null;
-        }
+        var user = data.FindUser(CurrentUserGuard.RequireUserId(data, currentUser));
         var wallet = data.Wallets.FirstOrDefault(candidate => candidate.UserId == user.Id);
         if (wallet is null)
         {
@@ -79,14 +68,14 @@ public sealed class GetTransactionByIdQueryHandler(ILevelUpRepository repository
     }
 }
 
-public sealed class GetTransactionsQueryHandler(ILevelUpRepository repository)
+public sealed class GetTransactionsQueryHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
     : IRequestHandler<GetTransactionsQuery, PagedTransactionsResponse>
 {
     public async Task<PagedTransactionsResponse> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
     {
         var data = await repository.LoadAsync(cancellationToken);
-        var user = data.CurrentUser;
-        var wallet = user is null ? null : data.Wallets.FirstOrDefault(candidate => candidate.UserId == user.Id);
+        var user = data.FindUser(CurrentUserGuard.RequireUserId(data, currentUser));
+        var wallet = data.Wallets.FirstOrDefault(candidate => candidate.UserId == user.Id);
         if (wallet is null)
         {
             return new([], request.Page, request.PageSize, 0, 0);

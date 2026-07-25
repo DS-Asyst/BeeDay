@@ -3,7 +3,6 @@ using LevelUp.Application.Features.Inventory.Queries;
 using LevelUp.Domain.Entities;
 using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
-using Xunit;
 
 namespace LevelUp.Application.Tests;
 

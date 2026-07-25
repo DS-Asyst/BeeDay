@@ -5,7 +5,6 @@ using LevelUp.Application.Features.Authentication.Handlers;
 using LevelUp.Application.Features.Authentication.Requests;
 using LevelUp.Domain.Entities;
 using LevelUp.Domain.Exceptions;
-using Xunit;
 
 namespace LevelUp.Application.Tests;
 

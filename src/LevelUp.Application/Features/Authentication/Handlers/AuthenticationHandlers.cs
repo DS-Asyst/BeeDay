@@ -30,7 +30,6 @@ public sealed class AuthenticateUserCommandHandler(
                 throw new InvalidDomainStateException("Invalid email or password.");
             }
 
-            data.SetCurrentUser(user.Id);
             user.RegisterLogin();
             response = new AuthenticatedUserResponse(
                 user.Id,

@@ -12,7 +12,6 @@ using LevelUp.Application.Features.Tasks.Validation;
 using LevelUp.Application.Features.Todos.Requests;
 using LevelUp.Application.Features.Todos.Validation;
 using LevelUp.Domain.Enums;
-using Xunit;
 
 namespace LevelUp.Application.Tests;
 

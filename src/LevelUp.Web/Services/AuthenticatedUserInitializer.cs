@@ -1,14 +1,11 @@
 using System.Security.Claims;
 using LevelUp.Application.Common.Contracts;
-using LevelUp.Application.Features.Authentication.Commands;
-using MediatR;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace LevelUp.Web.Services;
 
 public sealed class AuthenticatedUserInitializer(
     AuthenticationStateProvider authenticationStateProvider,
-    ISender sender,
     ILevelUpRepository repository)
 {
     private Guid? _initializedUserId;
@@ -29,11 +26,7 @@ public sealed class AuthenticatedUserInitializer(
             return null;
         }
 
-        if (_initializedUserId != userId)
-        {
-            await sender.Send(new SelectAuthenticatedUserCommand(userId), cancellationToken);
-            _initializedUserId = userId;
-        }
+        _initializedUserId = userId;
 
         return userId;
     }

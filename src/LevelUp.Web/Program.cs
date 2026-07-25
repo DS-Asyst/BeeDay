@@ -70,6 +70,8 @@ builder.Services
         };
     });
 builder.Services.AddAuthorization();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<LevelUp.Application.Common.Security.ICurrentUserContext, HttpCurrentUserContext>();
 builder.Services.AddCascadingAuthenticationState();
 
 builder.Services
