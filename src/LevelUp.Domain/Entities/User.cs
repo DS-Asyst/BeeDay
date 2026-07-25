@@ -22,12 +22,30 @@ public sealed class User : Entity
     [JsonInclude] public bool IsEmailConfirmed { get; private set; }
     [JsonInclude] public DateTimeOffset? EmailConfirmedAtUtc { get; private set; }
 
-    public static User Create(string name, string email, string? passwordHash = null)
+    public static User Create(string name, string email, string? passwordHash = null) =>
+        Create(name, email, passwordHash, DateTimeOffset.UtcNow);
+
+    public static User Create(
+        string name,
+        string email,
+        string? passwordHash,
+        DateTimeOffset createdAtUtc)
     {
-        var user = new User();
+        if (createdAtUtc == default)
+        {
+            throw new DomainValidationException(nameof(createdAtUtc), "Account creation date is required.");
+        }
+
+        var user = new User
+        {
+            CreatedAtUtc = createdAtUtc,
+            UpdatedAtUtc = createdAtUtc
+        };
+
         user.UpdateName(name);
         user.Email = EmailAddress.Create(email).Value;
         user.PasswordHash = (passwordHash ?? string.Empty).Trim();
+        user.UpdatedAtUtc = createdAtUtc;
         return user;
     }
 

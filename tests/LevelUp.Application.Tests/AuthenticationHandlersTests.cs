@@ -16,6 +16,7 @@ public sealed class AuthenticationHandlersTests
         var passwordService = new FakePasswordService();
         var repository = new TestRepository();
         var user = User.Create("Tiago", "tiago@levelup.invalid", passwordService.Hash("Password123"));
+        user.ConfirmEmail(user.CreatedAtUtc);
         repository.Data.AddUser(user);
         var handler = new AuthenticateUserCommandHandler(repository, passwordService);
 
@@ -56,6 +57,22 @@ public sealed class AuthenticationHandlersTests
         await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
             new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@levelup.invalid", "Password123")),
             TestContext.Current.CancellationToken));
+    }
+
+
+    [Fact]
+    public async Task Authenticate_RejectsUnconfirmedEmail()
+    {
+        var passwordService = new FakePasswordService();
+        var repository = new TestRepository();
+        repository.Data.AddUser(User.Create("Tiago", "tiago@levelup.invalid", passwordService.Hash("Password123")));
+        var handler = new AuthenticateUserCommandHandler(repository, passwordService);
+
+        var exception = await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
+            new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@levelup.invalid", "Password123")),
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal("Please confirm your email before signing in.", exception.Message);
     }
 
     private sealed class FakePasswordService : IPasswordService

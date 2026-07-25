@@ -1,4 +1,5 @@
 using LevelUp.Application.Common.Contracts;
+using LevelUp.Application.Common.Identity;
 using LevelUp.Application.Common.Messaging;
 using LevelUp.Application.Common.Security;
 using LevelUp.Application.Features.Characters.Commands;
@@ -11,12 +12,15 @@ namespace LevelUp.Application.Features.Characters.Handlers;
 
 public sealed class CreateAccountCommandHandler(
     ILevelUpRepository repository,
-    IPasswordService passwordService)
+    IPasswordService passwordService,
+    IEmailConfirmationIssuer confirmationIssuer,
+    IEmailSender emailSender)
     : IRequestHandler<CreateAccountCommand, Guid>
 {
     public async Task<Guid> Handle(CreateAccountCommand command, CancellationToken cancellationToken)
     {
         Guid userId = Guid.Empty;
+        EmailMessage? confirmationEmail = null;
 
         await repository.UpdateAsync(data =>
         {
@@ -36,9 +40,11 @@ public sealed class CreateAccountCommandHandler(
             // validation fails, no partial account is persisted.
             data.AddUser(user);
             data.AddCharacter(character);
+            confirmationEmail = confirmationIssuer.Issue(data, user);
             userId = user.Id;
         }, cancellationToken);
 
+        await emailSender.SendAsync(confirmationEmail!, cancellationToken);
         return userId;
     }
 }

@@ -3,6 +3,9 @@ using LevelUp.Application.Features.Characters.Requests;
 using LevelUp.Application.Features.Characters.Validation;
 using LevelUp.Application.Features.Habits.Requests;
 using LevelUp.Application.Features.Habits.Validation;
+using LevelUp.Application.Features.Identity.Commands;
+using LevelUp.Application.Features.Identity.Requests;
+using LevelUp.Application.Features.Identity.Validation;
 using LevelUp.Application.Features.Ordering.Requests;
 using LevelUp.Application.Features.Ordering.Validation;
 using LevelUp.Application.Features.Projects.Requests;
@@ -74,6 +77,28 @@ public sealed class RequestValidatorTests
         var result = await new ReorderActivitiesRequestValidator().ValidateAsync(
             new ReorderActivitiesRequest(ActivityCollection.Tasks, [id, id]),
             TestContext.Current.CancellationToken);
+        Assert.False(result.IsValid);
+    }
+
+    [Fact]
+    public async Task ResetPassword_RejectsWeakPasswordAndMismatchedConfirmation()
+    {
+        var result = await new ResetPasswordCommandValidator().ValidateAsync(
+            new ResetPasswordCommand(new ResetPasswordRequest("token", "weak", "different")),
+            TestContext.Current.CancellationToken);
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, error => error.PropertyName == "Request.NewPassword");
+        Assert.Contains(result.Errors, error => error.PropertyName == "Request.ConfirmNewPassword");
+    }
+
+    [Fact]
+    public async Task RequestPasswordReset_RejectsInvalidEmail()
+    {
+        var result = await new RequestPasswordResetCommandValidator().ValidateAsync(
+            new RequestPasswordResetCommand(new RequestPasswordResetRequest("invalid-email")),
+            TestContext.Current.CancellationToken);
+
         Assert.False(result.IsValid);
     }
 }

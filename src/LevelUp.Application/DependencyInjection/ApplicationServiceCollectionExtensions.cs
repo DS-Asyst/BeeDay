@@ -1,5 +1,6 @@
 using FluentValidation;
 using LevelUp.Application.Common.Behaviors;
+using LevelUp.Application.Common.Identity;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +11,8 @@ public static class ApplicationServiceCollectionExtensions
     public static IServiceCollection AddLevelUpApplication(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
+
+        services.AddScoped<IEmailConfirmationIssuer, EmailConfirmationIssuer>();
 
         services.AddValidatorsFromAssemblyContaining<ApplicationAssemblyMarker>();
         services.AddMediatR(configuration =>

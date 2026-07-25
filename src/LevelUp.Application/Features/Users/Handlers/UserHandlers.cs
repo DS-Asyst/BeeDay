@@ -1,4 +1,5 @@
 using LevelUp.Application.Common.Contracts;
+using LevelUp.Application.Common.Identity;
 using LevelUp.Application.Common.Messaging;
 using LevelUp.Application.Common.Security;
 using LevelUp.Application.Features.Users.Commands;
@@ -12,11 +13,14 @@ namespace LevelUp.Application.Features.Users.Handlers;
 
 public sealed class CreateUserCommandHandler(
     ILevelUpRepository repository,
-    IPasswordService passwordService) : IRequestHandler<CreateUserCommand, Guid>
+    IPasswordService passwordService,
+    IEmailConfirmationIssuer confirmationIssuer,
+    IEmailSender emailSender) : IRequestHandler<CreateUserCommand, Guid>
 {
     public async Task<Guid> Handle(CreateUserCommand command, CancellationToken cancellationToken)
     {
         Guid id = Guid.Empty;
+        EmailMessage? confirmationEmail = null;
         await repository.UpdateAsync(data =>
         {
             var passwordHash = string.IsNullOrWhiteSpace(command.Request.Password)
@@ -26,8 +30,10 @@ public sealed class CreateUserCommandHandler(
             var user = User.Create(command.Request.Name, command.Request.Email, passwordHash);
             data.AddUser(user);
             data.SetCurrentUser(user.Id);
+            confirmationEmail = confirmationIssuer.Issue(data, user);
             id = user.Id;
         }, cancellationToken);
+        await emailSender.SendAsync(confirmationEmail!, cancellationToken);
         return id;
     }
 }
@@ -105,7 +111,7 @@ public sealed class GetCurrentUserQueryHandler(ILevelUpRepository repository, IC
         var data = await repository.LoadAsync(cancellationToken);
         var userId = CurrentUserGuard.RequireUserId(data, currentUser);
         var user = data.FindUser(userId);
-        return new(user.Id, user.Name, user.Email, user.Language, user.Theme, user.IsActive, user.HasCompletedOnboarding);
+        return new(user.Id, user.Name, user.Email, user.Language, user.Theme, user.IsActive, user.HasCompletedOnboarding, user.IsEmailConfirmed);
     }
 }
 

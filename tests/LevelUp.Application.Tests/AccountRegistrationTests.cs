@@ -1,4 +1,5 @@
 using LevelUp.Application.Common.Contracts;
+using LevelUp.Application.Common.Identity;
 using LevelUp.Application.Common.Security;
 using LevelUp.Application.Features.Characters.Commands;
 using LevelUp.Application.Features.Characters.Handlers;
@@ -14,7 +15,12 @@ public sealed class AccountRegistrationTests
     public async Task CreateAccount_CreatesUserAndCharacterAtomically()
     {
         var repository = new TestRepository();
-        var handler = new CreateAccountCommandHandler(repository, new FakePasswordService());
+        var emailSender = new FakeEmailSender();
+        var handler = new CreateAccountCommandHandler(
+            repository,
+            new FakePasswordService(),
+            new FakeConfirmationIssuer(),
+            emailSender);
 
         var userId = await handler.Handle(
             new CreateAccountCommand(new CreateAccountRequest(
@@ -30,6 +36,34 @@ public sealed class AccountRegistrationTests
         Assert.Equal(userId, user.Id);
         Assert.Equal(user.Id, character.UserId);
         Assert.Equal("hash:Password123", user.PasswordHash);
+        Assert.Single(repository.Data.UserTokens);
+        Assert.Single(emailSender.Messages);
+    }
+
+
+    private sealed class FakeConfirmationIssuer : IEmailConfirmationIssuer
+    {
+        public EmailMessage Issue(LevelUpData data, User user)
+        {
+            var now = user.CreatedAtUtc;
+            data.AddUserToken(UserToken.Create(
+                user.Id,
+                UserTokenType.EmailConfirmation,
+                "hash:confirmation",
+                now,
+                now.AddHours(24)));
+            return new EmailMessage(user.Email, "Confirm", "Body");
+        }
+    }
+
+    private sealed class FakeEmailSender : IEmailSender
+    {
+        public List<EmailMessage> Messages { get; } = [];
+        public Task SendAsync(EmailMessage message, CancellationToken cancellationToken = default)
+        {
+            Messages.Add(message);
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class FakePasswordService : IPasswordService
