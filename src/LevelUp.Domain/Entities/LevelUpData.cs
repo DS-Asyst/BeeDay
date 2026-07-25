@@ -9,7 +9,7 @@ public sealed class LevelUpData
     private const string MigrationEmail = "migrated-user@levelup.invalid";
 
     [JsonInclude]
-    public int SchemaVersion { get; private set; } = 3;
+    public int SchemaVersion { get; private set; } = 4;
 
     [JsonInclude]
     public Guid? CurrentUserId { get; private set; }
@@ -31,6 +31,15 @@ public sealed class LevelUpData
 
     [JsonInclude]
     public List<Project> Projects { get; private set; } = [];
+
+    [JsonInclude]
+    public List<Wallet> Wallets { get; private set; } = [];
+
+    [JsonInclude]
+    public List<Transaction> Transactions { get; private set; } = [];
+
+    [JsonInclude]
+    public List<InventoryTag> InventoryTags { get; private set; } = [];
 
     [JsonInclude, JsonPropertyName("todos")]
     private List<Todo> LegacyTodos { get; set; } = [];
@@ -87,6 +96,63 @@ public sealed class LevelUpData
     public void AddTask(RecurringTask task) { AssignCurrentOwner(task); Tasks.Add(task); }
     public void AddProject(Project project) { AssignCurrentOwner(project); Projects.Add(project); }
 
+    public void AddWallet(Wallet wallet)
+    {
+        ArgumentNullException.ThrowIfNull(wallet);
+        if (Users.All(user => user.Id != wallet.UserId))
+        {
+            throw new InvalidDomainStateException("Wallet must belong to an existing User.");
+        }
+        if (Wallets.Any(existing => existing.UserId == wallet.UserId))
+        {
+            throw new InvalidDomainStateException("A User can have only one Wallet.");
+        }
+        Wallets.Add(wallet);
+    }
+
+    public void AddInventoryTag(InventoryTag tag)
+    {
+        ArgumentNullException.ThrowIfNull(tag);
+        if (Users.All(user => user.Id != tag.UserId))
+        {
+            throw new InvalidDomainStateException("Inventory tag must belong to an existing User.");
+        }
+        if (InventoryTags.Any(existing => existing.UserId == tag.UserId
+            && string.Equals(existing.Name, tag.Name, StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new InvalidDomainStateException($"Inventory tag '{tag.Name}' already exists for this User.");
+        }
+        InventoryTags.Add(tag);
+    }
+
+    public void AddTransaction(Transaction transaction)
+    {
+        ArgumentNullException.ThrowIfNull(transaction);
+        var wallet = FindWallet(transaction.WalletId);
+        ValidateTransactionTagOwnership(transaction, wallet);
+        Transactions.Add(transaction);
+        wallet.Touch();
+    }
+
+    public Wallet FindWallet(Guid walletId) => Wallets.FirstOrDefault(wallet => wallet.Id == walletId)
+        ?? throw new InvalidDomainStateException($"Wallet '{walletId}' was not found.");
+
+    public InventoryTag FindInventoryTag(Guid tagId) => InventoryTags.FirstOrDefault(tag => tag.Id == tagId)
+        ?? throw new InvalidDomainStateException($"Inventory tag '{tagId}' was not found.");
+
+    public Transaction FindTransaction(Guid transactionId) => Transactions.FirstOrDefault(transaction => transaction.Id == transactionId)
+        ?? throw new InvalidDomainStateException($"Transaction '{transactionId}' was not found.");
+
+    public void RemoveInventoryTag(Guid tagId)
+    {
+        var tag = FindInventoryTag(tagId);
+        foreach (var transaction in Transactions.Where(transaction => transaction.InventoryTagId == tagId))
+        {
+            transaction.RemoveTag();
+        }
+        InventoryTags.Remove(tag);
+    }
+
     public Project FindProject(Guid projectId) => Projects.FirstOrDefault(project => project.Id == projectId)
         ?? throw new InvalidDomainStateException($"Project '{projectId}' was not found.");
 
@@ -129,12 +195,15 @@ public sealed class LevelUpData
 
     public void EnsureValidState()
     {
-        SchemaVersion = 3;
+        SchemaVersion = 4;
         Users ??= [];
         Characters ??= [];
         Habits ??= [];
         Tasks ??= [];
         Projects ??= [];
+        Wallets ??= [];
+        Transactions ??= [];
+        InventoryTags ??= [];
         LegacyTodos ??= [];
 
         MigrateLegacyProfile();
@@ -145,8 +214,12 @@ public sealed class LevelUpData
         EnsureUniqueIds(Habits);
         EnsureUniqueIds(Tasks);
         EnsureUniqueIds(Projects);
+        EnsureUniqueIds(Wallets);
+        EnsureUniqueIds(Transactions);
+        EnsureUniqueIds(InventoryTags);
         EnsureUniqueValues(Users.Select(user => user.Email), "email");
         EnsureUniqueValues(Characters.Select(character => character.Nickname), "nickname");
+        EnsureUniqueInventoryTagNames();
 
         if (Users.Count == 0)
         {
@@ -223,6 +296,33 @@ public sealed class LevelUpData
         }
 
         EnsureUniqueIds(Projects.SelectMany(project => project.Todos));
+
+        foreach (var wallet in Wallets)
+        {
+            if (Users.All(user => user.Id != wallet.UserId))
+            {
+                throw new InvalidDomainStateException("A Wallet references an unknown User.");
+            }
+        }
+
+        if (Wallets.GroupBy(wallet => wallet.UserId).Any(group => group.Count() > 1))
+        {
+            throw new InvalidDomainStateException("A User cannot have more than one Wallet.");
+        }
+
+        foreach (var tag in InventoryTags)
+        {
+            if (Users.All(user => user.Id != tag.UserId))
+            {
+                throw new InvalidDomainStateException("An Inventory tag references an unknown User.");
+            }
+        }
+
+        foreach (var transaction in Transactions)
+        {
+            var wallet = FindWallet(transaction.WalletId);
+            ValidateTransactionTagOwnership(transaction, wallet);
+        }
     }
 
     private void MigrateLegacyProfile()
@@ -280,6 +380,31 @@ public sealed class LevelUpData
         var userId = CurrentUserId
             ?? throw new InvalidDomainStateException("A current User is required before activities can be created.");
         activity.AssignOwner(userId);
+    }
+
+
+    private void ValidateTransactionTagOwnership(Transaction transaction, Wallet wallet)
+    {
+        if (transaction.InventoryTagId is not Guid tagId)
+        {
+            return;
+        }
+
+        var tag = FindInventoryTag(tagId);
+        if (tag.UserId != wallet.UserId)
+        {
+            throw new InvalidDomainStateException("A Transaction cannot use an Inventory tag owned by another User.");
+        }
+    }
+
+    private void EnsureUniqueInventoryTagNames()
+    {
+        if (InventoryTags
+            .GroupBy(tag => new { tag.UserId, Name = tag.Name.ToUpperInvariant() })
+            .Any(group => string.IsNullOrWhiteSpace(group.Key.Name) || group.Count() > 1))
+        {
+            throw new InvalidDomainStateException("The data file contains an empty or duplicate Inventory tag name for the same User.");
+        }
     }
 
     private static void ReorderVisibleItems<T>(List<T> items, IReadOnlyList<Guid> orderedIds) where T : Activity

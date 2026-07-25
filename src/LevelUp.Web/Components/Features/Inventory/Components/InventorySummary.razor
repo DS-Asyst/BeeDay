@@ -1,0 +1,26 @@
+@using LevelUp.Application.Features.Inventory.Responses
+@using LevelUp.Web.Components.Features.Inventory.Services
+
+<section class="inventory-summary" aria-label="Wallet summary">
+    <article class="inventory-summary__card inventory-summary__card--balance @(HighlightBalance ? "inventory-summary__card--updated" : string.Empty)">
+        <span>Current balance</span>
+        <strong>@FormatMoney(Summary?.Balance ?? 0)</strong>
+        <small>@(Summary?.TransactionCount ?? 0) transactions</small>
+    </article>
+    <article class="inventory-summary__card inventory-summary__card--income">
+        <span>Total income</span>
+        <strong>@FormatMoney(Summary?.TotalIncome ?? 0)</strong>
+        <small>Money added</small>
+    </article>
+    <article class="inventory-summary__card inventory-summary__card--expense">
+        <span>Total expenses</span>
+        <strong>@FormatMoney(Summary?.TotalExpenses ?? 0)</strong>
+        <small>Money spent</small>
+    </article>
+</section>
+
+@code {
+    [Parameter] public WalletSummaryResponse? Summary { get; set; }
+    [Parameter] public bool HighlightBalance { get; set; }
+    private static string FormatMoney(decimal value) => InventoryCurrencyFormatter.Format(value);
+}

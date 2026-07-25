@@ -1,0 +1,83 @@
+@using LevelUp.Application.Features.Inventory.Responses
+@using LevelUp.Web.Components.Features.Inventory.Models
+
+@if (IsOpen)
+{
+    <div class="inventory-modal-backdrop" role="presentation" @onclick="CancelAsync">
+        <section class="inventory-modal" role="dialog" aria-modal="true" aria-labelledby="transaction-modal-title" @onclick:stopPropagation="true">
+            <header>
+                <div>
+                    <span class="inventory-eyebrow">Wallet</span>
+                    <h2 id="transaction-modal-title">@(IsEditing ? "Edit transaction" : "New transaction")</h2>
+                </div>
+                <button type="button" class="inventory-icon-button" aria-label="Close" @onclick="CancelAsync">×</button>
+            </header>
+
+            <EditForm Model="Model" OnValidSubmit="SaveAsync">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="inventory-validation" />
+
+                <div class="inventory-form-grid">
+                    <label class="inventory-field inventory-field--wide">
+                        <span>Description</span>
+                        <InputText @bind-Value="Model.Description" maxlength="120" />
+                        <ValidationMessage For="@(() => Model.Description)" />
+                    </label>
+
+                    <label class="inventory-field">
+                        <span>Type</span>
+                        <InputSelect @bind-Value="Model.Type">
+                            <option value="@TransactionType.Income">Income</option>
+                            <option value="@TransactionType.Expense">Expense</option>
+                        </InputSelect>
+                    </label>
+
+                    <label class="inventory-field">
+                        <span>Amount</span>
+                        <InputNumber @bind-Value="Model.Amount" step="0.01" min="0.01" />
+                        <ValidationMessage For="@(() => Model.Amount)" />
+                    </label>
+
+                    <label class="inventory-field">
+                        <span>Date</span>
+                        <InputDate @bind-Value="Model.TransactionDate" />
+                    </label>
+
+                    <label class="inventory-field">
+                        <span>Tag</span>
+                        <InputSelect @bind-Value="Model.InventoryTagId">
+                            <option value="">No tag</option>
+                            @foreach (var tag in Tags)
+                            {
+                                <option value="@tag.Id">@tag.Name</option>
+                            }
+                        </InputSelect>
+                    </label>
+
+                    <label class="inventory-field inventory-field--wide">
+                        <span>Notes</span>
+                        <InputTextArea @bind-Value="Model.Notes" maxlength="500" rows="3" />
+                    </label>
+                </div>
+
+                <footer class="inventory-modal__actions">
+                    <button type="button" class="inventory-button inventory-button--ghost" disabled="@IsBusy" @onclick="CancelAsync">Cancel</button>
+                    <button type="submit" class="inventory-button inventory-button--primary" disabled="@IsBusy">@(IsBusy ? "Saving..." : "Save transaction")</button>
+                </footer>
+            </EditForm>
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public bool IsEditing { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter, EditorRequired] public TransactionFormModel Model { get; set; } = new();
+    [Parameter] public IReadOnlyList<InventoryTagResponse> Tags { get; set; } = [];
+    [Parameter] public EventCallback OnSave { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private Task SaveAsync() => OnSave.InvokeAsync();
+    private Task CancelAsync() => OnCancel.InvokeAsync();
+}

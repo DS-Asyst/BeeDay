@@ -1,0 +1,51 @@
+@using LevelUp.Application.Features.Inventory.Responses
+@using LevelUp.Domain.Enums
+@using LevelUp.Web.Components.Features.Inventory.Services
+
+<article class="inventory-transaction-card" tabindex="0" aria-label="@($"{Transaction.Description}, {SignedAmount}")">
+    <div class="inventory-transaction-card__marker inventory-transaction-card__marker--@TypeClass" aria-hidden="true"></div>
+    <div class="inventory-transaction-card__content">
+        <div class="inventory-transaction-card__heading">
+            <div class="inventory-transaction-card__title-wrap">
+                <strong title="@Transaction.Description">@Transaction.Description</strong>
+                @if (!string.IsNullOrWhiteSpace(Transaction.Notes))
+                {
+                    <small title="@Transaction.Notes">@Transaction.Notes</small>
+                }
+            </div>
+            <span class="inventory-transaction-card__amount inventory-amount--@TypeClass">@SignedAmount</span>
+        </div>
+        <div class="inventory-transaction-card__meta">
+            @if (Transaction.InventoryTagId is not null)
+            {
+                <span class="inventory-tag-badge inventory-tag-badge--solid"
+                      style="background:@TagColor;color:@TagTextColor;border-color:@TagColor">
+                    @Transaction.InventoryTagName
+                </span>
+            }
+            else
+            {
+                <span class="inventory-muted">No tag</span>
+            }
+            <time datetime="@Transaction.TransactionDate.ToString("yyyy-MM-dd")">@Transaction.TransactionDate.ToString("MMM dd, yyyy")</time>
+            <span>@(Transaction.Type == TransactionType.Income ? "Income" : "Expense")</span>
+        </div>
+    </div>
+    <div class="inventory-transaction-card__actions">
+        <button type="button" aria-label="Edit @Transaction.Description" title="Edit transaction" @onclick="EditAsync">Edit</button>
+        <button type="button" class="danger" aria-label="Delete @Transaction.Description" title="Delete transaction" @onclick="DeleteAsync">Delete</button>
+    </div>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public TransactionResponse Transaction { get; set; } = default!;
+    [Parameter] public EventCallback<TransactionResponse> OnEdit { get; set; }
+    [Parameter] public EventCallback<TransactionResponse> OnDelete { get; set; }
+
+    private string TypeClass => Transaction.Type == TransactionType.Income ? "income" : "expense";
+    private string SignedAmount => InventoryCurrencyFormatter.FormatSigned(Transaction.Amount, Transaction.Type == TransactionType.Income);
+    private string TagColor => string.IsNullOrWhiteSpace(Transaction.InventoryTagColor) ? "#7A4FCB" : Transaction.InventoryTagColor;
+    private string TagTextColor => TagContrastCalculator.GetTextColor(TagColor);
+    private Task EditAsync() => OnEdit.InvokeAsync(Transaction);
+    private Task DeleteAsync() => OnDelete.InvokeAsync(Transaction);
+}

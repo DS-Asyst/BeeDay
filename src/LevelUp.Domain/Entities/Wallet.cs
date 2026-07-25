@@ -1,0 +1,49 @@
+using System.Text.Json.Serialization;
+using LevelUp.Domain.Abstractions;
+using LevelUp.Domain.Enums;
+using LevelUp.Domain.Exceptions;
+
+namespace LevelUp.Domain.Entities;
+
+public sealed class Wallet : Entity
+{
+    [JsonInclude]
+    public Guid UserId { get; private set; }
+
+    [JsonInclude]
+    public DateTimeOffset CreatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
+
+    [JsonInclude]
+    public DateTimeOffset UpdatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
+
+    public static Wallet Create(Guid userId)
+    {
+        if (userId == Guid.Empty)
+        {
+            throw new DomainValidationException(nameof(userId), "User identifier is required.");
+        }
+
+        return new Wallet { UserId = userId };
+    }
+
+    public decimal CalculateBalance(IEnumerable<Transaction> transactions) =>
+        FilterTransactions(transactions).Sum(transaction => transaction.SignedAmount);
+
+    public decimal CalculateTotalIncome(IEnumerable<Transaction> transactions) =>
+        FilterTransactions(transactions)
+            .Where(transaction => transaction.Type == TransactionType.Income)
+            .Sum(transaction => transaction.Amount);
+
+    public decimal CalculateTotalExpenses(IEnumerable<Transaction> transactions) =>
+        FilterTransactions(transactions)
+            .Where(transaction => transaction.Type == TransactionType.Expense)
+            .Sum(transaction => transaction.Amount);
+
+    public void Touch() => UpdatedAtUtc = DateTimeOffset.UtcNow;
+
+    private IEnumerable<Transaction> FilterTransactions(IEnumerable<Transaction> transactions)
+    {
+        ArgumentNullException.ThrowIfNull(transactions);
+        return transactions.Where(transaction => transaction.WalletId == Id);
+    }
+}
