@@ -51,7 +51,7 @@ public sealed class IdentityHandlersTests
         var user = fixture.AddUser(confirmed: false);
         var previous = fixture.AddToken(user, UserTokenType.EmailConfirmation, "old-token", Now.AddHours(1));
         var handler = new ResendEmailConfirmationCommandHandler(
-            fixture.Repository, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Clock);
+            fixture.Repository, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
 
         await handler.Handle(
             new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest(user.Email)),
@@ -67,7 +67,7 @@ public sealed class IdentityHandlersTests
     {
         var fixture = new Fixture();
         var handler = new RequestPasswordResetCommandHandler(
-            fixture.Repository, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Clock);
+            fixture.Repository, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
 
         await handler.Handle(
             new RequestPasswordResetCommand(new RequestPasswordResetRequest("missing@levelup.invalid")),
@@ -83,7 +83,7 @@ public sealed class IdentityHandlersTests
         var fixture = new Fixture();
         var user = fixture.AddUser(confirmed: true);
         var handler = new RequestPasswordResetCommandHandler(
-            fixture.Repository, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Clock);
+            fixture.Repository, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
 
         await handler.Handle(
             new RequestPasswordResetCommand(new RequestPasswordResetRequest(user.Email)),
@@ -134,6 +134,7 @@ public sealed class IdentityHandlersTests
         public FakeClock Clock { get; } = new(Now);
         public FakeEmailComposer Composer { get; } = new();
         public FakeEmailSender Email { get; } = new();
+        public FakeIdentityRequestThrottle Throttle { get; } = new();
         public FakePasswordService Passwords { get; } = new();
 
         public User AddUser(bool confirmed)
@@ -165,6 +166,16 @@ public sealed class IdentityHandlersTests
         private int sequence;
         public string GenerateToken() => $"generated-{++sequence}";
         public string HashToken(string token) => $"hash:{token}";
+    }
+
+
+    private sealed class FakeIdentityRequestThrottle : IIdentityRequestThrottle
+    {
+        public bool TryAcquire(string operation, string subject, TimeSpan cooldown, out TimeSpan retryAfter)
+        {
+            retryAfter = TimeSpan.Zero;
+            return true;
+        }
     }
 
     private sealed class FakeEmailComposer : IIdentityEmailComposer

@@ -49,7 +49,13 @@ builder.Services
         options.Cookie.HttpOnly = true;
         options.Cookie.SameSite = SameSiteMode.Lax;
         options.SlidingExpiration = true;
-        options.ExpireTimeSpan = TimeSpan.FromDays(14);
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.Events.OnRedirectToLogin = context =>
+        {
+            var returnUrl = Uri.EscapeDataString(context.Request.PathBase + context.Request.Path + context.Request.QueryString);
+            context.Response.Redirect($"/login?expired=true&returnUrl={returnUrl}");
+            return Task.CompletedTask;
+        };
         options.Events.OnValidatePrincipal = async context =>
         {
             var value = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -134,7 +140,9 @@ app.MapPost("/auth/login", async (
     ISender sender,
     [FromForm] string email,
     [FromForm] string password,
-    [FromForm] string? returnUrl) =>
+    [FromForm] string? returnUrl,
+    [FromForm] bool? rememberMe,
+    ILoggerFactory loggerFactory) =>
 {
     try
     {
@@ -148,15 +156,23 @@ app.MapPost("/auth/login", async (
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
 
+        var authenticationProperties = new AuthenticationProperties
+        {
+            IsPersistent = rememberMe == true,
+            AllowRefresh = true
+        };
+        if (rememberMe == true)
+        {
+            authenticationProperties.ExpiresUtc = DateTimeOffset.UtcNow.AddDays(14);
+        }
+
         await httpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
             principal,
-            new AuthenticationProperties
-            {
-                IsPersistent = true,
-                AllowRefresh = true,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(14)
-            });
+            authenticationProperties);
+
+        loggerFactory.CreateLogger("LevelUp.Authentication").LogInformation(
+            "Authentication.LoginSucceeded UserId={UserId} RememberMe={RememberMe}", user.Id, rememberMe == true);
 
         var destination = LoginDestinationResolver.Resolve(
             user.HasCharacter,
@@ -167,6 +183,10 @@ app.MapPost("/auth/login", async (
     }
     catch (InvalidDomainStateException exception)
     {
+        loggerFactory.CreateLogger("LevelUp.Authentication").LogWarning(
+            "Authentication.LoginFailed Email={EmailHash} Reason={Reason}",
+            Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(email.Trim().ToUpperInvariant()))),
+            exception.Message.Contains("confirm your email", StringComparison.OrdinalIgnoreCase) ? "Unconfirmed" : "InvalidCredentials");
         var encodedEmail = Uri.EscapeDataString(email ?? string.Empty);
         var error = exception.Message.Contains("confirm your email", StringComparison.OrdinalIgnoreCase)
             ? "unconfirmed"
@@ -175,9 +195,12 @@ app.MapPost("/auth/login", async (
     }
 }).DisableAntiforgery();
 
-app.MapGet("/auth/logout", async (HttpContext httpContext, [FromQuery] string? returnUrl) =>
+app.MapGet("/auth/logout", async (HttpContext httpContext, [FromQuery] string? returnUrl, ILoggerFactory loggerFactory) =>
 {
+    var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
     await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    loggerFactory.CreateLogger("LevelUp.Authentication").LogInformation(
+        "Authentication.LogoutSucceeded UserId={UserId}", userId);
     var destination = !string.IsNullOrWhiteSpace(returnUrl) &&
                       returnUrl.StartsWith('/') &&
                       !returnUrl.StartsWith("//")

@@ -61,6 +61,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<LevelUp.Application.Common.Security.IPasswordService, Pbkdf2PasswordService>();
         services.AddSingleton<LevelUp.Application.Common.Identity.IClock, SystemClock>();
         services.AddSingleton<LevelUp.Application.Common.Identity.IUserTokenService, SecureUserTokenService>();
+        services.AddSingleton<LevelUp.Application.Common.Identity.IIdentityRequestThrottle, MemoryIdentityRequestThrottle>();
         services.AddSingleton<LevelUp.Application.Common.Identity.IIdentityEmailComposer, IdentityEmailComposer>();
         var resendEnabled = configuration.GetValue<bool>($"{ResendOptions.SectionName}:Enabled");
         if (resendEnabled)

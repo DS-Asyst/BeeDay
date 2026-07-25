@@ -41,14 +41,21 @@ public sealed class ResendEmailConfirmationCommandHandler(
     IUserTokenService tokenService,
     IIdentityEmailComposer emailComposer,
     IEmailSender emailSender,
+    IIdentityRequestThrottle throttle,
     IClock clock) : IRequestHandler<ResendEmailConfirmationCommand>
 {
     public async Task Handle(ResendEmailConfirmationCommand command, CancellationToken cancellationToken)
     {
+        var email = command.Request.Email.Trim();
+        if (!throttle.TryAcquire("email-confirmation", email, TimeSpan.FromSeconds(60), out var retryAfter))
+        {
+            throw new InvalidDomainStateException($"Please wait {Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds))} seconds before requesting another email.");
+        }
+
         EmailMessage? message = null;
         await repository.UpdateAsync(data =>
         {
-            var user = FindUserByEmail(data, command.Request.Email);
+            var user = FindUserByEmail(data, email);
             if (user is null || !user.IsActive || user.IsEmailConfirmed)
             {
                 return;
@@ -82,15 +89,22 @@ public sealed class RequestPasswordResetCommandHandler(
     IUserTokenService tokenService,
     IIdentityEmailComposer emailComposer,
     IEmailSender emailSender,
+    IIdentityRequestThrottle throttle,
     IClock clock) : IRequestHandler<RequestPasswordResetCommand>
 {
     public async Task Handle(RequestPasswordResetCommand command, CancellationToken cancellationToken)
     {
+        var email = command.Request.Email.Trim();
+        if (!throttle.TryAcquire("password-reset", email, TimeSpan.FromSeconds(60), out _))
+        {
+            return;
+        }
+
         EmailMessage? message = null;
         await repository.UpdateAsync(data =>
         {
             var user = data.Users.FirstOrDefault(candidate =>
-                string.Equals(candidate.Email, command.Request.Email.Trim(), StringComparison.OrdinalIgnoreCase));
+                string.Equals(candidate.Email, email, StringComparison.OrdinalIgnoreCase));
             if (user is null || !user.IsActive || !user.IsEmailConfirmed)
             {
                 return;

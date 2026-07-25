@@ -1,58 +1,25 @@
 @page "/account/email-confirmation-sent"
 @attribute [AllowAnonymous]
 @layout OnboardingLayout
+@implements IDisposable
 @inject MediatR.ISender Sender
 
 <PageTitle>Confirm your email | LevelUp</PageTitle>
-
-<section class="identity-page levelup-fade-in">
-    <div class="identity-card">
-        <div class="identity-card__content">
-            <span class="identity-brand"><span>LEVEL</span><span>UP</span></span>
-            <header class="identity-header">
-                <h1>Check your email</h1>
-                <p>We created your account, but you must confirm your email before signing in.</p>
-            </header>
-
-            @if (_resent)
-            {
-                <div class="identity-feedback identity-feedback--success" role="status">
-                    If the account is eligible, a new confirmation message was generated.
-                </div>
-            }
-
-            <div class="identity-note">
-                <strong>@DisplayEmail</strong>
-                <span>Development mode saves the message in <code>src/LevelUp.Web/Data/Emails</code>.</span>
-            </div>
-
-            <button class="identity-primary" type="button" disabled="@_busy" @onclick="ResendAsync">
-                @(_busy ? "SENDING..." : "RESEND CONFIRMATION")
-            </button>
-
-            <a class="identity-secondary" href="/login">BACK TO SIGN IN</a>
-        </div>
-    </div>
-</section>
-
+<section class="identity-page levelup-fade-in"><div class="identity-card"><div class="identity-card__content">
+<span class="identity-brand"><span>LEVEL</span><span>UP</span></span>
+<header class="identity-header"><h1>Check your email</h1><p>We created your account, but you must confirm your email before signing in.</p></header>
+@if (_resent) { <div class="identity-feedback identity-feedback--success" role="status">If the account is eligible, a new confirmation message was generated.</div> }
+@if (!string.IsNullOrWhiteSpace(_error)) { <div class="identity-feedback identity-feedback--error" role="alert">@_error</div> }
+<div class="identity-note"><strong>@DisplayEmail</strong><span>Use the most recent confirmation email. Links expire after 24 hours.</span></div>
+<button class="identity-primary" type="button" disabled="@(_busy || _secondsRemaining > 0)" @onclick="ResendAsync">@ButtonText</button>
+<a class="identity-secondary" href="/login">BACK TO SIGN IN</a>
+</div></div></section>
 @code {
-    [SupplyParameterFromQuery(Name = "email")]
-    public string? Email { get; set; }
-
-    private bool _busy;
-    private bool _resent;
+    [SupplyParameterFromQuery(Name = "email")] public string? Email { get; set; }
+    private bool _busy; private bool _resent; private string? _error; private int _secondsRemaining; private PeriodicTimer? _timer; private CancellationTokenSource? _cts;
     private string DisplayEmail => string.IsNullOrWhiteSpace(Email) ? "your email address" : Email.Trim();
-
-    private async Task ResendAsync()
-    {
-        if (_busy || string.IsNullOrWhiteSpace(Email)) return;
-        _busy = true;
-        try
-        {
-            await Sender.Send(new LevelUp.Application.Features.Identity.Commands.ResendEmailConfirmationCommand(
-                new LevelUp.Application.Features.Identity.Requests.ResendEmailConfirmationRequest(Email.Trim())));
-            _resent = true;
-        }
-        finally { _busy = false; }
-    }
+    private string ButtonText => _busy ? "SENDING..." : _secondsRemaining > 0 ? $"RESEND AVAILABLE IN {_secondsRemaining}S" : "RESEND CONFIRMATION";
+    private async Task ResendAsync() { if (_busy || _secondsRemaining>0 || string.IsNullOrWhiteSpace(Email)) return; _busy=true; _error=null; try { await Sender.Send(new LevelUp.Application.Features.Identity.Commands.ResendEmailConfirmationCommand(new(Email.Trim()))); _resent=true; StartCountdown(); } catch(Exception ex) { _error=ex.Message; } finally { _busy=false; } }
+    private void StartCountdown(){_secondsRemaining=60;_cts?.Cancel();_cts=new();_timer=new(TimeSpan.FromSeconds(1));_=RunAsync(_cts.Token);} private async Task RunAsync(CancellationToken token){try{while(_secondsRemaining>0&&await _timer!.WaitForNextTickAsync(token)){_secondsRemaining--;await InvokeAsync(StateHasChanged);}}catch(OperationCanceledException){}}
+    public void Dispose(){_cts?.Cancel();_cts?.Dispose();_timer?.Dispose();}
 }

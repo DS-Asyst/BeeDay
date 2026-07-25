@@ -34,6 +34,13 @@
                 <div class="auth-feedback auth-feedback--success" role="status">Password updated. Sign in with your new password.</div>
             }
 
+            @if (SessionExpired)
+            {
+                <div class="auth-feedback auth-feedback--error" role="alert">
+                    Your session expired. Sign in again to continue.
+                </div>
+            }
+
             @if (NeedsConfirmation)
             {
                 <div class="auth-feedback auth-feedback--error" role="alert">
@@ -41,7 +48,7 @@
                 </div>
             }
 
-            <form method="post" action="/auth/login" class="auth-form">
+            <form method="post" action="/auth/login" class="auth-form" onsubmit="const button=this.querySelector('button[type=submit]');if(button){button.disabled=true;button.textContent='Signing in...';}">
                 <input type="hidden" name="returnUrl" value="@ReturnUrl" />
 
                 <label class="auth-field">
@@ -62,7 +69,10 @@
                            required />
                 </label>
 
-                <p class="auth-form__help"><a href="/account/forgot-password">Forgot password?</a></p>
+                <div class="auth-form__options">
+                    <label class="auth-remember"><input type="checkbox" name="rememberMe" value="true" /> <span>Remember me</span></label>
+                    <a href="/account/forgot-password">Forgot password?</a>
+                </div>
 
                 <LevelUpButton Type="submit" FullWidth="true" Class="auth-submit">
                     Sign in
@@ -89,12 +99,16 @@
     [SupplyParameterFromQuery(Name = "email")]
     public string? Email { get; set; }
 
+    [SupplyParameterFromQuery(Name = "expired")]
+    public bool Expired { get; set; }
+
     [SupplyParameterFromQuery(Name = "returnUrl")]
     public string? RequestedReturnUrl { get; set; }
 
     private bool HasInvalidCredentials => string.Equals(Error, "invalid", StringComparison.OrdinalIgnoreCase);
     private bool WasConfirmed => Confirmed;
     private bool WasReset => Reset;
+    private bool SessionExpired => Expired;
     private bool NeedsConfirmation => string.Equals(Error, "unconfirmed", StringComparison.OrdinalIgnoreCase);
     private string ResendUrl => $"/account/resend-confirmation?email={Uri.EscapeDataString(Email ?? string.Empty)}";
     private string ReturnUrl => IsLocalPath(RequestedReturnUrl) ? RequestedReturnUrl! : string.Empty;
