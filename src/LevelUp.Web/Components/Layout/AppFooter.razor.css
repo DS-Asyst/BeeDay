@@ -52,7 +52,7 @@
             text-decoration: underline;
         }
 
-/* Linha inferior ocupando toda a largura disponível */
+/* Bottom line spanning the full available width */
 .app-footer__bottom {
     display: flex;
     justify-content: space-between;

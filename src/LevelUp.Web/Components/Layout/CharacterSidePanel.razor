@@ -2,12 +2,12 @@
 @inject LevelUp.Web.Components.Features.Dashboard.State.DashboardState State
 
 <aside class="side-drawer side-drawer--left @(IsOpen ? "is-open" : null)"
-       aria-label="Painel do personagem"
+       aria-label="Character panel"
        aria-hidden="@(!IsOpen)">
     <section class="character-drawer">
         @if (State.IsLoading)
         {
-            <div class="character-drawer__loading">Carregando personagem...</div>
+            <div class="character-drawer__loading">Loading character...</div>
         }
         else if (State.Data?.CurrentCharacter is not null && State.Data.CurrentUser is not null)
         {
@@ -16,38 +16,38 @@
 
             <div class="character-drawer__profile">
                 <div class="character-drawer__avatar">
-                    <img src="@GetClassImage(character.Class)" alt="Classe @character.Class" />
+                    <img src="@GetClassImage(character.Class)" alt="@character.Class class" />
                 </div>
 
                 <div class="character-drawer__identity">
-                    <span>Personagem</span>
+                    <span>Character</span>
                     <h2>@user.Name</h2>
                     <p>@($"@{character.Nickname} · {character.Class}")</p>
                 </div>
             </div>
 
-            <div class="character-drawer__statistics" aria-label="Resumo de atividades">
+            <div class="character-drawer__statistics" aria-label="Activity summary">
                 <div>
-                    <span>Ativos</span>
+                    <span>Active</span>
                     <strong>@State.ActiveItems</strong>
                 </div>
                 <div>
-                    <span>Concluídos</span>
+                    <span>Completed</span>
                     <strong>@State.CompletedItems</strong>
                 </div>
             </div>
 
             <NavLink href="/character/create" class="character-drawer__link" @onclick="OnClose">
-                Ver personagem
+                View character
             </NavLink>
         }
         else
         {
             <div class="character-drawer__empty">
-                <strong>Nenhum personagem criado</strong>
-                <span>Crie seu personagem para acompanhar sua evolução.</span>
+                <strong>No character created</strong>
+                <span>Create your character to track your progress.</span>
                 <NavLink href="/character/create" class="character-drawer__link" @onclick="OnClose">
-                    Criar personagem
+                    Create character
                 </NavLink>
             </div>
         }

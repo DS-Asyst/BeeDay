@@ -14,12 +14,12 @@
 }
 
     /*
- * Mantém o card que possui um menu aberto acima dos demais cards.
+ * Keeps the card with an open menu above the other cards.
  *
  * Cada item do sortable cria um contexto de empilhamento por causa das
- * animações com transform. Sem este z-index, os cards seguintes encobrem
- * a parte inferior do menu, fazendo a opção DELETE aparecer somente no
- * último card da lista.
+ * animations that use transform. Without this z-index, the following cards cover
+ * the lower part of the menu, causing the DELETE option to appear only on the
+ * last card in the list.
  */
     .levelup-sortable__item:has(.activity-card--menu-open),
     .levelup-sortable__item:has(.habit-card--menu-open) {

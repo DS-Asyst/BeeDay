@@ -1,31 +1,31 @@
 # LevelUp.Web
 
-Aplicação Blazor Server e camada de apresentação do LevelUp.
+Blazor Server application and presentation layer for LevelUp.
 
-## Organização
+## Organization
 
-O frontend é organizado por feature em `Components/Features`:
+The frontend is organized by feature under `Components/Features`:
 
-- `Dashboard`: página, componentes e estados do painel.
-- `Habits`, `Tasks`, `Todos`, `Projects`: editores e modelos de formulário.
+- `Dashboard`: page, components and dashboard state.
+- `Habits`, `Tasks`, `Todos`, `Projects`: editors and form models.
 - `CharacterCreation`: page, model and state for character creation.
-- `Common`: tipos compartilhados pela apresentação.
-- `Layout`: estrutura global da aplicação.
-- `Shared`: componentes reutilizáveis entre features.
+- `Common`: types shared by the presentation layer.
+- `Layout`: global application structure.
+- `Shared`: reusable components across features.
 
 ## Estado
 
-- `DashboardState`: dados e operações do dashboard.
-- `DashboardModalState`: editores e exclusão.
-- `CharacterCreationState`: fluxo de criação de perfil.
+- `DashboardState`: dashboard data and operations.
+- `DashboardModalState`: editors and deletion flows.
+- `CharacterCreationState`: character creation flow.
 
-Os estados principais são registrados como `Scoped` em `Program.cs`.
+The main state containers are registered as `Scoped` in `Program.cs`.
 
-## Integração
+## Integration
 
-A interface chama a camada Application somente por `LevelUpWebService`. A persistência JSON é responsabilidade exclusiva de `LevelUp.Infrastructure`.
+The interface accesses the Application layer only through `LevelUpWebService`. JSON persistence is the exclusive responsibility of `LevelUp.Infrastructure`.
 
-## Execução
+## Running the application
 
 ```bash
 dotnet run --project src/LevelUp.Web/LevelUp.Web.csproj

@@ -130,14 +130,14 @@ Recommended additions:
 6. Protect the `main` environment and self-hosted deployment runner.
 7. Keep roadmap/sprint planning outside the repository root or under a clearly archival project-management location.
 
-## Correções posteriores à revisão
+## Corrections after the review
 
-- O módulo legado `Application/Features/Profiles` foi removido definitivamente.
-- Não existem mais referências a `ProfileCommandHandlers`, `LevelUpData.Profile` ou `SetProfile`.
-- A conta foi consolidada nos agregados `User` e `Character`.
-- As 33 ocorrências `IDE0011` registradas no build de 24 de julho de 2026 foram corrigidas com chaves explícitas em estruturas de controle.
+- The legacy `Application/Features/Profiles` module was permanently removed.
+- There are no remaining references to `ProfileCommandHandlers`, `LevelUpData.Profile` or `SetProfile`.
+- The account was consolidated into the `User` and `Character` aggregates.
+- The 33 `IDE0011` occurrences reported in the July 24, 2026 build were fixed with explicit braces in control structures.
 
-### Validação local recomendada
+### Recommended local validation
 
 ```bash
 dotnet clean
@@ -145,4 +145,4 @@ dotnet build
 dotnet test
 ```
 
-O ambiente usado para preparar este pacote não possui o SDK do .NET; por isso, a validação compilada deve ser executada em uma estação com .NET 10 instalado.
+The environment used to prepare this package does not include the .NET SDK, so compiled validation must be performed on a workstation with .NET 10 installed.

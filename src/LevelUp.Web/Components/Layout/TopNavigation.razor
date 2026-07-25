@@ -2,7 +2,7 @@
     <div class="top-navigation__content">
         <button type="button"
                 class="top-navigation__brand-button"
-                aria-label="@(IsCharacterPanelOpen ? "Fechar painel do personagem" : "Abrir painel do personagem")"
+                aria-label="@(IsCharacterPanelOpen ? "Close character panel" : "Open character panel")"
                 aria-expanded="@IsCharacterPanelOpen"
                 @onclick="OnToggleCharacterPanel">
             <span class="top-navigation__brand-text" aria-hidden="true">
@@ -17,7 +17,7 @@
             </span>
         </button>
 
-        <nav class="top-navigation__links" aria-label="Navegação principal">
+        <nav class="top-navigation__links" aria-label="Main navigation">
             <NavLink href="/daily" Match="NavLinkMatch.Prefix">Daily</NavLink>
             <NavLink href="/" Match="NavLinkMatch.All">Inventory</NavLink>
         </nav>
@@ -27,7 +27,7 @@
         <div class="top-navigation__actions @(IsMenuPanelOpen ? "is-menu-open" : null)">
             <button type="button"
                     class="top-navigation__menu-button"
-                    aria-label="@(IsMenuPanelOpen ? "Fechar menu de suporte" : "Abrir menu de suporte")"
+                    aria-label="@(IsMenuPanelOpen ? "Close support menu" : "Open support menu")"
                     aria-expanded="@IsMenuPanelOpen"
                     @onclick="OnToggleMenuPanel">
                 <span class="top-navigation__menu-icon" aria-hidden="true">
