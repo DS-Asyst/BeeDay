@@ -1,0 +1,16 @@
+using Microsoft.AspNetCore.Components;
+
+namespace LevelUp.Web.Components.DesignSystem.Layout;
+
+public partial class LevelUpSectionHeader
+{
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter] public string? Eyebrow { get; set; }
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public RenderFragment? Actions { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string CssClass => string.Join(' ', new[] { "levelup-section-header", Class }
+        .Where(value => !string.IsNullOrWhiteSpace(value)));
+}

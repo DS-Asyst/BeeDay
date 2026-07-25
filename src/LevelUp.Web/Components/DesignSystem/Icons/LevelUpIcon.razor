@@ -1,0 +1,22 @@
+<svg class="@CssClasses"
+     width="@Size"
+     height="@Size"
+     viewBox="0 0 24 24"
+     fill="none"
+     xmlns="http://www.w3.org/2000/svg"
+     aria-hidden="@(Decorative ? "true" : null)"
+     role="@(!Decorative ? "img" : null)"
+     focusable="false">
+    @if (!Decorative && !string.IsNullOrWhiteSpace(Label))
+    {
+        <title>@Label</title>
+    }
+    @foreach (var pixel in Pixels)
+    {
+        <rect x="@pixel.X"
+              y="@pixel.Y"
+              width="@pixel.Width"
+              height="@pixel.Height"
+              fill="currentColor" />
+    }
+</svg>

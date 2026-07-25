@@ -1,13 +1,10 @@
 @using LevelUp.Web.Components.Features.Account.Models
 
 <LevelUpCard Class="account-section">
-    <header class="account-section__header">
-        <div>
-            <span class="account-section__eyebrow">PROTECTION</span>
-            <h2>Security</h2>
-            <p>Change your password using your current credentials.</p>
-        </div>
-    </header>
+    <LevelUpSectionHeader Eyebrow="PASSWORD"
+                          Title="Security"
+                          Description="Protect your account with a strong, unique password."
+                          Class="account-section__header" />
 
     <EditForm Model="Model" OnValidSubmit="SubmitAsync" FormName="account-security">
         <DataAnnotationsValidator />

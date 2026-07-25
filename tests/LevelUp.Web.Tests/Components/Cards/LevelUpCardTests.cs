@@ -17,6 +17,21 @@ public sealed class LevelUpCardTests
     }
 
     [Fact]
+    public void AppliesReusableSurfaceModifiers()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<LevelUpCard>(parameters => parameters
+            .Add(component => component.Padded, true)
+            .Add(component => component.Muted, true)
+            .Add(component => component.Interactive, true));
+
+        var article = cut.Find("article");
+        Assert.Contains("levelup-card--padded", article.ClassList);
+        Assert.Contains("levelup-card--muted", article.ClassList);
+        Assert.Contains("levelup-card--interactive", article.ClassList);
+    }
+
+    [Fact]
     public void AppendsCustomClassAndAttributes()
     {
         using var context = new BunitContext();

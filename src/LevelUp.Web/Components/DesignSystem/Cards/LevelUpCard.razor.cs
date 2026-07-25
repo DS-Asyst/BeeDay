@@ -5,11 +5,19 @@ namespace LevelUp.Web.Components.DesignSystem.Cards;
 public partial class LevelUpCard
 {
     [Parameter] public string Class { get; set; } = string.Empty;
+    [Parameter] public bool Padded { get; set; }
+    [Parameter] public bool Muted { get; set; }
+    [Parameter] public bool Interactive { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
-    private string CssClass => string.IsNullOrWhiteSpace(Class)
-        ? "levelup-card"
-        : $"levelup-card {Class}";
+    private string CssClass => string.Join(' ', new[]
+    {
+        "levelup-card",
+        Padded ? "levelup-card--padded" : null,
+        Muted ? "levelup-card--muted" : null,
+        Interactive ? "levelup-card--interactive" : null,
+        Class
+    }.Where(value => !string.IsNullOrWhiteSpace(value)));
 }

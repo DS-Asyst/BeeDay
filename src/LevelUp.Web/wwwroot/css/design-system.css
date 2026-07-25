@@ -1,0 +1,121 @@
+/* Sprint 3.4 — reusable LevelUp design-system primitives */
+.levelup-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--levelup-spacing-sm);
+    min-height: 2.75rem;
+    padding: .65rem 1rem;
+    border: var(--levelup-game-border);
+    border-radius: var(--levelup-radius-xs);
+    color: var(--levelup-game-ink);
+    background: var(--levelup-game-yellow);
+    font-weight: 900;
+    letter-spacing: .035em;
+    line-height: 1;
+    text-transform: uppercase;
+    box-shadow: var(--levelup-game-shadow-sm);
+    cursor: pointer;
+    transform: translateY(0);
+    transition: transform 90ms ease, box-shadow 90ms ease, filter var(--levelup-transition-fast);
+}
+
+.levelup-button--secondary,
+.levelup-button--confirmation-cancel {
+    color: var(--levelup-game-ink);
+    background: var(--levelup-game-paper);
+}
+
+.levelup-button--danger,
+.levelup-button--confirmation-danger {
+    color: var(--levelup-color-text-inverse);
+    background: var(--levelup-game-red);
+}
+
+.levelup-button--full-width { width: 100%; }
+.levelup-button--compact { min-height: 2.25rem; padding: .45rem .75rem; font-size: .82rem; }
+
+.levelup-button:not(:disabled):hover {
+    filter: brightness(1.04) saturate(1.06);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 var(--levelup-game-ink);
+}
+
+.levelup-button:not(:disabled):active {
+    transform: translateY(3px);
+    box-shadow: none;
+}
+
+.levelup-button__loader {
+    width: .9rem;
+    height: .9rem;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: levelup-spin .7s linear infinite;
+}
+
+.levelup-card {
+    border: var(--levelup-game-border);
+    border-radius: var(--levelup-radius-xs);
+    background: var(--levelup-color-surface);
+    box-shadow: var(--levelup-game-shadow-sm);
+}
+
+.levelup-card--padded { padding: var(--levelup-spacing-lg); }
+.levelup-card--muted { background: var(--levelup-color-surface-muted); }
+.levelup-card--interactive { transition: transform var(--levelup-transition-normal), box-shadow var(--levelup-transition-normal); }
+.levelup-card--interactive:hover { transform: translateY(-2px); box-shadow: var(--levelup-game-shadow-md); }
+
+.levelup-page-header,
+.levelup-section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--levelup-spacing-lg);
+}
+
+.levelup-page-header { margin-bottom: var(--levelup-spacing-xl); }
+.levelup-page-header__content,
+.levelup-section-header > div:first-child { min-width: 0; }
+
+.levelup-page-header__eyebrow,
+.levelup-section-header__eyebrow {
+    display: block;
+    margin-bottom: var(--levelup-spacing-xs);
+    color: var(--levelup-color-primary);
+    font-size: .75rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.levelup-page-header h1,
+.levelup-section-header h2 { margin: 0; color: var(--levelup-color-text-primary); }
+.levelup-page-header h1 { font-size: clamp(2rem, 5vw, 3.2rem); }
+.levelup-section-header h2 { font-size: 1.55rem; }
+
+.levelup-page-header p,
+.levelup-section-header p {
+    max-width: 52rem;
+    margin: var(--levelup-spacing-sm) 0 0;
+    color: var(--levelup-color-text-muted);
+    line-height: 1.55;
+}
+
+.levelup-page-header__actions,
+.levelup-section-header__actions { display: flex; flex-wrap: wrap; gap: var(--levelup-spacing-sm); }
+
+@keyframes levelup-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 42rem) {
+    .levelup-page-header,
+    .levelup-section-header { flex-direction: column; }
+    .levelup-page-header__actions,
+    .levelup-section-header__actions { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .levelup-button,
+    .levelup-card--interactive { transition: none; }
+}

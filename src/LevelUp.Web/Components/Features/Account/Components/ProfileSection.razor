@@ -1,13 +1,10 @@
 @using LevelUp.Web.Components.Features.Account.Models
 
 <LevelUpCard Class="account-section">
-    <header class="account-section__header">
-        <div>
-            <span class="account-section__eyebrow">IDENTITY</span>
-            <h2>Profile</h2>
-            <p>Manage the personal information shown across LevelUp.</p>
-        </div>
-    </header>
+    <LevelUpSectionHeader Eyebrow="IDENTITY"
+                          Title="Profile"
+                          Description="Manage the personal information shown across LevelUp."
+                          Class="account-section__header" />
 
     <EditForm Model="Model" OnValidSubmit="SubmitAsync" FormName="account-profile">
         <DataAnnotationsValidator />

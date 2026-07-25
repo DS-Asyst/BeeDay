@@ -1,6 +1,6 @@
 <button type="@Type"
         class="@CssClasses"
-        disabled="@Disabled"
+        disabled="@IsDisabled"
         aria-busy="@IsLoading.ToString().ToLowerInvariant()"
         @onclick="OnClick"
         @attributes="AdditionalAttributes">
@@ -8,5 +8,9 @@
     {
         <span class="levelup-button__loader" aria-hidden="true"></span>
     }
-    @ChildContent
+    else if (Icon is not null)
+    {
+        <LevelUpIcon Name="@Icon.Value" Size="@IconSize" />
+    }
+    <span class="levelup-button__label">@ChildContent</span>
 </button>

@@ -12,13 +12,10 @@
 <PageTitle>My Account | LevelUp</PageTitle>
 
 <main class="account-page" aria-busy="@IsAnyBusy.ToString().ToLowerInvariant()">
-    <header class="account-page__hero">
-        <div>
-            <span class="account-page__eyebrow">PLAYER SETTINGS</span>
-            <h1>My Account</h1>
-            <p>Keep your profile, security and experience preferences up to date.</p>
-        </div>
-    </header>
+    <LevelUpPageHeader Eyebrow="PLAYER SETTINGS"
+                       Title="My Account"
+                       Description="Keep your profile, security and experience preferences up to date."
+                       Class="account-page__hero" />
 
     @if (_isLoading)
     {

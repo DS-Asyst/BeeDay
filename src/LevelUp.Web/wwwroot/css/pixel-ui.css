@@ -1,0 +1,202 @@
+/* Sprint 3.5 — Pixel UI Pack */
+
+/* Consistent pixel icons */
+.levelup-icon {
+    display: inline-block;
+    flex: 0 0 auto;
+    overflow: visible;
+    color: currentColor;
+    shape-rendering: crispEdges;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+/* Button state pack */
+.levelup-button {
+    position: relative;
+    isolation: isolate;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+        transform var(--levelup-duration-instant) var(--levelup-easing-pixel),
+        box-shadow var(--levelup-duration-instant) var(--levelup-easing-pixel),
+        filter var(--levelup-duration-interaction) var(--levelup-easing-standard),
+        background-color var(--levelup-duration-interaction) var(--levelup-easing-standard),
+        color var(--levelup-duration-interaction) var(--levelup-easing-standard);
+}
+
+.levelup-button::after {
+    position: absolute;
+    inset: 2px;
+    z-index: -1;
+    border: 1px solid rgb(255 255 255 / 48%);
+    content: "";
+    pointer-events: none;
+}
+
+.levelup-button__label {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.levelup-button:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: var(--levelup-pixel-shadow-hover);
+}
+
+.levelup-button:not(:disabled):active,
+.levelup-button[aria-pressed="true"] {
+    transform: translateY(2px);
+    box-shadow: var(--levelup-pixel-shadow-pressed);
+    filter: brightness(.96) saturate(1.08);
+}
+
+.levelup-button:focus-visible,
+.levelup-card--interactive:focus-visible,
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: var(--levelup-focus-outline);
+    outline-offset: var(--levelup-focus-offset);
+}
+
+.levelup-button:disabled,
+.levelup-button[aria-disabled="true"] {
+    color: color-mix(in srgb, var(--levelup-game-ink) 48%, transparent);
+    background: var(--levelup-color-surface-subtle);
+    box-shadow: 0 2px 0 color-mix(in srgb, var(--levelup-game-ink) 55%, transparent);
+    cursor: not-allowed;
+    filter: grayscale(.75) saturate(.4);
+    opacity: .72;
+    transform: none;
+}
+
+.levelup-button:disabled::after { opacity: .35; }
+
+.levelup-button__loader {
+    image-rendering: pixelated;
+    animation: levelup-pixel-spin .65s steps(8, end) infinite;
+}
+
+/* Interactive surfaces and card microinteractions */
+.levelup-card--interactive {
+    position: relative;
+    transition:
+        transform var(--levelup-duration-interaction) var(--levelup-easing-emphasized),
+        box-shadow var(--levelup-duration-interaction) var(--levelup-easing-pixel),
+        border-color var(--levelup-duration-interaction) var(--levelup-easing-standard);
+}
+
+.levelup-card--interactive:hover,
+.levelup-card--interactive:focus-within {
+    border-color: var(--levelup-color-primary);
+    transform: translateY(-3px);
+    box-shadow: var(--levelup-pixel-shadow-hover);
+}
+
+.levelup-card--interactive:active { transform: translateY(1px); }
+
+/* Form microinteractions */
+.levelup-field input,
+.levelup-field select,
+.levelup-field textarea,
+.levelup-input,
+.levelup-select {
+    transition:
+        border-color var(--levelup-duration-interaction) var(--levelup-easing-standard),
+        box-shadow var(--levelup-duration-interaction) var(--levelup-easing-standard),
+        background-color var(--levelup-duration-interaction) var(--levelup-easing-standard);
+}
+
+.levelup-field input:hover:not(:disabled),
+.levelup-field select:hover:not(:disabled),
+.levelup-field textarea:hover:not(:disabled),
+.levelup-input:hover:not(:disabled),
+.levelup-select:hover:not(:disabled) {
+    border-color: var(--levelup-color-primary-light);
+}
+
+/* Pixel scrollbar — Chromium/WebKit */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--levelup-color-primary) var(--levelup-color-surface-subtle);
+}
+
+*::-webkit-scrollbar { width: 14px; height: 14px; }
+*::-webkit-scrollbar-track {
+    border: 2px solid var(--levelup-game-ink);
+    background:
+        linear-gradient(45deg, transparent 25%, rgb(23 19 33 / 8%) 25% 50%, transparent 50% 75%, rgb(23 19 33 / 8%) 75%) 0 0 / 8px 8px,
+        var(--levelup-color-surface-subtle);
+}
+*::-webkit-scrollbar-thumb {
+    min-height: 32px;
+    border: 2px solid var(--levelup-game-ink);
+    background: var(--levelup-color-primary);
+    box-shadow: inset 2px 2px 0 rgb(255 255 255 / 28%);
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--levelup-color-primary-light); }
+*::-webkit-scrollbar-thumb:active { background: var(--levelup-color-primary-active); }
+*::-webkit-scrollbar-corner { background: var(--levelup-game-ink); }
+
+/* Shared hover and entrance utilities */
+.levelup-pixel-hover {
+    transition:
+        transform var(--levelup-duration-interaction) var(--levelup-easing-emphasized),
+        filter var(--levelup-duration-interaction) var(--levelup-easing-standard);
+}
+.levelup-pixel-hover:hover { transform: translateY(-2px); filter: brightness(1.04); }
+.levelup-pixel-press:active { transform: translateY(2px); }
+.levelup-pixel-pop { animation: levelup-pixel-pop var(--levelup-duration-panel) var(--levelup-easing-emphasized) both; }
+.levelup-panel-enter { animation: levelup-panel-enter var(--levelup-duration-panel) var(--levelup-easing-emphasized) both; }
+.levelup-success-pulse { animation: levelup-success-pulse 360ms var(--levelup-easing-emphasized); }
+.levelup-shake { animation: levelup-shake 260ms steps(4, end); }
+
+@keyframes levelup-pixel-spin { to { transform: rotate(360deg); } }
+@keyframes levelup-pixel-pop {
+    0% { opacity: 0; transform: scale(.94) translateY(4px); }
+    70% { opacity: 1; transform: scale(1.02) translateY(-1px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes levelup-panel-enter {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes levelup-success-pulse {
+    0%, 100% { filter: none; }
+    50% { filter: brightness(1.12) saturate(1.25); transform: scale(1.015); }
+}
+@keyframes levelup-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    50% { transform: translateX(4px); }
+    75% { transform: translateX(-2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .levelup-pixel-hover:hover,
+    .levelup-card--interactive:hover,
+    .levelup-card--interactive:focus-within,
+    .levelup-button:not(:disabled):hover,
+    .levelup-button:not(:disabled):active {
+        transform: none;
+    }
+
+    .levelup-pixel-pop,
+    .levelup-panel-enter,
+    .levelup-success-pulse,
+    .levelup-shake,
+    .levelup-button__loader {
+        animation: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .levelup-button,
+    .levelup-card,
+    *::-webkit-scrollbar-thumb { forced-color-adjust: auto; }
+}

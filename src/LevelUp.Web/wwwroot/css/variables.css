@@ -106,3 +106,18 @@
     --levelup-game-shadow-md: 0 5px 0 var(--levelup-game-ink);
     --levelup-game-shadow-lg: 0 7px 0 var(--levelup-game-ink), 0 16px 32px rgb(23 19 33 / 18%);
 }
+
+/* Sprint 3.5 — Pixel UI motion and interaction tokens */
+:root {
+    --levelup-pixel-unit: 2px;
+    --levelup-pixel-outline: 2px solid var(--levelup-game-ink);
+    --levelup-pixel-shadow-rest: 0 3px 0 var(--levelup-game-ink);
+    --levelup-pixel-shadow-hover: 0 5px 0 var(--levelup-game-ink);
+    --levelup-pixel-shadow-pressed: 0 1px 0 var(--levelup-game-ink);
+    --levelup-focus-outline: 3px solid var(--levelup-game-blue);
+    --levelup-focus-offset: 3px;
+    --levelup-duration-instant: 70ms;
+    --levelup-duration-interaction: 140ms;
+    --levelup-duration-panel: 220ms;
+    --levelup-easing-pixel: steps(2, end);
+}

@@ -2,13 +2,10 @@
 @using LevelUp.Domain.Enums
 
 <LevelUpCard Class="account-section">
-    <header class="account-section__header">
-        <div>
-            <span class="account-section__eyebrow">EXPERIENCE</span>
-            <h2>Preferences</h2>
-            <p>Choose how LevelUp should look and communicate with you.</p>
-        </div>
-    </header>
+    <LevelUpSectionHeader Eyebrow="EXPERIENCE"
+                          Title="Preferences"
+                          Description="Choose how LevelUp looks and communicates with you."
+                          Class="account-section__header" />
 
     <EditForm Model="Model" OnValidSubmit="SubmitAsync" FormName="account-preferences">
         <DataAnnotationsValidator />

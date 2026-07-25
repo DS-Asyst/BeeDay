@@ -110,3 +110,23 @@ The writable data directory should preferably live outside the publish directory
 6. Check `/health/live`, `/health/ready` and `/health`.
 7. Verify onboarding, Daily, project and My Account flows.
 8. Confirm runtime data and backup rotation.
+
+## Design system foundation
+
+Reusable UI primitives live under `src/LevelUp.Web/Components/DesignSystem` and their shared styles live in `src/LevelUp.Web/wwwroot/css/design-system.css`.
+
+Use these components before introducing feature-specific markup:
+
+- `LevelUpButton` for primary, secondary and destructive actions.
+- `LevelUpCard` for bordered surfaces, including padded, muted and interactive variants.
+- `LevelUpInput`, `LevelUpSelect`, `LevelUpTextArea`, `LevelUpDateInput` and `LevelUpCheckbox` for forms.
+- `LevelUpPageHeader` and `LevelUpSectionHeader` for page and section hierarchy.
+- feedback primitives such as loading, empty state, skeleton, toast and confirmation dialog.
+
+Feature CSS may control layout, but shared interaction, typography, focus, spacing and visual variants belong to the design system.
+
+## Sprint 3.6 UI polish layer
+
+`wwwroot/css/polish.css` is loaded after `pixel-ui.css` and is the final cross-component refinement layer. Place global spacing, responsive, accessibility and control-size rules there. Component-specific visual rules should remain in the component stylesheet or the relevant Design System stylesheet.
+
+The icon component renders pixel rectangles declaratively in Razor. Do not reintroduce manually incremented `RenderTreeBuilder` sequence numbers; they produce `ASP0006` analyzer warnings and make source-order reasoning harder.

@@ -1,0 +1,17 @@
+<header class="@CssClass" @attributes="AdditionalAttributes">
+    <div class="levelup-page-header__content">
+        @if (!string.IsNullOrWhiteSpace(Eyebrow))
+        {
+            <span class="levelup-page-header__eyebrow">@Eyebrow</span>
+        }
+        <h1>@Title</h1>
+        @if (!string.IsNullOrWhiteSpace(Description))
+        {
+            <p>@Description</p>
+        }
+    </div>
+    @if (Actions is not null)
+    {
+        <div class="levelup-page-header__actions">@Actions</div>
+    }
+</header>
