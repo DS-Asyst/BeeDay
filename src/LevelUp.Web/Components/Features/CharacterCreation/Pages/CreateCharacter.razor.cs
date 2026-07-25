@@ -36,6 +36,7 @@ public partial class CreateCharacter
     private void ContinueToCharacter() => State.ContinueToCharacter();
     private void ContinueToClasses() => State.ContinueToClasses();
     private void Back() => State.Back();
+    private void BackToLogin() => Navigation.NavigateTo("/login");
 
     private void RequestClassConfirmation(
         LevelUp.Web.Components.Features.CharacterCreation.State.CharacterClassOption option) =>

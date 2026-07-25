@@ -500,3 +500,44 @@
     margin-left: 0;
     margin-right: auto;
 }
+
+
+/* Unified secondary RPG action for every onboarding Back button. */
+.character-back-button {
+    justify-content: center;
+    width: auto;
+    min-width: 7.25rem;
+    min-height: 2.85rem;
+    margin: 0 0 1rem;
+    padding: 0 .9rem;
+    border: 2px solid var(--levelup-game-ink);
+    border-radius: .18rem;
+    color: rgb(255 255 255 / 82%);
+    background: color-mix(in srgb, #5b1095 68%, #fff 32%);
+    box-shadow: 0 3px 0 rgb(7 19 26 / 58%);
+    font-family: var(--levelup-font-ui);
+    font-size: .8rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: .035em;
+    text-transform: uppercase;
+    cursor: pointer;
+    opacity: .76;
+    transition: color var(--levelup-transition-fast), background-color var(--levelup-transition-fast), box-shadow var(--levelup-transition-fast), filter var(--levelup-transition-fast), opacity var(--levelup-transition-fast), transform var(--levelup-transition-fast);
+}
+
+.character-back-button:hover,
+.character-back-button:focus-visible {
+    color: #fff;
+    background: #5b1095;
+    box-shadow: 0 4px 0 var(--levelup-game-ink);
+    filter: brightness(1.08) saturate(1.08);
+    opacity: 1;
+    outline: none;
+    transform: translateY(-1px);
+}
+
+.character-back-button:active {
+    transform: translateY(3px);
+    box-shadow: none;
+}

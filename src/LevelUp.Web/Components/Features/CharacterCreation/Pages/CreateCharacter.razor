@@ -10,7 +10,7 @@
     <div class="character-panel character-panel--@State.CurrentStepClass">
         @if (State.Step == LevelUp.Web.Components.Features.CharacterCreation.State.CharacterCreationStep.Account)
         {
-            <span class="character-panel__brand">LEVELUP</span>
+            <button class="character-back-button" type="button" @onclick="BackToLogin">← Back</button>
             <h1>Create your account</h1>
             <p class="character-panel__intro">Start your LevelUp journey.</p>
 

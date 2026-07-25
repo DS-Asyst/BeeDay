@@ -654,3 +654,94 @@
 .inventory-empty-state .inventory-button--cta {
     min-width: 10.5rem;
 }
+
+
+/* Transaction actions reuse the exact Daily card menu visual language.
+   Inventory only controls placement/visibility; panel and items inherit app.css. */
+.inventory-transaction-card {
+    overflow: visible;
+}
+
+.inventory-transaction-card__actions {
+    position: relative;
+    align-self: start;
+    justify-self: center;
+    margin-top: .48rem;
+    z-index: 30;
+}
+
+.inventory-transaction-card .activity-card__menu.inventory-transaction-card__menu {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+    margin-top: 0;
+    border: 0;
+    background: transparent;
+    color: #756c7d;
+    outline: none;
+    box-shadow: none;
+}
+
+.inventory-transaction-card .activity-card__menu.inventory-transaction-card__menu:hover,
+.inventory-transaction-card .activity-card__menu.inventory-transaction-card__menu:focus-visible,
+.inventory-transaction-card__actions:focus-within .activity-card__menu.inventory-transaction-card__menu {
+    border: 0;
+    background: transparent;
+    color: var(--levelup-color-primary-hover);
+    outline: none;
+    box-shadow: none;
+    transform: none;
+}
+
+.inventory-transaction-card__actions .card-action-menu__panel {
+    top: calc(100% + .25rem);
+    right: -.2rem;
+    left: auto;
+    width: 9.75rem;
+    min-width: 0;
+}
+
+.inventory-transaction-card__actions .card-action-menu__item {
+    min-width: 0;
+    min-height: 3rem;
+    padding: 0 .9rem;
+    border: 0;
+    border-bottom: 1px solid #eeeaf0;
+    border-radius: 0;
+    background: var(--levelup-color-surface);
+    color: #342b3b;
+    box-shadow: none;
+    font-family: var(--levelup-font-family);
+    font-size: .82rem;
+    font-weight: 600;
+    transform: none;
+}
+
+.inventory-transaction-card__actions .card-action-menu__item:last-child {
+    border-bottom: 0;
+}
+
+.inventory-transaction-card__actions .card-action-menu__item:hover,
+.inventory-transaction-card__actions .card-action-menu__item:focus-visible {
+    background: #f6f3f8;
+    color: #512d86;
+    outline: none;
+    transform: none;
+}
+
+.inventory-transaction-card__actions .card-action-menu__item--delete,
+.inventory-transaction-card__actions .card-action-menu__item--delete span {
+    color: #e02f3a;
+}
+
+.inventory-transaction-card__actions .card-action-menu__item--delete:hover,
+.inventory-transaction-card__actions .card-action-menu__item--delete:focus-visible {
+    background: var(--levelup-color-danger-soft);
+    color: #bd202a;
+}
+
+.inventory-transaction-card__actions .card-action-menu__item--delete:hover span,
+.inventory-transaction-card__actions .card-action-menu__item--delete:focus-visible span {
+    color: #bd202a;
+}
