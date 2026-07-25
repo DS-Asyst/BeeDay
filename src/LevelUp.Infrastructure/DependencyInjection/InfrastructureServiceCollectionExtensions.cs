@@ -4,6 +4,7 @@ using LevelUp.Infrastructure.Background;
 using LevelUp.Infrastructure.Caching;
 using LevelUp.Infrastructure.Configuration;
 using LevelUp.Infrastructure.HealthChecks;
+using LevelUp.Infrastructure.Identity;
 using LevelUp.Infrastructure.Persistence.Json;
 using LevelUp.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +22,22 @@ public static class InfrastructureServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(configuration);
 
         services
+            .AddOptions<IdentityEmailOptions>()
+            .Bind(configuration.GetSection(IdentityEmailOptions.SectionName))
+            .Validate(options => Uri.TryCreate(options.PublicBaseUrl, UriKind.Absolute, out _), "Identity email public base URL must be absolute.")
+            .Validate(options => IsRootedRelativePath(options.ConfirmationPath), "Email confirmation path must start with '/'.")
+            .Validate(options => IsRootedRelativePath(options.PasswordResetPath), "Password reset path must start with '/'.")
+            .ValidateOnStart();
+
+        services
+            .AddOptions<ResendOptions>()
+            .Bind(configuration.GetSection(ResendOptions.SectionName))
+            .Validate(options => !options.Enabled || !string.IsNullOrWhiteSpace(options.ApiKey), "Resend API key is required when email delivery is enabled.")
+            .Validate(options => !options.Enabled || !string.IsNullOrWhiteSpace(options.FromAddress), "Resend sender address is required when email delivery is enabled.")
+            .Validate(options => !options.Enabled || options.FromAddress.Contains('@', StringComparison.Ordinal), "Resend sender address must be a valid email address.")
+            .ValidateOnStart();
+
+        services
             .AddOptions<JsonStorageOptions>()
             .Bind(configuration.GetSection(JsonStorageOptions.SectionName))
             .Validate(options => !string.IsNullOrWhiteSpace(options.Directory), "Storage directory is required.")
@@ -36,6 +53,14 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<JsonBackupService>();
         services.AddSingleton<ILevelUpRepository, JsonLevelUpRepository>();
         services.AddSingleton<LevelUp.Application.Common.Security.IPasswordService, Pbkdf2PasswordService>();
+        services.AddSingleton<LevelUp.Application.Common.Identity.IClock, SystemClock>();
+        services.AddSingleton<LevelUp.Application.Common.Identity.IUserTokenService, SecureUserTokenService>();
+        services.AddSingleton<LevelUp.Application.Common.Identity.IIdentityEmailComposer, IdentityEmailComposer>();
+        services.AddHttpClient<LevelUp.Application.Common.Identity.IEmailSender, ResendEmailSender>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.resend.com/");
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
         services.AddMemoryCache();
         services.AddSingleton<MemoryApplicationCache>();
         services.AddSingleton<LevelUp.Application.Common.Caching.IApplicationCache>(sp => sp.GetRequiredService<MemoryApplicationCache>());
@@ -56,6 +81,11 @@ public static class InfrastructureServiceCollectionExtensions
         !string.IsNullOrWhiteSpace(name)
         && string.Equals(Path.GetExtension(name), ".json", StringComparison.OrdinalIgnoreCase)
         && string.Equals(Path.GetFileName(name), name, StringComparison.Ordinal);
+
+    private static bool IsRootedRelativePath(string? path) =>
+        !string.IsNullOrWhiteSpace(path)
+        && path.StartsWith("/", StringComparison.Ordinal)
+        && !path.StartsWith("//", StringComparison.Ordinal);
 
     private static bool IsSimpleDirectoryName(string? name) =>
         !string.IsNullOrWhiteSpace(name)
