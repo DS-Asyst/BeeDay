@@ -1,19 +1,19 @@
+using System.Security.Claims;
+using LevelUp.Application.Common.Contracts;
 using LevelUp.Application.DependencyInjection;
+using LevelUp.Application.Features.Authentication.Commands;
+using LevelUp.Application.Features.Authentication.Requests;
 using LevelUp.Infrastructure.DependencyInjection;
 using LevelUp.Web.Components;
-using LevelUp.Web.Components.Features.Dashboard.State;
 using LevelUp.Web.Components.Features.CharacterCreation.State;
+using LevelUp.Web.Components.Features.Dashboard.State;
 using LevelUp.Web.Diagnostics;
 using LevelUp.Web.HealthChecks;
 using LevelUp.Web.Services;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
-using System.Security.Claims;
-using LevelUp.Application.Features.Authentication.Commands;
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Application.Features.Authentication.Requests;
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 

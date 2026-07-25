@@ -3,12 +3,12 @@ name: LevelUp CI
 on:
   push:
     branches:
-      - develop
+      - hmg
 
   pull_request:
     branches:
-      - develop
-      - main
+      - hmg
+      - prd
 
   workflow_dispatch:
 

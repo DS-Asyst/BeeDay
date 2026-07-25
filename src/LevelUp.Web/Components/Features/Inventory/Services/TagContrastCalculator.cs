@@ -4,10 +4,15 @@ public static class TagContrastCalculator
 {
     public static string GetTextColor(string? hexColor)
     {
-        if (string.IsNullOrWhiteSpace(hexColor)) return "#ffffff";
+        if (string.IsNullOrWhiteSpace(hexColor))
+        {
+            return "#ffffff";
+        }
         var value = hexColor.Trim().TrimStart('#');
         if (value.Length != 6 || !int.TryParse(value, System.Globalization.NumberStyles.HexNumber, null, out var rgb))
+        {
             return "#ffffff";
+        }
 
         var r = (rgb >> 16) & 255;
         var g = (rgb >> 8) & 255;

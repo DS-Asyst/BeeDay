@@ -1,15 +1,16 @@
 using LevelUp.Application.Common.Caching;
 using LevelUp.Application.Common.Contracts;
 using LevelUp.Application.Exceptions;
+using LevelUp.Application.Features.Characters.Commands;
+using LevelUp.Application.Features.Characters.Handlers;
 using LevelUp.Application.Features.Dashboard.Handlers;
 using LevelUp.Application.Features.Habits.Handlers;
 using LevelUp.Application.Features.Ordering.Handlers;
 using LevelUp.Application.Features.Ordering.Requests;
-using LevelUp.Application.Features.Characters.Handlers;
-using LevelUp.Application.Features.Characters.Commands;
 using LevelUp.Domain.Entities;
 using LevelUp.Domain.Enums;
 using Xunit;
+
 namespace LevelUp.Application.Tests;
 
 public sealed class FeatureServicesTests

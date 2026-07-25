@@ -1,12 +1,12 @@
+using LevelUp.Application.Features.Characters.Commands;
 using LevelUp.Application.Features.Dashboard.Queries;
 using LevelUp.Application.Features.Habits.Commands;
 using LevelUp.Application.Features.Ordering.Commands;
 using LevelUp.Application.Features.Ordering.Requests;
-using LevelUp.Application.Features.Characters.Commands;
-using LevelUp.Application.Features.Users.Commands;
 using LevelUp.Application.Features.Projects.Commands;
 using LevelUp.Application.Features.Tasks.Commands;
 using LevelUp.Application.Features.Todos.Commands;
+using LevelUp.Application.Features.Users.Commands;
 using LevelUp.Domain.Entities;
 using LevelUp.Domain.Enums;
 using LevelUp.Web.Components.Features.Habits.Models;

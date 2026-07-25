@@ -183,7 +183,7 @@ else
             await Sender.Send(new EnsureCurrentWalletCommand());
             await LoadDataAsync();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             _errorMessage = "We could not load your inventory. Please try again.";
         }

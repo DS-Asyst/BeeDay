@@ -65,6 +65,8 @@ Detailed documentation:
 - [Architecture](docs/ARCHITECTURE.md)
 - [Code review and technical findings](docs/CODE_REVIEW.md)
 - [Development and deployment](docs/DEVELOPMENT.md)
+- [Complete project map](docs/PROJECT_MAP.md)
+- [Refactoring guidance](docs/REFACTORING.md)
 
 ## Solution structure
 
@@ -198,8 +200,8 @@ GET /health        Complete health report
 
 ## Continuous integration and deployment
 
-- Pushes to `develop` and pull requests to `develop` or `main` run restore, build and tests.
-- Pushes to `main` validate the solution and then publish/deploy through a Windows self-hosted runner.
+- Pushes to `hmg` and pull requests to `hmg` or `prd` run restore, build and tests.
+- Pushes to `prd` validate the solution and then publish/deploy through a Windows self-hosted runner.
 - Production deployment uses `scripts/Deploy-LevelUp.ps1` and expects the IIS environment configured by the operator.
 
 ## Project status

@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Components;
 using LevelUp.Web.Components.DesignSystem.Icons;
+using Microsoft.AspNetCore.Components;
 
 namespace LevelUp.Web.Components.DesignSystem.Buttons;
 

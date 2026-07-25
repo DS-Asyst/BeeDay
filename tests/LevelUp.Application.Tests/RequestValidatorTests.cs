@@ -1,10 +1,10 @@
+using LevelUp.Application.Features.Characters.Commands;
+using LevelUp.Application.Features.Characters.Requests;
+using LevelUp.Application.Features.Characters.Validation;
 using LevelUp.Application.Features.Habits.Requests;
 using LevelUp.Application.Features.Habits.Validation;
 using LevelUp.Application.Features.Ordering.Requests;
 using LevelUp.Application.Features.Ordering.Validation;
-using LevelUp.Application.Features.Characters.Commands;
-using LevelUp.Application.Features.Characters.Requests;
-using LevelUp.Application.Features.Characters.Validation;
 using LevelUp.Application.Features.Projects.Requests;
 using LevelUp.Application.Features.Projects.Validation;
 using LevelUp.Application.Features.Tasks.Requests;

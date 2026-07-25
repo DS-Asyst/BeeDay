@@ -64,11 +64,11 @@ Compile/content exclusion rules used solely to suppress obsolete Profile files w
 
 **Priority:** Critical before enabling real multi-user access.
 
-#### 2. Authentication is not complete
+#### 2. Authentication boundary requires hardening
 
-The domain stores password hashes, but a complete login/session/logout and authorization boundary is not yet visible in the reviewed architecture. Password data must never be handled directly by UI state classes.
+Cookie authentication, login and logout flows are present, and password hashing is isolated behind `IPasswordService`. The remaining risk is the persisted global `CurrentUserId`: authenticated identity must become the sole source of user context before concurrent multi-user deployment. Account recovery, lockout/rate limiting and production cookie policy should also be completed.
 
-**Priority:** High.
+**Priority:** High before public deployment.
 
 #### 3. Domain aggregate growth
 
@@ -127,7 +127,7 @@ Recommended additions:
 3. Add explicit authorization checks to every user-owned command/query.
 4. Move password hashing behind a dedicated application/security abstraction if it is not already isolated.
 5. Add secret scanning and dependency/security scanning to CI.
-6. Protect the `main` environment and self-hosted deployment runner.
+6. Protect the `prd` environment and self-hosted deployment runner.
 7. Keep roadmap/sprint planning outside the repository root or under a clearly archival project-management location.
 
 ## Corrections after the review

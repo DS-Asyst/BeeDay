@@ -26,5 +26,7 @@
     <File Path="docs/ARCHITECTURE.md" />
     <File Path="docs/CODE_REVIEW.md" />
     <File Path="docs/DEVELOPMENT.md" />
+    <File Path="docs/PROJECT_MAP.md" />
+    <File Path="docs/REFACTORING.md" />
   </Folder>
 </Solution>

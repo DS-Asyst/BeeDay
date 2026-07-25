@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 namespace LevelUp.Web.Components.Features.CharacterCreation.Models;
+
 public sealed class CharacterCreationFormModel
 {
     [Required, StringLength(80)] public string Name { get; set; } = string.Empty;

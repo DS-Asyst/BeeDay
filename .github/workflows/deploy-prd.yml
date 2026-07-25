@@ -3,7 +3,7 @@ name: LevelUp Production Deploy
 on:
   push:
     branches:
-      - main
+      - prd
 
   workflow_dispatch:
 

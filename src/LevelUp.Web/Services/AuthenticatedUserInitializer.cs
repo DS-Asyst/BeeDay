@@ -1,6 +1,6 @@
 using System.Security.Claims;
-using LevelUp.Application.Features.Authentication.Commands;
 using LevelUp.Application.Common.Contracts;
+using LevelUp.Application.Features.Authentication.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Components.Authorization;
 
