@@ -9,13 +9,16 @@ public sealed class LevelUpData
     private const string MigrationEmail = "migrated-user@levelup.invalid";
 
     [JsonInclude]
-    public int SchemaVersion { get; private set; } = 4;
+    public int SchemaVersion { get; private set; } = 5;
 
     [JsonInclude]
     public Guid? CurrentUserId { get; private set; }
 
     [JsonInclude]
     public List<User> Users { get; private set; } = [];
+
+    [JsonInclude]
+    public List<UserToken> UserTokens { get; private set; } = [];
 
     [JsonInclude]
     public List<Character> Characters { get; private set; } = [];
@@ -68,6 +71,7 @@ public sealed class LevelUpData
             SchemaVersion = SchemaVersion,
             CurrentUserId = userId,
             Users = [user],
+            UserTokens = UserTokens.Where(token => token.UserId == userId).ToList(),
             Characters = Characters.Where(character => character.UserId == userId).ToList(),
             Habits = Habits.Where(habit => habit.UserId == userId).ToList(),
             Tasks = Tasks.Where(task => task.UserId == userId).ToList(),
@@ -131,6 +135,31 @@ public sealed class LevelUpData
         }
         Users.Add(user);
         CurrentUserId ??= user.Id;
+    }
+
+    public void AddUserToken(UserToken token)
+    {
+        ArgumentNullException.ThrowIfNull(token);
+        FindUser(token.UserId);
+
+        if (UserTokens.Any(existing => existing.Id == token.Id))
+        {
+            throw new InvalidDomainStateException($"User token '{token.Id}' is already registered.");
+        }
+
+        UserTokens.Add(token);
+    }
+
+    public UserToken FindUserToken(Guid tokenId) => UserTokens.FirstOrDefault(token => token.Id == tokenId)
+        ?? throw new InvalidDomainStateException($"User token '{tokenId}' was not found.");
+
+    public void RevokeActiveUserTokens(Guid userId, UserTokenType type, DateTimeOffset revokedAtUtc)
+    {
+        FindUser(userId);
+        foreach (var token in UserTokens.Where(token => token.UserId == userId && token.Type == type))
+        {
+            token.Revoke(revokedAtUtc);
+        }
     }
 
     public void SetCurrentUser(Guid userId)
@@ -264,8 +293,10 @@ public sealed class LevelUpData
 
     public void EnsureValidState()
     {
-        SchemaVersion = 4;
+        var sourceSchemaVersion = SchemaVersion;
+        SchemaVersion = 5;
         Users ??= [];
+        UserTokens ??= [];
         Characters ??= [];
         Habits ??= [];
         Tasks ??= [];
@@ -277,8 +308,10 @@ public sealed class LevelUpData
 
         MigrateLegacyProfile();
         EnsureOwnerForLegacyActivities();
+        ConfirmEmailsForExistingUsers(sourceSchemaVersion);
 
         EnsureUniqueIds(Users);
+        EnsureUniqueIds(UserTokens);
         EnsureUniqueIds(Characters);
         EnsureUniqueIds(Habits);
         EnsureUniqueIds(Tasks);
@@ -351,6 +384,24 @@ public sealed class LevelUpData
             }
         }
 
+        foreach (var token in UserTokens)
+        {
+            if (Users.All(user => user.Id != token.UserId))
+            {
+                throw new InvalidDomainStateException("A User token references an unknown User.");
+            }
+
+            if (string.IsNullOrWhiteSpace(token.TokenHash))
+            {
+                throw new InvalidDomainStateException("A User token cannot have an empty hash.");
+            }
+
+            if (token.ExpiresAtUtc <= token.CreatedAtUtc)
+            {
+                throw new InvalidDomainStateException("A User token has an invalid expiration time.");
+            }
+        }
+
         foreach (var character in Characters)
         {
             if (Users.All(user => user.Id != character.UserId))
@@ -391,6 +442,19 @@ public sealed class LevelUpData
         {
             var wallet = FindWallet(transaction.WalletId);
             ValidateTransactionTagOwnership(transaction, wallet);
+        }
+    }
+
+    private void ConfirmEmailsForExistingUsers(int sourceSchemaVersion)
+    {
+        if (sourceSchemaVersion >= 5)
+        {
+            return;
+        }
+
+        foreach (var user in Users.Where(user => !user.IsEmailConfirmed))
+        {
+            user.ConfirmEmail(user.CreatedAtUtc);
         }
     }
 

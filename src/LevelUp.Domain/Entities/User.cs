@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using LevelUp.Domain.Abstractions;
 using LevelUp.Domain.Common;
 using LevelUp.Domain.Enums;
+using LevelUp.Domain.Exceptions;
 using LevelUp.Domain.ValueObjects;
 
 namespace LevelUp.Domain.Entities;
@@ -18,6 +19,8 @@ public sealed class User : Entity
     [JsonInclude] public DateTimeOffset? LastLoginAtUtc { get; private set; }
     [JsonInclude] public bool IsActive { get; private set; } = true;
     [JsonInclude] public bool HasCompletedOnboarding { get; private set; }
+    [JsonInclude] public bool IsEmailConfirmed { get; private set; }
+    [JsonInclude] public DateTimeOffset? EmailConfirmedAtUtc { get; private set; }
 
     public static User Create(string name, string email, string? passwordHash = null)
     {
@@ -47,6 +50,23 @@ public sealed class User : Entity
         PasswordHash = passwordHash.Trim();
         Touch();
     }
+    public void ConfirmEmail(DateTimeOffset confirmedAtUtc)
+    {
+        if (IsEmailConfirmed)
+        {
+            return;
+        }
+
+        if (confirmedAtUtc < CreatedAtUtc)
+        {
+            throw new DomainValidationException(nameof(confirmedAtUtc), "Email confirmation cannot precede account creation.");
+        }
+
+        IsEmailConfirmed = true;
+        EmailConfirmedAtUtc = confirmedAtUtc;
+        UpdatedAtUtc = confirmedAtUtc;
+    }
+
     public void RegisterLogin() { LastLoginAtUtc = DateTimeOffset.UtcNow; Touch(); }
     public void SetActive(bool active) { IsActive = active; Touch(); }
     public void CompleteOnboarding() { HasCompletedOnboarding = true; Touch(); }
