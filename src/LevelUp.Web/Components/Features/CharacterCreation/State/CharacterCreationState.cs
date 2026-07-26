@@ -19,11 +19,11 @@ public sealed class CharacterCreationState(LevelUpWebService store, ToastService
 
     public static IReadOnlyList<CharacterClassOption> ClassOptions { get; } =
     [
-        new(CharacterClass.Warrior, "Warrior", "/images/classes/classicon_warrior.jpg", "Strong and resilient in battle."),
-        new(CharacterClass.Hunter, "Hunter", "/images/classes/classicon_hunter.jpg", "Precise and resourceful at a distance."),
-        new(CharacterClass.Rogue, "Rogue", "/images/classes/classicon_rogue.jpg", "Fast, subtle and strategically lethal."),
-        new(CharacterClass.Priest, "Priest", "/images/classes/classicon_priest.jpg", "A devoted protector and healer."),
-        new(CharacterClass.Druid, "Druid", "/images/classes/classicon_druid.jpg", "Adapts through the strength of nature.")
+        new(CharacterClass.Warrior, "Warrior", "/images/classes/classicon_warrior.png", "Strong and resilient in battle."),
+        new(CharacterClass.Hunter, "Hunter", "/images/classes/classicon_hunter.png", "Precise and resourceful at a distance."),
+        new(CharacterClass.Rogue, "Rogue", "/images/classes/classicon_rogue.png", "Fast, subtle and strategically lethal."),
+        new(CharacterClass.Priest, "Priest", "/images/classes/classicon_priest.png", "A devoted protector and healer."),
+        new(CharacterClass.Druid, "Druid", "/images/classes/classicon_druid.png", "Adapts through the strength of nature.")
     ];
 
     public string NormalizedNickname => Model.Nickname.Trim().TrimStart('@');

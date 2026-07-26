@@ -34,5 +34,5 @@
         ? Name.Replace(" ", string.Empty, StringComparison.Ordinal).ToLowerInvariant()
         : Nickname.Trim().TrimStart('@');
 
-    private string ClassImagePath => $"/images/classes/classicon_{Class.ToString().ToLowerInvariant()}.jpg";
+    private string ClassImagePath => $"/images/classes/classicon_{Class.ToString().ToLowerInvariant()}.png";
 }

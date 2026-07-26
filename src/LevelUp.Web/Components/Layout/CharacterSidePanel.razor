@@ -67,7 +67,7 @@
     private void HandleStateChanged() => InvokeAsync(StateHasChanged);
 
     private static string GetClassImage(CharacterClass characterClass) =>
-        $"/images/classes/classicon_{characterClass.ToString().ToLowerInvariant()}.jpg";
+        $"/images/classes/classicon_{characterClass.ToString().ToLowerInvariant()}.png";
 
     public void Dispose() => State.Changed -= HandleStateChanged;
 }
