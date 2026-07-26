@@ -1,27 +1,28 @@
-## Descrição
+## Description
 
-Descreva objetivamente as alterações realizadas.
+Describe the changes clearly and objectively.
 
-## Tipo de alteração
+## Change Type
 
-- [ ] Correção de bug
-- [ ] Nova funcionalidade
-- [ ] Refatoração
-- [ ] Alteração de infraestrutura
-- [ ] Alteração de documentação
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Refactoring
+- [ ] Infrastructure change
+- [ ] Documentation change
 
-## Validações realizadas
+## Validation
 
 - [ ] `dotnet restore`
+- [ ] `dotnet format --verify-no-changes`
 - [ ] `dotnet build`
 - [ ] `dotnet test`
-- [ ] Teste manual da aplicação
-- [ ] Persistência JSON validada
+- [ ] Manual application test
+- [ ] JSON persistence validation
 
-## Impactos
+## Impact
 
-Descreva possíveis impactos no frontend, backend, persistência ou infraestrutura.
+Describe any expected impact on the frontend, backend, persistence, security, or infrastructure.
 
-## Evidências
+## Evidence
 
-Adicione capturas de tela, logs ou informações relevantes quando necessário.
+Add screenshots, logs, test output, or other relevant evidence when applicable.

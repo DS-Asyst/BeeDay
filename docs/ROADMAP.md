@@ -1,15 +1,33 @@
 # Roadmap
 
 ## Completed
-- Epic 1 — Daily
-- Epic 2 — Account
-- Epic 3 — UI
 
-## Current
-- Epic 4 — Inventory
+- Daily productivity foundation
+- User account and onboarding
+- Identity and authentication flows
+- Inventory foundation
+- Shared UI design system
 
-## Planned
-- Epic 5 — Library
-- Epic 6 — Statistics
-- Epic 7 — Achievements
-- Epic 8 — Polish
+## Current Quality Gate
+
+### Security and Persistence Hardening
+
+- Repository cleanup
+- Authentication endpoint hardening
+- Production cookie and configuration review
+- CI and deployment review
+- Production data preservation
+- Security endpoint tests
+
+No major functional epic should begin until this quality gate is complete.
+
+## Planned Product Epics
+
+- Inventory application and UI polish
+- RPG core and experience progression
+- Character progression and level-up rewards
+- Attributes
+- Library
+- Statistics
+- Achievements
+- Final product polish
