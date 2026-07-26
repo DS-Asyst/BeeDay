@@ -1,3 +1,4 @@
+using LevelUp.Domain.Enums;
 using LevelUp.Web.Components.Features.Common;
 using Microsoft.AspNetCore.Components;
 
@@ -6,12 +7,17 @@ namespace LevelUp.Web.Components.Features.Dashboard.Components;
 public partial class FilterBar : IDisposable
 {
     private const int SearchDebounceMilliseconds = 300;
+    private static readonly ActivityAttribute[] Attributes = Enum.GetValues<ActivityAttribute>();
     private bool showCreateMenu;
+    private bool showTagsMenu;
     private string inputValue = string.Empty;
     private CancellationTokenSource? debounceCancellation;
 
     [Parameter] public string Value { get; set; } = string.Empty;
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public IReadOnlyCollection<ActivityAttribute> SelectedAttributes { get; set; } = Array.Empty<ActivityAttribute>();
+    [Parameter] public EventCallback<ActivityAttribute> OnAttributeToggle { get; set; }
+    [Parameter] public EventCallback OnClearAttributes { get; set; }
     [Parameter] public EventCallback<ActivityType> OnCreate { get; set; }
 
     protected override void OnParametersSet()
@@ -40,7 +46,34 @@ public partial class FilterBar : IDisposable
         }
     }
 
-    private void ToggleCreateMenu() => showCreateMenu = !showCreateMenu;
+    private void ToggleTagsMenu()
+    {
+        showTagsMenu = !showTagsMenu;
+        if (showTagsMenu)
+        {
+            showCreateMenu = false;
+        }
+    }
+
+    private void CloseTagsMenu() => showTagsMenu = false;
+
+    private async Task ToggleAttributeAsync(ActivityAttribute attribute) =>
+        await OnAttributeToggle.InvokeAsync(attribute);
+
+    private async Task ClearAttributesAsync()
+    {
+        await OnClearAttributes.InvokeAsync();
+    }
+
+    private void ToggleCreateMenu()
+    {
+        showCreateMenu = !showCreateMenu;
+        if (showCreateMenu)
+        {
+            showTagsMenu = false;
+        }
+    }
+
     private Task CreateHabitAsync() => SelectCreateTypeAsync(ActivityType.Habit);
     private Task CreateTaskAsync() => SelectCreateTypeAsync(ActivityType.Task);
     private Task CreateTodoAsync() => SelectCreateTypeAsync(ActivityType.Todo);

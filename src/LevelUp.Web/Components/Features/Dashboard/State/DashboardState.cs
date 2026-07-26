@@ -15,8 +15,7 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
 {
     private LevelUpData? data;
     private string search = string.Empty;
-    private ActivityAttribute? attributeFilter;
-    private ActivitySortOption sortOption;
+    private readonly HashSet<ActivityAttribute> selectedAttributes = [];
 
     public DashboardModalState Modals { get; } = new();
     public LevelUpData? Data => data;
@@ -38,17 +37,17 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
         set => search = value ?? string.Empty;
     }
 
-    public ActivityAttribute? AttributeFilter
+    public IReadOnlyCollection<ActivityAttribute> SelectedAttributes => selectedAttributes;
+
+    public void ToggleAttributeFilter(ActivityAttribute attribute)
     {
-        get => attributeFilter;
-        set => attributeFilter = value;
+        if (!selectedAttributes.Add(attribute))
+        {
+            selectedAttributes.Remove(attribute);
+        }
     }
 
-    public ActivitySortOption SortOption
-    {
-        get => sortOption;
-        set => sortOption = value;
-    }
+    public void ClearAttributeFilters() => selectedAttributes.Clear();
 
     public int CompletedItems => data is null
         ? 0
@@ -63,10 +62,10 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
           + data.Todos.Count(item => !item.Completed)
           + data.Projects.Count(item => !item.Completed);
 
-    public IEnumerable<Habit> FilteredHabits => FilterAndSort(data?.Habits ?? []);
-    public IEnumerable<RecurringTask> FilteredTasks => FilterAndSort(data?.Tasks ?? []);
-    public IEnumerable<Todo> FilteredTodos => FilterAndSort(data?.Todos ?? []);
-    public IEnumerable<Project> FilteredProjects => FilterAndSort(data?.Projects ?? []);
+    public IEnumerable<Habit> FilteredHabits => Filter(data?.Habits ?? []);
+    public IEnumerable<RecurringTask> FilteredTasks => Filter(data?.Tasks ?? []);
+    public IEnumerable<Todo> FilteredTodos => Filter(data?.Todos ?? []);
+    public IEnumerable<Project> FilteredProjects => Filter(data?.Projects ?? []);
 
     public int TotalItems => data is null
         ? 0
@@ -199,27 +198,12 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
         _ => status.ToString()
     };
 
-    private IEnumerable<TActivity> FilterAndSort<TActivity>(IEnumerable<TActivity> items)
-        where TActivity : Activity
-    {
-        var filtered = items.Where(MatchesFilters);
-
-        return SortOption switch
-        {
-            ActivitySortOption.AttributeAscending => filtered
-                .OrderBy(item => item.Attribute is null)
-                .ThenBy(item => item.Attribute)
-                .ThenBy(item => item.Title, StringComparer.OrdinalIgnoreCase),
-            ActivitySortOption.AttributeDescending => filtered
-                .OrderBy(item => item.Attribute is null)
-                .ThenByDescending(item => item.Attribute)
-                .ThenBy(item => item.Title, StringComparer.OrdinalIgnoreCase),
-            _ => filtered
-        };
-    }
+    private IEnumerable<TActivity> Filter<TActivity>(IEnumerable<TActivity> items)
+        where TActivity : Activity => items.Where(MatchesFilters);
 
     private bool MatchesFilters(Activity item) =>
-        (!AttributeFilter.HasValue || item.Attribute == AttributeFilter)
+        (selectedAttributes.Count == 0
+            || item.Attribute is ActivityAttribute attribute && selectedAttributes.Contains(attribute))
         && (string.IsNullOrWhiteSpace(search)
             || item.Title.Contains(search, StringComparison.OrdinalIgnoreCase)
             || item.Description.Contains(search, StringComparison.OrdinalIgnoreCase)
