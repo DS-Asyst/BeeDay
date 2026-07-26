@@ -1,0 +1,62 @@
+@using System.Globalization
+@using LevelUp.Web.Components.Features.Character.Models
+
+@if (IsLoading)
+{
+    <section class="character-experience character-experience--loading"
+             aria-label="Loading experience"
+             aria-busy="true">
+        <div class="character-experience__skeleton character-experience__skeleton--label"></div>
+        <div class="character-experience__skeleton character-experience__skeleton--bar"></div>
+        <div class="character-experience__skeleton character-experience__skeleton--value"></div>
+    </section>
+}
+else if (Model is not null)
+{
+    <section class="character-experience" aria-label="Character experience">
+        <div class="character-experience__header">
+            <span>Level</span>
+            <strong>@Model.Level</strong>
+        </div>
+
+        <div class="character-experience__track"
+             role="progressbar"
+             aria-label="Experience progress"
+             aria-valuemin="0"
+             aria-valuemax="@Model.RequiredExperience"
+             aria-valuenow="@Model.CurrentExperience"
+             aria-valuetext="@ExperienceText">
+            <div class="character-experience__fill"
+                 style="@ProgressStyle"></div>
+        </div>
+
+        <div class="character-experience__values">
+            <span>@Model.CurrentExperience / @Model.RequiredExperience XP</span>
+            <span>@Model.RemainingExperience XP to next level</span>
+        </div>
+
+        @if (ExperienceGain > 0)
+        {
+            <output @key="FeedbackKey"
+                    class="character-experience__gain"
+                    aria-live="polite">
+                +@ExperienceGain XP
+            </output>
+        }
+    </section>
+}
+
+@code {
+    [Parameter] public CharacterExperienceViewModel? Model { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public long ExperienceGain { get; set; }
+    [Parameter] public long FeedbackKey { get; set; }
+
+    private double ProgressPercentage => Model?.ProgressPercentage ?? 0d;
+
+    private string ProgressStyle => $"width: {ProgressPercentage.ToString("0.##", CultureInfo.InvariantCulture)}%";
+
+    private string ExperienceText => Model is null
+        ? string.Empty
+        : $"{Model.CurrentExperience} of {Model.RequiredExperience} experience points";
+}

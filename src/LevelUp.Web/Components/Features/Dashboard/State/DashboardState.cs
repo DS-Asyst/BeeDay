@@ -20,6 +20,8 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
     public LevelUpData? Data => data;
     public bool IsLoading => data is null;
     public bool IsBusy { get; private set; }
+    public long LatestExperienceGain { get; private set; }
+    public long ExperienceFeedbackVersion { get; private set; }
     public Guid? RemovingItemId { get; private set; }
     public event Action? Changed;
     public Task<LevelUpData> GetDataAsync() => store.LoadAsync();
@@ -148,16 +150,16 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
     }
 
     public Task RegisterPositiveAsync(Guid id) =>
-        ExecuteAsync(async () => { await store.RegisterHabitPositiveAsync(id); await ReloadAsync(); });
+        ExecuteExperienceOperationAsync(() => store.RegisterHabitPositiveAsync(id));
 
     public Task RegisterNegativeAsync(Guid id) =>
         ExecuteAsync(async () => { await store.RegisterHabitNegativeAsync(id); await ReloadAsync(); });
 
     public Task ToggleTaskAsync(Guid id) =>
-        ExecuteAsync(async () => { await store.ToggleTaskAsync(id); await ReloadAsync(); });
+        ExecuteExperienceOperationAsync(() => store.ToggleTaskAsync(id));
 
     public Task ToggleTodoAsync(Guid id) =>
-        ExecuteAsync(async () => { await store.ToggleTodoAsync(id); await ReloadAsync(); });
+        ExecuteExperienceOperationAsync(() => store.ToggleTodoAsync(id));
 
     public Task ReorderHabitsAsync(SortableReorderEvent reorder) =>
         ReorderAsync(ActivityCollection.Habits, FilteredHabits.Select(item => item.Id).ToList(), reorder);
@@ -214,6 +216,47 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
                 await ReloadAsync();
             },
             errorMessage: "The new card order could not be saved.");
+    }
+
+    private async Task ExecuteExperienceOperationAsync(Func<Task> operation)
+    {
+        var previousExperience = data?.CurrentCharacter?.Experience.TotalExperience ?? 0;
+
+        await ExecuteAsync(async () =>
+        {
+            await operation();
+            await ReloadAsync();
+            ShowExperienceGain(previousExperience);
+        });
+    }
+
+    private void ShowExperienceGain(long previousExperience)
+    {
+        var currentExperience = data?.CurrentCharacter?.Experience.TotalExperience ?? previousExperience;
+        var gainedExperience = currentExperience - previousExperience;
+
+        if (gainedExperience <= 0)
+        {
+            return;
+        }
+
+        LatestExperienceGain = gainedExperience;
+        ExperienceFeedbackVersion++;
+        Changed?.Invoke();
+        _ = ClearExperienceFeedbackAsync(ExperienceFeedbackVersion);
+    }
+
+    private async Task ClearExperienceFeedbackAsync(long feedbackVersion)
+    {
+        await Task.Delay(750);
+
+        if (ExperienceFeedbackVersion != feedbackVersion)
+        {
+            return;
+        }
+
+        LatestExperienceGain = 0;
+        Changed?.Invoke();
     }
 
     private async Task SaveEditorAsync(Func<Task> operation, string successMessage)

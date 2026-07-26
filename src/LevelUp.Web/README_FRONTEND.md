@@ -30,3 +30,9 @@ The interface accesses the Application layer only through `LevelUpWebService`. J
 ```bash
 dotnet run --project src/LevelUp.Web/LevelUp.Web.csproj
 ```
+
+## Character experience panel
+
+Character progression is displayed in the existing left-side character panel. The panel shows the current level, current-level XP, XP required for the next level, and a responsive progress bar. Activity counters are intentionally excluded because they belong to the Daily context rather than character progression.
+
+XP feedback is emitted only when the persisted character total increases after an idempotent reward operation. Reopening and completing the same source again does not replay the feedback when no new reward is granted. Motion is implemented with scoped CSS and disabled when `prefers-reduced-motion` is enabled.

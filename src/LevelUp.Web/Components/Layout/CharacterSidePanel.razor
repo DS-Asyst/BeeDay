@@ -1,4 +1,5 @@
 @implements IDisposable
+@using LevelUp.Web.Components.Features.Character.Models
 @inject LevelUp.Web.Components.Features.Dashboard.State.DashboardState State
 
 <aside class="side-drawer side-drawer--left @(IsOpen ? "is-open" : null)"
@@ -7,7 +8,10 @@
     <section class="character-drawer">
         @if (State.IsLoading)
         {
-            <div class="character-drawer__loading">Loading character...</div>
+            <div class="character-drawer__loading">
+                <span>Loading character...</span>
+                <CharacterExperienceBar IsLoading="true" />
+            </div>
         }
         else if (State.Data?.CurrentCharacter is not null && State.Data.CurrentUser is not null)
         {
@@ -26,16 +30,9 @@
                 </div>
             </div>
 
-            <div class="character-drawer__statistics" aria-label="Activity summary">
-                <div>
-                    <span>Active</span>
-                    <strong>@State.ActiveItems</strong>
-                </div>
-                <div>
-                    <span>Completed</span>
-                    <strong>@State.CompletedItems</strong>
-                </div>
-            </div>
+            <CharacterExperienceBar Model="CharacterExperienceViewModel.From(character.Experience)"
+                                    ExperienceGain="State.LatestExperienceGain"
+                                    FeedbackKey="State.ExperienceFeedbackVersion" />
 
             <NavLink href="/character/create" class="character-drawer__link" @onclick="OnClose">
                 View character

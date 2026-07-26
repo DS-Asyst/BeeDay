@@ -82,8 +82,7 @@
     min-width: 0;
 }
 
-    .character-drawer__identity > span,
-    .character-drawer__statistics span {
+    .character-drawer__identity > span {
         color: rgb(255 255 255 / 64%);
         font-size: .66rem;
         font-weight: 700;
@@ -106,33 +105,6 @@
         font-size: .77rem;
         text-overflow: ellipsis;
         white-space: nowrap;
-    }
-
-.character-drawer__statistics {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    margin-top: 1.35rem;
-    overflow: hidden;
-    background: rgb(255 255 255 / 5%);
-    border: 1px solid rgb(255 255 255 / 12%);
-    border-radius: .7rem;
-}
-
-    .character-drawer__statistics div {
-        display: flex;
-        min-height: 4rem;
-        flex-direction: column;
-        justify-content: center;
-        gap: .2rem;
-        padding: .7rem .8rem;
-    }
-
-        .character-drawer__statistics div + div {
-            border-left: 1px solid rgb(255 255 255 / 12%);
-        }
-
-    .character-drawer__statistics strong {
-        font-size: 1.15rem;
     }
 
 .character-drawer__link {
