@@ -1,0 +1,107 @@
+@page "/design-system/icons"
+@attribute [Authorize]
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment
+
+<PageTitle>Pixel Icon Catalog | LevelUp</PageTitle>
+
+@if (!HostEnvironment.IsDevelopment())
+{
+    <main class="icon-catalog icon-catalog--unavailable">
+        <PixelIcon Name="PixelIconName.Lock" Size="PixelIconSize.Large" Color="PixelIconColor.Muted" />
+        <h1>Design System catalog unavailable</h1>
+        <p>The icon catalog is limited to the Development environment.</p>
+    </main>
+}
+else
+{
+    <main class="icon-catalog">
+        <header class="icon-catalog__header">
+            <span class="icon-catalog__eyebrow">Design System</span>
+            <h1>Pixel Icon Catalog</h1>
+            <p>Official icon contracts, accessibility modes, semantic colors and size tokens.</p>
+        </header>
+
+        <section class="icon-catalog__section" aria-labelledby="icon-sizes-heading">
+            <h2 id="icon-sizes-heading">Size tokens</h2>
+            <div class="icon-catalog__tokens">
+                @foreach (var size in Sizes)
+                {
+                    <div class="icon-token">
+                        <PixelIcon Name="PixelIconName.Character" Size="size" />
+                        <code>@size</code>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="icon-catalog__section" aria-labelledby="icon-colors-heading">
+            <h2 id="icon-colors-heading">Color tokens</h2>
+            <div class="icon-catalog__tokens">
+                @foreach (var color in Colors)
+                {
+                    <div class="icon-token">
+                        <PixelIcon Name="PixelIconName.Statistics" Size="PixelIconSize.Large" Color="color" />
+                        <code>@color</code>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="icon-catalog__section" aria-labelledby="icon-accessibility-heading">
+            <h2 id="icon-accessibility-heading">Accessibility examples</h2>
+            <div class="icon-catalog__examples">
+                <div>
+                    <PixelIcon Name="PixelIconName.Featured" Size="PixelIconSize.Large" />
+                    <strong>Decorative</strong>
+                    <span>Hidden from assistive technology.</span>
+                </div>
+                <div>
+                    <PixelIcon Name="PixelIconName.Warning"
+                               Size="PixelIconSize.Large"
+                               Color="PixelIconColor.Warning"
+                               Decorative="false"
+                               Label="Warning status" />
+                    <strong>Informative</strong>
+                    <span>Rendered with role img and an accessible label.</span>
+                </div>
+            </div>
+        </section>
+
+        @foreach (var category in Categories)
+        {
+            var icons = PixelIconRegistry.All
+                .Where(entry => entry.Value.Category == category)
+                .OrderBy(entry => entry.Key.ToString())
+                .ToArray();
+
+            <section class="icon-catalog__section" aria-labelledby="@($"category-{category.ToString().ToLowerInvariant()}")">
+                <h2 id="@($"category-{category.ToString().ToLowerInvariant()}")">@category</h2>
+                <div class="icon-catalog__grid">
+                    @foreach (var entry in icons)
+                    {
+                        <article class="icon-catalog__card">
+                            <div class="icon-catalog__preview">
+                                <PixelIcon Name="entry.Key" Size="PixelIconSize.ExtraLarge" />
+                            </div>
+                            <h3>@entry.Key</h3>
+                            <dl>
+                                <div><dt>Symbol</dt><dd><code>@entry.Value.SymbolId</code></dd></div>
+                                <div><dt>Label</dt><dd>@entry.Value.DefaultLabel</dd></div>
+                                <div><dt>Asset</dt><dd><code>@entry.Value.AssetPath</code></dd></div>
+                            </dl>
+                            <div class="icon-catalog__usage">
+                                <code>&lt;PixelIcon Name=&quot;PixelIconName.@entry.Key&quot; /&gt;</code>
+                            </div>
+                        </article>
+                    }
+                </div>
+            </section>
+        }
+    </main>
+}
+
+@code {
+    private static readonly PixelIconSize[] Sizes = Enum.GetValues<PixelIconSize>();
+    private static readonly PixelIconColor[] Colors = Enum.GetValues<PixelIconColor>();
+    private static readonly PixelIconCategory[] Categories = Enum.GetValues<PixelIconCategory>();
+}

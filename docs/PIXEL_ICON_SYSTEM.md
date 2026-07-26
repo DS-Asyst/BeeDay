@@ -210,3 +210,23 @@ Completed: modal close/save/cancel/delete actions, confirmation and warning stat
 - Added semantic statistics contracts for experience, level, wallet, income, expense, trends, streak, completed and pending states.
 - No dashboard, statistics page, library implementation, wallet rule or functional module was introduced.
 - Status colors communicate semantic state: success for income, danger for expense, and neutral/default for informational metrics.
+
+## Final UI audit
+
+Sprint 6.6 consolidated the system around one renderer (`PixelIcon`), one enum contract (`PixelIconName`), one registry, and one SVG sprite. The audit verifies registry completeness, unique symbol IDs, asset-root safety, standardized sizes and colors, decorative and informative accessibility modes, disabled-state behavior, and reduced-motion support.
+
+The authenticated Development catalog is available at `/design-system/icons`. It is the canonical visual review surface for contracts, categories, sizes, colors, labels, accessibility modes, and usage examples.
+
+### Final verification
+
+```bash
+dotnet format --verify-no-changes
+dotnet build
+dotnet test
+
+grep -R "<svg" src/LevelUp.Web/Components --include="*.razor" --exclude="PixelIcon.razor"
+grep -R "\.svg" src/LevelUp.Web/Components --include="*.razor" --include="*.cs" --exclude="PixelIconRegistry.cs"
+grep -R "LevelUpIcon\|LevelUpIconName" src tests
+```
+
+The first two searches must return no feature or page references. SVG source files under `wwwroot/icons/pixel` are expected assets and are not direct component references.

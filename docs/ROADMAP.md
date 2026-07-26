@@ -75,7 +75,7 @@ Planned sequence:
 3. Sprint 6.3 — Activity Icons;
 4. Sprint 6.4 — Dialog & Forms Icon Integration;
 5. Sprint 6.5 — Dashboard & Statistics Icons;
-6. Sprint 6.6 — Final UI Polish.
+6. Sprint 6.6 — Final UI Polish (Completed).
 
 ## Later epics
 - Library
