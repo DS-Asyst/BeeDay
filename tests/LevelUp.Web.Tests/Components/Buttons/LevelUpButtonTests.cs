@@ -21,6 +21,7 @@ public sealed class LevelUpButtonTests
     [Theory]
     [InlineData(LevelUpButtonVariant.Primary, "levelup-button--primary")]
     [InlineData(LevelUpButtonVariant.Secondary, "levelup-button--secondary")]
+    [InlineData(LevelUpButtonVariant.Back, "levelup-button--back")]
     [InlineData(LevelUpButtonVariant.Danger, "levelup-button--danger")]
     [InlineData(LevelUpButtonVariant.ConfirmationDanger, "levelup-button--confirmation-danger")]
     [InlineData(LevelUpButtonVariant.ConfirmationCancel, "levelup-button--confirmation-cancel")]
@@ -86,6 +87,33 @@ public sealed class LevelUpButtonTests
         cut.Find("button").Click();
 
         Assert.True(clicked);
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public void DoesNotInvokeClickWhenUnavailable(bool disabled, bool loading)
+    {
+        using var context = new BunitContext();
+        var clicks = 0;
+        var cut = context.Render<LevelUpButton>(parameters => parameters
+            .Add(component => component.Disabled, disabled)
+            .Add(component => component.IsLoading, loading)
+            .Add(component => component.OnClick, () => clicks++));
+
+        cut.Find("button").Click();
+
+        Assert.Equal(0, clicks);
+    }
+
+    [Fact]
+    public void PreservesExplicitType()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<LevelUpButton>(parameters => parameters
+            .Add(component => component.Type, "submit"));
+
+        Assert.Equal("submit", cut.Find("button").GetAttribute("type"));
     }
 
     [Fact]

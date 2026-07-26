@@ -4,6 +4,7 @@ public enum LevelUpButtonVariant
 {
     Primary,
     Secondary,
+    Back,
     Danger,
     ConfirmationDanger,
     ConfirmationCancel

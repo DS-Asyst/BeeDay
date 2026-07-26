@@ -247,14 +247,11 @@ body {
         #f1eef6;
 }
 
-.levelup-button,
 .editor-modal__save,
 .editor-modal__cancel,
 .editor-modal__delete,
 .delete-confirmation__delete-button,
-.delete-confirmation__cancel-button,
-.character-primary-button,
-.class-confirmation__actions button {
+.delete-confirmation__cancel-button {
     position: relative;
     min-height: 2.75rem;
     border: var(--levelup-game-border) !important;
@@ -267,41 +264,32 @@ body {
     transition: transform 90ms ease, box-shadow 90ms ease, filter 120ms ease !important;
 }
 
-.levelup-button:not(:disabled):hover,
 .editor-modal__save:not(:disabled):hover,
 .editor-modal__cancel:not(:disabled):hover,
 .editor-modal__delete:not(:disabled):hover,
 .delete-confirmation__delete-button:not(:disabled):hover,
-.delete-confirmation__cancel-button:not(:disabled):hover,
-.character-primary-button:not(:disabled):hover,
-.class-confirmation__actions button:not(:disabled):hover {
+.delete-confirmation__cancel-button:not(:disabled):hover {
     filter: brightness(1.04) saturate(1.06);
     transform: translateY(-1px);
     box-shadow: 0 4px 0 var(--levelup-game-ink) !important;
 }
 
-.levelup-button:not(:disabled):active,
 .editor-modal__save:not(:disabled):active,
 .editor-modal__cancel:not(:disabled):active,
 .editor-modal__delete:not(:disabled):active,
 .delete-confirmation__delete-button:not(:disabled):active,
-.delete-confirmation__cancel-button:not(:disabled):active,
-.character-primary-button:not(:disabled):active,
-.class-confirmation__actions button:not(:disabled):active {
+.delete-confirmation__cancel-button:not(:disabled):active {
     transform: translateY(3px);
     box-shadow: 0 0 0 var(--levelup-game-ink) !important;
 }
 
-.editor-modal__save,
-.character-primary-button,
-.class-confirmation__confirm {
+.editor-modal__save {
     color: #07131a !important;
     background: var(--levelup-game-yellow) !important;
 }
 
 .editor-modal__cancel,
-.delete-confirmation__cancel-button,
-.class-confirmation__cancel {
+.delete-confirmation__cancel-button {
     color: var(--levelup-game-ink) !important;
     background: var(--levelup-game-paper) !important;
 }
@@ -367,11 +355,9 @@ textarea:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .levelup-button,
-    .editor-modal__save,
+        .editor-modal__save,
     .editor-modal__cancel,
-    .editor-modal__delete,
-    .character-primary-button {
+    .editor-modal__delete {
         transition: none !important;
     }
 }

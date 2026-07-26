@@ -111,3 +111,14 @@ Completed: modal close/save/cancel/delete actions, confirmation and warning stat
 - Added semantic statistics contracts for experience, level, wallet, income, expense, trends, streak, completed and pending states.
 - No dashboard, statistics page, library implementation, wallet rule or functional module was introduced.
 - Status colors communicate semantic state: success for income, danger for expense, and neutral/default for informational metrics.
+
+
+## UX / Visual Refinement
+
+Sprint UX.3 completed the onboarding layout consolidation:
+
+- moved the shared LevelUp brand, step indicator, slide content, and navigation into one card;
+- removed the external white shell and progress bar;
+- replaced functional tutorial symbols with existing `PixelIcon` contracts;
+- preserved all five onboarding steps and the final `/daily` navigation;
+- added a reusable, accessible `LevelUpBrand` component shared with Login.

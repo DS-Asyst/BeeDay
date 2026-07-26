@@ -94,56 +94,6 @@
     font-weight: 700;
 }
 
-.character-primary-button {
-    justify-self: end;
-    min-width: 10.5rem;
-    min-height: 2.85rem;
-    margin-top: .4rem;
-    padding: 0 1.15rem;
-    border: 0;
-    border-radius: .3rem;
-    color: var(--levelup-color-surface);
-    background: #65409f;
-    font: inherit;
-    font-size: .8rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background-color var(--levelup-transition-fast), box-shadow var(--levelup-transition-fast), transform var(--levelup-transition-fast);
-}
-
-.character-primary-button:disabled {
-    color: #98939d;
-    background: #dedce1;
-    box-shadow: none;
-    cursor: not-allowed;
-}
-
-.character-primary-button:not(:disabled):hover,
-.character-primary-button:not(:disabled):focus-visible {
-    background: #4f2d85;
-    box-shadow: 0 .35rem .9rem rgb(79 45 133 / 24%);
-    transform: translateY(-1px);
-}
-
-.character-back-button {
-    display: inline-flex;
-    align-items: center;
-    gap: .45rem;
-    margin: 0 0 1rem;
-    padding: .35rem 0;
-    border: 0;
-    color: #423849;
-    background: transparent;
-    font: inherit;
-    font-size: .8rem;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.character-back-button:hover {
-    color: #65409f;
-}
-
 .class-grid {
     display: grid;
     grid-template-columns: repeat(5, minmax(8rem, 1fr));
@@ -280,33 +230,6 @@
     margin-top: 1.5rem;
 }
 
-.class-confirmation__actions button {
-    min-height: 2.65rem;
-    padding: 0 1rem;
-    border-radius: .3rem;
-    font: inherit;
-    font-size: .75rem;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.class-confirmation__cancel {
-    border: 1px solid #d2cdd6;
-    color: #514757;
-    background: #f3f1f4;
-}
-
-.class-confirmation__confirm {
-    border: 1px solid #65409f;
-    color: var(--levelup-color-surface);
-    background: #65409f;
-}
-
-.class-confirmation__confirm:hover,
-.class-confirmation__confirm:focus-visible {
-    background: #4f2d85;
-}
-
 .validation-message {
     color: #b3261e;
     font-size: .72rem;
@@ -327,13 +250,11 @@
     .class-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .class-card { min-height: 11.5rem; }
     .class-confirmation__actions { flex-direction: column-reverse; }
-    .class-confirmation__actions button { width: 100%; }
-}
+    }
 
 @media (prefers-reduced-motion: reduce) {
     .class-card,
     .class-card img,
-    .character-primary-button,
     .class-confirmation { transition: none; animation: none; }
 }
 
@@ -387,12 +308,7 @@
     margin-bottom: 1rem;
 }
 
-.character-selection-header .character-back-button {
-    flex: 0 0 auto;
-    margin: 0;
-}
-
-.character-panel__brand--right {
+.character-selection-header .character-panel__brand--right {
     margin-left: auto;
     text-align: right;
 }
@@ -438,32 +354,6 @@
     text-shadow: 2px 2px 0 rgb(103 58 183 / 10%);
 }
 
-.character-primary-button {
-    min-width: 11rem;
-    color: #07131a;
-    background: var(--levelup-game-yellow);
-}
-
-.character-primary-button:not(:disabled):hover,
-.character-primary-button:not(:disabled):focus-visible {
-    color: #07131a;
-    background: #ffd84a;
-}
-
-.character-back-button {
-    min-height: 2.65rem;
-    padding: 0 .9rem;
-    border: 2px solid var(--levelup-game-ink);
-    border-radius: .18rem;
-    background: #fff;
-    box-shadow: 0 3px 0 var(--levelup-game-ink);
-}
-
-.character-back-button:active {
-    transform: translateY(3px);
-    box-shadow: none;
-}
-
 .class-card {
     border: 2px solid var(--levelup-game-ink);
     border-radius: .2rem;
@@ -492,52 +382,12 @@
 }
 
 
-/* Back navigation alignment for onboarding steps 2 and 3 */
-.character-panel--character > .character-back-button,
-.character-panel--classes > .character-back-button,
-.character-panel--class > .character-back-button {
-    justify-self: start;
-    margin-left: 0;
-    margin-right: auto;
+/* Official button placement only; visual states live in LevelUpButton. */
+.character-form ::deep .levelup-button--primary {
+    justify-self: end;
+    min-width: 10.5rem;
+    margin-top: .4rem;
 }
-
-
-/* Unified secondary RPG action for every onboarding Back button. */
-.character-back-button {
-    justify-content: center;
-    width: auto;
-    min-width: 7.25rem;
-    min-height: 2.85rem;
-    margin: 0 0 1rem;
-    padding: 0 .9rem;
-    border: 2px solid var(--levelup-game-ink);
-    border-radius: .18rem;
-    color: rgb(255 255 255 / 82%);
-    background: color-mix(in srgb, #5b1095 68%, #fff 32%);
-    box-shadow: 0 3px 0 rgb(7 19 26 / 58%);
-    font-family: var(--levelup-font-ui);
-    font-size: .8rem;
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: .035em;
-    text-transform: uppercase;
-    cursor: pointer;
-    opacity: .76;
-    transition: color var(--levelup-transition-fast), background-color var(--levelup-transition-fast), box-shadow var(--levelup-transition-fast), filter var(--levelup-transition-fast), opacity var(--levelup-transition-fast), transform var(--levelup-transition-fast);
-}
-
-.character-back-button:hover,
-.character-back-button:focus-visible {
-    color: #fff;
-    background: #5b1095;
-    box-shadow: 0 4px 0 var(--levelup-game-ink);
-    filter: brightness(1.08) saturate(1.08);
-    opacity: 1;
-    outline: none;
-    transform: translateY(-1px);
-}
-
-.character-back-button:active {
-    transform: translateY(3px);
-    box-shadow: none;
-}
+.character-panel > ::deep .levelup-button--back { margin-bottom: 1rem; }
+.class-confirmation__actions ::deep .levelup-button { min-width: 9rem; }
+@media (max-width: 580px) { .class-confirmation__actions ::deep .levelup-button { width:100%; } }

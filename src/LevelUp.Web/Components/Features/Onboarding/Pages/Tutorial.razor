@@ -7,18 +7,20 @@
 <PageTitle>Getting started | LevelUp</PageTitle>
 
 <section class="tutorial-page levelup-fade-in">
-    <div class="tutorial-shell">
+    <article class="tutorial-card">
         <header class="tutorial-header">
-            <span class="tutorial-brand">LEVELUP</span>
+            <LevelUpBrand />
             <span class="tutorial-progress">STEP @(_step + 1) OF @Slides.Length</span>
         </header>
 
-        <div class="tutorial-progress-bar" aria-hidden="true">
-            <span style="width: @ProgressPercent%"></span>
-        </div>
-
-        <article class="tutorial-card">
-            <div class="tutorial-icon" aria-hidden="true">@Slides[_step].Icon</div>
+        <div class="tutorial-content">
+            <div class="tutorial-icon">
+                <PixelIcon Name="@Slides[_step].Icon"
+                           Size="PixelIconSize.ExtraLarge"
+                           Color="PixelIconColor.Primary"
+                           Decorative="false"
+                           Label="@Slides[_step].IconLabel" />
+            </div>
             <p class="tutorial-eyebrow">@Slides[_step].Eyebrow</p>
             <h1>@Slides[_step].Title</h1>
             <p class="tutorial-copy">@Slides[_step].Description</p>
@@ -27,38 +29,44 @@
                 @foreach (var item in Slides[_step].Items)
                 {
                     <div class="tutorial-preview__item">
-                        <span>✓</span>
+                        <PixelIcon Name="PixelIconName.Check" Size="PixelIconSize.ExtraSmall" Color="PixelIconColor.Primary" />
                         <p>@item</p>
                     </div>
                 }
             </div>
-        </article>
+        </div>
 
         <footer class="tutorial-actions">
-            <button class="tutorial-button tutorial-button--secondary" type="button" disabled="@(_step == 0 || _busy)" @onclick="Previous">BACK</button>
-            <button class="tutorial-button tutorial-button--primary" type="button" disabled="@_busy" @onclick="NextAsync">
-                @(_busy ? "SAVING..." : _step == Slides.Length - 1 ? "ENTER DAILY" : "NEXT")
-            </button>
+            <LevelUpButton Variant="LevelUpButtonVariant.Back"
+                           Disabled="@(_step == 0 || _busy)"
+                           OnClick="Previous">
+                BACK
+            </LevelUpButton>
+            <LevelUpButton Variant="LevelUpButtonVariant.Primary"
+                           IsLoading="@_busy"
+                           Disabled="@_busy"
+                           OnClick="NextAsync">
+                @(_step == Slides.Length - 1 ? "ENTER DAILY" : "NEXT")
+            </LevelUpButton>
         </footer>
-    </div>
+    </article>
 </section>
 
 @code {
     private int _step;
     private bool _busy;
-    private int ProgressPercent => (int)Math.Round((_step + 1d) / Slides.Length * 100d);
 
     private static readonly TutorialSlide[] Slides =
     [
-        new("01 — DAILY", "Your command center", "☀", "Daily keeps the actions that move your life forward in one place.",
+        new("01 — DAILY", "Your command center", PixelIconName.Daily, "Daily", "Daily keeps the actions that move your life forward in one place.",
             ["Review today before starting", "Keep each item small and actionable", "Return throughout the day"]),
-        new("02 — HABITS", "Build your rhythm", "↻", "Habits are recurring behaviors. Register progress consistently and watch momentum grow.",
+        new("02 — HABITS", "Build your rhythm", PixelIconName.Streak, "Habits", "Habits are recurring behaviors. Register progress consistently and watch momentum grow.",
             ["Use positive habits to reinforce progress", "Use negative actions when accountability helps", "Let streaks reveal consistency"]),
-        new("03 — TASKS", "Handle recurring work", "✓", "Tasks can repeat daily, weekly or monthly and are completed manually.",
+        new("03 — TASKS", "Handle recurring work", PixelIconName.Completed, "Tasks", "Tasks can repeat daily, weekly or monthly and are completed manually.",
             ["Choose a recurrence that matches reality", "Complete the task when the cycle is done", "Keep tasks independent from projects"]),
-        new("04 — PROJECTS", "Turn goals into progress", "◆", "Projects represent objectives. Their To-Dos define the work and calculate completion.",
+        new("04 — PROJECTS", "Turn goals into progress", PixelIconName.Project, "Projects", "Projects represent objectives. Their To-Dos define the work and calculate completion.",
             ["Create the project first", "Add focused To-Dos", "Finish every To-Do to complete the project"]),
-        new("05 — READY", "Begin your journey", "★", "Your account, character and class are ready. The Daily is now yours.",
+        new("05 — READY", "Begin your journey", PixelIconName.Character, "Character ready", "Your account, character and class are ready. The Daily is now yours.",
             ["Start with one habit", "Add one meaningful task", "Create one project you care about"])
     ];
 
@@ -79,7 +87,10 @@
 
     private void Previous()
     {
-        if (_step > 0) _step--;
+        if (_step > 0)
+        {
+            _step--;
+        }
     }
 
     private async Task NextAsync()
@@ -102,5 +113,11 @@
         }
     }
 
-    private sealed record TutorialSlide(string Eyebrow, string Title, string Icon, string Description, string[] Items);
+    private sealed record TutorialSlide(
+        string Eyebrow,
+        string Title,
+        PixelIconName Icon,
+        string IconLabel,
+        string Description,
+        string[] Items);
 }

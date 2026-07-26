@@ -2,7 +2,7 @@
         class="@CssClasses"
         disabled="@IsDisabled"
         aria-busy="@IsLoading.ToString().ToLowerInvariant()"
-        @onclick="OnClick"
+        @onclick="HandleClickAsync"
         @attributes="AdditionalAttributes">
     @if (IsLoading)
     {

@@ -45,19 +45,7 @@
 }
 
 .auth-card__brand {
-    display: inline-flex;
     margin-bottom: 1.5rem;
-    color: var(--levelup-color-primary);
-    font-family: var(--levelup-font-brand);
-    font-size: 1.2rem;
-    font-weight: 700;
-    letter-spacing: .055em;
-    line-height: 1;
-}
-
-.auth-card__brand-accent {
-    color: var(--levelup-game-yellow);
-    text-shadow: 1px 0 0 var(--levelup-game-ink), -1px 0 0 var(--levelup-game-ink), 0 1px 0 var(--levelup-game-ink), 0 -1px 0 var(--levelup-game-ink);
 }
 
 .auth-card__header {

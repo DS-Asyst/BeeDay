@@ -11,77 +11,6 @@
     pointer-events: none;
 }
 
-/* Button state pack */
-.levelup-button {
-    position: relative;
-    isolation: isolate;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    transition:
-        transform var(--levelup-duration-instant) var(--levelup-easing-pixel),
-        box-shadow var(--levelup-duration-instant) var(--levelup-easing-pixel),
-        filter var(--levelup-duration-interaction) var(--levelup-easing-standard),
-        background-color var(--levelup-duration-interaction) var(--levelup-easing-standard),
-        color var(--levelup-duration-interaction) var(--levelup-easing-standard);
-}
-
-.levelup-button::after {
-    position: absolute;
-    inset: 2px;
-    z-index: -1;
-    border: 1px solid rgb(255 255 255 / 48%);
-    content: "";
-    pointer-events: none;
-}
-
-.levelup-button__label {
-    display: inline-flex;
-    align-items: center;
-    min-width: 0;
-}
-
-.levelup-button:not(:disabled):hover {
-    transform: translateY(-2px);
-    box-shadow: var(--levelup-pixel-shadow-hover);
-}
-
-.levelup-button:not(:disabled):active,
-.levelup-button[aria-pressed="true"] {
-    transform: translateY(2px);
-    box-shadow: var(--levelup-pixel-shadow-pressed);
-    filter: brightness(.96) saturate(1.08);
-}
-
-.levelup-button:focus-visible,
-.levelup-card--interactive:focus-visible,
-a:focus-visible,
-button:focus-visible,
-[role="button"]:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-    outline: var(--levelup-focus-outline);
-    outline-offset: var(--levelup-focus-offset);
-}
-
-.levelup-button:disabled,
-.levelup-button[aria-disabled="true"] {
-    color: color-mix(in srgb, var(--levelup-game-ink) 48%, transparent);
-    background: var(--levelup-color-surface-subtle);
-    box-shadow: 0 2px 0 color-mix(in srgb, var(--levelup-game-ink) 55%, transparent);
-    cursor: not-allowed;
-    filter: grayscale(.75) saturate(.4);
-    opacity: .72;
-    transform: none;
-}
-
-.levelup-button:disabled::after { opacity: .35; }
-
-.levelup-button__loader {
-    image-rendering: pixelated;
-    animation: levelup-pixel-spin .65s steps(8, end) infinite;
-}
-
 /* Interactive surfaces and card microinteractions */
 .levelup-card--interactive {
     position: relative;
@@ -181,16 +110,11 @@ textarea:focus-visible {
     .levelup-pixel-hover:hover,
     .levelup-card--interactive:hover,
     .levelup-card--interactive:focus-within,
-    .levelup-button:not(:disabled):hover,
-    .levelup-button:not(:disabled):active {
-        transform: none;
-    }
 
     .levelup-pixel-pop,
     .levelup-panel-enter,
     .levelup-success-pulse,
-    .levelup-shake,
-    .levelup-button__loader {
+    .levelup-shake {
         animation: none;
     }
 }

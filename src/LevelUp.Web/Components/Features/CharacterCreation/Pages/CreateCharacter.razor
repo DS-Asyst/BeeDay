@@ -10,7 +10,7 @@
     <div class="character-panel character-panel--@State.CurrentStepClass">
         @if (State.Step == LevelUp.Web.Components.Features.CharacterCreation.State.CharacterCreationStep.Account)
         {
-            <button class="character-back-button" type="button" @onclick="BackToLogin">← Back</button>
+            <LevelUpButton Variant="LevelUpButtonVariant.Back" Compact="true" OnClick="BackToLogin">BACK</LevelUpButton>
             <h1>Create your account</h1>
             <p class="character-panel__intro">Start your LevelUp journey.</p>
 
@@ -58,17 +58,16 @@
                     <p class="character-validation" role="alert">@State.ValidationError</p>
                 }
 
-                <button class="character-primary-button"
-                        type="button"
-                        disabled="@(!State.CanContinueAccount)"
-                        @onclick="ContinueToCharacter">
+                <LevelUpButton Variant="LevelUpButtonVariant.Primary"
+                               Disabled="@(!State.CanContinueAccount)"
+                               OnClick="ContinueToCharacter">
                     CONTINUE
-                </button>
+                </LevelUpButton>
             </div>
         }
         else if (State.Step == LevelUp.Web.Components.Features.CharacterCreation.State.CharacterCreationStep.Character)
         {
-            <button class="character-back-button" type="button" @onclick="Back">← Back</button>
+            <LevelUpButton Variant="LevelUpButtonVariant.Back" Compact="true" OnClick="Back">BACK</LevelUpButton>
             <h1>Create your character</h1>
             <p class="character-panel__intro">Choose the identity shown in LevelUp.</p>
 
@@ -91,16 +90,15 @@
                     <p class="character-validation" role="alert">@State.ValidationError</p>
                 }
 
-                <button class="character-primary-button"
-                        type="button"
-                        @onclick="ContinueToClasses">
+                <LevelUpButton Variant="LevelUpButtonVariant.Primary"
+                               OnClick="ContinueToClasses">
                     CHOOSE CLASS
-                </button>
+                </LevelUpButton>
             </div>
         }
         else
         {
-            <button class="character-back-button" type="button" @onclick="Back">← Back</button>
+            <LevelUpButton Variant="LevelUpButtonVariant.Back" Compact="true" OnClick="Back">BACK</LevelUpButton>
             <h1>Choose your class</h1>
             <p class="character-panel__intro">This choice is permanent.</p>
 
@@ -144,18 +142,17 @@
             }
 
             <div class="class-confirmation__actions">
-                <button class="class-confirmation__cancel"
-                        type="button"
-                        disabled="@State.IsBusy"
-                        @onclick="CloseConfirmation">
+                <LevelUpButton Variant="LevelUpButtonVariant.Secondary"
+                               Disabled="@State.IsBusy"
+                               OnClick="CloseConfirmation">
                     CANCEL
-                </button>
-                <button class="class-confirmation__confirm"
-                        type="button"
-                        disabled="@State.IsBusy"
-                        @onclick="ConfirmClassAsync">
-                    @(State.IsBusy ? "CREATING..." : "CONFIRM")
-                </button>
+                </LevelUpButton>
+                <LevelUpButton Variant="LevelUpButtonVariant.Primary"
+                               IsLoading="@State.IsBusy"
+                               Disabled="@State.IsBusy"
+                               OnClick="ConfirmClassAsync">
+                    CONFIRM
+                </LevelUpButton>
             </div>
         </section>
     </div>

@@ -1,1 +1,160 @@
-.tutorial-page{min-height:100vh;display:grid;place-items:center;padding:2rem 1rem;background:radial-gradient(circle at 50% 0,rgb(122 79 203 / 20%),transparent 38%),#f8f5ef;color:#2f2834}.tutorial-shell{width:min(48rem,100%)}.tutorial-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem}.tutorial-brand{font-family:var(--levelup-font-brand);font-size:2rem;letter-spacing:.05em;color:#6417a2}.tutorial-progress{font-family:var(--levelup-font-family);font-size:.72rem;font-weight:700;letter-spacing:.12em;color:#756b7c}.tutorial-progress-bar{height:.5rem;margin-bottom:1rem;overflow:hidden;border:1px solid #d9d0df;border-radius:999px;background:#fff}.tutorial-progress-bar span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#7a4fcb,#f0b429);transition:width .25s ease}.tutorial-card{min-height:31rem;padding:clamp(2rem,6vw,4rem);text-align:center;border:2px solid #33283a;border-radius:1.25rem;background:#fffdf8;box-shadow:8px 8px 0 #33283a}.tutorial-icon{display:grid;place-items:center;width:5rem;height:5rem;margin:0 auto 1.5rem;border:2px solid #33283a;border-radius:1rem;background:#f4edff;font-family:var(--levelup-font-brand);font-size:2.5rem;color:#6417a2;box-shadow:4px 4px 0 #33283a}.tutorial-eyebrow{margin:0 0 .4rem;font-family:var(--levelup-font-family);font-size:.75rem;font-weight:700;letter-spacing:.14em;color:#7a4fcb}.tutorial-card h1{margin:0;font-family:var(--levelup-font-display);font-size:clamp(2.8rem,8vw,4.7rem);font-weight:400;line-height:.9}.tutorial-copy{max-width:34rem;margin:1.25rem auto 1.75rem;font-size:1rem;line-height:1.6;color:#675e6d}.tutorial-preview{display:grid;gap:.7rem;max-width:32rem;margin:auto;text-align:left}.tutorial-preview__item{display:flex;align-items:flex-start;gap:.75rem;padding:.85rem 1rem;border:1px solid #e1d9e7;border-radius:.75rem;background:#faf7fc}.tutorial-preview__item span{font-weight:700;color:#7a4fcb}.tutorial-preview__item p{margin:0}.tutorial-actions{display:flex;justify-content:space-between;gap:1rem;margin-top:1.5rem}.tutorial-button{min-width:9rem;min-height:3rem;padding:.75rem 1.2rem;border:2px solid #33283a;border-radius:.65rem;font-family:var(--levelup-font-family);font-weight:700;letter-spacing:.05em;cursor:pointer;box-shadow:4px 4px 0 #33283a;transition:transform .12s ease,box-shadow .12s ease}.tutorial-button:hover:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 #33283a}.tutorial-button:disabled{opacity:.45;cursor:not-allowed}.tutorial-button--secondary{background:#fff}.tutorial-button--primary{background:#7a4fcb;color:#fff}@media(max-width:600px){.tutorial-card{min-height:auto;padding:2rem 1.25rem;box-shadow:5px 5px 0 #33283a}.tutorial-actions{display:grid;grid-template-columns:1fr 1fr}.tutorial-button{min-width:0}}
+.tutorial-page {
+    display: grid;
+    width: 100%;
+    min-height: 0;
+    place-items: center;
+    color: var(--levelup-game-ink);
+}
+
+.tutorial-card {
+    display: grid;
+    width: min(48rem, 100%);
+    min-height: min(40rem, calc(100dvh - 4rem));
+    padding: clamp(1.25rem, 4vw, 2.25rem);
+    border: 2px solid var(--levelup-game-ink);
+    border-radius: 1.25rem;
+    background: var(--levelup-game-paper);
+    box-shadow: 8px 8px 0 var(--levelup-game-ink);
+    grid-template-rows: auto 1fr auto;
+}
+
+.tutorial-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 2px solid rgb(51 40 58 / 12%);
+}
+
+.tutorial-progress {
+    color: var(--levelup-color-text-muted);
+    font-family: var(--levelup-font-family);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    white-space: nowrap;
+}
+
+.tutorial-content {
+    display: grid;
+    align-content: center;
+    padding: clamp(1.5rem, 5vw, 3rem) 0;
+    text-align: center;
+}
+
+.tutorial-icon {
+    display: grid;
+    width: 5rem;
+    height: 5rem;
+    margin: 0 auto 1.5rem;
+    place-items: center;
+    border: 2px solid var(--levelup-game-ink);
+    border-radius: 1rem;
+    background: #f4edff;
+    box-shadow: 4px 4px 0 var(--levelup-game-ink);
+}
+
+.tutorial-eyebrow {
+    margin: 0 0 .4rem;
+    color: var(--levelup-color-primary);
+    font-family: var(--levelup-font-family);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+}
+
+.tutorial-card h1 {
+    margin: 0;
+    font-family: var(--levelup-font-display);
+    font-size: clamp(2.8rem, 8vw, 4.7rem);
+    font-weight: 400;
+    line-height: .9;
+}
+
+.tutorial-copy {
+    max-width: 34rem;
+    margin: 1.25rem auto 1.75rem;
+    color: var(--levelup-color-text-muted);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.tutorial-preview {
+    display: grid;
+    max-width: 32rem;
+    margin: auto;
+    gap: .7rem;
+    text-align: left;
+}
+
+.tutorial-preview__item {
+    display: flex;
+    align-items: flex-start;
+    padding: .85rem 1rem;
+    gap: .75rem;
+    border: 1px solid #e1d9e7;
+    border-radius: .75rem;
+    background: #faf7fc;
+}
+
+.tutorial-preview__item ::deep .pixel-icon {
+    flex: 0 0 auto;
+    margin-top: .1rem;
+}
+
+.tutorial-preview__item p {
+    margin: 0;
+}
+
+.tutorial-actions {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 1.25rem;
+    gap: 1rem;
+    border-top: 2px solid rgb(51 40 58 / 12%);
+}
+
+@media (max-width: 600px) {
+    .tutorial-card {
+        min-height: auto;
+        padding: 1.25rem;
+        box-shadow: 5px 5px 0 var(--levelup-game-ink);
+    }
+
+    .tutorial-header {
+        align-items: flex-start;
+    }
+
+    .tutorial-content {
+        padding: 1.75rem 0;
+    }
+
+    .tutorial-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+}
+
+@media (max-width: 380px) {
+    .tutorial-header {
+        flex-direction: column;
+    }
+
+    .tutorial-progress {
+        align-self: flex-end;
+    }
+}
+
+
+.tutorial-actions ::deep .levelup-button {
+    min-width: 9rem;
+}
+
+@media (max-width: 600px) {
+    .tutorial-actions ::deep .levelup-button {
+        min-width: 0;
+        width: 100%;
+    }
+}

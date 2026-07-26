@@ -1,0 +1,14 @@
+.levelup-brand {
+    display: inline-flex;
+    color: var(--levelup-color-primary);
+    font-family: var(--levelup-font-brand);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: .055em;
+    line-height: 1;
+}
+
+.levelup-brand__accent {
+    color: var(--levelup-game-yellow);
+    text-shadow: 1px 0 0 var(--levelup-game-ink), -1px 0 0 var(--levelup-game-ink), 0 1px 0 var(--levelup-game-ink), 0 -1px 0 var(--levelup-game-ink);
+}

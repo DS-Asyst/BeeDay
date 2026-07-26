@@ -24,7 +24,6 @@ label,
 .levelup-button,
 .inventory-button,
 .inventory-link-button,
-.tutorial-button,
 [role="button"],
 [role="menuitem"],
 [role="tab"],
@@ -55,8 +54,7 @@ td,
 
 /* Reusable action typography. */
 .levelup-button,
-.inventory-button,
-.tutorial-button {
+.inventory-button {
     font-size: var(--levelup-font-size-md);
     font-weight: var(--levelup-font-weight-bold) !important;
     line-height: 1;

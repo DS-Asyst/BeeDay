@@ -1,59 +1,46 @@
-/* Sprint 3.4 — reusable LevelUp design-system primitives */
+/* Official LevelUp pressable action system */
 .levelup-button {
+    position: relative;
+    isolation: isolate;
     display: inline-flex;
+    min-height: 2.75rem;
     align-items: center;
     justify-content: center;
     gap: var(--levelup-spacing-sm);
-    min-height: 2.75rem;
     padding: .65rem 1rem;
-    border: var(--levelup-game-border);
-    border-radius: var(--levelup-radius-xs);
-    color: var(--levelup-game-ink);
+    border: 2px solid var(--levelup-game-ink);
+    border-radius: .75rem;
+    color: #171321;
     background: var(--levelup-game-yellow);
+    box-shadow: 4px 4px 0 var(--levelup-game-ink);
+    font: inherit;
     font-weight: 700;
     letter-spacing: .035em;
     line-height: 1;
     text-transform: uppercase;
-    box-shadow: var(--levelup-game-shadow-sm);
     cursor: pointer;
-    transform: translateY(0);
-    transition: transform 90ms ease, box-shadow 90ms ease, filter var(--levelup-transition-fast);
+    transform: translate(0, 0);
+    transition: transform 90ms ease, box-shadow 90ms ease, filter 120ms ease, background-color 120ms ease, color 120ms ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
-
-.levelup-button--secondary,
-.levelup-button--confirmation-cancel {
-    color: var(--levelup-game-ink);
-    background: var(--levelup-game-paper);
-}
-
-.levelup-button--danger,
-.levelup-button--confirmation-danger {
-    color: var(--levelup-color-text-inverse);
-    background: var(--levelup-game-red);
-}
-
-.levelup-button--full-width { width: 100%; }
-.levelup-button--compact { min-height: 2.25rem; padding: .45rem .75rem; font-size: .82rem; }
-
-.levelup-button:not(:disabled):hover {
-    filter: brightness(1.04) saturate(1.06);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 0 var(--levelup-game-ink);
-}
-
-.levelup-button:not(:disabled):active {
-    transform: translateY(3px);
-    box-shadow: none;
-}
-
-.levelup-button__loader {
-    width: .9rem;
-    height: .9rem;
-    border: 2px solid currentColor;
-    border-right-color: transparent;
-    border-radius: 50%;
-    animation: levelup-spin .7s linear infinite;
-}
+.levelup-button::after { position:absolute; inset:2px; z-index:-1; border:1px solid rgb(255 255 255 / 42%); border-radius:.55rem; content:""; pointer-events:none; }
+.levelup-button--primary { color:#171321; background:var(--levelup-game-yellow); }
+.levelup-button--secondary,.levelup-button--confirmation-cancel { color:#fff; background:var(--levelup-game-purple,#65409f); }
+.levelup-button--back { color:rgb(255 255 255 / 78%); background:color-mix(in srgb,var(--levelup-game-purple,#65409f) 72%,#27202f); filter:saturate(.62) brightness(.82); }
+.levelup-button--danger,.levelup-button--confirmation-danger { color:#fff; background:var(--levelup-game-red); }
+.levelup-button--full-width { width:100%; }
+.levelup-button--compact { min-height:2.25rem; padding:.45rem .75rem; font-size:.82rem; }
+.levelup-button__label { display:inline-flex; min-width:0; align-items:center; white-space:nowrap; }
+.levelup-button:not(:disabled):hover { filter:brightness(1.08) saturate(1.08); }
+.levelup-button--back:not(:disabled):hover { color:#fff; filter:saturate(1) brightness(1.08); }
+.levelup-button:not(:disabled):active { transform:translate(3px,3px); box-shadow:1px 1px 0 var(--levelup-game-ink); }
+.levelup-button:focus-visible { outline:3px solid #fff; outline-offset:3px; box-shadow:4px 4px 0 var(--levelup-game-ink),0 0 0 6px var(--levelup-color-primary); }
+.levelup-button:disabled { color:rgb(23 19 33 / 58%); background:#c9c5cc; box-shadow:2px 2px 0 rgb(23 19 33 / 55%); cursor:not-allowed; filter:grayscale(.65) saturate(.35); opacity:.78; transform:none; }
+.levelup-button:disabled::after { opacity:.25; }
+.levelup-button__loader { flex:0 0 auto; animation:levelup-spin .7s steps(8,end) infinite; }
+@keyframes levelup-spin { to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .levelup-button { transition:filter 120ms ease,background-color 120ms ease,color 120ms ease; } .levelup-button:not(:disabled):active { transform:none; box-shadow:4px 4px 0 var(--levelup-game-ink); } .levelup-button__loader { animation:none; } }
 
 .levelup-card {
     border: var(--levelup-game-border);
