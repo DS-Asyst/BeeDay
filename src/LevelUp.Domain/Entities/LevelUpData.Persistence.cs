@@ -123,6 +123,8 @@ public sealed partial class LevelUpData
             {
                 throw new InvalidDomainStateException("A Character references an unknown User.");
             }
+
+            character.EnsureExperienceState();
         }
 
         if (Characters.GroupBy(character => character.UserId).Any(group => group.Count() > 1))

@@ -13,6 +13,7 @@ Implemented areas include:
 - Character creation and onboarding
 - Daily productivity management with habits, recurring tasks, todos, and projects
 - Inventory management with wallets, transactions, and tags
+- Centralized RPG experience domain with derived level progression and source history
 - JSON persistence with atomic writes, backups, and recovery support
 - Reusable Blazor design-system components
 - Automated tests for Domain, Application, Infrastructure, and Web layers
@@ -29,7 +30,7 @@ LevelUp.Infrastructure
 LevelUp.Web
 ```
 
-- `LevelUp.Domain`: entities, value objects, domain events, enums, and business rules.
+- `LevelUp.Domain`: entities, value objects, domain events, enums, experience progression, and business rules.
 - `LevelUp.Application`: commands, queries, validators, handlers, security contracts, and orchestration.
 - `LevelUp.Infrastructure`: JSON persistence, password hashing, email delivery, caching, auditing, background services, and health checks.
 - `LevelUp.Web`: Blazor Server UI, authentication endpoints, layouts, feature components, and application composition.
@@ -129,3 +130,9 @@ dotnet format --verify-no-changes
 dotnet build
 dotnet test
 ```
+
+## RPG experience foundation
+
+Character XP is centralized in the Domain layer. `TotalExperience` is persisted as the single source of truth, while level, current-level progress, and XP remaining are derived through `ExperienceCurve`. Each reward records its origin in an `ExperienceTransaction`.
+
+Activity modules must not write XP fields directly. Future Application handlers should calculate an `ExperienceReward`, create an `ExperienceSource`, and invoke `Character.AddExperience`.

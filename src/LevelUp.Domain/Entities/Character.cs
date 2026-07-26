@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using LevelUp.Domain.Abstractions;
 using LevelUp.Domain.Common;
 using LevelUp.Domain.Enums;
+using LevelUp.Domain.Experience;
 using LevelUp.Domain.ValueObjects;
 
 namespace LevelUp.Domain.Entities;
@@ -12,6 +13,7 @@ public sealed class Character : Entity
     [JsonInclude] public string Nickname { get; private set; } = string.Empty;
     [JsonInclude] public CharacterClass Class { get; private set; } = CharacterClass.Warrior;
     [JsonInclude] public string Avatar { get; private set; } = string.Empty;
+    [JsonInclude] public CharacterExperience Experience { get; private set; } = CharacterExperience.Create();
     [JsonInclude] public DateTimeOffset CreatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
     [JsonInclude] public DateTimeOffset UpdatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
 
@@ -28,6 +30,22 @@ public sealed class Character : Entity
             Class = EnumValidation.Defined(characterClass, nameof(characterClass)),
             Avatar = (avatar ?? string.Empty).Trim()
         };
+    }
+
+    public ExperienceTransaction AddExperience(
+        ExperienceReward reward,
+        ExperienceSource source,
+        DateTimeOffset? occurredAtUtc = null)
+    {
+        var transaction = Experience.Add(reward, source, occurredAtUtc);
+        UpdatedAtUtc = transaction.OccurredAtUtc;
+        return transaction;
+    }
+
+    internal void EnsureExperienceState()
+    {
+        Experience ??= CharacterExperience.Create();
+        Experience.EnsureValidState();
     }
 
     public void UpdateAvatar(string? avatar)

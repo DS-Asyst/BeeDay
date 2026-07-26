@@ -38,3 +38,9 @@ Hosts the Blazor Server application, authentication endpoints, layouts, reusable
 - UI state and HTTP concerns belong in Web.
 - Web must access persistence through Application or declared contracts rather than concrete JSON classes.
 - Cross-cutting behavior should use pipeline behaviors, middleware, decorators, or shared abstractions instead of duplicated feature code.
+
+## RPG Progression Boundary
+
+The RPG progression foundation belongs entirely to Domain. Feature modules may identify an `ExperienceSource` and calculate an `ExperienceReward`, but they must use `Character.AddExperience` rather than writing progression fields directly.
+
+Only total XP is persisted. Level and progress values are calculated by `ExperienceCurve`, preventing duplicated state from diverging across JSON persistence, application handlers, and UI projections.
