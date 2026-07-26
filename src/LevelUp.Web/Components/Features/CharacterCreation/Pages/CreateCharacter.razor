@@ -8,6 +8,7 @@
 
 <section class="character-page levelup-fade-in">
     <div class="character-panel character-panel--@State.CurrentStepClass">
+        <div class="character-panel__global-brand"><LevelUpBrand /></div>
         @if (State.Step == LevelUp.Web.Components.Features.CharacterCreation.State.CharacterCreationStep.Account)
         {
             <LevelUpButton Variant="LevelUpButtonVariant.Back" Compact="true" OnClick="BackToLogin">BACK</LevelUpButton>
@@ -37,7 +38,7 @@
                 <p id="password-requirements"
                    class="character-password-hint @(State.IsPasswordValid ? "character-password-hint--valid" : string.Empty)">
                     @(State.IsPasswordValid
-                        ? "✓ Password valid"
+                        ? "Password valid"
                         : "Use at least 8 characters, one letter and one number.")
                 </p>
 

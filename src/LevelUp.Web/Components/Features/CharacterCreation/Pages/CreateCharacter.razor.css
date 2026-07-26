@@ -11,15 +11,19 @@
     width: min(100%, 30rem);
     padding: clamp(1.6rem, 4vw, 2.25rem);
     box-sizing: border-box;
-    border: 1px solid #ddd8e3;
-    border-radius: .55rem;
-    background: var(--levelup-color-surface);
-    box-shadow: 0 1.1rem 3.5rem rgb(42 27 62 / 12%);
+    border: 2px solid var(--levelup-game-ink);
+    border-radius: var(--levelup-radius-xs);
+    background: var(--levelup-game-paper);
+    box-shadow: 8px 8px 0 var(--levelup-game-ink);
 }
 
 .character-panel--classes,
 .character-panel--class {
     width: min(100%, 62rem);
+}
+
+.character-panel__global-brand {
+    margin-bottom: 1.5rem;
 }
 
 .character-panel__brand {
@@ -61,8 +65,8 @@
 .character-field input {
     min-height: 3rem;
     padding: 0 .9rem;
-    border: 1px solid #d3ced8;
-    border-radius: .3rem;
+    border: 2px solid var(--levelup-game-ink);
+    border-radius: var(--levelup-radius-xs);
     outline: none;
     color: #302638;
     background: var(--levelup-color-surface);
@@ -246,7 +250,7 @@
 
 @media (max-width: 580px) {
     .character-page { place-items: start center; padding: 0; }
-    .character-panel { padding: 1.35rem; }
+    .character-panel { padding: 1.35rem; box-shadow: 5px 5px 0 var(--levelup-game-ink); }
     .class-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .class-card { min-height: 11.5rem; }
     .class-confirmation__actions { flex-direction: column-reverse; }
@@ -265,8 +269,8 @@
     align-items: center;
     min-height: 3rem;
     overflow: hidden;
-    border: 1px solid #d3ced8;
-    border-radius: .3rem;
+    border: 2px solid var(--levelup-game-ink);
+    border-radius: var(--levelup-radius-xs);
     background: var(--levelup-color-surface);
     transition: border-color var(--levelup-transition-fast), box-shadow var(--levelup-transition-fast);
 }

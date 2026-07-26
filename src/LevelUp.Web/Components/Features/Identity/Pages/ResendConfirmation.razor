@@ -6,7 +6,7 @@
 
 <PageTitle>Resend confirmation | LevelUp</PageTitle>
 <section class="identity-page levelup-fade-in"><div class="identity-card"><div class="identity-card__content">
-<span class="identity-brand"><span>LEVEL</span><span>UP</span></span>
+<div class="identity-card__brand"><LevelUpBrand /></div>
 <header class="identity-header"><h1>Resend confirmation</h1><p>Enter the email used to create your account.</p></header>
 @if (_submitted) { <div class="identity-feedback identity-feedback--success" role="status">If the account is eligible, a new confirmation message was generated.</div> }
 @if (!string.IsNullOrWhiteSpace(_error)) { <div class="identity-feedback identity-feedback--error" role="alert">@_error</div> }
@@ -15,7 +15,7 @@
 <label class="identity-field"><span>Email</span><InputText type="email" @bind-Value="_model.Email" autocomplete="email" disabled="@_busy" /><ValidationMessage For="() => _model.Email" /></label>
 <LevelUpButton Type="submit" FullWidth="true" IsLoading="@_busy" Disabled="@(_busy || _secondsRemaining > 0)">@ButtonText</LevelUpButton>
 </EditForm>
-<a class="identity-secondary" href="/login">BACK TO SIGN IN</a>
+<a class="identity-navigation-link" href="/login">BACK TO SIGN IN</a>
 </div></div></section>
 @code {
     [SupplyParameterFromQuery(Name = "email")] public string? Email { get; set; }

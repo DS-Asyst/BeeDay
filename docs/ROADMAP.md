@@ -122,3 +122,20 @@ Sprint UX.3 completed the onboarding layout consolidation:
 - replaced functional tutorial symbols with existing `PixelIcon` contracts;
 - preserved all five onboarding steps and the final `/daily` navigation;
 - added a reusable, accessible `LevelUpBrand` component shared with Login.
+
+Sprint UX.4 completed the official pressable button system:
+
+- centralized action-button geometry, depth, interaction, focus, disabled, and loading states in `LevelUpButton`;
+- added the official Primary, Secondary, Back, and Danger variants;
+- migrated the authentication, identity, character creation, class confirmation, and tutorial actions;
+- removed replaced feature-specific button structures;
+- preserved navigation links, clickable cards, and controls with distinct semantics.
+
+Sprint UX.5 completed the authentication and onboarding consistency review:
+
+- standardized the shared `LevelUpBrand` across Login, Identity, Character Creation, and Tutorial;
+- aligned entry-flow cards, fields, validation feedback, links, spacing, and responsive behavior;
+- removed competing link-button styling and retained navigation semantics;
+- removed remaining obsolete tutorial and entry-flow style contracts;
+- confirmed the five final class assets are the only class artwork in use;
+- added automated source-level consistency checks without changing business rules.

@@ -8,7 +8,7 @@
 <section class="identity-page levelup-fade-in">
     <div class="identity-card">
         <div class="identity-card__content">
-            <span class="identity-brand"><span>LEVEL</span><span>UP</span></span>
+            <div class="identity-card__brand"><LevelUpBrand /></div>
 
             @switch (_state)
             {
@@ -27,7 +27,7 @@
                     <div class="identity-feedback identity-feedback--success" role="status">
                         Confirmation completed successfully.
                     </div>
-                    <a class="identity-primary identity-link-button" href="/login?confirmed=true">SIGN IN</a>
+                    <a class="identity-navigation-link identity-navigation-link--primary" href="/login?confirmed=true">SIGN IN</a>
                     break;
 
                 case ConfirmationPageState.AlreadyConfirmed:
@@ -38,7 +38,7 @@
                     <div class="identity-feedback identity-feedback--success" role="status">
                         You can sign in normally.
                     </div>
-                    <a class="identity-primary identity-link-button" href="/login">SIGN IN</a>
+                    <a class="identity-navigation-link identity-navigation-link--primary" href="/login">SIGN IN</a>
                     break;
 
                 case ConfirmationPageState.Expired:
@@ -47,7 +47,7 @@
                         <p>This link is no longer valid. Request a new confirmation email.</p>
                     </header>
                     <div class="identity-feedback identity-feedback--error" role="alert">@_error</div>
-                    <a class="identity-secondary" href="/account/resend-confirmation">REQUEST A NEW LINK</a>
+                    <a class="identity-navigation-link" href="/account/resend-confirmation">REQUEST A NEW LINK</a>
                     break;
 
                 case ConfirmationPageState.Replaced:
@@ -58,7 +58,7 @@
                     <div class="identity-feedback identity-feedback--error" role="alert">
                         Use the most recent email or request another confirmation link.
                     </div>
-                    <a class="identity-secondary" href="/account/resend-confirmation">REQUEST A NEW LINK</a>
+                    <a class="identity-navigation-link" href="/account/resend-confirmation">REQUEST A NEW LINK</a>
                     break;
 
                 default:
@@ -67,7 +67,7 @@
                         <p>This link is incomplete or does not belong to a valid confirmation request.</p>
                     </header>
                     <div class="identity-feedback identity-feedback--error" role="alert">@_error</div>
-                    <a class="identity-secondary" href="/account/resend-confirmation">REQUEST A NEW LINK</a>
+                    <a class="identity-navigation-link" href="/account/resend-confirmation">REQUEST A NEW LINK</a>
                     break;
             }
         </div>
