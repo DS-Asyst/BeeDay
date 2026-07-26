@@ -169,6 +169,24 @@ public sealed class JsonPersistenceTests : IDisposable
     }
 
     [Fact]
+    public void JsonStoragePaths_AllowsAbsoluteStorageDirectory()
+    {
+        var absoluteDirectory = Path.Combine(root, "ExternalData");
+        var options = Options.Create(new JsonStorageOptions
+        {
+            Directory = absoluteDirectory,
+            FileName = "LevelUpBD.json",
+            BackupDirectory = "Backups"
+        });
+
+        var paths = new JsonStoragePaths(new TestHostEnvironment(root), options);
+
+        Assert.Equal(Path.GetFullPath(absoluteDirectory), paths.StorageDirectory);
+        Assert.Equal(Path.Combine(absoluteDirectory, "LevelUpBD.json"), paths.DataFile);
+        Assert.Equal(Path.Combine(absoluteDirectory, "Backups"), paths.BackupDirectory);
+    }
+
+    [Fact]
     public async Task HealthCheck_ReturnsHealthy_WhenStorageIsWritableAndValid()
     {
         var fixture = CreateFixture();

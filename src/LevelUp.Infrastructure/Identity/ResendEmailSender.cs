@@ -20,7 +20,7 @@ public sealed class ResendEmailSender(
 
         if (!_options.Enabled)
         {
-            logger.LogInformation("Email delivery is disabled. Suppressed identity email to {Recipient} with subject {Subject}.", message.Recipient, message.Subject);
+            logger.LogInformation("Email delivery is disabled. Identity email was suppressed.");
             return;
         }
 
@@ -42,8 +42,9 @@ public sealed class ResendEmailSender(
             return;
         }
 
-        var details = await response.Content.ReadAsStringAsync(cancellationToken);
-        logger.LogError("Resend rejected an email to {Recipient}. StatusCode: {StatusCode}. Response: {Response}", message.Recipient, (int)response.StatusCode, details);
+        logger.LogError(
+            "Resend rejected an identity email. StatusCode={StatusCode}",
+            (int)response.StatusCode);
         throw new HttpRequestException($"Resend email delivery failed with HTTP {(int)response.StatusCode}.", null, response.StatusCode);
     }
 }

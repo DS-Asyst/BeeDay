@@ -11,6 +11,13 @@ $appPoolName = "LevelUpPool"
 
 $destinationPath = "C:\Apps\LevelUp"
 $backupRoot = "C:\Apps\LevelUp-Backups"
+$externalRoot = "C:\Apps\LevelUp-Data"
+$externalDirectories = @(
+    (Join-Path $externalRoot "Data"),
+    (Join-Path $externalRoot "DataProtection-Keys"),
+    (Join-Path $externalRoot "Emails"),
+    (Join-Path $externalRoot "Logs")
+)
 
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $backupPath = Join-Path $backupRoot "LevelUp-$timestamp"
@@ -96,6 +103,29 @@ New-Item `
     -Force |
     Out-Null
 
+foreach ($directory in $externalDirectories) {
+    New-Item `
+        -ItemType Directory `
+        -Path $directory `
+        -Force |
+        Out-Null
+}
+
+$appPoolIdentity = "IIS AppPool\$appPoolName"
+$accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+    $appPoolIdentity,
+    "Modify",
+    "ContainerInherit,ObjectInherit",
+    "None",
+    "Allow"
+)
+
+foreach ($directory in $externalDirectories) {
+    $acl = Get-Acl -LiteralPath $directory
+    $acl.SetAccessRule($accessRule)
+    Set-Acl -LiteralPath $directory -AclObject $acl
+}
+
 Write-DeployMessage "Criando backup em '$backupPath'..."
 
 New-Item `
@@ -137,13 +167,6 @@ try {
     Get-ChildItem `
         -LiteralPath $destinationPath `
         -Force |
-        Where-Object {
-            $_.Name -notin @(
-                "Data",
-                "logs",
-                "Backups"
-            )
-        } |
         Remove-Item `
             -Recurse `
             -Force
@@ -153,13 +176,6 @@ try {
     Get-ChildItem `
         -LiteralPath $PublishPath `
         -Force |
-        Where-Object {
-            $_.Name -notin @(
-                "Data",
-                "logs",
-                "Backups"
-            )
-        } |
         ForEach-Object {
             Copy-Item `
                 -LiteralPath $_.FullName `
@@ -168,18 +184,6 @@ try {
                 -Force
         }
 
-    New-Item `
-        -ItemType Directory `
-        -Path (Join-Path $destinationPath "Data") `
-        -Force |
-        Out-Null
-
-    New-Item `
-        -ItemType Directory `
-        -Path (Join-Path $destinationPath "logs") `
-        -Force |
-        Out-Null
-
     Start-LevelUpIis
 
     Start-Sleep -Seconds 8
@@ -187,7 +191,7 @@ try {
     Write-DeployMessage "Executando health check..."
 
     $response = Invoke-WebRequest `
-        -Uri "http://127.0.0.1/" `
+        -Uri "http://127.0.0.1/health/ready" `
         -Headers @{
             Host = "levelup"
         } `

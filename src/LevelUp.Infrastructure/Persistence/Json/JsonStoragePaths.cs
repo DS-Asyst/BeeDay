@@ -12,7 +12,7 @@ public sealed class JsonStoragePaths
         ArgumentNullException.ThrowIfNull(options);
 
         var root = Path.GetFullPath(environment.ContentRootPath);
-        StorageDirectory = ResolveChild(root, options.Value.Directory, "storage directory");
+        StorageDirectory = ResolveDirectory(root, options.Value.Directory, "storage directory");
         DataFile = ResolveFile(StorageDirectory, options.Value.FileName);
         BackupDirectory = ResolveChild(StorageDirectory, options.Value.BackupDirectory, "backup directory");
     }
@@ -32,6 +32,16 @@ public sealed class JsonStoragePaths
     public string CreateBackupFile(DateTimeOffset timestamp) => Path.Combine(
         BackupDirectory,
         $"{Path.GetFileNameWithoutExtension(DataFile)}-{timestamp.UtcDateTime:yyyyMMdd-HHmmssfff}-{Guid.NewGuid():N}.json");
+
+    private static string ResolveDirectory(string parent, string configuredPath, string label)
+    {
+        if (Path.IsPathRooted(configuredPath))
+        {
+            return Path.GetFullPath(configuredPath);
+        }
+
+        return ResolveChild(parent, configuredPath, label);
+    }
 
     private static string ResolveChild(string parent, string child, string label)
     {

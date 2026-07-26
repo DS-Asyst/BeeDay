@@ -72,7 +72,7 @@ Application configuration is stored under `src/LevelUp.Web/appsettings*.json`.
 
 Do not commit production secrets. Supply sensitive values through environment variables, user secrets, or the deployment platform's secret store.
 
-The default persistence provider stores application data under `src/LevelUp.Web/Data`. This directory, generated emails, backups, and the production JSON database are excluded from version control. Only `Data/.gitkeep` may be tracked.
+The default development persistence provider stores application data under `src/LevelUp.Web/Data`. Production stores data, backups, Data Protection keys, generated emails, and logs outside the publish directory under `C:\Apps\LevelUp-Data`. See the production guide before deploying.
 
 ## Quality Gate
 
@@ -106,6 +106,7 @@ git switch -c chore/repository-cleanup
 - [Development](docs/DEVELOPMENT.md)
 - [Domain](docs/DOMAIN.md)
 - [Persistence](docs/PERSISTENCE.md)
+- [Production Configuration](docs/PRODUCTION.md)
 - [Roadmap](docs/ROADMAP.md)
 - [User Interface](docs/UI.md)
 

@@ -8,6 +8,7 @@ using LevelUp.Infrastructure.DependencyInjection;
 using LevelUp.Web.Components;
 using LevelUp.Web.Components.Features.CharacterCreation.State;
 using LevelUp.Web.Components.Features.Dashboard.State;
+using LevelUp.Web.Configuration;
 using LevelUp.Web.Diagnostics;
 using LevelUp.Web.HealthChecks;
 using LevelUp.Web.Services;
@@ -15,11 +16,97 @@ using LevelUp.Web.Services.Authentication;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+var productionHosting = builder.Configuration
+    .GetSection(ProductionHostingOptions.SectionName)
+    .Get<ProductionHostingOptions>() ?? new ProductionHostingOptions();
+
+if (!builder.Environment.IsDevelopment())
+{
+    var publicBaseUrl = builder.Configuration["LevelUp:IdentityEmail:PublicBaseUrl"];
+    if (!Uri.TryCreate(publicBaseUrl, UriKind.Absolute, out var publicUri)
+        || publicUri.Scheme != Uri.UriSchemeHttps)
+    {
+        throw new InvalidOperationException(
+            "LevelUp:IdentityEmail:PublicBaseUrl must be an absolute HTTPS URL in production.");
+    }
+
+    var storageDirectory = builder.Configuration["LevelUp:Storage:Directory"];
+    if (string.IsNullOrWhiteSpace(storageDirectory) || !Path.IsPathRooted(storageDirectory))
+    {
+        throw new InvalidOperationException(
+            "LevelUp:Storage:Directory must be an absolute path outside the publish directory in production.");
+    }
+
+    if (string.IsNullOrWhiteSpace(productionHosting.DataProtectionKeysDirectory)
+        || !Path.IsPathRooted(productionHosting.DataProtectionKeysDirectory))
+    {
+        throw new InvalidOperationException(
+            "LevelUp:Hosting:DataProtectionKeysDirectory must be an absolute path in production.");
+    }
+
+    var allowedHosts = builder.Configuration["AllowedHosts"];
+    if (string.IsNullOrWhiteSpace(allowedHosts) || allowedHosts.Contains('*', StringComparison.Ordinal))
+    {
+        throw new InvalidOperationException("AllowedHosts must list explicit production hosts.");
+    }
+
+    var keysDirectory = Path.GetFullPath(productionHosting.DataProtectionKeysDirectory);
+    Directory.CreateDirectory(keysDirectory);
+
+    var dataProtection = builder.Services
+        .AddDataProtection()
+        .SetApplicationName("LevelUp")
+        .PersistKeysToFileSystem(new DirectoryInfo(keysDirectory));
+
+    if (OperatingSystem.IsWindows())
+    {
+        dataProtection.ProtectKeysWithDpapi(protectToLocalMachine: true);
+    }
+
+    if (productionHosting.ForwardedHeaders.Enabled)
+    {
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = productionHosting.ForwardedHeaders.Headers;
+            options.ForwardLimit = productionHosting.ForwardedHeaders.ForwardLimit;
+            options.RequireHeaderSymmetry = true;
+
+            options.KnownProxies.Clear();
+            options.KnownIPNetworks.Clear();
+
+            foreach (var proxy in productionHosting.ForwardedHeaders.KnownProxies)
+            {
+                if (!System.Net.IPAddress.TryParse(proxy, out var address))
+                {
+                    throw new InvalidOperationException($"Invalid forwarded-header proxy address: '{proxy}'.");
+                }
+
+                options.KnownProxies.Add(address);
+            }
+
+            foreach (var network in productionHosting.ForwardedHeaders.KnownNetworks)
+            {
+                var parts = network.Split('/', 2, StringSplitOptions.TrimEntries);
+                if (parts.Length != 2
+                    || !System.Net.IPAddress.TryParse(parts[0], out var prefix)
+                    || !int.TryParse(parts[1], out var prefixLength))
+                {
+                    throw new InvalidOperationException($"Invalid forwarded-header network: '{network}'.");
+                }
+
+                options.KnownIPNetworks.Add(new System.Net.IPNetwork(prefix, prefixLength));
+            }
+        });
+    }
+}
 
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole(options =>
@@ -98,6 +185,11 @@ builder.Services.AddScoped<DashboardState>();
 builder.Services.AddScoped<CharacterCreationState>();
 
 var app = builder.Build();
+
+if (!app.Environment.IsDevelopment() && productionHosting.ForwardedHeaders.Enabled)
+{
+    app.UseForwardedHeaders();
+}
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler();
