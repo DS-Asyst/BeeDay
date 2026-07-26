@@ -1,13 +1,13 @@
 # Domain
 
-## Core Entities
+## Core entities
 
 - `User`
 - `Character`
 - `Habit`
 - `RecurringTask`
-- `Project`
 - `Todo`
+- `Project`
 - `Wallet`
 - `Transaction`
 - `InventoryTag`
@@ -15,69 +15,91 @@
 - `CharacterExperience`
 - `ExperienceTransaction`
 
-## Value Objects
+## Value objects
 
-The domain uses value objects for validated concepts such as email addresses, user names, character nicknames, activity titles, activity descriptions, project colors, experience rewards, and experience sources.
+Validated concepts include email addresses, user names, character nicknames, activity titles, activity descriptions, project colors, experience rewards, and experience sources.
 
-## Experience Domain
+## Daily domain
 
-Experience progression is independent from the UI and from concrete activity types. Habits, tasks, todos, projects, reading, and future modules must not mutate character XP directly. They calculate or request a reward and pass it through the central experience model.
+The Daily context manages habits, recurring tasks, todos, and projects. Entities enforce their own invariants, while Application handlers coordinate persistence and cross-feature effects.
+
+## Inventory domain
+
+The Inventory context owns wallets, transactions, transaction types, and inventory tags. Wallet balances are derived from transactions rather than independently edited totals. Transaction and tag mutations are validated through Domain and Application boundaries.
+
+## Experience domain
+
+Experience progression is centralized and independent from UI components.
 
 ```text
-Activity completed
+Supported activity transition
        ↓
-Experience reward calculated
+Application requests automatic reward
        ↓
-Character.AddExperience
+IExperienceRewardService calculates the amount
        ↓
-CharacterExperience updates total XP
+Character.TryAddExperience
        ↓
-ExperienceCurve derives progression
+CharacterExperience checks idempotency
        ↓
-ExperienceTransaction records the source
+ExperienceTransaction is persisted
+       ↓
+ExperienceCurve derives level and progress
 ```
 
-`CharacterExperience.TotalExperience` is the only persisted progression value. The following values are derived and excluded from persistence:
+### Persisted and derived state
+
+Persisted:
+
+- total experience;
+- experience transaction history.
+
+Derived:
 
 - current level;
-- experience earned inside the current level;
-- experience required to advance the current level;
-- experience remaining until the next level.
+- XP earned inside the current level;
+- XP required to advance;
+- XP remaining until the next level.
 
-The progression formula is represented by the `IExperienceCurve` contract. The initial implementation is `LinearExperienceCurve`, where advancing from level `n` requires `BaseExperience × n` XP. With the default base value of `100`, cumulative thresholds are 0 XP for level 1, 100 XP for level 2, 300 XP for level 3, and 600 XP for level 4.
+The default `LinearExperienceCurve` uses a base cost of 100 XP. Advancing from level `n` requires `100 × n` XP. Cumulative thresholds therefore begin at:
 
-The default curve has no product-defined maximum level. Its effective range is constrained only by the persisted `long` XP total and the `int` level type. A configured `LinearExperienceCurve` may define an explicit maximum; at that terminal level, the advance cost is zero. This keeps the initial balancing replaceable without coupling character state or persistence to one permanent formula.
+| Level | Total XP required |
+| ---: | ---: |
+| 1 | 0 |
+| 2 | 100 |
+| 3 | 300 |
+| 4 | 600 |
 
-Initial balancing intentionally remains conservative:
+The default curve has no product-defined maximum level. A configured curve may define one.
 
-- `BaseExperience = 100` preserves the current progression pace;
-- the exponent-style progression proposed for later balancing is not hard-coded yet;
-- cumulative thresholds are derived rather than persisted;
-- binary search calculates a level from XP without iterating through every prior level;
-- boundary tests cover zero XP, exact thresholds, invalid values, configured caps, and `long.MaxValue`.
+### Automatic reward pipeline
 
-Every accepted reward must be greater than zero and generates an `ExperienceTransaction` containing the amount, source type, optional source identifier, optional description, and UTC occurrence time. Negative XP and experience removal are intentionally outside Sprint 3.1.
+The current automatic completion rewards are centralized in `ExperienceRewardService`:
 
-## Rules
+| Source | Completion reward |
+| --- | ---: |
+| Habit | 10 XP |
+| Recurring task | 20 XP |
+| Todo | 25 XP |
+| Project | 50 XP |
+| Reading | 10 XP |
 
-- Domain entities enforce their own invariants.
+Reading is reserved for the future Library module.
+
+Automatic rewards require a source identifier. The idempotency key is:
+
+```text
+(SourceType, SourceId, RewardType)
+```
+
+Repeating the same completion command cannot grant the same reward twice. Successful grants publish `ExperienceGrantedDomainEvent` after persistence.
+
+Reward values are balancing configuration embedded in the current service implementation and may change in a dedicated product-balancing sprint.
+
+## Domain rules
+
+- Entities enforce their own invariants.
 - Invalid state transitions raise domain exceptions.
-- Domain events communicate relevant state changes without coupling entities to infrastructure.
-- Persistence-specific serialization concerns are isolated from business behavior.
-- Future modules should extend the domain only after their invariants and ownership boundaries are defined.
-
-## Experience reward pipeline
-
-Automatic XP rewards are granted through `IExperienceRewardService`. The pipeline currently supports Habit, Task, To-Do and Project completion sources, while Reading is reserved for the future Library module.
-
-Each persisted experience transaction records its amount, source type, source identifier, reward type and UTC grant timestamp. The idempotency key is the tuple `(SourceType, SourceId, RewardType)`. Repeating the same completion command therefore returns no new transaction and cannot increase total XP twice.
-
-Initial reward amounts are deliberately centralized in `ExperienceRewardService` and should be treated as provisional balancing values:
-
-- Habit completion: 10 XP
-- Task completion: 20 XP
-- To-Do completion: 25 XP
-- Project completion: 50 XP
-- Reading completion: 10 XP
-
-Successful grants publish `ExperienceGrantedDomainEvent` after persistence. Generic command auditing remains handled separately by the MediatR domain-event behavior.
+- Domain events communicate meaningful state changes without infrastructure coupling.
+- Persistence serialization details must not redefine business behavior.
+- New modules must define ownership and invariants before extending shared aggregates.

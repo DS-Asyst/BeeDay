@@ -2,40 +2,44 @@
 
 LevelUp uses ASP.NET Core cookie authentication.
 
-## Responsibilities
+## Ownership
 
-- Web owns HTTP endpoints, cookie issuance, sign-out, redirects, and authorization middleware.
-- Application validates authentication requests through abstractions and use-case handlers.
-- Infrastructure implements password hashing, email delivery, token generation, and request throttling.
-- Domain owns user state and identity invariants without depending on ASP.NET Core.
+- Web owns HTTP endpoints, cookie issuance, sign-out, redirects, authorization middleware, and antiforgery integration.
+- Application owns authentication commands, validation, and contracts.
+- Infrastructure implements password hashing, email delivery, token persistence, and throttling.
+- Domain owns user state and identity invariants without ASP.NET Core dependencies.
 
-## Implemented Flows
+## Implemented flows
 
-- Account registration
-- Sign in
-- Sign out
-- Email confirmation
-- Resend confirmation email
-- Forgot password
-- Reset password
-- Authenticated account updates
+- account registration;
+- sign in;
+- sign out;
+- email confirmation and confirmation resend;
+- forgot password and reset password;
+- authenticated account updates.
 
-## Security Requirements
+## Cookie policy
 
-- Never log plaintext passwords, confirmation tokens, reset tokens, or email API keys.
-- Store production secrets outside committed configuration files.
-- Keep authentication cookies HTTP-only and configure transport security for production.
-- Require antiforgery validation for state-changing browser requests unless an endpoint has a documented alternative protection mechanism.
-- Use POST for state-changing operations such as sign-out.
-- Validate redirect targets as local URLs.
+- cookie name: `LevelUp.Auth`;
+- HTTP-only;
+- `SameSite=Lax`;
+- eight-hour expiration with sliding renewal;
+- persistent sessions are opt-in through **Remember me** and expire after fourteen days;
+- `CookieSecurePolicy=SameAsRequest` in Development;
+- `CookieSecurePolicy=Always` outside Development.
 
-## Endpoint security
+## Endpoint requirements
 
 - Login and logout are POST-only operations protected by antiforgery validation.
-- Logout is never exposed through a GET endpoint.
-- Authentication failures use the same public message for unknown, inactive, unconfirmed, or invalid accounts.
-- Return URLs are restricted to local application paths to prevent open redirects.
-- Authentication cookies are HttpOnly, use SameSite=Lax, expire after eight hours, and support sliding expiration.
-- Persistent sessions are opt-in through **Remember me** and expire after fourteen days.
-- CookieSecurePolicy is `Always` outside Development and `SameAsRequest` during local development.
-- Authentication logs contain user identifiers only after successful authentication and never contain email addresses, passwords, tokens, or credential hashes.
+- Logout is not exposed through GET.
+- Return URLs are restricted to local application paths.
+- Authentication failures use a common public response to avoid account enumeration.
+- The cookie principal is revalidated against the persisted active user.
+
+## Security rules
+
+- Never log plaintext passwords, confirmation tokens, reset tokens, API keys, or credential hashes.
+- Do not commit production secrets.
+- Production public URLs must use HTTPS.
+- Production `AllowedHosts` must contain explicit hosts and must not use `*`.
+- Authentication logs may contain a user identifier only after successful authentication; they must not contain email addresses or secret material.

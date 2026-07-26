@@ -1,12 +1,12 @@
 # User Interface
 
-LevelUp.Web is a Blazor Server application organized by feature under `Components/Features` and by reusable primitives under `Components/DesignSystem`.
+`LevelUp.Web` is a Blazor Server application organized by feature under `Components/Features` and by reusable primitives under `Components/DesignSystem`.
 
-## Feature Areas
+## Feature areas
 
 - Account
 - Authentication and identity
-- Character creation and onboarding
+- Character and character creation
 - Dashboard
 - Habits
 - Recurring tasks
@@ -14,90 +14,86 @@ LevelUp.Web is a Blazor Server application organized by feature under `Component
 - Projects
 - Inventory
 
-## Design Principles
+## Organization
 
-- Pixel-art-inspired visual language
-- Reusable components for buttons, cards, forms, icons, feedback, modals, and text
-- Consistent loading, empty, error, and disabled states
-- Responsive layouts
-- Accessible labels and keyboard behavior
-- Feature state isolated from persistence details
+Feature folders may contain:
+
+- `Pages`: routable components;
+- `Components`: feature-specific presentation components;
+- `Models`: UI models and form models;
+- `State`: scoped page or workflow state;
+- `Services`: presentation-layer orchestration that does not belong in Application.
+
+Global layout and reusable visual primitives remain outside feature folders.
+
+## Design principles
+
+- pixel-art-inspired visual language;
+- reusable controls for buttons, cards, forms, icons, feedback, modals, and text;
+- consistent loading, empty, error, disabled, and confirmation states;
+- responsive layouts and touch-friendly targets;
+- visible keyboard focus and semantic labels;
+- reduced-motion support for nonessential animation;
+- feature state isolated from persistence implementation details.
 
 ## Typography
 
-- **Jersey 15**: branding, primary headings, card titles, large numeric indicators, and decorative RPG elements
-- **Jersey 25**: buttons, inputs, labels, body copy, menus, tables, dialogs, messages, navigation, and actions
+Official families:
 
-### Canonical Scale
+- **Jersey 15**: brand, primary headings, card titles, large numeric indicators, and decorative RPG elements;
+- **Jersey 25**: buttons, inputs, labels, body copy, menus, tables, dialogs, messages, navigation, and actions.
+
+Canonical scale:
 
 | Token | Size | Intended use |
-|---|---:|---|
-| `--levelup-font-size-xs` | `.75rem` | Metadata and compact supporting text |
-| `--levelup-font-size-sm` | `.85rem` | Labels and secondary text |
-| `--levelup-font-size-md` | `.95rem` | Regular interface text |
-| `--levelup-font-size-base` | `1rem` | Body text |
-| `--levelup-font-size-lg` | `1.125rem` | Emphasized text |
-| `--levelup-font-size-xl` | `1.5rem` | Card and section headings |
-| `--levelup-font-size-2xl` | `1.8rem` | Page headings |
-| `--levelup-font-size-3xl` | `2.2rem` | Display headings |
+| --- | ---: | --- |
+| `--levelup-font-size-xs` | `.75rem` | metadata and compact supporting text |
+| `--levelup-font-size-sm` | `.85rem` | labels and secondary text |
+| `--levelup-font-size-md` | `.95rem` | regular interface text |
+| `--levelup-font-size-base` | `1rem` | body text |
+| `--levelup-font-size-lg` | `1.125rem` | emphasized text |
+| `--levelup-font-size-xl` | `1.5rem` | card and section headings |
+| `--levelup-font-size-2xl` | `1.8rem` | page headings |
+| `--levelup-font-size-3xl` | `2.2rem` | display headings |
 
 Textual controls should not be smaller than `.75rem`.
 
-## Integration
+## Character experience panel
 
-The presentation layer accesses application behavior through registered services and MediatR handlers. JSON persistence remains an Infrastructure responsibility.
+Character progression is shown in the existing left-side character panel. It displays:
 
-## Run
+- current level;
+- current-level XP;
+- XP required for the next level;
+- responsive progress bar;
+- temporary gain feedback only when persisted total XP increases.
 
-```bash
-dotnet run --project src/LevelUp.Web/LevelUp.Web.csproj
-```
+Daily activity counters are intentionally excluded from this panel. Idempotent reward attempts do not replay XP feedback. Motion is disabled when the user prefers reduced motion.
 
-## Inventory component architecture
+## Inventory architecture
 
-The Inventory feature is organized under `Components/Features/Inventory` and keeps the page focused on orchestration.
+The Inventory page remains an orchestrator. Supporting responsibilities are split across:
 
-- `Pages/Inventory.razor`: loads feature data, coordinates actions, controls dialogs, and exposes global feedback.
-- `State/InventoryPageState.cs`: owns filter and pagination state.
-- `Components/WalletSummary.razor`: renders wallet totals.
-- `Components/TransactionList.razor`: renders the transaction panel, list, and pagination.
-- `Components/TransactionCard.razor`: renders one transaction and its actions.
-- `Components/TransactionFormModal.razor`: handles transaction form presentation.
-- `Components/InventoryFilters.razor`: owns filter controls and emits filter changes.
-- `Components/InventoryEmptyState.razor`: renders filtered and first-use empty states.
-- `Components/InventoryTagManager.razor`: manages tag presentation and editing.
+- `State/InventoryPageState.cs` for filter and pagination state;
+- `Components/WalletSummary.razor` for wallet totals;
+- `Components/TransactionList.razor` and `TransactionCard.razor` for transaction presentation;
+- `Components/TransactionFormModal.razor` for transaction input;
+- `Components/InventoryFilters.razor` for filtering and sorting controls;
+- `Components/InventoryEmptyState.razor` for first-use and no-result states;
+- `Components/InventoryTagManager.razor` for tag management.
 
-Business rules remain in the Domain and Application layers; these components only manage presentation and interaction.
-## Inventory interaction reliability
+Inventory uses guarded interaction state to prevent concurrent mutations and duplicate submissions. Forms preserve user input after failed saves, destructive actions require confirmation, and data is refreshed after successful server-side mutation.
 
-The Inventory page uses an explicit interaction state to prevent concurrent mutations and duplicate submissions. Transaction and tag forms remain open after failed saves so user input is preserved. Destructive actions require confirmation, Escape closes idle dialogs, controls are disabled while requests are running, and server exceptions are translated into stable user-facing messages.
+Search and filtering support description or notes, transaction type, tag, inclusive date range, sort direction, active-filter counting, reset, and pagination reset after filter changes.
 
-Inventory data is refreshed after successful mutations. The UI deliberately avoids speculative balance, transaction, or tag updates because those values depend on server-side validation and aggregate calculations; existing data remains visible if a refresh fails.
+## UI tests
 
+The Web test project uses bUnit for public component behavior, including:
 
-## Inventory search and filters
+- loading and empty states;
+- form validation and disabled states;
+- Inventory filtering, pagination, and interaction guards;
+- wallet and transaction rendering;
+- character experience values, progress, loading, and gain feedback.
 
-Inventory transactions can be filtered in memory by description or notes, transaction type, tag, and inclusive date range. Results can be ordered by transaction date in ascending or descending order, and the UI exposes an active-filter count, one-action filter reset, pagination reset after filter changes, and a dedicated no-results state.
-
-The Web layer only captures filter state. `GetTransactionsQuery` owns the filter contract so the same parameters can later be translated to paginated SQL predicates without redesigning the page components.
-
-
-## Inventory responsive behavior
-
-The Inventory module uses explicit desktop, tablet, and mobile breakpoints. Desktop keeps independent scrolling for long transaction and tag collections; tablet collapses the workspace while retaining compact summary cards; mobile converts filters, pagination, tag actions, and primary actions to full-width touch controls. Interactive controls use at least 44 px touch targets, visible keyboard focus, semantic labelled regions, and responsive modal constraints.
-
-
-## Inventory UI test coverage
-
-The Inventory module is covered with bUnit and state tests for:
-
-- wallet summary rendering and currency formatting;
-- transaction and tag form validation;
-- search, type, tag, period, and sorting callbacks;
-- disabled controls while an operation is running;
-- initial empty state and filtered no-results state;
-- transaction refresh and pagination loading states;
-- filter reset, active-filter counting, and page reset;
-- concurrent-operation prevention through `InventoryInteractionState`.
-
-Tests intentionally assert public UI behavior and component contracts rather than internal CSS implementation details.
+Tests should avoid coupling to internal CSS implementation unless a visual class is itself a public contract.

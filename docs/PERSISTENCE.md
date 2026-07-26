@@ -1,36 +1,67 @@
 # Persistence
 
-The current persistence provider is JSON and is implemented in `LevelUp.Infrastructure`.
+The current persistence provider is JSON and is implemented in `LevelUp.Infrastructure` behind Application contracts.
 
-## Storage
+## Development storage
 
-Default configuration:
+Default development configuration:
 
-- Directory: `src/LevelUp.Web/Data`
-- Data file: `LevelUpBD.json`
-- Backup directory: `Backups`
+```text
+Directory: src/LevelUp.Web/Data
+File:      LevelUpBD.json
+Backups:   src/LevelUp.Web/Data/Backups
+```
 
-Application data, generated development emails, backups, and the production JSON database are excluded from version control.
+The directory contents are ignored by Git except for `.gitkeep`.
 
-## Reliability Features
+## Production storage
 
-The persistence implementation includes:
+Production uses an absolute external path:
 
-- Serialized access through a storage gate
-- Atomic file replacement
-- Configurable backup creation
-- Backup retention
-- Recovery support
-- Dedicated exceptions for corruption, access failures, and restore failures
-- Readiness health checks
+```text
+C:\Apps\LevelUp-Data\Data\LevelUpBD.json
+C:\Apps\LevelUp-Data\Data\Backups
+```
 
-## Boundaries
+Runtime data must remain outside `C:\Apps\LevelUp`, which is the replaceable application publish directory.
 
-Application code depends on `ILevelUpRepository`. Domain and Application do not depend on JSON APIs or file-system paths. This boundary allows the storage provider to be replaced later without changing core business rules.
+## Write and recovery behavior
 
-## Operational Guidance
+The JSON provider is configured to:
 
-- Preserve the `Data` directory during deployment.
-- Back up production data before migrations or manual intervention.
-- Never include a production data file in source archives or commits.
-- Store environment-specific paths and secrets outside source control.
+- serialize through a single repository boundary;
+- write atomically through a temporary file and replacement step;
+- create a backup before save when enabled;
+- retain a configured number of backups;
+- recover from a valid backup when the primary file cannot be read and recovery is enabled;
+- validate restored domain state before returning it to the application.
+
+Development uses indented JSON and a retention of 10 backups. Production uses compact JSON and a retention of 20 backups.
+
+## Authoritative state
+
+Persisted data includes users, characters, Daily entities, Inventory entities, tokens, total character XP, and experience transaction history.
+
+Calculated values such as wallet balance, current character level, current-level XP, and remaining XP should not be persisted independently when they can be derived reliably.
+
+## Deployment safety
+
+The production deployment script:
+
+- backs up the current application;
+- snapshots persistent JSON data;
+- replaces only application binaries;
+- leaves external runtime data in place;
+- rolls back application binaries when readiness checks fail.
+
+Data is not automatically rolled back because doing so could discard valid writes made during deployment. The snapshot is retained for manual recovery.
+
+## Repository rules
+
+Never commit:
+
+- `LevelUpBD.json`;
+- generated backups;
+- generated development emails;
+- production runtime directories;
+- local persistence exports containing user data.

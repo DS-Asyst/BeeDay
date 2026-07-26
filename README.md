@@ -1,22 +1,22 @@
 # LevelUp
 
-LevelUp is a personal productivity and RPG-inspired progression application built with ASP.NET Core, Blazor Server, and .NET 10.
+LevelUp is a personal productivity application with RPG-inspired character progression. It is built with ASP.NET Core, Blazor Server, and .NET 10.
 
-The project separates business rules, application use cases, infrastructure concerns, and presentation into independent layers so features can evolve without coupling the domain to the UI or the current JSON storage provider.
+The repository uses a layered architecture so domain rules, use cases, infrastructure, and presentation can evolve independently.
 
-## Current Scope
+## Current product scope
 
-Implemented areas include:
+Implemented modules and platform capabilities:
 
-- User registration and cookie-based authentication
-- Email confirmation and password recovery flows
-- Character creation and onboarding
-- Daily productivity management with habits, recurring tasks, todos, and projects
-- Inventory management with wallets, transactions, and tags
-- Centralized RPG experience domain with derived level progression and source history
-- JSON persistence with atomic writes, backups, and recovery support
-- Reusable Blazor design-system components
-- Automated tests for Domain, Application, Infrastructure, and Web layers
+- user registration, cookie authentication, email confirmation, and password recovery;
+- account management and character onboarding;
+- Daily management for habits, recurring tasks, todos, and projects;
+- Inventory management for wallets, transactions, and tags;
+- RPG experience model, experience curve, idempotent reward pipeline, and character XP interface;
+- JSON persistence with atomic writes, backups, and recovery;
+- reusable Blazor design-system components;
+- CI validation and IIS production deployment with rollback;
+- automated tests for Domain, Application, Infrastructure, and Web.
 
 ## Architecture
 
@@ -30,22 +30,22 @@ LevelUp.Infrastructure
 LevelUp.Web
 ```
 
-- `LevelUp.Domain`: entities, value objects, domain events, enums, experience progression, and business rules.
-- `LevelUp.Application`: commands, queries, validators, handlers, security contracts, and orchestration.
-- `LevelUp.Infrastructure`: JSON persistence, password hashing, email delivery, caching, auditing, background services, and health checks.
-- `LevelUp.Web`: Blazor Server UI, authentication endpoints, layouts, feature components, and application composition.
+- **Domain** owns entities, value objects, domain events, experience progression, and business invariants.
+- **Application** owns commands, queries, validation, handlers, contracts, and use-case orchestration.
+- **Infrastructure** implements JSON persistence, password hashing, email delivery, caching, auditing, health dependencies, and background services.
+- **Web** hosts the Blazor Server UI, authentication endpoints, layouts, feature state, diagnostics, and dependency-injection composition.
 
-Dependency direction is enforced toward the Domain layer. The Web project acts as the composition root.
+See [Architecture](docs/ARCHITECTURE.md) for dependency and ownership rules.
 
-## Repository Structure
+## Repository structure
 
 ```text
-.github/                 Pull request and workflow configuration
+.github/                 Pull-request template and GitHub Actions workflows
 docs/                    Maintained project documentation
-scripts/                 Local development and deployment scripts
+scripts/                 Operational and local-development scripts
 src/                     Production projects
 tests/                   Automated test projects
-Directory.Build.props    Shared .NET build configuration
+Directory.Build.props    Shared .NET build settings
 Directory.Packages.props Central package version management
 LevelUp.slnx             Solution definition
 ```
@@ -53,86 +53,64 @@ LevelUp.slnx             Solution definition
 ## Requirements
 
 - .NET 10 SDK
-- A supported browser
-- PowerShell 7 or a POSIX-compatible shell for optional scripts
+- supported modern browser
+- PowerShell 7 for the provided Windows scripts
 
-## Local Development
+## Local development
 
 ```bash
-dotnet restore
-dotnet build
-dotnet test
+dotnet restore LevelUp.slnx
+dotnet format LevelUp.slnx --verify-no-changes --no-restore
+dotnet build LevelUp.slnx
+dotnet test LevelUp.slnx
 dotnet run --project src/LevelUp.Web/LevelUp.Web.csproj
 ```
 
-The default development URL is defined in `src/LevelUp.Web/Properties/launchSettings.json`.
+Development configuration is stored in `src/LevelUp.Web/appsettings.json`. Local application data is written under `src/LevelUp.Web/Data` and is ignored by Git except for `.gitkeep`.
 
-## Configuration
+## Quality gate
 
-Application configuration is stored under `src/LevelUp.Web/appsettings*.json`.
-
-Do not commit production secrets. Supply sensitive values through environment variables, user secrets, or the deployment platform's secret store.
-
-The default development persistence provider stores application data under `src/LevelUp.Web/Data`. Production stores data, backups, Data Protection keys, generated emails, and logs outside the publish directory under `C:\Apps\LevelUp-Data`. See the production guide before deploying.
-
-## Quality Gate
-
-Run the following checks before opening or merging a pull request:
+Run before opening or merging a pull request:
 
 ```bash
 git status
-dotnet format --verify-no-changes
-dotnet build
-dotnet test
+dotnet format LevelUp.slnx --verify-no-changes
+dotnet build LevelUp.slnx --configuration Release --warnaserror
+dotnet test LevelUp.slnx --configuration Release
 ```
 
-## Branch Strategy
+## Branch strategy
 
-- `hmg`: integration and validation branch
-- `prd`: production branch
-- Work branches: use a descriptive prefix such as `feature/`, `fix/`, `refactor/`, `docs/`, or `chore/`
+- `hmg`: integration and validation
+- `prd`: production
+- temporary work branches: `feature/*`, `fix/*`, `refactor/*`, `docs/*`, or `chore/*`
 
 Example:
 
 ```bash
 git switch hmg
 git pull origin hmg
-git switch -c chore/repository-cleanup
+git switch -c feature/character-progression
 ```
+
+Changes should reach `prd` only after validation in `hmg`.
+
+## Configuration and secrets
+
+Do not commit production secrets or runtime data. Use environment variables, user secrets, or the deployment platform's secret store.
+
+Production data, backups, Data Protection keys, generated emails, and logs live outside the publish directory under `C:\Apps\LevelUp-Data`. See [Production](docs/PRODUCTION.md) and [CI/CD](docs/CI_CD.md).
 
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Authentication](docs/AUTHENTICATION.md)
+- [CI/CD](docs/CI_CD.md)
 - [Development](docs/DEVELOPMENT.md)
 - [Domain](docs/DOMAIN.md)
 - [Persistence](docs/PERSISTENCE.md)
-- [Production Configuration](docs/PRODUCTION.md)
+- [Production](docs/PRODUCTION.md)
 - [Roadmap](docs/ROADMAP.md)
 - [User Interface](docs/UI.md)
 
-Documentation must remain in English and reflect the current implementation.
-
-## Operations documentation
-
-- [Production configuration](docs/PRODUCTION.md)
-- [CI/CD hardening](docs/CI_CD.md)
-
-
-### Inventory quality baseline
-
-The Inventory module includes responsive transaction and tag management, in-memory search and filters for the current JSON persistence, guarded interaction states, accessible empty/loading feedback, and bUnit coverage for its primary UI contracts.
-
-Validate changes with:
-
-```bash
-dotnet format --verify-no-changes
-dotnet build
-dotnet test
-```
-
-## RPG experience foundation
-
-Character XP is centralized in the Domain layer. `TotalExperience` is persisted as the single source of truth, while level, current-level progress, and XP remaining are derived through `ExperienceCurve`. Each reward records its origin in an `ExperienceTransaction`.
-
-Activity modules must not write XP fields directly. Future Application handlers should calculate an `ExperienceReward`, create an `ExperienceSource`, and invoke `Character.AddExperience`.
+Documentation is maintained in English and must be updated in the same change as the implementation it describes.

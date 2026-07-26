@@ -1,127 +1,53 @@
-# Production Configuration
+# Production
 
-This document defines the required production configuration for LevelUp when hosted on IIS.
+LevelUp production hosting targets IIS on Windows and uses external runtime storage.
 
-## Runtime directories
-
-Application binaries are deployed to:
+## Paths
 
 ```text
-C:\Apps\LevelUp
+Application publish:      C:\Apps\LevelUp
+External runtime root:    C:\Apps\LevelUp-Data
+JSON data:                C:\Apps\LevelUp-Data\Data
+Data Protection keys:     C:\Apps\LevelUp-Data\DataProtection-Keys
+Generated emails:         C:\Apps\LevelUp-Data\Emails
+Logs:                     C:\Apps\LevelUp-Data\Logs
+Application backups:      C:\Apps\LevelUp-Backups\Application
+Data snapshots:           C:\Apps\LevelUp-Backups\Data
 ```
 
-Persistent runtime state is stored outside the publish directory:
+The IIS application-pool identity must have Modify permission on the external runtime directories.
 
-```text
-C:\Apps\LevelUp-Data\
-├── Data\
-│   └── Backups\
-├── DataProtection-Keys\
-├── Emails\
-└── Logs\
-```
+## Required production configuration
 
-The IIS application pool identity `IIS AppPool\LevelUpPool` requires `Modify` permission on these directories. The deployment script creates the directories and applies the permission.
+- `ASPNETCORE_ENVIRONMENT=Production`
+- `DOTNET_ENVIRONMENT=Production`
+- explicit `AllowedHosts` without wildcard values;
+- absolute HTTPS `LevelUp:IdentityEmail:PublicBaseUrl`;
+- absolute external `LevelUp:Storage:Directory`;
+- absolute external `LevelUp:Hosting:DataProtectionKeysDirectory`;
+- Resend enabled with a valid API key and verified sender;
+- known proxies or networks configured when forwarded headers are enabled.
 
-Never store the production database, backups, Data Protection keys, generated emails, or logs inside the deployment directory. A deployment may replace every file under `C:\Apps\LevelUp`.
-
-## Required environment variables
-
-ASP.NET Core maps double underscores to configuration separators. Configure these variables on the server or application pool. Do not commit their values.
-
-| Variable | Required | Description |
-| --- | --- | --- |
-| `ASPNETCORE_ENVIRONMENT=Production` | Yes | Activates production configuration and validation. |
-| `DOTNET_ENVIRONMENT=Production` | Yes | Keeps the generic host environment aligned. |
-| `LevelUp__IdentityEmail__PublicBaseUrl` | Yes | Public HTTPS origin, for example `https://levelup.example.com`. |
-| `LevelUp__Email__Resend__ApiKey` | Yes | Resend API key. |
-| `LevelUp__Email__Resend__FromAddress` | Yes | Verified sender address. |
-| `LevelUp__Email__Resend__FromName` | No | Sender display name. Defaults to `LevelUp`. |
-| `AllowedHosts` | Yes | Semicolon-separated production host names. Must not contain `*`. |
-
-The following values have safe server defaults in `appsettings.Production.json`, but may be overridden:
-
-| Variable | Default |
-| --- | --- |
-| `LevelUp__Storage__Directory` | `C:\Apps\LevelUp-Data\Data` |
-| `LevelUp__Hosting__DataProtectionKeysDirectory` | `C:\Apps\LevelUp-Data\DataProtection-Keys` |
-| `LevelUp__Hosting__ForwardedHeaders__Enabled` | `true` |
-| `LevelUp__Hosting__ForwardedHeaders__ForwardLimit` | `1` |
-
-Array values use numeric indexes, for example:
-
-```text
-LevelUp__Hosting__ForwardedHeaders__KnownProxies__0=127.0.0.1
-LevelUp__Hosting__ForwardedHeaders__KnownProxies__1=::1
-```
-
-Only add addresses or CIDR networks belonging to trusted reverse proxies. Forwarded headers from unknown proxies are ignored.
-
-## Resend
-
-Production enables Resend and disables development email capture. Startup fails when the API key or verified sender address is missing.
-
-The application does not log recipient addresses, message bodies, API responses, tokens, or API keys. Resend failures are recorded only with the HTTP status code.
-
-## HTTPS and proxy handling
-
-Production uses:
-
-- HSTS;
-- HTTPS redirection;
-- secure authentication cookies;
-- explicit allowed hosts;
-- forwarded `For`, `Proto`, and `Host` headers from trusted proxies only;
-- symmetric forwarded-header validation;
-- a maximum forwarding depth of one by default.
-
-The public base URL must use HTTPS. Startup fails for an HTTP or malformed public URL.
+The application fails startup outside Development when required production safety conditions are not met.
 
 ## Data Protection
 
-Authentication cookies and antiforgery tokens depend on ASP.NET Core Data Protection keys. Keys are persisted to `C:\Apps\LevelUp-Data\DataProtection-Keys`, use the stable application name `LevelUp`, and are protected with Windows DPAPI at machine scope.
+Production keys are persisted outside the publish directory. On Windows, keys are protected with machine-level DPAPI. Keeping the same key directory is necessary for authentication cookies and protected tokens to survive deployments.
 
-Preserving this directory prevents users from being signed out after every deployment. Back up and protect it like other application secrets. In a multi-server deployment, all instances must share the same protected key repository.
+## Health endpoints
 
-## Logging
-
-Application logs use structured JSON on standard output. IIS stdout startup logs are written to:
+The deployment workflow validates the readiness endpoint:
 
 ```text
-C:\Apps\LevelUp-Data\Logs
+/health/ready
 ```
 
-Restrict access to this directory and define an operating-system retention policy. Logs must not contain credentials, tokens, cookie values, email contents, Resend keys, or full third-party response bodies.
+A failed readiness check triggers application rollback.
 
-## Health checks
+## Deployment
 
-- `/health/live`: process liveness; does not access dependencies.
-- `/health/ready`: readiness, including writable and readable JSON storage.
-- `/health`: complete diagnostic health report.
+Pushes to `prd` trigger `.github/workflows/deploy-prd.yml`. The workflow validates and publishes on a GitHub-hosted runner, then deploys the exact validated artifact through a controlled self-hosted Windows runner.
 
-The deployment script validates `/health/ready` after starting IIS. Expose only the minimum endpoint required by infrastructure. Restrict the complete `/health` endpoint at the reverse proxy or firewall when it is not required publicly.
+The deployment script preserves external data, creates application and data backups, configures IIS environment variables, replaces application files, checks readiness, and restores the previous application version if the new version is unhealthy.
 
-## Deployment validation
-
-Before merging into `prd`:
-
-```bash
-dotnet format --verify-no-changes
-dotnet build --configuration Release
-dotnet test --configuration Release
-```
-
-After deployment:
-
-```powershell
-Invoke-WebRequest https://levelup.example.com/health/live
-Invoke-WebRequest https://levelup.example.com/health/ready
-```
-
-Verify that data, backups, Data Protection keys, and logs remain under `C:\Apps\LevelUp-Data` after a second deployment.
-
-## CI/CD
-
-Production deployments are controlled by `.github/workflows/deploy-prd.yml`. Source validation and artifact creation occur before the self-hosted runner is allowed to deploy. The runner downloads the exact validated artifact, creates application and data backups, preserves external runtime state, performs readiness checks, and restores the previous application version when the new version is unhealthy.
-
-See [CI/CD Hardening](CI_CD.md) for required GitHub secrets, runner permissions, concurrency, backup, health-check, and rollback behavior.
+See [CI/CD](CI_CD.md) for runner and secret requirements.
