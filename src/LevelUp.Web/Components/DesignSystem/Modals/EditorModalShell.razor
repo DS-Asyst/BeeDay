@@ -10,6 +10,12 @@
 
             <header class="editor-modal__header">
                 <h2 id="@TitleId">@Title</h2>
+                <LevelUpButton Type="submit"
+                               Variant="LevelUpButtonVariant.Primary"
+                               Icon="PixelIconName.Save"
+                               Disabled="IsBusy"
+                               IsLoading="IsBusy"
+                               Class="editor-modal__submit-action editor-modal__header-save">@SubmitLabel</LevelUpButton>
             </header>
 
             <div class="editor-modal__content">
@@ -30,17 +36,11 @@
                 </div>
 
                 <div class="editor-modal__footer-actions">
-                    <LevelUpButton Variant="LevelUpButtonVariant.Secondary"
+                    <LevelUpButton Variant="LevelUpButtonVariant.Back"
                                    Icon="PixelIconName.Cancel"
                                    Disabled="IsBusy"
                                    Class="editor-modal__cancel-action"
                                    OnClick="Cancel">CANCEL</LevelUpButton>
-                    <LevelUpButton Type="submit"
-                                   Variant="LevelUpButtonVariant.Primary"
-                                   Icon="PixelIconName.Save"
-                                   Disabled="IsBusy"
-                                   IsLoading="IsBusy"
-                                   Class="editor-modal__submit-action">@SubmitLabel</LevelUpButton>
                 </div>
             </footer>
         </EditForm>

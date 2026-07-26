@@ -37,19 +37,23 @@
                     </div>
                 }
 
-                <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationDanger"
-                               Icon="PixelIconName.Delete"
-                               Disabled="IsBusy"
-                               IsLoading="IsBusy"
-                               OnClick="ConfirmAsync">
-                    @ConfirmLabel
-                </LevelUpButton>
-                <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel"
-                               Icon="PixelIconName.Cancel"
-                               Disabled="IsBusy"
-                               OnClick="CancelAsync">
-                    @CancelLabel
-                </LevelUpButton>
+                <div class="delete-confirmation__actions">
+                    <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel"
+                                   Icon="PixelIconName.Cancel"
+                                   Disabled="IsBusy"
+                                   Class="delete-confirmation__cancel-action"
+                                   OnClick="CancelAsync">
+                        @CancelLabel
+                    </LevelUpButton>
+                    <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationDanger"
+                                   Icon="PixelIconName.Delete"
+                                   Disabled="IsBusy"
+                                   IsLoading="IsBusy"
+                                   Class="delete-confirmation__confirm-action"
+                                   OnClick="ConfirmAsync">
+                        @ConfirmLabel
+                    </LevelUpButton>
+                </div>
             </div>
         </section>
     </div>

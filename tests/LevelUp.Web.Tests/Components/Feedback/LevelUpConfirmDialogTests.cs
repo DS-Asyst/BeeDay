@@ -46,9 +46,8 @@ public sealed class LevelUpConfirmDialogTests
             .Add(component => component.OnConfirm, () => confirmed = true)
             .Add(component => component.OnCancel, () => cancelled = true));
 
-        var buttons = cut.FindAll("button");
-        buttons[0].Click();
-        buttons[1].Click();
+        cut.Find(".delete-confirmation__confirm-action").Click();
+        cut.Find(".delete-confirmation__cancel-action").Click();
 
         Assert.True(confirmed);
         Assert.True(cancelled);
@@ -104,5 +103,19 @@ public sealed class LevelUpConfirmDialogTests
         Assert.NotNull(cut.Find("svg.pixel-icon--delete"));
         Assert.NotNull(cut.Find("svg.pixel-icon--warning"));
         Assert.NotNull(cut.Find("svg.pixel-icon--cancel"));
+    }
+
+    [Fact]
+    public void RendersStandardizedSideBySideActions()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<LevelUpConfirmDialog>(parameters => parameters
+            .Add(component => component.IsOpen, true)
+            .Add(component => component.Title, "Delete project")
+            .Add(component => component.Message, "Are you sure?"));
+
+        var actions = cut.Find(".delete-confirmation__actions");
+        Assert.NotNull(actions.QuerySelector(".delete-confirmation__cancel-action"));
+        Assert.NotNull(actions.QuerySelector(".delete-confirmation__confirm-action"));
     }
 }

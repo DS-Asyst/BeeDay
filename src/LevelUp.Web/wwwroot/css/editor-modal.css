@@ -32,6 +32,8 @@
     display: flex;
     min-height: 4.25rem;
     align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
     padding: 1.1rem 1.4rem;
     border-bottom: 1px solid var(--levelup-color-border);
     background: var(--levelup-color-surface);
@@ -43,6 +45,11 @@
     font: var(--levelup-type-title);
     font-size: clamp(1.25rem, 4vw, 1.55rem);
     letter-spacing: .02em;
+}
+
+.editor-modal__header .editor-modal__header-save {
+    min-width: 8rem;
+    flex: 0 0 auto;
 }
 
 .editor-modal__content {
@@ -199,23 +206,6 @@
     min-width: 7.25rem;
 }
 
-.editor-modal__footer .editor-modal__cancel-action {
-    border-color: var(--levelup-color-danger);
-    background: var(--levelup-color-surface);
-    color: var(--levelup-color-danger);
-    box-shadow: 4px 4px 0 var(--levelup-game-ink);
-}
-
-.editor-modal__footer .editor-modal__cancel-action::after {
-    border-color: rgb(146 25 37 / 18%);
-}
-
-.editor-modal__footer .editor-modal__cancel-action:not(:disabled):hover {
-    background: var(--levelup-color-danger);
-    color: var(--levelup-color-surface);
-    filter: none;
-}
-
 .editor-modal__footer .editor-modal__submit-action {
     min-width: 8rem;
 }
@@ -247,12 +237,15 @@
 
     .editor-modal__footer-actions {
         width: 100%;
-        flex-direction: column-reverse;
     }
 
     .editor-modal__footer-actions .levelup-button,
     .editor-modal__footer-danger .levelup-button {
         width: 100%;
+    }
+
+    .editor-modal__header .editor-modal__header-save {
+        min-width: 6.75rem;
     }
 }
 
