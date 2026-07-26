@@ -128,3 +128,10 @@
         animation: none;
     }
 }
+
+.character-experience__label,
+.character-experience__values span,
+.character-experience__gain { display: flex; align-items: center; gap: .3rem; }
+.character-experience__label ::deep .pixel-icon,
+.character-experience__values ::deep .pixel-icon,
+.character-experience__gain ::deep .pixel-icon { flex: 0 0 auto; }

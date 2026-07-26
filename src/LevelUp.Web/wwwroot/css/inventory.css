@@ -1085,3 +1085,5 @@
         min-height: 48px;
     }
 }
+
+.inventory-summary__label,.inventory-page__title,.inventory-button,.inventory-alert>span,.inventory-transaction-card__type{display:flex;align-items:center;gap:.4rem}.inventory-summary__label .pixel-icon,.inventory-page__title .pixel-icon,.inventory-button .pixel-icon,.inventory-alert .pixel-icon,.inventory-transaction-card__type .pixel-icon{flex:0 0 auto}

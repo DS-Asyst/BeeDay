@@ -58,5 +58,16 @@ public enum PixelIconName
     Loading,
     Select,
     CheckboxUnchecked,
-    CheckboxChecked
+    CheckboxChecked,
+    Experience,
+    Level,
+    Wallet,
+    Income,
+    Expense,
+    Statistics,
+    TrendUp,
+    TrendDown,
+    Streak,
+    Completed,
+    Pending
 }

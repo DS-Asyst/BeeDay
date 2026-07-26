@@ -121,3 +121,10 @@
             border-left: 1px solid rgb(255 255 255 / 10%);
         }
 }
+
+.character-summary__eyebrow,
+.character-summary__metric-label { align-items: center; gap: .3rem; }
+.character-summary__eyebrow { display: inline-flex; }
+.character-summary__metric-label { display: flex; }
+.character-summary__eyebrow ::deep .pixel-icon,
+.character-summary__metric-label ::deep .pixel-icon { flex: 0 0 auto; }

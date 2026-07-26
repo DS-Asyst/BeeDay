@@ -5,7 +5,7 @@
         </div>
 
         <div class="profile-summary__identity">
-            <span class="profile-summary__eyebrow">Character</span>
+            <span class="profile-summary__eyebrow"><PixelIcon Name="PixelIconName.Character" Size="PixelIconSize.ExtraSmall" /> Character</span>
             <h1 id="profile-summary-title" class="profile-summary__name">@Name</h1>
             <span class="profile-summary__subtitle">@($"@{DisplayNickname} · {Class}")</span>
         </div>
@@ -13,11 +13,11 @@
 
     <div class="profile-summary__metrics" aria-label="Activity overview">
         <div class="profile-summary__metric">
-            <span class="profile-summary__metric-label">Active items</span>
+            <span class="profile-summary__metric-label"><PixelIcon Name="PixelIconName.Pending" Size="PixelIconSize.ExtraSmall" /> Active items</span>
             <strong>@ActiveItems</strong>
         </div>
         <div class="profile-summary__metric">
-            <span class="profile-summary__metric-label">Completed</span>
+            <span class="profile-summary__metric-label"><PixelIcon Name="PixelIconName.Completed" Size="PixelIconSize.ExtraSmall" /> Completed</span>
             <strong>@CompletedItems</strong>
         </div>
     </div>

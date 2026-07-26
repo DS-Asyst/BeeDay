@@ -15,7 +15,7 @@ else if (Model is not null)
 {
     <section class="character-experience" aria-label="Character experience">
         <div class="character-experience__header">
-            <span>Level</span>
+            <span class="character-experience__label"><PixelIcon Name="PixelIconName.Level" Size="PixelIconSize.ExtraSmall" /> Level</span>
             <strong>@Model.Level</strong>
         </div>
 
@@ -31,8 +31,8 @@ else if (Model is not null)
         </div>
 
         <div class="character-experience__values">
-            <span>@Model.CurrentExperience / @Model.RequiredExperience XP</span>
-            <span>@Model.RemainingExperience XP to next level</span>
+            <span><PixelIcon Name="PixelIconName.Experience" Size="PixelIconSize.ExtraSmall" /> @Model.CurrentExperience / @Model.RequiredExperience XP</span>
+            <span><PixelIcon Name="PixelIconName.TrendUp" Size="PixelIconSize.ExtraSmall" /> @Model.RemainingExperience XP to next level</span>
         </div>
 
         @if (ExperienceGain > 0)
@@ -40,7 +40,7 @@ else if (Model is not null)
             <output @key="FeedbackKey"
                     class="character-experience__gain"
                     aria-live="polite">
-                +@ExperienceGain XP
+                <PixelIcon Name="PixelIconName.Experience" Size="PixelIconSize.ExtraSmall" /> +@ExperienceGain XP
             </output>
         }
     </section>

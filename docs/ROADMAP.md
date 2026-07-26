@@ -103,3 +103,11 @@ Activity types and common activity actions now use `PixelIcon`, including cards,
 ## Sprint 6.4 — Dialog & Forms Icon Integration
 
 Completed: modal close/save/cancel/delete actions, confirmation and warning states, validation feedback, select/date/checkbox controls, toast states and loading now use `PixelIcon` without changing form contracts or business rules.
+
+
+## Sprint 6.5 — Dashboard & Statistics Icons
+
+- Existing character, XP, level, wallet, inventory and transaction indicators use `PixelIcon`.
+- Added semantic statistics contracts for experience, level, wallet, income, expense, trends, streak, completed and pending states.
+- No dashboard, statistics page, library implementation, wallet rule or functional module was introduced.
+- Status colors communicate semantic state: success for income, danger for expense, and neutral/default for informational metrics.
