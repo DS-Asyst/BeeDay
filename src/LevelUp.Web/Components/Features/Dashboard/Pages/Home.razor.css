@@ -1,34 +1,27 @@
 .dashboard-page {
     display: flex;
-    flex: 0 0 auto;
     flex-direction: column;
     width: 100%;
     min-width: 0;
-    min-height: 0;
-    height: calc(100dvh - var(--levelup-top-navigation-height, 3.75rem));
+    min-height: calc(100dvh - var(--levelup-top-navigation-height, 3.75rem));
     margin: 0;
     padding: 0;
-    overflow: hidden;
     background: var(--levelup-color-surface);
     box-sizing: border-box;
 }
 
 .dashboard-page__content {
     display: flex;
-    flex: 1 1 auto;
     flex-direction: column;
     width: 100%;
     min-width: 0;
-    min-height: 0;
-    padding: 0.75rem 0.9rem 1rem;
-    overflow: hidden;
+    padding: .55rem .9rem 1rem;
     background: var(--levelup-color-surface);
     box-sizing: border-box;
 }
 
 .loading-state {
     display: grid;
-    flex: 1;
     place-items: center;
     min-height: 20rem;
     padding: 3rem;
@@ -37,52 +30,26 @@
 
 .dashboard-grid {
     display: grid;
-    flex: 1 1 auto;
     grid-template-columns: repeat(4, minmax(17rem, 1fr));
-    align-items: stretch;
-    gap: 0.65rem;
+    align-items: start;
+    gap: .65rem;
     width: 100%;
     min-width: 0;
-    min-height: 0;
-    margin-top: 0.65rem;
+    margin-top: .55rem;
+    padding-bottom: .2rem;
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: visible;
     background: transparent;
     box-sizing: border-box;
     scrollbar-width: thin;
-    overscroll-behavior: contain;
+    scrollbar-color: #aaa2b1 transparent;
+    scroll-snap-type: x proximity;
 }
 
 .dashboard-grid > * {
     min-width: 17rem;
-    min-height: 0;
-    height: 100%;
-}
-
-@media (max-width: 1100px) {
-    .dashboard-grid {
-        grid-template-columns: repeat(4, 17rem);
-    }
-}
-
-@media (max-width: 700px) {
-    .dashboard-page__content {
-        padding-inline: 0.5rem;
-    }
-
-    .dashboard-grid {
-        gap: 0.5rem;
-    }
-}
-
-/* Sprint 1.7 — responsive Daily canvas */
-.dashboard-grid {
-    scrollbar-color: #aaa2b1 transparent;
-    scroll-snap-type: x proximity;
-    padding-bottom: .2rem;
-}
-
-.dashboard-grid > * {
+    min-height: 30rem;
+    height: auto;
     scroll-snap-align: start;
 }
 
@@ -96,17 +63,13 @@
     }
 }
 
+@media (max-width: 1100px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(4, 17rem);
+    }
+}
+
 @media (max-width: 900px) {
-    .dashboard-page {
-        height: auto;
-        min-height: calc(100dvh - var(--levelup-top-navigation-height, 3.75rem));
-        overflow: visible;
-    }
-
-    .dashboard-page__content {
-        overflow: visible;
-    }
-
     .dashboard-grid {
         grid-template-columns: repeat(2, minmax(16rem, 1fr));
         overflow: visible;
@@ -114,7 +77,16 @@
 
     .dashboard-grid > * {
         min-height: 28rem;
-        height: min(42rem, 68dvh);
+    }
+}
+
+@media (max-width: 700px) {
+    .dashboard-page__content {
+        padding-inline: .5rem;
+    }
+
+    .dashboard-grid {
+        gap: .5rem;
     }
 }
 
@@ -131,6 +103,6 @@
 
     .dashboard-grid > * {
         min-width: 0;
-        height: min(38rem, 72dvh);
+        min-height: 24rem;
     }
 }

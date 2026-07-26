@@ -1,41 +1,34 @@
-using LevelUp.Domain.Enums;
+using LevelUp.Web.Components.Features.Common;
 using LevelUp.Web.Components.Features.Dashboard.Components;
-using LevelUp.Web.Components.Features.Dashboard.State;
 
 namespace LevelUp.Web.Tests.Components.Dashboard;
 
 public sealed class FilterBarTests
 {
     [Fact]
-    public void RendersAttributeFilterAndSortControls()
+    public void RendersOnlySearchAndCreateControls()
     {
         using var context = new BunitContext();
-        var cut = context.Render<FilterBar>(parameters => parameters
-            .Add(component => component.Attribute, ActivityAttribute.Wisdom)
-            .Add(component => component.Sort, ActivitySortOption.AttributeAscending)
-            .Add(component => component.ResultCount, 2)
-            .Add(component => component.TotalCount, 8));
+        var cut = context.Render<FilterBar>();
 
-        Assert.Equal("Wisdom", cut.Find("select[aria-label='Filter by attribute']").GetAttribute("value"));
-        Assert.Contains("Attribute A–Z", cut.Markup);
         Assert.Contains("Search activities or attributes", cut.Markup);
+        Assert.Contains("Add activity", cut.Markup);
+        Assert.Empty(cut.FindAll("select"));
+        Assert.DoesNotContain("total", cut.Markup, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
-    public async Task EmitsSelectedAttributeAndSortOption()
+    public async Task OpensCreateMenuAndEmitsSelectedActivityType()
     {
         using var context = new BunitContext();
-        ActivityAttribute? selectedAttribute = null;
-        var selectedSort = ActivitySortOption.Manual;
+        ActivityType? selectedType = null;
 
         var cut = context.Render<FilterBar>(parameters => parameters
-            .Add(component => component.AttributeChanged, value => selectedAttribute = value)
-            .Add(component => component.SortChanged, value => selectedSort = value));
+            .Add(component => component.OnCreate, value => selectedType = value));
 
-        await cut.Find("select[aria-label='Filter by attribute']").ChangeAsync(ActivityAttribute.Charisma.ToString());
-        await cut.Find("select[aria-label='Sort activities']").ChangeAsync(ActivitySortOption.AttributeDescending.ToString());
+        await cut.Find("button[aria-haspopup='menu']").ClickAsync();
+        await cut.FindAll("button[role='menuitem']")[0].ClickAsync();
 
-        Assert.Equal(ActivityAttribute.Charisma, selectedAttribute);
-        Assert.Equal(ActivitySortOption.AttributeDescending, selectedSort);
+        Assert.Equal(ActivityType.Habit, selectedType);
     }
 }

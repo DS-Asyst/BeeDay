@@ -1,39 +1,21 @@
-@using LevelUp.Domain.Enums
-@using LevelUp.Web.Components.Features.Dashboard.State
-
 <div class="filter-bar" aria-label="Dashboard controls">
-    <div class="filter-bar__filters">
-        <label>
-            <span>Attribute</span>
-            <select class="filter-bar__select" value="@AttributeValue" @onchange="OnAttributeChangedAsync" aria-label="Filter by attribute">
-                <option value="">All attributes</option>
-                @foreach (var activityAttribute in Enum.GetValues<ActivityAttribute>())
-                {
-                    <option value="@activityAttribute">@activityAttribute.ToString()</option>
-                }
-            </select>
-        </label>
-
-        <label>
-            <span>Sort</span>
-            <select class="filter-bar__select" value="@Sort" @onchange="OnSortChangedAsync" aria-label="Sort activities">
-                <option value="@ActivitySortOption.Manual">Manual order</option>
-                <option value="@ActivitySortOption.AttributeAscending">Attribute A–Z</option>
-                <option value="@ActivitySortOption.AttributeDescending">Attribute Z–A</option>
-            </select>
-        </label>
-    </div>
-
     <div class="filter-bar__search" role="search">
-        <PixelIcon Name="PixelIconName.Search" Size="PixelIconSize.Medium" Class="filter-bar__search-icon" Decorative="true" />
         <label class="visually-hidden" for="dashboard-search">Search activities</label>
-        <input id="dashboard-search" class="filter-bar__input" type="search" placeholder="Search activities or attributes..." value="@inputValue" @oninput="OnInput" />
-        <span class="filter-bar__results" role="status" aria-live="polite">@ResultSummary</span>
+        <input id="dashboard-search"
+               class="filter-bar__input"
+               type="search"
+               placeholder="Search activities or attributes..."
+               value="@inputValue"
+               @oninput="OnInput" />
     </div>
 
     <div class="filter-bar__actions">
         <div class="filter-bar__create">
-            <button class="filter-bar__button filter-bar__button--primary" type="button" aria-haspopup="menu" aria-expanded="@showCreateMenu" @onclick="ToggleCreateMenu">
+            <button class="filter-bar__button filter-bar__button--primary"
+                    type="button"
+                    aria-haspopup="menu"
+                    aria-expanded="@showCreateMenu"
+                    @onclick="ToggleCreateMenu">
                 <PixelIcon Name="PixelIconName.Add" Size="PixelIconSize.Small" Decorative="true" />
                 Add activity
             </button>

@@ -15,7 +15,7 @@ else if (State.Data?.CurrentCharacter is not null)
 {
     <section class="dashboard-page levelup-fade-in">
         <div class="dashboard-page__content">
-            <FilterBar Value="@State.Search" ValueChanged="@(value => State.Search = value)" Attribute="@State.AttributeFilter" AttributeChanged="@(value => State.AttributeFilter = value)" Sort="@State.SortOption" SortChanged="@(value => State.SortOption = value)" ResultCount="@State.FilteredItems" TotalCount="@State.TotalItems" OnCreate="State.OpenCreate" />
+            <FilterBar Value="@State.Search" ValueChanged="@(value => State.Search = value)" OnCreate="State.OpenCreate" />
             <div class="dashboard-grid">
                 @{ var habits = State.FilteredHabits.ToList(); }
                 <DashboardColumn Title="Habits"

@@ -3,9 +3,9 @@
     flex-direction: column;
     width: 100%;
     min-width: 0;
-    min-height: 0;
-    height: 100%;
-    overflow: hidden;
+    min-height: 30rem;
+    height: auto;
+    overflow: visible;
     border: 1px solid #dedbe1;
     background: #ebe9ec;
     box-sizing: border-box;
@@ -90,35 +90,16 @@
 }
 
 .dashboard-column__viewport {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-width: thin;
-    scrollbar-color: #b9b1bf transparent;
-    overscroll-behavior: contain;
-}
-
-.dashboard-column__viewport::-webkit-scrollbar {
-    width: .48rem;
-}
-
-.dashboard-column__viewport::-webkit-scrollbar-thumb {
-    border: .12rem solid transparent;
-    border-radius: 999px;
-    background: #b9b1bf;
-    background-clip: padding-box;
-}
-
-.dashboard-column__viewport::-webkit-scrollbar-track {
-    background: transparent;
+    overflow: visible;
 }
 
 .dashboard-column__content {
     display: flex;
     flex-direction: column;
     gap: 0.22rem;
-    min-height: 100%;
+    min-height: calc(30rem - 3.65rem);
     margin: 0;
     padding: 0.35rem;
     background: #ebe9ec;
@@ -232,11 +213,6 @@
 
 .dashboard-column__add:focus-visible {
     outline-offset: 1px;
-}
-
-.dashboard-column__viewport::-webkit-scrollbar-thumb:hover {
-    background: var(--levelup-color-primary-light);
-    background-clip: padding-box;
 }
 
 .dashboard-column__completed-content {
