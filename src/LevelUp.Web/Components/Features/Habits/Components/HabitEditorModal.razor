@@ -1,3 +1,4 @@
+@using LevelUp.Domain.Enums
 <EditorModalShell Model="Model"
                   Title="@(IsEditing ? "Edit Habit" : "Create Habit")"
                   TitleId="habit-editor-title"
@@ -50,6 +51,17 @@
                            @bind-Value="Model.ResetCounter"
                            FieldCssClass="editor-modal__field">
                 @foreach (var option in Enum.GetValues<HabitResetCounter>())
+                {
+                    <option value="@option">@option</option>
+                }
+            </LevelUpSelect>
+            <LevelUpSelect TValue="ActivityAttribute?"
+                           Id="habit-attribute"
+                           Label="Attribute"
+                           @bind-Value="Model.Attribute"
+                           FieldCssClass="editor-modal__field">
+                <option value="">None</option>
+                @foreach (var option in Enum.GetValues<ActivityAttribute>())
                 {
                     <option value="@option">@option</option>
                 }

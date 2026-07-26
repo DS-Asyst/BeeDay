@@ -74,7 +74,8 @@ public sealed class DashboardModalState
             Description = item.Description,
             Direction = item.Direction,
             Difficulty = item.Difficulty,
-            ResetCounter = item.ResetCounter
+            ResetCounter = item.ResetCounter,
+            Attribute = item.Attribute
         };
         ActiveEditor = ActivityType.Habit;
     }
@@ -86,7 +87,8 @@ public sealed class DashboardModalState
         {
             Title = item.Title,
             Description = item.Description,
-            Repeat = item.Repeat
+            Repeat = item.Repeat,
+            Attribute = item.Attribute
         };
         ActiveEditor = ActivityType.Task;
     }
@@ -99,7 +101,8 @@ public sealed class DashboardModalState
             Title = item.Title,
             Description = item.Description,
             DueDate = item.DueDate?.ToDateTime(TimeOnly.MinValue),
-            ProjectId = item.ProjectId
+            ProjectId = item.ProjectId,
+            Attribute = item.Attribute
         };
         ActiveEditor = ActivityType.Todo;
     }
@@ -113,7 +116,8 @@ public sealed class DashboardModalState
             Description = item.Description,
             Color = item.Color,
             ExpectedDate = item.ExpectedDate?.ToDateTime(TimeOnly.MinValue),
-            Archived = item.Archived
+            Archived = item.Archived,
+            Attribute = item.Attribute
         };
         ActiveEditor = ActivityType.Project;
     }

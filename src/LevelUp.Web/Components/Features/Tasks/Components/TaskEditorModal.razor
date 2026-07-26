@@ -1,3 +1,4 @@
+@using LevelUp.Domain.Enums
 <EditorModalShell Model="Model"
                   Title="@(IsEditing ? "Edit Task" : "Create Task")"
                   TitleId="task-editor-title"
@@ -39,6 +40,17 @@
                 @foreach (var option in Enum.GetValues<TaskRepeat>())
                 {
                     <option value="@option">@FormatEnum(option.ToString())</option>
+                }
+            </LevelUpSelect>
+            <LevelUpSelect TValue="ActivityAttribute?"
+                           Id="task-attribute"
+                           Label="Attribute"
+                           @bind-Value="Model.Attribute"
+                           FieldCssClass="editor-modal__field">
+                <option value="">None</option>
+                @foreach (var option in Enum.GetValues<ActivityAttribute>())
+                {
+                    <option value="@option">@option</option>
                 }
             </LevelUpSelect>
         </div>

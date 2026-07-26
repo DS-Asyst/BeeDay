@@ -20,5 +20,9 @@ public sealed class SaveHabitRequestValidator : AbstractValidator<SaveHabitReque
         RuleFor(request => request.Direction).IsInEnum();
         RuleFor(request => request.Difficulty).IsInEnum();
         RuleFor(request => request.ResetCounter).IsInEnum();
+
+        RuleFor(request => request.Attribute)
+            .Must(attribute => !attribute.HasValue || Enum.IsDefined(attribute.Value))
+            .WithMessage("Attribute is invalid.");
     }
 }

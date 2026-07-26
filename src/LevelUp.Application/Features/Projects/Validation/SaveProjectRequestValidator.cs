@@ -18,5 +18,9 @@ public sealed class SaveProjectRequestValidator : AbstractValidator<SaveProjectR
         RuleFor(request => request.Color)
             .Matches("^#[0-9A-Fa-f]{6}$")
             .WithMessage("Color must use the #RRGGBB format.");
+
+        RuleFor(request => request.Attribute)
+            .Must(attribute => !attribute.HasValue || Enum.IsDefined(attribute.Value))
+            .WithMessage("Attribute is invalid.");
     }
 }

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using LevelUp.Domain.Enums;
 
 namespace LevelUp.Web.Components.Features.Projects.Models;
 
@@ -17,4 +18,6 @@ public sealed class ProjectEditorModel
 
     public DateTime? ExpectedDate { get; set; }
     public bool Archived { get; set; }
+
+    public ActivityAttribute? Attribute { get; set; }
 }

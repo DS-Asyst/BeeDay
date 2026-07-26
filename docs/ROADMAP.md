@@ -27,7 +27,7 @@ Completed:
 
 Epic 3 is integrated into `prd`.
 
-## Next product epic
+## Completed product epics
 
 ### Epic 4 — Character Progression
 
@@ -45,9 +45,19 @@ Planned scope:
 
 The business rules for rewards and activity XP should be reviewed before implementation so balancing decisions remain explicit.
 
-## Later epics
+### Epic 5 — Activity Attributes
 
-- Attributes
+Sprint 5.1 completed:
+
+- optional semantic attribute for Habits, Tasks, To-Dos, and Projects;
+- Strength, Dexterity, Intelligence, Wisdom, Vitality, and Charisma values;
+- create and edit selection;
+- JSON persistence and backward compatibility;
+- domain and application validation;
+- automated coverage;
+- no integration with XP, levels, rewards, or character progression.
+
+## Later epics
 - Library
 - Statistics
 - Achievements

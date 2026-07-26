@@ -12,12 +12,12 @@ namespace LevelUp.Application.Features.Habits.Handlers;
 
 public sealed class CreateHabitCommandHandler(ILevelUpRepository r, ICurrentUserContext? currentUser = null) : RequestHandlerBase(r), IRequestHandler<CreateHabitCommand>
 {
-    public Task Handle(CreateHabitCommand c, CancellationToken t) => MutateAsync(d => { var x = c.Request; d.AddHabit(CurrentUserGuard.RequireUserId(d, currentUser), Habit.Create(x.Title, x.Description, x.Direction, x.Difficulty, x.ResetCounter)); }, t);
+    public Task Handle(CreateHabitCommand c, CancellationToken t) => MutateAsync(d => { var x = c.Request; d.AddHabit(CurrentUserGuard.RequireUserId(d, currentUser), Habit.Create(x.Title, x.Description, x.Direction, x.Difficulty, x.ResetCounter, x.Attribute)); }, t);
 }
 
 public sealed class UpdateHabitCommandHandler(ILevelUpRepository r, ICurrentUserContext? currentUser = null) : RequestHandlerBase(r), IRequestHandler<UpdateHabitCommand>
 {
-    public Task Handle(UpdateHabitCommand c, CancellationToken t) => MutateAsync(d => { var x = c.Request; d.FindHabit(CurrentUserGuard.RequireUserId(d, currentUser), c.Id).Update(x.Title, x.Description, x.Direction, x.Difficulty, x.ResetCounter); }, t);
+    public Task Handle(UpdateHabitCommand c, CancellationToken t) => MutateAsync(d => { var x = c.Request; d.FindHabit(CurrentUserGuard.RequireUserId(d, currentUser), c.Id).Update(x.Title, x.Description, x.Direction, x.Difficulty, x.ResetCounter, x.Attribute); }, t);
 }
 
 public sealed class RegisterHabitPositiveCommandHandler(

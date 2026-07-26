@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
 
 namespace LevelUp.Domain.Entities;
@@ -11,14 +12,14 @@ public sealed class Todo : Activity
     [JsonInclude]
     public DateOnly? DueDate { get; private set; }
 
-    public static Todo Create(Guid projectId, string title, string? description, DateOnly? dueDate)
+    public static Todo Create(Guid projectId, string title, string? description, DateOnly? dueDate, ActivityAttribute? attribute = null)
     {
         var todo = new Todo();
-        todo.Update(projectId, title, description, dueDate);
+        todo.Update(projectId, title, description, dueDate, attribute);
         return todo;
     }
 
-    public void Update(Guid projectId, string title, string? description, DateOnly? dueDate)
+    public void Update(Guid projectId, string title, string? description, DateOnly? dueDate, ActivityAttribute? attribute = null)
     {
         if (projectId == Guid.Empty)
         {
@@ -28,6 +29,7 @@ public sealed class Todo : Activity
         ProjectId = projectId;
         UpdateDetails(title, description);
         DueDate = dueDate;
+        SetAttribute(attribute);
     }
 
     internal void AssignTo(Guid projectId)

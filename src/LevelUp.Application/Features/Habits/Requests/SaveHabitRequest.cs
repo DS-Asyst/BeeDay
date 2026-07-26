@@ -7,4 +7,5 @@ public sealed record SaveHabitRequest(
     string Description,
     HabitDirection Direction,
     HabitDifficulty Difficulty,
-    HabitResetCounter ResetCounter);
+    HabitResetCounter ResetCounter,
+    ActivityAttribute? Attribute = null);

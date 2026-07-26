@@ -16,5 +16,9 @@ public sealed class SaveTaskRequestValidator : AbstractValidator<SaveTaskRequest
             .MaximumLength(ActivityDescription.MaximumLength)
             .WithMessage($"Description cannot exceed {ActivityDescription.MaximumLength} characters.");
         RuleFor(request => request.Repeat).IsInEnum();
+
+        RuleFor(request => request.Attribute)
+            .Must(attribute => !attribute.HasValue || Enum.IsDefined(attribute.Value))
+            .WithMessage("Attribute is invalid.");
     }
 }

@@ -77,18 +77,19 @@ public sealed class Project : Activity
         protected set { }
     }
 
-    public static Project Create(string name, string? description, string? color = null, DateOnly? expectedDate = null)
+    public static Project Create(string name, string? description, string? color = null, DateOnly? expectedDate = null, ActivityAttribute? attribute = null)
     {
         var project = new Project();
-        project.Update(name, description, color, expectedDate);
+        project.Update(name, description, color, expectedDate, attribute);
         return project;
     }
 
-    public void Update(string name, string? description, string? color, DateOnly? expectedDate)
+    public void Update(string name, string? description, string? color, DateOnly? expectedDate, ActivityAttribute? attribute = null)
     {
         UpdateDetails(name, description);
         Color = ProjectColor.Create(color).Value;
         ExpectedDate = expectedDate;
+        SetAttribute(attribute);
     }
 
     public void SetArchived(bool archived)

@@ -16,5 +16,9 @@ public sealed class SaveTodoRequestValidator : AbstractValidator<SaveTodoRequest
         RuleFor(request => request.Description)
             .MaximumLength(ActivityDescription.MaximumLength)
             .WithMessage($"Description cannot exceed {ActivityDescription.MaximumLength} characters.");
+
+        RuleFor(request => request.Attribute)
+            .Must(attribute => !attribute.HasValue || Enum.IsDefined(attribute.Value))
+            .WithMessage("Attribute is invalid.");
     }
 }

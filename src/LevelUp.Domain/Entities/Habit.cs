@@ -21,19 +21,20 @@ public sealed class Habit : Activity
     [JsonInclude]
     public int NegativeCount { get; private set; }
 
-    public static Habit Create(string title, string? description, HabitDirection direction, HabitDifficulty difficulty, HabitResetCounter resetCounter)
+    public static Habit Create(string title, string? description, HabitDirection direction, HabitDifficulty difficulty, HabitResetCounter resetCounter, ActivityAttribute? attribute = null)
     {
         var habit = new Habit();
-        habit.Update(title, description, direction, difficulty, resetCounter);
+        habit.Update(title, description, direction, difficulty, resetCounter, attribute);
         return habit;
     }
 
-    public void Update(string title, string? description, HabitDirection direction, HabitDifficulty difficulty, HabitResetCounter resetCounter)
+    public void Update(string title, string? description, HabitDirection direction, HabitDifficulty difficulty, HabitResetCounter resetCounter, ActivityAttribute? attribute = null)
     {
         UpdateDetails(title, description);
         Direction = EnumValidation.Defined(direction, nameof(direction));
         Difficulty = EnumValidation.Defined(difficulty, nameof(difficulty));
         ResetCounter = EnumValidation.Defined(resetCounter, nameof(resetCounter));
+        SetAttribute(attribute);
     }
 
     public void RegisterPositive()

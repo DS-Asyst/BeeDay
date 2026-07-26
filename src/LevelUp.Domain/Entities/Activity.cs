@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 using LevelUp.Domain.Abstractions;
+using LevelUp.Domain.Common;
+using LevelUp.Domain.Enums;
 using LevelUp.Domain.ValueObjects;
 
 namespace LevelUp.Domain.Entities;
@@ -16,6 +18,9 @@ public abstract class Activity : Entity
 
     [JsonInclude]
     public bool Featured { get; private set; }
+
+    [JsonInclude]
+    public ActivityAttribute? Attribute { get; private set; }
 
     [JsonInclude]
     public virtual bool Completed { get; protected set; }
@@ -45,6 +50,14 @@ public abstract class Activity : Entity
     public void SetFeatured(bool featured)
     {
         Featured = featured;
+        Touch();
+    }
+
+    public void SetAttribute(ActivityAttribute? attribute)
+    {
+        Attribute = attribute.HasValue
+            ? EnumValidation.Defined(attribute.Value, nameof(attribute))
+            : null;
         Touch();
     }
 

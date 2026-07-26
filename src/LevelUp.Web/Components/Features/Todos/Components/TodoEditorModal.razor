@@ -1,3 +1,4 @@
+@using LevelUp.Domain.Enums
 <EditorModalShell Model="Model"
                   Title="@(IsEditing ? "Edit To-Do" : "Create To-Do")"
                   TitleId="todo-editor-title"
@@ -43,6 +44,17 @@
                               Label="Due date"
                               @bind-Value="Model.DueDate"
                               FieldCssClass="editor-modal__field" />
+            <LevelUpSelect TValue="ActivityAttribute?"
+                           Id="todo-attribute"
+                           Label="Attribute"
+                           @bind-Value="Model.Attribute"
+                           FieldCssClass="editor-modal__field">
+                <option value="">None</option>
+                @foreach (var option in Enum.GetValues<ActivityAttribute>())
+                {
+                    <option value="@option">@option</option>
+                }
+            </LevelUpSelect>
         </div>
     </BodyContent>
 </EditorModalShell>

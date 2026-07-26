@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using LevelUp.Domain.Enums;
 
 namespace LevelUp.Web.Components.Features.Habits.Models;
 
@@ -14,4 +15,6 @@ public sealed class HabitEditorModel
     public LevelUp.Domain.Enums.HabitDirection Direction { get; set; } = LevelUp.Domain.Enums.HabitDirection.Both;
     public LevelUp.Domain.Enums.HabitDifficulty Difficulty { get; set; } = LevelUp.Domain.Enums.HabitDifficulty.Easy;
     public LevelUp.Domain.Enums.HabitResetCounter ResetCounter { get; set; } = LevelUp.Domain.Enums.HabitResetCounter.Daily;
+
+    public ActivityAttribute? Attribute { get; set; }
 }

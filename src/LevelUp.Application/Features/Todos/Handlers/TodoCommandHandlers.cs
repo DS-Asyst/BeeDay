@@ -17,7 +17,7 @@ public sealed class CreateTodoCommandHandler(ILevelUpRepository repository, ICur
         var userId = CurrentUserGuard.RequireUserId(data, currentUser);
         var request = command.Request;
         var project = data.FindProject(userId, request.ProjectId);
-        var todo = Todo.Create(request.ProjectId, request.Title, request.Description, request.DueDate);
+        var todo = Todo.Create(request.ProjectId, request.Title, request.Description, request.DueDate, request.Attribute);
         todo.AssignOwner(userId);
         project.AddTodo(todo);
     }, cancellationToken);
@@ -33,11 +33,11 @@ public sealed class UpdateTodoCommandHandler(ILevelUpRepository repository, ICur
         var destination = data.FindProject(userId, request.ProjectId);
         if (found.Project.Id == destination.Id)
         {
-            found.Todo.Update(request.ProjectId, request.Title, request.Description, request.DueDate);
+            found.Todo.Update(request.ProjectId, request.Title, request.Description, request.DueDate, request.Attribute);
             return;
         }
         found.Project.RemoveTodo(command.Id);
-        found.Todo.Update(request.ProjectId, request.Title, request.Description, request.DueDate);
+        found.Todo.Update(request.ProjectId, request.Title, request.Description, request.DueDate, request.Attribute);
         destination.AddTodo(found.Todo);
     }, cancellationToken);
 }

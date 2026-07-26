@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using LevelUp.Domain.Enums;
 
 namespace LevelUp.Web.Components.Features.Tasks.Models;
 
@@ -12,4 +13,6 @@ public sealed class TaskEditorModel
     public string Description { get; set; } = string.Empty;
 
     public LevelUp.Domain.Enums.TaskRepeat Repeat { get; set; } = LevelUp.Domain.Enums.TaskRepeat.Daily;
+
+    public ActivityAttribute? Attribute { get; set; }
 }

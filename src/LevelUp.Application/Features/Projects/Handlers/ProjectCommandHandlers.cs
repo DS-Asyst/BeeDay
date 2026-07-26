@@ -12,7 +12,7 @@ public sealed class CreateProjectCommandHandler(ILevelUpRepository repository, I
     public Task Handle(CreateProjectCommand command, CancellationToken cancellationToken) => MutateAsync(data =>
     {
         var request = command.Request;
-        var project = Project.Create(request.Name, request.Description, request.Color, request.ExpectedDate);
+        var project = Project.Create(request.Name, request.Description, request.Color, request.ExpectedDate, request.Attribute);
         project.SetArchived(request.Archived);
         data.AddProject(CurrentUserGuard.RequireUserId(data, currentUser), project);
     }, cancellationToken);
@@ -24,7 +24,7 @@ public sealed class UpdateProjectCommandHandler(ILevelUpRepository repository, I
     {
         var request = command.Request;
         var project = data.FindProject(CurrentUserGuard.RequireUserId(data, currentUser), command.Id);
-        project.Update(request.Name, request.Description, request.Color, request.ExpectedDate);
+        project.Update(request.Name, request.Description, request.Color, request.ExpectedDate, request.Attribute);
         project.SetArchived(request.Archived);
     }, cancellationToken);
 }

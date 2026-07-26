@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using LevelUp.Domain.Enums;
 
 namespace LevelUp.Web.Components.Features.Todos.Models;
 
@@ -15,4 +16,6 @@ public sealed class TodoEditorModel
     public string Description { get; set; } = string.Empty;
 
     public DateTime? DueDate { get; set; }
+
+    public ActivityAttribute? Attribute { get; set; }
 }
