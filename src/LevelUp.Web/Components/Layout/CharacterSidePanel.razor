@@ -24,19 +24,26 @@
                 </div>
 
                 <div class="character-drawer__identity">
-                    <span><PixelIcon Name="PixelIconName.Character" Size="PixelIconSize.ExtraSmall" /> Character</span>
                     <h2>@user.Name</h2>
-                    <p>@($"@{character.Nickname} · {character.Class}")</p>
+                    <div class="character-drawer__identity-details">
+                        <strong>@($"@{character.Nickname}")</strong>
+                        <span>@character.Class</span>
+                    </div>
                 </div>
             </div>
 
-            <CharacterExperienceBar Model="CharacterExperienceViewModel.From(character.Experience)"
-                                    ExperienceGain="State.LatestExperienceGain"
-                                    FeedbackKey="State.ExperienceFeedbackVersion" />
+            <div class="character-drawer__experience-card">
+                <CharacterExperienceBar Model="CharacterExperienceViewModel.From(character.Experience)"
+                                        ExperienceGain="State.LatestExperienceGain"
+                                        FeedbackKey="State.ExperienceFeedbackVersion" />
 
-            <NavLink href="/character/create" class="character-drawer__link" @onclick="OnClose">
-                <PixelIcon Name="PixelIconName.Character" Size="PixelIconSize.Small" /> View character
-            </NavLink>
+                <NavLink href="/character/create"
+                         class="character-drawer__experience-link"
+                         aria-label="View character details"
+                         @onclick="OnClose">
+                    <PixelIcon Name="PixelIconName.Character" Size="PixelIconSize.Small" /> View character
+                </NavLink>
+            </div>
         }
         else
         {
