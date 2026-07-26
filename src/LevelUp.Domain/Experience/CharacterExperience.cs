@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
 
 namespace LevelUp.Domain.Experience;
@@ -31,6 +32,13 @@ public sealed class CharacterExperience
     public ExperienceTransaction Add(
         ExperienceReward reward,
         ExperienceSource source,
+        DateTimeOffset? occurredAtUtc = null) =>
+        Add(reward, source, ExperienceRewardType.Completion, occurredAtUtc);
+
+    public ExperienceTransaction Add(
+        ExperienceReward reward,
+        ExperienceSource source,
+        ExperienceRewardType rewardType,
         DateTimeOffset? occurredAtUtc = null)
     {
         ArgumentNullException.ThrowIfNull(source);
@@ -45,10 +53,32 @@ public sealed class CharacterExperience
             throw new InvalidDomainStateException("Total experience exceeds the supported range.");
         }
 
-        var transaction = ExperienceTransaction.Create(reward, source, occurredAtUtc);
+        var transaction = ExperienceTransaction.Create(reward, source, rewardType, occurredAtUtc);
         TotalExperience += reward.Amount;
         Transactions = [.. Transactions, transaction];
         return transaction;
+    }
+
+
+    public ExperienceTransaction? TryAdd(
+        ExperienceReward reward,
+        ExperienceSource source,
+        ExperienceRewardType rewardType,
+        DateTimeOffset? grantedAtUtc = null)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        if (source.ReferenceId is not Guid sourceId)
+        {
+            throw new DomainValidationException(nameof(source), "Automatic experience rewards require a source identifier.");
+        }
+
+        var alreadyGranted = Transactions.Any(transaction =>
+            transaction.Source.Type == source.Type
+            && transaction.Source.ReferenceId == sourceId
+            && transaction.RewardType == rewardType);
+
+        return alreadyGranted ? null : Add(reward, source, rewardType, grantedAtUtc);
     }
 
     internal void EnsureValidState()
@@ -63,6 +93,21 @@ public sealed class CharacterExperience
         if (Transactions.Any(transaction => transaction.Amount <= 0))
         {
             throw new InvalidDomainStateException("Experience history cannot contain non-positive rewards.");
+        }
+
+        var duplicateRewardExists = Transactions
+            .Where(transaction => transaction.Source.ReferenceId.HasValue)
+            .GroupBy(transaction => new
+            {
+                transaction.Source.Type,
+                transaction.Source.ReferenceId,
+                transaction.RewardType
+            })
+            .Any(group => group.Count() > 1);
+
+        if (duplicateRewardExists)
+        {
+            throw new InvalidDomainStateException("Experience history contains a duplicate reward key.");
         }
     }
 }

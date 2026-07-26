@@ -1,8 +1,11 @@
 using LevelUp.Application.Common.Contracts;
+using LevelUp.Application.Common.Experience;
 using LevelUp.Application.Common.Messaging;
 using LevelUp.Application.Common.Security;
 using LevelUp.Application.Features.Todos.Commands;
 using LevelUp.Domain.Entities;
+using LevelUp.Domain.Enums;
+using LevelUp.Domain.Experience;
 using MediatR;
 
 namespace LevelUp.Application.Features.Todos.Handlers;
@@ -39,9 +42,64 @@ public sealed class UpdateTodoCommandHandler(ILevelUpRepository repository, ICur
     }, cancellationToken);
 }
 
-public sealed class ToggleTodoCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null) : RequestHandlerBase(repository), IRequestHandler<ToggleTodoCommand>
+public sealed class ToggleTodoCommandHandler(
+    ILevelUpRepository repository,
+    ICurrentUserContext? currentUser = null,
+    IExperienceRewardService? rewards = null,
+    IPublisher? publisher = null) : RequestHandlerBase(repository), IRequestHandler<ToggleTodoCommand>
 {
-    public Task Handle(ToggleTodoCommand command, CancellationToken cancellationToken) => MutateAsync(data => data.FindTodo(CurrentUserGuard.RequireUserId(data, currentUser), command.Id).Todo.ToggleCompletion(), cancellationToken);
+    public async Task Handle(ToggleTodoCommand command, CancellationToken cancellationToken)
+    {
+        ExperienceTransaction? todoTransaction = null;
+        ExperienceTransaction? projectTransaction = null;
+        Character? character = null;
+        Guid userId = Guid.Empty;
+
+        await MutateAsync(data =>
+        {
+            userId = CurrentUserGuard.RequireUserId(data, currentUser);
+            var found = data.FindTodo(userId, command.Id);
+            var projectWasCompleted = found.Project.Completed;
+            var todoWasCompleted = found.Todo.Completed;
+
+            found.Todo.ToggleCompletion();
+
+            if (!todoWasCompleted && found.Todo.Completed)
+            {
+                character = data.FindCharacterForUser(userId);
+                todoTransaction = (rewards ?? new ExperienceRewardService()).Grant(
+                    data,
+                    userId,
+                    ExperienceSourceType.Todo,
+                    found.Todo.Id,
+                    ExperienceRewardType.Completion,
+                    $"To-Do completed: {found.Todo.Title}");
+            }
+
+            if (!projectWasCompleted && found.Project.Completed)
+            {
+                character ??= data.FindCharacterForUser(userId);
+                projectTransaction = (rewards ?? new ExperienceRewardService()).Grant(
+                    data,
+                    userId,
+                    ExperienceSourceType.Project,
+                    found.Project.Id,
+                    ExperienceRewardType.Completion,
+                    $"Project completed: {found.Project.Title}");
+            }
+        }, cancellationToken);
+
+        if (character is null)
+        {
+            return;
+        }
+
+        if (publisher is not null)
+        {
+            await ExperienceRewardEventPublisher.PublishAsync(publisher, userId, character, todoTransaction, cancellationToken);
+            await ExperienceRewardEventPublisher.PublishAsync(publisher, userId, character, projectTransaction, cancellationToken);
+        }
+    }
 }
 
 public sealed class DeleteTodoCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null) : RequestHandlerBase(repository), IRequestHandler<DeleteTodoCommand>

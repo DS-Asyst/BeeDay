@@ -35,10 +35,33 @@ public sealed class Character : Entity
     public ExperienceTransaction AddExperience(
         ExperienceReward reward,
         ExperienceSource source,
+        DateTimeOffset? occurredAtUtc = null) =>
+        AddExperience(reward, source, ExperienceRewardType.Completion, occurredAtUtc);
+
+    public ExperienceTransaction AddExperience(
+        ExperienceReward reward,
+        ExperienceSource source,
+        ExperienceRewardType rewardType,
         DateTimeOffset? occurredAtUtc = null)
     {
-        var transaction = Experience.Add(reward, source, occurredAtUtc);
+        var transaction = Experience.Add(reward, source, rewardType, occurredAtUtc);
         UpdatedAtUtc = transaction.OccurredAtUtc;
+        return transaction;
+    }
+
+
+    public ExperienceTransaction? TryAddExperience(
+        ExperienceReward reward,
+        ExperienceSource source,
+        ExperienceRewardType rewardType,
+        DateTimeOffset? grantedAtUtc = null)
+    {
+        var transaction = Experience.TryAdd(reward, source, rewardType, grantedAtUtc);
+        if (transaction is not null)
+        {
+            UpdatedAtUtc = transaction.GrantedAtUtc;
+        }
+
         return transaction;
     }
 

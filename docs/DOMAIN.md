@@ -65,3 +65,19 @@ Every accepted reward must be greater than zero and generates an `ExperienceTran
 - Domain events communicate relevant state changes without coupling entities to infrastructure.
 - Persistence-specific serialization concerns are isolated from business behavior.
 - Future modules should extend the domain only after their invariants and ownership boundaries are defined.
+
+## Experience reward pipeline
+
+Automatic XP rewards are granted through `IExperienceRewardService`. The pipeline currently supports Habit, Task, To-Do and Project completion sources, while Reading is reserved for the future Library module.
+
+Each persisted experience transaction records its amount, source type, source identifier, reward type and UTC grant timestamp. The idempotency key is the tuple `(SourceType, SourceId, RewardType)`. Repeating the same completion command therefore returns no new transaction and cannot increase total XP twice.
+
+Initial reward amounts are deliberately centralized in `ExperienceRewardService` and should be treated as provisional balancing values:
+
+- Habit completion: 10 XP
+- Task completion: 20 XP
+- To-Do completion: 25 XP
+- Project completion: 50 XP
+- Reading completion: 10 XP
+
+Successful grants publish `ExperienceGrantedDomainEvent` after persistence. Generic command auditing remains handled separately by the MediatR domain-event behavior.
