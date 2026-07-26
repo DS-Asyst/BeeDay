@@ -57,6 +57,26 @@ Sprint 5.1 completed:
 - automated coverage;
 - no integration with XP, levels, rewards, or character progression.
 
+### Epic 6 — Pixel Icon System
+
+Sprint 6.0 completed the architectural foundation:
+
+- formally recognized the existing `LevelUpIcon` and `LevelUpIconName` implementation as the migration baseline;
+- defined the definitive migration to `PixelIcon` and `PixelIconName`, with no parallel general-purpose systems;
+- inventoried current SVG assets, consumers, inline SVGs, direct references, and textual icon substitutes;
+- limited Sprint 6.4 to icon integration with existing Forms and Dialogs;
+- defined the registry, sprite, cache, naming, category, fallback, and accessibility targets;
+- added an explicit SVG line-ending rule to `.gitattributes`.
+
+Planned sequence:
+
+1. Sprint 6.1 — Pixel Icon Infrastructure;
+2. Sprint 6.2 — Navigation Icons;
+3. Sprint 6.3 — Activity Icons;
+4. Sprint 6.4 — Dialog & Forms Icon Integration;
+5. Sprint 6.5 — Dashboard & Statistics Icons;
+6. Sprint 6.6 — Final UI Polish.
+
 ## Later epics
 - Library
 - Statistics
