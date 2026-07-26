@@ -10,8 +10,8 @@
             <header class="editor-modal__header">
                 <h2 id="@TitleId">@Title</h2>
                 <div class="editor-modal__actions">
-                    <LevelUpButton Variant="LevelUpButtonVariant.Secondary" Disabled="IsBusy" OnClick="Cancel">CANCEL</LevelUpButton>
-                    <LevelUpButton Type="submit" Variant="LevelUpButtonVariant.Primary" Disabled="IsBusy" IsLoading="IsBusy">@SubmitLabel</LevelUpButton>
+                    <LevelUpButton Variant="LevelUpButtonVariant.Secondary" Icon="PixelIconName.Cancel" Disabled="IsBusy" OnClick="Cancel">CANCEL</LevelUpButton>
+                    <LevelUpButton Type="submit" Variant="LevelUpButtonVariant.Primary" Icon="PixelIconName.Save" Disabled="IsBusy" IsLoading="IsBusy">@SubmitLabel</LevelUpButton>
                 </div>
             </header>
 
@@ -21,7 +21,7 @@
             @if (ShowDelete)
             {
                 <footer class="editor-modal__footer">
-                    <LevelUpButton Variant="LevelUpButtonVariant.Danger" Disabled="IsBusy" OnClick="OnDelete">DELETE</LevelUpButton>
+                    <LevelUpButton Variant="LevelUpButtonVariant.Danger" Icon="PixelIconName.Delete" Disabled="IsBusy" OnClick="OnDelete">DELETE</LevelUpButton>
                 </footer>
             }
         </EditForm>

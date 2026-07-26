@@ -39,5 +39,18 @@ public enum PixelIconName
     Intelligence,
     Wisdom,
     Vitality,
-    Charisma
+    Charisma,
+    Habit,
+    RecurringTask,
+    Project,
+    Todo,
+    Complete,
+    Filter,
+    Calendar,
+    Repeat,
+    Tag,
+    Attribute,
+    Cancel,
+    Featured,
+    Progress
 }

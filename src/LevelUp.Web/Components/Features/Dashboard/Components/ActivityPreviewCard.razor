@@ -6,12 +6,12 @@
                     type="button"
                     aria-label="@(Completed ? $"Mark {Title} as incomplete" : $"Complete {Title}")"
                     @onclick="OnToggle">
-                <span aria-hidden="true">✓</span>
+                <PixelIcon Name="PixelIconName.Complete" Size="PixelIconSize.Small" Decorative="true" />
             </button>
         }
         else
         {
-            <span class="activity-card__project-status" aria-label="Project progress is calculated automatically">▤</span>
+            <PixelIcon Name="PixelIconName.Project" Size="PixelIconSize.Small" Class="activity-card__project-status" Decorative="false" Label="Project progress is calculated automatically" />
         }
     </div>
 
@@ -22,7 +22,7 @@
         <div class="activity-card__title-row">
             @if (Featured)
             {
-                <span class="activity-card__star">★</span>
+                <PixelIcon Name="PixelIconName.Featured" Size="PixelIconSize.ExtraSmall" Class="activity-card__star" Decorative="false" Label="Featured" />
             }
             <h3><SearchHighlight Text="@Title" SearchTerm="@SearchTerm" /></h3>
         </div>

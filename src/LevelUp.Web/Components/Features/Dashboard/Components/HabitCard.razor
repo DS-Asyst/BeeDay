@@ -15,7 +15,7 @@
             <div class="habit-card__title">
                 @if (Featured)
                 {
-                    <span class="habit-card__featured" aria-label="Featured">★</span>
+                    <PixelIcon Name="PixelIconName.Featured" Size="PixelIconSize.ExtraSmall" Class="habit-card__featured" Decorative="false" Label="Featured" />
                 }
                 <h3><SearchHighlight Text="@Title" SearchTerm="@SearchTerm" /></h3>
             </div>
@@ -35,9 +35,9 @@
         }
 
         <div class="habit-card__footer">
-            <span aria-hidden="true">▶▶</span>
+            <PixelIcon Name="PixelIconName.Progress" Size="PixelIconSize.Small" Decorative="true" />
             <span>@Balance</span>
-            <span class="habit-card__direction" title="@DirectionText">◇</span>
+            <PixelIcon Name="PixelIconName.Repeat" Size="PixelIconSize.Small" Class="habit-card__direction" Decorative="false" Label="@DirectionText" />
         </div>
     </div>
 

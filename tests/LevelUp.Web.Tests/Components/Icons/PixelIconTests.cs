@@ -107,4 +107,21 @@ public sealed class PixelIconTests
         Assert.Contains($"/{symbolId}.svg", definition.AssetPath, StringComparison.Ordinal);
     }
 
+
+    [Theory]
+    [InlineData(PixelIconName.Habit, "habit")]
+    [InlineData(PixelIconName.RecurringTask, "recurring-task")]
+    [InlineData(PixelIconName.Project, "project")]
+    [InlineData(PixelIconName.Todo, "todo")]
+    [InlineData(PixelIconName.Complete, "complete")]
+    [InlineData(PixelIconName.Filter, "filter")]
+    [InlineData(PixelIconName.Calendar, "calendar")]
+    [InlineData(PixelIconName.Repeat, "repeat")]
+    [InlineData(PixelIconName.Tag, "tag")]
+    [InlineData(PixelIconName.Attribute, "attribute")]
+    [InlineData(PixelIconName.Cancel, "cancel")]
+    public void ResolvesActivityAndActionIcons(PixelIconName name, string symbolId)
+    {
+        Assert.Equal(symbolId, PixelIconRegistry.Resolve(name).SymbolId);
+    }
 }

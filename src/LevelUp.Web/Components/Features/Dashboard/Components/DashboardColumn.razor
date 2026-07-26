@@ -12,7 +12,7 @@
                     aria-label="@($"Add {ResolvedSingularLabel}")"
                     title="@($"Add {ResolvedSingularLabel}")"
                     @onclick="OnCreate">
-                <span aria-hidden="true">+</span>
+                <PixelIcon Name="PixelIconName.Add" Size="PixelIconSize.Small" Decorative="true" />
             </button>
         }
     </header>
@@ -31,7 +31,7 @@
                             <span id="@CompletedHeadingId" class="dashboard-column__completed-label">Completed</span>
                         </span>
                         <span class="dashboard-column__completed-action">
-                            <span class="dashboard-column__chevron" aria-hidden="true">@(showCompleted ? "▼" : "▶")</span>
+                            <PixelIcon Name="@(showCompleted ? PixelIconName.ChevronDown : PixelIconName.ChevronRight)" Size="PixelIconSize.ExtraSmall" Class="dashboard-column__chevron" Decorative="true" />
                             @(showCompleted ? "Hide" : "Show")
                         </span>
                     </button>

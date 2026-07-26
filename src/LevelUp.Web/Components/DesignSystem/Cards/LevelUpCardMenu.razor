@@ -7,7 +7,7 @@
             disabled="@Disabled"
             @onclick="ToggleMenu"
             @onclick:stopPropagation>
-        ⋮
+        <PixelIcon Name="PixelIconName.More" Size="PixelIconSize.Medium" Decorative="true" />
     </button>
 
     @if (isOpen)
@@ -22,7 +22,7 @@
                     class="card-action-menu__item"
                     role="menuitem"
                     @onclick="EditAsync">
-                <span aria-hidden="true">✎</span>
+                <PixelIcon Name="PixelIconName.Edit" Size="PixelIconSize.Small" Decorative="true" />
                 <span>EDIT</span>
             </button>
 
@@ -30,7 +30,7 @@
                     class="card-action-menu__item card-action-menu__item--delete"
                     role="menuitem"
                     @onclick="DeleteAsync">
-                <span aria-hidden="true">⌫</span>
+                <PixelIcon Name="PixelIconName.Delete" Size="PixelIconSize.Small" Decorative="true" />
                 <span>DELETE</span>
             </button>
         </div>

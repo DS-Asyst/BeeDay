@@ -11,7 +11,7 @@
                         <p>@Project.Description</p>
                     }
                 </div>
-                <button type="button" class="project-workspace__close" aria-label="Close project" @onclick="OnClose">×</button>
+                <button type="button" class="project-workspace__close" aria-label="Close project" @onclick="OnClose"><PixelIcon Name="PixelIconName.Close" Size="PixelIconSize.Small" Decorative="true" /></button>
             </header>
 
             <div class="project-workspace__summary">
@@ -28,7 +28,7 @@
                     <h3>To-Dos</h3>
                     <p>Break this project into clear, executable steps.</p>
                 </div>
-                <button type="button" class="project-workspace__add" aria-label="Add To-Do" title="Add To-Do" @onclick="OnAddTodo">+</button>
+                <button type="button" class="project-workspace__add" aria-label="Add To-Do" title="Add To-Do" @onclick="OnAddTodo"><PixelIcon Name="PixelIconName.Add" Size="PixelIconSize.Small" Decorative="true" /></button>
             </div>
 
             <div class="project-workspace__body">
@@ -37,7 +37,7 @@
                     <div class="project-workspace__list-toggle-row">
                         <button type="button" class="project-workspace__list-toggle" aria-expanded="@showTodos" @onclick="ToggleTodos">
                             <span>@(showTodos ? "Hide" : "Show")</span>
-                            <span class="project-workspace__list-chevron">@(showTodos ? "▲" : "▼")</span>
+                            <PixelIcon Name="@(showTodos ? PixelIconName.ChevronRight : PixelIconName.ChevronDown)" Size="PixelIconSize.ExtraSmall" Class="project-workspace__list-chevron" Decorative="true" />
                         </button>
                     </div>
                 }

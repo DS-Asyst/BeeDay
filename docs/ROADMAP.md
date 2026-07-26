@@ -93,3 +93,8 @@ Sprint 6.2 completed the navigation migration:
 - registered all new assets in `PixelIconRegistry`;
 - removed inline SVG markup and direct SVG paths from Layout Razor components;
 - retained existing navigation behavior, hover states, focus states, and accessible labels.
+
+
+## Sprint 6.3 — Activity Icons
+
+Activity types and common activity actions now use `PixelIcon`, including cards, context menus, search/create controls, editor actions, project workspace controls, completion, repetition, tags, attributes, calendar and filters.

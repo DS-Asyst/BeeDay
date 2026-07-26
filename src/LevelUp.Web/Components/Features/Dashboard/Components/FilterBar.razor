@@ -40,10 +40,10 @@
             @if (showCreateMenu)
             {
                 <div class="filter-bar__menu" role="menu" aria-label="Choose activity type">
-                    <button type="button" role="menuitem" @onclick="CreateHabitAsync"><span>Habit</span></button>
-                    <button type="button" role="menuitem" @onclick="CreateTaskAsync"><span>Task</span></button>
-                    <button type="button" role="menuitem" @onclick="CreateTodoAsync"><span>To-Do</span></button>
-                    <button type="button" role="menuitem" @onclick="CreateProjectAsync"><span>Project</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateHabitAsync"><PixelIcon Name="PixelIconName.Habit" Size="PixelIconSize.Small" Decorative="true" /><span>Habit</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateTaskAsync"><PixelIcon Name="PixelIconName.RecurringTask" Size="PixelIconSize.Small" Decorative="true" /><span>Task</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateTodoAsync"><PixelIcon Name="PixelIconName.Todo" Size="PixelIconSize.Small" Decorative="true" /><span>To-Do</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateProjectAsync"><PixelIcon Name="PixelIconName.Project" Size="PixelIconSize.Small" Decorative="true" /><span>Project</span></button>
                 </div>
             }
         </div>
