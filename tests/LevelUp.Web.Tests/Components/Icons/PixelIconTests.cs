@@ -136,4 +136,24 @@ public sealed class PixelIconTests
     {
         Assert.Equal(symbolId, PixelIconRegistry.Resolve(name).SymbolId);
     }
+
+    [Theory]
+    [InlineData(PixelIconName.Experience, "experience")]
+    [InlineData(PixelIconName.Level, "level")]
+    [InlineData(PixelIconName.Wallet, "wallet")]
+    [InlineData(PixelIconName.Income, "income")]
+    [InlineData(PixelIconName.Expense, "expense")]
+    [InlineData(PixelIconName.Statistics, "statistics")]
+    [InlineData(PixelIconName.TrendUp, "trend-up")]
+    [InlineData(PixelIconName.TrendDown, "trend-down")]
+    [InlineData(PixelIconName.Streak, "streak")]
+    [InlineData(PixelIconName.Completed, "completed")]
+    [InlineData(PixelIconName.Pending, "pending")]
+    public void ResolvesDashboardAndStatisticIcons(PixelIconName name, string symbolId)
+    {
+        var definition = PixelIconRegistry.Resolve(name);
+
+        Assert.Equal(symbolId, definition.SymbolId);
+        Assert.Equal(PixelIconCategory.Statistics, definition.Category);
+    }
 }

@@ -3,17 +3,17 @@
 
 <section class="inventory-summary" aria-label="Wallet summary">
     <article class="inventory-summary__card inventory-summary__card--balance @(HighlightBalance ? "inventory-summary__card--updated" : string.Empty)">
-        <span>Current balance</span>
+        <span class="inventory-summary__label"><PixelIcon Name="PixelIconName.Wallet" Size="PixelIconSize.Small" /> Current balance</span>
         <strong>@FormatMoney(Summary?.Balance ?? 0)</strong>
         <small>@(Summary?.TransactionCount ?? 0) transactions</small>
     </article>
     <article class="inventory-summary__card inventory-summary__card--income">
-        <span>Total income</span>
+        <span class="inventory-summary__label"><PixelIcon Name="PixelIconName.Income" Size="PixelIconSize.Small" Color="PixelIconColor.Success" /> Total income</span>
         <strong>@FormatMoney(Summary?.TotalIncome ?? 0)</strong>
         <small>Money added</small>
     </article>
     <article class="inventory-summary__card inventory-summary__card--expense">
-        <span>Total expenses</span>
+        <span class="inventory-summary__label"><PixelIcon Name="PixelIconName.Expense" Size="PixelIconSize.Small" Color="PixelIconColor.Danger" /> Total expenses</span>
         <strong>@FormatMoney(Summary?.TotalExpenses ?? 0)</strong>
         <small>Money spent</small>
     </article>

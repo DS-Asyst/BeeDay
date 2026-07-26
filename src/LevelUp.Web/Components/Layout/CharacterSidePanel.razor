@@ -9,7 +9,7 @@
         @if (State.IsLoading)
         {
             <div class="character-drawer__loading">
-                <span>Loading character...</span>
+                <span><PixelIcon Name="PixelIconName.Loading" Size="PixelIconSize.Small" /> Loading character...</span>
                 <CharacterExperienceBar IsLoading="true" />
             </div>
         }
@@ -24,7 +24,7 @@
                 </div>
 
                 <div class="character-drawer__identity">
-                    <span>Character</span>
+                    <span><PixelIcon Name="PixelIconName.Character" Size="PixelIconSize.ExtraSmall" /> Character</span>
                     <h2>@user.Name</h2>
                     <p>@($"@{character.Nickname} · {character.Class}")</p>
                 </div>
@@ -35,7 +35,7 @@
                                     FeedbackKey="State.ExperienceFeedbackVersion" />
 
             <NavLink href="/character/create" class="character-drawer__link" @onclick="OnClose">
-                View character
+                <PixelIcon Name="PixelIconName.Character" Size="PixelIconSize.Small" /> View character
             </NavLink>
         }
         else
@@ -44,7 +44,7 @@
                 <strong>No character created</strong>
                 <span>Create your character to track your progress.</span>
                 <NavLink href="/character/create" class="character-drawer__link" @onclick="OnClose">
-                    Create character
+                    <PixelIcon Name="PixelIconName.Add" Size="PixelIconSize.Small" /> Create character
                 </NavLink>
             </div>
         }
