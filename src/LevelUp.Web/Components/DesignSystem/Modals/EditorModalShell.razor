@@ -7,26 +7,42 @@
              @onclick:stopPropagation>
         <EditForm Model="Model" OnValidSubmit="Submit">
             <DataAnnotationsValidator />
+
             <header class="editor-modal__header">
                 <h2 id="@TitleId">@Title</h2>
-                <div class="editor-modal__actions">
-                    <button type="button" class="editor-modal__close" aria-label="Close dialog" disabled="@IsBusy" @onclick="Cancel">
-                        <PixelIcon Name="PixelIconName.Close" Size="PixelIconSize.Small" />
-                    </button>
-                    <LevelUpButton Variant="LevelUpButtonVariant.Secondary" Icon="PixelIconName.Cancel" Disabled="IsBusy" OnClick="Cancel">CANCEL</LevelUpButton>
-                    <LevelUpButton Type="submit" Variant="LevelUpButtonVariant.Primary" Icon="PixelIconName.Save" Disabled="IsBusy" IsLoading="IsBusy">@SubmitLabel</LevelUpButton>
-                </div>
             </header>
 
-            @HeroContent
-            @BodyContent
+            <div class="editor-modal__content">
+                @HeroContent
+                @BodyContent
+            </div>
 
-            @if (ShowDelete)
-            {
-                <footer class="editor-modal__footer">
-                    <LevelUpButton Variant="LevelUpButtonVariant.Danger" Icon="PixelIconName.Delete" Disabled="IsBusy" OnClick="OnDelete">DELETE</LevelUpButton>
-                </footer>
-            }
+            <footer class="editor-modal__footer">
+                <div class="editor-modal__footer-danger">
+                    @if (ShowDelete)
+                    {
+                        <LevelUpButton Variant="LevelUpButtonVariant.Danger"
+                                       Icon="PixelIconName.Delete"
+                                       Disabled="IsBusy"
+                                       Compact="true"
+                                       OnClick="OnDelete">DELETE</LevelUpButton>
+                    }
+                </div>
+
+                <div class="editor-modal__footer-actions">
+                    <LevelUpButton Variant="LevelUpButtonVariant.Secondary"
+                                   Icon="PixelIconName.Cancel"
+                                   Disabled="IsBusy"
+                                   Class="editor-modal__cancel-action"
+                                   OnClick="Cancel">CANCEL</LevelUpButton>
+                    <LevelUpButton Type="submit"
+                                   Variant="LevelUpButtonVariant.Primary"
+                                   Icon="PixelIconName.Save"
+                                   Disabled="IsBusy"
+                                   IsLoading="IsBusy"
+                                   Class="editor-modal__submit-action">@SubmitLabel</LevelUpButton>
+                </div>
+            </footer>
         </EditForm>
     </section>
 </div>
