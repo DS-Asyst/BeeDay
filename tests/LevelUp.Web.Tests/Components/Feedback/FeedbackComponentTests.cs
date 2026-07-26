@@ -1,22 +1,25 @@
 using LevelUp.Web.Components.DesignSystem.Feedback;
+using LevelUp.Web.Components.DesignSystem.Icons;
 
 namespace LevelUp.Web.Tests.Components.Feedback;
 
 public sealed class FeedbackComponentTests
 {
     [Fact]
-    public void EmptyStateRendersMessageIconAndStatusRole()
+    public void EmptyStateRendersIconTitleDescriptionAndStatusRole()
     {
         using var context = new BunitContext();
         var cut = context.Render<LevelUpEmptyState>(parameters => parameters
-            .Add(component => component.Message, "No tasks yet")
-            .Add(component => component.Icon, "✓")
+            .Add(component => component.Title, "No tasks yet")
+            .Add(component => component.Description, "Create a task to get started.")
+            .Add(component => component.Icon, PixelIconName.RecurringTask)
             .Add(component => component.Class, "empty-tasks"));
 
         var root = cut.Find("[role='status']");
         Assert.Contains("empty-tasks", root.ClassList);
-        Assert.Contains("No tasks yet", root.TextContent);
-        Assert.Contains("✓", root.TextContent);
+        Assert.Equal("No tasks yet", cut.Find(".levelup-empty-state__title").TextContent);
+        Assert.Equal("Create a task to get started.", cut.Find(".levelup-empty-state__description").TextContent);
+        Assert.Single(cut.FindAll(".levelup-empty-state__icon"));
     }
 
     [Fact]

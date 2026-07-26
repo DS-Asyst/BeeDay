@@ -20,6 +20,9 @@ else if (State.Data?.CurrentCharacter is not null)
                 @{ var habits = State.FilteredHabits.ToList(); }
                 <DashboardColumn Title="Habits"
                                  EmptyLabel="habits"
+                                 EmptyTitle="No habits yet"
+                                 EmptyDescription="Create a habit to build routines and track your daily consistency."
+                                 EmptyIcon="PixelIconName.Habit"
                                  SingularLabel="Habit"
                                  ActiveCount="@habits.Count"
                                  ShowCompletedSection="false"
@@ -45,6 +48,9 @@ else if (State.Data?.CurrentCharacter is not null)
                 }
                 <DashboardColumn Title="Tasks"
                                  EmptyLabel="tasks"
+                                 EmptyTitle="No tasks yet"
+                                 EmptyDescription="Create a recurring task to organize work that repeats over time."
+                                 EmptyIcon="PixelIconName.RecurringTask"
                                  SingularLabel="Task"
                                  ActiveCount="@activeTasks.Count"
                                  CompletedCount="@completedTasks.Count"
@@ -76,6 +82,9 @@ else if (State.Data?.CurrentCharacter is not null)
                 }
                 <DashboardColumn Title="To-Dos"
                                  EmptyLabel="to-dos"
+                                 EmptyTitle="No to-dos yet"
+                                 EmptyDescription="To-dos are created inside projects and appear here for quick access."
+                                 EmptyIcon="PixelIconName.Todo"
                                  SingularLabel="To-Do"
                                  ActiveCount="@activeTodos.Count"
                                  CompletedCount="@completedTodos.Count"
@@ -107,6 +116,9 @@ else if (State.Data?.CurrentCharacter is not null)
                 }
                 <DashboardColumn Title="Projects"
                                  EmptyLabel="projects"
+                                 EmptyTitle="No projects yet"
+                                 EmptyDescription="Create a project to group related to-dos and follow their progress."
+                                 EmptyIcon="PixelIconName.Project"
                                  SingularLabel="Project"
                                  ActiveCount="@activeProjects.Count"
                                  CompletedCount="@completedProjects.Count"

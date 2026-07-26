@@ -54,7 +54,10 @@
 
             @if (ActiveCount == 0)
             {
-                <LevelUpEmptyState Class="dashboard-column__empty" Message="@($"No active {EmptyLabel.ToLowerInvariant()}.")" />
+                <LevelUpEmptyState Class="dashboard-column__empty"
+                                   Icon="@EmptyIcon"
+                                   Title="@EmptyTitle"
+                                   Description="@EmptyDescription" />
             }
             else
             {

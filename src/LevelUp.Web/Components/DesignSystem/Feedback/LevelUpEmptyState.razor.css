@@ -1,0 +1,57 @@
+.levelup-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--levelup-spacing-md);
+    width: 100%;
+    min-height: 15rem;
+    padding: var(--levelup-spacing-xl) var(--levelup-spacing-lg);
+    border: 1px dashed #cfc8d4;
+    border-radius: var(--levelup-radius-sm);
+    color: var(--levelup-color-text);
+    background: rgb(255 255 255 / 58%);
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.levelup-empty-state__icon {
+    display: grid;
+    place-items: center;
+    width: 4.75rem;
+    height: 4.75rem;
+    border: 1px solid #cfc8d4;
+    border-radius: var(--levelup-radius-sm);
+    color: var(--levelup-color-primary);
+    background: var(--levelup-color-surface);
+    box-shadow: var(--levelup-shadow-xs);
+}
+
+.levelup-empty-state__content {
+    display: grid;
+    gap: var(--levelup-spacing-xs);
+    max-width: 17rem;
+}
+
+.levelup-empty-state__title {
+    margin: 0;
+    color: #211a27;
+    font-family: var(--levelup-font-family);
+    font-size: 1.12rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.levelup-empty-state__description {
+    margin: 0;
+    color: var(--levelup-color-text-muted);
+    font-size: .78rem;
+    line-height: 1.65;
+}
+
+@media (max-width: 47.99rem) {
+    .levelup-empty-state {
+        min-height: 12rem;
+        padding: var(--levelup-spacing-lg) var(--levelup-spacing-md);
+    }
+}

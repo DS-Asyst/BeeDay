@@ -1,3 +1,4 @@
+using LevelUp.Web.Components.DesignSystem.Icons;
 using Microsoft.AspNetCore.Components;
 
 namespace LevelUp.Web.Components.Features.Dashboard.Components;
@@ -8,6 +9,9 @@ public partial class DashboardColumn
 
     [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
     [Parameter, EditorRequired] public string EmptyLabel { get; set; } = "items";
+    [Parameter, EditorRequired] public string EmptyTitle { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string EmptyDescription { get; set; } = string.Empty;
+    [Parameter] public PixelIconName EmptyIcon { get; set; } = PixelIconName.Information;
     [Parameter] public string? SingularLabel { get; set; }
     [Parameter] public int ActiveCount { get; set; }
     [Parameter] public int CompletedCount { get; set; }

@@ -108,9 +108,6 @@
 
 .dashboard-column__empty {
     margin: .75rem;
-    color: var(--levelup-color-text-muted);
-    font-size: .72rem;
-    text-align: center;
 }
 
 .dashboard-column__completed {
