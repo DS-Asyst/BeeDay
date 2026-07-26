@@ -74,3 +74,9 @@ The Inventory page uses an explicit interaction state to prevent concurrent muta
 
 Inventory data is refreshed after successful mutations. The UI deliberately avoids speculative balance, transaction, or tag updates because those values depend on server-side validation and aggregate calculations; existing data remains visible if a refresh fails.
 
+
+## Inventory search and filters
+
+Inventory transactions can be filtered in memory by description or notes, transaction type, tag, and inclusive date range. Results can be ordered by transaction date in ascending or descending order, and the UI exposes an active-filter count, one-action filter reset, pagination reset after filter changes, and a dedicated no-results state.
+
+The Web layer only captures filter state. `GetTransactionsQuery` owns the filter contract so the same parameters can later be translated to paginated SQL predicates without redesigning the page components.

@@ -69,6 +69,8 @@ public sealed class InventoryPageStateTests
             Search = "rent",
             TypeFilter = "Expense",
             TagFilter = Guid.NewGuid().ToString(),
+            StartDate = new DateOnly(2026, 1, 1),
+            EndDate = new DateOnly(2026, 1, 31),
             Sort = "amount-desc",
             Page = 3
         };
@@ -76,8 +78,27 @@ public sealed class InventoryPageStateTests
         state.ClearFilters();
 
         Assert.False(state.HasFilters);
+        Assert.Equal(0, state.ActiveFilterCount);
+        Assert.Null(state.StartDate);
+        Assert.Null(state.EndDate);
         Assert.Equal(1, state.Page);
         Assert.Equal("amount-desc", state.Sort);
+    }
+
+    [Fact]
+    public void ActiveFilterCount_CountsSearchTypeTagAndDateBounds()
+    {
+        var state = new LevelUp.Web.Components.Features.Inventory.State.InventoryPageState
+        {
+            Search = "rent",
+            TypeFilter = "Expense",
+            TagFilter = Guid.NewGuid().ToString(),
+            StartDate = new DateOnly(2026, 1, 1),
+            EndDate = new DateOnly(2026, 1, 31)
+        };
+
+        Assert.True(state.HasFilters);
+        Assert.Equal(5, state.ActiveFilterCount);
     }
 }
 

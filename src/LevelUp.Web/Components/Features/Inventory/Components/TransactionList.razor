@@ -13,12 +13,18 @@
                       Search="Search"
                       TypeFilter="TypeFilter"
                       TagFilter="TagFilter"
+                      StartDate="StartDate"
+                      EndDate="EndDate"
                       Sort="Sort"
+                      ActiveFilterCount="ActiveFilterCount"
                       Tags="Tags"
                       SearchChanged="SearchChanged"
                       TypeFilterChanged="TypeFilterChanged"
                       TagFilterChanged="TagFilterChanged"
-                      SortChanged="SortChanged" />
+                      StartDateChanged="StartDateChanged"
+                      EndDateChanged="EndDateChanged"
+                      SortChanged="SortChanged"
+                      OnClearFilters="OnClearFilters" />
 
     @if (Transactions.Items.Count == 0)
     {
@@ -56,10 +62,15 @@
     [Parameter] public string Search { get; set; } = string.Empty;
     [Parameter] public string TypeFilter { get; set; } = string.Empty;
     [Parameter] public string TagFilter { get; set; } = string.Empty;
+    [Parameter] public DateOnly? StartDate { get; set; }
+    [Parameter] public DateOnly? EndDate { get; set; }
     [Parameter] public string Sort { get; set; } = "date-desc";
     [Parameter] public EventCallback<string> SearchChanged { get; set; }
     [Parameter] public EventCallback<string> TypeFilterChanged { get; set; }
+    [Parameter] public int ActiveFilterCount { get; set; }
     [Parameter] public EventCallback<string> TagFilterChanged { get; set; }
+    [Parameter] public EventCallback<DateOnly?> StartDateChanged { get; set; }
+    [Parameter] public EventCallback<DateOnly?> EndDateChanged { get; set; }
     [Parameter] public EventCallback<string> SortChanged { get; set; }
     [Parameter] public EventCallback OnCreateTransaction { get; set; }
     [Parameter] public EventCallback OnClearFilters { get; set; }

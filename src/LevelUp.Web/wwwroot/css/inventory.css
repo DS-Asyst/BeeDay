@@ -745,3 +745,56 @@
 .inventory-transaction-card__actions .card-action-menu__item--delete:focus-visible span {
     color: #bd202a;
 }
+
+
+.inventory-filter-shell {
+    border-bottom: 1px solid var(--color-border, #e5e0e9);
+    background: #fff;
+}
+
+.inventory-filter-shell .inventory-filters {
+    grid-template-columns: minmax(190px, 1.4fr) repeat(5, minmax(125px, 1fr));
+    border-bottom: 0;
+}
+
+.inventory-filter-field {
+    display: grid;
+    gap: .35rem;
+    color: #625b69;
+    font-size: var(--levelup-font-size-sm, .85rem);
+}
+
+.inventory-filter-field > span {
+    font-weight: 700;
+}
+
+.inventory-active-filters {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: 0 1.2rem 1rem;
+    color: #625b69;
+}
+
+.inventory-active-filters .inventory-button {
+    min-height: 2.25rem;
+    padding: .4rem .7rem;
+}
+
+@media (max-width: 1200px) {
+    .inventory-filter-shell .inventory-filters {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .inventory-filter-shell .inventory-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .inventory-active-filters {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}

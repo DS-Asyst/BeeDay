@@ -51,10 +51,15 @@ else
                              Search="_state.Search"
                              TypeFilter="_state.TypeFilter"
                              TagFilter="_state.TagFilter"
+                             StartDate="_state.StartDate"
+                             EndDate="_state.EndDate"
                              Sort="_state.Sort"
+                             ActiveFilterCount="_state.ActiveFilterCount"
                              SearchChanged="HandleSearchChangedAsync"
                              TypeFilterChanged="HandleTypeChangedAsync"
                              TagFilterChanged="HandleTagChangedAsync"
+                             StartDateChanged="HandleStartDateChangedAsync"
+                             EndDateChanged="HandleEndDateChangedAsync"
                              SortChanged="HandleSortChangedAsync"
                              OnCreateTransaction="OpenCreateTransaction"
                              OnClearFilters="ClearFiltersAsync"
@@ -152,6 +157,8 @@ else
             Search: string.IsNullOrWhiteSpace(_state.Search) ? null : _state.Search.Trim(),
             Type: type,
             InventoryTagId: tagId,
+            StartDate: _state.StartDate,
+            EndDate: _state.EndDate,
             SortBy: sortField,
             SortDirection: sortDirection,
             Page: _state.Page,
@@ -196,6 +203,8 @@ else
     private async Task HandleSearchChangedAsync(string value) { if (_interaction.IsBusy) return; _state.Search = value; _state.ResetPage(); await RefreshAsync(); }
     private async Task HandleTypeChangedAsync(string value) { if (_interaction.IsBusy) return; _state.TypeFilter = value; _state.ResetPage(); await RefreshAsync(); }
     private async Task HandleTagChangedAsync(string value) { if (_interaction.IsBusy) return; _state.TagFilter = value; _state.ResetPage(); await RefreshAsync(); }
+    private async Task HandleStartDateChangedAsync(DateOnly? value) { if (_interaction.IsBusy) return; _state.StartDate = value; _state.ResetPage(); await RefreshAsync(); }
+    private async Task HandleEndDateChangedAsync(DateOnly? value) { if (_interaction.IsBusy) return; _state.EndDate = value; _state.ResetPage(); await RefreshAsync(); }
     private async Task HandleSortChangedAsync(string value) { if (_interaction.IsBusy) return; _state.Sort = string.IsNullOrWhiteSpace(value) ? "date-desc" : value; _state.ResetPage(); await RefreshAsync(); }
     private async Task ClearFiltersAsync() { if (_interaction.IsBusy) return; _state.ClearFilters(); await RefreshAsync(); }
     private async Task PreviousPageAsync() { if (!_interaction.IsBusy && _state.Page > 1) { _state.Page--; if (!await RefreshAsync()) _state.Page++; } }
