@@ -1,18 +1,15 @@
 @using LevelUp.Application.Features.Inventory.Responses
 @using LevelUp.Web.Components.Features.Inventory.Models
 
-<section class="inventory-tags-panel">
+<section class="inventory-tags-panel" aria-busy="@IsBusy.ToString().ToLowerInvariant()">
     <header class="inventory-panel-header">
-        <div>
-            <span class="inventory-eyebrow">Organization</span>
-            <h2>Tags</h2>
-        </div>
-        <button type="button" class="inventory-button inventory-button--cta inventory-button--small" @onclick="StartCreate">New tag</button>
+        <div><span class="inventory-eyebrow">Organization</span><h2>Tags</h2></div>
+        <button type="button" class="inventory-button inventory-button--cta inventory-button--small" disabled="@IsBusy" @onclick="StartCreate">New tag</button>
     </header>
 
     @if (Tags.Count == 0)
     {
-        <p class="inventory-empty-copy">Create tags to organize your income and expenses.</p>
+        <p class="inventory-empty-copy">No tags yet. Create one to organize your income and expenses.</p>
     }
     else
     {
@@ -21,12 +18,9 @@
             {
                 <div class="inventory-tag-item">
                     <span class="inventory-tag-dot" style="background:@tag.Color"></span>
-                    <div>
-                        <strong>@tag.Name</strong>
-                        <small>@tag.TransactionCount transaction@(tag.TransactionCount == 1 ? string.Empty : "s")</small>
-                    </div>
-                    <button type="button" class="inventory-tag-action inventory-tag-action--edit" @onclick="() => StartEdit(tag)">Edit</button>
-                    <button type="button" class="inventory-tag-action inventory-tag-action--delete" @onclick="() => OnDelete.InvokeAsync(tag)">Delete</button>
+                    <div><strong>@tag.Name</strong><small>@tag.TransactionCount transaction@(tag.TransactionCount == 1 ? string.Empty : "s")</small></div>
+                    <button type="button" class="inventory-tag-action inventory-tag-action--edit" disabled="@IsBusy" @onclick="() => StartEdit(tag)">Edit</button>
+                    <button type="button" class="inventory-tag-action inventory-tag-action--delete" disabled="@IsBusy" @onclick="() => OnDelete.InvokeAsync(tag)">Delete</button>
                 </div>
             }
         </div>
@@ -36,20 +30,11 @@
     {
         <EditForm Model="Form" OnValidSubmit="SubmitAsync" class="inventory-tag-form">
             <DataAnnotationsValidator />
-            <label class="inventory-field">
-                <span>Name</span>
-                <InputText @bind-Value="Form.Name" maxlength="40" />
-                <ValidationMessage For="@(() => Form.Name)" />
-            </label>
-            <label class="inventory-field inventory-color-field">
-                <span>Color</span>
-                <InputText @bind-Value="Form.Color" maxlength="7" />
-                <input type="color" @bind="Form.Color" aria-label="Select tag color" />
-                <ValidationMessage For="@(() => Form.Color)" />
-            </label>
+            <label class="inventory-field"><span>Name</span><InputText @bind-Value="Form.Name" maxlength="40" disabled="@IsBusy" autofocus /><ValidationMessage For="@(() => Form.Name)" /></label>
+            <label class="inventory-field inventory-color-field"><span>Color</span><InputText @bind-Value="Form.Color" maxlength="7" disabled="@IsBusy" /><input type="color" @bind="Form.Color" disabled="@IsBusy" aria-label="Select tag color" /><ValidationMessage For="@(() => Form.Color)" /></label>
             <div class="inventory-tag-form__actions">
-                <button type="button" class="inventory-button inventory-button--ghost inventory-button--small" @onclick="Cancel">Cancel</button>
-                <button type="submit" class="inventory-button inventory-button--cta inventory-button--small" disabled="@IsBusy">Save tag</button>
+                <button type="button" class="inventory-button inventory-button--ghost inventory-button--small" disabled="@IsBusy" @onclick="Cancel">Cancel</button>
+                <button type="submit" class="inventory-button inventory-button--cta inventory-button--small" disabled="@IsBusy">@(IsBusy ? "Saving..." : "Save tag")</button>
             </div>
         </EditForm>
     }
@@ -58,37 +43,13 @@
 @code {
     [Parameter] public IReadOnlyList<InventoryTagResponse> Tags { get; set; } = [];
     [Parameter] public bool IsBusy { get; set; }
-    [Parameter] public EventCallback<(Guid? Id, InventoryTagFormModel Form)> OnSave { get; set; }
+    [Parameter] public Func<(Guid? Id, InventoryTagFormModel Form), Task<bool>>? OnSave { get; set; }
     [Parameter] public EventCallback<InventoryTagResponse> OnDelete { get; set; }
-
     private bool IsEditorOpen { get; set; }
     private Guid? EditingId { get; set; }
     private InventoryTagFormModel Form { get; set; } = new();
-
-    private void StartCreate()
-    {
-        EditingId = null;
-        Form = new();
-        IsEditorOpen = true;
-    }
-
-    private void StartEdit(InventoryTagResponse tag)
-    {
-        EditingId = tag.Id;
-        Form = new InventoryTagFormModel { Name = tag.Name, Color = tag.Color };
-        IsEditorOpen = true;
-    }
-
-    private async Task SubmitAsync()
-    {
-        await OnSave.InvokeAsync((EditingId, Form));
-        Cancel();
-    }
-
-    private void Cancel()
-    {
-        IsEditorOpen = false;
-        EditingId = null;
-        Form = new();
-    }
+    private void StartCreate() { if (IsBusy) return; EditingId = null; Form = new(); IsEditorOpen = true; }
+    private void StartEdit(InventoryTagResponse tag) { if (IsBusy) return; EditingId = tag.Id; Form = new() { Name = tag.Name, Color = tag.Color }; IsEditorOpen = true; }
+    private async Task SubmitAsync() { if (IsBusy || OnSave is null) return; if (await OnSave((EditingId, Form))) Cancel(); }
+    private void Cancel() { if (IsBusy) return; IsEditorOpen = false; EditingId = null; Form = new(); }
 }

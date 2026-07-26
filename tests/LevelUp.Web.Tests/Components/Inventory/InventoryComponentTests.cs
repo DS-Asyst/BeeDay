@@ -80,3 +80,23 @@ public sealed class InventoryPageStateTests
         Assert.Equal("amount-desc", state.Sort);
     }
 }
+
+public sealed class InventoryInteractionStateTests
+{
+    [Fact]
+    public void TryBegin_PreventsConcurrentOperations()
+    {
+        var state = new LevelUp.Web.Components.Features.Inventory.State.InventoryInteractionState();
+
+        Assert.True(state.TryBegin("save-transaction"));
+        Assert.True(state.IsBusy);
+        Assert.Equal("save-transaction", state.Operation);
+        Assert.False(state.TryBegin("delete-transaction"));
+
+        state.End();
+
+        Assert.False(state.IsBusy);
+        Assert.Null(state.Operation);
+        Assert.True(state.TryBegin("delete-transaction"));
+    }
+}

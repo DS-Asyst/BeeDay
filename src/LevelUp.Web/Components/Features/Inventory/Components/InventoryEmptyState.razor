@@ -4,16 +4,17 @@
     <p>@(HasFilters ? "Change or clear your filters to see more results." : "Create your first transaction to start tracking your wallet.")</p>
     @if (HasFilters)
     {
-        <button type="button" class="inventory-button inventory-button--ghost" @onclick="OnClearFilters">Clear filters</button>
+        <button type="button" class="inventory-button inventory-button--ghost" disabled="@IsDisabled" @onclick="OnClearFilters">Clear filters</button>
     }
     else
     {
-        <button type="button" class="inventory-button inventory-button--cta" @onclick="OnCreateTransaction">Create transaction</button>
+        <button type="button" class="inventory-button inventory-button--cta" disabled="@IsDisabled" @onclick="OnCreateTransaction">Create transaction</button>
     }
 </div>
 
 @code {
     [Parameter] public bool HasFilters { get; set; }
+    [Parameter] public bool IsDisabled { get; set; }
     [Parameter] public EventCallback OnCreateTransaction { get; set; }
     [Parameter] public EventCallback OnClearFilters { get; set; }
 }

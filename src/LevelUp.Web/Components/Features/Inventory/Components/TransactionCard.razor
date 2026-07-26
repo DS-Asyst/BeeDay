@@ -35,12 +35,14 @@
     <LevelUpCardMenu Class="activity-card__actions inventory-transaction-card__actions"
                      TriggerClass="activity-card__menu inventory-transaction-card__menu"
                      Title="@Transaction.Description"
+                     Disabled="IsDisabled"
                      OnEdit="EditAsync"
                      OnDelete="DeleteAsync" />
 </article>
 
 @code {
     [Parameter, EditorRequired] public TransactionResponse Transaction { get; set; } = default!;
+    [Parameter] public bool IsDisabled { get; set; }
     [Parameter] public EventCallback<TransactionResponse> OnEdit { get; set; }
     [Parameter] public EventCallback<TransactionResponse> OnDelete { get; set; }
 

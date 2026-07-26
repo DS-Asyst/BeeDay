@@ -9,7 +9,8 @@
         <span class="inventory-result-count">@Transactions.TotalCount result@(Transactions.TotalCount == 1 ? string.Empty : "s")</span>
     </header>
 
-    <InventoryFilters Search="Search"
+    <InventoryFilters IsDisabled="IsBusy"
+                      Search="Search"
                       TypeFilter="TypeFilter"
                       TagFilter="TagFilter"
                       Sort="Sort"
@@ -22,6 +23,7 @@
     @if (Transactions.Items.Count == 0)
     {
         <InventoryEmptyState HasFilters="HasFilters"
+                             IsDisabled="IsBusy"
                              OnCreateTransaction="OnCreateTransaction"
                              OnClearFilters="OnClearFilters" />
     }
@@ -30,16 +32,16 @@
         <div class="inventory-transaction-list" aria-busy="@IsRefreshing">
             @foreach (var transaction in Transactions.Items)
             {
-                <TransactionCard Transaction="transaction" OnEdit="OnEdit" OnDelete="OnDelete" />
+                <TransactionCard Transaction="transaction" IsDisabled="IsBusy" OnEdit="OnEdit" OnDelete="OnDelete" />
             }
         </div>
 
         @if (Transactions.TotalPages > 1)
         {
             <nav class="inventory-pagination" aria-label="Transaction pages">
-                <button type="button" disabled="@(Transactions.Page <= 1)" @onclick="OnPreviousPage">Previous</button>
+                <button type="button" disabled="@(IsBusy || Transactions.Page <= 1)" @onclick="OnPreviousPage">Previous</button>
                 <span>@PaginationSummary · Page @Transactions.Page of @Transactions.TotalPages</span>
-                <button type="button" disabled="@(Transactions.Page >= Transactions.TotalPages)" @onclick="OnNextPage">Next</button>
+                <button type="button" disabled="@(IsBusy || Transactions.Page >= Transactions.TotalPages)" @onclick="OnNextPage">Next</button>
             </nav>
         }
     }
@@ -49,6 +51,7 @@
     [Parameter, EditorRequired] public PagedTransactionsResponse Transactions { get; set; } = default!;
     [Parameter] public IReadOnlyList<InventoryTagResponse> Tags { get; set; } = [];
     [Parameter] public bool IsRefreshing { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
     [Parameter] public bool HasFilters { get; set; }
     [Parameter] public string Search { get; set; } = string.Empty;
     [Parameter] public string TypeFilter { get; set; } = string.Empty;

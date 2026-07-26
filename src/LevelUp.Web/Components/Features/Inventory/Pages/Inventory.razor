@@ -21,31 +21,32 @@
 }
 else
 {
-    <main class="inventory-page levelup-fade-in">
+    <main class="inventory-page levelup-fade-in" aria-busy="@_interaction.IsBusy.ToString().ToLowerInvariant()">
         <header class="inventory-page__header">
             <div>
                 <span class="inventory-eyebrow">Personal finance</span>
                 <h1>Inventory</h1>
                 <p>Track your wallet, organize transactions and understand where your money goes.</p>
             </div>
-            <button type="button" class="inventory-button inventory-button--cta" @onclick="OpenCreateTransaction">+ New transaction</button>
+            <button type="button" class="inventory-button inventory-button--cta" disabled="@_interaction.IsBusy" @onclick="OpenCreateTransaction">+ New transaction</button>
         </header>
 
         @if (!string.IsNullOrWhiteSpace(_errorMessage))
         {
             <div class="inventory-alert" role="alert">
                 <span>@_errorMessage</span>
-                <button type="button" @onclick="LoadAsync">Try again</button>
+                <button type="button" disabled="@_interaction.IsBusy" @onclick="RetryAsync">Try again</button>
             </div>
         }
 
-        <div aria-live="polite" class="sr-only">@_balanceAnnouncement</div>
+        <div aria-live="polite" class="sr-only">@_statusAnnouncement</div>
         <WalletSummary Summary="_summary" HighlightBalance="_highlightBalance" />
 
         <section class="inventory-workspace">
             <TransactionList Transactions="_transactions"
                              Tags="_tags"
                              IsRefreshing="_isRefreshing"
+                             IsBusy="_interaction.IsBusy"
                              HasFilters="_state.HasFilters"
                              Search="_state.Search"
                              TypeFilter="_state.TypeFilter"
@@ -62,15 +63,15 @@ else
                              OnEdit="OpenEditTransaction"
                              OnDelete="RequestDeleteTransaction" />
 
-            <InventoryTagManager Tags="_tags" IsBusy="_isBusy" OnSave="SaveTagAsync" OnDelete="RequestDeleteTag" />
+            <InventoryTagManager Tags="_tags" IsBusy="_interaction.IsBusy" OnSave="SaveTagAsync" OnDelete="RequestDeleteTag" />
         </section>
     </main>
 }
 
-<TransactionFormModal IsOpen="_isTransactionEditorOpen" IsEditing="@(_editingTransactionId is not null)" IsBusy="_isBusy" Model="_transactionForm" Tags="_tags" OnSave="SaveTransactionAsync" OnCancel="CloseTransactionEditor" />
+<TransactionFormModal IsOpen="_isTransactionEditorOpen" IsEditing="@(_editingTransactionId is not null)" IsBusy="_interaction.IsBusy" Model="_transactionForm" Tags="_tags" OnSave="SaveTransactionAsync" OnCancel="CloseTransactionEditor" />
 
 <LevelUpConfirmDialog IsOpen="@(_pendingDeleteTransaction is not null)"
-                      IsBusy="_isBusy"
+                      IsBusy="_interaction.IsBusy"
                       Title="Delete transaction"
                       Message="Are you sure you want to delete this transaction?"
                       ItemTitle="@_pendingDeleteTransaction?.Description"
@@ -80,7 +81,7 @@ else
                       OnCancel="CancelDeleteTransaction" />
 
 <LevelUpConfirmDialog IsOpen="@(_pendingDeleteTag is not null)"
-                      IsBusy="_isBusy"
+                      IsBusy="_interaction.IsBusy"
                       Title="Delete tag"
                       Message="Transactions using this tag will remain and become untagged."
                       ItemTitle="@_pendingDeleteTag?.Name"
@@ -90,16 +91,18 @@ else
                       OnCancel="CancelDeleteTag" />
 
 @code {
+    private const string LoadError = "We could not load your inventory. Please try again.";
+    private const string RefreshError = "We could not refresh your inventory. Your current view was preserved.";
     private WalletSummaryResponse? _summary;
     private IReadOnlyList<InventoryTagResponse> _tags = [];
     private PagedTransactionsResponse _transactions = new([], 1, 20, 0, 0);
     private bool _isLoading = true;
-    private bool _isBusy;
     private bool _isRefreshing;
     private bool _highlightBalance;
-    private string _balanceAnnouncement = string.Empty;
+    private string _statusAnnouncement = string.Empty;
     private string? _errorMessage;
     private readonly InventoryPageState _state = new();
+    private readonly InventoryInteractionState _interaction = new();
     private bool _isTransactionEditorOpen;
     private Guid? _editingTransactionId;
     private TransactionFormModel _transactionForm = new();
@@ -121,14 +124,20 @@ else
             await Sender.Send(new EnsureCurrentWalletCommand());
             await LoadDataAsync();
         }
-        catch (Exception)
+        catch
         {
-            _errorMessage = "We could not load your inventory. Please try again.";
+            _errorMessage = LoadError;
         }
         finally
         {
             _isLoading = false;
         }
+    }
+
+    private async Task RetryAsync()
+    {
+        if (_summary is null) await LoadAsync();
+        else await RefreshAsync();
     }
 
     private async Task LoadDataAsync()
@@ -164,62 +173,47 @@ else
         _ => (TransactionSortField.Date, SortDirection.Descending)
     };
 
-    private async Task RefreshAsync()
+    private async Task<bool> RefreshAsync()
     {
         _errorMessage = null;
         _isRefreshing = true;
-        try { await LoadDataAsync(); }
-        catch { _errorMessage = "We could not load your transactions. Please try again."; }
-        finally { _isRefreshing = false; }
+        try
+        {
+            await LoadDataAsync();
+            return true;
+        }
+        catch
+        {
+            _errorMessage = RefreshError;
+            return false;
+        }
+        finally
+        {
+            _isRefreshing = false;
+        }
     }
 
-    private async Task HandleSearchChangedAsync(string value)
-    {
-        _state.Search = value;
-        _state.ResetPage();
-        await RefreshAsync();
-    }
-
-    private async Task HandleTypeChangedAsync(string value)
-    {
-        _state.TypeFilter = value;
-        _state.ResetPage();
-        await RefreshAsync();
-    }
-
-    private async Task HandleTagChangedAsync(string value)
-    {
-        _state.TagFilter = value;
-        _state.ResetPage();
-        await RefreshAsync();
-    }
-
-    private async Task HandleSortChangedAsync(string value)
-    {
-        _state.Sort = string.IsNullOrWhiteSpace(value) ? "date-desc" : value;
-        _state.ResetPage();
-        await RefreshAsync();
-    }
-
-    private async Task ClearFiltersAsync()
-    {
-        _state.ClearFilters();
-        await RefreshAsync();
-    }
-    private async Task PreviousPageAsync() { if (_state.Page > 1) { _state.Page--; await RefreshAsync(); } }
-    private async Task NextPageAsync() { if (_state.Page < _transactions.TotalPages) { _state.Page++; await RefreshAsync(); } }
+    private async Task HandleSearchChangedAsync(string value) { if (_interaction.IsBusy) return; _state.Search = value; _state.ResetPage(); await RefreshAsync(); }
+    private async Task HandleTypeChangedAsync(string value) { if (_interaction.IsBusy) return; _state.TypeFilter = value; _state.ResetPage(); await RefreshAsync(); }
+    private async Task HandleTagChangedAsync(string value) { if (_interaction.IsBusy) return; _state.TagFilter = value; _state.ResetPage(); await RefreshAsync(); }
+    private async Task HandleSortChangedAsync(string value) { if (_interaction.IsBusy) return; _state.Sort = string.IsNullOrWhiteSpace(value) ? "date-desc" : value; _state.ResetPage(); await RefreshAsync(); }
+    private async Task ClearFiltersAsync() { if (_interaction.IsBusy) return; _state.ClearFilters(); await RefreshAsync(); }
+    private async Task PreviousPageAsync() { if (!_interaction.IsBusy && _state.Page > 1) { _state.Page--; if (!await RefreshAsync()) _state.Page++; } }
+    private async Task NextPageAsync() { if (!_interaction.IsBusy && _state.Page < _transactions.TotalPages) { _state.Page++; if (!await RefreshAsync()) _state.Page--; } }
 
     private void OpenCreateTransaction()
     {
+        if (_interaction.IsBusy) return;
         _editingTransactionId = null;
-        _transactionForm = new TransactionFormModel { TransactionDate = DateTime.Today, Type = TransactionType.Expense };
+        _transactionForm = new() { TransactionDate = DateTime.Today, Type = TransactionType.Expense };
         _isTransactionEditorOpen = true;
     }
 
     private void OpenEditTransaction(TransactionResponse transaction)
     {
+        if (_interaction.IsBusy) return;
         _editingTransactionId = transaction.Id;
-        _transactionForm = new TransactionFormModel
+        _transactionForm = new()
         {
             Description = transaction.Description,
             Amount = transaction.Amount,
@@ -231,96 +225,110 @@ else
         _isTransactionEditorOpen = true;
     }
 
-    private void CloseTransactionEditor() { if (!_isBusy) { _isTransactionEditorOpen = false; _editingTransactionId = null; } }
+    private void CloseTransactionEditor()
+    {
+        if (_interaction.IsBusy) return;
+        _isTransactionEditorOpen = false;
+        _editingTransactionId = null;
+    }
 
     private async Task SaveTransactionAsync()
     {
-        _isBusy = true;
+        if (!_interaction.TryBegin("save-transaction")) return;
+        _errorMessage = null;
+        var wasEditing = _editingTransactionId is not null;
         try
         {
-            var request = new SaveTransactionRequest(
-                _transactionForm.Description,
-                _transactionForm.Amount,
-                _transactionForm.Type,
-                DateOnly.FromDateTime(_transactionForm.TransactionDate),
-                _transactionForm.InventoryTagId,
-                _transactionForm.Notes);
+            var request = new SaveTransactionRequest(_transactionForm.Description, _transactionForm.Amount, _transactionForm.Type, DateOnly.FromDateTime(_transactionForm.TransactionDate), _transactionForm.InventoryTagId, _transactionForm.Notes);
+            if (_editingTransactionId is Guid id) await Sender.Send(new UpdateTransactionCommand(id, request));
+            else await Sender.Send(new CreateTransactionCommand(request));
 
-            if (_editingTransactionId is Guid id)
-                await Sender.Send(new UpdateTransactionCommand(id, request));
-            else
-                await Sender.Send(new CreateTransactionCommand(request));
-
-            var wasEditing = _editingTransactionId is not null;
-            CloseTransactionEditor();
-            await RefreshAsync();
-            await AnnounceBalanceUpdatedAsync();
+            _isTransactionEditorOpen = false;
+            _editingTransactionId = null;
+            await RefreshAfterMutationAsync();
             Toast.ShowSuccess(wasEditing ? "Transaction updated successfully." : "Transaction created successfully.");
         }
-        catch (Exception ex) { _errorMessage = ex.Message; Toast.ShowError("Could not save the transaction."); }
-        finally { _isBusy = false; _isTransactionEditorOpen = false; _editingTransactionId = null; }
+        catch
+        {
+            _errorMessage = "We could not save the transaction. Review the information and try again.";
+            Toast.ShowError("Could not save the transaction.");
+        }
+        finally { _interaction.End(); }
     }
 
-    private void RequestDeleteTransaction(TransactionResponse transaction) => _pendingDeleteTransaction = transaction;
-    private void CancelDeleteTransaction() => _pendingDeleteTransaction = null;
+    private void RequestDeleteTransaction(TransactionResponse transaction) { if (!_interaction.IsBusy) _pendingDeleteTransaction = transaction; }
+    private void CancelDeleteTransaction() { if (!_interaction.IsBusy) _pendingDeleteTransaction = null; }
 
     private async Task DeleteTransactionAsync()
     {
-        if (_pendingDeleteTransaction is null) return;
-        _isBusy = true;
+        if (_pendingDeleteTransaction is null || !_interaction.TryBegin("delete-transaction")) return;
         try
         {
             await Sender.Send(new DeleteTransactionCommand(_pendingDeleteTransaction.Id));
             _pendingDeleteTransaction = null;
-            await RefreshAsync();
-            if (_transactions.Items.Count == 0 && _state.Page > 1)
-            {
-                _state.Page--;
-                await RefreshAsync();
-            }
-            await AnnounceBalanceUpdatedAsync();
+            await RefreshAfterMutationAsync();
+            if (_transactions.Items.Count == 0 && _state.Page > 1) { _state.Page--; await RefreshAsync(); }
             Toast.ShowSuccess("Transaction deleted successfully.");
         }
-        catch (Exception ex) { _errorMessage = ex.Message; Toast.ShowError("Could not delete the transaction."); }
-        finally { _isBusy = false; }
+        catch
+        {
+            _errorMessage = "We could not delete the transaction. Please try again.";
+            Toast.ShowError("Could not delete the transaction.");
+        }
+        finally { _interaction.End(); }
     }
 
-    private async Task SaveTagAsync((Guid? Id, InventoryTagFormModel Form) value)
+    private async Task<bool> SaveTagAsync((Guid? Id, InventoryTagFormModel Form) value)
     {
-        _isBusy = true;
+        if (!_interaction.TryBegin("save-tag")) return false;
         try
         {
             var request = new SaveInventoryTagRequest(value.Form.Name, value.Form.Color);
             if (value.Id is Guid id) await Sender.Send(new UpdateInventoryTagCommand(id, request));
             else await Sender.Send(new CreateInventoryTagCommand(request));
-            await RefreshAsync();
-            Toast.ShowSuccess(value.Id is null ? "Tag created." : "Tag updated.");
+            await RefreshAfterMutationAsync();
+            Toast.ShowSuccess(value.Id is null ? "Tag created successfully." : "Tag updated successfully.");
+            return true;
         }
-        catch (Exception ex) { _errorMessage = ex.Message; Toast.ShowError("Could not save the tag."); }
-        finally { _isBusy = false; }
+        catch
+        {
+            _errorMessage = "We could not save the tag. Review the information and try again.";
+            Toast.ShowError("Could not save the tag.");
+            return false;
+        }
+        finally { _interaction.End(); }
     }
 
-    private void RequestDeleteTag(InventoryTagResponse tag) => _pendingDeleteTag = tag;
-    private void CancelDeleteTag() => _pendingDeleteTag = null;
+    private void RequestDeleteTag(InventoryTagResponse tag) { if (!_interaction.IsBusy) _pendingDeleteTag = tag; }
+    private void CancelDeleteTag() { if (!_interaction.IsBusy) _pendingDeleteTag = null; }
 
     private async Task DeleteTagAsync()
     {
-        if (_pendingDeleteTag is null) return;
-        _isBusy = true;
+        if (_pendingDeleteTag is null || !_interaction.TryBegin("delete-tag")) return;
         try
         {
             await Sender.Send(new DeleteInventoryTagCommand(_pendingDeleteTag.Id));
             _pendingDeleteTag = null;
-            await RefreshAsync();
-            Toast.ShowSuccess("Tag deleted.");
+            await RefreshAfterMutationAsync();
+            Toast.ShowSuccess("Tag deleted successfully.");
         }
-        catch (Exception ex) { _errorMessage = ex.Message; Toast.ShowError("Could not delete the tag."); }
-        finally { _isBusy = false; }
+        catch
+        {
+            _errorMessage = "We could not delete the tag. Please try again.";
+            Toast.ShowError("Could not delete the tag.");
+        }
+        finally { _interaction.End(); }
     }
 
-    private async Task AnnounceBalanceUpdatedAsync()
+    private async Task RefreshAfterMutationAsync()
     {
-        _balanceAnnouncement = $"Balance updated to {InventoryCurrencyFormatter.Format(_summary?.Balance ?? 0)}.";
+        if (!await RefreshAsync())
+        {
+            Toast.ShowError("The operation succeeded, but the inventory could not be refreshed.");
+            return;
+        }
+
+        _statusAnnouncement = $"Balance updated to {InventoryCurrencyFormatter.Format(_summary?.Balance ?? 0)}.";
         _highlightBalance = true;
         StateHasChanged();
         await Task.Delay(700);

@@ -68,3 +68,9 @@ The Inventory feature is organized under `Components/Features/Inventory` and kee
 - `Components/InventoryTagManager.razor`: manages tag presentation and editing.
 
 Business rules remain in the Domain and Application layers; these components only manage presentation and interaction.
+## Inventory interaction reliability
+
+The Inventory page uses an explicit interaction state to prevent concurrent mutations and duplicate submissions. Transaction and tag forms remain open after failed saves so user input is preserved. Destructive actions require confirmation, Escape closes idle dialogs, controls are disabled while requests are running, and server exceptions are translated into stable user-facing messages.
+
+Inventory data is refreshed after successful mutations. The UI deliberately avoids speculative balance, transaction, or tag updates because those values depend on server-side validation and aggregate calculations; existing data remains visible if a refresh fails.
+

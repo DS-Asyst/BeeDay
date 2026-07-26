@@ -11,15 +11,16 @@ public partial class EditorModalShell
     [Parameter, EditorRequired] public string TitleId { get; set; } = string.Empty;
     [Parameter, EditorRequired] public string SubmitLabel { get; set; } = "SAVE";
     [Parameter] public bool ShowDelete { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
     [Parameter] public RenderFragment? HeroContent { get; set; }
     [Parameter] public RenderFragment? BodyContent { get; set; }
     [Parameter] public EventCallback OnSubmit { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public EventCallback OnDelete { get; set; }
 
-    private Task Submit(EditContext _) => OnSubmit.InvokeAsync();
+    private Task Submit(EditContext _) => IsBusy ? Task.CompletedTask : OnSubmit.InvokeAsync();
 
-    private Task Cancel() => OnCancel.InvokeAsync();
+    private Task Cancel() => IsBusy ? Task.CompletedTask : OnCancel.InvokeAsync();
 
     private Task HandleKeyDown(KeyboardEventArgs args)
         => args.Key == "Escape" ? Cancel() : Task.CompletedTask;

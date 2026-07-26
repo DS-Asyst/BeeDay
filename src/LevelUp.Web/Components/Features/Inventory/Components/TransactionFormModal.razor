@@ -7,6 +7,7 @@
                       Title="@(IsEditing ? "Edit Transaction" : "Create Transaction")"
                       TitleId="transaction-editor-title"
                       SubmitLabel="@(IsEditing ? "SAVE" : "CREATE")"
+                      IsBusy="IsBusy"
                       OnSubmit="SaveAsync"
                       OnCancel="CancelAsync">
         <HeroContent>
