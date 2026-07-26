@@ -120,3 +120,7 @@ Documentation is maintained in English and must be updated in the same change as
 ## Experience progression
 
 The finalized XP and Level Up pipeline is documented in [`docs/EXPERIENCE.md`](docs/EXPERIENCE.md).
+
+### Activity attributes
+
+Daily activities can be classified as Strength, Dexterity, Intelligence, Wisdom, Vitality, or Charisma. The Daily dashboard supports attribute-aware search, filtering, and optional attribute sorting while preserving manual card ordering as the default.

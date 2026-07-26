@@ -1,54 +1,49 @@
+@using LevelUp.Domain.Enums
+@using LevelUp.Web.Components.Features.Dashboard.State
+
 <div class="filter-bar" aria-label="Dashboard controls">
-    <div class="filter-bar__spacer" aria-hidden="true"></div>
+    <div class="filter-bar__filters">
+        <label>
+            <span>Attribute</span>
+            <select class="filter-bar__select" value="@AttributeValue" @onchange="OnAttributeChangedAsync" aria-label="Filter by attribute">
+                <option value="">All attributes</option>
+                @foreach (var activityAttribute in Enum.GetValues<ActivityAttribute>())
+                {
+                    <option value="@activityAttribute">@activityAttribute.ToString()</option>
+                }
+            </select>
+        </label>
+
+        <label>
+            <span>Sort</span>
+            <select class="filter-bar__select" value="@Sort" @onchange="OnSortChangedAsync" aria-label="Sort activities">
+                <option value="@ActivitySortOption.Manual">Manual order</option>
+                <option value="@ActivitySortOption.AttributeAscending">Attribute A–Z</option>
+                <option value="@ActivitySortOption.AttributeDescending">Attribute Z–A</option>
+            </select>
+        </label>
+    </div>
 
     <div class="filter-bar__search" role="search">
-        <span class="filter-bar__search-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" focusable="false">
-                <circle cx="11" cy="11" r="6.5"></circle>
-                <path d="m16 16 4 4"></path>
-            </svg>
-        </span>
-
+        <LevelUpIcon Name="LevelUpIconName.Search" Size="18" Class="filter-bar__search-icon" Decorative="true" />
         <label class="visually-hidden" for="dashboard-search">Search activities</label>
-        <input id="dashboard-search"
-               class="filter-bar__input"
-               type="search"
-               placeholder="Search activities..."
-               value="@inputValue"
-               @oninput="OnInput" />
+        <input id="dashboard-search" class="filter-bar__input" type="search" placeholder="Search activities or attributes..." value="@inputValue" @oninput="OnInput" />
         <span class="filter-bar__results" role="status" aria-live="polite">@ResultSummary</span>
     </div>
 
     <div class="filter-bar__actions">
         <div class="filter-bar__create">
-            <button class="filter-bar__button filter-bar__button--primary"
-                    type="button"
-                    aria-haspopup="menu"
-                    aria-expanded="@showCreateMenu"
-                    @onclick="ToggleCreateMenu">
-                <span class="filter-bar__plus" aria-hidden="true">＋</span>
+            <button class="filter-bar__button filter-bar__button--primary" type="button" aria-haspopup="menu" aria-expanded="@showCreateMenu" @onclick="ToggleCreateMenu">
+                <LevelUpIcon Name="LevelUpIconName.Add" Size="16" Decorative="true" />
                 Add activity
             </button>
-
             @if (showCreateMenu)
             {
                 <div class="filter-bar__menu" role="menu" aria-label="Choose activity type">
-                    <button type="button" role="menuitem" @onclick="CreateHabitAsync">
-                        <span class="filter-bar__menu-icon filter-bar__menu-icon--habit" aria-hidden="true"><b>+</b><b>−</b></span>
-                        <span>Habit</span>
-                    </button>
-                    <button type="button" role="menuitem" @onclick="CreateTaskAsync">
-                        <span class="filter-bar__menu-icon filter-bar__menu-icon--task" aria-hidden="true">▦</span>
-                        <span>Task</span>
-                    </button>
-                    <button type="button" role="menuitem" @onclick="CreateTodoAsync">
-                        <span class="filter-bar__menu-icon filter-bar__menu-icon--todo" aria-hidden="true">✓</span>
-                        <span>To-Do</span>
-                    </button>
-                    <button type="button" role="menuitem" @onclick="CreateProjectAsync">
-                        <span class="filter-bar__menu-icon filter-bar__menu-icon--project" aria-hidden="true">▤</span>
-                        <span>Project</span>
-                    </button>
+                    <button type="button" role="menuitem" @onclick="CreateHabitAsync"><span>Habit</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateTaskAsync"><span>Task</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateTodoAsync"><span>To-Do</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateProjectAsync"><span>Project</span></button>
                 </div>
             }
         </div>

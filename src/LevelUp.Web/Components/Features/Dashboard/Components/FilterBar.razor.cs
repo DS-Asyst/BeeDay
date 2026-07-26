@@ -1,4 +1,6 @@
+using LevelUp.Domain.Enums;
 using LevelUp.Web.Components.Features.Common;
+using LevelUp.Web.Components.Features.Dashboard.State;
 using Microsoft.AspNetCore.Components;
 
 namespace LevelUp.Web.Components.Features.Dashboard.Components;
@@ -13,6 +15,10 @@ public partial class FilterBar : IDisposable
     [Parameter] public string Value { get; set; } = string.Empty;
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
     [Parameter] public EventCallback<ActivityType> OnCreate { get; set; }
+    [Parameter] public ActivityAttribute? Attribute { get; set; }
+    [Parameter] public EventCallback<ActivityAttribute?> AttributeChanged { get; set; }
+    [Parameter] public ActivitySortOption Sort { get; set; }
+    [Parameter] public EventCallback<ActivitySortOption> SortChanged { get; set; }
     [Parameter] public int ResultCount { get; set; }
     [Parameter] public int TotalCount { get; set; }
 
@@ -40,6 +46,22 @@ public partial class FilterBar : IDisposable
         {
             // A newer input superseded this search.
         }
+    }
+
+    private string AttributeValue => Attribute?.ToString() ?? string.Empty;
+
+    private Task OnAttributeChangedAsync(ChangeEventArgs args)
+    {
+        var value = args.Value?.ToString();
+        ActivityAttribute? attribute = Enum.TryParse<ActivityAttribute>(value, out var parsed) ? parsed : null;
+        return AttributeChanged.InvokeAsync(attribute);
+    }
+
+    private Task OnSortChangedAsync(ChangeEventArgs args)
+    {
+        var value = args.Value?.ToString();
+        var sort = Enum.TryParse<ActivitySortOption>(value, out var parsed) ? parsed : ActivitySortOption.Manual;
+        return SortChanged.InvokeAsync(sort);
     }
 
     private string ResultSummary => string.IsNullOrWhiteSpace(inputValue)

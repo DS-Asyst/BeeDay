@@ -15,6 +15,8 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
 {
     private LevelUpData? data;
     private string search = string.Empty;
+    private ActivityAttribute? attributeFilter;
+    private ActivitySortOption sortOption;
 
     public DashboardModalState Modals { get; } = new();
     public LevelUpData? Data => data;
@@ -36,6 +38,18 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
         set => search = value ?? string.Empty;
     }
 
+    public ActivityAttribute? AttributeFilter
+    {
+        get => attributeFilter;
+        set => attributeFilter = value;
+    }
+
+    public ActivitySortOption SortOption
+    {
+        get => sortOption;
+        set => sortOption = value;
+    }
+
     public int CompletedItems => data is null
         ? 0
         : data.Tasks.Count(item => item.Completed)
@@ -49,10 +63,10 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
           + data.Todos.Count(item => !item.Completed)
           + data.Projects.Count(item => !item.Completed);
 
-    public IEnumerable<Habit> FilteredHabits => data?.Habits.Where(MatchesSearch) ?? [];
-    public IEnumerable<RecurringTask> FilteredTasks => data?.Tasks.Where(MatchesSearch) ?? [];
-    public IEnumerable<Todo> FilteredTodos => data?.Todos.Where(MatchesSearch) ?? [];
-    public IEnumerable<Project> FilteredProjects => data?.Projects.Where(MatchesSearch) ?? [];
+    public IEnumerable<Habit> FilteredHabits => FilterAndSort(data?.Habits ?? []);
+    public IEnumerable<RecurringTask> FilteredTasks => FilterAndSort(data?.Tasks ?? []);
+    public IEnumerable<Todo> FilteredTodos => FilterAndSort(data?.Todos ?? []);
+    public IEnumerable<Project> FilteredProjects => FilterAndSort(data?.Projects ?? []);
 
     public int TotalItems => data is null
         ? 0
@@ -185,10 +199,31 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
         _ => status.ToString()
     };
 
-    private bool MatchesSearch(Activity item) =>
-        string.IsNullOrWhiteSpace(search)
-        || item.Title.Contains(search, StringComparison.OrdinalIgnoreCase)
-        || item.Description.Contains(search, StringComparison.OrdinalIgnoreCase);
+    private IEnumerable<TActivity> FilterAndSort<TActivity>(IEnumerable<TActivity> items)
+        where TActivity : Activity
+    {
+        var filtered = items.Where(MatchesFilters);
+
+        return SortOption switch
+        {
+            ActivitySortOption.AttributeAscending => filtered
+                .OrderBy(item => item.Attribute is null)
+                .ThenBy(item => item.Attribute)
+                .ThenBy(item => item.Title, StringComparer.OrdinalIgnoreCase),
+            ActivitySortOption.AttributeDescending => filtered
+                .OrderBy(item => item.Attribute is null)
+                .ThenByDescending(item => item.Attribute)
+                .ThenBy(item => item.Title, StringComparer.OrdinalIgnoreCase),
+            _ => filtered
+        };
+    }
+
+    private bool MatchesFilters(Activity item) =>
+        (!AttributeFilter.HasValue || item.Attribute == AttributeFilter)
+        && (string.IsNullOrWhiteSpace(search)
+            || item.Title.Contains(search, StringComparison.OrdinalIgnoreCase)
+            || item.Description.Contains(search, StringComparison.OrdinalIgnoreCase)
+            || (item.Attribute?.ToString().Contains(search, StringComparison.OrdinalIgnoreCase) ?? false));
 
     private async Task ReloadAsync() => data = await store.LoadAsync();
 

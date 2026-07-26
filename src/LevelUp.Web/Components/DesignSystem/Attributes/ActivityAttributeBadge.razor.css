@@ -18,3 +18,16 @@
 .activity-attribute-badge--wisdom { color: var(--levelup-color-primary); }
 .activity-attribute-badge--vitality { color: var(--levelup-color-accent); }
 .activity-attribute-badge--charisma { color: var(--levelup-color-warning); }
+
+.activity-attribute-badge {
+    cursor: help;
+    transition:
+        transform var(--levelup-transition-fast),
+        background-color var(--levelup-transition-fast),
+        box-shadow var(--levelup-transition-fast);
+}
+
+.activity-attribute-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--levelup-shadow-sm);
+}

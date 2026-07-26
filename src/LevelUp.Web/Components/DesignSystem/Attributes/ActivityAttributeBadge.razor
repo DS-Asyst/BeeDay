@@ -1,6 +1,6 @@
 @if (Attribute is not null)
 {
-    <span class="activity-attribute-badge activity-attribute-badge--@AttributeCssName" data-attribute="@Attribute">
+    <span class="activity-attribute-badge activity-attribute-badge--@AttributeCssName" data-attribute="@Attribute" title="@Tooltip" aria-label="@Tooltip">
         <ActivityAttributeIcon Attribute="@Attribute" Size="14" />
         <span>@Attribute</span>
     </span>

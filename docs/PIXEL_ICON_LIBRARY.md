@@ -23,3 +23,16 @@ The Pixel Icon Library by HackerNoon is the official icon source for the LevelUp
 | Charisma | Crown |
 
 The library is integrated behind reusable components so icon assets can be replaced without changing feature pages.
+
+## Activity attribute polish
+
+Sprint 5.3 completes the attribute presentation layer:
+
+- dashboard filtering by attribute;
+- attribute-aware search;
+- optional A–Z and Z–A attribute sorting;
+- native tooltips and accessible labels on attribute badges;
+- responsive filter controls;
+- bUnit coverage for the filter bar and attribute accessibility.
+
+Manual order remains the default so drag-and-drop behavior is preserved. Attribute sorting is visual only and does not overwrite the persisted manual order.

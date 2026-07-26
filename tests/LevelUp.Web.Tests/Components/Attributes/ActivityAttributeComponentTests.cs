@@ -21,6 +21,8 @@ public sealed class ActivityAttributeComponentTests
         Assert.Contains(label, cut.Find("span.activity-attribute-badge > span").TextContent);
         Assert.Contains(iconFile, cut.Find("image").GetAttribute("href"));
         Assert.Contains($"activity-attribute-badge--{label.ToLowerInvariant()}", cut.Find("span").ClassList);
+        Assert.Equal($"{label} activity attribute", cut.Find("span.activity-attribute-badge").GetAttribute("title"));
+        Assert.Equal($"{label} activity attribute", cut.Find("span.activity-attribute-badge").GetAttribute("aria-label"));
     }
 
     [Fact]
