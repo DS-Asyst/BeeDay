@@ -52,5 +52,11 @@ public enum PixelIconName
     Attribute,
     Cancel,
     Featured,
-    Progress
+    Progress,
+    Success,
+    ValidationError,
+    Loading,
+    Select,
+    CheckboxUnchecked,
+    CheckboxChecked
 }

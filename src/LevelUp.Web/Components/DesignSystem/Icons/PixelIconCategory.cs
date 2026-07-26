@@ -6,6 +6,7 @@ public enum PixelIconCategory
     Activities,
     Attributes,
     Feedback,
+    Forms,
     Navigation,
     Social,
     Statistics,

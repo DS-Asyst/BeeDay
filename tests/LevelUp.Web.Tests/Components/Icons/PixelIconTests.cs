@@ -109,6 +109,18 @@ public sealed class PixelIconTests
 
 
     [Theory]
+    [InlineData(PixelIconName.Success, "success")]
+    [InlineData(PixelIconName.ValidationError, "validation-error")]
+    [InlineData(PixelIconName.Loading, "loading")]
+    [InlineData(PixelIconName.Select, "select")]
+    [InlineData(PixelIconName.CheckboxUnchecked, "checkbox-unchecked")]
+    [InlineData(PixelIconName.CheckboxChecked, "checkbox-checked")]
+    public void ResolvesDialogAndFormIcons(PixelIconName name, string symbolId)
+    {
+        Assert.Equal(symbolId, PixelIconRegistry.Resolve(name).SymbolId);
+    }
+
+    [Theory]
     [InlineData(PixelIconName.Habit, "habit")]
     [InlineData(PixelIconName.RecurringTask, "recurring-task")]
     [InlineData(PixelIconName.Project, "project")]

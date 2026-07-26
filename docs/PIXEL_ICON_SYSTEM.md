@@ -197,3 +197,8 @@ Layout components may style the rendered icon through wrapper elements and `::de
 ## Sprint 6.3 — Activity Icons
 
 Activity types and common activity actions now use `PixelIcon`, including cards, context menus, search/create controls, editor actions, project workspace controls, completion, repetition, tags, attributes, calendar and filters.
+
+
+## Sprint 6.4 — Dialog & Forms Icon Integration
+
+Completed: modal close/save/cancel/delete actions, confirmation and warning states, validation feedback, select/date/checkbox controls, toast states and loading now use `PixelIcon` without changing form contracts or business rules.

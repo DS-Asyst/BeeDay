@@ -44,7 +44,7 @@ public sealed class LevelUpButtonTests
         var button = cut.Find("button");
         Assert.True(button.HasAttribute("disabled"));
         Assert.Equal("true", button.GetAttribute("aria-busy"));
-        Assert.NotNull(cut.Find(".levelup-button__loader"));
+        Assert.NotNull(cut.Find("svg.pixel-icon--loading.levelup-button__loader"));
     }
 
     [Fact]

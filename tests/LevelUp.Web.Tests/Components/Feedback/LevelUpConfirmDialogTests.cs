@@ -90,4 +90,19 @@ public sealed class LevelUpConfirmDialogTests
 
         Assert.True(cancelled);
     }
+
+    [Fact]
+    public void UsesPixelIconsForDeleteWarningAndActions()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<LevelUpConfirmDialog>(parameters => parameters
+            .Add(component => component.IsOpen, true)
+            .Add(component => component.Title, "Delete item")
+            .Add(component => component.Message, "Confirm deletion")
+            .Add(component => component.Warning, "Cannot be undone"));
+
+        Assert.NotNull(cut.Find("svg.pixel-icon--delete"));
+        Assert.NotNull(cut.Find("svg.pixel-icon--warning"));
+        Assert.NotNull(cut.Find("svg.pixel-icon--cancel"));
+    }
 }

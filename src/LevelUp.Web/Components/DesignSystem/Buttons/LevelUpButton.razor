@@ -6,7 +6,7 @@
         @attributes="AdditionalAttributes">
     @if (IsLoading)
     {
-        <span class="levelup-button__loader" aria-hidden="true"></span>
+        <PixelIcon Name="PixelIconName.Loading" Size="@IconSize" Class="levelup-button__loader" />
     }
     else if (Icon is not null)
     {

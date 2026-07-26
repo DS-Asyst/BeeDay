@@ -8,7 +8,7 @@
     {
         <article class="levelup-toast levelup-toast--@VariantClass(toast.Variant)"
                  role="@RoleFor(toast.Variant)">
-            <span class="levelup-toast__icon" aria-hidden="true">@IconFor(toast.Variant)</span>
+            <span class="levelup-toast__icon" aria-hidden="true"><PixelIcon Name="@IconFor(toast.Variant)" Size="PixelIconSize.Small" /></span>
             <div class="levelup-toast__content">
                 <strong>@toast.Title</strong>
                 <p>@toast.Message</p>
@@ -16,7 +16,9 @@
             <button class="levelup-toast__close"
                     type="button"
                     aria-label="Dismiss notification"
-                    @onclick="() => ToastService.Remove(toast.Id)">×</button>
+                    @onclick="() => ToastService.Remove(toast.Id)">
+                <PixelIcon Name="PixelIconName.Close" Size="PixelIconSize.ExtraSmall" />
+            </button>
         </article>
     }
 </div>
@@ -41,11 +43,11 @@
         _ => "info"
     };
 
-    private static string IconFor(ToastVariant variant) => variant switch
+    private static PixelIconName IconFor(ToastVariant variant) => variant switch
     {
-        ToastVariant.Success => "✓",
-        ToastVariant.Error => "!",
-        _ => "i"
+        ToastVariant.Success => PixelIconName.Success,
+        ToastVariant.Error => PixelIconName.ValidationError,
+        _ => PixelIconName.Information
     };
 
     private static string RoleFor(ToastVariant variant) =>

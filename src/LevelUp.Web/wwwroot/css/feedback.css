@@ -45,9 +45,6 @@
     border: 0.25rem solid #e53935;
     border-radius: 50%;
     color: #e53935;
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 1;
 }
 
 .delete-confirmation h2 {
@@ -99,12 +96,7 @@
     width: 1.25rem;
     height: 1.25rem;
     margin-top: 0.05rem;
-    border: 2px solid #e53935;
-    border-radius: 50%;
     color: #e53935;
-    font-size: 0.78rem;
-    font-weight: 700;
-    line-height: 1;
 }
 
 .delete-confirmation__warning strong {
@@ -289,13 +281,8 @@
 }
 
 .levelup-loading-spinner {
-    width: 1rem;
-    height: 1rem;
     flex: 0 0 auto;
-    border: .14rem solid var(--levelup-color-primary-soft);
-    border-top-color: var(--levelup-color-primary);
-    border-radius: 50%;
-    animation: levelup-spin .75s linear infinite;
+    animation: levelup-spin .75s steps(8, end) infinite;
 }
 
 .levelup-loading-label {
@@ -400,3 +387,5 @@
         animation: none;
     }
 }
+
+.levelup-toast__close { display: grid; place-items: center; padding: .2rem; }
