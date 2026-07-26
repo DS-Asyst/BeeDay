@@ -44,7 +44,17 @@ ExperienceTransaction records the source
 - experience required to advance the current level;
 - experience remaining until the next level.
 
-The initial curve uses a linear cost per level: advancing from level `n` requires `100 × n` XP. Cumulative thresholds are therefore 0 XP for level 1, 100 XP for level 2, 300 XP for level 3, and 600 XP for level 4.
+The progression formula is represented by the `IExperienceCurve` contract. The initial implementation is `LinearExperienceCurve`, where advancing from level `n` requires `BaseExperience × n` XP. With the default base value of `100`, cumulative thresholds are 0 XP for level 1, 100 XP for level 2, 300 XP for level 3, and 600 XP for level 4.
+
+The default curve has no product-defined maximum level. Its effective range is constrained only by the persisted `long` XP total and the `int` level type. A configured `LinearExperienceCurve` may define an explicit maximum; at that terminal level, the advance cost is zero. This keeps the initial balancing replaceable without coupling character state or persistence to one permanent formula.
+
+Initial balancing intentionally remains conservative:
+
+- `BaseExperience = 100` preserves the current progression pace;
+- the exponent-style progression proposed for later balancing is not hard-coded yet;
+- cumulative thresholds are derived rather than persisted;
+- binary search calculates a level from XP without iterating through every prior level;
+- boundary tests cover zero XP, exact thresholds, invalid values, configured caps, and `long.MaxValue`.
 
 Every accepted reward must be greater than zero and generates an `ExperienceTransaction` containing the amount, source type, optional source identifier, optional description, and UTC occurrence time. Negative XP and experience removal are intentionally outside Sprint 3.1.
 

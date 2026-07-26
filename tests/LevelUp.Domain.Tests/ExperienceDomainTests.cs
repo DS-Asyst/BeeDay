@@ -142,6 +142,52 @@ public sealed class ExperienceDomainTests
         Assert.Equal(expectedTotal, ExperienceCurve.GetTotalExperienceRequiredForLevel(level));
     }
 
+
+    [Fact]
+    public void Curve_contract_supports_alternative_linear_balance()
+    {
+        IExperienceCurve curve = new LinearExperienceCurve(baseExperience: 250);
+
+        Assert.Equal(250L, curve.BaseExperience);
+        Assert.Null(curve.MaximumLevel);
+        Assert.Equal(2, curve.GetLevel(250));
+        Assert.Equal(750L, curve.GetTotalExperienceRequiredForLevel(3));
+        Assert.Equal(750L, curve.GetExperienceRequiredToAdvance(3));
+    }
+
+    [Fact]
+    public void Curve_can_enforce_an_explicit_maximum_level()
+    {
+        IExperienceCurve curve = new LinearExperienceCurve(baseExperience: 100, maximumLevel: 5);
+
+        Assert.Equal(5, curve.MaximumLevel);
+        Assert.Equal(5, curve.GetLevel(long.MaxValue));
+        Assert.Equal(0L, curve.GetExperienceRequiredToAdvance(5));
+        Assert.Throws<DomainValidationException>(() => curve.GetTotalExperienceRequiredForLevel(6));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-100)]
+    public void Curve_rejects_invalid_base_experience(long baseExperience)
+    {
+        Assert.Throws<DomainValidationException>(() => new LinearExperienceCurve(baseExperience));
+    }
+
+    [Fact]
+    public void Curve_handles_the_largest_supported_experience_value()
+    {
+        var curve = ExperienceCurve.Default;
+
+        var level = curve.GetLevel(long.MaxValue);
+        var currentThreshold = curve.GetTotalExperienceRequiredForLevel(level);
+        var advanceCost = curve.GetExperienceRequiredToAdvance(level);
+
+        Assert.True(level > 1);
+        Assert.True(currentThreshold <= long.MaxValue);
+        Assert.True((decimal)currentThreshold + advanceCost > long.MaxValue);
+    }
+
     [Fact]
     public void Curve_rejects_negative_total_experience()
     {
