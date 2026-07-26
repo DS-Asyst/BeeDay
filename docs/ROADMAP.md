@@ -61,7 +61,7 @@ Sprint 5.1 completed:
 
 Sprint 6.0 completed the architectural foundation:
 
-- formally recognized the existing `LevelUpIcon` and `LevelUpIconName` implementation as the migration baseline;
+- formally recorded the initial icon implementation as the migration baseline;
 - defined the definitive migration to `PixelIcon` and `PixelIconName`, with no parallel general-purpose systems;
 - inventoried current SVG assets, consumers, inline SVGs, direct references, and textual icon substitutes;
 - limited Sprint 6.4 to icon integration with existing Forms and Dialogs;

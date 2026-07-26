@@ -11,8 +11,8 @@ public partial class LevelUpButton
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public bool FullWidth { get; set; }
     [Parameter] public bool Compact { get; set; }
-    [Parameter] public LevelUpIconName? Icon { get; set; }
-    [Parameter] public int IconSize { get; set; } = 18;
+    [Parameter] public PixelIconName? Icon { get; set; }
+    [Parameter] public PixelIconSize IconSize { get; set; } = PixelIconSize.Small;
     [Parameter] public string? Class { get; set; }
     [Parameter] public EventCallback OnClick { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
