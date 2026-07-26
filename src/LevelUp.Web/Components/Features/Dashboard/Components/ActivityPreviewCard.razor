@@ -27,6 +27,8 @@
             <h3><SearchHighlight Text="@Title" SearchTerm="@SearchTerm" /></h3>
         </div>
 
+        <ActivityAttributeBadge Attribute="@Attribute" />
+
         @if (!string.IsNullOrWhiteSpace(Description))
         {
             <p><SearchHighlight Text="@Description" SearchTerm="@SearchTerm" /></p>

@@ -1,0 +1,5 @@
+.activity-attribute-icon {
+    display: inline-block;
+    flex: 0 0 auto;
+    image-rendering: pixelated;
+}

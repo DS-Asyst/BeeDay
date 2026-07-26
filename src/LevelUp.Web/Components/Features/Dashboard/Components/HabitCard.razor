@@ -27,6 +27,8 @@
                              OpenChanged="HandleMenuOpenChanged" />
         </div>
 
+        <ActivityAttributeBadge Attribute="@Attribute" />
+
         @if (!string.IsNullOrWhiteSpace(Description))
         {
             <p><SearchHighlight Text="@Description" SearchTerm="@SearchTerm" /></p>

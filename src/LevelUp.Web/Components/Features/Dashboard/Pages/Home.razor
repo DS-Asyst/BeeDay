@@ -32,7 +32,7 @@ else if (State.Data?.CurrentCharacter is not null)
                                          OnReorder="State.ReorderHabitsAsync">
                             <ItemTemplate Context="itemId">
                                 @{ var item = habits.First(candidate => candidate.Id == itemId); }
-                                <HabitCard Title="@item.Title" Description="@item.Description" Direction="@item.Direction" PositiveCount="@item.PositiveCount" NegativeCount="@item.NegativeCount" Featured="@item.Featured" SearchTerm="@State.Search" OnPositive="@(() => State.RegisterPositiveAsync(item.Id))" OnNegative="@(() => State.RegisterNegativeAsync(item.Id))" OnEdit="@(() => State.OpenHabitEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Habit, item.Title))" />
+                                <HabitCard Title="@item.Title" Description="@item.Description" Attribute="@item.Attribute" Direction="@item.Direction" PositiveCount="@item.PositiveCount" NegativeCount="@item.NegativeCount" Featured="@item.Featured" SearchTerm="@State.Search" OnPositive="@(() => State.RegisterPositiveAsync(item.Id))" OnNegative="@(() => State.RegisterNegativeAsync(item.Id))" OnEdit="@(() => State.OpenHabitEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Habit, item.Title))" />
                             </ItemTemplate>
                         </LevelUpSortable>
                     </ActiveContent>
@@ -57,14 +57,14 @@ else if (State.Data?.CurrentCharacter is not null)
                                          OnReorder="State.ReorderTasksAsync">
                             <ItemTemplate Context="itemId">
                                 @{ var item = activeTasks.First(candidate => candidate.Id == itemId); }
-                                <ActivityPreviewCard Title="@item.Title" Description="@item.Description" Meta="@State.FormatRepeat(item.Repeat)" Variant="task" Completed="false" Featured="@item.Featured" SearchTerm="@State.Search" OnToggle="@(() => State.ToggleTaskAsync(item.Id))" OnEdit="@(() => State.OpenTaskEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Task, item.Title))" />
+                                <ActivityPreviewCard Title="@item.Title" Description="@item.Description" Attribute="@item.Attribute" Meta="@State.FormatRepeat(item.Repeat)" Variant="task" Completed="false" Featured="@item.Featured" SearchTerm="@State.Search" OnToggle="@(() => State.ToggleTaskAsync(item.Id))" OnEdit="@(() => State.OpenTaskEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Task, item.Title))" />
                             </ItemTemplate>
                         </LevelUpSortable>
                     </ActiveContent>
                     <CompletedContent>
                         @foreach (var item in completedTasks)
                         {
-                            <ActivityPreviewCard @key="item.Id" Title="@item.Title" Description="@item.Description" Meta="@State.FormatRepeat(item.Repeat)" Variant="task" Completed="true" Featured="@item.Featured" SearchTerm="@State.Search" OnToggle="@(() => State.ToggleTaskAsync(item.Id))" OnEdit="@(() => State.OpenTaskEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Task, item.Title))" />
+                            <ActivityPreviewCard @key="item.Id" Title="@item.Title" Description="@item.Description" Attribute="@item.Attribute" Meta="@State.FormatRepeat(item.Repeat)" Variant="task" Completed="true" Featured="@item.Featured" SearchTerm="@State.Search" OnToggle="@(() => State.ToggleTaskAsync(item.Id))" OnEdit="@(() => State.OpenTaskEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Task, item.Title))" />
                         }
                     </CompletedContent>
                 </DashboardColumn>
@@ -88,14 +88,14 @@ else if (State.Data?.CurrentCharacter is not null)
                                          OnReorder="State.ReorderTodosAsync">
                             <ItemTemplate Context="itemId">
                                 @{ var item = activeTodos.First(candidate => candidate.Id == itemId); }
-                                <ActivityPreviewCard Title="@item.Title" Description="@item.Description" Meta="@State.FormatDueDate(item.DueDate)" Variant="todo" Completed="false" Featured="@item.Featured" SearchTerm="@State.Search" OnToggle="@(() => State.ToggleTodoAsync(item.Id))" OnEdit="@(() => State.OpenTodoEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Todo, item.Title))" />
+                                <ActivityPreviewCard Title="@item.Title" Description="@item.Description" Attribute="@item.Attribute" Meta="@State.FormatDueDate(item.DueDate)" Variant="todo" Completed="false" Featured="@item.Featured" SearchTerm="@State.Search" OnToggle="@(() => State.ToggleTodoAsync(item.Id))" OnEdit="@(() => State.OpenTodoEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Todo, item.Title))" />
                             </ItemTemplate>
                         </LevelUpSortable>
                     </ActiveContent>
                     <CompletedContent>
                         @foreach (var item in completedTodos)
                         {
-                            <ActivityPreviewCard @key="item.Id" Title="@item.Title" Description="@item.Description" Meta="@State.FormatDueDate(item.DueDate)" Variant="todo" Completed="true" Featured="@item.Featured" SearchTerm="@State.Search" OnToggle="@(() => State.ToggleTodoAsync(item.Id))" OnEdit="@(() => State.OpenTodoEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Todo, item.Title))" />
+                            <ActivityPreviewCard @key="item.Id" Title="@item.Title" Description="@item.Description" Attribute="@item.Attribute" Meta="@State.FormatDueDate(item.DueDate)" Variant="todo" Completed="true" Featured="@item.Featured" SearchTerm="@State.Search" OnToggle="@(() => State.ToggleTodoAsync(item.Id))" OnEdit="@(() => State.OpenTodoEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Todo, item.Title))" />
                         }
                     </CompletedContent>
                 </DashboardColumn>
@@ -119,14 +119,14 @@ else if (State.Data?.CurrentCharacter is not null)
                                          OnReorder="State.ReorderProjectsAsync">
                             <ItemTemplate Context="itemId">
                                 @{ var item = activeProjects.First(candidate => candidate.Id == itemId); }
-                                <ActivityPreviewCard Title="@item.Title" Description="@item.Description" Meta="@($"{State.FormatProjectStatus(item.Status)} · {item.Progress:0.##}%")" Variant="project" Completed="false" Featured="@item.Featured" SearchTerm="@State.Search" OnOpen="@(() => State.OpenProjectWorkspace(item))" OnEdit="@(() => State.OpenProjectEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Project, item.Title))" />
+                                <ActivityPreviewCard Title="@item.Title" Description="@item.Description" Attribute="@item.Attribute" Meta="@($"{State.FormatProjectStatus(item.Status)} · {item.Progress:0.##}%")" Variant="project" Completed="false" Featured="@item.Featured" SearchTerm="@State.Search" OnOpen="@(() => State.OpenProjectWorkspace(item))" OnEdit="@(() => State.OpenProjectEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Project, item.Title))" />
                             </ItemTemplate>
                         </LevelUpSortable>
                     </ActiveContent>
                     <CompletedContent>
                         @foreach (var item in completedProjects)
                         {
-                            <ActivityPreviewCard @key="item.Id" Title="@item.Title" Description="@item.Description" Meta="@($"{State.FormatProjectStatus(item.Status)} · {item.Progress:0.##}%")" Variant="project" Completed="true" Featured="@item.Featured" SearchTerm="@State.Search" OnOpen="@(() => State.OpenProjectWorkspace(item))" OnEdit="@(() => State.OpenProjectEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Project, item.Title))" />
+                            <ActivityPreviewCard @key="item.Id" Title="@item.Title" Description="@item.Description" Attribute="@item.Attribute" Meta="@($"{State.FormatProjectStatus(item.Status)} · {item.Progress:0.##}%")" Variant="project" Completed="true" Featured="@item.Featured" SearchTerm="@State.Search" OnOpen="@(() => State.OpenProjectWorkspace(item))" OnEdit="@(() => State.OpenProjectEditor(item))" OnDelete="@(() => State.RequestDelete(item.Id, ActivityType.Project, item.Title))" />
                         }
                     </CompletedContent>
                 </DashboardColumn>

@@ -16,7 +16,7 @@ public sealed class LevelUpIconTests
         var svg = cut.Find("svg");
         Assert.Equal("img", svg.GetAttribute("role"));
         Assert.Equal("Warning", cut.Find("title").TextContent);
-        Assert.NotEmpty(cut.FindAll("rect"));
+        Assert.Contains("warning.svg", cut.Find("image").GetAttribute("href"));
     }
 
     [Fact]

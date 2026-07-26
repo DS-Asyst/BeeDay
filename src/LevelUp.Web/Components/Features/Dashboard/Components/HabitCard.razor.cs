@@ -9,6 +9,7 @@ public partial class HabitCard
     [Parameter] public string Description { get; set; } = string.Empty;
     [Parameter] public string SearchTerm { get; set; } = string.Empty;
     [Parameter] public HabitDirection Direction { get; set; } = HabitDirection.Both;
+    [Parameter] public ActivityAttribute? Attribute { get; set; }
     [Parameter] public int PositiveCount { get; set; }
     [Parameter] public int NegativeCount { get; set; }
     [Parameter] public bool Featured { get; set; }

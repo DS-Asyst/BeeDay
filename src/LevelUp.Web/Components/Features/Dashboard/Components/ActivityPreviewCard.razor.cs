@@ -1,3 +1,4 @@
+using LevelUp.Domain.Enums;
 using Microsoft.AspNetCore.Components;
 
 namespace LevelUp.Web.Components.Features.Dashboard.Components;
@@ -9,6 +10,7 @@ public partial class ActivityPreviewCard
     [Parameter] public string SearchTerm { get; set; } = string.Empty;
     [Parameter] public string Meta { get; set; } = string.Empty;
     [Parameter] public string Variant { get; set; } = "task";
+    [Parameter] public ActivityAttribute? Attribute { get; set; }
     [Parameter] public bool Featured { get; set; }
     [Parameter] public bool Completed { get; set; }
     [Parameter] public EventCallback OnToggle { get; set; }

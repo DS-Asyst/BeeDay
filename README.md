@@ -103,6 +103,8 @@ Production data, backups, Data Protection keys, generated emails, and logs live 
 
 ## Documentation
 
+- [Pixel Icon Library](docs/PIXEL_ICON_LIBRARY.md)
+
 - [Architecture](docs/ARCHITECTURE.md)
 - [Authentication](docs/AUTHENTICATION.md)
 - [CI/CD](docs/CI_CD.md)
