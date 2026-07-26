@@ -54,7 +54,7 @@
 
 .character-field span {
     color: #4a4052;
-    font-size: .75rem;
+    font-size: var(--levelup-font-size-md);
     font-weight: 700;
 }
 
@@ -78,7 +78,7 @@
 .character-password-hint {
     margin: -.1rem 0 .2rem;
     color: #716877;
-    font-size: .72rem;
+    font-size: var(--levelup-font-size-md);
     line-height: 1.45;
 }
 

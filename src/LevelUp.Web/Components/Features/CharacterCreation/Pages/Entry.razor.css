@@ -1,5 +1,5 @@
 .entry-loading {
-    min-height: 100vh;
+    min-height: 0;
     display: grid;
     place-content: center;
     gap: .75rem;
