@@ -1,11 +1,13 @@
 using System.Security.Claims;
 using LevelUp.Application.Common.Contracts;
+using LevelUp.Application.Common.Events;
 using LevelUp.Application.DependencyInjection;
 using LevelUp.Application.Features.Authentication.Commands;
 using LevelUp.Application.Features.Authentication.Requests;
 using LevelUp.Domain.Exceptions;
 using LevelUp.Infrastructure.DependencyInjection;
 using LevelUp.Web.Components;
+using LevelUp.Web.Components.Features.Character.Feedback;
 using LevelUp.Web.Components.Features.CharacterCreation.State;
 using LevelUp.Web.Components.Features.Dashboard.State;
 using LevelUp.Web.Configuration;
@@ -182,6 +184,8 @@ builder.Services.AddScoped<LevelUpWebService>();
 builder.Services.AddScoped<ToastService>();
 builder.Services.AddScoped<AuthenticatedUserInitializer>();
 builder.Services.AddScoped<DashboardState>();
+builder.Services.AddScoped<LevelUpFeedbackStore>();
+builder.Services.AddScoped<INotificationHandler<DomainEventNotification>, LevelUpFeedbackEventHandler>();
 builder.Services.AddScoped<CharacterCreationState>();
 
 var app = builder.Build();

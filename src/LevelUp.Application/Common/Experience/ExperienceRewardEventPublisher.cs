@@ -8,28 +8,52 @@ namespace LevelUp.Application.Common.Experience;
 
 public static class ExperienceRewardEventPublisher
 {
-    public static Task PublishAsync(
+    public static async Task PublishAsync(
         IPublisher publisher,
         Guid userId,
         Character character,
-        ExperienceTransaction? transaction,
+        ExperienceEntry? entry,
         CancellationToken cancellationToken)
     {
-        if (transaction?.Source.ReferenceId is not Guid sourceId)
+        if (entry?.Source.ReferenceId is not Guid sourceId)
         {
-            return Task.CompletedTask;
+            return;
         }
 
-        var domainEvent = new ExperienceGrantedDomainEvent(
+        var experienceGrantedEvent = new ExperienceGrantedDomainEvent(
             userId,
             character.Id,
-            transaction.Id,
-            transaction.Amount,
-            transaction.Source.Type,
+            entry.Id,
+            entry.Amount,
+            entry.Source.Type,
             sourceId,
-            transaction.RewardType,
-            transaction.GrantedAtUtc);
+            entry.RewardType,
+            entry.GrantedAtUtc);
 
-        return publisher.Publish(new DomainEventNotification(domainEvent), cancellationToken);
+        await publisher.Publish(
+            new DomainEventNotification(experienceGrantedEvent),
+            cancellationToken);
+
+        if (entry.LevelAfter <= entry.LevelBefore)
+        {
+            return;
+        }
+
+        var characterLeveledUpEvent = new CharacterLeveledUpDomainEvent(
+            character.Id,
+            entry.Id,
+            entry.LevelBefore,
+            entry.LevelAfter,
+            entry.LevelAfter - entry.LevelBefore,
+            entry.Amount,
+            entry.Source.Type,
+            entry.GrantedAtUtc)
+        {
+            OccurredOnUtc = entry.GrantedAtUtc,
+        };
+
+        await publisher.Publish(
+            new DomainEventNotification(characterLeveledUpEvent),
+            cancellationToken);
     }
 }

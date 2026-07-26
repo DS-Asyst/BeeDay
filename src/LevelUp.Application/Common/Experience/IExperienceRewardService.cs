@@ -6,7 +6,7 @@ namespace LevelUp.Application.Common.Experience;
 
 public interface IExperienceRewardService
 {
-    public ExperienceTransaction? Grant(
+    public ExperienceEntry? Grant(
         LevelUpData data,
         Guid userId,
         ExperienceSourceType sourceType,

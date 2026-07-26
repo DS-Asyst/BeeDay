@@ -1,0 +1,186 @@
+.level-up-feedback-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--levelup-z-modal);
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgb(35 18 56 / 82%);
+    backdrop-filter: blur(3px);
+}
+
+.level-up-feedback {
+    position: relative;
+    width: min(34rem, calc(100vw - 2rem));
+    overflow: hidden;
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-lg);
+    background: var(--levelup-color-surface);
+    box-shadow: var(--levelup-shadow-lg);
+    animation: level-up-feedback-enter var(--levelup-transition-normal) ease-out;
+}
+
+.level-up-feedback:focus-visible {
+    outline: 3px solid var(--levelup-color-primary);
+    outline-offset: 3px;
+}
+
+.level-up-feedback__accent {
+    height: .45rem;
+    background: var(--levelup-color-primary);
+}
+
+.level-up-feedback__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+    text-align: center;
+}
+
+.level-up-feedback__eyebrow {
+    margin: 0;
+    color: var(--levelup-color-text-secondary);
+    font: var(--levelup-type-caption);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.level-up-feedback h2 {
+    margin: 0;
+    color: var(--levelup-color-primary);
+    font: var(--levelup-type-display);
+}
+
+.level-up-feedback__summary {
+    margin: 0;
+    color: var(--levelup-color-text-secondary);
+}
+
+.level-up-feedback__levels {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    margin: .25rem 0 0;
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-md);
+    background: var(--levelup-color-surface-subtle);
+}
+
+.level-up-feedback__levels > div {
+    padding: 1rem .75rem;
+}
+
+.level-up-feedback__levels > div + div {
+    border-left: 1px solid var(--levelup-color-border);
+}
+
+.level-up-feedback__levels dt {
+    color: var(--levelup-color-text-secondary);
+    font: var(--levelup-type-caption);
+}
+
+.level-up-feedback__levels dd {
+    margin: .35rem 0 0;
+    color: var(--levelup-color-text-primary);
+    font-size: 1.65rem;
+    font-weight: 700;
+}
+
+.level-up-feedback__new-level dd {
+    color: var(--levelup-color-primary);
+}
+
+.level-up-feedback__xp {
+    margin: 0;
+    padding: .65rem 1rem;
+    border-radius: var(--levelup-radius-pill);
+    background: var(--levelup-color-primary-soft);
+    color: var(--levelup-color-primary-active);
+    font-weight: 700;
+}
+
+.level-up-feedback__history {
+    width: 100%;
+    text-align: left;
+}
+
+.level-up-feedback__history h3 {
+    margin: 0 0 .5rem;
+    font: var(--levelup-type-subtitle);
+}
+
+.level-up-feedback__history ul {
+    display: grid;
+    gap: .5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.level-up-feedback__history li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .65rem .75rem;
+    border-bottom: 1px solid var(--levelup-color-border);
+}
+
+.level-up-feedback__history span {
+    color: var(--levelup-color-text-secondary);
+    text-align: right;
+}
+
+@keyframes level-up-feedback-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-.75rem) scale(.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 560px) {
+    .level-up-feedback-backdrop {
+        align-items: end;
+        padding: .5rem;
+    }
+
+    .level-up-feedback {
+        width: 100%;
+        max-height: calc(100vh - 1rem);
+        overflow-y: auto;
+    }
+
+    .level-up-feedback__content {
+        padding: 1.4rem 1rem;
+    }
+
+    .level-up-feedback__levels {
+        grid-template-columns: 1fr;
+    }
+
+    .level-up-feedback__levels > div + div {
+        border-top: 1px solid var(--levelup-color-border);
+        border-left: 0;
+    }
+
+    .level-up-feedback__history li {
+        flex-direction: column;
+        gap: .2rem;
+    }
+
+    .level-up-feedback__history span {
+        text-align: left;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .level-up-feedback {
+        animation: none;
+    }
+}

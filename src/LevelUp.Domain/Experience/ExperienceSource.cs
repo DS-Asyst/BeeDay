@@ -40,7 +40,7 @@ public sealed class ExperienceSource
         {
             Type = EnumValidation.Defined(type, nameof(type)),
             ReferenceId = referenceId,
-            Description = normalizedDescription
+            Description = normalizedDescription,
         };
     }
 }

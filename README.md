@@ -114,3 +114,7 @@ Production data, backups, Data Protection keys, generated emails, and logs live 
 - [User Interface](docs/UI.md)
 
 Documentation is maintained in English and must be updated in the same change as the implementation it describes.
+
+## Experience progression
+
+The finalized XP and Level Up pipeline is documented in [`docs/EXPERIENCE.md`](docs/EXPERIENCE.md).

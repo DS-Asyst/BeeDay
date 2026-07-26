@@ -5,9 +5,11 @@ using LevelUp.Domain.Experience;
 
 namespace LevelUp.Application.Common.Experience;
 
-public sealed class ExperienceRewardService : IExperienceRewardService
+public sealed class ExperienceRewardService(IExperienceRewardPolicy? policy = null) : IExperienceRewardService
 {
-    public ExperienceTransaction? Grant(
+    private readonly IExperienceRewardPolicy _policy = policy ?? new ExperienceRewardPolicy();
+
+    public ExperienceEntry? Grant(
         LevelUpData data,
         Guid userId,
         ExperienceSourceType sourceType,
@@ -23,32 +25,18 @@ public sealed class ExperienceRewardService : IExperienceRewardService
             throw new DomainValidationException(nameof(sourceId), "Experience source identifier is required.");
         }
 
-        var character = data.FindCharacterForUser(userId)
-            ?? throw new InvalidDomainStateException("A Character is required before experience can be granted.");
-
-        var amount = GetRewardAmount(sourceType, rewardType);
-        return character.TryAddExperience(
-            ExperienceReward.Create(amount),
-            ExperienceSource.Create(sourceType, sourceId, description),
-            rewardType,
-            grantedAtUtc);
-    }
-
-    private static long GetRewardAmount(ExperienceSourceType sourceType, ExperienceRewardType rewardType)
-    {
         if (rewardType != ExperienceRewardType.Completion)
         {
             throw new DomainValidationException(nameof(rewardType), "Unsupported experience reward type.");
         }
 
-        return sourceType switch
-        {
-            ExperienceSourceType.Habit => 10,
-            ExperienceSourceType.Task => 20,
-            ExperienceSourceType.Todo => 25,
-            ExperienceSourceType.Project => 50,
-            ExperienceSourceType.Reading => 10,
-            _ => throw new DomainValidationException(nameof(sourceType), "This source cannot use the automatic reward pipeline.")
-        };
+        Character character = data.FindCharacterForUser(userId)
+            ?? throw new InvalidDomainStateException("A Character is required before experience can be granted.");
+
+        return character.TryAddExperience(
+            ExperienceReward.Create(_policy.GetReward(sourceType)),
+            ExperienceSource.Create(sourceType, sourceId, description),
+            rewardType,
+            grantedAtUtc);
     }
 }

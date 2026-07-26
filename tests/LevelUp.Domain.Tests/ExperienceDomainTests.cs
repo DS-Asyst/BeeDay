@@ -18,7 +18,7 @@ public sealed class ExperienceDomainTests
         Assert.Equal(0L, character.Experience.CurrentLevelExperience);
         Assert.Equal(100L, character.Experience.ExperienceRequiredForCurrentLevel);
         Assert.Equal(100L, character.Experience.ExperienceForNextLevel);
-        Assert.Empty(character.Experience.Transactions);
+        Assert.Empty(character.Experience.Entries);
     }
 
     [Theory]
@@ -55,16 +55,16 @@ public sealed class ExperienceDomainTests
         var occurredAtUtc = new DateTimeOffset(2026, 7, 26, 3, 30, 0, TimeSpan.Zero);
         var source = ExperienceSource.Create(ExperienceSourceType.Habit, sourceId, "Completed morning routine");
 
-        var transaction = character.AddExperience(ExperienceReward.Create(25), source, occurredAtUtc);
+        var entry = character.AddExperience(ExperienceReward.Create(25), source, occurredAtUtc);
 
         Assert.Equal(25L, character.Experience.TotalExperience);
-        Assert.Single(character.Experience.Transactions);
-        Assert.Same(transaction, character.Experience.Transactions[0]);
-        Assert.Equal(25L, transaction.Amount);
-        Assert.Equal(ExperienceSourceType.Habit, transaction.Source.Type);
-        Assert.Equal(sourceId, transaction.Source.ReferenceId);
-        Assert.Equal("Completed morning routine", transaction.Source.Description);
-        Assert.Equal(occurredAtUtc, transaction.OccurredAtUtc);
+        Assert.Single(character.Experience.Entries);
+        Assert.Same(entry, character.Experience.Entries[0]);
+        Assert.Equal(25L, entry.Amount);
+        Assert.Equal(ExperienceSourceType.Habit, entry.Source.Type);
+        Assert.Equal(sourceId, entry.Source.ReferenceId);
+        Assert.Equal("Completed morning routine", entry.Source.Description);
+        Assert.Equal(occurredAtUtc, entry.OccurredAtUtc);
         Assert.Equal(occurredAtUtc, character.UpdatedAtUtc);
     }
 
@@ -84,7 +84,7 @@ public sealed class ExperienceDomainTests
         Assert.Equal(2, experience.CurrentLevel);
         Assert.Equal(10L, experience.CurrentLevelExperience);
         Assert.Equal(190L, experience.ExperienceForNextLevel);
-        Assert.Equal(2, experience.Transactions.Count);
+        Assert.Equal(2, experience.Entries.Count);
     }
 
     [Theory]

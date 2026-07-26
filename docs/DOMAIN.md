@@ -42,7 +42,7 @@ Character.TryAddExperience
        ↓
 CharacterExperience checks idempotency
        ↓
-ExperienceTransaction is persisted
+ExperienceEntry is persisted
        ↓
 ExperienceCurve derives level and progress
 ```
@@ -52,7 +52,7 @@ ExperienceCurve derives level and progress
 Persisted:
 
 - total experience;
-- experience transaction history.
+- experience entry history.
 
 Derived:
 
@@ -74,27 +74,22 @@ The default curve has no product-defined maximum level. A configured curve may d
 
 ### Automatic reward pipeline
 
-The current automatic completion rewards are centralized in `ExperienceRewardService`:
+The current automatic completion rewards are centralized in `ExperienceRewardPolicy`:
 
 | Source | Completion reward |
 | --- | ---: |
-| Habit | 10 XP |
-| Recurring task | 20 XP |
-| Todo | 25 XP |
-| Project | 50 XP |
-| Reading | 10 XP |
+| Positive habit | 1 XP |
+| Recurring task | 5 XP |
+| Todo | 7 XP |
+| Project | 20 XP |
 
-Reading is reserved for the future Library module.
-
-Automatic rewards require a source identifier. The idempotency key is:
+Automatic rewards require a source identifier. Task, todo, and project rewards use the idempotency key:
 
 ```text
-(SourceType, SourceId, RewardType)
+(CharacterId, SourceType, SourceId, RewardType)
 ```
 
-Repeating the same completion command cannot grant the same reward twice. Successful grants publish `ExperienceGrantedDomainEvent` after persistence.
-
-Reward values are balancing configuration embedded in the current service implementation and may change in a dedicated product-balancing sprint.
+Habit rewards use a unique occurrence identifier so repeated legitimate actions remain rewardable. Successful grants publish `ExperienceGrantedDomainEvent` after persistence. When an entry crosses one or more level boundaries, the same pipeline also publishes one aggregate `CharacterLeveledUpDomainEvent`.
 
 ## Domain rules
 
@@ -103,3 +98,20 @@ Reward values are balancing configuration embedded in the current service implem
 - Domain events communicate meaningful state changes without infrastructure coupling.
 - Persistence serialization details must not redefine business behavior.
 - New modules must define ownership and invariants before extending shared aggregates.
+
+
+## Experience progression
+
+All automatic XP rewards flow through `IExperienceRewardPolicy` and `IExperienceRewardService`.
+The initial balance is centralized as: positive habit `1 XP`, task completion `5 XP`, todo completion `7 XP`, and project completion `20 XP`.
+
+Every accepted reward creates an `ExperienceEntry` containing the character, typed source, source reference, amount, XP before/after, level before/after, and UTC grant time. Task, todo, and project rewards are idempotent by character, source type, and source reference. Positive habit actions use a unique occurrence reference so legitimate repeated actions remain rewardable.
+### Level-up events and journal
+
+A completed `ExperienceEntry` is the source of truth for level transitions. `CharacterLeveledUpDomainEvent` is published only when `LevelAfter` is greater than `LevelBefore`. The event records the previous level, new level, number of levels gained, reward amount, typed experience source, and the `ExperienceEntry` identifier that caused the transition.
+
+Multiple crossed levels produce one aggregate event rather than one event per level. The JSON Event Journal persists a readable summary and the structured event payload. Journal writes are idempotent by `EventId`; level-up events are additionally idempotent by `ExperienceEntryId`, preventing duplicate audit records when the same transition is processed again.
+
+## Experience progression
+
+The complete reward, persistence, idempotency, level calculation, events, journal, and UI flow is documented in [`EXPERIENCE.md`](EXPERIENCE.md).

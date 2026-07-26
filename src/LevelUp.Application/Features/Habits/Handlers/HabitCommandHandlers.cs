@@ -28,7 +28,7 @@ public sealed class RegisterHabitPositiveCommandHandler(
 {
     public async Task Handle(RegisterHabitPositiveCommand command, CancellationToken cancellationToken)
     {
-        ExperienceTransaction? transaction = null;
+        ExperienceEntry? experienceEntry = null;
         Character? character = null;
         Guid userId = Guid.Empty;
 
@@ -45,21 +45,23 @@ public sealed class RegisterHabitPositiveCommandHandler(
             }
 
             character = data.FindCharacterForUser(userId);
-            transaction = (rewards ?? new ExperienceRewardService()).Grant(
+            experienceEntry = (rewards ?? new ExperienceRewardService()).Grant(
                 data,
                 userId,
                 ExperienceSourceType.Habit,
-                habit.Id,
+                Guid.NewGuid(),
                 ExperienceRewardType.Completion,
                 $"Positive habit registered: {habit.Title}");
         }, cancellationToken);
 
-        if (character is not null)
+        if (character is not null && publisher is not null)
         {
-            if (publisher is not null)
-            {
-                await ExperienceRewardEventPublisher.PublishAsync(publisher, userId, character, transaction, cancellationToken);
-            }
+            await ExperienceRewardEventPublisher.PublishAsync(
+                publisher,
+                userId,
+                character,
+                experienceEntry,
+                cancellationToken);
         }
     }
 }

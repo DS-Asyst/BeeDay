@@ -32,31 +32,31 @@ public sealed class Character : Entity
         };
     }
 
-    public ExperienceTransaction AddExperience(
+    public ExperienceEntry AddExperience(
         ExperienceReward reward,
         ExperienceSource source,
         DateTimeOffset? occurredAtUtc = null) =>
         AddExperience(reward, source, ExperienceRewardType.Completion, occurredAtUtc);
 
-    public ExperienceTransaction AddExperience(
+    public ExperienceEntry AddExperience(
         ExperienceReward reward,
         ExperienceSource source,
         ExperienceRewardType rewardType,
         DateTimeOffset? occurredAtUtc = null)
     {
-        var transaction = Experience.Add(reward, source, rewardType, occurredAtUtc);
+        var transaction = Experience.Add(Id, reward, source, rewardType, occurredAtUtc);
         UpdatedAtUtc = transaction.OccurredAtUtc;
         return transaction;
     }
 
 
-    public ExperienceTransaction? TryAddExperience(
+    public ExperienceEntry? TryAddExperience(
         ExperienceReward reward,
         ExperienceSource source,
         ExperienceRewardType rewardType,
         DateTimeOffset? grantedAtUtc = null)
     {
-        var transaction = Experience.TryAdd(reward, source, rewardType, grantedAtUtc);
+        var transaction = Experience.TryAdd(Id, reward, source, rewardType, grantedAtUtc);
         if (transaction is not null)
         {
             UpdatedAtUtc = transaction.GrantedAtUtc;

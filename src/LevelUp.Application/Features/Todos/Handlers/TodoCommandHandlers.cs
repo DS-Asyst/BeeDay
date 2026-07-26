@@ -50,8 +50,8 @@ public sealed class ToggleTodoCommandHandler(
 {
     public async Task Handle(ToggleTodoCommand command, CancellationToken cancellationToken)
     {
-        ExperienceTransaction? todoTransaction = null;
-        ExperienceTransaction? projectTransaction = null;
+        ExperienceEntry? todoExperienceEntry = null;
+        ExperienceEntry? projectExperienceEntry = null;
         Character? character = null;
         Guid userId = Guid.Empty;
 
@@ -67,7 +67,7 @@ public sealed class ToggleTodoCommandHandler(
             if (!todoWasCompleted && found.Todo.Completed)
             {
                 character = data.FindCharacterForUser(userId);
-                todoTransaction = (rewards ?? new ExperienceRewardService()).Grant(
+                todoExperienceEntry = (rewards ?? new ExperienceRewardService()).Grant(
                     data,
                     userId,
                     ExperienceSourceType.Todo,
@@ -79,7 +79,7 @@ public sealed class ToggleTodoCommandHandler(
             if (!projectWasCompleted && found.Project.Completed)
             {
                 character ??= data.FindCharacterForUser(userId);
-                projectTransaction = (rewards ?? new ExperienceRewardService()).Grant(
+                projectExperienceEntry = (rewards ?? new ExperienceRewardService()).Grant(
                     data,
                     userId,
                     ExperienceSourceType.Project,
@@ -96,8 +96,18 @@ public sealed class ToggleTodoCommandHandler(
 
         if (publisher is not null)
         {
-            await ExperienceRewardEventPublisher.PublishAsync(publisher, userId, character, todoTransaction, cancellationToken);
-            await ExperienceRewardEventPublisher.PublishAsync(publisher, userId, character, projectTransaction, cancellationToken);
+            await ExperienceRewardEventPublisher.PublishAsync(
+                publisher,
+                userId,
+                character,
+                todoExperienceEntry,
+                cancellationToken);
+            await ExperienceRewardEventPublisher.PublishAsync(
+                publisher,
+                userId,
+                character,
+                projectExperienceEntry,
+                cancellationToken);
         }
     }
 }

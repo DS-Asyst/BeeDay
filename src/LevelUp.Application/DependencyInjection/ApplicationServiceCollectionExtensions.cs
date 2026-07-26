@@ -14,6 +14,7 @@ public static class ApplicationServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
 
         services.AddScoped<IEmailConfirmationIssuer, EmailConfirmationIssuer>();
+        services.AddSingleton<IExperienceRewardPolicy, ExperienceRewardPolicy>();
         services.AddScoped<IExperienceRewardService, ExperienceRewardService>();
 
         services.AddValidatorsFromAssemblyContaining<ApplicationAssemblyMarker>();

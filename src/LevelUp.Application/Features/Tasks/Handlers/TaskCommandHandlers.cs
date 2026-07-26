@@ -28,7 +28,7 @@ public sealed class ToggleTaskCommandHandler(
 {
     public async Task Handle(ToggleTaskCommand command, CancellationToken cancellationToken)
     {
-        ExperienceTransaction? transaction = null;
+        ExperienceEntry? experienceEntry = null;
         Character? character = null;
         Guid userId = Guid.Empty;
 
@@ -45,15 +45,17 @@ public sealed class ToggleTaskCommandHandler(
             }
 
             character = data.FindCharacterForUser(userId);
-            transaction = (rewards ?? new ExperienceRewardService()).Grant(data, userId, ExperienceSourceType.Task, task.Id, ExperienceRewardType.Completion, $"Task completed: {task.Title}");
+            experienceEntry = (rewards ?? new ExperienceRewardService()).Grant(data, userId, ExperienceSourceType.Task, task.Id, ExperienceRewardType.Completion, $"Task completed: {task.Title}");
         }, cancellationToken);
 
-        if (character is not null)
+        if (character is not null && publisher is not null)
         {
-            if (publisher is not null)
-            {
-                await ExperienceRewardEventPublisher.PublishAsync(publisher, userId, character, transaction, cancellationToken);
-            }
+            await ExperienceRewardEventPublisher.PublishAsync(
+                publisher,
+                userId,
+                character,
+                experienceEntry,
+                cancellationToken);
         }
     }
 }

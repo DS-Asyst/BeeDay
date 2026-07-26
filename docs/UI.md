@@ -97,3 +97,9 @@ The Web test project uses bUnit for public component behavior, including:
 - character experience values, progress, loading, and gain feedback.
 
 Tests should avoid coupling to internal CSS implementation unless a visual class is itself a public contract.
+
+## Level Up feedback
+
+The dashboard consumes `CharacterLeveledUpDomainEvent` notifications through a scoped feedback store. The UI never recalculates rewards, experience, levels, or levels gained.
+
+A real level transition produces one accessible modal, including multi-level transitions. Closing the modal consumes the pending feedback, and a new browser refresh or circuit does not replay it. The component supports Escape, explicit focus, responsive layouts, and reduced-motion preferences.
