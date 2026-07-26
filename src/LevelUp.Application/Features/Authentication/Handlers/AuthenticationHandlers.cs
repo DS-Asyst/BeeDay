@@ -32,7 +32,7 @@ public sealed class AuthenticateUserCommandHandler(
 
             if (!user.IsEmailConfirmed)
             {
-                throw new InvalidDomainStateException("Please confirm your email before signing in.");
+                throw new InvalidDomainStateException("Invalid email or password.");
             }
 
             user.RegisterLogin();

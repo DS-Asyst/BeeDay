@@ -28,3 +28,14 @@ LevelUp uses ASP.NET Core cookie authentication.
 - Require antiforgery validation for state-changing browser requests unless an endpoint has a documented alternative protection mechanism.
 - Use POST for state-changing operations such as sign-out.
 - Validate redirect targets as local URLs.
+
+## Endpoint security
+
+- Login and logout are POST-only operations protected by antiforgery validation.
+- Logout is never exposed through a GET endpoint.
+- Authentication failures use the same public message for unknown, inactive, unconfirmed, or invalid accounts.
+- Return URLs are restricted to local application paths to prevent open redirects.
+- Authentication cookies are HttpOnly, use SameSite=Lax, expire after eight hours, and support sliding expiration.
+- Persistent sessions are opt-in through **Remember me** and expire after fourteen days.
+- CookieSecurePolicy is `Always` outside Development and `SameAsRequest` during local development.
+- Authentication logs contain user identifiers only after successful authentication and never contain email addresses, passwords, tokens, or credential hashes.

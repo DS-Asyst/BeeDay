@@ -30,7 +30,9 @@
             </span>
         </a>
 
-        <a href="/auth/logout" class="support-drawer__item">
+        <form method="post" action="/auth/logout" class="support-drawer__logout-form">
+            <AntiforgeryToken />
+            <button type="submit" class="support-drawer__item">
             <span class="support-drawer__icon" aria-hidden="true">
                 <svg viewBox="0 0 64 64">
                     <path d="M28 14H14v36h14"></path>
@@ -42,7 +44,8 @@
                 <strong>LOGOUT</strong>
                 <small>End your current session securely.</small>
             </span>
-        </a>
+            </button>
+        </form>
 
         <button type="button" class="support-drawer__item" @onclick="OnClose">
             <span class="support-drawer__icon" aria-hidden="true">

@@ -41,14 +41,8 @@
                 </div>
             }
 
-            @if (NeedsConfirmation)
-            {
-                <div class="auth-feedback auth-feedback--error" role="alert">
-                    Confirm your email before signing in. <a href="@ResendUrl">Resend confirmation</a>
-                </div>
-            }
-
             <form method="post" action="/auth/login" class="auth-form" onsubmit="const button=this.querySelector('button[type=submit]');if(button){button.disabled=true;button.textContent='Signing in...';}">
+                <AntiforgeryToken />
                 <input type="hidden" name="returnUrl" value="@ReturnUrl" />
 
                 <label class="auth-field">
@@ -109,8 +103,6 @@
     private bool WasConfirmed => Confirmed;
     private bool WasReset => Reset;
     private bool SessionExpired => Expired;
-    private bool NeedsConfirmation => string.Equals(Error, "unconfirmed", StringComparison.OrdinalIgnoreCase);
-    private string ResendUrl => $"/account/resend-confirmation?email={Uri.EscapeDataString(Email ?? string.Empty)}";
     private string ReturnUrl => IsLocalPath(RequestedReturnUrl) ? RequestedReturnUrl! : string.Empty;
 
     private static bool IsLocalPath(string? value) =>

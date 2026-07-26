@@ -48,6 +48,9 @@ builder.Services
         options.Cookie.Name = "LevelUp.Auth";
         options.Cookie.HttpOnly = true;
         options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+            ? CookieSecurePolicy.SameAsRequest
+            : CookieSecurePolicy.Always;
         options.SlidingExpiration = true;
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.Events.OnRedirectToLogin = context =>
@@ -184,30 +187,24 @@ app.MapPost("/auth/login", async (
     catch (InvalidDomainStateException exception)
     {
         loggerFactory.CreateLogger("LevelUp.Authentication").LogWarning(
-            "Authentication.LoginFailed Email={EmailHash} Reason={Reason}",
-            Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(email.Trim().ToUpperInvariant()))),
-            exception.Message.Contains("confirm your email", StringComparison.OrdinalIgnoreCase) ? "Unconfirmed" : "InvalidCredentials");
-        var encodedEmail = Uri.EscapeDataString(email ?? string.Empty);
-        var error = exception.Message.Contains("confirm your email", StringComparison.OrdinalIgnoreCase)
-            ? "unconfirmed"
-            : "invalid";
-        return Results.LocalRedirect($"/login?error={error}&email={encodedEmail}");
+            "Authentication.LoginFailed TraceId={TraceId} Reason={Reason}",
+            httpContext.TraceIdentifier,
+            "InvalidCredentials");
+        return Results.LocalRedirect("/login?error=invalid");
     }
-}).DisableAntiforgery();
+});
 
-app.MapGet("/auth/logout", async (HttpContext httpContext, [FromQuery] string? returnUrl, ILoggerFactory loggerFactory) =>
+app.MapPost("/auth/logout", async (HttpContext httpContext, [FromForm] string? returnUrl, ILoggerFactory loggerFactory) =>
 {
     var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
     await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     loggerFactory.CreateLogger("LevelUp.Authentication").LogInformation(
-        "Authentication.LogoutSucceeded UserId={UserId}", userId);
-    var destination = !string.IsNullOrWhiteSpace(returnUrl) &&
-                      returnUrl.StartsWith('/') &&
-                      !returnUrl.StartsWith("//")
-        ? returnUrl
-        : "/login";
-    return Results.LocalRedirect(destination);
-});
+        "Authentication.LogoutSucceeded UserId={UserId} TraceId={TraceId}",
+        userId,
+        httpContext.TraceIdentifier);
+
+    return Results.LocalRedirect(LoginDestinationResolver.ResolveLogout(returnUrl));
+}).RequireAuthorization();
 
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 

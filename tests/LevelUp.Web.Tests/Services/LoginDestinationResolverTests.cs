@@ -53,3 +53,19 @@ public sealed class LoginDestinationResolverTests
         Assert.Equal("/daily", destination);
     }
 }
+
+public sealed class LogoutDestinationResolverTests
+{
+    [Theory]
+    [InlineData("/login", "/login")]
+    [InlineData("/daily?tab=completed", "/daily?tab=completed")]
+    [InlineData(null, "/login")]
+    [InlineData("", "/login")]
+    [InlineData("https://example.com", "/login")]
+    [InlineData("//example.com", "/login")]
+    [InlineData("/\\example.com", "/login")]
+    public void ResolveLogout_AllowsOnlyLocalPaths(string? returnUrl, string expected)
+    {
+        Assert.Equal(expected, LoginDestinationResolver.ResolveLogout(returnUrl));
+    }
+}

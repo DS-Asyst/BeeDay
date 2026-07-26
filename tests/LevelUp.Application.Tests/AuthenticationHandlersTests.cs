@@ -72,7 +72,7 @@ public sealed class AuthenticationHandlersTests
             new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@levelup.invalid", "Password123")),
             TestContext.Current.CancellationToken));
 
-        Assert.Equal("Please confirm your email before signing in.", exception.Message);
+        Assert.Equal("Invalid email or password.", exception.Message);
     }
 
     private sealed class FakePasswordService : IPasswordService

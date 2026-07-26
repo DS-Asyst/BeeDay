@@ -20,6 +20,9 @@ public static class LoginDestinationResolver
         return IsLocalPath(returnUrl) ? returnUrl! : "/daily";
     }
 
+    public static string ResolveLogout(string? returnUrl) =>
+        IsLocalPath(returnUrl) ? returnUrl! : "/login";
+
     internal static bool IsLocalPath(string? value) =>
         !string.IsNullOrWhiteSpace(value) &&
         value.StartsWith("/", StringComparison.Ordinal) &&

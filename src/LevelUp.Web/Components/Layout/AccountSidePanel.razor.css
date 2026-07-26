@@ -359,3 +359,13 @@
     background: #5b1095;
     border: 0;
 }
+
+.support-drawer__logout-form {
+    margin: 0;
+}
+
+.support-drawer__logout-form .support-drawer__item {
+    width: 100%;
+    border: 0;
+    text-align: left;
+}
