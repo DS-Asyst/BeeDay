@@ -25,7 +25,7 @@
     </div>
 
     <div class="filter-bar__search" role="search">
-        <LevelUpIcon Name="LevelUpIconName.Search" Size="18" Class="filter-bar__search-icon" Decorative="true" />
+        <PixelIcon Name="PixelIconName.Search" Size="PixelIconSize.Medium" Class="filter-bar__search-icon" Decorative="true" />
         <label class="visually-hidden" for="dashboard-search">Search activities</label>
         <input id="dashboard-search" class="filter-bar__input" type="search" placeholder="Search activities or attributes..." value="@inputValue" @oninput="OnInput" />
         <span class="filter-bar__results" role="status" aria-live="polite">@ResultSummary</span>
@@ -34,7 +34,7 @@
     <div class="filter-bar__actions">
         <div class="filter-bar__create">
             <button class="filter-bar__button filter-bar__button--primary" type="button" aria-haspopup="menu" aria-expanded="@showCreateMenu" @onclick="ToggleCreateMenu">
-                <LevelUpIcon Name="LevelUpIconName.Add" Size="16" Decorative="true" />
+                <PixelIcon Name="PixelIconName.Add" Size="PixelIconSize.Small" Decorative="true" />
                 Add activity
             </button>
             @if (showCreateMenu)

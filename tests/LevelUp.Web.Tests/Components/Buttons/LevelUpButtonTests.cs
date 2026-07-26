@@ -67,10 +67,10 @@ public sealed class LevelUpButtonTests
     {
         using var context = new BunitContext();
         var cut = context.Render<LevelUpButton>(parameters => parameters
-            .Add(component => component.Icon, LevelUpIconName.Save)
+            .Add(component => component.Icon, PixelIconName.Save)
             .AddChildContent("SAVE"));
 
-        var icon = cut.Find("svg.levelup-icon--save");
+        var icon = cut.Find("svg.pixel-icon--save");
         Assert.Equal("true", icon.GetAttribute("aria-hidden"));
         Assert.Contains("SAVE", cut.Find(".levelup-button__label").TextContent);
     }
