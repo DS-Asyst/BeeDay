@@ -1,115 +1,190 @@
 param(
     [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
-    [string]$PublishPath
+    [string]$PublishPath,
+
+    [Parameter(Mandatory = $true)]
+    [ValidatePattern("^https://")]
+    [string]$PublicBaseUrl,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNullOrEmpty()]
+    [string]$ResendApiKey,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNullOrEmpty()]
+    [string]$ResendFromAddress,
+
+    [string]$ResendFromName = "LevelUp",
+
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNullOrEmpty()]
+    [string]$AllowedHosts
 )
 
 $ErrorActionPreference = "Stop"
+Set-StrictMode -Version Latest
 
 $siteName = "LevelUp"
 $appPoolName = "LevelUpPool"
-
 $destinationPath = "C:\Apps\LevelUp"
 $backupRoot = "C:\Apps\LevelUp-Backups"
 $externalRoot = "C:\Apps\LevelUp-Data"
+$dataPath = Join-Path $externalRoot "Data"
+$dataBackupRoot = Join-Path $backupRoot "Data"
+$applicationBackupRoot = Join-Path $backupRoot "Application"
+$healthCheckUri = "http://127.0.0.1/health/ready"
+$healthCheckHost = "levelup"
+$timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+$applicationBackupPath = Join-Path $applicationBackupRoot "LevelUp-$timestamp"
+$dataBackupPath = Join-Path $dataBackupRoot "LevelUp-Data-$timestamp"
+$deploymentSucceeded = $false
+
 $externalDirectories = @(
-    (Join-Path $externalRoot "Data"),
+    $dataPath,
+    (Join-Path $dataPath "Backups"),
     (Join-Path $externalRoot "DataProtection-Keys"),
     (Join-Path $externalRoot "Emails"),
     (Join-Path $externalRoot "Logs")
 )
 
-$timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$backupPath = Join-Path $backupRoot "LevelUp-$timestamp"
-
 function Write-DeployMessage {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$Message
-    )
+    param([Parameter(Mandatory = $true)][string]$Message)
 
     Write-Host ""
     Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] $Message"
 }
 
+function Stop-LevelUpIis {
+    Write-DeployMessage "Stopping IIS site '$siteName'..."
+    Stop-Website -Name $siteName -ErrorAction SilentlyContinue
+
+    Write-DeployMessage "Stopping application pool '$appPoolName'..."
+    Stop-WebAppPool -Name $appPoolName -ErrorAction SilentlyContinue
+
+    Start-Sleep -Seconds 3
+}
+
 function Start-LevelUpIis {
-    Write-DeployMessage "Iniciando Application Pool '$appPoolName'..."
-
-    $appPoolState = Get-WebAppPoolState `
-        -Name $appPoolName `
-        -ErrorAction SilentlyContinue
-
+    $appPoolState = Get-WebAppPoolState -Name $appPoolName -ErrorAction SilentlyContinue
     if ($null -eq $appPoolState) {
-        throw "Application Pool nao encontrado: $appPoolName"
+        throw "Application pool was not found: $appPoolName"
     }
 
     if ($appPoolState.Value -ne "Started") {
+        Write-DeployMessage "Starting application pool '$appPoolName'..."
         Start-WebAppPool -Name $appPoolName
     }
 
-    Write-DeployMessage "Iniciando site '$siteName'..."
-
-    $siteState = Get-WebsiteState `
-        -Name $siteName `
-        -ErrorAction SilentlyContinue
-
+    $siteState = Get-WebsiteState -Name $siteName -ErrorAction SilentlyContinue
     if ($null -eq $siteState) {
-        throw "Site IIS nao encontrado: $siteName"
+        throw "IIS site was not found: $siteName"
     }
 
     if ($siteState.Value -ne "Started") {
+        Write-DeployMessage "Starting IIS site '$siteName'..."
         Start-Website -Name $siteName
     }
 }
 
+function Copy-DirectoryContents {
+    param(
+        [Parameter(Mandatory = $true)][string]$Source,
+        [Parameter(Mandatory = $true)][string]$Destination
+    )
+
+    New-Item -ItemType Directory -Path $Destination -Force | Out-Null
+
+    Get-ChildItem -LiteralPath $Source -Force -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            Copy-Item -LiteralPath $_.FullName -Destination $Destination -Recurse -Force
+        }
+}
+
+function Clear-DirectoryContents {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    Get-ChildItem -LiteralPath $Path -Force -ErrorAction SilentlyContinue |
+        Remove-Item -Recurse -Force
+}
+
+function Invoke-LevelUpHealthCheck {
+    $lastError = $null
+
+    for ($attempt = 1; $attempt -le 6; $attempt++) {
+        try {
+            Write-DeployMessage "Running readiness health check (attempt $attempt of 6)..."
+
+            $response = Invoke-WebRequest `
+                -Uri $healthCheckUri `
+                -Headers @{ Host = $healthCheckHost } `
+                -UseBasicParsing `
+                -TimeoutSec 20
+
+            if ($response.StatusCode -eq 200) {
+                return
+            }
+
+            $lastError = "HTTP $($response.StatusCode)"
+        }
+        catch {
+            $lastError = $_.Exception.Message
+        }
+
+        Start-Sleep -Seconds 5
+    }
+
+    throw "Readiness health check failed after 6 attempts. Last error: $lastError"
+}
+
+function Set-LevelUpEnvironmentVariables {
+    Write-DeployMessage "Configuring IIS application-pool environment variables..."
+
+    $variables = @{
+        ASPNETCORE_ENVIRONMENT = "Production"
+        DOTNET_ENVIRONMENT = "Production"
+        AllowedHosts = $AllowedHosts
+        LevelUp__IdentityEmail__PublicBaseUrl = $PublicBaseUrl
+        LevelUp__Email__Resend__ApiKey = $ResendApiKey
+        LevelUp__Email__Resend__FromAddress = $ResendFromAddress
+        LevelUp__Email__Resend__FromName = $ResendFromName
+    }
+
+    foreach ($entry in $variables.GetEnumerator()) {
+        $filter = "system.applicationHost/applicationPools/add[@name='$appPoolName']/environmentVariables/add[@name='$($entry.Key)']"
+
+        Remove-WebConfigurationProperty `
+            -PSPath "MACHINE/WEBROOT/APPHOST" `
+            -Filter $filter `
+            -Name "." `
+            -ErrorAction SilentlyContinue
+
+        Add-WebConfigurationProperty `
+            -PSPath "MACHINE/WEBROOT/APPHOST" `
+            -Filter "system.applicationHost/applicationPools/add[@name='$appPoolName']/environmentVariables" `
+            -Name "." `
+            -Value @{ name = $entry.Key; value = $entry.Value }
+    }
+}
+
 Write-Host "========================================"
-Write-Host "LEVELUP - DEPLOY PARA IIS"
+Write-Host "LEVELUP - HARDENED IIS DEPLOYMENT"
 Write-Host "========================================"
 
 Import-Module WebAdministration
 
-$resolvedPublishPath = Resolve-Path `
-    -LiteralPath $PublishPath `
-    -ErrorAction Stop
+$PublishPath = (Resolve-Path -LiteralPath $PublishPath -ErrorAction Stop).Path
 
-$PublishPath = $resolvedPublishPath.Path
-
-if (-not (Test-Path -LiteralPath $PublishPath -PathType Container)) {
-    throw "Diretorio de publicacao nao encontrado: $PublishPath"
-}
-
-$requiredFiles = @(
-    "LevelUp.Web.dll",
-    "web.config"
-)
-
+$requiredFiles = @("LevelUp.Web.dll", "web.config")
 foreach ($requiredFile in $requiredFiles) {
     $requiredFilePath = Join-Path $PublishPath $requiredFile
-
     if (-not (Test-Path -LiteralPath $requiredFilePath -PathType Leaf)) {
-        throw "Arquivo obrigatorio nao encontrado: $requiredFilePath"
+        throw "Required published file was not found: $requiredFilePath"
     }
 }
 
-New-Item `
-    -ItemType Directory `
-    -Path $destinationPath `
-    -Force |
-    Out-Null
-
-New-Item `
-    -ItemType Directory `
-    -Path $backupRoot `
-    -Force |
-    Out-Null
-
-foreach ($directory in $externalDirectories) {
-    New-Item `
-        -ItemType Directory `
-        -Path $directory `
-        -Force |
-        Out-Null
-}
+@($destinationPath, $backupRoot, $applicationBackupRoot, $dataBackupRoot) + $externalDirectories |
+    ForEach-Object { New-Item -ItemType Directory -Path $_ -Force | Out-Null }
 
 $appPoolIdentity = "IIS AppPool\$appPoolName"
 $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
@@ -126,96 +201,50 @@ foreach ($directory in $externalDirectories) {
     Set-Acl -LiteralPath $directory -AclObject $acl
 }
 
-Write-DeployMessage "Criando backup em '$backupPath'..."
+Write-DeployMessage "Backing up current application to '$applicationBackupPath'..."
+Copy-DirectoryContents -Source $destinationPath -Destination $applicationBackupPath
 
-New-Item `
-    -ItemType Directory `
-    -Path $backupPath `
-    -Force |
-    Out-Null
-
-$existingItems = Get-ChildItem `
-    -LiteralPath $destinationPath `
-    -Force `
-    -ErrorAction SilentlyContinue
-
-foreach ($item in $existingItems) {
-    Copy-Item `
-        -LiteralPath $item.FullName `
-        -Destination $backupPath `
-        -Recurse `
-        -Force
-}
+Write-DeployMessage "Backing up persistent data to '$dataBackupPath'..."
+Copy-DirectoryContents -Source $dataPath -Destination $dataBackupPath
 
 try {
-    Write-DeployMessage "Parando site '$siteName'..."
+    Stop-LevelUpIis
+    Set-LevelUpEnvironmentVariables
 
-    Stop-Website `
-        -Name $siteName `
-        -ErrorAction SilentlyContinue
-
-    Write-DeployMessage "Parando Application Pool '$appPoolName'..."
-
-    Stop-WebAppPool `
-        -Name $appPoolName `
-        -ErrorAction SilentlyContinue
-
-    Start-Sleep -Seconds 3
-
-    Write-DeployMessage "Removendo arquivos da versao anterior..."
-
-    Get-ChildItem `
-        -LiteralPath $destinationPath `
-        -Force |
-        Remove-Item `
-            -Recurse `
-            -Force
-
-    Write-DeployMessage "Copiando nova versao..."
-
-    Get-ChildItem `
-        -LiteralPath $PublishPath `
-        -Force |
-        ForEach-Object {
-            Copy-Item `
-                -LiteralPath $_.FullName `
-                -Destination $destinationPath `
-                -Recurse `
-                -Force
-        }
+    Write-DeployMessage "Replacing application files while preserving external data..."
+    Clear-DirectoryContents -Path $destinationPath
+    Copy-DirectoryContents -Source $PublishPath -Destination $destinationPath
 
     Start-LevelUpIis
+    Invoke-LevelUpHealthCheck
 
-    Start-Sleep -Seconds 8
-
-    Write-DeployMessage "Executando health check..."
-
-    $response = Invoke-WebRequest `
-        -Uri "http://127.0.0.1/health/ready" `
-        -Headers @{
-            Host = "levelup"
-        } `
-        -UseBasicParsing `
-        -TimeoutSec 30
-
-    if ($response.StatusCode -ne 200) {
-        throw "Health check falhou. HTTP $($response.StatusCode)."
-    }
-
-    Write-DeployMessage "Deploy concluido com sucesso."
-    Write-Host "HTTP Status: $($response.StatusCode)"
-    Write-Host "Backup: $backupPath"
+    $deploymentSucceeded = $true
+    Write-DeployMessage "Deployment completed successfully."
+    Write-Host "Application backup: $applicationBackupPath"
+    Write-Host "Data backup: $dataBackupPath"
 }
 catch {
-    Write-Host ""
-    Write-Error "Falha durante o deploy: $($_.Exception.Message)"
+    $deploymentError = $_.Exception.Message
+    Write-Error "Deployment failed: $deploymentError"
+
+    Write-DeployMessage "Starting rollback to the previous application version..."
 
     try {
+        Stop-LevelUpIis
+        Clear-DirectoryContents -Path $destinationPath
+        Copy-DirectoryContents -Source $applicationBackupPath -Destination $destinationPath
         Start-LevelUpIis
+        Invoke-LevelUpHealthCheck
+        Write-DeployMessage "Rollback completed and previous version is healthy."
     }
     catch {
-        Write-Error "Tambem nao foi possivel reiniciar o IIS: $($_.Exception.Message)"
+        Write-Error "Rollback also failed: $($_.Exception.Message)"
     }
 
-    throw
+    throw "Deployment failed and rollback was attempted. Original error: $deploymentError"
+}
+finally {
+    if (-not $deploymentSucceeded) {
+        Write-Host "Persistent data was not replaced. Backup available at: $dataBackupPath"
+    }
 }

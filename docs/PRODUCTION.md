@@ -119,3 +119,9 @@ Invoke-WebRequest https://levelup.example.com/health/ready
 ```
 
 Verify that data, backups, Data Protection keys, and logs remain under `C:\Apps\LevelUp-Data` after a second deployment.
+
+## CI/CD
+
+Production deployments are controlled by `.github/workflows/deploy-prd.yml`. Source validation and artifact creation occur before the self-hosted runner is allowed to deploy. The runner downloads the exact validated artifact, creates application and data backups, preserves external runtime state, performs readiness checks, and restores the previous application version when the new version is unhealthy.
+
+See [CI/CD Hardening](CI_CD.md) for required GitHub secrets, runner permissions, concurrency, backup, health-check, and rollback behavior.

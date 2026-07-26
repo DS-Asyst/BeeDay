@@ -12,16 +12,19 @@ on:
 
   workflow_dispatch:
 
+concurrency:
+  group: levelup-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
-  build-and-test:
-    name: Build and Test
+  validate:
+    name: Restore, Build, Test and Publish
 
     runs-on: windows-latest
-
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -40,12 +43,17 @@ jobs:
         shell: powershell
         run: dotnet restore LevelUp.slnx
 
+      - name: Verify formatting
+        shell: powershell
+        run: dotnet format LevelUp.slnx --verify-no-changes --no-restore
+
       - name: Build solution
         shell: powershell
         run: |
           dotnet build LevelUp.slnx `
             --configuration Release `
-            --no-restore
+            --no-restore `
+            --warnaserror
 
       - name: Run tests
         shell: powershell
@@ -53,4 +61,45 @@ jobs:
           dotnet test LevelUp.slnx `
             --configuration Release `
             --no-build `
-            --verbosity normal
+            --verbosity normal `
+            --logger "trx;LogFileName=levelup-tests.trx" `
+            --results-directory "${{ runner.temp }}\TestResults"
+
+      - name: Publish LevelUp
+        shell: powershell
+        run: |
+          dotnet publish `
+            ".\src\LevelUp.Web\LevelUp.Web.csproj" `
+            --configuration Release `
+            --no-build `
+            --output "${{ runner.temp }}\LevelUpPublish"
+
+      - name: Validate published files
+        shell: powershell
+        run: |
+          $publishPath = Join-Path "${{ runner.temp }}" "LevelUpPublish"
+          $requiredFiles = @("LevelUp.Web.dll", "web.config")
+
+          foreach ($file in $requiredFiles) {
+              $fullPath = Join-Path $publishPath $file
+              if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
+                  throw "Required published file was not found: $fullPath"
+              }
+          }
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: levelup-test-results
+          path: ${{ runner.temp }}\TestResults
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload validated publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: levelup-publish
+          path: ${{ runner.temp }}\LevelUpPublish
+          if-no-files-found: error
+          retention-days: 7

@@ -14,53 +14,15 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
 jobs:
   validate:
-    name: Validate Production Build
+    name: Validate Production Artifact
 
     runs-on: windows-latest
-
-    timeout-minutes: 15
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Configure .NET 10
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "10.0.x"
-
-      - name: Restore dependencies
-        shell: powershell
-        run: dotnet restore LevelUp.slnx
-
-      - name: Build solution
-        shell: powershell
-        run: |
-          dotnet build LevelUp.slnx `
-            --configuration Release `
-            --no-restore
-
-      - name: Run tests
-        shell: powershell
-        run: |
-          dotnet test LevelUp.slnx `
-            --configuration Release `
-            --no-build `
-            --verbosity normal
-
-  deploy:
-    name: Deploy to SERV3-WEB1
-
-    needs:
-      - validate
-
-    runs-on:
-      - self-hosted
-      - Windows
-      - X64
-
     timeout-minutes: 20
 
     steps:
@@ -76,30 +38,27 @@ jobs:
         shell: powershell
         run: dotnet restore LevelUp.slnx
 
+      - name: Verify formatting
+        shell: powershell
+        run: dotnet format LevelUp.slnx --verify-no-changes --no-restore
+
       - name: Build solution
         shell: powershell
         run: |
           dotnet build LevelUp.slnx `
             --configuration Release `
-            --no-restore
+            --no-restore `
+            --warnaserror
 
-      - name: Prepare publish directory
+      - name: Run tests
         shell: powershell
         run: |
-          $publishPath = Join-Path "${{ runner.temp }}" "LevelUpPublish"
-
-          if (Test-Path -LiteralPath $publishPath) {
-              Remove-Item `
-                  -LiteralPath $publishPath `
-                  -Recurse `
-                  -Force
-          }
-
-          New-Item `
-              -ItemType Directory `
-              -Path $publishPath `
-              -Force |
-              Out-Null
+          dotnet test LevelUp.slnx `
+            --configuration Release `
+            --no-build `
+            --verbosity normal `
+            --logger "trx;LogFileName=levelup-tests.trx" `
+            --results-directory "${{ runner.temp }}\TestResults"
 
       - name: Publish LevelUp
         shell: powershell
@@ -107,33 +66,101 @@ jobs:
           dotnet publish `
             ".\src\LevelUp.Web\LevelUp.Web.csproj" `
             --configuration Release `
-            --no-restore `
+            --no-build `
             --output "${{ runner.temp }}\LevelUpPublish"
 
       - name: Validate published files
         shell: powershell
         run: |
           $publishPath = Join-Path "${{ runner.temp }}" "LevelUpPublish"
-
-          $requiredFiles = @(
-              "LevelUp.Web.dll",
-              "web.config"
-          )
+          $requiredFiles = @("LevelUp.Web.dll", "web.config")
 
           foreach ($file in $requiredFiles) {
               $fullPath = Join-Path $publishPath $file
-
-              if (-not (Test-Path -LiteralPath $fullPath)) {
-                  throw "Arquivo obrigatorio nao encontrado: $fullPath"
+              if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
+                  throw "Required published file was not found: $fullPath"
               }
           }
 
-          Write-Host "Publicacao validada com sucesso."
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: levelup-production-test-results
+          path: ${{ runner.temp }}\TestResults
+          if-no-files-found: warn
+          retention-days: 30
 
-      - name: Deploy to IIS
+      - name: Upload validated production artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: levelup-production-publish
+          path: ${{ runner.temp }}\LevelUpPublish
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    name: Deploy to SERV3-WEB1
+    needs: validate
+
+    runs-on:
+      - self-hosted
+      - Windows
+      - X64
+
+    timeout-minutes: 25
+    environment: production
+
+    steps:
+      - name: Checkout deployment scripts
+        uses: actions/checkout@v4
+
+      - name: Download validated production artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: levelup-production-publish
+          path: ${{ runner.temp }}\LevelUpPublish
+
+      - name: Validate deployment secrets
         shell: powershell
+        env:
+          LEVELUP_PUBLIC_BASE_URL: ${{ secrets.LEVELUP_PUBLIC_BASE_URL }}
+          LEVELUP_RESEND_API_KEY: ${{ secrets.LEVELUP_RESEND_API_KEY }}
+          LEVELUP_RESEND_FROM_ADDRESS: ${{ secrets.LEVELUP_RESEND_FROM_ADDRESS }}
+          LEVELUP_ALLOWED_HOSTS: ${{ secrets.LEVELUP_ALLOWED_HOSTS }}
+        run: |
+          $required = @{
+              LEVELUP_PUBLIC_BASE_URL = $env:LEVELUP_PUBLIC_BASE_URL
+              LEVELUP_RESEND_API_KEY = $env:LEVELUP_RESEND_API_KEY
+              LEVELUP_RESEND_FROM_ADDRESS = $env:LEVELUP_RESEND_FROM_ADDRESS
+              LEVELUP_ALLOWED_HOSTS = $env:LEVELUP_ALLOWED_HOSTS
+          }
+
+          foreach ($entry in $required.GetEnumerator()) {
+              if ([string]::IsNullOrWhiteSpace($entry.Value)) {
+                  throw "Required GitHub secret is missing: $($entry.Key)"
+              }
+          }
+
+          if (-not $env:LEVELUP_PUBLIC_BASE_URL.StartsWith("https://", [StringComparison]::OrdinalIgnoreCase)) {
+              throw "LEVELUP_PUBLIC_BASE_URL must use HTTPS."
+          }
+
+      - name: Deploy to IIS with rollback
+        shell: powershell
+        env:
+          LEVELUP_PUBLIC_BASE_URL: ${{ secrets.LEVELUP_PUBLIC_BASE_URL }}
+          LEVELUP_RESEND_API_KEY: ${{ secrets.LEVELUP_RESEND_API_KEY }}
+          LEVELUP_RESEND_FROM_ADDRESS: ${{ secrets.LEVELUP_RESEND_FROM_ADDRESS }}
+          LEVELUP_RESEND_FROM_NAME: ${{ secrets.LEVELUP_RESEND_FROM_NAME }}
+          LEVELUP_ALLOWED_HOSTS: ${{ secrets.LEVELUP_ALLOWED_HOSTS }}
         run: |
           $publishPath = Join-Path "${{ runner.temp }}" "LevelUpPublish"
 
           & ".\scripts\Deploy-LevelUp.ps1" `
-              -PublishPath $publishPath
+              -PublishPath $publishPath `
+              -PublicBaseUrl $env:LEVELUP_PUBLIC_BASE_URL `
+              -ResendApiKey $env:LEVELUP_RESEND_API_KEY `
+              -ResendFromAddress $env:LEVELUP_RESEND_FROM_ADDRESS `
+              -ResendFromName $env:LEVELUP_RESEND_FROM_NAME `
+              -AllowedHosts $env:LEVELUP_ALLOWED_HOSTS

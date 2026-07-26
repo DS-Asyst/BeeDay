@@ -111,3 +111,8 @@ git switch -c chore/repository-cleanup
 - [User Interface](docs/UI.md)
 
 Documentation must remain in English and reflect the current implementation.
+
+## Operations documentation
+
+- [Production configuration](docs/PRODUCTION.md)
+- [CI/CD hardening](docs/CI_CD.md)
