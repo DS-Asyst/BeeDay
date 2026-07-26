@@ -1,0 +1,71 @@
+@using LevelUp.Application.Features.Inventory.Responses
+
+<div class="inventory-main-panel">
+    <header class="inventory-panel-header inventory-panel-header--transactions">
+        <div>
+            <span class="inventory-eyebrow">History</span>
+            <h2>Transactions</h2>
+        </div>
+        <span class="inventory-result-count">@Transactions.TotalCount result@(Transactions.TotalCount == 1 ? string.Empty : "s")</span>
+    </header>
+
+    <InventoryFilters Search="Search"
+                      TypeFilter="TypeFilter"
+                      TagFilter="TagFilter"
+                      Sort="Sort"
+                      Tags="Tags"
+                      SearchChanged="SearchChanged"
+                      TypeFilterChanged="TypeFilterChanged"
+                      TagFilterChanged="TagFilterChanged"
+                      SortChanged="SortChanged" />
+
+    @if (Transactions.Items.Count == 0)
+    {
+        <InventoryEmptyState HasFilters="HasFilters"
+                             OnCreateTransaction="OnCreateTransaction"
+                             OnClearFilters="OnClearFilters" />
+    }
+    else
+    {
+        <div class="inventory-transaction-list" aria-busy="@IsRefreshing">
+            @foreach (var transaction in Transactions.Items)
+            {
+                <TransactionCard Transaction="transaction" OnEdit="OnEdit" OnDelete="OnDelete" />
+            }
+        </div>
+
+        @if (Transactions.TotalPages > 1)
+        {
+            <nav class="inventory-pagination" aria-label="Transaction pages">
+                <button type="button" disabled="@(Transactions.Page <= 1)" @onclick="OnPreviousPage">Previous</button>
+                <span>@PaginationSummary · Page @Transactions.Page of @Transactions.TotalPages</span>
+                <button type="button" disabled="@(Transactions.Page >= Transactions.TotalPages)" @onclick="OnNextPage">Next</button>
+            </nav>
+        }
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public PagedTransactionsResponse Transactions { get; set; } = default!;
+    [Parameter] public IReadOnlyList<InventoryTagResponse> Tags { get; set; } = [];
+    [Parameter] public bool IsRefreshing { get; set; }
+    [Parameter] public bool HasFilters { get; set; }
+    [Parameter] public string Search { get; set; } = string.Empty;
+    [Parameter] public string TypeFilter { get; set; } = string.Empty;
+    [Parameter] public string TagFilter { get; set; } = string.Empty;
+    [Parameter] public string Sort { get; set; } = "date-desc";
+    [Parameter] public EventCallback<string> SearchChanged { get; set; }
+    [Parameter] public EventCallback<string> TypeFilterChanged { get; set; }
+    [Parameter] public EventCallback<string> TagFilterChanged { get; set; }
+    [Parameter] public EventCallback<string> SortChanged { get; set; }
+    [Parameter] public EventCallback OnCreateTransaction { get; set; }
+    [Parameter] public EventCallback OnClearFilters { get; set; }
+    [Parameter] public EventCallback OnPreviousPage { get; set; }
+    [Parameter] public EventCallback OnNextPage { get; set; }
+    [Parameter] public EventCallback<TransactionResponse> OnEdit { get; set; }
+    [Parameter] public EventCallback<TransactionResponse> OnDelete { get; set; }
+
+    private string PaginationSummary => Transactions.TotalCount == 0
+        ? "No results"
+        : $"Showing {((Transactions.Page - 1) * Transactions.PageSize) + 1}–{Math.Min(Transactions.Page * Transactions.PageSize, Transactions.TotalCount)} of {Transactions.TotalCount}";
+}

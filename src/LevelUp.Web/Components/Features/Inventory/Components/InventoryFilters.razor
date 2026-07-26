@@ -1,0 +1,45 @@
+@using LevelUp.Application.Features.Inventory.Responses
+
+<div class="inventory-filters">
+    <label class="inventory-search">
+        <span class="sr-only">Search transactions</span>
+        <input value="@Search" @oninput="HandleSearchInput" placeholder="Search transactions..." />
+    </label>
+    <select value="@TypeFilter" @onchange="HandleTypeChanged" aria-label="Filter by type">
+        <option value="">All types</option>
+        <option value="Income">Income</option>
+        <option value="Expense">Expense</option>
+    </select>
+    <select value="@TagFilter" @onchange="HandleTagChanged" aria-label="Filter by tag">
+        <option value="">All tags</option>
+        @foreach (var tag in Tags)
+        {
+            <option value="@tag.Id">@tag.Name</option>
+        }
+    </select>
+    <select value="@Sort" @onchange="HandleSortChanged" aria-label="Sort transactions">
+        <option value="date-desc">Newest first</option>
+        <option value="date-asc">Oldest first</option>
+        <option value="amount-desc">Highest amount</option>
+        <option value="amount-asc">Lowest amount</option>
+        <option value="description-asc">Description A-Z</option>
+        <option value="description-desc">Description Z-A</option>
+    </select>
+</div>
+
+@code {
+    [Parameter] public string Search { get; set; } = string.Empty;
+    [Parameter] public string TypeFilter { get; set; } = string.Empty;
+    [Parameter] public string TagFilter { get; set; } = string.Empty;
+    [Parameter] public string Sort { get; set; } = "date-desc";
+    [Parameter] public IReadOnlyList<InventoryTagResponse> Tags { get; set; } = [];
+    [Parameter] public EventCallback<string> SearchChanged { get; set; }
+    [Parameter] public EventCallback<string> TypeFilterChanged { get; set; }
+    [Parameter] public EventCallback<string> TagFilterChanged { get; set; }
+    [Parameter] public EventCallback<string> SortChanged { get; set; }
+
+    private Task HandleSearchInput(ChangeEventArgs args) => SearchChanged.InvokeAsync(args.Value?.ToString() ?? string.Empty);
+    private Task HandleTypeChanged(ChangeEventArgs args) => TypeFilterChanged.InvokeAsync(args.Value?.ToString() ?? string.Empty);
+    private Task HandleTagChanged(ChangeEventArgs args) => TagFilterChanged.InvokeAsync(args.Value?.ToString() ?? string.Empty);
+    private Task HandleSortChanged(ChangeEventArgs args) => SortChanged.InvokeAsync(args.Value?.ToString() ?? "date-desc");
+}

@@ -52,3 +52,19 @@ The presentation layer accesses application behavior through registered services
 ```bash
 dotnet run --project src/LevelUp.Web/LevelUp.Web.csproj
 ```
+
+## Inventory component architecture
+
+The Inventory feature is organized under `Components/Features/Inventory` and keeps the page focused on orchestration.
+
+- `Pages/Inventory.razor`: loads feature data, coordinates actions, controls dialogs, and exposes global feedback.
+- `State/InventoryPageState.cs`: owns filter and pagination state.
+- `Components/WalletSummary.razor`: renders wallet totals.
+- `Components/TransactionList.razor`: renders the transaction panel, list, and pagination.
+- `Components/TransactionCard.razor`: renders one transaction and its actions.
+- `Components/TransactionFormModal.razor`: handles transaction form presentation.
+- `Components/InventoryFilters.razor`: owns filter controls and emits filter changes.
+- `Components/InventoryEmptyState.razor`: renders filtered and first-use empty states.
+- `Components/InventoryTagManager.razor`: manages tag presentation and editing.
+
+Business rules remain in the Domain and Application layers; these components only manage presentation and interaction.

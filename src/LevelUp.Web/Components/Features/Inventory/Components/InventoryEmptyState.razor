@@ -1,0 +1,19 @@
+<div class="inventory-empty-state">
+    <div aria-hidden="true">◇</div>
+    <h3>No transactions found</h3>
+    <p>@(HasFilters ? "Change or clear your filters to see more results." : "Create your first transaction to start tracking your wallet.")</p>
+    @if (HasFilters)
+    {
+        <button type="button" class="inventory-button inventory-button--ghost" @onclick="OnClearFilters">Clear filters</button>
+    }
+    else
+    {
+        <button type="button" class="inventory-button inventory-button--cta" @onclick="OnCreateTransaction">Create transaction</button>
+    }
+</div>
+
+@code {
+    [Parameter] public bool HasFilters { get; set; }
+    [Parameter] public EventCallback OnCreateTransaction { get; set; }
+    [Parameter] public EventCallback OnClearFilters { get; set; }
+}

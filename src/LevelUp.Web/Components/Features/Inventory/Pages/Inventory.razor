@@ -8,6 +8,7 @@
 @using LevelUp.Web.Components.Features.Inventory.Components
 @using LevelUp.Web.Components.Features.Inventory.Models
 @using LevelUp.Web.Components.Features.Inventory.Services
+@using LevelUp.Web.Components.Features.Inventory.State
 @inject MediatR.ISender Sender
 @inject AuthenticatedUserInitializer UserInitializer
 @inject ToastService Toast
@@ -39,89 +40,34 @@ else
         }
 
         <div aria-live="polite" class="sr-only">@_balanceAnnouncement</div>
-        <InventorySummary Summary="_summary" HighlightBalance="_highlightBalance" />
+        <WalletSummary Summary="_summary" HighlightBalance="_highlightBalance" />
 
         <section class="inventory-workspace">
-            <div class="inventory-main-panel">
-                <header class="inventory-panel-header inventory-panel-header--transactions">
-                    <div>
-                        <span class="inventory-eyebrow">History</span>
-                        <h2>Transactions</h2>
-                    </div>
-                    <span class="inventory-result-count">@_transactions.TotalCount result@(_transactions.TotalCount == 1 ? string.Empty : "s")</span>
-                </header>
-
-                <div class="inventory-filters">
-                    <label class="inventory-search">
-                        <span class="sr-only">Search transactions</span>
-                        <input value="@_search" @oninput="HandleSearchInput" placeholder="Search transactions..." />
-                    </label>
-                    <select value="@_typeFilter" @onchange="HandleTypeChanged" aria-label="Filter by type">
-                        <option value="">All types</option>
-                        <option value="Income">Income</option>
-                        <option value="Expense">Expense</option>
-                    </select>
-                    <select value="@_tagFilter" @onchange="HandleTagChanged" aria-label="Filter by tag">
-                        <option value="">All tags</option>
-                        @foreach (var tag in _tags)
-                        {
-                            <option value="@tag.Id">@tag.Name</option>
-                        }
-                    </select>
-                    <select value="@_sort" @onchange="HandleSortChanged" aria-label="Sort transactions">
-                        <option value="date-desc">Newest first</option>
-                        <option value="date-asc">Oldest first</option>
-                        <option value="amount-desc">Highest amount</option>
-                        <option value="amount-asc">Lowest amount</option>
-                        <option value="description-asc">Description A-Z</option>
-                        <option value="description-desc">Description Z-A</option>
-                    </select>
-                </div>
-
-                @if (_transactions.Items.Count == 0)
-                {
-                    <div class="inventory-empty-state">
-                        <div aria-hidden="true">◇</div>
-                        <h3>No transactions found</h3>
-                        <p>@(HasFilters ? "Change or clear your filters to see more results." : "Create your first transaction to start tracking your wallet.")</p>
-                        @if (!HasFilters)
-                        {
-                            <button type="button" class="inventory-button inventory-button--cta" @onclick="OpenCreateTransaction">Create transaction</button>
-                        }
-                        else
-                        {
-                            <button type="button" class="inventory-button inventory-button--ghost" @onclick="ClearFiltersAsync">Clear filters</button>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <div class="inventory-transaction-list" aria-busy="@_isRefreshing">
-                        @foreach (var transaction in _transactions.Items)
-                        {
-                            <InventoryTransactionCard Transaction="transaction"
-                                                      OnEdit="OpenEditTransaction"
-                                                      OnDelete="RequestDeleteTransaction" />
-                        }
-                    </div>
-
-                    @if (_transactions.TotalPages > 1)
-                    {
-                        <nav class="inventory-pagination" aria-label="Transaction pages">
-                            <button type="button" disabled="@(_transactions.Page <= 1)" @onclick="PreviousPageAsync">Previous</button>
-                            <span>@PaginationSummary · Page @_transactions.Page of @_transactions.TotalPages</span>
-                            <button type="button" disabled="@(_transactions.Page >= _transactions.TotalPages)" @onclick="NextPageAsync">Next</button>
-                        </nav>
-                    }
-                }
-            </div>
+            <TransactionList Transactions="_transactions"
+                             Tags="_tags"
+                             IsRefreshing="_isRefreshing"
+                             HasFilters="_state.HasFilters"
+                             Search="_state.Search"
+                             TypeFilter="_state.TypeFilter"
+                             TagFilter="_state.TagFilter"
+                             Sort="_state.Sort"
+                             SearchChanged="HandleSearchChangedAsync"
+                             TypeFilterChanged="HandleTypeChangedAsync"
+                             TagFilterChanged="HandleTagChangedAsync"
+                             SortChanged="HandleSortChangedAsync"
+                             OnCreateTransaction="OpenCreateTransaction"
+                             OnClearFilters="ClearFiltersAsync"
+                             OnPreviousPage="PreviousPageAsync"
+                             OnNextPage="NextPageAsync"
+                             OnEdit="OpenEditTransaction"
+                             OnDelete="RequestDeleteTransaction" />
 
             <InventoryTagManager Tags="_tags" IsBusy="_isBusy" OnSave="SaveTagAsync" OnDelete="RequestDeleteTag" />
         </section>
     </main>
 }
 
-<TransactionEditorModal IsOpen="_isTransactionEditorOpen" IsEditing="@(_editingTransactionId is not null)" IsBusy="_isBusy" Model="_transactionForm" Tags="_tags" OnSave="SaveTransactionAsync" OnCancel="CloseTransactionEditor" />
+<TransactionFormModal IsOpen="_isTransactionEditorOpen" IsEditing="@(_editingTransactionId is not null)" IsBusy="_isBusy" Model="_transactionForm" Tags="_tags" OnSave="SaveTransactionAsync" OnCancel="CloseTransactionEditor" />
 
 <LevelUpConfirmDialog IsOpen="@(_pendingDeleteTransaction is not null)"
                       IsBusy="_isBusy"
@@ -153,20 +99,12 @@ else
     private bool _highlightBalance;
     private string _balanceAnnouncement = string.Empty;
     private string? _errorMessage;
-    private string _search = string.Empty;
-    private string _typeFilter = string.Empty;
-    private string _tagFilter = string.Empty;
-    private string _sort = "date-desc";
-    private int _page = 1;
+    private readonly InventoryPageState _state = new();
     private bool _isTransactionEditorOpen;
     private Guid? _editingTransactionId;
     private TransactionFormModel _transactionForm = new();
     private TransactionResponse? _pendingDeleteTransaction;
     private InventoryTagResponse? _pendingDeleteTag;
-
-    private string PaginationSummary => _transactions.TotalCount == 0 ? "No results" : $"Showing {((_transactions.Page - 1) * _transactions.PageSize) + 1}–{Math.Min(_transactions.Page * _transactions.PageSize, _transactions.TotalCount)} of {_transactions.TotalCount}";
-
-    private bool HasFilters => !string.IsNullOrWhiteSpace(_search) || !string.IsNullOrWhiteSpace(_typeFilter) || !string.IsNullOrWhiteSpace(_tagFilter);
 
     protected override async Task OnInitializedAsync()
     {
@@ -196,18 +134,18 @@ else
     private async Task LoadDataAsync()
     {
         var (sortField, sortDirection) = ResolveSort();
-        TransactionType? type = Enum.TryParse<TransactionType>(_typeFilter, out var parsedType) ? parsedType : null;
-        Guid? tagId = Guid.TryParse(_tagFilter, out var parsedTagId) ? parsedTagId : null;
+        TransactionType? type = Enum.TryParse<TransactionType>(_state.TypeFilter, out var parsedType) ? parsedType : null;
+        Guid? tagId = Guid.TryParse(_state.TagFilter, out var parsedTagId) ? parsedTagId : null;
 
         var summaryTask = Sender.Send(new GetWalletSummaryQuery());
         var tagsTask = Sender.Send(new GetInventoryTagsQuery());
         var transactionsTask = Sender.Send(new GetTransactionsQuery(
-            Search: string.IsNullOrWhiteSpace(_search) ? null : _search.Trim(),
+            Search: string.IsNullOrWhiteSpace(_state.Search) ? null : _state.Search.Trim(),
             Type: type,
             InventoryTagId: tagId,
             SortBy: sortField,
             SortDirection: sortDirection,
-            Page: _page,
+            Page: _state.Page,
             PageSize: 20));
 
         await Task.WhenAll(summaryTask, tagsTask, transactionsTask);
@@ -216,7 +154,7 @@ else
         _transactions = await transactionsTask;
     }
 
-    private (TransactionSortField, SortDirection) ResolveSort() => _sort switch
+    private (TransactionSortField, SortDirection) ResolveSort() => _state.Sort switch
     {
         "date-asc" => (TransactionSortField.Date, SortDirection.Ascending),
         "amount-desc" => (TransactionSortField.Amount, SortDirection.Descending),
@@ -235,19 +173,41 @@ else
         finally { _isRefreshing = false; }
     }
 
-    private async Task HandleSearchInput(ChangeEventArgs args)
+    private async Task HandleSearchChangedAsync(string value)
     {
-        _search = args.Value?.ToString() ?? string.Empty;
-        _page = 1;
+        _state.Search = value;
+        _state.ResetPage();
         await RefreshAsync();
     }
 
-    private async Task HandleTypeChanged(ChangeEventArgs args) { _typeFilter = args.Value?.ToString() ?? string.Empty; _page = 1; await RefreshAsync(); }
-    private async Task HandleTagChanged(ChangeEventArgs args) { _tagFilter = args.Value?.ToString() ?? string.Empty; _page = 1; await RefreshAsync(); }
-    private async Task HandleSortChanged(ChangeEventArgs args) { _sort = args.Value?.ToString() ?? "date-desc"; _page = 1; await RefreshAsync(); }
-    private async Task ClearFiltersAsync() { _search = string.Empty; _typeFilter = string.Empty; _tagFilter = string.Empty; _page = 1; await RefreshAsync(); }
-    private async Task PreviousPageAsync() { if (_page > 1) { _page--; await RefreshAsync(); } }
-    private async Task NextPageAsync() { if (_page < _transactions.TotalPages) { _page++; await RefreshAsync(); } }
+    private async Task HandleTypeChangedAsync(string value)
+    {
+        _state.TypeFilter = value;
+        _state.ResetPage();
+        await RefreshAsync();
+    }
+
+    private async Task HandleTagChangedAsync(string value)
+    {
+        _state.TagFilter = value;
+        _state.ResetPage();
+        await RefreshAsync();
+    }
+
+    private async Task HandleSortChangedAsync(string value)
+    {
+        _state.Sort = string.IsNullOrWhiteSpace(value) ? "date-desc" : value;
+        _state.ResetPage();
+        await RefreshAsync();
+    }
+
+    private async Task ClearFiltersAsync()
+    {
+        _state.ClearFilters();
+        await RefreshAsync();
+    }
+    private async Task PreviousPageAsync() { if (_state.Page > 1) { _state.Page--; await RefreshAsync(); } }
+    private async Task NextPageAsync() { if (_state.Page < _transactions.TotalPages) { _state.Page++; await RefreshAsync(); } }
 
     private void OpenCreateTransaction()
     {
@@ -313,9 +273,9 @@ else
             await Sender.Send(new DeleteTransactionCommand(_pendingDeleteTransaction.Id));
             _pendingDeleteTransaction = null;
             await RefreshAsync();
-            if (_transactions.Items.Count == 0 && _page > 1)
+            if (_transactions.Items.Count == 0 && _state.Page > 1)
             {
-                _page--;
+                _state.Page--;
                 await RefreshAsync();
             }
             await AnnounceBalanceUpdatedAsync();

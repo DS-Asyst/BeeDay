@@ -11,7 +11,7 @@ public sealed class InventoryComponentTests : BunitContext
     public void Summary_RendersWalletTotals()
     {
         var summary = new WalletSummaryResponse(Guid.NewGuid(), 125.50m, 200m, 74.50m, 3, DateTimeOffset.UtcNow);
-        var cut = Render<InventorySummary>(parameters => parameters.Add(component => component.Summary, summary));
+        var cut = Render<WalletSummary>(parameters => parameters.Add(component => component.Summary, summary));
 
         Assert.Contains("$125.50", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("$200.00", cut.Markup, StringComparison.Ordinal);
@@ -56,5 +56,27 @@ public sealed class InventoryComponentTests : BunitContext
     public void TagContrastCalculator_ReturnsReadableText(string color, string expected)
     {
         Assert.Equal(expected, LevelUp.Web.Components.Features.Inventory.Services.TagContrastCalculator.GetTextColor(color));
+    }
+}
+
+public sealed class InventoryPageStateTests
+{
+    [Fact]
+    public void ClearFilters_ResetsFilterValuesAndPage()
+    {
+        var state = new LevelUp.Web.Components.Features.Inventory.State.InventoryPageState
+        {
+            Search = "rent",
+            TypeFilter = "Expense",
+            TagFilter = Guid.NewGuid().ToString(),
+            Sort = "amount-desc",
+            Page = 3
+        };
+
+        state.ClearFilters();
+
+        Assert.False(state.HasFilters);
+        Assert.Equal(1, state.Page);
+        Assert.Equal("amount-desc", state.Sort);
     }
 }
