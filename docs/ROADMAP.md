@@ -70,8 +70,8 @@ Sprint 6.0 completed the architectural foundation:
 
 Planned sequence:
 
-1. Sprint 6.1 — Pixel Icon Infrastructure;
-2. Sprint 6.2 — Navigation Icons;
+1. Sprint 6.1 — Pixel Icon Infrastructure (completed);
+2. Sprint 6.2 — Navigation Icons (completed);
 3. Sprint 6.3 — Activity Icons;
 4. Sprint 6.4 — Dialog & Forms Icon Integration;
 5. Sprint 6.5 — Dashboard & Statistics Icons;
@@ -84,3 +84,12 @@ Planned sequence:
 - Product-wide accessibility, performance, and visual polish
 
 Roadmap items are directional. A sprint must define invariants, affected layers, migration impact, and acceptance criteria before code changes begin.
+
+
+Sprint 6.2 completed the navigation migration:
+
+- migrated Top Navigation, support/account drawer, and footer social icons to `PixelIcon`;
+- added Home, Character, Donate, Logout, Menu, Support, Facebook, Instagram, YouTube, X, LinkedIn, and GitHub contracts;
+- registered all new assets in `PixelIconRegistry`;
+- removed inline SVG markup and direct SVG paths from Layout Razor components;
+- retained existing navigation behavior, hover states, focus states, and accessible labels.

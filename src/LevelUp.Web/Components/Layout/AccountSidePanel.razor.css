@@ -201,7 +201,7 @@
     box-shadow: inset 0 -1px 0 rgb(0 0 0 / 8%);
 }
 
-    .support-drawer__icon svg {
+    .support-drawer__icon ::deep svg {
         width: 3.7rem;
         height: 3.7rem;
         fill: none;
@@ -281,7 +281,7 @@
             outline: none;
         }
 
-    .support-drawer__social-links svg {
+    .support-drawer__social-links ::deep svg {
         width: 2rem;
         height: 2rem;
         fill: currentColor;
@@ -289,7 +289,7 @@
         stroke-width: 1.8;
     }
 
-    .support-drawer__social-links a[aria-label="Instagram"] svg {
+    .support-drawer__social-links a[aria-label="Instagram"] ::deep svg {
         fill: none;
     }
 
@@ -308,7 +308,7 @@
         grid-template-columns: 4.4rem minmax(0, 1fr);
     }
 
-    .support-drawer__icon svg {
+    .support-drawer__icon ::deep svg {
         width: 3.2rem;
         height: 3.2rem;
     }

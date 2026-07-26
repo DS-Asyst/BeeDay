@@ -185,3 +185,10 @@ The generated sprite follows the same rule. Repository normalization must be rev
 - unknown icon names use the warning fallback;
 - sprite references are covered by tests;
 - source assets and sprite symbols remain synchronized.
+
+
+## Sprint 6.2 — Navigation migration
+
+Navigation and layout surfaces now consume the official `PixelIcon` renderer. The Top Navigation, account/support drawer, and application footer no longer embed SVG markup or reference physical SVG paths. Social icons are registered in the `Social` category, while menu, character, support, donation, and logout icons are registered in `Navigation`.
+
+Layout components may style the rendered icon through wrapper elements and `::deep` selectors, but they must not know the sprite path or asset path. Interactive controls retain their text or `aria-label`; embedded icons remain decorative unless they are the sole accessible content.

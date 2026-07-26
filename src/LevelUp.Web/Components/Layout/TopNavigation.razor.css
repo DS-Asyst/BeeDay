@@ -88,7 +88,7 @@
     transition: transform 220ms cubic-bezier(.2, .8, .2, 1);
 }
 
-.top-navigation__panel-arrow svg {
+.top-navigation__panel-arrow ::deep svg {
     width: 1.45rem;
     height: 1.45rem;
     fill: none;
@@ -103,7 +103,7 @@
     transform: translateX(.2rem);
 }
 
-.top-navigation__brand-button[aria-expanded="true"] .top-navigation__panel-arrow svg {
+.top-navigation__brand-button[aria-expanded="true"] .top-navigation__panel-arrow ::deep svg {
     transform: rotate(180deg);
 }
 
@@ -185,30 +185,16 @@
 .top-navigation__menu-button:focus-visible { outline: 2px solid #ffc800; outline-offset: 2px; }
 
 .top-navigation__menu-icon {
-    position: relative;
-    display: block;
-    width: 1.4rem;
-    height: 1.1rem;
+    display: grid;
+    width: 1.5rem;
+    height: 1.5rem;
+    place-items: center;
+    transition: transform 180ms ease;
 }
 
-.top-navigation__menu-icon span {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: currentColor;
-    border-radius: 999px;
-    transform-origin: center;
-    transition: top 240ms cubic-bezier(.2, .8, .2, 1), transform 240ms cubic-bezier(.2, .8, .2, 1), opacity 150ms ease, width 180ms ease;
+.top-navigation__menu-button:hover .top-navigation__menu-icon {
+    transform: scale(1.08);
 }
-
-.top-navigation__menu-icon span:nth-child(1) { top: 0; }
-.top-navigation__menu-icon span:nth-child(2) { top: calc(50% - 1px); }
-.top-navigation__menu-icon span:nth-child(3) { top: calc(100% - 2px); }
-.top-navigation__menu-button:hover .top-navigation__menu-icon span:nth-child(2) { width: 72%; }
-.top-navigation__menu-button[aria-expanded="true"] .top-navigation__menu-icon span:nth-child(1) { top: calc(50% - 1px); transform: rotate(45deg); }
-.top-navigation__menu-button[aria-expanded="true"] .top-navigation__menu-icon span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-.top-navigation__menu-button[aria-expanded="true"] .top-navigation__menu-icon span:nth-child(3) { top: calc(50% - 1px); transform: rotate(-45deg); }
 
 @media (max-width: 920px) {
     .top-navigation__content { grid-template-columns: 13rem auto minmax(0, 1fr) auto; }

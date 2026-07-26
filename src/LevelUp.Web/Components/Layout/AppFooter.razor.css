@@ -101,7 +101,7 @@
     gap: .48rem;
 }
 
-.app-footer__social-link svg {
+.app-footer__social-link ::deep svg {
     width: 1rem;
     height: 1rem;
     flex: 0 0 auto;
@@ -113,8 +113,8 @@
         transform var(--levelup-transition-normal);
 }
 
-.app-footer__social-link:hover svg,
-.app-footer__social-link:focus-visible svg {
+.app-footer__social-link:hover ::deep svg,
+.app-footer__social-link:focus-visible ::deep svg {
     filter: grayscale(0);
     transform: translateY(-1px);
 }

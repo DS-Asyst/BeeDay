@@ -4,11 +4,7 @@
     <nav class="support-drawer__navigation" aria-label="Menu options">
         <button type="button" class="support-drawer__item" @onclick="OnClose">
             <span class="support-drawer__icon" aria-hidden="true">
-                <svg viewBox="0 0 64 64">
-                    <circle cx="32" cy="32" r="22"></circle>
-                    <path d="M25.5 25.5a7 7 0 1 1 11.7 5.2C34 33.1 32 34.8 32 39"></path>
-                    <path d="M32 46h.01"></path>
-                </svg>
+                <PixelIcon Name="PixelIconName.Support" Size="PixelIconSize.ExtraLarge" />
             </span>
             <span class="support-drawer__copy">
                 <strong>SUPPORT</strong>
@@ -18,11 +14,7 @@
 
         <a href="/account" class="support-drawer__item">
             <span class="support-drawer__icon" aria-hidden="true">
-                <svg viewBox="0 0 64 64">
-                    <circle cx="32" cy="32" r="22"></circle>
-                    <circle cx="32" cy="25" r="7"></circle>
-                    <path d="M20 45c1.6-7.2 5.8-11 12-11s10.4 3.8 12 11"></path>
-                </svg>
+                <PixelIcon Name="PixelIconName.Account" Size="PixelIconSize.ExtraLarge" />
             </span>
             <span class="support-drawer__copy">
                 <strong>MY ACCOUNT</strong>
@@ -34,11 +26,7 @@
             <AntiforgeryToken />
             <button type="submit" class="support-drawer__item">
             <span class="support-drawer__icon" aria-hidden="true">
-                <svg viewBox="0 0 64 64">
-                    <path d="M28 14H14v36h14"></path>
-                    <path d="M38 22l10 10-10 10"></path>
-                    <path d="M22 32h26"></path>
-                </svg>
+                <PixelIcon Name="PixelIconName.Logout" Size="PixelIconSize.ExtraLarge" />
             </span>
             <span class="support-drawer__copy">
                 <strong>LOGOUT</strong>
@@ -49,13 +37,7 @@
 
         <button type="button" class="support-drawer__item" @onclick="OnClose">
             <span class="support-drawer__icon" aria-hidden="true">
-                <svg viewBox="0 0 64 64">
-                    <path d="M15 28h34v25H15z"></path>
-                    <path d="M11 21h42v9H11z"></path>
-                    <path d="M32 21v32"></path>
-                    <path d="M32 21H21c-5.5 0-7.2-7.5-2-10.2 5.2-2.6 10.3 4.8 13 10.2Z"></path>
-                    <path d="M32 21h11c5.5 0 7.2-7.5 2-10.2C39.8 8.2 34.7 15.6 32 21Z"></path>
-                </svg>
+                <PixelIcon Name="PixelIconName.Donate" Size="PixelIconSize.ExtraLarge" />
             </span>
             <span class="support-drawer__copy">
                 <strong>DONATE</strong>
@@ -69,16 +51,16 @@
 
         <div class="support-drawer__social-links">
             <a href="#" aria-label="Facebook">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3c-3.3 0-5 2-5 5v2H6v4h3v5h4v-5h3.4l.6-4h-4V9c0-.7.3-1 1-1Z"></path></svg>
+                <PixelIcon Name="PixelIconName.Facebook" Size="PixelIconSize.Medium" />
             </a>
             <a href="#" aria-label="YouTube">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 7.2c-.2-1.3-1.2-2.3-2.5-2.5C16.5 4.4 14.3 4.3 12 4.3s-4.5.1-6.5.4A3.2 3.2 0 0 0 3 7.2 24.8 24.8 0 0 0 2.7 12c0 1.6.1 3.2.3 4.8.2 1.3 1.2 2.3 2.5 2.5 2 .3 4.2.4 6.5.4s4.5-.1 6.5-.4a3.2 3.2 0 0 0 2.5-2.5c.2-1.6.3-3.2.3-4.8s-.1-3.2-.3-4.8ZM10 15.8V8.2l6 3.8-6 3.8Z"></path></svg>
+                <PixelIcon Name="PixelIconName.YouTube" Size="PixelIconSize.Medium" />
             </a>
             <a href="#" aria-label="Instagram">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg>
+                <PixelIcon Name="PixelIconName.Instagram" Size="PixelIconSize.Medium" />
             </a>
             <a href="#" aria-label="X / Twitter">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.7 3H22l-7.2 8.2L23 21h-6.4l-5-6.5L5.9 21H2.6l7.5-8.6L2.2 3h6.5l4.5 6 5.5-6Zm-1.1 16h1.8L7.7 4.9H5.8L17.6 19Z"></path></svg>
+                <PixelIcon Name="PixelIconName.X" Size="PixelIconSize.Medium" />
             </a>
         </div>
     </footer>

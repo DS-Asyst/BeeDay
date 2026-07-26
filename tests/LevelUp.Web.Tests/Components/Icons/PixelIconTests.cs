@@ -86,4 +86,25 @@ public sealed class PixelIconTests
         Assert.Equal("Warning", cut.Find("svg").GetAttribute("data-icon"));
         Assert.Equal("/icons/pixel/sprite.svg#warning", cut.Find("use").GetAttribute("href"));
     }
+    [Theory]
+    [InlineData(PixelIconName.Home, "home")]
+    [InlineData(PixelIconName.Character, "character")]
+    [InlineData(PixelIconName.Donate, "donate")]
+    [InlineData(PixelIconName.Logout, "logout")]
+    [InlineData(PixelIconName.Menu, "menu")]
+    [InlineData(PixelIconName.Support, "support")]
+    [InlineData(PixelIconName.Facebook, "facebook")]
+    [InlineData(PixelIconName.Instagram, "instagram")]
+    [InlineData(PixelIconName.YouTube, "youtube")]
+    [InlineData(PixelIconName.X, "x")]
+    [InlineData(PixelIconName.LinkedIn, "linkedin")]
+    [InlineData(PixelIconName.GitHub, "github")]
+    public void ResolvesNavigationAndSocialIcons(PixelIconName name, string symbolId)
+    {
+        var definition = PixelIconRegistry.Resolve(name);
+
+        Assert.Equal(symbolId, definition.SymbolId);
+        Assert.Contains($"/{symbolId}.svg", definition.AssetPath, StringComparison.Ordinal);
+    }
+
 }
