@@ -184,7 +184,7 @@ app.MapPost("/auth/login", async (
 
         return Results.LocalRedirect(destination);
     }
-    catch (InvalidDomainStateException exception)
+    catch (InvalidDomainStateException)
     {
         loggerFactory.CreateLogger("LevelUp.Authentication").LogWarning(
             "Authentication.LoginFailed TraceId={TraceId} Reason={Reason}",
