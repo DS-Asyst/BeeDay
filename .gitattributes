@@ -13,6 +13,7 @@
 *.editorconfig text eol=crlf
 *.config text eol=crlf
 *.xml text eol=crlf
+*.svg text eol=crlf
 *.md text eol=crlf
 *.txt text eol=crlf
 *.css text eol=crlf
