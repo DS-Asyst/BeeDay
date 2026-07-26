@@ -1,9 +1,9 @@
 @using LevelUp.Application.Features.Inventory.Responses
 @using LevelUp.Web.Components.Features.Inventory.Models
 
-<section class="inventory-tags-panel" aria-busy="@IsBusy.ToString().ToLowerInvariant()">
+<section class="inventory-tags-panel" aria-labelledby="inventory-tags-title" aria-busy="@IsBusy.ToString().ToLowerInvariant()">
     <header class="inventory-panel-header">
-        <div><span class="inventory-eyebrow">Organization</span><h2>Tags</h2></div>
+        <div><span class="inventory-eyebrow">Organization</span><h2 id="inventory-tags-title">Tags</h2></div>
         <button type="button" class="inventory-button inventory-button--cta inventory-button--small" disabled="@IsBusy" @onclick="StartCreate">New tag</button>
     </header>
 

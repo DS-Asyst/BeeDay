@@ -2,7 +2,7 @@
 @using LevelUp.Domain.Enums
 @using LevelUp.Web.Components.Features.Inventory.Services
 
-<article class="inventory-transaction-card" aria-label="@($"{Transaction.Description}, {SignedAmount}")">
+<article class="inventory-transaction-card" tabindex="0" aria-label="@($"{Transaction.Description}, {SignedAmount}")">
     <div class="inventory-transaction-card__marker inventory-transaction-card__marker--@TypeClass" aria-hidden="true"></div>
     <div class="inventory-transaction-card__content">
         <div class="inventory-transaction-card__heading">

@@ -80,3 +80,8 @@ Inventory data is refreshed after successful mutations. The UI deliberately avoi
 Inventory transactions can be filtered in memory by description or notes, transaction type, tag, and inclusive date range. Results can be ordered by transaction date in ascending or descending order, and the UI exposes an active-filter count, one-action filter reset, pagination reset after filter changes, and a dedicated no-results state.
 
 The Web layer only captures filter state. `GetTransactionsQuery` owns the filter contract so the same parameters can later be translated to paginated SQL predicates without redesigning the page components.
+
+
+## Inventory responsive behavior
+
+The Inventory module uses explicit desktop, tablet, and mobile breakpoints. Desktop keeps independent scrolling for long transaction and tag collections; tablet collapses the workspace while retaining compact summary cards; mobile converts filters, pagination, tag actions, and primary actions to full-width touch controls. Interactive controls use at least 44 px touch targets, visible keyboard focus, semantic labelled regions, and responsive modal constraints.

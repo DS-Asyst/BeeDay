@@ -1,10 +1,10 @@
 @using LevelUp.Application.Features.Inventory.Responses
 
-<div class="inventory-main-panel">
+<section class="inventory-main-panel" aria-labelledby="inventory-transactions-title">
     <header class="inventory-panel-header inventory-panel-header--transactions">
         <div>
             <span class="inventory-eyebrow">History</span>
-            <h2>Transactions</h2>
+            <h2 id="inventory-transactions-title">Transactions</h2>
         </div>
         <span class="inventory-result-count">@Transactions.TotalCount result@(Transactions.TotalCount == 1 ? string.Empty : "s")</span>
     </header>
@@ -51,7 +51,7 @@
             </nav>
         }
     }
-</div>
+</section>
 
 @code {
     [Parameter, EditorRequired] public PagedTransactionsResponse Transactions { get; set; } = default!;

@@ -798,3 +798,290 @@
         flex-direction: column;
     }
 }
+
+
+/* Sprint 2.4 — responsive, touch and keyboard polish */
+.inventory-page,
+.inventory-workspace,
+.inventory-main-panel,
+.inventory-tags-panel,
+.inventory-filter-shell,
+.inventory-transaction-card__content {
+    min-width: 0;
+}
+
+.inventory-button,
+.inventory-pagination button,
+.inventory-tag-action,
+.inventory-transaction-card__menu,
+.inventory-transaction-card__actions .card-action-menu__item {
+    min-height: 44px;
+}
+
+.inventory-button,
+.inventory-pagination button,
+.inventory-tag-action {
+    min-width: 44px;
+}
+
+.inventory-main-panel {
+    display: flex;
+    min-height: min(42rem, calc(100dvh - 9rem));
+    flex-direction: column;
+}
+
+.inventory-transaction-list {
+    flex: 1 1 auto;
+    max-height: min(56rem, calc(100dvh - 25rem));
+    scrollbar-width: thin;
+}
+
+.inventory-tags-panel {
+    max-height: calc(100dvh - 6rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
+.inventory-transaction-card:focus-visible,
+.inventory-tag-item:focus-within,
+.inventory-filter-field input:focus-visible,
+.inventory-filter-field select:focus-visible,
+.inventory-alert button:focus-visible {
+    outline: 3px solid #6a3caf;
+    outline-offset: 3px;
+}
+
+.inventory-filter-field input,
+.inventory-filter-field select {
+    min-height: 44px;
+}
+
+.inventory-alert {
+    align-items: center;
+}
+
+.inventory-alert button {
+    min-height: 44px;
+    padding-inline: .75rem;
+}
+
+@media (max-width: 1100px) {
+    .inventory-page {
+        width: 100%;
+        padding-inline: clamp(1rem, 3vw, 1.75rem);
+    }
+
+    .inventory-workspace {
+        grid-template-columns: minmax(0, 1fr) minmax(17rem, 19rem);
+    }
+
+    .inventory-filter-shell .inventory-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .inventory-filter-field--search {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 860px) {
+    .inventory-page__header {
+        align-items: stretch;
+    }
+
+    .inventory-page__header .inventory-button--cta {
+        align-self: flex-start;
+    }
+
+    .inventory-summary {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        overflow-x: auto;
+        padding-bottom: .25rem;
+        scroll-snap-type: x proximity;
+    }
+
+    .inventory-summary__card {
+        min-width: 13rem;
+        scroll-snap-align: start;
+    }
+
+    .inventory-workspace {
+        grid-template-columns: 1fr;
+    }
+
+    .inventory-main-panel {
+        min-height: auto;
+    }
+
+    .inventory-tags-panel {
+        position: static;
+        max-height: none;
+        overflow: visible;
+    }
+
+    .inventory-transaction-list {
+        max-height: 46rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .inventory-page {
+        padding: 1rem .75rem 2.5rem;
+    }
+
+    .inventory-page__header {
+        gap: 1rem;
+    }
+
+    .inventory-page__header .inventory-button--cta {
+        width: 100%;
+    }
+
+    .inventory-summary {
+        grid-template-columns: 1fr;
+        overflow: visible;
+    }
+
+    .inventory-summary__card {
+        min-width: 0;
+    }
+
+    .inventory-filter-shell .inventory-filters {
+        grid-template-columns: 1fr;
+        padding: .9rem;
+    }
+
+    .inventory-filter-field--search {
+        grid-column: auto;
+    }
+
+    .inventory-active-filters {
+        padding: 0 .9rem .9rem;
+    }
+
+    .inventory-active-filters .inventory-button,
+    .inventory-empty-state .inventory-button {
+        width: 100%;
+    }
+
+    .inventory-panel-header,
+    .inventory-panel-header--transactions {
+        align-items: flex-start;
+        padding: 1rem;
+    }
+
+    .inventory-result-count {
+        text-align: right;
+    }
+
+    .inventory-transaction-list {
+        max-height: none;
+        padding: .75rem;
+    }
+
+    .inventory-transaction-card {
+        grid-template-columns: 4px minmax(0, 1fr) 44px;
+        gap: .65rem;
+        padding: .8rem .55rem .8rem .45rem;
+    }
+
+    .inventory-transaction-card__actions {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    .inventory-transaction-card__heading {
+        display: block;
+    }
+
+    .inventory-transaction-card__title-wrap strong,
+    .inventory-transaction-card__title-wrap small {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .inventory-transaction-card__amount {
+        display: block;
+        margin-top: .35rem;
+    }
+
+    .inventory-tag-item {
+        grid-template-columns: auto minmax(0, 1fr);
+        padding: .8rem;
+    }
+
+    .inventory-tag-action {
+        width: 100%;
+    }
+
+    .inventory-tag-action--edit {
+        grid-column: 1 / -1;
+    }
+
+    .inventory-tag-action--delete {
+        grid-column: 1 / -1;
+    }
+
+    .inventory-tag-form__actions {
+        flex-direction: column-reverse;
+    }
+
+    .inventory-tag-form__actions .inventory-button {
+        width: 100%;
+    }
+
+    .inventory-pagination {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: .65rem;
+        padding: .85rem;
+    }
+
+    .inventory-pagination span {
+        grid-column: 1 / -1;
+        order: -1;
+        text-align: center;
+    }
+
+    .inventory-pagination button {
+        width: 100%;
+    }
+
+    .inventory-alert {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 420px) {
+    .inventory-page__header h1 {
+        font-size: 2.35rem;
+    }
+
+    .inventory-panel-header {
+        flex-direction: column;
+    }
+
+    .inventory-panel-header .inventory-button--small {
+        width: 100%;
+    }
+
+    .inventory-transaction-card {
+        grid-template-columns: 4px minmax(0, 1fr) 40px;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .inventory-button:hover,
+    .inventory-tag-action:hover,
+    .inventory-transaction-card:hover {
+        transform: none;
+    }
+
+    .inventory-transaction-card__menu,
+    .inventory-tag-action,
+    .inventory-pagination button {
+        min-height: 48px;
+    }
+}
