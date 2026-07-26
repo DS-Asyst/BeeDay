@@ -124,3 +124,9 @@ The finalized XP and Level Up pipeline is documented in [`docs/EXPERIENCE.md`](d
 ### Activity attributes
 
 Daily activities can be classified as Strength, Dexterity, Intelligence, Wisdom, Vitality, or Charisma. The Daily dashboard supports attribute-aware search, filtering, and optional attribute sorting while preserving manual card ordering as the default.
+
+## Design System
+
+LevelUp uses a centralized Pixel Icon System. UI code consumes the generic `PixelIcon` renderer and semantic `PixelIconName`, `PixelIconSize`, and `PixelIconColor` contracts. Inline SVG, direct SVG paths, legacy icon components, and functional emojis are not permitted in feature components.
+
+The internal icon catalog is available at `/design-system/icons` for authenticated users in the Development environment. Implementation and extension guidance is documented in `docs/PIXEL_ICON_SYSTEM.md` and `docs/DESIGN_SYSTEM.md`.

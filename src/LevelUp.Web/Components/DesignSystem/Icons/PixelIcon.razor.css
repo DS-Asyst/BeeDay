@@ -5,6 +5,18 @@
     vertical-align: middle;
     fill: currentColor;
     image-rendering: pixelated;
+    transition: color 120ms ease, opacity 120ms ease, transform 120ms ease;
+}
+
+button:disabled .pixel-icon,
+[aria-disabled="true"] .pixel-icon {
+    opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pixel-icon {
+        transition: none;
+    }
 }
 
 .pixel-icon--color-current { color: currentcolor; }

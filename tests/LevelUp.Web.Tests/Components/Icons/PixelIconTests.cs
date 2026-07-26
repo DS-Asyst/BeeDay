@@ -157,3 +157,86 @@ public sealed class PixelIconTests
         Assert.Equal(PixelIconCategory.Statistics, definition.Category);
     }
 }
+
+public sealed class PixelIconContractTests
+{
+    public static TheoryData<PixelIconColor> AllColors => new(Enum.GetValues<PixelIconColor>());
+
+    [Theory]
+    [MemberData(nameof(AllColors))]
+    public void MapsEveryOfficialColorToken(PixelIconColor color)
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<PixelIcon>(parameters => parameters
+            .Add(component => component.Name, PixelIconName.Information)
+            .Add(component => component.Color, color));
+
+        Assert.Contains($"pixel-icon--color-{color.ToString().ToLowerInvariant()}", cut.Find("svg").ClassList);
+    }
+
+    [Fact]
+    public void DecorativeIconIsHiddenAndNeverFocusable()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<PixelIcon>(parameters => parameters
+            .Add(component => component.Name, PixelIconName.Add));
+
+        var svg = cut.Find("svg");
+        Assert.Equal("true", svg.GetAttribute("aria-hidden"));
+        Assert.Equal("false", svg.GetAttribute("focusable"));
+        Assert.Null(svg.GetAttribute("aria-label"));
+        Assert.Null(svg.GetAttribute("role"));
+    }
+
+    [Fact]
+    public void InformativeIconHasImageSemanticsAndIsNeverFocusable()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<PixelIcon>(parameters => parameters
+            .Add(component => component.Name, PixelIconName.Completed)
+            .Add(component => component.Decorative, false)
+            .Add(component => component.Label, "Completed status"));
+
+        var svg = cut.Find("svg");
+        Assert.Equal("img", svg.GetAttribute("role"));
+        Assert.Equal("Completed status", svg.GetAttribute("aria-label"));
+        Assert.Equal("false", svg.GetAttribute("focusable"));
+        Assert.Null(svg.GetAttribute("aria-hidden"));
+    }
+
+    [Fact]
+    public void RegistryContainsEveryEnumValueExactlyOnce()
+    {
+        var names = Enum.GetValues<PixelIconName>();
+
+        Assert.Equal(names.Length, PixelIconRegistry.All.Count);
+        Assert.All(names, name => Assert.True(PixelIconRegistry.TryGet(name, out _), $"Missing icon contract: {name}"));
+        Assert.Equal(PixelIconRegistry.All.Count, PixelIconRegistry.All.Values.Select(value => value.SymbolId).Distinct().Count());
+    }
+
+    [Fact]
+    public void EveryRegistryEntryUsesTheOfficialSpriteAndAssetRoot()
+    {
+        foreach (var entry in PixelIconRegistry.All)
+        {
+            Assert.StartsWith("/icons/pixel/", entry.Value.AssetPath, StringComparison.Ordinal);
+            Assert.EndsWith(".svg", entry.Value.AssetPath, StringComparison.Ordinal);
+            Assert.DoesNotContain("..", entry.Value.AssetPath, StringComparison.Ordinal);
+            Assert.False(string.IsNullOrWhiteSpace(entry.Value.DefaultLabel));
+        }
+    }
+
+    [Fact]
+    public void PassesAdditionalAttributesWithoutReplacingOfficialClasses()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<PixelIcon>(parameters => parameters
+            .Add(component => component.Name, PixelIconName.Save)
+            .AddUnmatched("data-testid", "save-icon"));
+
+        var svg = cut.Find("svg");
+        Assert.Equal("save-icon", svg.GetAttribute("data-testid"));
+        Assert.Contains("pixel-icon", svg.ClassList);
+        Assert.Contains("pixel-icon--save", svg.ClassList);
+    }
+}
