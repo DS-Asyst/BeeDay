@@ -85,3 +85,19 @@ The Web layer only captures filter state. `GetTransactionsQuery` owns the filter
 ## Inventory responsive behavior
 
 The Inventory module uses explicit desktop, tablet, and mobile breakpoints. Desktop keeps independent scrolling for long transaction and tag collections; tablet collapses the workspace while retaining compact summary cards; mobile converts filters, pagination, tag actions, and primary actions to full-width touch controls. Interactive controls use at least 44 px touch targets, visible keyboard focus, semantic labelled regions, and responsive modal constraints.
+
+
+## Inventory UI test coverage
+
+The Inventory module is covered with bUnit and state tests for:
+
+- wallet summary rendering and currency formatting;
+- transaction and tag form validation;
+- search, type, tag, period, and sorting callbacks;
+- disabled controls while an operation is running;
+- initial empty state and filtered no-results state;
+- transaction refresh and pagination loading states;
+- filter reset, active-filter counting, and page reset;
+- concurrent-operation prevention through `InventoryInteractionState`.
+
+Tests intentionally assert public UI behavior and component contracts rather than internal CSS implementation details.

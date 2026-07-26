@@ -116,3 +116,16 @@ Documentation must remain in English and reflect the current implementation.
 
 - [Production configuration](docs/PRODUCTION.md)
 - [CI/CD hardening](docs/CI_CD.md)
+
+
+### Inventory quality baseline
+
+The Inventory module includes responsive transaction and tag management, in-memory search and filters for the current JSON persistence, guarded interaction states, accessible empty/loading feedback, and bUnit coverage for its primary UI contracts.
+
+Validate changes with:
+
+```bash
+dotnet format --verify-no-changes
+dotnet build
+dotnet test
+```
