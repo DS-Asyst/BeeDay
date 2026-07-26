@@ -265,3 +265,7 @@
 .editor-modal__counter { display: block; margin-top: .35rem; color: var(--levelup-color-text-muted); text-align: right; }
 .editor-modal__delete-confirmation { margin-right: auto; color: #6f6477; font-size: .78rem; font-weight: 700; }
 .editor-modal__footer { align-items: center; gap: .55rem; }
+
+.editor-modal__close { display: grid; place-items: center; width: 2rem; height: 2rem; padding: 0; border: 0; background: transparent; color: var(--levelup-color-surface); cursor: pointer; }
+.editor-modal__close:hover, .editor-modal__close:focus-visible { background: rgb(255 255 255 / 14%); transform: scale(1.06); }
+.editor-modal__close:disabled { cursor: not-allowed; opacity: .55; }

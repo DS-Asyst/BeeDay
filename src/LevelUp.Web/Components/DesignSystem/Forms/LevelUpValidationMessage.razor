@@ -1,0 +1,11 @@
+@typeparam TValue
+@if (_messages.Count > 0)
+{
+    @foreach (var message in _messages)
+    {
+        <div class="levelup-validation-message" role="alert">
+            <PixelIcon Name="PixelIconName.ValidationError" Size="PixelIconSize.ExtraSmall" Color="PixelIconColor.Danger" />
+            <span>@message</span>
+        </div>
+    }
+}

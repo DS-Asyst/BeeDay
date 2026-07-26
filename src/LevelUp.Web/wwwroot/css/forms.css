@@ -60,3 +60,18 @@
 .levelup-checkbox__label {
     font: var(--levelup-type-label);
 }
+
+.levelup-field__control-shell { position: relative; display: block; }
+.levelup-field__control-shell .levelup-field__control { padding-right: 2.25rem; }
+.levelup-field__control--select { appearance: none; }
+.levelup-field__control-icon { position: absolute; top: 50%; right: .7rem; transform: translateY(-50%); pointer-events: none; }
+.levelup-validation-message { display: flex; align-items: flex-start; gap: .35rem; color: var(--levelup-color-danger); font: var(--levelup-type-small); font-weight: var(--levelup-font-weight-bold); }
+.levelup-validation-message .pixel-icon { margin-top: .08rem; }
+.levelup-checkbox { position: relative; }
+.levelup-checkbox__control { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.levelup-checkbox__visual { display: inline-grid; place-items: center; width: 1.05rem; height: 1.05rem; }
+.levelup-checkbox__visual .pixel-icon { grid-area: 1 / 1; }
+.levelup-checkbox__checked { opacity: 0; }
+.levelup-checkbox__control:checked + .levelup-checkbox__visual .levelup-checkbox__unchecked { opacity: 0; }
+.levelup-checkbox__control:checked + .levelup-checkbox__visual .levelup-checkbox__checked { opacity: 1; }
+.levelup-checkbox__control:focus-visible + .levelup-checkbox__visual { outline: 2px solid var(--levelup-color-primary-light); outline-offset: 2px; }

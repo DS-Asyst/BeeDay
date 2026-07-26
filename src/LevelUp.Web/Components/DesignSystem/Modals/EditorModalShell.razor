@@ -10,6 +10,9 @@
             <header class="editor-modal__header">
                 <h2 id="@TitleId">@Title</h2>
                 <div class="editor-modal__actions">
+                    <button type="button" class="editor-modal__close" aria-label="Close dialog" disabled="@IsBusy" @onclick="Cancel">
+                        <PixelIcon Name="PixelIconName.Close" Size="PixelIconSize.Small" />
+                    </button>
                     <LevelUpButton Variant="LevelUpButtonVariant.Secondary" Icon="PixelIconName.Cancel" Disabled="IsBusy" OnClick="Cancel">CANCEL</LevelUpButton>
                     <LevelUpButton Type="submit" Variant="LevelUpButtonVariant.Primary" Icon="PixelIconName.Save" Disabled="IsBusy" IsLoading="IsBusy">@SubmitLabel</LevelUpButton>
                 </div>

@@ -20,6 +20,7 @@ public sealed class LevelUpToastHostTests
         Assert.Equal("status", toast.GetAttribute("role"));
         Assert.Contains("Saved", toast.TextContent);
         Assert.Contains("Habit saved", toast.TextContent);
+        Assert.NotNull(toast.QuerySelector("svg.pixel-icon--success"));
     }
 
     [Fact]
@@ -34,6 +35,7 @@ public sealed class LevelUpToastHostTests
         cut.WaitForAssertion(() => Assert.Single(cut.FindAll(".levelup-toast--error")));
 
         Assert.Equal("alert", cut.Find(".levelup-toast--error").GetAttribute("role"));
+        Assert.NotNull(cut.Find("svg.pixel-icon--validation-error"));
     }
 
     [Fact]

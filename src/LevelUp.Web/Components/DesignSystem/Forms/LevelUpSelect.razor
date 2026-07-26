@@ -12,18 +12,21 @@
             }
         </span>
     }
-    <InputSelect TValue="TValue"
-                 id="@Id"
-                 class="@InputCssClass"
-                 Value="Value"
-                 ValueChanged="ValueChanged"
-                 ValueExpression="ValueExpression"
-                 disabled="@Disabled"
-                 @attributes="AdditionalAttributes">
-        @ChildContent
-    </InputSelect>
+    <span class="levelup-field__control-shell">
+        <InputSelect TValue="TValue"
+                     id="@Id"
+                     class="@($"{InputCssClass} levelup-field__control--select")"
+                     Value="Value"
+                     ValueChanged="ValueChanged"
+                     ValueExpression="ValueExpression"
+                     disabled="@Disabled"
+                     @attributes="AdditionalAttributes">
+            @ChildContent
+        </InputSelect>
+        <PixelIcon Name="PixelIconName.Select" Size="PixelIconSize.Small" Color="PixelIconColor.Muted" Class="levelup-field__control-icon" />
+    </span>
 </label>
 @if (ShowValidationMessage)
 {
-    <ValidationMessage For="ValueExpression" />
+    <LevelUpValidationMessage For="ValueExpression" />
 }
