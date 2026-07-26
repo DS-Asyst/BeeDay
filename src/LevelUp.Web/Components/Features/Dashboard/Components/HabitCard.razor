@@ -20,14 +20,18 @@
                 <h3><SearchHighlight Text="@Title" SearchTerm="@SearchTerm" /></h3>
             </div>
 
-            <LevelUpCardMenu TriggerClass="habit-card__menu"
-                             Title="@Title"
-                             OnEdit="@OnEdit"
-                             OnDelete="@OnDelete"
-                             OpenChanged="HandleMenuOpenChanged" />
-        </div>
+            <div class="habit-card__header-actions">
+                <div class="habit-card__attribute">
+                    <ActivityAttributeBadge Attribute="@Attribute" />
+                </div>
 
-        <ActivityAttributeBadge Attribute="@Attribute" />
+                <LevelUpCardMenu TriggerClass="habit-card__menu"
+                                 Title="@Title"
+                                 OnEdit="@OnEdit"
+                                 OnDelete="@OnDelete"
+                                 OpenChanged="HandleMenuOpenChanged" />
+            </div>
+        </div>
 
         @if (!string.IsNullOrWhiteSpace(Description))
         {

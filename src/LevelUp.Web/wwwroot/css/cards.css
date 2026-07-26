@@ -438,3 +438,99 @@
         padding: .52rem .62rem .42rem;
     }
 }
+
+/* UX / Visual Refinement — Sprint 5: unified activity card presentation */
+.activity-card__header,
+.habit-card__header {
+    display: flex;
+    min-width: 0;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
+.activity-card__title-row,
+.habit-card__title {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.activity-card__title-row h3,
+.habit-card__title h3 {
+    min-width: 0;
+    font-family: var(--levelup-font-ui);
+    font-size: .95rem;
+    font-weight: var(--levelup-font-weight-semibold);
+    line-height: 1.15;
+    letter-spacing: .01em;
+}
+
+.activity-card__attribute,
+.habit-card__attribute {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: flex-start;
+    justify-content: flex-end;
+}
+
+.activity-card__attribute:empty,
+.habit-card__attribute:empty {
+    display: none;
+}
+
+.activity-card__attribute .activity-attribute-badge,
+.habit-card__attribute .activity-attribute-badge {
+    max-width: 7.25rem;
+    margin: 0;
+    padding: .16rem .38rem;
+    overflow: hidden;
+    font-size: .58rem;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.activity-card p,
+.habit-card__body > p {
+    margin: .28rem 0 0;
+    color: #786f80;
+    font-family: var(--levelup-font-body);
+    font-size: .74rem;
+    line-height: 1.35;
+}
+
+.habit-card__header-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: flex-start;
+    gap: .2rem;
+}
+
+.activity-card--project h3 {
+    text-transform: uppercase;
+}
+
+.activity-card--project .activity-card__project-status {
+    width: auto;
+    height: auto;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    color: #fff;
+    background: transparent;
+    box-shadow: none;
+}
+
+.activity-card--project .activity-card__project-status svg,
+.activity-card--project .activity-card__project-status .pixel-icon {
+    color: #fff;
+    fill: currentColor;
+}
+
+@media (max-width: 650px) {
+    .activity-card__attribute .activity-attribute-badge,
+    .habit-card__attribute .activity-attribute-badge {
+        max-width: 5.5rem;
+        font-size: .54rem;
+    }
+}
