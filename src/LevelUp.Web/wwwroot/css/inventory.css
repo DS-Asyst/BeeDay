@@ -1087,3 +1087,74 @@
 }
 
 .inventory-summary__label,.inventory-page__title,.inventory-button,.inventory-alert>span,.inventory-transaction-card__type{display:flex;align-items:center;gap:.4rem}.inventory-summary__label .pixel-icon,.inventory-page__title .pixel-icon,.inventory-button .pixel-icon,.inventory-alert .pixel-icon,.inventory-transaction-card__type .pixel-icon{flex:0 0 auto}
+
+
+/* Pixel action alignment — mirrors the + Add activity button while preserving palettes. */
+.inventory-button,
+.inventory-pagination button,
+.inventory-page__error button {
+    --inventory-action-face: #7a4fcb;
+    --inventory-action-hover: #8a60d4;
+    --inventory-action-foreground: #fff;
+    --inventory-action-outline: #44296f;
+    --inventory-action-depth: #4f3280;
+    --inventory-action-shadow: #27193d;
+    position: relative;
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    padding: .68rem 1rem .78rem;
+    border: 2px solid var(--inventory-action-outline);
+    border-radius: 3px;
+    color: var(--inventory-action-foreground);
+    background: var(--inventory-action-face);
+    box-shadow: inset -2px -3px 0 var(--inventory-action-depth), 0 4px 0 var(--inventory-action-shadow);
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: none;
+}
+.inventory-button--cta,
+.inventory-tag-form__actions .inventory-button[type="submit"] {
+    --inventory-action-face: #ffc82e;
+    --inventory-action-hover: #ffd454;
+    --inventory-action-foreground: #201a24;
+    --inventory-action-outline: #8d6500;
+    --inventory-action-depth: #d28b00;
+    --inventory-action-shadow: #2b2415;
+}
+.inventory-button--ghost { --inventory-action-face: transparent; --inventory-action-hover: rgb(122 79 203 / 10%); }
+.inventory-button--cancel {
+    --inventory-action-face: #fff;
+    --inventory-action-hover: #f1f1f1;
+    --inventory-action-foreground: #171321;
+    --inventory-action-outline: #444047;
+    --inventory-action-depth: #d7d5d8;
+    --inventory-action-shadow: #5a565d;
+}
+.inventory-button--small { min-height: 2.25rem; padding: .48rem .7rem .56rem; }
+.inventory-button:not(:disabled):hover,
+.inventory-pagination button:not(:disabled):hover,
+.inventory-page__error button:not(:disabled):hover {
+    transform: none;
+    color: var(--inventory-action-foreground);
+    background: var(--inventory-action-hover);
+    box-shadow: inset -2px -4px 0 var(--inventory-action-depth), 0 4px 0 var(--inventory-action-shadow);
+}
+.inventory-button:not(:disabled):active,
+.inventory-pagination button:not(:disabled):active,
+.inventory-page__error button:not(:disabled):active {
+    transform: translateY(4px);
+    background: var(--inventory-action-depth);
+    box-shadow: inset 2px 2px 0 var(--inventory-action-outline);
+}
+.inventory-button:focus-visible,
+.inventory-pagination button:focus-visible,
+.inventory-page__error button:focus-visible {
+    outline: 0;
+    box-shadow: inset -2px -3px 0 var(--inventory-action-depth), 0 4px 0 var(--inventory-action-shadow), 0 0 0 4px rgb(122 79 203 / 28%);
+}
+.inventory-button:disabled,
+.inventory-pagination button:disabled,
+.inventory-page__error button:disabled { opacity: .55; cursor: not-allowed; filter: grayscale(.35); }

@@ -1,0 +1,34 @@
+/* LevelUp custom cursor pack. */
+html,
+body,
+body * {
+    cursor: url("../cursors/cursor-normal.png") 4 1, auto !important;
+}
+
+/* Interactive controls use the dedicated click cursor. */
+a[href],
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+label[for],
+summary,
+select:not(:disabled),
+input[type="button"]:not(:disabled),
+input[type="submit"]:not(:disabled),
+input[type="reset"]:not(:disabled),
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled),
+input[type="color"]:not(:disabled),
+input[type="file"]:not(:disabled),
+.clickable,
+[onclick] {
+    cursor: url("../cursors/cursor-click.png") 15 0, pointer !important;
+}
+
+/* Disabled controls remain visually non-interactive while preserving the custom theme. */
+button:disabled,
+[aria-disabled="true"],
+input:disabled,
+select:disabled,
+textarea:disabled {
+    cursor: url("../cursors/cursor-normal.png") 4 1, not-allowed !important;
+}

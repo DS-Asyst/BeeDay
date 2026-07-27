@@ -122,10 +122,3 @@ body { min-width: 20rem; }
     .levelup-select,
     .levelup-card { border-color: CanvasText; }
 }
-
-/* LevelUp Pixel Button v2 keeps its own dimensions after polish rules. */
-.levelup-button.levelup-button--reference-blue {
-    min-height: 3rem;
-    padding: .72rem 1rem .82rem;
-    margin: 0;
-}

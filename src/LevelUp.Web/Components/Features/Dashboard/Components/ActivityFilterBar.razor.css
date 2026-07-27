@@ -216,3 +216,18 @@
     .filter-bar__menu { right: auto; left: 0; width: 100%; }
     .filter-bar__tags-grid { grid-template-columns: 1fr; gap: .2rem; }
 }
+
+
+.filter-bar__cancel.levelup-legacy-cancel {
+    min-height: 2.25rem;
+    padding: .5rem .8rem .58rem;
+    border: 2px solid #444047;
+    border-radius: 3px;
+    color: #171321;
+    background: #fff;
+    box-shadow: inset -2px -3px 0 #d7d5d8, 0 4px 0 #5a565d;
+    text-transform: uppercase;
+    transition: none;
+}
+.filter-bar__cancel.levelup-legacy-cancel:hover { color:#171321; background:#f1f1f1; box-shadow:inset -2px -4px 0 #d7d5d8,0 4px 0 #5a565d; }
+.filter-bar__cancel.levelup-legacy-cancel:active { transform:translateY(4px); background:#d7d5d8; box-shadow:inset 2px 2px 0 #444047; }
