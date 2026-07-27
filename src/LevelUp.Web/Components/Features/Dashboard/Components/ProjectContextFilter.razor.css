@@ -1,0 +1,46 @@
+.project-context-filter {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    min-width: 0;
+}
+
+.project-context-filter__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.project-context-filter__control {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    min-width: 0;
+    color: #5f5367;
+}
+
+.project-context-filter__select {
+    width: min(11.5rem, 100%);
+    min-width: 0;
+    padding: .15rem 1.35rem .15rem .1rem;
+    border: 0;
+    color: #4f3b5b;
+    background: transparent;
+    font-family: var(--levelup-font-family);
+    font-size: .8rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.project-context-filter__select:focus-visible {
+    outline: 2px solid var(--levelup-color-primary);
+    outline-offset: 2px;
+}

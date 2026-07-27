@@ -238,3 +238,16 @@
     border-bottom-color: #d8d4dc;
 }
 
+
+
+/* Sprint 9 — optional contextual controls in column headers */
+.dashboard-column__heading-group {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+    min-width: 0;
+}
+
+.dashboard-column__header-content {
+    min-width: 0;
+}

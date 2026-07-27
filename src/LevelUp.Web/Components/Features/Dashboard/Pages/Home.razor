@@ -128,6 +128,11 @@ else if (State.Data?.CurrentCharacter is not null)
                                  ActiveCount="@activeProjects.Count"
                                  CompletedCount="@completedProjects.Count"
                                  OnCreate="@(() => State.OpenCreate(ActivityType.Project))">
+                    <HeaderContent>
+                        <ProjectContextFilter Projects="@State.ProjectContextOptions"
+                                              SelectedProjectId="@State.SelectedProjectId"
+                                              SelectedProjectIdChanged="State.SelectProjectContext" />
+                    </HeaderContent>
                     <ActiveContent>
                         <LevelUpSortable ItemIds="@activeProjects.Select(item => item.Id).ToList()"
                                          CollectionKey="projects"

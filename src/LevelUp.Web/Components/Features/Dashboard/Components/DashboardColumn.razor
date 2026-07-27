@@ -1,8 +1,17 @@
 <section class="dashboard-column" aria-labelledby="@HeadingId">
     <header class="dashboard-column__header">
-        <div class="dashboard-column__heading">
-            <h2 id="@HeadingId">@Title</h2>
-            <span class="dashboard-column__count" aria-label="@CurrentCountLabel">@CurrentCount</span>
+        <div class="dashboard-column__heading-group">
+            <div class="dashboard-column__heading">
+                <h2 id="@HeadingId">@Title</h2>
+                <span class="dashboard-column__count" aria-label="@CurrentCountLabel">@CurrentCount</span>
+            </div>
+
+            @if (HeaderContent is not null)
+            {
+                <div class="dashboard-column__header-content">
+                    @HeaderContent
+                </div>
+            }
         </div>
 
         <div class="dashboard-column__actions">

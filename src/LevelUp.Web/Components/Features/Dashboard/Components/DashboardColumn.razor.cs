@@ -18,6 +18,7 @@ public partial class DashboardColumn
     [Parameter] public bool ShowCompletedSection { get; set; } = true;
     [Parameter] public bool ShowCreateButton { get; set; } = true;
     [Parameter] public EventCallback OnCreate { get; set; }
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
     [Parameter] public RenderFragment? ActiveContent { get; set; }
     [Parameter] public RenderFragment? CompletedContent { get; set; }
 

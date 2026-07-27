@@ -16,6 +16,7 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
     private LevelUpData? data;
     private string search = string.Empty;
     private readonly HashSet<ActivityAttribute> selectedAttributes = [];
+    private Guid? selectedProjectId;
 
     public DashboardModalState Modals { get; } = new();
     public LevelUpData? Data => data;
@@ -38,6 +39,16 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
     }
 
     public IReadOnlyCollection<ActivityAttribute> SelectedAttributes => selectedAttributes;
+    public Guid? SelectedProjectId => selectedProjectId;
+    public IReadOnlyList<Project> ProjectContextOptions => data?.Projects.ToList() ?? [];
+
+    public void SelectProjectContext(Guid? projectId)
+    {
+        selectedProjectId = projectId is Guid id && data?.Projects.Any(project => project.Id == id) == true
+            ? id
+            : null;
+        Changed?.Invoke();
+    }
 
     public void ToggleAttributeFilter(ActivityAttribute attribute)
     {
@@ -64,7 +75,8 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
 
     public IEnumerable<Habit> FilteredHabits => Filter(data?.Habits ?? []);
     public IEnumerable<RecurringTask> FilteredTasks => Filter(data?.Tasks ?? []);
-    public IEnumerable<Todo> FilteredTodos => Filter(data?.Todos ?? []);
+    public IEnumerable<Todo> FilteredTodos => Filter(data?.Todos ?? [])
+        .Where(item => selectedProjectId is null || item.ProjectId == selectedProjectId);
     public IEnumerable<Project> FilteredProjects => Filter(data?.Projects ?? []);
 
     public int TotalItems => data is null
@@ -209,7 +221,15 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
             || item.Description.Contains(search, StringComparison.OrdinalIgnoreCase)
             || (item.Attribute?.ToString().Contains(search, StringComparison.OrdinalIgnoreCase) ?? false));
 
-    private async Task ReloadAsync() => data = await store.LoadAsync();
+    private async Task ReloadAsync()
+    {
+        data = await store.LoadAsync();
+
+        if (selectedProjectId is Guid projectId && !data.Projects.Any(project => project.Id == projectId))
+        {
+            selectedProjectId = null;
+        }
+    }
 
     private Task ReorderAsync(
         ActivityCollection collection,

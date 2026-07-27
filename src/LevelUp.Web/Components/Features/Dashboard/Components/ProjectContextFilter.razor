@@ -1,0 +1,17 @@
+<div class="project-context-filter">
+    <label class="project-context-filter__label" for="@SelectId">Project context</label>
+    <div class="project-context-filter__control">
+        <PixelIcon Name="PixelIconName.ChevronDown" Size="PixelIconSize.ExtraSmall" Decorative="true" />
+        <select id="@SelectId"
+                class="project-context-filter__select"
+                aria-label="Filter To-Dos by project"
+                value="@SelectedValue"
+                @onchange="HandleSelectionChanged">
+            <option value="">All Projects</option>
+            @foreach (var project in Projects)
+            {
+                <option value="@project.Id">@project.Title</option>
+            }
+        </select>
+    </div>
+</div>
