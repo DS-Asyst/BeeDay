@@ -41,7 +41,7 @@
     padding: clamp(1.6rem, 5vw, 2.5rem);
     border: 2px solid var(--levelup-game-ink);
     border-radius: calc(var(--levelup-radius-xs) - 1px);
-    background: var(--levelup-game-paper);
+    background: #fff;
 }
 
 .auth-card__brand {

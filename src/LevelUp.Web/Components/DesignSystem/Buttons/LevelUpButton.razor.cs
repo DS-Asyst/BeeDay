@@ -27,6 +27,8 @@ public partial class LevelUpButton
             {
                 LevelUpButtonVariant.Primary => "levelup-button--primary",
                 LevelUpButtonVariant.Secondary => "levelup-button--secondary",
+                LevelUpButtonVariant.Success => "levelup-button--success",
+                LevelUpButtonVariant.Warning => "levelup-button--warning",
                 LevelUpButtonVariant.Back => "levelup-button--back",
                 LevelUpButtonVariant.Danger => "levelup-button--danger",
                 LevelUpButtonVariant.ConfirmationDanger => "levelup-button--confirmation-danger",

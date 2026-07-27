@@ -106,38 +106,3 @@
         min-height: 24rem;
     }
 }
-/* UX / Visual Refinement — Sprint 6.3: narrower desktop board. */
-@media (min-width: 1101px) {
-    .dashboard-grid {
-        width: min(100%, 85rem);
-        margin: .55rem auto 0;
-    }
-}
-/* UX / Visual Refinement — Sprint 6.4: separated dashboard columns. */
-.dashboard-grid {
-    column-gap: 1.15rem;
-    row-gap: 1.15rem;
-}
-
-@media (max-width: 700px) {
-    .dashboard-grid {
-        gap: .75rem;
-    }
-}
-/* UX / Visual Refinement — Sprint 6.5: use the full desktop main area. */
-@media (min-width: 1101px) {
-    .dashboard-page__content {
-        padding-inline: 1rem;
-    }
-
-    .dashboard-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        width: 100%;
-        max-width: none;
-        margin: .55rem 0 0;
-    }
-
-    .dashboard-grid > * {
-        min-width: 0;
-    }
-}

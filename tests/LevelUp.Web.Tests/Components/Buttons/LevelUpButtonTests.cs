@@ -21,6 +21,8 @@ public sealed class LevelUpButtonTests
     [Theory]
     [InlineData(LevelUpButtonVariant.Primary, "levelup-button--primary")]
     [InlineData(LevelUpButtonVariant.Secondary, "levelup-button--secondary")]
+    [InlineData(LevelUpButtonVariant.Success, "levelup-button--success")]
+    [InlineData(LevelUpButtonVariant.Warning, "levelup-button--warning")]
     [InlineData(LevelUpButtonVariant.Back, "levelup-button--back")]
     [InlineData(LevelUpButtonVariant.Danger, "levelup-button--danger")]
     [InlineData(LevelUpButtonVariant.ConfirmationDanger, "levelup-button--confirmation-danger")]

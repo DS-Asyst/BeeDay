@@ -216,38 +216,3 @@
     .filter-bar__menu { right: auto; left: 0; width: 100%; }
     .filter-bar__tags-grid { grid-template-columns: 1fr; gap: .2rem; }
 }
-/* UX / Visual Refinement — Sprint 6.3: compact search and actions. */
-.filter-bar__main {
-    grid-template-columns: minmax(12rem, 20.5rem) auto auto;
-    gap: .4rem;
-    width: min(100%, 34.5rem);
-}
-
-.filter-bar__input {
-    height: 1.85rem;
-    padding-inline: .55rem;
-    font-size: .68rem;
-}
-
-.filter-bar__input::placeholder {
-    font-size: .68rem;
-}
-
-.filter-bar__filters ::deep .filter-bar__filter-button,
-.filter-bar__create ::deep .filter-bar__create-button {
-    min-width: 3.35rem;
-    min-height: 1.85rem;
-    padding-inline: .4rem;
-    font-size: .58rem;
-}
-
-.filter-bar__create ::deep .filter-bar__create-button {
-    min-width: 3.85rem;
-}
-
-@media (max-width: 760px) {
-    .filter-bar__main {
-        grid-template-columns: minmax(0, 1fr) auto;
-        width: 100%;
-    }
-}
