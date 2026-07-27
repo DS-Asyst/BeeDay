@@ -23,9 +23,17 @@ public partial class DashboardColumn
 
     private string NormalizedTitle => Title.ToLowerInvariant().Replace(" ", "-");
     private string HeadingId => $"dashboard-{NormalizedTitle}";
-    private string CompletedHeadingId => $"dashboard-{NormalizedTitle}-completed-heading";
-    private string CompletedContentId => $"dashboard-{NormalizedTitle}-completed-content";
     private string ResolvedSingularLabel => string.IsNullOrWhiteSpace(SingularLabel) ? Title.TrimEnd('s') : SingularLabel;
+    private string CurrentViewLabel => showCompleted ? "Completed" : "Active";
+    private PixelIconName CurrentViewIcon => showCompleted ? PixelIconName.Completed : PixelIconName.Repeat;
+    private int CurrentCount => showCompleted && ShowCompletedSection ? CompletedCount : ActiveCount;
+    private string CurrentCountLabel => $"{CurrentCount} {CurrentViewLabel.ToLowerInvariant()} {EmptyLabel}";
+    private string AriaPressed => showCompleted ? "true" : "false";
+    private string ToggleViewLabel => showCompleted
+        ? $"Show active {EmptyLabel.ToLowerInvariant()}"
+        : $"Show completed {EmptyLabel.ToLowerInvariant()}";
+    private string CompletedEmptyTitle => $"No completed {EmptyLabel.ToLowerInvariant()}";
+    private string CompletedEmptyDescription => $"Completed {EmptyLabel.ToLowerInvariant()} will appear here.";
 
     private void ToggleCompleted() => showCompleted = !showCompleted;
 }

@@ -2,57 +2,52 @@
     <header class="dashboard-column__header">
         <div class="dashboard-column__heading">
             <h2 id="@HeadingId">@Title</h2>
-            <span class="dashboard-column__count" aria-label="@($"{ActiveCount} active {EmptyLabel}")">@ActiveCount</span>
+            <span class="dashboard-column__count" aria-label="@CurrentCountLabel">@CurrentCount</span>
         </div>
 
-        @if (ShowCreateButton)
-        {
-            <button class="dashboard-column__add"
-                    type="button"
-                    aria-label="@($"Add {ResolvedSingularLabel}")"
-                    title="@($"Add {ResolvedSingularLabel}")"
-                    @onclick="OnCreate">
-                <PixelIcon Name="PixelIconName.Add" Size="PixelIconSize.Small" Decorative="true" />
-            </button>
-        }
+        <div class="dashboard-column__actions">
+            @if (ShowCompletedSection)
+            {
+                <button class="dashboard-column__view-toggle"
+                        type="button"
+                        aria-pressed="@AriaPressed"
+                        aria-label="@ToggleViewLabel"
+                        title="@ToggleViewLabel"
+                        @onclick="ToggleCompleted">
+                    <PixelIcon Name="@CurrentViewIcon" Size="PixelIconSize.Small" Decorative="true" />
+                </button>
+            }
+
+            @if (ShowCreateButton)
+            {
+                <button class="dashboard-column__add"
+                        type="button"
+                        aria-label="@($"Add {ResolvedSingularLabel}")"
+                        title="@($"Add {ResolvedSingularLabel}")"
+                        @onclick="OnCreate">
+                    <PixelIcon Name="PixelIconName.Add" Size="PixelIconSize.Small" Decorative="true" />
+                </button>
+            }
+        </div>
     </header>
 
     <div class="dashboard-column__viewport">
         <div class="dashboard-column__content">
-            @if (ShowCompletedSection)
+            @if (showCompleted && ShowCompletedSection)
             {
-                <section class="dashboard-column__completed" aria-labelledby="@CompletedHeadingId">
-                    <button class="dashboard-column__completed-toggle"
-                            type="button"
-                            aria-expanded="@showCompleted"
-                            aria-controls="@CompletedContentId"
-                            @onclick="ToggleCompleted">
-                        <span class="dashboard-column__completed-summary">
-                            <span id="@CompletedHeadingId" class="dashboard-column__completed-label">Completed</span>
-                        </span>
-                        <span class="dashboard-column__completed-action">
-                            <PixelIcon Name="@(showCompleted ? PixelIconName.ChevronDown : PixelIconName.ChevronRight)" Size="PixelIconSize.ExtraSmall" Class="dashboard-column__chevron" Decorative="true" />
-                            @(showCompleted ? "Hide" : "Show")
-                        </span>
-                    </button>
-
-                    @if (showCompleted)
-                    {
-                        <div id="@CompletedContentId" class="dashboard-column__completed-content">
-                            @if (CompletedCount == 0)
-                            {
-                                <p class="dashboard-column__completed-empty">No completed @EmptyLabel.ToLowerInvariant().</p>
-                            }
-                            else
-                            {
-                                @CompletedContent
-                            }
-                        </div>
-                    }
-                </section>
+                @if (CompletedCount == 0)
+                {
+                    <LevelUpEmptyState Class="dashboard-column__empty"
+                                       Icon="PixelIconName.Completed"
+                                       Title="@CompletedEmptyTitle"
+                                       Description="@CompletedEmptyDescription" />
+                }
+                else
+                {
+                    @CompletedContent
+                }
             }
-
-            @if (ActiveCount == 0)
+            else if (ActiveCount == 0)
             {
                 <LevelUpEmptyState Class="dashboard-column__empty"
                                    Icon="@EmptyIcon"
