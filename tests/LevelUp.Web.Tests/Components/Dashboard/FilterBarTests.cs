@@ -4,13 +4,13 @@ using LevelUp.Web.Components.Features.Dashboard.Components;
 
 namespace LevelUp.Web.Tests.Components.Dashboard;
 
-public sealed class FilterBarTests
+public sealed class ActivityFilterBarTests
 {
     [Fact]
     public void RendersSearchTagsTriggerAndCreateAction()
     {
         using var context = new BunitContext();
-        var cut = context.Render<FilterBar>();
+        var cut = context.Render<ActivityFilterBar>();
 
         Assert.Contains("placeholder=\"Search\"", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Tags", cut.Markup);
@@ -26,7 +26,7 @@ public sealed class FilterBarTests
         using var context = new BunitContext();
         ActivityAttribute? selectedAttribute = null;
 
-        var cut = context.Render<FilterBar>(parameters => parameters
+        var cut = context.Render<ActivityFilterBar>(parameters => parameters
             .Add(component => component.OnAttributeToggle, value => selectedAttribute = value));
 
         await cut.Find("button[aria-haspopup='dialog']").ClickAsync();
@@ -40,7 +40,7 @@ public sealed class FilterBarTests
     public async Task MarksSelectedAttributeAsChecked()
     {
         using var context = new BunitContext();
-        var cut = context.Render<FilterBar>(parameters => parameters
+        var cut = context.Render<ActivityFilterBar>(parameters => parameters
             .Add(component => component.SelectedAttributes, [ActivityAttribute.Wisdom]));
 
         await cut.Find("button[aria-haspopup='dialog']").ClickAsync();
@@ -54,7 +54,7 @@ public sealed class FilterBarTests
     {
         using var context = new BunitContext();
         var cleared = false;
-        var cut = context.Render<FilterBar>(parameters => parameters
+        var cut = context.Render<ActivityFilterBar>(parameters => parameters
             .Add(component => component.SelectedAttributes, [ActivityAttribute.Strength])
             .Add(component => component.OnClearAttributes, () => cleared = true));
 
@@ -70,7 +70,7 @@ public sealed class FilterBarTests
         using var context = new BunitContext();
         ActivityType? selectedType = null;
 
-        var cut = context.Render<FilterBar>(parameters => parameters
+        var cut = context.Render<ActivityFilterBar>(parameters => parameters
             .Add(component => component.OnCreate, value => selectedType = value));
 
         await cut.Find("button[aria-haspopup='menu']").ClickAsync();

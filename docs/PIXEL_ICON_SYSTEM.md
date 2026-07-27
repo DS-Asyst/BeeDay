@@ -151,7 +151,7 @@ The fallback is intentionally visual and non-fatal. Decorative behavior remains 
 ## Existing integrations migrated in Sprint 6.1
 
 - `LevelUpButton`
-- dashboard `FilterBar`
+- dashboard `ActivityFilterBar`
 - `ActivityAttributeIcon`
 - `ActivityAttributeBadge`
 - icon bUnit tests

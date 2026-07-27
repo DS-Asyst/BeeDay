@@ -1,0 +1,88 @@
+@using LevelUp.Domain.Enums
+@using LevelUp.Web.Components.DesignSystem.Attributes
+@using LevelUp.Web.Components.DesignSystem.Buttons
+
+<div class="filter-bar" aria-label="Dashboard controls">
+    <div class="filter-bar__main">
+        <div class="filter-bar__search" role="search">
+            <input id="dashboard-search"
+                   class="filter-bar__input"
+                   type="search"
+                   aria-label="Search activities"
+                   placeholder="Search"
+                   value="@inputValue"
+                   @oninput="OnInput" />
+        </div>
+
+        <div class="filter-bar__filters">
+            <LevelUpButton Variant="LevelUpButtonVariant.Secondary"
+                           Compact="true"
+                           Icon="PixelIconName.Filter"
+                           Class="filter-bar__filter-button"
+                           OnClick="ToggleTagsMenu"
+                           aria-haspopup="dialog"
+                           aria-expanded="@showTagsMenu">
+                Tags
+                @if (SelectedAttributes.Count > 0)
+                {
+                    <span class="filter-bar__filter-count" aria-label="@($"{SelectedAttributes.Count} selected tags")">@SelectedAttributes.Count</span>
+                }
+                <span class="filter-bar__chevron @(showTagsMenu ? "filter-bar__chevron--open" : null)" aria-hidden="true"></span>
+            </LevelUpButton>
+
+            @if (showTagsMenu)
+            {
+                <div class="filter-bar__tags-menu" role="dialog" aria-label="Filter activities by tags">
+                    <div class="filter-bar__tags-heading">Tags</div>
+                    <div class="filter-bar__tags-grid">
+                        @foreach (var activityAttribute in Attributes)
+                        {
+                            var selected = SelectedAttributes.Contains(activityAttribute);
+                            <label class="filter-bar__tag-option @(selected ? "filter-bar__tag-option--selected" : null)">
+                                <input type="checkbox"
+                                       value="@activityAttribute"
+                                       checked="@selected"
+                                       @onchange="_ => ToggleAttributeAsync(activityAttribute)" />
+                                <ActivityAttributeIcon Attribute="activityAttribute"
+                                                       Size="PixelIconSize.Small"
+                                                       Decorative="true"
+                                                       Class="filter-bar__attribute-icon" />
+                                <span>@activityAttribute</span>
+                            </label>
+                        }
+                    </div>
+                    <div class="filter-bar__tags-footer">
+                        <button type="button"
+                                class="filter-bar__clear"
+                                disabled="@(SelectedAttributes.Count == 0)"
+                                @onclick="ClearAttributesAsync">
+                            Clear all filters
+                        </button>
+                        <button type="button" class="filter-bar__cancel" @onclick="CloseTagsMenu">Cancel</button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="filter-bar__create">
+            <LevelUpButton Variant="LevelUpButtonVariant.Primary"
+                           Compact="true"
+                           Icon="PixelIconName.Add"
+                           Class="filter-bar__create-button"
+                           OnClick="ToggleCreateMenu"
+                           aria-haspopup="menu"
+                           aria-expanded="@showCreateMenu">
+                Add activity
+            </LevelUpButton>
+            @if (showCreateMenu)
+            {
+                <div class="filter-bar__menu" role="menu" aria-label="Choose activity type">
+                    <button type="button" role="menuitem" @onclick="CreateHabitAsync"><PixelIcon Name="PixelIconName.Habit" Size="PixelIconSize.Small" Decorative="true" /><span>Habit</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateTaskAsync"><PixelIcon Name="PixelIconName.RecurringTask" Size="PixelIconSize.Small" Decorative="true" /><span>Task</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateTodoAsync"><PixelIcon Name="PixelIconName.Todo" Size="PixelIconSize.Small" Decorative="true" /><span>To-Do</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateProjectAsync"><PixelIcon Name="PixelIconName.Project" Size="PixelIconSize.Small" Decorative="true" /><span>Project</span></button>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -3,7 +3,7 @@
 
 @if (IsOpen)
 {
-    <EditorModalShell Model="Model"
+    <ActivityModal Model="Model"
                       Title="@(IsEditing ? "Edit Transaction" : "Create Transaction")"
                       TitleId="transaction-editor-title"
                       SubmitLabel="@(IsEditing ? "SAVE" : "CREATE")"
@@ -74,7 +74,7 @@
                 </LevelUpSelect>
             </div>
         </BodyContent>
-    </EditorModalShell>
+    </ActivityModal>
 }
 
 @code {

@@ -84,3 +84,16 @@ Icons inherit the interaction state of their host component. Disabled controls r
 - `LevelUpIcon` or `LevelUpIconName`.
 - Functional emojis used as buttons, statuses, navigation, or indicators.
 - New icon renderers that bypass `PixelIcon`.
+
+## Activity component consolidation
+
+The Daily experience uses a single component vocabulary:
+
+- `ActivityCard` for Tasks, To-Dos, and Projects;
+- `ActivityFilterBar` for search, attribute filters, and activity creation;
+- `EmptyState` for empty collections;
+- `ConfirmationDialog` for destructive confirmation;
+- `ActivityModal` as the common editor shell;
+- `CharacterSummaryCard` for the dashboard character overview.
+
+Shared spacing, typography, hover, animation, and visual-state tokens are centralized in `wwwroot/css/activity-design-system.css`. Feature components should compose these primitives rather than duplicate modal, card, filter, or feedback markup.

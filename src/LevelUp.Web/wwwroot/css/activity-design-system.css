@@ -1,0 +1,59 @@
+:root {
+    --activity-space-xs: .25rem;
+    --activity-space-sm: .5rem;
+    --activity-space-md: .75rem;
+    --activity-space-lg: 1rem;
+    --activity-radius-sm: .25rem;
+    --activity-radius-md: .4rem;
+    --activity-transition-fast: 120ms ease;
+    --activity-transition-standard: 160ms ease;
+    --activity-shadow-rest: 0 1px 2px rgb(40 27 52 / 8%);
+    --activity-shadow-hover: 0 4px 12px rgb(45 28 66 / 13%);
+    --activity-title-size: .82rem;
+    --activity-body-size: .64rem;
+    --activity-meta-size: .55rem;
+}
+
+.activity-card,
+.habit-card,
+.dashboard-column,
+.character-summary,
+.levelup-empty-state,
+.delete-confirmation,
+.editor-modal {
+    font-family: var(--levelup-font-body, Inter, sans-serif);
+}
+
+.activity-card,
+.habit-card {
+    box-shadow: var(--activity-shadow-rest);
+    transition: transform var(--activity-transition-standard),
+                box-shadow var(--activity-transition-standard),
+                border-color var(--activity-transition-standard);
+}
+
+.activity-card:hover,
+.habit-card:hover {
+    box-shadow: var(--activity-shadow-hover);
+}
+
+.activity-card h3,
+.habit-card h3 {
+    font-size: var(--activity-title-size);
+}
+
+.activity-card p,
+.habit-card p {
+    font-size: var(--activity-body-size);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .activity-card,
+    .habit-card,
+    .dashboard-column,
+    .editor-modal,
+    .delete-confirmation {
+        transition: none !important;
+        animation: none !important;
+    }
+}
