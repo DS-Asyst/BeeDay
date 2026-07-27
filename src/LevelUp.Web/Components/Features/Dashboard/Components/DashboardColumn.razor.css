@@ -259,3 +259,35 @@
     font-weight: var(--levelup-font-weight-semibold);
     letter-spacing: 0;
 }
+/* UX / Visual Refinement — Sprint 6.4: independent column surfaces. */
+.dashboard-column {
+    min-height: 30rem;
+    overflow: hidden;
+    border-color: #d7d3da !important;
+    border-radius: .18rem !important;
+    background: #f0eef1;
+    box-shadow: 0 1px 2px rgb(47 36 56 / 6%) !important;
+}
+
+.dashboard-column:focus-within {
+    border-color: #c8c2ce !important;
+    box-shadow: 0 2px 8px rgb(47 36 56 / 8%) !important;
+}
+
+.dashboard-column__header {
+    min-height: 3.45rem;
+    padding: .6rem .7rem;
+    border-bottom-color: #ddd9e0;
+    background: #fff;
+}
+
+.dashboard-column__content {
+    gap: .5rem;
+    min-height: calc(30rem - 3.45rem);
+    padding: .65rem;
+    background: #f0eef1;
+}
+
+.dashboard-column__empty {
+    margin: 1rem;
+}
