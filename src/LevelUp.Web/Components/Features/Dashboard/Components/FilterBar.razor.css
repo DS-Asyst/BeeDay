@@ -216,3 +216,40 @@
     .filter-bar__menu { right: auto; left: 0; width: 100%; }
     .filter-bar__tags-grid { grid-template-columns: 1fr; gap: .2rem; }
 }
+
+/* Sprint 6.2 — compact, lower-emphasis dashboard controls. */
+.filter-bar {
+    padding: .48rem .8rem;
+}
+
+.filter-bar__main {
+    grid-template-columns: minmax(15rem, 31rem) auto auto;
+    gap: .55rem;
+    width: min(100%, 52rem);
+}
+
+.filter-bar__input {
+    height: 2.2rem;
+    padding: 0 .7rem;
+    font-size: .78rem;
+}
+
+.filter-bar__input::placeholder {
+    font-size: .78rem;
+}
+
+.filter-bar__filters ::deep .filter-bar__filter-button,
+.filter-bar__create ::deep .filter-bar__create-button {
+    min-width: 6.7rem;
+    min-height: 2.2rem;
+    padding-inline: .7rem;
+    font-size: .7rem;
+}
+
+.filter-bar__create ::deep .filter-bar__create-button {
+    min-width: 7.7rem;
+}
+
+@media (max-width: 760px) {
+    .filter-bar__main { grid-template-columns: minmax(0, 1fr) auto; }
+}

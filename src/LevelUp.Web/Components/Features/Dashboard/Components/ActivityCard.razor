@@ -19,7 +19,7 @@
          role="@(OnOpen.HasDelegate ? "button" : null)"
          tabindex="@(OnOpen.HasDelegate ? "0" : null)"
          @onclick="OnOpen">
-        <div class="activity-card__header">
+        <div class="activity-card__content">
             <div class="activity-card__title-row">
                 @if (Featured)
                 {
@@ -28,19 +28,27 @@
                 <h3><SearchHighlight Text="@Title" SearchTerm="@SearchTerm" /></h3>
             </div>
 
-            <div class="activity-card__attribute">
-                <ActivityAttributeBadge Attribute="@Attribute" />
-            </div>
+            @if (!string.IsNullOrWhiteSpace(Description))
+            {
+                <p><SearchHighlight Text="@Description" SearchTerm="@SearchTerm" /></p>
+            }
         </div>
 
-        @if (!string.IsNullOrWhiteSpace(Description))
+        @if (Attribute is not null || !string.IsNullOrWhiteSpace(Meta))
         {
-            <p><SearchHighlight Text="@Description" SearchTerm="@SearchTerm" /></p>
-        }
+            <div class="activity-card__details">
+                @if (Attribute is not null)
+                {
+                    <div class="activity-card__attribute">
+                        <ActivityAttributeBadge Attribute="@Attribute" />
+                    </div>
+                }
 
-        @if (!string.IsNullOrWhiteSpace(Meta))
-        {
-            <span class="activity-card__meta">@Meta</span>
+                @if (!string.IsNullOrWhiteSpace(Meta))
+                {
+                    <span class="activity-card__meta">@Meta</span>
+                }
+            </div>
         }
     </div>
 

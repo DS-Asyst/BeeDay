@@ -13,6 +13,7 @@ public partial class HabitEditorModal
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public EventCallback OnDelete { get; set; }
     private bool showDeleteConfirmation;
+    private string VisualStateClass => HabitVisualState.GetEditorClass(Model.VisualBalance);
     private bool AllowsPositive => Model.Direction is HabitDirection.Positive or HabitDirection.Both;
     private bool AllowsNegative => Model.Direction is HabitDirection.Negative or HabitDirection.Both;
     private void TogglePositive() => Model.Direction = (AllowsPositive, AllowsNegative) switch { (true, true) => HabitDirection.Negative, (true, false) => HabitDirection.Positive, _ => HabitDirection.Both };

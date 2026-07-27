@@ -17,4 +17,6 @@ public sealed class HabitEditorModel
     public LevelUp.Domain.Enums.HabitResetCounter ResetCounter { get; set; } = LevelUp.Domain.Enums.HabitResetCounter.Daily;
 
     public ActivityAttribute? Attribute { get; set; }
+
+    public int VisualBalance { get; set; }
 }

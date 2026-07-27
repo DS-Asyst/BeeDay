@@ -31,6 +31,7 @@ else if (State.Data?.CurrentCharacter is not null)
                                  SingularLabel="Habit"
                                  ActiveCount="@habits.Count"
                                  ShowCompletedSection="false"
+                                 ShowCreateButton="false"
                                  OnCreate="@(() => State.OpenCreate(ActivityType.Habit))">
                     <ActiveContent>
                         <LevelUpSortable ItemIds="@habits.Select(item => item.Id).ToList()"
@@ -59,6 +60,7 @@ else if (State.Data?.CurrentCharacter is not null)
                                  SingularLabel="Task"
                                  ActiveCount="@activeTasks.Count"
                                  CompletedCount="@completedTasks.Count"
+                                 ShowCreateButton="false"
                                  OnCreate="@(() => State.OpenCreate(ActivityType.Task))">
                     <ActiveContent>
                         <LevelUpSortable ItemIds="@activeTasks.Select(item => item.Id).ToList()"
@@ -127,6 +129,7 @@ else if (State.Data?.CurrentCharacter is not null)
                                  SingularLabel="Project"
                                  ActiveCount="@activeProjects.Count"
                                  CompletedCount="@completedProjects.Count"
+                                 ShowCreateButton="false"
                                  OnCreate="@(() => State.OpenCreate(ActivityType.Project))">
                     <HeaderContent>
                         <ProjectContextFilter Projects="@State.ProjectContextOptions"

@@ -75,7 +75,8 @@ public sealed class DashboardModalState
             Direction = item.Direction,
             Difficulty = item.Difficulty,
             ResetCounter = item.ResetCounter,
-            Attribute = item.Attribute
+            Attribute = item.Attribute,
+            VisualBalance = item.PositiveCount - item.NegativeCount
         };
         ActiveEditor = ActivityType.Habit;
     }

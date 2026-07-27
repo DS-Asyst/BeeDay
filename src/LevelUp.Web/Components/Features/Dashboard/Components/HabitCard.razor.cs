@@ -1,4 +1,5 @@
 using LevelUp.Domain.Enums;
+using LevelUp.Web.Components.Features.Habits;
 using Microsoft.AspNetCore.Components;
 
 namespace LevelUp.Web.Components.Features.Dashboard.Components;
@@ -33,22 +34,6 @@ public partial class HabitCard
     };
 
     private string CardCssClass
-    {
-        get
-        {
-            var balanceClass = Balance switch
-            {
-                >= 21 => "habit-card--sky",
-                >= 14 => "habit-card--green",
-                >= 7 => "habit-card--yellow",
-                <= -14 => "habit-card--red-strong",
-                <= -7 => "habit-card--red-medium",
-                <= -1 => "habit-card--red-light",
-                _ => "habit-card--white"
-            };
-
-            return $"habit-card {balanceClass} {(menuOpen ? "habit-card--menu-open" : string.Empty)}";
-        }
-    }
+        => $"habit-card {HabitVisualState.GetCardClass(Balance)} {(menuOpen ? "habit-card--menu-open" : string.Empty)}";
 
 }

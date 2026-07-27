@@ -251,3 +251,11 @@
 .dashboard-column__header-content {
     min-width: 0;
 }
+
+/* UX / Visual Refinement — Sprint 6.1: Pixelify Sans column headings */
+.dashboard-column__heading h2 {
+    font-family: "Pixelify Sans", var(--levelup-font-display), sans-serif;
+    font-size: 1.48rem;
+    font-weight: var(--levelup-font-weight-semibold);
+    letter-spacing: 0;
+}

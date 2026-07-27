@@ -49,3 +49,42 @@
 @media (max-width: 520px) {
     .habit-editor__direction { gap: 1.5rem; }
 }
+
+/* Sprint 6.2 — preserve the current Habit visual state while editing. */
+.habit-editor--white { --habit-editor-accent: #f7f6f8; --habit-editor-accent-strong: #8b8491; }
+.habit-editor--yellow { --habit-editor-accent: #ffc15a; --habit-editor-accent-strong: #b8790d; }
+.habit-editor--green { --habit-editor-accent: #24cc8f; --habit-editor-accent-strong: #0f8058; }
+.habit-editor--sky { --habit-editor-accent: #39c5d7; --habit-editor-accent-strong: #167c8a; }
+.habit-editor--red-light { --habit-editor-accent: #ffb3b8; --habit-editor-accent-strong: #b94e57; }
+.habit-editor--red-medium { --habit-editor-accent: #ff5a62; --habit-editor-accent-strong: #b8242d; }
+.habit-editor--red-strong { --habit-editor-accent: #d71920; --habit-editor-accent-strong: #8f0d12; }
+
+.habit-editor--white ::deep .editor-modal,
+.habit-editor--yellow ::deep .editor-modal,
+.habit-editor--green ::deep .editor-modal,
+.habit-editor--sky ::deep .editor-modal,
+.habit-editor--red-light ::deep .editor-modal,
+.habit-editor--red-medium ::deep .editor-modal,
+.habit-editor--red-strong ::deep .editor-modal {
+    border-top: .42rem solid var(--habit-editor-accent);
+}
+
+.habit-editor--white ::deep .editor-modal__header,
+.habit-editor--yellow ::deep .editor-modal__header,
+.habit-editor--green ::deep .editor-modal__header,
+.habit-editor--sky ::deep .editor-modal__header,
+.habit-editor--red-light ::deep .editor-modal__header,
+.habit-editor--red-medium ::deep .editor-modal__header,
+.habit-editor--red-strong ::deep .editor-modal__header {
+    box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--habit-editor-accent-strong) 24%, transparent);
+}
+
+.habit-editor--white ::deep .editor-modal__hero,
+.habit-editor--yellow ::deep .editor-modal__hero,
+.habit-editor--green ::deep .editor-modal__hero,
+.habit-editor--sky ::deep .editor-modal__hero,
+.habit-editor--red-light ::deep .editor-modal__hero,
+.habit-editor--red-medium ::deep .editor-modal__hero,
+.habit-editor--red-strong ::deep .editor-modal__hero {
+    background: color-mix(in srgb, var(--habit-editor-accent) 13%, white);
+}
