@@ -1,6 +1,6 @@
 @using LevelUp.Application.Features.Inventory.Responses
 
-<section class="inventory-main-panel" aria-labelledby="inventory-transactions-title">
+<section class="inventory-main-panel @(Transactions.Items.Count == 0 ? "inventory-main-panel--empty" : null)" aria-labelledby="inventory-transactions-title">
     <header class="inventory-panel-header inventory-panel-header--transactions">
         <div>
             <span class="inventory-eyebrow">History</span>

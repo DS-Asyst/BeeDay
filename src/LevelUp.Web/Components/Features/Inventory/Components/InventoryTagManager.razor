@@ -9,7 +9,9 @@
 
     @if (Tags.Count == 0)
     {
-        <p class="inventory-empty-copy">No tags yet. Create one to organize your income and expenses.</p>
+        <LevelUpEmptyState Title="No tags yet"
+                           Description="Create one to organize your income and expenses."
+                           Icon="PixelIconName.Tag" />
     }
     else
     {
@@ -33,7 +35,7 @@
             <label class="inventory-field"><span>Name</span><InputText @bind-Value="Form.Name" maxlength="40" disabled="@IsBusy" autofocus /><ValidationMessage For="@(() => Form.Name)" /></label>
             <label class="inventory-field inventory-color-field"><span>Color</span><InputText @bind-Value="Form.Color" maxlength="7" disabled="@IsBusy" /><input type="color" @bind="Form.Color" disabled="@IsBusy" aria-label="Select tag color" /><ValidationMessage For="@(() => Form.Color)" /></label>
             <div class="inventory-tag-form__actions">
-                <button type="button" class="inventory-button inventory-button--ghost inventory-button--cancel inventory-button--small" disabled="@IsBusy" @onclick="Cancel">Cancel</button>
+                <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel" Compact="true" Disabled="IsBusy" OnClick="Cancel">Cancel</LevelUpButton>
                 <button type="submit" class="inventory-button inventory-button--cta inventory-button--small" disabled="@IsBusy">@(IsBusy ? "Saving..." : "Save tag")</button>
             </div>
         </EditForm>

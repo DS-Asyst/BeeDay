@@ -80,7 +80,14 @@
 }
 
 .inventory-summary__card {
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
     padding: 1.2rem 1.25rem;
+}
+
+.inventory-summary__card strong {
+    margin: 0;
 }
 
 .inventory-summary__card span,
@@ -335,6 +342,17 @@
 
 .inventory-tag-item {
     grid-template-columns: auto minmax(0, 1fr) auto auto;
+}
+
+.inventory-tag-item > div {
+    min-width: 0;
+}
+
+.inventory-tag-item strong,
+.inventory-tag-item small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .inventory-tag-action {
@@ -650,8 +668,8 @@
     color: #fff;
 }
 
-/* Empty-state action follows the same yellow CTA used by New transaction. */
-.inventory-empty-state .inventory-button--cta {
+/* Empty-state primary action uses the shared confirmation-cancel (white/neutral) button variant. */
+.inventory-empty-state .levelup-button--confirmation-cancel {
     min-width: 10.5rem;
 }
 
@@ -753,8 +771,43 @@
 }
 
 .inventory-filter-shell .inventory-filters {
-    grid-template-columns: minmax(190px, 1.4fr) repeat(5, minmax(125px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     border-bottom: 0;
+}
+
+.inventory-filter-shell .inventory-filters .inventory-filter-field--search {
+    flex: 1 1 16rem;
+    min-width: 0;
+}
+
+.inventory-filter-shell .inventory-filters .inventory-filter-field:not(.inventory-filter-field--search) {
+    flex: 0 1 12rem;
+    min-width: 9rem;
+}
+
+.inventory-filter-toggle-field > span {
+    visibility: hidden;
+}
+
+@media (min-width: 641px) {
+    .inventory-filter-shell .inventory-filters .inventory-filter-field.inventory-filter-toggle-field {
+        flex: 0 0 auto;
+        min-width: 0;
+        justify-items: start;
+    }
+}
+
+.inventory-secondary-filters {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(125px, 1fr));
+    gap: .6rem;
+    padding: 0 1.2rem 1rem;
+}
+
+.inventory-secondary-filters[hidden] {
+    display: none;
 }
 
 .inventory-filter-field {
@@ -770,10 +823,11 @@
 
 .inventory-active-filters {
     display: flex;
+    grid-column: 1 / -1;
     align-items: center;
     justify-content: space-between;
     gap: .75rem;
-    padding: 0 1.2rem 1rem;
+    padding-top: .4rem;
     color: #625b69;
 }
 
@@ -783,13 +837,25 @@
 }
 
 @media (max-width: 1200px) {
-    .inventory-filter-shell .inventory-filters {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+    .inventory-secondary-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
 @media (max-width: 640px) {
     .inventory-filter-shell .inventory-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .inventory-filter-shell .inventory-filters .inventory-filter-field--search,
+    .inventory-filter-shell .inventory-filters .inventory-filter-field:not(.inventory-filter-field--search) {
+        flex: 1 1 auto;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .inventory-secondary-filters {
         grid-template-columns: 1fr;
     }
 
@@ -830,6 +896,10 @@
     flex-direction: column;
 }
 
+.inventory-main-panel--empty {
+    min-height: auto;
+}
+
 .inventory-transaction-list {
     flex: 1 1 auto;
     max-height: min(56rem, calc(100dvh - 25rem));
@@ -838,6 +908,7 @@
 
 .inventory-tags-panel {
     max-height: calc(100dvh - 6rem);
+    overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-gutter: stable;
@@ -875,14 +946,6 @@
     .inventory-workspace {
         grid-template-columns: minmax(0, 1fr) minmax(17rem, 19rem);
     }
-
-    .inventory-filter-shell .inventory-filters {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .inventory-filter-field--search {
-        grid-column: 1 / -1;
-    }
 }
 
 @media (max-width: 860px) {
@@ -890,7 +953,7 @@
         align-items: stretch;
     }
 
-    .inventory-page__header .inventory-button--cta {
+    .inventory-page__header .levelup-button--reference-blue {
         align-self: flex-start;
     }
 
@@ -934,7 +997,7 @@
         gap: 1rem;
     }
 
-    .inventory-page__header .inventory-button--cta {
+    .inventory-page__header .levelup-button--reference-blue {
         width: 100%;
     }
 
@@ -948,20 +1011,20 @@
     }
 
     .inventory-filter-shell .inventory-filters {
-        grid-template-columns: 1fr;
         padding: .9rem;
     }
 
-    .inventory-filter-field--search {
-        grid-column: auto;
+    .inventory-secondary-filters {
+        padding: 0 .9rem 1rem;
     }
 
     .inventory-active-filters {
-        padding: 0 .9rem .9rem;
+        padding-top: .9rem;
     }
 
     .inventory-active-filters .inventory-button,
-    .inventory-empty-state .inventory-button {
+    .inventory-empty-state .inventory-button,
+    .inventory-empty-state .levelup-button--confirmation-cancel {
         width: 100%;
     }
 
@@ -1027,7 +1090,8 @@
         flex-direction: column-reverse;
     }
 
-    .inventory-tag-form__actions .inventory-button {
+    .inventory-tag-form__actions .inventory-button,
+    .inventory-tag-form__actions .levelup-button--confirmation-cancel {
         width: 100%;
     }
 

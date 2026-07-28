@@ -1,14 +1,14 @@
 <div class="inventory-empty-state">
-    <div aria-hidden="true">◇</div>
-    <h3>No transactions found</h3>
-    <p>@(HasFilters ? "Change or clear your filters to see more results." : "Create your first transaction to start tracking your wallet.")</p>
+    <LevelUpEmptyState Title="No transactions found"
+                       Description="@(HasFilters ? "Change or clear your filters to see more results." : "Create your first transaction to start tracking your wallet.")"
+                       Icon="PixelIconName.Inventory" />
     @if (HasFilters)
     {
         <button type="button" class="inventory-button inventory-button--ghost" disabled="@IsDisabled" @onclick="OnClearFilters">Clear filters</button>
     }
     else
     {
-        <button type="button" class="inventory-button inventory-button--cta" disabled="@IsDisabled" @onclick="OnCreateTransaction">Create transaction</button>
+        <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel" Disabled="IsDisabled" OnClick="OnCreateTransaction">Create transaction</LevelUpButton>
     }
 </div>
 

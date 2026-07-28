@@ -25,10 +25,13 @@ else
         <header class="inventory-page__header">
             <div>
                 <span class="inventory-eyebrow">Personal finance</span>
-                <h1 class="inventory-page__title"><PixelIcon Name="PixelIconName.Inventory" Size="PixelIconSize.Large" /> Inventory</h1>
+                <h1 class="inventory-page__title">Inventory</h1>
                 <p>Track your wallet, organize transactions and understand where your money goes.</p>
             </div>
-            <button type="button" class="inventory-button inventory-button--cta" disabled="@_interaction.IsBusy" @onclick="OpenCreateTransaction"><PixelIcon Name="PixelIconName.Add" Size="PixelIconSize.Small" /> New transaction</button>
+            <LevelUpButton Class="levelup-button--reference-blue"
+                           Icon="PixelIconName.Add"
+                           Disabled="_interaction.IsBusy"
+                           OnClick="OpenCreateTransaction">New transaction</LevelUpButton>
         </header>
 
         @if (!string.IsNullOrWhiteSpace(_errorMessage))
