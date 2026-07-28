@@ -114,8 +114,6 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
         }
     }
     public void CloseEditor() => Modals.CloseEditor();
-    public void RequestDelete(Guid id, ActivityType type, string title) => Modals.RequestDelete(id, type, title);
-    public void CancelDelete() => Modals.CancelDelete();
 
     public Task SaveHabitAsync(HabitEditorModel model) =>
         SaveEditorAsync(
@@ -152,27 +150,6 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
     public Task DeleteCurrentTaskAsync() => DeleteCurrentEditorItemAsync(ActivityType.Task, "Task deleted successfully.");
     public Task DeleteCurrentTodoAsync() => DeleteCurrentEditorItemAsync(ActivityType.Todo, "To-Do deleted successfully.");
     public Task DeleteCurrentProjectAsync() => DeleteCurrentEditorItemAsync(ActivityType.Project, "Project deleted successfully.");
-
-    public async Task ConfirmDeleteAsync()
-    {
-        if (Modals.PendingDeleteId is not Guid id || Modals.PendingDeleteType is not ActivityType type)
-        {
-            Modals.CancelDelete();
-            return;
-        }
-
-        var displayName = Modals.DeleteItemDisplayName;
-        await ExecuteAsync(
-            async () =>
-            {
-                await AnimateRemovalAsync(id);
-                await DeleteAsync(id, type);
-                Modals.CancelDelete();
-                await ReloadAsync();
-            },
-            $"{displayName} deleted successfully.",
-            $"The {displayName.ToLowerInvariant()} could not be deleted.");
-    }
 
     public Task RegisterPositiveAsync(Guid id) =>
         ExecuteExperienceOperationAsync(() => store.RegisterHabitPositiveAsync(id));

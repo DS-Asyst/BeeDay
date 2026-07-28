@@ -8,10 +8,14 @@
 .levelup-sortable__item {
     position: relative;
     border-radius: var(--levelup-radius-sm);
-    cursor: grab;
     touch-action: pan-y;
     transition: opacity var(--levelup-transition-fast), transform var(--levelup-transition-fast), box-shadow var(--levelup-transition-fast);
 }
+
+/* The actual drag cursor (custom asset, grab/grabbing fallback) is declared
+   in cursors.css, which loads after this file and after its own generic
+   [role="button"] cursor rule — see cursors.css for why it must live there
+   instead of here. */
 
     /*
  * Keeps the card with an open menu above the other cards.
@@ -26,12 +30,6 @@
         z-index: 100;
     }
 
-    .levelup-sortable__item:active,
-    .levelup-sortable__item.is-drag-armed,
-    .levelup-sortable__item.is-dragging {
-        cursor: grabbing;
-    }
-
 .levelup-sortable__item:focus-visible {
     outline: var(--levelup-focus-ring);
     outline-offset: 2px;
@@ -42,8 +40,7 @@
 .levelup-sortable__item input,
 .levelup-sortable__item textarea,
 .levelup-sortable__item select,
-.levelup-sortable__item label,
-.levelup-sortable__item [role="button"] {
+.levelup-sortable__item label {
     cursor: pointer;
 }
 
@@ -106,9 +103,10 @@
     will-change: transform;
 }
 
+/* Cursor for this state is declared in cursors.css alongside the rest of the
+   custom cursor pack; this rule only owns the non-cursor sorting behavior. */
 body.levelup-is-sorting,
 body.levelup-is-sorting * {
-    cursor: grabbing !important;
     user-select: none !important;
 }
 
