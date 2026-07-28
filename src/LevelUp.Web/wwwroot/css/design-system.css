@@ -17,13 +17,13 @@
     justify-content: center;
     gap: var(--levelup-spacing-sm);
     padding: .68rem 1rem .78rem;
-    border: 2px solid var(--levelup-button-outline);
+    border: var(--levelup-pixel-unit) solid var(--levelup-button-outline);
     border-radius: 3px;
     clip-path: none;
     color: var(--levelup-button-foreground);
     background: var(--levelup-button-background);
     box-shadow:
-        inset -2px -3px 0 var(--levelup-button-depth),
+        inset calc(var(--levelup-pixel-unit) * -1) -3px 0 var(--levelup-button-depth),
         0 4px 0 var(--levelup-button-shadow);
     filter: none;
     font: inherit;
@@ -129,24 +129,25 @@
 .levelup-button .levelup-icon { position: relative; z-index: 1; }
 
 .levelup-button:not(:disabled):hover {
+    transform: translateY(-1px);
     color: var(--levelup-button-foreground);
     background: var(--levelup-button-background-hover);
     box-shadow:
-        inset -2px -4px 0 var(--levelup-button-depth),
-        0 4px 0 var(--levelup-button-shadow);
+        inset calc(var(--levelup-pixel-unit) * -1) -4px 0 var(--levelup-button-depth),
+        0 5px 0 var(--levelup-button-shadow);
 }
 
 .levelup-button:not(:disabled):active {
     transform: translateY(4px);
     color: var(--levelup-button-foreground);
     background: var(--levelup-button-pressed, var(--levelup-button-depth));
-    box-shadow: inset 2px 2px 0 var(--levelup-button-outline);
+    box-shadow: inset var(--levelup-pixel-unit) var(--levelup-pixel-unit) 0 var(--levelup-button-outline);
 }
 
 .levelup-button:focus-visible {
     outline: 0;
     box-shadow:
-        inset -2px -3px 0 var(--levelup-button-depth),
+        inset calc(var(--levelup-pixel-unit) * -1) -3px 0 var(--levelup-button-depth),
         0 4px 0 var(--levelup-button-shadow),
         0 0 0 4px var(--levelup-button-focus);
 }
@@ -160,7 +161,6 @@
     --levelup-button-shadow: #777780;
     cursor: not-allowed;
     opacity: .62;
-    filter: grayscale(.35);
 }
 
 .levelup-button__loader { flex: 0 0 auto; animation: levelup-spin .7s steps(8, end) infinite; }
