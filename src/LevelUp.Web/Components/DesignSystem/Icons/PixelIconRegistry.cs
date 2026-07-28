@@ -4,7 +4,7 @@ namespace LevelUp.Web.Components.DesignSystem.Icons;
 
 public static class PixelIconRegistry
 {
-    public const string SpritePath = "/icons/pixel/sprite.svg";
+    public const string SpritePath = "/icons/streamline/sprite.svg";
     public const PixelIconName DefaultFallback = PixelIconName.Warning;
 
     private static readonly IReadOnlyDictionary<PixelIconName, PixelIconDefinition> Definitions =
@@ -23,16 +23,16 @@ public static class PixelIconRegistry
                 [PixelIconName.Information] = Define("info", "feedback/info.svg", PixelIconCategory.Feedback, "Information"),
                 [PixelIconName.Settings] = Define("settings", "system/settings.svg", PixelIconCategory.System, "Settings"),
                 [PixelIconName.Lock] = Define("lock", "system/lock.svg", PixelIconCategory.System, "Lock"),
-                [PixelIconName.Account] = Define("user", "navigation/user.svg", PixelIconCategory.Navigation, "Account"),
-                [PixelIconName.Language] = Define("language", "navigation/language.svg", PixelIconCategory.Navigation, "Language"),
+                [PixelIconName.Account] = Define("user", "character/user.svg", PixelIconCategory.Navigation, "Account"),
+                [PixelIconName.Language] = Define("language", "system/language.svg", PixelIconCategory.Navigation, "Language"),
                 [PixelIconName.ChevronDown] = Define("chevron-down", "navigation/chevron-down.svg", PixelIconCategory.Navigation, "Expand"),
                 [PixelIconName.ChevronLeft] = Define("chevron-left", "navigation/chevron-left.svg", PixelIconCategory.Navigation, "Previous"),
                 [PixelIconName.ChevronRight] = Define("chevron-right", "navigation/chevron-right.svg", PixelIconCategory.Navigation, "Next"),
-                [PixelIconName.Inventory] = Define("inventory", "navigation/inventory.svg", PixelIconCategory.Navigation, "Inventory"),
-                [PixelIconName.Library] = Define("book", "navigation/book.svg", PixelIconCategory.Navigation, "Library"),
+                [PixelIconName.Inventory] = Define("inventory", "inventory/inventory.svg", PixelIconCategory.Navigation, "Inventory"),
+                [PixelIconName.Library] = Define("book", "books/book.svg", PixelIconCategory.Navigation, "Library"),
                 [PixelIconName.Daily] = Define("daily", "navigation/daily.svg", PixelIconCategory.Navigation, "Daily"),
                 [PixelIconName.Home] = Define("home", "navigation/home.svg", PixelIconCategory.Navigation, "Home"),
-                [PixelIconName.Character] = Define("character", "navigation/character.svg", PixelIconCategory.Navigation, "Character"),
+                [PixelIconName.Character] = Define("character", "character/character.svg", PixelIconCategory.Navigation, "Character"),
                 [PixelIconName.Donate] = Define("donate", "navigation/donate.svg", PixelIconCategory.Navigation, "Donate"),
                 [PixelIconName.Logout] = Define("logout", "navigation/logout.svg", PixelIconCategory.Navigation, "Logout"),
                 [PixelIconName.Menu] = Define("menu", "navigation/menu.svg", PixelIconCategory.Navigation, "Menu"),
@@ -43,10 +43,10 @@ public static class PixelIconRegistry
                 [PixelIconName.X] = Define("x", "social/x.svg", PixelIconCategory.Social, "X"),
                 [PixelIconName.LinkedIn] = Define("linkedin", "social/linkedin.svg", PixelIconCategory.Social, "LinkedIn"),
                 [PixelIconName.GitHub] = Define("github", "social/github.svg", PixelIconCategory.Social, "GitHub"),
-                [PixelIconName.Habit] = Define("habit", "activities/habit.svg", PixelIconCategory.Activities, "Habit"),
-                [PixelIconName.RecurringTask] = Define("recurring-task", "activities/recurring-task.svg", PixelIconCategory.Activities, "Recurring task"),
-                [PixelIconName.Project] = Define("project", "activities/project.svg", PixelIconCategory.Activities, "Project"),
-                [PixelIconName.Todo] = Define("todo", "activities/todo.svg", PixelIconCategory.Activities, "To-Do"),
+                [PixelIconName.Habit] = Define("habit", "habits/habit.svg", PixelIconCategory.Activities, "Habit"),
+                [PixelIconName.RecurringTask] = Define("recurring-task", "tasks/recurring-task.svg", PixelIconCategory.Activities, "Recurring task"),
+                [PixelIconName.Project] = Define("project", "projects/project.svg", PixelIconCategory.Activities, "Project"),
+                [PixelIconName.Todo] = Define("todo", "tasks/todo.svg", PixelIconCategory.Activities, "To-Do"),
                 [PixelIconName.Complete] = Define("complete", "actions/complete.svg", PixelIconCategory.Actions, "Complete"),
                 [PixelIconName.Filter] = Define("filter", "actions/filter.svg", PixelIconCategory.Actions, "Filter"),
                 [PixelIconName.Calendar] = Define("calendar", "actions/calendar.svg", PixelIconCategory.Actions, "Calendar"),
@@ -101,5 +101,5 @@ public static class PixelIconRegistry
         string assetPath,
         PixelIconCategory category,
         string semanticName) =>
-        new(symbolId, $"/icons/pixel/{assetPath}", category, semanticName, semanticName, DefaultFallback);
+        new(symbolId, $"/icons/streamline/{assetPath}", category, semanticName, semanticName, DefaultFallback);
 }

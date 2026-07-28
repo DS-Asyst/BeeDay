@@ -14,7 +14,7 @@ public sealed class PixelIconTests
         var svg = cut.Find("svg");
         Assert.Equal("true", svg.GetAttribute("aria-hidden"));
         Assert.Null(svg.GetAttribute("role"));
-        Assert.Equal("/icons/pixel/sprite.svg#search", cut.Find("use").GetAttribute("href"));
+        Assert.Equal("/icons/streamline/sprite.svg#search", cut.Find("use").GetAttribute("href"));
     }
 
     [Fact]
@@ -84,7 +84,7 @@ public sealed class PixelIconTests
             .Add(component => component.Name, (PixelIconName)999));
 
         Assert.Equal("Warning", cut.Find("svg").GetAttribute("data-icon"));
-        Assert.Equal("/icons/pixel/sprite.svg#warning", cut.Find("use").GetAttribute("href"));
+        Assert.Equal("/icons/streamline/sprite.svg#warning", cut.Find("use").GetAttribute("href"));
     }
     [Theory]
     [InlineData(PixelIconName.Home, "home")]
@@ -219,10 +219,51 @@ public sealed class PixelIconContractTests
     {
         foreach (var entry in PixelIconRegistry.All)
         {
-            Assert.StartsWith("/icons/pixel/", entry.Value.AssetPath, StringComparison.Ordinal);
+            Assert.StartsWith("/icons/streamline/", entry.Value.AssetPath, StringComparison.Ordinal);
             Assert.EndsWith(".svg", entry.Value.AssetPath, StringComparison.Ordinal);
             Assert.DoesNotContain("..", entry.Value.AssetPath, StringComparison.Ordinal);
             Assert.False(string.IsNullOrWhiteSpace(entry.Value.DefaultLabel));
+        }
+    }
+
+    [Fact]
+    public void NoRegistryEntryReferencesTheImmutableSourceLibrary()
+    {
+        foreach (var entry in PixelIconRegistry.All)
+        {
+            Assert.DoesNotContain("streamline-pixel--", entry.Value.AssetPath, StringComparison.Ordinal);
+            Assert.DoesNotContain("/design/", entry.Value.AssetPath, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public void EveryRegistryAssetExistsOnDisk()
+    {
+        var wwwroot = IconFileLocator.ResolveWwwroot();
+
+        foreach (var entry in PixelIconRegistry.All)
+        {
+            var relativePath = entry.Value.AssetPath.TrimStart('/');
+            var fullPath = Path.Combine(wwwroot, relativePath.Replace('/', Path.DirectorySeparatorChar));
+
+            Assert.True(File.Exists(fullPath), $"Missing icon asset for {entry.Key}: {fullPath}");
+        }
+    }
+
+    [Fact]
+    public void SpriteFileContainsExactlyOneSymbolPerRegistryEntry()
+    {
+        var wwwroot = IconFileLocator.ResolveWwwroot();
+        var spritePath = Path.Combine(wwwroot, PixelIconRegistry.SpritePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+        var spriteContent = File.ReadAllText(spritePath);
+
+        foreach (var entry in PixelIconRegistry.All)
+        {
+            var occurrences = System.Text.RegularExpressions.Regex.Matches(
+                spriteContent,
+                $"<symbol id=\"{System.Text.RegularExpressions.Regex.Escape(entry.Value.SymbolId)}\"").Count;
+
+            Assert.True(occurrences == 1, $"Expected exactly one <symbol> for '{entry.Value.SymbolId}' ({entry.Key}) in sprite.svg, found {occurrences}.");
         }
     }
 
@@ -238,5 +279,25 @@ public sealed class PixelIconContractTests
         Assert.Equal("save-icon", svg.GetAttribute("data-testid"));
         Assert.Contains("pixel-icon", svg.ClassList);
         Assert.Contains("pixel-icon--save", svg.ClassList);
+    }
+}
+
+internal static class IconFileLocator
+{
+    public static string ResolveWwwroot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "LevelUp.slnx")))
+        {
+            directory = directory.Parent;
+        }
+
+        if (directory is null)
+        {
+            throw new InvalidOperationException("Could not locate the repository root (LevelUp.slnx) from the test output directory.");
+        }
+
+        return Path.Combine(directory.FullName, "src", "LevelUp.Web", "wwwroot");
     }
 }
