@@ -1,29 +1,39 @@
 <#
 .SYNOPSIS
-    Regenerates LevelUp's official Streamline-derived icon library and sprite.
+    Regenerates LevelUp's official multi-provider icon library and sprite.
 
 .DESCRIPTION
-    Reads design/icons/catalog/icon-mapping.csv (PixelIconName, SymbolId, Folder,
-    Category, SourceFile) and, for each row:
-      1. Reads the matching immutable source SVG from
-         design/icons/source/streamline-pixel/ (never modified, never written to).
+    Reads design/icons/catalog/icon-mapping.csv (PixelIconName, SymbolId, Provider,
+    SourceName, Folder, Category, Variant, License) and, for each row:
+      1. Reads the matching immutable source SVG from the provider's source folder
+         under design/icons/source/ (never modified, never written to).
       2. Extracts its inner path content and viewBox.
-      3. Writes a standalone icon file to
-         src/LevelUp.Web/wwwroot/icons/streamline/{Folder}/{SymbolId}.svg.
-      4. Adds a <symbol id="{SymbolId}"> entry to the combined sprite at
-         src/LevelUp.Web/wwwroot/icons/streamline/sprite.svg.
+      3. For monochrome providers (MaterialSymbols, LevelUpCustom), rewrites every
+         path/shape fill to currentColor so PixelIconColor works. For brand
+         providers (Devicon, OfficialBrand), the artwork's own colors are
+         preserved untouched — brand marks are not recolored.
+      4. Writes a standalone icon file to
+         src/LevelUp.Web/wwwroot/icons/{provider-slug}/{Folder}/{SymbolId}.svg.
+      5. Adds a <symbol id="{SymbolId}"> entry to the combined sprite at
+         src/LevelUp.Web/wwwroot/icons/sprite.svg.
 
-    This script only touches src/LevelUp.Web/wwwroot/icons/streamline/. It never
-    writes to design/icons/source/streamline-pixel/.
+    This script only touches src/LevelUp.Web/wwwroot/icons/. It never writes to
+    design/icons/source/.
+
+    Supported providers and their source folders:
+      MaterialSymbols -> design/icons/source/material-symbols/material-symbols--{SourceName}.svg
+      Devicon         -> design/icons/source/devicon/devicon--{SourceName}.svg
+      OfficialBrand   -> design/icons/source/official-brand/official-brand--{SourceName}.svg
+      LevelUpCustom   -> design/icons/source/levelup-custom/levelup-custom--{SourceName}.svg
 
     To add a new icon: add a PixelIconName entry to PixelIconName.cs, add a
     matching row to design/icons/catalog/icon-mapping.csv referencing an existing
-    file under design/icons/source/streamline-pixel/, add the corresponding
-    Define(...) line to PixelIconRegistry.cs, then re-run this script.
+    file under the appropriate design/icons/source/{provider}/ folder, add the
+    corresponding Define(...) line to PixelIconRegistry.cs, then re-run this script.
 
-    To replace an existing icon's artwork: change its SourceFile in
-    icon-mapping.csv to a different file from the source library, then re-run
-    this script. PixelIconName/PixelIconRegistry do not need to change.
+    To replace an existing icon's artwork: change its Provider/SourceName in
+    icon-mapping.csv, then re-run this script. PixelIconName/PixelIconRegistry do
+    not need to change.
 
 .EXAMPLE
     pwsh scripts/New-IconSprite.ps1
@@ -32,25 +42,61 @@
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$sourceDir = Join-Path $repoRoot 'design/icons/source/streamline-pixel'
+$sourceRoot = Join-Path $repoRoot 'design/icons/source'
 $mappingPath = Join-Path $repoRoot 'design/icons/catalog/icon-mapping.csv'
-$destRoot = Join-Path $repoRoot 'src/LevelUp.Web/wwwroot/icons/streamline'
+$destRoot = Join-Path $repoRoot 'src/LevelUp.Web/wwwroot/icons'
+
+$monochromeProviders = @('MaterialSymbols', 'LevelUpCustom')
+$brandProviders = @('Devicon', 'OfficialBrand')
+
+$providerSlugs = @{
+    MaterialSymbols = 'material-symbols'
+    Devicon         = 'devicon'
+    OfficialBrand   = 'official-brand'
+    LevelUpCustom   = 'levelup-custom'
+}
+
+$providerSourcePrefix = @{
+    MaterialSymbols = 'material-symbols--'
+    Devicon         = 'devicon--'
+    OfficialBrand   = 'official-brand--'
+    LevelUpCustom   = 'levelup-custom--'
+}
 
 if (-not (Test-Path $mappingPath)) {
     throw "Mapping file not found: $mappingPath"
 }
 
+function Assert-SafeToken {
+    param([string]$Value, [string]$FieldName, [string]$RowContext)
+
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        throw "Empty $FieldName for $RowContext"
+    }
+    if ($Value -match '\.\.' -or $Value -match '[\\/]') {
+        throw "Unsafe $FieldName '$Value' for $RowContext (path traversal or path separator not allowed)"
+    }
+    if ($Value -notmatch '^[A-Za-z0-9_-]+$') {
+        throw "Unsafe $FieldName '$Value' for $RowContext (only letters, digits, '-', '_' are allowed)"
+    }
+}
+
 $rows = Import-Csv -Path $mappingPath
 Write-Host "Loaded $($rows.Count) icon mappings from $mappingPath"
 
-$svgPattern = '(?s)<svg[^>]*viewBox="([^"]+)"[^>]*>(.*)</svg>'
+$svgPattern = '(?s)<svg([^>]*)>(.*)</svg>'
 $symbolBlocks = New-Object System.Collections.Generic.List[string]
 $seenSymbolIds = @{}
 
 foreach ($row in $rows) {
-    $sourcePath = Join-Path $sourceDir $row.SourceFile
-    if (-not (Test-Path $sourcePath)) {
-        throw "Missing source SVG for $($row.PixelIconName): $sourcePath"
+    $rowContext = "$($row.PixelIconName) ($($row.SymbolId))"
+
+    Assert-SafeToken -Value $row.SymbolId -FieldName 'SymbolId' -RowContext $rowContext
+    Assert-SafeToken -Value $row.SourceName -FieldName 'SourceName' -RowContext $rowContext
+    Assert-SafeToken -Value $row.Folder -FieldName 'Folder' -RowContext $rowContext
+
+    if (-not $providerSlugs.ContainsKey($row.Provider)) {
+        throw "Unsupported Provider '$($row.Provider)' for $rowContext. Expected one of: $($providerSlugs.Keys -join ', ')"
     }
 
     if ($seenSymbolIds.ContainsKey($row.SymbolId)) {
@@ -58,17 +104,57 @@ foreach ($row in $rows) {
     }
     $seenSymbolIds[$row.SymbolId] = $row.PixelIconName
 
+    $providerSlug = $providerSlugs[$row.Provider]
+    $sourceFileName = "$($providerSourcePrefix[$row.Provider])$($row.SourceName).svg"
+    $sourcePath = Join-Path (Join-Path $sourceRoot $providerSlug) $sourceFileName
+    $resolvedSourceRoot = (Resolve-Path (Join-Path $sourceRoot $providerSlug)).ProviderPath
+
+    if (-not (Test-Path $sourcePath)) {
+        throw "Missing source SVG for $rowContext`: $sourcePath"
+    }
+
+    $resolvedSourcePath = (Resolve-Path $sourcePath).ProviderPath
+    if (-not $resolvedSourcePath.StartsWith($resolvedSourceRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Path traversal detected resolving source for $rowContext`: $resolvedSourcePath"
+    }
+
     $content = Get-Content -Path $sourcePath -Raw
     $match = [regex]::Match($content, $svgPattern)
     if (-not $match.Success) {
-        throw "Could not parse SVG structure for $sourcePath"
+        throw "Could not parse SVG structure for $sourcePath (malformed or unsupported SVG)"
     }
 
-    $viewBox = $match.Groups[1].Value
+    $rootAttributes = $match.Groups[1].Value
+    $viewBoxMatch = [regex]::Match($rootAttributes, 'viewBox="([^"]+)"')
+    if ($viewBoxMatch.Success) {
+        $viewBox = $viewBoxMatch.Groups[1].Value
+    }
+    else {
+        $widthMatch = [regex]::Match($rootAttributes, 'width="([0-9.]+)"')
+        $heightMatch = [regex]::Match($rootAttributes, 'height="([0-9.]+)"')
+        if (-not ($widthMatch.Success -and $heightMatch.Success)) {
+            throw "Could not determine a viewBox for $sourcePath (no viewBox, width, or height attribute)"
+        }
+        $viewBox = "0 0 $($widthMatch.Groups[1].Value) $($heightMatch.Groups[1].Value)"
+    }
+
     $innerLines = $match.Groups[2].Value -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
     $inner = $innerLines -join "`n    "
 
-    $destDir = Join-Path $destRoot $row.Folder
+    if ($monochromeProviders -contains $row.Provider) {
+        # Monochrome providers must resolve to currentColor regardless of whether
+        # the source path already declares a fill attribute.
+        $inner = [regex]::Replace($inner, 'fill="(?!none")[^"]*"', 'fill="currentColor"')
+        if ($inner -notmatch 'fill="currentColor"') {
+            $inner = [regex]::Replace($inner, '<path ', '<path fill="currentColor" ', 1)
+        }
+    }
+    elseif ($brandProviders -notcontains $row.Provider) {
+        throw "Provider '$($row.Provider)' is not classified as monochrome or brand for $rowContext"
+    }
+    # Brand providers (Devicon, OfficialBrand): colors are preserved as authored.
+
+    $destDir = Join-Path (Join-Path $destRoot $providerSlug) $row.Folder
     New-Item -ItemType Directory -Force -Path $destDir | Out-Null
     $destFile = Join-Path $destDir "$($row.SymbolId).svg"
 
@@ -82,11 +168,16 @@ $spriteHeader = @'
 <?xml version='1.0' encoding='utf-8'?>
 <!--
   LevelUp Pixel Icon Sprite
-  Generated from the Streamline Pixel icon collection.
-  Source: https://icon-sets.iconify.design/streamline-pixel/
-  Author: Streamline (https://streamlinehq.com)
-  License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
-  Do not edit by hand. Regenerate via scripts/New-IconSprite.ps1.
+  Generated from multiple icon providers. Do not edit by hand.
+  Regenerate via scripts/New-IconSprite.ps1.
+
+  Providers:
+    Material Symbols — https://fonts.google.com/icons — Apache License 2.0
+    Devicon          — https://devicon.dev/            — MIT License
+    Official Brand   — https://simpleicons.org/         — CC0 1.0 (markup only; brand marks remain trademarks of their owners)
+
+  See design/icons/source/{provider}/ATTRIBUTION.md for full attribution and
+  design/icons/catalog/icon-mapping.csv for the per-icon provider/source record.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none">
 '@

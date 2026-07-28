@@ -4,7 +4,7 @@
     overflow: visible;
     vertical-align: middle;
     fill: currentColor;
-    image-rendering: pixelated;
+    pointer-events: none;
     transition: color 120ms ease, opacity 120ms ease, transform 120ms ease;
 }
 
