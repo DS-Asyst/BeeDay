@@ -58,3 +58,31 @@ Report:
 - proposed commit message only when useful.
 
 Do not commit or push unless explicitly requested.
+
+## 7. Sprint Completion Protocol
+
+When work is organized into explicit Sprints:
+
+- Stop implementation immediately once the Sprint scope has been completed.
+- Do not start additional improvements.
+- Do not suggest extra work.
+- Wait for explicit user validation.
+
+A Sprint is considered complete only when the user replies:
+
+`VALIDADO`
+
+After `VALIDADO`:
+
+1. Commit the completed Sprint before starting any new work.
+2. By default, create a single Conventional Commit representing the Sprint.
+3. Multiple commits are allowed only if explicitly requested by the user.
+4. Verify the repository is clean using:
+
+   git status
+
+5. If the working tree contains changes from multiple Sprints, stop and ask the user how to proceed. Never reconstruct Sprint history automatically.
+6. Only after a clean working tree is confirmed, clear the Sprint implementation context.
+7. Wait for the user to start a new conversation before beginning the next Sprint.
+
+Do not carry implementation context from a completed Sprint into future work.
