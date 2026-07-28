@@ -208,7 +208,7 @@
 
 .top-navigation__menu-button {
     border: 2px solid transparent;
-    border-radius: .18rem;
+    border-radius: var(--levelup-radius-xs);
 }
 
 .top-navigation__menu-button:hover,

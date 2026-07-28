@@ -6,7 +6,7 @@
     min-height: 30rem;
     height: auto;
     overflow: visible;
-    border: 1px solid #dedbe1;
+    border: 1px solid var(--levelup-color-border);
     background: #ebe9ec;
     box-sizing: border-box;
 }
@@ -19,7 +19,7 @@
     gap: 0.6rem;
     min-height: 3.15rem;
     padding: 0.5rem 0.55rem;
-    border-bottom: 1px solid #ddd9e0;
+    border-bottom: 1px solid var(--levelup-color-border);
     background: var(--levelup-color-surface);
     box-sizing: border-box;
     z-index: 2;
@@ -66,8 +66,8 @@
     width: 2rem;
     height: 2rem;
     padding: 0;
-    border: 1px solid #d6d0da;
-    border-radius: .25rem;
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-xs);
     color: #4f3b5b;
     background: #f8f7f9;
     font-family: var(--levelup-font-family);
@@ -125,8 +125,8 @@
     width: 2.15rem;
     height: 2.15rem;
     padding: 0;
-    border: 1px solid #d6d0da;
-    border-radius: .25rem;
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-xs);
     color: #4f3b5b;
     background: #f8f7f9;
     font-family: var(--levelup-font-family);
@@ -162,8 +162,6 @@
 
 /* Sprint 1.7 — column polish */
 .dashboard-column {
-    border-radius: var(--levelup-radius-sm);
-    box-shadow: var(--levelup-shadow-xs);
     transition: border-color var(--levelup-transition-normal), box-shadow var(--levelup-transition-normal);
 }
 
@@ -224,8 +222,8 @@
 
 /* Refined column depth — approved visual pass */
 .dashboard-column {
-    border: 1px solid #c9c5cd !important;
-    border-radius: .28rem !important;
+    border: 1px solid var(--levelup-color-border-strong) !important;
+    border-radius: var(--levelup-radius-sm) !important;
     box-shadow: 0 1px 2px rgb(47 36 56 / 8%), 0 4px 12px rgb(47 36 56 / 7%) !important;
 }
 
@@ -235,7 +233,7 @@
 }
 
 .dashboard-column__header {
-    border-bottom-color: #d8d4dc;
+    border-bottom-color: var(--levelup-color-border);
 }
 
 

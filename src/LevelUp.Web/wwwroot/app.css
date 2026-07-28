@@ -152,19 +152,8 @@ body {
 input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
-    border: 2px solid #7d8ca8 !important;
-    border-radius: .18rem !important;
     background: #fbfcff;
     box-shadow: inset 0 -2px 0 rgb(23 19 33 / 8%);
-}
-
-.levelup-field__control:focus,
-.character-field input:focus,
-input:not([type="checkbox"]):not([type="radio"]):focus,
-select:focus,
-textarea:focus {
-    border-color: var(--levelup-game-blue) !important;
-    box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--levelup-game-ink) !important;
 }
 
 .levelup-checkbox__control,

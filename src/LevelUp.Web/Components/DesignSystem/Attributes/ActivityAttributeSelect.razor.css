@@ -13,7 +13,7 @@
     box-sizing: border-box;
     padding: .55rem .75rem;
     border: 1px solid var(--levelup-color-border);
-    border-radius: .55rem;
+    border-radius: var(--levelup-radius-md);
     background: var(--levelup-color-surface);
     color: var(--levelup-color-text-primary);
     box-shadow: 0 2px 0 rgb(23 19 33 / 10%);

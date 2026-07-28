@@ -42,7 +42,7 @@ body { min-width: 20rem; }
 .levelup-select {
     min-height: var(--levelup-control-height-md);
     padding: .625rem .75rem;
-    border: var(--levelup-pixel-outline);
+    border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-xs);
     box-shadow: inset 0 -2px 0 rgb(23 19 33 / 7%);
 }
