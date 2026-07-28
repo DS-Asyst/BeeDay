@@ -62,6 +62,7 @@
 }
 
 .character-drawer__avatar {
+    display: block;
     width: 4rem;
     height: 4rem;
     flex: 0 0 auto;
@@ -70,6 +71,18 @@
     border: 2px solid rgb(255 255 255 / 82%);
     border-radius: 50%;
     box-shadow: 0 .35rem 1rem rgb(0 0 0 / 20%);
+    transition: transform 140ms ease, filter 140ms ease;
+}
+
+.character-drawer__avatar:hover,
+.character-drawer__avatar:focus-visible {
+    transform: translate(-2px, -2px);
+    filter: brightness(1.08);
+}
+
+.character-drawer__avatar:focus-visible {
+    outline: 2px solid rgb(255 255 255 / 90%);
+    outline-offset: 3px;
 }
 
     .character-drawer__avatar img {
@@ -124,61 +137,6 @@
 .character-drawer__experience-card {
     position: relative;
     margin-top: 1.35rem;
-    transition: transform 140ms ease, filter 140ms ease;
-}
-
-    .character-drawer__experience-card:hover,
-    .character-drawer__experience-card:focus-within {
-        transform: translate(-2px, -2px);
-        filter: brightness(1.02);
-    }
-
-.character-drawer__experience-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: .35rem;
-    width: calc(100% - 1.7rem);
-    min-height: 2rem;
-    margin: -.2rem auto 0;
-    padding: .35rem .65rem;
-    color: var(--levelup-game-ink);
-    background: var(--levelup-game-yellow);
-    border: 2px solid var(--levelup-game-ink);
-    border-radius: var(--levelup-radius-xs);
-    box-shadow: 3px 3px 0 var(--levelup-game-ink);
-    box-sizing: border-box;
-    font-size: .78rem;
-    font-weight: 800;
-    letter-spacing: .04em;
-    text-decoration: none;
-    text-transform: uppercase;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(-.35rem);
-    transition: opacity 140ms ease, transform 140ms ease, box-shadow 100ms ease;
-}
-
-.character-drawer__experience-card:hover .character-drawer__experience-link,
-.character-drawer__experience-card:focus-within .character-drawer__experience-link {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
-}
-
-.character-drawer__experience-link:hover {
-    color: var(--levelup-game-ink);
-    filter: brightness(1.04);
-}
-
-.character-drawer__experience-link:active {
-    box-shadow: 1px 1px 0 var(--levelup-game-ink);
-    transform: translate(2px, 2px);
-}
-
-.character-drawer__experience-link:focus-visible {
-    outline: 3px solid #fff;
-    outline-offset: 3px;
 }
 
 .character-drawer__link {

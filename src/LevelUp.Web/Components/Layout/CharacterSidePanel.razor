@@ -19,9 +19,12 @@
             var user = State.Data.CurrentUser;
 
             <div class="character-drawer__profile">
-                <div class="character-drawer__avatar">
+                <NavLink href="/character/create"
+                         class="character-drawer__avatar"
+                         aria-label="View character details"
+                         @onclick="OnClose">
                     <img src="@GetClassImage(character.Class)" alt="@character.Class class" />
-                </div>
+                </NavLink>
 
                 <div class="character-drawer__identity">
                     <h2>@user.Name</h2>
@@ -36,13 +39,6 @@
                 <CharacterExperienceBar Model="CharacterExperienceViewModel.From(character.Experience)"
                                         ExperienceGain="State.LatestExperienceGain"
                                         FeedbackKey="State.ExperienceFeedbackVersion" />
-
-                <NavLink href="/character/create"
-                         class="character-drawer__experience-link"
-                         aria-label="View character details"
-                         @onclick="OnClose">
-                    <PixelIcon Name="PixelIconName.Character" Size="PixelIconSize.Small" /> View character
-                </NavLink>
             </div>
         }
         else
