@@ -42,7 +42,7 @@
 .level-up-feedback__eyebrow {
     margin: 0;
     color: var(--levelup-color-text-secondary);
-    font: var(--levelup-type-caption);
+    font: var(--levelup-type-small);
     text-transform: uppercase;
     letter-spacing: .08em;
 }
@@ -78,7 +78,7 @@
 
 .level-up-feedback__levels dt {
     color: var(--levelup-color-text-secondary);
-    font: var(--levelup-type-caption);
+    font: var(--levelup-type-small);
 }
 
 .level-up-feedback__levels dd {

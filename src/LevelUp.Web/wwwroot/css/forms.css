@@ -13,7 +13,7 @@
     min-height: 2.35rem;
     padding: 0.55rem 0.72rem;
     border: 1px solid var(--levelup-color-border);
-    border-radius: 0.28rem;
+    border-radius: var(--levelup-radius-xs);
     background: var(--levelup-color-surface);
     color: var(--levelup-color-text-secondary);
     font: var(--levelup-type-body);

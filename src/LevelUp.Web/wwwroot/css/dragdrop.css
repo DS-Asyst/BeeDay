@@ -60,7 +60,7 @@
     left: .1rem;
     z-index: 40;
     height: 3px;
-    border-radius: 999px;
+    border-radius: var(--levelup-radius-pill);
     background: var(--levelup-color-primary);
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--levelup-color-primary) 18%, transparent);
     content: "";

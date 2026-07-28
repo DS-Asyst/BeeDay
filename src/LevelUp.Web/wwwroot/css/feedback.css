@@ -14,7 +14,7 @@
     width: min(31rem, calc(100vw - 2rem));
     overflow: hidden;
     border: 1px solid var(--levelup-color-border);
-    border-radius: .75rem;
+    border-radius: var(--levelup-radius-lg);
     background: var(--levelup-color-surface);
     box-shadow: var(--levelup-shadow-lg);
     animation: delete-confirmation-enter var(--levelup-transition-normal)-out;
@@ -81,7 +81,7 @@
     margin-bottom: 1.45rem;
     padding: .95rem 1rem;
     border: 1px solid color-mix(in srgb, var(--levelup-color-danger) 30%, white);
-    border-radius: .45rem;
+    border-radius: var(--levelup-radius-sm);
     background: color-mix(in srgb, var(--levelup-color-danger) 7%, white);
     color: var(--levelup-color-danger);
     text-align: left;
@@ -187,7 +187,7 @@
     height: 1.75rem;
     border-radius: 50%;
     background: var(--levelup-color-primary-soft);
-    color: var(--levelup-color-primary-dark);
+    color: var(--levelup-color-primary-hover);
     font-weight: 700;
 }
 
@@ -238,7 +238,7 @@
     gap: .5rem;
     padding: .5rem .75rem;
     border: 1px solid var(--levelup-color-border);
-    border-radius: 999px;
+    border-radius: var(--levelup-radius-pill);
     background: rgb(255 255 255 / 92%);
     color: var(--levelup-color-text-primary);
     box-shadow: var(--levelup-shadow-sm);
@@ -270,7 +270,7 @@
 .dashboard-skeleton__heading {
     display: block;
     height: .75rem;
-    border-radius: 999px;
+    border-radius: var(--levelup-radius-pill);
     background: linear-gradient(90deg, #ebe7ef 25%, var(--levelup-color-surface-muted) 50%, #ebe7ef 75%);
     background-size: 200% 100%;
     animation: levelup-shimmer 1.35s infinite linear;

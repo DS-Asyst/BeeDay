@@ -6,7 +6,7 @@
     padding: .95rem;
     color: var(--levelup-game-ink);
     background: var(--levelup-game-paper, #fff);
-    border: 2px solid var(--levelup-game-ink);
+    border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-xs);
     box-shadow: var(--levelup-shadow-sm);
     transition: box-shadow 140ms ease, transform 140ms ease;
@@ -43,7 +43,7 @@
     height: .8rem;
     overflow: hidden;
     background: #ded8e7;
-    border: 2px solid var(--levelup-game-ink);
+    border: 1px solid var(--levelup-color-border-strong);
     border-radius: 0;
     box-shadow: inset 2px 2px 0 rgb(23 19 33 / 18%);
 }

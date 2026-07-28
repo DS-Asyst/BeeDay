@@ -7,9 +7,9 @@
     width: 100%;
     min-height: 15rem;
     padding: var(--levelup-spacing-xl) var(--levelup-spacing-lg);
-    border: 1px dashed #cfc8d4;
+    border: 1px dashed var(--levelup-color-border);
     border-radius: var(--levelup-radius-sm);
-    color: var(--levelup-color-text);
+    color: var(--levelup-color-text-primary);
     background: rgb(255 255 255 / 58%);
     text-align: center;
     box-sizing: border-box;

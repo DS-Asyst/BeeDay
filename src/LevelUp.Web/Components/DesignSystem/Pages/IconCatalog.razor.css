@@ -83,7 +83,7 @@
     min-width: 0;
     padding: 1rem;
     border: 1px solid var(--levelup-color-border);
-    background: var(--levelup-color-surface-elevated);
+    background: var(--levelup-color-surface);
 }
 
 .icon-catalog__preview {

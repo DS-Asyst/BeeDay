@@ -15,7 +15,7 @@
     max-height: calc(100vh - 1.25rem);
     overflow: hidden auto;
     border: 1px solid var(--levelup-color-border);
-    border-radius: .9rem;
+    border-radius: var(--levelup-radius-lg);
     background: var(--levelup-color-surface);
     box-shadow: var(--levelup-shadow-lg);
     color: var(--levelup-color-text-primary);
@@ -93,7 +93,7 @@
     box-sizing: border-box;
     padding: .65rem .75rem;
     border: 1px solid var(--levelup-color-border);
-    border-radius: .55rem;
+    border-radius: var(--levelup-radius-md);
     background: var(--levelup-color-surface);
     color: var(--levelup-color-text-primary);
     box-shadow: 0 2px 0 rgb(23 19 33 / 10%);
@@ -141,7 +141,7 @@
     gap: .9rem;
     padding: .8rem;
     border: 1px solid var(--levelup-color-border);
-    border-radius: .65rem;
+    border-radius: var(--levelup-radius-md);
     background: var(--levelup-color-surface-subtle);
     text-align: left;
 }
@@ -152,8 +152,8 @@
     height: 2.8rem;
     flex: 0 0 auto;
     place-items: center;
-    border: 2px solid var(--levelup-game-ink);
-    border-radius: .55rem;
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-md);
     background: var(--levelup-color-primary);
     box-shadow: 3px 3px 0 var(--levelup-game-ink);
     color: var(--levelup-color-surface);
@@ -221,7 +221,7 @@
     .editor-modal {
         width: calc(100vw - .8rem);
         max-height: calc(100vh - .8rem);
-        border-radius: .75rem;
+        border-radius: var(--levelup-radius-lg);
     }
 
     .editor-modal__header,

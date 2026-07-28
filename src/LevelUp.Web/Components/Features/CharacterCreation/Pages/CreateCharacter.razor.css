@@ -11,7 +11,7 @@
     width: min(100%, 30rem);
     padding: clamp(1.6rem, 4vw, 2.25rem);
     box-sizing: border-box;
-    border: 2px solid var(--levelup-game-ink);
+    border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-xs);
     background: var(--levelup-game-paper);
     box-shadow: var(--levelup-shadow-lg);
@@ -65,7 +65,7 @@
 .character-field input {
     min-height: 3rem;
     padding: 0 .9rem;
-    border: 2px solid var(--levelup-game-ink);
+    border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-xs);
     outline: none;
     color: #302638;
@@ -111,7 +111,7 @@
     align-items: center;
     gap: .55rem;
     padding: 1rem .75rem;
-    border: 1px solid #d8d3dc;
+    border: 1px solid var(--levelup-color-border);
     border-radius: .55rem;
     color: #352c3c;
     background: var(--levelup-color-surface);
@@ -135,7 +135,7 @@
     height: 4.25rem;
     place-items: center;
     overflow: hidden;
-    border: 1px solid #ded9e2;
+    border: 1px solid var(--levelup-color-border);
     border-radius: 50%;
     background: #f4f3f5;
     transition: border-color 170ms ease, box-shadow 170ms ease;
@@ -269,7 +269,7 @@
     align-items: center;
     min-height: 3rem;
     overflow: hidden;
-    border: 2px solid var(--levelup-game-ink);
+    border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-xs);
     background: var(--levelup-color-surface);
     transition: border-color var(--levelup-transition-fast), box-shadow var(--levelup-transition-fast);
@@ -343,8 +343,8 @@
 }
 
 .character-panel {
-    border: 2px solid var(--levelup-game-ink);
-    border-radius: .2rem;
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-xs);
     background: var(--levelup-game-paper);
     box-shadow: var(--levelup-shadow-lg);
 }
@@ -359,28 +359,28 @@
 }
 
 .class-card {
-    border: 2px solid var(--levelup-game-ink);
-    border-radius: .2rem;
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-xs);
     background: #fff;
     box-shadow: var(--levelup-shadow-sm);
 }
 
 .class-card:hover,
 .class-card:focus-visible {
-    border-color: var(--levelup-game-ink);
+    border-color: var(--levelup-color-primary);
     box-shadow: var(--levelup-shadow-md);
     transform: translateY(-2px);
 }
 
 .class-card__image-frame,
 .class-confirmation__icon {
-    border: 2px solid var(--levelup-game-ink);
+    border: 1px solid var(--levelup-color-border);
 }
 
 .class-confirmation {
-    border: 2px solid var(--levelup-game-ink);
+    border: 1px solid var(--levelup-color-border);
     border-top: .45rem solid var(--levelup-game-yellow);
-    border-radius: .2rem;
+    border-radius: var(--levelup-radius-md);
     background: var(--levelup-game-paper);
     box-shadow: var(--levelup-shadow-lg);
 }

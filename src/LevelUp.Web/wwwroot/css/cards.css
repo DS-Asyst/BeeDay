@@ -1,4 +1,4 @@
-.activity-card{--activity-accent:var(--levelup-color-task);--activity-accent-dark:var(--levelup-color-task-dark);position:relative;display:grid;grid-template-columns:2.45rem minmax(0,1fr) 2.25rem;min-height:5.35rem;overflow:hidden;border:1px solid #cbc6cf;border-radius:.25rem;background:var(--levelup-color-surface);box-shadow:0 1px 2px rgb(40 27 52 / 8%);transition:transform 140ms ease,box-shadow 140ms ease,border-color 140ms ease}.activity-card--task{--activity-accent:var(--levelup-color-task);--activity-accent-dark:var(--levelup-color-task-dark)}.activity-card--todo{--activity-accent:var(--levelup-color-todo);--activity-accent-dark:var(--levelup-color-todo-dark)}.activity-card--project{--activity-accent:var(--levelup-color-project);--activity-accent-dark:var(--levelup-color-project-dark)}.activity-card:hover{z-index:2;border-color:#b9b1c2;box-shadow:0 4px 12px rgb(45 28 66 / 13%);transform:translateY(-1px)}
+.activity-card{--activity-accent:var(--levelup-color-task);--activity-accent-dark:var(--levelup-color-task-dark);position:relative;display:grid;grid-template-columns:2.45rem minmax(0,1fr) 2.25rem;min-height:5.35rem;overflow:hidden;border:1px solid var(--levelup-color-border);border-radius:.25rem;background:var(--levelup-color-surface);box-shadow:0 1px 2px rgb(40 27 52 / 8%);transition:transform 140ms ease,box-shadow 140ms ease,border-color 140ms ease}.activity-card--task{--activity-accent:var(--levelup-color-task);--activity-accent-dark:var(--levelup-color-task-dark)}.activity-card--todo{--activity-accent:var(--levelup-color-todo);--activity-accent-dark:var(--levelup-color-todo-dark)}.activity-card--project{--activity-accent:var(--levelup-color-project);--activity-accent-dark:var(--levelup-color-project-dark)}.activity-card:hover{z-index:2;border-color:#b9b1c2;box-shadow:0 4px 12px rgb(45 28 66 / 13%);transform:translateY(-1px)}
 .activity-card__rail{display:flex;align-items:flex-start;justify-content:center;padding-top:.5rem;background:var(--activity-accent)}.activity-card__checkbox{display:grid;place-items:center;width:1.55rem;height:1.55rem;padding:0;border:2px solid rgb(255 255 255 / 88%);border-radius:.14rem;background:rgb(255 255 255 / 88%);color:var(--activity-accent-dark);font-size:.95rem;font-weight:700;cursor:pointer;box-shadow:0 1px 2px rgb(50 30 20 / 12%);transition:transform .12s ease,background-color .12s ease,color .12s ease}.activity-card__checkbox span{opacity:0;transform:scale(.7);transition:opacity .12s ease,transform .12s ease}.activity-card__checkbox:hover{transform:scale(1.06);background:var(--levelup-color-surface)}.activity-card__checkbox:hover span{opacity:.62;transform:scale(1)}.activity-card__checkbox:active{transform:scale(.96)}
 .activity-card__body{min-width:0;padding:.66rem .72rem .55rem}.activity-card__title-row{display:flex;align-items:center;gap:.3rem}.activity-card h3{margin:0;overflow:hidden;color:#302638;font-size:.82rem;font-weight:650;line-height:1.25;text-overflow:ellipsis;white-space:nowrap}.activity-card p{display:-webkit-box;margin:.22rem 0 0;overflow:hidden;color:#786f80;font-size:.64rem;line-height:1.4;-webkit-box-orient:vertical;-webkit-line-clamp:2}.activity-card__star{color:#f3b82f;font-size:.74rem}.activity-card__meta{display:inline-block;margin-top:.42rem;padding:.12rem .35rem;border-radius:.15rem;color:#665d70;background:#f0edf2;font-size:.55rem;font-weight:700}
 .activity-card__menu{align-self:start;justify-self:center;width:1.35rem;height:1.55rem;margin-top:.48rem;padding:0;border:0;color:#756c7d;background:transparent;font-size:1.15rem;font-weight:700;line-height:1;cursor:pointer}.activity-card__menu:hover{color:var(--levelup-color-primary-hover)}.activity-card--completed{opacity:.66}.activity-card--completed h3{text-decoration:line-through}.activity-card--completed .activity-card__checkbox{background:var(--levelup-color-surface)}.activity-card--completed .activity-card__checkbox span{opacity:1;transform:scale(1)}
@@ -42,7 +42,7 @@
         transform: none;
     }
 }
-.habit-card{--habit-side:#f7f6f8;--habit-button-bg:var(--levelup-color-surface);--habit-button-border:var(--levelup-color-border-strong);--habit-button-text:#8b8491;display:grid;grid-template-columns:2.45rem minmax(0,1fr) 2.45rem;height:5.15rem;min-height:5.15rem;overflow:hidden;border:1px solid #c9c5cc;border-radius:.2rem;background:var(--levelup-color-surface);box-shadow:0 1px 2px rgb(40 27 52 / 8%);transition:border-color .18s ease,box-shadow .18s ease}.habit-card:hover{border-color:#a89daf;box-shadow:0 2px 5px rgb(40 27 52 / 13%)}
+.habit-card{--habit-side:#f7f6f8;--habit-button-bg:var(--levelup-color-surface);--habit-button-border:var(--levelup-color-border-strong);--habit-button-text:#8b8491;display:grid;grid-template-columns:2.45rem minmax(0,1fr) 2.45rem;height:5.15rem;min-height:5.15rem;overflow:hidden;border:1px solid var(--levelup-color-border);border-radius:.2rem;background:var(--levelup-color-surface);box-shadow:0 1px 2px rgb(40 27 52 / 8%);transition:border-color .18s ease,box-shadow .18s ease}.habit-card:hover{border-color:var(--levelup-color-border-strong);box-shadow:0 2px 5px rgb(40 27 52 / 13%)}
 .habit-card--white{--habit-side:#f7f6f8;--habit-button-bg:var(--levelup-color-surface);--habit-button-border:var(--levelup-color-border-strong);--habit-button-text:#8b8491}
 .habit-card--yellow{--habit-side:#ffc15a;--habit-button-bg:#dfa234;--habit-button-border:rgb(255 255 255 / 55%);--habit-button-text:var(--levelup-color-surface)}
 .habit-card--green{--habit-side:#24cc8f;--habit-button-bg:#159d6c;--habit-button-border:rgb(255 255 255 / 55%);--habit-button-text:var(--levelup-color-surface)}
@@ -265,13 +265,13 @@
 /* Card refinement — softer depth and Inter content typography. */
 .activity-card,
 .habit-card {
-    border: 1px solid #cbc7cf !important;
+    border: 1px solid var(--levelup-color-border) !important;
     box-shadow: 0 1px 2px rgb(42 31 50 / 10%), 0 2px 5px rgb(42 31 50 / 6%) !important;
 }
 
 .activity-card:hover,
 .habit-card:hover {
-    border-color: #b9b3bf !important;
+    border-color: var(--levelup-color-border-strong) !important;
     box-shadow: 0 2px 5px rgb(42 31 50 / 12%), 0 5px 12px rgb(42 31 50 / 7%) !important;
 }
 
@@ -451,7 +451,7 @@
 .habit-card__body > p {
     margin: .28rem 0 0;
     color: #786f80;
-    font-family: var(--levelup-font-body);
+    font-family: var(--levelup-font-card);
     font-size: .74rem;
     line-height: 1.35;
 }
