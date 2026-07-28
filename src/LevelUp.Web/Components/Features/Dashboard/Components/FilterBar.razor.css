@@ -90,7 +90,7 @@
     border: var(--levelup-game-border);
     border-radius: var(--levelup-radius-xs);
     background: #fff;
-    box-shadow: var(--levelup-game-shadow-md);
+    box-shadow: var(--levelup-shadow-md);
     transform-origin: top right;
     animation: levelup-fade-in var(--levelup-duration-fast) var(--levelup-easing-emphasized) both;
 }
@@ -174,7 +174,7 @@
     border: var(--levelup-game-border);
     border-radius: var(--levelup-radius-xs);
     background: var(--levelup-color-surface);
-    box-shadow: var(--levelup-game-shadow-md);
+    box-shadow: var(--levelup-shadow-md);
     transform-origin: top right;
     animation: levelup-fade-in var(--levelup-duration-fast) var(--levelup-easing-emphasized) both;
 }

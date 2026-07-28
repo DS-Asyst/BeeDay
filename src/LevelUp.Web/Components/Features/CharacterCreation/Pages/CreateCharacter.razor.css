@@ -14,7 +14,7 @@
     border: 2px solid var(--levelup-game-ink);
     border-radius: var(--levelup-radius-xs);
     background: var(--levelup-game-paper);
-    box-shadow: 8px 8px 0 var(--levelup-game-ink);
+    box-shadow: var(--levelup-shadow-lg);
 }
 
 .character-panel--classes,
@@ -250,7 +250,7 @@
 
 @media (max-width: 580px) {
     .character-page { place-items: start center; padding: 0; }
-    .character-panel { padding: 1.35rem; box-shadow: 5px 5px 0 var(--levelup-game-ink); }
+    .character-panel { padding: 1.35rem; }
     .class-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .class-card { min-height: 11.5rem; }
     .class-confirmation__actions { flex-direction: column-reverse; }
@@ -346,7 +346,7 @@
     border: 2px solid var(--levelup-game-ink);
     border-radius: .2rem;
     background: var(--levelup-game-paper);
-    box-shadow: var(--levelup-game-shadow-lg);
+    box-shadow: var(--levelup-shadow-lg);
 }
 
 .character-panel__brand {
@@ -362,13 +362,13 @@
     border: 2px solid var(--levelup-game-ink);
     border-radius: .2rem;
     background: #fff;
-    box-shadow: 0 3px 0 var(--levelup-game-ink);
+    box-shadow: var(--levelup-shadow-sm);
 }
 
 .class-card:hover,
 .class-card:focus-visible {
     border-color: var(--levelup-game-ink);
-    box-shadow: 0 5px 0 var(--levelup-game-ink);
+    box-shadow: var(--levelup-shadow-md);
     transform: translateY(-2px);
 }
 
@@ -382,7 +382,7 @@
     border-top: .45rem solid var(--levelup-game-yellow);
     border-radius: .2rem;
     background: var(--levelup-game-paper);
-    box-shadow: var(--levelup-game-shadow-lg);
+    box-shadow: var(--levelup-shadow-lg);
 }
 
 

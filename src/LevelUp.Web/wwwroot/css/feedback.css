@@ -13,10 +13,10 @@
     position: relative;
     width: min(31rem, calc(100vw - 2rem));
     overflow: hidden;
-    border: 2px solid var(--levelup-game-ink);
+    border: 1px solid var(--levelup-color-border);
     border-radius: .75rem;
     background: var(--levelup-color-surface);
-    box-shadow: 8px 8px 0 var(--levelup-game-ink), 0 1.75rem 5rem rgb(20 10 34 / 40%);
+    box-shadow: var(--levelup-shadow-lg);
     animation: delete-confirmation-enter var(--levelup-transition-normal)-out;
     font-family: var(--levelup-font-family);
 }
@@ -124,34 +124,6 @@
     min-height: 2.9rem;
 }
 
-.delete-confirmation__actions .delete-confirmation__cancel-action {
-    border-color: var(--levelup-color-danger);
-    background: var(--levelup-color-surface);
-    color: var(--levelup-color-danger);
-    box-shadow: 4px 4px 0 var(--levelup-game-ink);
-}
-
-.delete-confirmation__actions .delete-confirmation__cancel-action:not(:disabled):hover,
-.delete-confirmation__actions .delete-confirmation__cancel-action:not(:disabled):focus-visible {
-    border-color: var(--levelup-color-danger);
-    background: var(--levelup-color-danger);
-    color: var(--levelup-color-surface);
-    filter: none;
-}
-
-.delete-confirmation__actions .delete-confirmation__confirm-action {
-    border-color: var(--levelup-color-danger);
-    background: var(--levelup-color-danger);
-    color: var(--levelup-color-surface);
-    box-shadow: 4px 4px 0 var(--levelup-game-ink);
-}
-
-.delete-confirmation__actions .delete-confirmation__confirm-action:not(:disabled):hover,
-.delete-confirmation__actions .delete-confirmation__confirm-action:not(:disabled):focus-visible {
-    background: color-mix(in srgb, var(--levelup-color-danger) 84%, black);
-    filter: none;
-}
-
 @keyframes delete-confirmation-enter {
     from {
         opacity: 0;
@@ -166,7 +138,7 @@
 
 @media (max-width: 520px) {
     .delete-confirmation-backdrop { padding: .65rem; }
-    .delete-confirmation { width: calc(100vw - 1.3rem); box-shadow: 5px 5px 0 var(--levelup-game-ink); }
+    .delete-confirmation { width: calc(100vw - 1.3rem); }
     .delete-confirmation__content { padding: 1.65rem 1.1rem 1.35rem; }
     .delete-confirmation__warning { padding: .85rem; }
     .delete-confirmation__actions { gap: .65rem; }
@@ -184,7 +156,7 @@
     right: 1rem;
     z-index: var(--levelup-z-toast);
     display: grid;
-    gap: .75rem;
+    gap: var(--levelup-spacing-smd);
     width: min(24rem, calc(100vw - 2rem));
     pointer-events: none;
 }
@@ -193,15 +165,15 @@
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: start;
-    gap: .8rem;
-    padding: .95rem 1rem;
+    gap: var(--levelup-spacing-smd);
+    padding: var(--levelup-spacing-md);
     border: 1px solid var(--levelup-color-border);
-    border-left-width: .3rem;
+    border-left-width: .2rem;
     border-radius: var(--levelup-radius-md);
     background: var(--levelup-color-surface);
     box-shadow: var(--levelup-shadow-md);
     pointer-events: auto;
-    animation: levelup-toast-enter var(--levelup-transition-normal)-out;
+    animation: levelup-toast-enter var(--levelup-transition-normal);
 }
 
 .levelup-toast--success { border-left-color: var(--levelup-color-success); }
@@ -225,23 +197,34 @@
 .levelup-toast__content strong {
     display: block;
     color: var(--levelup-color-text-primary);
-    font-size: .9rem;
+    font: var(--levelup-type-label);
 }
 
 .levelup-toast__content p {
-    margin: .2rem 0 0;
+    margin: var(--levelup-spacing-xs) 0 0;
     color: var(--levelup-color-text-secondary);
-    font-size: .82rem;
-    line-height: 1.45;
+    font: var(--levelup-type-small);
 }
 
 .levelup-toast__close {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
     border: 0;
+    border-radius: var(--levelup-radius-xs);
     background: transparent;
     color: var(--levelup-color-text-muted);
-    font-size: 1.25rem;
-    line-height: 1;
     cursor: pointer;
+    transition: background-color var(--levelup-transition-fast), color var(--levelup-transition-fast);
+}
+
+.levelup-toast__close:hover,
+.levelup-toast__close:focus-visible {
+    background: var(--levelup-color-surface-muted);
+    color: var(--levelup-color-text-primary);
+    outline: none;
 }
 
 /* Loading: compact, non-blocking and delayed to avoid flicker on fast operations. */
@@ -370,6 +353,10 @@
     .dashboard-skeleton__toolbar,
     .dashboard-skeleton__heading {
         animation: none;
+    }
+
+    .levelup-toast__close {
+        transition: none;
     }
 }
 
