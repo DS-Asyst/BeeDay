@@ -1,6 +1,6 @@
 .inventory-page{width:min(1440px,100%);margin:0 auto;padding:2rem 1.5rem 3rem;color:var(--text-primary,#f8f5ff)}
 .inventory-page__header{display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;margin-bottom:1.5rem}
-.inventory-page__header h1,.inventory-panel-header h2,.inventory-modal h2{margin:.15rem 0;font-family:var(--levelup-font-display);letter-spacing:.04em}
+.inventory-page__header h1,.inventory-panel-header h2,.inventory-modal h2{margin:.15rem 0;font-family:var(--levelup-font-ui);letter-spacing:.04em}
 .inventory-page__header h1{font-size:3.25rem;line-height:.9}.inventory-page__header p{max-width:680px;margin:.6rem 0 0;color:var(--text-secondary,#c8bfd5)}
 .inventory-eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;font-weight:700;color:#d8bcff}
 .inventory-summary{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:1rem;margin-bottom:1rem}.inventory-summary__card{padding:1.2rem;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:linear-gradient(145deg,rgba(92,45,140,.72),rgba(37,22,57,.92));box-shadow:0 14px 30px rgba(0,0,0,.16)}.inventory-summary__card span,.inventory-summary__card small{display:block;color:#cfc5da}.inventory-summary__card strong{display:block;margin:.3rem 0;font-size:1.65rem}.inventory-summary__card--income strong,.inventory-amount--income{color:#73e5aa}.inventory-summary__card--expense strong,.inventory-amount--expense{color:#ff8e9a}

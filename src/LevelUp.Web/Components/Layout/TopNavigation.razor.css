@@ -225,13 +225,13 @@
     box-shadow: 0 2px 7px rgb(39 9 66 / 14%);
 }
 
-/* Active/hover state: yellow Pixelify Sans text with a pixel drop shadow, no fill. */
+/* Active/hover state: yellow retro UI text with a pixel drop shadow, no fill. */
 .top-navigation__links ::deep a:hover,
 .top-navigation__links ::deep a:focus-visible,
 .top-navigation__links ::deep a.active {
     color: #ffc928;
     background: transparent;
-    font-family: "Pixelify Sans", var(--levelup-font-display), sans-serif;
+    font-family: var(--levelup-font-ui);
     font-size: 1.45rem;
     letter-spacing: .02em;
     text-transform: uppercase;

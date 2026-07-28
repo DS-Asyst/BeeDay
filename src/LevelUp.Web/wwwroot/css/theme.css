@@ -52,15 +52,19 @@ h4,
 .page-title,
 .section-title,
 .modal-title {
-    font-family: var(--levelup-font-display);
+    font-family: var(--levelup-font-ui);
     font-weight: 400;
 }
 
 .levelup-brand,
 .brand,
-.logo,
+.logo {
+    font-family: var(--levelup-font-ui);
+    font-weight: 400;
+}
+
 .loading-title {
-    font-family: var(--levelup-font-brand);
+    font-family: var(--levelup-font-pixel);
     font-weight: 400;
 }
 
