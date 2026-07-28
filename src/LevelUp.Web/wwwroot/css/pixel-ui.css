@@ -1,16 +1,5 @@
 /* Sprint 3.5 — Pixel UI Pack */
 
-/* Consistent pixel icons */
-.levelup-icon {
-    display: inline-block;
-    flex: 0 0 auto;
-    overflow: visible;
-    color: currentColor;
-    shape-rendering: crispEdges;
-    image-rendering: pixelated;
-    pointer-events: none;
-}
-
 /* Interactive surfaces and card microinteractions */
 .levelup-card--interactive {
     position: relative;
@@ -24,7 +13,7 @@
 .levelup-card--interactive:focus-within {
     border-color: var(--levelup-color-primary);
     transform: translateY(-3px);
-    box-shadow: var(--levelup-pixel-shadow-hover);
+    box-shadow: var(--levelup-shadow-md);
 }
 
 .levelup-card--interactive:active { transform: translateY(1px); }

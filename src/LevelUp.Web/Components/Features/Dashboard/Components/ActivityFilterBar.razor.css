@@ -7,7 +7,7 @@
 
 .filter-bar__main {
     display: grid;
-    grid-template-columns: minmax(18rem, 38rem) auto auto;
+    grid-template-columns: auto minmax(18rem, 1fr) auto;
     align-items: center;
     justify-content: center;
     gap: .8rem;
@@ -84,10 +84,10 @@
     top: calc(100% + .55rem);
     right: 0;
     width: min(30rem, calc(100vw - 2rem));
-    border: var(--levelup-game-border);
+    border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-xs);
-    background: #fff;
-    box-shadow: var(--levelup-game-shadow-md);
+    background: var(--levelup-color-surface);
+    box-shadow: var(--levelup-shadow-md);
     transform-origin: top right;
     animation: levelup-fade-in var(--levelup-duration-fast) var(--levelup-easing-emphasized) both;
 }
@@ -95,8 +95,7 @@
 .filter-bar__tags-heading {
     padding: 1rem 1.15rem .35rem;
     color: var(--levelup-color-text-primary);
-    font-size: .92rem;
-    font-weight: 800;
+    font: var(--levelup-type-label);
 }
 
 .filter-bar__tags-grid {
@@ -112,15 +111,15 @@
     align-items: center;
     gap: .5rem;
     min-height: 2.45rem;
-    padding: .25rem .35rem;
-    border-radius: .25rem;
+    padding: .45rem .6rem;
+    border-radius: .15rem;
     color: var(--levelup-color-text-primary);
     cursor: pointer;
-    font-size: .88rem;
-    font-weight: 600;
+    font: var(--levelup-type-button);
 }
 
 .filter-bar__tag-option:hover,
+.filter-bar__tag-option:focus-within,
 .filter-bar__tag-option--selected { background: var(--levelup-color-surface-muted); }
 
 .filter-bar__tag-option input {
@@ -146,19 +145,16 @@
     border-top: 1px solid #e5e1e8;
 }
 
-.filter-bar__clear,
-.filter-bar__cancel {
+.filter-bar__clear {
     border: 0;
     background: transparent;
     font: inherit;
     font-size: .84rem;
     cursor: pointer;
+    color: var(--levelup-game-red);
 }
-.filter-bar__clear { color: var(--levelup-game-red); }
 .filter-bar__clear:disabled { color: #aaa4ad; cursor: default; }
-.filter-bar__cancel { color: var(--levelup-color-text-muted); }
-.filter-bar__clear:not(:disabled):hover,
-.filter-bar__cancel:hover { text-decoration: underline; }
+.filter-bar__clear:not(:disabled):hover { text-decoration: underline; }
 
 .filter-bar__menu {
     position: absolute;
@@ -168,10 +164,10 @@
     display: grid;
     width: 10.8rem;
     padding: .32rem;
-    border: var(--levelup-game-border);
+    border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-xs);
     background: var(--levelup-color-surface);
-    box-shadow: var(--levelup-game-shadow-md);
+    box-shadow: var(--levelup-shadow-md);
     transform-origin: top right;
     animation: levelup-fade-in var(--levelup-duration-fast) var(--levelup-easing-emphasized) both;
 }
@@ -180,21 +176,24 @@
     display: grid;
     grid-template-columns: 1.1rem minmax(0, 1fr);
     align-items: center;
-    gap: var(--levelup-spacing-xs);
+    gap: .5rem;
     width: 100%;
     min-height: 2.1rem;
-    padding: .3rem .4rem;
+    padding: .45rem .6rem;
     border: 0;
     border-radius: .15rem;
-    color: #3e3545;
+    color: var(--levelup-color-text-primary);
     background: transparent;
     text-align: left;
-    font: inherit;
-    font-size: .74rem;
+    font: var(--levelup-type-button);
     cursor: pointer;
     transition: background-color var(--levelup-transition-fast);
 }
-.filter-bar__menu button:hover { background: #f2eef7; }
+.filter-bar__menu button:hover,
+.filter-bar__menu button:focus-visible {
+    background: var(--levelup-color-surface-muted);
+    outline: none;
+}
 
 @media (max-width: 760px) {
     .filter-bar { padding: var(--levelup-spacing-sm); }
@@ -213,18 +212,3 @@
     .filter-bar__menu { right: auto; left: 0; width: 100%; }
     .filter-bar__tags-grid { grid-template-columns: 1fr; gap: .2rem; }
 }
-
-
-.filter-bar__cancel.levelup-legacy-cancel {
-    min-height: 2.25rem;
-    padding: .5rem .8rem .58rem;
-    border: 2px solid #444047;
-    border-radius: 3px;
-    color: #171321;
-    background: #fff;
-    box-shadow: inset -2px -3px 0 #d7d5d8, 0 4px 0 #5a565d;
-    text-transform: uppercase;
-    transition: none;
-}
-.filter-bar__cancel.levelup-legacy-cancel:hover { color:#171321; background:#f1f1f1; box-shadow:inset -2px -4px 0 #d7d5d8,0 4px 0 #5a565d; }
-.filter-bar__cancel.levelup-legacy-cancel:active { transform:translateY(4px); background:#d7d5d8; box-shadow:inset 2px 2px 0 #444047; }

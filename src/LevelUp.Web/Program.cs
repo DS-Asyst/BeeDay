@@ -187,6 +187,7 @@ builder.Services.AddScoped<DashboardState>();
 builder.Services.AddScoped<LevelUpFeedbackStore>();
 builder.Services.AddScoped<INotificationHandler<DomainEventNotification>, LevelUpFeedbackEventHandler>();
 builder.Services.AddScoped<CharacterCreationState>();
+builder.Services.AddScoped<CardActionMenuCoordinator>();
 
 var app = builder.Build();
 

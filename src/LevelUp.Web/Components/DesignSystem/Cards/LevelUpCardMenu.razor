@@ -1,5 +1,9 @@
-<div class="@MenuCssClass">
+@inject IJSRuntime JS
+@inject LevelUp.Web.Services.CardActionMenuCoordinator Coordinator
+
+<div class="@MenuCssClass" @ref="rootElement" @onkeydown="HandleKeyDown">
     <button type="button"
+            @ref="triggerElement"
             class="@TriggerCssClass"
             title="@Title"
             aria-label="@AriaLabel"
@@ -12,12 +16,10 @@
 
     @if (isOpen)
     {
-        <button type="button"
-                class="card-action-menu__dismiss"
-                aria-label="Close options"
-                @onclick="CloseMenu"></button>
-
-        <div class="card-action-menu__panel" role="menu">
+        <div class="card-action-menu__panel @(flipUp ? "card-action-menu__panel--flip-up" : null) @(isMeasuring ? "card-action-menu__panel--measuring" : null)"
+             style="@(horizontalShiftPx == 0 ? null : $"transform: translateX({horizontalShiftPx.ToString(System.Globalization.CultureInfo.InvariantCulture)}px)")"
+             @ref="panelElement"
+             role="menu">
             <button type="button"
                     class="card-action-menu__item"
                     role="menuitem"

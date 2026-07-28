@@ -4,16 +4,6 @@
 
 <div class="filter-bar" aria-label="Dashboard controls">
     <div class="filter-bar__main">
-        <div class="filter-bar__search" role="search">
-            <input id="dashboard-search"
-                   class="filter-bar__input"
-                   type="search"
-                   aria-label="Search activities"
-                   placeholder="Search"
-                   value="@inputValue"
-                   @oninput="OnInput" />
-        </div>
-
         <div class="filter-bar__filters">
             <LevelUpButton Variant="LevelUpButtonVariant.Secondary"
                            Compact="true"
@@ -27,10 +17,6 @@
                 {
                     <span class="filter-bar__filter-count" aria-label="@($"{SelectedAttributes.Count} selected tags")">@SelectedAttributes.Count</span>
                 }
-                <PixelIcon Name="PixelIconName.ChevronDown"
-                           Size="PixelIconSize.ExtraSmall"
-                           Decorative="true"
-                           Class="@($"filter-bar__chevron {(showTagsMenu ? "filter-bar__chevron--open" : null)}")" />
             </LevelUpButton>
 
             @if (showTagsMenu)
@@ -61,10 +47,20 @@
                                 @onclick="ClearAttributesAsync">
                             Clear all filters
                         </button>
-                        <button type="button" class="filter-bar__cancel levelup-legacy-cancel" @onclick="CloseTagsMenu">Cancel</button>
+                        <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel" Compact="true" OnClick="CloseTagsMenu">Cancel</LevelUpButton>
                     </div>
                 </div>
             }
+        </div>
+
+        <div class="filter-bar__search" role="search">
+            <input id="dashboard-search"
+                   class="filter-bar__input"
+                   type="search"
+                   aria-label="Search activities"
+                   placeholder="Search"
+                   value="@inputValue"
+                   @oninput="OnInput" />
         </div>
 
         <div class="filter-bar__create">

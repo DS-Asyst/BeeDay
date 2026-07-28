@@ -173,7 +173,7 @@ public sealed class InventoryEmptyStateTests : BunitContext
         Assert.Equal("No transactions found", cut.Find(".levelup-empty-state__title").TextContent);
         Assert.Contains("Create your first transaction", cut.Find(".levelup-empty-state__description").TextContent, StringComparison.Ordinal);
 
-        var button = cut.Find(".levelup-button--confirmation-cancel");
+        var button = cut.Find(".levelup-button--primary");
         Assert.Contains("Create transaction", button.TextContent, StringComparison.Ordinal);
         button.Click();
         Assert.True(invoked);
@@ -195,6 +195,9 @@ public sealed class InventoryEmptyStateTests : BunitContext
 
 public sealed class TransactionListTests : BunitContext
 {
+    public TransactionListTests() =>
+        Services.AddScoped<LevelUp.Web.Services.CardActionMenuCoordinator>();
+
     [Fact]
     public void RendersRefreshStateAndTransactions()
     {
@@ -259,7 +262,7 @@ public sealed class InventoryTagManagerTests : BunitContext
     {
         var cut = Render<InventoryTagManager>();
 
-        await cut.Find("button.inventory-button--cta").ClickAsync();
+        await cut.Find(".inventory-panel-header .levelup-button--primary").ClickAsync();
         Assert.NotEmpty(cut.FindAll(".inventory-tag-form"));
 
         await cut.Find(".inventory-tag-form__actions .levelup-button--confirmation-cancel").ClickAsync();

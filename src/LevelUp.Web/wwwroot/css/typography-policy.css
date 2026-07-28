@@ -22,8 +22,6 @@ option,
 optgroup,
 label,
 .levelup-button,
-.inventory-button,
-.inventory-link-button,
 [role="button"],
 [role="menuitem"],
 [role="tab"],
@@ -53,16 +51,14 @@ td,
 }
 
 /* Reusable action typography. */
-.levelup-button,
-.inventory-button {
+.levelup-button {
     font-size: var(--levelup-font-size-md);
     font-weight: var(--levelup-font-weight-bold) !important;
     line-height: 1;
     letter-spacing: .035em;
 }
 
-.levelup-button--compact,
-.inventory-button--small {
+.levelup-button--compact {
     font-size: var(--levelup-font-size-sm);
 }
 

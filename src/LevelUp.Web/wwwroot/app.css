@@ -56,117 +56,17 @@ h1:focus {
     content: "An error has occurred.";
 }
 
-/* Card action menu */
+/* Card action menu — outer trigger-positioning context only; the panel and
+   its items are a scoped Design System component (LevelUpCardMenu.razor.css)
+   which owns their actual visual styling. */
 .card-action-menu {
     position: relative;
     z-index: 4;
 }
 
-.card-action-menu__dismiss {
-    position: fixed;
-    inset: 0;
-    z-index: 80;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    cursor: default;
-}
-
-.card-action-menu__panel {
-    position: absolute;
-    top: calc(100% + .25rem);
-    right: -.2rem;
-    z-index: 81;
-    width: 9.75rem;
-    overflow: hidden;
-    border: 1px solid #ded9e2;
-    border-radius: .4rem;
-    background: var(--levelup-color-surface);
-    box-shadow: 0 .65rem 1.8rem rgb(39 23 57 / 22%);
-    animation: card-menu-enter 130ms ease-out;
-}
-
-.card-action-menu__panel::before {
-    content: "";
-    position: absolute;
-    top: -.35rem;
-    right: .72rem;
-    width: .65rem;
-    height: .65rem;
-    border-top: 1px solid #ded9e2;
-    border-left: 1px solid #ded9e2;
-    background: var(--levelup-color-surface);
-    transform: rotate(45deg);
-}
-
-.card-action-menu__item {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: .7rem;
-    width: 100%;
-    min-height: 3rem;
-    padding: 0 .9rem;
-    border: 0;
-    border-bottom: 1px solid #eeeaf0;
-    background: var(--levelup-color-surface);
-    color: #342b3b;
-    font-size: .82rem;
-    font-weight: 600;
-    letter-spacing: 0;
-    text-align: left;
-    cursor: pointer;
-    transition: background-color 130ms ease, color 130ms ease;
-}
-
-.card-action-menu__item:last-child {
-    border-bottom: 0;
-}
-
-.card-action-menu__item:hover,
-.card-action-menu__item:focus-visible {
-    background: #f6f3f8;
-    color: #512d86;
-    outline: none;
-}
-
-.card-action-menu__item--delete {
-    color: #d92f38;
-}
-
-.card-action-menu__item--delete:hover,
-.card-action-menu__item--delete:focus-visible {
-    background: var(--levelup-color-danger-soft);
-    color: #bd202a;
-}
-
-.card-action-menu__item > span:first-child {
-    display: inline-grid;
-    place-items: center;
-    width: 1rem;
-    font-size: 1rem;
-}
-
 @keyframes card-menu-enter {
     from { opacity: 0; transform: translateY(-.25rem) scale(.98); }
     to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-
-.card-action-menu__panel {
-    overflow: visible;
-}
-
-.card-action-menu__panel .card-action-menu__item--delete,
-.card-action-menu__panel .card-action-menu__item--delete span {
-    color: #e02f3a;
-}
-
-.card-action-menu__panel .card-action-menu__item--delete:hover,
-.card-action-menu__panel .card-action-menu__item--delete:focus-visible {
-    color: #bd202a;
-    background: var(--levelup-color-danger-soft);
 }
 
 /* Sprint 1.7 — global interaction polish */
@@ -247,59 +147,6 @@ body {
         #f1eef6;
 }
 
-.editor-modal__save,
-.editor-modal__cancel,
-.editor-modal__delete,
-.delete-confirmation__delete-button,
-.delete-confirmation__cancel-button {
-    position: relative;
-    min-height: 2.75rem;
-    border: var(--levelup-game-border) !important;
-    border-radius: .2rem !important;
-    font-weight: 700 !important;
-    letter-spacing: .035em;
-    text-transform: uppercase;
-    box-shadow: var(--levelup-game-shadow-sm) !important;
-    transform: translateY(0);
-    transition: transform 90ms ease, box-shadow 90ms ease, filter 120ms ease !important;
-}
-
-.editor-modal__save:not(:disabled):hover,
-.editor-modal__cancel:not(:disabled):hover,
-.editor-modal__delete:not(:disabled):hover,
-.delete-confirmation__delete-button:not(:disabled):hover,
-.delete-confirmation__cancel-button:not(:disabled):hover {
-    filter: brightness(1.04) saturate(1.06);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 0 var(--levelup-game-ink) !important;
-}
-
-.editor-modal__save:not(:disabled):active,
-.editor-modal__cancel:not(:disabled):active,
-.editor-modal__delete:not(:disabled):active,
-.delete-confirmation__delete-button:not(:disabled):active,
-.delete-confirmation__cancel-button:not(:disabled):active {
-    transform: translateY(3px);
-    box-shadow: 0 0 0 var(--levelup-game-ink) !important;
-}
-
-.editor-modal__save {
-    color: #07131a !important;
-    background: var(--levelup-game-yellow) !important;
-}
-
-.editor-modal__cancel,
-.delete-confirmation__cancel-button {
-    color: var(--levelup-game-ink) !important;
-    background: var(--levelup-game-paper) !important;
-}
-
-.editor-modal__delete,
-.delete-confirmation__delete-button {
-    color: #fff !important;
-    background: var(--levelup-game-red) !important;
-}
-
 .levelup-field__control,
 .character-field input,
 input:not([type="checkbox"]):not([type="radio"]),
@@ -318,35 +165,6 @@ select:focus,
 textarea:focus {
     border-color: var(--levelup-game-blue) !important;
     box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--levelup-game-ink) !important;
-}
-
-.activity-card,
-.habit-card,
-.levelup-card,
-.profile-summary-card,
-.character-summary-card,
-.dashboard-column,
-.settings-card {
-    border: 2px solid var(--levelup-game-ink) !important;
-    border-radius: .18rem !important;
-    box-shadow: var(--levelup-game-shadow-sm) !important;
-}
-
-.activity-card:hover,
-.habit-card:hover,
-.levelup-card:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: var(--levelup-game-shadow-md) !important;
-}
-
-.card-action-menu__panel {
-    border: 2px solid var(--levelup-game-ink) !important;
-    border-radius: .18rem !important;
-    box-shadow: var(--levelup-game-shadow-md) !important;
-}
-
-.card-action-menu__item {
-    font-weight: 700;
 }
 
 .levelup-checkbox__control,

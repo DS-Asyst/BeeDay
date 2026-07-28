@@ -5,17 +5,17 @@ namespace LevelUp.Web.Components.Features.Dashboard.Components;
 
 public partial class ProjectContextFilter
 {
+    private bool isOpen;
+
     [Parameter] public IReadOnlyList<Project> Projects { get; set; } = [];
     [Parameter] public Guid? SelectedProjectId { get; set; }
     [Parameter] public EventCallback<Guid?> SelectedProjectIdChanged { get; set; }
 
-    private string SelectId => "dashboard-project-context";
-    private string SelectedValue => SelectedProjectId?.ToString() ?? string.Empty;
+    private void ToggleMenu() => isOpen = !isOpen;
 
-    private Task HandleSelectionChanged(ChangeEventArgs args)
+    private Task SelectAsync(Guid? projectId)
     {
-        var value = args.Value?.ToString();
-        Guid? projectId = Guid.TryParse(value, out var parsedProjectId) ? parsedProjectId : null;
+        isOpen = false;
         return SelectedProjectIdChanged.InvokeAsync(projectId);
     }
 }

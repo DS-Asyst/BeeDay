@@ -137,13 +137,13 @@
 }
 
 .support-drawer__item,
-.support-drawer__social {
+.support-drawer__brand {
     opacity: 0;
     transform: translateX(1rem);
 }
 
 .support-drawer.is-open .support-drawer__item,
-.support-drawer.is-open .support-drawer__social {
+.support-drawer.is-open .support-drawer__brand {
     opacity: 1;
     transform: translateX(0);
     transition: opacity 260ms ease, transform 300ms cubic-bezier(.2, .8, .2, 1);
@@ -161,7 +161,7 @@
         transition-delay: 140ms;
     }
 
-.support-drawer.is-open .support-drawer__social {
+.support-drawer.is-open .support-drawer__brand {
     transition-delay: 180ms;
 }
 
@@ -242,56 +242,33 @@
         line-height: 1.2;
     }
 
-.support-drawer__social {
+.support-drawer__brand {
     margin-top: auto;
     padding: 3rem 2.15rem 2rem;
+    border-top: 1px solid rgb(255 255 255 / 12%);
 }
 
-    .support-drawer__social h2 {
-        margin: 0 0 1rem;
-        font-family: var(--levelup-font-family);
-        font-size: 1.72rem;
-        font-weight: 700;
-        line-height: .82;
-        letter-spacing: -.03em;
-    }
-
-.support-drawer__social-links {
-    display: flex;
-    align-items: center;
-    gap: .65rem;
+.support-drawer__brand-mark {
+    margin: 0 0 .5rem;
+    font-family: var(--levelup-font-family);
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: .04em;
 }
 
-    .support-drawer__social-links a {
-        display: grid;
-        width: 3.15rem;
-        height: 3.15rem;
-        place-items: center;
-        color: #6417a2;
-        background: #fff;
-        border-radius: .55rem;
-        text-decoration: none;
-        transition: transform 150ms ease, background-color 150ms ease;
-    }
+.support-drawer__brand-level { color: #fff; }
+.support-drawer__brand-up { color: #ffc800; }
 
-        .support-drawer__social-links a:hover,
-        .support-drawer__social-links a:focus-visible {
-            background: #ffc800;
-            transform: translateY(-2px);
-            outline: none;
-        }
-
-    .support-drawer__social-links ::deep svg {
-        width: 2rem;
-        height: 2rem;
-        fill: currentColor;
-        stroke: currentColor;
-        stroke-width: 1.8;
-    }
-
-    .support-drawer__social-links a[aria-label="Instagram"] ::deep svg {
-        fill: none;
-    }
+.support-drawer__tagline {
+    margin: 0;
+    color: #fff;
+    font-family: var(--levelup-font-family);
+    font-size: 1.55rem;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    text-transform: uppercase;
+}
 
 @media (max-height: 700px) {
     .support-drawer__navigation {
@@ -313,7 +290,7 @@
         height: 3.2rem;
     }
 
-    .support-drawer__social {
+    .support-drawer__brand {
         padding-top: 1.6rem;
     }
 }
@@ -341,14 +318,13 @@
     }
 
     .support-drawer__navigation,
-    .support-drawer__social {
+    .support-drawer__brand {
         padding-inline: 1.25rem;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .support-drawer,
-    .support-drawer__social-links a {
+    .support-drawer {
         transition: none;
     }
 }

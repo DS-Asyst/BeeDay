@@ -1,0 +1,13 @@
+@typeparam TModel
+
+<EditForm Model="Model" OnValidSubmit="HandleValidSubmitAsync" FormName="@FormName">
+    <DataAnnotationsValidator />
+    <fieldset class="levelup-settings-form" disabled="@IsBusy">
+        @ChildContent
+        <div class="levelup-settings-form__actions">
+            <LevelUpButton Type="submit" IsLoading="@IsBusy" Disabled="@IsBusy">
+                @SubmitLabel
+            </LevelUpButton>
+        </div>
+    </fieldset>
+</EditForm>

@@ -24,6 +24,37 @@ input[type="file"]:not(:disabled),
     cursor: url("../cursors/cursor-click.png") 15 0, pointer !important;
 }
 
+/* Drag-and-drop cards (Habits, Tasks, To-Dos, Projects): reuse the same
+   click cursor asset used for every other interactive control, but with
+   grab/grabbing as the native fallback so the drag affordance survives even
+   where the custom cursor image fails to load. The card's clickable body has
+   role="button" (see cards.css) and would otherwise match the generic
+   [role="button"] rule above; these selectors match its specificity and are
+   declared after it so the drag cursor wins while the card sits inside an
+   active LevelUpSortable list. Non-draggable (completed) cards render
+   outside .levelup-sortable__item and are unaffected, so they keep the
+   ordinary click cursor. */
+.levelup-sortable__item,
+.levelup-sortable__item .activity-card__body--openable,
+.levelup-sortable__item .habit-card__body--openable {
+    cursor: url("../cursors/cursor-click.png") 15 0, grab !important;
+}
+
+.levelup-sortable__item:active,
+.levelup-sortable__item.is-drag-armed,
+.levelup-sortable__item.is-dragging,
+.levelup-sortable__item:active .activity-card__body--openable,
+.levelup-sortable__item:active .habit-card__body--openable,
+.levelup-sortable__item.is-drag-armed .activity-card__body--openable,
+.levelup-sortable__item.is-drag-armed .habit-card__body--openable,
+.levelup-sortable__item.is-dragging .activity-card__body--openable,
+.levelup-sortable__item.is-dragging .habit-card__body--openable,
+body.levelup-is-sorting,
+body.levelup-is-sorting *,
+body.levelup-is-sorting [role="button"] {
+    cursor: url("../cursors/cursor-click.png") 15 0, grabbing !important;
+}
+
 /* Disabled controls remain visually non-interactive while preserving the custom theme. */
 button:disabled,
 [aria-disabled="true"],

@@ -1,0 +1,58 @@
+@using LevelUp.Domain.Enums
+@using LevelUp.Web.Components.DesignSystem.Icons
+
+<label class="@FieldCssClass" for="@Id">
+    @if (!string.IsNullOrWhiteSpace(Label))
+    {
+        <span class="@LabelCssClass">@Label</span>
+    }
+    <span class="activity-attribute-select">
+        <button type="button"
+                id="@Id"
+                class="activity-attribute-select__trigger"
+                disabled="@Disabled"
+                aria-haspopup="listbox"
+                aria-expanded="@isOpen.ToString().ToLowerInvariant()"
+                @onclick="ToggleMenu">
+            <span class="activity-attribute-select__value">
+                @if (Value is not null)
+                {
+                    <ActivityAttributeIcon Attribute="@Value" Size="PixelIconSize.Small" Decorative="true" />
+                    <span>@Value</span>
+                }
+                else
+                {
+                    <span class="activity-attribute-select__placeholder">None</span>
+                }
+            </span>
+            <PixelIcon Name="PixelIconName.ChevronDown"
+                       Size="PixelIconSize.ExtraSmall"
+                       Decorative="true"
+                       Class="@($"activity-attribute-select__chevron {(isOpen ? "activity-attribute-select__chevron--open" : null)}")" />
+        </button>
+
+        @if (isOpen)
+        {
+            <div class="activity-attribute-select__menu" role="listbox" aria-label="@(string.IsNullOrWhiteSpace(Label) ? "Attribute" : Label)">
+                <button type="button"
+                        role="option"
+                        aria-selected="@(Value is null)"
+                        class="activity-attribute-select__option @(Value is null ? "activity-attribute-select__option--selected" : null)"
+                        @onclick="@(() => SelectAsync(null))">
+                    None
+                </button>
+                @foreach (var activityAttribute in Attributes)
+                {
+                    <button type="button"
+                            role="option"
+                            aria-selected="@(Value == activityAttribute)"
+                            class="activity-attribute-select__option @(Value == activityAttribute ? "activity-attribute-select__option--selected" : null)"
+                            @onclick="@(() => SelectAsync(activityAttribute))">
+                        <ActivityAttributeIcon Attribute="@activityAttribute" Size="PixelIconSize.Small" Decorative="true" />
+                        <span>@activityAttribute</span>
+                    </button>
+                }
+            </div>
+        }
+    </span>
+</label>

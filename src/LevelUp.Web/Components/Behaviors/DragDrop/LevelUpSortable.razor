@@ -12,7 +12,6 @@
             <div class="levelup-sortable__item levelup-card-enter @(RemovingItemId == itemId ? "levelup-card-leave" : string.Empty)"
                  data-sortable-item="@itemId"
                  role="listitem"
-                 tabindex="0"
                  aria-label="Hold and drag this card to reorder it. Use the arrow keys when focused."
                  @key="itemId">
                 @ItemTemplate(itemId)
@@ -26,7 +25,6 @@
             <div class="levelup-sortable__item levelup-card-enter @(RemovingItemId == itemId ? "levelup-card-leave" : string.Empty)"
                  data-sortable-item="@itemId"
                  role="listitem"
-                 tabindex="0"
                  aria-label="Hold and drag this card to reorder it. Use the arrow keys when focused."
                  @key="itemId">
                 @ItemTemplate(itemId)

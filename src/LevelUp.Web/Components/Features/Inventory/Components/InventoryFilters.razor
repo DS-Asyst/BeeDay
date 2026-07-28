@@ -65,7 +65,7 @@
             {
                 <div class="inventory-active-filters" role="status">
                     <span>@ActiveFilterCount active filter@(ActiveFilterCount == 1 ? string.Empty : "s")</span>
-                    <button type="button" class="inventory-button inventory-button--ghost" disabled="@IsDisabled" @onclick="OnClearFilters">Clear filters</button>
+                    <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel" Compact="true" Disabled="IsDisabled" OnClick="OnClearFilters">Clear filters</LevelUpButton>
                 </div>
             }
         }

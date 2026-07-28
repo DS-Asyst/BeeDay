@@ -4,11 +4,11 @@
                        Icon="PixelIconName.Inventory" />
     @if (HasFilters)
     {
-        <button type="button" class="inventory-button inventory-button--ghost" disabled="@IsDisabled" @onclick="OnClearFilters">Clear filters</button>
+        <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel" Disabled="IsDisabled" OnClick="OnClearFilters">Clear filters</LevelUpButton>
     }
     else
     {
-        <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel" Disabled="IsDisabled" OnClick="OnCreateTransaction">Create transaction</LevelUpButton>
+        <LevelUpButton Variant="LevelUpButtonVariant.Primary" Disabled="IsDisabled" OnClick="OnCreateTransaction">Create transaction</LevelUpButton>
     }
 </div>
 

@@ -4,6 +4,7 @@
         {
             <button class="activity-card__checkbox"
                     type="button"
+                    title="@(Completed ? $"Mark {Title} as incomplete" : $"Complete {Title}")"
                     aria-label="@(Completed ? $"Mark {Title} as incomplete" : $"Complete {Title}")"
                     @onclick="OnToggle">
                 <PixelIcon Name="PixelIconName.Complete" Size="PixelIconSize.Small" Decorative="true" />
@@ -15,10 +16,12 @@
         }
     </div>
 
-    <div class="activity-card__body @(OnOpen.HasDelegate ? "activity-card__body--openable" : string.Empty)"
-         role="@(OnOpen.HasDelegate ? "button" : null)"
-         tabindex="@(OnOpen.HasDelegate ? "0" : null)"
-         @onclick="OnOpen">
+    <div class="activity-card__body activity-card__body--openable"
+         role="button"
+         tabindex="0"
+         aria-label="@($"Edit {EntityLabel}: {Title}")"
+         @onclick="OnEdit"
+         @onkeydown="HandleBodyKeyDown">
         <div class="activity-card__content">
             <div class="activity-card__title-row">
                 @if (Featured)
@@ -34,28 +37,11 @@
             }
         </div>
 
-        @if (Attribute is not null || !string.IsNullOrWhiteSpace(Meta))
+        @if (!string.IsNullOrWhiteSpace(Meta))
         {
             <div class="activity-card__details">
-                @if (Attribute is not null)
-                {
-                    <div class="activity-card__attribute">
-                        <ActivityAttributeBadge Attribute="@Attribute" />
-                    </div>
-                }
-
-                @if (!string.IsNullOrWhiteSpace(Meta))
-                {
-                    <span class="activity-card__meta">@Meta</span>
-                }
+                <span class="activity-card__meta">@Meta</span>
             </div>
         }
     </div>
-
-    <LevelUpCardMenu Class="activity-card__actions"
-                     TriggerClass="activity-card__menu"
-                     Title="@Title"
-                     OnEdit="@OnEdit"
-                     OnDelete="@OnDelete"
-                     OpenChanged="HandleMenuOpenChanged" />
 </LevelUpCard>

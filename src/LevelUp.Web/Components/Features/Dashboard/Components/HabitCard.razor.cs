@@ -1,6 +1,7 @@
 using LevelUp.Domain.Enums;
 using LevelUp.Web.Components.Features.Habits;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace LevelUp.Web.Components.Features.Dashboard.Components;
 
@@ -17,14 +18,11 @@ public partial class HabitCard
     [Parameter] public EventCallback OnPositive { get; set; }
     [Parameter] public EventCallback OnNegative { get; set; }
     [Parameter] public EventCallback OnEdit { get; set; }
-    [Parameter] public EventCallback OnDelete { get; set; }
 
-    private bool menuOpen;
     private int Balance => PositiveCount - NegativeCount;
+    private string FormattedBalance => Balance > 0 ? $"+{Balance}" : Balance.ToString();
     private bool AllowsPositive => Direction is HabitDirection.Positive or HabitDirection.Both;
     private bool AllowsNegative => Direction is HabitDirection.Negative or HabitDirection.Both;
-
-    private void HandleMenuOpenChanged(bool isOpen) => menuOpen = isOpen;
 
     private string DirectionText => Direction switch
     {
@@ -33,7 +31,8 @@ public partial class HabitCard
         _ => "Positive and negative habit"
     };
 
-    private string CardCssClass
-        => $"habit-card {HabitVisualState.GetCardClass(Balance)} {(menuOpen ? "habit-card--menu-open" : string.Empty)}";
+    private string CardCssClass => $"habit-card {HabitVisualState.GetCardClass(Balance)}";
 
+    private Task HandleBodyKeyDown(KeyboardEventArgs args) =>
+        args.Key is "Enter" or " " ? OnEdit.InvokeAsync() : Task.CompletedTask;
 }

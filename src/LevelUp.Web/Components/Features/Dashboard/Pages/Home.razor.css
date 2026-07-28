@@ -3,7 +3,6 @@
     flex-direction: column;
     width: 100%;
     min-width: 0;
-    min-height: calc(100dvh - var(--levelup-top-navigation-height, 3.75rem));
     margin: 0;
     padding: 0;
     background: var(--levelup-color-surface);
@@ -38,7 +37,14 @@
     margin-top: .55rem;
     padding-bottom: .2rem;
     overflow-x: auto;
-    overflow-y: visible;
+    /* `clip`, not `visible`: pairing an `overflow-x: auto` (kept for the
+       narrower-viewport horizontal scroll below) with `overflow-y: visible`
+       gets overflow-y silently promoted to `auto` by the UA (one axis
+       non-visible forces the other from visible to auto) — that previously
+       turned the board into an unintended internal vertical scroll
+       container. `clip` avoids the pairing; it has no clipping effect here
+       since this element has no height/max-height constraint of its own. */
+    overflow-y: clip;
     background: transparent;
     box-sizing: border-box;
     scrollbar-width: thin;

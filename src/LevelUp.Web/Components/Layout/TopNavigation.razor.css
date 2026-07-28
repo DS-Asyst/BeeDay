@@ -89,13 +89,6 @@
 }
 
 .top-navigation__panel-arrow ::deep svg {
-    width: 1.45rem;
-    height: 1.45rem;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 3;
-    stroke-linecap: round;
-    stroke-linejoin: round;
     transition: transform 260ms cubic-bezier(.2, .9, .25, 1);
 }
 
@@ -125,23 +118,12 @@
     font-size: 1.18rem;
     font-weight: 700;
     text-decoration: none;
+    text-shadow: none;
     transition:
-        color 160ms ease,
-        background-color 180ms ease,
-        transform 150ms ease,
-        font-size 180ms cubic-bezier(.2, .8, .2, 1),
-        font-weight 180ms ease,
-        letter-spacing 180ms ease;
-}
-
-.top-navigation__links ::deep a:hover,
-.top-navigation__links ::deep a:focus-visible {
-    color: #fff;
-    background: rgb(255 255 255 / 7%);
-    font-size: 1.28rem;
-    font-weight: 700;
-    letter-spacing: .025em;
-    text-transform: uppercase;
+        color 200ms ease,
+        text-shadow 200ms ease,
+        font-size 200ms cubic-bezier(.2, .8, .2, 1),
+        letter-spacing 200ms ease;
 }
 
 .top-navigation__links ::deep a:active { transform: scale(.97); }
@@ -224,12 +206,6 @@
     box-shadow: 0 2px 8px rgb(52 20 75 / 16%);
 }
 
-.top-navigation__links ::deep a:hover,
-.top-navigation__links ::deep a:focus-visible {
-    background: rgb(255 201 40 / 14%);
-    box-shadow: inset 0 -3px 0 #ffc928;
-}
-
 .top-navigation__menu-button {
     border: 2px solid transparent;
     border-radius: .18rem;
@@ -249,22 +225,15 @@
     box-shadow: 0 2px 7px rgb(39 9 66 / 14%);
 }
 
-/* Navigation states use the established yellow/black LevelUp treatment. */
+/* Active/hover state: yellow Pixelify Sans text with a pixel drop shadow, no fill. */
 .top-navigation__links ::deep a:hover,
 .top-navigation__links ::deep a:focus-visible,
 .top-navigation__links ::deep a.active {
-    color: #24152f;
-    background: #ffc928;
-    box-shadow: inset 0 -3px 0 #171321;
-    font-size: 1.22rem;
-    font-weight: 700;
-    letter-spacing: .025em;
+    color: #ffc928;
+    background: transparent;
+    font-family: "Pixelify Sans", var(--levelup-font-display), sans-serif;
+    font-size: 1.45rem;
+    letter-spacing: .02em;
     text-transform: uppercase;
-}
-
-.top-navigation__links ::deep a.active:hover,
-.top-navigation__links ::deep a.active:focus-visible {
-    color: #24152f;
-    background: #ffd34f;
-    box-shadow: inset 0 -3px 0 #171321;
+    text-shadow: 2px 2px 0 #171321;
 }

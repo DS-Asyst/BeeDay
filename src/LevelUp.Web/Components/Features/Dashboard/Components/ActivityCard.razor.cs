@@ -1,5 +1,6 @@
 using LevelUp.Domain.Enums;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace LevelUp.Web.Components.Features.Dashboard.Components;
 
@@ -15,13 +16,17 @@ public partial class ActivityCard
     [Parameter] public bool Completed { get; set; }
     [Parameter] public EventCallback OnToggle { get; set; }
     [Parameter] public EventCallback OnEdit { get; set; }
-    [Parameter] public EventCallback OnDelete { get; set; }
-    [Parameter] public EventCallback OnOpen { get; set; }
-
-    private bool menuOpen;
 
     private string CardCssClass =>
-        $"activity-card activity-card--{Variant} {(Completed ? "activity-card--completed" : string.Empty)} {(menuOpen ? "activity-card--menu-open" : string.Empty)}";
+        $"activity-card activity-card--{Variant} {(Completed ? "activity-card--completed" : string.Empty)}";
 
-    private void HandleMenuOpenChanged(bool isOpen) => menuOpen = isOpen;
+    private string EntityLabel => Variant switch
+    {
+        "todo" => "To-Do",
+        "project" => "Project",
+        _ => "Task"
+    };
+
+    private Task HandleBodyKeyDown(KeyboardEventArgs args) =>
+        args.Key is "Enter" or " " ? OnEdit.InvokeAsync() : Task.CompletedTask;
 }

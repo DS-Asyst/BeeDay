@@ -59,6 +59,7 @@ Report:
 
 Do not commit or push unless explicitly requested.
 
+<<<<<<< HEAD
 ## 7. Sprint Completion Protocol
 
 When work is organized into explicit Sprints:
@@ -86,3 +87,12 @@ After `VALIDADO`:
 7. Wait for the user to start a new conversation before beginning the next Sprint.
 
 Do not carry implementation context from a completed Sprint into future work.
+=======
+## 7. Sprint completion protocol
+
+When work is organized into an explicit Sprint:
+
+- Stop implementation as soon as the Sprint's stated scope is delivered and validated. Do not start additional improvements or suggest further changes beyond that scope.
+- Wait for explicit user validation before treating the Sprint as complete. The literal reply `VALIDADO` is the sole signal that a Sprint is approved and finished — no other confirmation implies it.
+- After `VALIDADO`, do not carry that Sprint's implementation context into further work. Wait for the user to start a new conversation before beginning the next Sprint.
+>>>>>>> hmg

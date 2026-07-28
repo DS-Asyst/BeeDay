@@ -111,9 +111,6 @@
 :root {
     --levelup-pixel-unit: 2px;
     --levelup-pixel-outline: 2px solid var(--levelup-game-ink);
-    --levelup-pixel-shadow-rest: 0 3px 0 var(--levelup-game-ink);
-    --levelup-pixel-shadow-hover: 0 5px 0 var(--levelup-game-ink);
-    --levelup-pixel-shadow-pressed: 0 1px 0 var(--levelup-game-ink);
     --levelup-focus-outline: 3px solid var(--levelup-game-blue);
     --levelup-focus-offset: 3px;
     --levelup-duration-instant: 70ms;

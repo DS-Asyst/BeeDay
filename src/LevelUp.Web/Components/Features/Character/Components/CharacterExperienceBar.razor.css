@@ -8,13 +8,13 @@
     background: var(--levelup-game-paper, #fff);
     border: 2px solid var(--levelup-game-ink);
     border-radius: var(--levelup-radius-xs);
-    box-shadow: 5px 5px 0 var(--levelup-game-ink);
+    box-shadow: var(--levelup-shadow-sm);
     transition: box-shadow 140ms ease, transform 140ms ease;
 }
 
 .character-experience:hover,
 .character-experience:focus-within {
-    box-shadow: 7px 7px 0 var(--levelup-game-ink);
+    box-shadow: var(--levelup-shadow-md);
 }
 
 .character-experience__header {

@@ -56,17 +56,10 @@
                     <option value="@option">@option</option>
                 }
             </LevelUpSelect>
-            <LevelUpSelect TValue="ActivityAttribute?"
-                           Id="habit-attribute"
-                           Label="Attribute"
-                           @bind-Value="Model.Attribute"
-                           FieldCssClass="editor-modal__field">
-                <option value="">None</option>
-                @foreach (var option in Enum.GetValues<ActivityAttribute>())
-                {
-                    <option value="@option">@option</option>
-                }
-            </LevelUpSelect>
+            <ActivityAttributeSelect Id="habit-attribute"
+                                      Label="Attribute"
+                                      @bind-Value="Model.Attribute"
+                                      FieldCssClass="editor-modal__field" />
         </div>
     </BodyContent>
 </ActivityModal>

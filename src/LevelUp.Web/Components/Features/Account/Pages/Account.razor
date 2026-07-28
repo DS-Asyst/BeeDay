@@ -14,8 +14,7 @@
 <main class="account-page" aria-busy="@IsAnyBusy.ToString().ToLowerInvariant()">
     <LevelUpPageHeader Eyebrow="PLAYER SETTINGS"
                        Title="My Account"
-                       Description="Keep your profile, security and experience preferences up to date."
-                       Class="account-page__hero" />
+                       Description="Keep your profile, security and experience preferences up to date." />
 
     @if (_isLoading)
     {
@@ -62,7 +61,6 @@
             _profile.Name = data.CurrentUser.Name;
             _profile.Email = data.CurrentUser.Email;
             _profile.Nickname = data.CurrentCharacter.Nickname;
-            _profile.Avatar = data.CurrentCharacter.Avatar;
             _profile.CharacterClass = data.CurrentCharacter.Class.ToString();
             _preferences.Language = data.CurrentUser.Language;
             _preferences.Theme = data.CurrentUser.Theme;
@@ -84,7 +82,6 @@
         try
         {
             await Store.UpdateUserAsync(_profile.Name.Trim(), _profile.Email.Trim());
-            await Store.UpdateCharacterAvatarAsync(string.IsNullOrWhiteSpace(_profile.Avatar) ? null : _profile.Avatar.Trim());
             Toast.ShowSuccess("Your profile has been updated.", "Profile saved");
         }
         catch (Exception ex)

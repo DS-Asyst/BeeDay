@@ -45,9 +45,9 @@
         @if (Transactions.TotalPages > 1)
         {
             <nav class="inventory-pagination" aria-label="Transaction pages">
-                <button type="button" disabled="@(IsBusy || Transactions.Page <= 1)" @onclick="OnPreviousPage">Previous</button>
+                <LevelUpButton Variant="LevelUpButtonVariant.Secondary" Compact="true" Disabled="@(IsBusy || Transactions.Page <= 1)" OnClick="OnPreviousPage">Previous</LevelUpButton>
                 <span>@PaginationSummary · Page @Transactions.Page of @Transactions.TotalPages</span>
-                <button type="button" disabled="@(IsBusy || Transactions.Page >= Transactions.TotalPages)" @onclick="OnNextPage">Next</button>
+                <LevelUpButton Variant="LevelUpButtonVariant.Secondary" Compact="true" Disabled="@(IsBusy || Transactions.Page >= Transactions.TotalPages)" OnClick="OnNextPage">Next</LevelUpButton>
             </nav>
         }
     }

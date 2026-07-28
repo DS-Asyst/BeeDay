@@ -14,7 +14,7 @@ public sealed class PixelIconTests
         var svg = cut.Find("svg");
         Assert.Equal("true", svg.GetAttribute("aria-hidden"));
         Assert.Null(svg.GetAttribute("role"));
-        Assert.Equal("/icons/pixel/sprite.svg#search", cut.Find("use").GetAttribute("href"));
+        Assert.Equal("/icons/sprite.svg#search", cut.Find("use").GetAttribute("href"));
     }
 
     [Fact]
@@ -84,7 +84,7 @@ public sealed class PixelIconTests
             .Add(component => component.Name, (PixelIconName)999));
 
         Assert.Equal("Warning", cut.Find("svg").GetAttribute("data-icon"));
-        Assert.Equal("/icons/pixel/sprite.svg#warning", cut.Find("use").GetAttribute("href"));
+        Assert.Equal("/icons/sprite.svg#warning", cut.Find("use").GetAttribute("href"));
     }
     [Theory]
     [InlineData(PixelIconName.Home, "home")]
@@ -215,14 +215,62 @@ public sealed class PixelIconContractTests
     }
 
     [Fact]
-    public void EveryRegistryEntryUsesTheOfficialSpriteAndAssetRoot()
+    public void EveryRegistryEntryUsesTheOfficialAssetRoot()
     {
+        var knownProviderFolders = new[] { "material-symbols/", "devicon/", "official-brand/", "levelup-custom/" };
+
         foreach (var entry in PixelIconRegistry.All)
         {
-            Assert.StartsWith("/icons/pixel/", entry.Value.AssetPath, StringComparison.Ordinal);
+            Assert.StartsWith("/icons/", entry.Value.AssetPath, StringComparison.Ordinal);
             Assert.EndsWith(".svg", entry.Value.AssetPath, StringComparison.Ordinal);
             Assert.DoesNotContain("..", entry.Value.AssetPath, StringComparison.Ordinal);
             Assert.False(string.IsNullOrWhiteSpace(entry.Value.DefaultLabel));
+            Assert.Contains(knownProviderFolders, folder => entry.Value.AssetPath.StartsWith($"/icons/{folder}", StringComparison.Ordinal));
+        }
+    }
+
+    [Fact]
+    public void NoRegistryEntryReferencesAnImmutableSourceLibraryOrObsoleteStreamlinePath()
+    {
+        foreach (var entry in PixelIconRegistry.All)
+        {
+            Assert.DoesNotContain("streamline-pixel--", entry.Value.AssetPath, StringComparison.Ordinal);
+            Assert.DoesNotContain("material-symbols--", entry.Value.AssetPath, StringComparison.Ordinal);
+            Assert.DoesNotContain("devicon--", entry.Value.AssetPath, StringComparison.Ordinal);
+            Assert.DoesNotContain("official-brand--", entry.Value.AssetPath, StringComparison.Ordinal);
+            Assert.DoesNotContain("/design/", entry.Value.AssetPath, StringComparison.Ordinal);
+            Assert.DoesNotContain("/icons/streamline/", entry.Value.AssetPath, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public void EveryRegistryAssetExistsOnDisk()
+    {
+        var wwwroot = IconFileLocator.ResolveWwwroot();
+
+        foreach (var entry in PixelIconRegistry.All)
+        {
+            var relativePath = entry.Value.AssetPath.TrimStart('/');
+            var fullPath = Path.Combine(wwwroot, relativePath.Replace('/', Path.DirectorySeparatorChar));
+
+            Assert.True(File.Exists(fullPath), $"Missing icon asset for {entry.Key}: {fullPath}");
+        }
+    }
+
+    [Fact]
+    public void SpriteFileContainsExactlyOneSymbolPerRegistryEntry()
+    {
+        var wwwroot = IconFileLocator.ResolveWwwroot();
+        var spritePath = Path.Combine(wwwroot, PixelIconRegistry.SpritePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+        var spriteContent = File.ReadAllText(spritePath);
+
+        foreach (var entry in PixelIconRegistry.All)
+        {
+            var occurrences = System.Text.RegularExpressions.Regex.Matches(
+                spriteContent,
+                $"<symbol id=\"{System.Text.RegularExpressions.Regex.Escape(entry.Value.SymbolId)}\"").Count;
+
+            Assert.True(occurrences == 1, $"Expected exactly one <symbol> for '{entry.Value.SymbolId}' ({entry.Key}) in sprite.svg, found {occurrences}.");
         }
     }
 
@@ -239,4 +287,171 @@ public sealed class PixelIconContractTests
         Assert.Contains("pixel-icon", svg.ClassList);
         Assert.Contains("pixel-icon--save", svg.ClassList);
     }
+}
+
+/// <summary>
+/// Strongly typed mirror of the icon-mapping.csv Provider column, used only by this
+/// test project to validate the mapping file. Not part of the application's public
+/// contract: <see cref="PixelIconDefinition"/> and <see cref="PixelIcon"/> never expose
+/// provider identity to feature components — <see cref="PixelIconName"/> remains the
+/// only semantic contract they use.
+/// </summary>
+internal enum IconProvider
+{
+    MaterialSymbols,
+    Devicon,
+    OfficialBrand,
+    LevelUpCustom
+}
+
+public sealed class IconMappingCsvTests
+{
+    private static List<Dictionary<string, string>> ReadMappingRows()
+    {
+        var csvPath = Path.Combine(IconFileLocator.ResolveRepoRoot(), "design", "icons", "catalog", "icon-mapping.csv");
+        var lines = File.ReadAllLines(csvPath);
+        var header = lines[0].Split(',');
+        var rows = new List<Dictionary<string, string>>();
+
+        foreach (var line in lines.Skip(1).Where(l => !string.IsNullOrWhiteSpace(l)))
+        {
+            var values = line.Split(',');
+            var row = new Dictionary<string, string>();
+            for (var i = 0; i < header.Length; i++)
+            {
+                row[header[i]] = values[i];
+            }
+
+            rows.Add(row);
+        }
+
+        return rows;
+    }
+
+    [Fact]
+    public void RowCountMatchesPixelIconNameCount()
+    {
+        var rows = ReadMappingRows();
+
+        Assert.Equal(Enum.GetValues<PixelIconName>().Length, rows.Count);
+    }
+
+    [Fact]
+    public void EveryRowDeclaresAKnownProvider()
+    {
+        var rows = ReadMappingRows();
+
+        Assert.NotEmpty(rows);
+        Assert.All(rows, row => Assert.True(Enum.TryParse<IconProvider>(row["Provider"], out _),
+            $"'{row["Provider"]}' for {row["PixelIconName"]} is not a known IconProvider value"));
+    }
+
+    [Fact]
+    public void EveryRowDeclaresLicenseMetadata()
+    {
+        var rows = ReadMappingRows();
+
+        Assert.All(rows, row => Assert.False(string.IsNullOrWhiteSpace(row["License"])));
+    }
+
+    [Fact]
+    public void EverySymbolIdIsUnique()
+    {
+        var symbolIds = ReadMappingRows().Select(row => row["SymbolId"]).ToList();
+
+        Assert.Equal(symbolIds.Count, symbolIds.Distinct().Count());
+    }
+
+    [Theory]
+    [InlineData("MaterialSymbols", "material-symbols")]
+    [InlineData("Devicon", "devicon")]
+    [InlineData("OfficialBrand", "official-brand")]
+    public void EveryRowsGeneratedAssetExistsUnderItsProviderFolder(string provider, string providerSlug)
+    {
+        var rows = ReadMappingRows().Where(row => row["Provider"] == provider);
+        var wwwroot = IconFileLocator.ResolveWwwroot();
+
+        Assert.All(rows, row =>
+        {
+            var expectedPath = Path.Combine(wwwroot, "icons", providerSlug, row["Folder"], $"{row["SymbolId"]}.svg");
+            Assert.True(File.Exists(expectedPath), $"Missing generated asset for {row["PixelIconName"]}: {expectedPath}");
+        });
+    }
+
+    [Fact]
+    public void NoObsoleteStreamlineRowsRemain()
+    {
+        var rows = ReadMappingRows();
+
+        Assert.DoesNotContain(rows, row =>
+            !Enum.TryParse<IconProvider>(row["Provider"], out _) ||
+            row["SourceName"].Contains("streamline", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Theory]
+    [InlineData("Habit", "repeat")]
+    [InlineData("Streak", "repeat")]
+    [InlineData("Repeat", "repeat")]
+    [InlineData("Account", "account_circle")]
+    [InlineData("Character", "person")]
+    public void ApprovedSprint81SemanticsAreMapped(string pixelIconName, string expectedSourceName)
+    {
+        var row = ReadMappingRows().Single(r => r["PixelIconName"] == pixelIconName);
+
+        Assert.Equal(expectedSourceName, row["SourceName"]);
+    }
+
+    [Theory]
+    [InlineData("autorenew")]
+    [InlineData("loop")]
+    [InlineData("sync")]
+    [InlineData("refresh")]
+    [InlineData("local_fire_department")]
+    public void NoRemovedHabitOrStreakSourceNameIsReferenced(string removedSourceName)
+    {
+        var rows = ReadMappingRows();
+
+        Assert.DoesNotContain(rows, row => row["SourceName"] == removedSourceName);
+    }
+
+    [Fact]
+    public void TrendingUpIsOnlyUsedByTrendUpNeverHabitOrStreak()
+    {
+        var rows = ReadMappingRows();
+
+        Assert.DoesNotContain(rows, row =>
+            row["SourceName"] == "trending_up" && row["PixelIconName"] is "Habit" or "Streak" or "Repeat");
+    }
+
+    [Fact]
+    public void NoOrphanedAutorenewProductionAssetRemains()
+    {
+        var wwwroot = IconFileLocator.ResolveWwwroot();
+        var orphan = Path.Combine(wwwroot, "icons", "material-symbols", "habits", "autorenew.svg");
+
+        Assert.False(File.Exists(orphan), $"Obsolete autorenew asset should have been removed: {orphan}");
+    }
+}
+
+internal static class IconFileLocator
+{
+    public static string ResolveRepoRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "LevelUp.slnx")))
+        {
+            directory = directory.Parent;
+        }
+
+        if (directory is null)
+        {
+            throw new InvalidOperationException("Could not locate the repository root (LevelUp.slnx) from the test output directory.");
+        }
+
+        return directory.FullName;
+    }
+
+    public static string ResolveWwwroot() =>
+        Path.Combine(ResolveRepoRoot(), "src", "LevelUp.Web", "wwwroot");
 }

@@ -1,40 +1,29 @@
 @using LevelUp.Web.Components.Features.Account.Models
 @using LevelUp.Domain.Enums
 
-<LevelUpCard Class="account-section">
-    <LevelUpSectionHeader Eyebrow="EXPERIENCE"
-                          Title="Preferences"
-                          Description="Choose how LevelUp looks and communicates with you."
-                          Class="account-section__header" />
-
-    <EditForm Model="Model" OnValidSubmit="SubmitAsync" FormName="account-preferences">
-        <DataAnnotationsValidator />
-        <fieldset class="account-form" disabled="@IsBusy">
-            <div class="account-form__grid">
-                <LevelUpSelect TValue="UserLanguage" Id="account-language" Label="Language"
-                               @bind-Value="Model.Language">
-                    <option value="@UserLanguage.English">English</option>
-                    <option value="@UserLanguage.Portuguese">Portuguese</option>
-                </LevelUpSelect>
-                <LevelUpSelect TValue="UserTheme" Id="account-theme" Label="Theme"
-                               @bind-Value="Model.Theme">
-                    <option value="@UserTheme.System">System</option>
-                    <option value="@UserTheme.Light">Light</option>
-                    <option value="@UserTheme.Dark">Dark</option>
-                </LevelUpSelect>
-            </div>
-            <div class="account-form__actions">
-                <LevelUpButton Type="submit" IsLoading="@IsBusy" Disabled="@IsBusy">
-                    SAVE PREFERENCES
-                </LevelUpButton>
-            </div>
-        </fieldset>
-    </EditForm>
-</LevelUpCard>
+<LevelUpSettingsSection Eyebrow="EXPERIENCE"
+                        Title="Preferences"
+                        Description="Choose how LevelUp looks and communicates with you.">
+    <LevelUpSettingsForm TModel="PreferencesFormModel" Model="Model" OnValidSubmit="OnSave"
+                         FormName="account-preferences" SubmitLabel="SAVE PREFERENCES" IsBusy="IsBusy">
+        <div class="levelup-settings-form__grid">
+            <LevelUpSelect TValue="UserLanguage" Id="account-language" Label="Language"
+                           @bind-Value="Model.Language">
+                <option value="@UserLanguage.English">English</option>
+                <option value="@UserLanguage.Portuguese">Portuguese</option>
+            </LevelUpSelect>
+            <LevelUpSelect TValue="UserTheme" Id="account-theme" Label="Theme"
+                           @bind-Value="Model.Theme">
+                <option value="@UserTheme.System">System</option>
+                <option value="@UserTheme.Light">Light</option>
+                <option value="@UserTheme.Dark">Dark</option>
+            </LevelUpSelect>
+        </div>
+    </LevelUpSettingsForm>
+</LevelUpSettingsSection>
 
 @code {
     [Parameter, EditorRequired] public PreferencesFormModel Model { get; set; } = default!;
     [Parameter] public bool IsBusy { get; set; }
     [Parameter] public EventCallback OnSave { get; set; }
-    private Task SubmitAsync() => OnSave.InvokeAsync();
 }

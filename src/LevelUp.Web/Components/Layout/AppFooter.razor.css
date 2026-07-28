@@ -102,8 +102,6 @@
 }
 
 .app-footer__social-link ::deep svg {
-    width: 1rem;
-    height: 1rem;
     flex: 0 0 auto;
     fill: currentColor;
     filter: grayscale(1);

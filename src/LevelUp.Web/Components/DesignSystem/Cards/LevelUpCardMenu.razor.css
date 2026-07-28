@@ -1,0 +1,81 @@
+/* Official Design System overlay contract for the card action menu.
+   The panel must never participate in document flow — opening it must not
+   change the height of any ancestor (card, column, board, page).
+
+   Outside-click detection is handled by a real document-level JS listener
+   (levelup-card-menu.js), not a full-viewport `position: fixed` scrim —
+   several ancestors in the card/board layout carry a resting `transform`
+   from entrance animations, which creates a new containing block and
+   silently confines a fixed-positioned element to that ancestor's box
+   instead of the viewport. */
+
+.card-action-menu {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+}
+
+.card-action-menu__panel {
+    position: absolute;
+    top: calc(100% + .3rem);
+    right: 0;
+    z-index: var(--levelup-z-dropdown);
+    display: grid;
+    min-width: 9rem;
+    padding: .3rem;
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-xs);
+    background: var(--levelup-color-surface);
+    box-shadow: var(--levelup-shadow-sm);
+}
+
+.card-action-menu__panel--flip-up {
+    top: auto;
+    bottom: calc(100% + .3rem);
+}
+
+/* First-paint measurement pass: kept in normal layout (so its real width
+   and height are measurable via getBoundingClientRect) but not visible or
+   interactive until LevelUpCardMenu.razor.cs has computed and applied the
+   final placement. */
+.card-action-menu__panel--measuring {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.card-action-menu__item {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    width: 100%;
+    padding: .45rem .6rem;
+    border: 0;
+    border-radius: .15rem;
+    background: transparent;
+    color: var(--levelup-color-text-primary);
+    font: var(--levelup-type-button);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--levelup-transition-fast);
+}
+
+.card-action-menu__item:hover,
+.card-action-menu__item:focus-visible {
+    background: var(--levelup-color-surface-muted);
+    outline: none;
+}
+
+.card-action-menu__item--delete {
+    color: var(--levelup-color-danger);
+}
+
+.card-action-menu__item--delete:hover,
+.card-action-menu__item--delete:focus-visible {
+    background: var(--levelup-color-danger-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .card-action-menu__item {
+        transition: none;
+    }
+}

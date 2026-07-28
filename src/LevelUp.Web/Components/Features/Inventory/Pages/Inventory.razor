@@ -28,7 +28,7 @@ else
                 <h1 class="inventory-page__title">Inventory</h1>
                 <p>Track your wallet, organize transactions and understand where your money goes.</p>
             </div>
-            <LevelUpButton Class="levelup-button--reference-blue"
+            <LevelUpButton Variant="LevelUpButtonVariant.Primary"
                            Icon="PixelIconName.Add"
                            Disabled="_interaction.IsBusy"
                            OnClick="OpenCreateTransaction">New transaction</LevelUpButton>
@@ -38,7 +38,7 @@ else
         {
             <div class="inventory-alert" role="alert">
                 <span><PixelIcon Name="PixelIconName.Warning" Size="PixelIconSize.Small" Color="PixelIconColor.Danger" /> @_errorMessage</span>
-                <button type="button" disabled="@_interaction.IsBusy" @onclick="RetryAsync">Try again</button>
+                <LevelUpButton Variant="LevelUpButtonVariant.Secondary" Compact="true" Disabled="_interaction.IsBusy" OnClick="RetryAsync">Try again</LevelUpButton>
             </div>
         }
 

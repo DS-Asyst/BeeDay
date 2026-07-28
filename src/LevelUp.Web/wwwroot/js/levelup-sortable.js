@@ -17,8 +17,14 @@ export function initialize(container, dotnetReference) {
     let longPressTimer = null;
 
     const itemFrom = element => element?.closest?.('[data-sortable-item]');
+    // Note: [role="button"] is deliberately NOT excluded here. Cards expose a
+    // clickable, role="button" body (open-to-edit) that must still be
+    // draggable by the same pointer gesture — the movement threshold below
+    // (and the click-suppression-after-drag logic) is what distinguishes a
+    // click from a drag, not a static role check. Real interactive controls
+    // (native buttons, links, inputs, etc.) are still excluded by tag name.
     const isInteractive = element => Boolean(element?.closest?.(
-        'button, a, input, textarea, select, option, label, [contenteditable="true"], [role="button"], [data-no-drag]'));
+        'button, a, input, textarea, select, option, label, [contenteditable="true"], [data-no-drag]'));
 
     const clearLongPress = () => {
         if (longPressTimer !== null) {
@@ -38,6 +44,14 @@ export function initialize(container, dotnetReference) {
 
         container.querySelectorAll('.is-dragging, .is-drag-armed')
             .forEach(element => element.classList.remove('is-dragging', 'is-drag-armed'));
+
+        // Defensive: if pointerup landed on a different element than the
+        // drag started on, no 'click' will ever fire on draggedItem to
+        // consume this flag naturally — clear it so a later, unrelated click
+        // on the same card is never mistakenly suppressed.
+        if (draggedItem) {
+            delete draggedItem.dataset.suppressClick;
+        }
 
         dragClone?.remove();
         dragClone = null;
@@ -85,6 +99,16 @@ export function initialize(container, dotnetReference) {
         draggedItem = armedItem;
         draggedItem.classList.remove('is-drag-armed');
         draggedItem.classList.add('is-dragging');
+        // Now that this is confirmed to be a real drag (not a click), take
+        // pointer capture so pointermove/pointerup keep targeting this item
+        // even if the pointer travels outside its bounds.
+        draggedItem.setPointerCapture?.(activePointerId);
+        // The pointerdown/pointerup pair that just became a drag will still
+        // produce a native 'click' afterwards in most browsers (pointerup
+        // landing back on the same element the pointerdown started on).
+        // Flag it so the capture-phase click listener below can swallow that
+        // one click without affecting any future, genuine click.
+        draggedItem.dataset.suppressClick = 'true';
         document.body.classList.add('levelup-is-sorting');
 
         dragClone = draggedItem.cloneNode(true);
@@ -153,7 +177,13 @@ export function initialize(container, dotnetReference) {
         startX = lastX = event.clientX;
         startY = lastY = event.clientY;
         item.classList.add('is-drag-armed');
-        item.setPointerCapture?.(event.pointerId);
+        // Pointer capture is deliberately NOT taken here. Capturing on every
+        // pointerdown (even a plain click that never becomes a drag) makes
+        // the browser retarget the resulting 'click' event to this wrapper
+        // element instead of the actual clicked descendant (the card's
+        // clickable body), so Blazor's @onclick on that inner element would
+        // never fire. Capture is acquired only once a real drag starts, in
+        // beginDrag() below.
 
         if (event.pointerType === 'touch' || event.pointerType === 'pen') {
             longPressTimer = window.setTimeout(beginDrag, 260);
@@ -204,6 +234,17 @@ export function initialize(container, dotnetReference) {
 
     const onPointerCancel = () => cleanup();
 
+    // Capture phase: runs before the click would reach the card's own
+    // (Blazor-bound) click handler, so a drag-then-release never opens Edit.
+    const onClickCapture = event => {
+        const item = itemFrom(event.target);
+        if (item?.dataset.suppressClick === 'true') {
+            delete item.dataset.suppressClick;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }
+    };
+
     const onKeyDown = event => {
         if ((event.key !== 'ArrowUp' && event.key !== 'ArrowDown') || isInteractive(event.target)) {
             return;
@@ -231,6 +272,7 @@ export function initialize(container, dotnetReference) {
     container.addEventListener('pointerup', onPointerUp);
     container.addEventListener('pointercancel', onPointerCancel);
     container.addEventListener('keydown', onKeyDown);
+    container.addEventListener('click', onClickCapture, true);
 
     registrations.set(container, () => {
         container.removeEventListener('pointerdown', onPointerDown);
@@ -238,6 +280,7 @@ export function initialize(container, dotnetReference) {
         container.removeEventListener('pointerup', onPointerUp);
         container.removeEventListener('pointercancel', onPointerCancel);
         container.removeEventListener('keydown', onKeyDown);
+        container.removeEventListener('click', onClickCapture, true);
         cleanup();
     });
 }

@@ -12,7 +12,7 @@
     border: var(--levelup-game-border);
     border-radius: var(--levelup-radius-xs);
     background: var(--levelup-game-purple, #5f259f);
-    box-shadow: 8px 8px 0 var(--levelup-game-ink);
+    box-shadow: var(--levelup-shadow-lg);
     image-rendering: pixelated;
 }
 
@@ -107,7 +107,7 @@
     padding: .8rem .9rem;
     border: 2px solid var(--levelup-game-ink);
     border-radius: var(--levelup-radius-xs);
-    box-shadow: 3px 3px 0 var(--levelup-game-ink);
+    box-shadow: var(--levelup-shadow-sm);
     font-weight: 700;
 }
 
@@ -117,7 +117,6 @@
 .identity-note code { overflow-wrap: anywhere; }
 
 @media (max-width: 34rem) {
-    .identity-card { box-shadow: 5px 5px 0 var(--levelup-game-ink); }
     .identity-card__content { padding: 1.35rem; }
 }
 

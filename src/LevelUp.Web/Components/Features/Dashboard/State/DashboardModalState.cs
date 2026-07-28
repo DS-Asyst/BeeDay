@@ -16,24 +16,11 @@ public sealed class DashboardModalState
     public TodoEditorModel TodoForm { get; private set; } = new();
     public ProjectEditorModel ProjectForm { get; private set; } = new();
 
-    public bool IsDeleteConfirmationOpen { get; private set; }
-    public Guid? PendingDeleteId { get; private set; }
-    public ActivityType? PendingDeleteType { get; private set; }
-    public string PendingDeleteTitle { get; private set; } = string.Empty;
-
     public bool IsEditing => EditingId is not null;
     public bool IsHabitEditorOpen => ActiveEditor == ActivityType.Habit;
     public bool IsTaskEditorOpen => ActiveEditor == ActivityType.Task;
     public bool IsTodoEditorOpen => ActiveEditor == ActivityType.Todo;
     public bool IsProjectEditorOpen => ActiveEditor == ActivityType.Project;
-
-    public string DeleteItemDisplayName => PendingDeleteType switch
-    {
-        ActivityType.Habit => "Habit",
-        ActivityType.Todo => "To-Do",
-        ActivityType.Project => "Project",
-        _ => "Task"
-    };
 
     public void OpenCreate(ActivityType type)
     {
@@ -129,19 +116,4 @@ public sealed class DashboardModalState
         EditingId = null;
     }
 
-    public void RequestDelete(Guid id, ActivityType type, string title)
-    {
-        PendingDeleteId = id;
-        PendingDeleteType = type;
-        PendingDeleteTitle = title;
-        IsDeleteConfirmationOpen = true;
-    }
-
-    public void CancelDelete()
-    {
-        IsDeleteConfirmationOpen = false;
-        PendingDeleteId = null;
-        PendingDeleteType = null;
-        PendingDeleteTitle = string.Empty;
-    }
 }
