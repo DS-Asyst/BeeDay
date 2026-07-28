@@ -1,0 +1,163 @@
+/*
+ * PROVENANCE-ONLY EXCERPT — NOT LOADED BY THE APPLICATION.
+ *
+ * This file exists solely for license/version auditing. It is never linked
+ * from App.razor and is never referenced by any component. Do not add a
+ * <link> to it. The actual stylesheet the application loads is
+ * ../pixel-nes.css, which is LevelUp-authored and recolored with LevelUp
+ * design tokens — see that file and NES_ATTRIBUTION.md in this folder for
+ * details of the adaptation.
+ *
+ * Source:      NES.css (package "nes.css")
+ * Repository:  https://github.com/nostalgic-css/NES.css
+ * Version:     2.3.0
+ * Tag:         v2.3.0
+ * Commit:      68d6d9e92403a0a78a0bf603d9cd4cbfdb636b8c
+ * Source file: css/nes-core.css (readable/unminified build)
+ * License:     MIT
+ *              Copyright (c) 2018 B.C.Rikko <https://github.com/BcRikko>
+ *              Permission is hereby granted, free of charge, to any person
+ *              obtaining a copy of this software and associated
+ *              documentation files (the "Software"), to deal in the
+ *              Software without restriction, including without limitation
+ *              the rights to use, copy, modify, merge, publish, distribute,
+ *              sublicense, and/or sell copies of the Software, and to
+ *              permit persons to whom the Software is furnished to do so,
+ *              subject to the following conditions:
+ *              The above copyright notice and this permission notice shall
+ *              be included in all copies or substantial portions of the
+ *              Software.
+ *              THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+ *              KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ *              WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ *              PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+ *              OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ *              OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ *              OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ *              SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * Included below: every upstream rule block for .nes-container (base) and
+ * .nes-container.is-rounded, and for .nes-btn (base) and .nes-btn.is-primary
+ * including their pseudo-elements and interactive states, exactly as they
+ * appear upstream — EXCEPT the `cursor: url(data:image/png;base64,...) ...`
+ * declaration inside the .nes-btn base rule, which has been stripped even
+ * from this provenance copy (LevelUp owns cursor styling globally via
+ * wwwroot/css/cursors.css; shipping an unused embedded cursor asset serves
+ * no purpose here). That is the only textual change in this file; every
+ * other selector, property, and value below is byte-identical to upstream.
+ *
+ * Explicitly and intentionally excluded from this excerpt (present upstream,
+ * not reproduced here in any form): the Bootstrap 4.1.3 Reboot/Normalize
+ * preamble; the global `body,code,html,kbd,pre,samp{font-family:"Press
+ * Start 2P"}` rule and every other bare-element selector (html, body, a,
+ * button, input, select, textarea, table, th, td, label, headings, lists,
+ * forms); `.nes-container.is-dark` / `.is-centered` / `.is-right` /
+ * `.with-title`; `.nes-btn.is-success` / `.is-warning` / `.is-error` /
+ * `.is-disabled`; `.nes-btn input[type="file"]`; and every other NES.css
+ * component family (badge, dialog, balloon, icon, table, field, select,
+ * radio, checkbox, progress, list, container variants, etc.) — none of
+ * these have a real LevelUp consumer.
+ */
+
+.nes-container {
+  position: relative;
+  padding: 1.5rem 2rem;
+  border-color: black;
+  border-style: solid;
+  border-width: 4px;
+}
+
+.nes-container.is-rounded {
+  border-image-slice: 3;
+  border-image-width: 3;
+  border-image-repeat: stretch;
+  border-image-source: url('data:image/svg+xml;utf8,<?xml version="1.0" encoding="UTF-8" ?><svg version="1.1" width="8" height="8" xmlns="http://www.w3.org/2000/svg"><path d="M3 1 h1 v1 h-1 z M4 1 h1 v1 h-1 z M2 2 h1 v1 h-1 z M5 2 h1 v1 h-1 z M1 3 h1 v1 h-1 z M6 3 h1 v1 h-1 z M1 4 h1 v1 h-1 z M6 4 h1 v1 h-1 z M2 5 h1 v1 h-1 z M5 5 h1 v1 h-1 z M3 6 h1 v1 h-1 z M4 6 h1 v1 h-1 z" fill="rgb(33,37,41)" /></svg>');
+  border-image-outset: 2;
+  padding: 1rem 1.5rem;
+  margin: 4px;
+}
+
+.nes-btn {
+  border-image-slice: 2;
+  border-image-width: 2;
+  border-image-repeat: stretch;
+  border-image-source: url('data:image/svg+xml;utf8,<?xml version="1.0" encoding="UTF-8" ?><svg version="1.1" width="5" height="5" xmlns="http://www.w3.org/2000/svg"><path d="M2 1 h1 v1 h-1 z M1 2 h1 v1 h-1 z M3 2 h1 v1 h-1 z M2 3 h1 v1 h-1 z" fill="rgb(33,37,41)" /></svg>');
+  border-image-outset: 2;
+  position: relative;
+  display: inline-block;
+  padding: 6px 8px;
+  margin: 4px;
+  text-align: center;
+  vertical-align: middle;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  color: #212529;
+  background-color: #fff;
+}
+
+.nes-btn::after {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  bottom: -4px;
+  left: -4px;
+  content: "";
+  box-shadow: inset -4px -4px #adafbc;
+}
+
+.nes-btn:hover {
+  color: #212529;
+  text-decoration: none;
+  background-color: #e7e7e7;
+}
+
+.nes-btn:hover::after {
+  box-shadow: inset -6px -6px #adafbc;
+}
+
+.nes-btn:focus {
+  box-shadow: 0 0 0 6px rgba(173, 175, 188, 0.3);
+}
+
+.nes-btn:active:not(.is-disabled)::after {
+  box-shadow: inset 4px 4px #adafbc;
+}
+
+.nes-btn:focus {
+  outline: 0;
+}
+
+.nes-btn.is-primary {
+  color: #fff;
+  background-color: #209cee;
+}
+
+.nes-btn.is-primary::after {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  bottom: -4px;
+  left: -4px;
+  content: "";
+  box-shadow: inset -4px -4px #006bb3;
+}
+
+.nes-btn.is-primary:hover {
+  color: #fff;
+  text-decoration: none;
+  background-color: #108de0;
+}
+
+.nes-btn.is-primary:hover::after {
+  box-shadow: inset -6px -6px #006bb3;
+}
+
+.nes-btn.is-primary:focus {
+  box-shadow: 0 0 0 6px rgba(0, 107, 179, 0.3);
+}
+
+.nes-btn.is-primary:active:not(.is-disabled)::after {
+  box-shadow: inset 4px 4px #006bb3;
+}

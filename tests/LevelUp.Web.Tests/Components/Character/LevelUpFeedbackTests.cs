@@ -97,6 +97,20 @@ public sealed class LevelUpFeedbackTests
     }
 
     [Fact]
+    public void AppliesThePixelAdapterToThePanelAndContinueAction()
+    {
+        using var context = CreateContext();
+        LevelUpFeedback feedback = CreateFeedback(1, 2, 10, ExperienceSourceType.Habit);
+        var cut = context.Render<LevelUpFeedbackModal>(parameters => parameters
+            .Add(component => component.Feedback, feedback)
+            .Add(component => component.History, [feedback]));
+
+        var dialog = cut.Find("[role='dialog']");
+        Assert.Contains("levelup-pixel-panel", dialog.ClassList);
+        Assert.Contains("levelup-pixel-cta", cut.Find("button").ClassList);
+    }
+
+    [Fact]
     public async Task HandlerIgnoresExperienceWithoutLevelUp()
     {
         var store = new LevelUpFeedbackStore();
