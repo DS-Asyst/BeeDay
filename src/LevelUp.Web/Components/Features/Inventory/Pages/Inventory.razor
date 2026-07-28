@@ -78,7 +78,7 @@ else
 
 <TransactionFormModal IsOpen="_isTransactionEditorOpen" IsEditing="@(_editingTransactionId is not null)" IsBusy="_interaction.IsBusy" Model="_transactionForm" Tags="_tags" OnSave="SaveTransactionAsync" OnCancel="CloseTransactionEditor" />
 
-<ConfirmationDialog IsOpen="@(_pendingDeleteTransaction is not null)"
+<LevelUpConfirmDialog IsOpen="@(_pendingDeleteTransaction is not null)"
                       IsBusy="_interaction.IsBusy"
                       Title="Delete transaction"
                       Message="Are you sure you want to delete this transaction?"
@@ -88,7 +88,7 @@ else
                       OnConfirm="DeleteTransactionAsync"
                       OnCancel="CancelDeleteTransaction" />
 
-<ConfirmationDialog IsOpen="@(_pendingDeleteTag is not null)"
+<LevelUpConfirmDialog IsOpen="@(_pendingDeleteTag is not null)"
                       IsBusy="_interaction.IsBusy"
                       Title="Delete tag"
                       Message="Transactions using this tag will remain and become untagged."

@@ -4,17 +4,18 @@ Design System components are organized by responsibility under `Components/Desig
 
 ## Groups
 
-- **Activities**: shared activity presentation and controls;
 - **Attributes**: semantic rendering for activity attributes;
 - **Buttons**: standardized actions and icon integration;
 - **Cards**: shared card surfaces and card behavior;
-- **Feedback**: empty, loading, toast, warning, and validation states;
+- **Feedback**: empty, loading, toast, warning, validation, and confirmation-dialog states;
 - **Forms**: labels, fields, selects, validation, checkboxes, and related controls;
 - **Icons**: centralized pixel-icon renderer, contracts, registry, and catalog;
 - **Layout**: reusable structural surfaces;
-- **Modals**: shared dialogs and confirmation patterns;
+- **Modals**: shared dialogs and the editor modal shell;
 - **Pages**: development-only visual review surfaces;
 - **Text**: typography primitives.
+
+Every editor modal (Habits, Tasks, To-Dos, Projects, Inventory transactions) composes `Modals.EditorModalShell` directly. Every empty state composes `Feedback.LevelUpEmptyState` directly (optionally wrapped by feature-specific composition, e.g. `Inventory.InventoryEmptyState`, which adds contextual actions). Every delete/destructive confirmation composes `Feedback.LevelUpConfirmDialog` directly. There is exactly one component for each of these three contracts — do not reintroduce a feature- or domain-named wrapper that only forwards parameters unchanged.
 
 ## Usage rules
 

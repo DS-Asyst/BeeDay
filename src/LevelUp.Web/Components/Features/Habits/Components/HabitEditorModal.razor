@@ -1,6 +1,6 @@
 <div class="@VisualStateClass">
 @using LevelUp.Domain.Enums
-<ActivityModal Model="Model"
+<EditorModalShell Model="Model"
                   Title="@(IsEditing ? "Edit Habit" : "Create Habit")"
                   TitleId="habit-editor-title"
                   SubmitLabel="@(IsEditing ? "SAVE" : "CREATE")"
@@ -62,9 +62,9 @@
                                       FieldCssClass="editor-modal__field" />
         </div>
     </BodyContent>
-</ActivityModal>
+</EditorModalShell>
 
-<ConfirmationDialog IsOpen="showDeleteConfirmation"
+<LevelUpConfirmDialog IsOpen="showDeleteConfirmation"
                       Title="Delete Habit"
                       Message="Are you sure you want to delete this habit?"
                       ItemTitle="@Model.Title"
