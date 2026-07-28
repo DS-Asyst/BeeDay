@@ -68,7 +68,12 @@
     min-width: 0;
     min-height: calc(100dvh - var(--levelup-top-navigation-height));
     flex-direction: column;
-    overflow-x: hidden;
+    /* `clip`, not `hidden`: an axis set to anything other than `visible` while
+       the other stays `visible` gets that other axis silently promoted to
+       `auto` by the UA (a spec-mandated pairing) — that previously turned
+       this element into an unintended internal vertical scroll container.
+       `clip` does not participate in that pairing. */
+    overflow-x: clip;
 }
 
 .levelup-main {

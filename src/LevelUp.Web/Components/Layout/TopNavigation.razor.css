@@ -89,13 +89,6 @@
 }
 
 .top-navigation__panel-arrow ::deep svg {
-    width: 1.45rem;
-    height: 1.45rem;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 3;
-    stroke-linecap: round;
-    stroke-linejoin: round;
     transition: transform 260ms cubic-bezier(.2, .9, .25, 1);
 }
 

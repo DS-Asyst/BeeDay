@@ -17,10 +17,6 @@
                 {
                     <span class="filter-bar__filter-count" aria-label="@($"{SelectedAttributes.Count} selected tags")">@SelectedAttributes.Count</span>
                 }
-                <PixelIcon Name="PixelIconName.ChevronDown"
-                           Size="PixelIconSize.ExtraSmall"
-                           Decorative="true"
-                           Class="@($"filter-bar__chevron {(showTagsMenu ? "filter-bar__chevron--open" : null)}")" />
             </LevelUpButton>
 
             @if (showTagsMenu)
@@ -51,7 +47,7 @@
                                 @onclick="ClearAttributesAsync">
                             Clear all filters
                         </button>
-                        <button type="button" class="filter-bar__cancel levelup-legacy-cancel" @onclick="CloseTagsMenu">Cancel</button>
+                        <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel" Compact="true" OnClick="CloseTagsMenu">Cancel</LevelUpButton>
                     </div>
                 </div>
             }

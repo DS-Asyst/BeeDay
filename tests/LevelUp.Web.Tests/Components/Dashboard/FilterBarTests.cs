@@ -21,15 +21,17 @@ public sealed class ActivityFilterBarTests
     }
 
     [Fact]
-    public void RendersTheTagsChevronThroughThePixelIconSystem()
+    public void RendersTheTagsTriggerWithoutAChevronOrExpandIndicator()
     {
         using var context = new BunitContext();
         var cut = context.Render<ActivityFilterBar>();
 
-        var chevron = cut.Find("button[aria-haspopup='dialog'] .filter-bar__chevron");
-        Assert.Contains("pixel-icon", chevron.ClassList);
-        Assert.Equal("true", chevron.GetAttribute("aria-hidden"));
-        Assert.DoesNotContain("filter-bar__chevron--open", chevron.ClassList);
+        var trigger = cut.Find("button[aria-haspopup='dialog']");
+        Assert.Empty(trigger.QuerySelectorAll(".filter-bar__chevron"));
+
+        var filterIcon = trigger.QuerySelector(".pixel-icon--filter");
+        Assert.NotNull(filterIcon);
+        Assert.Equal("true", filterIcon!.GetAttribute("aria-hidden"));
     }
 
     [Fact]
@@ -49,15 +51,18 @@ public sealed class ActivityFilterBarTests
     }
 
     [Fact]
-    public async Task TogglesTheChevronOpenStateWithTheTagsMenu()
+    public async Task TogglesAriaExpandedWithTheTagsMenu()
     {
         using var context = new BunitContext();
         var cut = context.Render<ActivityFilterBar>();
 
-        await cut.Find("button[aria-haspopup='dialog']").ClickAsync();
+        var trigger = cut.Find("button[aria-haspopup='dialog']");
+        Assert.Null(trigger.GetAttribute("aria-expanded"));
 
-        var chevron = cut.Find("button[aria-haspopup='dialog'] .filter-bar__chevron");
-        Assert.Contains("filter-bar__chevron--open", chevron.ClassList);
+        await trigger.ClickAsync();
+
+        trigger = cut.Find("button[aria-haspopup='dialog']");
+        Assert.NotNull(trigger.GetAttribute("aria-expanded"));
     }
 
     [Fact]

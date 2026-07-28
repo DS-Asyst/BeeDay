@@ -1,20 +1,15 @@
 @using LevelUp.Domain.Entities
-@using LevelUp.Web.Components.DesignSystem.Buttons
 
 <div class="project-context-filter">
-    <LevelUpButton Variant="LevelUpButtonVariant.Secondary"
-                   Compact="true"
-                   Class="project-context-filter__trigger"
-                   OnClick="ToggleMenu"
-                   aria-haspopup="listbox"
-                   aria-expanded="@isOpen.ToString().ToLowerInvariant()"
-                   aria-label="Filter projects">
-        Projects
-        <PixelIcon Name="PixelIconName.ChevronDown"
-                   Size="PixelIconSize.ExtraSmall"
-                   Decorative="true"
-                   Class="@($"project-context-filter__chevron {(isOpen ? "project-context-filter__chevron--open" : null)}")" />
-    </LevelUpButton>
+    <button type="button"
+            class="project-context-filter__trigger"
+            @onclick="ToggleMenu"
+            aria-haspopup="listbox"
+            aria-expanded="@isOpen.ToString().ToLowerInvariant()"
+            aria-label="Filter Projects"
+            title="Filter Projects">
+        <PixelIcon Name="PixelIconName.Project" Size="PixelIconSize.Small" Decorative="true" />
+    </button>
 
     @if (isOpen)
     {
