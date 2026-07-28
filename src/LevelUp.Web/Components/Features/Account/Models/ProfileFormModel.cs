@@ -15,8 +15,5 @@ public sealed class ProfileFormModel
 
     public string Nickname { get; set; } = string.Empty;
 
-    [Url(ErrorMessage = "Enter a valid avatar URL.")]
-    public string? Avatar { get; set; }
-
     public string CharacterClass { get; set; } = string.Empty;
 }
