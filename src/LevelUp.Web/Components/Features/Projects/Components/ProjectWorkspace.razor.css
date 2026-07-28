@@ -17,8 +17,8 @@
     overflow: hidden;
     border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-md);
-    background: #f7f5f8;
-    box-shadow: 0 1.4rem 4rem rgb(22 10 28 / 38%);
+    background: var(--levelup-color-surface-muted);
+    box-shadow: var(--levelup-shadow-lg);
 }
 
 .project-workspace__header {
@@ -371,8 +371,8 @@
     padding: .3rem;
     border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-sm);
-    background: #fff;
-    box-shadow: 0 .55rem 1.4rem rgb(34 20 42 / 18%);
+    background: var(--levelup-color-surface);
+    box-shadow: var(--levelup-shadow-md);
 }
 
 .project-workspace__todo-menu button {

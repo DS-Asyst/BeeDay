@@ -451,7 +451,7 @@
 .habit-card__body > p {
     margin: .28rem 0 0;
     color: #786f80;
-    font-family: var(--levelup-font-body);
+    font-family: var(--levelup-font-card);
     font-size: .74rem;
     line-height: 1.35;
 }

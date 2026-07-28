@@ -8,40 +8,14 @@
 .auth-card {
     position: relative;
     width: min(100%, 31rem);
-    padding: 4px;
-    border: var(--levelup-game-border);
+    border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-xs);
-    background: var(--levelup-game-purple, #5f259f);
+    background: var(--levelup-color-surface);
     box-shadow: var(--levelup-shadow-lg);
-    image-rendering: pixelated;
-}
-
-.auth-card::before,
-.auth-card::after {
-    position: absolute;
-    z-index: 2;
-    width: 8px;
-    height: 8px;
-    background: var(--levelup-game-yellow);
-    content: "";
-    pointer-events: none;
-}
-
-.auth-card::before {
-    top: 8px;
-    left: 8px;
-}
-
-.auth-card::after {
-    right: 8px;
-    bottom: 8px;
 }
 
 .auth-card__content {
     padding: clamp(1.6rem, 5vw, 2.5rem);
-    border: 2px solid var(--levelup-game-ink);
-    border-radius: calc(var(--levelup-radius-xs) - 1px);
-    background: #fff;
 }
 
 .auth-card__brand {
@@ -54,7 +28,7 @@
 
 .auth-card__header h1 {
     margin: 0;
-    color: var(--levelup-game-ink);
+    color: var(--levelup-color-text-primary);
     font-size: clamp(1.8rem, 6vw, 2.35rem);
     line-height: 1;
 }
@@ -73,7 +47,7 @@
 .auth-field {
     display: grid;
     gap: .45rem;
-    color: var(--levelup-game-ink);
+    color: var(--levelup-color-text-primary);
     font-weight: 700;
 }
 
@@ -81,12 +55,12 @@
     width: 100%;
     min-height: 3rem;
     padding: .7rem .8rem;
-    border: 2px solid var(--levelup-game-ink);
+    border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-xs);
     background: var(--levelup-color-surface-subtle);
-    color: var(--levelup-game-ink);
+    color: var(--levelup-color-text-primary);
     font: inherit;
-    box-shadow: inset 2px 2px 0 rgb(23 19 33 / 10%);
+    box-shadow: inset 0 -2px 0 rgb(23 19 33 / 8%);
 }
 
 .auth-field input:hover {
@@ -96,7 +70,7 @@
 .auth-field input:focus {
     background: var(--levelup-game-paper);
     border-color: var(--levelup-color-primary);
-    box-shadow: 0 0 0 2px var(--levelup-game-paper), 0 0 0 4px var(--levelup-color-primary);
+    box-shadow: var(--levelup-focus-ring);
     outline: none;
 }
 
@@ -111,7 +85,7 @@
 .auth-feedback {
     margin-bottom: 1rem;
     padding: .8rem .9rem;
-    border: 2px solid var(--levelup-game-ink);
+    border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-xs);
     box-shadow: var(--levelup-shadow-sm);
     font-weight: 700;
@@ -134,7 +108,7 @@
 }
 
 .auth-action-link {
-    color: var(--levelup-game-ink);
+    color: var(--levelup-color-text-primary);
     font-weight: 700;
     text-decoration-line: underline;
     text-decoration-thickness: 2px;
@@ -153,7 +127,7 @@
 }
 
 .auth-action-link:active {
-    color: var(--levelup-game-purple, #5f259f);
+    color: var(--levelup-color-primary-active);
 }
 
 @media (max-width: 34rem) {

@@ -77,6 +77,11 @@
     filter: none !important;
 }
 
+.inventory-modal {
+    border-radius: var(--levelup-radius-lg);
+    box-shadow: var(--levelup-shadow-lg);
+}
+
 .inventory-summary__card {
     display: flex;
     flex-direction: column;
@@ -334,7 +339,7 @@
 .inventory-editor-grid .editor-modal__field > span {
     display: block;
     margin-bottom: .45rem;
-    color: var(--levelup-color-text, #2f2835);
+    color: var(--levelup-color-text-primary);
     font-weight: 700;
 }
 

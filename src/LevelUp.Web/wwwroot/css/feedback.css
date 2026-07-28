@@ -187,7 +187,7 @@
     height: 1.75rem;
     border-radius: 50%;
     background: var(--levelup-color-primary-soft);
-    color: var(--levelup-color-primary-dark);
+    color: var(--levelup-color-primary-hover);
     font-weight: 700;
 }
 
