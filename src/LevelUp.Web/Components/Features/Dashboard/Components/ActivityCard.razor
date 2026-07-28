@@ -34,20 +34,10 @@
             }
         </div>
 
-        @if (Attribute is not null || !string.IsNullOrWhiteSpace(Meta))
+        @if (!string.IsNullOrWhiteSpace(Meta))
         {
             <div class="activity-card__details">
-                @if (Attribute is not null)
-                {
-                    <div class="activity-card__attribute">
-                        <ActivityAttributeBadge Attribute="@Attribute" />
-                    </div>
-                }
-
-                @if (!string.IsNullOrWhiteSpace(Meta))
-                {
-                    <span class="activity-card__meta">@Meta</span>
-                }
+                <span class="activity-card__meta">@Meta</span>
             </div>
         }
     </div>

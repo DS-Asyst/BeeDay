@@ -3,7 +3,6 @@
     flex-direction: column;
     width: 100%;
     min-width: 0;
-    min-height: calc(100dvh - var(--levelup-top-navigation-height, 3.75rem));
     margin: 0;
     padding: 0;
     background: var(--levelup-color-surface);

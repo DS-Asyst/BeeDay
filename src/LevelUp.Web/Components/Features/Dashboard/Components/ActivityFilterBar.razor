@@ -4,16 +4,6 @@
 
 <div class="filter-bar" aria-label="Dashboard controls">
     <div class="filter-bar__main">
-        <div class="filter-bar__search" role="search">
-            <input id="dashboard-search"
-                   class="filter-bar__input"
-                   type="search"
-                   aria-label="Search activities"
-                   placeholder="Search"
-                   value="@inputValue"
-                   @oninput="OnInput" />
-        </div>
-
         <div class="filter-bar__filters">
             <LevelUpButton Variant="LevelUpButtonVariant.Secondary"
                            Compact="true"
@@ -65,6 +55,16 @@
                     </div>
                 </div>
             }
+        </div>
+
+        <div class="filter-bar__search" role="search">
+            <input id="dashboard-search"
+                   class="filter-bar__input"
+                   type="search"
+                   aria-label="Search activities"
+                   placeholder="Search"
+                   value="@inputValue"
+                   @oninput="OnInput" />
         </div>
 
         <div class="filter-bar__create">

@@ -1,17 +1,41 @@
+@using LevelUp.Domain.Entities
+@using LevelUp.Web.Components.DesignSystem.Buttons
+
 <div class="project-context-filter">
-    <label class="project-context-filter__label" for="@SelectId">Project context</label>
-    <div class="project-context-filter__control">
-        <PixelIcon Name="PixelIconName.ChevronDown" Size="PixelIconSize.ExtraSmall" Decorative="true" />
-        <select id="@SelectId"
-                class="project-context-filter__select"
-                aria-label="Filter To-Dos by project"
-                value="@SelectedValue"
-                @onchange="HandleSelectionChanged">
-            <option value="">All Projects</option>
+    <LevelUpButton Variant="LevelUpButtonVariant.Secondary"
+                   Compact="true"
+                   Class="project-context-filter__trigger"
+                   OnClick="ToggleMenu"
+                   aria-haspopup="listbox"
+                   aria-expanded="@isOpen.ToString().ToLowerInvariant()"
+                   aria-label="Filter projects">
+        Projects
+        <PixelIcon Name="PixelIconName.ChevronDown"
+                   Size="PixelIconSize.ExtraSmall"
+                   Decorative="true"
+                   Class="@($"project-context-filter__chevron {(isOpen ? "project-context-filter__chevron--open" : null)}")" />
+    </LevelUpButton>
+
+    @if (isOpen)
+    {
+        <div class="project-context-filter__menu" role="listbox" aria-label="Projects">
+            <button type="button"
+                    role="option"
+                    aria-selected="@(SelectedProjectId is null)"
+                    class="project-context-filter__option @(SelectedProjectId is null ? "project-context-filter__option--selected" : null)"
+                    @onclick="@(() => SelectAsync(null))">
+                All Projects
+            </button>
             @foreach (var project in Projects)
             {
-                <option value="@project.Id">@project.Title</option>
+                <button type="button"
+                        role="option"
+                        aria-selected="@(SelectedProjectId == project.Id)"
+                        class="project-context-filter__option @(SelectedProjectId == project.Id ? "project-context-filter__option--selected" : null)"
+                        @onclick="@(() => SelectAsync(project.Id))">
+                    @project.Title
+                </button>
             }
-        </select>
-    </div>
+        </div>
+    }
 </div>

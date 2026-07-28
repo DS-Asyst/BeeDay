@@ -7,7 +7,7 @@
 
 .filter-bar__main {
     display: grid;
-    grid-template-columns: minmax(18rem, 38rem) auto auto;
+    grid-template-columns: auto minmax(18rem, 1fr) auto;
     align-items: center;
     justify-content: center;
     gap: .8rem;
