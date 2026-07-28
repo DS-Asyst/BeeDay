@@ -21,6 +21,18 @@ public sealed class ActivityFilterBarTests
     }
 
     [Fact]
+    public void RendersTheTagsChevronThroughThePixelIconSystem()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<ActivityFilterBar>();
+
+        var chevron = cut.Find("button[aria-haspopup='dialog'] .filter-bar__chevron");
+        Assert.Contains("pixel-icon", chevron.ClassList);
+        Assert.Equal("true", chevron.GetAttribute("aria-hidden"));
+        Assert.DoesNotContain("filter-bar__chevron--open", chevron.ClassList);
+    }
+
+    [Fact]
     public async Task OpensTagsMenuAndEmitsSelectedAttribute()
     {
         using var context = new BunitContext();
@@ -34,6 +46,18 @@ public sealed class ActivityFilterBarTests
         await strengthCheckbox.ChangeAsync(true);
 
         Assert.Equal(ActivityAttribute.Strength, selectedAttribute);
+    }
+
+    [Fact]
+    public async Task TogglesTheChevronOpenStateWithTheTagsMenu()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<ActivityFilterBar>();
+
+        await cut.Find("button[aria-haspopup='dialog']").ClickAsync();
+
+        var chevron = cut.Find("button[aria-haspopup='dialog'] .filter-bar__chevron");
+        Assert.Contains("filter-bar__chevron--open", chevron.ClassList);
     }
 
     [Fact]

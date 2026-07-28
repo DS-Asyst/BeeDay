@@ -20,6 +20,10 @@ public sealed class FeedbackComponentTests
         Assert.Equal("No tasks yet", cut.Find(".levelup-empty-state__title").TextContent);
         Assert.Equal("Create a task to get started.", cut.Find(".levelup-empty-state__description").TextContent);
         Assert.Single(cut.FindAll(".levelup-empty-state__icon"));
+
+        var icon = cut.Find(".levelup-empty-state__icon .pixel-icon");
+        Assert.Contains("pixel-icon--color-muted", icon.ClassList);
+        Assert.Equal("true", icon.GetAttribute("aria-hidden"));
     }
 
     [Fact]

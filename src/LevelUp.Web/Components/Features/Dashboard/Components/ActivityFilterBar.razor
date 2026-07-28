@@ -27,7 +27,10 @@
                 {
                     <span class="filter-bar__filter-count" aria-label="@($"{SelectedAttributes.Count} selected tags")">@SelectedAttributes.Count</span>
                 }
-                <span class="filter-bar__chevron @(showTagsMenu ? "filter-bar__chevron--open" : null)" aria-hidden="true"></span>
+                <PixelIcon Name="PixelIconName.ChevronDown"
+                           Size="PixelIconSize.ExtraSmall"
+                           Decorative="true"
+                           Class="@($"filter-bar__chevron {(showTagsMenu ? "filter-bar__chevron--open" : null)}")" />
             </LevelUpButton>
 
             @if (showTagsMenu)

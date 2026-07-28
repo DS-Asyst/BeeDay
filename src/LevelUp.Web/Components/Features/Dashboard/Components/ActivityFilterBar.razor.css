@@ -60,26 +60,23 @@
 .filter-bar__filter-count {
     display: inline-grid;
     place-items: center;
-    min-width: 1.15rem;
-    height: 1.15rem;
-    padding: 0 .22rem;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    margin-left: var(--levelup-spacing-xs);
+    padding: 0 .3rem;
     border-radius: 999px;
     color: #fff;
     background: var(--levelup-color-project-dark);
-    font-size: .65rem;
+    font-size: .72rem;
+    font-weight: 700;
 }
 
-.filter-bar__chevron {
-    width: 0;
-    height: 0;
-    margin-left: .1rem;
-    border-right: .28rem solid transparent;
-    border-left: .28rem solid transparent;
-    border-top: .34rem solid currentColor;
+.filter-bar__filters ::deep .filter-bar__chevron {
+    margin-left: var(--levelup-spacing-2xs);
     transition: transform var(--levelup-transition-fast);
 }
 
-.filter-bar__chevron--open { transform: rotate(180deg); }
+.filter-bar__filters ::deep .filter-bar__chevron--open { transform: rotate(180deg); }
 
 .filter-bar__tags-menu {
     position: absolute;
@@ -181,9 +178,9 @@
 
 .filter-bar__menu button {
     display: grid;
-    grid-template-columns: 1.65rem minmax(0, 1fr);
+    grid-template-columns: 1.1rem minmax(0, 1fr);
     align-items: center;
-    gap: .45rem;
+    gap: var(--levelup-spacing-xs);
     width: 100%;
     min-height: 2.1rem;
     padding: .3rem .4rem;
