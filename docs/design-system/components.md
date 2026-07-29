@@ -30,9 +30,17 @@ Every editor modal (Habits, Tasks, To-Dos, Projects, Inventory transactions) com
 
 ## Skewed press action style
 
-`LevelUpButton` supports the opt-in `levelup-button--skew-press` class for the approved primary operational actions. The class applies the shared skewed press geometry, typography, depth shadow, and active displacement while preserving the semantic palette supplied by the button variant. Its fixed height is `2.9em`.
+`LevelUpButton` supports the opt-in `levelup-button--skew-press` class for the approved primary operational actions. The class applies the shared skewed press geometry, typography, depth shadow, and active displacement while preserving the semantic palette supplied by the button variant. Its fixed height is `2.4em`.
 
-Current consumers are Sign in, New transaction, Add activity, the Account submit actions, and the editor Delete action. Other buttons keep the standard LevelUpButton presentation unless explicitly approved.
+Current consumers are Sign in, New transaction, Add activity, the Account submit actions, the editor Delete action, and the inventory tag Delete action. Other buttons keep the standard LevelUpButton presentation unless explicitly approved.
+
+## Comic panel press style
+
+`LevelUpButton` also supports the opt-in `levelup-button--comic-press` class, reserved for destructive confirmation actions. It applies a bold ink outline and hard offset shadow (reusing the shared `--levelup-game-ink` / `--levelup-game-border` pixel-UI tokens) that inverts fill and text color on hover and settles flush into the shadow on press, while the fill and text colors keep reusing the semantic palette supplied by the button variant (Danger/ConfirmationDanger). Unlike skew-press, it does not set its own width/height/padding — sizing stays owned by the consumer's layout.
+
+Current consumer is the delete-confirmation dialog's Delete action (`LevelUpConfirmDialog`), used by every delete flow in the app (Habits, Tasks, To-Dos, Projects, Inventory transactions and tags).
+
+The Inventory transaction card's "..." menu Delete entry (`LevelUpCardMenu`, a dropdown-menu item and therefore not a `LevelUpButton`) carries the same visual language via scoped CSS in `LevelUpCardMenu.razor.css` and a matching override in `inventory.css`, so the "comic panel" look is consistent between the card's inline Delete action and the confirmation dialog it opens. Other dropdown-menu items remain the plain UI-exception presentation described above.
 
 ## Page Header vs. Hero (`LevelUpPageHeader` vs. `LevelUpHero`)
 

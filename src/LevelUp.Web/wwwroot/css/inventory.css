@@ -622,20 +622,46 @@
     transform: none;
 }
 
+/* "Comic panel" treatment — matches the Daily card menu's Delete action
+   (LevelUpCardMenu.razor.css): bold ink outline, hard offset shadow,
+   inverted on hover, settled into the shadow on press. */
 .inventory-transaction-card__actions .card-action-menu__item--delete,
 .inventory-transaction-card__actions .card-action-menu__item--delete span {
-    color: #e02f3a;
+    color: #fff;
+}
+
+.inventory-transaction-card__actions .card-action-menu__item--delete {
+    border: var(--levelup-game-border);
+    border-radius: var(--levelup-radius-sm);
+    background: var(--levelup-color-danger);
+    box-shadow: 3px 3px 0 var(--levelup-game-ink);
+    transform: none;
+}
+
+.inventory-transaction-card__actions .card-action-menu__item--delete:last-child {
+    border-bottom: var(--levelup-game-border);
 }
 
 .inventory-transaction-card__actions .card-action-menu__item--delete:hover,
 .inventory-transaction-card__actions .card-action-menu__item--delete:focus-visible {
-    background: var(--levelup-color-danger-soft);
-    color: #bd202a;
+    background: #fff;
+    color: var(--levelup-color-danger);
+    border-color: var(--levelup-color-danger);
+    box-shadow: 3px 3px 0 var(--levelup-color-danger);
+    outline: none;
+    transform: none;
 }
 
 .inventory-transaction-card__actions .card-action-menu__item--delete:hover span,
 .inventory-transaction-card__actions .card-action-menu__item--delete:focus-visible span {
-    color: #bd202a;
+    color: var(--levelup-color-danger);
+}
+
+.inventory-transaction-card__actions .card-action-menu__item--delete:active {
+    background: var(--levelup-color-danger-hover);
+    color: #fff;
+    box-shadow: 1px 1px 0 var(--levelup-game-ink);
+    transform: translate(2px, 2px);
 }
 
 

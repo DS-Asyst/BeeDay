@@ -22,7 +22,7 @@
                     <span class="inventory-tag-dot" style="background:@tag.Color"></span>
                     <div><strong>@tag.Name</strong><small>@tag.TransactionCount transaction@(tag.TransactionCount == 1 ? string.Empty : "s")</small></div>
                     <LevelUpButton Variant="LevelUpButtonVariant.Secondary" Compact="true" Icon="PixelIconName.Edit" Disabled="IsBusy" OnClick="() => StartEdit(tag)">Edit</LevelUpButton>
-                    <LevelUpButton Variant="LevelUpButtonVariant.Danger" Compact="true" Icon="PixelIconName.Delete" Disabled="IsBusy" OnClick="() => OnDelete.InvokeAsync(tag)">Delete</LevelUpButton>
+                    <LevelUpButton Variant="LevelUpButtonVariant.Danger" Compact="true" Icon="PixelIconName.Delete" Disabled="IsBusy" Class="levelup-button--skew-press" OnClick="() => OnDelete.InvokeAsync(tag)">Delete</LevelUpButton>
                 </div>
             }
         </div>
