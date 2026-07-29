@@ -184,7 +184,8 @@
 .levelup-card--interactive:hover { transform: translateY(-2px); box-shadow: var(--levelup-shadow-md); }
 
 .levelup-page-header,
-.levelup-section-header {
+.levelup-section-header,
+.levelup-hero__row {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -193,10 +194,12 @@
 
 .levelup-page-header { margin-bottom: var(--levelup-spacing-xl); }
 .levelup-page-header__content,
-.levelup-section-header > div:first-child { min-width: 0; }
+.levelup-section-header > div:first-child,
+.levelup-hero__content { min-width: 0; }
 
 .levelup-page-header__eyebrow,
-.levelup-section-header__eyebrow {
+.levelup-section-header__eyebrow,
+.levelup-hero__eyebrow {
     display: block;
     margin-bottom: var(--levelup-spacing-xs);
     color: var(--levelup-color-primary);
@@ -207,12 +210,15 @@
 }
 
 .levelup-page-header h1,
-.levelup-section-header h2 { margin: 0; color: var(--levelup-color-text-primary); }
-.levelup-page-header h1 { font-size: clamp(2rem, 5vw, 3.2rem); }
+.levelup-section-header h2,
+.levelup-hero__content h1 { margin: 0; color: var(--levelup-color-text-primary); }
+.levelup-page-header h1,
+.levelup-hero__content h1 { font-size: clamp(2rem, 5vw, 3.2rem); }
 .levelup-section-header h2 { font-size: 1.55rem; }
 
 .levelup-page-header p,
-.levelup-section-header p {
+.levelup-section-header p,
+.levelup-hero__subtitle {
     max-width: 52rem;
     margin: var(--levelup-spacing-sm) 0 0;
     color: var(--levelup-color-text-muted);
@@ -220,16 +226,57 @@
 }
 
 .levelup-page-header__actions,
-.levelup-section-header__actions { display: flex; flex-wrap: wrap; gap: var(--levelup-spacing-sm); }
+.levelup-section-header__actions,
+.levelup-hero__primary-action { display: flex; flex-wrap: wrap; gap: var(--levelup-spacing-sm); }
 
 @media (max-width: 42rem) {
     .levelup-page-header,
-    .levelup-section-header { flex-direction: column; }
+    .levelup-section-header,
+    .levelup-hero__row { flex-direction: column; }
     .levelup-page-header__actions,
-    .levelup-section-header__actions { width: 100%; }
+    .levelup-section-header__actions,
+    .levelup-hero__primary-action { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .levelup-button,
     .levelup-card--interactive { transition: none; }
+}
+
+/* LevelUpHero — a richer introductory panel than LevelUpPageHeader: an
+   optional illustration slot, a single emphasized primary action, brief
+   supporting content, and a contextual variant. See docs/design-system/
+   components.md for when to use this instead of LevelUpPageHeader. */
+.levelup-hero { margin-bottom: var(--levelup-spacing-xl); }
+
+.levelup-hero__illustration {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    /* Reserves a stable box so mounting the consumer-supplied illustration
+       content never shifts surrounding layout (CLS). */
+    min-width: 4rem;
+    min-height: 4rem;
+}
+
+.levelup-hero__supporting {
+    margin-top: var(--levelup-spacing-md);
+    padding-top: var(--levelup-spacing-md);
+    border-top: 1px solid var(--levelup-color-border);
+    color: var(--levelup-color-text-secondary);
+    font-size: var(--levelup-font-size-sm);
+}
+
+.levelup-hero--onboarding {
+    padding: var(--levelup-spacing-lg);
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-lg);
+    background: var(--levelup-color-primary-soft);
+}
+
+.levelup-hero--onboarding .levelup-hero__eyebrow { color: var(--levelup-color-primary-active); }
+
+@media (max-width: 30rem) {
+    .levelup-hero__illustration { min-width: 3rem; min-height: 3rem; }
 }

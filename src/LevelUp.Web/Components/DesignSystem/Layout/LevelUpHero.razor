@@ -1,0 +1,27 @@
+<header class="@CssClass" @attributes="AdditionalAttributes">
+    <div class="levelup-hero__row">
+        @if (Illustration is not null)
+        {
+            <div class="levelup-hero__illustration">@Illustration</div>
+        }
+        <div class="levelup-hero__content">
+            @if (!string.IsNullOrWhiteSpace(Eyebrow))
+            {
+                <span class="levelup-hero__eyebrow">@Eyebrow</span>
+            }
+            <h1>@Title</h1>
+            @if (!string.IsNullOrWhiteSpace(Subtitle))
+            {
+                <p class="levelup-hero__subtitle">@Subtitle</p>
+            }
+        </div>
+        @if (PrimaryAction is not null)
+        {
+            <div class="levelup-hero__primary-action">@PrimaryAction</div>
+        }
+    </div>
+    @if (SupportingContent is not null)
+    {
+        <div class="levelup-hero__supporting">@SupportingContent</div>
+    }
+</header>
