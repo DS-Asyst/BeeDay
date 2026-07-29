@@ -5,7 +5,7 @@
                         Title="Preferences"
                         Description="Choose how LevelUp looks and communicates with you.">
     <LevelUpSettingsForm TModel="PreferencesFormModel" Model="Model" OnValidSubmit="OnSave"
-                         FormName="account-preferences" SubmitLabel="SAVE PREFERENCES" IsBusy="IsBusy">
+                         FormName="account-preferences" SubmitLabel="SAVE PREFERENCES" SubmitButtonClass="levelup-button--skew-press" IsBusy="IsBusy">
         <div class="levelup-settings-form__grid">
             <LevelUpSelect TValue="UserLanguage" Id="account-language" Label="Language"
                            @bind-Value="Model.Language">

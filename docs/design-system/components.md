@@ -28,6 +28,12 @@ Every editor modal (Habits, Tasks, To-Dos, Projects, Inventory transactions) com
 - All buttons render through `LevelUpButton` (`Variant`: Primary, Secondary, Success, Warning, Back, Danger, ConfirmationDanger, ConfirmationCancel) — never a bare `<button>` with its own bespoke CSS. Buttons with the same semantic meaning (Save, Cancel, Delete, Edit, Create) use the same variant everywhere. Real UI exceptions (dropdown menu items, combobox triggers, checkboxes, segmented toggles, nav/drawer entries, icon-only dismiss controls, clickable cards) are not "buttons" in this sense and are unaffected.
 - Any settings-style page (a card containing a titled form section — Account today; Preferences, Character, and administrative pages in the future) composes `LevelUpSettingsSection` (card + section header) with `LevelUpSettingsForm<TModel>` (EditForm + validation + fieldset + submit action) from the Layout group, rather than re-implementing that card/form chrome per page. Field layout inside the form (grid, hints) uses the shared `.levelup-settings-form__grid` / `.levelup-settings-form__hint` classes from `wwwroot/css/settings.css`.
 
+## Skewed press action style
+
+`LevelUpButton` supports the opt-in `levelup-button--skew-press` class for the approved primary operational actions. The class applies the shared skewed press geometry, typography, depth shadow, and active displacement while preserving the semantic palette supplied by the button variant. Its fixed height is `2.9em`.
+
+Current consumers are Sign in, New transaction, Add activity, the Account submit actions, and the editor Delete action. Other buttons keep the standard LevelUpButton presentation unless explicitly approved.
+
 ## Page Header vs. Hero (`LevelUpPageHeader` vs. `LevelUpHero`)
 
 Both live in the Layout group and share the same responsive flex-header CSS foundation (`design-system.css`/`polish.css`), so choosing between them is about responsibility, not styling:

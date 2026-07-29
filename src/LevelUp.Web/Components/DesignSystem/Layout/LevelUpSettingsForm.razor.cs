@@ -9,6 +9,7 @@ public partial class LevelUpSettingsForm<TModel>
     [Parameter, EditorRequired] public string FormName { get; set; } = string.Empty;
     [Parameter, EditorRequired] public string SubmitLabel { get; set; } = string.Empty;
     [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public string? SubmitButtonClass { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 

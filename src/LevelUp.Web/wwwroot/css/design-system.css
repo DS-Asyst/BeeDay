@@ -123,6 +123,55 @@
     text-transform: none;
 }
 
+/* Opt-in skewed press style used by the primary operational actions requested by the product.
+   The structural treatment is shared while each LevelUpButton variant keeps its semantic palette. */
+.levelup-button.levelup-button--skew-press {
+    width: 100%;
+    height: 2.4em;
+    min-height: 0;
+    padding: 0 1rem;
+    gap: 1rem;
+    border: 2px solid var(--levelup-button-outline);
+    border-radius: .75rem;
+    color: var(--levelup-button-foreground);
+    background: var(--levelup-button-background);
+    box-shadow: 0 8px 0 var(--levelup-button-depth);
+    filter: drop-shadow(0 15px 20px color-mix(in srgb, var(--levelup-button-shadow) 38%, transparent));
+    font-size: 1.125em;
+    font-weight: 800;
+    letter-spacing: 2px;
+    line-height: 1;
+    text-transform: none;
+    transform: skew(-10deg);
+    transition: all .1s ease;
+}
+
+.levelup-button.levelup-button--skew-press:not(:disabled):hover {
+    color: var(--levelup-button-foreground);
+    background: var(--levelup-button-background);
+    box-shadow: 0 8px 0 var(--levelup-button-depth);
+    transform: skew(-10deg);
+}
+
+.levelup-button.levelup-button--skew-press:not(:disabled):active {
+    letter-spacing: 0;
+    color: var(--levelup-button-foreground);
+    background: var(--levelup-button-background);
+    box-shadow: 0 0 0 var(--levelup-button-shadow);
+    transform: skew(-10deg) translateY(8px);
+}
+
+.levelup-button.levelup-button--skew-press:focus-visible {
+    outline: 0;
+    box-shadow:
+        0 8px 0 var(--levelup-button-depth),
+        0 0 0 4px var(--levelup-button-focus);
+}
+
+.levelup-button.levelup-button--skew-press:disabled {
+    filter: none;
+}
+
 .levelup-button--full-width { width: 100%; }
 .levelup-button--compact { min-height: 2.25rem; padding: .5rem .8rem .58rem; font-size: .82rem; }
 .levelup-button__label { position: relative; z-index: 1; display: inline-flex; min-width: 0; align-items: center; white-space: nowrap; }

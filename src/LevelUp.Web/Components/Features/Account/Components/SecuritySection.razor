@@ -4,7 +4,7 @@
                         Title="Security"
                         Description="Protect your account with a strong, unique password.">
     <LevelUpSettingsForm TModel="SecurityFormModel" Model="Model" OnValidSubmit="OnSave"
-                         FormName="account-security" SubmitLabel="CHANGE PASSWORD" IsBusy="IsBusy">
+                         FormName="account-security" SubmitLabel="CHANGE PASSWORD" SubmitButtonClass="levelup-button--skew-press" IsBusy="IsBusy">
         <LevelUpInput Id="current-password" Label="Current password" Required="true"
                       @bind-Value="Model.CurrentPassword" type="password" autocomplete="current-password" />
         <div class="levelup-settings-form__grid">
