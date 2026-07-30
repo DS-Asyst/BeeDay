@@ -22,11 +22,14 @@ body { min-width: 20rem; }
 
 .levelup-page-header { margin-bottom: var(--levelup-section-gap); }
 .levelup-section-header { margin-bottom: calc(var(--levelup-grid) * 2); }
+.levelup-hero { margin-bottom: var(--levelup-section-gap); }
 .levelup-page-header,
-.levelup-section-header { align-items: center; }
+.levelup-section-header,
+.levelup-hero__row { align-items: center; }
 
 .levelup-page-header__actions,
-.levelup-section-header__actions { align-items: center; }
+.levelup-section-header__actions,
+.levelup-hero__primary-action { align-items: center; }
 
 /* Eight-pixel spacing and uniform control sizing */
 .levelup-button {
@@ -84,17 +87,24 @@ body { min-width: 20rem; }
 
 @media (max-width: 42rem) {
     .levelup-page-header,
-    .levelup-section-header { align-items: stretch; }
+    .levelup-section-header,
+    .levelup-hero__row { align-items: stretch; }
     .levelup-page-header__actions,
-    .levelup-section-header__actions { display: grid; grid-template-columns: 1fr; }
+    .levelup-section-header__actions,
+    .levelup-hero__primary-action { display: grid; grid-template-columns: 1fr; }
     .levelup-page-header__actions > *,
-    .levelup-section-header__actions > * { width: 100%; }
+    .levelup-section-header__actions > *,
+    .levelup-hero__primary-action > * { width: 100%; }
     .levelup-card--padded { padding: calc(var(--levelup-grid) * 2); }
+    /* The illustration steps aside on narrow viewports so the CTA and
+       supporting content stay reachable without excess scrolling. */
+    .levelup-hero__illustration { display: none; }
 }
 
 @media (max-width: 30rem) {
     :root { --levelup-page-gutter: .75rem; }
-    .levelup-page-header h1 { font-size: clamp(2rem, 12vw, 2.6rem); }
+    .levelup-page-header h1,
+    .levelup-hero__content h1 { font-size: clamp(2rem, 12vw, 2.6rem); }
     .levelup-section-header h2 { font-size: 1.35rem; }
 }
 

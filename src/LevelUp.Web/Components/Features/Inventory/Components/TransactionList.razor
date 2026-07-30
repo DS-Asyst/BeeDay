@@ -1,6 +1,6 @@
 @using LevelUp.Application.Features.Inventory.Responses
 
-<section class="inventory-main-panel @(Transactions.Items.Count == 0 ? "inventory-main-panel--empty" : null)" aria-labelledby="inventory-transactions-title">
+<section class="inventory-main-panel levelup-card @(Transactions.Items.Count == 0 ? "inventory-main-panel--empty" : null)" aria-labelledby="inventory-transactions-title">
     <header class="inventory-panel-header inventory-panel-header--transactions">
         <div>
             <span class="inventory-eyebrow">History</span>
@@ -38,7 +38,7 @@
         <div class="inventory-transaction-list" aria-busy="@IsRefreshing">
             @foreach (var transaction in Transactions.Items)
             {
-                <TransactionCard Transaction="transaction" IsDisabled="IsBusy" OnEdit="OnEdit" OnDelete="OnDelete" />
+                <TransactionCard Transaction="transaction" OnEdit="OnEdit" />
             }
         </div>
 
@@ -77,7 +77,6 @@
     [Parameter] public EventCallback OnPreviousPage { get; set; }
     [Parameter] public EventCallback OnNextPage { get; set; }
     [Parameter] public EventCallback<TransactionResponse> OnEdit { get; set; }
-    [Parameter] public EventCallback<TransactionResponse> OnDelete { get; set; }
 
     private string PaginationSummary => Transactions.TotalCount == 0
         ? "No results"

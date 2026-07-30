@@ -1,41 +1,35 @@
 /*
  * LevelUp typography policy
  *
- * Jersey 15: primary headings, large values, card headings and
- * decorative RPG display elements.
- * Jersey 25: buttons, form controls, labels, body text, navigation,
- * menus, tables, dialogs, messages and actions.
+ * Inter: the default for all regular UI text (paragraphs, descriptions, forms,
+ * inputs, tables, dialogs, navigation, menus, tabs, values, counters,
+ * statistics, balances, HUD information, and every other regular UI element).
+ * Jersey 25: reserved for page titles, card titles, stylized buttons
+ * (the shared LevelUpButton component), and LevelUp branding only.
  */
 
-/* The complete interface inherits Jersey 25 by default. */
+/* The complete interface reads from Inter by default. */
 html,
 body {
-    font-family: var(--levelup-font-family);
+    font-family: var(--levelup-font-body);
 }
 
-/* Interactive controls and form content always use Jersey 25. */
-button,
+/* Only the shared stylized button component uses the retro UI font. */
+.levelup-button {
+    font-family: var(--levelup-font-ui) !important;
+}
+
+/* Form fields and labels use Inter for readability. */
 input,
 select,
 textarea,
 option,
 optgroup,
-label,
-.levelup-button,
-[role="button"],
-[role="menuitem"],
-[role="tab"],
-[role="option"] {
-    font-family: var(--levelup-font-family) !important;
+label {
+    font-family: var(--levelup-font-body) !important;
 }
 
-/* Navigation, menus, tables, modal copy, messages and actions are UI text. */
-nav,
-nav a,
-nav button,
-menu,
-menu a,
-menu button,
+/* Tables, dialogs, and messages read as body content. */
 table,
 th,
 td,
@@ -47,22 +41,18 @@ td,
 .toast,
 .feedback,
 .message {
-    font-family: var(--levelup-font-family);
+    font-family: var(--levelup-font-body);
 }
 
-/* Reusable action typography. */
+/* Button font-weight is enforced here (rather than only in design-system.css) so no
+   variant, state, or legacy modifier class can ever render bold; size/line-height/letter-
+   spacing are owned solely by design-system.css's .levelup-button rule to avoid duplicated,
+   drift-prone declarations across files. */
 .levelup-button {
-    font-size: var(--levelup-font-size-md);
-    font-weight: var(--levelup-font-weight-bold) !important;
-    line-height: 1;
-    letter-spacing: .035em;
+    font-weight: var(--levelup-font-weight-regular) !important;
 }
 
-.levelup-button--compact {
-    font-size: var(--levelup-font-size-sm);
-}
-
-/* Display roles use Jersey 15. */
+/* Brand and heading roles use the retro UI font. */
 .levelup-brand,
 .levelup-logo,
 .top-navigation__brand-button,
@@ -70,15 +60,14 @@ td,
 .tutorial-icon,
 .display-title,
 .special-card-title,
-.stat-value,
 .rpg-display,
 h1,
 .page-title,
 .hero-title {
-    font-family: var(--levelup-font-display);
+    font-family: var(--levelup-font-ui);
 }
 
-/* Card and section titles can opt into the display family. */
+/* Card and section titles use the retro UI font. */
 h2.title,
 h3.title,
 .card-title,
@@ -86,16 +75,16 @@ h3.title,
 .section-title--display,
 .inventory-panel-header h2,
 .inventory-modal h2 {
-    font-family: var(--levelup-font-display);
+    font-family: var(--levelup-font-ui);
 }
 
-/* Large numeric indicators retain the RPG display identity. */
+/* Large numeric indicators (XP, level, counters, balances) use Inter, tabular. */
 .stat-value,
 .metric-value,
 .wallet-balance,
 .inventory-wallet__balance,
 [data-display="number"] {
-    font-family: var(--levelup-font-display);
+    font-family: var(--levelup-font-body);
     font-variant-numeric: tabular-nums;
 }
 
@@ -107,10 +96,8 @@ body {
 
 .card-title,
 .special-card-title,
-.activity-card h3,
-.habit-card__title h3,
 .dashboard-column__heading h2 {
-    font-family: var(--levelup-font-display);
+    font-family: var(--levelup-font-ui);
 }
 
 small,
@@ -120,14 +107,14 @@ small,
     font-size: var(--levelup-font-size-sm);
 }
 
-/* Dashboard card copy uses Inter; display fonts remain reserved for page/section identity. */
+/* Dashboard card copy uses Inter; the retro UI font remains reserved for page/section identity. */
 .activity-card h3,
 .habit-card__title h3,
 .activity-card p,
 .habit-card__body p,
 .activity-card__meta,
 .habit-card__footer {
-    font-family: var(--levelup-font-card);
+    font-family: var(--levelup-font-body);
 }
 
 .activity-card h3,

@@ -1,8 +1,8 @@
 @using LevelUp.Domain.Enums
-<ActivityModal Model="Model"
+<EditorModalShell Model="Model"
                   Title="@(IsEditing ? "Edit To-Do" : "Create To-Do")"
                   TitleId="todo-editor-title"
-                  SubmitLabel="@(IsEditing ? "SAVE" : "CREATE")"
+                  SubmitLabel="@(IsEditing ? "Save" : "Create")"
                   ShowDelete="IsEditing"
                   OnSubmit="Save"
                   OnCancel="Cancel"
@@ -50,9 +50,9 @@
                                       FieldCssClass="editor-modal__field" />
         </div>
     </BodyContent>
-</ActivityModal>
+</EditorModalShell>
 
-<ConfirmationDialog IsOpen="showDeleteConfirmation"
+<LevelUpConfirmDialog IsOpen="showDeleteConfirmation"
                       Title="Delete To-Do"
                       Message="Are you sure you want to delete this to-do?"
                       ItemTitle="@Model.Title"

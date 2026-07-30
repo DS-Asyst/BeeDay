@@ -169,7 +169,7 @@ else if (State.Data?.CurrentCharacter is not null)
     @if (State.Modals.IsHabitEditorOpen) { <HabitEditorModal Model="State.Modals.HabitForm" IsEditing="State.Modals.IsEditing" OnSave="State.SaveHabitAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentHabitAsync" /> }
     @if (State.Modals.IsTaskEditorOpen) { <TaskEditorModal Model="State.Modals.TaskForm" IsEditing="State.Modals.IsEditing" OnSave="State.SaveTaskAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentTaskAsync" /> }
     @if (State.Modals.IsTodoEditorOpen) { <TodoEditorModal Model="State.Modals.TodoForm" Projects="@(State.Data?.Projects ?? [])" IsEditing="State.Modals.IsEditing" OnSave="State.SaveTodoAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentTodoAsync" /> }
-    @if (State.Modals.IsProjectEditorOpen) { <ProjectEditorModal Model="State.Modals.ProjectForm" IsEditing="State.Modals.IsEditing" OnSave="State.SaveProjectAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentProjectAsync" /> }
+    @if (State.Modals.IsProjectEditorOpen) { <ProjectEditorModal Model="State.Modals.ProjectForm" IsEditing="State.Modals.IsEditing" OnSave="State.SaveProjectAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentProjectAsync" OnOpenProject="State.OpenProjectFromEditor" /> }
 
     <LevelUpLoading IsVisible="State.IsBusy" Label="Saving..." />
     <LevelUpFeedbackHost />

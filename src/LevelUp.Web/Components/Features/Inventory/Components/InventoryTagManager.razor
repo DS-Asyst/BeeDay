@@ -1,10 +1,9 @@
 @using LevelUp.Application.Features.Inventory.Responses
-@using LevelUp.Web.Components.Features.Inventory.Models
 
-<section class="inventory-tags-panel" aria-labelledby="inventory-tags-title" aria-busy="@IsBusy.ToString().ToLowerInvariant()">
+<section class="inventory-tags-panel levelup-card" aria-labelledby="inventory-tags-title" aria-busy="@IsBusy.ToString().ToLowerInvariant()">
     <header class="inventory-panel-header">
         <div><span class="inventory-eyebrow">Organization</span><h2 id="inventory-tags-title">Tags</h2></div>
-        <LevelUpButton Variant="LevelUpButtonVariant.Primary" Compact="true" Disabled="IsBusy" OnClick="StartCreate">New tag</LevelUpButton>
+        <LevelUpButton Variant="LevelUpButtonVariant.Primary" Compact="true" Disabled="IsBusy" Class="levelup-button--comic levelup-button--comic-magenta" OnClick="RaiseCreate">New tag</LevelUpButton>
     </header>
 
     @if (Tags.Count == 0)
@@ -18,40 +17,28 @@
         <div class="inventory-tag-list">
             @foreach (var tag in Tags)
             {
-                <div class="inventory-tag-item">
+                <div class="inventory-tag-item"
+                     role="button"
+                     tabindex="0"
+                     aria-label="@($"Edit Tag: {tag.Name}")"
+                     @onclick="() => RaiseEdit(tag)"
+                     @onkeydown="args => HandleRowKeyDown(args, tag)">
                     <span class="inventory-tag-dot" style="background:@tag.Color"></span>
                     <div><strong>@tag.Name</strong><small>@tag.TransactionCount transaction@(tag.TransactionCount == 1 ? string.Empty : "s")</small></div>
-                    <LevelUpButton Variant="LevelUpButtonVariant.Secondary" Compact="true" Icon="PixelIconName.Edit" Disabled="IsBusy" OnClick="() => StartEdit(tag)">Edit</LevelUpButton>
-                    <LevelUpButton Variant="LevelUpButtonVariant.Danger" Compact="true" Icon="PixelIconName.Delete" Disabled="IsBusy" OnClick="() => OnDelete.InvokeAsync(tag)">Delete</LevelUpButton>
                 </div>
             }
         </div>
-    }
-
-    @if (IsEditorOpen)
-    {
-        <EditForm Model="Form" OnValidSubmit="SubmitAsync" class="inventory-tag-form">
-            <DataAnnotationsValidator />
-            <label class="inventory-field"><span>Name</span><InputText @bind-Value="Form.Name" maxlength="40" disabled="@IsBusy" autofocus /><ValidationMessage For="@(() => Form.Name)" /></label>
-            <label class="inventory-field inventory-color-field"><span>Color</span><InputText @bind-Value="Form.Color" maxlength="7" disabled="@IsBusy" /><input type="color" @bind="Form.Color" disabled="@IsBusy" aria-label="Select tag color" /><ValidationMessage For="@(() => Form.Color)" /></label>
-            <div class="inventory-tag-form__actions">
-                <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel" Compact="true" Disabled="IsBusy" OnClick="Cancel">Cancel</LevelUpButton>
-                <LevelUpButton Type="submit" Variant="LevelUpButtonVariant.Primary" Compact="true" IsLoading="IsBusy" Disabled="IsBusy">@(IsBusy ? "Saving..." : "Save tag")</LevelUpButton>
-            </div>
-        </EditForm>
     }
 </section>
 
 @code {
     [Parameter] public IReadOnlyList<InventoryTagResponse> Tags { get; set; } = [];
     [Parameter] public bool IsBusy { get; set; }
-    [Parameter] public Func<(Guid? Id, InventoryTagFormModel Form), Task<bool>>? OnSave { get; set; }
-    [Parameter] public EventCallback<InventoryTagResponse> OnDelete { get; set; }
-    private bool IsEditorOpen { get; set; }
-    private Guid? EditingId { get; set; }
-    private InventoryTagFormModel Form { get; set; } = new();
-    private void StartCreate() { if (IsBusy) return; EditingId = null; Form = new(); IsEditorOpen = true; }
-    private void StartEdit(InventoryTagResponse tag) { if (IsBusy) return; EditingId = tag.Id; Form = new() { Name = tag.Name, Color = tag.Color }; IsEditorOpen = true; }
-    private async Task SubmitAsync() { if (IsBusy || OnSave is null) return; if (await OnSave((EditingId, Form))) Cancel(); }
-    private void Cancel() { if (IsBusy) return; IsEditorOpen = false; EditingId = null; Form = new(); }
+    [Parameter] public EventCallback OnCreate { get; set; }
+    [Parameter] public EventCallback<InventoryTagResponse> OnEdit { get; set; }
+
+    private Task RaiseCreate() => OnCreate.InvokeAsync();
+    private Task RaiseEdit(InventoryTagResponse tag) => OnEdit.InvokeAsync(tag);
+    private Task HandleRowKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs args, InventoryTagResponse tag) =>
+        args.Key is "Enter" or " " ? RaiseEdit(tag) : Task.CompletedTask;
 }

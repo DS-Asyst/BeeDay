@@ -11,14 +11,14 @@
 @if (_resent) { <div class="identity-feedback identity-feedback--success" role="status">If the account is eligible, a new confirmation message was generated.</div> }
 @if (!string.IsNullOrWhiteSpace(_error)) { <div class="identity-feedback identity-feedback--error" role="alert">@_error</div> }
 <div class="identity-note"><strong>@DisplayEmail</strong><span>Use the most recent confirmation email. Links expire after 24 hours.</span></div>
-<LevelUpButton FullWidth="true" IsLoading="@_busy" Disabled="@(_busy || _secondsRemaining > 0)" OnClick="ResendAsync">@ButtonText</LevelUpButton>
+<LevelUpButton FullWidth="true" Class="levelup-button--comic levelup-button--comic-yellow" IsLoading="@_busy" Disabled="@(_busy || _secondsRemaining > 0)" OnClick="ResendAsync">@ButtonText</LevelUpButton>
 <a class="identity-navigation-link" href="/login">BACK TO SIGN IN</a>
 </div></div></section>
 @code {
     [SupplyParameterFromQuery(Name = "email")] public string? Email { get; set; }
     private bool _busy; private bool _resent; private string? _error; private int _secondsRemaining; private PeriodicTimer? _timer; private CancellationTokenSource? _cts;
     private string DisplayEmail => string.IsNullOrWhiteSpace(Email) ? "your email address" : Email.Trim();
-    private string ButtonText => _busy ? "SENDING..." : _secondsRemaining > 0 ? $"RESEND AVAILABLE IN {_secondsRemaining}S" : "RESEND CONFIRMATION";
+    private string ButtonText => _busy ? "Sending..." : _secondsRemaining > 0 ? $"Resend available in {_secondsRemaining}s" : "Resend Confirmation";
     private async Task ResendAsync() { if (_busy || _secondsRemaining>0 || string.IsNullOrWhiteSpace(Email)) return; _busy=true; _error=null; try { await Sender.Send(new LevelUp.Application.Features.Identity.Commands.ResendEmailConfirmationCommand(new(Email.Trim()))); _resent=true; StartCountdown(); } catch(Exception ex) { _error=ex.Message; } finally { _busy=false; } }
     private void StartCountdown(){_secondsRemaining=60;_cts?.Cancel();_cts=new();_timer=new(TimeSpan.FromSeconds(1));_=RunAsync(_cts.Token);} private async Task RunAsync(CancellationToken token){try{while(_secondsRemaining>0&&await _timer!.WaitForNextTickAsync(token)){_secondsRemaining--;await InvokeAsync(StateHasChanged);}}catch(OperationCanceledException){}}
     public void Dispose(){_cts?.Cancel();_cts?.Dispose();_timer?.Dispose();}

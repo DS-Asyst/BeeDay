@@ -1,7 +1,7 @@
 .levelup-brand {
     display: inline-flex;
     color: var(--levelup-color-primary);
-    font-family: var(--levelup-font-brand);
+    font-family: var(--levelup-font-ui);
     font-size: 1.2rem;
     font-weight: 700;
     letter-spacing: .055em;

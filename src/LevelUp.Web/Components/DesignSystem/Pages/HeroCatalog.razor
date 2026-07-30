@@ -1,0 +1,110 @@
+@page "/design-system/hero"
+@attribute [Authorize]
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment
+
+<PageTitle>Hero Catalog | LevelUp</PageTitle>
+
+@if (!HostEnvironment.IsDevelopment())
+{
+    <main class="hero-catalog hero-catalog--unavailable">
+        <PixelIcon Name="PixelIconName.Lock" Size="PixelIconSize.Large" Color="PixelIconColor.Muted" />
+        <h1>Design System catalog unavailable</h1>
+        <p>The Hero catalog is limited to the Development environment.</p>
+    </main>
+}
+else
+{
+    <main class="hero-catalog">
+        <header class="hero-catalog__header">
+            <span class="hero-catalog__eyebrow">Design System</span>
+            <h1>Contextual Hero Catalog</h1>
+            <p>
+                Realistic, isolated <code>LevelUpHero</code> compositions. This page exists only to review the
+                component in Development — it does not replace any production page header, and no production
+                page currently consumes <code>LevelUpHero</code>.
+            </p>
+        </header>
+
+        <section class="hero-catalog__section" aria-labelledby="hero-default-heading">
+            <h2 id="hero-default-heading">Default variant — operational page, no illustration</h2>
+            <p class="hero-catalog__note">
+                Mirrors an operational page such as Inventory: eyebrow, title, subtitle and a single primary
+                action. No illustration is supplied.
+            </p>
+            <div class="hero-catalog__frame">
+                <LevelUpHero Eyebrow="Personal finance"
+                             Title="Inventory"
+                             Subtitle="Track your wallet, organize transactions and understand where your money goes.">
+                    <PrimaryAction>
+                        <LevelUpButton Variant="LevelUpButtonVariant.Primary" Icon="PixelIconName.Add">
+                            New transaction
+                        </LevelUpButton>
+                    </PrimaryAction>
+                </LevelUpHero>
+            </div>
+        </section>
+
+        <section class="hero-catalog__section" aria-labelledby="hero-onboarding-heading">
+            <h2 id="hero-onboarding-heading">Onboarding variant — illustration, primary action, supporting content</h2>
+            <p class="hero-catalog__note">
+                Mirrors an onboarding-style page such as the tutorial: a decorative illustration, a primary
+                action, and brief supporting content. Supporting content stays short — never a form, grid, or
+                long list.
+            </p>
+            <div class="hero-catalog__frame">
+                <LevelUpHero Variant="LevelUpHeroVariant.Onboarding"
+                             Eyebrow="01 — Daily"
+                             Title="Your command center"
+                             Subtitle="Daily keeps the actions that move your life forward in one place.">
+                    <Illustration>
+                        <PixelIcon Name="PixelIconName.Daily" Size="PixelIconSize.ExtraLarge" Color="PixelIconColor.Primary" Decorative="true" />
+                    </Illustration>
+                    <PrimaryAction>
+                        <LevelUpButton Variant="LevelUpButtonVariant.Primary">Next</LevelUpButton>
+                    </PrimaryAction>
+                    <SupportingContent>
+                        Review today before starting, and return throughout the day.
+                    </SupportingContent>
+                </LevelUpHero>
+            </div>
+        </section>
+
+        <section class="hero-catalog__section" aria-labelledby="hero-accessibility-heading">
+            <h2 id="hero-accessibility-heading">Illustration accessibility examples</h2>
+            <p class="hero-catalog__note">
+                The illustration slot is an opaque <code>RenderFragment</code> — <code>LevelUpHero</code> never
+                selects, loads, or labels the asset itself. Whether an illustration is decorative or informative
+                is entirely up to the content the consumer places inside the slot.
+            </p>
+            <div class="hero-catalog__examples">
+                <div class="hero-catalog__frame">
+                    <p class="hero-catalog__example-label"><strong>Decorative</strong> — <code>Decorative="true"</code>, hidden from assistive technology.</p>
+                    <LevelUpHero Title="Decorative illustration example" Subtitle="The character icon here carries no information beyond mood.">
+                        <Illustration>
+                            <PixelIcon Name="PixelIconName.Character" Size="PixelIconSize.ExtraLarge" Decorative="true" />
+                        </Illustration>
+                    </LevelUpHero>
+                </div>
+                <div class="hero-catalog__frame">
+                    <p class="hero-catalog__example-label"><strong>Informative</strong> — explicit <code>Label</code>, exposed to assistive technology.</p>
+                    <LevelUpHero Title="Informative illustration example" Subtitle="The warning icon here communicates status and must be announced.">
+                        <Illustration>
+                            <PixelIcon Name="PixelIconName.Warning" Size="PixelIconSize.ExtraLarge" Color="PixelIconColor.Warning" Decorative="false" Label="Action required" />
+                        </Illustration>
+                    </LevelUpHero>
+                </div>
+            </div>
+        </section>
+
+        <section class="hero-catalog__section" aria-labelledby="hero-minimal-heading">
+            <h2 id="hero-minimal-heading">Minimal composition — title only</h2>
+            <p class="hero-catalog__note">
+                No eyebrow, subtitle, illustration, primary action, or supporting content are rendered as empty
+                wrappers when their parameters are omitted.
+            </p>
+            <div class="hero-catalog__frame">
+                <LevelUpHero Title="Title-only Hero" />
+            </div>
+        </section>
+    </main>
+}

@@ -51,18 +51,53 @@
 .filter-bar__filters,
 .filter-bar__create { position: relative; }
 
-.filter-bar__filters ::deep .filter-bar__filter-button,
 .filter-bar__create ::deep .filter-bar__create-button {
     min-width: 8.2rem;
     min-height: 2.75rem;
 }
 
+/* Compact, icon-only toggle matching the visual language of the Daily column's
+   "Completed" and "Projects" icon buttons — square, bordered, primary-color active state. */
+.filter-bar__tags-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-sm);
+    color: #4f3b5b;
+    background: var(--levelup-color-surface);
+    cursor: pointer;
+    transition: background-color var(--levelup-transition-fast), color var(--levelup-transition-fast), border-color var(--levelup-transition-fast);
+}
+
+.filter-bar__tags-toggle:hover {
+    color: var(--levelup-color-primary);
+    background: #f2eef7;
+}
+
+.filter-bar__tags-toggle[aria-expanded="true"] {
+    color: var(--levelup-color-primary);
+    background: #f2eef7;
+    border-color: var(--levelup-color-primary);
+}
+
+.filter-bar__tags-toggle:focus-visible {
+    outline: 2px solid var(--levelup-color-primary);
+    outline-offset: 1px;
+}
+
 .filter-bar__filter-count {
+    position: absolute;
+    top: -.35rem;
+    right: -.35rem;
     display: inline-grid;
     place-items: center;
     min-width: 1.35rem;
     height: 1.35rem;
-    margin-left: var(--levelup-spacing-xs);
     padding: 0 .3rem;
     border-radius: var(--levelup-radius-pill);
     color: #fff;
@@ -204,9 +239,7 @@
 
 @media (max-width: 520px) {
     .filter-bar__main { grid-template-columns: 1fr; }
-    .filter-bar__filters,
     .filter-bar__create,
-    .filter-bar__filters ::deep .filter-bar__filter-button,
     .filter-bar__create ::deep .filter-bar__create-button { width: 100%; }
     .filter-bar__tags-menu,
     .filter-bar__menu { right: auto; left: 0; width: 100%; }

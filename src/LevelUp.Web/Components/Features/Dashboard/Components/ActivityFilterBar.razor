@@ -5,19 +5,18 @@
 <div class="filter-bar" aria-label="Dashboard controls">
     <div class="filter-bar__main">
         <div class="filter-bar__filters">
-            <LevelUpButton Variant="LevelUpButtonVariant.Secondary"
-                           Compact="true"
-                           Icon="PixelIconName.Filter"
-                           Class="filter-bar__filter-button"
-                           OnClick="ToggleTagsMenu"
-                           aria-haspopup="dialog"
-                           aria-expanded="@showTagsMenu">
-                Tags
+            <button type="button"
+                    class="filter-bar__tags-toggle"
+                    @onclick="ToggleTagsMenu"
+                    aria-haspopup="dialog"
+                    aria-expanded="@showTagsMenu"
+                    aria-label="Filter by tags">
+                <PixelIcon Name="PixelIconName.Filter" Size="PixelIconSize.Small" Decorative="true" />
                 @if (SelectedAttributes.Count > 0)
                 {
-                    <span class="filter-bar__filter-count" aria-label="@($"{SelectedAttributes.Count} selected tags")">@SelectedAttributes.Count</span>
+                    <span class="filter-bar__filter-count" aria-hidden="true">@SelectedAttributes.Count</span>
                 }
-            </LevelUpButton>
+            </button>
 
             @if (showTagsMenu)
             {
@@ -67,11 +66,11 @@
             <LevelUpButton Variant="LevelUpButtonVariant.Primary"
                            Compact="true"
                            Icon="PixelIconName.Add"
-                           Class="filter-bar__create-button"
+                           Class="filter-bar__create-button levelup-button--comic levelup-button--comic-blue"
                            OnClick="ToggleCreateMenu"
                            aria-haspopup="menu"
                            aria-expanded="@showCreateMenu">
-                Add activity
+                Activity
             </LevelUpButton>
             @if (showCreateMenu)
             {

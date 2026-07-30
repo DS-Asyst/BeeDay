@@ -3,13 +3,15 @@
 
 @if (IsOpen)
 {
-    <ActivityModal Model="Model"
+    <EditorModalShell Model="Model"
                       Title="@(IsEditing ? "Edit Transaction" : "Create Transaction")"
                       TitleId="transaction-editor-title"
-                      SubmitLabel="@(IsEditing ? "SAVE" : "CREATE")"
+                      SubmitLabel="@(IsEditing ? "Save" : "Create")"
+                      ShowDelete="IsEditing"
                       IsBusy="IsBusy"
                       OnSubmit="SaveAsync"
-                      OnCancel="CancelAsync">
+                      OnCancel="CancelAsync"
+                      OnDelete="DeleteAsync">
         <HeroContent>
             <div class="editor-modal__hero">
                 <LevelUpInput Id="transaction-description"
@@ -75,7 +77,7 @@
                 </LevelUpSelect>
             </div>
         </BodyContent>
-    </ActivityModal>
+    </EditorModalShell>
 }
 
 @code {
@@ -86,7 +88,9 @@
     [Parameter] public IReadOnlyList<InventoryTagResponse> Tags { get; set; } = [];
     [Parameter] public EventCallback OnSave { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnDeleteRequested { get; set; }
 
     private Task SaveAsync() => IsBusy ? Task.CompletedTask : OnSave.InvokeAsync();
     private Task CancelAsync() => IsBusy ? Task.CompletedTask : OnCancel.InvokeAsync();
+    private Task DeleteAsync() => IsBusy ? Task.CompletedTask : OnDeleteRequested.InvokeAsync();
 }

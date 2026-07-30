@@ -283,12 +283,12 @@
 
 .activity-card__body,
 .habit-card__body {
-    font-family: var(--levelup-font-card);
+    font-family: var(--levelup-font-body);
 }
 
 .activity-card h3,
 .habit-card__title h3 {
-    font-family: var(--levelup-font-card);
+    font-family: var(--levelup-font-body);
     font-size: .88rem;
     font-weight: 500;
     line-height: 1.2;
@@ -298,7 +298,7 @@
 .activity-card p,
 .habit-card__body p {
     margin-top: .12rem;
-    font-family: var(--levelup-font-card);
+    font-family: var(--levelup-font-body);
     font-size: .78rem;
     font-weight: 400;
     line-height: 1.3;
@@ -306,7 +306,7 @@
 }
 
 .activity-card__meta {
-    font-family: var(--levelup-font-card);
+    font-family: var(--levelup-font-body);
     font-weight: 500;
 }
 
@@ -360,7 +360,7 @@
     min-height: 0;
     padding: .58rem .72rem .48rem;
     overflow: visible;
-    font-family: var(--levelup-font-card);
+    font-family: var(--levelup-font-body);
 }
 
 .habit-card__header {
@@ -381,7 +381,7 @@
     margin: 0;
     overflow: hidden;
     color: #302638;
-    font-family: var(--levelup-font-card);
+    font-family: var(--levelup-font-body);
     font-size: .88rem;
     font-weight: 500;
     line-height: 1.2;
@@ -395,7 +395,7 @@
     margin: .12rem 0 0;
     overflow: hidden;
     color: #786f80;
-    font-family: var(--levelup-font-card);
+    font-family: var(--levelup-font-body);
     font-size: .78rem;
     font-weight: 400;
     line-height: 1.3;
@@ -451,7 +451,7 @@
 .habit-card__body > p {
     margin: .28rem 0 0;
     color: #786f80;
-    font-family: var(--levelup-font-card);
+    font-family: var(--levelup-font-body);
     font-size: .74rem;
     line-height: 1.35;
 }
@@ -583,7 +583,7 @@
     flex: 0 0 auto;
     min-width: 6ch;
     color: var(--levelup-color-text-secondary);
-    font-family: var(--levelup-font-card);
+    font-family: var(--levelup-font-body);
     font-size: .68rem;
     font-variant-numeric: tabular-nums;
     font-weight: var(--levelup-font-weight-regular);

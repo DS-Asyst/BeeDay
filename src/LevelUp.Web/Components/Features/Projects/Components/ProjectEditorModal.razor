@@ -1,8 +1,8 @@
 @using LevelUp.Domain.Enums
-<ActivityModal Model="Model"
+<EditorModalShell Model="Model"
                   Title="@(IsEditing ? "Edit Project" : "Create Project")"
                   TitleId="project-editor-title"
-                  SubmitLabel="@(IsEditing ? "SAVE" : "CREATE")"
+                  SubmitLabel="@(IsEditing ? "Save" : "Create")"
                   ShowDelete="IsEditing"
                   OnSubmit="Save"
                   OnCancel="Cancel"
@@ -50,9 +50,18 @@
                                       FieldCssClass="editor-modal__field" />
         </div>
     </BodyContent>
-</ActivityModal>
+    <SecondaryAction>
+        @if (IsEditing)
+        {
+            <LevelUpButton Variant="LevelUpButtonVariant.Secondary"
+                           Compact="true"
+                           Class="levelup-button--comic"
+                           OnClick="OpenProject">Open Project</LevelUpButton>
+        }
+    </SecondaryAction>
+</EditorModalShell>
 
-<ConfirmationDialog IsOpen="showDeleteConfirmation"
+<LevelUpConfirmDialog IsOpen="showDeleteConfirmation"
                       Title="Delete Project"
                       Message="Are you sure you want to delete this project?"
                       ItemTitle="@Model.Title"

@@ -7,17 +7,21 @@ namespace LevelUp.Web.Tests.Components.Dashboard;
 public sealed class ActivityFilterBarTests
 {
     [Fact]
-    public void RendersSearchTagsTriggerAndCreateAction()
+    public void RendersSearchTagsToggleAndCreateAction()
     {
         using var context = new BunitContext();
         var cut = context.Render<ActivityFilterBar>();
 
         Assert.Contains("placeholder=\"Search\"", cut.Markup, StringComparison.Ordinal);
-        Assert.Contains("Tags", cut.Markup);
-        Assert.Contains("Add activity", cut.Markup);
+        Assert.Contains("Activity", cut.Markup);
+        Assert.DoesNotContain("Add activity", cut.Markup, StringComparison.Ordinal);
         Assert.DoesNotContain(">Search activities<", cut.Markup, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("total", cut.Markup, StringComparison.OrdinalIgnoreCase);
         Assert.Empty(cut.FindAll("select"));
+
+        var toggle = cut.Find("button[aria-haspopup='dialog']");
+        Assert.Equal("Filter by tags", toggle.GetAttribute("aria-label"));
+        Assert.DoesNotContain("Tags", toggle.TextContent, StringComparison.Ordinal);
     }
 
     [Fact]
