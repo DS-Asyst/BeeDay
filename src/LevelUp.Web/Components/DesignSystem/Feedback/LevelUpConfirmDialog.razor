@@ -41,7 +41,7 @@
                     <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel"
                                    Icon="PixelIconName.Cancel"
                                    Disabled="IsBusy"
-                                   Class="delete-confirmation__cancel-action"
+                                   Class="delete-confirmation__cancel-action levelup-button--comic levelup-button--comic-neutral"
                                    OnClick="CancelAsync">
                         @CancelLabel
                     </LevelUpButton>
@@ -49,7 +49,7 @@
                                    Icon="PixelIconName.Delete"
                                    Disabled="IsBusy"
                                    IsLoading="IsBusy"
-                                   Class="delete-confirmation__confirm-action levelup-button--comic-press"
+                                   Class="delete-confirmation__confirm-action levelup-button--comic levelup-button--comic-danger"
                                    OnClick="ConfirmAsync">
                         @ConfirmLabel
                     </LevelUpButton>

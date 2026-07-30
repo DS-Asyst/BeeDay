@@ -4,7 +4,7 @@
 <section class="inventory-tags-panel" aria-labelledby="inventory-tags-title" aria-busy="@IsBusy.ToString().ToLowerInvariant()">
     <header class="inventory-panel-header">
         <div><span class="inventory-eyebrow">Organization</span><h2 id="inventory-tags-title">Tags</h2></div>
-        <LevelUpButton Variant="LevelUpButtonVariant.Primary" Compact="true" Disabled="IsBusy" OnClick="StartCreate">New tag</LevelUpButton>
+        <LevelUpButton Variant="LevelUpButtonVariant.Primary" Compact="true" Disabled="IsBusy" Class="levelup-button--comic levelup-button--comic-magenta" OnClick="StartCreate">New tag</LevelUpButton>
     </header>
 
     @if (Tags.Count == 0)
@@ -22,7 +22,7 @@
                     <span class="inventory-tag-dot" style="background:@tag.Color"></span>
                     <div><strong>@tag.Name</strong><small>@tag.TransactionCount transaction@(tag.TransactionCount == 1 ? string.Empty : "s")</small></div>
                     <LevelUpButton Variant="LevelUpButtonVariant.Secondary" Compact="true" Icon="PixelIconName.Edit" Disabled="IsBusy" OnClick="() => StartEdit(tag)">Edit</LevelUpButton>
-                    <LevelUpButton Variant="LevelUpButtonVariant.Danger" Compact="true" Icon="PixelIconName.Delete" Disabled="IsBusy" Class="levelup-button--skew-press" OnClick="() => OnDelete.InvokeAsync(tag)">Delete</LevelUpButton>
+                    <LevelUpButton Variant="LevelUpButtonVariant.Danger" Compact="true" Icon="PixelIconName.Delete" Disabled="IsBusy" Class="levelup-button--comic levelup-button--comic-danger" OnClick="() => OnDelete.InvokeAsync(tag)">Delete</LevelUpButton>
                 </div>
             }
         </div>
@@ -35,8 +35,8 @@
             <label class="inventory-field"><span>Name</span><InputText @bind-Value="Form.Name" maxlength="40" disabled="@IsBusy" autofocus /><ValidationMessage For="@(() => Form.Name)" /></label>
             <label class="inventory-field inventory-color-field"><span>Color</span><InputText @bind-Value="Form.Color" maxlength="7" disabled="@IsBusy" /><input type="color" @bind="Form.Color" disabled="@IsBusy" aria-label="Select tag color" /><ValidationMessage For="@(() => Form.Color)" /></label>
             <div class="inventory-tag-form__actions">
-                <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel" Compact="true" Disabled="IsBusy" OnClick="Cancel">Cancel</LevelUpButton>
-                <LevelUpButton Type="submit" Variant="LevelUpButtonVariant.Primary" Compact="true" IsLoading="IsBusy" Disabled="IsBusy">@(IsBusy ? "Saving..." : "Save tag")</LevelUpButton>
+                <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel" Compact="true" Disabled="IsBusy" Class="levelup-button--comic levelup-button--comic-neutral" OnClick="Cancel">Cancel</LevelUpButton>
+                <LevelUpButton Type="submit" Variant="LevelUpButtonVariant.Primary" Compact="true" IsLoading="IsBusy" Disabled="IsBusy" Class="levelup-button--comic levelup-button--comic-success">@(IsBusy ? "Saving..." : "Save tag")</LevelUpButton>
             </div>
         </EditForm>
     }

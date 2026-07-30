@@ -4,7 +4,7 @@
                         Title="Profile"
                         Description="Manage the personal information shown across LevelUp.">
     <LevelUpSettingsForm TModel="ProfileFormModel" Model="Model" OnValidSubmit="OnSave"
-                         FormName="account-profile" SubmitLabel="SAVE PROFILE" SubmitButtonClass="levelup-button--skew-press" IsBusy="IsBusy">
+                         FormName="account-profile" SubmitLabel="SAVE PROFILE" SubmitButtonClass="levelup-button--comic levelup-button--comic-success" IsBusy="IsBusy">
         <div class="levelup-settings-form__grid">
             <LevelUpInput Id="account-name" Label="Name" Required="true" MaxLength="100"
                           @bind-Value="Model.Name" />

@@ -28,19 +28,22 @@ Every editor modal (Habits, Tasks, To-Dos, Projects, Inventory transactions) com
 - All buttons render through `LevelUpButton` (`Variant`: Primary, Secondary, Success, Warning, Back, Danger, ConfirmationDanger, ConfirmationCancel) — never a bare `<button>` with its own bespoke CSS. Buttons with the same semantic meaning (Save, Cancel, Delete, Edit, Create) use the same variant everywhere. Real UI exceptions (dropdown menu items, combobox triggers, checkboxes, segmented toggles, nav/drawer entries, icon-only dismiss controls, clickable cards) are not "buttons" in this sense and are unaffected.
 - Any settings-style page (a card containing a titled form section — Account today; Preferences, Character, and administrative pages in the future) composes `LevelUpSettingsSection` (card + section header) with `LevelUpSettingsForm<TModel>` (EditForm + validation + fieldset + submit action) from the Layout group, rather than re-implementing that card/form chrome per page. Field layout inside the form (grid, hints) uses the shared `.levelup-settings-form__grid` / `.levelup-settings-form__hint` classes from `wwwroot/css/settings.css`.
 
-## Skewed press action style
+## Comic action style
 
-`LevelUpButton` supports the opt-in `levelup-button--skew-press` class for the approved primary operational actions. The class applies the shared skewed press geometry, typography, depth shadow, and active displacement while preserving the semantic palette supplied by the button variant. Its fixed height is `2.4em`.
+`LevelUpButton` supports the opt-in `levelup-button--comic` class for the primary operational actions approved by the product. It centralizes the shared Jersey 25 typography, 2 px black border, 9 px radius, hard offset shadow, hover depth, active displacement, keyboard focus ring, disabled state, and reduced-motion behavior.
 
-Current consumers are Sign in, New transaction, Add activity, the Account submit actions, the editor Delete action, and the inventory tag Delete action. Other buttons keep the standard LevelUpButton presentation unless explicitly approved.
+Palette modifiers preserve the requested action semantics without duplicating component CSS:
 
-## Comic panel press style
+- `levelup-button--comic-blue`: Sign in, Add activity, and Change password;
+- `levelup-button--comic-yellow`: Continue, Choose class, Confirm, and Resend confirmation;
+- `levelup-button--comic-back`: Back;
+- `levelup-button--comic-danger`: destructive Delete actions;
+- `levelup-button--comic-neutral`: Cancel actions;
+- `levelup-button--comic-success`: Create, Save, Save profile, and Save preferences;
+- `levelup-button--comic-orange`: New transaction;
+- `levelup-button--comic-magenta`: New tag.
 
-`LevelUpButton` also supports the opt-in `levelup-button--comic-press` class, reserved for destructive confirmation actions. It applies a bold ink outline and hard offset shadow (reusing the shared `--levelup-game-ink` / `--levelup-game-border` pixel-UI tokens) that inverts fill and text color on hover and settles flush into the shadow on press, while the fill and text colors keep reusing the semantic palette supplied by the button variant (Danger/ConfirmationDanger). Unlike skew-press, it does not set its own width/height/padding — sizing stays owned by the consumer's layout.
-
-Current consumer is the delete-confirmation dialog's Delete action (`LevelUpConfirmDialog`), used by every delete flow in the app (Habits, Tasks, To-Dos, Projects, Inventory transactions and tags).
-
-The Inventory transaction card's "..." menu Delete entry (`LevelUpCardMenu`, a dropdown-menu item and therefore not a `LevelUpButton`) carries the same visual language via scoped CSS in `LevelUpCardMenu.razor.css` and a matching override in `inventory.css`, so the "comic panel" look is consistent between the card's inline Delete action and the confirmation dialog it opens. Other dropdown-menu items remain the plain UI-exception presentation described above.
+The older `levelup-button--skew-press` and `levelup-button--comic-press` hooks remain available for backward compatibility, but the production consumers listed above use the unified comic action contract.
 
 ## Page Header vs. Hero (`LevelUpPageHeader` vs. `LevelUpHero`)
 

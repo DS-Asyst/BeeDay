@@ -11,7 +11,7 @@
 @if (_resent) { <div class="identity-feedback identity-feedback--success" role="status">If the account is eligible, a new confirmation message was generated.</div> }
 @if (!string.IsNullOrWhiteSpace(_error)) { <div class="identity-feedback identity-feedback--error" role="alert">@_error</div> }
 <div class="identity-note"><strong>@DisplayEmail</strong><span>Use the most recent confirmation email. Links expire after 24 hours.</span></div>
-<LevelUpButton FullWidth="true" IsLoading="@_busy" Disabled="@(_busy || _secondsRemaining > 0)" OnClick="ResendAsync">@ButtonText</LevelUpButton>
+<LevelUpButton FullWidth="true" Class="levelup-button--comic levelup-button--comic-yellow" IsLoading="@_busy" Disabled="@(_busy || _secondsRemaining > 0)" OnClick="ResendAsync">@ButtonText</LevelUpButton>
 <a class="identity-navigation-link" href="/login">BACK TO SIGN IN</a>
 </div></div></section>
 @code {

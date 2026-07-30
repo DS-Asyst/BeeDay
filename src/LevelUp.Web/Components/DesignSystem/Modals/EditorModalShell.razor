@@ -15,7 +15,7 @@
                                Icon="PixelIconName.Save"
                                Disabled="IsBusy"
                                IsLoading="IsBusy"
-                               Class="editor-modal__submit-action editor-modal__header-save">@SubmitLabel</LevelUpButton>
+                               Class="editor-modal__submit-action editor-modal__header-save levelup-button--comic levelup-button--comic-success">@SubmitLabel</LevelUpButton>
             </header>
 
             <div class="editor-modal__content">
@@ -31,7 +31,7 @@
                                        Icon="PixelIconName.Delete"
                                        Disabled="IsBusy"
                                        Compact="true"
-                                       Class="levelup-button--skew-press"
+                                       Class="levelup-button--comic levelup-button--comic-danger"
                                        OnClick="OnDelete">DELETE</LevelUpButton>
                     }
                 </div>
@@ -40,7 +40,7 @@
                     <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel"
                                    Icon="PixelIconName.Cancel"
                                    Disabled="IsBusy"
-                                   Class="editor-modal__cancel-action"
+                                   Class="editor-modal__cancel-action levelup-button--comic levelup-button--comic-neutral"
                                    OnClick="Cancel">CANCEL</LevelUpButton>
                 </div>
             </footer>

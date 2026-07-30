@@ -13,7 +13,7 @@
 <EditForm Model="_model" OnValidSubmit="SubmitAsync" class="identity-form">
 <DataAnnotationsValidator />
 <label class="identity-field"><span>Email</span><InputText type="email" @bind-Value="_model.Email" autocomplete="email" disabled="@_busy" /><ValidationMessage For="() => _model.Email" /></label>
-<LevelUpButton Type="submit" FullWidth="true" IsLoading="@_busy" Disabled="@(_busy || _secondsRemaining > 0)">@ButtonText</LevelUpButton>
+<LevelUpButton Type="submit" FullWidth="true" Class="levelup-button--comic levelup-button--comic-yellow" IsLoading="@_busy" Disabled="@(_busy || _secondsRemaining > 0)">@ButtonText</LevelUpButton>
 </EditForm>
 <a class="identity-navigation-link" href="/login">BACK TO SIGN IN</a>
 </div></div></section>

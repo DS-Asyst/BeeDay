@@ -210,6 +210,123 @@
     box-shadow: 5px 5px 0 var(--levelup-game-ink), 0 0 0 4px var(--levelup-button-focus);
 }
 
+
+/* Comic action style approved for the main LevelUp operational buttons.
+   Geometry is shared; palette modifiers map each product action to its requested colors. */
+.levelup-button.levelup-button--comic {
+    --levelup-comic-hover-foreground: var(--levelup-button-foreground);
+
+    min-height: 0;
+    max-height: 2.7em;
+    padding: 10px 20px;
+    border: 2px solid #000;
+    border-radius: 9px;
+    color: var(--levelup-button-foreground);
+    background: var(--levelup-button-background);
+    box-shadow: 3.5px 3.5px 0 #000;
+    filter: none;
+    font-family: var(--levelup-font-ui);
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1;
+    text-transform: none;
+    transition:
+        background-color .3s ease,
+        color .3s ease,
+        box-shadow .3s ease,
+        transform .3s ease;
+}
+
+.levelup-button.levelup-button--comic:not(:disabled):hover {
+    color: var(--levelup-comic-hover-foreground);
+    background: var(--levelup-button-background-hover);
+    border-color: #000;
+    box-shadow: 5px 5px 0 #000;
+    transform: none;
+}
+
+.levelup-button.levelup-button--comic:not(:disabled):active {
+    color: var(--levelup-button-pressed-foreground, var(--levelup-button-foreground));
+    background: var(--levelup-button-pressed);
+    box-shadow: none;
+    transform: translateY(4px);
+}
+
+.levelup-button.levelup-button--comic:focus-visible {
+    outline: 0;
+    box-shadow: 3.5px 3.5px 0 #000, 0 0 0 4px var(--levelup-button-focus);
+}
+
+.levelup-button.levelup-button--comic-blue {
+    --levelup-button-background: #14adff;
+    --levelup-button-background-hover: #2cbaff;
+    --levelup-button-pressed: #0080d4;
+    --levelup-button-foreground: #fff;
+    --levelup-button-focus: rgb(20 173 255 / 35%);
+}
+
+.levelup-button.levelup-button--comic-yellow {
+    --levelup-button-background: #ffc928;
+    --levelup-button-background-hover: #ffd454;
+    --levelup-button-pressed: #d28b00;
+    --levelup-button-foreground: #000;
+    --levelup-button-focus: rgb(255 201 40 / 40%);
+}
+
+.levelup-button.levelup-button--comic-back {
+    --levelup-button-background: #fff;
+    --levelup-button-background-hover: #9c1bff;
+    --levelup-button-pressed: #6512a6;
+    --levelup-button-foreground: #000;
+    --levelup-comic-hover-foreground: #fff;
+    --levelup-button-pressed-foreground: #fff;
+    --levelup-button-focus: rgb(156 27 255 / 35%);
+}
+
+.levelup-button.levelup-button--comic-danger {
+    --levelup-button-background: #fff;
+    --levelup-button-background-hover: #ef4455;
+    --levelup-button-pressed: #d63d4c;
+    --levelup-button-foreground: #000;
+    --levelup-comic-hover-foreground: #fff;
+    --levelup-button-pressed-foreground: #fff;
+    --levelup-button-focus: rgb(239 68 85 / 35%);
+}
+
+.levelup-button.levelup-button--comic-neutral {
+    --levelup-button-background: #fff;
+    --levelup-button-background-hover: #e3e3e3;
+    --levelup-button-pressed: #afaeb0;
+    --levelup-button-foreground: #000;
+    --levelup-button-pressed-foreground: #fff;
+    --levelup-button-focus: rgb(175 174 176 / 38%);
+}
+
+.levelup-button.levelup-button--comic-success {
+    --levelup-button-background: #bef264;
+    --levelup-button-background-hover: #bef264;
+    --levelup-button-pressed: #84cc16;
+    --levelup-button-foreground: #000;
+    --levelup-button-focus: rgb(190 242 100 / 42%);
+}
+
+.levelup-button.levelup-button--comic-orange {
+    --levelup-button-background: #f08d2e;
+    --levelup-button-background-hover: #ff9731;
+    --levelup-button-pressed: #d17c29;
+    --levelup-button-foreground: #000;
+    --levelup-button-focus: rgb(240 141 46 / 38%);
+}
+
+.levelup-button.levelup-button--comic-magenta {
+    --levelup-button-background: #d40fde;
+    --levelup-button-background-hover: #f311ff;
+    --levelup-button-pressed: #b90dc2;
+    --levelup-button-foreground: #fff;
+    --levelup-button-focus: rgb(212 15 222 / 35%);
+}
+
 .levelup-button--full-width { width: 100%; }
 .levelup-button--compact { min-height: 2.25rem; padding: .5rem .8rem .58rem; font-size: .82rem; }
 .levelup-button__label { position: relative; z-index: 1; display: inline-flex; min-width: 0; align-items: center; white-space: nowrap; }
@@ -257,6 +374,7 @@
     .levelup-button { transition: none; }
     .levelup-button.levelup-button--skew-press { transition: none; }
     .levelup-button.levelup-button--comic-press { transition: none; }
+    .levelup-button.levelup-button--comic { transition: none; }
     .levelup-button__loader { animation: none; }
 }
 
