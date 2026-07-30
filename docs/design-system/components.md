@@ -28,20 +28,28 @@ Every editor modal (Habits, Tasks, To-Dos, Projects, Inventory transactions) com
 - All buttons render through `LevelUpButton` (`Variant`: Primary, Secondary, Success, Warning, Back, Danger, ConfirmationDanger, ConfirmationCancel) — never a bare `<button>` with its own bespoke CSS. Buttons with the same semantic meaning (Save, Cancel, Delete, Edit, Create) use the same variant everywhere. Real UI exceptions (dropdown menu items, combobox triggers, checkboxes, segmented toggles, nav/drawer entries, icon-only dismiss controls, clickable cards) are not "buttons" in this sense and are unaffected.
 - Any settings-style page (a card containing a titled form section — Account today; Preferences, Character, and administrative pages in the future) composes `LevelUpSettingsSection` (card + section header) with `LevelUpSettingsForm<TModel>` (EditForm + validation + fieldset + submit action) from the Layout group, rather than re-implementing that card/form chrome per page. Field layout inside the form (grid, hints) uses the shared `.levelup-settings-form__grid` / `.levelup-settings-form__hint` classes from `wwwroot/css/settings.css`.
 
+## Button typography
+
+Every `LevelUpButton`, comic or not, renders Jersey 25 and never forces uppercase — `LevelUpButton` always displays the exact text it is given (e.g. "Save", "Cancel", "Delete", "Choose Class"), and never bold under any state (default, hover, focus, active, disabled, loading). This is a property of the shared `.levelup-button` base class itself, not just the opt-in comic style — `font-weight: 400` and the current size scale (base `.88rem`, `--compact` `.78rem`, `--comic` `20px`) are declared exactly once, in `design-system.css`; `typography-policy.css` only adds the `!important` font-weight backstop and the Jersey 25 font-family policy, never a second size/weight declaration, so there is a single source of truth for button typography. Other interactive elements that are not `LevelUpButton` (bare buttons, menu items, tabs, options, navigation links, clickable cards) are unaffected and read as Inter body text by default.
+
+Cancel and Delete buttons never carry an icon — text only — everywhere they appear (`EditorModalShell`, `LevelUpConfirmDialog`, and every consumer that composes them). This is enforced at the two shared components, not per feature.
+
 ## Comic action style
 
-`LevelUpButton` supports the opt-in `levelup-button--comic` class for the primary operational actions approved by the product. It centralizes the shared Jersey 25 typography, 2 px black border, 9 px radius, hard offset shadow, hover depth, active displacement, keyboard focus ring, disabled state, and reduced-motion behavior.
+`LevelUpButton` supports the opt-in `levelup-button--comic` class for the primary operational actions approved by the product. It adds a 2 px black border, 9 px radius, hard offset shadow, hover depth, active displacement, keyboard focus ring, disabled state, and reduced-motion behavior on top of the shared button typography above.
 
 Palette modifiers preserve the requested action semantics without duplicating component CSS:
 
-- `levelup-button--comic-blue`: Sign in, Add activity, and Change password;
+- `levelup-button--comic-blue`: Sign in, Activity, and Change password;
 - `levelup-button--comic-yellow`: Continue, Choose class, Confirm, and Resend confirmation;
 - `levelup-button--comic-back`: Back;
 - `levelup-button--comic-danger`: destructive Delete actions;
-- `levelup-button--comic-neutral`: Cancel actions;
+- `levelup-button--comic-neutral`: Cancel actions, and any other action that must look and behave identically to Cancel (e.g. Inventory's "More Filters" toggle) — reuse `ConfirmationCancel` + `levelup-button--comic levelup-button--comic-neutral` rather than a page-specific look-alike;
 - `levelup-button--comic-success`: Create, Save, Save profile, and Save preferences;
 - `levelup-button--comic-orange`: New transaction;
 - `levelup-button--comic-magenta`: New tag.
+
+Compact, inline "Cancel"/"Clear filters" actions inside dropdowns and filter panels (e.g. `ActivityFilterBar`'s tags-menu Cancel, `InventoryFilters`' "Clear filters") intentionally stay on the plain (non-comic) `ConfirmationCancel` styling at compact size — applying the comic treatment's own fixed padding/min-height to a `Compact` button would override its compact sizing (comic's two-class selector always wins over `--compact`'s one-class selector) and blow it back up to full size. Reach for comic-neutral only on non-compact `ConfirmationCancel` buttons.
 
 The older `levelup-button--skew-press` and `levelup-button--comic-press` hooks remain available for backward compatibility, but the production consumers listed above use the unified comic action contract.
 

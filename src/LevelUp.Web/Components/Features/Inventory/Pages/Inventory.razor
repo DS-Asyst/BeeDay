@@ -69,15 +69,16 @@ else
                              OnClearFilters="ClearFiltersAsync"
                              OnPreviousPage="PreviousPageAsync"
                              OnNextPage="NextPageAsync"
-                             OnEdit="OpenEditTransaction"
-                             OnDelete="RequestDeleteTransaction" />
+                             OnEdit="OpenEditTransaction" />
 
-            <InventoryTagManager Tags="_tags" IsBusy="_interaction.IsBusy" OnSave="SaveTagAsync" OnDelete="RequestDeleteTag" />
+            <InventoryTagManager Tags="_tags" IsBusy="_interaction.IsBusy" OnCreate="OpenCreateTag" OnEdit="OpenEditTag" />
         </section>
     </main>
 }
 
-<TransactionFormModal IsOpen="_isTransactionEditorOpen" IsEditing="@(_editingTransactionId is not null)" IsBusy="_interaction.IsBusy" Model="_transactionForm" Tags="_tags" OnSave="SaveTransactionAsync" OnCancel="CloseTransactionEditor" />
+<TransactionFormModal IsOpen="_isTransactionEditorOpen" IsEditing="@(_editingTransactionId is not null)" IsBusy="_interaction.IsBusy" Model="_transactionForm" Tags="_tags" OnSave="SaveTransactionAsync" OnCancel="CloseTransactionEditor" OnDeleteRequested="RequestDeleteCurrentTransaction" />
+
+<TagFormModal IsOpen="_isTagEditorOpen" IsEditing="@(_editingTagId is not null)" IsBusy="_interaction.IsBusy" Model="_tagForm" OnSave="SaveTagFormAsync" OnCancel="CloseTagEditor" OnDeleteRequested="RequestDeleteCurrentTag" />
 
 <LevelUpConfirmDialog IsOpen="@(_pendingDeleteTransaction is not null)"
                       IsBusy="_interaction.IsBusy"
@@ -116,6 +117,9 @@ else
     private Guid? _editingTransactionId;
     private TransactionFormModel _transactionForm = new();
     private TransactionResponse? _pendingDeleteTransaction;
+    private bool _isTagEditorOpen;
+    private Guid? _editingTagId;
+    private InventoryTagFormModel _tagForm = new();
     private InventoryTagResponse? _pendingDeleteTag;
 
     protected override async Task OnInitializedAsync()
@@ -270,6 +274,16 @@ else
     }
 
     private void RequestDeleteTransaction(TransactionResponse transaction) { if (!_interaction.IsBusy) _pendingDeleteTransaction = transaction; }
+
+    private void RequestDeleteCurrentTransaction()
+    {
+        if (_interaction.IsBusy || _editingTransactionId is not Guid id) return;
+        var transaction = _transactions.Items.FirstOrDefault(t => t.Id == id);
+        if (transaction is null) return;
+        _isTransactionEditorOpen = false;
+        _editingTransactionId = null;
+        RequestDeleteTransaction(transaction);
+    }
     private void CancelDeleteTransaction() { if (!_interaction.IsBusy) _pendingDeleteTransaction = null; }
 
     private async Task DeleteTransactionAsync()
@@ -291,28 +305,64 @@ else
         finally { _interaction.End(); }
     }
 
-    private async Task<bool> SaveTagAsync((Guid? Id, InventoryTagFormModel Form) value)
+    private void OpenCreateTag()
     {
-        if (!_interaction.TryBegin("save-tag")) return false;
+        if (_interaction.IsBusy) return;
+        _editingTagId = null;
+        _tagForm = new();
+        _isTagEditorOpen = true;
+    }
+
+    private void OpenEditTag(InventoryTagResponse tag)
+    {
+        if (_interaction.IsBusy) return;
+        _editingTagId = tag.Id;
+        _tagForm = new() { Name = tag.Name, Color = tag.Color };
+        _isTagEditorOpen = true;
+    }
+
+    private void CloseTagEditor()
+    {
+        if (_interaction.IsBusy) return;
+        _isTagEditorOpen = false;
+        _editingTagId = null;
+    }
+
+    private async Task SaveTagFormAsync()
+    {
+        if (!_interaction.TryBegin("save-tag")) return;
+        _errorMessage = null;
+        var wasEditing = _editingTagId is not null;
         try
         {
-            var request = new SaveInventoryTagRequest(value.Form.Name, value.Form.Color);
-            if (value.Id is Guid id) await Sender.Send(new UpdateInventoryTagCommand(id, request));
+            var request = new SaveInventoryTagRequest(_tagForm.Name, _tagForm.Color);
+            if (_editingTagId is Guid id) await Sender.Send(new UpdateInventoryTagCommand(id, request));
             else await Sender.Send(new CreateInventoryTagCommand(request));
+
+            _isTagEditorOpen = false;
+            _editingTagId = null;
             await RefreshAfterMutationAsync();
-            Toast.ShowSuccess(value.Id is null ? "Tag created successfully." : "Tag updated successfully.");
-            return true;
+            Toast.ShowSuccess(wasEditing ? "Tag updated successfully." : "Tag created successfully.");
         }
         catch
         {
             _errorMessage = "We could not save the tag. Review the information and try again.";
             Toast.ShowError("Could not save the tag.");
-            return false;
         }
         finally { _interaction.End(); }
     }
 
     private void RequestDeleteTag(InventoryTagResponse tag) { if (!_interaction.IsBusy) _pendingDeleteTag = tag; }
+
+    private void RequestDeleteCurrentTag()
+    {
+        if (_interaction.IsBusy || _editingTagId is not Guid id) return;
+        var tag = _tags.FirstOrDefault(t => t.Id == id);
+        if (tag is null) return;
+        _isTagEditorOpen = false;
+        _editingTagId = null;
+        RequestDeleteTag(tag);
+    }
     private void CancelDeleteTag() { if (!_interaction.IsBusy) _pendingDeleteTag = null; }
 
     private async Task DeleteTagAsync()

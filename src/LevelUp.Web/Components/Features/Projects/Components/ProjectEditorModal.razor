@@ -2,7 +2,7 @@
 <EditorModalShell Model="Model"
                   Title="@(IsEditing ? "Edit Project" : "Create Project")"
                   TitleId="project-editor-title"
-                  SubmitLabel="@(IsEditing ? "SAVE" : "CREATE")"
+                  SubmitLabel="@(IsEditing ? "Save" : "Create")"
                   ShowDelete="IsEditing"
                   OnSubmit="Save"
                   OnCancel="Cancel"
@@ -50,6 +50,15 @@
                                       FieldCssClass="editor-modal__field" />
         </div>
     </BodyContent>
+    <SecondaryAction>
+        @if (IsEditing)
+        {
+            <LevelUpButton Variant="LevelUpButtonVariant.Secondary"
+                           Compact="true"
+                           Class="levelup-button--comic"
+                           OnClick="OpenProject">Open Project</LevelUpButton>
+        }
+    </SecondaryAction>
 </EditorModalShell>
 
 <LevelUpConfirmDialog IsOpen="showDeleteConfirmation"

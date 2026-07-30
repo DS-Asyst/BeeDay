@@ -258,15 +258,94 @@ public sealed class InventoryTagManagerTests : BunitContext
     }
 
     [Fact]
-    public async Task CancelClosesTheTagEditorForm()
+    public async Task ClickingNewTagInvokesOnCreate()
     {
-        var cut = Render<InventoryTagManager>();
+        var invoked = false;
+        var cut = Render<InventoryTagManager>(parameters => parameters
+            .Add(component => component.OnCreate, () => invoked = true));
 
         await cut.Find(".inventory-panel-header .levelup-button--primary").ClickAsync();
-        Assert.NotEmpty(cut.FindAll(".inventory-tag-form"));
 
-        await cut.Find(".inventory-tag-form__actions .levelup-button--confirmation-cancel").ClickAsync();
-
-        Assert.Empty(cut.FindAll(".inventory-tag-form"));
+        Assert.True(invoked);
     }
+
+    [Fact]
+    public async Task ClickingTheTagRowInvokesOnEditWithThatTag()
+    {
+        var tag = CreateTag("Groceries");
+        InventoryTagResponse? edited = null;
+        var cut = Render<InventoryTagManager>(parameters => parameters
+            .Add(component => component.Tags, [tag])
+            .Add(component => component.OnEdit, (InventoryTagResponse value) => edited = value));
+
+        await cut.Find("[role='button']").ClickAsync();
+
+        Assert.Equal(tag, edited);
+    }
+
+    [Theory]
+    [InlineData("Enter")]
+    [InlineData(" ")]
+    public void ActivationKeyOnTheTagRowInvokesOnEdit(string key)
+    {
+        var tag = CreateTag("Groceries");
+        var editInvoked = false;
+        var cut = Render<InventoryTagManager>(parameters => parameters
+            .Add(component => component.Tags, [tag])
+            .Add(component => component.OnEdit, (InventoryTagResponse _) => editInvoked = true));
+
+        cut.Find("[role='button']").KeyDown(key);
+
+        Assert.True(editInvoked);
+    }
+
+    [Fact]
+    public void OtherKeyOnTheTagRowDoesNotInvokeOnEdit()
+    {
+        var tag = CreateTag("Groceries");
+        var editInvoked = false;
+        var cut = Render<InventoryTagManager>(parameters => parameters
+            .Add(component => component.Tags, [tag])
+            .Add(component => component.OnEdit, (InventoryTagResponse _) => editInvoked = true));
+
+        cut.Find("[role='button']").KeyDown("Tab");
+
+        Assert.False(editInvoked);
+    }
+
+    [Fact]
+    public void TagRowRendersNoEditOrDeleteButtons()
+    {
+        var tag = CreateTag("Groceries");
+        var cut = Render<InventoryTagManager>(parameters => parameters
+            .Add(component => component.Tags, [tag]));
+
+        Assert.Empty(cut.Find(".inventory-tag-item").QuerySelectorAll("button"));
+    }
+
+    [Fact]
+    public void RendersNoModal()
+    {
+        // The editor modal is owned and rendered by the page (Inventory.razor), not by this
+        // list component — nesting it here previously trapped its fixed-position backdrop
+        // inside the page's animated <main>, clipping it to a rectangle instead of the viewport.
+        var tag = CreateTag("Groceries");
+        var cut = Render<InventoryTagManager>(parameters => parameters
+            .Add(component => component.Tags, [tag]));
+
+        Assert.Empty(cut.FindAll(".editor-modal"));
+    }
+
+    [Fact]
+    public void ExposesAccessibleEditNameOnTheTagRow()
+    {
+        var tag = CreateTag("Groceries");
+        var cut = Render<InventoryTagManager>(parameters => parameters
+            .Add(component => component.Tags, [tag]));
+
+        Assert.Equal("Edit Tag: Groceries", cut.Find("[role='button']").GetAttribute("aria-label"));
+    }
+
+    private static InventoryTagResponse CreateTag(string name) =>
+        new(Guid.NewGuid(), name, "#7A4FCB", 0, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
 }

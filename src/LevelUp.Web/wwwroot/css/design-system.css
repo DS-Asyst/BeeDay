@@ -27,11 +27,11 @@
         0 4px 0 var(--levelup-button-shadow);
     filter: none;
     font: inherit;
-    font-weight: 700;
+    font-size: .88rem;
+    font-weight: 400;
     letter-spacing: .035em;
     line-height: 1;
     text-align: center;
-    text-transform: uppercase;
     vertical-align: middle;
     cursor: pointer;
     user-select: none;
@@ -138,7 +138,7 @@
     box-shadow: 0 8px 0 var(--levelup-button-depth);
     filter: drop-shadow(0 15px 20px color-mix(in srgb, var(--levelup-button-shadow) 38%, transparent));
     font-size: 1.125em;
-    font-weight: 800;
+    font-weight: 400;
     letter-spacing: 2px;
     line-height: 1;
     text-transform: none;
@@ -226,7 +226,7 @@
     box-shadow: 3.5px 3.5px 0 #000;
     filter: none;
     font-family: var(--levelup-font-ui);
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 400;
     letter-spacing: 0;
     line-height: 1;
@@ -328,7 +328,7 @@
 }
 
 .levelup-button--full-width { width: 100%; }
-.levelup-button--compact { min-height: 2.25rem; padding: .5rem .8rem .58rem; font-size: .82rem; }
+.levelup-button--compact { min-height: 2.25rem; padding: .5rem .8rem .58rem; font-size: .78rem; }
 .levelup-button__label { position: relative; z-index: 1; display: inline-flex; min-width: 0; align-items: center; white-space: nowrap; }
 .levelup-button .pixel-icon { position: relative; z-index: 1; }
 

@@ -14,6 +14,7 @@ public partial class EditorModalShell
     [Parameter] public bool IsBusy { get; set; }
     [Parameter] public RenderFragment? HeroContent { get; set; }
     [Parameter] public RenderFragment? BodyContent { get; set; }
+    [Parameter] public RenderFragment? SecondaryAction { get; set; }
     [Parameter] public EventCallback OnSubmit { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public EventCallback OnDelete { get; set; }

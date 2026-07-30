@@ -8,7 +8,7 @@
 .inventory-filters{display:grid;grid-template-columns:minmax(180px,1fr) repeat(3,minmax(130px,auto));gap:.6rem;padding:1rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.08)}.inventory-filters input,.inventory-filters select,.inventory-field input,.inventory-field select,.inventory-field textarea{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.15);border-radius:7px;background:#21152e;color:#fff;padding:.68rem .75rem;font:inherit}.inventory-filters input:focus,.inventory-filters select:focus,.inventory-field input:focus,.inventory-field select:focus,.inventory-field textarea:focus{outline:2px solid rgba(143,95,224,.6);outline-offset:1px}
 .inventory-table-wrap{overflow:auto}.inventory-table{width:100%;border-collapse:collapse;min-width:760px}.inventory-table th{padding:.8rem 1rem;text-align:left;text-transform:uppercase;letter-spacing:.08em;font-size:.7rem;color:#ad9fbb;background:rgba(255,255,255,.025)}.inventory-table td{padding:.95rem 1rem;border-top:1px solid rgba(255,255,255,.065);vertical-align:middle}.inventory-table td strong,.inventory-table td small{display:block}.inventory-table td small{margin-top:.2rem;color:#9f93aa}.inventory-muted{color:#8f8499}.inventory-tag-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .5rem;border-radius:99px;background:rgba(255,255,255,.06);font-size:.78rem}.inventory-tag-badge i{width:.55rem;height:.55rem;border-radius:50%;background:var(--tag-color,#7a4fcb)}.inventory-row-actions{white-space:nowrap}.inventory-pagination{display:flex;align-items:center;justify-content:center;gap:1rem;padding:1rem;border-top:1px solid rgba(255,255,255,.08)}
 .inventory-empty-state{text-align:center;padding:3.5rem 1rem}.inventory-empty-state>div{font-size:3rem;color:#9f76e8}.inventory-empty-state h3{margin:.5rem 0}.inventory-empty-state p,.inventory-empty-copy{color:#aa9db6}.inventory-alert{display:flex;justify-content:space-between;gap:1rem;margin-bottom:1rem;padding:.8rem 1rem;border:1px solid rgba(255,100,115,.45);border-radius:8px;background:rgba(120,25,40,.35)}
-.inventory-tag-list{display:grid;gap:.45rem;margin-top:1rem}.inventory-tag-item{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:.55rem;padding:.65rem;border-radius:8px;background:rgba(255,255,255,.035)}.inventory-tag-dot{width:.7rem;height:.7rem;border-radius:50%}.inventory-tag-item strong,.inventory-tag-item small{display:block}.inventory-tag-item small{color:#9f93aa;font-size:.72rem}.inventory-tag-form{display:grid;gap:.7rem;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.09)}.inventory-tag-form__actions{display:flex;justify-content:flex-end;gap:.5rem}.inventory-color-field{display:grid;grid-template-columns:1fr 48px;gap:.5rem}.inventory-color-field>span,.inventory-color-field>div{grid-column:1/-1}.inventory-color-field input[type=color]{height:42px;padding:.2rem}
+.inventory-tag-list{display:grid;gap:.45rem;margin-top:1rem}.inventory-tag-item{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:.55rem;padding:.65rem;border-radius:8px;background:rgba(255,255,255,.035)}.inventory-tag-dot{width:.7rem;height:.7rem;border-radius:50%}.inventory-tag-item strong,.inventory-tag-item small{display:block}.inventory-tag-item small{color:#9f93aa;font-size:.72rem}.inventory-color-field{display:grid;grid-template-columns:1fr 48px;gap:.5rem}.inventory-color-field>span,.inventory-color-field>div{grid-column:1/-1}.inventory-color-field input[type=color]{height:42px;padding:.2rem}
 .inventory-modal-backdrop{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:1rem;background:rgba(8,4,13,.72);backdrop-filter:blur(4px)}.inventory-modal{width:min(620px,100%);max-height:90vh;overflow:auto;border:1px solid rgba(255,255,255,.15);border-radius:12px;background:#1c1129;box-shadow:0 25px 80px rgba(0,0,0,.45)}.inventory-modal>header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.09)}.inventory-modal form{padding:1.2rem}.inventory-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}.inventory-field{display:grid;gap:.35rem;font-size:.82rem;color:#cbbfd5}.inventory-field--wide{grid-column:1/-1}.inventory-field .validation-message,.inventory-validation{color:#ff929c;font-size:.75rem}.inventory-modal__actions{display:flex;justify-content:flex-end;gap:.65rem;margin-top:1.2rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.08)}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media(max-width:1000px){.inventory-workspace{grid-template-columns:1fr}.inventory-tags-panel{position:static}.inventory-summary{grid-template-columns:1fr}.inventory-filters{grid-template-columns:1fr 1fr}}
@@ -17,19 +17,16 @@
 /* Sprint 4.5 — Inventory polish */
 .inventory-main-panel{min-height:34rem}
 .inventory-transaction-list{display:grid;gap:.65rem;max-height:calc(100dvh - 22rem);overflow-y:auto;padding:1rem;scrollbar-gutter:stable;overscroll-behavior:contain}
-.inventory-transaction-card{position:relative;display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:.85rem;align-items:center;min-height:76px;padding:.85rem 1rem .85rem .65rem;border:1px solid rgba(255,255,255,.10);border-radius:9px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.025));box-shadow:0 3px 0 rgba(0,0,0,.22);transition:transform 160ms ease,border-color 160ms ease,background 160ms ease,box-shadow 160ms ease}
-.inventory-transaction-card:hover{transform:translateY(-2px);border-color:rgba(205,179,251,.38);background:rgba(122,79,203,.10);box-shadow:0 5px 0 rgba(0,0,0,.22)}
-.inventory-transaction-card:focus-visible{outline:3px solid rgba(216,188,255,.75);outline-offset:2px}
+.inventory-transaction-card{position:relative;display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:.85rem;align-items:center;padding:.85rem 1rem .85rem .65rem;border:1px solid rgba(255,255,255,.10);border-radius:9px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.025));box-shadow:0 3px 0 rgba(0,0,0,.22)}
 .inventory-transaction-card__marker{align-self:stretch;border-radius:4px}.inventory-transaction-card__marker--income{background:#73e5aa}.inventory-transaction-card__marker--expense{background:#ff8e9a}
-.inventory-transaction-card__content{min-width:0}.inventory-transaction-card__heading{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}.inventory-transaction-card__title-wrap{min-width:0}.inventory-transaction-card__title-wrap strong,.inventory-transaction-card__title-wrap small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.inventory-transaction-card__title-wrap strong{font-size:1rem}.inventory-transaction-card__title-wrap small{max-width:52rem;margin-top:.2rem;color:#a99db5}.inventory-transaction-card__amount{flex:none;font-weight:700;font-variant-numeric:tabular-nums}.inventory-transaction-card__meta{display:flex;flex-wrap:wrap;align-items:center;gap:.45rem .75rem;margin-top:.5rem;color:#a99db5;font-size:.76rem}.inventory-transaction-card__actions{display:flex;gap:.25rem}.inventory-transaction-card__actions button{min-width:44px;min-height:38px;border:1px solid transparent;border-radius:6px;background:transparent;color:#cdb3fb;cursor:pointer;font:inherit}.inventory-transaction-card__actions button:hover,.inventory-transaction-card__actions button:focus-visible{border-color:rgba(255,255,255,.14);background:rgba(255,255,255,.06);outline:none}.inventory-transaction-card__actions .danger{color:#ff929c}
+.inventory-transaction-card__content{min-width:0}.inventory-transaction-card__heading{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}.inventory-transaction-card__title-wrap{min-width:0}.inventory-transaction-card__title-wrap strong,.inventory-transaction-card__title-wrap small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.inventory-transaction-card__title-wrap strong{font-size:1rem}.inventory-transaction-card__title-wrap small{max-width:52rem;margin-top:.2rem;color:#a99db5}.inventory-transaction-card__amount{flex:none;font-weight:700;font-variant-numeric:tabular-nums}.inventory-transaction-card__meta{display:flex;flex-wrap:wrap;align-items:center;gap:.45rem .75rem;margin-top:.5rem;color:#a99db5;font-size:.76rem}
 .inventory-tag-badge--solid{border:1px solid;padding:.25rem .55rem;font-weight:700;text-shadow:none}
 .inventory-summary__card--updated{animation:inventory-balance-pulse 700ms ease}
 @keyframes inventory-balance-pulse{0%,100%{box-shadow:0 14px 30px rgba(0,0,0,.16)}45%{box-shadow:0 0 0 3px rgba(216,188,255,.55),0 14px 30px rgba(0,0,0,.16);transform:translateY(-2px)}}
 .inventory-modal-backdrop{animation:inventory-backdrop-in 150ms ease}.inventory-modal{animation:inventory-modal-in 170ms ease}
 @keyframes inventory-backdrop-in{from{opacity:0}to{opacity:1}}@keyframes inventory-modal-in{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
 .inventory-transaction-list[aria-busy="true"]{opacity:.62;pointer-events:none}
-.inventory-tag-item:focus-within{outline:2px solid rgba(216,188,255,.55);outline-offset:1px}
-@media(max-width:720px){.inventory-transaction-list{max-height:none}.inventory-transaction-card{grid-template-columns:4px minmax(0,1fr)}.inventory-transaction-card__actions{grid-column:2;justify-content:flex-end}.inventory-transaction-card__heading{display:block}.inventory-transaction-card__amount{display:block;margin-top:.4rem}.inventory-pagination{flex-wrap:wrap}.inventory-pagination span{order:-1;width:100%;text-align:center}}
+@media(max-width:720px){.inventory-transaction-list{max-height:none}.inventory-transaction-card{grid-template-columns:4px minmax(0,1fr)}.inventory-transaction-card__heading{display:block}.inventory-transaction-card__amount{display:block;margin-top:.4rem}.inventory-pagination{flex-wrap:wrap}.inventory-pagination span{order:-1;width:100%;text-align:center}}
 @media(prefers-reduced-motion:reduce){.inventory-transaction-card,.inventory-modal-backdrop,.inventory-modal,.inventory-summary__card--updated{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 /* Inventory visual alignment with My Account — Design System surfaces */
@@ -64,21 +61,25 @@
     margin-bottom: 1.25rem;
 }
 
+/* .inventory-summary__card, .inventory-main-panel, and .inventory-tags-panel also carry the
+   shared, non-interactive .levelup-card class (no hover) — the exact border/background/shadow
+   values are still declared explicitly here rather than left to design-system.css, since the
+   legacy dark-theme rules earlier in this file load after it and would otherwise win the cascade. */
 .inventory-summary__card,
 .inventory-main-panel,
-.inventory-tags-panel,
-.inventory-modal {
+.inventory-tags-panel {
     border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-sm);
     background: var(--levelup-color-surface);
     color: var(--levelup-color-text-primary);
     box-shadow: var(--levelup-shadow-sm);
-    transform: none !important;
-    filter: none !important;
 }
 
 .inventory-modal {
+    border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-lg);
+    background: var(--levelup-color-surface);
+    color: var(--levelup-color-text-primary);
     box-shadow: var(--levelup-shadow-lg);
 }
 
@@ -201,51 +202,32 @@
     background: #fff;
     color: #2f2835;
     box-shadow: var(--levelup-shadow-sm);
+    cursor: pointer;
     transition: none;
 }
 
+/* .inventory-summary__card, .inventory-main-panel, and .inventory-tags-panel are static
+   (via .levelup-card) — no hover/focus elevation rule for them, matching My Account cards.
+   .inventory-transaction-card and .inventory-tag-item are individually clickable and keep
+   their own distinct interactive-card affordance. */
 .inventory-transaction-card:hover,
 .inventory-transaction-card:focus,
-.inventory-transaction-card:focus-within,
-.inventory-tag-item:hover,
-.inventory-tag-item:focus-within,
-.inventory-summary__card:hover,
-.inventory-summary__card:focus,
-.inventory-summary__card:focus-within,
-.inventory-main-panel:hover,
-.inventory-main-panel:focus-within,
-.inventory-tags-panel:hover,
-.inventory-tags-panel:focus-within {
+.inventory-tag-item:hover {
     transform: none !important;
     filter: none !important;
     background: #fff;
     border-color: var(--levelup-color-border);
-}
-
-.inventory-transaction-card:hover,
-.inventory-transaction-card:focus,
-.inventory-transaction-card:focus-within,
-.inventory-tag-item:hover,
-.inventory-tag-item:focus-within {
     box-shadow: var(--levelup-shadow-md);
 }
 
-.inventory-summary__card:hover,
-.inventory-summary__card:focus,
-.inventory-summary__card:focus-within,
-.inventory-main-panel:hover,
-.inventory-main-panel:focus-within,
-.inventory-tags-panel:hover,
-.inventory-tags-panel:focus-within {
-    box-shadow: var(--levelup-shadow-md);
+.inventory-transaction-card:focus-visible,
+.inventory-tag-item:focus-visible {
+    outline: none;
+    box-shadow: var(--levelup-focus-ring);
 }
 
 .inventory-pagination {
     border-top: 1px solid var(--levelup-color-border);
-}
-
-.inventory-transaction-card__actions button {
-    color: #6a3caf;
 }
 
 .inventory-modal-backdrop {
@@ -253,8 +235,7 @@
 }
 
 .inventory-modal > header,
-.inventory-modal__actions,
-.inventory-tag-form {
+.inventory-modal__actions {
     border-color: var(--levelup-color-border);
 }
 
@@ -268,47 +249,12 @@
 }
 
 .inventory-transaction-card {
-    grid-template-columns: 4px minmax(0, 1fr) auto;
+    grid-template-columns: 4px minmax(0, 1fr);
     overflow: visible;
 }
 
-.inventory-transaction-card__actions {
-    position: relative;
-    align-self: start;
-}
-
-.inventory-transaction-card__menu {
-    display: grid;
-    width: 2rem;
-    height: 2rem;
-    place-items: center;
-    border: 0;
-    background: transparent;
-    color: #5d5364;
-    cursor: pointer;
-    font: 700 1.25rem/1 var(--levelup-font-ui);
-}
-
-.inventory-transaction-card__menu:hover,
-.inventory-transaction-card__menu:focus-visible {
-    background: rgb(122 79 203 / 10%);
-    color: #4f238f;
-    outline: 2px solid rgb(122 79 203 / 30%);
-    outline-offset: 1px;
-}
-
-.inventory-transaction-card__actions .card-action-menu__panel {
-    right: 0;
-    left: auto;
-    z-index: 20;
-}
-
-.inventory-transaction-card__actions .card-action-menu__item {
-    min-width: 9rem;
-}
-
 .inventory-tag-item {
-    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-columns: auto minmax(0, 1fr);
 }
 
 .inventory-tag-item > div {
@@ -385,15 +331,10 @@
 }
 
 .inventory-transaction-card {
-    grid-template-columns: 3px minmax(0, 1fr) 1.9rem;
+    grid-template-columns: 3px minmax(0, 1fr);
     gap: .65rem;
-    min-height: 4.3rem;
     padding: .58rem .65rem .55rem .45rem;
     align-items: start;
-}
-
-.inventory-transaction-card__marker {
-    min-height: 3.15rem;
 }
 
 .inventory-transaction-card__heading {
@@ -429,117 +370,30 @@
     font-size: .65rem;
 }
 
-.inventory-transaction-card__actions {
-    align-self: start;
-    justify-self: end;
-    margin-top: 0;
-    z-index: 30;
-}
-
-.inventory-transaction-card__menu {
-    width: 1.35rem;
-    height: 1.55rem;
-    padding: 0;
-    opacity: 1;
-    visibility: visible;
-    border: 0;
-    background: transparent;
-    color: #756c7d;
-    font: 700 1.15rem/1 var(--levelup-font-ui);
-    transform: none;
-}
-
-.inventory-transaction-card__menu:hover,
-.inventory-transaction-card__menu:focus-visible {
-    background: transparent;
-    color: var(--levelup-color-primary-hover);
-    outline: none;
-}
-
-.inventory-transaction-card__actions .card-action-menu__panel {
-    top: calc(100% + .18rem);
-    right: -.15rem;
-    left: auto;
-    width: 9.75rem;
-    min-width: 9.75rem;
-    z-index: 90;
-}
-
-.inventory-transaction-card__actions .card-action-menu__item {
-    min-width: 0;
-}
-
 @media (max-width: 720px) {
     .inventory-transaction-card {
-        grid-template-columns: 3px minmax(0, 1fr) 1.9rem;
-    }
-
-    .inventory-transaction-card__actions {
-        grid-column: auto;
+        grid-template-columns: 3px minmax(0, 1fr);
     }
 }
 
-/* Inventory transaction polish — Inter typography and Daily-style actions */
+/* Inventory transaction polish — Inter typography */
 .inventory-transaction-card,
 .inventory-transaction-card button,
 .inventory-transaction-card time,
 .inventory-transaction-card .inventory-tag-badge,
 .inventory-transaction-card .inventory-muted {
-    font-family: "Inter", "Segoe UI", sans-serif;
+    font-family: var(--levelup-font-body);
 }
 
 .inventory-transaction-card__title-wrap strong {
-    font-family: "Inter", "Segoe UI", sans-serif;
+    font-family: var(--levelup-font-body);
     font-weight: 500;
 }
 
 .inventory-transaction-card__title-wrap small,
 .inventory-transaction-card__meta,
 .inventory-transaction-card__amount {
-    font-family: "Inter", "Segoe UI", sans-serif;
-}
-
-/* Match the three-dot trigger behavior used by Daily cards. */
-.inventory-transaction-card__menu {
-    display: inline-grid;
-    place-items: center;
-    border-radius: var(--levelup-radius-xs);
-    cursor: pointer;
-    transition: color 130ms ease, background-color 130ms ease, transform 130ms ease;
-}
-
-.inventory-transaction-card__menu:hover,
-.inventory-transaction-card__menu:focus-visible,
-.inventory-transaction-card__actions:focus-within .inventory-transaction-card__menu {
-    background: #f1ecf6;
-    color: var(--levelup-color-primary-hover);
-    outline: none;
-    transform: translateY(-1px);
-}
-
-.inventory-transaction-card__menu:active {
-    transform: translateY(1px);
-}
-
-.inventory-transaction-card__actions .card-action-menu__item {
-    font-family: "Inter", "Segoe UI", sans-serif;
-}
-
-.inventory-transaction-card__actions .card-action-menu__item:hover,
-.inventory-transaction-card__actions .card-action-menu__item:focus-visible {
-    background: #eaf3fb;
-    color: #201a24;
-}
-
-.inventory-transaction-card__actions .card-action-menu__item--delete:hover,
-.inventory-transaction-card__actions .card-action-menu__item--delete:focus-visible {
-    background: #d94c57;
-    color: #fff;
-}
-
-.inventory-transaction-card__actions .card-action-menu__item--delete:hover span,
-.inventory-transaction-card__actions .card-action-menu__item--delete:focus-visible span {
-    color: #fff;
+    font-family: var(--levelup-font-body);
 }
 
 /* Empty-state primary action uses the shared confirmation-cancel (white/neutral) button variant. */
@@ -547,123 +401,9 @@
     min-width: 10.5rem;
 }
 
-
-/* Transaction actions reuse the exact Daily card menu visual language.
-   Inventory only controls placement/visibility; panel and items inherit app.css. */
 .inventory-transaction-card {
     overflow: visible;
 }
-
-.inventory-transaction-card__actions {
-    position: relative;
-    align-self: start;
-    justify-self: center;
-    margin-top: .48rem;
-    z-index: 30;
-}
-
-.inventory-transaction-card .activity-card__menu.inventory-transaction-card__menu {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: none;
-    margin-top: 0;
-    border: 0;
-    background: transparent;
-    color: #756c7d;
-    outline: none;
-    box-shadow: none;
-}
-
-.inventory-transaction-card .activity-card__menu.inventory-transaction-card__menu:hover,
-.inventory-transaction-card .activity-card__menu.inventory-transaction-card__menu:focus-visible,
-.inventory-transaction-card__actions:focus-within .activity-card__menu.inventory-transaction-card__menu {
-    border: 0;
-    background: transparent;
-    color: var(--levelup-color-primary-hover);
-    outline: none;
-    box-shadow: none;
-    transform: none;
-}
-
-.inventory-transaction-card__actions .card-action-menu__panel {
-    top: calc(100% + .25rem);
-    right: -.2rem;
-    left: auto;
-    width: 9.75rem;
-    min-width: 0;
-}
-
-.inventory-transaction-card__actions .card-action-menu__item {
-    min-width: 0;
-    min-height: 3rem;
-    padding: 0 .9rem;
-    border: 0;
-    border-bottom: 1px solid #eeeaf0;
-    border-radius: 0;
-    background: var(--levelup-color-surface);
-    color: #342b3b;
-    box-shadow: none;
-    font-family: var(--levelup-font-family);
-    font-size: .82rem;
-    font-weight: 600;
-    transform: none;
-}
-
-.inventory-transaction-card__actions .card-action-menu__item:last-child {
-    border-bottom: 0;
-}
-
-.inventory-transaction-card__actions .card-action-menu__item:hover,
-.inventory-transaction-card__actions .card-action-menu__item:focus-visible {
-    background: #f6f3f8;
-    color: #512d86;
-    outline: none;
-    transform: none;
-}
-
-/* "Comic panel" treatment — matches the Daily card menu's Delete action
-   (LevelUpCardMenu.razor.css): bold ink outline, hard offset shadow,
-   inverted on hover, settled into the shadow on press. */
-.inventory-transaction-card__actions .card-action-menu__item--delete,
-.inventory-transaction-card__actions .card-action-menu__item--delete span {
-    color: #fff;
-}
-
-.inventory-transaction-card__actions .card-action-menu__item--delete {
-    border: var(--levelup-game-border);
-    border-radius: var(--levelup-radius-sm);
-    background: var(--levelup-color-danger);
-    box-shadow: 3px 3px 0 var(--levelup-game-ink);
-    transform: none;
-}
-
-.inventory-transaction-card__actions .card-action-menu__item--delete:last-child {
-    border-bottom: var(--levelup-game-border);
-}
-
-.inventory-transaction-card__actions .card-action-menu__item--delete:hover,
-.inventory-transaction-card__actions .card-action-menu__item--delete:focus-visible {
-    background: #fff;
-    color: var(--levelup-color-danger);
-    border-color: var(--levelup-color-danger);
-    box-shadow: 3px 3px 0 var(--levelup-color-danger);
-    outline: none;
-    transform: none;
-}
-
-.inventory-transaction-card__actions .card-action-menu__item--delete:hover span,
-.inventory-transaction-card__actions .card-action-menu__item--delete:focus-visible span {
-    color: var(--levelup-color-danger);
-}
-
-.inventory-transaction-card__actions .card-action-menu__item--delete:active {
-    background: var(--levelup-color-danger-hover);
-    color: #fff;
-    box-shadow: 1px 1px 0 var(--levelup-game-ink);
-    transform: translate(2px, 2px);
-}
-
 
 .inventory-filter-shell {
     border-bottom: 1px solid var(--levelup-color-border);
@@ -771,24 +511,17 @@
     min-width: 0;
 }
 
-.inventory-transaction-card__menu,
-.inventory-transaction-card__actions .card-action-menu__item {
-    min-height: 44px;
-}
 
 .inventory-main-panel {
     display: flex;
-    min-height: min(42rem, calc(100dvh - 9rem));
     flex-direction: column;
-}
-
-.inventory-main-panel--empty {
-    min-height: auto;
 }
 
 .inventory-transaction-list {
     flex: 1 1 auto;
     max-height: min(56rem, calc(100dvh - 25rem));
+    align-content: start;
+    align-items: start;
     scrollbar-width: thin;
 }
 
@@ -800,8 +533,6 @@
     scrollbar-gutter: stable;
 }
 
-.inventory-transaction-card:focus-visible,
-.inventory-tag-item:focus-within,
 .inventory-filter-field input:focus-visible,
 .inventory-filter-field select:focus-visible,
 .inventory-alert button:focus-visible {
@@ -929,14 +660,9 @@
     }
 
     .inventory-transaction-card {
-        grid-template-columns: 4px minmax(0, 1fr) 44px;
+        grid-template-columns: 4px minmax(0, 1fr);
         gap: .65rem;
         padding: .8rem .55rem .8rem .45rem;
-    }
-
-    .inventory-transaction-card__actions {
-        grid-column: 3;
-        grid-row: 1;
     }
 
     .inventory-transaction-card__heading {
@@ -957,21 +683,6 @@
     .inventory-tag-item {
         grid-template-columns: auto minmax(0, 1fr);
         padding: .8rem;
-    }
-
-    .inventory-tag-item .levelup-button--secondary,
-    .inventory-tag-item .levelup-button--danger {
-        grid-column: 1 / -1;
-        width: 100%;
-    }
-
-    .inventory-tag-form__actions {
-        flex-direction: column-reverse;
-    }
-
-    .inventory-tag-form__actions .levelup-button--confirmation-cancel,
-    .inventory-tag-form__actions .levelup-button--primary {
-        width: 100%;
     }
 
     .inventory-pagination {
@@ -1011,17 +722,13 @@
     }
 
     .inventory-transaction-card {
-        grid-template-columns: 4px minmax(0, 1fr) 40px;
+        grid-template-columns: 4px minmax(0, 1fr);
     }
 }
 
 @media (hover: none) and (pointer: coarse) {
     .inventory-transaction-card:hover {
         transform: none;
-    }
-
-    .inventory-transaction-card__menu {
-        min-height: 48px;
     }
 }
 

@@ -20,6 +20,17 @@ public sealed class InventoryComponentTests : BunitContext
     }
 
     [Fact]
+    public void Summary_CardsComposeTheSharedStaticLevelUpCardPrimitive()
+    {
+        var summary = new WalletSummaryResponse(Guid.NewGuid(), 125.50m, 200m, 74.50m, 3, DateTimeOffset.UtcNow);
+        var cut = Render<WalletSummary>(parameters => parameters.Add(component => component.Summary, summary));
+
+        var cards = cut.FindAll(".inventory-summary__card");
+        Assert.Equal(3, cards.Count);
+        Assert.All(cards, card => Assert.Contains("levelup-card", card.ClassList));
+    }
+
+    [Fact]
     public void TransactionForm_RejectsZeroAmount()
     {
         var model = new TransactionFormModel { Description = "Test transaction", Amount = 0m };

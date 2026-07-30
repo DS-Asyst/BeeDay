@@ -104,6 +104,14 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
     public void OpenTodoEditor(Todo item) => Modals.OpenTodo(item);
     public void OpenProjectEditor(Project item) => Modals.OpenProject(item);
     public void OpenProjectWorkspace(Project item) { OpenProjectId = item.Id; Changed?.Invoke(); }
+    public void OpenProjectFromEditor()
+    {
+        if (Modals.EditingId is Guid id && data?.Projects.FirstOrDefault(project => project.Id == id) is Project project)
+        {
+            Modals.CloseEditor();
+            OpenProjectWorkspace(project);
+        }
+    }
     public void CloseProjectWorkspace() { OpenProjectId = null; Changed?.Invoke(); }
     public void OpenTodoForProject()
     {

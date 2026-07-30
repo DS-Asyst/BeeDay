@@ -91,7 +91,7 @@ public sealed class LevelUpConfirmDialogTests
     }
 
     [Fact]
-    public void UsesPixelIconsForDeleteWarningAndActions()
+    public void UsesPixelIconsForDeleteAndWarningButNotForCancelOrConfirmButtons()
     {
         using var context = new BunitContext();
         var cut = context.Render<LevelUpConfirmDialog>(parameters => parameters
@@ -102,7 +102,8 @@ public sealed class LevelUpConfirmDialogTests
 
         Assert.NotNull(cut.Find("svg.pixel-icon--delete"));
         Assert.NotNull(cut.Find("svg.pixel-icon--warning"));
-        Assert.NotNull(cut.Find("svg.pixel-icon--cancel"));
+        Assert.Empty(cut.Find(".delete-confirmation__cancel-action").QuerySelectorAll("svg"));
+        Assert.Empty(cut.Find(".delete-confirmation__confirm-action").QuerySelectorAll("svg"));
     }
 
     [Fact]

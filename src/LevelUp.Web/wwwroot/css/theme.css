@@ -64,7 +64,7 @@ h4,
 }
 
 .loading-title {
-    font-family: var(--levelup-font-pixel);
+    font-family: var(--levelup-font-body);
     font-weight: 400;
 }
 

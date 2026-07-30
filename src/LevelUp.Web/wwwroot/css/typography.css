@@ -1,7 +1,6 @@
 :root {
     --levelup-font-body: "Inter", "Segoe UI", sans-serif;
     --levelup-font-ui: "Jersey 25", "Segoe UI", sans-serif;
-    --levelup-font-pixel: "Press Start 2P", monospace;
     --levelup-font-family: var(--levelup-font-ui);
 
     --levelup-font-size-xs: .75rem;
@@ -25,7 +24,7 @@
 
     --levelup-letter-spacing-label: .04em;
 
-    --levelup-type-display: var(--levelup-font-weight-regular) var(--levelup-font-size-3xl) / var(--levelup-line-height-tight) var(--levelup-font-pixel);
+    --levelup-type-display: var(--levelup-font-weight-regular) var(--levelup-font-size-3xl) / var(--levelup-line-height-tight) var(--levelup-font-body);
     --levelup-type-title: var(--levelup-font-weight-regular) var(--levelup-font-size-xl) / var(--levelup-line-height-tight) var(--levelup-font-ui);
     --levelup-type-subtitle: var(--levelup-font-weight-bold) var(--levelup-font-size-base) / 1.3 var(--levelup-font-ui);
     --levelup-type-label: var(--levelup-font-weight-bold) var(--levelup-font-size-sm) / 1.3 var(--levelup-font-body);

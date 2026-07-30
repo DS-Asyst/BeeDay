@@ -25,14 +25,18 @@
 - Place attribute and status metadata predictably across Habits, Tasks, To-Dos, and Projects.
 - Preserve manual ordering unless the user explicitly selects another sorting mode.
 
-## Card interaction contract (Habits, Tasks, To-Dos, Projects)
+## Card interaction contract (Habits, Tasks, To-Dos, Projects, Inventory Transactions, Inventory Tags)
 
-- The non-interactive body of a card is the single entry point to Edit — no separate action-menu trigger.
-- Clicking or tapping the card body opens the item's existing edit dialog directly; there is no intermediate menu step.
-- Internal controls nested in the card (completion checkbox, Habit +/− counters, and similar per-type controls) act independently: activating them never opens Edit, and dragging the card never triggers them.
-- Dragging a card (for manual reordering) and clicking it are mutually exclusive outcomes of the same gesture, distinguished by movement distance, not by card position or an explicit mode switch.
-- The clickable card body is keyboard-reachable, activates on Enter and Space, and carries an accessible name identifying the action and the item (for example, "Edit Habit: Morning run").
-- Delete is not available directly from the card; it is reached through the edit dialog's existing confirmation flow.
+- The entire card is the single entry point to Edit — no separate action-menu trigger, and no Edit/Delete buttons on the card itself (this replaced both the three-dot menu previously used by Inventory Transaction cards and the Edit/Delete buttons previously on Inventory Tag cards).
+- Clicking or tapping anywhere on the card opens the item's existing edit dialog directly; there is no intermediate menu step.
+- Internal controls nested in the card (completion checkbox, Habit +/− counters, and similar per-type controls) act independently: activating them never opens Edit (propagation is stopped where needed), and dragging the card never triggers them.
+- Dragging a card (for manual reordering) and clicking it are mutually exclusive outcomes of the same gesture, distinguished by movement distance, not by card position or an explicit mode switch. Manual drag reordering applies to Habits, Tasks, To-Dos, and Projects; Inventory Transaction and Tag cards are not draggable.
+- The clickable card body is keyboard-reachable, activates on Enter and Space, and carries an accessible name identifying the action and the item (for example, "Edit Habit: Morning run", "Edit Transaction: Rent, -$1,200.00", "Edit Tag: Groceries").
+- Delete is not available directly from any of these cards (Habits, Tasks, To-Dos, Projects, Transactions, or Tags); it is reached through the edit dialog's existing confirmation flow for every entity type, without introducing a duplicate confirmation dialog.
+
+## Static (non-interactive) cards
+
+Informational cards that only display data — My Account's settings sections and Inventory's summary/panel cards (Current Balance, Total Income, Total Expenses, Transactions panel, Tags panel) — compose the Design System's non-interactive `LevelUpCard` primitive (or its underlying `.levelup-card` class) and carry no hover elevation, shadow bump, border change, or background transition. Interactive controls nested inside them (filters, pagination, New Tag/New Transaction actions) are unaffected and keep their own normal interactive states. Set `LevelUpCard`'s `Interactive="true"` only for a card that is itself a single clickable action — never to add decorative hover motion to an informational surface.
 
 ## Edit dialog actions
 

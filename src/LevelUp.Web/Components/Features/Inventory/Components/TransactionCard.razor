@@ -2,7 +2,12 @@
 @using LevelUp.Domain.Enums
 @using LevelUp.Web.Components.Features.Inventory.Services
 
-<article class="inventory-transaction-card" tabindex="0" aria-label="@($"{Transaction.Description}, {SignedAmount}")">
+<article class="inventory-transaction-card"
+         role="button"
+         tabindex="0"
+         aria-label="@($"Edit Transaction: {Transaction.Description}, {SignedAmount}")"
+         @onclick="EditAsync"
+         @onkeydown="HandleBodyKeyDown">
     <div class="inventory-transaction-card__marker inventory-transaction-card__marker--@TypeClass" aria-hidden="true"></div>
     <div class="inventory-transaction-card__content">
         <div class="inventory-transaction-card__heading">
@@ -31,20 +36,11 @@
             <span class="inventory-transaction-card__type"><PixelIcon Name="@TransactionTypeIcon" Size="PixelIconSize.ExtraSmall" Color="@TransactionTypeColor" /> @(Transaction.Type == TransactionType.Income ? "Income" : "Expense")</span>
         </div>
     </div>
-
-    <LevelUpCardMenu Class="activity-card__actions inventory-transaction-card__actions"
-                     TriggerClass="activity-card__menu inventory-transaction-card__menu"
-                     Title="@Transaction.Description"
-                     Disabled="IsDisabled"
-                     OnEdit="EditAsync"
-                     OnDelete="DeleteAsync" />
 </article>
 
 @code {
     [Parameter, EditorRequired] public TransactionResponse Transaction { get; set; } = default!;
-    [Parameter] public bool IsDisabled { get; set; }
     [Parameter] public EventCallback<TransactionResponse> OnEdit { get; set; }
-    [Parameter] public EventCallback<TransactionResponse> OnDelete { get; set; }
 
     private PixelIconName TransactionTypeIcon => Transaction.Type == TransactionType.Income ? PixelIconName.Income : PixelIconName.Expense;
     private PixelIconColor TransactionTypeColor => Transaction.Type == TransactionType.Income ? PixelIconColor.Success : PixelIconColor.Danger;
@@ -53,5 +49,6 @@
     private string TagColor => string.IsNullOrWhiteSpace(Transaction.InventoryTagColor) ? "#7A4FCB" : Transaction.InventoryTagColor;
     private string TagTextColor => TagContrastCalculator.GetTextColor(TagColor);
     private Task EditAsync() => OnEdit.InvokeAsync(Transaction);
-    private Task DeleteAsync() => OnDelete.InvokeAsync(Transaction);
+    private Task HandleBodyKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs args) =>
+        args.Key is "Enter" or " " ? OnEdit.InvokeAsync(Transaction) : Task.CompletedTask;
 }
