@@ -1,31 +1,17 @@
+/* Attributes are identified by name and color only — plain text, no chip,
+   no badge box, no border. Single shared implementation reused everywhere
+   an attribute is displayed (Select dropdown, filter menu, anywhere else). */
 .activity-attribute-badge {
     display: inline-flex;
     align-items: center;
-    gap: .35rem;
     width: fit-content;
-    padding: .18rem .45rem;
-    border: 1px solid currentColor;
-    border-radius: 2px;
     font-size: var(--levelup-font-size-xs);
-    font-weight: var(--levelup-font-weight-bold);
-    line-height: 1;
-    background: var(--levelup-color-surface);
+    font-weight: var(--levelup-font-weight-medium);
+    line-height: 1.2;
+    cursor: help;
 }
 
 .activity-attribute-badge--strength { color: var(--levelup-color-attribute-strength); }
 .activity-attribute-badge--dexterity { color: var(--levelup-color-attribute-dexterity); }
 .activity-attribute-badge--intelligence { color: var(--levelup-color-attribute-intelligence); }
 .activity-attribute-badge--vitality { color: var(--levelup-color-attribute-vitality); }
-
-.activity-attribute-badge {
-    cursor: help;
-    transition:
-        transform var(--levelup-transition-fast),
-        background-color var(--levelup-transition-fast),
-        box-shadow var(--levelup-transition-fast);
-}
-
-.activity-attribute-badge:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--levelup-shadow-sm);
-}

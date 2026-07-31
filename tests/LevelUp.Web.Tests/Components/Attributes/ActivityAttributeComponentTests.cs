@@ -16,7 +16,7 @@ public sealed class ActivityAttributeComponentTests
         var cut = context.Render<ActivityAttributeBadge>(parameters => parameters
             .Add(component => component.Attribute, attribute));
 
-        Assert.Contains(label, cut.Find("span.activity-attribute-badge > span").TextContent);
+        Assert.Contains(label, cut.Find("span.activity-attribute-badge").TextContent);
         Assert.Empty(cut.FindAll("svg"));
         Assert.Contains($"activity-attribute-badge--{label.ToLowerInvariant()}", cut.Find("span").ClassList);
         Assert.Equal($"{label} activity attribute", cut.Find("span.activity-attribute-badge").GetAttribute("title"));
