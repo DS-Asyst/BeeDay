@@ -25,7 +25,7 @@ public sealed class ProjectEditorModalTests : BunitContext
     public void OpenProjectAction_MatchesNewTagsVisualWeight()
     {
         // Compact + the comic border/shadow treatment, no icon — same size and shape family
-        // as InventoryTagManager's "New tag" button, not the larger plain pixel-button style.
+        // as WalletTagManager's "New tag" button, not the larger plain pixel-button style.
         var cut = Render<ProjectEditorModal>(parameters => parameters
             .Add(component => component.Model, new ProjectEditorModel { Title = "Kitchen remodel" })
             .Add(component => component.IsEditing, true));

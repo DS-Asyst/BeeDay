@@ -7,7 +7,7 @@ namespace LevelUp.Domain.Experience;
 public sealed class ExperienceEntry : Entity
 {
     [JsonInclude]
-    public Guid CharacterId { get; private set; }
+    public Guid UserId { get; private set; }
 
     [JsonInclude]
     public long Amount { get; private set; }
@@ -43,7 +43,7 @@ public sealed class ExperienceEntry : Entity
     public DateTimeOffset OccurredAtUtc => GrantedAtUtc;
 
     public static ExperienceEntry Create(
-        Guid characterId,
+        Guid userId,
         ExperienceReward reward,
         ExperienceSource source,
         ExperienceRewardType rewardType,
@@ -53,16 +53,16 @@ public sealed class ExperienceEntry : Entity
         int levelAfter,
         DateTimeOffset? grantedAtUtc = null)
     {
-        if (characterId == Guid.Empty)
+        if (userId == Guid.Empty)
         {
-            throw new ArgumentException("Character identifier is required.", nameof(characterId));
+            throw new ArgumentException("User identifier is required.", nameof(userId));
         }
 
         ArgumentNullException.ThrowIfNull(source);
 
         return new ExperienceEntry
         {
-            CharacterId = characterId,
+            UserId = userId,
             Amount = reward.Amount,
             Source = source,
             RewardType = rewardType,

@@ -6,18 +6,17 @@
 
 ## Main entities
 
-- `User`: identity, account, preferences, active state, character ownership, and tokens;
-- `Character`: character identity, class, avatar/onboarding state, and experience;
+- `User`: identity, account, preferences, active state, profile (nickname, avatar), experience, and tokens;
 - `Activity`: shared base for Habit, RecurringTask, Todo, and Project;
 - `Project`: project state and relationships to work items;
-- `Wallet`, `Transaction`, and `InventoryTag`: inventory state;
+- `Wallet`, `Transaction`, and `WalletTag`: personal finance state;
 - `UserToken`: confirmation and password-reset token state.
 
 ## Main value objects
 
 - `EmailAddress`
 - `UserName`
-- `CharacterNickname`
+- `Nickname`
 - `ActivityTitle`
 - `ActivityDescription`
 - `ProjectColor`
@@ -26,8 +25,8 @@
 
 - `ApplicationActionDomainEvent`
 - `ExperienceGrantedDomainEvent`
-- `CharacterLeveledUpDomainEvent`
+- `UserLeveledUpDomainEvent`
 
 ## Enumerations
 
-Domain enums define supported character classes, activity attributes, habit settings, task recurrence, project status, transaction types, identity settings, token types, and experience source/reward classifications.
+Domain enums define activity attributes, habit settings, task recurrence, project status, transaction types, identity settings, token types, and experience source/reward classifications.

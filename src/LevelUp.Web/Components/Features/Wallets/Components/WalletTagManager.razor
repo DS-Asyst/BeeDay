@@ -1,0 +1,45 @@
+@using LevelUp.Application.Features.Wallets.Responses
+
+<section class="wallet-tags-panel levelup-card" aria-labelledby="wallet-tags-title" aria-busy="@IsBusy.ToString().ToLowerInvariant()">
+    <header class="wallet-panel-header">
+        <div><span class="wallet-eyebrow">Organization</span><h2 id="wallet-tags-title">Tags</h2></div>
+        <LevelUpButton Variant="LevelUpButtonVariant.Primary" Compact="true" Disabled="IsBusy" Class="levelup-button--comic levelup-button--comic-magenta" OnClick="RaiseCreate">New tag</LevelUpButton>
+    </header>
+
+    @if (Tags.Count == 0)
+    {
+        <LevelUpEmptyState Title="No tags yet"
+                           Description="Create one to organize your income and expenses."
+                           Icon="PixelIconName.Tag" />
+    }
+    else
+    {
+        <div class="wallet-tag-list">
+            @foreach (var tag in Tags)
+            {
+                <LevelUpCard Class="wallet-tag-item"
+                             Interactive="true"
+                             role="button"
+                             tabindex="0"
+                             aria-label="@($"Edit Tag: {tag.Name}")"
+                             @onclick="() => RaiseEdit(tag)"
+                             @onkeydown="args => HandleRowKeyDown(args, tag)">
+                    <span class="wallet-tag-dot" style="background:@tag.Color"></span>
+                    <div><strong>@tag.Name</strong><small>@tag.TransactionCount transaction@(tag.TransactionCount == 1 ? string.Empty : "s")</small></div>
+                </LevelUpCard>
+            }
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter] public IReadOnlyList<WalletTagResponse> Tags { get; set; } = [];
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public EventCallback OnCreate { get; set; }
+    [Parameter] public EventCallback<WalletTagResponse> OnEdit { get; set; }
+
+    private Task RaiseCreate() => OnCreate.InvokeAsync();
+    private Task RaiseEdit(WalletTagResponse tag) => OnEdit.InvokeAsync(tag);
+    private Task HandleRowKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs args, WalletTagResponse tag) =>
+        args.Key is "Enter" or " " ? RaiseEdit(tag) : Task.CompletedTask;
+}

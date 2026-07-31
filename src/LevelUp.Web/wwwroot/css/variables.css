@@ -48,7 +48,7 @@
     --levelup-color-attribute-intelligence: #4456c9;
     --levelup-color-attribute-vitality: #b23a86;
 
-    /* Inventory */
+    /* Wallet */
     --levelup-color-tag-default: #7a4fcb;
 
     /* LevelUpButton variant palettes — single source for every semantic button
@@ -249,7 +249,7 @@
     --levelup-z-toast: 1700;
 }
 
-/* LevelUp RPG UI — Game Boy Advance / SNES inspired tokens */
+/* LevelUp pixel-console accent tokens */
 :root {
     --levelup-game-ink: #171321;
     --levelup-game-ink-soft: #332b43;

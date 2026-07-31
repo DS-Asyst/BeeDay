@@ -15,7 +15,7 @@ public sealed class LoginTests
         Assert.Equal(2, actions.Count);
         Assert.Equal("/account/forgot-password", actions[0].GetAttribute("href"));
         Assert.Contains("Forgot password?", actions[0].TextContent);
-        Assert.Equal("/character/create", actions[1].GetAttribute("href"));
+        Assert.Equal("/profile/create", actions[1].GetAttribute("href"));
         Assert.Contains("Create account", actions[1].TextContent);
     }
 }

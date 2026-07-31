@@ -40,7 +40,7 @@ public sealed class AuthenticateUserCommandHandler(
                 user.Id,
                 user.Name,
                 user.Email,
-                data.Characters.Any(character => character.UserId == user.Id),
+                user.HasProfile,
                 user.HasCompletedOnboarding);
         }, cancellationToken);
 

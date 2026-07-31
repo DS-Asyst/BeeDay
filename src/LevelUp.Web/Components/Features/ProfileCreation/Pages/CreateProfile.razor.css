@@ -1,0 +1,150 @@
+.profile-page {
+    display: grid;
+    min-height: auto;
+    place-items: center;
+    padding: 0;
+    box-sizing: border-box;
+    background: transparent;
+}
+
+.profile-panel {
+    width: min(100%, 30rem);
+    padding: clamp(1.6rem, 4vw, 2.25rem);
+    box-sizing: border-box;
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-xs);
+    background: var(--levelup-game-paper);
+    box-shadow: var(--levelup-shadow-lg);
+}
+
+.profile-panel__global-brand {
+    margin-bottom: 1.5rem;
+}
+
+.profile-panel__brand {
+    color: #6133a8;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-shadow: 1px 1px 0 #fff;
+}
+
+.profile-panel h1 {
+    margin: .55rem 0 .4rem;
+    color: #2f2638;
+    font-size: clamp(1.65rem, 4vw, 2.1rem);
+    line-height: 1.15;
+    text-shadow: 2px 2px 0 rgb(103 58 183 / 10%);
+}
+
+.profile-panel__intro {
+    margin: 0 0 1.6rem;
+    color: #746a7c;
+    font-size: .92rem;
+}
+
+.profile-form {
+    display: grid;
+    gap: .65rem;
+}
+
+.profile-field {
+    display: grid;
+    gap: .5rem;
+}
+
+.profile-field span {
+    color: #4a4052;
+    font-size: var(--levelup-font-size-md);
+    font-weight: 700;
+}
+
+.profile-field input {
+    min-height: 3rem;
+    padding: 0 .9rem;
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-xs);
+    outline: none;
+    color: #302638;
+    background: var(--levelup-color-surface);
+    font: inherit;
+    transition: border-color var(--levelup-transition-fast), box-shadow var(--levelup-transition-fast);
+}
+
+.profile-field input:focus {
+    border-color: #7548b7;
+    box-shadow: 0 0 0 .2rem rgb(101 64 159 / 14%);
+}
+
+.profile-password-hint {
+    margin: -.1rem 0 .2rem;
+    color: #716877;
+    font-size: var(--levelup-font-size-md);
+    line-height: 1.45;
+}
+
+.profile-password-hint--valid {
+    color: #237a3b;
+    font-weight: 700;
+}
+
+.profile-validation {
+    margin: .15rem 0 0;
+    color: #b3261e;
+    font-size: .76rem;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.profile-nickname-field {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    min-height: 3rem;
+    overflow: hidden;
+    border: 1px solid var(--levelup-color-border);
+    border-radius: var(--levelup-radius-xs);
+    background: var(--levelup-color-surface);
+    transition: border-color var(--levelup-transition-fast), box-shadow var(--levelup-transition-fast);
+}
+
+.profile-nickname-field:focus-within {
+    border-color: #7548b7;
+    box-shadow: 0 0 0 .2rem rgb(101 64 159 / 14%);
+}
+
+.profile-nickname-field__prefix {
+    display: grid;
+    align-self: stretch;
+    place-items: center;
+    min-width: 2.65rem;
+    color: #65409f;
+    background: #f3eef9;
+    font-size: .9rem !important;
+    font-weight: 700 !important;
+}
+
+.profile-field .profile-nickname-field__input {
+    min-width: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.profile-field .profile-nickname-field__input:focus {
+    border-color: transparent;
+    box-shadow: none;
+}
+
+@media (max-width: 580px) {
+    .profile-page { place-items: start center; padding: 0; }
+    .profile-panel { padding: 1.35rem; }
+}
+
+/* Official button placement only; visual states live in LevelUpButton. */
+.profile-form ::deep .levelup-button--primary {
+    justify-self: end;
+    min-width: 10.5rem;
+    margin-top: .4rem;
+}
+.profile-panel > ::deep .levelup-button--back { margin-bottom: 1rem; }

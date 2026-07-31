@@ -1,16 +1,18 @@
 # LevelUp
 
-LevelUp is a personal productivity application with RPG-inspired character progression. It is built with ASP.NET Core, Blazor Server, C#, and .NET 10.
+> `LevelUp` is a temporary product name.
 
-The application combines daily activity management, projects, inventory, identity flows, and a character experience system while keeping domain rules independent from storage and presentation concerns.
+LevelUp is a personal productivity application with light gamification and personal finance tracking. It helps people organize habits, tasks, projects, and money in a single experience. It is built with ASP.NET Core, Blazor Server, C#, and .NET 10.
+
+The application combines daily activity management, projects, a personal Wallet, identity flows, and a light XP/Level progression system, while keeping domain rules independent from storage and presentation concerns. The gamification is intentionally light — inspired by products like Duolingo rather than by RPG mechanics — and exists only to encourage consistency and visible progress.
 
 ## Current capabilities
 
-- user registration, cookie authentication, email confirmation, and password recovery;
-- account management, character creation, onboarding, and preferences;
+- user registration with full name, cookie authentication, email confirmation, and password recovery;
+- account management, profile creation, onboarding, and preferences;
 - Daily management for Habits, recurring Tasks, To-Dos, and Projects;
 - optional activity attributes: Strength, Dexterity, Intelligence, and Vitality;
-- Inventory wallets, transactions, tags, filters, and responsive UI;
+- Wallet: transactions, tags, filters, and responsive UI for personal finance;
 - experience curve, idempotent XP rewards, reward history, level calculation, and level-up feedback;
 - JSON persistence with serialized access, atomic writes, backups, initialization, and recovery;
 - reusable Blazor Design System and centralized Pixel Icon System;

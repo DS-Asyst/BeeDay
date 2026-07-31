@@ -1,4 +1,3 @@
-using LevelUp.Application.Features.Characters.Commands;
 using LevelUp.Application.Features.Dashboard.Queries;
 using LevelUp.Application.Features.Habits.Commands;
 using LevelUp.Application.Features.Ordering.Commands;
@@ -19,10 +18,10 @@ namespace LevelUp.Web.Services;
 public sealed class LevelUpWebService(ISender sender)
 {
     public async Task<LevelUpData> LoadAsync() => (await sender.Send(new GetLevelUpQuery())).Data;
-    public Task<Guid> CreateAccountAsync(string name, string email, string password, string nickname, CharacterClass characterClass, string? avatar = null) =>
-        sender.Send(new CreateAccountCommand(new(name, email, password, nickname, characterClass, avatar)));
+    public Task<Guid> CreateAccountAsync(string name, string email, string password, string nickname, string? avatar = null) =>
+        sender.Send(new CreateAccountCommand(new(name, email, password, nickname, avatar)));
     public Task<Guid> CreateUserAsync(string name, string email, string password) => sender.Send(new CreateUserCommand(new(name, email, password)));
-    public Task CreateCharacterAsync(string n, string k, CharacterClass c, string? avatar = null) => sender.Send(new CreateCharacterCommand(new(n, k, c, avatar)));
+    public Task CompleteUserProfileAsync(string fullName, string nickname, string? avatar = null) => sender.Send(new CompleteUserProfileCommand(new(fullName, nickname, avatar)));
     public Task UpdateUserAsync(string name, string email) => sender.Send(new UpdateCurrentUserAccountCommand(new(name, email)));
     public Task UpdatePreferencesAsync(UserLanguage language, UserTheme theme) => sender.Send(new UpdateCurrentUserPreferencesCommand(new(language, theme)));
     public Task CompleteOnboardingAsync() => sender.Send(new CompleteCurrentUserOnboardingCommand());

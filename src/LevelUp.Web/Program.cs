@@ -7,9 +7,9 @@ using LevelUp.Application.Features.Authentication.Requests;
 using LevelUp.Domain.Exceptions;
 using LevelUp.Infrastructure.DependencyInjection;
 using LevelUp.Web.Components;
-using LevelUp.Web.Components.Features.Character.Feedback;
-using LevelUp.Web.Components.Features.CharacterCreation.State;
 using LevelUp.Web.Components.Features.Dashboard.State;
+using LevelUp.Web.Components.Features.Experience.Feedback;
+using LevelUp.Web.Components.Features.ProfileCreation.State;
 using LevelUp.Web.Configuration;
 using LevelUp.Web.Diagnostics;
 using LevelUp.Web.HealthChecks;
@@ -186,7 +186,7 @@ builder.Services.AddScoped<AuthenticatedUserInitializer>();
 builder.Services.AddScoped<DashboardState>();
 builder.Services.AddScoped<LevelUpFeedbackStore>();
 builder.Services.AddScoped<INotificationHandler<DomainEventNotification>, LevelUpFeedbackEventHandler>();
-builder.Services.AddScoped<CharacterCreationState>();
+builder.Services.AddScoped<ProfileCreationState>();
 builder.Services.AddScoped<CardActionMenuCoordinator>();
 
 var app = builder.Build();
@@ -275,7 +275,7 @@ app.MapPost("/auth/login", async (
             "Authentication.LoginSucceeded UserId={UserId} RememberMe={RememberMe}", user.Id, rememberMe == true);
 
         var destination = LoginDestinationResolver.Resolve(
-            user.HasCharacter,
+            user.HasProfile,
             user.HasCompletedOnboarding,
             returnUrl);
 

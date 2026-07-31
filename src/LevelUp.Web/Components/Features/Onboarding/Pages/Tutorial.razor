@@ -66,16 +66,16 @@
             ["Choose a recurrence that matches reality", "Complete the task when the cycle is done", "Keep tasks independent from projects"]),
         new("04 — PROJECTS", "Turn goals into progress", PixelIconName.Project, "Projects", "Projects represent objectives. Their To-Dos define the work and calculate completion.",
             ["Create the project first", "Add focused To-Dos", "Finish every To-Do to complete the project"]),
-        new("05 — READY", "Begin your journey", PixelIconName.Character, "Character ready", "Your account, character and class are ready. The Daily is now yours.",
+        new("05 — READY", "You're all set", PixelIconName.Profile, "Profile ready", "Your account and profile are ready. The Daily is now yours.",
             ["Start with one habit", "Add one meaningful task", "Create one project you care about"])
     ];
 
     protected override async Task OnInitializedAsync()
     {
         var data = await Store.LoadAsync();
-        if (data.CurrentCharacter is null)
+        if (data.CurrentUser?.HasProfile != true)
         {
-            Navigation.NavigateTo("/character/create", forceLoad: true, replace: true);
+            Navigation.NavigateTo("/profile/create", forceLoad: true, replace: true);
             return;
         }
 

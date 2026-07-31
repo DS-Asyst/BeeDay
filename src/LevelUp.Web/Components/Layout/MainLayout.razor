@@ -2,14 +2,14 @@
 @inherits LayoutComponentBase
 
 <div class="levelup-app">
-    <TopNavigation IsCharacterPanelOpen="@_isCharacterPanelOpen"
+    <TopNavigation IsProfilePanelOpen="@_isProfilePanelOpen"
                    IsMenuPanelOpen="@_isMenuPanelOpen"
-                   OnToggleCharacterPanel="ToggleCharacterPanel"
+                   OnToggleProfilePanel="ToggleProfilePanel"
                    OnToggleMenuPanel="ToggleMenuPanel" />
 
     <div class="levelup-workspace @GetWorkspaceClass()">
         <div class="levelup-side-slot levelup-side-slot--left">
-            <CharacterSidePanel IsOpen="@_isCharacterPanelOpen" OnClose="ClosePanels" />
+            <ProfileSidePanel IsOpen="@_isProfilePanelOpen" OnClose="ClosePanels" />
         </div>
 
         <div class="levelup-content-shell">
@@ -34,29 +34,29 @@
         await AuthenticatedUserInitializer.EnsureInitializedAsync();
     }
 
-    private bool _isCharacterPanelOpen;
+    private bool _isProfilePanelOpen;
     private bool _isMenuPanelOpen;
 
-    private void ToggleCharacterPanel()
+    private void ToggleProfilePanel()
     {
-        _isCharacterPanelOpen = !_isCharacterPanelOpen;
+        _isProfilePanelOpen = !_isProfilePanelOpen;
         _isMenuPanelOpen = false;
     }
 
     private void ToggleMenuPanel()
     {
         _isMenuPanelOpen = !_isMenuPanelOpen;
-        _isCharacterPanelOpen = false;
+        _isProfilePanelOpen = false;
     }
 
     private void ClosePanels()
     {
-        _isCharacterPanelOpen = false;
+        _isProfilePanelOpen = false;
         _isMenuPanelOpen = false;
     }
 
     private string GetWorkspaceClass() =>
-        _isCharacterPanelOpen
+        _isProfilePanelOpen
             ? "has-left-panel"
             : _isMenuPanelOpen
                 ? "has-right-panel"

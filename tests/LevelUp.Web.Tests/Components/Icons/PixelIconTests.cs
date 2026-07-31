@@ -52,7 +52,7 @@ public sealed class PixelIconTests
     {
         using var context = new BunitContext();
         var cut = context.Render<PixelIcon>(parameters => parameters
-            .Add(component => component.Name, PixelIconName.Inventory)
+            .Add(component => component.Name, PixelIconName.Wallet)
             .Add(component => component.Size, size));
 
         var svg = cut.Find("svg");
@@ -66,12 +66,12 @@ public sealed class PixelIconTests
     {
         using var context = new BunitContext();
         var cut = context.Render<PixelIcon>(parameters => parameters
-            .Add(component => component.Name, PixelIconName.Inventory)
+            .Add(component => component.Name, PixelIconName.Wallet)
             .Add(component => component.Color, PixelIconColor.Primary)
             .Add(component => component.Class, "menu-icon"));
 
         var svg = cut.Find("svg");
-        Assert.Contains("pixel-icon--inventory", svg.ClassList);
+        Assert.Contains("pixel-icon--wallet", svg.ClassList);
         Assert.Contains("pixel-icon--color-primary", svg.ClassList);
         Assert.Contains("menu-icon", svg.ClassList);
     }
@@ -88,7 +88,7 @@ public sealed class PixelIconTests
     }
     [Theory]
     [InlineData(PixelIconName.Home, "home")]
-    [InlineData(PixelIconName.Character, "character")]
+    [InlineData(PixelIconName.Profile, "character")]
     [InlineData(PixelIconName.Donate, "donate")]
     [InlineData(PixelIconName.Logout, "logout")]
     [InlineData(PixelIconName.Menu, "menu")]

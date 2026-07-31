@@ -1,0 +1,72 @@
+@implements IDisposable
+@using LevelUp.Web.Components.Features.Experience.Models
+@inject LevelUp.Web.Components.Features.Dashboard.State.DashboardState State
+
+<aside class="side-drawer side-drawer--left @(IsOpen ? "is-open" : null)"
+       aria-label="Profile panel"
+       aria-hidden="@(!IsOpen)">
+    <section class="profile-drawer">
+        @if (State.IsLoading)
+        {
+            <div class="profile-drawer__loading">
+                <span><PixelIcon Name="PixelIconName.Loading" Size="PixelIconSize.Small" /> Loading profile...</span>
+                <ExperienceBar IsLoading="true" />
+            </div>
+        }
+        else if (State.Data?.CurrentUser is { HasProfile: true } user)
+        {
+            <div class="profile-drawer__profile">
+                <NavLink href="/account"
+                         class="profile-drawer__avatar"
+                         aria-label="View profile details"
+                         @onclick="OnClose">
+                    <span>@GetInitial(user.Nickname)</span>
+                </NavLink>
+
+                <div class="profile-drawer__identity">
+                    <h2>@user.Name</h2>
+                    <div class="profile-drawer__identity-details">
+                        <strong>@($"@{user.Nickname}")</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-drawer__experience-card">
+                <ExperienceBar Model="ExperienceViewModel.From(user.Experience)"
+                               ExperienceGain="State.LatestExperienceGain"
+                               FeedbackKey="State.ExperienceFeedbackVersion" />
+            </div>
+        }
+        else
+        {
+            <div class="profile-drawer__empty">
+                <strong>No profile created</strong>
+                <span>Create your profile to track your progress.</span>
+                <NavLink href="/profile/create" class="profile-drawer__link" @onclick="OnClose">
+                    <PixelIcon Name="PixelIconName.Add" Size="PixelIconSize.Small" /> Create profile
+                </NavLink>
+            </div>
+        }
+    </section>
+</aside>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        State.Changed += HandleStateChanged;
+        if (State.Data is null)
+        {
+            await State.InitializeAsync();
+        }
+    }
+
+    private void HandleStateChanged() => InvokeAsync(StateHasChanged);
+
+    private static string GetInitial(string nickname) =>
+        nickname.Length > 0 ? nickname[..1].ToUpperInvariant() : "?";
+
+    public void Dispose() => State.Changed -= HandleStateChanged;
+}

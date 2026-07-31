@@ -18,7 +18,7 @@ Visual foundations, shared components, typography, icons, accessibility, and int
 
 ### [Domain](domain/README.md)
 
-Business concepts and invariants for users, characters, activities, projects, inventory, and experience progression.
+Business concepts and invariants for users and profiles, activities, projects, the Wallet, and experience progression.
 
 ### [AI collaboration](ai/README.md)
 

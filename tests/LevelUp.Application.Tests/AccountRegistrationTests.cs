@@ -1,9 +1,9 @@
 using LevelUp.Application.Common.Contracts;
 using LevelUp.Application.Common.Identity;
 using LevelUp.Application.Common.Security;
-using LevelUp.Application.Features.Characters.Commands;
-using LevelUp.Application.Features.Characters.Handlers;
-using LevelUp.Application.Features.Characters.Requests;
+using LevelUp.Application.Features.Users.Commands;
+using LevelUp.Application.Features.Users.Handlers;
+using LevelUp.Application.Features.Users.Requests;
 using LevelUp.Domain.Entities;
 using LevelUp.Domain.Enums;
 
@@ -12,7 +12,7 @@ namespace LevelUp.Application.Tests;
 public sealed class AccountRegistrationTests
 {
     [Fact]
-    public async Task CreateAccount_CreatesUserAndCharacterAtomically()
+    public async Task CreateAccount_CreatesUserWithProfileAtomically()
     {
         var repository = new TestRepository();
         var emailSender = new FakeEmailSender();
@@ -27,14 +27,13 @@ public sealed class AccountRegistrationTests
                 "Tiago",
                 "tiago@example.com",
                 "Password123",
-                "tiago",
-                CharacterClass.Warrior)),
+                "tiago")),
             TestContext.Current.CancellationToken);
 
         var user = Assert.Single(repository.Data.Users);
-        var character = Assert.Single(repository.Data.Characters);
         Assert.Equal(userId, user.Id);
-        Assert.Equal(user.Id, character.UserId);
+        Assert.True(user.HasProfile);
+        Assert.Equal("tiago", user.Nickname);
         Assert.Equal("hash:Password123", user.PasswordHash);
         Assert.Single(repository.Data.UserTokens);
         Assert.Single(emailSender.Messages);

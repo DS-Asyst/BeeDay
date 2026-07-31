@@ -13,16 +13,15 @@ public sealed class LevelUpEventTests
     [Fact]
     public async Task Reward_without_level_change_does_not_publish_level_up_event()
     {
-        Character character = CreateCharacter();
-        ExperienceEntry entry = character.AddExperience(
+        User user = CreateUser();
+        ExperienceEntry entry = user.AddExperience(
             ExperienceReward.Create(5),
             ExperienceSource.Create(ExperienceSourceType.Task, Guid.NewGuid()));
         var publisher = new CapturingPublisher();
 
         await ExperienceRewardEventPublisher.PublishAsync(
             publisher,
-            character.UserId,
-            character,
+            user.Id,
             entry,
             TestContext.Current.CancellationToken);
 
@@ -33,25 +32,24 @@ public sealed class LevelUpEventTests
     [Fact]
     public async Task Reward_crossing_level_boundary_publishes_one_level_up_event()
     {
-        Character character = CreateCharacter();
-        character.AddExperience(
+        User user = CreateUser();
+        user.AddExperience(
             ExperienceReward.Create(95),
             ExperienceSource.Create(ExperienceSourceType.System));
-        ExperienceEntry entry = character.AddExperience(
+        ExperienceEntry entry = user.AddExperience(
             ExperienceReward.Create(5),
             ExperienceSource.Create(ExperienceSourceType.Task, Guid.NewGuid()));
         var publisher = new CapturingPublisher();
 
         await ExperienceRewardEventPublisher.PublishAsync(
             publisher,
-            character.UserId,
-            character,
+            user.Id,
             entry,
             TestContext.Current.CancellationToken);
 
-        CharacterLeveledUpDomainEvent domainEvent = Assert.Single(
-            publisher.Notifications.Select(item => item.DomainEvent).OfType<CharacterLeveledUpDomainEvent>());
-        Assert.Equal(character.Id, domainEvent.CharacterId);
+        UserLeveledUpDomainEvent domainEvent = Assert.Single(
+            publisher.Notifications.Select(item => item.DomainEvent).OfType<UserLeveledUpDomainEvent>());
+        Assert.Equal(user.Id, domainEvent.UserId);
         Assert.Equal(entry.Id, domainEvent.ExperienceEntryId);
         Assert.Equal(1, domainEvent.PreviousLevel);
         Assert.Equal(2, domainEvent.NewLevel);
@@ -64,29 +62,28 @@ public sealed class LevelUpEventTests
     [Fact]
     public async Task Reward_crossing_multiple_levels_publishes_single_aggregate_event()
     {
-        Character character = CreateCharacter();
-        ExperienceEntry entry = character.AddExperience(
+        User user = CreateUser();
+        ExperienceEntry entry = user.AddExperience(
             ExperienceReward.Create(1000),
             ExperienceSource.Create(ExperienceSourceType.Project, Guid.NewGuid()));
         var publisher = new CapturingPublisher();
 
         await ExperienceRewardEventPublisher.PublishAsync(
             publisher,
-            character.UserId,
-            character,
+            user.Id,
             entry,
             TestContext.Current.CancellationToken);
 
-        CharacterLeveledUpDomainEvent domainEvent = Assert.Single(
-            publisher.Notifications.Select(item => item.DomainEvent).OfType<CharacterLeveledUpDomainEvent>());
+        UserLeveledUpDomainEvent domainEvent = Assert.Single(
+            publisher.Notifications.Select(item => item.DomainEvent).OfType<UserLeveledUpDomainEvent>());
         Assert.Equal(entry.LevelBefore, domainEvent.PreviousLevel);
         Assert.Equal(entry.LevelAfter, domainEvent.NewLevel);
         Assert.Equal(entry.LevelAfter - entry.LevelBefore, domainEvent.LevelsGained);
         Assert.True(domainEvent.LevelsGained > 1);
     }
 
-    private static Character CreateCharacter() =>
-        Character.Create(Guid.NewGuid(), "eventhero", CharacterClass.Warrior);
+    private static User CreateUser() =>
+        User.Create("Event Hero", "eventhero@levelup.invalid");
 
     private sealed class CapturingPublisher : IPublisher
     {

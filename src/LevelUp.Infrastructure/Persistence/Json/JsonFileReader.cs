@@ -28,6 +28,8 @@ public sealed class JsonFileReader(
                 ?? throw new JsonException("The JSON file contains no LevelUp data.");
 
             LegacyActivityAttributeMigrator.Migrate(node);
+            LegacyCharacterMigrator.Migrate(node);
+            LegacyInventoryTagMigrator.Migrate(node);
 
             var data = node.Deserialize<LevelUpData>(serializerOptionsFactory.Create())
                 ?? throw new JsonException("The JSON file contains no LevelUp data.");

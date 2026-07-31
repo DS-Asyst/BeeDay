@@ -15,7 +15,7 @@ Design System components are organized by responsibility under `Components/Desig
 - **Pages**: development-only visual review surfaces;
 - **Text**: typography primitives.
 
-Every editor modal (Habits, Tasks, To-Dos, Projects, Inventory transactions) composes `Modals.EditorModalShell` directly. Every empty state composes `Feedback.LevelUpEmptyState` directly (optionally wrapped by feature-specific composition, e.g. `Inventory.InventoryEmptyState`, which adds contextual actions). Every delete/destructive confirmation composes `Feedback.LevelUpConfirmDialog` directly. There is exactly one component for each of these three contracts — do not reintroduce a feature- or domain-named wrapper that only forwards parameters unchanged.
+Every editor modal (Habits, Tasks, To-Dos, Projects, Wallet transactions) composes `Modals.EditorModalShell` directly. Every empty state composes `Feedback.LevelUpEmptyState` directly (optionally wrapped by feature-specific composition, e.g. `Wallets.WalletEmptyState`, which adds contextual actions). Every delete/destructive confirmation composes `Feedback.LevelUpConfirmDialog` directly. There is exactly one component for each of these three contracts — do not reintroduce a feature- or domain-named wrapper that only forwards parameters unchanged.
 
 ## Usage rules
 
@@ -26,7 +26,7 @@ Every editor modal (Habits, Tasks, To-Dos, Projects, Inventory transactions) com
 - Keep decorative icons hidden from assistive technologies.
 - Avoid breaking public component parameters without updating all consumers and tests.
 - All buttons render through `LevelUpButton` (`Variant`: Primary, Secondary, Success, Warning, Back, Danger, ConfirmationDanger, ConfirmationCancel) — never a bare `<button>` with its own bespoke CSS. Buttons with the same semantic meaning (Save, Cancel, Delete, Edit, Create) use the same variant everywhere. Real UI exceptions (dropdown menu items, combobox triggers, checkboxes, segmented toggles, nav/drawer entries, icon-only dismiss controls, clickable cards) are not "buttons" in this sense and are unaffected.
-- Any settings-style page (a card containing a titled form section — Account today; Preferences, Character, and administrative pages in the future) composes `LevelUpSettingsSection` (card + section header) with `LevelUpSettingsForm<TModel>` (EditForm + validation + fieldset + submit action) from the Layout group, rather than re-implementing that card/form chrome per page. Field layout inside the form (grid, hints) uses the shared `.levelup-settings-form__grid` / `.levelup-settings-form__hint` classes from `wwwroot/css/settings.css`.
+- Any settings-style page (a card containing a titled form section — Account today; other administrative pages in the future) composes `LevelUpSettingsSection` (card + section header) with `LevelUpSettingsForm<TModel>` (EditForm + validation + fieldset + submit action) from the Layout group, rather than re-implementing that card/form chrome per page. Field layout inside the form (grid, hints) uses the shared `.levelup-settings-form__grid` / `.levelup-settings-form__hint` classes from `wwwroot/css/settings.css`.
 
 ## Button typography
 
@@ -44,12 +44,12 @@ Palette modifiers preserve the requested action semantics without duplicating co
 - `levelup-button--comic-yellow`: Continue, Choose class, Confirm, and Resend confirmation;
 - `levelup-button--comic-back`: Back;
 - `levelup-button--comic-danger`: destructive Delete actions;
-- `levelup-button--comic-neutral`: Cancel actions, and any other action that must look and behave identically to Cancel (e.g. Inventory's "More Filters" toggle) — reuse `ConfirmationCancel` + `levelup-button--comic levelup-button--comic-neutral` rather than a page-specific look-alike;
+- `levelup-button--comic-neutral`: Cancel actions, and any other action that must look and behave identically to Cancel (e.g. Wallet's "More Filters" toggle) — reuse `ConfirmationCancel` + `levelup-button--comic levelup-button--comic-neutral` rather than a page-specific look-alike;
 - `levelup-button--comic-success`: Create, Save, Save profile, and Save preferences;
 - `levelup-button--comic-orange`: New transaction;
 - `levelup-button--comic-magenta`: New tag.
 
-Reach for comic-neutral only on non-compact `ConfirmationCancel` buttons used as real operational actions (e.g. `InventoryFilters`' "More Filters" toggle). Inline actions inside a popover or an already-expanded filter panel (Cancel, Clear filters) use the lighter `levelup-button--plain` modifier instead — see below.
+Reach for comic-neutral only on non-compact `ConfirmationCancel` buttons used as real operational actions (e.g. `WalletFilters`' "More Filters" toggle). Inline actions inside a popover or an already-expanded filter panel (Cancel, Clear filters) use the lighter `levelup-button--plain` modifier instead — see below.
 
 The older `levelup-button--skew-press` and `levelup-button--comic-press` hooks remain available for backward compatibility, but the production consumers listed above use the unified comic action contract.
 
@@ -57,7 +57,7 @@ The older `levelup-button--skew-press` and `levelup-button--comic-press` hooks r
 
 `LevelUpButton` supports the opt-in `levelup-button--plain` modifier (same mechanism as `--comic`) for lightweight inline actions inside popovers and filter panels that must not compete visually with real operational buttons: no border, no background, no pixel-press shadow — just colored text, sized and spaced identically regardless of which color modifier is applied.
 
-- `levelup-button--plain-danger`: destructive/reset text actions (e.g. `ActivityFilterBar`'s "Clear all filters", `InventoryFilters`' "Clear filters");
+- `levelup-button--plain-danger`: destructive/reset text actions (e.g. `ActivityFilterBar`'s "Clear all filters", `WalletFilters`' "Clear filters");
 - `levelup-button--plain-neutral`: neutral text actions with identical sizing/spacing to the danger variant (e.g. `ActivityFilterBar`'s tags-popover "Cancel").
 
 Single shared implementation — reach for `levelup-button--plain` rather than a page-specific transparent-button style whenever an inline text-only action is needed.

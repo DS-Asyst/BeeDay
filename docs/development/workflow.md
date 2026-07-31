@@ -50,7 +50,7 @@ Use focused conventional-style messages, for example:
 feat(daily): add activity attribute filtering
 fix(auth): reject unsafe return URLs
 docs(ai): align agent workflow
-refactor(inventory): isolate transaction mapping
+refactor(wallet): isolate transaction mapping
 ```
 
 Do not mix unrelated formatting, refactoring, behavior, and documentation changes unless they are inseparable.

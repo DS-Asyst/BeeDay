@@ -11,7 +11,7 @@
 {
     <LevelUpDashboardSkeleton />
 }
-else if (State.Data?.CurrentCharacter is not null)
+else if (State.Data?.CurrentUser?.HasProfile == true)
 {
     <section class="dashboard-page levelup-fade-in">
         <div class="dashboard-page__content">

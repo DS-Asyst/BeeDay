@@ -8,11 +8,11 @@ public partial class Home : IDisposable
         await UserInitializer.EnsureInitializedAsync();
         await State.InitializeAsync();
 
-        if (!State.HasCharacter)
+        if (!State.HasProfile)
         {
             var data = await State.GetDataAsync();
             Navigation.NavigateTo(
-                data.CurrentUser is null ? "/login" : "/character/create",
+                data.CurrentUser is null ? "/login" : "/profile/create",
                 forceLoad: true,
                 replace: true);
         }

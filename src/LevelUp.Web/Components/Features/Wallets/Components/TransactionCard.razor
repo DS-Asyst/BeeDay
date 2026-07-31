@@ -1,0 +1,55 @@
+@using LevelUp.Application.Features.Wallets.Responses
+@using LevelUp.Domain.Enums
+@using LevelUp.Web.Components.Features.Wallets.Services
+
+<LevelUpCard Class="wallet-transaction-card"
+             Interactive="true"
+             role="button"
+             tabindex="0"
+             aria-label="@($"Edit Transaction: {Transaction.Description}, {SignedAmount}")"
+             @onclick="EditAsync"
+             @onkeydown="HandleBodyKeyDown">
+    <div class="wallet-transaction-card__marker wallet-transaction-card__marker--@TypeClass" aria-hidden="true"></div>
+    <div class="wallet-transaction-card__content">
+        <div class="wallet-transaction-card__heading">
+            <div class="wallet-transaction-card__title-wrap">
+                <strong title="@Transaction.Description">@Transaction.Description</strong>
+                @if (!string.IsNullOrWhiteSpace(Transaction.Notes))
+                {
+                    <small title="@Transaction.Notes">@Transaction.Notes</small>
+                }
+            </div>
+            <span class="wallet-transaction-card__amount wallet-amount--@TypeClass">@SignedAmount</span>
+        </div>
+        <div class="wallet-transaction-card__meta">
+            @if (Transaction.WalletTagId is not null)
+            {
+                <span class="wallet-tag-badge wallet-tag-badge--solid"
+                      style="background:@TagColor;color:@TagTextColor;border-color:@TagColor">
+                    @Transaction.WalletTagName
+                </span>
+            }
+            else
+            {
+                <span class="wallet-muted">No tag</span>
+            }
+            <time datetime="@Transaction.TransactionDate.ToString("yyyy-MM-dd")">@Transaction.TransactionDate.ToString("MMM dd, yyyy")</time>
+            <span class="wallet-transaction-card__type"><PixelIcon Name="@TransactionTypeIcon" Size="PixelIconSize.ExtraSmall" Color="@TransactionTypeColor" /> @(Transaction.Type == TransactionType.Income ? "Income" : "Expense")</span>
+        </div>
+    </div>
+</LevelUpCard>
+
+@code {
+    [Parameter, EditorRequired] public TransactionResponse Transaction { get; set; } = default!;
+    [Parameter] public EventCallback<TransactionResponse> OnEdit { get; set; }
+
+    private PixelIconName TransactionTypeIcon => Transaction.Type == TransactionType.Income ? PixelIconName.Income : PixelIconName.Expense;
+    private PixelIconColor TransactionTypeColor => Transaction.Type == TransactionType.Income ? PixelIconColor.Success : PixelIconColor.Danger;
+    private string TypeClass => Transaction.Type == TransactionType.Income ? "income" : "expense";
+    private string SignedAmount => WalletCurrencyFormatter.FormatSigned(Transaction.Amount, Transaction.Type == TransactionType.Income);
+    private string TagColor => string.IsNullOrWhiteSpace(Transaction.WalletTagColor) ? "#7A4FCB" : Transaction.WalletTagColor;
+    private string TagTextColor => TagContrastCalculator.GetTextColor(TagColor);
+    private Task EditAsync() => OnEdit.InvokeAsync(Transaction);
+    private Task HandleBodyKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs args) =>
+        args.Key is "Enter" or " " ? OnEdit.InvokeAsync(Transaction) : Task.CompletedTask;
+}

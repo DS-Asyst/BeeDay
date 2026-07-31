@@ -30,10 +30,9 @@ public sealed class ExperienceRewardService(IExperienceRewardPolicy? policy = nu
             throw new DomainValidationException(nameof(rewardType), "Unsupported experience reward type.");
         }
 
-        Character character = data.FindCharacterForUser(userId)
-            ?? throw new InvalidDomainStateException("A Character is required before experience can be granted.");
+        var user = data.FindUser(userId);
 
-        return character.TryAddExperience(
+        return user.TryAddExperience(
             ExperienceReward.Create(_policy.GetReward(sourceType)),
             ExperienceSource.Create(sourceType, sourceId, description),
             rewardType,

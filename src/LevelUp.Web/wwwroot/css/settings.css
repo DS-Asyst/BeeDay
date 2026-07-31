@@ -2,8 +2,8 @@
    + LevelUpSettingsForm), used by any settings-style page: a card with a
    section header, wrapping a form with a fieldset, an optional 2-column
    field grid, hint text, and a right-aligned submit action. Introduced for
-   the Account page and intended for future Preferences, Character, and
-   administrative pages so they reuse this instead of re-implementing it. */
+   the Account page and intended for future Preferences and administrative
+   pages so they reuse this instead of re-implementing it. */
 
 .levelup-settings-section {
     padding: 0;

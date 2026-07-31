@@ -9,16 +9,16 @@ namespace LevelUp.Domain.Tests;
 public sealed class ExperienceDomainTests
 {
     [Fact]
-    public void New_character_starts_at_level_one_without_experience()
+    public void New_user_starts_at_level_one_without_experience()
     {
-        var character = CreateCharacter();
+        var user = CreateUser();
 
-        Assert.Equal(0L, character.Experience.TotalExperience);
-        Assert.Equal(1, character.Experience.CurrentLevel);
-        Assert.Equal(0L, character.Experience.CurrentLevelExperience);
-        Assert.Equal(100L, character.Experience.ExperienceRequiredForCurrentLevel);
-        Assert.Equal(100L, character.Experience.ExperienceForNextLevel);
-        Assert.Empty(character.Experience.Entries);
+        Assert.Equal(0L, user.Experience.TotalExperience);
+        Assert.Equal(1, user.Experience.CurrentLevel);
+        Assert.Equal(0L, user.Experience.CurrentLevelExperience);
+        Assert.Equal(100L, user.Experience.ExperienceRequiredForCurrentLevel);
+        Assert.Equal(100L, user.Experience.ExperienceForNextLevel);
+        Assert.Empty(user.Experience.Entries);
     }
 
     [Theory]
@@ -34,7 +34,7 @@ public sealed class ExperienceDomainTests
         long expectedCurrentLevelExperience,
         long expectedExperienceForNextLevel)
     {
-        var experience = CharacterExperience.Create();
+        var experience = UserExperience.Create();
         if (totalExperience > 0)
         {
             experience.Add(
@@ -50,28 +50,28 @@ public sealed class ExperienceDomainTests
     [Fact]
     public void Add_experience_updates_total_and_records_source_history()
     {
-        var character = CreateCharacter();
+        var user = CreateUser();
         var sourceId = Guid.NewGuid();
         var occurredAtUtc = new DateTimeOffset(2026, 7, 26, 3, 30, 0, TimeSpan.Zero);
         var source = ExperienceSource.Create(ExperienceSourceType.Habit, sourceId, "Completed morning routine");
 
-        var entry = character.AddExperience(ExperienceReward.Create(25), source, occurredAtUtc);
+        var entry = user.AddExperience(ExperienceReward.Create(25), source, occurredAtUtc);
 
-        Assert.Equal(25L, character.Experience.TotalExperience);
-        Assert.Single(character.Experience.Entries);
-        Assert.Same(entry, character.Experience.Entries[0]);
+        Assert.Equal(25L, user.Experience.TotalExperience);
+        Assert.Single(user.Experience.Entries);
+        Assert.Same(entry, user.Experience.Entries[0]);
         Assert.Equal(25L, entry.Amount);
         Assert.Equal(ExperienceSourceType.Habit, entry.Source.Type);
         Assert.Equal(sourceId, entry.Source.ReferenceId);
         Assert.Equal("Completed morning routine", entry.Source.Description);
         Assert.Equal(occurredAtUtc, entry.OccurredAtUtc);
-        Assert.Equal(occurredAtUtc, character.UpdatedAtUtc);
+        Assert.Equal(occurredAtUtc, user.UpdatedAtUtc);
     }
 
     [Fact]
     public void Multiple_rewards_accumulate_without_storing_derived_level_state()
     {
-        var experience = CharacterExperience.Create();
+        var experience = UserExperience.Create();
 
         experience.Add(
             ExperienceReward.Create(60),
@@ -99,7 +99,7 @@ public sealed class ExperienceDomainTests
     [Fact]
     public void Add_rejects_default_reward_that_bypasses_factory()
     {
-        var experience = CharacterExperience.Create();
+        var experience = UserExperience.Create();
 
         Assert.Throws<DomainValidationException>(() => experience.Add(
             default,
@@ -201,6 +201,6 @@ public sealed class ExperienceDomainTests
         Assert.Throws<DomainValidationException>(() => ExperienceCurve.GetExperienceRequiredToAdvance(0));
     }
 
-    private static Character CreateCharacter() =>
-        Character.Create(Guid.NewGuid(), "hero", CharacterClass.Warrior);
+    private static User CreateUser() =>
+        User.Create("Hero", "hero@levelup.invalid");
 }

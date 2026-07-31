@@ -76,7 +76,7 @@ public sealed class LevelUpHeroTests
             .Add(component => component.Illustration, (RenderTreeBuilder builder) =>
             {
                 builder.OpenComponent<PixelIcon>(0);
-                builder.AddAttribute(1, "Name", PixelIconName.Character);
+                builder.AddAttribute(1, "Name", PixelIconName.Profile);
                 builder.AddAttribute(2, "Decorative", true);
                 builder.CloseComponent();
             }));

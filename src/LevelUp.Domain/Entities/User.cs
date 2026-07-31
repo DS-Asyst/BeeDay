@@ -3,6 +3,7 @@ using LevelUp.Domain.Abstractions;
 using LevelUp.Domain.Common;
 using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
+using LevelUp.Domain.Experience;
 using LevelUp.Domain.ValueObjects;
 
 namespace LevelUp.Domain.Entities;
@@ -21,6 +22,12 @@ public sealed class User : Entity
     [JsonInclude] public bool HasCompletedOnboarding { get; private set; }
     [JsonInclude] public bool IsEmailConfirmed { get; private set; }
     [JsonInclude] public DateTimeOffset? EmailConfirmedAtUtc { get; private set; }
+    [JsonInclude] public string Nickname { get; private set; } = string.Empty;
+    [JsonInclude] public string Avatar { get; private set; } = string.Empty;
+    [JsonInclude] public UserExperience Experience { get; private set; } = UserExperience.Create();
+
+    [JsonIgnore]
+    public bool HasProfile => !string.IsNullOrEmpty(Nickname);
 
     public static User Create(string name, string email, string? passwordHash = null) =>
         Create(name, email, passwordHash, DateTimeOffset.UtcNow);
@@ -88,5 +95,62 @@ public sealed class User : Entity
     public void RegisterLogin() { LastLoginAtUtc = DateTimeOffset.UtcNow; Touch(); }
     public void SetActive(bool active) { IsActive = active; Touch(); }
     public void CompleteOnboarding() { HasCompletedOnboarding = true; Touch(); }
+
+    internal void CompleteProfile(string nickname, string? avatar)
+    {
+        if (HasProfile)
+        {
+            throw new InvalidDomainStateException("A User can only complete their profile once.");
+        }
+
+        Nickname = LevelUp.Domain.ValueObjects.Nickname.Create(nickname).Value;
+        Avatar = (avatar ?? string.Empty).Trim();
+        Touch();
+    }
+
+    public void UpdateAvatar(string? avatar)
+    {
+        Avatar = (avatar ?? string.Empty).Trim();
+        Touch();
+    }
+
+    public ExperienceEntry AddExperience(
+        ExperienceReward reward,
+        ExperienceSource source,
+        DateTimeOffset? occurredAtUtc = null) =>
+        AddExperience(reward, source, ExperienceRewardType.Completion, occurredAtUtc);
+
+    public ExperienceEntry AddExperience(
+        ExperienceReward reward,
+        ExperienceSource source,
+        ExperienceRewardType rewardType,
+        DateTimeOffset? occurredAtUtc = null)
+    {
+        var entry = Experience.Add(Id, reward, source, rewardType, occurredAtUtc);
+        UpdatedAtUtc = entry.OccurredAtUtc;
+        return entry;
+    }
+
+    public ExperienceEntry? TryAddExperience(
+        ExperienceReward reward,
+        ExperienceSource source,
+        ExperienceRewardType rewardType,
+        DateTimeOffset? grantedAtUtc = null)
+    {
+        var entry = Experience.TryAdd(Id, reward, source, rewardType, grantedAtUtc);
+        if (entry is not null)
+        {
+            UpdatedAtUtc = entry.GrantedAtUtc;
+        }
+
+        return entry;
+    }
+
+    internal void EnsureExperienceState()
+    {
+        Experience ??= UserExperience.Create();
+        Experience.EnsureValidState();
+    }
+
     private void Touch() => UpdatedAtUtc = DateTimeOffset.UtcNow;
 }

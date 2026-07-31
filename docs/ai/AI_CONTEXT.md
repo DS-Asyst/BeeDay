@@ -2,7 +2,7 @@
 
 ## Product
 
-LevelUp is a personal productivity application with RPG-inspired character progression. It is not a game engine. RPG concepts provide motivation and visual progression around productivity workflows.
+LevelUp (a temporary product name) is a personal productivity application with a light gamification layer and personal finance tracking. It is not a game and does not model RPG concepts (characters, classes, equipment, combat). XP and Level exist only to provide light motivation and visible progress around productivity workflows, in the spirit of products like Duolingo rather than Habitica.
 
 ## Stack
 
@@ -19,11 +19,11 @@ LevelUp is a personal productivity application with RPG-inspired character progr
 
 ## Current product areas
 
-- account registration, authentication, email confirmation, password recovery, and account preferences;
-- character creation, onboarding, class/avatar selection, and sidebar progression UI;
+- account registration with full name, authentication, email confirmation, password recovery, and account preferences;
+- profile creation, onboarding, avatar, and sidebar progression UI;
 - Daily: Habits, recurring Tasks, To-Dos, Projects, ordering, search, and attribute filtering;
 - optional activity attributes used only for organization;
-- Inventory: Wallets, Transactions, Tags, filters, forms, and responsive states;
+- Wallet: Wallets, Transactions, Wallet Tags, filters, forms, and responsive states;
 - experience curve, automatic idempotent rewards, transaction history, and level-up events;
 - shared Blazor Design System and centralized Pixel Icon System;
 - JSON persistence, backups, health checks, diagnostics, CI, IIS deployment, and rollback.

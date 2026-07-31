@@ -1,11 +1,11 @@
 using LevelUp.Application.Common.Caching;
 using LevelUp.Application.Common.Contracts;
-using LevelUp.Application.Features.Characters.Commands;
-using LevelUp.Application.Features.Characters.Handlers;
 using LevelUp.Application.Features.Dashboard.Handlers;
 using LevelUp.Application.Features.Habits.Handlers;
 using LevelUp.Application.Features.Ordering.Handlers;
 using LevelUp.Application.Features.Ordering.Requests;
+using LevelUp.Application.Features.Users.Commands;
+using LevelUp.Application.Features.Users.Handlers;
 using LevelUp.Domain.Entities;
 using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
@@ -15,16 +15,16 @@ namespace LevelUp.Application.Tests;
 public sealed class FeatureServicesTests
 {
     [Fact]
-    public async Task CreateCharacterHandler_SeparatesUserAndCharacter()
+    public async Task CompleteUserProfileHandler_SetsNicknameAndFullName()
     {
         var r = new Repo();
         var user = r.CreateCurrentUser();
-        await new CreateCharacterCommandHandler(r, new UserContext(user.Id))
-            .Handle(new CreateCharacterCommand(new("Tiago", "tiago", CharacterClass.Warrior)), TestContext.Current.CancellationToken);
+        await new CompleteUserProfileCommandHandler(r, new UserContext(user.Id))
+            .Handle(new CompleteUserProfileCommand(new("Tiago", "tiago")), TestContext.Current.CancellationToken);
 
         Assert.Equal("Tiago", r.Data.CurrentUser!.Name);
-        Assert.Equal("tiago", r.Data.CurrentCharacter!.Nickname);
-        Assert.Equal(r.Data.CurrentUser.Id, r.Data.CurrentCharacter.UserId);
+        Assert.True(r.Data.CurrentUser.HasProfile);
+        Assert.Equal("tiago", r.Data.CurrentUser.Nickname);
     }
     [Fact] public async Task CreateHabitHandler_AddsHabit() { var r = new Repo(); r.CreateCurrentUser(); await new CreateHabitCommandHandler(r).Handle(new(new("Study", "Study ASP.NET Core", HabitDirection.Positive, HabitDifficulty.Medium, HabitResetCounter.Daily)), TestContext.Current.CancellationToken); Assert.Equal("Study", Assert.Single(r.Data.Habits).Title); }
     [Fact]

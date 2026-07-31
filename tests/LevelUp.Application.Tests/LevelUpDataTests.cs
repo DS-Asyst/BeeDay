@@ -7,17 +7,15 @@ namespace LevelUp.Application.Tests;
 public sealed class LevelUpDataTests
 {
     [Fact]
-    public void NewData_StartsWithoutUserOrCharacter()
+    public void NewData_StartsWithoutUser()
     {
         var data = new LevelUpData();
 
         data.EnsureValidState();
 
         Assert.Empty(data.Users);
-        Assert.Empty(data.Characters);
         Assert.Null(data.CurrentUserId);
         Assert.Null(data.CurrentUser);
-        Assert.Null(data.CurrentCharacter);
     }
 
     [Fact]

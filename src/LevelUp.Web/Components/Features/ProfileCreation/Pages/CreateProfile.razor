@@ -1,0 +1,113 @@
+@page "/profile/create"
+@attribute [AllowAnonymous]
+@layout LevelUp.Web.Components.Layout.OnboardingLayout
+@inject LevelUp.Web.Components.Features.ProfileCreation.State.ProfileCreationState State
+@inject NavigationManager Navigation
+
+<PageTitle>Get started | LevelUp</PageTitle>
+
+<section class="profile-page levelup-fade-in">
+    <div class="profile-panel profile-panel--@State.CurrentStepClass">
+        <div class="profile-panel__global-brand"><LevelUpBrand /></div>
+        @if (State.Step == LevelUp.Web.Components.Features.ProfileCreation.State.ProfileCreationStep.Account)
+        {
+            <LevelUpButton Variant="LevelUpButtonVariant.Back" Compact="true" Class="levelup-button--comic levelup-button--comic-back" OnClick="BackToLogin">Back</LevelUpButton>
+            <h1>Create your account</h1>
+            <p class="profile-panel__intro">Start organizing your habits, tasks and finances.</p>
+
+            <div class="profile-form">
+                <label class="profile-field">
+                    <span>Full name</span>
+                    <input type="text"
+                           class="profile-field__input"
+                           autocomplete="name"
+                           @bind="State.Model.Name"
+                           @bind:event="oninput" />
+                </label>
+
+                <label class="profile-field">
+                    <span>Email</span>
+                    <input type="email"
+                           class="profile-field__input"
+                           autocomplete="email"
+                           @bind="State.Model.Email"
+                           @bind:event="oninput" />
+                </label>
+
+                <label class="profile-field">
+                    <span>Password</span>
+                    <input type="password"
+                           class="profile-field__input"
+                           autocomplete="new-password"
+                           aria-describedby="password-requirements"
+                           @bind="State.Model.Password"
+                           @bind:event="oninput" />
+                </label>
+
+                <p id="password-requirements"
+                   class="profile-password-hint @(State.IsPasswordValid ? "profile-password-hint--valid" : string.Empty)">
+                    @(State.IsPasswordValid
+                        ? "Password valid"
+                        : "Use at least 8 characters, one letter and one number.")
+                </p>
+
+                @if (State.ShouldShowConfirmPassword)
+                {
+                    <label class="profile-field levelup-fade-in">
+                        <span>Confirm password</span>
+                        <input type="password"
+                               class="profile-field__input"
+                               autocomplete="new-password"
+                               @bind="State.Model.ConfirmPassword"
+                               @bind:event="oninput" />
+                    </label>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(State.ValidationError))
+                {
+                    <p class="profile-validation" role="alert">@State.ValidationError</p>
+                }
+
+                <LevelUpButton Variant="LevelUpButtonVariant.Primary"
+                               Class="levelup-button--comic levelup-button--comic-yellow"
+                               Disabled="@(!State.CanContinueAccount)"
+                               OnClick="ContinueToProfile">
+                    Continue
+                </LevelUpButton>
+            </div>
+        }
+        else
+        {
+            <LevelUpButton Variant="LevelUpButtonVariant.Back" Compact="true" Class="levelup-button--comic levelup-button--comic-back" OnClick="Back">Back</LevelUpButton>
+            <h1>Choose your nickname</h1>
+            <p class="profile-panel__intro">This is how you'll be identified in LevelUp.</p>
+
+            <div class="profile-form">
+                <label class="profile-field">
+                    <span>Nickname</span>
+                    <div class="profile-nickname-field">
+                        <span class="profile-nickname-field__prefix">@@</span>
+                        <input class="profile-field__input profile-nickname-field__input"
+                               autocomplete="nickname"
+                               maxlength="24"
+                               @bind="State.Model.Nickname"
+                               @bind:event="oninput" />
+                    </div>
+                </label>
+
+                @if (!string.IsNullOrWhiteSpace(State.ValidationError))
+                {
+                    <p class="profile-validation" role="alert">@State.ValidationError</p>
+                }
+
+                <LevelUpButton Variant="LevelUpButtonVariant.Primary"
+                               Class="levelup-button--comic levelup-button--comic-yellow"
+                               IsLoading="@State.IsBusy"
+                               Disabled="@State.IsBusy"
+                               OnClick="CompleteProfileAsync">
+                    Create account
+                </LevelUpButton>
+            </div>
+        }
+    </div>
+</section>

@@ -2,7 +2,6 @@ using LevelUp.Domain.Entities;
 using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
 using Xunit;
-using InventoryTransaction = LevelUp.Domain.Entities.Transaction;
 
 namespace LevelUp.Domain.Tests;
 
@@ -30,9 +29,9 @@ public sealed class WalletTests
         var wallet = Wallet.Create(Guid.NewGuid());
         var transactions = new[]
         {
-            InventoryTransaction.Create(wallet.Id, "Salary", 1500m, TransactionType.Income, new DateOnly(2026, 7, 1)),
-            InventoryTransaction.Create(wallet.Id, "Internet", 80m, TransactionType.Expense, new DateOnly(2026, 7, 10)),
-            InventoryTransaction.Create(wallet.Id, "Food", 120m, TransactionType.Expense, new DateOnly(2026, 7, 11))
+            Transaction.Create(wallet.Id, "Salary", 1500m, TransactionType.Income, new DateOnly(2026, 7, 1)),
+            Transaction.Create(wallet.Id, "Internet", 80m, TransactionType.Expense, new DateOnly(2026, 7, 10)),
+            Transaction.Create(wallet.Id, "Food", 120m, TransactionType.Expense, new DateOnly(2026, 7, 11))
         };
 
         Assert.Equal(1300m, wallet.CalculateBalance(transactions));
@@ -44,7 +43,7 @@ public sealed class WalletTests
     public void Balance_can_be_negative()
     {
         var wallet = Wallet.Create(Guid.NewGuid());
-        var expense = InventoryTransaction.Create(
+        var expense = Transaction.Create(
             wallet.Id,
             "Rent",
             900m,
@@ -59,8 +58,8 @@ public sealed class WalletTests
     {
         var wallet = Wallet.Create(Guid.NewGuid());
         var anotherWallet = Wallet.Create(Guid.NewGuid());
-        var ownIncome = InventoryTransaction.Create(wallet.Id, "Salary", 100m, TransactionType.Income, new DateOnly(2026, 7, 1));
-        var foreignIncome = InventoryTransaction.Create(anotherWallet.Id, "Other", 500m, TransactionType.Income, new DateOnly(2026, 7, 1));
+        var ownIncome = Transaction.Create(wallet.Id, "Salary", 100m, TransactionType.Income, new DateOnly(2026, 7, 1));
+        var foreignIncome = Transaction.Create(anotherWallet.Id, "Other", 500m, TransactionType.Income, new DateOnly(2026, 7, 1));
 
         Assert.Equal(100m, wallet.CalculateBalance([ownIncome, foreignIncome]));
     }

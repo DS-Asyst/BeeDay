@@ -27,7 +27,7 @@ public sealed class Transaction : Entity
     public DateOnly TransactionDate { get; private set; }
 
     [JsonInclude]
-    public Guid? InventoryTagId { get; private set; }
+    public Guid? WalletTagId { get; private set; }
 
     [JsonInclude]
     public string Notes { get; private set; } = string.Empty;
@@ -47,7 +47,7 @@ public sealed class Transaction : Entity
         decimal amount,
         TransactionType type,
         DateOnly transactionDate,
-        Guid? inventoryTagId = null,
+        Guid? walletTagId = null,
         string? notes = null)
     {
         if (walletId == Guid.Empty)
@@ -56,7 +56,7 @@ public sealed class Transaction : Entity
         }
 
         var transaction = new Transaction { WalletId = walletId };
-        transaction.Update(description, amount, type, transactionDate, inventoryTagId, notes);
+        transaction.Update(description, amount, type, transactionDate, walletTagId, notes);
         return transaction;
     }
 
@@ -65,7 +65,7 @@ public sealed class Transaction : Entity
         decimal amount,
         TransactionType type,
         DateOnly transactionDate,
-        Guid? inventoryTagId,
+        Guid? walletTagId,
         string? notes)
     {
         Description = ValidateDescription(description);
@@ -76,20 +76,20 @@ public sealed class Transaction : Entity
             throw new DomainValidationException(nameof(transactionDate), "Transaction date is required.");
         }
         TransactionDate = transactionDate;
-        InventoryTagId = ValidateTagId(inventoryTagId);
+        WalletTagId = ValidateTagId(walletTagId);
         Notes = ValidateNotes(notes);
         Touch();
     }
 
-    public void AssignTag(Guid inventoryTagId)
+    public void AssignTag(Guid walletTagId)
     {
-        InventoryTagId = ValidateTagId(inventoryTagId);
+        WalletTagId = ValidateTagId(walletTagId);
         Touch();
     }
 
     public void RemoveTag()
     {
-        InventoryTagId = null;
+        WalletTagId = null;
         Touch();
     }
 
@@ -124,14 +124,14 @@ public sealed class Transaction : Entity
         return amount;
     }
 
-    private static Guid? ValidateTagId(Guid? inventoryTagId)
+    private static Guid? ValidateTagId(Guid? walletTagId)
     {
-        if (inventoryTagId == Guid.Empty)
+        if (walletTagId == Guid.Empty)
         {
-            throw new DomainValidationException(nameof(inventoryTagId), "Inventory tag identifier cannot be empty.");
+            throw new DomainValidationException(nameof(walletTagId), "Wallet tag identifier cannot be empty.");
         }
 
-        return inventoryTagId;
+        return walletTagId;
     }
 
     private static string ValidateNotes(string? notes)

@@ -14,7 +14,7 @@ public sealed class EntryFlowVisualConsistencyTests
             SearchOption.AllDirectories)
             .Where(path => path.Contains($"{Path.DirectorySeparatorChar}Authentication{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
                 || path.Contains($"{Path.DirectorySeparatorChar}Identity{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
-                || path.Contains($"{Path.DirectorySeparatorChar}CharacterCreation{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                || path.Contains($"{Path.DirectorySeparatorChar}ProfileCreation{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
                 || path.Contains($"{Path.DirectorySeparatorChar}Onboarding{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
             .ToArray();
 

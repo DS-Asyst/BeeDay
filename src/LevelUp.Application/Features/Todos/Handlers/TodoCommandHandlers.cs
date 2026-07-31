@@ -52,7 +52,6 @@ public sealed class ToggleTodoCommandHandler(
     {
         ExperienceEntry? todoExperienceEntry = null;
         ExperienceEntry? projectExperienceEntry = null;
-        Character? character = null;
         Guid userId = Guid.Empty;
 
         await MutateAsync(data =>
@@ -66,7 +65,6 @@ public sealed class ToggleTodoCommandHandler(
 
             if (!todoWasCompleted && found.Todo.Completed)
             {
-                character = data.FindCharacterForUser(userId);
                 todoExperienceEntry = (rewards ?? new ExperienceRewardService()).Grant(
                     data,
                     userId,
@@ -78,7 +76,6 @@ public sealed class ToggleTodoCommandHandler(
 
             if (!projectWasCompleted && found.Project.Completed)
             {
-                character ??= data.FindCharacterForUser(userId);
                 projectExperienceEntry = (rewards ?? new ExperienceRewardService()).Grant(
                     data,
                     userId,
@@ -89,23 +86,16 @@ public sealed class ToggleTodoCommandHandler(
             }
         }, cancellationToken);
 
-        if (character is null)
-        {
-            return;
-        }
-
         if (publisher is not null)
         {
             await ExperienceRewardEventPublisher.PublishAsync(
                 publisher,
                 userId,
-                character,
                 todoExperienceEntry,
                 cancellationToken);
             await ExperienceRewardEventPublisher.PublishAsync(
                 publisher,
                 userId,
-                character,
                 projectExperienceEntry,
                 cancellationToken);
         }

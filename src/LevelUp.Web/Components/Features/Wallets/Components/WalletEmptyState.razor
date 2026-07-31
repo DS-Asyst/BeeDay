@@ -1,0 +1,20 @@
+<div class="wallet-empty-state">
+    <LevelUpEmptyState Title="No transactions found"
+                       Description="@(HasFilters ? "Change or clear your filters to see more results." : "Create your first transaction to start tracking your wallet.")"
+                       Icon="PixelIconName.Wallet" />
+    @if (HasFilters)
+    {
+        <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel" Disabled="IsDisabled" OnClick="OnClearFilters">Clear filters</LevelUpButton>
+    }
+    else
+    {
+        <LevelUpButton Variant="LevelUpButtonVariant.Primary" Disabled="IsDisabled" OnClick="OnCreateTransaction">Create transaction</LevelUpButton>
+    }
+</div>
+
+@code {
+    [Parameter] public bool HasFilters { get; set; }
+    [Parameter] public bool IsDisabled { get; set; }
+    [Parameter] public EventCallback OnCreateTransaction { get; set; }
+    [Parameter] public EventCallback OnClearFilters { get; set; }
+}

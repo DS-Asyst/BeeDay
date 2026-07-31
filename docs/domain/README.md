@@ -7,8 +7,8 @@ The Domain project owns LevelUp business state and invariants.
 - [Domain model overview](overview.md)
 - [Users and identity](users-and-identity.md)
 - [Activities and projects](activities-and-projects.md)
-- [Character and experience](character-and-experience.md)
-- [Inventory](inventory.md)
+- [Experience](experience.md)
+- [Wallet](wallet.md)
 
 ## Principles
 

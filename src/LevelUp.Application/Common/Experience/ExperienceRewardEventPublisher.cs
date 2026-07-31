@@ -1,5 +1,4 @@
 using LevelUp.Application.Common.Events;
-using LevelUp.Domain.Entities;
 using LevelUp.Domain.Events;
 using LevelUp.Domain.Experience;
 using MediatR;
@@ -11,7 +10,6 @@ public static class ExperienceRewardEventPublisher
     public static async Task PublishAsync(
         IPublisher publisher,
         Guid userId,
-        Character character,
         ExperienceEntry? entry,
         CancellationToken cancellationToken)
     {
@@ -22,7 +20,6 @@ public static class ExperienceRewardEventPublisher
 
         var experienceGrantedEvent = new ExperienceGrantedDomainEvent(
             userId,
-            character.Id,
             entry.Id,
             entry.Amount,
             entry.Source.Type,
@@ -39,8 +36,8 @@ public static class ExperienceRewardEventPublisher
             return;
         }
 
-        var characterLeveledUpEvent = new CharacterLeveledUpDomainEvent(
-            character.Id,
+        var userLeveledUpEvent = new UserLeveledUpDomainEvent(
+            userId,
             entry.Id,
             entry.LevelBefore,
             entry.LevelAfter,
@@ -53,7 +50,7 @@ public static class ExperienceRewardEventPublisher
         };
 
         await publisher.Publish(
-            new DomainEventNotification(characterLeveledUpEvent),
+            new DomainEventNotification(userLeveledUpEvent),
             cancellationToken);
     }
 }

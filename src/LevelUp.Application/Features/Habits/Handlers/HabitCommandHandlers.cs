@@ -29,7 +29,6 @@ public sealed class RegisterHabitPositiveCommandHandler(
     public async Task Handle(RegisterHabitPositiveCommand command, CancellationToken cancellationToken)
     {
         ExperienceEntry? experienceEntry = null;
-        Character? character = null;
         Guid userId = Guid.Empty;
 
         await MutateAsync(data =>
@@ -44,7 +43,6 @@ public sealed class RegisterHabitPositiveCommandHandler(
                 return;
             }
 
-            character = data.FindCharacterForUser(userId);
             experienceEntry = (rewards ?? new ExperienceRewardService()).Grant(
                 data,
                 userId,
@@ -54,12 +52,11 @@ public sealed class RegisterHabitPositiveCommandHandler(
                 $"Positive habit registered: {habit.Title}");
         }, cancellationToken);
 
-        if (character is not null && publisher is not null)
+        if (publisher is not null)
         {
             await ExperienceRewardEventPublisher.PublishAsync(
                 publisher,
                 userId,
-                character,
                 experienceEntry,
                 cancellationToken);
         }

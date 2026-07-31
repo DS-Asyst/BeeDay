@@ -29,7 +29,6 @@ public sealed class ToggleTaskCommandHandler(
     public async Task Handle(ToggleTaskCommand command, CancellationToken cancellationToken)
     {
         ExperienceEntry? experienceEntry = null;
-        Character? character = null;
         Guid userId = Guid.Empty;
 
         await MutateAsync(data =>
@@ -44,16 +43,14 @@ public sealed class ToggleTaskCommandHandler(
                 return;
             }
 
-            character = data.FindCharacterForUser(userId);
             experienceEntry = (rewards ?? new ExperienceRewardService()).Grant(data, userId, ExperienceSourceType.Task, task.Id, ExperienceRewardType.Completion, $"Task completed: {task.Title}");
         }, cancellationToken);
 
-        if (character is not null && publisher is not null)
+        if (publisher is not null)
         {
             await ExperienceRewardEventPublisher.PublishAsync(
                 publisher,
                 userId,
-                character,
                 experienceEntry,
                 cancellationToken);
         }

@@ -21,7 +21,7 @@ public sealed class JsonEventJournalTests : IDisposable
     public async Task Repeated_event_id_is_written_only_once()
     {
         JsonEventJournal journal = CreateJournal();
-        CharacterLeveledUpDomainEvent domainEvent = CreateLevelUpEvent(Guid.NewGuid());
+        UserLeveledUpDomainEvent domainEvent = CreateLevelUpEvent(Guid.NewGuid());
 
         await journal.AppendAsync(domainEvent, TestContext.Current.CancellationToken);
         await journal.AppendAsync(domainEvent, TestContext.Current.CancellationToken);
@@ -51,7 +51,7 @@ public sealed class JsonEventJournalTests : IDisposable
     public async Task Level_up_entry_contains_summary_and_structured_payload()
     {
         JsonEventJournal journal = CreateJournal();
-        CharacterLeveledUpDomainEvent domainEvent = CreateLevelUpEvent(Guid.NewGuid());
+        UserLeveledUpDomainEvent domainEvent = CreateLevelUpEvent(Guid.NewGuid());
 
         await journal.AppendAsync(domainEvent, TestContext.Current.CancellationToken);
 
@@ -60,11 +60,11 @@ public sealed class JsonEventJournalTests : IDisposable
         JsonElement root = document.RootElement;
         JsonElement payload = root.GetProperty("payload");
 
-        Assert.Equal(nameof(CharacterLeveledUpDomainEvent), root.GetProperty("type").GetString());
+        Assert.Equal(nameof(UserLeveledUpDomainEvent), root.GetProperty("type").GetString());
         Assert.Equal(
-            "Character reached level 7 after gaining 20 XP from Project.",
+            "Reached level 7 after gaining 20 XP from Project.",
             root.GetProperty("summary").GetString());
-        Assert.Equal(domainEvent.CharacterId, payload.GetProperty("characterId").GetGuid());
+        Assert.Equal(domainEvent.UserId, payload.GetProperty("userId").GetGuid());
         Assert.Equal(domainEvent.ExperienceEntryId, payload.GetProperty("experienceEntryId").GetGuid());
         Assert.Equal(3, payload.GetProperty("previousLevel").GetInt32());
         Assert.Equal(7, payload.GetProperty("newLevel").GetInt32());
@@ -104,7 +104,7 @@ public sealed class JsonEventJournalTests : IDisposable
         return await File.ReadAllLinesAsync(path, TestContext.Current.CancellationToken);
     }
 
-    private static CharacterLeveledUpDomainEvent CreateLevelUpEvent(Guid experienceEntryId) =>
+    private static UserLeveledUpDomainEvent CreateLevelUpEvent(Guid experienceEntryId) =>
         new(
             Guid.NewGuid(),
             experienceEntryId,

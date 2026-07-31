@@ -60,7 +60,6 @@ td,
 .tutorial-icon,
 .display-title,
 .special-card-title,
-.rpg-display,
 h1,
 .page-title,
 .hero-title {
@@ -73,7 +72,7 @@ h3.title,
 .card-title,
 .card-title--special,
 .section-title--display,
-.inventory-panel-header h2 {
+.wallet-panel-header h2 {
     font-family: var(--levelup-font-ui);
 }
 
@@ -81,7 +80,6 @@ h3.title,
 .stat-value,
 .metric-value,
 .wallet-balance,
-.inventory-wallet__balance,
 [data-display="number"] {
     font-family: var(--levelup-font-body);
     font-variant-numeric: tabular-nums;

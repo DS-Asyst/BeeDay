@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
 
 namespace LevelUp.Domain.Entities;
@@ -9,16 +8,15 @@ public sealed partial class LevelUpData
     public void EnsureValidState()
     {
         var sourceSchemaVersion = SchemaVersion;
-        SchemaVersion = 5;
+        SchemaVersion = 7;
         Users ??= [];
         UserTokens ??= [];
-        Characters ??= [];
         Habits ??= [];
         Tasks ??= [];
         Projects ??= [];
         Wallets ??= [];
         Transactions ??= [];
-        InventoryTags ??= [];
+        WalletTags ??= [];
         LegacyTodos ??= [];
 
         MigrateLegacyProfile();
@@ -27,16 +25,15 @@ public sealed partial class LevelUpData
 
         EnsureUniqueIds(Users);
         EnsureUniqueIds(UserTokens);
-        EnsureUniqueIds(Characters);
         EnsureUniqueIds(Habits);
         EnsureUniqueIds(Tasks);
         EnsureUniqueIds(Projects);
         EnsureUniqueIds(Wallets);
         EnsureUniqueIds(Transactions);
-        EnsureUniqueIds(InventoryTags);
+        EnsureUniqueIds(WalletTags);
         EnsureUniqueValues(Users.Select(user => user.Email), "email");
-        EnsureUniqueValues(Characters.Select(character => character.Nickname), "nickname");
-        EnsureUniqueInventoryTagNames();
+        EnsureUniqueNicknames();
+        EnsureUniqueWalletTagNames();
 
         if (Users.Count == 0)
         {
@@ -117,19 +114,9 @@ public sealed partial class LevelUpData
             }
         }
 
-        foreach (var character in Characters)
+        foreach (var user in Users)
         {
-            if (Users.All(user => user.Id != character.UserId))
-            {
-                throw new InvalidDomainStateException("A Character references an unknown User.");
-            }
-
-            character.EnsureExperienceState();
-        }
-
-        if (Characters.GroupBy(character => character.UserId).Any(group => group.Count() > 1))
-        {
-            throw new InvalidDomainStateException("A User cannot have more than one Character.");
+            user.EnsureExperienceState();
         }
 
         EnsureUniqueIds(Projects.SelectMany(project => project.Todos));
@@ -147,11 +134,11 @@ public sealed partial class LevelUpData
             throw new InvalidDomainStateException("A User cannot have more than one Wallet.");
         }
 
-        foreach (var tag in InventoryTags)
+        foreach (var tag in WalletTags)
         {
             if (Users.All(user => user.Id != tag.UserId))
             {
-                throw new InvalidDomainStateException("An Inventory tag references an unknown User.");
+                throw new InvalidDomainStateException("A Wallet tag references an unknown User.");
             }
         }
 
@@ -191,12 +178,12 @@ public sealed partial class LevelUpData
             user.UpdateName(LegacyProfile.Name);
         }
         CurrentUserId ??= user.Id;
-        if (Characters.All(character => character.UserId != user.Id))
+        if (!user.HasProfile)
         {
             var nickname = string.IsNullOrWhiteSpace(LegacyProfile.Nickname)
                 ? LegacyProfile.Name.Replace(" ", string.Empty, StringComparison.Ordinal).ToLowerInvariant()
                 : LegacyProfile.Nickname;
-            AddCharacter(Character.Create(user.Id, nickname, LegacyProfile.Class));
+            CompleteUserProfile(user.Id, nickname);
         }
         LegacyProfile = null;
     }
@@ -260,25 +247,36 @@ public sealed partial class LevelUpData
 
     private void ValidateTransactionTagOwnership(Transaction transaction, Wallet wallet)
     {
-        if (transaction.InventoryTagId is not Guid tagId)
+        if (transaction.WalletTagId is not Guid tagId)
         {
             return;
         }
 
-        var tag = FindInventoryTag(tagId);
+        var tag = FindWalletTag(tagId);
         if (tag.UserId != wallet.UserId)
         {
-            throw new InvalidDomainStateException("A Transaction cannot use an Inventory tag owned by another User.");
+            throw new InvalidDomainStateException("A Transaction cannot use a Wallet tag owned by another User.");
         }
     }
 
-    private void EnsureUniqueInventoryTagNames()
+    private void EnsureUniqueNicknames()
     {
-        if (InventoryTags
+        if (Users
+            .Where(user => !string.IsNullOrWhiteSpace(user.Nickname))
+            .GroupBy(user => user.Nickname, StringComparer.OrdinalIgnoreCase)
+            .Any(group => group.Count() > 1))
+        {
+            throw new InvalidDomainStateException("The data file contains a duplicate nickname for a different User.");
+        }
+    }
+
+    private void EnsureUniqueWalletTagNames()
+    {
+        if (WalletTags
             .GroupBy(tag => new { tag.UserId, Name = tag.Name.ToUpperInvariant() })
             .Any(group => string.IsNullOrWhiteSpace(group.Key.Name) || group.Count() > 1))
         {
-            throw new InvalidDomainStateException("The data file contains an empty or duplicate Inventory tag name for the same User.");
+            throw new InvalidDomainStateException("The data file contains an empty or duplicate Wallet tag name for the same User.");
         }
     }
 
@@ -325,9 +323,6 @@ public sealed partial class LevelUpData
 
         [JsonInclude]
         public string Nickname { get; private set; } = string.Empty;
-
-        [JsonInclude]
-        public CharacterClass Class { get; private set; } = CharacterClass.Warrior;
     }
 
     private static void EnsureUniqueValues(IEnumerable<string> values, string label)

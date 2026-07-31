@@ -4,11 +4,11 @@ LevelUp has four test projects aligned with the production layers.
 
 ## Domain tests
 
-Validate entities, value objects, invariants, activity behavior, project rules, inventory aggregates, experience calculations, and domain events.
+Validate entities, value objects, invariants, activity behavior, project rules, wallet aggregates, experience calculations, and domain events.
 
 ## Application tests
 
-Validate commands, handlers, validators, use-case orchestration, multi-user isolation, authentication, identity, inventory, dashboard behavior, and experience reward idempotency.
+Validate commands, handlers, validators, use-case orchestration, multi-user isolation, authentication, identity, wallet, dashboard behavior, and experience reward idempotency.
 
 ## Infrastructure tests
 
@@ -16,7 +16,7 @@ Validate JSON persistence, backups and recovery behavior, password hashing, iden
 
 ## Web tests
 
-Use bUnit and AngleSharp to validate components, routes, services, accessibility contracts, Design System behavior, icons, visual states, dashboard behavior, authentication UI, inventory UI, and feature interactions.
+Use bUnit and AngleSharp to validate components, routes, services, accessibility contracts, Design System behavior, icons, visual states, dashboard behavior, authentication UI, wallet UI, and feature interactions.
 
 ## Commands
 

@@ -136,8 +136,8 @@ body {
 }
 
 /* =========================================================
-   LevelUp RPG UI v1
-   Pixel-console visual language inspired by GBA/SNES/RPG UI.
+   LevelUp UI v1
+   Friendly, high-contrast visual language with light pixel-console accents.
    ========================================================= */
 
 body {
@@ -148,7 +148,7 @@ body {
 }
 
 .levelup-field__control,
-.character-field input,
+.profile-field input,
 input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
@@ -187,7 +187,7 @@ textarea {
 
 /* Official LevelUp typography */
 .levelup-brand,
-.character-panel__brand,
+.profile-panel__brand,
 .welcome > span,
 .entry-loading > span,
 .top-navigation__brand-button {

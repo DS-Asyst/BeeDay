@@ -5,21 +5,21 @@ namespace LevelUp.Web.Tests.Services;
 public sealed class LoginDestinationResolverTests
 {
     [Fact]
-    public void Resolve_WithoutCharacter_RequiresCharacterCreation()
+    public void Resolve_WithoutProfile_RequiresProfileCreation()
     {
         var destination = LoginDestinationResolver.Resolve(
-            hasCharacter: false,
+            hasProfile: false,
             hasCompletedOnboarding: false,
             returnUrl: "/daily");
 
-        Assert.Equal("/character/create", destination);
+        Assert.Equal("/profile/create", destination);
     }
 
     [Fact]
-    public void Resolve_FirstLoginWithCharacter_RequiresTutorialEvenWhenReturnUrlTargetsDaily()
+    public void Resolve_FirstLoginWithProfile_RequiresTutorialEvenWhenReturnUrlTargetsDaily()
     {
         var destination = LoginDestinationResolver.Resolve(
-            hasCharacter: true,
+            hasProfile: true,
             hasCompletedOnboarding: false,
             returnUrl: "/daily");
 
@@ -30,11 +30,11 @@ public sealed class LoginDestinationResolverTests
     public void Resolve_AfterOnboarding_UsesSafeLocalReturnUrl()
     {
         var destination = LoginDestinationResolver.Resolve(
-            hasCharacter: true,
+            hasProfile: true,
             hasCompletedOnboarding: true,
-            returnUrl: "/inventory");
+            returnUrl: "/wallet");
 
-        Assert.Equal("/inventory", destination);
+        Assert.Equal("/wallet", destination);
     }
 
     [Theory]
@@ -46,7 +46,7 @@ public sealed class LoginDestinationResolverTests
     public void Resolve_AfterOnboarding_RejectsMissingOrUnsafeReturnUrl(string? returnUrl)
     {
         var destination = LoginDestinationResolver.Resolve(
-            hasCharacter: true,
+            hasProfile: true,
             hasCompletedOnboarding: true,
             returnUrl);
 

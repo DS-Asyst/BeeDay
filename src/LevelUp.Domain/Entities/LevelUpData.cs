@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
+using LevelUp.Domain.ValueObjects;
 
 namespace LevelUp.Domain.Entities;
 
@@ -19,9 +20,6 @@ public sealed partial class LevelUpData
 
     [JsonInclude]
     public List<UserToken> UserTokens { get; private set; } = [];
-
-    [JsonInclude]
-    public List<Character> Characters { get; private set; } = [];
 
     [JsonInclude, JsonPropertyName("profile")]
     private LegacyProfileSnapshot? LegacyProfile { get; set; }
@@ -42,7 +40,7 @@ public sealed partial class LevelUpData
     public List<Transaction> Transactions { get; private set; } = [];
 
     [JsonInclude]
-    public List<InventoryTag> InventoryTags { get; private set; } = [];
+    public List<WalletTag> WalletTags { get; private set; } = [];
 
     [JsonInclude, JsonPropertyName("todos")]
     private List<Todo> LegacyTodos { get; set; } = [];
@@ -51,16 +49,10 @@ public sealed partial class LevelUpData
     public User? CurrentUser => CurrentUserId is Guid id ? Users.FirstOrDefault(user => user.Id == id) : null;
 
     [JsonIgnore]
-    public Character? CurrentCharacter => CurrentUserId is Guid id ? Characters.FirstOrDefault(character => character.UserId == id) : null;
-
-    [JsonIgnore]
     public List<Todo> Todos => Projects.SelectMany(project => project.Todos).ToList();
 
     public User FindUser(Guid userId) => Users.FirstOrDefault(user => user.Id == userId)
         ?? throw new InvalidDomainStateException($"User '{userId}' was not found.");
-
-    public Character? FindCharacterForUser(Guid userId) =>
-        Characters.FirstOrDefault(character => character.UserId == userId);
 
     public LevelUpData CreateUserSnapshot(Guid userId)
     {
@@ -72,12 +64,11 @@ public sealed partial class LevelUpData
             CurrentUserId = userId,
             Users = [user],
             UserTokens = UserTokens.Where(token => token.UserId == userId).ToList(),
-            Characters = Characters.Where(character => character.UserId == userId).ToList(),
             Habits = Habits.Where(habit => habit.UserId == userId).ToList(),
             Tasks = Tasks.Where(task => task.UserId == userId).ToList(),
             Projects = projects,
             Wallets = Wallets.Where(wallet => wallet.UserId == userId).ToList(),
-            InventoryTags = InventoryTags.Where(tag => tag.UserId == userId).ToList(),
+            WalletTags = WalletTags.Where(tag => tag.UserId == userId).ToList(),
             Transactions = Transactions.Where(transaction =>
                 Wallets.Any(wallet => wallet.Id == transaction.WalletId && wallet.UserId == userId)).ToList()
         };
@@ -171,23 +162,22 @@ public sealed partial class LevelUpData
         CurrentUserId = userId;
     }
 
-    public void AddCharacter(Character character)
+    public void CompleteUserProfile(Guid userId, string nickname, string? avatar = null)
     {
-        ArgumentNullException.ThrowIfNull(character);
-        if (Users.All(user => user.Id != character.UserId))
+        var user = FindUser(userId);
+        if (user.HasProfile)
         {
-            throw new InvalidDomainStateException("Character must belong to an existing User.");
+            throw new InvalidDomainStateException("A User can only complete their profile once.");
         }
 
-        if (Characters.Any(existing => existing.UserId == character.UserId))
+        var normalizedNickname = Nickname.Create(nickname).Value;
+        if (Users.Any(existing => existing.Id != user.Id
+            && string.Equals(existing.Nickname, normalizedNickname, StringComparison.OrdinalIgnoreCase)))
         {
-            throw new InvalidDomainStateException("A User can have only one Character.");
+            throw new InvalidDomainStateException($"Nickname '@{normalizedNickname}' is already in use.");
         }
-        if (Characters.Any(existing => string.Equals(existing.Nickname, character.Nickname, StringComparison.OrdinalIgnoreCase)))
-        {
-            throw new InvalidDomainStateException($"Nickname '@{character.Nickname}' is already in use.");
-        }
-        Characters.Add(character);
+
+        user.CompleteProfile(nickname, avatar);
     }
 
     public void AddHabit(Habit habit) { AssignCurrentOwner(habit); Habits.Add(habit); }
@@ -208,19 +198,19 @@ public sealed partial class LevelUpData
         Wallets.Add(wallet);
     }
 
-    public void AddInventoryTag(InventoryTag tag)
+    public void AddWalletTag(WalletTag tag)
     {
         ArgumentNullException.ThrowIfNull(tag);
         if (Users.All(user => user.Id != tag.UserId))
         {
-            throw new InvalidDomainStateException("Inventory tag must belong to an existing User.");
+            throw new InvalidDomainStateException("Wallet tag must belong to an existing User.");
         }
-        if (InventoryTags.Any(existing => existing.UserId == tag.UserId
+        if (WalletTags.Any(existing => existing.UserId == tag.UserId
             && string.Equals(existing.Name, tag.Name, StringComparison.OrdinalIgnoreCase)))
         {
-            throw new InvalidDomainStateException($"Inventory tag '{tag.Name}' already exists for this User.");
+            throw new InvalidDomainStateException($"Wallet tag '{tag.Name}' already exists for this User.");
         }
-        InventoryTags.Add(tag);
+        WalletTags.Add(tag);
     }
 
     public void AddTransaction(Transaction transaction)
@@ -235,20 +225,20 @@ public sealed partial class LevelUpData
     public Wallet FindWallet(Guid walletId) => Wallets.FirstOrDefault(wallet => wallet.Id == walletId)
         ?? throw new InvalidDomainStateException($"Wallet '{walletId}' was not found.");
 
-    public InventoryTag FindInventoryTag(Guid tagId) => InventoryTags.FirstOrDefault(tag => tag.Id == tagId)
-        ?? throw new InvalidDomainStateException($"Inventory tag '{tagId}' was not found.");
+    public WalletTag FindWalletTag(Guid tagId) => WalletTags.FirstOrDefault(tag => tag.Id == tagId)
+        ?? throw new InvalidDomainStateException($"Wallet tag '{tagId}' was not found.");
 
     public Transaction FindTransaction(Guid transactionId) => Transactions.FirstOrDefault(transaction => transaction.Id == transactionId)
         ?? throw new InvalidDomainStateException($"Transaction '{transactionId}' was not found.");
 
-    public void RemoveInventoryTag(Guid tagId)
+    public void RemoveWalletTag(Guid tagId)
     {
-        var tag = FindInventoryTag(tagId);
-        foreach (var transaction in Transactions.Where(transaction => transaction.InventoryTagId == tagId))
+        var tag = FindWalletTag(tagId);
+        foreach (var transaction in Transactions.Where(transaction => transaction.WalletTagId == tagId))
         {
             transaction.RemoveTag();
         }
-        InventoryTags.Remove(tag);
+        WalletTags.Remove(tag);
     }
 
     public Project FindProject(Guid projectId) => Projects.FirstOrDefault(project => project.Id == projectId)

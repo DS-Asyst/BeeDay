@@ -36,6 +36,6 @@ JSON infrastructure implementation
 
 ## Authoritative boundaries
 
-The JSON repository persists the authoritative application state. Derived values such as character level and progress are calculated from persisted total experience and the configured experience curve.
+The JSON repository persists the authoritative application state. Derived values such as level and progress are calculated from persisted total experience and the configured experience curve.
 
 The UI does not write storage directly. It dispatches use cases through Application contracts or Web feature services.

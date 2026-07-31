@@ -2,22 +2,22 @@
     <div class="top-navigation__content">
         <button type="button"
                 class="top-navigation__brand-button"
-                aria-label="@(IsCharacterPanelOpen ? "Close character panel" : "Open character panel")"
-                aria-expanded="@IsCharacterPanelOpen"
-                @onclick="OnToggleCharacterPanel">
+                aria-label="@(IsProfilePanelOpen ? "Close profile panel" : "Open profile panel")"
+                aria-expanded="@IsProfilePanelOpen"
+                @onclick="OnToggleProfilePanel">
             <span class="top-navigation__brand-text" aria-hidden="true">
                 <span class="top-navigation__brand-level">LEVEL</span>
                 <span class="top-navigation__brand-up">UP</span>
             </span>
 
             <span class="top-navigation__panel-arrow" aria-hidden="true">
-                <PixelIcon Name="@(IsCharacterPanelOpen ? PixelIconName.ChevronLeft : PixelIconName.ChevronRight)" Size="PixelIconSize.Medium" />
+                <PixelIcon Name="@(IsProfilePanelOpen ? PixelIconName.ChevronLeft : PixelIconName.ChevronRight)" Size="PixelIconSize.Medium" />
             </span>
         </button>
 
         <nav class="top-navigation__links" aria-label="Main navigation">
             <NavLink href="/daily" Match="NavLinkMatch.Prefix">Daily</NavLink>
-            <NavLink href="/inventory" Match="NavLinkMatch.Prefix">Inventory</NavLink>
+            <NavLink href="/wallet" Match="NavLinkMatch.Prefix">Wallet</NavLink>
         </nav>
 
 
@@ -36,8 +36,8 @@
 </header>
 
 @code {
-    [Parameter] public bool IsCharacterPanelOpen { get; set; }
+    [Parameter] public bool IsProfilePanelOpen { get; set; }
     [Parameter] public bool IsMenuPanelOpen { get; set; }
-    [Parameter] public EventCallback OnToggleCharacterPanel { get; set; }
+    [Parameter] public EventCallback OnToggleProfilePanel { get; set; }
     [Parameter] public EventCallback OnToggleMenuPanel { get; set; }
 }

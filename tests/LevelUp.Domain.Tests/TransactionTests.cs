@@ -1,7 +1,7 @@
+using LevelUp.Domain.Entities;
 using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
 using Xunit;
-using InventoryTransaction = LevelUp.Domain.Entities.Transaction;
 
 namespace LevelUp.Domain.Tests;
 
@@ -12,7 +12,7 @@ public sealed class TransactionTests
     [InlineData(TransactionType.Expense, 25.50, -25.50)]
     public void Create_sets_signed_amount_from_type(TransactionType type, double amount, double expected)
     {
-        var transaction = InventoryTransaction.Create(
+        var transaction = Transaction.Create(
             Guid.NewGuid(),
             "Transaction",
             (decimal)amount,
@@ -26,7 +26,7 @@ public sealed class TransactionTests
     [Fact]
     public void Create_normalizes_text_fields()
     {
-        var transaction = InventoryTransaction.Create(
+        var transaction = Transaction.Create(
             Guid.NewGuid(),
             "  Internet   bill  ",
             80m,
@@ -44,7 +44,7 @@ public sealed class TransactionTests
     [InlineData(10.999)]
     public void Create_rejects_invalid_amounts(double value)
     {
-        Assert.Throws<DomainValidationException>(() => InventoryTransaction.Create(
+        Assert.Throws<DomainValidationException>(() => Transaction.Create(
             Guid.NewGuid(),
             "Invalid",
             (decimal)value,
@@ -55,11 +55,11 @@ public sealed class TransactionTests
     [Fact]
     public void Create_rejects_empty_description_invalid_type_and_date()
     {
-        Assert.Throws<DomainValidationException>(() => InventoryTransaction.Create(
+        Assert.Throws<DomainValidationException>(() => Transaction.Create(
             Guid.NewGuid(), " ", 1m, TransactionType.Income, new DateOnly(2026, 7, 24)));
-        Assert.Throws<DomainValidationException>(() => InventoryTransaction.Create(
+        Assert.Throws<DomainValidationException>(() => Transaction.Create(
             Guid.NewGuid(), "Invalid type", 1m, (TransactionType)999, new DateOnly(2026, 7, 24)));
-        Assert.Throws<DomainValidationException>(() => InventoryTransaction.Create(
+        Assert.Throws<DomainValidationException>(() => Transaction.Create(
             Guid.NewGuid(), "Invalid date", 1m, TransactionType.Income, default));
     }
 
@@ -67,7 +67,7 @@ public sealed class TransactionTests
     public void Update_preserves_identity_and_wallet()
     {
         var walletId = Guid.NewGuid();
-        var transaction = InventoryTransaction.Create(
+        var transaction = Transaction.Create(
             walletId, "Old", 10m, TransactionType.Income, new DateOnly(2026, 7, 1));
         var id = transaction.Id;
         var createdAt = transaction.CreatedAtUtc;
@@ -86,14 +86,14 @@ public sealed class TransactionTests
     [Fact]
     public void Tag_can_be_assigned_and_removed()
     {
-        var transaction = InventoryTransaction.Create(
+        var transaction = Transaction.Create(
             Guid.NewGuid(), "Tagged", 10m, TransactionType.Expense, new DateOnly(2026, 7, 1));
         var tagId = Guid.NewGuid();
 
         transaction.AssignTag(tagId);
-        Assert.Equal(tagId, transaction.InventoryTagId);
+        Assert.Equal(tagId, transaction.WalletTagId);
 
         transaction.RemoveTag();
-        Assert.Null(transaction.InventoryTagId);
+        Assert.Null(transaction.WalletTagId);
     }
 }

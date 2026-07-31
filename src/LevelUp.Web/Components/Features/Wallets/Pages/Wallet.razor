@@ -1,0 +1,400 @@
+@page "/wallet"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@using LevelUp.Application.Features.Wallets.Commands
+@using LevelUp.Application.Features.Wallets.Queries
+@using LevelUp.Application.Features.Wallets.Requests
+@using LevelUp.Application.Features.Wallets.Responses
+@using LevelUp.Web.Components.Features.Wallets.Components
+@using LevelUp.Web.Components.Features.Wallets.Models
+@using LevelUp.Web.Components.Features.Wallets.Services
+@using LevelUp.Web.Components.Features.Wallets.State
+@inject MediatR.ISender Sender
+@inject AuthenticatedUserInitializer UserInitializer
+@inject ToastService Toast
+
+<PageTitle>Wallet | LevelUp</PageTitle>
+
+@if (_isLoading)
+{
+    <LevelUpDashboardSkeleton />
+}
+else
+{
+    <main class="wallet-page levelup-fade-in" aria-busy="@_interaction.IsBusy.ToString().ToLowerInvariant()">
+        <header class="wallet-page__header">
+            <div>
+                <span class="wallet-eyebrow">Personal finance</span>
+                <h1 class="wallet-page__title">Wallet</h1>
+                <p>Track your wallet, organize transactions and understand where your money goes.</p>
+            </div>
+            <LevelUpButton Variant="LevelUpButtonVariant.Primary"
+                           Icon="PixelIconName.Add"
+                           Disabled="_interaction.IsBusy"
+                           Class="levelup-button--comic levelup-button--comic-orange"
+                           OnClick="OpenCreateTransaction">New transaction</LevelUpButton>
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <div class="wallet-alert" role="alert">
+                <span><PixelIcon Name="PixelIconName.Warning" Size="PixelIconSize.Small" Color="PixelIconColor.Danger" /> @_errorMessage</span>
+                <LevelUpButton Variant="LevelUpButtonVariant.Secondary" Compact="true" Disabled="_interaction.IsBusy" OnClick="RetryAsync">Try again</LevelUpButton>
+            </div>
+        }
+
+        <div aria-live="polite" class="sr-only">@_statusAnnouncement</div>
+        <WalletSummary Summary="_summary" HighlightBalance="_highlightBalance" />
+
+        <section class="wallet-workspace">
+            <TransactionList Transactions="_transactions"
+                             Tags="_tags"
+                             IsRefreshing="_isRefreshing"
+                             IsBusy="_interaction.IsBusy"
+                             HasFilters="_state.HasFilters"
+                             Search="@_state.Search"
+                             TypeFilter="@_state.TypeFilter"
+                             TagFilter="@_state.TagFilter"
+                             StartDate="_state.StartDate"
+                             EndDate="_state.EndDate"
+                             Sort="@_state.Sort"
+                             ActiveFilterCount="_state.ActiveFilterCount"
+                             SearchChanged="HandleSearchChangedAsync"
+                             TypeFilterChanged="HandleTypeChangedAsync"
+                             TagFilterChanged="HandleTagChangedAsync"
+                             StartDateChanged="HandleStartDateChangedAsync"
+                             EndDateChanged="HandleEndDateChangedAsync"
+                             SortChanged="HandleSortChangedAsync"
+                             OnCreateTransaction="OpenCreateTransaction"
+                             OnClearFilters="ClearFiltersAsync"
+                             OnPreviousPage="PreviousPageAsync"
+                             OnNextPage="NextPageAsync"
+                             OnEdit="OpenEditTransaction" />
+
+            <WalletTagManager Tags="_tags" IsBusy="_interaction.IsBusy" OnCreate="OpenCreateTag" OnEdit="OpenEditTag" />
+        </section>
+    </main>
+}
+
+<TransactionFormModal IsOpen="_isTransactionEditorOpen" IsEditing="@(_editingTransactionId is not null)" IsBusy="_interaction.IsBusy" Model="_transactionForm" Tags="_tags" OnSave="SaveTransactionAsync" OnCancel="CloseTransactionEditor" OnDeleteRequested="RequestDeleteCurrentTransaction" />
+
+<TagFormModal IsOpen="_isTagEditorOpen" IsEditing="@(_editingTagId is not null)" IsBusy="_interaction.IsBusy" Model="_tagForm" OnSave="SaveTagFormAsync" OnCancel="CloseTagEditor" OnDeleteRequested="RequestDeleteCurrentTag" />
+
+<LevelUpConfirmDialog IsOpen="@(_pendingDeleteTransaction is not null)"
+                      IsBusy="_interaction.IsBusy"
+                      Title="Delete transaction"
+                      Message="Are you sure you want to delete this transaction?"
+                      ItemTitle="@_pendingDeleteTransaction?.Description"
+                      Warning="This action cannot be undone."
+                      ConfirmLabel="Delete transaction"
+                      OnConfirm="DeleteTransactionAsync"
+                      OnCancel="CancelDeleteTransaction" />
+
+<LevelUpConfirmDialog IsOpen="@(_pendingDeleteTag is not null)"
+                      IsBusy="_interaction.IsBusy"
+                      Title="Delete tag"
+                      Message="Transactions using this tag will remain and become untagged."
+                      ItemTitle="@_pendingDeleteTag?.Name"
+                      Warning="The tag will be permanently removed."
+                      ConfirmLabel="Delete tag"
+                      OnConfirm="DeleteTagAsync"
+                      OnCancel="CancelDeleteTag" />
+
+@code {
+    private const string LoadError = "We could not load your wallet. Please try again.";
+    private const string RefreshError = "We could not refresh your wallet. Your current view was preserved.";
+    private WalletSummaryResponse? _summary;
+    private IReadOnlyList<WalletTagResponse> _tags = [];
+    private PagedTransactionsResponse _transactions = new([], 1, 20, 0, 0);
+    private bool _isLoading = true;
+    private bool _isRefreshing;
+    private bool _highlightBalance;
+    private string _statusAnnouncement = string.Empty;
+    private string? _errorMessage;
+    private readonly WalletPageState _state = new();
+    private readonly WalletInteractionState _interaction = new();
+    private bool _isTransactionEditorOpen;
+    private Guid? _editingTransactionId;
+    private TransactionFormModel _transactionForm = new();
+    private TransactionResponse? _pendingDeleteTransaction;
+    private bool _isTagEditorOpen;
+    private Guid? _editingTagId;
+    private WalletTagFormModel _tagForm = new();
+    private WalletTagResponse? _pendingDeleteTag;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UserInitializer.EnsureInitializedAsync();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+        try
+        {
+            await Sender.Send(new EnsureCurrentWalletCommand());
+            await LoadDataAsync();
+        }
+        catch
+        {
+            _errorMessage = LoadError;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task RetryAsync()
+    {
+        if (_summary is null) await LoadAsync();
+        else await RefreshAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        var (sortField, sortDirection) = ResolveSort();
+        TransactionType? type = Enum.TryParse<TransactionType>(_state.TypeFilter, out var parsedType) ? parsedType : null;
+        Guid? tagId = Guid.TryParse(_state.TagFilter, out var parsedTagId) ? parsedTagId : null;
+
+        var summaryTask = Sender.Send(new GetWalletSummaryQuery());
+        var tagsTask = Sender.Send(new GetWalletTagsQuery());
+        var transactionsTask = Sender.Send(new GetTransactionsQuery(
+            Search: string.IsNullOrWhiteSpace(_state.Search) ? null : _state.Search.Trim(),
+            Type: type,
+            WalletTagId: tagId,
+            StartDate: _state.StartDate,
+            EndDate: _state.EndDate,
+            SortBy: sortField,
+            SortDirection: sortDirection,
+            Page: _state.Page,
+            PageSize: 20));
+
+        await Task.WhenAll(summaryTask, tagsTask, transactionsTask);
+        _summary = await summaryTask;
+        _tags = await tagsTask;
+        _transactions = await transactionsTask;
+    }
+
+    private (TransactionSortField, SortDirection) ResolveSort() => _state.Sort switch
+    {
+        "date-asc" => (TransactionSortField.Date, SortDirection.Ascending),
+        "amount-desc" => (TransactionSortField.Amount, SortDirection.Descending),
+        "amount-asc" => (TransactionSortField.Amount, SortDirection.Ascending),
+        "description-asc" => (TransactionSortField.Description, SortDirection.Ascending),
+        "description-desc" => (TransactionSortField.Description, SortDirection.Descending),
+        _ => (TransactionSortField.Date, SortDirection.Descending)
+    };
+
+    private async Task<bool> RefreshAsync()
+    {
+        _errorMessage = null;
+        _isRefreshing = true;
+        try
+        {
+            await LoadDataAsync();
+            return true;
+        }
+        catch
+        {
+            _errorMessage = RefreshError;
+            return false;
+        }
+        finally
+        {
+            _isRefreshing = false;
+        }
+    }
+
+    private async Task HandleSearchChangedAsync(string value) { if (_interaction.IsBusy) return; _state.Search = value; _state.ResetPage(); await RefreshAsync(); }
+    private async Task HandleTypeChangedAsync(string value) { if (_interaction.IsBusy) return; _state.TypeFilter = value; _state.ResetPage(); await RefreshAsync(); }
+    private async Task HandleTagChangedAsync(string value) { if (_interaction.IsBusy) return; _state.TagFilter = value; _state.ResetPage(); await RefreshAsync(); }
+    private async Task HandleStartDateChangedAsync(DateOnly? value) { if (_interaction.IsBusy) return; _state.StartDate = value; _state.ResetPage(); await RefreshAsync(); }
+    private async Task HandleEndDateChangedAsync(DateOnly? value) { if (_interaction.IsBusy) return; _state.EndDate = value; _state.ResetPage(); await RefreshAsync(); }
+    private async Task HandleSortChangedAsync(string value) { if (_interaction.IsBusy) return; _state.Sort = string.IsNullOrWhiteSpace(value) ? "date-desc" : value; _state.ResetPage(); await RefreshAsync(); }
+    private async Task ClearFiltersAsync() { if (_interaction.IsBusy) return; _state.ClearFilters(); await RefreshAsync(); }
+    private async Task PreviousPageAsync() { if (!_interaction.IsBusy && _state.Page > 1) { _state.Page--; if (!await RefreshAsync()) _state.Page++; } }
+    private async Task NextPageAsync() { if (!_interaction.IsBusy && _state.Page < _transactions.TotalPages) { _state.Page++; if (!await RefreshAsync()) _state.Page--; } }
+
+    private void OpenCreateTransaction()
+    {
+        if (_interaction.IsBusy) return;
+        _editingTransactionId = null;
+        _transactionForm = new() { TransactionDate = DateTime.Today, Type = TransactionType.Expense };
+        _isTransactionEditorOpen = true;
+    }
+
+    private void OpenEditTransaction(TransactionResponse transaction)
+    {
+        if (_interaction.IsBusy) return;
+        _editingTransactionId = transaction.Id;
+        _transactionForm = new()
+        {
+            Description = transaction.Description,
+            Amount = transaction.Amount,
+            Type = transaction.Type,
+            TransactionDate = transaction.TransactionDate.ToDateTime(TimeOnly.MinValue),
+            WalletTagId = transaction.WalletTagId,
+            Notes = transaction.Notes
+        };
+        _isTransactionEditorOpen = true;
+    }
+
+    private void CloseTransactionEditor()
+    {
+        if (_interaction.IsBusy) return;
+        _isTransactionEditorOpen = false;
+        _editingTransactionId = null;
+    }
+
+    private async Task SaveTransactionAsync()
+    {
+        if (!_interaction.TryBegin("save-transaction")) return;
+        _errorMessage = null;
+        var wasEditing = _editingTransactionId is not null;
+        try
+        {
+            var request = new SaveTransactionRequest(_transactionForm.Description, _transactionForm.Amount, _transactionForm.Type, DateOnly.FromDateTime(_transactionForm.TransactionDate), _transactionForm.WalletTagId, _transactionForm.Notes);
+            if (_editingTransactionId is Guid id) await Sender.Send(new UpdateTransactionCommand(id, request));
+            else await Sender.Send(new CreateTransactionCommand(request));
+
+            _isTransactionEditorOpen = false;
+            _editingTransactionId = null;
+            await RefreshAfterMutationAsync();
+            Toast.ShowSuccess(wasEditing ? "Transaction updated successfully." : "Transaction created successfully.");
+        }
+        catch
+        {
+            _errorMessage = "We could not save the transaction. Review the information and try again.";
+            Toast.ShowError("Could not save the transaction.");
+        }
+        finally { _interaction.End(); }
+    }
+
+    private void RequestDeleteTransaction(TransactionResponse transaction) { if (!_interaction.IsBusy) _pendingDeleteTransaction = transaction; }
+
+    private void RequestDeleteCurrentTransaction()
+    {
+        if (_interaction.IsBusy || _editingTransactionId is not Guid id) return;
+        var transaction = _transactions.Items.FirstOrDefault(t => t.Id == id);
+        if (transaction is null) return;
+        _isTransactionEditorOpen = false;
+        _editingTransactionId = null;
+        RequestDeleteTransaction(transaction);
+    }
+    private void CancelDeleteTransaction() { if (!_interaction.IsBusy) _pendingDeleteTransaction = null; }
+
+    private async Task DeleteTransactionAsync()
+    {
+        if (_pendingDeleteTransaction is null || !_interaction.TryBegin("delete-transaction")) return;
+        try
+        {
+            await Sender.Send(new DeleteTransactionCommand(_pendingDeleteTransaction.Id));
+            _pendingDeleteTransaction = null;
+            await RefreshAfterMutationAsync();
+            if (_transactions.Items.Count == 0 && _state.Page > 1) { _state.Page--; await RefreshAsync(); }
+            Toast.ShowSuccess("Transaction deleted successfully.");
+        }
+        catch
+        {
+            _errorMessage = "We could not delete the transaction. Please try again.";
+            Toast.ShowError("Could not delete the transaction.");
+        }
+        finally { _interaction.End(); }
+    }
+
+    private void OpenCreateTag()
+    {
+        if (_interaction.IsBusy) return;
+        _editingTagId = null;
+        _tagForm = new();
+        _isTagEditorOpen = true;
+    }
+
+    private void OpenEditTag(WalletTagResponse tag)
+    {
+        if (_interaction.IsBusy) return;
+        _editingTagId = tag.Id;
+        _tagForm = new() { Name = tag.Name, Color = tag.Color };
+        _isTagEditorOpen = true;
+    }
+
+    private void CloseTagEditor()
+    {
+        if (_interaction.IsBusy) return;
+        _isTagEditorOpen = false;
+        _editingTagId = null;
+    }
+
+    private async Task SaveTagFormAsync()
+    {
+        if (!_interaction.TryBegin("save-tag")) return;
+        _errorMessage = null;
+        var wasEditing = _editingTagId is not null;
+        try
+        {
+            var request = new SaveWalletTagRequest(_tagForm.Name, _tagForm.Color);
+            if (_editingTagId is Guid id) await Sender.Send(new UpdateWalletTagCommand(id, request));
+            else await Sender.Send(new CreateWalletTagCommand(request));
+
+            _isTagEditorOpen = false;
+            _editingTagId = null;
+            await RefreshAfterMutationAsync();
+            Toast.ShowSuccess(wasEditing ? "Tag updated successfully." : "Tag created successfully.");
+        }
+        catch
+        {
+            _errorMessage = "We could not save the tag. Review the information and try again.";
+            Toast.ShowError("Could not save the tag.");
+        }
+        finally { _interaction.End(); }
+    }
+
+    private void RequestDeleteTag(WalletTagResponse tag) { if (!_interaction.IsBusy) _pendingDeleteTag = tag; }
+
+    private void RequestDeleteCurrentTag()
+    {
+        if (_interaction.IsBusy || _editingTagId is not Guid id) return;
+        var tag = _tags.FirstOrDefault(t => t.Id == id);
+        if (tag is null) return;
+        _isTagEditorOpen = false;
+        _editingTagId = null;
+        RequestDeleteTag(tag);
+    }
+    private void CancelDeleteTag() { if (!_interaction.IsBusy) _pendingDeleteTag = null; }
+
+    private async Task DeleteTagAsync()
+    {
+        if (_pendingDeleteTag is null || !_interaction.TryBegin("delete-tag")) return;
+        try
+        {
+            await Sender.Send(new DeleteWalletTagCommand(_pendingDeleteTag.Id));
+            _pendingDeleteTag = null;
+            await RefreshAfterMutationAsync();
+            Toast.ShowSuccess("Tag deleted successfully.");
+        }
+        catch
+        {
+            _errorMessage = "We could not delete the tag. Please try again.";
+            Toast.ShowError("Could not delete the tag.");
+        }
+        finally { _interaction.End(); }
+    }
+
+    private async Task RefreshAfterMutationAsync()
+    {
+        if (!await RefreshAsync())
+        {
+            Toast.ShowError("The operation succeeded, but the wallet could not be refreshed.");
+            return;
+        }
+
+        _statusAnnouncement = $"Balance updated to {WalletCurrencyFormatter.Format(_summary?.Balance ?? 0)}.";
+        _highlightBalance = true;
+        StateHasChanged();
+        await Task.Delay(700);
+        _highlightBalance = false;
+    }
+}

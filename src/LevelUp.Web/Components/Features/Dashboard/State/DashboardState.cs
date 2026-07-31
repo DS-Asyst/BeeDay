@@ -28,7 +28,7 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
     public event Action? Changed;
     public Task<LevelUpData> GetDataAsync() => store.LoadAsync();
 
-    public bool HasCharacter => data?.CurrentCharacter is not null;
+    public bool HasProfile => data?.CurrentUser?.HasProfile == true;
     public Guid? OpenProjectId { get; private set; }
     public Project? OpenProject => OpenProjectId is Guid id ? data?.Projects.FirstOrDefault(project => project.Id == id) : null;
 
@@ -244,7 +244,7 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
 
     private async Task ExecuteExperienceOperationAsync(Func<Task> operation)
     {
-        var previousExperience = data?.CurrentCharacter?.Experience.TotalExperience ?? 0;
+        var previousExperience = data?.CurrentUser?.Experience.TotalExperience ?? 0;
 
         await ExecuteAsync(async () =>
         {
@@ -256,7 +256,7 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
 
     private void ShowExperienceGain(long previousExperience)
     {
-        var currentExperience = data?.CurrentCharacter?.Experience.TotalExperience ?? previousExperience;
+        var currentExperience = data?.CurrentUser?.Experience.TotalExperience ?? previousExperience;
         var gainedExperience = currentExperience - previousExperience;
 
         if (gainedExperience <= 0)

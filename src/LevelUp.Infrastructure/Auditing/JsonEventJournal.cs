@@ -44,8 +44,8 @@ public sealed class JsonEventJournal(
     {
         string? summary = domainEvent switch
         {
-            CharacterLeveledUpDomainEvent leveledUpEvent =>
-                $"Character reached level {leveledUpEvent.NewLevel} after gaining {leveledUpEvent.ExperienceAmount} XP from {leveledUpEvent.ExperienceSource}.",
+            UserLeveledUpDomainEvent leveledUpEvent =>
+                $"Reached level {leveledUpEvent.NewLevel} after gaining {leveledUpEvent.ExperienceAmount} XP from {leveledUpEvent.ExperienceSource}.",
             _ => null,
         };
 
@@ -97,7 +97,7 @@ public sealed class JsonEventJournal(
                     return true;
                 }
 
-                if (domainEvent is CharacterLeveledUpDomainEvent leveledUpEvent &&
+                if (domainEvent is UserLeveledUpDomainEvent leveledUpEvent &&
                     IsSameLevelUpEntry(root, leveledUpEvent.ExperienceEntryId))
                 {
                     return true;
@@ -117,7 +117,7 @@ public sealed class JsonEventJournal(
         if (!root.TryGetProperty("type", out JsonElement typeElement) ||
             !string.Equals(
                 typeElement.GetString(),
-                nameof(CharacterLeveledUpDomainEvent),
+                nameof(UserLeveledUpDomainEvent),
                 StringComparison.Ordinal))
         {
             return false;

@@ -38,6 +38,63 @@ public sealed class CreateUserCommandHandler(
     }
 }
 
+public sealed class CreateAccountCommandHandler(
+    ILevelUpRepository repository,
+    IPasswordService passwordService,
+    IEmailConfirmationIssuer confirmationIssuer,
+    IEmailSender emailSender)
+    : IRequestHandler<CreateAccountCommand, Guid>
+{
+    public async Task<Guid> Handle(CreateAccountCommand command, CancellationToken cancellationToken)
+    {
+        Guid userId = Guid.Empty;
+        EmailMessage? confirmationEmail = null;
+
+        await repository.UpdateAsync(data =>
+        {
+            var request = command.Request;
+            var user = User.Create(
+                request.Name,
+                request.Email,
+                passwordService.Hash(request.Password));
+
+            // Both mutations are committed in the same repository update. If either
+            // validation fails, no partial account is persisted.
+            data.AddUser(user);
+            data.CompleteUserProfile(user.Id, request.Nickname, request.Avatar);
+            confirmationEmail = confirmationIssuer.Issue(data, user);
+            userId = user.Id;
+        }, cancellationToken);
+
+        await emailSender.SendAsync(confirmationEmail!, cancellationToken);
+        return userId;
+    }
+}
+
+public sealed class CompleteUserProfileCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+    : RequestHandlerBase(repository), IRequestHandler<CompleteUserProfileCommand>
+{
+    public Task Handle(CompleteUserProfileCommand command, CancellationToken cancellationToken) =>
+        MutateAsync(data =>
+        {
+            var userId = CurrentUserGuard.RequireUserId(data, currentUser);
+            var user = data.FindUser(userId);
+            user.UpdateName(command.Request.FullName);
+            data.CompleteUserProfile(userId, command.Request.Nickname, command.Request.Avatar);
+        }, cancellationToken);
+}
+
+public sealed class UpdateCurrentUserAvatarCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+    : RequestHandlerBase(repository), IRequestHandler<UpdateCurrentUserAvatarCommand>
+{
+    public Task Handle(UpdateCurrentUserAvatarCommand command, CancellationToken cancellationToken) =>
+        MutateAsync(data =>
+        {
+            var userId = CurrentUserGuard.RequireUserId(data, currentUser);
+            data.FindUser(userId).UpdateAvatar(command.Request.Avatar);
+        }, cancellationToken);
+}
+
 public sealed class UpdateCurrentUserPreferencesCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
     : RequestHandlerBase(repository), IRequestHandler<UpdateCurrentUserPreferencesCommand>
 {
@@ -112,17 +169,5 @@ public sealed class GetCurrentUserQueryHandler(ILevelUpRepository repository, IC
         var userId = CurrentUserGuard.RequireUserId(data, currentUser);
         var user = data.FindUser(userId);
         return new(user.Id, user.Name, user.Email, user.Language, user.Theme, user.IsActive, user.HasCompletedOnboarding, user.IsEmailConfirmed);
-    }
-}
-
-public sealed class GetCurrentCharacterQueryHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
-    : IRequestHandler<GetCurrentCharacterQuery, CurrentCharacterResponse?>
-{
-    public async Task<CurrentCharacterResponse?> Handle(GetCurrentCharacterQuery request, CancellationToken cancellationToken)
-    {
-        var data = await repository.LoadAsync(cancellationToken);
-        var userId = CurrentUserGuard.RequireUserId(data, currentUser);
-        var character = data.FindCharacterForUser(userId);
-        return character is null ? null : new(character.Id, character.UserId, character.Nickname, character.Class, character.Avatar);
     }
 }

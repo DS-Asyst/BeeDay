@@ -1,0 +1,84 @@
+@using LevelUp.Application.Features.Wallets.Responses
+
+<section class="wallet-main-panel levelup-card @(Transactions.Items.Count == 0 ? "wallet-main-panel--empty" : null)" aria-labelledby="wallet-transactions-title">
+    <header class="wallet-panel-header wallet-panel-header--transactions">
+        <div>
+            <span class="wallet-eyebrow">History</span>
+            <h2 id="wallet-transactions-title">Transactions</h2>
+        </div>
+        <span class="wallet-result-count">@Transactions.TotalCount result@(Transactions.TotalCount == 1 ? string.Empty : "s")</span>
+    </header>
+
+    <WalletFilters IsDisabled="IsBusy"
+                      Search="@Search"
+                      TypeFilter="@TypeFilter"
+                      TagFilter="@TagFilter"
+                      StartDate="StartDate"
+                      EndDate="EndDate"
+                      Sort="@Sort"
+                      ActiveFilterCount="ActiveFilterCount"
+                      Tags="Tags"
+                      SearchChanged="SearchChanged"
+                      TypeFilterChanged="TypeFilterChanged"
+                      TagFilterChanged="TagFilterChanged"
+                      StartDateChanged="StartDateChanged"
+                      EndDateChanged="EndDateChanged"
+                      SortChanged="SortChanged"
+                      OnClearFilters="OnClearFilters" />
+
+    @if (Transactions.Items.Count == 0)
+    {
+        <WalletEmptyState HasFilters="HasFilters"
+                             IsDisabled="IsBusy"
+                             OnCreateTransaction="OnCreateTransaction"
+                             OnClearFilters="OnClearFilters" />
+    }
+    else
+    {
+        <div class="wallet-transaction-list" aria-busy="@IsRefreshing">
+            @foreach (var transaction in Transactions.Items)
+            {
+                <TransactionCard Transaction="transaction" OnEdit="OnEdit" />
+            }
+        </div>
+
+        @if (Transactions.TotalPages > 1)
+        {
+            <nav class="wallet-pagination" aria-label="Transaction pages">
+                <LevelUpButton Variant="LevelUpButtonVariant.Secondary" Compact="true" Disabled="@(IsBusy || Transactions.Page <= 1)" OnClick="OnPreviousPage">Previous</LevelUpButton>
+                <span>@PaginationSummary · Page @Transactions.Page of @Transactions.TotalPages</span>
+                <LevelUpButton Variant="LevelUpButtonVariant.Secondary" Compact="true" Disabled="@(IsBusy || Transactions.Page >= Transactions.TotalPages)" OnClick="OnNextPage">Next</LevelUpButton>
+            </nav>
+        }
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public PagedTransactionsResponse Transactions { get; set; } = default!;
+    [Parameter] public IReadOnlyList<WalletTagResponse> Tags { get; set; } = [];
+    [Parameter] public bool IsRefreshing { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public bool HasFilters { get; set; }
+    [Parameter] public string Search { get; set; } = string.Empty;
+    [Parameter] public string TypeFilter { get; set; } = string.Empty;
+    [Parameter] public string TagFilter { get; set; } = string.Empty;
+    [Parameter] public DateOnly? StartDate { get; set; }
+    [Parameter] public DateOnly? EndDate { get; set; }
+    [Parameter] public string Sort { get; set; } = "date-desc";
+    [Parameter] public EventCallback<string> SearchChanged { get; set; }
+    [Parameter] public EventCallback<string> TypeFilterChanged { get; set; }
+    [Parameter] public int ActiveFilterCount { get; set; }
+    [Parameter] public EventCallback<string> TagFilterChanged { get; set; }
+    [Parameter] public EventCallback<DateOnly?> StartDateChanged { get; set; }
+    [Parameter] public EventCallback<DateOnly?> EndDateChanged { get; set; }
+    [Parameter] public EventCallback<string> SortChanged { get; set; }
+    [Parameter] public EventCallback OnCreateTransaction { get; set; }
+    [Parameter] public EventCallback OnClearFilters { get; set; }
+    [Parameter] public EventCallback OnPreviousPage { get; set; }
+    [Parameter] public EventCallback OnNextPage { get; set; }
+    [Parameter] public EventCallback<TransactionResponse> OnEdit { get; set; }
+
+    private string PaginationSummary => Transactions.TotalCount == 0
+        ? "No results"
+        : $"Showing {((Transactions.Page - 1) * Transactions.PageSize) + 1}–{Math.Min(Transactions.Page * Transactions.PageSize, Transactions.TotalCount)} of {Transactions.TotalCount}";
+}

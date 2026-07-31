@@ -90,7 +90,7 @@ public sealed class JsonPersistenceTests : IDisposable
 
         var loaded = await fixture.Repository.LoadAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal(5, loaded.SchemaVersion);
+        Assert.Equal(7, loaded.SchemaVersion);
         Assert.Empty(loaded.Users);
         Assert.True(File.Exists(fixture.Paths.DataFile));
     }

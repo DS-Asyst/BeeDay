@@ -20,6 +20,59 @@ public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCom
     }
 }
 
+public sealed class CreateAccountCommandValidator : AbstractValidator<CreateAccountCommand>
+{
+    public CreateAccountCommandValidator()
+    {
+        RuleFor(command => command.Request.Name)
+            .NotEmpty()
+            .MaximumLength(UserName.MaximumLength);
+        RuleFor(command => command.Request.Email)
+            .NotEmpty()
+            .EmailAddress()
+            .MaximumLength(EmailAddress.MaximumLength);
+        RuleFor(command => command.Request.Password)
+            .NotEmpty()
+            .MinimumLength(PasswordPolicy.MinimumLength)
+            .MaximumLength(PasswordPolicy.MaximumLength)
+            .Matches("[A-Za-z]").WithMessage("Password must contain at least one letter.")
+            .Matches("[0-9]").WithMessage("Password must contain at least one number.");
+        RuleFor(command => command.Request.Nickname)
+            .NotEmpty()
+            .MinimumLength(Nickname.MinimumLength)
+            .MaximumLength(Nickname.MaximumLength)
+            .Matches("^[A-Za-z0-9._-]+$");
+    }
+}
+
+public sealed class CompleteUserProfileCommandValidator : AbstractValidator<CompleteUserProfileCommand>
+{
+    public CompleteUserProfileCommandValidator()
+    {
+        RuleFor(command => command.Request.FullName)
+            .NotEmpty()
+            .MaximumLength(UserName.MaximumLength)
+            .OverridePropertyName("FullName");
+        RuleFor(command => command.Request.Nickname)
+            .NotEmpty()
+            .MinimumLength(Nickname.MinimumLength)
+            .MaximumLength(Nickname.MaximumLength)
+            .Matches("^[A-Za-z0-9._-]+$")
+            .OverridePropertyName("Nickname");
+    }
+}
+
+public sealed class UpdateCurrentUserAvatarCommandValidator : AbstractValidator<UpdateCurrentUserAvatarCommand>
+{
+    private const int MaximumAvatarLength = 2048;
+
+    public UpdateCurrentUserAvatarCommandValidator()
+    {
+        RuleFor(command => command.Request.Avatar)
+            .MaximumLength(MaximumAvatarLength);
+    }
+}
+
 public sealed class UpdateCurrentUserAccountCommandValidator : AbstractValidator<UpdateCurrentUserAccountCommand>
 {
     public UpdateCurrentUserAccountCommandValidator()

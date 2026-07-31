@@ -3,13 +3,13 @@ namespace LevelUp.Web.Services.Authentication;
 public static class LoginDestinationResolver
 {
     public static string Resolve(
-        bool hasCharacter,
+        bool hasProfile,
         bool hasCompletedOnboarding,
         string? returnUrl)
     {
-        if (!hasCharacter)
+        if (!hasProfile)
         {
-            return "/character/create";
+            return "/profile/create";
         }
 
         if (!hasCompletedOnboarding)

@@ -17,7 +17,7 @@ Physical asset paths and provider identity must not leak into feature components
 
 LevelUp icons come from three providers, chosen per icon by what each one actually offers — never forced:
 
-1. **Material Symbols** — primary provider for interface, actions, navigation, forms, feedback, and general application icons (including the RPG/domain icons: Character, Level, Experience, Habit, Streak, etc. — Material's generic catalog covers these adequately; there is currently no icon that requires bespoke LevelUp artwork). Activity attributes (Strength, Dexterity, Intelligence, Vitality) are identified by name and a dedicated Design System color only and do not have icons.
+1. **Material Symbols** — primary provider for interface, actions, navigation, forms, feedback, and general application icons (including domain icons such as Profile, Level, Experience, Habit, Streak, etc. — Material's generic catalog covers these adequately; there is currently no icon that requires bespoke LevelUp artwork). Activity attributes (Strength, Dexterity, Intelligence, Vitality) are identified by name and a dedicated Design System color only and do not have icons.
 2. **Devicon** — only for brands, technologies, and development tools that Devicon actually provides (verified against Devicon's own catalog, never assumed). Currently used for GitHub, Facebook, and LinkedIn.
 3. **Official Brand** — current official brand artwork used by LevelUp for a brand Devicon does not provide. Preferred source is the brand owner's own official brand-resource or brand-guideline page; [Simple Icons](https://simpleicons.org/) may be used only when its path data accurately reproduces the current official mark — it is a curated source, never the brand's owner or issuer of the trademark. Currently used for YouTube, Instagram, and X (Devicon's only Twitter-family asset is the retired bird logo, which does not represent the current X brand and is not used as a substitute).
 4. **LevelUp Custom** — reserved for genuinely product-specific domain icons where neither Material Symbols nor Devicon offers an acceptable semantic representation. Not currently used by any icon.
@@ -81,7 +81,7 @@ Each source folder has its own `ATTRIBUTION.md`. Never modify, rename, recolor, 
 wwwroot/icons/
     material-symbols/
         actions/  navigation/  forms/  feedback/  activities/(habits/tasks/projects)
-        attributes/  character/  books/  inventory/  statistics/  system/
+        attributes/  character/  books/  statistics/  system/
     devicon/
         social/
     official-brand/

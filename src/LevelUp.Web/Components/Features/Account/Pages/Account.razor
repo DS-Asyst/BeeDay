@@ -12,7 +12,7 @@
 <PageTitle>My Account | LevelUp</PageTitle>
 
 <main class="account-page" aria-busy="@IsAnyBusy.ToString().ToLowerInvariant()">
-    <LevelUpPageHeader Eyebrow="PLAYER SETTINGS"
+    <LevelUpPageHeader Eyebrow="ACCOUNT SETTINGS"
                        Title="My Account"
                        Description="Keep your profile, security and experience preferences up to date." />
 
@@ -52,18 +52,17 @@
         {
             await UserInitializer.EnsureInitializedAsync();
             var data = await Store.LoadAsync();
-            if (data.CurrentUser is null || data.CurrentCharacter is null)
+            if (data.CurrentUser is not { HasProfile: true } user)
             {
-                Navigation.NavigateTo("/character/create", true);
+                Navigation.NavigateTo("/profile/create", true);
                 return;
             }
 
-            _profile.Name = data.CurrentUser.Name;
-            _profile.Email = data.CurrentUser.Email;
-            _profile.Nickname = data.CurrentCharacter.Nickname;
-            _profile.CharacterClass = data.CurrentCharacter.Class.ToString();
-            _preferences.Language = data.CurrentUser.Language;
-            _preferences.Theme = data.CurrentUser.Theme;
+            _profile.Name = user.Name;
+            _profile.Email = user.Email;
+            _profile.Nickname = user.Nickname;
+            _preferences.Language = user.Language;
+            _preferences.Theme = user.Theme;
         }
         catch (Exception ex)
         {

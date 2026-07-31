@@ -8,14 +8,14 @@ Contains entities, value objects, enums, domain events, exceptions, and experien
 
 Important areas:
 
-- `Entities/`: User, Character, Activity, Habit, RecurringTask, Todo, Project, Wallet, Transaction, InventoryTag, UserToken, and LevelUpData;
+- `Entities/`: User, Activity, Habit, RecurringTask, Todo, Project, Wallet, Transaction, WalletTag, UserToken, and LevelUpData;
 - `ValueObjects/`: validated names, email, titles, descriptions, nicknames, and project colors;
-- `Experience/`: curves, entries, rewards, sources, transactions, and character experience;
-- `Events/`: application-action, experience-granted, and character-level-up events.
+- `Experience/`: curves, entries, rewards, sources, transactions, and user experience;
+- `Events/`: application-action, experience-granted, and level-up events.
 
 ### `src/LevelUp.Application`
 
-Contains use cases and technical contracts. Feature directories cover Authentication, Characters, Dashboard, Habits, Identity, Inventory, Ordering, Projects, Tasks, Todos, and Users.
+Contains use cases and technical contracts. Feature directories cover Authentication, Dashboard, Habits, Identity, Ordering, Projects, Tasks, Todos, Users (including profile creation), and Wallets.
 
 Shared areas contain auditing, caching, background work, events, experience rewards, messaging, identity, security, and validation behavior.
 
