@@ -96,6 +96,26 @@ public sealed class JsonPersistenceTests : IDisposable
     }
 
     [Fact]
+    public async Task LoadAsync_MigratesLegacyWisdomAndCharismaAttributes_ToNull()
+    {
+        var fixture = CreateFixture();
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var data = CreateData("Meditate");
+        data.Habits[0].SetAttribute(ActivityAttribute.Vitality);
+        await fixture.Repository.SaveAsync(data, cancellationToken);
+
+        var raw = await File.ReadAllTextAsync(fixture.Paths.DataFile, cancellationToken);
+        Assert.Contains("\"Vitality\"", raw, StringComparison.Ordinal);
+        var legacyRaw = raw.Replace("\"Vitality\"", "\"Wisdom\"", StringComparison.Ordinal);
+        await File.WriteAllTextAsync(fixture.Paths.DataFile, legacyRaw, cancellationToken);
+
+        var loaded = await fixture.Repository.LoadAsync(cancellationToken);
+
+        Assert.Single(loaded.Habits);
+        Assert.Null(loaded.Habits[0].Attribute);
+    }
+
+    [Fact]
     public async Task LoadAsync_NormalizesMissingCollections_FromCompatibleOlderDocument()
     {
         var fixture = CreateFixture();

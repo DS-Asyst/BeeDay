@@ -74,12 +74,12 @@ public sealed class ActivityFilterBarTests
     {
         using var context = new BunitContext();
         var cut = context.Render<ActivityFilterBar>(parameters => parameters
-            .Add(component => component.SelectedAttributes, [ActivityAttribute.Wisdom]));
+            .Add(component => component.SelectedAttributes, [ActivityAttribute.Vitality]));
 
         await cut.Find("button[aria-haspopup='dialog']").ClickAsync();
-        var wisdomCheckbox = cut.Find("input[type='checkbox'][value='Wisdom']");
+        var vitalityCheckbox = cut.Find("input[type='checkbox'][value='Vitality']");
 
-        Assert.True(wisdomCheckbox.HasAttribute("checked"));
+        Assert.True(vitalityCheckbox.HasAttribute("checked"));
     }
 
     [Fact]

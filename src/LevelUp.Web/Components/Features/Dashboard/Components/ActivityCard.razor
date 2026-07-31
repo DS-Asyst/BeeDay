@@ -7,7 +7,9 @@
                     title="@(Completed ? $"Mark {Title} as incomplete" : $"Complete {Title}")"
                     aria-label="@(Completed ? $"Mark {Title} as incomplete" : $"Complete {Title}")"
                     @onclick="OnToggle">
-                <PixelIcon Name="PixelIconName.Complete" Size="PixelIconSize.Small" Decorative="true" />
+                <span class="activity-card__checkbox-glyph">
+                    <PixelIcon Name="PixelIconName.Complete" Size="PixelIconSize.Small" Decorative="true" />
+                </span>
             </button>
         }
         else

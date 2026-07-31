@@ -51,13 +51,13 @@
 }
 
 /* Sprint 6.2 — preserve the current Habit visual state while editing. */
-.habit-editor--white { --habit-editor-accent: #f7f6f8; --habit-editor-accent-strong: #8b8491; }
-.habit-editor--yellow { --habit-editor-accent: #ffc15a; --habit-editor-accent-strong: #b8790d; }
-.habit-editor--green { --habit-editor-accent: #24cc8f; --habit-editor-accent-strong: #0f8058; }
-.habit-editor--sky { --habit-editor-accent: #39c5d7; --habit-editor-accent-strong: #167c8a; }
-.habit-editor--red-light { --habit-editor-accent: #ffb3b8; --habit-editor-accent-strong: #b94e57; }
-.habit-editor--red-medium { --habit-editor-accent: #ff5a62; --habit-editor-accent-strong: #b8242d; }
-.habit-editor--red-strong { --habit-editor-accent: #d71920; --habit-editor-accent-strong: #8f0d12; }
+.habit-editor--white { --habit-editor-accent: var(--levelup-habit-color-white); --habit-editor-accent-strong: var(--levelup-habit-color-white-dark); }
+.habit-editor--yellow { --habit-editor-accent: var(--levelup-habit-color-yellow); --habit-editor-accent-strong: var(--levelup-habit-color-yellow-dark); }
+.habit-editor--green { --habit-editor-accent: var(--levelup-habit-color-green); --habit-editor-accent-strong: var(--levelup-habit-color-green-dark); }
+.habit-editor--sky { --habit-editor-accent: var(--levelup-habit-color-sky); --habit-editor-accent-strong: var(--levelup-habit-color-sky-dark); }
+.habit-editor--red-light { --habit-editor-accent: var(--levelup-habit-color-red-light); --habit-editor-accent-strong: var(--levelup-habit-color-red-light-dark); }
+.habit-editor--red-medium { --habit-editor-accent: var(--levelup-habit-color-red-medium); --habit-editor-accent-strong: var(--levelup-habit-color-red-medium-dark); }
+.habit-editor--red-strong { --habit-editor-accent: var(--levelup-habit-color-red-strong); --habit-editor-accent-strong: var(--levelup-habit-color-red-strong-dark); }
 
 .habit-editor--white ::deep .editor-modal,
 .habit-editor--yellow ::deep .editor-modal,

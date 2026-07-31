@@ -56,38 +56,20 @@
     min-height: 2.75rem;
 }
 
-/* Compact, icon-only toggle matching the visual language of the Daily column's
-   "Completed" and "Projects" icon buttons — square, bordered, primary-color active state. */
-.filter-bar__tags-toggle {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+/* Sized to match the Daily column's compact square icon-only toggles
+   (DashboardColumn's view-toggle/add); color/border/hover/focus chrome comes
+   from the LevelUpButton ConfirmationCancel variant it now renders through. */
+.filter-bar__filters ::deep .filter-bar__tags-toggle {
     width: 2.75rem;
     height: 2.75rem;
+    min-height: 0;
     padding: 0;
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-sm);
-    color: #4f3b5b;
-    background: var(--levelup-color-surface);
-    cursor: pointer;
-    transition: background-color var(--levelup-transition-fast), color var(--levelup-transition-fast), border-color var(--levelup-transition-fast);
 }
 
-.filter-bar__tags-toggle:hover {
+.filter-bar__filters ::deep .filter-bar__tags-toggle[aria-expanded="true"] {
     color: var(--levelup-color-primary);
-    background: #f2eef7;
-}
-
-.filter-bar__tags-toggle[aria-expanded="true"] {
-    color: var(--levelup-color-primary);
-    background: #f2eef7;
+    background: var(--levelup-color-filter-surface-tint);
     border-color: var(--levelup-color-primary);
-}
-
-.filter-bar__tags-toggle:focus-visible {
-    outline: 2px solid var(--levelup-color-primary);
-    outline-offset: 1px;
 }
 
 .filter-bar__filter-count {
@@ -142,7 +124,7 @@
 
 .filter-bar__tag-option {
     display: grid;
-    grid-template-columns: 1.2rem 1.5rem minmax(0, 1fr);
+    grid-template-columns: 1.2rem minmax(0, 1fr);
     align-items: center;
     gap: .5rem;
     min-height: 2.45rem;
@@ -165,12 +147,6 @@
     cursor: pointer;
 }
 
-.filter-bar__tag-option ::deep .filter-bar__attribute-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .filter-bar__tags-footer {
     display: flex;
     align-items: center;
@@ -179,17 +155,6 @@
     padding: .8rem 1.15rem;
     border-top: 1px solid var(--levelup-color-border);
 }
-
-.filter-bar__clear {
-    border: 0;
-    background: transparent;
-    font: inherit;
-    font-size: .84rem;
-    cursor: pointer;
-    color: var(--levelup-game-red);
-}
-.filter-bar__clear:disabled { color: #aaa4ad; cursor: default; }
-.filter-bar__clear:not(:disabled):hover { text-decoration: underline; }
 
 .filter-bar__menu {
     position: absolute;

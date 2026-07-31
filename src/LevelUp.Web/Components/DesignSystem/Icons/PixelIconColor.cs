@@ -9,11 +9,5 @@ public enum PixelIconColor
     Success,
     Warning,
     Danger,
-    Information,
-    Strength,
-    Dexterity,
-    Intelligence,
-    Wisdom,
-    Vitality,
-    Charisma
+    Information
 }

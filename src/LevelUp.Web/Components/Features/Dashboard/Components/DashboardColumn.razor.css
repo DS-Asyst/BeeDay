@@ -7,7 +7,7 @@
     height: auto;
     overflow: visible;
     border: 1px solid var(--levelup-color-border);
-    background: #ebe9ec;
+    background: var(--levelup-color-board-surface);
     box-sizing: border-box;
 }
 
@@ -36,7 +36,7 @@
     margin: 0;
     overflow: hidden;
     color: #17121d;
-    font-family: var(--levelup-font-family);
+    font-family: var(--levelup-font-ui);
     font-size: 1.42rem;
     font-weight: 700;
     letter-spacing: -.035em;
@@ -68,9 +68,8 @@
     padding: 0;
     border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-xs);
-    color: #4f3b5b;
-    background: #f8f7f9;
-    font-family: var(--levelup-font-family);
+    color: var(--levelup-color-chrome-icon);
+    background: var(--levelup-color-chrome-icon-surface);
     font-size: 1.35rem;
     font-weight: 700;
     line-height: 1;
@@ -102,7 +101,7 @@
     min-height: calc(30rem - 3.65rem);
     margin: 0;
     padding: 0.35rem;
-    background: #ebe9ec;
+    background: var(--levelup-color-board-surface);
     box-sizing: border-box;
 }
 
@@ -127,9 +126,8 @@
     padding: 0;
     border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-xs);
-    color: #4f3b5b;
-    background: #f8f7f9;
-    font-family: var(--levelup-font-family);
+    color: var(--levelup-color-chrome-icon);
+    background: var(--levelup-color-chrome-icon-surface);
     font-size: .86rem;
     font-weight: 700;
     line-height: 1;

@@ -259,72 +259,72 @@
 }
 
 .levelup-button.levelup-button--comic-blue {
-    --levelup-button-background: #14adff;
-    --levelup-button-background-hover: #2cbaff;
-    --levelup-button-pressed: #0080d4;
-    --levelup-button-foreground: #fff;
-    --levelup-button-focus: rgb(20 173 255 / 35%);
+    --levelup-button-background: var(--levelup-color-comic-blue);
+    --levelup-button-background-hover: var(--levelup-color-comic-blue-hover);
+    --levelup-button-pressed: var(--levelup-color-comic-blue-pressed);
+    --levelup-button-foreground: var(--levelup-color-comic-blue-foreground);
+    --levelup-button-focus: var(--levelup-color-comic-blue-focus);
 }
 
 .levelup-button.levelup-button--comic-yellow {
-    --levelup-button-background: #ffc928;
-    --levelup-button-background-hover: #ffd454;
-    --levelup-button-pressed: #d28b00;
-    --levelup-button-foreground: #000;
-    --levelup-button-focus: rgb(255 201 40 / 40%);
+    --levelup-button-background: var(--levelup-color-comic-yellow);
+    --levelup-button-background-hover: var(--levelup-color-comic-yellow-hover);
+    --levelup-button-pressed: var(--levelup-color-comic-yellow-pressed);
+    --levelup-button-foreground: var(--levelup-color-comic-yellow-foreground);
+    --levelup-button-focus: var(--levelup-color-comic-yellow-focus);
 }
 
 .levelup-button.levelup-button--comic-back {
-    --levelup-button-background: #fff;
-    --levelup-button-background-hover: #9c1bff;
-    --levelup-button-pressed: #6512a6;
-    --levelup-button-foreground: #000;
-    --levelup-comic-hover-foreground: #fff;
-    --levelup-button-pressed-foreground: #fff;
-    --levelup-button-focus: rgb(156 27 255 / 35%);
+    --levelup-button-background: var(--levelup-color-comic-back);
+    --levelup-button-background-hover: var(--levelup-color-comic-back-hover);
+    --levelup-button-pressed: var(--levelup-color-comic-back-pressed);
+    --levelup-button-foreground: var(--levelup-color-comic-back-foreground);
+    --levelup-comic-hover-foreground: var(--levelup-color-comic-back-hover-foreground);
+    --levelup-button-pressed-foreground: var(--levelup-color-comic-back-pressed-foreground);
+    --levelup-button-focus: var(--levelup-color-comic-back-focus);
 }
 
 .levelup-button.levelup-button--comic-danger {
-    --levelup-button-background: #fff;
-    --levelup-button-background-hover: #ef4455;
-    --levelup-button-pressed: #d63d4c;
-    --levelup-button-foreground: #000;
-    --levelup-comic-hover-foreground: #fff;
-    --levelup-button-pressed-foreground: #fff;
-    --levelup-button-focus: rgb(239 68 85 / 35%);
+    --levelup-button-background: var(--levelup-color-comic-danger);
+    --levelup-button-background-hover: var(--levelup-color-comic-danger-hover);
+    --levelup-button-pressed: var(--levelup-color-comic-danger-pressed);
+    --levelup-button-foreground: var(--levelup-color-comic-danger-foreground);
+    --levelup-comic-hover-foreground: var(--levelup-color-comic-danger-hover-foreground);
+    --levelup-button-pressed-foreground: var(--levelup-color-comic-danger-pressed-foreground);
+    --levelup-button-focus: var(--levelup-color-comic-danger-focus);
 }
 
 .levelup-button.levelup-button--comic-neutral {
-    --levelup-button-background: #fff;
-    --levelup-button-background-hover: #e3e3e3;
-    --levelup-button-pressed: #afaeb0;
-    --levelup-button-foreground: #000;
-    --levelup-button-pressed-foreground: #fff;
-    --levelup-button-focus: rgb(175 174 176 / 38%);
+    --levelup-button-background: var(--levelup-color-comic-neutral);
+    --levelup-button-background-hover: var(--levelup-color-comic-neutral-hover);
+    --levelup-button-pressed: var(--levelup-color-comic-neutral-pressed);
+    --levelup-button-foreground: var(--levelup-color-comic-neutral-foreground);
+    --levelup-button-pressed-foreground: var(--levelup-color-comic-neutral-pressed-foreground);
+    --levelup-button-focus: var(--levelup-color-comic-neutral-focus);
 }
 
 .levelup-button.levelup-button--comic-success {
-    --levelup-button-background: #bef264;
-    --levelup-button-background-hover: #bef264;
-    --levelup-button-pressed: #84cc16;
-    --levelup-button-foreground: #000;
-    --levelup-button-focus: rgb(190 242 100 / 42%);
+    --levelup-button-background: var(--levelup-color-comic-success);
+    --levelup-button-background-hover: var(--levelup-color-comic-success-hover);
+    --levelup-button-pressed: var(--levelup-color-comic-success-pressed);
+    --levelup-button-foreground: var(--levelup-color-comic-success-foreground);
+    --levelup-button-focus: var(--levelup-color-comic-success-focus);
 }
 
 .levelup-button.levelup-button--comic-orange {
-    --levelup-button-background: #f08d2e;
-    --levelup-button-background-hover: #ff9731;
-    --levelup-button-pressed: #d17c29;
-    --levelup-button-foreground: #000;
-    --levelup-button-focus: rgb(240 141 46 / 38%);
+    --levelup-button-background: var(--levelup-color-comic-orange);
+    --levelup-button-background-hover: var(--levelup-color-comic-orange-hover);
+    --levelup-button-pressed: var(--levelup-color-comic-orange-pressed);
+    --levelup-button-foreground: var(--levelup-color-comic-orange-foreground);
+    --levelup-button-focus: var(--levelup-color-comic-orange-focus);
 }
 
 .levelup-button.levelup-button--comic-magenta {
-    --levelup-button-background: #d40fde;
-    --levelup-button-background-hover: #f311ff;
-    --levelup-button-pressed: #b90dc2;
-    --levelup-button-foreground: #fff;
-    --levelup-button-focus: rgb(212 15 222 / 35%);
+    --levelup-button-background: var(--levelup-color-comic-magenta);
+    --levelup-button-background-hover: var(--levelup-color-comic-magenta-hover);
+    --levelup-button-pressed: var(--levelup-color-comic-magenta-pressed);
+    --levelup-button-foreground: var(--levelup-color-comic-magenta-foreground);
+    --levelup-button-focus: var(--levelup-color-comic-magenta-focus);
 }
 
 .levelup-button--full-width { width: 100%; }

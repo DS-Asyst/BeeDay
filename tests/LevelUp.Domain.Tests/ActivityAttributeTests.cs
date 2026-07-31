@@ -11,9 +11,7 @@ public sealed class ActivityAttributeTests
     [InlineData(ActivityAttribute.Strength)]
     [InlineData(ActivityAttribute.Dexterity)]
     [InlineData(ActivityAttribute.Intelligence)]
-    [InlineData(ActivityAttribute.Wisdom)]
     [InlineData(ActivityAttribute.Vitality)]
-    [InlineData(ActivityAttribute.Charisma)]
     public void Create_PersistsSupportedAttribute(ActivityAttribute attribute)
     {
         var habit = Habit.Create("Train", null, HabitDirection.Both, HabitDifficulty.Easy, HabitResetCounter.Daily, attribute);

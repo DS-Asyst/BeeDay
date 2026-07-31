@@ -9,11 +9,9 @@ Activities use validated titles and descriptions and may carry an optional seman
 - Strength
 - Dexterity
 - Intelligence
-- Wisdom
 - Vitality
-- Charisma
 
-A missing attribute is valid. Attributes are organizational metadata only: they do not grant XP, alter rewards, change levels, or modify the experience curve.
+A missing attribute is valid. Attributes are organizational metadata only: they do not grant XP, alter rewards, change levels, or modify the experience curve. Attributes are identified by name and a dedicated Design System color only — they do not have icons.
 
 ## Habits
 

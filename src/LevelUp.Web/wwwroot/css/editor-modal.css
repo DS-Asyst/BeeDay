@@ -19,7 +19,7 @@
     background: var(--levelup-color-surface);
     box-shadow: var(--levelup-shadow-lg);
     color: var(--levelup-color-text-primary);
-    font-family: var(--levelup-font-family);
+    font-family: var(--levelup-font-body);
 }
 
 .editor-modal form {

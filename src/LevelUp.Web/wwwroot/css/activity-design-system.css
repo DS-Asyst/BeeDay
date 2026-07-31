@@ -21,7 +21,7 @@
 .levelup-empty-state,
 .delete-confirmation,
 .editor-modal {
-    font-family: var(--levelup-font-body, Inter, sans-serif);
+    font-family: var(--levelup-font-body);
 }
 
 .activity-card,
