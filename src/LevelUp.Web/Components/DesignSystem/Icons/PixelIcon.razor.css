@@ -27,9 +27,3 @@ button:disabled .pixel-icon,
 .pixel-icon--color-warning { color: var(--levelup-color-warning); }
 .pixel-icon--color-danger { color: var(--levelup-color-danger); }
 .pixel-icon--color-information { color: var(--levelup-color-info); }
-.pixel-icon--color-strength { color: var(--levelup-color-danger); }
-.pixel-icon--color-dexterity { color: var(--levelup-color-success); }
-.pixel-icon--color-intelligence { color: var(--levelup-color-info); }
-.pixel-icon--color-wisdom { color: var(--levelup-color-primary); }
-.pixel-icon--color-vitality { color: var(--levelup-color-accent); }
-.pixel-icon--color-charisma { color: var(--levelup-color-warning); }

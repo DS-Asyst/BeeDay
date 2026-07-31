@@ -18,12 +18,6 @@ Habit,habit,MaterialSymbols,repeat,habits,Activities,Rounded-Fill1-Wght400-Grad0
 RecurringTask,recurring-task,MaterialSymbols,event_repeat,tasks,Activities,Rounded-Fill1-Wght400-Grad0-Opsz24,Apache-2.0
 Project,project,MaterialSymbols,folder,projects,Activities,Rounded-Fill1-Wght400-Grad0-Opsz24,Apache-2.0
 Todo,todo,MaterialSymbols,checklist,tasks,Activities,Rounded-Fill1-Wght400-Grad0-Opsz24,Apache-2.0
-Strength,attribute-strength,MaterialSymbols,fitness_center,attributes,Attributes,Rounded-Fill1-Wght400-Grad0-Opsz24,Apache-2.0
-Dexterity,attribute-dexterity,MaterialSymbols,bolt,attributes,Attributes,Rounded-Fill1-Wght400-Grad0-Opsz24,Apache-2.0
-Intelligence,attribute-intelligence,MaterialSymbols,psychology,attributes,Attributes,Rounded-Fill1-Wght400-Grad0-Opsz24,Apache-2.0
-Wisdom,attribute-wisdom,MaterialSymbols,menu_book,attributes,Attributes,Rounded-Fill1-Wght400-Grad0-Opsz24,Apache-2.0
-Vitality,attribute-vitality,MaterialSymbols,favorite,attributes,Attributes,Rounded-Fill1-Wght400-Grad0-Opsz24,Apache-2.0
-Charisma,attribute-charisma,MaterialSymbols,mood,attributes,Attributes,Rounded-Fill1-Wght400-Grad0-Opsz24,Apache-2.0
 Warning,warning,MaterialSymbols,warning,feedback,Feedback,Rounded-Fill1-Wght400-Grad0-Opsz24,Apache-2.0
 Information,info,MaterialSymbols,info,feedback,Feedback,Rounded-Fill1-Wght400-Grad0-Opsz24,Apache-2.0
 Success,success,MaterialSymbols,check_circle,feedback,Feedback,Rounded-Fill1-Wght400-Grad0-Opsz24,Apache-2.0

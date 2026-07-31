@@ -102,7 +102,6 @@ public sealed class DashboardModalState
         {
             Title = item.Title,
             Description = item.Description,
-            Color = item.Color,
             ExpectedDate = item.ExpectedDate?.ToDateTime(TimeOnly.MinValue),
             Archived = item.Archived,
             Attribute = item.Attribute

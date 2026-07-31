@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using LevelUp.Domain.Entities;
 using LevelUp.Domain.Exceptions;
 using LevelUp.Infrastructure.Diagnostics;
@@ -23,10 +24,13 @@ public sealed class JsonFileReader(
                 bufferSize: 16 * 1024,
                 options: FileOptions.Asynchronous | FileOptions.SequentialScan);
 
-            var data = await JsonSerializer.DeserializeAsync<LevelUpData>(
-                stream,
-                serializerOptionsFactory.Create(),
-                cancellationToken) ?? throw new JsonException("The JSON file contains no LevelUp data.");
+            var node = await JsonNode.ParseAsync(stream, cancellationToken: cancellationToken)
+                ?? throw new JsonException("The JSON file contains no LevelUp data.");
+
+            LegacyActivityAttributeMigrator.Migrate(node);
+
+            var data = node.Deserialize<LevelUpData>(serializerOptionsFactory.Create())
+                ?? throw new JsonException("The JSON file contains no LevelUp data.");
 
             data.EnsureValidState();
             return data;

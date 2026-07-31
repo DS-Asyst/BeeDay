@@ -73,8 +73,7 @@ h3.title,
 .card-title,
 .card-title--special,
 .section-title--display,
-.inventory-panel-header h2,
-.inventory-modal h2 {
+.inventory-panel-header h2 {
     font-family: var(--levelup-font-ui);
 }
 

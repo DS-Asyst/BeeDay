@@ -9,7 +9,7 @@ The application combines daily activity management, projects, inventory, identit
 - user registration, cookie authentication, email confirmation, and password recovery;
 - account management, character creation, onboarding, and preferences;
 - Daily management for Habits, recurring Tasks, To-Dos, and Projects;
-- optional activity attributes: Strength, Dexterity, Intelligence, Wisdom, Vitality, and Charisma;
+- optional activity attributes: Strength, Dexterity, Intelligence, and Vitality;
 - Inventory wallets, transactions, tags, filters, and responsive UI;
 - experience curve, idempotent XP rewards, reward history, level calculation, and level-up feedback;
 - JSON persistence with serialized access, atomic writes, backups, initialization, and recovery;

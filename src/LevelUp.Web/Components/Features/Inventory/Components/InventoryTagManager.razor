@@ -17,15 +17,16 @@
         <div class="inventory-tag-list">
             @foreach (var tag in Tags)
             {
-                <div class="inventory-tag-item"
-                     role="button"
-                     tabindex="0"
-                     aria-label="@($"Edit Tag: {tag.Name}")"
-                     @onclick="() => RaiseEdit(tag)"
-                     @onkeydown="args => HandleRowKeyDown(args, tag)">
+                <LevelUpCard Class="inventory-tag-item"
+                             Interactive="true"
+                             role="button"
+                             tabindex="0"
+                             aria-label="@($"Edit Tag: {tag.Name}")"
+                             @onclick="() => RaiseEdit(tag)"
+                             @onkeydown="args => HandleRowKeyDown(args, tag)">
                     <span class="inventory-tag-dot" style="background:@tag.Color"></span>
                     <div><strong>@tag.Name</strong><small>@tag.TransactionCount transaction@(tag.TransactionCount == 1 ? string.Empty : "s")</small></div>
-                </div>
+                </LevelUpCard>
             }
         </div>
     }

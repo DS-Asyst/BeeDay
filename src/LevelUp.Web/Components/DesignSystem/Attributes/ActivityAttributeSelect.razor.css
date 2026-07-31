@@ -61,22 +61,46 @@
     transform: rotate(180deg);
 }
 
+/* Rendered as a position: fixed overlay (not position: absolute) so it
+   floats above the editor modal instead of being clipped/scrolled by the
+   modal's own `overflow: hidden auto` scroll region. Safe here because
+   EditorModalShell is always rendered as a top-level sibling of the page
+   content (see Home.razor), never nested inside a transformed ancestor
+   (unlike LevelUpCardMenu, which lives inside dashboard/sortable containers
+   that do carry a resting transform and therefore cannot use position: fixed
+   — see levelup-card-menu.js for that rationale). Top/left/width/max-height
+   are computed by AttributeSelectPlacementCalculator (pure C#) from real
+   getBoundingClientRect geometry and applied as inline pixel values; this
+   rule only supplies the parts that never change. */
 .activity-attribute-select__menu {
-    position: absolute;
-    z-index: 900;
-    top: calc(100% + .35rem);
-    left: 0;
+    position: fixed;
+    z-index: var(--levelup-z-dropdown);
     display: grid;
-    width: 100%;
-    max-height: 16rem;
     padding: .32rem;
     overflow-y: auto;
     border: 1px solid var(--levelup-color-border);
     border-radius: var(--levelup-radius-xs);
     background: var(--levelup-color-surface);
     box-shadow: var(--levelup-shadow-md);
-    transform-origin: top;
     animation: levelup-fade-in var(--levelup-duration-fast) var(--levelup-easing-emphasized) both;
+}
+
+/* First-render-only state: laid out exactly like the pre-overlay dropdown
+   (absolute, matching the trigger's width) so its real height can be
+   measured before the fixed, viewport-aware placement is computed and
+   revealed — never estimated, never causes a visible flash/jump. */
+.activity-attribute-select__menu--measuring {
+    position: absolute;
+    top: calc(100% + .35rem);
+    left: 0;
+    width: 100%;
+    max-height: 16rem;
+    visibility: hidden;
+    animation: none;
+}
+
+.activity-attribute-select__menu--flip-up {
+    transform-origin: bottom;
 }
 
 .activity-attribute-select__option {

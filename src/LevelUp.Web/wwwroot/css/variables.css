@@ -42,6 +42,166 @@
     --levelup-color-project: #8056c7;
     --levelup-color-project-dark: #613ca2;
 
+    /* Activity attributes — dedicated identity colors, distinct from status/brand tokens */
+    --levelup-color-attribute-strength: #b3432f;
+    --levelup-color-attribute-dexterity: #1f8a99;
+    --levelup-color-attribute-intelligence: #4456c9;
+    --levelup-color-attribute-vitality: #b23a86;
+
+    /* Inventory */
+    --levelup-color-tag-default: #7a4fcb;
+
+    /* LevelUpButton variant palettes — single source for every semantic button
+       variant's pressable-pixel palette (background/hover/foreground/outline/
+       depth/shadow[/focus]), consumed by design-system.css. */
+    --levelup-color-button-focus-default: rgb(122 79 203 / 36%);
+
+    --levelup-color-button-primary-bg: var(--levelup-game-yellow);
+    --levelup-color-button-primary-bg-hover: #ffd454;
+    --levelup-color-button-primary-fg: #171321;
+    --levelup-color-button-primary-outline: #8d6500;
+    --levelup-color-button-primary-depth: #d28b00;
+    --levelup-color-button-primary-shadow: #2b2415;
+
+    --levelup-color-button-secondary-bg: var(--levelup-game-purple, #65409f);
+    --levelup-color-button-secondary-bg-hover: #7650b5;
+    --levelup-color-button-secondary-fg: #ffffff;
+    --levelup-color-button-secondary-outline: #44296f;
+    --levelup-color-button-secondary-depth: #4f3280;
+    --levelup-color-button-secondary-shadow: #27193d;
+
+    --levelup-color-button-success-bg: #36a866;
+    --levelup-color-button-success-bg-hover: #46b976;
+    --levelup-color-button-success-fg: #ffffff;
+    --levelup-color-button-success-outline: #1a6139;
+    --levelup-color-button-success-depth: #287d4d;
+    --levelup-color-button-success-shadow: #174a2d;
+
+    --levelup-color-button-warning-bg: #f5b942;
+    --levelup-color-button-warning-bg-hover: #ffc85d;
+    --levelup-color-button-warning-fg: #171321;
+    --levelup-color-button-warning-outline: #9b6508;
+    --levelup-color-button-warning-depth: #c9820d;
+    --levelup-color-button-warning-shadow: #5f410d;
+
+    --levelup-color-button-back-bg: color-mix(in srgb, var(--levelup-game-purple, #65409f) 72%, #27202f);
+    --levelup-color-button-back-bg-hover: var(--levelup-game-purple, #65409f);
+    --levelup-color-button-back-fg: #ffffff;
+    --levelup-color-button-back-outline: #322046;
+    --levelup-color-button-back-depth: #3c2853;
+    --levelup-color-button-back-shadow: #21152f;
+
+    --levelup-color-button-danger-bg: var(--levelup-game-red);
+    --levelup-color-button-danger-bg-hover: #d94c57;
+    --levelup-color-button-danger-fg: #ffffff;
+    --levelup-color-button-danger-outline: #691a20;
+    --levelup-color-button-danger-depth: #9f2a32;
+    --levelup-color-button-danger-shadow: #57151a;
+
+    --levelup-color-button-confirmation-cancel-bg: #ffffff;
+    --levelup-color-button-confirmation-cancel-bg-hover: #f1f1f1;
+    --levelup-color-button-confirmation-cancel-fg: #171321;
+    --levelup-color-button-confirmation-cancel-outline: #444047;
+    --levelup-color-button-confirmation-cancel-depth: #d7d5d8;
+    --levelup-color-button-confirmation-cancel-shadow: #5a565d;
+    --levelup-color-button-confirmation-cancel-focus: rgb(68 64 71 / 28%);
+
+    --levelup-color-button-reference-blue-bg: #20b4f4;
+    --levelup-color-button-reference-blue-bg-hover: #2dbcf8;
+    --levelup-color-button-reference-blue-fg: #ffffff;
+    --levelup-color-button-reference-blue-outline: #075b8f;
+    --levelup-color-button-reference-blue-depth: #087fbe;
+    --levelup-color-button-reference-blue-shadow: #064b78;
+    --levelup-color-button-reference-blue-focus: rgb(32 180 244 / 30%);
+
+    /* Card title/description/star text colors — shared by every activity and
+       habit card (see cards.css), so a single change here updates every card. */
+    --levelup-color-card-title: #302638;
+    --levelup-color-card-description: #786f80;
+    --levelup-color-card-star: #f3b82f;
+    --levelup-color-card-meta-text: #665d70;
+    --levelup-color-card-meta-bg: #f0edf2;
+
+    /* Dashboard chrome — icon-only toggle buttons (filter, view-toggle, add) and
+       the Daily board surface, shared across ActivityFilterBar/DashboardColumn. */
+    --levelup-color-chrome-icon: #4f3b5b;
+    --levelup-color-chrome-icon-surface: #f8f7f9;
+    --levelup-color-filter-surface-tint: #f2eef7;
+    --levelup-color-board-surface: #ebe9ec;
+
+    /* Habit colors — single source for the Habit card side rail/score button and
+       the matching Habit editor accent, so both surfaces of the same chosen
+       color never drift apart. */
+    --levelup-habit-color-white: #f7f6f8;
+    --levelup-habit-color-white-dark: #8b8491;
+    --levelup-habit-color-yellow: #ffc15a;
+    --levelup-habit-color-yellow-dark: #dfa234;
+    --levelup-habit-color-green: #24cc8f;
+    --levelup-habit-color-green-dark: #159d6c;
+    --levelup-habit-color-sky: #39c5d7;
+    --levelup-habit-color-sky-dark: #2297a8;
+    --levelup-habit-color-red-light: #ffb3b8;
+    --levelup-habit-color-red-light-dark: #e98189;
+    --levelup-habit-color-red-medium: #ff5a62;
+    --levelup-habit-color-red-medium-dark: #d93640;
+    --levelup-habit-color-red-strong: #d71920;
+    --levelup-habit-color-red-strong-dark: #a90f15;
+
+    /* Comic button palette — single source for LevelUpButton's 8 opt-in
+       levelup-button--comic-* modifiers (see docs/design-system/components.md). */
+    --levelup-color-comic-blue: #14adff;
+    --levelup-color-comic-blue-hover: #2cbaff;
+    --levelup-color-comic-blue-pressed: #0080d4;
+    --levelup-color-comic-blue-foreground: #ffffff;
+    --levelup-color-comic-blue-focus: rgb(20 173 255 / 35%);
+
+    --levelup-color-comic-yellow: #ffc928;
+    --levelup-color-comic-yellow-hover: #ffd454;
+    --levelup-color-comic-yellow-pressed: #d28b00;
+    --levelup-color-comic-yellow-foreground: #000000;
+    --levelup-color-comic-yellow-focus: rgb(255 201 40 / 40%);
+
+    --levelup-color-comic-back: #ffffff;
+    --levelup-color-comic-back-hover: #9c1bff;
+    --levelup-color-comic-back-pressed: #6512a6;
+    --levelup-color-comic-back-foreground: #000000;
+    --levelup-color-comic-back-hover-foreground: #ffffff;
+    --levelup-color-comic-back-pressed-foreground: #ffffff;
+    --levelup-color-comic-back-focus: rgb(156 27 255 / 35%);
+
+    --levelup-color-comic-danger: #ffffff;
+    --levelup-color-comic-danger-hover: #ef4455;
+    --levelup-color-comic-danger-pressed: #d63d4c;
+    --levelup-color-comic-danger-foreground: #000000;
+    --levelup-color-comic-danger-hover-foreground: #ffffff;
+    --levelup-color-comic-danger-pressed-foreground: #ffffff;
+    --levelup-color-comic-danger-focus: rgb(239 68 85 / 35%);
+
+    --levelup-color-comic-neutral: #ffffff;
+    --levelup-color-comic-neutral-hover: #e3e3e3;
+    --levelup-color-comic-neutral-pressed: #afaeb0;
+    --levelup-color-comic-neutral-foreground: #000000;
+    --levelup-color-comic-neutral-pressed-foreground: #ffffff;
+    --levelup-color-comic-neutral-focus: rgb(175 174 176 / 38%);
+
+    --levelup-color-comic-success: #bef264;
+    --levelup-color-comic-success-hover: #bef264;
+    --levelup-color-comic-success-pressed: #84cc16;
+    --levelup-color-comic-success-foreground: #000000;
+    --levelup-color-comic-success-focus: rgb(190 242 100 / 42%);
+
+    --levelup-color-comic-orange: #f08d2e;
+    --levelup-color-comic-orange-hover: #ff9731;
+    --levelup-color-comic-orange-pressed: #d17c29;
+    --levelup-color-comic-orange-foreground: #000000;
+    --levelup-color-comic-orange-focus: rgb(240 141 46 / 38%);
+
+    --levelup-color-comic-magenta: #d40fde;
+    --levelup-color-comic-magenta-hover: #f311ff;
+    --levelup-color-comic-magenta-pressed: #b90dc2;
+    --levelup-color-comic-magenta-foreground: #ffffff;
+    --levelup-color-comic-magenta-focus: rgb(212 15 222 / 35%);
+
     /* Spacing scale */
     --levelup-spacing-2xs: .125rem;
     --levelup-spacing-xs: .25rem;

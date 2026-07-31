@@ -1,3 +1,7 @@
+/* The single shared Empty State implementation, used everywhere (Daily
+   columns, Inventory Tags/Transactions, and every other empty list). Icon,
+   title, and description only — centered with whitespace, no placeholder
+   box: no dashed/dotted border, no background container, no nested box. */
 .levelup-empty-state {
     display: flex;
     flex-direction: column;
@@ -5,12 +9,8 @@
     justify-content: center;
     gap: var(--levelup-spacing-sm);
     width: 100%;
-    min-height: 15rem;
     padding: var(--levelup-spacing-xl) var(--levelup-spacing-lg);
-    border: 1px dashed var(--levelup-color-border);
-    border-radius: var(--levelup-radius-sm);
     color: var(--levelup-color-text-primary);
-    background: rgb(255 255 255 / 58%);
     text-align: center;
     box-sizing: border-box;
 }
@@ -30,7 +30,7 @@
 
 .levelup-empty-state__title {
     margin: 0;
-    color: #211a27;
+    color: var(--levelup-color-text-primary);
     font-family: var(--levelup-font-ui);
     font-size: 1.12rem;
     font-weight: 700;
@@ -46,7 +46,6 @@
 
 @media (max-width: 47.99rem) {
     .levelup-empty-state {
-        min-height: 12rem;
         padding: var(--levelup-spacing-lg) var(--levelup-spacing-md);
     }
 }

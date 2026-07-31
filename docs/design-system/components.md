@@ -4,7 +4,7 @@ Design System components are organized by responsibility under `Components/Desig
 
 ## Groups
 
-- **Attributes**: semantic rendering for activity attributes;
+- **Attributes**: semantic rendering for activity attributes — name and color only (`ActivityAttributeBadge`), never an icon, chip, badge box, or outlined border; the single implementation used everywhere an attribute is displayed (`ActivityAttributeSelect`, `ActivityFilterBar`, and anywhere else);
 - **Buttons**: standardized actions and icon integration;
 - **Cards**: shared card surfaces and card behavior;
 - **Feedback**: empty, loading, toast, warning, validation, and confirmation-dialog states;
@@ -49,9 +49,22 @@ Palette modifiers preserve the requested action semantics without duplicating co
 - `levelup-button--comic-orange`: New transaction;
 - `levelup-button--comic-magenta`: New tag.
 
-Compact, inline "Cancel"/"Clear filters" actions inside dropdowns and filter panels (e.g. `ActivityFilterBar`'s tags-menu Cancel, `InventoryFilters`' "Clear filters") intentionally stay on the plain (non-comic) `ConfirmationCancel` styling at compact size — applying the comic treatment's own fixed padding/min-height to a `Compact` button would override its compact sizing (comic's two-class selector always wins over `--compact`'s one-class selector) and blow it back up to full size. Reach for comic-neutral only on non-compact `ConfirmationCancel` buttons.
+Reach for comic-neutral only on non-compact `ConfirmationCancel` buttons used as real operational actions (e.g. `InventoryFilters`' "More Filters" toggle). Inline actions inside a popover or an already-expanded filter panel (Cancel, Clear filters) use the lighter `levelup-button--plain` modifier instead — see below.
 
 The older `levelup-button--skew-press` and `levelup-button--comic-press` hooks remain available for backward compatibility, but the production consumers listed above use the unified comic action contract.
+
+## Plain text actions
+
+`LevelUpButton` supports the opt-in `levelup-button--plain` modifier (same mechanism as `--comic`) for lightweight inline actions inside popovers and filter panels that must not compete visually with real operational buttons: no border, no background, no pixel-press shadow — just colored text, sized and spaced identically regardless of which color modifier is applied.
+
+- `levelup-button--plain-danger`: destructive/reset text actions (e.g. `ActivityFilterBar`'s "Clear all filters", `InventoryFilters`' "Clear filters");
+- `levelup-button--plain-neutral`: neutral text actions with identical sizing/spacing to the danger variant (e.g. `ActivityFilterBar`'s tags-popover "Cancel").
+
+Single shared implementation — reach for `levelup-button--plain` rather than a page-specific transparent-button style whenever an inline text-only action is needed.
+
+## Lightweight icon toggles (`levelup-icon-toggle`)
+
+A shared CSS class (`design-system.css`, not a `LevelUpButton` variant) for square, icon-only secondary/contextual controls that must sit next to real buttons without competing with them for visual weight: no elevation, no pixel-press shadow, no thick border — a 1px border, a subtle surface tint, and a hover/pressed/active state that shifts to the primary accent. Used by `DashboardColumn`'s Completed-view toggle and Add button, and by `ActivityFilterBar`'s Tags filter toggle. Apply `levelup-icon-toggle` to any new icon-only secondary control instead of re-declaring this chrome locally.
 
 ## Page Header vs. Hero (`LevelUpPageHeader` vs. `LevelUpHero`)
 

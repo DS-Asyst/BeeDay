@@ -72,13 +72,7 @@ public static class PixelIconRegistry
                 [PixelIconName.TrendDown] = Define("trend-down", "material-symbols/statistics/trend-down.svg", PixelIconCategory.Statistics, "Downward trend"),
                 [PixelIconName.Streak] = Define("streak", "material-symbols/statistics/streak.svg", PixelIconCategory.Statistics, "Streak"),
                 [PixelIconName.Completed] = Define("completed", "material-symbols/statistics/completed.svg", PixelIconCategory.Statistics, "Completed"),
-                [PixelIconName.Pending] = Define("pending", "material-symbols/statistics/pending.svg", PixelIconCategory.Statistics, "Pending"),
-                [PixelIconName.Strength] = Define("attribute-strength", "material-symbols/attributes/attribute-strength.svg", PixelIconCategory.Attributes, "Strength"),
-                [PixelIconName.Dexterity] = Define("attribute-dexterity", "material-symbols/attributes/attribute-dexterity.svg", PixelIconCategory.Attributes, "Dexterity"),
-                [PixelIconName.Intelligence] = Define("attribute-intelligence", "material-symbols/attributes/attribute-intelligence.svg", PixelIconCategory.Attributes, "Intelligence"),
-                [PixelIconName.Wisdom] = Define("attribute-wisdom", "material-symbols/attributes/attribute-wisdom.svg", PixelIconCategory.Attributes, "Wisdom"),
-                [PixelIconName.Vitality] = Define("attribute-vitality", "material-symbols/attributes/attribute-vitality.svg", PixelIconCategory.Attributes, "Vitality"),
-                [PixelIconName.Charisma] = Define("attribute-charisma", "material-symbols/attributes/attribute-charisma.svg", PixelIconCategory.Attributes, "Charisma")
+                [PixelIconName.Pending] = Define("pending", "material-symbols/statistics/pending.svg", PixelIconCategory.Statistics, "Pending")
             });
 
     public static IReadOnlyDictionary<PixelIconName, PixelIconDefinition> All => Definitions;

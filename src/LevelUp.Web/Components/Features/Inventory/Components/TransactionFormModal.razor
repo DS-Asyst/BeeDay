@@ -59,10 +59,11 @@
                     <ValidationMessage For="@(() => Model.Amount)" />
                 </label>
 
-                <label class="editor-modal__field">
-                    <span>Date</span>
-                    <InputDate @bind-Value="Model.TransactionDate" />
-                </label>
+                <LevelUpDateInput TValue="DateTime"
+                                  Id="transaction-date"
+                                  Label="Date"
+                                  @bind-Value="Model.TransactionDate"
+                                  FieldCssClass="editor-modal__field" />
 
                 <LevelUpSelect TValue="Guid?"
                                Id="transaction-tag"

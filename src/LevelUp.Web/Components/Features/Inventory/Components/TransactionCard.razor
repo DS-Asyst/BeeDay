@@ -2,12 +2,13 @@
 @using LevelUp.Domain.Enums
 @using LevelUp.Web.Components.Features.Inventory.Services
 
-<article class="inventory-transaction-card"
-         role="button"
-         tabindex="0"
-         aria-label="@($"Edit Transaction: {Transaction.Description}, {SignedAmount}")"
-         @onclick="EditAsync"
-         @onkeydown="HandleBodyKeyDown">
+<LevelUpCard Class="inventory-transaction-card"
+             Interactive="true"
+             role="button"
+             tabindex="0"
+             aria-label="@($"Edit Transaction: {Transaction.Description}, {SignedAmount}")"
+             @onclick="EditAsync"
+             @onkeydown="HandleBodyKeyDown">
     <div class="inventory-transaction-card__marker inventory-transaction-card__marker--@TypeClass" aria-hidden="true"></div>
     <div class="inventory-transaction-card__content">
         <div class="inventory-transaction-card__heading">
@@ -36,7 +37,7 @@
             <span class="inventory-transaction-card__type"><PixelIcon Name="@TransactionTypeIcon" Size="PixelIconSize.ExtraSmall" Color="@TransactionTypeColor" /> @(Transaction.Type == TransactionType.Income ? "Income" : "Expense")</span>
         </div>
     </div>
-</article>
+</LevelUpCard>
 
 @code {
     [Parameter, EditorRequired] public TransactionResponse Transaction { get; set; } = default!;

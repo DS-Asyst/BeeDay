@@ -6,7 +6,7 @@
     <div class="filter-bar__main">
         <div class="filter-bar__filters">
             <button type="button"
-                    class="filter-bar__tags-toggle"
+                    class="levelup-icon-toggle filter-bar__tags-toggle"
                     @onclick="ToggleTagsMenu"
                     aria-haspopup="dialog"
                     aria-expanded="@showTagsMenu"
@@ -31,22 +31,22 @@
                                        value="@activityAttribute"
                                        checked="@selected"
                                        @onchange="_ => ToggleAttributeAsync(activityAttribute)" />
-                                <ActivityAttributeIcon Attribute="activityAttribute"
-                                                       Size="PixelIconSize.Small"
-                                                       Decorative="true"
-                                                       Class="filter-bar__attribute-icon" />
-                                <span>@activityAttribute</span>
+                                <ActivityAttributeBadge Attribute="activityAttribute" />
                             </label>
                         }
                     </div>
                     <div class="filter-bar__tags-footer">
-                        <button type="button"
-                                class="filter-bar__clear"
-                                disabled="@(SelectedAttributes.Count == 0)"
-                                @onclick="ClearAttributesAsync">
+                        <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel"
+                                       Class="levelup-button--plain levelup-button--plain-danger filter-bar__clear"
+                                       Disabled="@(SelectedAttributes.Count == 0)"
+                                       OnClick="ClearAttributesAsync">
                             Clear all filters
-                        </button>
-                        <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel" Compact="true" OnClick="CloseTagsMenu">Cancel</LevelUpButton>
+                        </LevelUpButton>
+                        <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel"
+                                       Class="levelup-button--plain levelup-button--plain-neutral"
+                                       OnClick="CloseTagsMenu">
+                            Cancel
+                        </LevelUpButton>
                     </div>
                 </div>
             }
