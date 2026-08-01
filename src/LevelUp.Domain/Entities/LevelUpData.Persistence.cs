@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using LevelUp.Domain.Exceptions;
 
 namespace LevelUp.Domain.Entities;
@@ -318,10 +317,8 @@ public sealed partial class LevelUpData
 
     private sealed class LegacyProfileSnapshot
     {
-        [JsonInclude]
         public string Name { get; private set; } = string.Empty;
 
-        [JsonInclude]
         public string Nickname { get; private set; } = string.Empty;
     }
 

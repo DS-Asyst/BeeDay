@@ -1,5 +1,7 @@
+using System.Text.Json;
 using LevelUp.Domain.Entities;
 using LevelUp.Domain.Enums;
+using LevelUp.Domain.Exceptions;
 using LevelUp.Infrastructure.Configuration;
 using LevelUp.Infrastructure.HealthChecks;
 using LevelUp.Infrastructure.Persistence.Exceptions;
@@ -186,6 +188,34 @@ public sealed class JsonPersistenceTests : IDisposable
         await fixture.Repository.SaveAsync(CreateData("No leftovers"), TestContext.Current.CancellationToken);
 
         Assert.Empty(Directory.GetFiles(fixture.Paths.StorageDirectory, "*.tmp"));
+    }
+
+    [Fact]
+    public void JsonSerializerOptionsFactory_DeserializesDuplicateIds_ForEnsureValidStateToReject()
+    {
+        // LevelUpData no longer carries any System.Text.Json attribute (Sprint 12.8): private
+        // setters are only reachable through the contract this factory configures, so this must
+        // go through it — a bare `new JsonSerializerOptions(...)` can no longer populate them.
+        var id = Guid.NewGuid();
+        var json = $$"""
+        {
+          "schemaVersion": 1,
+          "habits": [
+            { "id": "{{id}}", "title": "One" },
+            { "id": "{{id}}", "title": "Two" }
+          ]
+        }
+        """;
+        var factory = new JsonSerializerOptionsFactory(Options.Create(new JsonStorageOptions
+        {
+            Directory = "Data",
+            FileName = "LevelUpBD.json",
+            BackupDirectory = "Backups"
+        }));
+
+        var data = JsonSerializer.Deserialize<LevelUpData>(json, factory.Create())!;
+
+        Assert.Throws<InvalidDomainStateException>(data.EnsureValidState);
     }
 
     [Fact]

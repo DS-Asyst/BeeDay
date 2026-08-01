@@ -1,6 +1,7 @@
 using LevelUp.Application.Exceptions;
 using LevelUp.Domain.Exceptions;
 using LevelUp.Infrastructure.Persistence.Exceptions;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -84,6 +85,15 @@ public sealed class GlobalExceptionHandler(
                 StatusCodes.Status409Conflict,
                 "Invalid domain state",
                 domainState.Message),
+            // BadHttpRequestException is minimal APIs' contract for "the request itself is
+            // malformed" (missing/invalid antiforgery token, missing body, unparseable form
+            // data, etc.) — always a client error, never a server fault. A bare
+            // AntiforgeryValidationException is handled the same way in case another code path
+            // throws it unwrapped.
+            AntiforgeryValidationException or BadHttpRequestException => Create(
+                StatusCodes.Status400BadRequest,
+                "Malformed request",
+                includeTechnicalDetails ? exception.Message : "The request could not be processed. Reload the page and try again."),
             ActivityNotFoundException notFound => new ProblemDetails
             {
                 Status = StatusCodes.Status404NotFound,

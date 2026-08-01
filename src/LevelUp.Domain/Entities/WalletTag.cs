@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using LevelUp.Domain.Abstractions;
 using LevelUp.Domain.Exceptions;
@@ -10,19 +9,14 @@ public sealed partial class WalletTag : Entity
     public const int MaximumNameLength = 40;
     public const string DefaultColor = "#7A4FCB";
 
-    [JsonInclude]
     public Guid UserId { get; private set; }
 
-    [JsonInclude]
     public string Name { get; private set; } = string.Empty;
 
-    [JsonInclude]
     public string Color { get; private set; } = DefaultColor;
 
-    [JsonInclude]
     public DateTimeOffset CreatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
 
-    [JsonInclude]
     public DateTimeOffset UpdatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
 
     public static WalletTag Create(Guid userId, string name, string? color = null)

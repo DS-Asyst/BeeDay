@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
 using LevelUp.Domain.ValueObjects;
@@ -9,46 +8,44 @@ public sealed partial class LevelUpData
 {
     private const string MigrationEmail = "migrated-user@levelup.invalid";
 
-    [JsonInclude]
     public int SchemaVersion { get; private set; } = 5;
 
-    [JsonInclude]
     public Guid? CurrentUserId { get; private set; }
 
-    [JsonInclude]
     public List<User> Users { get; private set; } = [];
 
-    [JsonInclude]
     public List<UserToken> UserTokens { get; private set; } = [];
 
-    [JsonInclude, JsonPropertyName("profile")]
+    /// <summary>
+    /// Historical top-level "profile" field from before Users existed as their own list; read by
+    /// <see cref="MigrateLegacyProfile"/> for documents predating that model and never written
+    /// again afterward. Kept private for encapsulation — Infrastructure's JSON contract resolver
+    /// adds it back to the persisted contract without a Domain-side serialization attribute.
+    /// </summary>
     private LegacyProfileSnapshot? LegacyProfile { get; set; }
 
-    [JsonInclude]
     public List<Habit> Habits { get; private set; } = [];
 
-    [JsonInclude]
     public List<RecurringTask> Tasks { get; private set; } = [];
 
-    [JsonInclude]
     public List<Project> Projects { get; private set; } = [];
 
-    [JsonInclude]
     public List<Wallet> Wallets { get; private set; } = [];
 
-    [JsonInclude]
     public List<Transaction> Transactions { get; private set; } = [];
 
-    [JsonInclude]
     public List<WalletTag> WalletTags { get; private set; } = [];
 
-    [JsonInclude, JsonPropertyName("todos")]
+    /// <summary>
+    /// Historical top-level "todos" field from before To-Dos belonged to a Project; read by
+    /// <see cref="EnsureValidState"/> for documents predating that model and never written again
+    /// afterward. Kept private for encapsulation — Infrastructure's JSON contract resolver adds
+    /// it back to the persisted contract without a Domain-side serialization attribute.
+    /// </summary>
     private List<Todo> LegacyTodos { get; set; } = [];
 
-    [JsonIgnore]
     public User? CurrentUser => CurrentUserId is Guid id ? Users.FirstOrDefault(user => user.Id == id) : null;
 
-    [JsonIgnore]
     public List<Todo> Todos => Projects.SelectMany(project => project.Todos).ToList();
 
     public User FindUser(Guid userId) => Users.FirstOrDefault(user => user.Id == userId)

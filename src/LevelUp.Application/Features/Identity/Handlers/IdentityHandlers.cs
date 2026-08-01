@@ -148,6 +148,7 @@ public sealed class ResetPasswordCommandHandler(
             token.EnsureCanBeUsed(UserTokenType.PasswordReset, now);
             var user = data.FindUser(token.UserId);
             user.SetPasswordHash(passwordService.Hash(command.Request.NewPassword));
+            user.InvalidateSessions();
             token.MarkAsUsed(UserTokenType.PasswordReset, now);
             data.RevokeActiveUserTokens(user.Id, UserTokenType.PasswordReset, now);
         }, cancellationToken);

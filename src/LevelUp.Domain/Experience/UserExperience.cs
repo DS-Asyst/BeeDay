@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
 
@@ -6,23 +5,16 @@ namespace LevelUp.Domain.Experience;
 
 public sealed class UserExperience
 {
-    [JsonInclude]
     public long TotalExperience { get; private set; }
 
-    [JsonInclude]
-    [JsonPropertyName("Transactions")]
     public IReadOnlyList<ExperienceEntry> Entries { get; private set; } = [];
 
-    [JsonIgnore]
     public int CurrentLevel => ExperienceCurve.GetLevel(TotalExperience);
 
-    [JsonIgnore]
     public long CurrentLevelExperience => TotalExperience - ExperienceCurve.GetTotalExperienceRequiredForLevel(CurrentLevel);
 
-    [JsonIgnore]
     public long ExperienceRequiredForCurrentLevel => ExperienceCurve.GetExperienceRequiredToAdvance(CurrentLevel);
 
-    [JsonIgnore]
     public long ExperienceForNextLevel => ExperienceRequiredForCurrentLevel - CurrentLevelExperience;
 
     public static UserExperience Create() => new();

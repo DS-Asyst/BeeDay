@@ -35,22 +35,23 @@ public sealed class AuthenticateUserCommandHandler(
                 throw new InvalidDomainStateException("Invalid email or password.");
             }
 
+            if (passwordService.NeedsRehash(user.PasswordHash))
+            {
+                // A transparent hash-format upgrade, not a security-relevant password change:
+                // must not invalidate this or any other session.
+                user.SetPasswordHash(passwordService.Hash(command.Request.Password));
+            }
+
             user.RegisterLogin();
             response = new AuthenticatedUserResponse(
                 user.Id,
                 user.Name,
                 user.Email,
                 user.HasProfile,
-                user.HasCompletedOnboarding);
+                user.HasCompletedOnboarding,
+                user.SessionVersion);
         }, cancellationToken);
 
         return response!;
     }
-}
-
-public sealed class SelectAuthenticatedUserCommandHandler(ILevelUpRepository repository)
-    : IRequestHandler<SelectAuthenticatedUserCommand>
-{
-    public Task Handle(SelectAuthenticatedUserCommand command, CancellationToken cancellationToken) =>
-        repository.UpdateAsync(data => data.SetCurrentUser(command.UserId), cancellationToken);
 }

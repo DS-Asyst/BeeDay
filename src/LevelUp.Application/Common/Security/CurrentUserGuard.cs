@@ -5,10 +5,14 @@ namespace LevelUp.Application.Common.Security;
 
 public static class CurrentUserGuard
 {
-    public static Guid RequireUserId(LevelUpData data, ICurrentUserContext? context)
+    /// <summary>
+    /// Resolves the authenticated User's id. Depends exclusively on the authenticated identity
+    /// (<paramref name="currentUser"/>) — never on <c>LevelUpData.CurrentUserId</c>, which is a
+    /// persisted document-bootstrapping field, not an authentication mechanism.
+    /// </summary>
+    public static Guid RequireUserId(LevelUpData data, ICurrentUserContext currentUser)
     {
-        var userId = context?.UserId ?? data.CurrentUserId;
-        if (userId is not Guid id || data.Users.All(user => user.Id != id))
+        if (currentUser.UserId is not Guid id || data.Users.All(user => user.Id != id))
         {
             throw new InvalidDomainStateException("An authenticated User is required.");
         }

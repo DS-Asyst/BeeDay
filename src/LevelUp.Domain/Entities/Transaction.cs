@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using LevelUp.Domain.Abstractions;
 using LevelUp.Domain.Common;
 using LevelUp.Domain.Enums;
@@ -11,34 +10,24 @@ public sealed class Transaction : Entity
     public const int MaximumDescriptionLength = 120;
     public const int MaximumNotesLength = 500;
 
-    [JsonInclude]
     public Guid WalletId { get; private set; }
 
-    [JsonInclude]
     public string Description { get; private set; } = string.Empty;
 
-    [JsonInclude]
     public decimal Amount { get; private set; }
 
-    [JsonInclude]
     public TransactionType Type { get; private set; }
 
-    [JsonInclude]
     public DateOnly TransactionDate { get; private set; }
 
-    [JsonInclude]
     public Guid? WalletTagId { get; private set; }
 
-    [JsonInclude]
     public string Notes { get; private set; } = string.Empty;
 
-    [JsonInclude]
     public DateTimeOffset CreatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
 
-    [JsonInclude]
     public DateTimeOffset UpdatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
 
-    [JsonIgnore]
     public decimal SignedAmount => Type == TransactionType.Income ? Amount : -Amount;
 
     public static Transaction Create(

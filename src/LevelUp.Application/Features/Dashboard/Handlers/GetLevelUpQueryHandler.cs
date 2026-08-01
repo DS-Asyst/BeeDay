@@ -10,7 +10,7 @@ namespace LevelUp.Application.Features.Dashboard.Handlers;
 public sealed class GetLevelUpQueryHandler(
     ILevelUpRepository repository,
     IApplicationCache cache,
-    ICurrentUserContext? currentUser = null) : IRequestHandler<GetLevelUpQuery, GetLevelUpResponse>
+    ICurrentUserContext currentUser) : IRequestHandler<GetLevelUpQuery, GetLevelUpResponse>
 {
     public async Task<GetLevelUpResponse> Handle(GetLevelUpQuery request, CancellationToken cancellationToken)
     {

@@ -1,11 +1,9 @@
-using System.Text.Json.Serialization;
 using LevelUp.Domain.Exceptions;
 
 namespace LevelUp.Domain.Abstractions;
 
 public abstract class Entity
 {
-    [JsonInclude]
     public Guid Id { get; private set; } = Guid.NewGuid();
 
     protected void EnsureIdentity()

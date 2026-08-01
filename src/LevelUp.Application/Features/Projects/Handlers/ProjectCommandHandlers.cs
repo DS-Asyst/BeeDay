@@ -7,7 +7,7 @@ using MediatR;
 
 namespace LevelUp.Application.Features.Projects.Handlers;
 
-public sealed class CreateProjectCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null) : RequestHandlerBase(repository), IRequestHandler<CreateProjectCommand>
+public sealed class CreateProjectCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser) : RequestHandlerBase(repository), IRequestHandler<CreateProjectCommand>
 {
     public Task Handle(CreateProjectCommand command, CancellationToken cancellationToken) => MutateAsync(data =>
     {
@@ -18,7 +18,7 @@ public sealed class CreateProjectCommandHandler(ILevelUpRepository repository, I
     }, cancellationToken);
 }
 
-public sealed class UpdateProjectCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null) : RequestHandlerBase(repository), IRequestHandler<UpdateProjectCommand>
+public sealed class UpdateProjectCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser) : RequestHandlerBase(repository), IRequestHandler<UpdateProjectCommand>
 {
     public Task Handle(UpdateProjectCommand command, CancellationToken cancellationToken) => MutateAsync(data =>
     {
@@ -29,7 +29,7 @@ public sealed class UpdateProjectCommandHandler(ILevelUpRepository repository, I
     }, cancellationToken);
 }
 
-public sealed class DeleteProjectCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null) : RequestHandlerBase(repository), IRequestHandler<DeleteProjectCommand>
+public sealed class DeleteProjectCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser) : RequestHandlerBase(repository), IRequestHandler<DeleteProjectCommand>
 {
     public Task Handle(DeleteProjectCommand command, CancellationToken cancellationToken) => MutateAsync(data =>
     {

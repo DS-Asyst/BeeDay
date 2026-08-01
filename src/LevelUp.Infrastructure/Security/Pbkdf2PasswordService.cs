@@ -72,4 +72,16 @@ public sealed class Pbkdf2PasswordService : IPasswordService
             return false;
         }
     }
+
+    public bool NeedsRehash(string passwordHash)
+    {
+        var parts = passwordHash.Split('$', StringSplitOptions.None);
+        if (parts.Length != 4 || !string.Equals(parts[0], Algorithm, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        return !int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out var iterations)
+            || iterations < Iterations;
+    }
 }

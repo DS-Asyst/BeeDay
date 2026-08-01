@@ -26,7 +26,7 @@ public sealed class FeatureServicesTests
         Assert.True(r.Data.CurrentUser.HasProfile);
         Assert.Equal("tiago", r.Data.CurrentUser.Nickname);
     }
-    [Fact] public async Task CreateHabitHandler_AddsHabit() { var r = new Repo(); r.CreateCurrentUser(); await new CreateHabitCommandHandler(r).Handle(new(new("Study", "Study ASP.NET Core", HabitDirection.Positive, HabitDifficulty.Medium, HabitResetCounter.Daily)), TestContext.Current.CancellationToken); Assert.Equal("Study", Assert.Single(r.Data.Habits).Title); }
+    [Fact] public async Task CreateHabitHandler_AddsHabit() { var r = new Repo(); var user = r.CreateCurrentUser(); await new CreateHabitCommandHandler(r, new UserContext(user.Id)).Handle(new(new("Study", "Study ASP.NET Core", HabitDirection.Positive, HabitDifficulty.Medium, HabitResetCounter.Daily)), TestContext.Current.CancellationToken); Assert.Equal("Study", Assert.Single(r.Data.Habits).Title); }
     [Fact]
     public async Task RegisterHabitPositiveHandler_ThrowsWhenMissing()
     {
@@ -37,7 +37,7 @@ public sealed class FeatureServicesTests
             new RegisterHabitPositiveCommandHandler(r, new UserContext(user.Id))
                 .Handle(new(Guid.NewGuid()), TestContext.Current.CancellationToken));
     }
-    [Fact] public async Task ReorderHandler_ReordersTasks() { var r = new Repo(); r.CreateCurrentUser(); var a = RecurringTask.Create("First", "", TaskRepeat.None); var b = RecurringTask.Create("Second", "", TaskRepeat.None); r.Data.AddTask(a); r.Data.AddTask(b); await new ReorderActivitiesCommandHandler(r).Handle(new(new(ActivityCollection.Tasks, [b.Id, a.Id])), TestContext.Current.CancellationToken); Assert.Equal([b.Id, a.Id], r.Data.Tasks.Select(x => x.Id)); }
+    [Fact] public async Task ReorderHandler_ReordersTasks() { var r = new Repo(); var user = r.CreateCurrentUser(); var a = RecurringTask.Create("First", "", TaskRepeat.None); var b = RecurringTask.Create("Second", "", TaskRepeat.None); r.Data.AddTask(a); r.Data.AddTask(b); await new ReorderActivitiesCommandHandler(r, new UserContext(user.Id)).Handle(new(new(ActivityCollection.Tasks, [b.Id, a.Id])), TestContext.Current.CancellationToken); Assert.Equal([b.Id, a.Id], r.Data.Tasks.Select(x => x.Id)); }
     [Fact]
     public async Task QueryHandler_ReturnsAuthenticatedUserSnapshot()
     {

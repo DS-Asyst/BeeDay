@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using LevelUp.Domain.Common;
 using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
@@ -9,13 +8,10 @@ public sealed class ExperienceSource
 {
     public const int MaximumDescriptionLength = 160;
 
-    [JsonInclude]
     public ExperienceSourceType Type { get; private set; }
 
-    [JsonInclude]
     public Guid? ReferenceId { get; private set; }
 
-    [JsonInclude]
     public string Description { get; private set; } = string.Empty;
 
     public static ExperienceSource Create(

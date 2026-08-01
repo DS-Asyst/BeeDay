@@ -1,0 +1,265 @@
+openapi: 3.1.0
+info:
+  title: LevelUp API
+  version: 1.0.0-draft
+  description: Contrato inicial futuro. A implementação HTTP completa não faz parte da primeira etapa.
+servers:
+  - url: https://localhost:5001/api/v1
+paths:
+  /auth/login:
+    post:
+      operationId: login
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '400': { $ref: '#/components/responses/ValidationProblem' }
+        '401': { $ref: '#/components/responses/UnauthorizedProblem' }
+        '429': { $ref: '#/components/responses/RateLimitedProblem' }
+  /users/me:
+    get:
+      operationId: getCurrentUser
+      tags: [Users]
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentUserResponse'
+        '401': { $ref: '#/components/responses/UnauthorizedProblem' }
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [Dashboard]
+      responses:
+        '200':
+          description: Dashboard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardResponse'
+        '401': { $ref: '#/components/responses/UnauthorizedProblem' }
+  /habits:
+    post:
+      operationId: createHabit
+      tags: [Habits]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHabitRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HabitResponse'
+        '400': { $ref: '#/components/responses/ValidationProblem' }
+        '401': { $ref: '#/components/responses/UnauthorizedProblem' }
+  /habits/{habitId}:
+    parameters:
+      - name: habitId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    put:
+      operationId: updateHabit
+      tags: [Habits]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateHabitRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HabitResponse'
+        '404': { $ref: '#/components/responses/NotFoundProblem' }
+        '409': { $ref: '#/components/responses/ConflictProblem' }
+    delete:
+      operationId: deleteHabit
+      tags: [Habits]
+      responses:
+        '204': { description: Deleted }
+        '404': { $ref: '#/components/responses/NotFoundProblem' }
+  /wallet/transactions:
+    get:
+      operationId: listTransactions
+      tags: [Wallet]
+      responses:
+        '200':
+          description: Transaction page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionPageResponse'
+    post:
+      operationId: createTransaction
+      tags: [Wallet]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTransactionRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+components:
+  responses:
+    ValidationProblem:
+      description: Validation failed
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemContract' }
+    UnauthorizedProblem:
+      description: Authentication required
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemContract' }
+    RateLimitedProblem:
+      description: Rate limit exceeded
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemContract' }
+    NotFoundProblem:
+      description: Resource not found
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemContract' }
+    ConflictProblem:
+      description: Resource conflict
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemContract' }
+  schemas:
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 1 }
+        rememberMe: { type: boolean, default: false }
+    AuthenticationResponse:
+      type: object
+      required: [user]
+      properties:
+        user: { $ref: '#/components/schemas/CurrentUserResponse' }
+    CurrentUserResponse:
+      type: object
+      required: [id, name, email, emailConfirmed, profileCompleted, onboardingCompleted]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        nickname: { type: [string, 'null'] }
+        email: { type: string, format: email }
+        emailConfirmed: { type: boolean }
+        profileCompleted: { type: boolean }
+        onboardingCompleted: { type: boolean }
+    DashboardResponse:
+      type: object
+      required: [user, habits, tasks, todos, projects, experience]
+      properties:
+        user: { $ref: '#/components/schemas/CurrentUserResponse' }
+        habits: { type: array, items: { $ref: '#/components/schemas/HabitResponse' } }
+        tasks: { type: array, items: { type: object } }
+        todos: { type: array, items: { type: object } }
+        projects: { type: array, items: { type: object } }
+        experience: { type: object }
+    CreateHabitRequest:
+      type: object
+      required: [title, difficulty, direction]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: [string, 'null'], maxLength: 2000 }
+        difficulty: { type: string, enum: [trivial, easy, medium, hard] }
+        direction: { type: string, enum: [positive, negative, both] }
+        attribute: { type: [string, 'null'] }
+    UpdateHabitRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateHabitRequest'
+        - type: object
+          required: [version]
+          properties:
+            version: { type: integer, format: int64, minimum: 1 }
+    HabitResponse:
+      type: object
+      required: [id, title, difficulty, direction, position, createdAt, updatedAt, version]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        description: { type: [string, 'null'] }
+        difficulty: { type: string }
+        direction: { type: string }
+        attribute: { type: [string, 'null'] }
+        position: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        version: { type: integer, format: int64 }
+    CreateTransactionRequest:
+      type: object
+      required: [type, description, amount, occurredOn]
+      properties:
+        type: { type: string, enum: [income, expense] }
+        description: { type: string, minLength: 1, maxLength: 300 }
+        amount: { type: number, format: decimal, exclusiveMinimum: 0 }
+        occurredOn: { type: string, format: date }
+        tagId: { type: [string, 'null'], format: uuid }
+    TransactionResponse:
+      type: object
+      required: [id, type, description, amount, occurredOn, createdAt, updatedAt, version]
+      properties:
+        id: { type: string, format: uuid }
+        type: { type: string }
+        description: { type: string }
+        amount: { type: number, format: decimal }
+        occurredOn: { type: string, format: date }
+        tagId: { type: [string, 'null'], format: uuid }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        version: { type: integer, format: int64 }
+    TransactionPageResponse:
+      type: object
+      required: [items, page, pageSize, totalCount]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/TransactionResponse' } }
+        page: { type: integer, minimum: 1 }
+        pageSize: { type: integer, minimum: 1 }
+        totalCount: { type: integer, minimum: 0 }
+    ProblemContract:
+      type: object
+      required: [title, status, code, correlationId]
+      properties:
+        type: { type: [string, 'null'], format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: [string, 'null'] }
+        instance: { type: [string, 'null'] }
+        code: { type: string }
+        correlationId: { type: string }
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }

@@ -1,0 +1,76 @@
+namespace LevelUp.Web.Tests.Integration;
+
+/// <summary>
+/// Boots the app in the Production environment (satisfying every production-only startup guard
+/// in Program.cs with harmless test values) so cookie/HSTS/HTTPS-redirect behavior that only
+/// differs in Production — e.g. <c>CookieSecurePolicy.Always</c> vs <c>SameAsRequest</c> — can be
+/// verified for real rather than assumed from reading the code.
+/// </summary>
+/// <remarks>
+/// Program.cs's production guard clauses read <c>builder.Configuration</c> synchronously,
+/// deliberately, before <c>Build()</c> — a correct fail-fast safety check, not a bug, so this
+/// class does not ask Program.cs to change. WebApplicationFactory's own
+/// <c>ConfigureAppConfiguration</c> hook only takes effect around <c>Build()</c>, too late for
+/// that eager read; environment variables, read by <c>WebApplication.CreateBuilder</c> itself at
+/// the very start, are not. They are set only for the lifetime of this instance and restored on
+/// dispose, since they are process-wide state.
+/// </remarks>
+public sealed class ProductionLikeWebApplicationFactory : LevelUpWebApplicationFactory
+{
+    private readonly (string Key, string Value)[] requiredEnvironmentVariables;
+    private readonly string dataProtectionKeysDirectory =
+        Path.Combine(Path.GetTempPath(), "levelup-web-tests-dp", Guid.NewGuid().ToString("N"));
+
+    private readonly string?[] previousValues;
+
+    public ProductionLikeWebApplicationFactory()
+    {
+        requiredEnvironmentVariables =
+        [
+            ("LevelUp__IdentityEmail__PublicBaseUrl", "https://levelup.invalid"),
+            // TestServer's default client sends Host: localhost; include it explicitly alongside
+            // the "real" host so ASP.NET Core's host-filtering middleware doesn't reject requests
+            // — AllowedHosts still lists specific hosts, never a wildcard.
+            ("AllowedHosts", "levelup.invalid;localhost"),
+            ("LevelUp__Storage__Directory", StorageDirectory),
+            ("LevelUp__Hosting__DataProtectionKeysDirectory", dataProtectionKeysDirectory),
+            // appsettings.Production.json enables Resend (real email delivery, needs secrets we
+            // don't have here); the Development-capture sender is enough for these tests.
+            ("LevelUp__Email__Resend__Enabled", "false")
+        ];
+
+        previousValues = new string?[requiredEnvironmentVariables.Length];
+        for (var i = 0; i < requiredEnvironmentVariables.Length; i++)
+        {
+            previousValues[i] = Environment.GetEnvironmentVariable(requiredEnvironmentVariables[i].Key);
+            Environment.SetEnvironmentVariable(requiredEnvironmentVariables[i].Key, requiredEnvironmentVariables[i].Value);
+        }
+    }
+
+    protected override string EnvironmentName => "Production";
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+
+        if (disposing)
+        {
+            for (var i = 0; i < requiredEnvironmentVariables.Length; i++)
+            {
+                Environment.SetEnvironmentVariable(requiredEnvironmentVariables[i].Key, previousValues[i]);
+            }
+
+            if (Directory.Exists(dataProtectionKeysDirectory))
+            {
+                try
+                {
+                    Directory.Delete(dataProtectionKeysDirectory, recursive: true);
+                }
+                catch (IOException)
+                {
+                    // Best-effort cleanup only.
+                }
+            }
+        }
+    }
+}

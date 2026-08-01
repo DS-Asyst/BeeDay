@@ -75,11 +75,80 @@ public sealed class AuthenticationHandlersTests
         Assert.Equal("Invalid email or password.", exception.Message);
     }
 
+    [Fact]
+    public async Task Authenticate_ReturnsCurrentSessionVersion()
+    {
+        var passwordService = new FakePasswordService();
+        var repository = new TestRepository();
+        var user = User.Create("Tiago", "tiago@levelup.invalid", passwordService.Hash("Password123"));
+        user.ConfirmEmail(user.CreatedAtUtc);
+        user.InvalidateSessions();
+        repository.Data.AddUser(user);
+        var handler = new AuthenticateUserCommandHandler(repository, passwordService);
+
+        var result = await handler.Handle(
+            new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@levelup.invalid", "Password123")),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(user.SessionVersion, result.SessionVersion);
+    }
+
+    [Fact]
+    public async Task Authenticate_RehashesPasswordWhenServiceRequestsIt()
+    {
+        var passwordService = new FakePasswordService();
+        var repository = new TestRepository();
+        var originalHash = passwordService.Hash("Password123");
+        var user = User.Create("Tiago", "tiago@levelup.invalid", originalHash);
+        user.ConfirmEmail(user.CreatedAtUtc);
+        var sessionVersionBeforeLogin = user.SessionVersion;
+        repository.Data.AddUser(user);
+        passwordService.RehashNeeded = true;
+        var handler = new AuthenticateUserCommandHandler(repository, passwordService);
+
+        await handler.Handle(
+            new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@levelup.invalid", "Password123")),
+            TestContext.Current.CancellationToken);
+
+        Assert.NotEqual(originalHash, repository.Data.CurrentUser!.PasswordHash);
+        Assert.Equal(2, passwordService.HashCallCount);
+        Assert.Equal(sessionVersionBeforeLogin, repository.Data.CurrentUser.SessionVersion);
+    }
+
+    [Fact]
+    public async Task Authenticate_DoesNotRehashWhenServiceDoesNotRequestIt()
+    {
+        var passwordService = new FakePasswordService();
+        var repository = new TestRepository();
+        var originalHash = passwordService.Hash("Password123");
+        var user = User.Create("Tiago", "tiago@levelup.invalid", originalHash);
+        user.ConfirmEmail(user.CreatedAtUtc);
+        repository.Data.AddUser(user);
+        var handler = new AuthenticateUserCommandHandler(repository, passwordService);
+
+        await handler.Handle(
+            new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@levelup.invalid", "Password123")),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(originalHash, repository.Data.CurrentUser!.PasswordHash);
+        Assert.Equal(1, passwordService.HashCallCount);
+    }
+
     private sealed class FakePasswordService : IPasswordService
     {
-        public string Hash(string password) => $"hash:{password}";
+        public bool RehashNeeded { get; set; }
+        public int HashCallCount { get; private set; }
+
+        public string Hash(string password)
+        {
+            HashCallCount++;
+            return $"hash:{password}:{HashCallCount}";
+        }
+
         public bool Verify(string password, string passwordHash) =>
-            string.Equals(passwordHash, Hash(password), StringComparison.Ordinal);
+            passwordHash.StartsWith($"hash:{password}:", StringComparison.Ordinal);
+
+        public bool NeedsRehash(string passwordHash) => RehashNeeded;
     }
 
     private sealed class TestRepository : ILevelUpRepository

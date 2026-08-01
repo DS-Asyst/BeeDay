@@ -88,7 +88,7 @@ public sealed class PixelIconTests
     }
     [Theory]
     [InlineData(PixelIconName.Home, "home")]
-    [InlineData(PixelIconName.Profile, "character")]
+    [InlineData(PixelIconName.Profile, "profile")]
     [InlineData(PixelIconName.Donate, "donate")]
     [InlineData(PixelIconName.Logout, "logout")]
     [InlineData(PixelIconName.Menu, "menu")]
@@ -393,7 +393,7 @@ public sealed class IconMappingCsvTests
     [InlineData("Streak", "repeat")]
     [InlineData("Repeat", "repeat")]
     [InlineData("Account", "account_circle")]
-    [InlineData("Character", "person")]
+    [InlineData("Profile", "person")]
     public void ApprovedSprint81SemanticsAreMapped(string pixelIconName, string expectedSourceName)
     {
         var row = ReadMappingRows().Single(r => r["PixelIconName"] == pixelIconName);

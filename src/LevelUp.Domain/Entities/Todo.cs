@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
 
@@ -6,10 +5,8 @@ namespace LevelUp.Domain.Entities;
 
 public sealed class Todo : Activity
 {
-    [JsonInclude]
     public Guid ProjectId { get; private set; }
 
-    [JsonInclude]
     public DateOnly? DueDate { get; private set; }
 
     public static Todo Create(Guid projectId, string title, string? description, DateOnly? dueDate, ActivityAttribute? attribute = null)

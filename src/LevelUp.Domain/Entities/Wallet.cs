@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using LevelUp.Domain.Abstractions;
 using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
@@ -7,13 +6,10 @@ namespace LevelUp.Domain.Entities;
 
 public sealed class Wallet : Entity
 {
-    [JsonInclude]
     public Guid UserId { get; private set; }
 
-    [JsonInclude]
     public DateTimeOffset CreatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
 
-    [JsonInclude]
     public DateTimeOffset UpdatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
 
     public static Wallet Create(Guid userId)

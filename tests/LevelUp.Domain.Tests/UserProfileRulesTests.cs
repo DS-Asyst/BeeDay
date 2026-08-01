@@ -90,4 +90,32 @@ public sealed class UserProfileRulesTests
 
         Assert.True(user.HasCompletedOnboarding);
     }
+
+    [Fact]
+    public void Profile_ReflectsUnderlyingUserPresentationData()
+    {
+        var data = new LevelUpData();
+        var user = User.Create("Tiago", "tiago@levelup.invalid");
+        data.AddUser(user);
+        data.CompleteUserProfile(user.Id, "tiago", "avatar-key");
+        user.UpdatePreferences(UserLanguage.Portuguese, UserTheme.Dark);
+
+        var profile = user.Profile;
+
+        Assert.Equal(user.Nickname, profile.Nickname);
+        Assert.Equal(user.Name, profile.Name);
+        Assert.Equal(user.Avatar, profile.Avatar);
+        Assert.Equal(user.Language, profile.Language);
+        Assert.Equal(user.Theme, profile.Theme);
+        Assert.Same(user.Experience, profile.Experience);
+        Assert.True(profile.IsComplete);
+    }
+
+    [Fact]
+    public void Profile_IsIncomplete_BeforeProfileCreation()
+    {
+        var user = User.Create("Tiago", "tiago@levelup.invalid");
+
+        Assert.False(user.Profile.IsComplete);
+    }
 }

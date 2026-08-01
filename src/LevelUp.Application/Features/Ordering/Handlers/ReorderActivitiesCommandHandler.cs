@@ -6,7 +6,7 @@ using LevelUp.Application.Features.Ordering.Requests;
 using MediatR;
 namespace LevelUp.Application.Features.Ordering.Handlers;
 
-public sealed class ReorderActivitiesCommandHandler(ILevelUpRepository r, ICurrentUserContext? currentUser = null) : RequestHandlerBase(r), IRequestHandler<ReorderActivitiesCommand>
+public sealed class ReorderActivitiesCommandHandler(ILevelUpRepository r, ICurrentUserContext currentUser) : RequestHandlerBase(r), IRequestHandler<ReorderActivitiesCommand>
 {
     public Task Handle(ReorderActivitiesCommand c, CancellationToken t) => MutateAsync(d =>
     {

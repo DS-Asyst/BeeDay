@@ -110,6 +110,7 @@ public sealed class IdentityHandlersTests
 
         Assert.Equal("hash:NewPassword123", user.PasswordHash);
         Assert.True(token.IsUsed);
+        Assert.Equal(2, user.SessionVersion);
     }
 
     [Fact]
@@ -200,6 +201,7 @@ public sealed class IdentityHandlersTests
     {
         public string Hash(string password) => $"hash:{password}";
         public bool Verify(string password, string passwordHash) => passwordHash == Hash(password);
+        public bool NeedsRehash(string passwordHash) => false;
     }
 
     private sealed class TestRepository : ILevelUpRepository

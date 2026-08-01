@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
 using LevelUp.Domain.ValueObjects;
@@ -7,46 +6,34 @@ namespace LevelUp.Domain.Entities;
 
 public sealed class Project : Activity
 {
-    [JsonInclude]
     public string Color { get; private set; } = ProjectColor.Default;
 
-    [JsonInclude]
     public DateOnly? ExpectedDate { get; private set; }
 
-    [JsonInclude]
     public bool Archived { get; private set; }
 
-    [JsonInclude]
     public List<Todo> Todos { get; private set; } = [];
 
-    [JsonIgnore]
     public string Name => Title;
 
-    [JsonIgnore]
     public int TotalTodos => Todos.Count;
 
-    [JsonIgnore]
     public int PendingTodos => Todos.Count(todo => !todo.Completed);
 
-    [JsonIgnore]
     public int CompletedTodos => Todos.Count(todo => todo.Completed);
 
-    [JsonIgnore]
     public decimal ProgressPercentage => TotalTodos == 0
         ? 0m
         : decimal.Round(CompletedTodos * 100m / TotalTodos, 2);
 
-    [JsonIgnore]
     public decimal Progress => ProgressPercentage;
 
-    [JsonIgnore]
     public DateTimeOffset LastUpdatedAtUtc => Todos.Count == 0
         ? UpdatedAtUtc
         : Todos.Max(todo => todo.UpdatedAtUtc) > UpdatedAtUtc
             ? Todos.Max(todo => todo.UpdatedAtUtc)
             : UpdatedAtUtc;
 
-    [JsonIgnore]
     public Todo? NextTodo => Todos
         .Where(todo => !todo.Completed)
         .OrderBy(todo => todo.DueDate.HasValue ? 0 : 1)
@@ -54,7 +41,6 @@ public sealed class Project : Activity
         .ThenBy(todo => todo.CreatedAtUtc)
         .FirstOrDefault();
 
-    [JsonIgnore]
     public ProjectStatus Status
     {
         get
@@ -70,7 +56,6 @@ public sealed class Project : Activity
         }
     }
 
-    [JsonIgnore]
     public override bool Completed
     {
         get => Status == ProjectStatus.Completed;

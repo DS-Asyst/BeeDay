@@ -8,7 +8,7 @@ using MediatR;
 
 namespace LevelUp.Application.Features.Wallets.Handlers;
 
-public sealed class EnsureCurrentWalletCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class EnsureCurrentWalletCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : IRequestHandler<EnsureCurrentWalletCommand, Guid>
 {
     public async Task<Guid> Handle(EnsureCurrentWalletCommand request, CancellationToken cancellationToken)
@@ -28,10 +28,10 @@ public sealed class EnsureCurrentWalletCommandHandler(ILevelUpRepository reposit
         return walletId;
     }
 
-    internal static User RequireCurrentUser(LevelUpData data, ICurrentUserContext? currentUser) =>
+    internal static User RequireCurrentUser(LevelUpData data, ICurrentUserContext currentUser) =>
         data.FindUser(CurrentUserGuard.RequireUserId(data, currentUser));
 
-    internal static Wallet RequireCurrentWallet(LevelUpData data, ICurrentUserContext? currentUser)
+    internal static Wallet RequireCurrentWallet(LevelUpData data, ICurrentUserContext currentUser)
     {
         var user = RequireCurrentUser(data, currentUser);
         return data.Wallets.FirstOrDefault(wallet => wallet.UserId == user.Id)
@@ -59,7 +59,7 @@ public sealed class EnsureCurrentWalletCommandHandler(ILevelUpRepository reposit
     }
 }
 
-public sealed class CreateTransactionCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class CreateTransactionCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : IRequestHandler<CreateTransactionCommand, Guid>
 {
     public async Task<Guid> Handle(CreateTransactionCommand command, CancellationToken cancellationToken)
@@ -96,7 +96,7 @@ public sealed class CreateTransactionCommandHandler(ILevelUpRepository repositor
     }
 }
 
-public sealed class UpdateTransactionCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class UpdateTransactionCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : RequestHandlerBase(repository), IRequestHandler<UpdateTransactionCommand>
 {
     public Task Handle(UpdateTransactionCommand command, CancellationToken cancellationToken) =>
@@ -122,7 +122,7 @@ public sealed class UpdateTransactionCommandHandler(ILevelUpRepository repositor
         }, cancellationToken);
 }
 
-public sealed class DeleteTransactionCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class DeleteTransactionCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : RequestHandlerBase(repository), IRequestHandler<DeleteTransactionCommand>
 {
     public Task Handle(DeleteTransactionCommand command, CancellationToken cancellationToken) =>
@@ -135,7 +135,7 @@ public sealed class DeleteTransactionCommandHandler(ILevelUpRepository repositor
         }, cancellationToken);
 }
 
-public sealed class CreateWalletTagCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class CreateWalletTagCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : IRequestHandler<CreateWalletTagCommand, Guid>
 {
     public async Task<Guid> Handle(CreateWalletTagCommand command, CancellationToken cancellationToken)
@@ -153,7 +153,7 @@ public sealed class CreateWalletTagCommandHandler(ILevelUpRepository repository,
     }
 }
 
-public sealed class UpdateWalletTagCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class UpdateWalletTagCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : RequestHandlerBase(repository), IRequestHandler<UpdateWalletTagCommand>
 {
     public Task Handle(UpdateWalletTagCommand command, CancellationToken cancellationToken) =>
@@ -171,7 +171,7 @@ public sealed class UpdateWalletTagCommandHandler(ILevelUpRepository repository,
         }, cancellationToken);
 }
 
-public sealed class DeleteWalletTagCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class DeleteWalletTagCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : RequestHandlerBase(repository), IRequestHandler<DeleteWalletTagCommand>
 {
     public Task Handle(DeleteWalletTagCommand command, CancellationToken cancellationToken) =>

@@ -71,7 +71,7 @@ public sealed class CreateAccountCommandHandler(
     }
 }
 
-public sealed class CompleteUserProfileCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class CompleteUserProfileCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : RequestHandlerBase(repository), IRequestHandler<CompleteUserProfileCommand>
 {
     public Task Handle(CompleteUserProfileCommand command, CancellationToken cancellationToken) =>
@@ -84,7 +84,7 @@ public sealed class CompleteUserProfileCommandHandler(ILevelUpRepository reposit
         }, cancellationToken);
 }
 
-public sealed class UpdateCurrentUserAvatarCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class UpdateCurrentUserAvatarCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : RequestHandlerBase(repository), IRequestHandler<UpdateCurrentUserAvatarCommand>
 {
     public Task Handle(UpdateCurrentUserAvatarCommand command, CancellationToken cancellationToken) =>
@@ -95,7 +95,7 @@ public sealed class UpdateCurrentUserAvatarCommandHandler(ILevelUpRepository rep
         }, cancellationToken);
 }
 
-public sealed class UpdateCurrentUserPreferencesCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class UpdateCurrentUserPreferencesCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : RequestHandlerBase(repository), IRequestHandler<UpdateCurrentUserPreferencesCommand>
 {
     public Task Handle(UpdateCurrentUserPreferencesCommand command, CancellationToken cancellationToken) =>
@@ -106,7 +106,7 @@ public sealed class UpdateCurrentUserPreferencesCommandHandler(ILevelUpRepositor
         }, cancellationToken);
 }
 
-public sealed class UpdateCurrentUserAccountCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class UpdateCurrentUserAccountCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : RequestHandlerBase(repository), IRequestHandler<UpdateCurrentUserAccountCommand>
 {
     public Task Handle(UpdateCurrentUserAccountCommand command, CancellationToken cancellationToken) =>
@@ -125,7 +125,7 @@ public sealed class UpdateCurrentUserAccountCommandHandler(ILevelUpRepository re
 public sealed class ChangeCurrentUserPasswordCommandHandler(
     ILevelUpRepository repository,
     IPasswordService passwordService,
-    ICurrentUserContext? currentUser = null)
+    ICurrentUserContext currentUser)
     : RequestHandlerBase(repository), IRequestHandler<ChangeCurrentUserPasswordCommand>
 {
     public Task Handle(ChangeCurrentUserPasswordCommand command, CancellationToken cancellationToken) =>
@@ -145,11 +145,12 @@ public sealed class ChangeCurrentUserPasswordCommandHandler(
             }
 
             user.SetPasswordHash(passwordService.Hash(command.Request.NewPassword));
+            user.InvalidateSessions();
         }, cancellationToken);
 }
 
 
-public sealed class CompleteCurrentUserOnboardingCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class CompleteCurrentUserOnboardingCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : RequestHandlerBase(repository), IRequestHandler<CompleteCurrentUserOnboardingCommand>
 {
     public Task Handle(CompleteCurrentUserOnboardingCommand command, CancellationToken cancellationToken) =>
@@ -160,7 +161,7 @@ public sealed class CompleteCurrentUserOnboardingCommandHandler(ILevelUpReposito
         }, cancellationToken);
 }
 
-public sealed class GetCurrentUserQueryHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class GetCurrentUserQueryHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : IRequestHandler<GetCurrentUserQuery, CurrentUserResponse?>
 {
     public async Task<CurrentUserResponse?> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
@@ -168,6 +169,6 @@ public sealed class GetCurrentUserQueryHandler(ILevelUpRepository repository, IC
         var data = await repository.LoadAsync(cancellationToken);
         var userId = CurrentUserGuard.RequireUserId(data, currentUser);
         var user = data.FindUser(userId);
-        return new(user.Id, user.Name, user.Email, user.Language, user.Theme, user.IsActive, user.HasCompletedOnboarding, user.IsEmailConfirmed);
+        return new(user.Id, user.Email, user.IsActive, user.HasCompletedOnboarding, user.IsEmailConfirmed);
     }
 }

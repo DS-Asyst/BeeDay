@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using LevelUp.Domain.Abstractions;
 using LevelUp.Domain.Common;
 using LevelUp.Domain.Enums;
@@ -10,24 +9,38 @@ namespace LevelUp.Domain.Entities;
 
 public sealed class User : Entity
 {
-    [JsonInclude] public string Name { get; private set; } = string.Empty;
-    [JsonInclude] public string Email { get; private set; } = string.Empty;
-    [JsonInclude] public string PasswordHash { get; private set; } = string.Empty;
-    [JsonInclude] public UserLanguage Language { get; private set; } = UserLanguage.English;
-    [JsonInclude] public UserTheme Theme { get; private set; } = UserTheme.System;
-    [JsonInclude] public DateTimeOffset CreatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
-    [JsonInclude] public DateTimeOffset UpdatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
-    [JsonInclude] public DateTimeOffset? LastLoginAtUtc { get; private set; }
-    [JsonInclude] public bool IsActive { get; private set; } = true;
-    [JsonInclude] public bool HasCompletedOnboarding { get; private set; }
-    [JsonInclude] public bool IsEmailConfirmed { get; private set; }
-    [JsonInclude] public DateTimeOffset? EmailConfirmedAtUtc { get; private set; }
-    [JsonInclude] public string Nickname { get; private set; } = string.Empty;
-    [JsonInclude] public string Avatar { get; private set; } = string.Empty;
-    [JsonInclude] public UserExperience Experience { get; private set; } = UserExperience.Create();
+    public string Name { get; private set; } = string.Empty;
+    public string Email { get; private set; } = string.Empty;
+    public string PasswordHash { get; private set; } = string.Empty;
+    public UserLanguage Language { get; private set; } = UserLanguage.English;
+    public UserTheme Theme { get; private set; } = UserTheme.System;
+    public DateTimeOffset CreatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset UpdatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? LastLoginAtUtc { get; private set; }
+    public bool IsActive { get; private set; } = true;
+    public bool HasCompletedOnboarding { get; private set; }
+    public bool IsEmailConfirmed { get; private set; }
+    public DateTimeOffset? EmailConfirmedAtUtc { get; private set; }
+    public string Nickname { get; private set; } = string.Empty;
+    public string Avatar { get; private set; } = string.Empty;
+    public UserExperience Experience { get; private set; } = UserExperience.Create();
 
-    [JsonIgnore]
+    /// <summary>
+    /// Incremented whenever previously-issued session cookies must stop being honored (password
+    /// change, password reset, account deactivation). The active session's claim is compared
+    /// against this value on every request; a mismatch signs the session out.
+    /// </summary>
+    public int SessionVersion { get; private set; } = 1;
+
     public bool HasProfile => !string.IsNullOrEmpty(Nickname);
+
+    /// <summary>
+    /// Presentation-facing view of this User (nickname, name, avatar, preferences, progress),
+    /// carrying no authentication state. Prefer this over reading the fields above directly
+    /// for anything Profile-facing. See <see cref="Entities.Profile"/> remarks for why the
+    /// underlying fields still live on User rather than a separately-persisted aggregate.
+    /// </summary>
+    public Profile Profile => new(Nickname, Name, Avatar, Language, Theme, Experience);
 
     public static User Create(string name, string email, string? passwordHash = null) =>
         Create(name, email, passwordHash, DateTimeOffset.UtcNow);
@@ -93,8 +106,29 @@ public sealed class User : Entity
     }
 
     public void RegisterLogin() { LastLoginAtUtc = DateTimeOffset.UtcNow; Touch(); }
-    public void SetActive(bool active) { IsActive = active; Touch(); }
+
+    public void SetActive(bool active)
+    {
+        IsActive = active;
+        if (!active)
+        {
+            InvalidateSessions();
+            return;
+        }
+
+        Touch();
+    }
+
     public void CompleteOnboarding() { HasCompletedOnboarding = true; Touch(); }
+
+    /// <summary>
+    /// Revokes every session issued before this call by advancing <see cref="SessionVersion"/>.
+    /// Call explicitly after a genuine security-relevant change (password change, password
+    /// reset, deactivation) — not from <see cref="SetPasswordHash"/> itself, since that method
+    /// is also used for transparent hash-format upgrades on login, which must not sign out the
+    /// very session being created.
+    /// </summary>
+    public void InvalidateSessions() { SessionVersion++; Touch(); }
 
     internal void CompleteProfile(string nickname, string? avatar)
     {

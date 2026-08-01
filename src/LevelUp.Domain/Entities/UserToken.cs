@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using LevelUp.Domain.Abstractions;
 using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
@@ -7,16 +6,16 @@ namespace LevelUp.Domain.Entities;
 
 public sealed class UserToken : Entity
 {
-    [JsonInclude] public Guid UserId { get; private set; }
-    [JsonInclude] public UserTokenType Type { get; private set; }
-    [JsonInclude] public string TokenHash { get; private set; } = string.Empty;
-    [JsonInclude] public DateTimeOffset CreatedAtUtc { get; private set; }
-    [JsonInclude] public DateTimeOffset ExpiresAtUtc { get; private set; }
-    [JsonInclude] public DateTimeOffset? UsedAtUtc { get; private set; }
-    [JsonInclude] public DateTimeOffset? RevokedAtUtc { get; private set; }
+    public Guid UserId { get; private set; }
+    public UserTokenType Type { get; private set; }
+    public string TokenHash { get; private set; } = string.Empty;
+    public DateTimeOffset CreatedAtUtc { get; private set; }
+    public DateTimeOffset ExpiresAtUtc { get; private set; }
+    public DateTimeOffset? UsedAtUtc { get; private set; }
+    public DateTimeOffset? RevokedAtUtc { get; private set; }
 
-    [JsonIgnore] public bool IsUsed => UsedAtUtc.HasValue;
-    [JsonIgnore] public bool IsRevoked => RevokedAtUtc.HasValue;
+    public bool IsUsed => UsedAtUtc.HasValue;
+    public bool IsRevoked => RevokedAtUtc.HasValue;
 
     public static UserToken Create(
         Guid userId,

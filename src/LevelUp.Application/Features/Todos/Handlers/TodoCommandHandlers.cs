@@ -10,7 +10,7 @@ using MediatR;
 
 namespace LevelUp.Application.Features.Todos.Handlers;
 
-public sealed class CreateTodoCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null) : RequestHandlerBase(repository), IRequestHandler<CreateTodoCommand>
+public sealed class CreateTodoCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser) : RequestHandlerBase(repository), IRequestHandler<CreateTodoCommand>
 {
     public Task Handle(CreateTodoCommand command, CancellationToken cancellationToken) => MutateAsync(data =>
     {
@@ -23,7 +23,7 @@ public sealed class CreateTodoCommandHandler(ILevelUpRepository repository, ICur
     }, cancellationToken);
 }
 
-public sealed class UpdateTodoCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null) : RequestHandlerBase(repository), IRequestHandler<UpdateTodoCommand>
+public sealed class UpdateTodoCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser) : RequestHandlerBase(repository), IRequestHandler<UpdateTodoCommand>
 {
     public Task Handle(UpdateTodoCommand command, CancellationToken cancellationToken) => MutateAsync(data =>
     {
@@ -44,7 +44,7 @@ public sealed class UpdateTodoCommandHandler(ILevelUpRepository repository, ICur
 
 public sealed class ToggleTodoCommandHandler(
     ILevelUpRepository repository,
-    ICurrentUserContext? currentUser = null,
+    ICurrentUserContext currentUser,
     IExperienceRewardService? rewards = null,
     IPublisher? publisher = null) : RequestHandlerBase(repository), IRequestHandler<ToggleTodoCommand>
 {
@@ -102,7 +102,7 @@ public sealed class ToggleTodoCommandHandler(
     }
 }
 
-public sealed class DeleteTodoCommandHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null) : RequestHandlerBase(repository), IRequestHandler<DeleteTodoCommand>
+public sealed class DeleteTodoCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser) : RequestHandlerBase(repository), IRequestHandler<DeleteTodoCommand>
 {
     public Task Handle(DeleteTodoCommand command, CancellationToken cancellationToken) => MutateAsync(data =>
     {

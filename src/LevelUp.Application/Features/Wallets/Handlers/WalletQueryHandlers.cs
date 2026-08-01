@@ -7,7 +7,7 @@ using MediatR;
 
 namespace LevelUp.Application.Features.Wallets.Handlers;
 
-public sealed class GetWalletSummaryQueryHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class GetWalletSummaryQueryHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : IRequestHandler<GetWalletSummaryQuery, WalletSummaryResponse?>
 {
     public async Task<WalletSummaryResponse?> Handle(GetWalletSummaryQuery request, CancellationToken cancellationToken)
@@ -30,7 +30,7 @@ public sealed class GetWalletSummaryQueryHandler(ILevelUpRepository repository, 
     }
 }
 
-public sealed class GetWalletTagsQueryHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class GetWalletTagsQueryHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : IRequestHandler<GetWalletTagsQuery, IReadOnlyList<WalletTagResponse>>
 {
     public async Task<IReadOnlyList<WalletTagResponse>> Handle(GetWalletTagsQuery request, CancellationToken cancellationToken)
@@ -51,7 +51,7 @@ public sealed class GetWalletTagsQueryHandler(ILevelUpRepository repository, ICu
     }
 }
 
-public sealed class GetTransactionByIdQueryHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class GetTransactionByIdQueryHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : IRequestHandler<GetTransactionByIdQuery, TransactionResponse?>
 {
     public async Task<TransactionResponse?> Handle(GetTransactionByIdQuery request, CancellationToken cancellationToken)
@@ -68,7 +68,7 @@ public sealed class GetTransactionByIdQueryHandler(ILevelUpRepository repository
     }
 }
 
-public sealed class GetTransactionsQueryHandler(ILevelUpRepository repository, ICurrentUserContext? currentUser = null)
+public sealed class GetTransactionsQueryHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
     : IRequestHandler<GetTransactionsQuery, PagedTransactionsResponse>
 {
     public async Task<PagedTransactionsResponse> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)

@@ -158,11 +158,19 @@ builder.Services
                 return;
             }
 
+            var sessionVersionClaim = context.Principal?.FindFirstValue(LevelUpClaimTypes.SessionVersion);
+            if (!int.TryParse(sessionVersionClaim, out var sessionVersion))
+            {
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return;
+            }
+
             var repository = context.HttpContext.RequestServices.GetRequiredService<ILevelUpRepository>();
             var data = await repository.LoadAsync(context.HttpContext.RequestAborted);
             var user = data.Users.FirstOrDefault(candidate => candidate.Id == userId);
 
-            if (user is null || !user.IsActive)
+            if (user is null || !user.IsActive || user.SessionVersion != sessionVersion)
             {
                 context.RejectPrincipal();
                 await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -170,6 +178,7 @@ builder.Services
         };
     });
 builder.Services.AddAuthorization();
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<LevelUp.Application.Common.Security.ICurrentUserContext, HttpCurrentUserContext>();
 builder.Services.AddCascadingAuthenticationState();
@@ -190,6 +199,14 @@ builder.Services.AddScoped<ProfileCreationState>();
 builder.Services.AddScoped<CardActionMenuCoordinator>();
 
 var app = builder.Build();
+
+// Read only after Build(): WebApplicationFactory-based integration tests inject configuration
+// overrides that are merged in around Build(), so an eager read of builder.Configuration taken
+// earlier in this file would silently see the un-overridden (production-default) values.
+var loginRateLimiterOptions = app.Configuration
+    .GetSection(LoginRateLimiterOptions.SectionName)
+    .Get<LoginRateLimiterOptions>() ?? new LoginRateLimiterOptions();
+var loginRateLimiter = LoginRateLimiterFactory.Create(loginRateLimiterOptions);
 
 if (!app.Environment.IsDevelopment() && productionHosting.ForwardedHeaders.Enabled)
 {
@@ -251,7 +268,8 @@ app.MapPost("/auth/login", async (
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Name, user.Name),
-            new Claim(ClaimTypes.Email, user.Email)
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(LevelUpClaimTypes.SessionVersion, user.SessionVersion.ToString(System.Globalization.CultureInfo.InvariantCulture))
         };
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
@@ -289,6 +307,20 @@ app.MapPost("/auth/login", async (
             "InvalidCredentials");
         return Results.LocalRedirect("/login?error=invalid");
     }
+}).AddEndpointFilter(async (context, next) =>
+{
+    using var lease = loginRateLimiter.AttemptAcquire(context.HttpContext);
+    if (!lease.IsAcquired)
+    {
+        context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>()
+            .CreateLogger("LevelUp.Authentication")
+            .LogWarning("Authentication.LoginRateLimited TraceId={TraceId}", context.HttpContext.TraceIdentifier);
+
+        // Same generic wording regardless of whether the email belongs to a real account.
+        return Results.Text("Too many attempts. Please wait and try again.", statusCode: StatusCodes.Status429TooManyRequests);
+    }
+
+    return await next(context);
 });
 
 app.MapPost("/auth/logout", async (HttpContext httpContext, [FromForm] string? returnUrl, ILoggerFactory loggerFactory) =>
@@ -306,3 +338,6 @@ app.MapPost("/auth/logout", async (HttpContext httpContext, [FromForm] string? r
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.Run();
+
+/// <summary>Exposes the top-level Program for WebApplicationFactory-based integration tests.</summary>
+public partial class Program;

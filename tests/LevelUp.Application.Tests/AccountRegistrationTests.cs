@@ -69,6 +69,7 @@ public sealed class AccountRegistrationTests
     {
         public string Hash(string password) => $"hash:{password}";
         public bool Verify(string password, string passwordHash) => passwordHash == Hash(password);
+        public bool NeedsRehash(string passwordHash) => false;
     }
 
     private sealed class TestRepository : ILevelUpRepository

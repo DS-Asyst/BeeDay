@@ -11,6 +11,7 @@ public sealed class JsonSerializerOptionsFactory(IOptions<JsonStorageOptions> op
     {
         WriteIndented = options.Value.WriteIndented,
         PropertyNameCaseInsensitive = true,
-        Converters = { new JsonStringEnumConverter() }
+        Converters = { new JsonStringEnumConverter() },
+        TypeInfoResolver = DomainJsonContractResolver.Create()
     };
 }
