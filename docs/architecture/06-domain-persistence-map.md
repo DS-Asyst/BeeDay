@@ -44,6 +44,9 @@ alterei `01-relational-model.md` nesta Sprint: é um documento de uma tecnologia
 fora do princípio agnóstico desta Sprint, e sua correção pertence à Sprint que tratar da modelagem SQL
 concreta. Registro aqui apenas para que a inconsistência não seja esquecida.
 
+**Resolvido na Sprint 14.1:** ambos os pontos foram corrigidos em `01-relational-model.md` §0 (itens 1 e
+2) — `WalletTags` agora referencia `UserId`, `Todos.ProjectId` agora é `NOT NULL`.
+
 ---
 
 ## 1. Modelo geral de fluxo

@@ -6,9 +6,13 @@ using LevelUp.Infrastructure.Configuration;
 using LevelUp.Infrastructure.HealthChecks;
 using LevelUp.Infrastructure.Identity;
 using LevelUp.Infrastructure.Persistence.Json;
+using LevelUp.Infrastructure.Persistence.SqlServer;
+using LevelUp.Infrastructure.Persistence.SqlServer.Repositories;
 using LevelUp.Infrastructure.Security;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace LevelUp.Infrastructure.DependencyInjection;
 
@@ -52,6 +56,11 @@ public static class InfrastructureServiceCollectionExtensions
             .Validate(options => options.BackupRetention is >= 1 and <= 100, "Backup retention must be between 1 and 100.")
             .ValidateOnStart();
 
+        services
+            .AddOptions<SqlServerOptions>()
+            .Bind(configuration.GetSection(SqlServerOptions.SectionName))
+            .ValidateOnStart();
+
         services.AddSingleton<JsonStoragePaths>();
         services.AddSingleton<JsonStorageGate>();
         services.AddSingleton<JsonStorageInitializer>();
@@ -90,10 +99,48 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<BackgroundTaskQueue>();
         services.AddSingleton<LevelUp.Application.Common.Background.IBackgroundTaskQueue>(sp => sp.GetRequiredService<BackgroundTaskQueue>());
         services.AddHostedService<BackgroundTaskWorker>();
+
+        // AddDbContextFactory, not AddDbContext: LevelUp.Web is Blazor Server, whose SignalR circuits
+        // are long-lived. A DbContext registered as scoped would live for the whole circuit — unsafe
+        // for a type that is not thread-safe and not meant to track state across many operations. Every
+        // future adapter must resolve IDbContextFactory<LevelUpDbContext> and create/dispose a
+        // short-lived context per operation via CreateDbContext()/CreateDbContextAsync().
+        services.AddDbContextFactory<LevelUpDbContext>((serviceProvider, options) =>
+        {
+            var sqlServerOptions = serviceProvider.GetRequiredService<IOptions<SqlServerOptions>>().Value;
+            options.UseSqlServer(sqlServerOptions.ConnectionString);
+        });
+
+        // Sprint 14.4: the first real adapters for the 8 per-Aggregate persistence contracts defined in
+        // EPIC 13 (docs/architecture/07-persistence-contracts.md). Registering them makes the contracts
+        // *resolvable*, not *consumed* — no handler depends on any of these interfaces yet (they all
+        // still depend on ILevelUpRepository/JSON, unchanged by this Sprint), so this does not make SQL
+        // Server the active provider.
+        services.AddScoped<IUserRepository, EfUserRepository>();
+        services.AddScoped<IUserTokenRepository, EfUserTokenRepository>();
+        services.AddScoped<IHabitRepository, EfHabitRepository>();
+        services.AddScoped<IRecurringTaskRepository, EfRecurringTaskRepository>();
+        services.AddScoped<IProjectRepository, EfProjectRepository>();
+        services.AddScoped<IWalletRepository, EfWalletRepository>();
+        services.AddScoped<IWalletTagRepository, EfWalletTagRepository>();
+        services.AddScoped<ITransactionRepository, EfTransactionRepository>();
+
         services.AddHealthChecks()
             .AddCheck<JsonStorageHealthCheck>(
                 "json-storage",
                 tags: ["ready", "storage"]);
+
+        // Registered only when explicitly enabled (default off — see SqlServerOptions.HealthCheckEnabled),
+        // and tagged "sql" only (never "ready"/"storage") — JSON remains the only active provider, and
+        // /health has no tag filter, so this must stay dormant until something actually depends on SQL
+        // Server being reachable.
+        var sqlServerHealthCheckEnabled = configuration.GetValue<bool>(
+            $"{SqlServerOptions.SectionName}:HealthCheckEnabled");
+        if (sqlServerHealthCheckEnabled)
+        {
+            services.AddHealthChecks()
+                .AddCheck<SqlServerHealthCheck>("sql-server", tags: ["sql"]);
+        }
 
         return services;
     }

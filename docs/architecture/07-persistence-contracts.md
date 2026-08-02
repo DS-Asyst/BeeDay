@@ -1,11 +1,11 @@
 # Persistence Contracts (Sprint 13.3 — adoção parcial, Sprints 13.4–13.6)
 
 **Status:** contratos definidos na Sprint 13.3. Adoção parcial: os dois read services (`IWalletReadService`,
-`IDashboardReadService`) estão totalmente adotados; as 8 portas de escrita por Aggregate seguem sem
-nenhum adapter, registro em DI ou handler consumidor. `ILevelUpRepository` continua sendo o contrato
-efetivamente usado por todos os handlers de escrita e por 2 dos 4 fluxos de leitura. **Ver
-[`08-migration-status.md`](08-migration-status.md) para o inventário completo e verificado — este
-cabeçalho é um resumo, aquele documento é a referência precisa.**
+`IDashboardReadService`) estão totalmente adotados; as 8 portas de escrita por Aggregate agora têm um
+adapter EF Core e registro em DI (Sprint 14.4), mas ainda nenhum handler consumidor.
+`ILevelUpRepository` continua sendo o contrato efetivamente usado por todos os handlers de escrita e por
+2 dos 4 fluxos de leitura. **Ver [`08-migration-status.md`](08-migration-status.md) para o inventário
+completo e verificado — este cabeçalho é um resumo, aquele documento é a referência precisa.**
 **Escopo:** interfaces (portas) e formas de resposta derivadas exclusivamente do
 [Aggregate Map (13.1)](05-domain-aggregate-map.md) e do
 [Persistence Map (13.2)](06-domain-persistence-map.md), ambos tratados como arquitetura aprovada e não
@@ -128,9 +128,11 @@ seguir o exemplo ilustrativo do ADR-003 ao pé da letra) estão registradas aqui
 ## 5. Contratos removidos
 
 Nenhum. `ILevelUpRepository` **não foi removido nem descontinuado em código** — continua sendo o
-contrato efetivamente usado por todos os handlers existentes, porque nenhum adapter para os novos
-contratos existe ainda (ver §0). Está formalmente marcado aqui como **substituído na arquitetura
-aprovada**; sua remoção de código é trabalho da Sprint em que os handlers forem religados.
+contrato efetivamente usado por todos os handlers existentes. Um adapter EF Core para cada uma das 8
+portas por Aggregate agora existe (Sprint 14.4, `docs/architecture/08-migration-status.md` §5.2), mas
+isso não muda esta seção: nenhum handler foi religado, então `ILevelUpRepository` permanece o único
+caminho real. Está formalmente marcado aqui como **substituído na arquitetura aprovada**; sua remoção de
+código é trabalho da Sprint em que os handlers forem religados.
 
 ### 5.1 Violações encontradas e não corrigidas
 
@@ -176,6 +178,9 @@ unicidade `(WalletId, NormalizedName)`; o contrato desta Sprint usa `UserId` e
 `IsNameInUseAsync(userId, ...)`, seguindo o Aggregate Map validado. Não corrigido em
 `01-relational-model.md` nesta Sprint — é um documento de tecnologia específica (SQL Server), fora do
 princípio agnóstico das Sprints 13.1–13.3.
+
+**Resolvido na Sprint 14.1:** `01-relational-model.md` agora modela `WalletTags.UserId` com unicidade
+`(UserId, Name)` via collation case-insensitive, alinhado a `IsNameInUseAsync(userId, ...)`.
 
 ## 9. Sprint 13.4 — Correção da abstração de atomicidade (supersede §6)
 
