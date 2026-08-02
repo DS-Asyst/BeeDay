@@ -1,4 +1,3 @@
-using LevelUp.Application.Common.Contracts;
 using LevelUp.Application.Common.Identity;
 using LevelUp.Application.Common.Security;
 using LevelUp.Application.Features.Users.Commands;
@@ -14,7 +13,7 @@ public sealed class AccountRegistrationTests
     [Fact]
     public async Task CreateAccount_CreatesUserWithProfileAtomically()
     {
-        var repository = new TestRepository();
+        var repository = new FakeLevelUpRepository();
         var emailSender = new FakeEmailSender();
         var handler = new CreateAccountCommandHandler(
             repository,
@@ -72,15 +71,4 @@ public sealed class AccountRegistrationTests
         public bool NeedsRehash(string passwordHash) => false;
     }
 
-    private sealed class TestRepository : ILevelUpRepository
-    {
-        public LevelUpData Data { get; } = new();
-        public Task<LevelUpData> LoadAsync(CancellationToken cancellationToken = default) => Task.FromResult(Data);
-        public Task SaveAsync(LevelUpData data, CancellationToken cancellationToken = default) => Task.CompletedTask;
-        public Task UpdateAsync(Action<LevelUpData> mutation, CancellationToken cancellationToken = default)
-        {
-            mutation(Data);
-            return Task.CompletedTask;
-        }
-    }
 }

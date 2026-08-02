@@ -1,8 +1,14 @@
 # LevelUp — Documentação Técnica Contract-First
 
-**Status:** arquitetura-alvo aprovada para planejamento  
+**Status:** arquitetura-alvo aprovada; migração em andamento — **parcial**, não concluída. Ver
+[`architecture/08-migration-status.md`](architecture/08-migration-status.md) para o estado verificado
+contra o código: 2 fluxos de leitura (Dashboard, Wallet) migrados para contratos por Aggregate/read
+service; 0 handlers de escrita migrados; 8 portas de escrita definidas na Sprint 13.3 sem nenhum
+adapter ou consumidor ainda.  
 **Escopo:** aplicação LevelUp completa  
-**Plataforma atual:** .NET 10, Blazor Server, Clean Architecture pragmática, MediatR, persistência JSON  
+**Plataforma atual:** .NET 10, Blazor Server, Clean Architecture pragmática, MediatR, persistência JSON
+(parcialmente por trás de contratos por Aggregate/read service; majoritariamente ainda pelo documento
+global `LevelUpData` via `ILevelUpRepository`)  
 **Plataforma-alvo:** contratos estáveis, EF Core, SQL Server e banco iniciado sem dados legados
 
 ## 1. Objetivo
@@ -41,6 +47,10 @@ A estratégia adotada é **Contract-First Development**:
 - [Arquitetura-alvo](architecture/02-target-architecture.md)
 - [Regras de dependência](architecture/03-dependency-rules.md)
 - [Fluxos de execução](architecture/04-runtime-flows.md)
+- [Aggregate Map do Domain (Sprint 13.1)](architecture/05-domain-aggregate-map.md)
+- [Domain Persistence Map (Sprint 13.2)](architecture/06-domain-persistence-map.md)
+- [Persistence Contracts (Sprint 13.3)](architecture/07-persistence-contracts.md)
+- [Contract-First Migration Status (Sprint 13.7)](architecture/08-migration-status.md) — estado verificado, não um plano
 
 ### Contract-First
 

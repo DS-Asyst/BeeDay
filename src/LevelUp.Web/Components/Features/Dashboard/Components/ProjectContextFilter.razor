@@ -1,4 +1,4 @@
-@using LevelUp.Domain.Entities
+@using LevelUp.Application.Features.Dashboard.Responses
 
 <div class="project-context-filter">
     <button type="button"
@@ -28,7 +28,7 @@
                         aria-selected="@(SelectedProjectId == project.Id)"
                         class="project-context-filter__option @(SelectedProjectId == project.Id ? "project-context-filter__option--selected" : null)"
                         @onclick="@(() => SelectAsync(project.Id))">
-                    @project.Title
+                    @project.Name
                 </button>
             }
         </div>

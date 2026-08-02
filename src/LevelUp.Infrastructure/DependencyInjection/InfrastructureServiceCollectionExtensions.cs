@@ -60,7 +60,10 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<JsonFileReader>();
         services.AddSingleton<JsonFileWriter>();
         services.AddSingleton<JsonBackupService>();
+        services.AddSingleton<JsonLevelUpDocumentStore>();
         services.AddSingleton<ILevelUpRepository, JsonLevelUpRepository>();
+        services.AddSingleton<LevelUp.Application.Features.Wallets.Contracts.IWalletReadService, JsonWalletReadService>();
+        services.AddSingleton<LevelUp.Application.Features.Dashboard.Contracts.IDashboardReadService, JsonDashboardReadService>();
         services.AddSingleton<LevelUp.Application.Common.Security.IPasswordService, Pbkdf2PasswordService>();
         services.AddSingleton<LevelUp.Application.Common.Identity.IClock, SystemClock>();
         services.AddSingleton<LevelUp.Application.Common.Identity.IUserTokenService, SecureUserTokenService>();

@@ -27,7 +27,13 @@ E quatro projetos de testes correspondentes.
   históricos) é reconstruído a partir da Infrastructure por um `IJsonTypeInfoResolver` dedicado
   (`DomainJsonContractResolver`), configurado exclusivamente dentro de
   `JsonSerializerOptionsFactory`. Ver `docs/data/03-json-to-sql-transition.md` §6.
-- `ILevelUpRepository` expondo `LoadAsync`, `SaveAsync` e `UpdateAsync` sobre o documento completo.
+- `ILevelUpRepository` expondo `LoadAsync`, `SaveAsync` e `UpdateAsync` sobre o documento completo —
+  ainda o contrato usado por todo handler de escrita (ver §3.6).
+- Desde a Sprint 13.4, dois fluxos de leitura (Dashboard, Wallet) não passam mais por
+  `ILevelUpRepository`: usam `IDashboardReadService`/`IWalletReadService`, cada um com adapter JSON
+  próprio (`JsonDashboardReadService`/`JsonWalletReadService`) sobre o mesmo `JsonLevelUpDocumentStore`
+  interno. Oito portas de escrita por Aggregate (Sprint 13.3) existem no código mas não têm adapter
+  nem consumidor — ver `docs/architecture/08-migration-status.md`.
 - Isolamento por `UserId` em diversos handlers e snapshots.
 - `CurrentUserId` ainda presente no documento persistido (bootstrapping/migração legada), mas
   não é mais utilizado como fallback de autenticação desde a Sprint 12.5 — `ICurrentUserContext`
@@ -62,33 +68,37 @@ necessidade de um documento único.
 
 Sem contratos específicos, a substituição por EF Core pode exigir alterações simultâneas em handlers, testes e componentes.
 
-### 3.6 Bloqueadores confirmados para a substituição relacional (Sprint 12.8)
+### 3.6 Bloqueadores confirmados para a substituição relacional (Sprint 12.8; status atualizado na Sprint 13.7)
 
-A Sprint 12.8 removeu o acoplamento de `LevelUp.Domain` ao formato JSON (§2 acima), mas
-confirmou — sem redesenhar nesta Sprint — que os itens abaixo em Application/Infrastructure
-ainda impedem trocar apenas a Infrastructure por um provider SQL Server. Nenhum destes é uma
-regressão desta Sprint; são a continuação de 3.1/3.2, agora explicitamente marcados como
-bloqueadores do Contract-First:
+A Sprint 12.8 removeu o acoplamento de `LevelUp.Domain` ao formato JSON (§2 acima) e confirmou quatro
+bloqueadores em Application/Infrastructure para trocar apenas a Infrastructure por um provider SQL
+Server. A EPIC 13 (Sprints 13.1–13.6) tratou os quatro — **dois estão parcialmente resolvidos, dois
+seguem exatamente como estavam**. Status verificado contra o código atual; ver
+`docs/architecture/08-migration-status.md` para o inventário completo, arquivo por arquivo:
 
-- **`ILevelUpRepository` ainda expõe o documento `LevelUpData` inteiro** (não portas por
-  agregado) — qualquer novo adapter (SQL) precisaria ou reconstruir o documento inteiro em
-  memória a cada chamada, ou esperar o redesenho de `docs/architecture/02-target-architecture.md`
-  §3.
-- **`GetLevelUpResponse` (Application/Features/Dashboard/Responses) ainda expõe `LevelUpData`
-  diretamente como resposta** — o mesmo redesenho de contratos de saída (§3.3) é pré-requisito
-  antes de trocar o provider sem tocar Application/Web.
-- **Vários handlers de Application (Identity, Wallet, Habits, Tasks, Projects, Todos) operam
-  diretamente sobre o agregado global** via `ILevelUpRepository.UpdateAsync(Action<LevelUpData>)`
-  — cada um precisaria ser reescrito para uma porta por agregado no Contract-First.
-- **`JsonStorageGate` é uma estratégia de concorrência específica de um único arquivo** (semáforo
-  de processo inteiro) — não deve motivar o desenho de concorrência do SQL Server (que usa
-  `rowversion`/transações reais, ver `docs/data/02-ef-core-strategy.md` §5); é uma decisão
-  correta para JSON e exclusiva dela.
+- **`ILevelUpRepository` ainda expõe o documento `LevelUpData` inteiro** — **parcialmente resolvido**.
+  Oito portas por Aggregate foram definidas (Sprint 13.3, `docs/architecture/07-persistence-contracts.md`
+  §3.1), mas nenhuma tem adapter, registro em DI ou consumidor — `ILevelUpRepository` continua sendo o
+  único contrato de escrita efetivamente usado por todo handler de comando (Habits, Tasks, Todos,
+  Projects, Ordering, Wallet, Users, Authentication, Identity).
+- **`GetLevelUpResponse` ainda expõe `LevelUpData` diretamente como resposta** — **parcialmente
+  resolvido**. `IDashboardReadService`/`DashboardResponse` substituíram esse caminho para a tela
+  `/daily` (Sprint 13.4). `GetLevelUpResponse` continua existindo e sendo retornado para 3 consumidores
+  não migrados (`Tutorial.razor`, `Account.razor`, `ProfileCreationState`) — o tipo não foi removido
+  porque ainda tem consumidores reais.
+- **Vários handlers de Application operam diretamente sobre o agregado global** — **parcialmente
+  resolvido, apenas para leitura**. Os 4 handlers de consulta de Wallet e o handler de consulta do
+  Dashboard foram reescritos para read services dedicados (`IWalletReadService`, `IDashboardReadService`,
+  ambos com adapter JSON real e testados). **Nenhum handler de escrita foi migrado** — todos continuam
+  usando `ILevelUpRepository.UpdateAsync(Action<LevelUpData>)` inalterado.
+- **`JsonStorageGate` é uma estratégia de concorrência específica de um único arquivo** — **inalterado,
+  como esperado**. Reconfirmado pela auditoria de isolamento de persistência da Sprint 13.5: continua
+  sendo uma decisão correta e exclusiva do adapter JSON, sem influenciar o desenho de concorrência do
+  SQL Server (`rowversion`/transações reais).
 
-Nenhuma correção de código foi feita para estes quatro itens nesta Sprint — são, por decisão
-explícita, trabalho do Contract-First (Sprint 13+), não desta Sprint. Até lá, a afirmação "trocar
-JSON por SQL Server mudando apenas a Infrastructure" **não é verdadeira**: os quatro pontos acima
-também precisarão mudar.
+Até que os quatro itens acima estejam totalmente resolvidos, a afirmação "trocar JSON por SQL Server
+mudando apenas a Infrastructure" **ainda não é verdadeira** — apenas os dois fluxos de leitura migrados
+(Dashboard, Wallet) já satisfazem essa propriedade hoje.
 
 ## 4. Capacidades que devem ser preservadas
 

@@ -1,163 +1,73 @@
-using LevelUp.Application.Common.Contracts;
 using LevelUp.Application.Common.Security;
+using LevelUp.Application.Features.Wallets.Contracts;
 using LevelUp.Application.Features.Wallets.Queries;
 using LevelUp.Application.Features.Wallets.Responses;
-using LevelUp.Domain.Entities;
 using MediatR;
+using FilterSortDirection = LevelUp.Application.Features.Wallets.Contracts.SortDirection;
+using FilterSortField = LevelUp.Application.Features.Wallets.Contracts.TransactionSortField;
+using QuerySortDirection = LevelUp.Application.Features.Wallets.Queries.SortDirection;
+using QuerySortField = LevelUp.Application.Features.Wallets.Queries.TransactionSortField;
 
 namespace LevelUp.Application.Features.Wallets.Handlers;
 
-public sealed class GetWalletSummaryQueryHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
+public sealed class GetWalletSummaryQueryHandler(IWalletReadService walletReadService, ICurrentUserContext currentUser)
     : IRequestHandler<GetWalletSummaryQuery, WalletSummaryResponse?>
 {
-    public async Task<WalletSummaryResponse?> Handle(GetWalletSummaryQuery request, CancellationToken cancellationToken)
-    {
-        var data = await repository.LoadAsync(cancellationToken);
-        var user = data.FindUser(CurrentUserGuard.RequireUserId(data, currentUser));
-        var wallet = data.Wallets.FirstOrDefault(candidate => candidate.UserId == user.Id);
-        if (wallet is null)
-        {
-            return null;
-        }
-        var transactions = data.Transactions.Where(transaction => transaction.WalletId == wallet.Id).ToList();
-        return new WalletSummaryResponse(
-            wallet.Id,
-            wallet.CalculateBalance(transactions),
-            wallet.CalculateTotalIncome(transactions),
-            wallet.CalculateTotalExpenses(transactions),
-            transactions.Count,
-            wallet.UpdatedAtUtc);
-    }
+    public Task<WalletSummaryResponse?> Handle(GetWalletSummaryQuery request, CancellationToken cancellationToken) =>
+        walletReadService.GetSummaryAsync(CurrentUserGuard.RequireUserId(currentUser), cancellationToken);
 }
 
-public sealed class GetWalletTagsQueryHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
+public sealed class GetWalletTagsQueryHandler(IWalletReadService walletReadService, ICurrentUserContext currentUser)
     : IRequestHandler<GetWalletTagsQuery, IReadOnlyList<WalletTagResponse>>
 {
-    public async Task<IReadOnlyList<WalletTagResponse>> Handle(GetWalletTagsQuery request, CancellationToken cancellationToken)
-    {
-        var data = await repository.LoadAsync(cancellationToken);
-        var user = data.FindUser(CurrentUserGuard.RequireUserId(data, currentUser));
-        return data.WalletTags
-            .Where(tag => tag.UserId == user.Id)
-            .OrderBy(tag => tag.Name, StringComparer.OrdinalIgnoreCase)
-            .Select(tag => new WalletTagResponse(
-                tag.Id,
-                tag.Name,
-                tag.Color,
-                data.Transactions.Count(transaction => transaction.WalletTagId == tag.Id),
-                tag.CreatedAtUtc,
-                tag.UpdatedAtUtc))
-            .ToList();
-    }
+    public Task<IReadOnlyList<WalletTagResponse>> Handle(GetWalletTagsQuery request, CancellationToken cancellationToken) =>
+        walletReadService.ListTagsAsync(CurrentUserGuard.RequireUserId(currentUser), cancellationToken);
 }
 
-public sealed class GetTransactionByIdQueryHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
+public sealed class GetTransactionByIdQueryHandler(IWalletReadService walletReadService, ICurrentUserContext currentUser)
     : IRequestHandler<GetTransactionByIdQuery, TransactionResponse?>
 {
-    public async Task<TransactionResponse?> Handle(GetTransactionByIdQuery request, CancellationToken cancellationToken)
-    {
-        var data = await repository.LoadAsync(cancellationToken);
-        var user = data.FindUser(CurrentUserGuard.RequireUserId(data, currentUser));
-        var wallet = data.Wallets.FirstOrDefault(candidate => candidate.UserId == user.Id);
-        if (wallet is null)
-        {
-            return null;
-        }
-        var transaction = data.Transactions.FirstOrDefault(candidate => candidate.Id == request.Id && candidate.WalletId == wallet.Id);
-        return transaction is null ? null : WalletResponseMapper.MapTransaction(data, transaction);
-    }
+    public Task<TransactionResponse?> Handle(GetTransactionByIdQuery request, CancellationToken cancellationToken) =>
+        walletReadService.GetTransactionAsync(CurrentUserGuard.RequireUserId(currentUser), request.Id, cancellationToken);
 }
 
-public sealed class GetTransactionsQueryHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
+public sealed class GetTransactionsQueryHandler(IWalletReadService walletReadService, ICurrentUserContext currentUser)
     : IRequestHandler<GetTransactionsQuery, PagedTransactionsResponse>
 {
-    public async Task<PagedTransactionsResponse> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
+    public Task<PagedTransactionsResponse> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
     {
-        var data = await repository.LoadAsync(cancellationToken);
-        var user = data.FindUser(CurrentUserGuard.RequireUserId(data, currentUser));
-        var wallet = data.Wallets.FirstOrDefault(candidate => candidate.UserId == user.Id);
-        if (wallet is null)
-        {
-            return new([], request.Page, request.PageSize, 0, 0);
-        }
-
-        IEnumerable<Transaction> query = data.Transactions.Where(transaction => transaction.WalletId == wallet.Id);
-        if (!string.IsNullOrWhiteSpace(request.Search))
-        {
-            var search = request.Search.Trim();
-            query = query.Where(transaction =>
-                transaction.Description.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                transaction.Notes.Contains(search, StringComparison.OrdinalIgnoreCase));
-        }
-        if (request.Type is not null)
-        {
-            query = query.Where(transaction => transaction.Type == request.Type);
-        }
-        if (request.WalletTagId is not null)
-        {
-            query = query.Where(transaction => transaction.WalletTagId == request.WalletTagId);
-        }
-        if (request.StartDate is not null)
-        {
-            query = query.Where(transaction => transaction.TransactionDate >= request.StartDate.Value);
-        }
-        if (request.EndDate is not null)
-        {
-            query = query.Where(transaction => transaction.TransactionDate <= request.EndDate.Value);
-        }
-        if (request.MinimumAmount is not null)
-        {
-            query = query.Where(transaction => transaction.Amount >= request.MinimumAmount.Value);
-        }
-        if (request.MaximumAmount is not null)
-        {
-            query = query.Where(transaction => transaction.Amount <= request.MaximumAmount.Value);
-        }
-
-        query = ApplyOrdering(query, request.SortBy, request.SortDirection);
-        var totalCount = query.Count();
-        var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)request.PageSize);
-        var items = query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize)
-            .Select(transaction => WalletResponseMapper.MapTransaction(data, transaction)).ToList();
-        return new(items, request.Page, request.PageSize, totalCount, totalPages);
+        var filter = new TransactionQueryFilter(
+            request.Search,
+            request.Type,
+            request.WalletTagId,
+            request.StartDate,
+            request.EndDate,
+            request.MinimumAmount,
+            request.MaximumAmount,
+            MapSortField(request.SortBy),
+            MapSortDirection(request.SortDirection),
+            request.Page,
+            request.PageSize);
+        return walletReadService.ListTransactionsAsync(CurrentUserGuard.RequireUserId(currentUser), filter, cancellationToken);
     }
 
-    private static IEnumerable<Transaction> ApplyOrdering(
-        IEnumerable<Transaction> query,
-        TransactionSortField field,
-        SortDirection direction) => (field, direction) switch
-        {
-            (TransactionSortField.Description, SortDirection.Ascending) => query.OrderBy(x => x.Description, StringComparer.OrdinalIgnoreCase),
-            (TransactionSortField.Description, SortDirection.Descending) => query.OrderByDescending(x => x.Description, StringComparer.OrdinalIgnoreCase),
-            (TransactionSortField.Amount, SortDirection.Ascending) => query.OrderBy(x => x.Amount),
-            (TransactionSortField.Amount, SortDirection.Descending) => query.OrderByDescending(x => x.Amount),
-            (TransactionSortField.CreatedAt, SortDirection.Ascending) => query.OrderBy(x => x.CreatedAtUtc),
-            (TransactionSortField.CreatedAt, SortDirection.Descending) => query.OrderByDescending(x => x.CreatedAtUtc),
-            (_, SortDirection.Ascending) => query.OrderBy(x => x.TransactionDate).ThenBy(x => x.CreatedAtUtc),
-            _ => query.OrderByDescending(x => x.TransactionDate).ThenByDescending(x => x.CreatedAtUtc)
-        };
-}
-
-internal static class WalletResponseMapper
-{
-    public static TransactionResponse MapTransaction(LevelUpData data, Transaction transaction)
+    // Explicit mapping, not a cast: QuerySortField/QuerySortDirection (the MediatR request shape) and
+    // FilterSortField/FilterSortDirection (the read-service filter shape, in Contracts) are
+    // deliberately separate types per docs/architecture/03-dependency-rules.md §3 — they are allowed
+    // to diverge, so nothing may assume their underlying values stay aligned.
+    private static FilterSortField MapSortField(QuerySortField field) => field switch
     {
-        var tag = transaction.WalletTagId is Guid tagId
-            ? data.WalletTags.FirstOrDefault(candidate => candidate.Id == tagId)
-            : null;
-        return new(
-            transaction.Id,
-            transaction.WalletId,
-            transaction.Description,
-            transaction.Amount,
-            transaction.SignedAmount,
-            transaction.Type,
-            transaction.TransactionDate,
-            transaction.WalletTagId,
-            tag?.Name,
-            tag?.Color,
-            transaction.Notes,
-            transaction.CreatedAtUtc,
-            transaction.UpdatedAtUtc);
-    }
+        QuerySortField.Date => FilterSortField.Date,
+        QuerySortField.Description => FilterSortField.Description,
+        QuerySortField.Amount => FilterSortField.Amount,
+        QuerySortField.CreatedAt => FilterSortField.CreatedAt,
+        _ => throw new ArgumentOutOfRangeException(nameof(field), field, "Unsupported transaction sort field.")
+    };
+
+    private static FilterSortDirection MapSortDirection(QuerySortDirection direction) => direction switch
+    {
+        QuerySortDirection.Ascending => FilterSortDirection.Ascending,
+        QuerySortDirection.Descending => FilterSortDirection.Descending,
+        _ => throw new ArgumentOutOfRangeException(nameof(direction), direction, "Unsupported sort direction.")
+    };
 }

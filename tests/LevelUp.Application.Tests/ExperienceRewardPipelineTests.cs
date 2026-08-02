@@ -1,6 +1,4 @@
-using LevelUp.Application.Common.Contracts;
 using LevelUp.Application.Common.Experience;
-using LevelUp.Application.Common.Security;
 using LevelUp.Application.Features.Tasks.Commands;
 using LevelUp.Application.Features.Tasks.Handlers;
 using LevelUp.Application.Features.Todos.Commands;
@@ -16,21 +14,21 @@ public sealed class ExperienceRewardPipelineTests
     [Fact]
     public async Task Completing_task_twice_grants_experience_only_once()
     {
-        var repository = CreateRepository();
+        var (repository, user) = CreateRepository();
         var task = RecurringTask.Create("Review pull request", null, TaskRepeat.None);
-        repository.Data.AddTask(repository.User.Id, task);
-        var handler = new ToggleTaskCommandHandler(repository, new UserContext(repository.User.Id), new ExperienceRewardService());
+        repository.Data.AddTask(user.Id, task);
+        var handler = new ToggleTaskCommandHandler(repository, new FakeCurrentUserContext(user.Id), new ExperienceRewardService());
 
         await handler.Handle(new ToggleTaskCommand(task.Id), TestContext.Current.CancellationToken);
         await handler.Handle(new ToggleTaskCommand(task.Id), TestContext.Current.CancellationToken);
         await handler.Handle(new ToggleTaskCommand(task.Id), TestContext.Current.CancellationToken);
 
-        ExperienceEntry entry = Assert.Single(repository.User.Experience.Entries);
-        Assert.Equal(5L, repository.User.Experience.TotalExperience);
+        ExperienceEntry entry = Assert.Single(user.Experience.Entries);
+        Assert.Equal(5L, user.Experience.TotalExperience);
         Assert.Equal(ExperienceSourceType.Task, entry.Source.Type);
         Assert.Equal(task.Id, entry.Source.ReferenceId);
         Assert.Equal(ExperienceRewardType.Completion, entry.RewardType);
-        Assert.Equal(repository.User.Id, entry.UserId);
+        Assert.Equal(user.Id, entry.UserId);
         Assert.Equal(0L, entry.ExperienceBefore);
         Assert.Equal(5L, entry.ExperienceAfter);
         Assert.Equal(1, entry.LevelBefore);
@@ -40,38 +38,38 @@ public sealed class ExperienceRewardPipelineTests
     [Fact]
     public async Task Completing_last_todo_grants_todo_and_project_rewards_once()
     {
-        var repository = CreateRepository();
+        var (repository, user) = CreateRepository();
         var project = Project.Create("Release Sprint 3.3", null);
-        repository.Data.AddProject(repository.User.Id, project);
+        repository.Data.AddProject(user.Id, project);
         var todo = Todo.Create(project.Id, "Validate pipeline", null, null);
-        todo.AssignOwner(repository.User.Id);
+        todo.AssignOwner(user.Id);
         project.AddTodo(todo);
-        var handler = new ToggleTodoCommandHandler(repository, new UserContext(repository.User.Id), new ExperienceRewardService());
+        var handler = new ToggleTodoCommandHandler(repository, new FakeCurrentUserContext(user.Id), new ExperienceRewardService());
 
         await handler.Handle(new ToggleTodoCommand(todo.Id), TestContext.Current.CancellationToken);
         await handler.Handle(new ToggleTodoCommand(todo.Id), TestContext.Current.CancellationToken);
         await handler.Handle(new ToggleTodoCommand(todo.Id), TestContext.Current.CancellationToken);
 
-        Assert.Equal(27L, repository.User.Experience.TotalExperience);
-        Assert.Equal(2, repository.User.Experience.Entries.Count);
-        Assert.Single(repository.User.Experience.Entries, item => item.Source.Type == ExperienceSourceType.Todo);
-        Assert.Single(repository.User.Experience.Entries, item => item.Source.Type == ExperienceSourceType.Project);
+        Assert.Equal(27L, user.Experience.TotalExperience);
+        Assert.Equal(2, user.Experience.Entries.Count);
+        Assert.Single(user.Experience.Entries, item => item.Source.Type == ExperienceSourceType.Todo);
+        Assert.Single(user.Experience.Entries, item => item.Source.Type == ExperienceSourceType.Project);
     }
 
     [Fact]
     public void Central_service_rejects_duplicate_reward_key()
     {
-        var repository = CreateRepository();
+        var (repository, user) = CreateRepository();
         var service = new ExperienceRewardService();
         var sourceId = Guid.NewGuid();
 
-        var first = service.Grant(repository.Data, repository.User.Id, ExperienceSourceType.Task, sourceId, ExperienceRewardType.Completion, "Chapter completed");
-        var duplicate = service.Grant(repository.Data, repository.User.Id, ExperienceSourceType.Task, sourceId, ExperienceRewardType.Completion, "Chapter completed again");
+        var first = service.Grant(repository.Data, user.Id, ExperienceSourceType.Task, sourceId, ExperienceRewardType.Completion, "Chapter completed");
+        var duplicate = service.Grant(repository.Data, user.Id, ExperienceSourceType.Task, sourceId, ExperienceRewardType.Completion, "Chapter completed again");
 
         Assert.NotNull(first);
         Assert.Null(duplicate);
-        Assert.Equal(5L, repository.User.Experience.TotalExperience);
-        Assert.Single(repository.User.Experience.Entries);
+        Assert.Equal(5L, user.Experience.TotalExperience);
+        Assert.Single(user.Experience.Entries);
     }
 
     [Fact]
@@ -89,19 +87,19 @@ public sealed class ExperienceRewardPipelineTests
     [Fact]
     public async Task Positive_habit_grants_experience_for_each_distinct_occurrence()
     {
-        var repository = CreateRepository();
+        var (repository, user) = CreateRepository();
         var habit = Habit.Create("Drink water", null, HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily);
-        repository.Data.AddHabit(repository.User.Id, habit);
+        repository.Data.AddHabit(user.Id, habit);
         var handler = new LevelUp.Application.Features.Habits.Handlers.RegisterHabitPositiveCommandHandler(
-            repository, new UserContext(repository.User.Id), new ExperienceRewardService());
+            repository, new FakeCurrentUserContext(user.Id), new ExperienceRewardService());
 
         await handler.Handle(new LevelUp.Application.Features.Habits.Commands.RegisterHabitPositiveCommand(habit.Id), TestContext.Current.CancellationToken);
         await handler.Handle(new LevelUp.Application.Features.Habits.Commands.RegisterHabitPositiveCommand(habit.Id), TestContext.Current.CancellationToken);
 
-        Assert.Equal(2L, repository.User.Experience.TotalExperience);
-        Assert.Equal(2, repository.User.Experience.Entries.Count);
-        Assert.All(repository.User.Experience.Entries, entry => Assert.Equal(ExperienceSourceType.Habit, entry.SourceType));
-        Assert.Equal(2, repository.User.Experience.Entries.Select(entry => entry.SourceId).Distinct().Count());
+        Assert.Equal(2L, user.Experience.TotalExperience);
+        Assert.Equal(2, user.Experience.Entries.Count);
+        Assert.All(user.Experience.Entries, entry => Assert.Equal(ExperienceSourceType.Habit, entry.SourceType));
+        Assert.Equal(2, user.Experience.Entries.Select(entry => entry.SourceId).Distinct().Count());
     }
 
     [Theory]
@@ -115,31 +113,13 @@ public sealed class ExperienceRewardPipelineTests
         Assert.Throws<LevelUp.Domain.Exceptions.DomainValidationException>(() => policy.GetReward(sourceType));
     }
 
-    private static TestRepository CreateRepository()
+    private static (FakeLevelUpRepository Repository, User User) CreateRepository()
     {
-        var repository = new TestRepository();
-        repository.Data.AddUser(repository.User);
-        repository.Data.SetCurrentUser(repository.User.Id);
-        repository.Data.CompleteUserProfile(repository.User.Id, "pipelinehero");
-        return repository;
-    }
-
-    private sealed record UserContext(Guid Id) : ICurrentUserContext
-    {
-        public Guid? UserId => Id;
-    }
-
-    private sealed class TestRepository : ILevelUpRepository
-    {
-        public LevelUpData Data { get; } = new();
-        public User User { get; } = User.Create("Pipeline User", "pipeline@levelup.invalid");
-
-        public Task<LevelUpData> LoadAsync(CancellationToken cancellationToken = default) => Task.FromResult(Data);
-        public Task SaveAsync(LevelUpData data, CancellationToken cancellationToken = default) => Task.CompletedTask;
-        public Task UpdateAsync(Action<LevelUpData> mutation, CancellationToken cancellationToken = default)
-        {
-            mutation(Data);
-            return Task.CompletedTask;
-        }
+        var repository = new FakeLevelUpRepository();
+        var user = User.Create("Pipeline User", "pipeline@levelup.invalid");
+        repository.Data.AddUser(user);
+        repository.Data.SetCurrentUser(user.Id);
+        repository.Data.CompleteUserProfile(user.Id, "pipelinehero");
+        return (repository, user);
     }
 }

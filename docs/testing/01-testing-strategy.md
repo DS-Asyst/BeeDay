@@ -297,3 +297,30 @@ pwsh tests/LevelUp.E2E.Tests/bin/Release/net10.0/playwright.ps1 show-trace tests
 O workflow `.github/workflows/ci.yml` instala o Chromium do Playwright após o build (o script de
 instalação é gerado no output de build) e publica `e2e-artifacts/` como artefato sempre que existir
 conteúdo (só existe em caso de falha).
+
+## 8. Testes arquiteturais — implementado (Sprints 12.8, 13.6)
+
+Dois arquivos, um por fronteira, inspecionam metadados de assembly/reflexão compilados — não texto-fonte:
+
+- `LevelUp.Domain.Tests/DomainAssemblyBoundaryTests.cs` (Sprint 12.8) — `LevelUp.Domain` nunca referencia
+  `System.Text.Json`, `Microsoft.EntityFrameworkCore` ou `LevelUp.Infrastructure`; nenhum tipo do Domain
+  carrega atributo de serialização.
+- `LevelUp.Application.Tests/PersistenceContractBoundaryTests.cs` (Sprint 13.3, estendido na 13.6) —
+  nenhum contrato em `Common.Contracts`/`*.Contracts` expõe `LevelUpData` ou qualquer tipo
+  `System.Text.Json.*` em parâmetro ou retorno (exceto `ILevelUpRepository`, a exceção legada
+  explicitamente rastreada); nenhuma interface de contrato é uma definição genérica
+  (`IRepository<T>`)/tem "UnitOfWork" no nome; `LevelUp.Application` nunca referencia
+  `LevelUp.Infrastructure`.
+
+Ambos falham a build (`--warnaserror` não afeta isso — são testes, falham como teste) se a fronteira for
+violada, não apenas avisam. Ver `docs/architecture/08-migration-status.md` §6 para o que esses testes
+cobrem hoje vs. o que ainda depende de `ILevelUpRepository`.
+
+## 9. Fakes de teste — padronizados (Sprint 13.6)
+
+`LevelUp.Application.Tests` usa três fakes compartilhados (`FakeLevelUpRepository`,
+`FakeCurrentUserContext`, `FakeApplicationCache`) em vez de cópias privadas por arquivo de teste — ver
+`docs/architecture/08-migration-status.md` §6. Não criar uma nova cópia privada de `ILevelUpRepository`
+em um teste novo; reusar `FakeLevelUpRepository`. Fakes com comportamento realmente distinto entre
+cenários (ex.: `FakePasswordService` com contagem de chamadas em `AuthenticationHandlersTests`)
+permanecem locais deliberadamente — não force a consolidação de fakes com comportamento divergente.

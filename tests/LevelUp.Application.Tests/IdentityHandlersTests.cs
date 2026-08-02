@@ -1,4 +1,3 @@
-using LevelUp.Application.Common.Contracts;
 using LevelUp.Application.Common.Identity;
 using LevelUp.Application.Common.Security;
 using LevelUp.Application.Features.Identity.Commands;
@@ -130,7 +129,7 @@ public sealed class IdentityHandlersTests
 
     private sealed class Fixture
     {
-        public TestRepository Repository { get; } = new();
+        public FakeLevelUpRepository Repository { get; } = new();
         public FakeTokenService Tokens { get; } = new();
         public FakeClock Clock { get; } = new(Now);
         public FakeEmailComposer Composer { get; } = new();
@@ -204,15 +203,4 @@ public sealed class IdentityHandlersTests
         public bool NeedsRehash(string passwordHash) => false;
     }
 
-    private sealed class TestRepository : ILevelUpRepository
-    {
-        public LevelUpData Data { get; } = new();
-        public Task<LevelUpData> LoadAsync(CancellationToken cancellationToken = default) => Task.FromResult(Data);
-        public Task SaveAsync(LevelUpData data, CancellationToken cancellationToken = default) => Task.CompletedTask;
-        public Task UpdateAsync(Action<LevelUpData> mutation, CancellationToken cancellationToken = default)
-        {
-            mutation(Data);
-            return Task.CompletedTask;
-        }
-    }
 }

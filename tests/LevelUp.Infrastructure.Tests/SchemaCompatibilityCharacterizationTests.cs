@@ -166,7 +166,7 @@ public sealed class SchemaCompatibilityCharacterizationTests : IDisposable
         var reader = new JsonFileReader(serializerFactory, NullLogger<JsonFileReader>.Instance);
         var writer = new JsonFileWriter(serializerFactory);
         var backups = new JsonBackupService(paths, options, reader, NullLogger<JsonBackupService>.Instance);
-        var repository = new JsonLevelUpRepository(
+        var store = new JsonLevelUpDocumentStore(
             paths,
             reader,
             writer,
@@ -175,7 +175,8 @@ public sealed class SchemaCompatibilityCharacterizationTests : IDisposable
             new JsonStorageInitializer(paths),
             new JsonAtomicFileCommitter(),
             options,
-            NullLogger<JsonLevelUpRepository>.Instance);
+            NullLogger<JsonLevelUpDocumentStore>.Instance);
+        var repository = new JsonLevelUpRepository(store);
 
         return new Fixture(repository, paths);
     }

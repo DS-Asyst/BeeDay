@@ -44,14 +44,17 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
 
         using var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion);
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-        var response = await sender.Send(new GetLevelUpQuery(), cancellationToken);
+        var response = await sender.Send(new GetDashboardQuery(), cancellationToken);
 
-        Assert.Equal(alice.Id, response.Data.CurrentUserId);
-        Assert.Empty(response.Data.Habits);
-        Assert.Empty(response.Data.Tasks);
-        Assert.Empty(response.Data.Projects);
-        Assert.Empty(response.Data.WalletTags);
-        Assert.Empty(response.Data.Transactions);
+        Assert.Equal(alice.Id, response.Profile.UserId);
+        Assert.Empty(response.Habits);
+        Assert.Empty(response.Tasks);
+        Assert.Empty(response.Projects);
+        // Wallet tag/transaction isolation for bob's data is covered separately by
+        // JsonWalletReadServiceTests.ListTransactionsAsync_IsolatesTransactionsBetweenUsers
+        // (Sprint 13.4 Lot 1) — DashboardResponse doesn't carry raw WalletTags/Transactions lists at
+        // all (only a Wallet summary), since the Dashboard page never renders them.
+        Assert.Null(response.Wallet);
     }
 
     [Fact]

@@ -6,4 +6,12 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
+
+  <ItemGroup>
+    <!-- Lets Infrastructure.Tests construct internal JSON adapters directly (e.g. JsonLevelUpRepository,
+         JsonLevelUpDocumentStore) to validate the real adapter, per docs/testing/01-testing-strategy.md.
+         Concrete adapter types stay internal to the rest of the solution — only the test assembly is a
+         declared friend. -->
+    <InternalsVisibleTo Include="LevelUp.Infrastructure.Tests" />
+  </ItemGroup>
 </Project>

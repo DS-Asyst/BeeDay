@@ -1,6 +1,8 @@
 # ADR-001 — Adotar Contract-First
 
-**Status:** Proposto para aprovação  
+**Status:** Aceito — princípio adotado a partir da Sprint 13.1; adoção em código parcial (contratos
+por Aggregate definidos, dois read services adotados, nenhum handler de escrita migrado). Ver
+`docs/architecture/08-migration-status.md`.  
 **Data:** 2026-07-31
 
 ## Contexto

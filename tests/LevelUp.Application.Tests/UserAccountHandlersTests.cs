@@ -1,4 +1,3 @@
-using LevelUp.Application.Common.Contracts;
 using LevelUp.Application.Common.Security;
 using LevelUp.Application.Features.Users.Commands;
 using LevelUp.Application.Features.Users.Handlers;
@@ -125,18 +124,13 @@ public sealed class UserAccountHandlersTests
         Assert.Equal(repository.Data.CurrentUser.IsEmailConfirmed, response.IsEmailConfirmed);
     }
 
-    private static TestRepository CreateRepository(string passwordHash, out UserContext context)
+    private static FakeLevelUpRepository CreateRepository(string passwordHash, out FakeCurrentUserContext context)
     {
-        var repository = new TestRepository();
+        var repository = new FakeLevelUpRepository();
         var user = User.Create("Test User", "test@levelup.invalid", passwordHash);
         repository.Data.AddUser(user);
-        context = new UserContext(user.Id);
+        context = new FakeCurrentUserContext(user.Id);
         return repository;
-    }
-
-    private sealed record UserContext(Guid Id) : ICurrentUserContext
-    {
-        public Guid? UserId => Id;
     }
 
     private sealed class FakePasswordService : IPasswordService
@@ -147,22 +141,5 @@ public sealed class UserAccountHandlersTests
             string.Equals(passwordHash, Hash(password), StringComparison.Ordinal);
 
         public bool NeedsRehash(string passwordHash) => false;
-    }
-
-    private sealed class TestRepository : ILevelUpRepository
-    {
-        public LevelUpData Data { get; } = new();
-
-        public Task<LevelUpData> LoadAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult(Data);
-
-        public Task SaveAsync(LevelUpData data, CancellationToken cancellationToken = default) =>
-            Task.CompletedTask;
-
-        public Task UpdateAsync(Action<LevelUpData> mutation, CancellationToken cancellationToken = default)
-        {
-            mutation(Data);
-            return Task.CompletedTask;
-        }
     }
 }

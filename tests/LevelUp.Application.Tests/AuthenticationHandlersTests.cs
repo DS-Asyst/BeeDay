@@ -1,4 +1,3 @@
-using LevelUp.Application.Common.Contracts;
 using LevelUp.Application.Common.Security;
 using LevelUp.Application.Features.Authentication.Commands;
 using LevelUp.Application.Features.Authentication.Handlers;
@@ -14,7 +13,7 @@ public sealed class AuthenticationHandlersTests
     public async Task Authenticate_SelectsUserAndRegistersLogin()
     {
         var passwordService = new FakePasswordService();
-        var repository = new TestRepository();
+        var repository = new FakeLevelUpRepository();
         var user = User.Create("Tiago", "tiago@levelup.invalid", passwordService.Hash("Password123"));
         user.ConfirmEmail(user.CreatedAtUtc);
         repository.Data.AddUser(user);
@@ -33,7 +32,7 @@ public sealed class AuthenticationHandlersTests
     public async Task Authenticate_RejectsInvalidPassword()
     {
         var passwordService = new FakePasswordService();
-        var repository = new TestRepository();
+        var repository = new FakeLevelUpRepository();
         repository.Data.AddUser(User.Create("Tiago", "tiago@levelup.invalid", passwordService.Hash("Password123")));
         var handler = new AuthenticateUserCommandHandler(repository, passwordService);
 
@@ -48,7 +47,7 @@ public sealed class AuthenticationHandlersTests
     public async Task Authenticate_RejectsInactiveUser()
     {
         var passwordService = new FakePasswordService();
-        var repository = new TestRepository();
+        var repository = new FakeLevelUpRepository();
         var user = User.Create("Tiago", "tiago@levelup.invalid", passwordService.Hash("Password123"));
         user.SetActive(false);
         repository.Data.AddUser(user);
@@ -64,7 +63,7 @@ public sealed class AuthenticationHandlersTests
     public async Task Authenticate_RejectsUnconfirmedEmail()
     {
         var passwordService = new FakePasswordService();
-        var repository = new TestRepository();
+        var repository = new FakeLevelUpRepository();
         repository.Data.AddUser(User.Create("Tiago", "tiago@levelup.invalid", passwordService.Hash("Password123")));
         var handler = new AuthenticateUserCommandHandler(repository, passwordService);
 
@@ -79,7 +78,7 @@ public sealed class AuthenticationHandlersTests
     public async Task Authenticate_ReturnsCurrentSessionVersion()
     {
         var passwordService = new FakePasswordService();
-        var repository = new TestRepository();
+        var repository = new FakeLevelUpRepository();
         var user = User.Create("Tiago", "tiago@levelup.invalid", passwordService.Hash("Password123"));
         user.ConfirmEmail(user.CreatedAtUtc);
         user.InvalidateSessions();
@@ -97,7 +96,7 @@ public sealed class AuthenticationHandlersTests
     public async Task Authenticate_RehashesPasswordWhenServiceRequestsIt()
     {
         var passwordService = new FakePasswordService();
-        var repository = new TestRepository();
+        var repository = new FakeLevelUpRepository();
         var originalHash = passwordService.Hash("Password123");
         var user = User.Create("Tiago", "tiago@levelup.invalid", originalHash);
         user.ConfirmEmail(user.CreatedAtUtc);
@@ -119,7 +118,7 @@ public sealed class AuthenticationHandlersTests
     public async Task Authenticate_DoesNotRehashWhenServiceDoesNotRequestIt()
     {
         var passwordService = new FakePasswordService();
-        var repository = new TestRepository();
+        var repository = new FakeLevelUpRepository();
         var originalHash = passwordService.Hash("Password123");
         var user = User.Create("Tiago", "tiago@levelup.invalid", originalHash);
         user.ConfirmEmail(user.CreatedAtUtc);
@@ -151,15 +150,4 @@ public sealed class AuthenticationHandlersTests
         public bool NeedsRehash(string passwordHash) => RehashNeeded;
     }
 
-    private sealed class TestRepository : ILevelUpRepository
-    {
-        public LevelUpData Data { get; } = new();
-        public Task<LevelUpData> LoadAsync(CancellationToken cancellationToken = default) => Task.FromResult(Data);
-        public Task SaveAsync(LevelUpData data, CancellationToken cancellationToken = default) => Task.CompletedTask;
-        public Task UpdateAsync(Action<LevelUpData> mutation, CancellationToken cancellationToken = default)
-        {
-            mutation(Data);
-            return Task.CompletedTask;
-        }
-    }
 }

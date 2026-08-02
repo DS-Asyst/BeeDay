@@ -121,11 +121,13 @@ tornando os três migradores obsoletos por definição, não por reescrita.
 Nenhum é "obrigatório" ou "documentação histórica apenas" — todos os três ainda são exercitados
 por instâncias JSON reais em uso (Development/HMG) enquanto o adapter JSON permanecer ativo.
 
-### O que isso NÃO resolve (bloqueadores confirmados, não redesenhados nesta Sprint)
+### O que isso NÃO resolve (bloqueadores confirmados, status atualizado na Sprint 13.7)
 
-`ILevelUpRepository` ainda expõe `LevelUpData` inteiro, `GetLevelUpResponse` ainda expõe
-`LevelUpData` diretamente, vários handlers de Application ainda operam sobre o agregado global, e
-`JsonStorageGate` continua sendo uma estratégia de concorrência específica de arquivo único. Trocar
-JSON por SQL Server **não** é hoje uma mudança isolada à Infrastructure — esses quatro pontos
-exigem o redesenho do Contract-First (Sprint 13+). Ver
-`docs/architecture/01-current-state.md` §3.6 para o detalhamento completo.
+`ILevelUpRepository` ainda expõe `LevelUpData` inteiro para todo handler de escrita,
+`GetLevelUpResponse` ainda expõe `LevelUpData` diretamente para 3 consumidores não migrados,
+handlers de escrita ainda operam sobre o agregado global, e `JsonStorageGate` continua sendo — como
+esperado, permanentemente — uma estratégia de concorrência específica de arquivo único. Os fluxos de
+leitura de Dashboard e Wallet já não dependem mais disso (Sprint 13.4). Trocar JSON por SQL Server
+**ainda não** é hoje uma mudança isolada à Infrastructure para o restante da aplicação. Ver
+`docs/architecture/01-current-state.md` §3.6 e `docs/architecture/08-migration-status.md` para o
+estado verificado, arquivo por arquivo.

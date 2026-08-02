@@ -1,5 +1,8 @@
 # Arquitetura-Alvo
 
+**Este documento descreve destino, não estado atual.** Para o que já existe em código, ver
+[`01-current-state.md`](01-current-state.md) e [`08-migration-status.md`](08-migration-status.md).
+
 ## 1. Visão geral
 
 ```text

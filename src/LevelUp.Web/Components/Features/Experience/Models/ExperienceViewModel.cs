@@ -1,3 +1,4 @@
+using LevelUp.Application.Features.Dashboard.Responses;
 using LevelUp.Domain.Experience;
 
 namespace LevelUp.Web.Components.Features.Experience.Models;
@@ -21,5 +22,16 @@ public sealed record ExperienceViewModel(
             experience.CurrentLevelExperience,
             experience.ExperienceRequiredForCurrentLevel,
             experience.ExperienceForNextLevel);
+    }
+
+    public static ExperienceViewModel From(UserProfileSummary profile)
+    {
+        ArgumentNullException.ThrowIfNull(profile);
+
+        return new ExperienceViewModel(
+            profile.CurrentLevel,
+            profile.CurrentLevelExperience,
+            profile.ExperienceRequiredForCurrentLevel,
+            profile.ExperienceRequiredForCurrentLevel - profile.CurrentLevelExperience);
     }
 }

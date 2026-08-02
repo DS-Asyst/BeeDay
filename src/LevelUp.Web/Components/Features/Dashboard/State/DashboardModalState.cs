@@ -1,4 +1,4 @@
-using LevelUp.Domain.Entities;
+using LevelUp.Application.Features.Dashboard.Responses;
 using LevelUp.Web.Components.Features.Common;
 using LevelUp.Web.Components.Features.Habits.Models;
 using LevelUp.Web.Components.Features.Projects.Models;
@@ -52,7 +52,7 @@ public sealed class DashboardModalState
         ActiveEditor = ActivityType.Todo;
     }
 
-    public void OpenHabit(Habit item)
+    public void OpenHabit(HabitSummary item)
     {
         EditingId = item.Id;
         HabitForm = new HabitEditorModel
@@ -68,7 +68,7 @@ public sealed class DashboardModalState
         ActiveEditor = ActivityType.Habit;
     }
 
-    public void OpenTask(RecurringTask item)
+    public void OpenTask(TaskSummary item)
     {
         EditingId = item.Id;
         TaskForm = new TaskEditorModel
@@ -81,7 +81,7 @@ public sealed class DashboardModalState
         ActiveEditor = ActivityType.Task;
     }
 
-    public void OpenTodo(Todo item)
+    public void OpenTodo(TodoSummary item)
     {
         EditingId = item.Id;
         TodoForm = new TodoEditorModel
@@ -95,12 +95,12 @@ public sealed class DashboardModalState
         ActiveEditor = ActivityType.Todo;
     }
 
-    public void OpenProject(Project item)
+    public void OpenProject(ProjectSummary item)
     {
         EditingId = item.Id;
         ProjectForm = new ProjectEditorModel
         {
-            Title = item.Title,
+            Title = item.Name,
             Description = item.Description,
             ExpectedDate = item.ExpectedDate?.ToDateTime(TimeOnly.MinValue),
             Archived = item.Archived,

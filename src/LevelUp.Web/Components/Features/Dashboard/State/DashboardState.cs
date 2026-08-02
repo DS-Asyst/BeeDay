@@ -1,5 +1,5 @@
+using LevelUp.Application.Features.Dashboard.Responses;
 using LevelUp.Application.Features.Ordering.Requests;
-using LevelUp.Domain.Entities;
 using LevelUp.Domain.Enums;
 using LevelUp.Web.Components.Behaviors.DragDrop;
 using LevelUp.Web.Components.Features.Common;
@@ -13,24 +13,27 @@ namespace LevelUp.Web.Components.Features.Dashboard.State;
 
 public sealed class DashboardState(LevelUpWebService store, ToastService toastService)
 {
-    private LevelUpData? data;
+    private static readonly UserProfileSummary EmptyProfile = new(
+        Guid.Empty, string.Empty, string.Empty, string.Empty, UserLanguage.English, UserTheme.System, 0, 1, 0, 0);
+
+    private DashboardResponse? data;
     private string search = string.Empty;
     private readonly HashSet<ActivityAttribute> selectedAttributes = [];
     private Guid? selectedProjectId;
 
     public DashboardModalState Modals { get; } = new();
-    public LevelUpData? Data => data;
+    public DashboardResponse? Data => data;
     public bool IsLoading => data is null;
     public bool IsBusy { get; private set; }
     public long LatestExperienceGain { get; private set; }
     public long ExperienceFeedbackVersion { get; private set; }
     public Guid? RemovingItemId { get; private set; }
     public event Action? Changed;
-    public Task<LevelUpData> GetDataAsync() => store.LoadAsync();
+    public Task<DashboardResponse> GetDataAsync() => store.LoadDashboardAsync();
 
-    public bool HasProfile => data?.CurrentUser?.HasProfile == true;
+    public bool HasProfile => data?.Profile.HasProfile == true;
     public Guid? OpenProjectId { get; private set; }
-    public Project? OpenProject => OpenProjectId is Guid id ? data?.Projects.FirstOrDefault(project => project.Id == id) : null;
+    public ProjectSummary? OpenProject => OpenProjectId is Guid id ? data?.Projects.FirstOrDefault(project => project.Id == id) : null;
 
     public string Search
     {
@@ -40,7 +43,7 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
 
     public IReadOnlyCollection<ActivityAttribute> SelectedAttributes => selectedAttributes;
     public Guid? SelectedProjectId => selectedProjectId;
-    public IReadOnlyList<Project> ProjectContextOptions => data?.Projects.ToList() ?? [];
+    public IReadOnlyList<ProjectSummary> ProjectContextOptions => data?.Projects.ToList() ?? [];
 
     public void SelectProjectContext(Guid? projectId)
     {
@@ -60,28 +63,37 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
 
     public void ClearAttributeFilters() => selectedAttributes.Clear();
 
+    private IEnumerable<TodoSummary> AllTodos => data?.Projects.SelectMany(project => project.Todos) ?? [];
+
     public int CompletedItems => data is null
         ? 0
         : data.Tasks.Count(item => item.Completed)
-          + data.Todos.Count(item => item.Completed)
+          + AllTodos.Count(item => item.Completed)
           + data.Projects.Count(item => item.Completed);
 
     public int ActiveItems => data is null
         ? 0
         : data.Habits.Count
           + data.Tasks.Count(item => !item.Completed)
-          + data.Todos.Count(item => !item.Completed)
+          + AllTodos.Count(item => !item.Completed)
           + data.Projects.Count(item => !item.Completed);
 
-    public IEnumerable<Habit> FilteredHabits => Filter(data?.Habits ?? []);
-    public IEnumerable<RecurringTask> FilteredTasks => Filter(data?.Tasks ?? []);
-    public IEnumerable<Todo> FilteredTodos => Filter(data?.Todos ?? [])
-        .Where(item => selectedProjectId is null || item.ProjectId == selectedProjectId);
-    public IEnumerable<Project> FilteredProjects => Filter(data?.Projects ?? []);
+    public IEnumerable<HabitSummary> FilteredHabits =>
+        Filter(data?.Habits ?? [], item => item.Title, item => item.Description, item => item.Attribute);
+
+    public IEnumerable<TaskSummary> FilteredTasks =>
+        Filter(data?.Tasks ?? [], item => item.Title, item => item.Description, item => item.Attribute);
+
+    public IEnumerable<TodoSummary> FilteredTodos =>
+        Filter(AllTodos, item => item.Title, item => item.Description, item => item.Attribute)
+            .Where(item => selectedProjectId is null || item.ProjectId == selectedProjectId);
+
+    public IEnumerable<ProjectSummary> FilteredProjects =>
+        Filter(data?.Projects ?? [], item => item.Name, item => item.Description, item => item.Attribute);
 
     public int TotalItems => data is null
         ? 0
-        : data.Habits.Count + data.Tasks.Count + data.Todos.Count + data.Projects.Count;
+        : data.Habits.Count + data.Tasks.Count + AllTodos.Count() + data.Projects.Count;
 
     public int FilteredItems => FilteredHabits.Count() + FilteredTasks.Count() + FilteredTodos.Count() + FilteredProjects.Count();
 
@@ -94,19 +106,19 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
         catch
         {
             toastService.ShowError("The dashboard data could not be loaded. Try refreshing the page.");
-            data = new LevelUpData();
+            data = new DashboardResponse(EmptyProfile, [], [], [], null);
         }
     }
 
     public void OpenCreate(ActivityType type) => Modals.OpenCreate(type);
-    public void OpenHabitEditor(Habit item) => Modals.OpenHabit(item);
-    public void OpenTaskEditor(RecurringTask item) => Modals.OpenTask(item);
-    public void OpenTodoEditor(Todo item) => Modals.OpenTodo(item);
-    public void OpenProjectEditor(Project item) => Modals.OpenProject(item);
-    public void OpenProjectWorkspace(Project item) { OpenProjectId = item.Id; Changed?.Invoke(); }
+    public void OpenHabitEditor(HabitSummary item) => Modals.OpenHabit(item);
+    public void OpenTaskEditor(TaskSummary item) => Modals.OpenTask(item);
+    public void OpenTodoEditor(TodoSummary item) => Modals.OpenTodo(item);
+    public void OpenProjectEditor(ProjectSummary item) => Modals.OpenProject(item);
+    public void OpenProjectWorkspace(ProjectSummary item) { OpenProjectId = item.Id; Changed?.Invoke(); }
     public void OpenProjectFromEditor()
     {
-        if (Modals.EditingId is Guid id && data?.Projects.FirstOrDefault(project => project.Id == id) is Project project)
+        if (Modals.EditingId is Guid id && data?.Projects.FirstOrDefault(project => project.Id == id) is ProjectSummary project)
         {
             Modals.CloseEditor();
             OpenProjectWorkspace(project);
@@ -195,20 +207,28 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
         _ => status.ToString()
     };
 
-    private IEnumerable<TActivity> Filter<TActivity>(IEnumerable<TActivity> items)
-        where TActivity : Activity => items.Where(MatchesFilters);
+    // Private helper, not a public Application-layer abstraction: the four summary DTOs
+    // (HabitSummary/TaskSummary/TodoSummary/ProjectSummary) deliberately share no interface — this
+    // just extracts the three fields each caller already has, via delegates supplied at each call
+    // site, so the search/attribute predicate isn't duplicated four times.
+    private IEnumerable<T> Filter<T>(
+        IEnumerable<T> items,
+        Func<T, string> title,
+        Func<T, string> description,
+        Func<T, ActivityAttribute?> attribute) =>
+        items.Where(item => MatchesFilters(title(item), description(item), attribute(item)));
 
-    private bool MatchesFilters(Activity item) =>
+    private bool MatchesFilters(string title, string description, ActivityAttribute? attribute) =>
         (selectedAttributes.Count == 0
-            || item.Attribute is ActivityAttribute attribute && selectedAttributes.Contains(attribute))
+            || attribute is ActivityAttribute value && selectedAttributes.Contains(value))
         && (string.IsNullOrWhiteSpace(search)
-            || item.Title.Contains(search, StringComparison.OrdinalIgnoreCase)
-            || item.Description.Contains(search, StringComparison.OrdinalIgnoreCase)
-            || (item.Attribute?.ToString().Contains(search, StringComparison.OrdinalIgnoreCase) ?? false));
+            || title.Contains(search, StringComparison.OrdinalIgnoreCase)
+            || description.Contains(search, StringComparison.OrdinalIgnoreCase)
+            || (attribute?.ToString().Contains(search, StringComparison.OrdinalIgnoreCase) ?? false));
 
     private async Task ReloadAsync()
     {
-        data = await store.LoadAsync();
+        data = await store.LoadDashboardAsync();
 
         if (selectedProjectId is Guid projectId && !data.Projects.Any(project => project.Id == projectId))
         {
@@ -244,7 +264,7 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
 
     private async Task ExecuteExperienceOperationAsync(Func<Task> operation)
     {
-        var previousExperience = data?.CurrentUser?.Experience.TotalExperience ?? 0;
+        var previousExperience = data?.Profile.TotalExperience ?? 0;
 
         await ExecuteAsync(async () =>
         {
@@ -256,7 +276,7 @@ public sealed class DashboardState(LevelUpWebService store, ToastService toastSe
 
     private void ShowExperienceGain(long previousExperience)
     {
-        var currentExperience = data?.CurrentUser?.Experience.TotalExperience ?? previousExperience;
+        var currentExperience = data?.Profile.TotalExperience ?? previousExperience;
         var gainedExperience = currentExperience - previousExperience;
 
         if (gainedExperience <= 0)

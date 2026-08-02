@@ -1,4 +1,4 @@
-using LevelUp.Domain.Entities;
+using LevelUp.Application.Features.Dashboard.Responses;
 using LevelUp.Domain.Enums;
 using Microsoft.AspNetCore.Components;
 
@@ -6,11 +6,11 @@ namespace LevelUp.Web.Components.Features.Projects.Components;
 
 public partial class ProjectWorkspace
 {
-    [Parameter, EditorRequired] public Project? Project { get; set; }
+    [Parameter, EditorRequired] public ProjectSummary? Project { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public EventCallback OnAddTodo { get; set; }
-    [Parameter] public EventCallback<Todo> OnEditTodo { get; set; }
-    [Parameter] public EventCallback<Todo> OnDeleteTodo { get; set; }
+    [Parameter] public EventCallback<TodoSummary> OnEditTodo { get; set; }
+    [Parameter] public EventCallback<TodoSummary> OnDeleteTodo { get; set; }
 
     private bool showTodos = true;
 

@@ -1,4 +1,4 @@
-using LevelUp.Domain.Entities;
+using LevelUp.Application.Features.Dashboard.Responses;
 using LevelUp.Web.Components.Features.Todos.Models;
 using Microsoft.AspNetCore.Components;
 
@@ -7,7 +7,7 @@ namespace LevelUp.Web.Components.Features.Todos.Components;
 public partial class TodoEditorModal
 {
     [Parameter, EditorRequired] public TodoEditorModel Model { get; set; } = new();
-    [Parameter] public IReadOnlyList<Project> Projects { get; set; } = [];
+    [Parameter] public IReadOnlyList<ProjectSummary> Projects { get; set; } = [];
     [Parameter] public bool IsEditing { get; set; }
     [Parameter] public EventCallback<TodoEditorModel> OnSave { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }

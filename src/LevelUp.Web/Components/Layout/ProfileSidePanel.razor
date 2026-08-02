@@ -13,7 +13,7 @@
                 <ExperienceBar IsLoading="true" />
             </div>
         }
-        else if (State.Data?.CurrentUser is { HasProfile: true } user)
+        else if (State.Data?.Profile is { HasProfile: true } user)
         {
             <div class="profile-drawer__profile">
                 <NavLink href="/account"
@@ -32,7 +32,7 @@
             </div>
 
             <div class="profile-drawer__experience-card">
-                <ExperienceBar Model="ExperienceViewModel.From(user.Experience)"
+                <ExperienceBar Model="ExperienceViewModel.From(user)"
                                ExperienceGain="State.LatestExperienceGain"
                                FeedbackKey="State.ExperienceFeedbackVersion" />
             </div>

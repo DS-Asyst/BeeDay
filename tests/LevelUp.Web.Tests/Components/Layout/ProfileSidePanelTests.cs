@@ -1,6 +1,6 @@
 using LevelUp.Application.Features.Dashboard.Queries;
 using LevelUp.Application.Features.Dashboard.Responses;
-using LevelUp.Domain.Entities;
+using LevelUp.Domain.Enums;
 using LevelUp.Web.Components.Features.Dashboard.State;
 using LevelUp.Web.Components.Layout;
 using LevelUp.Web.Services;
@@ -14,8 +14,8 @@ public sealed class ProfileSidePanelTests
     public void KeepsTheIdentityAreaPresentationalAndMakesTheAvatarTheAccessibleNavigationPath()
     {
         using var context = new BunitContext();
-        var data = BuildDataWithProfile(out var user);
-        context.Services.AddSingleton(BuildState(data));
+        var response = BuildResponseWithProfile(out var name);
+        context.Services.AddSingleton(BuildState(response));
 
         var cut = context.Render<ProfileSidePanel>(parameters => parameters
             .Add(component => component.IsOpen, true));
@@ -32,7 +32,7 @@ public sealed class ProfileSidePanelTests
         Assert.Equal("View profile details", avatarLink.GetAttribute("aria-label"));
         Assert.Equal("J", avatarLink.TextContent.Trim());
 
-        Assert.Contains(user.Name, cut.Find(".profile-drawer__identity h2").TextContent);
+        Assert.Contains(name, cut.Find(".profile-drawer__identity h2").TextContent);
         Assert.Contains("Level", cut.Markup);
     }
 
@@ -53,7 +53,7 @@ public sealed class ProfileSidePanelTests
     public void RendersCreateProfileLinkWhenNoProfileExists()
     {
         using var context = new BunitContext();
-        context.Services.AddSingleton(BuildState(new LevelUpData()));
+        context.Services.AddSingleton(BuildState(BuildResponseWithoutProfile()));
 
         var cut = context.Render<ProfileSidePanel>(parameters => parameters
             .Add(component => component.IsOpen, true));
@@ -63,26 +63,31 @@ public sealed class ProfileSidePanelTests
         Assert.Empty(cut.FindAll("a.profile-drawer__avatar"));
     }
 
-    private static LevelUpData BuildDataWithProfile(out User user)
+    private static DashboardResponse BuildResponseWithProfile(out string name)
     {
-        var data = new LevelUpData();
-        user = User.Create("Jane Doe", "jane@example.com");
-        data.AddUser(user);
-        data.CompleteUserProfile(user.Id, "janedoe");
-        data.EnsureValidState();
-        return data;
+        name = "Jane Doe";
+        var profile = new UserProfileSummary(
+            Guid.NewGuid(), "janedoe", name, string.Empty, UserLanguage.English, UserTheme.System, 0, 1, 0, 100);
+        return new DashboardResponse(profile, [], [], [], null);
     }
 
-    private static DashboardState BuildState(LevelUpData data) =>
-        new(new LevelUpWebService(new StubSender(data)), new ToastService());
+    private static DashboardResponse BuildResponseWithoutProfile()
+    {
+        var profile = new UserProfileSummary(
+            Guid.NewGuid(), string.Empty, string.Empty, string.Empty, UserLanguage.English, UserTheme.System, 0, 1, 0, 0);
+        return new DashboardResponse(profile, [], [], [], null);
+    }
 
-    private sealed class StubSender(LevelUpData data) : ISender
+    private static DashboardState BuildState(DashboardResponse response) =>
+        new(new LevelUpWebService(new StubSender(response)), new ToastService());
+
+    private sealed class StubSender(DashboardResponse response) : ISender
     {
         public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
         {
-            if (request is GetLevelUpQuery)
+            if (request is GetDashboardQuery)
             {
-                return Task.FromResult((TResponse)(object)new GetLevelUpResponse(data));
+                return Task.FromResult((TResponse)(object)response);
             }
 
             throw new NotSupportedException($"Unexpected request: {request.GetType().Name}");

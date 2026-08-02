@@ -1,4 +1,5 @@
-using LevelUp.Domain.Entities;
+using LevelUp.Application.Features.Dashboard.Responses;
+using LevelUp.Domain.Enums;
 using LevelUp.Web.Components.Features.Dashboard.Components;
 
 namespace LevelUp.Web.Tests.Components.Dashboard;
@@ -20,7 +21,7 @@ public sealed class ProjectContextFilterTests
     public async Task RendersAllProjectsAndAvailableProjectsWhenOpened()
     {
         using var context = new BunitContext();
-        var project = Project.Create("Project A", "Description");
+        var project = CreateProject("Project A");
 
         var cut = context.Render<ProjectContextFilter>(parameters => parameters
             .Add(component => component.Projects, [project]));
@@ -38,7 +39,7 @@ public sealed class ProjectContextFilterTests
     public async Task EmitsSelectedProjectAndClearsBackToAllProjects()
     {
         using var context = new BunitContext();
-        var project = Project.Create("Project A", "Description");
+        var project = CreateProject("Project A");
         Guid? selectedProjectId = null;
 
         var cut = context.Render<ProjectContextFilter>(parameters => parameters
@@ -58,7 +59,7 @@ public sealed class ProjectContextFilterTests
     public async Task ClosesTheMenuAfterSelectingAnOption()
     {
         using var context = new BunitContext();
-        var project = Project.Create("Project A", "Description");
+        var project = CreateProject("Project A");
 
         var cut = context.Render<ProjectContextFilter>(parameters => parameters
             .Add(component => component.Projects, [project]));
@@ -68,4 +69,17 @@ public sealed class ProjectContextFilterTests
 
         Assert.Empty(cut.FindAll(".project-context-filter__menu"));
     }
+
+    private static ProjectSummary CreateProject(string name) => new(
+        Guid.NewGuid(),
+        name,
+        "Description",
+        "#7A4FCB",
+        Featured: false,
+        Attribute: null,
+        ExpectedDate: null,
+        Archived: false,
+        Status: ProjectStatus.Planned,
+        ProgressPercentage: 0m,
+        Todos: []);
 }

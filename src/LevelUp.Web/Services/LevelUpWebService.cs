@@ -1,4 +1,5 @@
 using LevelUp.Application.Features.Dashboard.Queries;
+using LevelUp.Application.Features.Dashboard.Responses;
 using LevelUp.Application.Features.Habits.Commands;
 using LevelUp.Application.Features.Ordering.Commands;
 using LevelUp.Application.Features.Ordering.Requests;
@@ -18,6 +19,7 @@ namespace LevelUp.Web.Services;
 public sealed class LevelUpWebService(ISender sender)
 {
     public async Task<LevelUpData> LoadAsync() => (await sender.Send(new GetLevelUpQuery())).Data;
+    public Task<DashboardResponse> LoadDashboardAsync() => sender.Send(new GetDashboardQuery());
     public Task<Guid> CreateAccountAsync(string name, string email, string password, string nickname, string? avatar = null) =>
         sender.Send(new CreateAccountCommand(new(name, email, password, nickname, avatar)));
     public Task<Guid> CreateUserAsync(string name, string email, string password) => sender.Send(new CreateUserCommand(new(name, email, password)));

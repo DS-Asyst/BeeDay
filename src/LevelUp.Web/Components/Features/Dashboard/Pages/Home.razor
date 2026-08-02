@@ -11,7 +11,7 @@
 {
     <LevelUpDashboardSkeleton />
 }
-else if (State.Data?.CurrentUser?.HasProfile == true)
+else if (State.Data?.Profile.HasProfile == true)
 {
     <section class="dashboard-page levelup-fade-in">
         <div class="dashboard-page__content">
@@ -144,14 +144,14 @@ else if (State.Data?.CurrentUser?.HasProfile == true)
                                          OnReorder="State.ReorderProjectsAsync">
                             <ItemTemplate Context="itemId">
                                 @{ var item = activeProjects.First(candidate => candidate.Id == itemId); }
-                                <ActivityCard Title="@item.Title" Description="@item.Description" Attribute="@item.Attribute" Meta="@($"{State.FormatProjectStatus(item.Status)} · {item.Progress:0.##}%")" Variant="project" Completed="false" Featured="@item.Featured" SearchTerm="@State.Search" OnEdit="@(() => State.OpenProjectEditor(item))" />
+                                <ActivityCard Title="@item.Name" Description="@item.Description" Attribute="@item.Attribute" Meta="@($"{State.FormatProjectStatus(item.Status)} · {item.ProgressPercentage:0.##}%")" Variant="project" Completed="false" Featured="@item.Featured" SearchTerm="@State.Search" OnEdit="@(() => State.OpenProjectEditor(item))" />
                             </ItemTemplate>
                         </LevelUpSortable>
                     </ActiveContent>
                     <CompletedContent>
                         @foreach (var item in completedProjects)
                         {
-                            <ActivityCard @key="item.Id" Title="@item.Title" Description="@item.Description" Attribute="@item.Attribute" Meta="@($"{State.FormatProjectStatus(item.Status)} · {item.Progress:0.##}%")" Variant="project" Completed="true" Featured="@item.Featured" SearchTerm="@State.Search" OnEdit="@(() => State.OpenProjectEditor(item))" />
+                            <ActivityCard @key="item.Id" Title="@item.Name" Description="@item.Description" Attribute="@item.Attribute" Meta="@($"{State.FormatProjectStatus(item.Status)} · {item.ProgressPercentage:0.##}%")" Variant="project" Completed="true" Featured="@item.Featured" SearchTerm="@State.Search" OnEdit="@(() => State.OpenProjectEditor(item))" />
                         }
                     </CompletedContent>
                 </DashboardColumn>

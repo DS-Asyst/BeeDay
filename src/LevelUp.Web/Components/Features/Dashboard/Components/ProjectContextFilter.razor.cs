@@ -1,4 +1,4 @@
-using LevelUp.Domain.Entities;
+using LevelUp.Application.Features.Dashboard.Responses;
 using Microsoft.AspNetCore.Components;
 
 namespace LevelUp.Web.Components.Features.Dashboard.Components;
@@ -7,7 +7,7 @@ public partial class ProjectContextFilter
 {
     private bool isOpen;
 
-    [Parameter] public IReadOnlyList<Project> Projects { get; set; } = [];
+    [Parameter] public IReadOnlyList<ProjectSummary> Projects { get; set; } = [];
     [Parameter] public Guid? SelectedProjectId { get; set; }
     [Parameter] public EventCallback<Guid?> SelectedProjectIdChanged { get; set; }
 

@@ -36,7 +36,7 @@
                 <option value="">Select a project</option>
                 @foreach (var project in Projects.Where(project => !project.Archived))
                 {
-                    <option value="@project.Id">@project.Title</option>
+                    <option value="@project.Id">@project.Name</option>
                 }
             </LevelUpSelect>
             <LevelUpDateInput TValue="DateTime?"

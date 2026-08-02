@@ -1,4 +1,3 @@
-using LevelUp.Application.Common.Contracts;
 using LevelUp.Application.Common.Security;
 using LevelUp.Application.Features.Habits.Commands;
 using LevelUp.Application.Features.Habits.Handlers;
@@ -11,7 +10,7 @@ namespace LevelUp.Application.Tests;
 
 /// <summary>
 /// Re-verifies, in the exact combined shape the Sprint 12.5 fallback-removal fix was meant to
-/// cover, that <see cref="CurrentUserGuard.RequireUserId"/> never falls back to
+/// cover, that <see cref="CurrentUserGuard.RequireUserId(LevelUpData, ICurrentUserContext)"/> never falls back to
 /// <see cref="LevelUpData.CurrentUserId"/> — a persisted document-bootstrapping field, not an
 /// authentication mechanism — when the authenticated context itself has no user. The scenario:
 /// <c>LevelUpData.CurrentUserId</c> points at a real, existing user AND
@@ -24,25 +23,25 @@ public sealed class CurrentUserGuardTests
     [Fact]
     public void RequireUserId_WithNullContextUserId_ThrowsEvenWhenDataCurrentUserIdPointsAtARealUser()
     {
-        var repository = new Repository();
-        var user = repository.AddUser("Real User", "real-user@levelup.test");
+        var repository = new FakeLevelUpRepository();
+        var user = AddUser(repository, "Real User", "real-user@levelup.test");
         repository.Data.SetCurrentUser(user.Id);
 
         Assert.Equal(user.Id, repository.Data.CurrentUserId);
 
         var exception = Assert.Throws<InvalidDomainStateException>(() =>
-            CurrentUserGuard.RequireUserId(repository.Data, new NullUserContext()));
+            CurrentUserGuard.RequireUserId(repository.Data, new FakeCurrentUserContext(null)));
         Assert.Equal("An authenticated User is required.", exception.Message);
     }
 
     [Fact]
     public async Task Handler_WithNullContextUserId_RejectsTheOperationEvenWhenDataCurrentUserIdPointsAtARealUser()
     {
-        var repository = new Repository();
-        var user = repository.AddUser("Real User", "real-user@levelup.test");
+        var repository = new FakeLevelUpRepository();
+        var user = AddUser(repository, "Real User", "real-user@levelup.test");
         repository.Data.SetCurrentUser(user.Id);
 
-        var handler = new CreateHabitCommandHandler(repository, new NullUserContext());
+        var handler = new CreateHabitCommandHandler(repository, new FakeCurrentUserContext(null));
         var command = new CreateHabitCommand(new SaveHabitRequest(
             "Should never be created", "", HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily));
 
@@ -52,29 +51,34 @@ public sealed class CurrentUserGuardTests
         Assert.Empty(repository.Data.Habits);
     }
 
-    private sealed class NullUserContext : ICurrentUserContext
+    /// <summary>
+    /// Covers the single-argument overload introduced in Sprint 13.4 for handlers migrated off
+    /// <c>LevelUpData</c> (docs/architecture/07-persistence-contracts.md). It only extracts the
+    /// claim — existence/ownership is deliberately not its job anymore; the next Aggregate repository
+    /// call in the handler is responsible for that (see the overload's XML doc).
+    /// </summary>
+    [Fact]
+    public void RequireUserId_SingleArgumentOverload_WithNullContextUserId_Throws()
     {
-        public Guid? UserId => null;
+        var exception = Assert.Throws<InvalidDomainStateException>(() =>
+            CurrentUserGuard.RequireUserId(new FakeCurrentUserContext(null)));
+        Assert.Equal("An authenticated User is required.", exception.Message);
     }
 
-    private sealed class Repository : ILevelUpRepository
+    [Fact]
+    public void RequireUserId_SingleArgumentOverload_ReturnsTheClaimedId_WithoutTouchingAnyRepository()
     {
-        public LevelUpData Data { get; } = new();
+        var claimedId = Guid.NewGuid();
 
-        public User AddUser(string name, string email)
-        {
-            var user = User.Create(name, email);
-            Data.AddUser(user);
-            return user;
-        }
+        var result = CurrentUserGuard.RequireUserId(new FakeCurrentUserContext(claimedId));
 
-        public Task<LevelUpData> LoadAsync(CancellationToken cancellationToken = default) => Task.FromResult(Data);
-        public Task SaveAsync(LevelUpData data, CancellationToken cancellationToken = default) => Task.CompletedTask;
+        Assert.Equal(claimedId, result);
+    }
 
-        public Task UpdateAsync(Action<LevelUpData> mutation, CancellationToken cancellationToken = default)
-        {
-            mutation(Data);
-            return Task.CompletedTask;
-        }
+    private static User AddUser(FakeLevelUpRepository repository, string name, string email)
+    {
+        var user = User.Create(name, email);
+        repository.Data.AddUser(user);
+        return user;
     }
 }

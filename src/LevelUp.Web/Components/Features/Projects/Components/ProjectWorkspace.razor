@@ -5,7 +5,7 @@
             <header class="project-workspace__header">
                 <div>
                     <span class="project-workspace__eyebrow">Project</span>
-                    <h2 id="project-workspace-title">@Project.Title</h2>
+                    <h2 id="project-workspace-title">@Project.Name</h2>
                     @if (!string.IsNullOrWhiteSpace(Project.Description))
                     {
                         <p>@Project.Description</p>
@@ -16,11 +16,11 @@
 
             <div class="project-workspace__summary">
                 <div><span>Status</span><strong>@StatusLabel</strong></div>
-                <div><span>Progress</span><strong>@Project.CompletedTodos / @Project.TotalTodos</strong></div>
+                <div><span>Progress</span><strong>@Project.Todos.Count(todo => todo.Completed) / @Project.Todos.Count</strong></div>
             </div>
 
-            <div class="project-workspace__progress" aria-label="@($"Project progress {Project.Progress:0}%")">
-                <span style="width:@($"{Project.Progress:0.##}%")"></span>
+            <div class="project-workspace__progress" aria-label="@($"Project progress {Project.ProgressPercentage:0}%")">
+                <span style="width:@($"{Project.ProgressPercentage:0.##}%")"></span>
             </div>
 
             <div class="project-workspace__toolbar">
