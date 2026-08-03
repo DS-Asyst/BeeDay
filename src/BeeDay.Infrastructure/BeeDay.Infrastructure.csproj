@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <ProjectReference Include="../LevelUp.Application/LevelUp.Application.csproj" />
+    <ProjectReference Include="../BeeDay.Application/BeeDay.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,8 +22,8 @@
          solution — only these test assemblies are declared friends. Web.Tests/E2E.Tests need
          LevelUpDbContext specifically (internal) to apply/tear down each test's disposable LocalDB
          database from LevelUpWebApplicationFactory/E2EWebApplicationFactory. -->
-    <InternalsVisibleTo Include="LevelUp.Infrastructure.Tests" />
-    <InternalsVisibleTo Include="LevelUp.Web.Tests" />
-    <InternalsVisibleTo Include="LevelUp.E2E.Tests" />
+    <InternalsVisibleTo Include="BeeDay.Infrastructure.Tests" />
+    <InternalsVisibleTo Include="BeeDay.Web.Tests" />
+    <InternalsVisibleTo Include="BeeDay.E2E.Tests" />
   </ItemGroup>
 </Project>

@@ -22,14 +22,14 @@ public sealed class DailyPageScrollArchitectureTests
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
 
-        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "LevelUp.slnx")))
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "BeeDay.slnx")))
         {
             directory = directory.Parent;
         }
 
         if (directory is null)
         {
-            throw new InvalidOperationException("Could not locate the repository root (LevelUp.slnx) from the test output directory.");
+            throw new InvalidOperationException("Could not locate the repository root (BeeDay.slnx) from the test output directory.");
         }
 
         return directory.FullName;
@@ -54,7 +54,7 @@ public sealed class DailyPageScrollArchitectureTests
     [Fact]
     public void ContentShellDoesNotPairNonVisibleOverflowXWithVisibleOverflowY()
     {
-        var css = ReadCss("src", "LevelUp.Web", "Components", "Layout", "MainLayout.razor.css");
+        var css = ReadCss("src", "BeeDay.Web", "Components", "Layout", "MainLayout.razor.css");
         var rule = ExtractRuleBody(css, ".levelup-content-shell");
 
         Assert.NotNull(rule);
@@ -67,7 +67,7 @@ public sealed class DailyPageScrollArchitectureTests
     [Fact]
     public void DashboardGridDoesNotPairOverflowXWithVisibleOverflowY()
     {
-        var css = ReadCss("src", "LevelUp.Web", "Components", "Features", "Dashboard", "Pages", "Home.razor.css");
+        var css = ReadCss("src", "BeeDay.Web", "Components", "Features", "Dashboard", "Pages", "Home.razor.css");
         var rule = ExtractRuleBody(css, ".dashboard-grid");
 
         Assert.NotNull(rule);
@@ -77,7 +77,7 @@ public sealed class DailyPageScrollArchitectureTests
     [Fact]
     public void MainLayoutDoesNotReintroduceViewportBasedMainHeight()
     {
-        var css = ReadCss("src", "LevelUp.Web", "Components", "Layout", "MainLayout.razor.css");
+        var css = ReadCss("src", "BeeDay.Web", "Components", "Layout", "MainLayout.razor.css");
         var rule = ExtractRuleBody(css, ".levelup-main");
 
         Assert.NotNull(rule);
@@ -90,7 +90,7 @@ public sealed class DailyPageScrollArchitectureTests
     [Fact]
     public void DashboardGridDoesNotReintroduceViewportBasedMaxHeight()
     {
-        var css = ReadCss("src", "LevelUp.Web", "Components", "Features", "Dashboard", "Pages", "Home.razor.css");
+        var css = ReadCss("src", "BeeDay.Web", "Components", "Features", "Dashboard", "Pages", "Home.razor.css");
         var rule = ExtractRuleBody(css, ".dashboard-grid");
 
         Assert.NotNull(rule);

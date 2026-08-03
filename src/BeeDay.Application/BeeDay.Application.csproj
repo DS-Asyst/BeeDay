@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <ProjectReference Include="../LevelUp.Domain/LevelUp.Domain.csproj" />
+    <ProjectReference Include="../BeeDay.Domain/BeeDay.Domain.csproj" />
   </ItemGroup>
 
 

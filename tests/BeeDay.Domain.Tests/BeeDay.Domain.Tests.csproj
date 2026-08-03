@@ -4,9 +4,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="Microsoft.Playwright" />
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>
@@ -15,6 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/LevelUp.Web/LevelUp.Web.csproj" />
+    <ProjectReference Include="../../src/BeeDay.Domain/BeeDay.Domain.csproj" />
   </ItemGroup>
 </Project>

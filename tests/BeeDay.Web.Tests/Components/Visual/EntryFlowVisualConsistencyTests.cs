@@ -9,7 +9,7 @@ public sealed class EntryFlowVisualConsistencyTests
     {
         var root = FindRepositoryRoot();
         var pagePaths = Directory.GetFiles(
-            Path.Combine(root, "src", "LevelUp.Web", "Components", "Features"),
+            Path.Combine(root, "src", "BeeDay.Web", "Components", "Features"),
             "*.razor",
             SearchOption.AllDirectories)
             .Where(path => path.Contains($"{Path.DirectorySeparatorChar}Authentication{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
@@ -53,7 +53,7 @@ public sealed class EntryFlowVisualConsistencyTests
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            if (File.Exists(Path.Combine(directory.FullName, "LevelUp.slnx")))
+            if (File.Exists(Path.Combine(directory.FullName, "BeeDay.slnx")))
             {
                 return directory.FullName;
             }
@@ -61,6 +61,6 @@ public sealed class EntryFlowVisualConsistencyTests
             directory = directory.Parent;
         }
 
-        throw new DirectoryNotFoundException("Could not locate the LevelUp repository root.");
+        throw new DirectoryNotFoundException("Could not locate the BeeDay repository root.");
     }
 }

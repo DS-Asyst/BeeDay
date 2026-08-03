@@ -439,19 +439,19 @@ internal static class IconFileLocator
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
 
-        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "LevelUp.slnx")))
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "BeeDay.slnx")))
         {
             directory = directory.Parent;
         }
 
         if (directory is null)
         {
-            throw new InvalidOperationException("Could not locate the repository root (LevelUp.slnx) from the test output directory.");
+            throw new InvalidOperationException("Could not locate the repository root (BeeDay.slnx) from the test output directory.");
         }
 
         return directory.FullName;
     }
 
     public static string ResolveWwwroot() =>
-        Path.Combine(ResolveRepoRoot(), "src", "LevelUp.Web", "wwwroot");
+        Path.Combine(ResolveRepoRoot(), "src", "BeeDay.Web", "wwwroot");
 }

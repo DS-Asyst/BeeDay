@@ -1,22 +1,22 @@
 <Solution>
   <Folder Name="/src/">
     <Folder Name="/src/Core/">
-      <Project Path="src/LevelUp.Domain/LevelUp.Domain.csproj" />
-      <Project Path="src/LevelUp.Application/LevelUp.Application.csproj" />
+      <Project Path="src/BeeDay.Domain/BeeDay.Domain.csproj" />
+      <Project Path="src/BeeDay.Application/BeeDay.Application.csproj" />
     </Folder>
     <Folder Name="/src/Infrastructure/">
-      <Project Path="src/LevelUp.Infrastructure/LevelUp.Infrastructure.csproj" />
+      <Project Path="src/BeeDay.Infrastructure/BeeDay.Infrastructure.csproj" />
     </Folder>
     <Folder Name="/src/Presentation/">
-      <Project Path="src/LevelUp.Web/LevelUp.Web.csproj" />
+      <Project Path="src/BeeDay.Web/BeeDay.Web.csproj" />
     </Folder>
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/LevelUp.Domain.Tests/LevelUp.Domain.Tests.csproj" />
-    <Project Path="tests/LevelUp.Application.Tests/LevelUp.Application.Tests.csproj" />
-    <Project Path="tests/LevelUp.Infrastructure.Tests/LevelUp.Infrastructure.Tests.csproj" />
-    <Project Path="tests/LevelUp.Web.Tests/LevelUp.Web.Tests.csproj" />
-    <Project Path="tests/LevelUp.E2E.Tests/LevelUp.E2E.Tests.csproj" />
+    <Project Path="tests/BeeDay.Domain.Tests/BeeDay.Domain.Tests.csproj" />
+    <Project Path="tests/BeeDay.Application.Tests/BeeDay.Application.Tests.csproj" />
+    <Project Path="tests/BeeDay.Infrastructure.Tests/BeeDay.Infrastructure.Tests.csproj" />
+    <Project Path="tests/BeeDay.Web.Tests/BeeDay.Web.Tests.csproj" />
+    <Project Path="tests/BeeDay.E2E.Tests/BeeDay.E2E.Tests.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />

@@ -21,14 +21,14 @@ public sealed class PixelNesAdapterIsolationTests
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
 
-        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "LevelUp.slnx")))
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "BeeDay.slnx")))
         {
             directory = directory.Parent;
         }
 
         if (directory is null)
         {
-            throw new InvalidOperationException("Could not locate the repository root (LevelUp.slnx) from the test output directory.");
+            throw new InvalidOperationException("Could not locate the repository root (BeeDay.slnx) from the test output directory.");
         }
 
         return directory.FullName;
@@ -51,7 +51,7 @@ public sealed class PixelNesAdapterIsolationTests
 
     private static IEnumerable<string> EnumerateFeatureAndPageFiles()
     {
-        var componentsRoot = Path.Combine(ResolveRepoRoot(), "src", "LevelUp.Web", "Components");
+        var componentsRoot = Path.Combine(ResolveRepoRoot(), "src", "BeeDay.Web", "Components");
 
         foreach (var extension in new[] { "*.razor", "*.razor.cs", "*.razor.css" })
         {
@@ -84,7 +84,7 @@ public sealed class PixelNesAdapterIsolationTests
     [Fact]
     public void ProvenanceExcerptIsNeverLinkedFromAppRazor()
     {
-        var appRazor = ReadRepoFile("src", "LevelUp.Web", "Components", "App.razor");
+        var appRazor = ReadRepoFile("src", "BeeDay.Web", "Components", "App.razor");
 
         Assert.DoesNotContain("nes-core.levelup-excerpt.css", appRazor, StringComparison.Ordinal);
         Assert.Contains("css/pixel-nes.css", appRazor, StringComparison.Ordinal);
@@ -93,7 +93,7 @@ public sealed class PixelNesAdapterIsolationTests
     [Fact]
     public void ShippedAdapterContainsNoNesDashClassSelector()
     {
-        var css = ReadRepoFile("src", "LevelUp.Web", "wwwroot", "css", "pixel-nes.css");
+        var css = ReadRepoFile("src", "BeeDay.Web", "wwwroot", "css", "pixel-nes.css");
         var selectorsOnly = StripCommentsAndUrls(css);
 
         Assert.DoesNotContain("nes-", selectorsOnly, StringComparison.Ordinal);
@@ -102,7 +102,7 @@ public sealed class PixelNesAdapterIsolationTests
     [Fact]
     public void ShippedAdapterDefinesNoUnsafeGlobalSelector()
     {
-        var css = ReadRepoFile("src", "LevelUp.Web", "wwwroot", "css", "pixel-nes.css");
+        var css = ReadRepoFile("src", "BeeDay.Web", "wwwroot", "css", "pixel-nes.css");
         var selectorsOnly = StripCommentsAndUrls(css);
 
         foreach (var bareSelector in ForbiddenBareSelectors)
@@ -117,7 +117,7 @@ public sealed class PixelNesAdapterIsolationTests
     [Fact]
     public void PixelPanelClassAppearsOnlyInApprovedConsumer()
     {
-        var componentsRoot = Path.Combine(ResolveRepoRoot(), "src", "LevelUp.Web", "Components");
+        var componentsRoot = Path.Combine(ResolveRepoRoot(), "src", "BeeDay.Web", "Components");
         var consumers = Directory.EnumerateFiles(componentsRoot, "*.razor", SearchOption.AllDirectories)
             .Where(file => File.ReadAllText(file).Contains("levelup-pixel-panel", StringComparison.Ordinal))
             .Select(file => Path.GetFileName(file))
@@ -129,7 +129,7 @@ public sealed class PixelNesAdapterIsolationTests
     [Fact]
     public void PixelCtaClassAppearsOnlyInApprovedConsumer()
     {
-        var componentsRoot = Path.Combine(ResolveRepoRoot(), "src", "LevelUp.Web", "Components");
+        var componentsRoot = Path.Combine(ResolveRepoRoot(), "src", "BeeDay.Web", "Components");
         var consumers = Directory.EnumerateFiles(componentsRoot, "*.razor", SearchOption.AllDirectories)
             .Where(file => File.ReadAllText(file).Contains("levelup-pixel-cta", StringComparison.Ordinal))
             .Select(file => Path.GetFileName(file))

@@ -52,8 +52,8 @@ logs/
 # Application Data and Local Backups
 #####################################################
 
-src/LevelUp.Web/Data/*
-!src/LevelUp.Web/Data/.gitkeep
+src/BeeDay.Web/Data/*
+!src/BeeDay.Web/Data/.gitkeep
 **/Backups/
 **/*.local.json
 **/LevelUpBD.json
@@ -68,7 +68,7 @@ coverage-report/
 *.trx
 *.coverage
 *.coveragexml
-src/LevelUp.Web/App_Data/test-email-capture/
+src/BeeDay.Web/App_Data/test-email-capture/
 
 #####################################################
 # NuGet

@@ -13,6 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/LevelUp.Domain/LevelUp.Domain.csproj" />
+    <ProjectReference Include="../../src/BeeDay.Infrastructure/BeeDay.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

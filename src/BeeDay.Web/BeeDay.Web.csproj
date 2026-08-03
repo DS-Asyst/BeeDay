@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <UserSecretsId>LevelUp-Web-Identity</UserSecretsId>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <RootNamespace>LevelUp.Web</RootNamespace>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="../BeeDay.Application/BeeDay.Application.csproj" />
+    <ProjectReference Include="../BeeDay.Domain/BeeDay.Domain.csproj" />
+    <ProjectReference Include="../BeeDay.Infrastructure/BeeDay.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>
