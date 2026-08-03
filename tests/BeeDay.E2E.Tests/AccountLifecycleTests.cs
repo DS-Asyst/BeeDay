@@ -18,7 +18,7 @@ public sealed class AccountLifecycleTests(PlaywrightAppFixture fixture) : E2ETes
     [Fact]
     public async Task CreateAccount_ReachesEmailConfirmationPending()
     {
-        var email = $"e2e-create-{Guid.NewGuid():N}@levelup.invalid";
+        var email = $"e2e-create-{Guid.NewGuid():N}@beeday.invalid";
 
         await GotoAsync("/login");
         await Page.GetByRole(AriaRole.Link, new() { Name = "Create account" }).ClickAsync();
@@ -41,7 +41,7 @@ public sealed class AccountLifecycleTests(PlaywrightAppFixture fixture) : E2ETes
     [Fact]
     public async Task Login_CompletesOnboarding_ReachesDashboard()
     {
-        var email = $"e2e-login-{Guid.NewGuid():N}@levelup.invalid";
+        var email = $"e2e-login-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: false);
 
         await LoginAsync(email);
@@ -75,7 +75,7 @@ public sealed class AccountLifecycleTests(PlaywrightAppFixture fixture) : E2ETes
     [Fact]
     public async Task Logout_EndsSessionAndBlocksDashboard()
     {
-        var email = $"e2e-logout-{Guid.NewGuid():N}@levelup.invalid";
+        var email = $"e2e-logout-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
         await LoginAsync(email);
         await Expect(Page).ToHaveURLAsync(new Regex("/daily$"));
@@ -98,7 +98,7 @@ public sealed class AccountLifecycleTests(PlaywrightAppFixture fixture) : E2ETes
     [Fact]
     public async Task EditProfile_UpdatesName()
     {
-        var email = $"e2e-profile-{Guid.NewGuid():N}@levelup.invalid";
+        var email = $"e2e-profile-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
         await LoginAsync(email);
         await Expect(Page).ToHaveURLAsync(new Regex("/daily$"));

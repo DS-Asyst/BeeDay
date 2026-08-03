@@ -15,7 +15,7 @@ public sealed class WalletTests(PlaywrightAppFixture fixture) : E2ETestBase(fixt
     [Fact]
     public async Task CreateTagAndTransaction_UpdatesBalance()
     {
-        var email = $"e2e-wallet-{Guid.NewGuid():N}@levelup.invalid";
+        var email = $"e2e-wallet-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
 
         await GotoAsync("/login");

@@ -62,22 +62,22 @@ public sealed class UserAccountHandlersTests
         var handler = new UpdateCurrentUserAccountCommandHandler(repository.Users, context);
 
         await handler.Handle(
-            new UpdateCurrentUserAccountCommand(new UpdateUserAccountRequest("Tiago Arrigoni", "tiago@levelup.invalid")),
+            new UpdateCurrentUserAccountCommand(new UpdateUserAccountRequest("Tiago Arrigoni", "tiago@beeday.invalid")),
             TestContext.Current.CancellationToken);
 
         Assert.Equal("Tiago Arrigoni", user.Name);
-        Assert.Equal("tiago@levelup.invalid", user.Email);
+        Assert.Equal("tiago@beeday.invalid", user.Email);
     }
 
     [Fact]
     public async Task UpdateProfile_RejectsEmailAlreadyUsedByAnotherUser()
     {
         var repository = CreateRepository("hash:Current123", out var context, out _);
-        repository.UsersData.Add(User.Create("Other User", "other@levelup.invalid"));
+        repository.UsersData.Add(User.Create("Other User", "other@beeday.invalid"));
         var handler = new UpdateCurrentUserAccountCommandHandler(repository.Users, context);
 
         await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
-            new UpdateCurrentUserAccountCommand(new UpdateUserAccountRequest("Tiago", "other@levelup.invalid")),
+            new UpdateCurrentUserAccountCommand(new UpdateUserAccountRequest("Tiago", "other@beeday.invalid")),
             TestContext.Current.CancellationToken));
     }
 
@@ -127,7 +127,7 @@ public sealed class UserAccountHandlersTests
     private static FakeUnitOfWork CreateRepository(string passwordHash, out FakeCurrentUserContext context, out User user)
     {
         var repository = new FakeUnitOfWork();
-        user = User.Create("Test User", "test@levelup.invalid", passwordHash);
+        user = User.Create("Test User", "test@beeday.invalid", passwordHash);
         repository.UsersData.Add(user);
         context = new FakeCurrentUserContext(user.Id);
         return repository;

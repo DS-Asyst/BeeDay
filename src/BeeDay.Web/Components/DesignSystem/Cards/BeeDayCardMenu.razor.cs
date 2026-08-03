@@ -120,7 +120,7 @@ public partial class BeeDayCardMenu : IAsyncDisposable
     public Task NotifyOutsideClickAsync() => CloseMenu();
 
     private async Task<IJSObjectReference> EnsureModuleAsync() =>
-        module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/levelup-card-menu.js?v=20260729-1");
+        module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/beeday-card-menu.js?v=20260729-1");
 
     private async Task MeasureAndApplyPlacementAsync()
     {

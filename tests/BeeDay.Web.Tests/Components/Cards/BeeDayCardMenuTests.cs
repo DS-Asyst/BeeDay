@@ -54,7 +54,7 @@ public sealed class BeeDayCardMenuTests
         Assert.Single(cut.FindAll("[role='menu']"));
 
         // Simulates the real document-level pointerdown listener (registered
-        // via levelup-card-menu.js) invoking back into .NET when a click
+        // via beeday-card-menu.js) invoking back into .NET when a click
         // lands outside the menu's root element.
         await cut.InvokeAsync(() => cut.Instance.NotifyOutsideClickAsync());
         cut.Render();
@@ -145,7 +145,7 @@ public sealed class BeeDayCardMenuTests
     public void PlacesPanelBelowByDefaultWhenViewportSpaceIsSufficient()
     {
         using var context = CreateContext();
-        context.JSInterop.SetupModule("./js/levelup-card-menu.js?v=20260729-1")
+        context.JSInterop.SetupModule("./js/beeday-card-menu.js?v=20260729-1")
             .Setup<CardMenuGeometry>("measureGeometry", _ => true)
             .SetResult(new CardMenuGeometry(
                 TriggerTop: 100, TriggerBottom: 120, TriggerLeft: 50, TriggerRight: 100,
@@ -166,7 +166,7 @@ public sealed class BeeDayCardMenuTests
     public void FlipsPanelAboveWhenViewportSpaceBelowIsInsufficient()
     {
         using var context = CreateContext();
-        context.JSInterop.SetupModule("./js/levelup-card-menu.js?v=20260729-1")
+        context.JSInterop.SetupModule("./js/beeday-card-menu.js?v=20260729-1")
             .Setup<CardMenuGeometry>("measureGeometry", _ => true)
             .SetResult(new CardMenuGeometry(
                 TriggerTop: 750, TriggerBottom: 770, TriggerLeft: 50, TriggerRight: 100,

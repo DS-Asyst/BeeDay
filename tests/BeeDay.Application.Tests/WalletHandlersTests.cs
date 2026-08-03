@@ -47,7 +47,7 @@ public sealed class WalletHandlersTests
     {
         var repo = new FakeUnitOfWork();
         var current = CreateCurrentUser(repo);
-        var other = User.Create("Other", "other@levelup.invalid");
+        var other = User.Create("Other", "other@beeday.invalid");
         repo.UsersData.Add(other);
         var tag = WalletTag.Create(other.Id, "Private");
         repo.WalletTagsData.Add(tag);
@@ -119,7 +119,7 @@ public sealed class WalletHandlersTests
 
     private static User CreateCurrentUser(FakeUnitOfWork repo)
     {
-        var user = User.Create("Test User", $"{Guid.NewGuid():N}@levelup.invalid");
+        var user = User.Create("Test User", $"{Guid.NewGuid():N}@beeday.invalid");
         repo.UsersData.Add(user);
         return user;
     }

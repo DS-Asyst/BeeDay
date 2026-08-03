@@ -14,13 +14,13 @@ public sealed class AuthenticationHandlersTests
     {
         var passwordService = new FakePasswordService();
         var unitOfWork = new FakeUnitOfWork();
-        var user = User.Create("Tiago", "tiago@levelup.invalid", passwordService.Hash("Password123"));
+        var user = User.Create("Tiago", "tiago@beeday.invalid", passwordService.Hash("Password123"));
         user.ConfirmEmail(user.CreatedAtUtc);
         unitOfWork.UsersData.Add(user);
         var handler = new AuthenticateUserCommandHandler(unitOfWork.Users, passwordService);
 
         var result = await handler.Handle(
-            new AuthenticateUserCommand(new AuthenticateUserRequest("TIAGO@levelup.invalid", "Password123")),
+            new AuthenticateUserCommand(new AuthenticateUserRequest("TIAGO@beeday.invalid", "Password123")),
             TestContext.Current.CancellationToken);
 
         Assert.Equal(user.Id, result.Id);
@@ -32,11 +32,11 @@ public sealed class AuthenticationHandlersTests
     {
         var passwordService = new FakePasswordService();
         var unitOfWork = new FakeUnitOfWork();
-        unitOfWork.UsersData.Add(User.Create("Tiago", "tiago@levelup.invalid", passwordService.Hash("Password123")));
+        unitOfWork.UsersData.Add(User.Create("Tiago", "tiago@beeday.invalid", passwordService.Hash("Password123")));
         var handler = new AuthenticateUserCommandHandler(unitOfWork.Users, passwordService);
 
         var exception = await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
-            new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@levelup.invalid", "WrongPassword")),
+            new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@beeday.invalid", "WrongPassword")),
             TestContext.Current.CancellationToken));
 
         Assert.Equal("Invalid email or password.", exception.Message);
@@ -47,13 +47,13 @@ public sealed class AuthenticationHandlersTests
     {
         var passwordService = new FakePasswordService();
         var unitOfWork = new FakeUnitOfWork();
-        var user = User.Create("Tiago", "tiago@levelup.invalid", passwordService.Hash("Password123"));
+        var user = User.Create("Tiago", "tiago@beeday.invalid", passwordService.Hash("Password123"));
         user.SetActive(false);
         unitOfWork.UsersData.Add(user);
         var handler = new AuthenticateUserCommandHandler(unitOfWork.Users, passwordService);
 
         await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
-            new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@levelup.invalid", "Password123")),
+            new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@beeday.invalid", "Password123")),
             TestContext.Current.CancellationToken));
     }
 
@@ -62,11 +62,11 @@ public sealed class AuthenticationHandlersTests
     {
         var passwordService = new FakePasswordService();
         var unitOfWork = new FakeUnitOfWork();
-        unitOfWork.UsersData.Add(User.Create("Tiago", "tiago@levelup.invalid", passwordService.Hash("Password123")));
+        unitOfWork.UsersData.Add(User.Create("Tiago", "tiago@beeday.invalid", passwordService.Hash("Password123")));
         var handler = new AuthenticateUserCommandHandler(unitOfWork.Users, passwordService);
 
         var exception = await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
-            new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@levelup.invalid", "Password123")),
+            new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@beeday.invalid", "Password123")),
             TestContext.Current.CancellationToken));
 
         Assert.Equal("Invalid email or password.", exception.Message);
@@ -77,14 +77,14 @@ public sealed class AuthenticationHandlersTests
     {
         var passwordService = new FakePasswordService();
         var unitOfWork = new FakeUnitOfWork();
-        var user = User.Create("Tiago", "tiago@levelup.invalid", passwordService.Hash("Password123"));
+        var user = User.Create("Tiago", "tiago@beeday.invalid", passwordService.Hash("Password123"));
         user.ConfirmEmail(user.CreatedAtUtc);
         user.InvalidateSessions();
         unitOfWork.UsersData.Add(user);
         var handler = new AuthenticateUserCommandHandler(unitOfWork.Users, passwordService);
 
         var result = await handler.Handle(
-            new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@levelup.invalid", "Password123")),
+            new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@beeday.invalid", "Password123")),
             TestContext.Current.CancellationToken);
 
         Assert.Equal(user.SessionVersion, result.SessionVersion);
@@ -96,7 +96,7 @@ public sealed class AuthenticationHandlersTests
         var passwordService = new FakePasswordService();
         var unitOfWork = new FakeUnitOfWork();
         var originalHash = passwordService.Hash("Password123");
-        var user = User.Create("Tiago", "tiago@levelup.invalid", originalHash);
+        var user = User.Create("Tiago", "tiago@beeday.invalid", originalHash);
         user.ConfirmEmail(user.CreatedAtUtc);
         var sessionVersionBeforeLogin = user.SessionVersion;
         unitOfWork.UsersData.Add(user);
@@ -104,7 +104,7 @@ public sealed class AuthenticationHandlersTests
         var handler = new AuthenticateUserCommandHandler(unitOfWork.Users, passwordService);
 
         await handler.Handle(
-            new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@levelup.invalid", "Password123")),
+            new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@beeday.invalid", "Password123")),
             TestContext.Current.CancellationToken);
 
         var stored = unitOfWork.UsersData.Single(candidate => candidate.Id == user.Id);
@@ -119,13 +119,13 @@ public sealed class AuthenticationHandlersTests
         var passwordService = new FakePasswordService();
         var unitOfWork = new FakeUnitOfWork();
         var originalHash = passwordService.Hash("Password123");
-        var user = User.Create("Tiago", "tiago@levelup.invalid", originalHash);
+        var user = User.Create("Tiago", "tiago@beeday.invalid", originalHash);
         user.ConfirmEmail(user.CreatedAtUtc);
         unitOfWork.UsersData.Add(user);
         var handler = new AuthenticateUserCommandHandler(unitOfWork.Users, passwordService);
 
         await handler.Handle(
-            new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@levelup.invalid", "Password123")),
+            new AuthenticateUserCommand(new AuthenticateUserRequest("tiago@beeday.invalid", "Password123")),
             TestContext.Current.CancellationToken);
 
         var stored = unitOfWork.UsersData.Single(candidate => candidate.Id == user.Id);

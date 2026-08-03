@@ -27,8 +27,8 @@ public class EmailCaptureWebApplicationFactory : BeeDayWebApplicationFactory
     {
         AdditionalConfiguration = new Dictionary<string, string?>
         {
-            ["LevelUp:Email:Development:Enabled"] = "true",
-            ["LevelUp:Email:Development:Directory"] = emailDirectoryRelativePath
+            ["BeeDay:Email:Development:Enabled"] = "true",
+            ["BeeDay:Email:Development:Directory"] = emailDirectoryRelativePath
         };
     }
 

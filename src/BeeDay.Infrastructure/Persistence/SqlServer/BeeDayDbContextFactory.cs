@@ -11,7 +11,7 @@ namespace BeeDay.Infrastructure.Persistence.SqlServer;
 internal sealed class BeeDayDbContextFactory : IDesignTimeDbContextFactory<BeeDayDbContext>
 {
     private const string FallbackConnectionString =
-        "Server=(localdb)\\mssqllocaldb;Database=LevelUpDev;Trusted_Connection=True;TrustServerCertificate=True;";
+        "Server=(localdb)\\mssqllocaldb;Database=BeeDayDev;Trusted_Connection=True;TrustServerCertificate=True;";
 
     public BeeDayDbContext CreateDbContext(string[] args)
     {

@@ -32,19 +32,19 @@ var productionHosting = builder.Configuration
 
 if (!builder.Environment.IsDevelopment())
 {
-    var publicBaseUrl = builder.Configuration["LevelUp:IdentityEmail:PublicBaseUrl"];
+    var publicBaseUrl = builder.Configuration["BeeDay:IdentityEmail:PublicBaseUrl"];
     if (!Uri.TryCreate(publicBaseUrl, UriKind.Absolute, out var publicUri)
         || publicUri.Scheme != Uri.UriSchemeHttps)
     {
         throw new InvalidOperationException(
-            "LevelUp:IdentityEmail:PublicBaseUrl must be an absolute HTTPS URL in production.");
+            "BeeDay:IdentityEmail:PublicBaseUrl must be an absolute HTTPS URL in production.");
     }
 
     if (string.IsNullOrWhiteSpace(productionHosting.DataProtectionKeysDirectory)
         || !Path.IsPathRooted(productionHosting.DataProtectionKeysDirectory))
     {
         throw new InvalidOperationException(
-            "LevelUp:Hosting:DataProtectionKeysDirectory must be an absolute path in production.");
+            "BeeDay:Hosting:DataProtectionKeysDirectory must be an absolute path in production.");
     }
 
     var allowedHosts = builder.Configuration["AllowedHosts"];
@@ -58,7 +58,7 @@ if (!builder.Environment.IsDevelopment())
 
     var dataProtection = builder.Services
         .AddDataProtection()
-        .SetApplicationName("LevelUp")
+        .SetApplicationName("BeeDay")
         .PersistKeysToFileSystem(new DirectoryInfo(keysDirectory));
 
     if (OperatingSystem.IsWindows())
@@ -127,7 +127,7 @@ builder.Services
     {
         options.LoginPath = "/login";
         options.AccessDeniedPath = "/login";
-        options.Cookie.Name = "LevelUp.Auth";
+        options.Cookie.Name = "BeeDay.Auth";
         options.Cookie.HttpOnly = true;
         options.Cookie.SameSite = SameSiteMode.Lax;
         options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
@@ -281,7 +281,7 @@ app.MapPost("/auth/login", async (
             principal,
             authenticationProperties);
 
-        loggerFactory.CreateLogger("LevelUp.Authentication").LogInformation(
+        loggerFactory.CreateLogger("BeeDay.Authentication").LogInformation(
             "Authentication.LoginSucceeded UserId={UserId} RememberMe={RememberMe}", user.Id, rememberMe == true);
 
         var destination = LoginDestinationResolver.Resolve(
@@ -293,7 +293,7 @@ app.MapPost("/auth/login", async (
     }
     catch (InvalidDomainStateException)
     {
-        loggerFactory.CreateLogger("LevelUp.Authentication").LogWarning(
+        loggerFactory.CreateLogger("BeeDay.Authentication").LogWarning(
             "Authentication.LoginFailed TraceId={TraceId} Reason={Reason}",
             httpContext.TraceIdentifier,
             "InvalidCredentials");
@@ -305,7 +305,7 @@ app.MapPost("/auth/login", async (
     if (!lease.IsAcquired)
     {
         context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>()
-            .CreateLogger("LevelUp.Authentication")
+            .CreateLogger("BeeDay.Authentication")
             .LogWarning("Authentication.LoginRateLimited TraceId={TraceId}", context.HttpContext.TraceIdentifier);
 
         // Same generic wording regardless of whether the email belongs to a real account.
@@ -319,7 +319,7 @@ app.MapPost("/auth/logout", async (HttpContext httpContext, [FromForm] string? r
 {
     var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
     await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-    loggerFactory.CreateLogger("LevelUp.Authentication").LogInformation(
+    loggerFactory.CreateLogger("BeeDay.Authentication").LogInformation(
         "Authentication.LogoutSucceeded UserId={UserId} TraceId={TraceId}",
         userId,
         httpContext.TraceIdentifier);

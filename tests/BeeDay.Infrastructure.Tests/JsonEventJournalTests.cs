@@ -109,7 +109,7 @@ public sealed class JsonEventJournalTests : IDisposable
 
     private async Task<string[]> ReadJournalLinesAsync()
     {
-        string path = Path.Combine(_root, "Data", "LevelUpEvents.ndjson");
+        string path = Path.Combine(_root, "Data", "BeeDayEvents.ndjson");
         return await File.ReadAllLinesAsync(path, TestContext.Current.CancellationToken);
     }
 

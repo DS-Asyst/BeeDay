@@ -202,5 +202,5 @@ public sealed class ExperienceDomainTests
     }
 
     private static User CreateUser() =>
-        User.Create("Hero", "hero@levelup.invalid");
+        User.Create("Hero", "hero@beeday.invalid");
 }

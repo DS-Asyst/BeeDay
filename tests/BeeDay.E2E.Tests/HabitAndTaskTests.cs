@@ -69,7 +69,7 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
 
     private async Task LoginToDailyAsync()
     {
-        var email = $"e2e-activity-{Guid.NewGuid():N}@levelup.invalid";
+        var email = $"e2e-activity-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
 
         await GotoAsync("/login");

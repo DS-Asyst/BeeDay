@@ -10,7 +10,7 @@ public sealed class UserProfileRulesTests
     [Fact]
     public void User_UpdateAvatar_PreservesImmutableNickname()
     {
-        var user = User.Create("Tiago", "tiago@levelup.invalid");
+        var user = User.Create("Tiago", "tiago@beeday.invalid");
         user.CompleteProfile("tiago", "old-avatar");
 
         user.UpdateAvatar("new-avatar");
@@ -36,7 +36,7 @@ public sealed class UserProfileRulesTests
     [Fact]
     public void CompleteUserProfile_RejectsCompletingProfileTwice()
     {
-        var user = User.Create("Tiago", "tiago@levelup.invalid");
+        var user = User.Create("Tiago", "tiago@beeday.invalid");
         user.CompleteProfile("tiago", null);
 
         Assert.Throws<InvalidDomainStateException>(() => user.CompleteProfile("othernick", null));
@@ -45,18 +45,18 @@ public sealed class UserProfileRulesTests
     [Fact]
     public void User_UpdateAccount_ChangesProfileData()
     {
-        var user = User.Create("Old Name", "old@levelup.invalid");
+        var user = User.Create("Old Name", "old@beeday.invalid");
 
-        user.UpdateAccount("New Name", "new@levelup.invalid");
+        user.UpdateAccount("New Name", "new@beeday.invalid");
 
         Assert.Equal("New Name", user.Name);
-        Assert.Equal("new@levelup.invalid", user.Email);
+        Assert.Equal("new@beeday.invalid", user.Email);
     }
 
     [Fact]
     public void User_UpdatePreferences_ChangesLanguageAndTheme()
     {
-        var user = User.Create("Tiago", "tiago@levelup.invalid");
+        var user = User.Create("Tiago", "tiago@beeday.invalid");
 
         user.UpdatePreferences(UserLanguage.Portuguese, UserTheme.Dark);
 
@@ -67,7 +67,7 @@ public sealed class UserProfileRulesTests
     [Fact]
     public void CompleteOnboarding_IsPersistedOnUser()
     {
-        var user = User.Create("Test User", "test@levelup.invalid");
+        var user = User.Create("Test User", "test@beeday.invalid");
 
         user.CompleteOnboarding();
 
@@ -77,7 +77,7 @@ public sealed class UserProfileRulesTests
     [Fact]
     public void Profile_ReflectsUnderlyingUserPresentationData()
     {
-        var user = User.Create("Tiago", "tiago@levelup.invalid");
+        var user = User.Create("Tiago", "tiago@beeday.invalid");
         user.CompleteProfile("tiago", "avatar-key");
         user.UpdatePreferences(UserLanguage.Portuguese, UserTheme.Dark);
 
@@ -95,7 +95,7 @@ public sealed class UserProfileRulesTests
     [Fact]
     public void Profile_IsIncomplete_BeforeProfileCreation()
     {
-        var user = User.Create("Tiago", "tiago@levelup.invalid");
+        var user = User.Create("Tiago", "tiago@beeday.invalid");
 
         Assert.False(user.Profile.IsComplete);
     }

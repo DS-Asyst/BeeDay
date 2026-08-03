@@ -5,7 +5,7 @@ using Microsoft.Net.Http.Headers;
 namespace BeeDay.Web.Tests.Integration;
 
 /// <summary>
-/// Validates the actual attributes of the "LevelUp.Auth" cookie as emitted by the real
+/// Validates the actual attributes of the "BeeDay.Auth" cookie as emitted by the real
 /// /auth/login endpoint — not just what Program.cs is expected to configure.
 /// </summary>
 public sealed class CookieIntegrationTests(BeeDayWebApplicationFactory factory)
@@ -15,9 +15,9 @@ public sealed class CookieIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task AuthCookie_HasExpectedNameHttpOnlyAndSameSite()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        var cookie = await LoginAndGetAuthCookieAsync("cookie-attrs@levelup.invalid", rememberMe: false, cancellationToken);
+        var cookie = await LoginAndGetAuthCookieAsync("cookie-attrs@beeday.invalid", rememberMe: false, cancellationToken);
 
-        Assert.Equal("LevelUp.Auth", cookie.Name.ToString());
+        Assert.Equal("BeeDay.Auth", cookie.Name.ToString());
         Assert.True(cookie.HttpOnly);
         Assert.Equal(SameSiteMode.Lax, cookie.SameSite);
     }
@@ -26,7 +26,7 @@ public sealed class CookieIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task AuthCookie_PathIsRoot()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        var cookie = await LoginAndGetAuthCookieAsync("cookie-path@levelup.invalid", rememberMe: false, cancellationToken);
+        var cookie = await LoginAndGetAuthCookieAsync("cookie-path@beeday.invalid", rememberMe: false, cancellationToken);
 
         Assert.Equal("/", cookie.Path.ToString());
     }
@@ -35,7 +35,7 @@ public sealed class CookieIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task AuthCookie_WithoutRememberMe_IsASessionCookie()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        var cookie = await LoginAndGetAuthCookieAsync("cookie-no-remember@levelup.invalid", rememberMe: false, cancellationToken);
+        var cookie = await LoginAndGetAuthCookieAsync("cookie-no-remember@beeday.invalid", rememberMe: false, cancellationToken);
 
         // A session cookie carries no Expires/Max-Age attribute at all — the browser discards it
         // when it closes, even though the encrypted ticket inside still has a server-checked
@@ -48,7 +48,7 @@ public sealed class CookieIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task AuthCookie_WithRememberMe_PersistsForFourteenDays()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        var cookie = await LoginAndGetAuthCookieAsync("cookie-remember-me@levelup.invalid", rememberMe: true, cancellationToken);
+        var cookie = await LoginAndGetAuthCookieAsync("cookie-remember-me@beeday.invalid", rememberMe: true, cancellationToken);
 
         Assert.NotNull(cookie.Expires);
         var daysFromNow = (cookie.Expires!.Value - DateTimeOffset.UtcNow).TotalDays;
@@ -64,7 +64,7 @@ public sealed class CookieIntegrationTests(BeeDayWebApplicationFactory factory)
         // whatever scheme the request used. This test exists to document that Secure is
         // request-driven in Development, not hardcoded off; see the Production test below for
         // the contrasting Always policy.
-        var cookie = await LoginAndGetAuthCookieAsync("cookie-dev-secure@levelup.invalid", rememberMe: false, cancellationToken);
+        var cookie = await LoginAndGetAuthCookieAsync("cookie-dev-secure@beeday.invalid", rememberMe: false, cancellationToken);
 
         Assert.NotNull(cookie);
     }
@@ -74,7 +74,7 @@ public sealed class CookieIntegrationTests(BeeDayWebApplicationFactory factory)
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var productionFactory = new ProductionLikeWebApplicationFactory();
-        await productionFactory.SeedConfirmedUserAsync("cookie-prod-secure@levelup.invalid", "Password123!");
+        await productionFactory.SeedConfirmedUserAsync("cookie-prod-secure@beeday.invalid", "Password123!");
 
         using var client = productionFactory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
         var token = await AntiforgeryTestHelper.GetTokenAsync(client, "/login", cancellationToken);
@@ -82,7 +82,7 @@ public sealed class CookieIntegrationTests(BeeDayWebApplicationFactory factory)
             "/auth/login",
             new FormUrlEncodedContent(new Dictionary<string, string>
             {
-                ["email"] = "cookie-prod-secure@levelup.invalid",
+                ["email"] = "cookie-prod-secure@beeday.invalid",
                 ["password"] = "Password123!",
                 ["__RequestVerificationToken"] = token
             }),
@@ -127,6 +127,6 @@ public sealed class CookieIntegrationTests(BeeDayWebApplicationFactory factory)
     {
         Assert.True(response.Headers.TryGetValues("Set-Cookie", out var rawCookies));
         var parsed = SetCookieHeaderValue.ParseList([.. rawCookies]);
-        return parsed.Single(cookie => cookie.Name.ToString() == "LevelUp.Auth");
+        return parsed.Single(cookie => cookie.Name.ToString() == "BeeDay.Auth");
     }
 }

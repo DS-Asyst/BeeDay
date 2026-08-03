@@ -22,7 +22,7 @@ public sealed class EmailConfirmationIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new BeeDayWebApplicationFactory();
-        var user = await factory.SeedUnconfirmedUserAsync("confirm-valid@levelup.invalid", "Password123!");
+        var user = await factory.SeedUnconfirmedUserAsync("confirm-valid@beeday.invalid", "Password123!");
         var token = await factory.IssueEmailConfirmationTokenAsync(user.Id);
 
         await using (var scope = factory.Services.CreateAsyncScope())
@@ -31,7 +31,7 @@ public sealed class EmailConfirmationIntegrationTests
             await sender.Send(new ConfirmEmailCommand(new ConfirmEmailRequest(token)), cancellationToken);
         }
 
-        var confirmed = await factory.FindUserAsync("confirm-valid@levelup.invalid");
+        var confirmed = await factory.FindUserAsync("confirm-valid@beeday.invalid");
         Assert.True(confirmed!.IsEmailConfirmed);
     }
 
@@ -52,7 +52,7 @@ public sealed class EmailConfirmationIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new BeeDayWebApplicationFactory();
-        var user = await factory.SeedUnconfirmedUserAsync("confirm-expired@levelup.invalid", "Password123!");
+        var user = await factory.SeedUnconfirmedUserAsync("confirm-expired@beeday.invalid", "Password123!");
         var token = await factory.IssueEmailConfirmationTokenAsync(user.Id, expired: true);
 
         await using var scope = factory.Services.CreateAsyncScope();
@@ -61,7 +61,7 @@ public sealed class EmailConfirmationIntegrationTests
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
             sender.Send(new ConfirmEmailCommand(new ConfirmEmailRequest(token)), cancellationToken));
 
-        var user2 = await factory.FindUserAsync("confirm-expired@levelup.invalid");
+        var user2 = await factory.FindUserAsync("confirm-expired@beeday.invalid");
         Assert.False(user2!.IsEmailConfirmed);
     }
 
@@ -70,7 +70,7 @@ public sealed class EmailConfirmationIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new BeeDayWebApplicationFactory();
-        var user = await factory.SeedUnconfirmedUserAsync("confirm-reused@levelup.invalid", "Password123!");
+        var user = await factory.SeedUnconfirmedUserAsync("confirm-reused@beeday.invalid", "Password123!");
         var token = await factory.IssueEmailConfirmationTokenAsync(user.Id);
 
         await using var scope = factory.Services.CreateAsyncScope();
@@ -86,13 +86,13 @@ public sealed class EmailConfirmationIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new EmailCaptureWebApplicationFactory();
-        var user = await factory.SeedUnconfirmedUserAsync("confirm-resend@levelup.invalid", "Password123!");
+        var user = await factory.SeedUnconfirmedUserAsync("confirm-resend@beeday.invalid", "Password123!");
         var firstToken = await factory.IssueEmailConfirmationTokenAsync(user.Id);
 
         await using (var scope = factory.Services.CreateAsyncScope())
         {
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-            await sender.Send(new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest("confirm-resend@levelup.invalid")), cancellationToken);
+            await sender.Send(new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest("confirm-resend@beeday.invalid")), cancellationToken);
         }
 
         Assert.Equal(1, factory.CountCapturedEmails());
@@ -109,7 +109,7 @@ public sealed class EmailConfirmationIntegrationTests
             await sender.Send(new ConfirmEmailCommand(new ConfirmEmailRequest(newToken!)), cancellationToken);
         }
 
-        var confirmed = await factory.FindUserAsync("confirm-resend@levelup.invalid");
+        var confirmed = await factory.FindUserAsync("confirm-resend@beeday.invalid");
         Assert.True(confirmed!.IsEmailConfirmed);
     }
 
@@ -118,11 +118,11 @@ public sealed class EmailConfirmationIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new EmailCaptureWebApplicationFactory();
-        await factory.SeedConfirmedUserAsync("confirm-already@levelup.invalid", "Password123!");
+        await factory.SeedConfirmedUserAsync("confirm-already@beeday.invalid", "Password123!");
 
         await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-        await sender.Send(new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest("confirm-already@levelup.invalid")), cancellationToken);
+        await sender.Send(new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest("confirm-already@beeday.invalid")), cancellationToken);
 
         Assert.Equal(0, factory.CountCapturedEmails());
     }
@@ -135,7 +135,7 @@ public sealed class EmailConfirmationIntegrationTests
 
         await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-        await sender.Send(new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest("confirm-never-existed@levelup.invalid")), cancellationToken);
+        await sender.Send(new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest("confirm-never-existed@beeday.invalid")), cancellationToken);
 
         Assert.Equal(0, factory.CountCapturedEmails());
     }
@@ -145,16 +145,16 @@ public sealed class EmailConfirmationIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new EmailCaptureWebApplicationFactory();
-        await factory.SeedUnconfirmedUserAsync("confirm-throttled@levelup.invalid", "Password123!");
+        await factory.SeedUnconfirmedUserAsync("confirm-throttled@beeday.invalid", "Password123!");
 
         await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-        await sender.Send(new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest("confirm-throttled@levelup.invalid")), cancellationToken);
+        await sender.Send(new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest("confirm-throttled@beeday.invalid")), cancellationToken);
 
         // Unlike password reset (which silently no-ops when throttled), resend surfaces the
         // throttle as an explicit error — verified real behavior, not a design decision made here.
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
-            sender.Send(new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest("confirm-throttled@levelup.invalid")), cancellationToken));
+            sender.Send(new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest("confirm-throttled@beeday.invalid")), cancellationToken));
     }
 
     [Fact]
@@ -162,10 +162,10 @@ public sealed class EmailConfirmationIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new BeeDayWebApplicationFactory();
-        var user = await factory.SeedUnconfirmedUserAsync("confirm-login-gate@levelup.invalid", "Password123!");
+        var user = await factory.SeedUnconfirmedUserAsync("confirm-login-gate@beeday.invalid", "Password123!");
 
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
-        var beforeConfirmation = await PostLoginAsync(client, "confirm-login-gate@levelup.invalid", "Password123!", cancellationToken);
+        var beforeConfirmation = await PostLoginAsync(client, "confirm-login-gate@beeday.invalid", "Password123!", cancellationToken);
         Assert.Contains("error=invalid", beforeConfirmation.Headers.Location!.ToString(), StringComparison.Ordinal);
 
         var token = await factory.IssueEmailConfirmationTokenAsync(user.Id);
@@ -175,7 +175,7 @@ public sealed class EmailConfirmationIntegrationTests
             await sender.Send(new ConfirmEmailCommand(new ConfirmEmailRequest(token)), cancellationToken);
         }
 
-        var afterConfirmation = await PostLoginAsync(client, "confirm-login-gate@levelup.invalid", "Password123!", cancellationToken);
+        var afterConfirmation = await PostLoginAsync(client, "confirm-login-gate@beeday.invalid", "Password123!", cancellationToken);
         Assert.False(afterConfirmation.Headers.Location?.ToString().Contains("error=invalid", StringComparison.Ordinal) ?? false);
     }
 

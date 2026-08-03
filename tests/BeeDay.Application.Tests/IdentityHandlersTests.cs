@@ -69,7 +69,7 @@ public sealed class IdentityHandlersTests
             fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
 
         await handler.Handle(
-            new RequestPasswordResetCommand(new RequestPasswordResetRequest("missing@levelup.invalid")),
+            new RequestPasswordResetCommand(new RequestPasswordResetRequest("missing@beeday.invalid")),
             TestContext.Current.CancellationToken);
 
         Assert.Empty(fixture.Repository.UserTokensData);
@@ -139,7 +139,7 @@ public sealed class IdentityHandlersTests
 
         public User AddUser(bool confirmed)
         {
-            var user = User.Create("Tiago", "tiago@levelup.invalid", Passwords.Hash("Password123"), Now.AddHours(-2));
+            var user = User.Create("Tiago", "tiago@beeday.invalid", Passwords.Hash("Password123"), Now.AddHours(-2));
             if (confirmed)
             {
                 user.ConfirmEmail(user.CreatedAtUtc);

@@ -29,7 +29,7 @@ public sealed class FeatureServicesTests
     public async Task CompleteUserProfileHandler_RejectsNicknameAlreadyUsedByAnotherUser()
     {
         var r = new FakeUnitOfWork();
-        var other = User.Create("Other", "other@levelup.invalid");
+        var other = User.Create("Other", "other@beeday.invalid");
         other.CompleteProfile("tiago", null);
         r.UsersData.Add(other);
         var user = CreateCurrentUser(r);
@@ -89,7 +89,7 @@ public sealed class FeatureServicesTests
 
     private static User CreateCurrentUser(FakeUnitOfWork repository)
     {
-        var user = User.Create("Test User", "test-user@levelup.invalid");
+        var user = User.Create("Test User", "test-user@beeday.invalid");
         repository.UsersData.Add(user);
         return user;
     }

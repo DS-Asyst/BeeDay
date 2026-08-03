@@ -25,7 +25,7 @@ public abstract class EfLocalDbTestBase : IAsyncLifetime
 
     public async ValueTask InitializeAsync()
     {
-        var databaseName = $"LevelUp_EfTests_{Guid.NewGuid():N}";
+        var databaseName = $"BeeDay_EfTests_{Guid.NewGuid():N}";
         var connectionString =
             $"Server=(localdb)\\mssqllocaldb;Database={databaseName};Trusted_Connection=True;TrustServerCertificate=True;";
 

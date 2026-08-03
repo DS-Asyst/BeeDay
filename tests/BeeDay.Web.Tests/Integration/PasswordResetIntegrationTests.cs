@@ -24,12 +24,12 @@ public sealed class PasswordResetIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new EmailCaptureWebApplicationFactory();
-        await factory.SeedConfirmedUserAsync("reset-existing@levelup.invalid", "Password123!");
+        await factory.SeedConfirmedUserAsync("reset-existing@beeday.invalid", "Password123!");
 
         await using (var scope = factory.Services.CreateAsyncScope())
         {
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-            await sender.Send(new RequestPasswordResetCommand(new RequestPasswordResetRequest("reset-existing@levelup.invalid")), cancellationToken);
+            await sender.Send(new RequestPasswordResetCommand(new RequestPasswordResetRequest("reset-existing@beeday.invalid")), cancellationToken);
         }
 
         Assert.Equal(1, factory.CountCapturedEmails());
@@ -43,10 +43,10 @@ public sealed class PasswordResetIntegrationTests
         }
 
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
-        var oldPasswordAttempt = await PostLoginAsync(client, "reset-existing@levelup.invalid", "Password123!", cancellationToken);
+        var oldPasswordAttempt = await PostLoginAsync(client, "reset-existing@beeday.invalid", "Password123!", cancellationToken);
         Assert.Contains("error=invalid", oldPasswordAttempt.Headers.Location!.ToString(), StringComparison.Ordinal);
 
-        var newPasswordAttempt = await PostLoginAsync(client, "reset-existing@levelup.invalid", "NewPassword123!", cancellationToken);
+        var newPasswordAttempt = await PostLoginAsync(client, "reset-existing@beeday.invalid", "NewPassword123!", cancellationToken);
         Assert.False(newPasswordAttempt.Headers.Location?.ToString().Contains("error=invalid", StringComparison.Ordinal) ?? false);
     }
 
@@ -61,7 +61,7 @@ public sealed class PasswordResetIntegrationTests
 
         // No exception, regardless of whether the account exists — the handler must never let a
         // caller distinguish the two cases through its outcome (success/failure or timing of throw).
-        await sender.Send(new RequestPasswordResetCommand(new RequestPasswordResetRequest("reset-never-existed@levelup.invalid")), cancellationToken);
+        await sender.Send(new RequestPasswordResetCommand(new RequestPasswordResetRequest("reset-never-existed@beeday.invalid")), cancellationToken);
 
         Assert.Equal(0, factory.CountCapturedEmails());
     }
@@ -71,13 +71,13 @@ public sealed class PasswordResetIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new EmailCaptureWebApplicationFactory();
-        await factory.SeedConfirmedUserAsync("reset-throttled@levelup.invalid", "Password123!");
+        await factory.SeedConfirmedUserAsync("reset-throttled@beeday.invalid", "Password123!");
 
         await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
-        await sender.Send(new RequestPasswordResetCommand(new RequestPasswordResetRequest("reset-throttled@levelup.invalid")), cancellationToken);
-        await sender.Send(new RequestPasswordResetCommand(new RequestPasswordResetRequest("reset-throttled@levelup.invalid")), cancellationToken);
+        await sender.Send(new RequestPasswordResetCommand(new RequestPasswordResetRequest("reset-throttled@beeday.invalid")), cancellationToken);
+        await sender.Send(new RequestPasswordResetCommand(new RequestPasswordResetRequest("reset-throttled@beeday.invalid")), cancellationToken);
 
         Assert.Equal(1, factory.CountCapturedEmails());
     }
@@ -99,7 +99,7 @@ public sealed class PasswordResetIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new BeeDayWebApplicationFactory();
-        var user = await factory.SeedConfirmedUserAsync("reset-expired@levelup.invalid", "Password123!");
+        var user = await factory.SeedConfirmedUserAsync("reset-expired@beeday.invalid", "Password123!");
         var token = await factory.IssuePasswordResetTokenAsync(user.Id, expired: true);
 
         await using var scope = factory.Services.CreateAsyncScope();
@@ -114,7 +114,7 @@ public sealed class PasswordResetIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new BeeDayWebApplicationFactory();
-        var user = await factory.SeedConfirmedUserAsync("reset-reused@levelup.invalid", "Password123!");
+        var user = await factory.SeedConfirmedUserAsync("reset-reused@beeday.invalid", "Password123!");
         var token = await factory.IssuePasswordResetTokenAsync(user.Id);
 
         await using var scope = factory.Services.CreateAsyncScope();
@@ -130,7 +130,7 @@ public sealed class PasswordResetIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new BeeDayWebApplicationFactory();
-        var user = await factory.SeedConfirmedUserAsync("reset-revoked@levelup.invalid", "Password123!");
+        var user = await factory.SeedConfirmedUserAsync("reset-revoked@beeday.invalid", "Password123!");
         var firstToken = await factory.IssuePasswordResetTokenAsync(user.Id);
 
         await using (var scope = factory.Services.CreateAsyncScope())
@@ -138,7 +138,7 @@ public sealed class PasswordResetIntegrationTests
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
             // A fresh request for the same user revokes every previously issued, still-active
             // PasswordReset token (RequestPasswordResetCommandHandler calls RevokeActiveUserTokens).
-            await sender.Send(new RequestPasswordResetCommand(new RequestPasswordResetRequest("reset-revoked@levelup.invalid")), cancellationToken);
+            await sender.Send(new RequestPasswordResetCommand(new RequestPasswordResetRequest("reset-revoked@beeday.invalid")), cancellationToken);
         }
 
         await using (var scope = factory.Services.CreateAsyncScope())

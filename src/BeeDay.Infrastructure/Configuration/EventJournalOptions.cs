@@ -7,8 +7,8 @@ namespace BeeDay.Infrastructure.Configuration;
 /// </summary>
 public sealed class EventJournalOptions
 {
-    public const string SectionName = "LevelUp:Auditing:EventJournal";
+    public const string SectionName = "BeeDay:Auditing:EventJournal";
 
     public string Directory { get; set; } = "Data";
-    public string FileName { get; set; } = "LevelUpEvents.ndjson";
+    public string FileName { get; set; } = "BeeDayEvents.ndjson";
 }

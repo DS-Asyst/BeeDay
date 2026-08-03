@@ -196,8 +196,8 @@ public sealed class MultiUserIsolationIntegrationTests(BeeDayWebApplicationFacto
 
     private async Task<(User Alice, User Bob)> SeedTwoUsersAsync(string prefix)
     {
-        var alice = await factory.SeedConfirmedUserAsync($"{prefix}-alice@levelup.invalid", "Password123!");
-        var bob = await factory.SeedConfirmedUserAsync($"{prefix}-bob@levelup.invalid", "Password123!");
+        var alice = await factory.SeedConfirmedUserAsync($"{prefix}-alice@beeday.invalid", "Password123!");
+        var bob = await factory.SeedConfirmedUserAsync($"{prefix}-bob@beeday.invalid", "Password123!");
         return (alice, bob);
     }
 

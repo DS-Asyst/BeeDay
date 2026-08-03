@@ -23,7 +23,7 @@ public sealed class SessionInvalidationIntegrationTests(BeeDayWebApplicationFact
     public async Task ForgedCookie_WithCurrentSessionVersion_IsAccepted()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        var user = await factory.SeedConfirmedUserAsync("session-current-version@levelup.invalid", "Password123!");
+        var user = await factory.SeedConfirmedUserAsync("session-current-version@beeday.invalid", "Password123!");
 
         var response = await GetWithForgedCookieAsync(
             [
@@ -39,7 +39,7 @@ public sealed class SessionInvalidationIntegrationTests(BeeDayWebApplicationFact
     public async Task ForgedCookie_MissingSessionVersionClaim_IsRejected()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        var user = await factory.SeedConfirmedUserAsync("session-missing-claim@levelup.invalid", "Password123!");
+        var user = await factory.SeedConfirmedUserAsync("session-missing-claim@beeday.invalid", "Password123!");
 
         var response = await GetWithForgedCookieAsync(
             [new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())],
@@ -52,7 +52,7 @@ public sealed class SessionInvalidationIntegrationTests(BeeDayWebApplicationFact
     public async Task ForgedCookie_WithNonNumericSessionVersionClaim_IsRejected()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        var user = await factory.SeedConfirmedUserAsync("session-invalid-claim@levelup.invalid", "Password123!");
+        var user = await factory.SeedConfirmedUserAsync("session-invalid-claim@beeday.invalid", "Password123!");
 
         var response = await GetWithForgedCookieAsync(
             [
@@ -95,8 +95,8 @@ public sealed class SessionInvalidationIntegrationTests(BeeDayWebApplicationFact
     public async Task RealCookie_ForDeactivatedUser_IsRejected()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        using var client = await factory.CreateAuthenticatedClientAsync("session-deactivated@levelup.invalid", "Password123!", cancellationToken);
-        var user = await factory.FindUserAsync("session-deactivated@levelup.invalid");
+        using var client = await factory.CreateAuthenticatedClientAsync("session-deactivated@beeday.invalid", "Password123!", cancellationToken);
+        var user = await factory.FindUserAsync("session-deactivated@beeday.invalid");
 
         await factory.DeactivateUserAsync(user!.Id);
 
@@ -108,8 +108,8 @@ public sealed class SessionInvalidationIntegrationTests(BeeDayWebApplicationFact
     public async Task RealCookie_AfterPasswordChange_IsRejected()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        using var client = await factory.CreateAuthenticatedClientAsync("session-password-change@levelup.invalid", "Password123!", cancellationToken);
-        var user = await factory.FindUserAsync("session-password-change@levelup.invalid");
+        using var client = await factory.CreateAuthenticatedClientAsync("session-password-change@beeday.invalid", "Password123!", cancellationToken);
+        var user = await factory.FindUserAsync("session-password-change@beeday.invalid");
 
         await using (var scope = factory.CreateAuthenticatedScope(user!.Id, user.SessionVersion))
         {
@@ -127,8 +127,8 @@ public sealed class SessionInvalidationIntegrationTests(BeeDayWebApplicationFact
     public async Task RealCookie_AfterPasswordReset_IsRejectedAndOldPasswordStopsWorking()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        using var client = await factory.CreateAuthenticatedClientAsync("session-password-reset@levelup.invalid", "Password123!", cancellationToken);
-        var user = await factory.FindUserAsync("session-password-reset@levelup.invalid");
+        using var client = await factory.CreateAuthenticatedClientAsync("session-password-reset@beeday.invalid", "Password123!", cancellationToken);
+        var user = await factory.FindUserAsync("session-password-reset@beeday.invalid");
         var rawToken = await factory.IssuePasswordResetTokenAsync(user!.Id);
 
         await using (var scope = factory.Services.CreateAsyncScope())
@@ -143,10 +143,10 @@ public sealed class SessionInvalidationIntegrationTests(BeeDayWebApplicationFact
         AssertRejected(afterReset);
 
         using var freshClient = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
-        var oldPasswordAttempt = await PostLoginAsync(freshClient, "session-password-reset@levelup.invalid", "Password123!", cancellationToken);
+        var oldPasswordAttempt = await PostLoginAsync(freshClient, "session-password-reset@beeday.invalid", "Password123!", cancellationToken);
         Assert.Contains("error=invalid", oldPasswordAttempt.Headers.Location!.ToString(), StringComparison.Ordinal);
 
-        var newPasswordAttempt = await PostLoginAsync(freshClient, "session-password-reset@levelup.invalid", "NewPassword123!", cancellationToken);
+        var newPasswordAttempt = await PostLoginAsync(freshClient, "session-password-reset@beeday.invalid", "NewPassword123!", cancellationToken);
         Assert.False(newPasswordAttempt.Headers.Location?.ToString().Contains("error=invalid", StringComparison.Ordinal) ?? false);
     }
 
@@ -155,7 +155,7 @@ public sealed class SessionInvalidationIntegrationTests(BeeDayWebApplicationFact
         var cookieValue = factory.CreateRawAuthCookie(claims);
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
         using var request = new HttpRequestMessage(HttpMethod.Get, "/daily");
-        request.Headers.Add("Cookie", $"LevelUp.Auth={cookieValue}");
+        request.Headers.Add("Cookie", $"BeeDay.Auth={cookieValue}");
         return await client.SendAsync(request, cancellationToken);
     }
 

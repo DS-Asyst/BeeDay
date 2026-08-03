@@ -17,11 +17,11 @@ public sealed class RateLimitingIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new RateLimitingWebApplicationFactory();
-        await factory.SeedConfirmedUserAsync("below-limit@levelup.invalid", "Password123!");
+        await factory.SeedConfirmedUserAsync("below-limit@beeday.invalid", "Password123!");
 
         for (var attempt = 0; attempt < 3; attempt++)
         {
-            var response = await PostLoginAsync(factory, "below-limit@levelup.invalid", "WrongPassword!", cancellationToken);
+            var response = await PostLoginAsync(factory, "below-limit@beeday.invalid", "WrongPassword!", cancellationToken);
             Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
             Assert.Contains("error=invalid", response.Headers.Location!.ToString(), StringComparison.Ordinal);
         }
@@ -32,16 +32,16 @@ public sealed class RateLimitingIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new RateLimitingWebApplicationFactory();
-        await factory.SeedConfirmedUserAsync("email-limit@levelup.invalid", "Password123!");
+        await factory.SeedConfirmedUserAsync("email-limit@beeday.invalid", "Password123!");
 
         // Email limit is 3; the IP limit (6) is not the constraint being tested here.
         for (var attempt = 0; attempt < 3; attempt++)
         {
-            var response = await PostLoginAsync(factory, "email-limit@levelup.invalid", "WrongPassword!", cancellationToken);
+            var response = await PostLoginAsync(factory, "email-limit@beeday.invalid", "WrongPassword!", cancellationToken);
             Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
         }
 
-        var fourthAttempt = await PostLoginAsync(factory, "email-limit@levelup.invalid", "WrongPassword!", cancellationToken);
+        var fourthAttempt = await PostLoginAsync(factory, "email-limit@beeday.invalid", "WrongPassword!", cancellationToken);
         Assert.Equal(HttpStatusCode.TooManyRequests, fourthAttempt.StatusCode);
     }
 
@@ -50,13 +50,13 @@ public sealed class RateLimitingIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new RateLimitingWebApplicationFactory();
-        await factory.SeedConfirmedUserAsync("case-variant@levelup.invalid", "Password123!");
+        await factory.SeedConfirmedUserAsync("case-variant@beeday.invalid", "Password123!");
 
         var variants = new[]
         {
-            "case-variant@levelup.invalid",
-            "CASE-VARIANT@levelup.invalid",
-            " case-variant@levelup.invalid "
+            "case-variant@beeday.invalid",
+            "CASE-VARIANT@beeday.invalid",
+            " case-variant@beeday.invalid "
         };
 
         foreach (var variant in variants)
@@ -67,7 +67,7 @@ public sealed class RateLimitingIntegrationTests
 
         // A 4th attempt, in any casing, must already be blocked — proving all three counted
         // against the same partition rather than three separate ones.
-        var fourthAttempt = await PostLoginAsync(factory, "Case-Variant@LevelUp.Invalid", "WrongPassword!", cancellationToken);
+        var fourthAttempt = await PostLoginAsync(factory, "Case-Variant@BeeDay.Invalid", "WrongPassword!", cancellationToken);
         Assert.Equal(HttpStatusCode.TooManyRequests, fourthAttempt.StatusCode);
     }
 
@@ -82,11 +82,11 @@ public sealed class RateLimitingIntegrationTests
         // TestServer's single loopback-like remote IP.
         for (var attempt = 0; attempt < 6; attempt++)
         {
-            var response = await PostLoginAsync(factory, $"ip-limit-{attempt}@levelup.invalid", "WrongPassword!", cancellationToken);
+            var response = await PostLoginAsync(factory, $"ip-limit-{attempt}@beeday.invalid", "WrongPassword!", cancellationToken);
             Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
         }
 
-        var seventhAttempt = await PostLoginAsync(factory, "ip-limit-6@levelup.invalid", "WrongPassword!", cancellationToken);
+        var seventhAttempt = await PostLoginAsync(factory, "ip-limit-6@beeday.invalid", "WrongPassword!", cancellationToken);
         Assert.Equal(HttpStatusCode.TooManyRequests, seventhAttempt.StatusCode);
     }
 
@@ -95,21 +95,21 @@ public sealed class RateLimitingIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new RateLimitingWebApplicationFactory();
-        await factory.SeedConfirmedUserAsync("exists-rate-limited@levelup.invalid", "Password123!");
+        await factory.SeedConfirmedUserAsync("exists-rate-limited@beeday.invalid", "Password123!");
 
         for (var attempt = 0; attempt < 3; attempt++)
         {
-            await PostLoginAsync(factory, "exists-rate-limited@levelup.invalid", "WrongPassword!", cancellationToken);
+            await PostLoginAsync(factory, "exists-rate-limited@beeday.invalid", "WrongPassword!", cancellationToken);
         }
 
-        var existingRejected = await PostLoginAsync(factory, "exists-rate-limited@levelup.invalid", "WrongPassword!", cancellationToken);
+        var existingRejected = await PostLoginAsync(factory, "exists-rate-limited@beeday.invalid", "WrongPassword!", cancellationToken);
 
         for (var attempt = 0; attempt < 3; attempt++)
         {
-            await PostLoginAsync(factory, "never-existed@levelup.invalid", "WrongPassword!", cancellationToken);
+            await PostLoginAsync(factory, "never-existed@beeday.invalid", "WrongPassword!", cancellationToken);
         }
 
-        var missingRejected = await PostLoginAsync(factory, "never-existed@levelup.invalid", "WrongPassword!", cancellationToken);
+        var missingRejected = await PostLoginAsync(factory, "never-existed@beeday.invalid", "WrongPassword!", cancellationToken);
 
         Assert.Equal(HttpStatusCode.TooManyRequests, existingRejected.StatusCode);
         Assert.Equal(HttpStatusCode.TooManyRequests, missingRejected.StatusCode);
@@ -126,7 +126,7 @@ public sealed class RateLimitingIntegrationTests
 
         for (var attempt = 0; attempt < 7; attempt++)
         {
-            await PostLoginAsync(factory, $"unrelated-{attempt}@levelup.invalid", "WrongPassword!", cancellationToken);
+            await PostLoginAsync(factory, $"unrelated-{attempt}@beeday.invalid", "WrongPassword!", cancellationToken);
         }
 
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });

@@ -16,7 +16,7 @@ public sealed class LogoutIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task Logout_ClearsTheAuthCookie()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        using var client = await factory.CreateAuthenticatedClientAsync("logout-clears-cookie@levelup.invalid", "Password123!", cancellationToken);
+        using var client = await factory.CreateAuthenticatedClientAsync("logout-clears-cookie@beeday.invalid", "Password123!", cancellationToken);
         var token = await AntiforgeryTestHelper.GetTokenAsync(client, "/daily", cancellationToken);
 
         var response = await client.PostAsync(
@@ -25,7 +25,7 @@ public sealed class LogoutIntegrationTests(BeeDayWebApplicationFactory factory)
             cancellationToken);
 
         Assert.True(response.Headers.TryGetValues("Set-Cookie", out var rawCookies));
-        var authCookie = SetCookieHeaderValue.ParseList([.. rawCookies]).Single(c => c.Name.ToString() == "LevelUp.Auth");
+        var authCookie = SetCookieHeaderValue.ParseList([.. rawCookies]).Single(c => c.Name.ToString() == "BeeDay.Auth");
         // ASP.NET Core clears a cookie by re-issuing it with an empty value and an Expires date
         // in the past, instructing the browser to delete it immediately.
         Assert.Equal(string.Empty, authCookie.Value.ToString());
@@ -37,7 +37,7 @@ public sealed class LogoutIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task Logout_RevokesAccessToProtectedPagesOnTheSameClient()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        using var client = await factory.CreateAuthenticatedClientAsync("logout-revokes-access@levelup.invalid", "Password123!", cancellationToken);
+        using var client = await factory.CreateAuthenticatedClientAsync("logout-revokes-access@beeday.invalid", "Password123!", cancellationToken);
 
         var beforeLogout = await client.GetAsync("/daily", cancellationToken);
         Assert.Equal(HttpStatusCode.OK, beforeLogout.StatusCode);
@@ -57,7 +57,7 @@ public sealed class LogoutIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task Logout_CalledTwice_DoesNotError()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        using var client = await factory.CreateAuthenticatedClientAsync("logout-twice@levelup.invalid", "Password123!", cancellationToken);
+        using var client = await factory.CreateAuthenticatedClientAsync("logout-twice@beeday.invalid", "Password123!", cancellationToken);
 
         var firstToken = await AntiforgeryTestHelper.GetTokenAsync(client, "/daily", cancellationToken);
         var firstLogout = await client.PostAsync(
@@ -84,14 +84,14 @@ public sealed class LogoutIntegrationTests(BeeDayWebApplicationFactory factory)
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
 
-        using var deviceA = await factory.CreateAuthenticatedClientAsync("logout-is-local@levelup.invalid", "Password123!", cancellationToken);
+        using var deviceA = await factory.CreateAuthenticatedClientAsync("logout-is-local@beeday.invalid", "Password123!", cancellationToken);
         using var deviceB = factory.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
         var tokenB = await AntiforgeryTestHelper.GetTokenAsync(deviceB, "/login", cancellationToken);
         await deviceB.PostAsync(
             "/auth/login",
             new FormUrlEncodedContent(new Dictionary<string, string>
             {
-                ["email"] = "logout-is-local@levelup.invalid",
+                ["email"] = "logout-is-local@beeday.invalid",
                 ["password"] = "Password123!",
                 ["__RequestVerificationToken"] = tokenB
             }),

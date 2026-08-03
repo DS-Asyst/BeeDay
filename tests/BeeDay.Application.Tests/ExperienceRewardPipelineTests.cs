@@ -119,7 +119,7 @@ public sealed class ExperienceRewardPipelineTests
     private static (FakeUnitOfWork Repository, User User) CreateRepository()
     {
         var repository = new FakeUnitOfWork();
-        var user = User.Create("Pipeline User", "pipeline@levelup.invalid");
+        var user = User.Create("Pipeline User", "pipeline@beeday.invalid");
         user.CompleteProfile("pipelinehero", null);
         repository.UsersData.Add(user);
         return (repository, user);

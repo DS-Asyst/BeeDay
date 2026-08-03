@@ -23,7 +23,7 @@ namespace BeeDay.E2E.Tests;
 public sealed class E2EWebApplicationFactory : WebApplicationFactory<Program>
 {
     private readonly string connectionString =
-        $"Server=(localdb)\\mssqllocaldb;Database=LevelUp_E2ETests_{Guid.NewGuid():N};Trusted_Connection=True;TrustServerCertificate=True;";
+        $"Server=(localdb)\\mssqllocaldb;Database=BeeDay_E2ETests_{Guid.NewGuid():N};Trusted_Connection=True;TrustServerCertificate=True;";
 
     public E2EWebApplicationFactory() => UseKestrel(port: 0);
 
@@ -43,14 +43,14 @@ public sealed class E2EWebApplicationFactory : WebApplicationFactory<Program>
         builder.UseEnvironment("Development");
         builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["LevelUp:Persistence:SqlServer:ConnectionString"] = connectionString,
-            ["LevelUp:Email:Development:Enabled"] = "false",
+            ["BeeDay:Persistence:SqlServer:ConnectionString"] = connectionString,
+            ["BeeDay:Email:Development:Enabled"] = "false",
             // Generous limits: E2E exercises real user journeys, not the rate limiter itself
             // (already covered by Sprint 12.6's integration tests) — this just keeps it out of the way.
-            ["LevelUp:RateLimiting:Login:IpPermitLimit"] = "1000",
-            ["LevelUp:RateLimiting:Login:EmailPermitLimit"] = "1000",
-            ["LevelUp:RateLimiting:Login:Window"] = "00:00:01",
-            ["LevelUp:RateLimiting:Login:SegmentsPerWindow"] = "1"
+            ["BeeDay:RateLimiting:Login:IpPermitLimit"] = "1000",
+            ["BeeDay:RateLimiting:Login:EmailPermitLimit"] = "1000",
+            ["BeeDay:RateLimiting:Login:Window"] = "00:00:01",
+            ["BeeDay:RateLimiting:Login:SegmentsPerWindow"] = "1"
         }));
     }
 

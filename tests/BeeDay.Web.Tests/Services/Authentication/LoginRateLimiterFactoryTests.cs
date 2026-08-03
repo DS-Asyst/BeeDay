@@ -15,11 +15,11 @@ public sealed class LoginRateLimiterFactoryTests
 
         for (var attempt = 0; attempt < 10; attempt++)
         {
-            using var lease = limiter.AttemptAcquire(CreateContext(ip, $"user{attempt}@levelup.invalid"));
+            using var lease = limiter.AttemptAcquire(CreateContext(ip, $"user{attempt}@beeday.invalid"));
             Assert.True(lease.IsAcquired, $"Attempt {attempt} should have been permitted.");
         }
 
-        using var rejected = limiter.AttemptAcquire(CreateContext(ip, "one-more@levelup.invalid"));
+        using var rejected = limiter.AttemptAcquire(CreateContext(ip, "one-more@beeday.invalid"));
         Assert.False(rejected.IsAcquired);
     }
 
@@ -32,11 +32,11 @@ public sealed class LoginRateLimiterFactoryTests
 
         for (var attempt = 0; attempt < 10; attempt++)
         {
-            using var lease = limiter.AttemptAcquire(CreateContext(first, "user@levelup.invalid"));
+            using var lease = limiter.AttemptAcquire(CreateContext(first, "user@beeday.invalid"));
             Assert.True(lease.IsAcquired);
         }
 
-        using var otherIpLease = limiter.AttemptAcquire(CreateContext(second, "user@levelup.invalid"));
+        using var otherIpLease = limiter.AttemptAcquire(CreateContext(second, "user@beeday.invalid"));
         Assert.True(otherIpLease.IsAcquired);
     }
 
@@ -48,11 +48,11 @@ public sealed class LoginRateLimiterFactoryTests
 
         for (var attempt = 0; attempt < 5; attempt++)
         {
-            using var lease = limiter.AttemptAcquire(CreateContext(IPAddress.Parse($"198.51.100.{attempt}"), "Victim@LevelUp.invalid"));
+            using var lease = limiter.AttemptAcquire(CreateContext(IPAddress.Parse($"198.51.100.{attempt}"), "Victim@BeeDay.invalid"));
             Assert.True(lease.IsAcquired, $"Attempt {attempt} should have been permitted.");
         }
 
-        using var rejected = limiter.AttemptAcquire(CreateContext(IPAddress.Parse("198.51.100.99"), "victim@levelup.invalid"));
+        using var rejected = limiter.AttemptAcquire(CreateContext(IPAddress.Parse("198.51.100.99"), "victim@beeday.invalid"));
         Assert.False(rejected.IsAcquired);
     }
 
@@ -64,12 +64,12 @@ public sealed class LoginRateLimiterFactoryTests
 
         for (var attempt = 0; attempt < 5; attempt++)
         {
-            using var lease = limiter.AttemptAcquire(CreateContext(ip, "victim@levelup.invalid"));
+            using var lease = limiter.AttemptAcquire(CreateContext(ip, "victim@beeday.invalid"));
             Assert.True(lease.IsAcquired, $"Attempt {attempt} should have been permitted.");
         }
 
         // The email-specific limit (5) is exhausted even though the IP limit (10) is not.
-        using var rejected = limiter.AttemptAcquire(CreateContext(ip, "victim@levelup.invalid"));
+        using var rejected = limiter.AttemptAcquire(CreateContext(ip, "victim@beeday.invalid"));
         Assert.False(rejected.IsAcquired);
     }
 

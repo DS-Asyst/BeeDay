@@ -58,7 +58,7 @@ public sealed class AuthorizationIntegrationTests(BeeDayWebApplicationFactory fa
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         using var client = await factory.CreateAuthenticatedClientAsync(
-            $"authz-ok-{Guid.NewGuid():N}@levelup.invalid", "Password123!", cancellationToken);
+            $"authz-ok-{Guid.NewGuid():N}@beeday.invalid", "Password123!", cancellationToken);
 
         var response = await client.GetAsync(path, cancellationToken);
 

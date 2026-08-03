@@ -40,14 +40,14 @@ public sealed class ProblemDetailsIntegrationTests(BeeDayWebApplicationFactory f
     public async Task MalformedRequest_MissingAntiforgeryToken_ReturnsWellFormedProblemDetails()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await factory.SeedConfirmedUserAsync("problem-malformed@levelup.invalid", "Password123!");
+        await factory.SeedConfirmedUserAsync("problem-malformed@beeday.invalid", "Password123!");
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
 
         var response = await client.PostAsync(
             "/auth/login",
             new FormUrlEncodedContent(new Dictionary<string, string>
             {
-                ["email"] = "problem-malformed@levelup.invalid",
+                ["email"] = "problem-malformed@beeday.invalid",
                 ["password"] = "Password123!"
             }),
             cancellationToken);
@@ -111,7 +111,7 @@ public sealed class ProblemDetailsIntegrationTests(BeeDayWebApplicationFactory f
                 "/auth/login",
                 new FormUrlEncodedContent(new Dictionary<string, string>
                 {
-                    ["email"] = $"rate-limited-problem-{attempt}@levelup.invalid",
+                    ["email"] = $"rate-limited-problem-{attempt}@beeday.invalid",
                     ["password"] = "WrongPassword!",
                     ["__RequestVerificationToken"] = token
                 }),

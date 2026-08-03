@@ -1,8 +1,8 @@
-// LevelUpCardMenu behaviors that cannot be expressed reliably in CSS alone:
+// BeeDayCardMenu behaviors that cannot be expressed reliably in CSS alone:
 //   1. Viewport-aware placement. This module only *measures* — the panel is
 //      rendered once (invisible via the `--measuring` class) so its real
 //      width/height are known, never estimated, and it is only revealed
-//      after LevelUpCardMenu.razor.cs has computed and applied the final
+//      after BeeDayCardMenu.razor.cs has computed and applied the final
 //      placement via CardMenuPlacementCalculator (a pure C# function, unit
 //      tested independently of any DOM/browser).
 //   2. Outside-click detection via a real document-level listener. A CSS

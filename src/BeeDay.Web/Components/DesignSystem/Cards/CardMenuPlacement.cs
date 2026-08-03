@@ -2,7 +2,7 @@ namespace BeeDay.Web.Components.DesignSystem.Cards;
 
 /// <summary>
 /// Raw geometry measured from the real DOM (trigger, the menu panel itself,
-/// and the viewport) — gathered by <c>levelup-card-menu.js</c>'s
+/// and the viewport) — gathered by <c>beeday-card-menu.js</c>'s
 /// <c>measureGeometry</c> after the panel has been rendered (invisible, but
 /// laid out) so its actual width/height are known, never estimated.
 /// </summary>

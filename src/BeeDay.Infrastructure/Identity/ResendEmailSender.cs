@@ -26,7 +26,7 @@ public sealed class ResendEmailSender(
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "emails");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _options.ApiKey);
-        request.Headers.UserAgent.ParseAdd("LevelUp/1.0");
+        request.Headers.UserAgent.ParseAdd("BeeDay/1.0");
         request.Headers.TryAddWithoutValidation("Idempotency-Key", Guid.NewGuid().ToString("N"));
         request.Content = JsonContent.Create(new
         {

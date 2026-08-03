@@ -37,7 +37,7 @@ namespace BeeDay.Web.Tests.Integration;
 public class BeeDayWebApplicationFactory : WebApplicationFactory<Program>
 {
     public string ConnectionString { get; } =
-        $"Server=(localdb)\\mssqllocaldb;Database=LevelUp_WebTests_{Guid.NewGuid():N};Trusted_Connection=True;TrustServerCertificate=True;";
+        $"Server=(localdb)\\mssqllocaldb;Database=BeeDay_WebTests_{Guid.NewGuid():N};Trusted_Connection=True;TrustServerCertificate=True;";
 
     protected virtual IReadOnlyDictionary<string, string?> RateLimiterConfiguration { get; } = new Dictionary<string, string?>
     {
@@ -63,8 +63,8 @@ public class BeeDayWebApplicationFactory : WebApplicationFactory<Program>
         {
             var settings = new Dictionary<string, string?>
             {
-                ["LevelUp:Persistence:SqlServer:ConnectionString"] = ConnectionString,
-                ["LevelUp:Email:Development:Enabled"] = "false"
+                ["BeeDay:Persistence:SqlServer:ConnectionString"] = ConnectionString,
+                ["BeeDay:Email:Development:Enabled"] = "false"
             };
             foreach (var (key, value) in RateLimiterConfiguration)
             {
@@ -245,7 +245,7 @@ public class BeeDayWebApplicationFactory : WebApplicationFactory<Program>
     }
 
     /// <summary>
-    /// Produces a validly-encrypted "LevelUp.Auth" cookie value for an arbitrary claim set, using
+    /// Produces a validly-encrypted "BeeDay.Auth" cookie value for an arbitrary claim set, using
     /// the app's own real <c>CookieAuthenticationOptions.TicketDataFormat</c> — the same
     /// DataProtection-backed format /auth/login itself uses to sign cookies. This lets tests forge
     /// exactly the edge-case ticket needed (missing/invalid/stale SessionVersion claim, nonexistent

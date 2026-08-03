@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: LevelUp API
+  title: BeeDay API
   version: 1.0.0-draft
   description: Contrato inicial futuro. A implementação HTTP completa não faz parte da primeira etapa.
 servers:

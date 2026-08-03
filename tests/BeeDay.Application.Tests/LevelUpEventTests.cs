@@ -83,7 +83,7 @@ public sealed class LevelUpEventTests
     }
 
     private static User CreateUser() =>
-        User.Create("Event Hero", "eventhero@levelup.invalid");
+        User.Create("Event Hero", "eventhero@beeday.invalid");
 
     private sealed class CapturingPublisher : IPublisher
     {

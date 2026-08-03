@@ -30,7 +30,7 @@ public partial class BeeDaySortable : IAsyncDisposable
             return;
         }
 
-        module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/levelup-sortable.js?v=20260721-f13-dragfix");
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/beeday-sortable.js?v=20260721-f13-dragfix");
         selfReference = DotNetObjectReference.Create(this);
         await module.InvokeVoidAsync("initialize", container, selfReference);
     }

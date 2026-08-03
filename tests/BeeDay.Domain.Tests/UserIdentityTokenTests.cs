@@ -12,7 +12,7 @@ public sealed class UserIdentityTokenTests
     [Fact]
     public void User_StartsWithUnconfirmedEmail()
     {
-        var user = User.Create("Tiago", "tiago@levelup.invalid");
+        var user = User.Create("Tiago", "tiago@beeday.invalid");
 
         Assert.False(user.IsEmailConfirmed);
         Assert.Null(user.EmailConfirmedAtUtc);
@@ -21,7 +21,7 @@ public sealed class UserIdentityTokenTests
     [Fact]
     public void ConfirmEmail_ChangesConfirmationState()
     {
-        var user = User.Create("Tiago", "tiago@levelup.invalid");
+        var user = User.Create("Tiago", "tiago@beeday.invalid");
 
         user.ConfirmEmail(user.CreatedAtUtc.AddMinutes(1));
 
@@ -32,7 +32,7 @@ public sealed class UserIdentityTokenTests
     [Fact]
     public void ConfirmEmail_IsIdempotent()
     {
-        var user = User.Create("Tiago", "tiago@levelup.invalid");
+        var user = User.Create("Tiago", "tiago@beeday.invalid");
         var firstConfirmation = user.CreatedAtUtc.AddMinutes(1);
 
         user.ConfirmEmail(firstConfirmation);

@@ -4,7 +4,7 @@ namespace BeeDay.Web.Configuration;
 
 public sealed class ProductionHostingOptions
 {
-    public const string SectionName = "LevelUp:Hosting";
+    public const string SectionName = "BeeDay:Hosting";
 
     public string DataProtectionKeysDirectory { get; set; } = "DataProtection-Keys";
     public ForwardedHeadersConfiguration ForwardedHeaders { get; set; } = new();

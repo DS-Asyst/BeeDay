@@ -17,9 +17,9 @@ public sealed class LoginIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task Login_WithValidCredentials_Succeeds()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await factory.SeedConfirmedUserAsync("valid-login@levelup.invalid", "Password123!");
+        await factory.SeedConfirmedUserAsync("valid-login@beeday.invalid", "Password123!");
 
-        var response = await PostLoginAsync("valid-login@levelup.invalid", "Password123!", cancellationToken);
+        var response = await PostLoginAsync("valid-login@beeday.invalid", "Password123!", cancellationToken);
 
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
     }
@@ -28,9 +28,9 @@ public sealed class LoginIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task Login_WithNormalizedEmailCasing_Succeeds()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await factory.SeedConfirmedUserAsync("normalized-email@levelup.invalid", "Password123!");
+        await factory.SeedConfirmedUserAsync("normalized-email@beeday.invalid", "Password123!");
 
-        var response = await PostLoginAsync("Normalized-Email@LevelUp.Invalid", "Password123!", cancellationToken);
+        var response = await PostLoginAsync("Normalized-Email@BeeDay.Invalid", "Password123!", cancellationToken);
 
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
         Assert.DoesNotContain("error=invalid", response.Headers.Location?.ToString() ?? string.Empty, StringComparison.Ordinal);
@@ -40,9 +40,9 @@ public sealed class LoginIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task Login_WithInvalidPassword_ShowsGenericError()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await factory.SeedConfirmedUserAsync("wrong-password@levelup.invalid", "Password123!");
+        await factory.SeedConfirmedUserAsync("wrong-password@beeday.invalid", "Password123!");
 
-        var response = await PostLoginAsync("wrong-password@levelup.invalid", "IncorrectPassword!", cancellationToken);
+        var response = await PostLoginAsync("wrong-password@beeday.invalid", "IncorrectPassword!", cancellationToken);
 
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
         Assert.Contains("error=invalid", response.Headers.Location!.ToString(), StringComparison.Ordinal);
@@ -52,10 +52,10 @@ public sealed class LoginIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task Login_WithNonexistentUser_ShowsSameGenericErrorAsWrongPassword()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await factory.SeedConfirmedUserAsync("real-account@levelup.invalid", "Password123!");
+        await factory.SeedConfirmedUserAsync("real-account@beeday.invalid", "Password123!");
 
-        var wrongPasswordResponse = await PostLoginAsync("real-account@levelup.invalid", "IncorrectPassword!", cancellationToken);
-        var nonexistentResponse = await PostLoginAsync("nobody-here@levelup.invalid", "IncorrectPassword!", cancellationToken);
+        var wrongPasswordResponse = await PostLoginAsync("real-account@beeday.invalid", "IncorrectPassword!", cancellationToken);
+        var nonexistentResponse = await PostLoginAsync("nobody-here@beeday.invalid", "IncorrectPassword!", cancellationToken);
 
         Assert.Equal(wrongPasswordResponse.StatusCode, nonexistentResponse.StatusCode);
         Assert.Equal(wrongPasswordResponse.Headers.Location, nonexistentResponse.Headers.Location);
@@ -65,10 +65,10 @@ public sealed class LoginIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task Login_WithDeactivatedUser_IsRejectedWithSameGenericError()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        var user = await factory.SeedConfirmedUserAsync("deactivated-login@levelup.invalid", "Password123!");
+        var user = await factory.SeedConfirmedUserAsync("deactivated-login@beeday.invalid", "Password123!");
         await factory.DeactivateUserAsync(user.Id);
 
-        var response = await PostLoginAsync("deactivated-login@levelup.invalid", "Password123!", cancellationToken);
+        var response = await PostLoginAsync("deactivated-login@beeday.invalid", "Password123!", cancellationToken);
 
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
         Assert.Contains("error=invalid", response.Headers.Location!.ToString(), StringComparison.Ordinal);
@@ -78,9 +78,9 @@ public sealed class LoginIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task Login_WithUnconfirmedEmail_IsRejectedWithSameGenericError()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await factory.SeedUnconfirmedUserAsync("unconfirmed-login@levelup.invalid", "Password123!");
+        await factory.SeedUnconfirmedUserAsync("unconfirmed-login@beeday.invalid", "Password123!");
 
-        var response = await PostLoginAsync("unconfirmed-login@levelup.invalid", "Password123!", cancellationToken);
+        var response = await PostLoginAsync("unconfirmed-login@beeday.invalid", "Password123!", cancellationToken);
 
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
         Assert.Contains("error=invalid", response.Headers.Location!.ToString(), StringComparison.Ordinal);
@@ -90,12 +90,12 @@ public sealed class LoginIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task Login_IssuesAuthCookieWithSessionVersionClaim()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await factory.SeedConfirmedUserAsync("session-claim@levelup.invalid", "Password123!");
+        await factory.SeedConfirmedUserAsync("session-claim@beeday.invalid", "Password123!");
 
-        var response = await PostLoginAsync("session-claim@levelup.invalid", "Password123!", cancellationToken);
+        var response = await PostLoginAsync("session-claim@beeday.invalid", "Password123!", cancellationToken);
 
         Assert.True(response.Headers.TryGetValues("Set-Cookie", out var cookies));
-        var authCookie = Assert.Single(cookies, cookie => cookie.StartsWith("LevelUp.Auth=", StringComparison.Ordinal));
+        var authCookie = Assert.Single(cookies, cookie => cookie.StartsWith("BeeDay.Auth=", StringComparison.Ordinal));
         // The cookie value itself is the encrypted/protected ticket; we cannot decode it without
         // the app's DataProtection keys, but its mere presence plus a successful subsequent
         // request to a protected page (covered by AuthorizationIntegrationTests) proves the
@@ -107,9 +107,9 @@ public sealed class LoginIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task Login_RedirectsToOnboarding_WhenProfileCompleteButOnboardingNot()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await factory.SeedConfirmedUserAsync("needs-onboarding@levelup.invalid", "Password123!");
+        await factory.SeedConfirmedUserAsync("needs-onboarding@beeday.invalid", "Password123!");
 
-        var response = await PostLoginAsync("needs-onboarding@levelup.invalid", "Password123!", cancellationToken);
+        var response = await PostLoginAsync("needs-onboarding@beeday.invalid", "Password123!", cancellationToken);
 
         Assert.Equal("/onboarding/tutorial", response.Headers.Location!.ToString());
     }
@@ -118,14 +118,14 @@ public sealed class LoginIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task Login_RedirectsToDaily_WhenOnboardingAlreadyCompleted()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        var user = await factory.SeedConfirmedUserAsync("onboarding-done@levelup.invalid", "Password123!");
+        var user = await factory.SeedConfirmedUserAsync("onboarding-done@beeday.invalid", "Password123!");
         using (var scope = factory.Services.CreateScope())
         {
             var repository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
             await repository.UpdateAsync(user.Id, u => u.CompleteOnboarding(), cancellationToken);
         }
 
-        var response = await PostLoginAsync("onboarding-done@levelup.invalid", "Password123!", cancellationToken);
+        var response = await PostLoginAsync("onboarding-done@beeday.invalid", "Password123!", cancellationToken);
 
         Assert.Equal("/daily", response.Headers.Location!.ToString());
     }
@@ -134,9 +134,9 @@ public sealed class LoginIntegrationTests(BeeDayWebApplicationFactory factory)
     public async Task Login_ResponseBody_NeverContainsPasswordOrHash()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        var user = await factory.SeedConfirmedUserAsync("no-leak@levelup.invalid", "Sup3rSecretPassword!");
+        var user = await factory.SeedConfirmedUserAsync("no-leak@beeday.invalid", "Sup3rSecretPassword!");
 
-        var response = await PostLoginAsync("no-leak@levelup.invalid", "Sup3rSecretPassword!", cancellationToken);
+        var response = await PostLoginAsync("no-leak@beeday.invalid", "Sup3rSecretPassword!", cancellationToken);
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
         Assert.DoesNotContain("Sup3rSecretPassword!", body, StringComparison.Ordinal);

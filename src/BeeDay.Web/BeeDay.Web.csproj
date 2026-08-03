@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>BeeDay.Web</AssemblyName>
     <RootNamespace>BeeDay.Web</RootNamespace>
-    <UserSecretsId>LevelUp-Web-Identity</UserSecretsId>
+    <UserSecretsId>BeeDay-Web-Identity</UserSecretsId>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
