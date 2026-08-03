@@ -6,8 +6,8 @@
     min-height: 30rem;
     height: auto;
     overflow: visible;
-    border: 1px solid var(--levelup-color-border);
-    background: var(--levelup-color-board-surface);
+    border: 1px solid var(--beeday-color-border);
+    background: var(--beeday-color-board-surface);
     box-sizing: border-box;
 }
 
@@ -19,8 +19,8 @@
     gap: 0.6rem;
     min-height: 3.15rem;
     padding: 0.5rem 0.55rem;
-    border-bottom: 1px solid var(--levelup-color-border);
-    background: var(--levelup-color-surface);
+    border-bottom: 1px solid var(--beeday-color-border);
+    background: var(--beeday-color-surface);
     box-sizing: border-box;
     z-index: 2;
 }
@@ -36,7 +36,7 @@
     margin: 0;
     overflow: hidden;
     color: #17121d;
-    font-family: var(--levelup-font-ui);
+    font-family: var(--beeday-font-ui);
     font-size: 1.42rem;
     font-weight: 700;
     letter-spacing: -.035em;
@@ -52,8 +52,8 @@
     height: 1.65rem;
     padding: 0 .42rem;
     border-radius: 999px;
-    color: var(--levelup-color-surface);
-    background: var(--levelup-color-project);
+    color: var(--beeday-color-surface);
+    background: var(--beeday-color-project);
     font-size: .75rem;
     font-weight: 700;
     box-sizing: border-box;
@@ -72,7 +72,7 @@
     min-height: calc(30rem - 3.65rem);
     margin: 0;
     padding: 0.35rem;
-    background: var(--levelup-color-board-surface);
+    background: var(--beeday-color-board-surface);
     box-sizing: border-box;
 }
 
@@ -90,16 +90,16 @@
 
 /* Sprint 1.7 — column polish */
 .dashboard-column {
-    transition: border-color var(--levelup-transition-normal), box-shadow var(--levelup-transition-normal);
+    transition: border-color var(--beeday-transition-normal), box-shadow var(--beeday-transition-normal);
 }
 
 .dashboard-column:focus-within {
     border-color: #c6bdd0;
-    box-shadow: var(--levelup-shadow-sm);
+    box-shadow: var(--beeday-shadow-sm);
 }
 
 .dashboard-column__header {
-    padding: var(--levelup-spacing-sm) var(--levelup-spacing-smd);
+    padding: var(--beeday-spacing-sm) var(--beeday-spacing-smd);
 }
 
 /* Dashboard hierarchy and readability pass — 2026-07-25 */
@@ -109,9 +109,9 @@
 }
 
 .dashboard-column__heading h2 {
-    font-family: var(--levelup-font-ui);
+    font-family: var(--beeday-font-ui);
     font-size: 1.65rem;
-    font-weight: var(--levelup-font-weight-regular);
+    font-weight: var(--beeday-font-weight-regular);
     letter-spacing: -.015em;
     line-height: 1;
 }
@@ -120,9 +120,9 @@
     min-width: 1.85rem;
     height: 1.85rem;
     padding: 0 .5rem;
-    font-family: var(--levelup-font-body);
+    font-family: var(--beeday-font-body);
     font-size: .95rem;
-    font-weight: var(--levelup-font-weight-regular);
+    font-weight: var(--beeday-font-weight-regular);
 }
 
 .dashboard-column__content {
@@ -139,8 +139,8 @@
 
 /* Refined column depth — approved visual pass */
 .dashboard-column {
-    border: 1px solid var(--levelup-color-border-strong) !important;
-    border-radius: var(--levelup-radius-sm) !important;
+    border: 1px solid var(--beeday-color-border-strong) !important;
+    border-radius: var(--beeday-radius-sm) !important;
     box-shadow: 0 1px 2px rgb(47 36 56 / 8%), 0 4px 12px rgb(47 36 56 / 7%) !important;
 }
 
@@ -150,7 +150,7 @@
 }
 
 .dashboard-column__header {
-    border-bottom-color: var(--levelup-color-border);
+    border-bottom-color: var(--beeday-color-border);
 }
 
 
@@ -169,8 +169,8 @@
 
 /* UX / Visual Refinement — Sprint 6.1: retro UI column headings */
 .dashboard-column__heading h2 {
-    font-family: var(--levelup-font-ui);
+    font-family: var(--beeday-font-ui);
     font-size: 1.48rem;
-    font-weight: var(--levelup-font-weight-semibold);
+    font-weight: var(--beeday-font-weight-semibold);
     letter-spacing: 0;
 }

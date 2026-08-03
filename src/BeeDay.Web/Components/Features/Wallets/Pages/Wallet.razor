@@ -21,7 +21,7 @@
 }
 else
 {
-    <main class="wallet-page levelup-fade-in" aria-busy="@_interaction.IsBusy.ToString().ToLowerInvariant()">
+    <main class="wallet-page beeday-fade-in" aria-busy="@_interaction.IsBusy.ToString().ToLowerInvariant()">
         <header class="wallet-page__header">
             <div>
                 <span class="wallet-eyebrow">Personal finance</span>
@@ -31,7 +31,7 @@ else
             <BeeDayButton Variant="BeeDayButtonVariant.Primary"
                            Icon="PixelIconName.Add"
                            Disabled="_interaction.IsBusy"
-                           Class="levelup-button--comic levelup-button--comic-orange"
+                           Class="beeday-button--comic beeday-button--comic-orange"
                            OnClick="OpenCreateTransaction">New transaction</BeeDayButton>
         </header>
 

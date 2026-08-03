@@ -25,8 +25,8 @@ public sealed class BeeDayHeroTests
             .Add(component => component.Eyebrow, "Personal finance")
             .Add(component => component.Subtitle, "Track your wallet."));
 
-        Assert.Contains("Personal finance", cut.Find(".levelup-hero__eyebrow").TextContent);
-        Assert.Contains("Track your wallet.", cut.Find(".levelup-hero__subtitle").TextContent);
+        Assert.Contains("Personal finance", cut.Find(".beeday-hero__eyebrow").TextContent);
+        Assert.Contains("Track your wallet.", cut.Find(".beeday-hero__subtitle").TextContent);
     }
 
     [Fact]
@@ -36,8 +36,8 @@ public sealed class BeeDayHeroTests
         var cut = context.Render<BeeDayHero>(parameters => parameters
             .Add(component => component.Title, "Inventory"));
 
-        Assert.Empty(cut.FindAll(".levelup-hero__eyebrow"));
-        Assert.Empty(cut.FindAll(".levelup-hero__subtitle"));
+        Assert.Empty(cut.FindAll(".beeday-hero__eyebrow"));
+        Assert.Empty(cut.FindAll(".beeday-hero__subtitle"));
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public sealed class BeeDayHeroTests
                 builder.CloseComponent();
             }));
 
-        var illustration = cut.Find(".levelup-hero__illustration");
+        var illustration = cut.Find(".beeday-hero__illustration");
         Assert.NotNull(illustration.QuerySelector("svg"));
     }
 
@@ -64,7 +64,7 @@ public sealed class BeeDayHeroTests
         var cut = context.Render<BeeDayHero>(parameters => parameters
             .Add(component => component.Title, "Daily"));
 
-        Assert.Empty(cut.FindAll(".levelup-hero__illustration"));
+        Assert.Empty(cut.FindAll(".beeday-hero__illustration"));
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public sealed class BeeDayHeroTests
                 builder.CloseComponent();
             }));
 
-        var svg = cut.Find(".levelup-hero__illustration svg");
+        var svg = cut.Find(".beeday-hero__illustration svg");
         Assert.Equal("true", svg.GetAttribute("aria-hidden"));
     }
 
@@ -100,7 +100,7 @@ public sealed class BeeDayHeroTests
                 builder.CloseComponent();
             }));
 
-        var svg = cut.Find(".levelup-hero__illustration svg");
+        var svg = cut.Find(".beeday-hero__illustration svg");
         Assert.Equal("img", svg.GetAttribute("role"));
         Assert.Equal("Action required", svg.GetAttribute("aria-label"));
     }
@@ -113,7 +113,7 @@ public sealed class BeeDayHeroTests
             .Add(component => component.Title, "Inventory")
             .Add(component => component.PrimaryAction, builder => builder.AddContent(0, "New transaction")));
 
-        Assert.Contains("New transaction", cut.Find(".levelup-hero__primary-action").TextContent);
+        Assert.Contains("New transaction", cut.Find(".beeday-hero__primary-action").TextContent);
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public sealed class BeeDayHeroTests
         var cut = context.Render<BeeDayHero>(parameters => parameters
             .Add(component => component.Title, "Inventory"));
 
-        Assert.Empty(cut.FindAll(".levelup-hero__primary-action"));
+        Assert.Empty(cut.FindAll(".beeday-hero__primary-action"));
     }
 
     [Fact]
@@ -134,7 +134,7 @@ public sealed class BeeDayHeroTests
             .Add(component => component.Title, "Daily")
             .Add(component => component.SupportingContent, builder => builder.AddContent(0, "Return throughout the day.")));
 
-        Assert.Contains("Return throughout the day.", cut.Find(".levelup-hero__supporting").TextContent);
+        Assert.Contains("Return throughout the day.", cut.Find(".beeday-hero__supporting").TextContent);
     }
 
     [Fact]
@@ -144,7 +144,7 @@ public sealed class BeeDayHeroTests
         var cut = context.Render<BeeDayHero>(parameters => parameters
             .Add(component => component.Title, "Daily"));
 
-        Assert.Empty(cut.FindAll(".levelup-hero__supporting"));
+        Assert.Empty(cut.FindAll(".beeday-hero__supporting"));
     }
 
     [Theory]
@@ -158,8 +158,8 @@ public sealed class BeeDayHeroTests
             .Add(component => component.Variant, variant));
 
         var header = cut.Find("header");
-        Assert.Contains("levelup-hero", header.ClassList);
-        Assert.Equal(expectsOnboardingClass, header.ClassList.Contains("levelup-hero--onboarding"));
+        Assert.Contains("beeday-hero", header.ClassList);
+        Assert.Equal(expectsOnboardingClass, header.ClassList.Contains("beeday-hero--onboarding"));
     }
 
     [Fact]
@@ -183,11 +183,11 @@ public sealed class BeeDayHeroTests
         var cut = context.Render<BeeDayHero>(parameters => parameters
             .Add(component => component.Title, "Title-only Hero"));
 
-        Assert.Empty(cut.FindAll(".levelup-hero__eyebrow"));
-        Assert.Empty(cut.FindAll(".levelup-hero__subtitle"));
-        Assert.Empty(cut.FindAll(".levelup-hero__illustration"));
-        Assert.Empty(cut.FindAll(".levelup-hero__primary-action"));
-        Assert.Empty(cut.FindAll(".levelup-hero__supporting"));
+        Assert.Empty(cut.FindAll(".beeday-hero__eyebrow"));
+        Assert.Empty(cut.FindAll(".beeday-hero__subtitle"));
+        Assert.Empty(cut.FindAll(".beeday-hero__illustration"));
+        Assert.Empty(cut.FindAll(".beeday-hero__primary-action"));
+        Assert.Empty(cut.FindAll(".beeday-hero__supporting"));
         Assert.Single(cut.FindAll("h1"));
     }
 }

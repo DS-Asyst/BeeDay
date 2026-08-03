@@ -19,9 +19,9 @@ public sealed class BeeDaySettingsTests
             .Add(component => component.Description, "Manage your profile.")
             .Add(component => component.ChildContent, builder => builder.AddContent(0, "Form goes here")));
 
-        Assert.Contains("levelup-card", cut.Find("article").ClassList);
+        Assert.Contains("beeday-card", cut.Find("article").ClassList);
         Assert.Equal("Profile", cut.Find("h2").TextContent);
-        Assert.Contains("IDENTITY", cut.Find(".levelup-settings-section__header").TextContent, StringComparison.Ordinal);
+        Assert.Contains("IDENTITY", cut.Find(".beeday-settings-section__header").TextContent, StringComparison.Ordinal);
         Assert.Contains("Form goes here", cut.Markup, StringComparison.Ordinal);
     }
 

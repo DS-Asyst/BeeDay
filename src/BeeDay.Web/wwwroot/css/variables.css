@@ -1,279 +1,279 @@
 :root {
     /* Brand */
-    --levelup-color-primary: #673ab7;
-    --levelup-color-primary-hover: #523384;
-    --levelup-color-primary-active: #432874;
-    --levelup-color-primary-light: #8b61c7;
-    --levelup-color-primary-soft: #ede4fa;
-    --levelup-color-accent: #f29b24;
-    --levelup-color-accent-hover: #d9820d;
+    --beeday-color-primary: #673ab7;
+    --beeday-color-primary-hover: #523384;
+    --beeday-color-primary-active: #432874;
+    --beeday-color-primary-light: #8b61c7;
+    --beeday-color-primary-soft: #ede4fa;
+    --beeday-color-accent: #f29b24;
+    --beeday-color-accent-hover: #d9820d;
 
     /* Surfaces */
-    --levelup-color-background: #f2f1f3;
-    --levelup-color-surface: #ffffff;
-    --levelup-color-surface-muted: #f7f5f9;
-    --levelup-color-surface-subtle: #eceaec;
-    --levelup-color-overlay: rgb(47 27 72 / 72%);
+    --beeday-color-background: #f2f1f3;
+    --beeday-color-surface: #ffffff;
+    --beeday-color-surface-muted: #f7f5f9;
+    --beeday-color-surface-subtle: #eceaec;
+    --beeday-color-overlay: rgb(47 27 72 / 72%);
 
     /* Content */
-    --levelup-color-text-primary: #2f2737;
-    --levelup-color-text-secondary: #514858;
-    --levelup-color-text-muted: #817789;
-    --levelup-color-text-inverse: #ffffff;
-    --levelup-color-border: #d7d2da;
-    --levelup-color-border-strong: #c6c1ca;
+    --beeday-color-text-primary: #2f2737;
+    --beeday-color-text-secondary: #514858;
+    --beeday-color-text-muted: #817789;
+    --beeday-color-text-inverse: #ffffff;
+    --beeday-color-border: #d7d2da;
+    --beeday-color-border-strong: #c6c1ca;
 
     /* Status */
-    --levelup-color-success: #2f9e5b;
-    --levelup-color-success-soft: #e8f7ee;
-    --levelup-color-warning: #d89b22;
-    --levelup-color-warning-soft: #fff5dc;
-    --levelup-color-danger: #d33b46;
-    --levelup-color-danger-hover: #b32121;
-    --levelup-color-danger-soft: #fff0f1;
-    --levelup-color-info: #335f71;
-    --levelup-color-info-soft: #e7f0f4;
+    --beeday-color-success: #2f9e5b;
+    --beeday-color-success-soft: #e8f7ee;
+    --beeday-color-warning: #d89b22;
+    --beeday-color-warning-soft: #fff5dc;
+    --beeday-color-danger: #d33b46;
+    --beeday-color-danger-hover: #b32121;
+    --beeday-color-danger-soft: #fff0f1;
+    --beeday-color-info: #335f71;
+    --beeday-color-info-soft: #e7f0f4;
 
     /* Activity accents */
-    --levelup-color-task: #335f71;
-    --levelup-color-task-dark: #244554;
-    --levelup-color-todo: #bf2ec7;
-    --levelup-color-todo-dark: #92239a;
-    --levelup-color-project: #8056c7;
-    --levelup-color-project-dark: #613ca2;
+    --beeday-color-task: #335f71;
+    --beeday-color-task-dark: #244554;
+    --beeday-color-todo: #bf2ec7;
+    --beeday-color-todo-dark: #92239a;
+    --beeday-color-project: #8056c7;
+    --beeday-color-project-dark: #613ca2;
 
     /* Activity attributes — dedicated identity colors, distinct from status/brand tokens */
-    --levelup-color-attribute-strength: #b3432f;
-    --levelup-color-attribute-dexterity: #1f8a99;
-    --levelup-color-attribute-intelligence: #4456c9;
-    --levelup-color-attribute-vitality: #b23a86;
+    --beeday-color-attribute-strength: #b3432f;
+    --beeday-color-attribute-dexterity: #1f8a99;
+    --beeday-color-attribute-intelligence: #4456c9;
+    --beeday-color-attribute-vitality: #b23a86;
 
     /* Wallet */
-    --levelup-color-tag-default: #7a4fcb;
+    --beeday-color-tag-default: #7a4fcb;
 
-    /* LevelUpButton variant palettes — single source for every semantic button
+    /* BeeDayButton variant palettes — single source for every semantic button
        variant's pressable-pixel palette (background/hover/foreground/outline/
        depth/shadow[/focus]), consumed by design-system.css. */
-    --levelup-color-button-focus-default: rgb(122 79 203 / 36%);
+    --beeday-color-button-focus-default: rgb(122 79 203 / 36%);
 
-    --levelup-color-button-primary-bg: var(--levelup-game-yellow);
-    --levelup-color-button-primary-bg-hover: #ffd454;
-    --levelup-color-button-primary-fg: #171321;
-    --levelup-color-button-primary-outline: #8d6500;
-    --levelup-color-button-primary-depth: #d28b00;
-    --levelup-color-button-primary-shadow: #2b2415;
+    --beeday-color-button-primary-bg: var(--beeday-game-yellow);
+    --beeday-color-button-primary-bg-hover: #ffd454;
+    --beeday-color-button-primary-fg: #171321;
+    --beeday-color-button-primary-outline: #8d6500;
+    --beeday-color-button-primary-depth: #d28b00;
+    --beeday-color-button-primary-shadow: #2b2415;
 
-    --levelup-color-button-secondary-bg: var(--levelup-game-purple, #65409f);
-    --levelup-color-button-secondary-bg-hover: #7650b5;
-    --levelup-color-button-secondary-fg: #ffffff;
-    --levelup-color-button-secondary-outline: #44296f;
-    --levelup-color-button-secondary-depth: #4f3280;
-    --levelup-color-button-secondary-shadow: #27193d;
+    --beeday-color-button-secondary-bg: var(--beeday-game-purple, #65409f);
+    --beeday-color-button-secondary-bg-hover: #7650b5;
+    --beeday-color-button-secondary-fg: #ffffff;
+    --beeday-color-button-secondary-outline: #44296f;
+    --beeday-color-button-secondary-depth: #4f3280;
+    --beeday-color-button-secondary-shadow: #27193d;
 
-    --levelup-color-button-success-bg: #36a866;
-    --levelup-color-button-success-bg-hover: #46b976;
-    --levelup-color-button-success-fg: #ffffff;
-    --levelup-color-button-success-outline: #1a6139;
-    --levelup-color-button-success-depth: #287d4d;
-    --levelup-color-button-success-shadow: #174a2d;
+    --beeday-color-button-success-bg: #36a866;
+    --beeday-color-button-success-bg-hover: #46b976;
+    --beeday-color-button-success-fg: #ffffff;
+    --beeday-color-button-success-outline: #1a6139;
+    --beeday-color-button-success-depth: #287d4d;
+    --beeday-color-button-success-shadow: #174a2d;
 
-    --levelup-color-button-warning-bg: #f5b942;
-    --levelup-color-button-warning-bg-hover: #ffc85d;
-    --levelup-color-button-warning-fg: #171321;
-    --levelup-color-button-warning-outline: #9b6508;
-    --levelup-color-button-warning-depth: #c9820d;
-    --levelup-color-button-warning-shadow: #5f410d;
+    --beeday-color-button-warning-bg: #f5b942;
+    --beeday-color-button-warning-bg-hover: #ffc85d;
+    --beeday-color-button-warning-fg: #171321;
+    --beeday-color-button-warning-outline: #9b6508;
+    --beeday-color-button-warning-depth: #c9820d;
+    --beeday-color-button-warning-shadow: #5f410d;
 
-    --levelup-color-button-back-bg: color-mix(in srgb, var(--levelup-game-purple, #65409f) 72%, #27202f);
-    --levelup-color-button-back-bg-hover: var(--levelup-game-purple, #65409f);
-    --levelup-color-button-back-fg: #ffffff;
-    --levelup-color-button-back-outline: #322046;
-    --levelup-color-button-back-depth: #3c2853;
-    --levelup-color-button-back-shadow: #21152f;
+    --beeday-color-button-back-bg: color-mix(in srgb, var(--beeday-game-purple, #65409f) 72%, #27202f);
+    --beeday-color-button-back-bg-hover: var(--beeday-game-purple, #65409f);
+    --beeday-color-button-back-fg: #ffffff;
+    --beeday-color-button-back-outline: #322046;
+    --beeday-color-button-back-depth: #3c2853;
+    --beeday-color-button-back-shadow: #21152f;
 
-    --levelup-color-button-danger-bg: var(--levelup-game-red);
-    --levelup-color-button-danger-bg-hover: #d94c57;
-    --levelup-color-button-danger-fg: #ffffff;
-    --levelup-color-button-danger-outline: #691a20;
-    --levelup-color-button-danger-depth: #9f2a32;
-    --levelup-color-button-danger-shadow: #57151a;
+    --beeday-color-button-danger-bg: var(--beeday-game-red);
+    --beeday-color-button-danger-bg-hover: #d94c57;
+    --beeday-color-button-danger-fg: #ffffff;
+    --beeday-color-button-danger-outline: #691a20;
+    --beeday-color-button-danger-depth: #9f2a32;
+    --beeday-color-button-danger-shadow: #57151a;
 
-    --levelup-color-button-confirmation-cancel-bg: #ffffff;
-    --levelup-color-button-confirmation-cancel-bg-hover: #f1f1f1;
-    --levelup-color-button-confirmation-cancel-fg: #171321;
-    --levelup-color-button-confirmation-cancel-outline: #444047;
-    --levelup-color-button-confirmation-cancel-depth: #d7d5d8;
-    --levelup-color-button-confirmation-cancel-shadow: #5a565d;
-    --levelup-color-button-confirmation-cancel-focus: rgb(68 64 71 / 28%);
+    --beeday-color-button-confirmation-cancel-bg: #ffffff;
+    --beeday-color-button-confirmation-cancel-bg-hover: #f1f1f1;
+    --beeday-color-button-confirmation-cancel-fg: #171321;
+    --beeday-color-button-confirmation-cancel-outline: #444047;
+    --beeday-color-button-confirmation-cancel-depth: #d7d5d8;
+    --beeday-color-button-confirmation-cancel-shadow: #5a565d;
+    --beeday-color-button-confirmation-cancel-focus: rgb(68 64 71 / 28%);
 
-    --levelup-color-button-reference-blue-bg: #20b4f4;
-    --levelup-color-button-reference-blue-bg-hover: #2dbcf8;
-    --levelup-color-button-reference-blue-fg: #ffffff;
-    --levelup-color-button-reference-blue-outline: #075b8f;
-    --levelup-color-button-reference-blue-depth: #087fbe;
-    --levelup-color-button-reference-blue-shadow: #064b78;
-    --levelup-color-button-reference-blue-focus: rgb(32 180 244 / 30%);
+    --beeday-color-button-reference-blue-bg: #20b4f4;
+    --beeday-color-button-reference-blue-bg-hover: #2dbcf8;
+    --beeday-color-button-reference-blue-fg: #ffffff;
+    --beeday-color-button-reference-blue-outline: #075b8f;
+    --beeday-color-button-reference-blue-depth: #087fbe;
+    --beeday-color-button-reference-blue-shadow: #064b78;
+    --beeday-color-button-reference-blue-focus: rgb(32 180 244 / 30%);
 
     /* Card title/description/star text colors — shared by every activity and
        habit card (see cards.css), so a single change here updates every card. */
-    --levelup-color-card-title: #302638;
-    --levelup-color-card-description: #786f80;
-    --levelup-color-card-star: #f3b82f;
-    --levelup-color-card-meta-text: #665d70;
-    --levelup-color-card-meta-bg: #f0edf2;
+    --beeday-color-card-title: #302638;
+    --beeday-color-card-description: #786f80;
+    --beeday-color-card-star: #f3b82f;
+    --beeday-color-card-meta-text: #665d70;
+    --beeday-color-card-meta-bg: #f0edf2;
 
     /* Dashboard chrome — icon-only toggle buttons (filter, view-toggle, add) and
        the Daily board surface, shared across ActivityFilterBar/DashboardColumn. */
-    --levelup-color-chrome-icon: #4f3b5b;
-    --levelup-color-chrome-icon-surface: #f8f7f9;
-    --levelup-color-filter-surface-tint: #f2eef7;
-    --levelup-color-board-surface: #ebe9ec;
+    --beeday-color-chrome-icon: #4f3b5b;
+    --beeday-color-chrome-icon-surface: #f8f7f9;
+    --beeday-color-filter-surface-tint: #f2eef7;
+    --beeday-color-board-surface: #ebe9ec;
 
     /* Habit colors — single source for the Habit card side rail/score button and
        the matching Habit editor accent, so both surfaces of the same chosen
        color never drift apart. */
-    --levelup-habit-color-white: #f7f6f8;
-    --levelup-habit-color-white-dark: #8b8491;
-    --levelup-habit-color-yellow: #ffc15a;
-    --levelup-habit-color-yellow-dark: #dfa234;
-    --levelup-habit-color-green: #24cc8f;
-    --levelup-habit-color-green-dark: #159d6c;
-    --levelup-habit-color-sky: #39c5d7;
-    --levelup-habit-color-sky-dark: #2297a8;
-    --levelup-habit-color-red-light: #ffb3b8;
-    --levelup-habit-color-red-light-dark: #e98189;
-    --levelup-habit-color-red-medium: #ff5a62;
-    --levelup-habit-color-red-medium-dark: #d93640;
-    --levelup-habit-color-red-strong: #d71920;
-    --levelup-habit-color-red-strong-dark: #a90f15;
+    --beeday-habit-color-white: #f7f6f8;
+    --beeday-habit-color-white-dark: #8b8491;
+    --beeday-habit-color-yellow: #ffc15a;
+    --beeday-habit-color-yellow-dark: #dfa234;
+    --beeday-habit-color-green: #24cc8f;
+    --beeday-habit-color-green-dark: #159d6c;
+    --beeday-habit-color-sky: #39c5d7;
+    --beeday-habit-color-sky-dark: #2297a8;
+    --beeday-habit-color-red-light: #ffb3b8;
+    --beeday-habit-color-red-light-dark: #e98189;
+    --beeday-habit-color-red-medium: #ff5a62;
+    --beeday-habit-color-red-medium-dark: #d93640;
+    --beeday-habit-color-red-strong: #d71920;
+    --beeday-habit-color-red-strong-dark: #a90f15;
 
-    /* Comic button palette — single source for LevelUpButton's 8 opt-in
-       levelup-button--comic-* modifiers (see docs/design-system/components.md). */
-    --levelup-color-comic-blue: #14adff;
-    --levelup-color-comic-blue-hover: #2cbaff;
-    --levelup-color-comic-blue-pressed: #0080d4;
-    --levelup-color-comic-blue-foreground: #ffffff;
-    --levelup-color-comic-blue-focus: rgb(20 173 255 / 35%);
+    /* Comic button palette — single source for BeeDayButton's 8 opt-in
+       beeday-button--comic-* modifiers (see docs/design-system/components.md). */
+    --beeday-color-comic-blue: #14adff;
+    --beeday-color-comic-blue-hover: #2cbaff;
+    --beeday-color-comic-blue-pressed: #0080d4;
+    --beeday-color-comic-blue-foreground: #ffffff;
+    --beeday-color-comic-blue-focus: rgb(20 173 255 / 35%);
 
-    --levelup-color-comic-yellow: #ffc928;
-    --levelup-color-comic-yellow-hover: #ffd454;
-    --levelup-color-comic-yellow-pressed: #d28b00;
-    --levelup-color-comic-yellow-foreground: #000000;
-    --levelup-color-comic-yellow-focus: rgb(255 201 40 / 40%);
+    --beeday-color-comic-yellow: #ffc928;
+    --beeday-color-comic-yellow-hover: #ffd454;
+    --beeday-color-comic-yellow-pressed: #d28b00;
+    --beeday-color-comic-yellow-foreground: #000000;
+    --beeday-color-comic-yellow-focus: rgb(255 201 40 / 40%);
 
-    --levelup-color-comic-back: #ffffff;
-    --levelup-color-comic-back-hover: #9c1bff;
-    --levelup-color-comic-back-pressed: #6512a6;
-    --levelup-color-comic-back-foreground: #000000;
-    --levelup-color-comic-back-hover-foreground: #ffffff;
-    --levelup-color-comic-back-pressed-foreground: #ffffff;
-    --levelup-color-comic-back-focus: rgb(156 27 255 / 35%);
+    --beeday-color-comic-back: #ffffff;
+    --beeday-color-comic-back-hover: #9c1bff;
+    --beeday-color-comic-back-pressed: #6512a6;
+    --beeday-color-comic-back-foreground: #000000;
+    --beeday-color-comic-back-hover-foreground: #ffffff;
+    --beeday-color-comic-back-pressed-foreground: #ffffff;
+    --beeday-color-comic-back-focus: rgb(156 27 255 / 35%);
 
-    --levelup-color-comic-danger: #ffffff;
-    --levelup-color-comic-danger-hover: #ef4455;
-    --levelup-color-comic-danger-pressed: #d63d4c;
-    --levelup-color-comic-danger-foreground: #000000;
-    --levelup-color-comic-danger-hover-foreground: #ffffff;
-    --levelup-color-comic-danger-pressed-foreground: #ffffff;
-    --levelup-color-comic-danger-focus: rgb(239 68 85 / 35%);
+    --beeday-color-comic-danger: #ffffff;
+    --beeday-color-comic-danger-hover: #ef4455;
+    --beeday-color-comic-danger-pressed: #d63d4c;
+    --beeday-color-comic-danger-foreground: #000000;
+    --beeday-color-comic-danger-hover-foreground: #ffffff;
+    --beeday-color-comic-danger-pressed-foreground: #ffffff;
+    --beeday-color-comic-danger-focus: rgb(239 68 85 / 35%);
 
-    --levelup-color-comic-neutral: #ffffff;
-    --levelup-color-comic-neutral-hover: #e3e3e3;
-    --levelup-color-comic-neutral-pressed: #afaeb0;
-    --levelup-color-comic-neutral-foreground: #000000;
-    --levelup-color-comic-neutral-pressed-foreground: #ffffff;
-    --levelup-color-comic-neutral-focus: rgb(175 174 176 / 38%);
+    --beeday-color-comic-neutral: #ffffff;
+    --beeday-color-comic-neutral-hover: #e3e3e3;
+    --beeday-color-comic-neutral-pressed: #afaeb0;
+    --beeday-color-comic-neutral-foreground: #000000;
+    --beeday-color-comic-neutral-pressed-foreground: #ffffff;
+    --beeday-color-comic-neutral-focus: rgb(175 174 176 / 38%);
 
-    --levelup-color-comic-success: #bef264;
-    --levelup-color-comic-success-hover: #bef264;
-    --levelup-color-comic-success-pressed: #84cc16;
-    --levelup-color-comic-success-foreground: #000000;
-    --levelup-color-comic-success-focus: rgb(190 242 100 / 42%);
+    --beeday-color-comic-success: #bef264;
+    --beeday-color-comic-success-hover: #bef264;
+    --beeday-color-comic-success-pressed: #84cc16;
+    --beeday-color-comic-success-foreground: #000000;
+    --beeday-color-comic-success-focus: rgb(190 242 100 / 42%);
 
-    --levelup-color-comic-orange: #f08d2e;
-    --levelup-color-comic-orange-hover: #ff9731;
-    --levelup-color-comic-orange-pressed: #d17c29;
-    --levelup-color-comic-orange-foreground: #000000;
-    --levelup-color-comic-orange-focus: rgb(240 141 46 / 38%);
+    --beeday-color-comic-orange: #f08d2e;
+    --beeday-color-comic-orange-hover: #ff9731;
+    --beeday-color-comic-orange-pressed: #d17c29;
+    --beeday-color-comic-orange-foreground: #000000;
+    --beeday-color-comic-orange-focus: rgb(240 141 46 / 38%);
 
-    --levelup-color-comic-magenta: #d40fde;
-    --levelup-color-comic-magenta-hover: #f311ff;
-    --levelup-color-comic-magenta-pressed: #b90dc2;
-    --levelup-color-comic-magenta-foreground: #ffffff;
-    --levelup-color-comic-magenta-focus: rgb(212 15 222 / 35%);
+    --beeday-color-comic-magenta: #d40fde;
+    --beeday-color-comic-magenta-hover: #f311ff;
+    --beeday-color-comic-magenta-pressed: #b90dc2;
+    --beeday-color-comic-magenta-foreground: #ffffff;
+    --beeday-color-comic-magenta-focus: rgb(212 15 222 / 35%);
 
     /* Spacing scale */
-    --levelup-spacing-2xs: .125rem;
-    --levelup-spacing-xs: .25rem;
-    --levelup-spacing-sm: .5rem;
-    --levelup-spacing-smd: .75rem;
-    --levelup-spacing-md: 1rem;
-    --levelup-spacing-lg: 1.5rem;
-    --levelup-spacing-xl: 2rem;
-    --levelup-spacing-2xl: 3rem;
-    --levelup-spacing-3xl: 4rem;
+    --beeday-spacing-2xs: .125rem;
+    --beeday-spacing-xs: .25rem;
+    --beeday-spacing-sm: .5rem;
+    --beeday-spacing-smd: .75rem;
+    --beeday-spacing-md: 1rem;
+    --beeday-spacing-lg: 1.5rem;
+    --beeday-spacing-xl: 2rem;
+    --beeday-spacing-2xl: 3rem;
+    --beeday-spacing-3xl: 4rem;
 
     /* Shape */
-    --levelup-radius-xs: .2rem;
-    --levelup-radius-sm: .375rem;
-    --levelup-radius-md: .625rem;
-    --levelup-radius-lg: .875rem;
-    --levelup-radius-xl: 1.25rem;
-    --levelup-radius-pill: 999px;
+    --beeday-radius-xs: .2rem;
+    --beeday-radius-sm: .375rem;
+    --beeday-radius-md: .625rem;
+    --beeday-radius-lg: .875rem;
+    --beeday-radius-xl: 1.25rem;
+    --beeday-radius-pill: 999px;
 
     /* Elevation */
-    --levelup-shadow-xs: 0 1px 2px rgb(40 27 52 / 8%);
-    --levelup-shadow-sm: 0 1px 2px rgb(47 36 56 / 8%), 0 2px 8px rgb(47 36 56 / 6%);
-    --levelup-shadow-md: 0 4px 12px rgb(47 36 56 / 10%), 0 10px 28px rgb(47 36 56 / 8%);
-    --levelup-shadow-lg: 0 1.5rem 4rem rgb(12 6 22 / 42%);
+    --beeday-shadow-xs: 0 1px 2px rgb(40 27 52 / 8%);
+    --beeday-shadow-sm: 0 1px 2px rgb(47 36 56 / 8%), 0 2px 8px rgb(47 36 56 / 6%);
+    --beeday-shadow-md: 0 4px 12px rgb(47 36 56 / 10%), 0 10px 28px rgb(47 36 56 / 8%);
+    --beeday-shadow-lg: 0 1.5rem 4rem rgb(12 6 22 / 42%);
 
     /* Focus */
-    --levelup-focus-color: rgb(103 58 183 / 20%);
-    --levelup-focus-ring: 0 0 0 3px var(--levelup-focus-color);
+    --beeday-focus-color: rgb(103 58 183 / 20%);
+    --beeday-focus-ring: 0 0 0 3px var(--beeday-focus-color);
 
     /* Motion */
-    --levelup-duration-fast: 120ms;
-    --levelup-duration-normal: 180ms;
-    --levelup-duration-slow: 260ms;
-    --levelup-easing-standard: cubic-bezier(.2, 0, 0, 1);
-    --levelup-easing-emphasized: cubic-bezier(.2, .8, .2, 1);
-    --levelup-transition-fast: var(--levelup-duration-fast) var(--levelup-easing-standard);
-    --levelup-transition-normal: var(--levelup-duration-normal) var(--levelup-easing-standard);
-    --levelup-transition-emphasized: var(--levelup-duration-slow) var(--levelup-easing-emphasized);
+    --beeday-duration-fast: 120ms;
+    --beeday-duration-normal: 180ms;
+    --beeday-duration-slow: 260ms;
+    --beeday-easing-standard: cubic-bezier(.2, 0, 0, 1);
+    --beeday-easing-emphasized: cubic-bezier(.2, .8, .2, 1);
+    --beeday-transition-fast: var(--beeday-duration-fast) var(--beeday-easing-standard);
+    --beeday-transition-normal: var(--beeday-duration-normal) var(--beeday-easing-standard);
+    --beeday-transition-emphasized: var(--beeday-duration-slow) var(--beeday-easing-emphasized);
 
     /* Layout and layers */
-    --levelup-content-width: 100%;
-    --levelup-z-dropdown: 300;
-    --levelup-z-modal: 900;
-    --levelup-z-loading: 1500;
-    --levelup-z-toast: 1700;
+    --beeday-content-width: 100%;
+    --beeday-z-dropdown: 300;
+    --beeday-z-modal: 900;
+    --beeday-z-loading: 1500;
+    --beeday-z-toast: 1700;
 }
 
-/* LevelUp pixel-console accent tokens */
+/* BeeDay pixel-console accent tokens */
 :root {
-    --levelup-game-ink: #171321;
-    --levelup-game-ink-soft: #332b43;
-    --levelup-game-paper: #fffdf7;
-    --levelup-game-panel: #ffffff;
-    --levelup-game-blue: #27a8e8;
-    --levelup-game-blue-dark: #0879b5;
-    --levelup-game-yellow: #ffc928;
-    --levelup-game-yellow-dark: #d69100;
-    --levelup-game-red: #ef4455;
-    --levelup-game-green: #45c46b;
-    --levelup-game-border: 2px solid var(--levelup-game-ink);
-    --levelup-game-shadow-sm: 0 3px 0 var(--levelup-game-ink);
-    --levelup-game-shadow-md: 0 5px 0 var(--levelup-game-ink);
-    --levelup-game-shadow-lg: 0 7px 0 var(--levelup-game-ink), 0 16px 32px rgb(23 19 33 / 18%);
+    --beeday-game-ink: #171321;
+    --beeday-game-ink-soft: #332b43;
+    --beeday-game-paper: #fffdf7;
+    --beeday-game-panel: #ffffff;
+    --beeday-game-blue: #27a8e8;
+    --beeday-game-blue-dark: #0879b5;
+    --beeday-game-yellow: #ffc928;
+    --beeday-game-yellow-dark: #d69100;
+    --beeday-game-red: #ef4455;
+    --beeday-game-green: #45c46b;
+    --beeday-game-border: 2px solid var(--beeday-game-ink);
+    --beeday-game-shadow-sm: 0 3px 0 var(--beeday-game-ink);
+    --beeday-game-shadow-md: 0 5px 0 var(--beeday-game-ink);
+    --beeday-game-shadow-lg: 0 7px 0 var(--beeday-game-ink), 0 16px 32px rgb(23 19 33 / 18%);
 }
 
 /* Sprint 3.5 — Pixel UI motion and interaction tokens */
 :root {
-    --levelup-pixel-unit: 2px;
-    --levelup-focus-outline: 3px solid var(--levelup-game-blue);
-    --levelup-focus-offset: 3px;
-    --levelup-duration-instant: 70ms;
-    --levelup-duration-interaction: 140ms;
-    --levelup-duration-panel: 220ms;
-    --levelup-easing-pixel: steps(2, end);
+    --beeday-pixel-unit: 2px;
+    --beeday-focus-outline: 3px solid var(--beeday-game-blue);
+    --beeday-focus-offset: 3px;
+    --beeday-duration-instant: 70ms;
+    --beeday-duration-interaction: 140ms;
+    --beeday-duration-panel: 220ms;
+    --beeday-easing-pixel: steps(2, end);
 }

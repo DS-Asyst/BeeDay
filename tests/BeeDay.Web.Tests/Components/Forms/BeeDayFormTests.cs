@@ -75,7 +75,7 @@ public sealed class BeeDayFormTests
             .Add(component => component.Value, model.TextValue)
             .Add(component => component.ValueExpression, () => model.TextValue));
 
-        Assert.Equal("5 / 100", cut.Find(".levelup-field__counter").TextContent.Trim());
+        Assert.Equal("5 / 100", cut.Find(".beeday-field__counter").TextContent.Trim());
         Assert.Equal("100", cut.Find("textarea").GetAttribute("maxlength"));
     }
 

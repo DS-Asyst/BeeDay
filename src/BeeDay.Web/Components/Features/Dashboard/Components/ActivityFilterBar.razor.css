@@ -1,7 +1,7 @@
 .filter-bar {
     padding: .7rem 1rem;
-    border-bottom: 1px solid var(--levelup-color-border);
-    background: var(--levelup-color-surface);
+    border-bottom: 1px solid var(--beeday-color-border);
+    background: var(--beeday-color-surface);
     box-shadow: 0 1px 2px rgb(38 24 54 / 5%);
 }
 
@@ -25,15 +25,15 @@
     min-width: 0;
     height: 2.75rem;
     padding: 0 .9rem;
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-sm);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-sm);
     outline: none;
-    color: var(--levelup-color-text-primary);
-    background: var(--levelup-color-surface);
+    color: var(--beeday-color-text-primary);
+    background: var(--beeday-color-surface);
     box-sizing: border-box;
     font: inherit;
     font-size: .95rem;
-    transition: color var(--levelup-transition-fast), background-color var(--levelup-transition-fast), border-color var(--levelup-transition-fast), box-shadow var(--levelup-transition-fast);
+    transition: color var(--beeday-transition-fast), background-color var(--beeday-transition-fast), border-color var(--beeday-transition-fast), box-shadow var(--beeday-transition-fast);
 }
 
 .filter-bar__input::placeholder {
@@ -44,7 +44,7 @@
 
 .filter-bar__input:hover { border-color: #aaa4b2; }
 .filter-bar__input:focus {
-    border-color: var(--levelup-color-project);
+    border-color: var(--beeday-color-project);
     box-shadow: 0 0 0 3px rgb(102 65 166 / 14%);
 }
 
@@ -57,7 +57,7 @@
 }
 
 /* Sizing, color, border, hover, and focus chrome all come from the shared
-   .levelup-icon-toggle class (design-system.css) — the same lightweight
+   .beeday-icon-toggle class (design-system.css) — the same lightweight
    treatment as the Daily column's Completed/Add icon toggles. No local
    overrides here by design. */
 
@@ -70,9 +70,9 @@
     min-width: 1.35rem;
     height: 1.35rem;
     padding: 0 .3rem;
-    border-radius: var(--levelup-radius-pill);
+    border-radius: var(--beeday-radius-pill);
     color: #fff;
-    background: var(--levelup-color-project-dark);
+    background: var(--beeday-color-project-dark);
     font-size: .72rem;
     font-weight: 700;
 }
@@ -83,18 +83,18 @@
     top: calc(100% + .55rem);
     right: 0;
     width: min(30rem, calc(100vw - 2rem));
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-xs);
-    background: var(--levelup-color-surface);
-    box-shadow: var(--levelup-shadow-md);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-xs);
+    background: var(--beeday-color-surface);
+    box-shadow: var(--beeday-shadow-md);
     transform-origin: top right;
-    animation: levelup-fade-in var(--levelup-duration-fast) var(--levelup-easing-emphasized) both;
+    animation: beeday-fade-in var(--beeday-duration-fast) var(--beeday-easing-emphasized) both;
 }
 
 .filter-bar__tags-heading {
     padding: 1rem 1.15rem .35rem;
-    color: var(--levelup-color-text-primary);
-    font: var(--levelup-type-label);
+    color: var(--beeday-color-text-primary);
+    font: var(--beeday-type-label);
 }
 
 .filter-bar__tags-grid {
@@ -111,21 +111,21 @@
     gap: .5rem;
     min-height: 2.45rem;
     padding: .45rem .6rem;
-    border-radius: var(--levelup-radius-xs);
-    color: var(--levelup-color-text-primary);
+    border-radius: var(--beeday-radius-xs);
+    color: var(--beeday-color-text-primary);
     cursor: pointer;
-    font: var(--levelup-type-button);
+    font: var(--beeday-type-button);
 }
 
 .filter-bar__tag-option:hover,
 .filter-bar__tag-option:focus-within,
-.filter-bar__tag-option--selected { background: var(--levelup-color-surface-muted); }
+.filter-bar__tag-option--selected { background: var(--beeday-color-surface-muted); }
 
 .filter-bar__tag-option input {
     width: 1.05rem;
     height: 1.05rem;
     margin: 0;
-    accent-color: var(--levelup-color-project-dark);
+    accent-color: var(--beeday-color-project-dark);
     cursor: pointer;
 }
 
@@ -135,7 +135,7 @@
     justify-content: space-between;
     gap: 1rem;
     padding: .8rem 1.15rem;
-    border-top: 1px solid var(--levelup-color-border);
+    border-top: 1px solid var(--beeday-color-border);
 }
 
 .filter-bar__menu {
@@ -146,12 +146,12 @@
     display: grid;
     width: 10.8rem;
     padding: .32rem;
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-xs);
-    background: var(--levelup-color-surface);
-    box-shadow: var(--levelup-shadow-md);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-xs);
+    background: var(--beeday-color-surface);
+    box-shadow: var(--beeday-shadow-md);
     transform-origin: top right;
-    animation: levelup-fade-in var(--levelup-duration-fast) var(--levelup-easing-emphasized) both;
+    animation: beeday-fade-in var(--beeday-duration-fast) var(--beeday-easing-emphasized) both;
 }
 
 .filter-bar__menu button {
@@ -163,22 +163,22 @@
     min-height: 2.1rem;
     padding: .45rem .6rem;
     border: 0;
-    border-radius: var(--levelup-radius-xs);
-    color: var(--levelup-color-text-primary);
+    border-radius: var(--beeday-radius-xs);
+    color: var(--beeday-color-text-primary);
     background: transparent;
     text-align: left;
-    font: var(--levelup-type-button);
+    font: var(--beeday-type-button);
     cursor: pointer;
-    transition: background-color var(--levelup-transition-fast);
+    transition: background-color var(--beeday-transition-fast);
 }
 .filter-bar__menu button:hover,
 .filter-bar__menu button:focus-visible {
-    background: var(--levelup-color-surface-muted);
+    background: var(--beeday-color-surface-muted);
     outline: none;
 }
 
 @media (max-width: 760px) {
-    .filter-bar { padding: var(--levelup-spacing-sm); }
+    .filter-bar { padding: var(--beeday-spacing-sm); }
     .filter-bar__main { grid-template-columns: minmax(0, 1fr) auto; width: 100%; }
     .filter-bar__create { grid-column: 1 / -1; }
     .filter-bar__create ::deep .filter-bar__create-button { width: 100%; }

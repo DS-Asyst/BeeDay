@@ -6,7 +6,7 @@ namespace BeeDay.Web.Components.DesignSystem.Cards;
 
 public partial class BeeDayCardMenu : IAsyncDisposable
 {
-    // Matches the Design System's --levelup-spacing-sm token (.5rem @ 16px
+    // Matches the Design System's --beeday-spacing-sm token (.5rem @ 16px
     // root = 8px). Kept as a plain pixel constant here because the placement
     // math (CardMenuPlacementCalculator) operates on real getBoundingClientRect
     // numbers, not CSS custom properties.

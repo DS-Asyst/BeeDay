@@ -1,4 +1,4 @@
-/* LevelUp custom cursor pack. */
+/* BeeDay custom cursor pack. */
 html,
 body,
 body * {
@@ -31,27 +31,27 @@ input[type="file"]:not(:disabled),
    role="button" (see cards.css) and would otherwise match the generic
    [role="button"] rule above; these selectors match its specificity and are
    declared after it so the drag cursor wins while the card sits inside an
-   active LevelUpSortable list. Non-draggable (completed) cards render
-   outside .levelup-sortable__item and are unaffected, so they keep the
+   active BeeDaySortable list. Non-draggable (completed) cards render
+   outside .beeday-sortable__item and are unaffected, so they keep the
    ordinary click cursor. */
-.levelup-sortable__item,
-.levelup-sortable__item .activity-card__body--openable,
-.levelup-sortable__item .habit-card__body--openable {
+.beeday-sortable__item,
+.beeday-sortable__item .activity-card__body--openable,
+.beeday-sortable__item .habit-card__body--openable {
     cursor: url("../cursors/cursor-click.png") 15 0, grab !important;
 }
 
-.levelup-sortable__item:active,
-.levelup-sortable__item.is-drag-armed,
-.levelup-sortable__item.is-dragging,
-.levelup-sortable__item:active .activity-card__body--openable,
-.levelup-sortable__item:active .habit-card__body--openable,
-.levelup-sortable__item.is-drag-armed .activity-card__body--openable,
-.levelup-sortable__item.is-drag-armed .habit-card__body--openable,
-.levelup-sortable__item.is-dragging .activity-card__body--openable,
-.levelup-sortable__item.is-dragging .habit-card__body--openable,
-body.levelup-is-sorting,
-body.levelup-is-sorting *,
-body.levelup-is-sorting [role="button"] {
+.beeday-sortable__item:active,
+.beeday-sortable__item.is-drag-armed,
+.beeday-sortable__item.is-dragging,
+.beeday-sortable__item:active .activity-card__body--openable,
+.beeday-sortable__item:active .habit-card__body--openable,
+.beeday-sortable__item.is-drag-armed .activity-card__body--openable,
+.beeday-sortable__item.is-drag-armed .habit-card__body--openable,
+.beeday-sortable__item.is-dragging .activity-card__body--openable,
+.beeday-sortable__item.is-dragging .habit-card__body--openable,
+body.beeday-is-sorting,
+body.beeday-is-sorting *,
+body.beeday-is-sorting [role="button"] {
     cursor: url("../cursors/cursor-click.png") 15 0, grabbing !important;
 }
 

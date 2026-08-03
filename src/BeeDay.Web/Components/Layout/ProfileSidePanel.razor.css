@@ -1,8 +1,8 @@
 .side-drawer {
     position: relative;
-    width: var(--levelup-left-panel-width);
+    width: var(--beeday-left-panel-width);
     height: 100%;
-    flex: 0 0 var(--levelup-left-panel-width);
+    flex: 0 0 var(--beeday-left-panel-width);
     overflow-y: auto;
     color: #fff;
     background: #5b1095;
@@ -52,7 +52,7 @@
     min-height: 100%;
     padding: 1.5rem 1.25rem;
     box-sizing: border-box;
-    font-family: var(--levelup-font-family);
+    font-family: var(--beeday-font-family);
 }
 
 .profile-drawer__profile {
@@ -167,7 +167,7 @@
         left: 0;
         height: auto;
         transform: translateX(-100%);
-        width: min(var(--levelup-left-panel-width), 88vw);
+        width: min(var(--beeday-left-panel-width), 88vw);
         box-shadow: .5rem 0 2rem rgb(20 2 35 / 34%);
     }
 

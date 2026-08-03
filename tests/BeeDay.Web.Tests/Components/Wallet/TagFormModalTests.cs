@@ -13,14 +13,14 @@ public sealed class TagFormModalTests : BunitContext
             .Add(component => component.IsEditing, true)
             .Add(component => component.Model, new WalletTagFormModel()));
 
-        Assert.NotEmpty(editingCut.FindAll(".editor-modal__footer-danger .levelup-button--danger"));
+        Assert.NotEmpty(editingCut.FindAll(".editor-modal__footer-danger .beeday-button--danger"));
 
         var creatingCut = Render<TagFormModal>(parameters => parameters
             .Add(component => component.IsOpen, true)
             .Add(component => component.IsEditing, false)
             .Add(component => component.Model, new WalletTagFormModel()));
 
-        Assert.Empty(creatingCut.FindAll(".editor-modal__footer-danger .levelup-button--danger"));
+        Assert.Empty(creatingCut.FindAll(".editor-modal__footer-danger .beeday-button--danger"));
     }
 
     [Fact]
@@ -33,7 +33,7 @@ public sealed class TagFormModalTests : BunitContext
             .Add(component => component.Model, new WalletTagFormModel())
             .Add(component => component.OnDeleteRequested, () => deleteRequested = true));
 
-        await cut.Find(".editor-modal__footer-danger .levelup-button--danger").ClickAsync();
+        await cut.Find(".editor-modal__footer-danger .beeday-button--danger").ClickAsync();
 
         Assert.True(deleteRequested);
         Assert.Empty(cut.FindAll(".delete-confirmation"));

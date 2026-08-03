@@ -2,7 +2,7 @@
     <div>
         @if (!string.IsNullOrWhiteSpace(Eyebrow))
         {
-            <span class="levelup-section-header__eyebrow">@Eyebrow</span>
+            <span class="beeday-section-header__eyebrow">@Eyebrow</span>
         }
         <h2>@Title</h2>
         @if (!string.IsNullOrWhiteSpace(Description))
@@ -12,6 +12,6 @@
     </div>
     @if (Actions is not null)
     {
-        <div class="levelup-section-header__actions">@Actions</div>
+        <div class="beeday-section-header__actions">@Actions</div>
     }
 </header>

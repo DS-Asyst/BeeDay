@@ -8,7 +8,7 @@
 }
 
 .entry-loading span {
-    font-family: var(--levelup-font-family);
+    font-family: var(--beeday-font-family);
     font-size: clamp(2rem, 6vw, 4rem);
     font-weight: 700;
     letter-spacing: .18em;

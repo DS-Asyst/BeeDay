@@ -2,10 +2,10 @@
 
 <BeeDaySettingsSection Eyebrow="IDENTITY"
                         Title="Profile"
-                        Description="Manage the personal information shown across LevelUp.">
+                        Description="Manage the personal information shown across BeeDay.">
     <BeeDaySettingsForm TModel="ProfileFormModel" Model="Model" OnValidSubmit="OnSave"
-                         FormName="account-profile" SubmitLabel="Save Profile" SubmitButtonClass="levelup-button--comic levelup-button--comic-success" IsBusy="IsBusy">
-        <div class="levelup-settings-form__grid">
+                         FormName="account-profile" SubmitLabel="Save Profile" SubmitButtonClass="beeday-button--comic beeday-button--comic-success" IsBusy="IsBusy">
+        <div class="beeday-settings-form__grid">
             <BeeDayInput Id="account-name" Label="Name" Required="true" MaxLength="100"
                           @bind-Value="Model.Name" />
             <BeeDayInput Id="account-email" Label="Email" Required="true" MaxLength="254"
@@ -13,7 +13,7 @@
             <BeeDayInput Id="account-nickname" Label="Nickname" ReadOnly="true" @bind-Value="Model.Nickname" />
         </div>
 
-        <p class="levelup-settings-form__hint">Your nickname is permanent after your profile is created.</p>
+        <p class="beeday-settings-form__hint">Your nickname is permanent after your profile is created.</p>
     </BeeDaySettingsForm>
 </BeeDaySettingsSection>
 

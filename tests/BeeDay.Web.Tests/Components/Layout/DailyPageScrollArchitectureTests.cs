@@ -4,7 +4,7 @@ namespace BeeDay.Web.Tests.Components.Layout;
 
 /// <summary>
 /// Guards the single-document-scroll contract for the app shell and the Daily
-/// board: <c>.levelup-content-shell</c> and <c>.dashboard-grid</c> must never
+/// board: <c>.beeday-content-shell</c> and <c>.dashboard-grid</c> must never
 /// go back to pairing a non-<c>visible</c> overflow-x with a <c>visible</c>
 /// overflow-y, because browsers silently promote that <c>visible</c> axis to
 /// <c>auto</c> (per the CSS Overflow spec), turning the element back into an
@@ -55,7 +55,7 @@ public sealed class DailyPageScrollArchitectureTests
     public void ContentShellDoesNotPairNonVisibleOverflowXWithVisibleOverflowY()
     {
         var css = ReadCss("src", "BeeDay.Web", "Components", "Layout", "MainLayout.razor.css");
-        var rule = ExtractRuleBody(css, ".levelup-content-shell");
+        var rule = ExtractRuleBody(css, ".beeday-content-shell");
 
         Assert.NotNull(rule);
         Assert.DoesNotContain("overflow-x: hidden", rule, StringComparison.OrdinalIgnoreCase);
@@ -78,7 +78,7 @@ public sealed class DailyPageScrollArchitectureTests
     public void MainLayoutDoesNotReintroduceViewportBasedMainHeight()
     {
         var css = ReadCss("src", "BeeDay.Web", "Components", "Layout", "MainLayout.razor.css");
-        var rule = ExtractRuleBody(css, ".levelup-main");
+        var rule = ExtractRuleBody(css, ".beeday-main");
 
         Assert.NotNull(rule);
         Assert.DoesNotContain("100vh", rule, StringComparison.OrdinalIgnoreCase);

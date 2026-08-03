@@ -21,13 +21,13 @@
 
 
 #components-reconnect-modal {
-    background-color: var(--levelup-color-surface);
+    background-color: var(--beeday-color-surface);
     width: 20rem;
     margin: 20vh auto;
     padding: 2rem;
     border: 0;
-    border-radius: var(--levelup-radius-md);
-    box-shadow: var(--levelup-shadow-lg);
+    border-radius: var(--beeday-radius-md);
+    box-shadow: var(--beeday-shadow-lg);
     opacity: 0;
     transition: display 0.5s allow-discrete, overlay 0.5s allow-discrete;
     animation: components-reconnect-modal-fadeOutOpacity 0.5s both;
@@ -90,18 +90,18 @@
 
 #components-reconnect-modal button {
     border: 0;
-    background-color: var(--levelup-color-primary);
-    color: var(--levelup-color-text-inverse);
+    background-color: var(--beeday-color-primary);
+    color: var(--beeday-color-text-inverse);
     padding: 4px 24px;
-    border-radius: var(--levelup-radius-xs);
+    border-radius: var(--beeday-radius-xs);
 }
 
     #components-reconnect-modal button:hover {
-        background-color: var(--levelup-color-primary-hover);
+        background-color: var(--beeday-color-primary-hover);
     }
 
     #components-reconnect-modal button:active {
-        background-color: var(--levelup-color-primary-active);
+        background-color: var(--beeday-color-primary-active);
     }
 
 .components-rejoining-animation {

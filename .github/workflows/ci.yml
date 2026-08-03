@@ -1,4 +1,4 @@
-name: LevelUp CI
+name: BeeDay CI
 
 on:
   push:
@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: levelup-ci-${{ github.workflow }}-${{ github.ref }}
+  group: beeday-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -41,48 +41,48 @@ jobs:
 
       - name: Restore dependencies
         shell: powershell
-        run: dotnet restore LevelUp.slnx
+        run: dotnet restore BeeDay.slnx
 
       - name: Verify formatting
         shell: powershell
-        run: dotnet format LevelUp.slnx --verify-no-changes --no-restore
+        run: dotnet format BeeDay.slnx --verify-no-changes --no-restore
 
       - name: Build solution
         shell: powershell
         run: |
-          dotnet build LevelUp.slnx `
+          dotnet build BeeDay.slnx `
             --configuration Release `
             --no-restore `
             --warnaserror
 
       - name: Install Playwright Chromium
         shell: powershell
-        run: pwsh tests/LevelUp.E2E.Tests/bin/Release/net10.0/playwright.ps1 install chromium
+        run: pwsh tests/BeeDay.E2E.Tests/bin/Release/net10.0/playwright.ps1 install chromium
 
       - name: Run tests
         shell: powershell
         run: |
-          dotnet test LevelUp.slnx `
+          dotnet test BeeDay.slnx `
             --configuration Release `
             --no-build `
             --verbosity normal `
-            --logger "trx;LogFileName=levelup-tests.trx" `
+            --logger "trx;LogFileName=beeday-tests.trx" `
             --results-directory "${{ runner.temp }}\TestResults"
 
-      - name: Publish LevelUp
+      - name: Publish BeeDay
         shell: powershell
         run: |
           dotnet publish `
-            ".\src\LevelUp.Web\LevelUp.Web.csproj" `
+            ".\src\BeeDay.Web\BeeDay.Web.csproj" `
             --configuration Release `
             --no-build `
-            --output "${{ runner.temp }}\LevelUpPublish"
+            --output "${{ runner.temp }}\BeeDayPublish"
 
       - name: Validate published files
         shell: powershell
         run: |
-          $publishPath = Join-Path "${{ runner.temp }}" "LevelUpPublish"
-          $requiredFiles = @("LevelUp.Web.dll", "web.config")
+          $publishPath = Join-Path "${{ runner.temp }}" "BeeDayPublish"
+          $requiredFiles = @("BeeDay.Web.dll", "web.config")
 
           foreach ($file in $requiredFiles) {
               $fullPath = Join-Path $publishPath $file
@@ -95,7 +95,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: levelup-test-results
+          name: beeday-test-results
           path: ${{ runner.temp }}\TestResults
           if-no-files-found: warn
           retention-days: 14
@@ -104,15 +104,15 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: levelup-e2e-artifacts
-          path: tests\LevelUp.E2E.Tests\bin\Release\net10.0\e2e-artifacts
+          name: beeday-e2e-artifacts
+          path: tests\BeeDay.E2E.Tests\bin\Release\net10.0\e2e-artifacts
           if-no-files-found: ignore
           retention-days: 14
 
       - name: Upload validated publish artifact
         uses: actions/upload-artifact@v4
         with:
-          name: levelup-publish
-          path: ${{ runner.temp }}\LevelUpPublish
+          name: beeday-publish
+          path: ${{ runner.temp }}\BeeDayPublish
           if-no-files-found: error
           retention-days: 7

@@ -170,10 +170,10 @@ public sealed class WalletEmptyStateTests : BunitContext
         var cut = Render<WalletEmptyState>(parameters => parameters
             .Add(component => component.OnCreateTransaction, () => invoked = true));
 
-        Assert.Equal("No transactions found", cut.Find(".levelup-empty-state__title").TextContent);
-        Assert.Contains("Create your first transaction", cut.Find(".levelup-empty-state__description").TextContent, StringComparison.Ordinal);
+        Assert.Equal("No transactions found", cut.Find(".beeday-empty-state__title").TextContent);
+        Assert.Contains("Create your first transaction", cut.Find(".beeday-empty-state__description").TextContent, StringComparison.Ordinal);
 
-        var button = cut.Find(".levelup-button--primary");
+        var button = cut.Find(".beeday-button--primary");
         Assert.Contains("Create transaction", button.TextContent, StringComparison.Ordinal);
         button.Click();
         Assert.True(invoked);
@@ -187,7 +187,7 @@ public sealed class WalletEmptyStateTests : BunitContext
             .Add(component => component.HasFilters, true)
             .Add(component => component.OnClearFilters, () => invoked = true));
 
-        Assert.Contains("Change or clear your filters", cut.Find(".levelup-empty-state__description").TextContent, StringComparison.Ordinal);
+        Assert.Contains("Change or clear your filters", cut.Find(".beeday-empty-state__description").TextContent, StringComparison.Ordinal);
         cut.Find("button").Click();
         Assert.True(invoked);
     }
@@ -250,10 +250,10 @@ public sealed class WalletTagManagerTests : BunitContext
     {
         var cut = Render<WalletTagManager>();
 
-        Assert.Equal("No tags yet", cut.Find(".levelup-empty-state__title").TextContent);
+        Assert.Equal("No tags yet", cut.Find(".beeday-empty-state__title").TextContent);
         Assert.Contains(
             "Create one to organize your income and expenses.",
-            cut.Find(".levelup-empty-state__description").TextContent,
+            cut.Find(".beeday-empty-state__description").TextContent,
             StringComparison.Ordinal);
     }
 
@@ -264,7 +264,7 @@ public sealed class WalletTagManagerTests : BunitContext
         var cut = Render<WalletTagManager>(parameters => parameters
             .Add(component => component.OnCreate, () => invoked = true));
 
-        await cut.Find(".wallet-panel-header .levelup-button--primary").ClickAsync();
+        await cut.Find(".wallet-panel-header .beeday-button--primary").ClickAsync();
 
         Assert.True(invoked);
     }

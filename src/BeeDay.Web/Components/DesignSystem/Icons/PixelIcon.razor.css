@@ -20,10 +20,10 @@ button:disabled .pixel-icon,
 }
 
 .pixel-icon--color-current { color: currentcolor; }
-.pixel-icon--color-primary { color: var(--levelup-color-primary); }
-.pixel-icon--color-secondary { color: var(--levelup-color-text-secondary); }
-.pixel-icon--color-muted { color: var(--levelup-color-text-muted); }
-.pixel-icon--color-success { color: var(--levelup-color-success); }
-.pixel-icon--color-warning { color: var(--levelup-color-warning); }
-.pixel-icon--color-danger { color: var(--levelup-color-danger); }
-.pixel-icon--color-information { color: var(--levelup-color-info); }
+.pixel-icon--color-primary { color: var(--beeday-color-primary); }
+.pixel-icon--color-secondary { color: var(--beeday-color-text-secondary); }
+.pixel-icon--color-muted { color: var(--beeday-color-text-muted); }
+.pixel-icon--color-success { color: var(--beeday-color-success); }
+.pixel-icon--color-warning { color: var(--beeday-color-warning); }
+.pixel-icon--color-danger { color: var(--beeday-color-danger); }
+.pixel-icon--color-information { color: var(--beeday-color-info); }

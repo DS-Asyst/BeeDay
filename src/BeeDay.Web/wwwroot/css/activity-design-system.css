@@ -17,10 +17,10 @@
 .activity-card,
 .habit-card,
 .dashboard-column,
-.levelup-empty-state,
+.beeday-empty-state,
 .delete-confirmation,
 .editor-modal {
-    font-family: var(--levelup-font-body);
+    font-family: var(--beeday-font-body);
 }
 
 .activity-card,

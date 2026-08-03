@@ -1,4 +1,4 @@
-@keyframes levelup-fade-in {
+@keyframes beeday-fade-in {
     from {
         opacity: 0;
         transform: translateY(4px);
@@ -10,8 +10,8 @@
     }
 }
 
-.levelup-fade-in {
-    animation: levelup-fade-in var(--levelup-duration-normal) var(--levelup-easing-standard) both;
+.beeday-fade-in {
+    animation: beeday-fade-in var(--beeday-duration-normal) var(--beeday-easing-standard) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -25,31 +25,31 @@
     }
 }
 
-@keyframes levelup-card-enter {
+@keyframes beeday-card-enter {
     from { opacity: 0; transform: translateY(7px) scale(.985); }
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes levelup-filter-refresh {
+@keyframes beeday-filter-refresh {
     from { opacity: .45; transform: translateY(3px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes levelup-reorder-settle {
+@keyframes beeday-reorder-settle {
     0% { transform: scale(.985); }
     65% { transform: scale(1.008); }
     100% { transform: scale(1); }
 }
 
-.levelup-card-enter {
-    animation: levelup-card-enter 180ms ease-out both;
+.beeday-card-enter {
+    animation: beeday-card-enter 180ms ease-out both;
 }
 
-.levelup-sortable__item.is-reorder-settling {
-    animation: levelup-reorder-settle 220ms ease-out;
+.beeday-sortable__item.is-reorder-settling {
+    animation: beeday-reorder-settle 220ms ease-out;
 }
 
-.levelup-search-highlight {
+.beeday-search-highlight {
     padding: 0 .05em;
     border-radius: .12em;
     color: inherit;
@@ -58,13 +58,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .levelup-card-enter,
-    .levelup-sortable__item.is-reorder-settling {
+    .beeday-card-enter,
+    .beeday-sortable__item.is-reorder-settling {
         animation: none;
     }
 }
 
-@keyframes levelup-card-leave {
+@keyframes beeday-card-leave {
     to {
         opacity: 0;
         transform: translateX(10px) scale(.98);
@@ -73,14 +73,14 @@
     }
 }
 
-.levelup-card-leave {
+.beeday-card-leave {
     overflow: hidden;
     pointer-events: none;
-    animation: levelup-card-leave 160ms ease-in both;
+    animation: beeday-card-leave 160ms ease-in both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .levelup-card-leave {
+    .beeday-card-leave {
         animation: none;
     }
 }

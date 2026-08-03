@@ -2,14 +2,14 @@
 @inject IJSRuntime JS
 
 <div @ref="container"
-     class="levelup-sortable @Class @(UseVirtualization ? "levelup-sortable--virtualized" : string.Empty)"
+     class="beeday-sortable @Class @(UseVirtualization ? "beeday-sortable--virtualized" : string.Empty)"
      data-sortable-key="@CollectionKey"
      role="list"
      aria-label="@AriaLabel">
     @if (UseVirtualization)
     {
         <Virtualize TItem="Guid" Items="@VirtualizedItemIds" Context="itemId" ItemSize="@ItemSize" OverscanCount="@OverscanCount" SpacerElement="div">
-            <div class="levelup-sortable__item levelup-card-enter @(RemovingItemId == itemId ? "levelup-card-leave" : string.Empty)"
+            <div class="beeday-sortable__item beeday-card-enter @(RemovingItemId == itemId ? "beeday-card-leave" : string.Empty)"
                  data-sortable-item="@itemId"
                  role="listitem"
                  aria-label="Hold and drag this card to reorder it. Use the arrow keys when focused."
@@ -22,7 +22,7 @@
     {
         @foreach (var itemId in ItemIds)
         {
-            <div class="levelup-sortable__item levelup-card-enter @(RemovingItemId == itemId ? "levelup-card-leave" : string.Empty)"
+            <div class="beeday-sortable__item beeday-card-enter @(RemovingItemId == itemId ? "beeday-card-leave" : string.Empty)"
                  data-sortable-item="@itemId"
                  role="listitem"
                  aria-label="Hold and drag this card to reorder it. Use the arrow keys when focused."

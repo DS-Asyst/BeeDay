@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Regenerates LevelUp's official multi-provider icon library and sprite.
+    Regenerates BeeDay's official multi-provider icon library and sprite.
 
 .DESCRIPTION
     Reads design/icons/catalog/icon-mapping.csv (PixelIconName, SymbolId, Provider,
@@ -8,23 +8,23 @@
       1. Reads the matching immutable source SVG from the provider's source folder
          under design/icons/source/ (never modified, never written to).
       2. Extracts its inner path content and viewBox.
-      3. For monochrome providers (MaterialSymbols, LevelUpCustom), rewrites every
+      3. For monochrome providers (MaterialSymbols, BeeDayCustom), rewrites every
          path/shape fill to currentColor so PixelIconColor works. For brand
          providers (Devicon, OfficialBrand), the artwork's own colors are
          preserved untouched — brand marks are not recolored.
       4. Writes a standalone icon file to
-         src/LevelUp.Web/wwwroot/icons/{provider-slug}/{Folder}/{SymbolId}.svg.
+         src/BeeDay.Web/wwwroot/icons/{provider-slug}/{Folder}/{SymbolId}.svg.
       5. Adds a <symbol id="{SymbolId}"> entry to the combined sprite at
-         src/LevelUp.Web/wwwroot/icons/sprite.svg.
+         src/BeeDay.Web/wwwroot/icons/sprite.svg.
 
-    This script only touches src/LevelUp.Web/wwwroot/icons/. It never writes to
+    This script only touches src/BeeDay.Web/wwwroot/icons/. It never writes to
     design/icons/source/.
 
     Supported providers and their source folders:
       MaterialSymbols -> design/icons/source/material-symbols/material-symbols--{SourceName}.svg
       Devicon         -> design/icons/source/devicon/devicon--{SourceName}.svg
       OfficialBrand   -> design/icons/source/official-brand/official-brand--{SourceName}.svg
-      LevelUpCustom   -> design/icons/source/levelup-custom/levelup-custom--{SourceName}.svg
+      BeeDayCustom   -> design/icons/source/beeday-custom/beeday-custom--{SourceName}.svg
 
     To add a new icon: add a PixelIconName entry to PixelIconName.cs, add a
     matching row to design/icons/catalog/icon-mapping.csv referencing an existing
@@ -44,23 +44,23 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $sourceRoot = Join-Path $repoRoot 'design/icons/source'
 $mappingPath = Join-Path $repoRoot 'design/icons/catalog/icon-mapping.csv'
-$destRoot = Join-Path $repoRoot 'src/LevelUp.Web/wwwroot/icons'
+$destRoot = Join-Path $repoRoot 'src/BeeDay.Web/wwwroot/icons'
 
-$monochromeProviders = @('MaterialSymbols', 'LevelUpCustom')
+$monochromeProviders = @('MaterialSymbols', 'BeeDayCustom')
 $brandProviders = @('Devicon', 'OfficialBrand')
 
 $providerSlugs = @{
     MaterialSymbols = 'material-symbols'
     Devicon         = 'devicon'
     OfficialBrand   = 'official-brand'
-    LevelUpCustom   = 'levelup-custom'
+    BeeDayCustom   = 'beeday-custom'
 }
 
 $providerSourcePrefix = @{
     MaterialSymbols = 'material-symbols--'
     Devicon         = 'devicon--'
     OfficialBrand   = 'official-brand--'
-    LevelUpCustom   = 'levelup-custom--'
+    BeeDayCustom   = 'beeday-custom--'
 }
 
 if (-not (Test-Path $mappingPath)) {
@@ -167,7 +167,7 @@ foreach ($row in $rows) {
 $spriteHeader = @'
 <?xml version='1.0' encoding='utf-8'?>
 <!--
-  LevelUp Pixel Icon Sprite
+  BeeDay Pixel Icon Sprite
   Generated from multiple icon providers. Do not edit by hand.
   Regenerate via scripts/New-IconSprite.ps1.
 

@@ -15,8 +15,8 @@ public sealed class MultiUserIsolationTests
     public async Task Repositories_ReturnOnlyTheAuthenticatedUsersOwnActivities()
     {
         var repository = new FakeUnitOfWork();
-        var first = AddUser(repository, "First", "first@levelup.test");
-        var second = AddUser(repository, "Second", "second@levelup.test");
+        var first = AddUser(repository, "First", "first@beeday.test");
+        var second = AddUser(repository, "Second", "second@beeday.test");
         AddHabit(repository, first.Id, Habit.Create("First habit", "", HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily));
         AddHabit(repository, second.Id, Habit.Create("Second habit", "", HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily));
         AddTask(repository, first.Id, RecurringTask.Create("First task", "", TaskRepeat.None));
@@ -34,8 +34,8 @@ public sealed class MultiUserIsolationTests
     public async Task User_CannotModifyAnotherUsersHabit()
     {
         var repository = new FakeUnitOfWork();
-        var first = AddUser(repository, "First", "first@levelup.test");
-        var second = AddUser(repository, "Second", "second@levelup.test");
+        var first = AddUser(repository, "First", "first@beeday.test");
+        var second = AddUser(repository, "Second", "second@beeday.test");
         var habit = Habit.Create("Private habit", "", HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily);
         AddHabit(repository, second.Id, habit);
 
@@ -50,8 +50,8 @@ public sealed class MultiUserIsolationTests
     public async Task ConcurrentSessions_CreateActivitiesForTheirOwnUsers()
     {
         var repository = new FakeUnitOfWork();
-        var first = AddUser(repository, "First", "first@levelup.test");
-        var second = AddUser(repository, "Second", "second@levelup.test");
+        var first = AddUser(repository, "First", "first@beeday.test");
+        var second = AddUser(repository, "Second", "second@beeday.test");
         var firstHandler = new CreateTaskCommandHandler(repository.RecurringTasks, new FakeCurrentUserContext(first.Id));
         var secondHandler = new CreateTaskCommandHandler(repository.RecurringTasks, new FakeCurrentUserContext(second.Id));
 

@@ -1,15 +1,15 @@
-.levelup-sortable {
+.beeday-sortable {
     display: flex;
     flex-direction: column;
     gap: .18rem;
     min-height: 2rem;
 }
 
-.levelup-sortable__item {
+.beeday-sortable__item {
     position: relative;
-    border-radius: var(--levelup-radius-sm);
+    border-radius: var(--beeday-radius-sm);
     touch-action: pan-y;
-    transition: opacity var(--levelup-transition-fast), transform var(--levelup-transition-fast), box-shadow var(--levelup-transition-fast);
+    transition: opacity var(--beeday-transition-fast), transform var(--beeday-transition-fast), box-shadow var(--beeday-transition-fast);
 }
 
 /* The actual drag cursor (custom asset, grab/grabbing fallback) is declared
@@ -25,97 +25,97 @@
  * the lower part of the menu, causing the DELETE option to appear only on the
  * last card in the list.
  */
-    .levelup-sortable__item:has(.activity-card--menu-open),
-    .levelup-sortable__item:has(.habit-card--menu-open) {
+    .beeday-sortable__item:has(.activity-card--menu-open),
+    .beeday-sortable__item:has(.habit-card--menu-open) {
         z-index: 100;
     }
 
-.levelup-sortable__item:focus-visible {
-    outline: var(--levelup-focus-ring);
+.beeday-sortable__item:focus-visible {
+    outline: var(--beeday-focus-ring);
     outline-offset: 2px;
 }
 
-.levelup-sortable__item button,
-.levelup-sortable__item a,
-.levelup-sortable__item input,
-.levelup-sortable__item textarea,
-.levelup-sortable__item select,
-.levelup-sortable__item label {
+.beeday-sortable__item button,
+.beeday-sortable__item a,
+.beeday-sortable__item input,
+.beeday-sortable__item textarea,
+.beeday-sortable__item select,
+.beeday-sortable__item label {
     cursor: pointer;
 }
 
-.levelup-sortable__item.is-drag-armed {
+.beeday-sortable__item.is-drag-armed {
     transform: scale(.995);
 }
 
-.levelup-sortable__item.is-dragging {
+.beeday-sortable__item.is-dragging {
     opacity: .42;
     transform: scale(.985);
 }
 
-.levelup-sortable__item.is-drop-before::before,
-.levelup-sortable__item.is-drop-after::after {
+.beeday-sortable__item.is-drop-before::before,
+.beeday-sortable__item.is-drop-after::after {
     position: absolute;
     right: .1rem;
     left: .1rem;
     z-index: 40;
     height: 3px;
-    border-radius: var(--levelup-radius-pill);
-    background: var(--levelup-color-primary);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--levelup-color-primary) 18%, transparent);
+    border-radius: var(--beeday-radius-pill);
+    background: var(--beeday-color-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--beeday-color-primary) 18%, transparent);
     content: "";
 }
 
-.levelup-sortable__item.is-drop-before::before {
+.beeday-sortable__item.is-drop-before::before {
     top: -.18rem;
 }
 
-.levelup-sortable__item.is-drop-after::after {
+.beeday-sortable__item.is-drop-after::after {
     bottom: -.18rem;
 }
 
-.levelup-sortable__touch-clone {
+.beeday-sortable__touch-clone {
     position: fixed;
     top: 0;
     left: 0;
-    z-index: var(--levelup-z-modal);
+    z-index: var(--beeday-z-modal);
     width: min(22rem, calc(100vw - 2rem));
     pointer-events: none;
     opacity: .9;
-    filter: drop-shadow(var(--levelup-shadow-lg));
+    filter: drop-shadow(var(--beeday-shadow-lg));
     will-change: transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .levelup-sortable__item {
+    .beeday-sortable__item {
         transition: none;
     }
 }
 
-.levelup-sortable__drag-clone {
+.beeday-sortable__drag-clone {
     position: fixed;
     top: 0;
     left: 0;
-    z-index: var(--levelup-z-modal);
+    z-index: var(--beeday-z-modal);
     pointer-events: none;
     opacity: .92;
-    filter: drop-shadow(var(--levelup-shadow-lg));
+    filter: drop-shadow(var(--beeday-shadow-lg));
     will-change: transform;
 }
 
 /* Cursor for this state is declared in cursors.css alongside the rest of the
    custom cursor pack; this rule only owns the non-cursor sorting behavior. */
-body.levelup-is-sorting,
-body.levelup-is-sorting * {
+body.beeday-is-sorting,
+body.beeday-is-sorting * {
     user-select: none !important;
 }
 
-.levelup-sortable--virtualized {
+.beeday-sortable--virtualized {
     min-height: 100%;
     overflow-y: auto;
     contain: layout paint;
 }
 
-.levelup-sortable--virtualized > div[style*="height"] {
+.beeday-sortable--virtualized > div[style*="height"] {
     flex: 0 0 auto;
 }

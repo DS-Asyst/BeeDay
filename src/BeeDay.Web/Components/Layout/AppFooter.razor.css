@@ -3,7 +3,7 @@
     margin: 0;
     padding: 0;
     background: #e7e6e9;
-    border-top: 1px solid var(--levelup-color-border);
+    border-top: 1px solid var(--beeday-color-border);
     box-sizing: border-box;
 }
 
@@ -42,13 +42,13 @@
     }
 
     .app-footer__column a {
-        color: var(--levelup-color-text-secondary);
+        color: var(--beeday-color-text-secondary);
         font-size: 0.85rem;
         text-decoration: none;
     }
 
         .app-footer__column a:hover {
-            color: var(--levelup-color-primary);
+            color: var(--beeday-color-primary);
             text-decoration: underline;
         }
 
@@ -60,9 +60,9 @@
     width: 100%;
     padding: 0.75rem 0 0;
     margin: 0;
-    border-top: 1px solid var(--levelup-color-border);
+    border-top: 1px solid var(--beeday-color-border);
     box-sizing: border-box;
-    color: var(--levelup-color-text-secondary);
+    color: var(--beeday-color-text-secondary);
     font-size: 0.8rem;
 }
 
@@ -75,12 +75,12 @@
 }
 
     .app-footer__legal a {
-        color: var(--levelup-color-text-secondary);
+        color: var(--beeday-color-text-secondary);
         text-decoration: none;
     }
 
         .app-footer__legal a:hover {
-            color: var(--levelup-color-primary);
+            color: var(--beeday-color-primary);
             text-decoration: underline;
         }
 
@@ -106,9 +106,9 @@
     fill: currentColor;
     filter: grayscale(1);
     transition:
-        color var(--levelup-transition-normal),
-        filter var(--levelup-transition-normal),
-        transform var(--levelup-transition-normal);
+        color var(--beeday-transition-normal),
+        filter var(--beeday-transition-normal),
+        transform var(--beeday-transition-normal);
 }
 
 .app-footer__social-link:hover ::deep svg,

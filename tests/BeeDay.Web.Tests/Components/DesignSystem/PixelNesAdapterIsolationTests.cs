@@ -86,7 +86,7 @@ public sealed class PixelNesAdapterIsolationTests
     {
         var appRazor = ReadRepoFile("src", "BeeDay.Web", "Components", "App.razor");
 
-        Assert.DoesNotContain("nes-core.levelup-excerpt.css", appRazor, StringComparison.Ordinal);
+        Assert.DoesNotContain("nes-core.beeday-excerpt.css", appRazor, StringComparison.Ordinal);
         Assert.Contains("css/pixel-nes.css", appRazor, StringComparison.Ordinal);
     }
 
@@ -119,7 +119,7 @@ public sealed class PixelNesAdapterIsolationTests
     {
         var componentsRoot = Path.Combine(ResolveRepoRoot(), "src", "BeeDay.Web", "Components");
         var consumers = Directory.EnumerateFiles(componentsRoot, "*.razor", SearchOption.AllDirectories)
-            .Where(file => File.ReadAllText(file).Contains("levelup-pixel-panel", StringComparison.Ordinal))
+            .Where(file => File.ReadAllText(file).Contains("beeday-pixel-panel", StringComparison.Ordinal))
             .Select(file => Path.GetFileName(file))
             .ToList();
 
@@ -131,7 +131,7 @@ public sealed class PixelNesAdapterIsolationTests
     {
         var componentsRoot = Path.Combine(ResolveRepoRoot(), "src", "BeeDay.Web", "Components");
         var consumers = Directory.EnumerateFiles(componentsRoot, "*.razor", SearchOption.AllDirectories)
-            .Where(file => File.ReadAllText(file).Contains("levelup-pixel-cta", StringComparison.Ordinal))
+            .Where(file => File.ReadAllText(file).Contains("beeday-pixel-cta", StringComparison.Ordinal))
             .Select(file => Path.GetFileName(file))
             .ToList();
 

@@ -15,5 +15,5 @@ public sealed class InvalidateDashboardCacheHandler(IApplicationCache cache)
 
 public static class CacheKeys
 {
-    public const string Dashboard = "dashboard:levelup-data";
+    public const string Dashboard = "dashboard:beeday-data";
 }

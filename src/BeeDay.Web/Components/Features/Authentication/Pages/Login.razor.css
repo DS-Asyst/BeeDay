@@ -8,10 +8,10 @@
 .auth-card {
     position: relative;
     width: min(100%, 31rem);
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-xs);
-    background: var(--levelup-color-surface);
-    box-shadow: var(--levelup-shadow-lg);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-xs);
+    background: var(--beeday-color-surface);
+    box-shadow: var(--beeday-shadow-lg);
 }
 
 .auth-card__content {
@@ -28,14 +28,14 @@
 
 .auth-card__header h1 {
     margin: 0;
-    color: var(--levelup-color-text-primary);
+    color: var(--beeday-color-text-primary);
     font-size: clamp(1.8rem, 6vw, 2.35rem);
     line-height: 1;
 }
 
 .auth-card__header p {
     margin: .75rem 0 0;
-    color: var(--levelup-color-text-muted);
+    color: var(--beeday-color-text-muted);
     line-height: 1.45;
 }
 
@@ -47,7 +47,7 @@
 .auth-field {
     display: grid;
     gap: .45rem;
-    color: var(--levelup-color-text-primary);
+    color: var(--beeday-color-text-primary);
     font-weight: 700;
 }
 
@@ -55,39 +55,39 @@
     width: 100%;
     min-height: 3rem;
     padding: .7rem .8rem;
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-xs);
-    background: var(--levelup-color-surface-subtle);
-    color: var(--levelup-color-text-primary);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-xs);
+    background: var(--beeday-color-surface-subtle);
+    color: var(--beeday-color-text-primary);
     font: inherit;
     box-shadow: inset 0 -2px 0 rgb(23 19 33 / 8%);
 }
 
 .auth-field input:hover {
-    background: var(--levelup-game-paper);
+    background: var(--beeday-game-paper);
 }
 
 .auth-field input:focus {
-    background: var(--levelup-game-paper);
-    border-color: var(--levelup-color-primary);
-    box-shadow: var(--levelup-focus-ring);
+    background: var(--beeday-game-paper);
+    border-color: var(--beeday-color-primary);
+    box-shadow: var(--beeday-focus-ring);
     outline: none;
 }
 
 .auth-card ::deep .auth-submit {
     min-height: 3.25rem;
     margin-top: .25rem;
-    font-family: var(--levelup-font-family);
-    font-size: var(--levelup-font-size-md);
+    font-family: var(--beeday-font-family);
+    font-size: var(--beeday-font-size-md);
     letter-spacing: .035em;
 }
 
 .auth-feedback {
     margin-bottom: 1rem;
     padding: .8rem .9rem;
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-xs);
-    box-shadow: var(--levelup-shadow-sm);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-xs);
+    box-shadow: var(--beeday-shadow-sm);
     font-weight: 700;
 }
 
@@ -103,31 +103,31 @@
 
 .auth-card__footer {
     margin: 1.5rem 0 0;
-    color: var(--levelup-color-text-muted);
+    color: var(--beeday-color-text-muted);
     text-align: center;
 }
 
 .auth-action-link {
-    color: var(--levelup-color-text-primary);
+    color: var(--beeday-color-text-primary);
     font-weight: 700;
     text-decoration-line: underline;
     text-decoration-thickness: 2px;
     text-underline-offset: 3px;
-    transition: color var(--levelup-duration-fast) ease;
+    transition: color var(--beeday-duration-fast) ease;
 }
 
 .auth-action-link:hover {
-    color: var(--levelup-color-primary);
+    color: var(--beeday-color-primary);
 }
 
 .auth-action-link:focus-visible {
     border-radius: 2px;
-    outline: 2px solid var(--levelup-color-primary);
+    outline: 2px solid var(--beeday-color-primary);
     outline-offset: 3px;
 }
 
 .auth-action-link:active {
-    color: var(--levelup-color-primary-active);
+    color: var(--beeday-color-primary-active);
 }
 
 @media (max-width: 34rem) {
@@ -137,7 +137,7 @@
 }
 
 .auth-form__help { margin: -.25rem 0 0; text-align: right; }
-.auth-form__help a, .auth-feedback a { color: var(--levelup-color-primary); font-weight: 700; }
+.auth-form__help a, .auth-feedback a { color: var(--beeday-color-primary); font-weight: 700; }
 
 .auth-form__options {
     display: flex;
@@ -150,14 +150,14 @@
     display: flex;
     align-items: center;
     gap: .45rem;
-    color: var(--levelup-color-text-muted);
+    color: var(--beeday-color-text-muted);
     cursor: pointer;
 }
 
 .auth-remember input {
     width: 1rem;
     height: 1rem;
-    accent-color: var(--levelup-color-primary);
+    accent-color: var(--beeday-color-primary);
 }
 
 @media (max-width: 28rem) {

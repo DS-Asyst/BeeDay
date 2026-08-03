@@ -16,7 +16,7 @@ public sealed class EditorModalShellTests : BunitContext
             .Add(component => component.ShowDelete, true));
 
         Assert.Contains("Save", cut.Find(".editor-modal__header-save").TextContent);
-        Assert.Contains("Delete", cut.Find(".editor-modal__footer-danger .levelup-button--danger").TextContent);
+        Assert.Contains("Delete", cut.Find(".editor-modal__footer-danger .beeday-button--danger").TextContent);
         Assert.Contains("Cancel", cut.Find(".editor-modal__cancel-action").TextContent);
     }
 
@@ -31,7 +31,7 @@ public sealed class EditorModalShellTests : BunitContext
             .Add(component => component.ShowDelete, true));
 
         Assert.Empty(cut.Find(".editor-modal__cancel-action").QuerySelectorAll("svg"));
-        Assert.Empty(cut.Find(".editor-modal__footer-danger .levelup-button--danger").QuerySelectorAll("svg"));
+        Assert.Empty(cut.Find(".editor-modal__footer-danger .beeday-button--danger").QuerySelectorAll("svg"));
     }
 
     [Fact]

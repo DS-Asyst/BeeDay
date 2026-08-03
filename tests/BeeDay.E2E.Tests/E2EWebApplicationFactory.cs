@@ -12,7 +12,7 @@ using Microsoft.Extensions.Hosting;
 namespace BeeDay.E2E.Tests;
 
 /// <summary>
-/// Hosts the real LevelUp application on a real Kestrel TCP endpoint (not TestServer's in-memory
+/// Hosts the real BeeDay application on a real Kestrel TCP endpoint (not TestServer's in-memory
 /// transport) so a genuine Chromium instance can navigate to it. Self-contained: does not inherit
 /// from or reference any type in BeeDay.Web.Tests — only the production BeeDay.Web project.
 /// Storage is an isolated, disposable SQL Server LocalDB database per instance (migrated on startup,

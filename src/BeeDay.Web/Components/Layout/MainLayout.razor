@@ -1,26 +1,26 @@
 @inject AuthenticatedUserInitializer AuthenticatedUserInitializer
 @inherits LayoutComponentBase
 
-<div class="levelup-app">
+<div class="beeday-app">
     <TopNavigation IsProfilePanelOpen="@_isProfilePanelOpen"
                    IsMenuPanelOpen="@_isMenuPanelOpen"
                    OnToggleProfilePanel="ToggleProfilePanel"
                    OnToggleMenuPanel="ToggleMenuPanel" />
 
-    <div class="levelup-workspace @GetWorkspaceClass()">
-        <div class="levelup-side-slot levelup-side-slot--left">
+    <div class="beeday-workspace @GetWorkspaceClass()">
+        <div class="beeday-side-slot beeday-side-slot--left">
             <ProfileSidePanel IsOpen="@_isProfilePanelOpen" OnClose="ClosePanels" />
         </div>
 
-        <div class="levelup-content-shell">
-            <main class="levelup-main">
+        <div class="beeday-content-shell">
+            <main class="beeday-main">
                 @Body
             </main>
 
             <AppFooter />
         </div>
 
-        <div class="levelup-side-slot levelup-side-slot--right">
+        <div class="beeday-side-slot beeday-side-slot--right">
             <AccountSidePanel IsOpen="@_isMenuPanelOpen" OnClose="ClosePanels" />
         </div>
     </div>

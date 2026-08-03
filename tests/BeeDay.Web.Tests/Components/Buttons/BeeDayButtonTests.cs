@@ -15,18 +15,18 @@ public sealed class BeeDayButtonTests
         var button = cut.Find("button");
         Assert.Equal("button", button.GetAttribute("type"));
         Assert.Contains("SAVE", button.TextContent);
-        Assert.Contains("levelup-button--primary", button.ClassList);
+        Assert.Contains("beeday-button--primary", button.ClassList);
     }
 
     [Theory]
-    [InlineData(BeeDayButtonVariant.Primary, "levelup-button--primary")]
-    [InlineData(BeeDayButtonVariant.Secondary, "levelup-button--secondary")]
-    [InlineData(BeeDayButtonVariant.Success, "levelup-button--success")]
-    [InlineData(BeeDayButtonVariant.Warning, "levelup-button--warning")]
-    [InlineData(BeeDayButtonVariant.Back, "levelup-button--back")]
-    [InlineData(BeeDayButtonVariant.Danger, "levelup-button--danger")]
-    [InlineData(BeeDayButtonVariant.ConfirmationDanger, "levelup-button--confirmation-danger")]
-    [InlineData(BeeDayButtonVariant.ConfirmationCancel, "levelup-button--confirmation-cancel")]
+    [InlineData(BeeDayButtonVariant.Primary, "beeday-button--primary")]
+    [InlineData(BeeDayButtonVariant.Secondary, "beeday-button--secondary")]
+    [InlineData(BeeDayButtonVariant.Success, "beeday-button--success")]
+    [InlineData(BeeDayButtonVariant.Warning, "beeday-button--warning")]
+    [InlineData(BeeDayButtonVariant.Back, "beeday-button--back")]
+    [InlineData(BeeDayButtonVariant.Danger, "beeday-button--danger")]
+    [InlineData(BeeDayButtonVariant.ConfirmationDanger, "beeday-button--confirmation-danger")]
+    [InlineData(BeeDayButtonVariant.ConfirmationCancel, "beeday-button--confirmation-cancel")]
     public void AppliesVariantClass(BeeDayButtonVariant variant, string expectedClass)
     {
         using var context = new BunitContext();
@@ -47,7 +47,7 @@ public sealed class BeeDayButtonTests
         var button = cut.Find("button");
         Assert.True(button.HasAttribute("disabled"));
         Assert.Equal("true", button.GetAttribute("aria-busy"));
-        Assert.NotNull(cut.Find("svg.pixel-icon--loading.levelup-button__loader"));
+        Assert.NotNull(cut.Find("svg.pixel-icon--loading.beeday-button__loader"));
     }
 
     [Fact]
@@ -60,8 +60,8 @@ public sealed class BeeDayButtonTests
             .Add(component => component.IsLoading, true));
 
         var button = cut.Find("button");
-        Assert.Contains("levelup-button--full-width", button.ClassList);
-        Assert.Contains("levelup-button--compact", button.ClassList);
+        Assert.Contains("beeday-button--full-width", button.ClassList);
+        Assert.Contains("beeday-button--compact", button.ClassList);
         Assert.True(button.HasAttribute("disabled"));
     }
 
@@ -75,7 +75,7 @@ public sealed class BeeDayButtonTests
 
         var icon = cut.Find("svg.pixel-icon--save");
         Assert.Equal("true", icon.GetAttribute("aria-hidden"));
-        Assert.Contains("SAVE", cut.Find(".levelup-button__label").TextContent);
+        Assert.Contains("SAVE", cut.Find(".beeday-button__label").TextContent);
     }
 
     [Fact]

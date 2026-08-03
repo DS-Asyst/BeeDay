@@ -5,7 +5,7 @@
     min-width: 0;
     margin: 0;
     padding: 0;
-    background: var(--levelup-color-surface);
+    background: var(--beeday-color-surface);
     box-sizing: border-box;
 }
 
@@ -15,7 +15,7 @@
     width: 100%;
     min-width: 0;
     padding: .55rem .9rem 1rem;
-    background: var(--levelup-color-surface);
+    background: var(--beeday-color-surface);
     box-sizing: border-box;
 }
 
@@ -98,13 +98,13 @@
 
 @media (max-width: 620px) {
     .dashboard-page__content {
-        padding: var(--levelup-spacing-sm);
+        padding: var(--beeday-spacing-sm);
     }
 
     .dashboard-grid {
         grid-template-columns: minmax(0, 1fr);
-        gap: var(--levelup-spacing-sm);
-        margin-top: var(--levelup-spacing-sm);
+        gap: var(--beeday-spacing-sm);
+        margin-top: var(--beeday-spacing-sm);
     }
 
     .dashboard-grid > * {

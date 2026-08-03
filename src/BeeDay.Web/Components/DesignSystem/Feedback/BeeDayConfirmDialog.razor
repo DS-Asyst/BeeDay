@@ -9,14 +9,14 @@
         <section class="delete-confirmation"
                  role="alertdialog"
                  aria-modal="true"
-                 aria-labelledby="levelup-confirm-title"
-                 aria-describedby="levelup-confirm-description"
+                 aria-labelledby="beeday-confirm-title"
+                 aria-describedby="beeday-confirm-description"
                  @onclick:stopPropagation>
             <div class="delete-confirmation__top-border" aria-hidden="true"></div>
             <div class="delete-confirmation__content">
                 <div class="delete-confirmation__icon" aria-hidden="true"><PixelIcon Name="PixelIconName.Delete" Size="PixelIconSize.ExtraLarge" Color="PixelIconColor.Danger" /></div>
-                <h2 id="levelup-confirm-title">@Title</h2>
-                <p id="levelup-confirm-description" class="delete-confirmation__question">@Message</p>
+                <h2 id="beeday-confirm-title">@Title</h2>
+                <p id="beeday-confirm-description" class="delete-confirmation__question">@Message</p>
 
                 @if (!string.IsNullOrWhiteSpace(ItemTitle))
                 {
@@ -40,14 +40,14 @@
                 <div class="delete-confirmation__actions">
                     <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel"
                                    Disabled="IsBusy"
-                                   Class="delete-confirmation__cancel-action levelup-button--comic levelup-button--comic-neutral"
+                                   Class="delete-confirmation__cancel-action beeday-button--comic beeday-button--comic-neutral"
                                    OnClick="CancelAsync">
                         @CancelLabel
                     </BeeDayButton>
                     <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationDanger"
                                    Disabled="IsBusy"
                                    IsLoading="IsBusy"
-                                   Class="delete-confirmation__confirm-action levelup-button--comic levelup-button--comic-danger"
+                                   Class="delete-confirmation__confirm-action beeday-button--comic beeday-button--comic-danger"
                                    OnClick="ConfirmAsync">
                         @ConfirmLabel
                     </BeeDayButton>

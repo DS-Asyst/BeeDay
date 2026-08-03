@@ -1,21 +1,21 @@
-.levelup-container {
+.beeday-container {
     width: min(100% - 2rem, 1440px);
     margin-inline: auto;
 }
 
-.levelup-surface {
-    background: var(--levelup-color-surface);
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-md);
-    box-shadow: var(--levelup-shadow-sm);
+.beeday-surface {
+    background: var(--beeday-color-surface);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-md);
+    box-shadow: var(--beeday-shadow-sm);
 }
 
-.levelup-text-muted { color: var(--levelup-color-text-muted); }
-.levelup-text-danger { color: var(--levelup-color-danger); }
-.levelup-stack-sm { display: grid; gap: var(--levelup-spacing-sm); }
-.levelup-stack-md { display: grid; gap: var(--levelup-spacing-md); }
-.levelup-cluster { display: flex; flex-wrap: wrap; align-items: center; gap: var(--levelup-spacing-sm); }
-.levelup-visually-hidden {
+.beeday-text-muted { color: var(--beeday-color-text-muted); }
+.beeday-text-danger { color: var(--beeday-color-danger); }
+.beeday-stack-sm { display: grid; gap: var(--beeday-spacing-sm); }
+.beeday-stack-md { display: grid; gap: var(--beeday-spacing-md); }
+.beeday-cluster { display: flex; flex-wrap: wrap; align-items: center; gap: var(--beeday-spacing-sm); }
+.beeday-visually-hidden {
     position: absolute;
     width: 1px;
     height: 1px;

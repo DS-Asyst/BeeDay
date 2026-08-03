@@ -12,24 +12,24 @@
     gap: .5rem;
     box-sizing: border-box;
     padding: .55rem .75rem;
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-md);
-    background: var(--levelup-color-surface);
-    color: var(--levelup-color-text-primary);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-md);
+    background: var(--beeday-color-surface);
+    color: var(--beeday-color-text-primary);
     box-shadow: 0 2px 0 rgb(23 19 33 / 10%);
-    font: var(--levelup-type-body);
+    font: var(--beeday-type-body);
     text-align: left;
     cursor: pointer;
-    transition: border-color var(--levelup-transition-normal), box-shadow var(--levelup-transition-normal), background-color var(--levelup-transition-normal);
+    transition: border-color var(--beeday-transition-normal), box-shadow var(--beeday-transition-normal), background-color var(--beeday-transition-normal);
 }
 
 .activity-attribute-select__trigger:hover {
-    border-color: color-mix(in srgb, var(--levelup-color-primary) 45%, var(--levelup-color-border));
+    border-color: color-mix(in srgb, var(--beeday-color-primary) 45%, var(--beeday-color-border));
 }
 
 .activity-attribute-select__trigger:focus-visible {
     outline: none;
-    border-color: var(--levelup-color-primary);
+    border-color: var(--beeday-color-primary);
     box-shadow: 0 0 0 3px rgb(103 58 183 / 15%);
 }
 
@@ -49,12 +49,12 @@
 }
 
 .activity-attribute-select__placeholder {
-    color: var(--levelup-color-text-muted);
+    color: var(--beeday-color-text-muted);
 }
 
 .activity-attribute-select ::deep .activity-attribute-select__chevron {
     flex: 0 0 auto;
-    transition: transform var(--levelup-transition-fast);
+    transition: transform var(--beeday-transition-fast);
 }
 
 .activity-attribute-select ::deep .activity-attribute-select__chevron--open {
@@ -66,23 +66,23 @@
    modal's own `overflow: hidden auto` scroll region. Safe here because
    EditorModalShell is always rendered as a top-level sibling of the page
    content (see Home.razor), never nested inside a transformed ancestor
-   (unlike LevelUpCardMenu, which lives inside dashboard/sortable containers
+   (unlike BeeDayCardMenu, which lives inside dashboard/sortable containers
    that do carry a resting transform and therefore cannot use position: fixed
-   — see levelup-card-menu.js for that rationale). Top/left/width/max-height
+   — see beeday-card-menu.js for that rationale). Top/left/width/max-height
    are computed by AttributeSelectPlacementCalculator (pure C#) from real
    getBoundingClientRect geometry and applied as inline pixel values; this
    rule only supplies the parts that never change. */
 .activity-attribute-select__menu {
     position: fixed;
-    z-index: var(--levelup-z-dropdown);
+    z-index: var(--beeday-z-dropdown);
     display: grid;
     padding: .32rem;
     overflow-y: auto;
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-xs);
-    background: var(--levelup-color-surface);
-    box-shadow: var(--levelup-shadow-md);
-    animation: levelup-fade-in var(--levelup-duration-fast) var(--levelup-easing-emphasized) both;
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-xs);
+    background: var(--beeday-color-surface);
+    box-shadow: var(--beeday-shadow-md);
+    animation: beeday-fade-in var(--beeday-duration-fast) var(--beeday-easing-emphasized) both;
 }
 
 /* First-render-only state: laid out exactly like the pre-overlay dropdown
@@ -111,21 +111,21 @@
     padding: .45rem .6rem;
     border: 0;
     border-radius: .15rem;
-    color: var(--levelup-color-text-primary);
+    color: var(--beeday-color-text-primary);
     background: transparent;
     text-align: left;
-    font: var(--levelup-type-button);
+    font: var(--beeday-type-button);
     cursor: pointer;
-    transition: background-color var(--levelup-transition-fast);
+    transition: background-color var(--beeday-transition-fast);
 }
 
 .activity-attribute-select__option:hover,
 .activity-attribute-select__option:focus-visible {
-    background: var(--levelup-color-surface-muted);
+    background: var(--beeday-color-surface-muted);
     outline: none;
 }
 
 .activity-attribute-select__option--selected {
-    background: var(--levelup-color-surface-muted);
+    background: var(--beeday-color-surface-muted);
     font-weight: 700;
 }

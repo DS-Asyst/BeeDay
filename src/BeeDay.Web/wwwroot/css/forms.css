@@ -1,76 +1,76 @@
-.levelup-field {
+.beeday-field {
     display: grid;
     gap: 0.38rem;
 }
 
-.levelup-field__label {
-    font: var(--levelup-type-label);
+.beeday-field__label {
+    font: var(--beeday-type-label);
 }
 
-.levelup-field__control {
+.beeday-field__control {
     width: 100%;
     box-sizing: border-box;
     min-height: 2.35rem;
     padding: 0.55rem 0.72rem;
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-xs);
-    background: var(--levelup-color-surface);
-    color: var(--levelup-color-text-secondary);
-    font: var(--levelup-type-body);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-xs);
+    background: var(--beeday-color-surface);
+    color: var(--beeday-color-text-secondary);
+    font: var(--beeday-type-body);
     box-shadow: 0 1px 2px rgb(33 22 43 / 7%);
     outline: none;
 }
 
-.levelup-field__control--textarea {
+.beeday-field__control--textarea {
     min-height: 4.3rem;
     resize: vertical;
 }
 
-.levelup-field__control:focus {
-    border-color: var(--levelup-color-primary-light);
+.beeday-field__control:focus {
+    border-color: var(--beeday-color-primary-light);
     box-shadow: 0 0 0 2px rgb(103 58 183 / 16%);
 }
 
-.levelup-field__control:disabled,
-.levelup-field__control[readonly] {
+.beeday-field__control:disabled,
+.beeday-field__control[readonly] {
     cursor: not-allowed;
     background: #f2f0f3;
     color: #82788a;
 }
 
-.levelup-field__counter {
+.beeday-field__counter {
     justify-self: end;
     color: inherit;
-    font: var(--levelup-type-small);
+    font: var(--beeday-type-small);
 }
 
-.levelup-checkbox {
+.beeday-checkbox {
     display: inline-flex;
     align-items: center;
     gap: 0.55rem;
     cursor: pointer;
 }
 
-.levelup-checkbox__control {
+.beeday-checkbox__control {
     width: 1.05rem;
     height: 1.05rem;
-    accent-color: var(--levelup-color-primary);
+    accent-color: var(--beeday-color-primary);
 }
 
-.levelup-checkbox__label {
-    font: var(--levelup-type-label);
+.beeday-checkbox__label {
+    font: var(--beeday-type-label);
 }
 
-.levelup-field__control-shell { position: relative; display: block; }
-.levelup-field__control-shell .levelup-field__control { padding-right: 2.25rem; }
-.levelup-field__control--select { appearance: none; }
-.levelup-field__control-icon { position: absolute; top: 50%; right: .7rem; transform: translateY(-50%); pointer-events: none; }
+.beeday-field__control-shell { position: relative; display: block; }
+.beeday-field__control-shell .beeday-field__control { padding-right: 2.25rem; }
+.beeday-field__control--select { appearance: none; }
+.beeday-field__control-icon { position: absolute; top: 50%; right: .7rem; transform: translateY(-50%); pointer-events: none; }
 
-/* LevelUpDateInput already renders its own decorative Calendar PixelIcon;
+/* BeeDayDateInput already renders its own decorative Calendar PixelIcon;
    suppress the browser's native date-picker glyph so only one calendar icon
    shows, while keeping the native picker itself openable from anywhere in
    the field (a fully transparent, full-size indicator, not display:none). */
-.levelup-field__control-shell input[type="date"]::-webkit-calendar-picker-indicator {
+.beeday-field__control-shell input[type="date"]::-webkit-calendar-picker-indicator {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -80,13 +80,13 @@
     opacity: 0;
     cursor: pointer;
 }
-.levelup-validation-message { display: flex; align-items: flex-start; gap: .35rem; color: var(--levelup-color-danger); font: var(--levelup-type-small); font-weight: var(--levelup-font-weight-bold); }
-.levelup-validation-message .pixel-icon { margin-top: .08rem; }
-.levelup-checkbox { position: relative; }
-.levelup-checkbox__control { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.levelup-checkbox__visual { display: inline-grid; place-items: center; width: 1.05rem; height: 1.05rem; }
-.levelup-checkbox__visual .pixel-icon { grid-area: 1 / 1; }
-.levelup-checkbox__checked { opacity: 0; }
-.levelup-checkbox__control:checked + .levelup-checkbox__visual .levelup-checkbox__unchecked { opacity: 0; }
-.levelup-checkbox__control:checked + .levelup-checkbox__visual .levelup-checkbox__checked { opacity: 1; }
-.levelup-checkbox__control:focus-visible + .levelup-checkbox__visual { outline: 2px solid var(--levelup-color-primary-light); outline-offset: 2px; }
+.beeday-validation-message { display: flex; align-items: flex-start; gap: .35rem; color: var(--beeday-color-danger); font: var(--beeday-type-small); font-weight: var(--beeday-font-weight-bold); }
+.beeday-validation-message .pixel-icon { margin-top: .08rem; }
+.beeday-checkbox { position: relative; }
+.beeday-checkbox__control { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.beeday-checkbox__visual { display: inline-grid; place-items: center; width: 1.05rem; height: 1.05rem; }
+.beeday-checkbox__visual .pixel-icon { grid-area: 1 / 1; }
+.beeday-checkbox__checked { opacity: 0; }
+.beeday-checkbox__control:checked + .beeday-checkbox__visual .beeday-checkbox__unchecked { opacity: 0; }
+.beeday-checkbox__control:checked + .beeday-checkbox__visual .beeday-checkbox__checked { opacity: 1; }
+.beeday-checkbox__control:focus-visible + .beeday-checkbox__visual { outline: 2px solid var(--beeday-color-primary-light); outline-offset: 2px; }

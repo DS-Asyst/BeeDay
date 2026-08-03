@@ -22,7 +22,7 @@ public sealed class CurrentUserGuardTests
     public async Task Handler_WithNullContextUserId_RejectsTheOperationEvenWhenAnotherUserExists()
     {
         var repository = new FakeUnitOfWork();
-        AddUser(repository, "Real User", "real-user@levelup.test");
+        AddUser(repository, "Real User", "real-user@beeday.test");
 
         var handler = new CreateHabitCommandHandler(repository.Habits, new FakeCurrentUserContext(null));
         var command = new CreateHabitCommand(new SaveHabitRequest(

@@ -1,135 +1,52 @@
-# LevelUp — Documentação Técnica Contract-First
+# BeeDay Documentation
 
-**Status:** migração para SQL Server **concluída** na Sprint 14.6; legado JSON **removido do código**
-na Sprint 14.7. Ver [`architecture/08-migration-status.md`](architecture/08-migration-status.md) §8/§9
-para o estado verificado contra o código: todo handler de leitura e escrita usa os 8 contratos por
-Aggregate/read services/`IUnitOfWork`; `ILevelUpRepository`/`GetLevelUpResponse`/`RequestHandlerBase`
-removidos na 14.6; `LevelUpData` (Domain), todo o pipeline `Persistence/Json/`, `JsonStorageOptions` e
-`JsonStorageHealthCheck` removidos na 14.7; SQL Server é o único provider — não existe mais nenhum
-código de persistência JSON no repositório. `JsonEventJournal` permanece, mas é auditoria de domain
-events (write-only), não persistência funcional — ver ADR-004 §atualização Sprint 14.7.  
-**Escopo:** aplicação LevelUp completa  
-**Plataforma atual:** .NET 10, Blazor Server, Clean Architecture pragmática, MediatR, EF Core/SQL Server
-como único provider de persistência — nenhum código JSON de persistência restante (ver
-`data/03-json-to-sql-transition.md` §"Sprint 14.7")  
-**Plataforma-alvo:** já alcançada — contratos estáveis, EF Core, SQL Server, banco iniciado sem dados
-legados e nenhum código de persistência JSON remanescente
+Índice principal da documentação do BeeDay. A documentação descreve o sistema como ele é hoje e as
+decisões que o trouxeram até aqui — não a ordem histórica em que as funcionalidades foram
+implementadas. A exceção é [`adr/`](adr/README.md): cada ADR é um registro imutável do momento em
+que uma decisão foi tomada.
 
-## 1. Objetivo
+**Fonte da verdade:** esta taxonomia foi definida na Sprint 16.2 verificando diretamente
+`BeeDay.slnx`, `src/*`, `tests/*` e o inventário de documentos existentes auditado na Sprint 16.1.
 
-Esta documentação redefine a base técnica do LevelUp a partir do código existente. O objetivo é preparar toda a aplicação para substituir a persistência JSON por banco relacional sem acoplar os casos de uso, a interface Blazor ou o domínio ao Entity Framework Core.
+## Regra permanente desta documentação
 
-A estratégia adotada é **Contract-First Development**:
+Todo documento deve declarar explicitamente sua fonte de verdade — por exemplo:
+"Verificado diretamente em `src/BeeDay.Infrastructure/...`", "Baseado na implementação atual de
+`BeeDayDbContext`", "Extraído dos contratos em `Application/Common/Contracts`", "Derivado dos
+testes em `tests/BeeDay.Web.Tests`". Ver [`CONVENTIONS.md`](CONVENTIONS.md).
 
-1. o contrato é definido antes da implementação;
-2. consumidores dependem de contratos, não de adapters;
-3. domínio, UI, persistência e transporte não compartilham modelos por conveniência;
-4. alterações incompatíveis exigem versão ou migração explícita;
-5. testes verificam o contrato independentemente da implementação;
-6. EF Core e JSON são adapters substituíveis durante a transição;
-7. o novo banco será criado vazio, sem importação de `LevelUpBD.json` ou backups JSON.
+## Áreas
 
-## 2. Decisões principais
+| Área | Conteúdo | Status |
+|---|---|---|
+| [`architecture/`](architecture/README.md) | Visão geral, estrutura da solução, camadas, dependências, runtime, persistência, segurança, deployment | Correto — reconstruído por completo na Sprint 16.3 a partir do código atual |
+| [`domain/`](domain/README.md) | Aggregates, Entities, Value Objects, Domain Events, Business Rules | Correto — reconstruído por completo na Sprint 16.4 a partir do código atual |
+| [`application/`](application/README.md) | Casos de uso, Requests/Responses | Parcialmente correto/obsoleto — reescrita pendente |
+| [`infrastructure/`](infrastructure/README.md) | Caching, background jobs, health checks, Identity técnica | Reservado — sem conteúdo próprio ainda |
+| [`web/`](web/README.md) | Composition root, páginas Blazor Server | Reservado — sem conteúdo próprio ainda |
+| [`persistence/`](persistence/README.md) | Modelo relacional, estratégia EF Core | Correto |
+| [`authentication/`](authentication/README.md) | Cookies, confirmação de e-mail, rate limiting | Reservado — ver `security/` enquanto isso |
+| [`security/`](security/README.md) | Baseline de segurança | Correto |
+| [`deployment/`](deployment/README.md) | Ambiente, backup/restore, CI/CD | Correto/parcialmente correto |
+| [`testing/`](testing/README.md) | Estratégia e infraestrutura de testes | Parcialmente correto |
+| [`design-system/`](design-system/README.md) | Design System Blazor, Pixel Icon System | Reservado — sem conteúdo próprio ainda |
+| [`ux/`](ux/README.md) | Fluxos de usuário e jornadas | Reservado — ver `architecture/05-runtime-flows.md` enquanto isso |
+| [`api/`](api/README.md) | Especificação OpenAPI | Não reauditado quanto ao conteúdo |
+| [`adr/`](adr/README.md) | Registros de decisão arquitetural | Correto (histórico, imutável) |
+| [`developer/`](developer/README.md) | Guia de contribuição, setup de ambiente | Reservado — ver `README.md` da raiz enquanto isso |
+| [`history/`](history/README.md) | Diários de sprint e transições já concluídas | Correto (histórico, congelado) |
 
-- Criar o projeto `LevelUp.Contracts`.
-- Remover `LevelUpData` como contrato de aplicação.
-- Substituir `ILevelUpRepository` por portas específicas por agregado e por consulta.
-- Separar contratos públicos, commands, domain entities e persistence models.
-- Adotar respostas tipadas e um catálogo único de erros.
-- Manter JSON somente como adapter temporário de compatibilidade funcional.
-- Não criar rotina de migração de dados JSON → SQL.
-- Iniciar SQL Server com migrations novas e base vazia.
-- Introduzir EF Core apenas após os contratos e testes de contrato estarem estabilizados.
-- Remover o conceito persistido de `CurrentUserId`.
-- Adicionar rate limiting de login, invalidação de sessões e testes E2E antes da exposição pública.
+## Templates
 
-## 3. Índice
+Modelos oficiais para criar novos documentos de cada tipo vivem em [`_templates/`](_templates/).
 
-### Arquitetura
+## Ordem de leitura recomendada para quem chega agora ao projeto
 
-- [Estado atual](architecture/01-current-state.md)
-- [Arquitetura-alvo](architecture/02-target-architecture.md)
-- [Regras de dependência](architecture/03-dependency-rules.md)
-- [Fluxos de execução](architecture/04-runtime-flows.md)
-- [Aggregate Map do Domain (Sprint 13.1)](architecture/05-domain-aggregate-map.md)
-- [Domain Persistence Map (Sprint 13.2)](architecture/06-domain-persistence-map.md)
-- [Persistence Contracts (Sprint 13.3)](architecture/07-persistence-contracts.md)
-- [Contract-First Migration Status (Sprint 14.6 — concluído)](architecture/08-migration-status.md) — estado verificado, não um plano
-
-### Contract-First
-
-- [Padrão Contract-First](contracts/01-contract-first-standard.md)
-- [Catálogo de contratos](contracts/02-contract-catalog.md)
-- [Erros e versionamento](contracts/03-errors-and-versioning.md)
-- [Estrutura proposta em C#](contracts/04-csharp-structure.md)
-
-### Dados
-
-- [Modelo relacional](data/01-relational-model.md)
-- [Estratégia EF Core](data/02-ef-core-strategy.md)
-- [Transição JSON → SQL sem dados](data/03-json-to-sql-transition.md)
-
-### Segurança e qualidade
-
-- [Baseline de segurança](security/01-security-baseline.md)
-- [Estratégia de testes](testing/01-testing-strategy.md)
-
-### Operação
-
-- [HMG, produção e observabilidade](operations/01-operations.md)
-- [Backup, restore e continuidade](operations/02-backup-and-restore.md)
-
-### Execução
-
-- Roadmap técnico, backlog por sprint e Definition of Done: ainda não redigidos (`docs/roadmap/` não existe nesta branch). Criar antes de linkar aqui.
-
-### Decisões arquiteturais
-
-- [ADR-001 — Contract-First](adr/ADR-001-contract-first.md)
-- [ADR-002 — Banco novo sem dados JSON](adr/ADR-002-greenfield-database.md)
-- [ADR-003 — Repositórios por agregado](adr/ADR-003-aggregate-repositories.md)
-- [ADR-004 — SQL Server como único provider de runtime (Sprint 14.6)](adr/ADR-004-sql-server-runtime-cutover.md)
-- [ADR-005 — Remoção do código legado JSON e de `LevelUpData` (Sprint 14.7)](adr/ADR-005-json-legacy-removal.md)
-
-### Contrato HTTP futuro
-
-- [OpenAPI inicial](openapi/levelup.v1.yaml)
-
-## 4. Ordem obrigatória de implementação
-
-1. corrigir riscos atuais;
-2. criar contratos e testes de contrato;
-3. adaptar a implementação JSON aos novos contratos;
-4. introduzir EF Core e SQL Server;
-5. executar testes de conformidade nos dois adapters;
-6. trocar o adapter ativo por configuração;
-7. iniciar o banco vazio;
-8. remover JSON após estabilização — **concluído na Sprint 14.7**;
-9. automatizar HMG e fortalecer operação.
-
-## 5. Fora do escopo
-
-- importar usuários ou dados do JSON;
-- manter identificadores antigos;
-- realizar dual-write entre JSON e SQL;
-- expor todas as operações como API pública imediatamente;
-- introduzir microserviços;
-- substituir Blazor Server nesta etapa;
-- implementar Event Sourcing.
-
-## 6. Resultado esperado
-
-Ao final, a aplicação deverá permitir trocar:
-
-```text
-Json adapters → EF Core adapters
-```
-
-sem alterar:
-
-- contratos de entrada e saída;
-- componentes Blazor;
-- handlers dos casos de uso, salvo composição de dependências;
-- regras de domínio;
-- catálogo de erros;
-- testes de comportamento.
+1. [`README.md`](../README.md) da raiz — visão geral, stack, como rodar.
+2. [`architecture/`](architecture/README.md) — como as camadas se relacionam.
+3. [`persistence/`](persistence/README.md) e [`security/`](security/README.md) — como os dados e a
+   autenticação funcionam hoje.
+4. [`testing/`](testing/README.md) — como validar mudanças.
+5. [`adr/`](adr/README.md) — por que as decisões estruturais foram tomadas.
+6. [`deployment/`](deployment/README.md) — como o sistema chega a produção.
+7. [`history/`](history/README.md) — apenas se precisar entender a jornada até aqui.

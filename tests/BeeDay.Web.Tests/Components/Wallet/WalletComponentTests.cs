@@ -27,7 +27,7 @@ public sealed class WalletComponentTests : BunitContext
 
         var cards = cut.FindAll(".wallet-summary__card");
         Assert.Equal(3, cards.Count);
-        Assert.All(cards, card => Assert.Contains("levelup-card", card.ClassList));
+        Assert.All(cards, card => Assert.Contains("beeday-card", card.ClassList));
     }
 
     [Fact]

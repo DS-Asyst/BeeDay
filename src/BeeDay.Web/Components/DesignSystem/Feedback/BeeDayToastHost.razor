@@ -1,19 +1,19 @@
 @implements IDisposable
 @inject ToastService ToastService
 
-<div class="levelup-toast-region"
+<div class="beeday-toast-region"
      aria-live="polite"
      aria-label="Notifications">
     @foreach (var toast in ToastService.Messages)
     {
-        <article class="levelup-toast levelup-toast--@VariantClass(toast.Variant)"
+        <article class="beeday-toast beeday-toast--@VariantClass(toast.Variant)"
                  role="@RoleFor(toast.Variant)">
-            <span class="levelup-toast__icon" aria-hidden="true"><PixelIcon Name="@IconFor(toast.Variant)" Size="PixelIconSize.Small" /></span>
-            <div class="levelup-toast__content">
+            <span class="beeday-toast__icon" aria-hidden="true"><PixelIcon Name="@IconFor(toast.Variant)" Size="PixelIconSize.Small" /></span>
+            <div class="beeday-toast__content">
                 <strong>@toast.Title</strong>
                 <p>@toast.Message</p>
             </div>
-            <button class="levelup-toast__close"
+            <button class="beeday-toast__close"
                     type="button"
                     aria-label="Dismiss notification"
                     @onclick="() => ToastService.Remove(toast.Id)">

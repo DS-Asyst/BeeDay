@@ -9,9 +9,9 @@
 .hero-catalog__header,
 .hero-catalog__section,
 .hero-catalog--unavailable {
-    border: 1px solid var(--levelup-color-border);
-    background: var(--levelup-color-surface);
-    box-shadow: var(--levelup-shadow-sm);
+    border: 1px solid var(--beeday-color-border);
+    background: var(--beeday-color-surface);
+    box-shadow: var(--beeday-shadow-sm);
 }
 
 .hero-catalog__header,
@@ -20,7 +20,7 @@
 }
 
 .hero-catalog__eyebrow {
-    color: var(--levelup-color-primary);
+    color: var(--beeday-color-primary);
     font-size: .75rem;
     font-weight: 700;
     letter-spacing: .12em;
@@ -34,19 +34,19 @@
 
 .hero-catalog__header p {
     margin-bottom: 0;
-    color: var(--levelup-color-text-secondary);
+    color: var(--beeday-color-text-secondary);
 }
 
 .hero-catalog__note {
     margin-top: .5rem;
-    color: var(--levelup-color-text-secondary);
+    color: var(--beeday-color-text-secondary);
 }
 
 .hero-catalog__frame {
     margin-top: 1rem;
     padding: 1.25rem;
-    border: 1px dashed var(--levelup-color-border);
-    background: var(--levelup-color-background);
+    border: 1px dashed var(--beeday-color-border);
+    background: var(--beeday-color-background);
 }
 
 .hero-catalog__examples {
@@ -57,7 +57,7 @@
 
 .hero-catalog__example-label {
     margin: 0 0 .75rem;
-    color: var(--levelup-color-text-secondary);
+    color: var(--beeday-color-text-secondary);
     font-size: .85rem;
 }
 

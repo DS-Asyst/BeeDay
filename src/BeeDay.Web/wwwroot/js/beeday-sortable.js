@@ -59,7 +59,7 @@ export function initialize(container, dotnetReference) {
         draggedItem = null;
         armedItem = null;
         activePointerId = null;
-        document.body.classList.remove('levelup-is-sorting');
+        document.body.classList.remove('beeday-is-sorting');
     };
 
     const updateClonePosition = (clientX, clientY) => {
@@ -109,7 +109,7 @@ export function initialize(container, dotnetReference) {
         // Flag it so the capture-phase click listener below can swallow that
         // one click without affecting any future, genuine click.
         draggedItem.dataset.suppressClick = 'true';
-        document.body.classList.add('levelup-is-sorting');
+        document.body.classList.add('beeday-is-sorting');
 
         dragClone = draggedItem.cloneNode(true);
         dragClone.classList.remove(
@@ -117,10 +117,10 @@ export function initialize(container, dotnetReference) {
             'is-drag-armed',
             'is-drop-before',
             'is-drop-after',
-            'levelup-card-enter',
-            'levelup-card-leave',
+            'beeday-card-enter',
+            'beeday-card-leave',
             'is-reorder-settling');
-        dragClone.classList.add('levelup-sortable__drag-clone');
+        dragClone.classList.add('beeday-sortable__drag-clone');
         dragClone.removeAttribute('data-sortable-item');
         dragClone.removeAttribute('tabindex');
         dragClone.setAttribute('aria-hidden', 'true');

@@ -145,7 +145,7 @@ public sealed class ProfileCreationState(BeeDayWebService store, ToastService to
                     string.Empty);
             }
 
-            toastService.ShowSuccess("Welcome to LevelUp.");
+            toastService.ShowSuccess("Welcome to BeeDay.");
             return true;
         }
         catch (Exception exception)

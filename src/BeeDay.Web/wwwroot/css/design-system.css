@@ -1,30 +1,30 @@
-/* Official LevelUp pixel pressable action system.
+/* Official BeeDay pixel pressable action system.
    Shared by every semantic action button. Each variant preserves its palette. */
-.levelup-button {
-    --levelup-button-background: var(--levelup-color-button-primary-bg);
-    --levelup-button-background-hover: color-mix(in srgb, var(--levelup-button-background) 90%, white);
-    --levelup-button-pressed: var(--levelup-button-depth);
-    --levelup-button-foreground: var(--levelup-color-button-primary-fg);
-    --levelup-button-outline: var(--levelup-color-button-primary-outline);
-    --levelup-button-depth: var(--levelup-color-button-primary-depth);
-    --levelup-button-shadow: var(--levelup-color-button-primary-shadow);
-    --levelup-button-focus: var(--levelup-color-button-focus-default);
+.beeday-button {
+    --beeday-button-background: var(--beeday-color-button-primary-bg);
+    --beeday-button-background-hover: color-mix(in srgb, var(--beeday-button-background) 90%, white);
+    --beeday-button-pressed: var(--beeday-button-depth);
+    --beeday-button-foreground: var(--beeday-color-button-primary-fg);
+    --beeday-button-outline: var(--beeday-color-button-primary-outline);
+    --beeday-button-depth: var(--beeday-color-button-primary-depth);
+    --beeday-button-shadow: var(--beeday-color-button-primary-shadow);
+    --beeday-button-focus: var(--beeday-color-button-focus-default);
 
     position: relative;
     display: inline-flex;
     min-height: 2.75rem;
     align-items: center;
     justify-content: center;
-    gap: var(--levelup-spacing-sm);
+    gap: var(--beeday-spacing-sm);
     padding: .68rem 1rem .78rem;
-    border: var(--levelup-pixel-unit) solid var(--levelup-button-outline);
+    border: var(--beeday-pixel-unit) solid var(--beeday-button-outline);
     border-radius: 3px;
     clip-path: none;
-    color: var(--levelup-button-foreground);
-    background: var(--levelup-button-background);
+    color: var(--beeday-button-foreground);
+    background: var(--beeday-button-background);
     box-shadow:
-        inset calc(var(--levelup-pixel-unit) * -1) -3px 0 var(--levelup-button-depth),
-        0 4px 0 var(--levelup-button-shadow);
+        inset calc(var(--beeday-pixel-unit) * -1) -3px 0 var(--beeday-button-depth),
+        0 4px 0 var(--beeday-button-shadow);
     filter: none;
     font: inherit;
     font-size: .88rem;
@@ -40,103 +40,103 @@
     overflow: visible;
 }
 
-.levelup-button::before,
-.levelup-button::after { content: none; }
+.beeday-button::before,
+.beeday-button::after { content: none; }
 
-.levelup-button--primary {
-    --levelup-button-background: var(--levelup-color-button-primary-bg);
-    --levelup-button-background-hover: var(--levelup-color-button-primary-bg-hover);
-    --levelup-button-foreground: var(--levelup-color-button-primary-fg);
-    --levelup-button-outline: var(--levelup-color-button-primary-outline);
-    --levelup-button-depth: var(--levelup-color-button-primary-depth);
-    --levelup-button-shadow: var(--levelup-color-button-primary-shadow);
+.beeday-button--primary {
+    --beeday-button-background: var(--beeday-color-button-primary-bg);
+    --beeday-button-background-hover: var(--beeday-color-button-primary-bg-hover);
+    --beeday-button-foreground: var(--beeday-color-button-primary-fg);
+    --beeday-button-outline: var(--beeday-color-button-primary-outline);
+    --beeday-button-depth: var(--beeday-color-button-primary-depth);
+    --beeday-button-shadow: var(--beeday-color-button-primary-shadow);
 }
 
-.levelup-button--secondary {
-    --levelup-button-background: var(--levelup-color-button-secondary-bg);
-    --levelup-button-background-hover: var(--levelup-color-button-secondary-bg-hover);
-    --levelup-button-foreground: var(--levelup-color-button-secondary-fg);
-    --levelup-button-outline: var(--levelup-color-button-secondary-outline);
-    --levelup-button-depth: var(--levelup-color-button-secondary-depth);
-    --levelup-button-shadow: var(--levelup-color-button-secondary-shadow);
+.beeday-button--secondary {
+    --beeday-button-background: var(--beeday-color-button-secondary-bg);
+    --beeday-button-background-hover: var(--beeday-color-button-secondary-bg-hover);
+    --beeday-button-foreground: var(--beeday-color-button-secondary-fg);
+    --beeday-button-outline: var(--beeday-color-button-secondary-outline);
+    --beeday-button-depth: var(--beeday-color-button-secondary-depth);
+    --beeday-button-shadow: var(--beeday-color-button-secondary-shadow);
 }
 
-.levelup-button--success {
-    --levelup-button-background: var(--levelup-color-button-success-bg);
-    --levelup-button-background-hover: var(--levelup-color-button-success-bg-hover);
-    --levelup-button-foreground: var(--levelup-color-button-success-fg);
-    --levelup-button-outline: var(--levelup-color-button-success-outline);
-    --levelup-button-depth: var(--levelup-color-button-success-depth);
-    --levelup-button-shadow: var(--levelup-color-button-success-shadow);
+.beeday-button--success {
+    --beeday-button-background: var(--beeday-color-button-success-bg);
+    --beeday-button-background-hover: var(--beeday-color-button-success-bg-hover);
+    --beeday-button-foreground: var(--beeday-color-button-success-fg);
+    --beeday-button-outline: var(--beeday-color-button-success-outline);
+    --beeday-button-depth: var(--beeday-color-button-success-depth);
+    --beeday-button-shadow: var(--beeday-color-button-success-shadow);
 }
 
-.levelup-button--warning {
-    --levelup-button-background: var(--levelup-color-button-warning-bg);
-    --levelup-button-background-hover: var(--levelup-color-button-warning-bg-hover);
-    --levelup-button-foreground: var(--levelup-color-button-warning-fg);
-    --levelup-button-outline: var(--levelup-color-button-warning-outline);
-    --levelup-button-depth: var(--levelup-color-button-warning-depth);
-    --levelup-button-shadow: var(--levelup-color-button-warning-shadow);
+.beeday-button--warning {
+    --beeday-button-background: var(--beeday-color-button-warning-bg);
+    --beeday-button-background-hover: var(--beeday-color-button-warning-bg-hover);
+    --beeday-button-foreground: var(--beeday-color-button-warning-fg);
+    --beeday-button-outline: var(--beeday-color-button-warning-outline);
+    --beeday-button-depth: var(--beeday-color-button-warning-depth);
+    --beeday-button-shadow: var(--beeday-color-button-warning-shadow);
 }
 
-.levelup-button--back {
-    --levelup-button-background: var(--levelup-color-button-back-bg);
-    --levelup-button-background-hover: var(--levelup-color-button-back-bg-hover);
-    --levelup-button-foreground: var(--levelup-color-button-back-fg);
-    --levelup-button-outline: var(--levelup-color-button-back-outline);
-    --levelup-button-depth: var(--levelup-color-button-back-depth);
-    --levelup-button-shadow: var(--levelup-color-button-back-shadow);
+.beeday-button--back {
+    --beeday-button-background: var(--beeday-color-button-back-bg);
+    --beeday-button-background-hover: var(--beeday-color-button-back-bg-hover);
+    --beeday-button-foreground: var(--beeday-color-button-back-fg);
+    --beeday-button-outline: var(--beeday-color-button-back-outline);
+    --beeday-button-depth: var(--beeday-color-button-back-depth);
+    --beeday-button-shadow: var(--beeday-color-button-back-shadow);
 }
 
-.levelup-button--danger,
-.levelup-button--confirmation-danger {
-    --levelup-button-background: var(--levelup-color-button-danger-bg);
-    --levelup-button-background-hover: var(--levelup-color-button-danger-bg-hover);
-    --levelup-button-foreground: var(--levelup-color-button-danger-fg);
-    --levelup-button-outline: var(--levelup-color-button-danger-outline);
-    --levelup-button-depth: var(--levelup-color-button-danger-depth);
-    --levelup-button-shadow: var(--levelup-color-button-danger-shadow);
+.beeday-button--danger,
+.beeday-button--confirmation-danger {
+    --beeday-button-background: var(--beeday-color-button-danger-bg);
+    --beeday-button-background-hover: var(--beeday-color-button-danger-bg-hover);
+    --beeday-button-foreground: var(--beeday-color-button-danger-fg);
+    --beeday-button-outline: var(--beeday-color-button-danger-outline);
+    --beeday-button-depth: var(--beeday-color-button-danger-depth);
+    --beeday-button-shadow: var(--beeday-color-button-danger-shadow);
 }
 
 /* Cancel actions are deliberately neutral: white surface and black text. */
-.levelup-button--confirmation-cancel {
-    --levelup-button-background: var(--levelup-color-button-confirmation-cancel-bg);
-    --levelup-button-background-hover: var(--levelup-color-button-confirmation-cancel-bg-hover);
-    --levelup-button-foreground: var(--levelup-color-button-confirmation-cancel-fg);
-    --levelup-button-outline: var(--levelup-color-button-confirmation-cancel-outline);
-    --levelup-button-depth: var(--levelup-color-button-confirmation-cancel-depth);
-    --levelup-button-shadow: var(--levelup-color-button-confirmation-cancel-shadow);
-    --levelup-button-focus: var(--levelup-color-button-confirmation-cancel-focus);
+.beeday-button--confirmation-cancel {
+    --beeday-button-background: var(--beeday-color-button-confirmation-cancel-bg);
+    --beeday-button-background-hover: var(--beeday-color-button-confirmation-cancel-bg-hover);
+    --beeday-button-foreground: var(--beeday-color-button-confirmation-cancel-fg);
+    --beeday-button-outline: var(--beeday-color-button-confirmation-cancel-outline);
+    --beeday-button-depth: var(--beeday-color-button-confirmation-cancel-depth);
+    --beeday-button-shadow: var(--beeday-color-button-confirmation-cancel-shadow);
+    --beeday-button-focus: var(--beeday-color-button-confirmation-cancel-focus);
 }
 
 /* The former blue comparison button remains compatible, but uses the shared mechanism. */
-.levelup-button.levelup-button--reference-blue {
-    --levelup-button-background: var(--levelup-color-button-reference-blue-bg);
-    --levelup-button-background-hover: var(--levelup-color-button-reference-blue-bg-hover);
-    --levelup-button-foreground: var(--levelup-color-button-reference-blue-fg);
-    --levelup-button-outline: var(--levelup-color-button-reference-blue-outline);
-    --levelup-button-depth: var(--levelup-color-button-reference-blue-depth);
-    --levelup-button-shadow: var(--levelup-color-button-reference-blue-shadow);
-    --levelup-button-focus: var(--levelup-color-button-reference-blue-focus);
+.beeday-button.beeday-button--reference-blue {
+    --beeday-button-background: var(--beeday-color-button-reference-blue-bg);
+    --beeday-button-background-hover: var(--beeday-color-button-reference-blue-bg-hover);
+    --beeday-button-foreground: var(--beeday-color-button-reference-blue-fg);
+    --beeday-button-outline: var(--beeday-color-button-reference-blue-outline);
+    --beeday-button-depth: var(--beeday-color-button-reference-blue-depth);
+    --beeday-button-shadow: var(--beeday-color-button-reference-blue-shadow);
+    --beeday-button-focus: var(--beeday-color-button-reference-blue-focus);
     min-height: 3rem;
     padding: .72rem 1rem .82rem;
     text-transform: none;
 }
 
 /* Opt-in skewed press style used by the primary operational actions requested by the product.
-   The structural treatment is shared while each LevelUpButton variant keeps its semantic palette. */
-.levelup-button.levelup-button--skew-press {
+   The structural treatment is shared while each BeeDayButton variant keeps its semantic palette. */
+.beeday-button.beeday-button--skew-press {
     width: 100%;
     height: 2.4em;
     min-height: 0;
     padding: 0 1rem;
     gap: 1rem;
-    border: 2px solid var(--levelup-button-outline);
+    border: 2px solid var(--beeday-button-outline);
     border-radius: .75rem;
-    color: var(--levelup-button-foreground);
-    background: var(--levelup-button-background);
-    box-shadow: 0 8px 0 var(--levelup-button-depth);
-    filter: drop-shadow(0 15px 20px color-mix(in srgb, var(--levelup-button-shadow) 38%, transparent));
+    color: var(--beeday-button-foreground);
+    background: var(--beeday-button-background);
+    box-shadow: 0 8px 0 var(--beeday-button-depth);
+    filter: drop-shadow(0 15px 20px color-mix(in srgb, var(--beeday-button-shadow) 38%, transparent));
     font-size: 1.125em;
     font-weight: 400;
     letter-spacing: 2px;
@@ -146,29 +146,29 @@
     transition: all .1s ease;
 }
 
-.levelup-button.levelup-button--skew-press:not(:disabled):hover {
-    color: var(--levelup-button-foreground);
-    background: var(--levelup-button-background);
-    box-shadow: 0 8px 0 var(--levelup-button-depth);
+.beeday-button.beeday-button--skew-press:not(:disabled):hover {
+    color: var(--beeday-button-foreground);
+    background: var(--beeday-button-background);
+    box-shadow: 0 8px 0 var(--beeday-button-depth);
     transform: skew(-10deg);
 }
 
-.levelup-button.levelup-button--skew-press:not(:disabled):active {
+.beeday-button.beeday-button--skew-press:not(:disabled):active {
     letter-spacing: 0;
-    color: var(--levelup-button-foreground);
-    background: var(--levelup-button-background);
-    box-shadow: 0 0 0 var(--levelup-button-shadow);
+    color: var(--beeday-button-foreground);
+    background: var(--beeday-button-background);
+    box-shadow: 0 0 0 var(--beeday-button-shadow);
     transform: skew(-10deg) translateY(8px);
 }
 
-.levelup-button.levelup-button--skew-press:focus-visible {
+.beeday-button.beeday-button--skew-press:focus-visible {
     outline: 0;
     box-shadow:
-        0 8px 0 var(--levelup-button-depth),
-        0 0 0 4px var(--levelup-button-focus);
+        0 8px 0 var(--beeday-button-depth),
+        0 0 0 4px var(--beeday-button-focus);
 }
 
-.levelup-button.levelup-button--skew-press:disabled {
+.beeday-button.beeday-button--skew-press:disabled {
     filter: none;
 }
 
@@ -176,56 +176,56 @@
    bold ink outline and hard offset shadow that inverts on hover and settles
    into the shadow on press. The ink reuses the existing pixel-UI outline
    token; fill and text colors reuse the semantic palette of the button variant. */
-.levelup-button.levelup-button--comic-press {
-    border: var(--levelup-game-border);
-    border-radius: var(--levelup-radius-md);
-    color: var(--levelup-button-foreground);
-    background: var(--levelup-button-background);
-    box-shadow: 5px 5px 0 var(--levelup-game-ink);
+.beeday-button.beeday-button--comic-press {
+    border: var(--beeday-game-border);
+    border-radius: var(--beeday-radius-md);
+    color: var(--beeday-button-foreground);
+    background: var(--beeday-button-background);
+    box-shadow: 5px 5px 0 var(--beeday-game-ink);
     transition:
-        background-color var(--levelup-transition-normal),
-        color var(--levelup-transition-normal),
-        border-color var(--levelup-transition-normal),
-        box-shadow var(--levelup-transition-normal),
-        transform var(--levelup-transition-normal);
+        background-color var(--beeday-transition-normal),
+        color var(--beeday-transition-normal),
+        border-color var(--beeday-transition-normal),
+        box-shadow var(--beeday-transition-normal),
+        transform var(--beeday-transition-normal);
 }
 
-.levelup-button.levelup-button--comic-press:not(:disabled):hover {
-    color: var(--levelup-button-background);
-    background: var(--levelup-button-foreground);
-    border-color: var(--levelup-button-background);
-    box-shadow: 5px 5px 0 var(--levelup-button-background);
+.beeday-button.beeday-button--comic-press:not(:disabled):hover {
+    color: var(--beeday-button-background);
+    background: var(--beeday-button-foreground);
+    border-color: var(--beeday-button-background);
+    box-shadow: 5px 5px 0 var(--beeday-button-background);
     transform: none;
 }
 
-.levelup-button.levelup-button--comic-press:not(:disabled):active {
-    color: var(--levelup-button-foreground);
-    background: var(--levelup-button-depth);
-    box-shadow: 1px 1px 0 var(--levelup-game-ink);
+.beeday-button.beeday-button--comic-press:not(:disabled):active {
+    color: var(--beeday-button-foreground);
+    background: var(--beeday-button-depth);
+    box-shadow: 1px 1px 0 var(--beeday-game-ink);
     transform: translate(4px, 4px);
 }
 
-.levelup-button.levelup-button--comic-press:focus-visible {
+.beeday-button.beeday-button--comic-press:focus-visible {
     outline: 0;
-    box-shadow: 5px 5px 0 var(--levelup-game-ink), 0 0 0 4px var(--levelup-button-focus);
+    box-shadow: 5px 5px 0 var(--beeday-game-ink), 0 0 0 4px var(--beeday-button-focus);
 }
 
 
-/* Comic action style approved for the main LevelUp operational buttons.
+/* Comic action style approved for the main BeeDay operational buttons.
    Geometry is shared; palette modifiers map each product action to its requested colors. */
-.levelup-button.levelup-button--comic {
-    --levelup-comic-hover-foreground: var(--levelup-button-foreground);
+.beeday-button.beeday-button--comic {
+    --beeday-comic-hover-foreground: var(--beeday-button-foreground);
 
     min-height: 0;
     max-height: 2.7em;
     padding: 10px 20px;
     border: 2px solid #000;
     border-radius: 9px;
-    color: var(--levelup-button-foreground);
-    background: var(--levelup-button-background);
+    color: var(--beeday-button-foreground);
+    background: var(--beeday-button-background);
     box-shadow: 3.5px 3.5px 0 #000;
     filter: none;
-    font-family: var(--levelup-font-ui);
+    font-family: var(--beeday-font-ui);
     font-size: 20px;
     font-weight: 400;
     letter-spacing: 0;
@@ -238,102 +238,102 @@
         transform .3s ease;
 }
 
-.levelup-button.levelup-button--comic:not(:disabled):hover {
-    color: var(--levelup-comic-hover-foreground);
-    background: var(--levelup-button-background-hover);
+.beeday-button.beeday-button--comic:not(:disabled):hover {
+    color: var(--beeday-comic-hover-foreground);
+    background: var(--beeday-button-background-hover);
     border-color: #000;
     box-shadow: 5px 5px 0 #000;
     transform: none;
 }
 
-.levelup-button.levelup-button--comic:not(:disabled):active {
-    color: var(--levelup-button-pressed-foreground, var(--levelup-button-foreground));
-    background: var(--levelup-button-pressed);
+.beeday-button.beeday-button--comic:not(:disabled):active {
+    color: var(--beeday-button-pressed-foreground, var(--beeday-button-foreground));
+    background: var(--beeday-button-pressed);
     box-shadow: none;
     transform: translateY(4px);
 }
 
-.levelup-button.levelup-button--comic:focus-visible {
+.beeday-button.beeday-button--comic:focus-visible {
     outline: 0;
-    box-shadow: 3.5px 3.5px 0 #000, 0 0 0 4px var(--levelup-button-focus);
+    box-shadow: 3.5px 3.5px 0 #000, 0 0 0 4px var(--beeday-button-focus);
 }
 
-.levelup-button.levelup-button--comic-blue {
-    --levelup-button-background: var(--levelup-color-comic-blue);
-    --levelup-button-background-hover: var(--levelup-color-comic-blue-hover);
-    --levelup-button-pressed: var(--levelup-color-comic-blue-pressed);
-    --levelup-button-foreground: var(--levelup-color-comic-blue-foreground);
-    --levelup-button-focus: var(--levelup-color-comic-blue-focus);
+.beeday-button.beeday-button--comic-blue {
+    --beeday-button-background: var(--beeday-color-comic-blue);
+    --beeday-button-background-hover: var(--beeday-color-comic-blue-hover);
+    --beeday-button-pressed: var(--beeday-color-comic-blue-pressed);
+    --beeday-button-foreground: var(--beeday-color-comic-blue-foreground);
+    --beeday-button-focus: var(--beeday-color-comic-blue-focus);
 }
 
-.levelup-button.levelup-button--comic-yellow {
-    --levelup-button-background: var(--levelup-color-comic-yellow);
-    --levelup-button-background-hover: var(--levelup-color-comic-yellow-hover);
-    --levelup-button-pressed: var(--levelup-color-comic-yellow-pressed);
-    --levelup-button-foreground: var(--levelup-color-comic-yellow-foreground);
-    --levelup-button-focus: var(--levelup-color-comic-yellow-focus);
+.beeday-button.beeday-button--comic-yellow {
+    --beeday-button-background: var(--beeday-color-comic-yellow);
+    --beeday-button-background-hover: var(--beeday-color-comic-yellow-hover);
+    --beeday-button-pressed: var(--beeday-color-comic-yellow-pressed);
+    --beeday-button-foreground: var(--beeday-color-comic-yellow-foreground);
+    --beeday-button-focus: var(--beeday-color-comic-yellow-focus);
 }
 
-.levelup-button.levelup-button--comic-back {
-    --levelup-button-background: var(--levelup-color-comic-back);
-    --levelup-button-background-hover: var(--levelup-color-comic-back-hover);
-    --levelup-button-pressed: var(--levelup-color-comic-back-pressed);
-    --levelup-button-foreground: var(--levelup-color-comic-back-foreground);
-    --levelup-comic-hover-foreground: var(--levelup-color-comic-back-hover-foreground);
-    --levelup-button-pressed-foreground: var(--levelup-color-comic-back-pressed-foreground);
-    --levelup-button-focus: var(--levelup-color-comic-back-focus);
+.beeday-button.beeday-button--comic-back {
+    --beeday-button-background: var(--beeday-color-comic-back);
+    --beeday-button-background-hover: var(--beeday-color-comic-back-hover);
+    --beeday-button-pressed: var(--beeday-color-comic-back-pressed);
+    --beeday-button-foreground: var(--beeday-color-comic-back-foreground);
+    --beeday-comic-hover-foreground: var(--beeday-color-comic-back-hover-foreground);
+    --beeday-button-pressed-foreground: var(--beeday-color-comic-back-pressed-foreground);
+    --beeday-button-focus: var(--beeday-color-comic-back-focus);
 }
 
-.levelup-button.levelup-button--comic-danger {
-    --levelup-button-background: var(--levelup-color-comic-danger);
-    --levelup-button-background-hover: var(--levelup-color-comic-danger-hover);
-    --levelup-button-pressed: var(--levelup-color-comic-danger-pressed);
-    --levelup-button-foreground: var(--levelup-color-comic-danger-foreground);
-    --levelup-comic-hover-foreground: var(--levelup-color-comic-danger-hover-foreground);
-    --levelup-button-pressed-foreground: var(--levelup-color-comic-danger-pressed-foreground);
-    --levelup-button-focus: var(--levelup-color-comic-danger-focus);
+.beeday-button.beeday-button--comic-danger {
+    --beeday-button-background: var(--beeday-color-comic-danger);
+    --beeday-button-background-hover: var(--beeday-color-comic-danger-hover);
+    --beeday-button-pressed: var(--beeday-color-comic-danger-pressed);
+    --beeday-button-foreground: var(--beeday-color-comic-danger-foreground);
+    --beeday-comic-hover-foreground: var(--beeday-color-comic-danger-hover-foreground);
+    --beeday-button-pressed-foreground: var(--beeday-color-comic-danger-pressed-foreground);
+    --beeday-button-focus: var(--beeday-color-comic-danger-focus);
 }
 
-.levelup-button.levelup-button--comic-neutral {
-    --levelup-button-background: var(--levelup-color-comic-neutral);
-    --levelup-button-background-hover: var(--levelup-color-comic-neutral-hover);
-    --levelup-button-pressed: var(--levelup-color-comic-neutral-pressed);
-    --levelup-button-foreground: var(--levelup-color-comic-neutral-foreground);
-    --levelup-button-pressed-foreground: var(--levelup-color-comic-neutral-pressed-foreground);
-    --levelup-button-focus: var(--levelup-color-comic-neutral-focus);
+.beeday-button.beeday-button--comic-neutral {
+    --beeday-button-background: var(--beeday-color-comic-neutral);
+    --beeday-button-background-hover: var(--beeday-color-comic-neutral-hover);
+    --beeday-button-pressed: var(--beeday-color-comic-neutral-pressed);
+    --beeday-button-foreground: var(--beeday-color-comic-neutral-foreground);
+    --beeday-button-pressed-foreground: var(--beeday-color-comic-neutral-pressed-foreground);
+    --beeday-button-focus: var(--beeday-color-comic-neutral-focus);
 }
 
-.levelup-button.levelup-button--comic-success {
-    --levelup-button-background: var(--levelup-color-comic-success);
-    --levelup-button-background-hover: var(--levelup-color-comic-success-hover);
-    --levelup-button-pressed: var(--levelup-color-comic-success-pressed);
-    --levelup-button-foreground: var(--levelup-color-comic-success-foreground);
-    --levelup-button-focus: var(--levelup-color-comic-success-focus);
+.beeday-button.beeday-button--comic-success {
+    --beeday-button-background: var(--beeday-color-comic-success);
+    --beeday-button-background-hover: var(--beeday-color-comic-success-hover);
+    --beeday-button-pressed: var(--beeday-color-comic-success-pressed);
+    --beeday-button-foreground: var(--beeday-color-comic-success-foreground);
+    --beeday-button-focus: var(--beeday-color-comic-success-focus);
 }
 
-.levelup-button.levelup-button--comic-orange {
-    --levelup-button-background: var(--levelup-color-comic-orange);
-    --levelup-button-background-hover: var(--levelup-color-comic-orange-hover);
-    --levelup-button-pressed: var(--levelup-color-comic-orange-pressed);
-    --levelup-button-foreground: var(--levelup-color-comic-orange-foreground);
-    --levelup-button-focus: var(--levelup-color-comic-orange-focus);
+.beeday-button.beeday-button--comic-orange {
+    --beeday-button-background: var(--beeday-color-comic-orange);
+    --beeday-button-background-hover: var(--beeday-color-comic-orange-hover);
+    --beeday-button-pressed: var(--beeday-color-comic-orange-pressed);
+    --beeday-button-foreground: var(--beeday-color-comic-orange-foreground);
+    --beeday-button-focus: var(--beeday-color-comic-orange-focus);
 }
 
-.levelup-button.levelup-button--comic-magenta {
-    --levelup-button-background: var(--levelup-color-comic-magenta);
-    --levelup-button-background-hover: var(--levelup-color-comic-magenta-hover);
-    --levelup-button-pressed: var(--levelup-color-comic-magenta-pressed);
-    --levelup-button-foreground: var(--levelup-color-comic-magenta-foreground);
-    --levelup-button-focus: var(--levelup-color-comic-magenta-focus);
+.beeday-button.beeday-button--comic-magenta {
+    --beeday-button-background: var(--beeday-color-comic-magenta);
+    --beeday-button-background-hover: var(--beeday-color-comic-magenta-hover);
+    --beeday-button-pressed: var(--beeday-color-comic-magenta-pressed);
+    --beeday-button-foreground: var(--beeday-color-comic-magenta-foreground);
+    --beeday-button-focus: var(--beeday-color-comic-magenta-focus);
 }
 
 /* Shared lightweight icon-only toggle chrome — a square, subtly bordered
    button used for secondary/contextual actions (view toggles, filters,
-   add-item triggers) that must sit next to real LevelUpButtons without
+   add-item triggers) that must sit next to real BeeDayButtons without
    competing with them for visual weight. No elevation, no pixel-press
-   shadow, no thick border — deliberately lighter than .levelup-button.
+   shadow, no thick border — deliberately lighter than .beeday-button.
    Single shared implementation; do not re-declare this chrome per page. */
-.levelup-icon-toggle {
+.beeday-icon-toggle {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -341,10 +341,10 @@
     width: 2.15rem;
     height: 2.15rem;
     padding: 0;
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-xs);
-    color: var(--levelup-color-chrome-icon);
-    background: var(--levelup-color-chrome-icon-surface);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-xs);
+    color: var(--beeday-color-chrome-icon);
+    background: var(--beeday-color-chrome-icon-surface);
     font-size: .86rem;
     font-weight: 700;
     line-height: 1;
@@ -352,36 +352,36 @@
     transition: transform .12s ease, color .12s ease, border-color .12s ease, background-color .12s ease;
 }
 
-.levelup-icon-toggle:hover,
-.levelup-icon-toggle[aria-pressed="true"],
-.levelup-icon-toggle[aria-expanded="true"] {
+.beeday-icon-toggle:hover,
+.beeday-icon-toggle[aria-pressed="true"],
+.beeday-icon-toggle[aria-expanded="true"] {
     transform: translateY(-1px);
-    border-color: var(--levelup-color-primary);
+    border-color: var(--beeday-color-primary);
     color: #fff;
-    background: var(--levelup-color-primary);
+    background: var(--beeday-color-primary);
 }
 
-.levelup-icon-toggle:active {
+.beeday-icon-toggle:active {
     transform: translateY(0);
 }
 
-.levelup-icon-toggle:focus-visible {
+.beeday-icon-toggle:focus-visible {
     outline-offset: 1px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .levelup-icon-toggle {
+    .beeday-icon-toggle {
         transition: none;
     }
 }
 
-/* Plain text action — an opt-in LevelUpButton modifier (same mechanism as
+/* Plain text action — an opt-in BeeDayButton modifier (same mechanism as
    the --comic-* modifiers) for lightweight inline actions inside popovers
    and filter panels (Clear filters, Cancel) that must not compete visually
    with real operational buttons: no border, no background, no press/shadow
    chrome, just colored text. Single shared implementation — do not
    reintroduce a page-specific transparent-button style. */
-.levelup-button.levelup-button--plain {
+.beeday-button.beeday-button--plain {
     min-height: 2rem;
     padding: .4rem .3rem;
     border: 0;
@@ -391,164 +391,164 @@
     text-transform: none;
 }
 
-.levelup-button.levelup-button--plain:not(:disabled):hover {
+.beeday-button.beeday-button--plain:not(:disabled):hover {
     transform: none;
     background: transparent;
     box-shadow: none;
     text-decoration: underline;
 }
 
-.levelup-button.levelup-button--plain:not(:disabled):active {
+.beeday-button.beeday-button--plain:not(:disabled):active {
     transform: none;
     background: transparent;
     box-shadow: none;
 }
 
-.levelup-button.levelup-button--plain:focus-visible {
-    outline: 2px solid var(--levelup-color-primary);
+.beeday-button.beeday-button--plain:focus-visible {
+    outline: 2px solid var(--beeday-color-primary);
     outline-offset: 2px;
     box-shadow: none;
 }
 
-.levelup-button.levelup-button--plain:disabled {
+.beeday-button.beeday-button--plain:disabled {
     background: transparent;
     box-shadow: none;
     opacity: .5;
 }
 
-.levelup-button.levelup-button--plain-danger { color: var(--levelup-color-danger); }
-.levelup-button.levelup-button--plain-neutral { color: var(--levelup-color-text-secondary); }
+.beeday-button.beeday-button--plain-danger { color: var(--beeday-color-danger); }
+.beeday-button.beeday-button--plain-neutral { color: var(--beeday-color-text-secondary); }
 
-.levelup-button--full-width { width: 100%; }
-.levelup-button--compact { min-height: 2.25rem; padding: .5rem .8rem .58rem; font-size: .78rem; }
-.levelup-button__label { position: relative; z-index: 1; display: inline-flex; min-width: 0; align-items: center; white-space: nowrap; }
-.levelup-button .pixel-icon { position: relative; z-index: 1; }
+.beeday-button--full-width { width: 100%; }
+.beeday-button--compact { min-height: 2.25rem; padding: .5rem .8rem .58rem; font-size: .78rem; }
+.beeday-button__label { position: relative; z-index: 1; display: inline-flex; min-width: 0; align-items: center; white-space: nowrap; }
+.beeday-button .pixel-icon { position: relative; z-index: 1; }
 
-.levelup-button:not(:disabled):hover {
+.beeday-button:not(:disabled):hover {
     transform: translateY(-1px);
-    color: var(--levelup-button-foreground);
-    background: var(--levelup-button-background-hover);
+    color: var(--beeday-button-foreground);
+    background: var(--beeday-button-background-hover);
     box-shadow:
-        inset calc(var(--levelup-pixel-unit) * -1) -4px 0 var(--levelup-button-depth),
-        0 5px 0 var(--levelup-button-shadow);
+        inset calc(var(--beeday-pixel-unit) * -1) -4px 0 var(--beeday-button-depth),
+        0 5px 0 var(--beeday-button-shadow);
 }
 
-.levelup-button:not(:disabled):active {
+.beeday-button:not(:disabled):active {
     transform: translateY(4px);
-    color: var(--levelup-button-foreground);
-    background: var(--levelup-button-pressed, var(--levelup-button-depth));
-    box-shadow: inset var(--levelup-pixel-unit) var(--levelup-pixel-unit) 0 var(--levelup-button-outline);
+    color: var(--beeday-button-foreground);
+    background: var(--beeday-button-pressed, var(--beeday-button-depth));
+    box-shadow: inset var(--beeday-pixel-unit) var(--beeday-pixel-unit) 0 var(--beeday-button-outline);
 }
 
-.levelup-button:focus-visible {
+.beeday-button:focus-visible {
     outline: 0;
     box-shadow:
-        inset calc(var(--levelup-pixel-unit) * -1) -3px 0 var(--levelup-button-depth),
-        0 4px 0 var(--levelup-button-shadow),
-        0 0 0 4px var(--levelup-button-focus);
+        inset calc(var(--beeday-pixel-unit) * -1) -3px 0 var(--beeday-button-depth),
+        0 4px 0 var(--beeday-button-shadow),
+        0 0 0 4px var(--beeday-button-focus);
 }
 
-.levelup-button:disabled {
-    --levelup-button-background: #d3d3d3;
-    --levelup-button-background-hover: #d3d3d3;
-    --levelup-button-foreground: rgb(33 37 41 / 64%);
-    --levelup-button-outline: #85858d;
-    --levelup-button-depth: #a9a9af;
-    --levelup-button-shadow: #777780;
+.beeday-button:disabled {
+    --beeday-button-background: #d3d3d3;
+    --beeday-button-background-hover: #d3d3d3;
+    --beeday-button-foreground: rgb(33 37 41 / 64%);
+    --beeday-button-outline: #85858d;
+    --beeday-button-depth: #a9a9af;
+    --beeday-button-shadow: #777780;
     cursor: not-allowed;
     opacity: .62;
 }
 
-.levelup-button__loader { flex: 0 0 auto; animation: levelup-spin .7s steps(8, end) infinite; }
-@keyframes levelup-spin { to { transform: rotate(360deg); } }
+.beeday-button__loader { flex: 0 0 auto; animation: beeday-spin .7s steps(8, end) infinite; }
+@keyframes beeday-spin { to { transform: rotate(360deg); } }
 
 @media (prefers-reduced-motion: reduce) {
-    .levelup-button { transition: none; }
-    .levelup-button.levelup-button--skew-press { transition: none; }
-    .levelup-button.levelup-button--comic-press { transition: none; }
-    .levelup-button.levelup-button--comic { transition: none; }
-    .levelup-button__loader { animation: none; }
+    .beeday-button { transition: none; }
+    .beeday-button.beeday-button--skew-press { transition: none; }
+    .beeday-button.beeday-button--comic-press { transition: none; }
+    .beeday-button.beeday-button--comic { transition: none; }
+    .beeday-button__loader { animation: none; }
 }
 
-.levelup-card {
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-xs);
-    background: var(--levelup-color-surface);
-    box-shadow: var(--levelup-shadow-sm);
+.beeday-card {
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-xs);
+    background: var(--beeday-color-surface);
+    box-shadow: var(--beeday-shadow-sm);
 }
 
-.levelup-card--padded { padding: var(--levelup-spacing-lg); }
-.levelup-card--muted { background: var(--levelup-color-surface-muted); }
-.levelup-card--interactive { transition: transform var(--levelup-transition-normal), box-shadow var(--levelup-transition-normal); }
-.levelup-card--interactive:hover { transform: translateY(-2px); box-shadow: var(--levelup-shadow-md); }
+.beeday-card--padded { padding: var(--beeday-spacing-lg); }
+.beeday-card--muted { background: var(--beeday-color-surface-muted); }
+.beeday-card--interactive { transition: transform var(--beeday-transition-normal), box-shadow var(--beeday-transition-normal); }
+.beeday-card--interactive:hover { transform: translateY(-2px); box-shadow: var(--beeday-shadow-md); }
 
-.levelup-page-header,
-.levelup-section-header,
-.levelup-hero__row {
+.beeday-page-header,
+.beeday-section-header,
+.beeday-hero__row {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--levelup-spacing-lg);
+    gap: var(--beeday-spacing-lg);
 }
 
-.levelup-page-header { margin-bottom: var(--levelup-spacing-xl); }
-.levelup-page-header__content,
-.levelup-section-header > div:first-child,
-.levelup-hero__content { min-width: 0; }
+.beeday-page-header { margin-bottom: var(--beeday-spacing-xl); }
+.beeday-page-header__content,
+.beeday-section-header > div:first-child,
+.beeday-hero__content { min-width: 0; }
 
-.levelup-page-header__eyebrow,
-.levelup-section-header__eyebrow,
-.levelup-hero__eyebrow {
+.beeday-page-header__eyebrow,
+.beeday-section-header__eyebrow,
+.beeday-hero__eyebrow {
     display: block;
-    margin-bottom: var(--levelup-spacing-xs);
-    color: var(--levelup-color-primary);
+    margin-bottom: var(--beeday-spacing-xs);
+    color: var(--beeday-color-primary);
     font-size: .75rem;
     font-weight: 700;
     letter-spacing: .1em;
     text-transform: uppercase;
 }
 
-.levelup-page-header h1,
-.levelup-section-header h2,
-.levelup-hero__content h1 { margin: 0; color: var(--levelup-color-text-primary); }
-.levelup-page-header h1,
-.levelup-hero__content h1 { font-size: clamp(2rem, 5vw, 3.2rem); }
-.levelup-section-header h2 { font-size: 1.55rem; }
+.beeday-page-header h1,
+.beeday-section-header h2,
+.beeday-hero__content h1 { margin: 0; color: var(--beeday-color-text-primary); }
+.beeday-page-header h1,
+.beeday-hero__content h1 { font-size: clamp(2rem, 5vw, 3.2rem); }
+.beeday-section-header h2 { font-size: 1.55rem; }
 
-.levelup-page-header p,
-.levelup-section-header p,
-.levelup-hero__subtitle {
+.beeday-page-header p,
+.beeday-section-header p,
+.beeday-hero__subtitle {
     max-width: 52rem;
-    margin: var(--levelup-spacing-sm) 0 0;
-    color: var(--levelup-color-text-muted);
+    margin: var(--beeday-spacing-sm) 0 0;
+    color: var(--beeday-color-text-muted);
     line-height: 1.55;
 }
 
-.levelup-page-header__actions,
-.levelup-section-header__actions,
-.levelup-hero__primary-action { display: flex; flex-wrap: wrap; gap: var(--levelup-spacing-sm); }
+.beeday-page-header__actions,
+.beeday-section-header__actions,
+.beeday-hero__primary-action { display: flex; flex-wrap: wrap; gap: var(--beeday-spacing-sm); }
 
 @media (max-width: 42rem) {
-    .levelup-page-header,
-    .levelup-section-header,
-    .levelup-hero__row { flex-direction: column; }
-    .levelup-page-header__actions,
-    .levelup-section-header__actions,
-    .levelup-hero__primary-action { width: 100%; }
+    .beeday-page-header,
+    .beeday-section-header,
+    .beeday-hero__row { flex-direction: column; }
+    .beeday-page-header__actions,
+    .beeday-section-header__actions,
+    .beeday-hero__primary-action { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .levelup-button,
-    .levelup-card--interactive { transition: none; }
+    .beeday-button,
+    .beeday-card--interactive { transition: none; }
 }
 
-/* LevelUpHero — a richer introductory panel than LevelUpPageHeader: an
+/* BeeDayHero — a richer introductory panel than BeeDayPageHeader: an
    optional illustration slot, a single emphasized primary action, brief
    supporting content, and a contextual variant. See docs/design-system/
-   components.md for when to use this instead of LevelUpPageHeader. */
-.levelup-hero { margin-bottom: var(--levelup-spacing-xl); }
+   components.md for when to use this instead of BeeDayPageHeader. */
+.beeday-hero { margin-bottom: var(--beeday-spacing-xl); }
 
-.levelup-hero__illustration {
+.beeday-hero__illustration {
     display: flex;
     flex: 0 0 auto;
     align-items: center;
@@ -559,23 +559,23 @@
     min-height: 4rem;
 }
 
-.levelup-hero__supporting {
-    margin-top: var(--levelup-spacing-md);
-    padding-top: var(--levelup-spacing-md);
-    border-top: 1px solid var(--levelup-color-border);
-    color: var(--levelup-color-text-secondary);
-    font-size: var(--levelup-font-size-sm);
+.beeday-hero__supporting {
+    margin-top: var(--beeday-spacing-md);
+    padding-top: var(--beeday-spacing-md);
+    border-top: 1px solid var(--beeday-color-border);
+    color: var(--beeday-color-text-secondary);
+    font-size: var(--beeday-font-size-sm);
 }
 
-.levelup-hero--onboarding {
-    padding: var(--levelup-spacing-lg);
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-lg);
-    background: var(--levelup-color-primary-soft);
+.beeday-hero--onboarding {
+    padding: var(--beeday-spacing-lg);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-lg);
+    background: var(--beeday-color-primary-soft);
 }
 
-.levelup-hero--onboarding .levelup-hero__eyebrow { color: var(--levelup-color-primary-active); }
+.beeday-hero--onboarding .beeday-hero__eyebrow { color: var(--beeday-color-primary-active); }
 
 @media (max-width: 30rem) {
-    .levelup-hero__illustration { min-width: 3rem; min-height: 3rem; }
+    .beeday-hero__illustration { min-width: 3rem; min-height: 3rem; }
 }

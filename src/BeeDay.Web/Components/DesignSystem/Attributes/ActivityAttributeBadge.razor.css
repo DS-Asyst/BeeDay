@@ -5,13 +5,13 @@
     display: inline-flex;
     align-items: center;
     width: fit-content;
-    font-size: var(--levelup-font-size-xs);
-    font-weight: var(--levelup-font-weight-medium);
+    font-size: var(--beeday-font-size-xs);
+    font-weight: var(--beeday-font-weight-medium);
     line-height: 1.2;
     cursor: help;
 }
 
-.activity-attribute-badge--strength { color: var(--levelup-color-attribute-strength); }
-.activity-attribute-badge--dexterity { color: var(--levelup-color-attribute-dexterity); }
-.activity-attribute-badge--intelligence { color: var(--levelup-color-attribute-intelligence); }
-.activity-attribute-badge--vitality { color: var(--levelup-color-attribute-vitality); }
+.activity-attribute-badge--strength { color: var(--beeday-color-attribute-strength); }
+.activity-attribute-badge--dexterity { color: var(--beeday-color-attribute-dexterity); }
+.activity-attribute-badge--intelligence { color: var(--beeday-color-attribute-intelligence); }
+.activity-attribute-badge--vitality { color: var(--beeday-color-attribute-vitality); }

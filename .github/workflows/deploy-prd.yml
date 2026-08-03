@@ -1,4 +1,4 @@
-name: LevelUp Production Deploy
+name: BeeDay Production Deploy
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: levelup-production
+  group: beeday-production
   cancel-in-progress: false
 
 permissions:
@@ -36,16 +36,16 @@ jobs:
 
       - name: Restore dependencies
         shell: powershell
-        run: dotnet restore LevelUp.slnx
+        run: dotnet restore BeeDay.slnx
 
       - name: Verify formatting
         shell: powershell
-        run: dotnet format LevelUp.slnx --verify-no-changes --no-restore
+        run: dotnet format BeeDay.slnx --verify-no-changes --no-restore
 
       - name: Build solution
         shell: powershell
         run: |
-          dotnet build LevelUp.slnx `
+          dotnet build BeeDay.slnx `
             --configuration Release `
             --no-restore `
             --warnaserror
@@ -53,27 +53,27 @@ jobs:
       - name: Run tests
         shell: powershell
         run: |
-          dotnet test LevelUp.slnx `
+          dotnet test BeeDay.slnx `
             --configuration Release `
             --no-build `
             --verbosity normal `
-            --logger "trx;LogFileName=levelup-tests.trx" `
+            --logger "trx;LogFileName=beeday-tests.trx" `
             --results-directory "${{ runner.temp }}\TestResults"
 
-      - name: Publish LevelUp
+      - name: Publish BeeDay
         shell: powershell
         run: |
           dotnet publish `
-            ".\src\LevelUp.Web\LevelUp.Web.csproj" `
+            ".\src\BeeDay.Web\BeeDay.Web.csproj" `
             --configuration Release `
             --no-build `
-            --output "${{ runner.temp }}\LevelUpPublish"
+            --output "${{ runner.temp }}\BeeDayPublish"
 
       - name: Validate published files
         shell: powershell
         run: |
-          $publishPath = Join-Path "${{ runner.temp }}" "LevelUpPublish"
-          $requiredFiles = @("LevelUp.Web.dll", "web.config")
+          $publishPath = Join-Path "${{ runner.temp }}" "BeeDayPublish"
+          $requiredFiles = @("BeeDay.Web.dll", "web.config")
 
           foreach ($file in $requiredFiles) {
               $fullPath = Join-Path $publishPath $file
@@ -86,7 +86,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: levelup-production-test-results
+          name: beeday-production-test-results
           path: ${{ runner.temp }}\TestResults
           if-no-files-found: warn
           retention-days: 30
@@ -94,8 +94,8 @@ jobs:
       - name: Upload validated production artifact
         uses: actions/upload-artifact@v4
         with:
-          name: levelup-production-publish
-          path: ${{ runner.temp }}\LevelUpPublish
+          name: beeday-production-publish
+          path: ${{ runner.temp }}\BeeDayPublish
           if-no-files-found: error
           retention-days: 7
 
@@ -118,22 +118,22 @@ jobs:
       - name: Download validated production artifact
         uses: actions/download-artifact@v4
         with:
-          name: levelup-production-publish
-          path: ${{ runner.temp }}\LevelUpPublish
+          name: beeday-production-publish
+          path: ${{ runner.temp }}\BeeDayPublish
 
       - name: Validate deployment secrets
         shell: powershell
         env:
-          LEVELUP_PUBLIC_BASE_URL: ${{ secrets.LEVELUP_PUBLIC_BASE_URL }}
-          LEVELUP_RESEND_API_KEY: ${{ secrets.LEVELUP_RESEND_API_KEY }}
-          LEVELUP_RESEND_FROM_ADDRESS: ${{ secrets.LEVELUP_RESEND_FROM_ADDRESS }}
-          LEVELUP_ALLOWED_HOSTS: ${{ secrets.LEVELUP_ALLOWED_HOSTS }}
+          BEEDAY_PUBLIC_BASE_URL: ${{ secrets.BEEDAY_PUBLIC_BASE_URL }}
+          BEEDAY_RESEND_API_KEY: ${{ secrets.BEEDAY_RESEND_API_KEY }}
+          BEEDAY_RESEND_FROM_ADDRESS: ${{ secrets.BEEDAY_RESEND_FROM_ADDRESS }}
+          BEEDAY_ALLOWED_HOSTS: ${{ secrets.BEEDAY_ALLOWED_HOSTS }}
         run: |
           $required = @{
-              LEVELUP_PUBLIC_BASE_URL = $env:LEVELUP_PUBLIC_BASE_URL
-              LEVELUP_RESEND_API_KEY = $env:LEVELUP_RESEND_API_KEY
-              LEVELUP_RESEND_FROM_ADDRESS = $env:LEVELUP_RESEND_FROM_ADDRESS
-              LEVELUP_ALLOWED_HOSTS = $env:LEVELUP_ALLOWED_HOSTS
+              BEEDAY_PUBLIC_BASE_URL = $env:BEEDAY_PUBLIC_BASE_URL
+              BEEDAY_RESEND_API_KEY = $env:BEEDAY_RESEND_API_KEY
+              BEEDAY_RESEND_FROM_ADDRESS = $env:BEEDAY_RESEND_FROM_ADDRESS
+              BEEDAY_ALLOWED_HOSTS = $env:BEEDAY_ALLOWED_HOSTS
           }
 
           foreach ($entry in $required.GetEnumerator()) {
@@ -142,25 +142,25 @@ jobs:
               }
           }
 
-          if (-not $env:LEVELUP_PUBLIC_BASE_URL.StartsWith("https://", [StringComparison]::OrdinalIgnoreCase)) {
-              throw "LEVELUP_PUBLIC_BASE_URL must use HTTPS."
+          if (-not $env:BEEDAY_PUBLIC_BASE_URL.StartsWith("https://", [StringComparison]::OrdinalIgnoreCase)) {
+              throw "BEEDAY_PUBLIC_BASE_URL must use HTTPS."
           }
 
       - name: Deploy to IIS with rollback
         shell: powershell
         env:
-          LEVELUP_PUBLIC_BASE_URL: ${{ secrets.LEVELUP_PUBLIC_BASE_URL }}
-          LEVELUP_RESEND_API_KEY: ${{ secrets.LEVELUP_RESEND_API_KEY }}
-          LEVELUP_RESEND_FROM_ADDRESS: ${{ secrets.LEVELUP_RESEND_FROM_ADDRESS }}
-          LEVELUP_RESEND_FROM_NAME: ${{ secrets.LEVELUP_RESEND_FROM_NAME }}
-          LEVELUP_ALLOWED_HOSTS: ${{ secrets.LEVELUP_ALLOWED_HOSTS }}
+          BEEDAY_PUBLIC_BASE_URL: ${{ secrets.BEEDAY_PUBLIC_BASE_URL }}
+          BEEDAY_RESEND_API_KEY: ${{ secrets.BEEDAY_RESEND_API_KEY }}
+          BEEDAY_RESEND_FROM_ADDRESS: ${{ secrets.BEEDAY_RESEND_FROM_ADDRESS }}
+          BEEDAY_RESEND_FROM_NAME: ${{ secrets.BEEDAY_RESEND_FROM_NAME }}
+          BEEDAY_ALLOWED_HOSTS: ${{ secrets.BEEDAY_ALLOWED_HOSTS }}
         run: |
-          $publishPath = Join-Path "${{ runner.temp }}" "LevelUpPublish"
+          $publishPath = Join-Path "${{ runner.temp }}" "BeeDayPublish"
 
-          & ".\scripts\Deploy-LevelUp.ps1" `
+          & ".\scripts\Deploy-BeeDay.ps1" `
               -PublishPath $publishPath `
-              -PublicBaseUrl $env:LEVELUP_PUBLIC_BASE_URL `
-              -ResendApiKey $env:LEVELUP_RESEND_API_KEY `
-              -ResendFromAddress $env:LEVELUP_RESEND_FROM_ADDRESS `
-              -ResendFromName $env:LEVELUP_RESEND_FROM_NAME `
-              -AllowedHosts $env:LEVELUP_ALLOWED_HOSTS
+              -PublicBaseUrl $env:BEEDAY_PUBLIC_BASE_URL `
+              -ResendApiKey $env:BEEDAY_RESEND_API_KEY `
+              -ResendFromAddress $env:BEEDAY_RESEND_FROM_ADDRESS `
+              -ResendFromName $env:BEEDAY_RESEND_FROM_NAME `
+              -AllowedHosts $env:BEEDAY_ALLOWED_HOSTS

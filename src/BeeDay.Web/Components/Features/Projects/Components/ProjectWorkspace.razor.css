@@ -15,10 +15,10 @@
     width: min(58rem, 100%);
     max-height: min(54rem, 94vh);
     overflow: hidden;
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-md);
-    background: var(--levelup-color-surface-muted);
-    box-shadow: var(--levelup-shadow-lg);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-md);
+    background: var(--beeday-color-surface-muted);
+    box-shadow: var(--beeday-shadow-lg);
 }
 
 .project-workspace__header {
@@ -31,7 +31,7 @@
 }
 
 .project-workspace__eyebrow {
-    color: var(--levelup-color-primary);
+    color: var(--beeday-color-primary);
     font-size: .68rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -53,7 +53,7 @@
     width: 2rem;
     height: 2rem;
     border: 0;
-    border-radius: var(--levelup-radius-sm);
+    border-radius: var(--beeday-radius-sm);
     background: transparent;
     font-size: 1.5rem;
     cursor: pointer;
@@ -74,8 +74,8 @@
     display: flex;
     justify-content: space-between;
     padding: .65rem .75rem;
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-sm);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-sm);
     background: #fff;
 }
 
@@ -92,14 +92,14 @@
     height: .48rem;
     margin: 0 1.3rem .9rem;
     overflow: hidden;
-    border-radius: var(--levelup-radius-pill);
+    border-radius: var(--beeday-radius-pill);
     background: #ddd7e0;
 }
 
 .project-workspace__progress span {
     display: block;
     height: 100%;
-    background: var(--levelup-color-primary);
+    background: var(--beeday-color-primary);
     transition: width .2s ease;
 }
 
@@ -131,9 +131,9 @@
     width: 2.2rem;
     height: 2.2rem;
     padding: 0;
-    border: 1px solid var(--levelup-color-primary);
-    border-radius: var(--levelup-radius-sm);
-    color: var(--levelup-color-primary);
+    border: 1px solid var(--beeday-color-primary);
+    border-radius: var(--beeday-radius-sm);
+    color: var(--beeday-color-primary);
     background: #fff;
     font-size: 1.3rem;
     font-weight: 700;
@@ -145,7 +145,7 @@
 .project-workspace__add:hover {
     transform: translateY(-1px);
     color: #fff;
-    background: var(--levelup-color-primary);
+    background: var(--beeday-color-primary);
 }
 
 .project-workspace__body {
@@ -167,11 +167,11 @@
     gap: .4rem;
     min-height: 2rem;
     padding: .4rem .65rem;
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-sm);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-sm);
     color: #5a4b62;
     background: #fff;
-    font-family: var(--levelup-font-body);
+    font-family: var(--beeday-font-body);
     font-size: .68rem;
     font-weight: 700;
     cursor: pointer;
@@ -179,9 +179,9 @@
 }
 
 .project-workspace__list-toggle:hover {
-    border-color: var(--levelup-color-primary);
+    border-color: var(--beeday-color-primary);
     color: #fff;
-    background: var(--levelup-color-primary);
+    background: var(--beeday-color-primary);
 }
 
 .project-workspace__list-chevron {
@@ -207,7 +207,7 @@
 
 .project-workspace__todos::-webkit-scrollbar-thumb {
     border: .1rem solid transparent;
-    border-radius: var(--levelup-radius-pill);
+    border-radius: var(--beeday-radius-pill);
     background: #b9b1bf;
     background-clip: padding-box;
 }
@@ -235,9 +235,9 @@
     grid-template-columns: auto 1fr;
     align-items: stretch;
     min-height: 3rem;
-    border: 1px solid var(--levelup-color-border);
-    border-left: 4px solid var(--levelup-color-todo);
-    border-radius: var(--levelup-radius-sm);
+    border: 1px solid var(--beeday-color-border);
+    border-left: 4px solid var(--beeday-color-todo);
+    border-radius: var(--beeday-radius-sm);
     background: #fff;
 }
 
@@ -254,7 +254,7 @@
 .project-workspace__check:hover,
 .project-workspace__todo--done .project-workspace__check {
     color: #fff;
-    background: var(--levelup-color-primary);
+    background: var(--beeday-color-primary);
 }
 
 .project-workspace__todo-body {
@@ -270,7 +270,7 @@
 
 .project-workspace__todo-body strong {
     overflow: hidden;
-    font-family: var(--levelup-font-ui);
+    font-family: var(--beeday-font-ui);
     font-size: .78rem;
     text-overflow: ellipsis;
     white-space: nowrap;

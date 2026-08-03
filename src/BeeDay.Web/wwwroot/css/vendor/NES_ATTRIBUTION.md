@@ -25,18 +25,18 @@ The Bootstrap 4.1.3 Reboot/Normalize preamble; every bare-element selector (`htm
 
 ## How LevelUp's shipped adapter (`../pixel-nes.css`) differs from this excerpt
 
-`pixel-nes.css` is the file the application actually loads. It does **not** contain any `.nes-*` class name — it defines exactly two LevelUp-owned classes, `.levelup-pixel-panel` and `.levelup-pixel-cta`, reproducing the border-image pixel-corner *mechanic* above but recolored:
+`pixel-nes.css` is the file the application actually loads. It does **not** contain any `.nes-*` class name — it defines exactly two LevelUp-owned classes, `.beeday-pixel-panel` and `.beeday-pixel-cta`, reproducing the border-image pixel-corner *mechanic* above but recolored:
 
-- The container's pixel-corner fill is baked from `--levelup-game-ink` (`#171321`).
-- The button's pixel-corner fill is baked from the Primary button variant's `--levelup-button-outline` (`#8d6500`).
+- The container's pixel-corner fill is baked from `--beeday-game-ink` (`#171321`).
+- The button's pixel-corner fill is baked from the Primary button variant's `--beeday-button-outline` (`#8d6500`).
 - The upstream `.nes-btn`'s `::after` inset-shadow "3D press" depth layer, and its `:hover`/`:focus`/`:active` states, were evaluated but **not** adopted: `LevelUpButton` already implements an equivalent, working 3D-press mechanic via its own `box-shadow` system (see `design-system.css`), and layering NES's competing technique on top would produce a duplicated/conflicting depth effect. Only the pixel-corner border-image outline was adopted for the button; every other button state (hover, active, focus, disabled, loading) is unchanged, existing `LevelUpButton` behavior.
-- `:focus` styling uses LevelUp's own `var(--levelup-focus-ring)`, never NES's own focus color.
+- `:focus` styling uses LevelUp's own `var(--beeday-focus-ring)`, never NES's own focus color.
 
-Border-image `data:` URIs cannot reliably resolve `currentColor`/CSS custom properties across browsers, so the two fill colors above are baked into the SVG data URI text at authoring time rather than referenced live via `var()`. If `--levelup-game-ink` or the Primary variant's `--levelup-button-outline` value ever changes, the corresponding data URI in `pixel-nes.css` must be regenerated to match — this is a known, documented coupling, not an oversight.
+Border-image `data:` URIs cannot reliably resolve `currentColor`/CSS custom properties across browsers, so the two fill colors above are baked into the SVG data URI text at authoring time rather than referenced live via `var()`. If `--beeday-game-ink` or the Primary variant's `--beeday-button-outline` value ever changes, the corresponding data URI in `pixel-nes.css` must be regenerated to match — this is a known, documented coupling, not an oversight.
 
 ## Restricted use
 
-`.levelup-pixel-panel` and `.levelup-pixel-cta` are internal Design System adapter classes for a genuine, one-off special pixel experience — not general-purpose styling hooks. See `docs/design-system/foundations.md` for the required review process before applying either class to any new consumer.
+`.beeday-pixel-panel` and `.beeday-pixel-cta` are internal Design System adapter classes for a genuine, one-off special pixel experience — not general-purpose styling hooks. See `docs/design-system/foundations.md` for the required review process before applying either class to any new consumer.
 
 ## Rules for this folder
 

@@ -21,7 +21,7 @@
         <div class="wallet-filter-field wallet-filter-toggle-field">
             <span aria-hidden="true">&nbsp;</span>
             <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel"
-                           Class="wallet-filter-toggle levelup-button--comic levelup-button--comic-neutral"
+                           Class="wallet-filter-toggle beeday-button--comic beeday-button--comic-neutral"
                            Disabled="IsDisabled"
                            OnClick="ToggleSecondaryFilters"
                            aria-expanded="@isExpanded.ToString().ToLowerInvariant()"
@@ -66,7 +66,7 @@
                 <div class="wallet-active-filters" role="status">
                     <span>@ActiveFilterCount active filter@(ActiveFilterCount == 1 ? string.Empty : "s")</span>
                     <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel"
-                                   Class="levelup-button--plain levelup-button--plain-danger"
+                                   Class="beeday-button--plain beeday-button--plain-danger"
                                    Disabled="IsDisabled"
                                    OnClick="OnClearFilters">
                         Clear filters

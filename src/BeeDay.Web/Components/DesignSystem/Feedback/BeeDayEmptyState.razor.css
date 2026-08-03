@@ -2,50 +2,50 @@
    columns, Wallet Tags/Transactions, and every other empty list). Icon,
    title, and description only — centered with whitespace, no placeholder
    box: no dashed/dotted border, no background container, no nested box. */
-.levelup-empty-state {
+.beeday-empty-state {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--levelup-spacing-sm);
+    gap: var(--beeday-spacing-sm);
     width: 100%;
-    padding: var(--levelup-spacing-xl) var(--levelup-spacing-lg);
-    color: var(--levelup-color-text-primary);
+    padding: var(--beeday-spacing-xl) var(--beeday-spacing-lg);
+    color: var(--beeday-color-text-primary);
     text-align: center;
     box-sizing: border-box;
 }
 
-.levelup-empty-state__icon {
+.beeday-empty-state__icon {
     display: grid;
     place-items: center;
     width: 4.75rem;
     height: 4.75rem;
 }
 
-.levelup-empty-state__content {
+.beeday-empty-state__content {
     display: grid;
-    gap: var(--levelup-spacing-2xs);
+    gap: var(--beeday-spacing-2xs);
     max-width: 17rem;
 }
 
-.levelup-empty-state__title {
+.beeday-empty-state__title {
     margin: 0;
-    color: var(--levelup-color-text-primary);
-    font-family: var(--levelup-font-ui);
+    color: var(--beeday-color-text-primary);
+    font-family: var(--beeday-font-ui);
     font-size: 1.12rem;
     font-weight: 700;
     line-height: 1.25;
 }
 
-.levelup-empty-state__description {
+.beeday-empty-state__description {
     margin: 0;
-    color: var(--levelup-color-text-muted);
+    color: var(--beeday-color-text-muted);
     font-size: .78rem;
     line-height: 1.65;
 }
 
 @media (max-width: 47.99rem) {
-    .levelup-empty-state {
-        padding: var(--levelup-spacing-lg) var(--levelup-spacing-md);
+    .beeday-empty-state {
+        padding: var(--beeday-spacing-lg) var(--beeday-spacing-md);
     }
 }

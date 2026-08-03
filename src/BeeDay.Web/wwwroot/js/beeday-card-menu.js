@@ -8,7 +8,7 @@
 //   2. Outside-click detection via a real document-level listener. A CSS
 //      full-viewport `position: fixed` scrim was tried first and rejected:
 //      several ancestors in the card/board layout (entrance animations on
-//      .levelup-sortable__item and .dashboard-page) carry a resting
+//      .beeday-sortable__item and .dashboard-page) carry a resting
 //      `transform` value, which creates a new containing block for any
 //      fixed-positioned descendant and silently confines it to that
 //      ancestor's box instead of the viewport. A document listener sidesteps

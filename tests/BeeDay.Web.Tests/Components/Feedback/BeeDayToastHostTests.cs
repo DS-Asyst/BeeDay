@@ -14,9 +14,9 @@ public sealed class BeeDayToastHostTests
         var cut = context.Render<BeeDayToastHost>();
 
         cut.InvokeAsync(() => service.ShowSuccess("Habit saved", "Saved"));
-        cut.WaitForAssertion(() => Assert.Single(cut.FindAll(".levelup-toast--success")));
+        cut.WaitForAssertion(() => Assert.Single(cut.FindAll(".beeday-toast--success")));
 
-        var toast = cut.Find(".levelup-toast--success");
+        var toast = cut.Find(".beeday-toast--success");
         Assert.Equal("status", toast.GetAttribute("role"));
         Assert.Contains("Saved", toast.TextContent);
         Assert.Contains("Habit saved", toast.TextContent);
@@ -32,9 +32,9 @@ public sealed class BeeDayToastHostTests
         var cut = context.Render<BeeDayToastHost>();
 
         cut.InvokeAsync(() => service.ShowError("Unable to save"));
-        cut.WaitForAssertion(() => Assert.Single(cut.FindAll(".levelup-toast--error")));
+        cut.WaitForAssertion(() => Assert.Single(cut.FindAll(".beeday-toast--error")));
 
-        Assert.Equal("alert", cut.Find(".levelup-toast--error").GetAttribute("role"));
+        Assert.Equal("alert", cut.Find(".beeday-toast--error").GetAttribute("role"));
         Assert.NotNull(cut.Find("svg.pixel-icon--validation-error"));
     }
 
@@ -47,10 +47,10 @@ public sealed class BeeDayToastHostTests
         var cut = context.Render<BeeDayToastHost>();
 
         cut.InvokeAsync(() => service.ShowInfo("Information"));
-        cut.WaitForAssertion(() => Assert.Single(cut.FindAll(".levelup-toast")));
-        cut.Find(".levelup-toast__close").Click();
+        cut.WaitForAssertion(() => Assert.Single(cut.FindAll(".beeday-toast")));
+        cut.Find(".beeday-toast__close").Click();
 
-        cut.WaitForAssertion(() => Assert.Empty(cut.FindAll(".levelup-toast")));
+        cut.WaitForAssertion(() => Assert.Empty(cut.FindAll(".beeday-toast")));
         Assert.Empty(service.Messages);
     }
 }

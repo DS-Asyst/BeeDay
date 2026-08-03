@@ -19,7 +19,7 @@ public sealed class ProductionLikeWebApplicationFactory : BeeDayWebApplicationFa
 {
     private readonly (string Key, string Value)[] requiredEnvironmentVariables;
     private readonly string dataProtectionKeysDirectory =
-        Path.Combine(Path.GetTempPath(), "levelup-web-tests-dp", Guid.NewGuid().ToString("N"));
+        Path.Combine(Path.GetTempPath(), "beeday-web-tests-dp", Guid.NewGuid().ToString("N"));
 
     private readonly string?[] previousValues;
 

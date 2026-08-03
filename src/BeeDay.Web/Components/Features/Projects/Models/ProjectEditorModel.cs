@@ -13,7 +13,7 @@ public sealed class ProjectEditorModel
     public string Description { get; set; } = string.Empty;
 
     // Projects no longer expose manual color selection — every project uses the
-    // fixed --levelup-color-project Design System accent (kept as a plain string
+    // fixed --beeday-color-project Design System accent (kept as a plain string
     // here only because the Domain's ProjectColor value object still requires one).
     [Required]
     [RegularExpression("^#[0-9A-Fa-f]{6}$", ErrorMessage = "Use a valid hexadecimal color.")]

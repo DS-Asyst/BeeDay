@@ -25,23 +25,23 @@ public partial class BeeDayButton
         {
             var variantClass = Variant switch
             {
-                BeeDayButtonVariant.Primary => "levelup-button--primary",
-                BeeDayButtonVariant.Secondary => "levelup-button--secondary",
-                BeeDayButtonVariant.Success => "levelup-button--success",
-                BeeDayButtonVariant.Warning => "levelup-button--warning",
-                BeeDayButtonVariant.Back => "levelup-button--back",
-                BeeDayButtonVariant.Danger => "levelup-button--danger",
-                BeeDayButtonVariant.ConfirmationDanger => "levelup-button--confirmation-danger",
-                BeeDayButtonVariant.ConfirmationCancel => "levelup-button--confirmation-cancel",
-                _ => "levelup-button--primary"
+                BeeDayButtonVariant.Primary => "beeday-button--primary",
+                BeeDayButtonVariant.Secondary => "beeday-button--secondary",
+                BeeDayButtonVariant.Success => "beeday-button--success",
+                BeeDayButtonVariant.Warning => "beeday-button--warning",
+                BeeDayButtonVariant.Back => "beeday-button--back",
+                BeeDayButtonVariant.Danger => "beeday-button--danger",
+                BeeDayButtonVariant.ConfirmationDanger => "beeday-button--confirmation-danger",
+                BeeDayButtonVariant.ConfirmationCancel => "beeday-button--confirmation-cancel",
+                _ => "beeday-button--primary"
             };
 
             return string.Join(' ', new[]
             {
-                "levelup-button",
+                "beeday-button",
                 variantClass,
-                FullWidth ? "levelup-button--full-width" : null,
-                Compact ? "levelup-button--compact" : null,
+                FullWidth ? "beeday-button--full-width" : null,
+                Compact ? "beeday-button--compact" : null,
                 Class
             }.Where(value => !string.IsNullOrWhiteSpace(value)));
         }

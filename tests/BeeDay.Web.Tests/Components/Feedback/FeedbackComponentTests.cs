@@ -17,11 +17,11 @@ public sealed class FeedbackComponentTests
 
         var root = cut.Find("[role='status']");
         Assert.Contains("empty-tasks", root.ClassList);
-        Assert.Equal("No tasks yet", cut.Find(".levelup-empty-state__title").TextContent);
-        Assert.Equal("Create a task to get started.", cut.Find(".levelup-empty-state__description").TextContent);
-        Assert.Single(cut.FindAll(".levelup-empty-state__icon"));
+        Assert.Equal("No tasks yet", cut.Find(".beeday-empty-state__title").TextContent);
+        Assert.Equal("Create a task to get started.", cut.Find(".beeday-empty-state__description").TextContent);
+        Assert.Single(cut.FindAll(".beeday-empty-state__icon"));
 
-        var icon = cut.Find(".levelup-empty-state__icon .pixel-icon");
+        var icon = cut.Find(".beeday-empty-state__icon .pixel-icon");
         Assert.Contains("pixel-icon--color-muted", icon.ClassList);
         Assert.Equal("true", icon.GetAttribute("aria-hidden"));
     }
@@ -56,8 +56,8 @@ public sealed class FeedbackComponentTests
             .Add(component => component.Lines, 5)
             .Add(component => component.Class, "card-placeholder"));
 
-        Assert.Equal(5, cut.FindAll(".levelup-skeleton__line").Count);
-        Assert.Contains("card-placeholder", cut.Find(".levelup-skeleton").ClassList);
+        Assert.Equal(5, cut.FindAll(".beeday-skeleton__line").Count);
+        Assert.Contains("card-placeholder", cut.Find(".beeday-skeleton").ClassList);
     }
 
     [Fact]

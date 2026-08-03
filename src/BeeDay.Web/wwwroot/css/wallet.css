@@ -1,12 +1,12 @@
 .wallet-page{width:min(1440px,100%);margin:0 auto;padding:2rem 1.5rem 3rem}
 .wallet-page__header{display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;margin-bottom:1.5rem}
-.wallet-page__header h1,.wallet-panel-header h2{margin:.15rem 0;font-family:var(--levelup-font-ui);letter-spacing:.04em}
+.wallet-page__header h1,.wallet-panel-header h2{margin:.15rem 0;font-family:var(--beeday-font-ui);letter-spacing:.04em}
 .wallet-page__header h1{font-size:3.25rem;line-height:.9}.wallet-page__header p{max-width:680px;margin:.6rem 0 0}
 .wallet-eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;font-weight:700}
 .wallet-summary{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:1rem;margin-bottom:1rem}.wallet-summary__card{padding:1.2rem}.wallet-summary__card span,.wallet-summary__card small{display:block}.wallet-summary__card strong{display:block;margin:.3rem 0;font-size:1.65rem}
 .wallet-workspace{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:1rem;align-items:start}.wallet-tags-panel{padding:1rem;position:sticky;top:5rem}.wallet-panel-header{display:flex;align-items:center;justify-content:space-between;gap:1rem}.wallet-panel-header--transactions{padding:1.1rem 1.2rem}.wallet-panel-header h2{font-size:2rem}.wallet-result-count{font-size:.82rem}
 .wallet-filters{display:grid;grid-template-columns:minmax(180px,1fr) repeat(3,minmax(130px,auto));gap:.6rem;padding:1rem 1.2rem}.wallet-filters input,.wallet-filters select{width:100%;box-sizing:border-box;border-radius:7px;padding:.68rem .75rem;font:inherit}.wallet-filters input:focus,.wallet-filters select:focus{outline-offset:1px}
-.wallet-tag-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .5rem;border-radius:99px;font-size:.78rem}.wallet-tag-badge i{width:.55rem;height:.55rem;border-radius:50%;background:var(--tag-color,var(--levelup-color-tag-default))}.wallet-pagination{display:flex;align-items:center;justify-content:center;gap:1rem;padding:1rem}
+.wallet-tag-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .5rem;border-radius:99px;font-size:.78rem}.wallet-tag-badge i{width:.55rem;height:.55rem;border-radius:50%;background:var(--tag-color,var(--beeday-color-tag-default))}.wallet-pagination{display:flex;align-items:center;justify-content:center;gap:1rem;padding:1rem}
 .wallet-empty-state{text-align:center;padding:3.5rem 1rem}.wallet-empty-state>div{font-size:3rem}.wallet-empty-state h3{margin:.5rem 0}.wallet-alert{display:flex;justify-content:space-between;gap:1rem;margin-bottom:1rem;padding:.8rem 1rem;border-radius:8px}
 .wallet-tag-list{display:grid;gap:.45rem;margin-top:1rem}.wallet-tag-item{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:.55rem;padding:.65rem;border-radius:8px}.wallet-tag-dot{width:.7rem;height:.7rem;border-radius:50%}.wallet-tag-item strong,.wallet-tag-item small{display:block}.wallet-tag-item small{font-size:.72rem}.wallet-color-field{display:grid;grid-template-columns:1fr 48px;gap:.5rem}.wallet-color-field>span,.wallet-color-field>div{grid-column:1/-1}.wallet-color-field input[type=color]{height:42px;padding:.2rem}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
@@ -17,7 +17,7 @@
 .wallet-main-panel{min-height:34rem}
 .wallet-transaction-list{display:grid;gap:.65rem;max-height:calc(100dvh - 22rem);overflow-y:auto;padding:1rem;scrollbar-gutter:stable;overscroll-behavior:contain}
 .wallet-transaction-card{position:relative;display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:.85rem;align-items:center;padding:.85rem 1rem .85rem .65rem;border-radius:9px}
-.wallet-transaction-card__marker{align-self:stretch;border-radius:4px}.wallet-transaction-card__marker--income{background:var(--levelup-color-success);}.wallet-transaction-card__marker--expense{background:var(--levelup-color-danger);}
+.wallet-transaction-card__marker{align-self:stretch;border-radius:4px}.wallet-transaction-card__marker--income{background:var(--beeday-color-success);}.wallet-transaction-card__marker--expense{background:var(--beeday-color-danger);}
 .wallet-transaction-card__content{min-width:0}.wallet-transaction-card__heading{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}.wallet-transaction-card__title-wrap{min-width:0}.wallet-transaction-card__title-wrap strong,.wallet-transaction-card__title-wrap small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wallet-transaction-card__title-wrap strong{font-size:1rem}.wallet-transaction-card__title-wrap small{max-width:52rem;margin-top:.2rem}.wallet-transaction-card__amount{flex:none;font-weight:700;font-variant-numeric:tabular-nums}.wallet-transaction-card__meta{display:flex;flex-wrap:wrap;align-items:center;gap:.45rem .75rem;margin-top:.5rem;font-size:.76rem}
 .wallet-tag-badge--solid{border:1px solid;padding:.25rem .55rem;font-weight:700;text-shadow:none}
 .wallet-summary__card--updated{animation:wallet-balance-pulse 700ms ease}
@@ -29,7 +29,7 @@
 .wallet-page {
     width: min(76rem, 100%);
     padding: 2rem clamp(1rem, 3vw, 2.5rem) 4rem;
-    color: var(--levelup-color-text-primary);
+    color: var(--beeday-color-text-primary);
 }
 
 .wallet-page__header {
@@ -39,17 +39,17 @@
 }
 
 .wallet-page__header h1 {
-    color: var(--levelup-color-text-primary);
+    color: var(--beeday-color-text-primary);
     font-size: clamp(2rem, 5vw, 3.25rem);
     line-height: 1;
 }
 
 .wallet-page__header p {
-    color: var(--levelup-color-text-muted);
+    color: var(--beeday-color-text-muted);
 }
 
 .wallet-eyebrow {
-    color: var(--levelup-color-tag-default);
+    color: var(--beeday-color-tag-default);
 }
 
 .wallet-summary {
@@ -58,17 +58,17 @@
 }
 
 /* .wallet-summary__card, .wallet-main-panel, and .wallet-tags-panel also carry the
-   shared, non-interactive .levelup-card class (no hover) — the exact border/background/shadow
+   shared, non-interactive .beeday-card class (no hover) — the exact border/background/shadow
    values are still declared explicitly here rather than left to design-system.css, since the
    legacy dark-theme rules earlier in this file load after it and would otherwise win the cascade. */
 .wallet-summary__card,
 .wallet-main-panel,
 .wallet-tags-panel {
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-sm);
-    background: var(--levelup-color-surface);
-    color: var(--levelup-color-text-primary);
-    box-shadow: var(--levelup-shadow-sm);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-sm);
+    background: var(--beeday-color-surface);
+    color: var(--beeday-color-text-primary);
+    box-shadow: var(--beeday-shadow-sm);
 }
 
 .wallet-summary__card {
@@ -91,21 +91,21 @@
 .wallet-transaction-card__title-wrap small,
 .wallet-transaction-card__meta,
 .wallet-tag-item small {
-    color: var(--levelup-color-text-muted);
+    color: var(--beeday-color-text-muted);
 }
 
 .wallet-summary__card strong {
-    color: var(--levelup-color-text-primary);
+    color: var(--beeday-color-text-primary);
 }
 
 .wallet-summary__card--income strong,
 .wallet-amount--income {
-    color: var(--levelup-color-success);
+    color: var(--beeday-color-success);
 }
 
 .wallet-summary__card--expense strong,
 .wallet-amount--expense {
-    color: var(--levelup-color-danger);
+    color: var(--beeday-color-danger);
 }
 
 .wallet-workspace {
@@ -124,8 +124,8 @@
 .wallet-panel-header,
 .wallet-panel-header--transactions {
     padding: 1.35rem 1.5rem;
-    border-bottom: 1px solid var(--levelup-color-border);
-    background: linear-gradient(180deg, color-mix(in srgb, var(--levelup-color-primary) 7%, transparent), transparent);
+    border-bottom: 1px solid var(--beeday-color-border);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--beeday-color-primary) 7%, transparent), transparent);
 }
 
 .wallet-tags-panel > .wallet-panel-header {
@@ -142,44 +142,44 @@
 }
 
 .wallet-panel-header h2 {
-    color: var(--levelup-color-text-primary);
+    color: var(--beeday-color-text-primary);
 }
 
 .wallet-filters {
-    border-bottom: 1px solid var(--levelup-color-border);
-    background: var(--levelup-color-surface);
+    border-bottom: 1px solid var(--beeday-color-border);
+    background: var(--beeday-color-surface);
 }
 
 .wallet-filters input,
 .wallet-filters select {
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-xs);
-    background: var(--levelup-color-surface);
-    color: var(--levelup-color-text-primary);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-xs);
+    background: var(--beeday-color-surface);
+    color: var(--beeday-color-text-primary);
 }
 
 .wallet-filters input:focus,
 .wallet-filters select:focus {
-    outline: 2px solid color-mix(in srgb, var(--levelup-color-primary) 45%, transparent);
+    outline: 2px solid color-mix(in srgb, var(--beeday-color-primary) 45%, transparent);
 }
 
 .wallet-empty-state {
-    color: var(--levelup-color-text-primary);
+    color: var(--beeday-color-text-primary);
 }
 
 .wallet-tag-item,
 .wallet-transaction-card {
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-sm);
-    background: var(--levelup-color-surface);
-    color: var(--levelup-color-text-primary);
-    box-shadow: var(--levelup-shadow-sm);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-sm);
+    background: var(--beeday-color-surface);
+    color: var(--beeday-color-text-primary);
+    box-shadow: var(--beeday-shadow-sm);
     cursor: pointer;
     transition: none;
 }
 
 /* .wallet-summary__card, .wallet-main-panel, and .wallet-tags-panel are static
-   (via .levelup-card) — no hover/focus elevation rule for them, matching My Account cards.
+   (via .beeday-card) — no hover/focus elevation rule for them, matching My Account cards.
    .wallet-transaction-card and .wallet-tag-item are individually clickable and keep
    their own distinct interactive-card affordance. */
 .wallet-transaction-card:hover,
@@ -187,24 +187,24 @@
 .wallet-tag-item:hover {
     transform: none !important;
     filter: none !important;
-    background: var(--levelup-color-surface);
-    border-color: var(--levelup-color-border);
-    box-shadow: var(--levelup-shadow-md);
+    background: var(--beeday-color-surface);
+    border-color: var(--beeday-color-border);
+    box-shadow: var(--beeday-shadow-md);
 }
 
 .wallet-transaction-card:focus-visible,
 .wallet-tag-item:focus-visible {
     outline: none;
-    box-shadow: var(--levelup-focus-ring);
+    box-shadow: var(--beeday-focus-ring);
 }
 
 .wallet-pagination {
-    border-top: 1px solid var(--levelup-color-border);
+    border-top: 1px solid var(--beeday-color-border);
 }
 
 @keyframes wallet-balance-pulse {
-    0%, 100% { box-shadow: var(--levelup-shadow-sm); }
-    45% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--levelup-color-primary) 28%, transparent), var(--levelup-shadow-md); }
+    0%, 100% { box-shadow: var(--beeday-shadow-sm); }
+    45% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--beeday-color-primary) 28%, transparent), var(--beeday-shadow-md); }
 }
 
 .wallet-transaction-card {
@@ -244,7 +244,7 @@
 .wallet-editor-grid .editor-modal__field > span {
     display: block;
     margin-bottom: .45rem;
-    color: var(--levelup-color-text-primary);
+    color: var(--beeday-color-text-primary);
     font-weight: 700;
 }
 
@@ -252,10 +252,10 @@
     width: 100%;
     min-height: 2.6rem;
     box-sizing: border-box;
-    border: 1px solid var(--levelup-color-border);
-    border-radius: var(--levelup-radius-xs);
-    background: var(--levelup-color-surface);
-    color: var(--levelup-color-text-primary);
+    border: 1px solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-xs);
+    background: var(--beeday-color-surface);
+    color: var(--beeday-color-text-primary);
     padding: .65rem .75rem;
     font: inherit;
 }
@@ -341,22 +341,22 @@
 .wallet-transaction-card time,
 .wallet-transaction-card .wallet-tag-badge,
 .wallet-transaction-card .wallet-muted {
-    font-family: var(--levelup-font-body);
+    font-family: var(--beeday-font-body);
 }
 
 .wallet-transaction-card__title-wrap strong {
-    font-family: var(--levelup-font-body);
+    font-family: var(--beeday-font-body);
     font-weight: 500;
 }
 
 .wallet-transaction-card__title-wrap small,
 .wallet-transaction-card__meta,
 .wallet-transaction-card__amount {
-    font-family: var(--levelup-font-body);
+    font-family: var(--beeday-font-body);
 }
 
 /* Empty-state primary action uses the shared confirmation-cancel (white/neutral) button variant. */
-.wallet-empty-state .levelup-button--confirmation-cancel {
+.wallet-empty-state .beeday-button--confirmation-cancel {
     min-width: 10.5rem;
 }
 
@@ -365,8 +365,8 @@
 }
 
 .wallet-filter-shell {
-    border-bottom: 1px solid var(--levelup-color-border);
-    background: var(--levelup-color-surface);
+    border-bottom: 1px solid var(--beeday-color-border);
+    background: var(--beeday-color-surface);
 }
 
 .wallet-filter-shell .wallet-filters {
@@ -412,8 +412,8 @@
 .wallet-filter-field {
     display: grid;
     gap: .35rem;
-    color: var(--levelup-color-text-secondary);
-    font-size: var(--levelup-font-size-sm, .85rem);
+    color: var(--beeday-color-text-secondary);
+    font-size: var(--beeday-font-size-sm, .85rem);
 }
 
 .wallet-filter-field > span {
@@ -427,7 +427,7 @@
     justify-content: space-between;
     gap: .75rem;
     padding-top: .4rem;
-    color: var(--levelup-color-text-secondary);
+    color: var(--beeday-color-text-secondary);
 }
 
 @media (max-width: 1200px) {
@@ -495,7 +495,7 @@
 .wallet-filter-field input:focus-visible,
 .wallet-filter-field select:focus-visible,
 .wallet-alert button:focus-visible {
-    outline: 3px solid var(--levelup-color-primary);
+    outline: 3px solid var(--beeday-color-primary);
     outline-offset: 3px;
 }
 
@@ -529,7 +529,7 @@
         align-items: stretch;
     }
 
-    .wallet-page__header .levelup-button--reference-blue {
+    .wallet-page__header .beeday-button--reference-blue {
         align-self: flex-start;
     }
 
@@ -573,7 +573,7 @@
         gap: 1rem;
     }
 
-    .wallet-page__header .levelup-button--reference-blue {
+    .wallet-page__header .beeday-button--reference-blue {
         width: 100%;
     }
 
@@ -598,8 +598,8 @@
         padding-top: .9rem;
     }
 
-    .wallet-empty-state .levelup-button--confirmation-cancel,
-    .wallet-empty-state .levelup-button--primary {
+    .wallet-empty-state .beeday-button--confirmation-cancel,
+    .wallet-empty-state .beeday-button--primary {
         width: 100%;
     }
 
@@ -676,7 +676,7 @@
         flex-direction: column;
     }
 
-    .wallet-panel-header .levelup-button--compact {
+    .wallet-panel-header .beeday-button--compact {
         width: 100%;
     }
 
@@ -695,5 +695,5 @@
 
 
 /* Pagination and inline "Try again"/"Clear filters"/"New tag" actions now
-   render via the shared LevelUpButton design-system component instead of a
+   render via the shared BeeDayButton design-system component instead of a
    parallel .wallet-button/--wallet-action-* system. */

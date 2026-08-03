@@ -14,7 +14,7 @@ public sealed class JsonEventJournalTests : IDisposable
 {
     private readonly string _root = Path.Combine(
         Path.GetTempPath(),
-        $"levelup-journal-tests-{Guid.NewGuid():N}");
+        $"beeday-journal-tests-{Guid.NewGuid():N}");
 
     [Fact]
     public async Task Repeated_event_id_is_written_only_once()

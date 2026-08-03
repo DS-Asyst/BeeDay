@@ -1,22 +1,22 @@
 /*
- * LevelUp typography policy
+ * BeeDay typography policy
  *
  * Inter: the default for all regular UI text (paragraphs, descriptions, forms,
  * inputs, tables, dialogs, navigation, menus, tabs, values, counters,
  * statistics, balances, HUD information, and every other regular UI element).
  * Jersey 25: reserved for page titles, card titles, stylized buttons
- * (the shared LevelUpButton component), and LevelUp branding only.
+ * (the shared BeeDayButton component), and BeeDay branding only.
  */
 
 /* The complete interface reads from Inter by default. */
 html,
 body {
-    font-family: var(--levelup-font-body);
+    font-family: var(--beeday-font-body);
 }
 
 /* Only the shared stylized button component uses the retro UI font. */
-.levelup-button {
-    font-family: var(--levelup-font-ui) !important;
+.beeday-button {
+    font-family: var(--beeday-font-ui) !important;
 }
 
 /* Form fields and labels use Inter for readability. */
@@ -26,7 +26,7 @@ textarea,
 option,
 optgroup,
 label {
-    font-family: var(--levelup-font-body) !important;
+    font-family: var(--beeday-font-body) !important;
 }
 
 /* Tables, dialogs, and messages read as body content. */
@@ -41,20 +41,20 @@ td,
 .toast,
 .feedback,
 .message {
-    font-family: var(--levelup-font-body);
+    font-family: var(--beeday-font-body);
 }
 
 /* Button font-weight is enforced here (rather than only in design-system.css) so no
    variant, state, or legacy modifier class can ever render bold; size/line-height/letter-
-   spacing are owned solely by design-system.css's .levelup-button rule to avoid duplicated,
+   spacing are owned solely by design-system.css's .beeday-button rule to avoid duplicated,
    drift-prone declarations across files. */
-.levelup-button {
-    font-weight: var(--levelup-font-weight-regular) !important;
+.beeday-button {
+    font-weight: var(--beeday-font-weight-regular) !important;
 }
 
 /* Brand and heading roles use the retro UI font. */
-.levelup-brand,
-.levelup-logo,
+.beeday-brand,
+.beeday-logo,
 .top-navigation__brand-button,
 .tutorial-brand,
 .tutorial-icon,
@@ -63,7 +63,7 @@ td,
 h1,
 .page-title,
 .hero-title {
-    font-family: var(--levelup-font-ui);
+    font-family: var(--beeday-font-ui);
 }
 
 /* Card and section titles use the retro UI font. */
@@ -73,7 +73,7 @@ h3.title,
 .card-title--special,
 .section-title--display,
 .wallet-panel-header h2 {
-    font-family: var(--levelup-font-ui);
+    font-family: var(--beeday-font-ui);
 }
 
 /* Large numeric indicators (XP, level, counters, balances) use Inter, tabular. */
@@ -81,27 +81,27 @@ h3.title,
 .metric-value,
 .wallet-balance,
 [data-display="number"] {
-    font-family: var(--levelup-font-body);
+    font-family: var(--beeday-font-body);
     font-variant-numeric: tabular-nums;
 }
 
 /* Canonical project-wide readable type scale. */
 body {
-    font-size: var(--levelup-font-size-base);
-    line-height: var(--levelup-line-height-normal);
+    font-size: var(--beeday-font-size-base);
+    line-height: var(--beeday-line-height-normal);
 }
 
 .card-title,
 .special-card-title,
 .dashboard-column__heading h2 {
-    font-family: var(--levelup-font-ui);
+    font-family: var(--beeday-font-ui);
 }
 
 small,
 .text-small,
 .helper-text,
 .muted-text {
-    font-size: var(--levelup-font-size-sm);
+    font-size: var(--beeday-font-size-sm);
 }
 
 /* Dashboard card copy uses Inter; the retro UI font remains reserved for page/section identity. */
@@ -111,7 +111,7 @@ small,
 .habit-card__body p,
 .activity-card__meta,
 .habit-card__footer {
-    font-family: var(--levelup-font-body);
+    font-family: var(--beeday-font-body);
 }
 
 .activity-card h3,

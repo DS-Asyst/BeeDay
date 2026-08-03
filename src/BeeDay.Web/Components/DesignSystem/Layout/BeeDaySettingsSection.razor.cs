@@ -10,6 +10,6 @@ public partial class BeeDaySettingsSection
     [Parameter] public string? Class { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
-    private string CssClass => string.Join(' ', new[] { "levelup-settings-section", Class }
+    private string CssClass => string.Join(' ', new[] { "beeday-settings-section", Class }
         .Where(value => !string.IsNullOrWhiteSpace(value)));
 }

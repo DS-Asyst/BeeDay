@@ -1,16 +1,16 @@
 html {
     min-height: 100%;
-    background: var(--levelup-color-background);
+    background: var(--beeday-color-background);
 }
 
 body {
     min-height: 100vh;
     margin: 0;
-    background: var(--levelup-color-background);
-    color: var(--levelup-color-text-primary);
-    font-family: var(--levelup-font-family);
+    background: var(--beeday-color-background);
+    color: var(--beeday-color-text-primary);
+    font-family: var(--beeday-font-family);
     font-size: 16px;
-    line-height: var(--levelup-line-height-normal);
+    line-height: var(--beeday-line-height-normal);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
 }
@@ -27,7 +27,7 @@ select,
 textarea,
 option,
 optgroup {
-    font-family: var(--levelup-font-family);
+    font-family: var(--beeday-font-family);
     font-size: inherit;
     font-weight: inherit;
     line-height: inherit;
@@ -52,28 +52,28 @@ h4,
 .page-title,
 .section-title,
 .modal-title {
-    font-family: var(--levelup-font-ui);
+    font-family: var(--beeday-font-ui);
     font-weight: 400;
 }
 
-.levelup-brand,
+.beeday-brand,
 .brand,
 .logo {
-    font-family: var(--levelup-font-ui);
+    font-family: var(--beeday-font-ui);
     font-weight: 400;
 }
 
 .loading-title {
-    font-family: var(--levelup-font-body);
+    font-family: var(--beeday-font-body);
     font-weight: 400;
 }
 
-.levelup-app {
+.beeday-app {
     min-height: 100vh;
-    background: var(--levelup-color-background);
+    background: var(--beeday-color-background);
 }
 
-.levelup-main {
+.beeday-main {
     width: 100%;
     margin: 0;
     padding: 0;
@@ -81,10 +81,10 @@ h4,
 
 :where(button, a, input, select, textarea, [tabindex]):focus-visible {
     outline: none;
-    box-shadow: var(--levelup-focus-ring);
+    box-shadow: var(--beeday-focus-ring);
 }
 
 ::selection {
-    background: var(--levelup-color-primary-soft);
-    color: var(--levelup-color-text-primary);
+    background: var(--beeday-color-primary-soft);
+    color: var(--beeday-color-text-primary);
 }

@@ -75,7 +75,7 @@ public sealed class BeeDayFeedbackTests
             .Add(component => component.History, [feedback])
             .Add(component => component.OnClose, () => closed = true));
 
-        cut.Find(".level-up-feedback-backdrop").KeyDown("Escape");
+        cut.Find(".beeday-feedback-backdrop").KeyDown("Escape");
 
         Assert.True(closed);
     }
@@ -91,8 +91,8 @@ public sealed class BeeDayFeedbackTests
 
         var dialog = cut.Find("[role='dialog']");
         Assert.Equal("true", dialog.GetAttribute("aria-modal"));
-        Assert.Equal("level-up-feedback-title", dialog.GetAttribute("aria-labelledby"));
-        Assert.Equal("level-up-feedback-description", dialog.GetAttribute("aria-describedby"));
+        Assert.Equal("beeday-feedback-title", dialog.GetAttribute("aria-labelledby"));
+        Assert.Equal("beeday-feedback-description", dialog.GetAttribute("aria-describedby"));
         Assert.True(dialog.HasAttribute("tabindex"));
     }
 
@@ -106,8 +106,8 @@ public sealed class BeeDayFeedbackTests
             .Add(component => component.History, [feedback]));
 
         var dialog = cut.Find("[role='dialog']");
-        Assert.Contains("levelup-pixel-panel", dialog.ClassList);
-        Assert.Contains("levelup-pixel-cta", cut.Find("button").ClassList);
+        Assert.Contains("beeday-pixel-panel", dialog.ClassList);
+        Assert.Contains("beeday-pixel-cta", cut.Find("button").ClassList);
     }
 
     [Fact]

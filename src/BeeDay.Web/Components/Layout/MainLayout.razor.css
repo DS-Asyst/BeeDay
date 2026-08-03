@@ -1,72 +1,72 @@
-.levelup-app {
-    --levelup-top-navigation-height: 3.75rem;
-    --levelup-left-panel-width: 17rem;
-    --levelup-right-panel-width: 24rem;
-    --levelup-collapsed-panel-width: 1.35rem;
+.beeday-app {
+    --beeday-top-navigation-height: 3.75rem;
+    --beeday-left-panel-width: 17rem;
+    --beeday-right-panel-width: 24rem;
+    --beeday-collapsed-panel-width: 1.35rem;
 
     display: flex;
     width: 100%;
     min-height: 100dvh;
     flex-direction: column;
-    padding-top: var(--levelup-top-navigation-height);
+    padding-top: var(--beeday-top-navigation-height);
     overflow-x: clip;
     background: #f4f3f5;
 }
 
-.levelup-workspace {
+.beeday-workspace {
     display: grid;
     grid-template-columns:
-        var(--levelup-collapsed-panel-width)
+        var(--beeday-collapsed-panel-width)
         minmax(0, 1fr)
-        var(--levelup-collapsed-panel-width);
+        var(--beeday-collapsed-panel-width);
     flex: 1 0 auto;
-    min-height: calc(100dvh - var(--levelup-top-navigation-height));
+    min-height: calc(100dvh - var(--beeday-top-navigation-height));
     margin-top: 0;
 }
 
-.levelup-workspace {
+.beeday-workspace {
     transition: grid-template-columns 300ms cubic-bezier(.2, .8, .2, 1);
 }
 
-.levelup-workspace.has-left-panel {
+.beeday-workspace.has-left-panel {
     grid-template-columns:
-        var(--levelup-left-panel-width)
+        var(--beeday-left-panel-width)
         minmax(0, 1fr)
-        var(--levelup-collapsed-panel-width);
+        var(--beeday-collapsed-panel-width);
 }
 
-.levelup-workspace.has-right-panel {
+.beeday-workspace.has-right-panel {
     grid-template-columns:
-        var(--levelup-collapsed-panel-width)
+        var(--beeday-collapsed-panel-width)
         minmax(0, 1fr)
-        var(--levelup-right-panel-width);
+        var(--beeday-right-panel-width);
 }
 
-.levelup-side-slot {
+.beeday-side-slot {
     position: relative;
     min-width: 0;
-    height: calc(100dvh - var(--levelup-top-navigation-height));
+    height: calc(100dvh - var(--beeday-top-navigation-height));
     overflow: hidden;
     align-self: start;
     position: sticky;
-    top: var(--levelup-top-navigation-height);
+    top: var(--beeday-top-navigation-height);
     z-index: 20;
 }
 
-.levelup-side-slot--left {
+.beeday-side-slot--left {
     display: flex;
     justify-content: flex-end;
 }
 
-.levelup-side-slot--right {
+.beeday-side-slot--right {
     display: flex;
     justify-content: flex-start;
 }
 
-.levelup-content-shell {
+.beeday-content-shell {
     display: flex;
     min-width: 0;
-    min-height: calc(100dvh - var(--levelup-top-navigation-height));
+    min-height: calc(100dvh - var(--beeday-top-navigation-height));
     flex-direction: column;
     /* `clip`, not `hidden`: an axis set to anything other than `visible` while
        the other stays `visible` gets that other axis silently promoted to
@@ -76,7 +76,7 @@
     overflow-x: clip;
 }
 
-.levelup-main {
+.beeday-main {
     display: flex;
     flex: 1;
     min-width: 0;
@@ -86,72 +86,72 @@
 }
 
 @media (max-width: 760px) {
-    .levelup-workspace,
-    .levelup-workspace.has-left-panel,
-    .levelup-workspace.has-right-panel {
+    .beeday-workspace,
+    .beeday-workspace.has-left-panel,
+    .beeday-workspace.has-right-panel {
         grid-template-columns: 0 minmax(0, 1fr) 0;
     }
 
-    .levelup-side-slot {
+    .beeday-side-slot {
         position: fixed;
-        top: var(--levelup-top-navigation-height);
+        top: var(--beeday-top-navigation-height);
         bottom: 0;
         width: 0;
         height: auto;
         overflow: visible;
     }
 
-    .levelup-side-slot--left {
+    .beeday-side-slot--left {
         left: 0;
     }
 
-    .levelup-side-slot--right {
+    .beeday-side-slot--right {
         right: 0;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .levelup-workspace {
+    .beeday-workspace {
         transition: none;
     }
 }
 
 /* Collapsed side rails follow the Top Navigation identity. */
-.levelup-side-slot {
+.beeday-side-slot {
     background: #5b1095;
 }
 
-.levelup-side-slot--left {
+.beeday-side-slot--left {
     border-right: 1px solid rgb(255 255 255 / 10%);
 }
 
-.levelup-side-slot--right {
+.beeday-side-slot--right {
     border-left: 1px solid rgb(255 255 255 / 10%);
 }
 
-.levelup-workspace.has-left-panel .levelup-side-slot--left,
-.levelup-workspace.has-right-panel .levelup-side-slot--right {
+.beeday-workspace.has-left-panel .beeday-side-slot--left,
+.beeday-workspace.has-right-panel .beeday-side-slot--right {
     background: transparent;
     border-color: transparent;
 }
 
 @media (max-width: 760px) {
-    .levelup-side-slot {
+    .beeday-side-slot {
         background: transparent;
         border: 0;
     }
 }
 
 /* The collapsed rails and open drawers visually continue the Top Navigation. */
-.levelup-side-slot,
-.levelup-side-slot--left,
-.levelup-side-slot--right {
+.beeday-side-slot,
+.beeday-side-slot--left,
+.beeday-side-slot--right {
     background: #5b1095;
     border: 0;
 }
 
-.levelup-workspace.has-left-panel .levelup-side-slot--left,
-.levelup-workspace.has-right-panel .levelup-side-slot--right {
+.beeday-workspace.has-left-panel .beeday-side-slot--left,
+.beeday-workspace.has-right-panel .beeday-side-slot--right {
     background: #5b1095;
     border: 0;
 }

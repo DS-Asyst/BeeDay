@@ -12,7 +12,7 @@ public sealed class BeeDayCardTests
             .AddChildContent("Card content"));
 
         var article = cut.Find("article");
-        Assert.Contains("levelup-card", article.ClassList);
+        Assert.Contains("beeday-card", article.ClassList);
         Assert.Equal("Card content", article.TextContent);
     }
 
@@ -26,9 +26,9 @@ public sealed class BeeDayCardTests
             .Add(component => component.Interactive, true));
 
         var article = cut.Find("article");
-        Assert.Contains("levelup-card--padded", article.ClassList);
-        Assert.Contains("levelup-card--muted", article.ClassList);
-        Assert.Contains("levelup-card--interactive", article.ClassList);
+        Assert.Contains("beeday-card--padded", article.ClassList);
+        Assert.Contains("beeday-card--muted", article.ClassList);
+        Assert.Contains("beeday-card--interactive", article.ClassList);
     }
 
     [Fact]

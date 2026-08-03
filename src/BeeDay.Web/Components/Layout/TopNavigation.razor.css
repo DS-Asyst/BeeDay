@@ -17,7 +17,7 @@
     min-height: 3.75rem;
     padding: 0 .8rem 0 0;
     box-sizing: border-box;
-    font-family: var(--levelup-font-family);
+    font-family: var(--beeday-font-family);
 }
 
 .top-navigation__brand-button {
@@ -208,7 +208,7 @@
 
 .top-navigation__menu-button {
     border: 2px solid transparent;
-    border-radius: var(--levelup-radius-xs);
+    border-radius: var(--beeday-radius-xs);
 }
 
 .top-navigation__menu-button:hover,
@@ -231,7 +231,7 @@
 .top-navigation__links ::deep a.active {
     color: #ffc928;
     background: transparent;
-    font-family: var(--levelup-font-ui);
+    font-family: var(--beeday-font-ui);
     font-size: 1.45rem;
     letter-spacing: .02em;
     text-transform: uppercase;

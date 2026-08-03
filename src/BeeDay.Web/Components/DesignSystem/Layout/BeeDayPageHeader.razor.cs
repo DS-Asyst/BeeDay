@@ -11,6 +11,6 @@ public partial class BeeDayPageHeader
     [Parameter] public string? Class { get; set; }
     [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
-    private string CssClass => string.Join(' ', new[] { "levelup-page-header", Class }
+    private string CssClass => string.Join(' ', new[] { "beeday-page-header", Class }
         .Where(value => !string.IsNullOrWhiteSpace(value)));
 }

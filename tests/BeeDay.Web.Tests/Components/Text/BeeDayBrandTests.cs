@@ -10,10 +10,10 @@ public sealed class BeeDayBrandTests
         using var context = new BunitContext();
 
         var cut = context.Render<BeeDayBrand>();
-        var brand = cut.Find(".levelup-brand");
+        var brand = cut.Find(".beeday-brand");
 
-        Assert.Equal("Level Up", brand.GetAttribute("aria-label"));
-        Assert.Equal("LEVELUP", brand.TextContent.Trim());
-        Assert.Contains("UP", cut.Find(".levelup-brand__accent").TextContent);
+        Assert.Equal("Bee Day", brand.GetAttribute("aria-label"));
+        Assert.Equal("BEEDAY", brand.TextContent.Trim());
+        Assert.Contains("DAY", cut.Find(".beeday-brand__accent").TextContent);
     }
 }

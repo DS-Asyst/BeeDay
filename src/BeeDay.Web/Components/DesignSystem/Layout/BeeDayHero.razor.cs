@@ -20,11 +20,11 @@ public partial class BeeDayHero
         {
             var variantClass = Variant switch
             {
-                BeeDayHeroVariant.Onboarding => "levelup-hero--onboarding",
+                BeeDayHeroVariant.Onboarding => "beeday-hero--onboarding",
                 _ => null
             };
 
-            return string.Join(' ', new[] { "levelup-hero", variantClass, Class }
+            return string.Join(' ', new[] { "beeday-hero", variantClass, Class }
                 .Where(value => !string.IsNullOrWhiteSpace(value)));
         }
     }

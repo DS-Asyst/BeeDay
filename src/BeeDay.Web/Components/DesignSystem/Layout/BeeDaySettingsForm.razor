@@ -2,9 +2,9 @@
 
 <EditForm Model="Model" OnValidSubmit="HandleValidSubmitAsync" FormName="@FormName">
     <DataAnnotationsValidator />
-    <fieldset class="levelup-settings-form" disabled="@IsBusy">
+    <fieldset class="beeday-settings-form" disabled="@IsBusy">
         @ChildContent
-        <div class="levelup-settings-form__actions">
+        <div class="beeday-settings-form__actions">
             <BeeDayButton Type="submit" IsLoading="@IsBusy" Disabled="@IsBusy" Class="@SubmitButtonClass">
                 @SubmitLabel
             </BeeDayButton>

@@ -14,10 +14,10 @@ public partial class BeeDayCard
 
     private string CssClass => string.Join(' ', new[]
     {
-        "levelup-card",
-        Padded ? "levelup-card--padded" : null,
-        Muted ? "levelup-card--muted" : null,
-        Interactive ? "levelup-card--interactive" : null,
+        "beeday-card",
+        Padded ? "beeday-card--padded" : null,
+        Muted ? "beeday-card--muted" : null,
+        Interactive ? "beeday-card--interactive" : null,
         Class
     }.Where(value => !string.IsNullOrWhiteSpace(value)));
 }

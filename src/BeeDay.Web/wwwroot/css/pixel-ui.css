@@ -1,71 +1,71 @@
 /* Sprint 3.5 — Pixel UI Pack */
 
 /* Interactive surfaces and card microinteractions */
-.levelup-card--interactive {
+.beeday-card--interactive {
     position: relative;
     transition:
-        transform var(--levelup-duration-interaction) var(--levelup-easing-emphasized),
-        box-shadow var(--levelup-duration-interaction) var(--levelup-easing-pixel),
-        border-color var(--levelup-duration-interaction) var(--levelup-easing-standard);
+        transform var(--beeday-duration-interaction) var(--beeday-easing-emphasized),
+        box-shadow var(--beeday-duration-interaction) var(--beeday-easing-pixel),
+        border-color var(--beeday-duration-interaction) var(--beeday-easing-standard);
 }
 
-.levelup-card--interactive:hover,
-.levelup-card--interactive:focus-within {
-    border-color: var(--levelup-color-primary);
+.beeday-card--interactive:hover,
+.beeday-card--interactive:focus-within {
+    border-color: var(--beeday-color-primary);
     transform: translateY(-3px);
-    box-shadow: var(--levelup-shadow-md);
+    box-shadow: var(--beeday-shadow-md);
 }
 
-.levelup-card--interactive:active { transform: translateY(1px); }
+.beeday-card--interactive:active { transform: translateY(1px); }
 
 /* Form microinteractions */
-.levelup-field input,
-.levelup-field select,
-.levelup-field textarea,
-.levelup-input,
-.levelup-select {
+.beeday-field input,
+.beeday-field select,
+.beeday-field textarea,
+.beeday-input,
+.beeday-select {
     transition:
-        border-color var(--levelup-duration-interaction) var(--levelup-easing-standard),
-        box-shadow var(--levelup-duration-interaction) var(--levelup-easing-standard),
-        background-color var(--levelup-duration-interaction) var(--levelup-easing-standard);
+        border-color var(--beeday-duration-interaction) var(--beeday-easing-standard),
+        box-shadow var(--beeday-duration-interaction) var(--beeday-easing-standard),
+        background-color var(--beeday-duration-interaction) var(--beeday-easing-standard);
 }
 
-.levelup-field input:hover:not(:disabled),
-.levelup-field select:hover:not(:disabled),
-.levelup-field textarea:hover:not(:disabled),
-.levelup-input:hover:not(:disabled),
-.levelup-select:hover:not(:disabled) {
-    border-color: var(--levelup-color-primary-light);
+.beeday-field input:hover:not(:disabled),
+.beeday-field select:hover:not(:disabled),
+.beeday-field textarea:hover:not(:disabled),
+.beeday-input:hover:not(:disabled),
+.beeday-select:hover:not(:disabled) {
+    border-color: var(--beeday-color-primary-light);
 }
 
 /* Shared hover and entrance utilities */
-.levelup-pixel-hover {
+.beeday-pixel-hover {
     transition:
-        transform var(--levelup-duration-interaction) var(--levelup-easing-emphasized),
-        filter var(--levelup-duration-interaction) var(--levelup-easing-standard);
+        transform var(--beeday-duration-interaction) var(--beeday-easing-emphasized),
+        filter var(--beeday-duration-interaction) var(--beeday-easing-standard);
 }
-.levelup-pixel-hover:hover { transform: translateY(-2px); filter: brightness(1.04); }
-.levelup-pixel-press:active { transform: translateY(2px); }
-.levelup-pixel-pop { animation: levelup-pixel-pop var(--levelup-duration-panel) var(--levelup-easing-emphasized) both; }
-.levelup-panel-enter { animation: levelup-panel-enter var(--levelup-duration-panel) var(--levelup-easing-emphasized) both; }
-.levelup-success-pulse { animation: levelup-success-pulse 360ms var(--levelup-easing-emphasized); }
-.levelup-shake { animation: levelup-shake 260ms steps(4, end); }
+.beeday-pixel-hover:hover { transform: translateY(-2px); filter: brightness(1.04); }
+.beeday-pixel-press:active { transform: translateY(2px); }
+.beeday-pixel-pop { animation: beeday-pixel-pop var(--beeday-duration-panel) var(--beeday-easing-emphasized) both; }
+.beeday-panel-enter { animation: beeday-panel-enter var(--beeday-duration-panel) var(--beeday-easing-emphasized) both; }
+.beeday-success-pulse { animation: beeday-success-pulse 360ms var(--beeday-easing-emphasized); }
+.beeday-shake { animation: beeday-shake 260ms steps(4, end); }
 
-@keyframes levelup-pixel-spin { to { transform: rotate(360deg); } }
-@keyframes levelup-pixel-pop {
+@keyframes beeday-pixel-spin { to { transform: rotate(360deg); } }
+@keyframes beeday-pixel-pop {
     0% { opacity: 0; transform: scale(.94) translateY(4px); }
     70% { opacity: 1; transform: scale(1.02) translateY(-1px); }
     100% { opacity: 1; transform: scale(1) translateY(0); }
 }
-@keyframes levelup-panel-enter {
+@keyframes beeday-panel-enter {
     from { opacity: 0; transform: translateX(10px); }
     to { opacity: 1; transform: translateX(0); }
 }
-@keyframes levelup-success-pulse {
+@keyframes beeday-success-pulse {
     0%, 100% { filter: none; }
     50% { filter: brightness(1.12) saturate(1.25); transform: scale(1.015); }
 }
-@keyframes levelup-shake {
+@keyframes beeday-shake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-4px); }
     50% { transform: translateX(4px); }
@@ -73,20 +73,20 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .levelup-pixel-hover:hover,
-    .levelup-card--interactive:hover,
-    .levelup-card--interactive:focus-within,
+    .beeday-pixel-hover:hover,
+    .beeday-card--interactive:hover,
+    .beeday-card--interactive:focus-within,
 
-    .levelup-pixel-pop,
-    .levelup-panel-enter,
-    .levelup-success-pulse,
-    .levelup-shake {
+    .beeday-pixel-pop,
+    .beeday-panel-enter,
+    .beeday-success-pulse,
+    .beeday-shake {
         animation: none;
     }
 }
 
 @media (forced-colors: active) {
-    .levelup-button,
-    .levelup-card,
+    .beeday-button,
+    .beeday-card,
     *::-webkit-scrollbar-thumb { forced-color-adjust: auto; }
 }

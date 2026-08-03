@@ -6,12 +6,12 @@
 
 <PageTitle>Get started | BeeDay</PageTitle>
 
-<section class="profile-page levelup-fade-in">
+<section class="profile-page beeday-fade-in">
     <div class="profile-panel profile-panel--@State.CurrentStepClass">
         <div class="profile-panel__global-brand"><BeeDayBrand /></div>
         @if (State.Step == BeeDay.Web.Components.Features.ProfileCreation.State.ProfileCreationStep.Account)
         {
-            <BeeDayButton Variant="BeeDayButtonVariant.Back" Compact="true" Class="levelup-button--comic levelup-button--comic-back" OnClick="BackToLogin">Back</BeeDayButton>
+            <BeeDayButton Variant="BeeDayButtonVariant.Back" Compact="true" Class="beeday-button--comic beeday-button--comic-back" OnClick="BackToLogin">Back</BeeDayButton>
             <h1>Create your account</h1>
             <p class="profile-panel__intro">Start organizing your habits, tasks and finances.</p>
 
@@ -53,7 +53,7 @@
 
                 @if (State.ShouldShowConfirmPassword)
                 {
-                    <label class="profile-field levelup-fade-in">
+                    <label class="profile-field beeday-fade-in">
                         <span>Confirm password</span>
                         <input type="password"
                                class="profile-field__input"
@@ -69,7 +69,7 @@
                 }
 
                 <BeeDayButton Variant="BeeDayButtonVariant.Primary"
-                               Class="levelup-button--comic levelup-button--comic-yellow"
+                               Class="beeday-button--comic beeday-button--comic-yellow"
                                Disabled="@(!State.CanContinueAccount)"
                                OnClick="ContinueToProfile">
                     Continue
@@ -78,9 +78,9 @@
         }
         else
         {
-            <BeeDayButton Variant="BeeDayButtonVariant.Back" Compact="true" Class="levelup-button--comic levelup-button--comic-back" OnClick="Back">Back</BeeDayButton>
+            <BeeDayButton Variant="BeeDayButtonVariant.Back" Compact="true" Class="beeday-button--comic beeday-button--comic-back" OnClick="Back">Back</BeeDayButton>
             <h1>Choose your nickname</h1>
-            <p class="profile-panel__intro">This is how you'll be identified in LevelUp.</p>
+            <p class="profile-panel__intro">This is how you'll be identified in BeeDay.</p>
 
             <div class="profile-form">
                 <label class="profile-field">
@@ -101,7 +101,7 @@
                 }
 
                 <BeeDayButton Variant="BeeDayButtonVariant.Primary"
-                               Class="levelup-button--comic levelup-button--comic-yellow"
+                               Class="beeday-button--comic beeday-button--comic-yellow"
                                IsLoading="@State.IsBusy"
                                Disabled="@State.IsBusy"
                                OnClick="CompleteProfileAsync">

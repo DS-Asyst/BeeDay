@@ -9,9 +9,9 @@
 .icon-catalog__header,
 .icon-catalog__section,
 .icon-catalog--unavailable {
-    border: 1px solid var(--levelup-color-border);
-    background: var(--levelup-color-surface);
-    box-shadow: var(--levelup-shadow-sm);
+    border: 1px solid var(--beeday-color-border);
+    background: var(--beeday-color-surface);
+    box-shadow: var(--beeday-shadow-sm);
 }
 
 .icon-catalog__header,
@@ -20,7 +20,7 @@
 }
 
 .icon-catalog__eyebrow {
-    color: var(--levelup-color-primary);
+    color: var(--beeday-color-primary);
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.12em;
@@ -35,7 +35,7 @@
 
 .icon-catalog__header p {
     margin-bottom: 0;
-    color: var(--levelup-color-text-secondary);
+    color: var(--beeday-color-text-secondary);
 }
 
 .icon-catalog__tokens,
@@ -57,7 +57,7 @@
     gap: 0.75rem;
     min-height: 3.5rem;
     padding: 0.75rem;
-    border: 1px solid var(--levelup-color-border);
+    border: 1px solid var(--beeday-color-border);
 }
 
 .icon-catalog__examples {
@@ -70,7 +70,7 @@
 
 .icon-catalog__examples span {
     width: 100%;
-    color: var(--levelup-color-text-secondary);
+    color: var(--beeday-color-text-secondary);
 }
 
 .icon-catalog__grid {
@@ -82,16 +82,16 @@
     gap: 0.75rem;
     min-width: 0;
     padding: 1rem;
-    border: 1px solid var(--levelup-color-border);
-    background: var(--levelup-color-surface);
+    border: 1px solid var(--beeday-color-border);
+    background: var(--beeday-color-surface);
 }
 
 .icon-catalog__preview {
     display: grid;
     place-items: center;
     min-height: 5rem;
-    color: var(--levelup-color-primary);
-    background: var(--levelup-color-background);
+    color: var(--beeday-color-primary);
+    background: var(--beeday-color-background);
 }
 
 .icon-catalog__card dl,
@@ -106,7 +106,7 @@
 }
 
 .icon-catalog__card dt {
-    color: var(--levelup-color-text-muted);
+    color: var(--beeday-color-text-muted);
     font-size: 0.75rem;
     text-transform: uppercase;
 }
@@ -120,7 +120,7 @@
 .icon-catalog__usage {
     overflow-x: auto;
     padding: 0.75rem;
-    background: var(--levelup-color-background);
+    background: var(--beeday-color-background);
 }
 
 .icon-catalog--unavailable {

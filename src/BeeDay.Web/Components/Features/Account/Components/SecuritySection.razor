@@ -4,16 +4,16 @@
                         Title="Security"
                         Description="Protect your account with a strong, unique password.">
     <BeeDaySettingsForm TModel="SecurityFormModel" Model="Model" OnValidSubmit="OnSave"
-                         FormName="account-security" SubmitLabel="Change Password" SubmitButtonClass="levelup-button--comic levelup-button--comic-blue" IsBusy="IsBusy">
+                         FormName="account-security" SubmitLabel="Change Password" SubmitButtonClass="beeday-button--comic beeday-button--comic-blue" IsBusy="IsBusy">
         <BeeDayInput Id="current-password" Label="Current password" Required="true"
                       @bind-Value="Model.CurrentPassword" type="password" autocomplete="current-password" />
-        <div class="levelup-settings-form__grid">
+        <div class="beeday-settings-form__grid">
             <BeeDayInput Id="new-password" Label="New password" Required="true"
                           @bind-Value="Model.NewPassword" type="password" autocomplete="new-password" />
             <BeeDayInput Id="confirm-password" Label="Confirm new password" Required="true"
                           @bind-Value="Model.ConfirmNewPassword" type="password" autocomplete="new-password" />
         </div>
-        <p class="levelup-settings-form__hint">Use at least 8 characters, including one letter and one number.</p>
+        <p class="beeday-settings-form__hint">Use at least 8 characters, including one letter and one number.</p>
     </BeeDaySettingsForm>
 </BeeDaySettingsSection>
 

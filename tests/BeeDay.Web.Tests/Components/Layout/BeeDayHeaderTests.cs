@@ -15,8 +15,8 @@ public sealed class BeeDayHeaderTests
             .Add(component => component.Actions, builder => builder.AddContent(0, "Action")));
 
         Assert.Equal("My Account", cut.Find("h1").TextContent);
-        Assert.Contains("PLAYER", cut.Find(".levelup-page-header__eyebrow").TextContent);
-        Assert.Contains("Action", cut.Find(".levelup-page-header__actions").TextContent);
+        Assert.Contains("PLAYER", cut.Find(".beeday-page-header__eyebrow").TextContent);
+        Assert.Contains("Action", cut.Find(".beeday-page-header__actions").TextContent);
     }
 
     [Fact]

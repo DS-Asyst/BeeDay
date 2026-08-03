@@ -32,8 +32,8 @@ public sealed class ProjectEditorModalTests : BunitContext
 
         var button = cut.FindAll("button").First(element => element.TextContent.Contains("Open Project", StringComparison.Ordinal));
 
-        Assert.Contains("levelup-button--compact", button.ClassList);
-        Assert.Contains("levelup-button--comic", button.ClassList);
+        Assert.Contains("beeday-button--compact", button.ClassList);
+        Assert.Contains("beeday-button--comic", button.ClassList);
         Assert.Empty(button.QuerySelectorAll("svg"));
     }
 

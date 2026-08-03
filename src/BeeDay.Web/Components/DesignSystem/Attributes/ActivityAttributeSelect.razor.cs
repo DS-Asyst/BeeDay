@@ -7,7 +7,7 @@ namespace BeeDay.Web.Components.DesignSystem.Attributes;
 
 public partial class ActivityAttributeSelect : IAsyncDisposable
 {
-    // Matches the Design System's --levelup-spacing-sm token (.5rem @ 16px
+    // Matches the Design System's --beeday-spacing-sm token (.5rem @ 16px
     // root = 8px). Kept as a plain pixel constant because the placement math
     // (AttributeSelectPlacementCalculator) operates on real
     // getBoundingClientRect numbers, not CSS custom properties.
@@ -29,8 +29,8 @@ public partial class ActivityAttributeSelect : IAsyncDisposable
 
     [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
     [Parameter] public string Label { get; set; } = string.Empty;
-    [Parameter] public string FieldCssClass { get; set; } = "levelup-field";
-    [Parameter] public string LabelCssClass { get; set; } = "levelup-field__label";
+    [Parameter] public string FieldCssClass { get; set; } = "beeday-field";
+    [Parameter] public string LabelCssClass { get; set; } = "beeday-field__label";
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public ActivityAttribute? Value { get; set; }
     [Parameter] public EventCallback<ActivityAttribute?> ValueChanged { get; set; }
