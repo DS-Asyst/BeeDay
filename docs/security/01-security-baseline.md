@@ -47,9 +47,9 @@ senha do ponto de vista de segurança, apenas uma atualização silenciosa do fo
 
 `CurrentUserGuard.RequireUserId` não usa mais `LevelUpData.CurrentUserId` como fallback.
 `ICurrentUserContext` é agora um parâmetro obrigatório (não mais `ICurrentUserContext? = null`)
-em todos os handlers de Application que resolvem o usuário autenticado. `LevelUpData.CurrentUserId`
-continua existindo apenas como um campo de bootstrapping do documento JSON (usado por
-`AddUser`/`EnsureValidState`/migração legada) — não é mais lido por nenhum caminho de autenticação.
+em todos os handlers de Application que resolvem o usuário autenticado. `LevelUpData` (e com ele,
+`CurrentUserId`) foi removido do código na Sprint 14.7 — não existe mais nenhum campo persistido de
+"usuário atual" em lugar nenhum, ambiente ou não.
 
 ### Antiforgery & Security Integration Tests — implementado (Sprint 12.6)
 
@@ -78,9 +78,13 @@ limitações conhecidas.
   `app.Configuration` após `Build()`.
 
 **Re-verificação do fix de remoção de fallback (Sprint 12.5):** `CurrentUserGuardTests` (em
-`tests/LevelUp.Application.Tests/`) prova, no cenário combinado exato — `LevelUpData.CurrentUserId`
-apontando para um usuário real E `ICurrentUserContext.UserId` nulo ao mesmo tempo — que a operação é
-rejeitada, nunca cai de volta para `CurrentUserId`.
+`tests/LevelUp.Application.Tests/`) prova que, mesmo com um usuário real existente no repositório e
+`ICurrentUserContext.UserId` nulo, a operação é rejeitada — nunca há fallback para nenhum "usuário
+atual" implícito. Até a Sprint 14.7, o cenário testado era literalmente `LevelUpData.CurrentUserId`
+apontando para esse usuário; com `LevelUpData` removido, o teste (renomeado
+`Handler_WithNullContextUserId_RejectsTheOperationEvenWhenAnotherUserExists`) prova a mesma garantia
+sem precisar de um campo ambiente para apontar — a ausência desse campo em qualquer lugar do código é,
+em si, parte da garantia.
 
 ## 2. Password policy — implementado
 

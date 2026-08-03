@@ -1,42 +1,71 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using LevelUp.Application.Common.Auditing;
 using LevelUp.Domain.Events;
-using LevelUp.Infrastructure.Persistence.Json;
+using LevelUp.Infrastructure.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace LevelUp.Infrastructure.Auditing;
 
-public sealed class JsonEventJournal(
-    JsonStoragePaths storagePaths,
-    JsonSerializerOptionsFactory serializerOptionsFactory) : IEventJournal
+/// <summary>
+/// Append-only audit log for domain events — entirely independent of application-state persistence.
+/// <see cref="IEventJournal"/> is write-only (no read-back API), its only consumer is
+/// <c>AuditDomainEventHandler</c> (fire-and-forget via the background task queue), and it writes to its
+/// own file, never read by anything else. Before Sprint 14.7 this depended on the JSON document-store
+/// path/serializer helpers (<c>JsonStoragePaths</c>, <c>JsonSerializerOptionsFactory</c>) purely by
+/// convenience of file co-location — genuinely unrelated dependencies, since domain events are plain
+/// immutable records with public <c>init</c> properties (<see cref="DomainEvent"/> and its derivatives)
+/// and serialize correctly with a plain <see cref="JsonSerializerOptions"/>; they never needed the
+/// custom <c>DomainJsonContractResolver</c> built specifically for <c>LevelUpData</c>/entity private
+/// setters. This class now resolves its own file location from <see cref="EventJournalOptions"/> alone.
+/// </summary>
+public sealed class JsonEventJournal : IEventJournal
 {
-    private const string JournalFileName = "LevelUpEvents.ndjson";
-    private readonly SemaphoreSlim _writeLock = new(1, 1);
+    private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web)
+    {
+        PropertyNameCaseInsensitive = true,
+        Converters = { new JsonStringEnumConverter() },
+    };
+
+    private readonly string journalPath;
+    private readonly SemaphoreSlim writeLock = new(1, 1);
+
+    public JsonEventJournal(IHostEnvironment environment, IOptions<EventJournalOptions> options)
+    {
+        ArgumentNullException.ThrowIfNull(environment);
+        ArgumentNullException.ThrowIfNull(options);
+
+        var root = Path.GetFullPath(environment.ContentRootPath);
+        var directory = Path.IsPathRooted(options.Value.Directory)
+            ? Path.GetFullPath(options.Value.Directory)
+            : Path.GetFullPath(Path.Combine(root, options.Value.Directory));
+        journalPath = Path.Combine(directory, options.Value.FileName);
+    }
 
     public async Task AppendAsync(IDomainEvent domainEvent, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(domainEvent);
 
-        string directory = Path.GetDirectoryName(storagePaths.DataFile)
-            ?? throw new InvalidOperationException("The storage directory could not be resolved.");
+        var directory = Path.GetDirectoryName(journalPath)
+            ?? throw new InvalidOperationException("The event journal directory could not be resolved.");
         Directory.CreateDirectory(directory);
 
-        string journalPath = Path.Combine(directory, JournalFileName);
-
-        await _writeLock.WaitAsync(cancellationToken);
+        await writeLock.WaitAsync(cancellationToken);
         try
         {
-            if (await ContainsAsync(journalPath, domainEvent, cancellationToken))
+            if (await ContainsAsync(domainEvent, cancellationToken))
             {
                 return;
             }
 
             object envelope = CreateEnvelope(domainEvent);
-            string json = JsonSerializer.Serialize(envelope, serializerOptionsFactory.Create());
+            string json = JsonSerializer.Serialize(envelope, SerializerOptions);
             await File.AppendAllTextAsync(journalPath, json + Environment.NewLine, cancellationToken);
         }
         finally
         {
-            _writeLock.Release();
+            writeLock.Release();
         }
     }
 
@@ -59,10 +88,7 @@ public sealed class JsonEventJournal(
         };
     }
 
-    private static async Task<bool> ContainsAsync(
-        string journalPath,
-        IDomainEvent domainEvent,
-        CancellationToken cancellationToken)
+    private async Task<bool> ContainsAsync(IDomainEvent domainEvent, CancellationToken cancellationToken)
     {
         if (!File.Exists(journalPath))
         {

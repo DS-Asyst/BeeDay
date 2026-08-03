@@ -111,7 +111,7 @@ public sealed class SessionInvalidationIntegrationTests(LevelUpWebApplicationFac
         using var client = await factory.CreateAuthenticatedClientAsync("session-password-change@levelup.invalid", "Password123!", cancellationToken);
         var user = await factory.FindUserAsync("session-password-change@levelup.invalid");
 
-        using (var scope = factory.CreateAuthenticatedScope(user!.Id, user.SessionVersion))
+        await using (var scope = factory.CreateAuthenticatedScope(user!.Id, user.SessionVersion))
         {
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
             await sender.Send(
@@ -131,7 +131,7 @@ public sealed class SessionInvalidationIntegrationTests(LevelUpWebApplicationFac
         var user = await factory.FindUserAsync("session-password-reset@levelup.invalid");
         var rawToken = await factory.IssuePasswordResetTokenAsync(user!.Id);
 
-        using (var scope = factory.Services.CreateScope())
+        await using (var scope = factory.Services.CreateAsyncScope())
         {
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
             await sender.Send(

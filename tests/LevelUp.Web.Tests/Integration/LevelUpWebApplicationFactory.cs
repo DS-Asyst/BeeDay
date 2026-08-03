@@ -4,20 +4,25 @@ using LevelUp.Application.Common.Contracts;
 using LevelUp.Application.Common.Identity;
 using LevelUp.Application.Common.Security;
 using LevelUp.Domain.Entities;
+using LevelUp.Infrastructure.Persistence.SqlServer;
 using LevelUp.Web.Services.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace LevelUp.Web.Tests.Integration;
 
 /// <summary>
 /// Boots the real application (Development environment, so the production-only startup guards
-/// in Program.cs don't apply) against an isolated temp JSON storage directory, so integration
+/// in Program.cs don't apply) against an isolated, disposable SQL Server LocalDB database (one per
+/// factory instance, migrated on startup and dropped on <see cref="Dispose"/> — the Sprint 14.6 SQL
+/// Server cutover replaced the JSON temp-directory isolation this class used before), so integration
 /// tests never touch the developer's real local data and never collide with each other. Shared
 /// by every integration test class in this project — do not duplicate this setup.
 /// </summary>
@@ -31,8 +36,8 @@ namespace LevelUp.Web.Tests.Integration;
 /// </remarks>
 public class LevelUpWebApplicationFactory : WebApplicationFactory<Program>
 {
-    public string StorageDirectory { get; } =
-        Path.Combine(Path.GetTempPath(), "levelup-web-tests", Guid.NewGuid().ToString("N"));
+    public string ConnectionString { get; } =
+        $"Server=(localdb)\\mssqllocaldb;Database=LevelUp_WebTests_{Guid.NewGuid():N};Trusted_Connection=True;TrustServerCertificate=True;";
 
     protected virtual IReadOnlyDictionary<string, string?> RateLimiterConfiguration { get; } = new Dictionary<string, string?>
     {
@@ -48,7 +53,7 @@ public class LevelUpWebApplicationFactory : WebApplicationFactory<Program>
     /// <summary>Hosting environment name. Override for scenarios that need Production-only behavior (e.g. cookie Secure policy).</summary>
     protected virtual string EnvironmentName => "Development";
 
-    /// <summary>Extra configuration merged in on top of storage isolation and rate-limiter settings.</summary>
+    /// <summary>Extra configuration merged in on top of database isolation and rate-limiter settings.</summary>
     protected virtual IReadOnlyDictionary<string, string?> AdditionalConfiguration { get; } = new Dictionary<string, string?>();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -58,7 +63,7 @@ public class LevelUpWebApplicationFactory : WebApplicationFactory<Program>
         {
             var settings = new Dictionary<string, string?>
             {
-                ["LevelUp:Storage:Directory"] = StorageDirectory,
+                ["LevelUp:Persistence:SqlServer:ConnectionString"] = ConnectionString,
                 ["LevelUp:Email:Development:Enabled"] = "false"
             };
             foreach (var (key, value) in RateLimiterConfiguration)
@@ -74,6 +79,18 @@ public class LevelUpWebApplicationFactory : WebApplicationFactory<Program>
         });
     }
 
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        var host = base.CreateHost(builder);
+
+        using var scope = host.Services.CreateScope();
+        var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<LevelUpDbContext>>();
+        using var context = contextFactory.CreateDbContext();
+        context.Database.Migrate();
+
+        return host;
+    }
+
     /// <summary>Creates and persists a confirmed, active User with a known password, bypassing HTTP.</summary>
     public Task<User> SeedConfirmedUserAsync(string email, string password, string name = "Test User") =>
         SeedUserAsync(email, password, name, confirmEmail: true);
@@ -85,10 +102,10 @@ public class LevelUpWebApplicationFactory : WebApplicationFactory<Program>
     private async Task<User> SeedUserAsync(string email, string password, string name, bool confirmEmail)
     {
         using var scope = Services.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<ILevelUpRepository>();
+        var repository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
         var passwordService = scope.ServiceProvider.GetRequiredService<IPasswordService>();
 
-        // The nickname must be unique per User.CompleteUserProfile; derive it from the (always
+        // The nickname must be unique per User.CompleteProfile; derive it from the (always
         // distinct, per test) email rather than the shared default name to avoid collisions
         // across the multiple users seeded into one IClassFixture-shared factory. Truncated to
         // Nickname.MaximumLength (20) with a hash suffix when the local-part alone would exceed it.
@@ -101,35 +118,30 @@ public class LevelUpWebApplicationFactory : WebApplicationFactory<Program>
             ? rawNickname
             : rawNickname[..14] + Math.Abs(rawNickname.GetHashCode()).ToString(CultureInfo.InvariantCulture).PadLeft(6, '0')[..6];
 
-        User? user = null;
-        await repository.UpdateAsync(data =>
+        var user = User.Create(name, email, passwordService.Hash(password));
+        if (confirmEmail)
         {
-            user = User.Create(name, email, passwordService.Hash(password));
-            if (confirmEmail)
-            {
-                user.ConfirmEmail(user.CreatedAtUtc);
-            }
+            user.ConfirmEmail(user.CreatedAtUtc);
+        }
 
-            data.AddUser(user);
-            data.CompleteUserProfile(user.Id, nickname);
-        });
+        user.CompleteProfile(nickname, avatar: null);
+        await repository.AddAsync(user);
 
-        return user!;
+        return user;
     }
 
     public async Task<User?> FindUserAsync(string email)
     {
         using var scope = Services.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<ILevelUpRepository>();
-        var data = await repository.LoadAsync();
-        return data.Users.FirstOrDefault(candidate => string.Equals(candidate.Email, email, StringComparison.OrdinalIgnoreCase));
+        var repository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+        return await repository.GetByEmailAsync(email);
     }
 
     public async Task DeactivateUserAsync(Guid userId)
     {
         using var scope = Services.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<ILevelUpRepository>();
-        await repository.UpdateAsync(data => data.FindUser(userId).SetActive(false));
+        var repository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+        await repository.UpdateAsync(userId, user => user.SetActive(false));
     }
 
     /// <summary>
@@ -174,9 +186,17 @@ public class LevelUpWebApplicationFactory : WebApplicationFactory<Program>
     /// exercises the real handler, the real CurrentUserGuard, and the real repository — the
     /// ICurrentUserContext interface itself is never faked or mocked.
     /// </summary>
-    public IServiceScope CreateAuthenticatedScope(Guid userId, int sessionVersion)
+    /// <remarks>
+    /// Returns <see cref="AsyncServiceScope"/> (from <c>CreateAsyncScope()</c>), not the plain
+    /// <see cref="IServiceScope"/> <c>CreateScope()</c> gives — cross-Aggregate handlers resolve a
+    /// Transient <c>IUnitOfWork</c> (<c>EfUnitOfWork</c>), which implements only
+    /// <see cref="IAsyncDisposable"/>. Disposing this scope synchronously (<c>using</c>) throws once
+    /// the container discovers that tracked, async-only disposable at scope teardown; the caller must
+    /// use <c>await using</c>.
+    /// </remarks>
+    public AsyncServiceScope CreateAuthenticatedScope(Guid userId, int sessionVersion)
     {
-        var scope = Services.CreateScope();
+        var scope = Services.CreateAsyncScope();
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
@@ -211,18 +231,15 @@ public class LevelUpWebApplicationFactory : WebApplicationFactory<Program>
     private async Task<string> IssueTokenAsync(Guid userId, LevelUp.Domain.Enums.UserTokenType type, bool expired)
     {
         using var scope = Services.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<ILevelUpRepository>();
+        var repository = scope.ServiceProvider.GetRequiredService<IUserTokenRepository>();
         var tokenService = scope.ServiceProvider.GetRequiredService<IUserTokenService>();
         var clock = scope.ServiceProvider.GetRequiredService<IClock>();
 
         var rawToken = tokenService.GenerateToken();
-        await repository.UpdateAsync(data =>
-        {
-            var now = clock.UtcNow;
-            var createdAt = expired ? now.AddHours(-2) : now;
-            var expiresAt = expired ? now.AddHours(-1) : now.AddHours(1);
-            data.AddUserToken(LevelUp.Domain.Entities.UserToken.Create(userId, type, tokenService.HashToken(rawToken), createdAt, expiresAt));
-        });
+        var now = clock.UtcNow;
+        var createdAt = expired ? now.AddHours(-2) : now;
+        var expiresAt = expired ? now.AddHours(-1) : now.AddHours(1);
+        await repository.AddAsync(LevelUp.Domain.Entities.UserToken.Create(userId, type, tokenService.HashToken(rawToken), createdAt, expiresAt));
 
         return rawToken;
     }
@@ -244,19 +261,73 @@ public class LevelUpWebApplicationFactory : WebApplicationFactory<Program>
         return options.TicketDataFormat.Protect(ticket);
     }
 
+    // WebApplicationFactory<TEntryPoint> implements both IDisposable and IAsyncDisposable — xunit's
+    // IClassFixture support prefers the async path when a fixture implements IAsyncDisposable, so
+    // DisposeAsync (not Dispose(bool)) is what actually runs at teardown for these tests. Both are
+    // overridden so the database is dropped whichever path a caller takes; each is independently safe
+    // to call (EnsureDeleted[Async] is a no-op if the database is already gone).
+    public override async ValueTask DisposeAsync()
+    {
+        await DropDatabaseBestEffortAsync();
+        await base.DisposeAsync();
+    }
+
     protected override void Dispose(bool disposing)
     {
-        base.Dispose(disposing);
+        if (disposing)
+        {
+            DropDatabaseBestEffort();
+        }
 
-        if (disposing && Directory.Exists(StorageDirectory))
+        base.Dispose(disposing);
+    }
+
+    // SQL Server LocalDB refuses to DROP DATABASE while this same process still holds a pooled
+    // connection to it (ADO.NET connection pooling keeps the physical connection open even after every
+    // DbContext using it is disposed), and a background task still finishing up (BackgroundTaskWorker)
+    // can hold one open for a moment after the last test method returns. ClearAllPools() releases idle
+    // pooled connections immediately but can't force-close one still actively in use — a handful of
+    // retries clears that up reliably, mirroring EmailCaptureWebApplicationFactory's file-cleanup retry
+    // loop. This is teardown hygiene only; every attempt is swallowed, but Dispose does not silently
+    // give up after the first failure the way it used to.
+    private async Task DropDatabaseBestEffortAsync()
+    {
+        for (var attempt = 0; attempt < 10; attempt++)
         {
             try
             {
-                Directory.Delete(StorageDirectory, recursive: true);
+                using var scope = Services.CreateScope();
+                var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<LevelUpDbContext>>();
+                await using var context = await contextFactory.CreateDbContextAsync();
+
+                Microsoft.Data.SqlClient.SqlConnection.ClearAllPools();
+                await context.Database.EnsureDeletedAsync();
+                return;
             }
-            catch (IOException)
+            catch (Exception)
             {
-                // Best-effort cleanup; a stray temp folder under %TEMP% is not worth failing the test run over.
+                await Task.Delay(100);
+            }
+        }
+    }
+
+    private void DropDatabaseBestEffort()
+    {
+        for (var attempt = 0; attempt < 10; attempt++)
+        {
+            try
+            {
+                using var scope = Services.CreateScope();
+                var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<LevelUpDbContext>>();
+                using var context = contextFactory.CreateDbContext();
+
+                Microsoft.Data.SqlClient.SqlConnection.ClearAllPools();
+                context.Database.EnsureDeleted();
+                return;
+            }
+            catch (Exception)
+            {
+                Thread.Sleep(100);
             }
         }
     }

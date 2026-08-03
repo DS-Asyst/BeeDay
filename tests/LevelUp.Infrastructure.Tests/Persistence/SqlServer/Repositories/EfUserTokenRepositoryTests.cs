@@ -54,6 +54,49 @@ public sealed class EfUserTokenRepositoryTests : EfLocalDbTestBase
         Assert.Equal(active.Id, activeTokens[0].Id);
     }
 
+    [Fact]
+    public async Task UpdateAsync_PersistsTheMutation()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfUserTokenRepository(ContextFactory);
+        var userId = await CreateUserAsync(cancellationToken);
+        var now = DateTimeOffset.UtcNow;
+        var token = UserToken.Create(userId, UserTokenType.EmailConfirmation, "hash-1", now, now.AddHours(1));
+        await repository.AddAsync(token, cancellationToken);
+
+        await repository.UpdateAsync(
+            token.Id,
+            t => t.MarkAsUsed(UserTokenType.EmailConfirmation, now),
+            cancellationToken);
+
+        var loaded = await repository.GetByHashAsync("hash-1", UserTokenType.EmailConfirmation, cancellationToken);
+        Assert.True(loaded!.IsUsed);
+    }
+
+    [Fact]
+    public async Task RevokeActiveAsync_RevokesEveryActiveTokenOfThatType()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfUserTokenRepository(ContextFactory);
+        var userId = await CreateUserAsync(cancellationToken);
+        var now = DateTimeOffset.UtcNow;
+
+        var first = UserToken.Create(userId, UserTokenType.PasswordReset, "first", now, now.AddHours(1));
+        var second = UserToken.Create(userId, UserTokenType.PasswordReset, "second", now, now.AddHours(1));
+        var third = UserToken.Create(userId, UserTokenType.PasswordReset, "third", now, now.AddHours(1));
+        await repository.AddAsync(first, cancellationToken);
+        await repository.AddAsync(second, cancellationToken);
+        await repository.AddAsync(third, cancellationToken);
+
+        await repository.RevokeActiveAsync(userId, UserTokenType.PasswordReset, now, cancellationToken);
+
+        var stillActive = await repository.ListActiveAsync(userId, UserTokenType.PasswordReset, cancellationToken);
+        Assert.Empty(stillActive);
+        Assert.True((await repository.GetByHashAsync("first", UserTokenType.PasswordReset, cancellationToken))!.IsRevoked);
+        Assert.True((await repository.GetByHashAsync("second", UserTokenType.PasswordReset, cancellationToken))!.IsRevoked);
+        Assert.True((await repository.GetByHashAsync("third", UserTokenType.PasswordReset, cancellationToken))!.IsRevoked);
+    }
+
     private async Task<Guid> CreateUserAsync(CancellationToken cancellationToken)
     {
         var user = User.Create($"Test User {Guid.NewGuid():N}", $"{Guid.NewGuid():N}@example.com");

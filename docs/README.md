@@ -1,15 +1,19 @@
 # LevelUp — Documentação Técnica Contract-First
 
-**Status:** arquitetura-alvo aprovada; migração em andamento — **parcial**, não concluída. Ver
-[`architecture/08-migration-status.md`](architecture/08-migration-status.md) para o estado verificado
-contra o código: 2 fluxos de leitura (Dashboard, Wallet) migrados para contratos por Aggregate/read
-service; 0 handlers de escrita migrados; 8 portas de escrita definidas na Sprint 13.3 sem nenhum
-adapter ou consumidor ainda.  
+**Status:** migração para SQL Server **concluída** na Sprint 14.6; legado JSON **removido do código**
+na Sprint 14.7. Ver [`architecture/08-migration-status.md`](architecture/08-migration-status.md) §8/§9
+para o estado verificado contra o código: todo handler de leitura e escrita usa os 8 contratos por
+Aggregate/read services/`IUnitOfWork`; `ILevelUpRepository`/`GetLevelUpResponse`/`RequestHandlerBase`
+removidos na 14.6; `LevelUpData` (Domain), todo o pipeline `Persistence/Json/`, `JsonStorageOptions` e
+`JsonStorageHealthCheck` removidos na 14.7; SQL Server é o único provider — não existe mais nenhum
+código de persistência JSON no repositório. `JsonEventJournal` permanece, mas é auditoria de domain
+events (write-only), não persistência funcional — ver ADR-004 §atualização Sprint 14.7.  
 **Escopo:** aplicação LevelUp completa  
-**Plataforma atual:** .NET 10, Blazor Server, Clean Architecture pragmática, MediatR, persistência JSON
-(parcialmente por trás de contratos por Aggregate/read service; majoritariamente ainda pelo documento
-global `LevelUpData` via `ILevelUpRepository`)  
-**Plataforma-alvo:** contratos estáveis, EF Core, SQL Server e banco iniciado sem dados legados
+**Plataforma atual:** .NET 10, Blazor Server, Clean Architecture pragmática, MediatR, EF Core/SQL Server
+como único provider de persistência — nenhum código JSON de persistência restante (ver
+`data/03-json-to-sql-transition.md` §"Sprint 14.7")  
+**Plataforma-alvo:** já alcançada — contratos estáveis, EF Core, SQL Server, banco iniciado sem dados
+legados e nenhum código de persistência JSON remanescente
 
 ## 1. Objetivo
 
@@ -50,7 +54,7 @@ A estratégia adotada é **Contract-First Development**:
 - [Aggregate Map do Domain (Sprint 13.1)](architecture/05-domain-aggregate-map.md)
 - [Domain Persistence Map (Sprint 13.2)](architecture/06-domain-persistence-map.md)
 - [Persistence Contracts (Sprint 13.3)](architecture/07-persistence-contracts.md)
-- [Contract-First Migration Status (Sprint 13.7)](architecture/08-migration-status.md) — estado verificado, não um plano
+- [Contract-First Migration Status (Sprint 14.6 — concluído)](architecture/08-migration-status.md) — estado verificado, não um plano
 
 ### Contract-First
 
@@ -84,6 +88,8 @@ A estratégia adotada é **Contract-First Development**:
 - [ADR-001 — Contract-First](adr/ADR-001-contract-first.md)
 - [ADR-002 — Banco novo sem dados JSON](adr/ADR-002-greenfield-database.md)
 - [ADR-003 — Repositórios por agregado](adr/ADR-003-aggregate-repositories.md)
+- [ADR-004 — SQL Server como único provider de runtime (Sprint 14.6)](adr/ADR-004-sql-server-runtime-cutover.md)
+- [ADR-005 — Remoção do código legado JSON e de `LevelUpData` (Sprint 14.7)](adr/ADR-005-json-legacy-removal.md)
 
 ### Contrato HTTP futuro
 
@@ -98,7 +104,7 @@ A estratégia adotada é **Contract-First Development**:
 5. executar testes de conformidade nos dois adapters;
 6. trocar o adapter ativo por configuração;
 7. iniciar o banco vazio;
-8. remover JSON após estabilização;
+8. remover JSON após estabilização — **concluído na Sprint 14.7**;
 9. automatizar HMG e fortalecer operação.
 
 ## 5. Fora do escopo

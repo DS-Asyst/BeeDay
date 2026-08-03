@@ -1,4 +1,5 @@
 using LevelUp.Domain.Entities;
+using LevelUp.Infrastructure.Persistence.Exceptions;
 using LevelUp.Infrastructure.Persistence.SqlServer.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
@@ -71,5 +72,43 @@ public sealed class EfUserRepositoryTests : EfLocalDbTestBase
         Assert.True(await repository.IsNicknameInUseAsync("margaret", cancellationToken: cancellationToken));
         Assert.False(await repository.IsNicknameInUseAsync("margaret", user.Id, cancellationToken));
         Assert.False(await repository.IsNicknameInUseAsync("nobody", cancellationToken: cancellationToken));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_PersistsTheMutation()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfUserRepository(ContextFactory);
+        var user = User.Create("Ada Lovelace", "ada@example.com");
+        await repository.AddAsync(user, cancellationToken);
+
+        await repository.UpdateAsync(user.Id, u => u.UpdateName("Augusta Ada King"), cancellationToken);
+
+        var loaded = await repository.GetByIdAsync(user.Id, cancellationToken);
+        Assert.Equal("Augusta Ada King", loaded!.Name);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ConcurrentModification_ThrowsConcurrencyConflictException()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfUserRepository(ContextFactory);
+        var user = User.Create("Grace Hopper", "grace@example.com");
+        await repository.AddAsync(user, cancellationToken);
+
+        await Assert.ThrowsAsync<ConcurrencyConflictException>(() => repository.UpdateAsync(
+            user.Id,
+            u =>
+            {
+                // Simulates a concurrent writer racing in exactly here, before this UpdateAsync call's
+                // own SaveChanges — proves the concurrency check is genuine, not just theoretical.
+                using var raceContext = ContextFactory.CreateDbContext();
+                var raceUser = raceContext.Users.Single(existing => existing.Id == user.Id);
+                raceUser.UpdateName("Someone Else");
+                raceContext.SaveChanges();
+
+                u.UpdateName("My Update");
+            },
+            cancellationToken));
     }
 }

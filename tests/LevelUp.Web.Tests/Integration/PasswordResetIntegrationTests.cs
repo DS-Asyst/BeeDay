@@ -26,7 +26,7 @@ public sealed class PasswordResetIntegrationTests
         await using var factory = new EmailCaptureWebApplicationFactory();
         await factory.SeedConfirmedUserAsync("reset-existing@levelup.invalid", "Password123!");
 
-        using (var scope = factory.Services.CreateScope())
+        await using (var scope = factory.Services.CreateAsyncScope())
         {
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
             await sender.Send(new RequestPasswordResetCommand(new RequestPasswordResetRequest("reset-existing@levelup.invalid")), cancellationToken);
@@ -36,7 +36,7 @@ public sealed class PasswordResetIntegrationTests
         var token = await factory.TryGetLatestCapturedTokenAsync(cancellationToken);
         Assert.False(string.IsNullOrWhiteSpace(token));
 
-        using (var scope = factory.Services.CreateScope())
+        await using (var scope = factory.Services.CreateAsyncScope())
         {
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
             await sender.Send(new ResetPasswordCommand(new ResetPasswordRequest(token!, "NewPassword123!", "NewPassword123!")), cancellationToken);
@@ -56,7 +56,7 @@ public sealed class PasswordResetIntegrationTests
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new EmailCaptureWebApplicationFactory();
 
-        using var scope = factory.Services.CreateScope();
+        await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         // No exception, regardless of whether the account exists — the handler must never let a
@@ -73,7 +73,7 @@ public sealed class PasswordResetIntegrationTests
         await using var factory = new EmailCaptureWebApplicationFactory();
         await factory.SeedConfirmedUserAsync("reset-throttled@levelup.invalid", "Password123!");
 
-        using var scope = factory.Services.CreateScope();
+        await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         await sender.Send(new RequestPasswordResetCommand(new RequestPasswordResetRequest("reset-throttled@levelup.invalid")), cancellationToken);
@@ -87,7 +87,7 @@ public sealed class PasswordResetIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new LevelUpWebApplicationFactory();
-        using var scope = factory.Services.CreateScope();
+        await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
@@ -102,7 +102,7 @@ public sealed class PasswordResetIntegrationTests
         var user = await factory.SeedConfirmedUserAsync("reset-expired@levelup.invalid", "Password123!");
         var token = await factory.IssuePasswordResetTokenAsync(user.Id, expired: true);
 
-        using var scope = factory.Services.CreateScope();
+        await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
@@ -117,7 +117,7 @@ public sealed class PasswordResetIntegrationTests
         var user = await factory.SeedConfirmedUserAsync("reset-reused@levelup.invalid", "Password123!");
         var token = await factory.IssuePasswordResetTokenAsync(user.Id);
 
-        using var scope = factory.Services.CreateScope();
+        await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         await sender.Send(new ResetPasswordCommand(new ResetPasswordRequest(token, "NewPassword123!", "NewPassword123!")), cancellationToken);
 
@@ -133,7 +133,7 @@ public sealed class PasswordResetIntegrationTests
         var user = await factory.SeedConfirmedUserAsync("reset-revoked@levelup.invalid", "Password123!");
         var firstToken = await factory.IssuePasswordResetTokenAsync(user.Id);
 
-        using (var scope = factory.Services.CreateScope())
+        await using (var scope = factory.Services.CreateAsyncScope())
         {
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
             // A fresh request for the same user revokes every previously issued, still-active
@@ -141,7 +141,7 @@ public sealed class PasswordResetIntegrationTests
             await sender.Send(new RequestPasswordResetCommand(new RequestPasswordResetRequest("reset-revoked@levelup.invalid")), cancellationToken);
         }
 
-        using (var scope = factory.Services.CreateScope())
+        await using (var scope = factory.Services.CreateAsyncScope())
         {
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
             await Assert.ThrowsAsync<InvalidDomainStateException>(() =>

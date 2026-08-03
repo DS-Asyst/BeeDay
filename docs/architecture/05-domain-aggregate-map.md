@@ -4,6 +4,13 @@
 **Escopo:** exclusivamente `LevelUp.Domain`. Nenhuma porta, repositório, Unit of Work ou implementação
 de persistência foi criada ou antecipada por este documento.
 
+> **Atualização Sprint 14.7:** a decomposição que este documento previa como "trabalho de Sprint
+> futura" (§1) foi concluída — os 8 repositórios por Aggregate existem desde a Sprint 13.3/14.4, e
+> `LevelUpData` (o documento único descrito abaixo no presente do indicativo) foi removido do Domain.
+> O restante deste documento é o registro histórico da análise que levou a essa decomposição — leia os
+> verbos no presente abaixo como descrevendo o estado da Sprint 13.1, não o atual. Ver
+> `docs/architecture/08-migration-status.md` §9 para o estado atual.
+
 Este documento registra o resultado da Sprint 13.1 — revisão de Aggregate & Domain Boundary — e serve
 de baseline para o desenho de repositórios por agregado nas Sprints seguintes (ver ADR-003).
 

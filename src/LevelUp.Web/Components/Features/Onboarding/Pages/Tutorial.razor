@@ -72,14 +72,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var data = await Store.LoadAsync();
-        if (data.CurrentUser?.HasProfile != true)
+        var user = await Store.GetCurrentUserAsync();
+        if (user?.HasProfile != true)
         {
             Navigation.NavigateTo("/profile/create", forceLoad: true, replace: true);
             return;
         }
 
-        if (data.CurrentUser?.HasCompletedOnboarding == true)
+        if (user.HasCompletedOnboarding)
         {
             Navigation.NavigateTo("/daily", forceLoad: true, replace: true);
         }

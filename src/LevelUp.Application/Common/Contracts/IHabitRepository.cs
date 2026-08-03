@@ -23,4 +23,14 @@ public interface IHabitRepository
         Guid userId,
         IReadOnlyList<Guid> orderedHabitIds,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Loads the Habit tracked, applies <paramref name="mutation"/>, and persists the result — see
+    /// <see cref="IUserRepository.UpdateAsync"/> for why this shape, not a disconnected "Save".
+    /// </summary>
+    public Task UpdateAsync(
+        Guid userId,
+        Guid habitId,
+        Action<Habit> mutation,
+        CancellationToken cancellationToken = default);
 }

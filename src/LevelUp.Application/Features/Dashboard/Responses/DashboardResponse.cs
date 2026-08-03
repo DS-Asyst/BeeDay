@@ -4,9 +4,9 @@ using LevelUp.Domain.Enums;
 namespace LevelUp.Application.Features.Dashboard.Responses;
 
 /// <summary>
-/// Replaces <see cref="GetLevelUpResponse"/>, which exposed <c>LevelUpData</c> directly — the
-/// bloqueador documented in docs/architecture/01-current-state.md §3.6. Composed entirely of
-/// read-only projections; never a mutable Domain entity or the document root.
+/// Replaced <c>GetLevelUpResponse</c> (removed on the Sprint 14.6 cutover), which exposed
+/// <c>LevelUpData</c> directly — the bloqueador documented in docs/architecture/01-current-state.md
+/// §3.6. Composed entirely of read-only projections; never a mutable Domain entity or the document root.
 /// </summary>
 public sealed record DashboardResponse(
     UserProfileSummary Profile,

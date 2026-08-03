@@ -16,7 +16,8 @@ public sealed class ExperienceRewardPipelineTests
     {
         var (repository, user) = CreateRepository();
         var task = RecurringTask.Create("Review pull request", null, TaskRepeat.None);
-        repository.Data.AddTask(user.Id, task);
+        task.AssignOwner(user.Id);
+        repository.RecurringTasksData.Add(task);
         var handler = new ToggleTaskCommandHandler(repository, new FakeCurrentUserContext(user.Id), new ExperienceRewardService());
 
         await handler.Handle(new ToggleTaskCommand(task.Id), TestContext.Current.CancellationToken);
@@ -40,7 +41,8 @@ public sealed class ExperienceRewardPipelineTests
     {
         var (repository, user) = CreateRepository();
         var project = Project.Create("Release Sprint 3.3", null);
-        repository.Data.AddProject(user.Id, project);
+        project.AssignOwner(user.Id);
+        repository.ProjectsData.Add(project);
         var todo = Todo.Create(project.Id, "Validate pipeline", null, null);
         todo.AssignOwner(user.Id);
         project.AddTodo(todo);
@@ -63,8 +65,8 @@ public sealed class ExperienceRewardPipelineTests
         var service = new ExperienceRewardService();
         var sourceId = Guid.NewGuid();
 
-        var first = service.Grant(repository.Data, user.Id, ExperienceSourceType.Task, sourceId, ExperienceRewardType.Completion, "Chapter completed");
-        var duplicate = service.Grant(repository.Data, user.Id, ExperienceSourceType.Task, sourceId, ExperienceRewardType.Completion, "Chapter completed again");
+        var first = service.Grant(user, ExperienceSourceType.Task, sourceId, ExperienceRewardType.Completion, "Chapter completed");
+        var duplicate = service.Grant(user, ExperienceSourceType.Task, sourceId, ExperienceRewardType.Completion, "Chapter completed again");
 
         Assert.NotNull(first);
         Assert.Null(duplicate);
@@ -89,7 +91,8 @@ public sealed class ExperienceRewardPipelineTests
     {
         var (repository, user) = CreateRepository();
         var habit = Habit.Create("Drink water", null, HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily);
-        repository.Data.AddHabit(user.Id, habit);
+        habit.AssignOwner(user.Id);
+        repository.HabitsData.Add(habit);
         var handler = new LevelUp.Application.Features.Habits.Handlers.RegisterHabitPositiveCommandHandler(
             repository, new FakeCurrentUserContext(user.Id), new ExperienceRewardService());
 
@@ -113,13 +116,12 @@ public sealed class ExperienceRewardPipelineTests
         Assert.Throws<LevelUp.Domain.Exceptions.DomainValidationException>(() => policy.GetReward(sourceType));
     }
 
-    private static (FakeLevelUpRepository Repository, User User) CreateRepository()
+    private static (FakeUnitOfWork Repository, User User) CreateRepository()
     {
-        var repository = new FakeLevelUpRepository();
+        var repository = new FakeUnitOfWork();
         var user = User.Create("Pipeline User", "pipeline@levelup.invalid");
-        repository.Data.AddUser(user);
-        repository.Data.SetCurrentUser(user.Id);
-        repository.Data.CompleteUserProfile(user.Id, "pipelinehero");
+        user.CompleteProfile("pipelinehero", null);
+        repository.UsersData.Add(user);
         return (repository, user);
     }
 }

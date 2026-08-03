@@ -4,16 +4,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LevelUp.Infrastructure.Persistence.SqlServer.Repositories;
 
-internal sealed class EfTransactionRepository(IDbContextFactory<LevelUpDbContext> contextFactory) : ITransactionRepository
+internal sealed class EfTransactionRepository : EfRepositoryBase, ITransactionRepository
 {
+    public EfTransactionRepository(IDbContextFactory<LevelUpDbContext> contextFactory) : base(contextFactory)
+    {
+    }
+
+    internal EfTransactionRepository(LevelUpDbContext sharedContext) : base(sharedContext)
+    {
+    }
+
     public async Task<Transaction?> GetAsync(
         Guid walletId,
         Guid transactionId,
         CancellationToken cancellationToken = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        await using var lease = await AcquireContextAsync(cancellationToken);
 
-        return await context.Transactions
+        return await lease.Context.Transactions
             .AsNoTracking()
             .FirstOrDefaultAsync(
                 transaction => transaction.WalletId == walletId && transaction.Id == transactionId,
@@ -24,9 +32,9 @@ internal sealed class EfTransactionRepository(IDbContextFactory<LevelUpDbContext
         Guid walletTagId,
         CancellationToken cancellationToken = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        await using var lease = await AcquireContextAsync(cancellationToken);
 
-        return await context.Transactions
+        return await lease.Context.Transactions
             .AsNoTracking()
             .Where(transaction => transaction.WalletTagId == walletTagId)
             .ToListAsync(cancellationToken);
@@ -34,19 +42,57 @@ internal sealed class EfTransactionRepository(IDbContextFactory<LevelUpDbContext
 
     public async Task AddAsync(Transaction transaction, CancellationToken cancellationToken = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        await using var lease = await AcquireContextAsync(cancellationToken);
 
-        context.Transactions.Add(transaction);
-        await context.SaveChangesAsync(cancellationToken);
+        lease.Context.Transactions.Add(transaction);
+        await EfConcurrencySaveChanges.ExecuteAsync(lease.Context, cancellationToken);
     }
 
     public async Task RemoveAsync(Transaction transaction, CancellationToken cancellationToken = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        await using var lease = await AcquireContextAsync(cancellationToken);
 
-        var tracked = await context.Transactions
+        var tracked = await lease.Context.Transactions
             .SingleAsync(existing => existing.Id == transaction.Id, cancellationToken);
-        context.Transactions.Remove(tracked);
-        await context.SaveChangesAsync(cancellationToken);
+        lease.Context.Transactions.Remove(tracked);
+        await EfConcurrencySaveChanges.ExecuteAsync(lease.Context, cancellationToken);
+    }
+
+    public async Task UpdateAsync(
+        Guid walletId,
+        Guid transactionId,
+        Action<Transaction> mutation,
+        CancellationToken cancellationToken = default)
+    {
+        await using var lease = await AcquireContextAsync(cancellationToken);
+        var context = lease.Context;
+
+        // See EfUserRepository.UpdateAsync for why tracked-and-mutated-within-this-call, not a
+        // disconnected Save.
+        var transaction = await context.Transactions
+            .SingleAsync(
+                existing => existing.WalletId == walletId && existing.Id == transactionId,
+                cancellationToken);
+        mutation(transaction);
+        await EfConcurrencySaveChanges.ExecuteAsync(context, cancellationToken);
+    }
+
+    public async Task ClearTagReferencesAsync(Guid walletTagId, CancellationToken cancellationToken = default)
+    {
+        await using var lease = await AcquireContextAsync(cancellationToken);
+        var context = lease.Context;
+
+        // Mirrors LevelUpData.RemoveWalletTag exactly: every Transaction referencing a deleted
+        // WalletTag has its reference cleared, never the Transaction itself.
+        var affected = await context.Transactions
+            .Where(transaction => transaction.WalletTagId == walletTagId)
+            .ToListAsync(cancellationToken);
+
+        foreach (var transaction in affected)
+        {
+            transaction.RemoveTag();
+        }
+
+        await EfConcurrencySaveChanges.ExecuteAsync(context, cancellationToken);
     }
 }

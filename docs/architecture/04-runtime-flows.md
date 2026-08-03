@@ -31,8 +31,7 @@ SaveHabitContract
 → validator
 → current user
 → Habit.Create(...)
-→ IActivityRepository.AddHabitAsync
-→ IUnitOfWork.SaveChangesAsync
+→ IHabitRepository.AddAsync
 → HabitResponse
 ```
 
@@ -56,11 +55,13 @@ ToggleTaskContract
 GetDashboardQuery
 → current user
 → IDashboardReadService
-→ projeção SQL/JSON
+→ projeção SQL Server (EfDashboardReadService — único provider de runtime desde a Sprint 14.6)
 → DashboardResponse
 ```
 
-O dashboard não deve retornar `LevelUpData` nem entidades mutáveis.
+O dashboard não deve retornar entidades mutáveis nem um documento global (`LevelUpData`, removido do
+Domain na Sprint 14.7 — a regra permanece como princípio arquitetural mesmo sem o tipo original que a
+motivou).
 
 ## 5. Alterar senha
 

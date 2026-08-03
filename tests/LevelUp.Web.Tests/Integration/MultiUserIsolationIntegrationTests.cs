@@ -1,4 +1,3 @@
-using LevelUp.Application.Common.Contracts;
 using LevelUp.Application.Features.Dashboard.Queries;
 using LevelUp.Application.Features.Habits.Commands;
 using LevelUp.Application.Features.Habits.Requests;
@@ -16,6 +15,7 @@ using LevelUp.Domain.Entities;
 using LevelUp.Domain.Enums;
 using LevelUp.Domain.Exceptions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace LevelUp.Web.Tests.Integration;
 
@@ -42,7 +42,7 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
         await CreateWalletTagAsync(bob.Id, cancellationToken);
         await CreateTransactionAsync(bob.Id, null, cancellationToken);
 
-        using var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion);
+        await using var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion);
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         var response = await sender.Send(new GetDashboardQuery(), cancellationToken);
 
@@ -64,7 +64,7 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
         var (alice, bob) = await SeedTwoUsersAsync("isolation-habit");
         var habitId = await CreateHabitAsync(bob.Id, cancellationToken);
 
-        using var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion);
+        await using var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion);
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
@@ -81,7 +81,7 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
         var (alice, bob) = await SeedTwoUsersAsync("isolation-task");
         var taskId = await CreateTaskAsync(bob.Id, cancellationToken);
 
-        using var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion);
+        await using var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion);
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
@@ -89,7 +89,7 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
             sender.Send(new DeleteTaskCommand(taskId), cancellationToken));
 
-        var task = await FindAsync(data => data.Tasks.Single(item => item.Id == taskId));
+        var task = await FindAsync(data => data.RecurringTasks.Single(item => item.Id == taskId));
         Assert.Equal("Bob task", task.Title);
     }
 
@@ -100,7 +100,7 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
         var (alice, bob) = await SeedTwoUsersAsync("isolation-project");
         var projectId = await CreateProjectAsync(bob.Id, cancellationToken);
 
-        using var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion);
+        await using var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion);
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
@@ -120,7 +120,7 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
         var projectId = await CreateProjectAsync(bob.Id, cancellationToken);
         var todoId = await CreateTodoAsync(bob.Id, projectId, cancellationToken);
 
-        using var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion);
+        await using var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion);
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
@@ -130,7 +130,7 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
             sender.Send(new DeleteTodoCommand(todoId), cancellationToken));
 
-        var project = await FindAsync(data => data.Projects.Single(item => item.Id == projectId));
+        var project = await FindAsync(data => data.Projects.Include(item => item.Todos).Single(item => item.Id == projectId));
         var todo = project.Todos.Single(item => item.Id == todoId);
         Assert.False(todo.Completed);
         Assert.Equal("Bob todo", todo.Title);
@@ -143,7 +143,7 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
         var (alice, bob) = await SeedTwoUsersAsync("isolation-transaction");
         var transactionId = await CreateTransactionAsync(bob.Id, null, cancellationToken);
 
-        using var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion);
+        await using var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion);
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
@@ -164,7 +164,7 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
         var (alice, bob) = await SeedTwoUsersAsync("isolation-tag");
         var tagId = await CreateWalletTagAsync(bob.Id, cancellationToken);
 
-        using var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion);
+        await using var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion);
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
@@ -182,14 +182,14 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         var (alice, bob) = await SeedTwoUsersAsync("isolation-profile");
 
-        using (var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion))
+        await using (var scope = factory.CreateAuthenticatedScope(alice.Id, alice.SessionVersion))
         {
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
             await sender.Send(new UpdateCurrentUserAvatarCommand(new UpdateUserAvatarRequest("alice-avatar")), cancellationToken);
         }
 
-        var bobAfter = await FindAsync(data => data.FindUser(bob.Id));
-        var aliceAfter = await FindAsync(data => data.FindUser(alice.Id));
+        var bobAfter = await FindAsync(data => data.Users.Single(u => u.Id == bob.Id));
+        var aliceAfter = await FindAsync(data => data.Users.Single(u => u.Id == alice.Id));
         Assert.Equal(string.Empty, bobAfter.Avatar);
         Assert.Equal("alice-avatar", aliceAfter.Avatar);
     }
@@ -203,7 +203,7 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
 
     private async Task<Guid> CreateHabitAsync(Guid userId, CancellationToken cancellationToken)
     {
-        using var scope = factory.CreateAuthenticatedScope(userId, 1);
+        await using var scope = factory.CreateAuthenticatedScope(userId, 1);
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         await sender.Send(
             new CreateHabitCommand(new SaveHabitRequest("Bob habit", "", HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily)),
@@ -214,18 +214,18 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
 
     private async Task<Guid> CreateTaskAsync(Guid userId, CancellationToken cancellationToken)
     {
-        using var scope = factory.CreateAuthenticatedScope(userId, 1);
+        await using var scope = factory.CreateAuthenticatedScope(userId, 1);
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         await sender.Send(
             new CreateTaskCommand(new SaveTaskRequest("Bob task", "", TaskRepeat.None)),
             cancellationToken);
-        var task = await FindAsync(data => data.Tasks.Single(item => item.UserId == userId));
+        var task = await FindAsync(data => data.RecurringTasks.Single(item => item.UserId == userId));
         return task.Id;
     }
 
     private async Task<Guid> CreateProjectAsync(Guid userId, CancellationToken cancellationToken)
     {
-        using var scope = factory.CreateAuthenticatedScope(userId, 1);
+        await using var scope = factory.CreateAuthenticatedScope(userId, 1);
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         await sender.Send(
             new CreateProjectCommand(new SaveProjectRequest("Bob project", "", "#123456", null, false)),
@@ -236,18 +236,18 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
 
     private async Task<Guid> CreateTodoAsync(Guid userId, Guid projectId, CancellationToken cancellationToken)
     {
-        using var scope = factory.CreateAuthenticatedScope(userId, 1);
+        await using var scope = factory.CreateAuthenticatedScope(userId, 1);
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         await sender.Send(
             new CreateTodoCommand(new SaveTodoRequest(projectId, "Bob todo", "", null)),
             cancellationToken);
-        var project = await FindAsync(data => data.Projects.Single(item => item.Id == projectId));
+        var project = await FindAsync(data => data.Projects.Include(item => item.Todos).Single(item => item.Id == projectId));
         return project.Todos.Single(item => item.Title == "Bob todo").Id;
     }
 
     private async Task<Guid> CreateWalletTagAsync(Guid userId, CancellationToken cancellationToken)
     {
-        using var scope = factory.CreateAuthenticatedScope(userId, 1);
+        await using var scope = factory.CreateAuthenticatedScope(userId, 1);
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         await sender.Send(new CreateWalletTagCommand(new SaveWalletTagRequest("Bob tag", null)), cancellationToken);
         var tag = await FindAsync(data => data.WalletTags.Single(item => item.UserId == userId));
@@ -256,7 +256,7 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
 
     private async Task<Guid> CreateTransactionAsync(Guid userId, Guid? tagId, CancellationToken cancellationToken)
     {
-        using var scope = factory.CreateAuthenticatedScope(userId, 1);
+        await using var scope = factory.CreateAuthenticatedScope(userId, 1);
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         await sender.Send(
             new CreateTransactionCommand(new SaveTransactionRequest("Bob transaction", 10m, TransactionType.Expense, DateOnly.FromDateTime(DateTime.UtcNow), tagId, null)),
@@ -266,11 +266,12 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
         return transaction.Id;
     }
 
-    private async Task<T> FindAsync<T>(Func<LevelUpData, T> select)
+    private async Task<T> FindAsync<T>(Func<LevelUp.Infrastructure.Persistence.SqlServer.LevelUpDbContext, T> select)
     {
-        using var scope = factory.Services.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<ILevelUpRepository>();
-        var data = await repository.LoadAsync();
-        return select(data);
+        await using var scope = factory.Services.CreateAsyncScope();
+        var contextFactory = scope.ServiceProvider
+            .GetRequiredService<IDbContextFactory<LevelUp.Infrastructure.Persistence.SqlServer.LevelUpDbContext>>();
+        await using var context = await contextFactory.CreateDbContextAsync();
+        return select(context);
     }
 }

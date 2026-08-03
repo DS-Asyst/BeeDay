@@ -40,13 +40,6 @@ if (!builder.Environment.IsDevelopment())
             "LevelUp:IdentityEmail:PublicBaseUrl must be an absolute HTTPS URL in production.");
     }
 
-    var storageDirectory = builder.Configuration["LevelUp:Storage:Directory"];
-    if (string.IsNullOrWhiteSpace(storageDirectory) || !Path.IsPathRooted(storageDirectory))
-    {
-        throw new InvalidOperationException(
-            "LevelUp:Storage:Directory must be an absolute path outside the publish directory in production.");
-    }
-
     if (string.IsNullOrWhiteSpace(productionHosting.DataProtectionKeysDirectory)
         || !Path.IsPathRooted(productionHosting.DataProtectionKeysDirectory))
     {
@@ -166,9 +159,8 @@ builder.Services
                 return;
             }
 
-            var repository = context.HttpContext.RequestServices.GetRequiredService<ILevelUpRepository>();
-            var data = await repository.LoadAsync(context.HttpContext.RequestAborted);
-            var user = data.Users.FirstOrDefault(candidate => candidate.Id == userId);
+            var repository = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
+            var user = await repository.GetByIdAsync(userId, context.HttpContext.RequestAborted);
 
             if (user is null || !user.IsActive || user.SessionVersion != sessionVersion)
             {

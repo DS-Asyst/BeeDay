@@ -39,10 +39,10 @@
             return;
         }
 
-        var data = await Store.LoadAsync();
-        var destination = data.CurrentUser?.HasProfile != true
+        var user = await Store.GetCurrentUserAsync();
+        var destination = user?.HasProfile != true
             ? "/profile/create"
-            : data.CurrentUser?.HasCompletedOnboarding == true ? "/daily" : "/onboarding/tutorial";
+            : user.HasCompletedOnboarding ? "/daily" : "/onboarding/tutorial";
         Navigation.NavigateTo(destination, forceLoad: true, replace: true);
     }
 }

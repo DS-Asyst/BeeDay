@@ -11,7 +11,7 @@ public sealed class ProfileCreationState(LevelUpWebService store, ToastService t
     public string? ValidationError { get; private set; }
     public bool HasAuthenticatedSession { get; private set; }
 
-    public Task<LevelUp.Domain.Entities.LevelUpData> LoadDataAsync() => store.LoadAsync();
+    public Task<LevelUp.Application.Features.Users.Responses.CurrentUserResponse?> LoadDataAsync() => store.GetCurrentUserAsync();
 
     public string NormalizedName => Model.Name.Trim();
     public string NormalizedNickname => Model.Nickname.Trim().TrimStart('@');
@@ -53,25 +53,21 @@ public sealed class ProfileCreationState(LevelUpWebService store, ToastService t
             return new OnboardingStatus(false, false);
         }
 
-        var data = await store.LoadAsync();
-        if (data.CurrentUser is not null)
+        var user = await store.GetCurrentUserAsync();
+        if (user is not null)
         {
-            Model.Name = data.CurrentUser.Name;
-            Model.Email = data.CurrentUser.Email;
+            Model.Name = user.Name;
+            Model.Email = user.Email;
             Step = ProfileCreationStep.Profile;
         }
 
-        return new OnboardingStatus(
-            data.CurrentUser is not null,
-            data.CurrentUser?.HasProfile == true);
+        return new OnboardingStatus(user is not null, user?.HasProfile == true);
     }
 
     public async Task<OnboardingStatus> GetStatusAsync()
     {
-        var data = await store.LoadAsync();
-        return new OnboardingStatus(
-            data.CurrentUser is not null,
-            data.CurrentUser?.HasProfile == true);
+        var user = await store.GetCurrentUserAsync();
+        return new OnboardingStatus(user is not null, user?.HasProfile == true);
     }
 
     public bool ContinueToProfile()

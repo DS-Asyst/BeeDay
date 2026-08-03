@@ -21,7 +21,7 @@ public sealed class DomainAssemblyBoundaryTests
     [Fact]
     public void DomainAssembly_DoesNotReferenceSerializationOrInfrastructureAssemblies()
     {
-        var referenced = typeof(LevelUpData).Assembly.GetReferencedAssemblies()
+        var referenced = typeof(User).Assembly.GetReferencedAssemblies()
             .Select(assemblyName => assemblyName.Name)
             .ToArray();
 
@@ -34,7 +34,7 @@ public sealed class DomainAssemblyBoundaryTests
     [Fact]
     public void DomainTypes_CarryNoSystemTextJsonAttributes()
     {
-        var domainAssembly = typeof(LevelUpData).Assembly;
+        var domainAssembly = typeof(User).Assembly;
 
         foreach (var type in domainAssembly.GetTypes())
         {

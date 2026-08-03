@@ -32,4 +32,46 @@ public interface IProjectRepository
         Guid projectId,
         IReadOnlyList<Guid> orderedTodoIds,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Loads the Project tracked, applies <paramref name="mutation"/>, and persists the result — see
+    /// <see cref="IUserRepository.UpdateAsync"/> for why this shape, not a disconnected "Save".
+    /// </summary>
+    public Task UpdateAsync(
+        Guid userId,
+        Guid projectId,
+        Action<Project> mutation,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds <paramref name="todo"/> to an existing, already-persisted Project — <see cref="AddAsync"/>
+    /// only covers a brand-new Project. Todo stays reachable exclusively through this port.
+    /// </summary>
+    public Task AddTodoAsync(
+        Guid userId,
+        Guid projectId,
+        Todo todo,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Loads the Todo tracked by its own id, applies <paramref name="mutation"/>, and persists the
+    /// result — see <see cref="IUserRepository.UpdateAsync"/> for why this shape.
+    /// </summary>
+    public Task UpdateTodoAsync(
+        Guid userId,
+        Guid todoId,
+        Action<Todo> mutation,
+        CancellationToken cancellationToken = default);
+
+    public Task RemoveTodoAsync(Guid userId, Guid todoId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Reassigns a Todo from its current Project to <paramref name="destinationProjectId"/> — approved
+    /// in docs/architecture/07-persistence-contracts.md §10, implemented here.
+    /// </summary>
+    public Task MoveTodoAsync(
+        Guid userId,
+        Guid todoId,
+        Guid destinationProjectId,
+        CancellationToken cancellationToken = default);
 }

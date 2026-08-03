@@ -130,7 +130,7 @@ public sealed class User : Entity
     /// </summary>
     public void InvalidateSessions() { SessionVersion++; Touch(); }
 
-    internal void CompleteProfile(string nickname, string? avatar)
+    public void CompleteProfile(string nickname, string? avatar)
     {
         if (HasProfile)
         {

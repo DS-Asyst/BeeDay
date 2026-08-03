@@ -25,7 +25,7 @@ public sealed class EmailConfirmationIntegrationTests
         var user = await factory.SeedUnconfirmedUserAsync("confirm-valid@levelup.invalid", "Password123!");
         var token = await factory.IssueEmailConfirmationTokenAsync(user.Id);
 
-        using (var scope = factory.Services.CreateScope())
+        await using (var scope = factory.Services.CreateAsyncScope())
         {
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
             await sender.Send(new ConfirmEmailCommand(new ConfirmEmailRequest(token)), cancellationToken);
@@ -40,7 +40,7 @@ public sealed class EmailConfirmationIntegrationTests
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new LevelUpWebApplicationFactory();
-        using var scope = factory.Services.CreateScope();
+        await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
@@ -55,7 +55,7 @@ public sealed class EmailConfirmationIntegrationTests
         var user = await factory.SeedUnconfirmedUserAsync("confirm-expired@levelup.invalid", "Password123!");
         var token = await factory.IssueEmailConfirmationTokenAsync(user.Id, expired: true);
 
-        using var scope = factory.Services.CreateScope();
+        await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
@@ -73,7 +73,7 @@ public sealed class EmailConfirmationIntegrationTests
         var user = await factory.SeedUnconfirmedUserAsync("confirm-reused@levelup.invalid", "Password123!");
         var token = await factory.IssueEmailConfirmationTokenAsync(user.Id);
 
-        using var scope = factory.Services.CreateScope();
+        await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         await sender.Send(new ConfirmEmailCommand(new ConfirmEmailRequest(token)), cancellationToken);
 
@@ -89,7 +89,7 @@ public sealed class EmailConfirmationIntegrationTests
         var user = await factory.SeedUnconfirmedUserAsync("confirm-resend@levelup.invalid", "Password123!");
         var firstToken = await factory.IssueEmailConfirmationTokenAsync(user.Id);
 
-        using (var scope = factory.Services.CreateScope())
+        await using (var scope = factory.Services.CreateAsyncScope())
         {
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
             await sender.Send(new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest("confirm-resend@levelup.invalid")), cancellationToken);
@@ -99,7 +99,7 @@ public sealed class EmailConfirmationIntegrationTests
         var newToken = await factory.TryGetLatestCapturedTokenAsync(cancellationToken);
         Assert.False(string.IsNullOrWhiteSpace(newToken));
 
-        using (var scope = factory.Services.CreateScope())
+        await using (var scope = factory.Services.CreateAsyncScope())
         {
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
             // The token issued before the resend must now be revoked...
@@ -120,7 +120,7 @@ public sealed class EmailConfirmationIntegrationTests
         await using var factory = new EmailCaptureWebApplicationFactory();
         await factory.SeedConfirmedUserAsync("confirm-already@levelup.invalid", "Password123!");
 
-        using var scope = factory.Services.CreateScope();
+        await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         await sender.Send(new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest("confirm-already@levelup.invalid")), cancellationToken);
 
@@ -133,7 +133,7 @@ public sealed class EmailConfirmationIntegrationTests
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         await using var factory = new EmailCaptureWebApplicationFactory();
 
-        using var scope = factory.Services.CreateScope();
+        await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         await sender.Send(new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest("confirm-never-existed@levelup.invalid")), cancellationToken);
 
@@ -147,7 +147,7 @@ public sealed class EmailConfirmationIntegrationTests
         await using var factory = new EmailCaptureWebApplicationFactory();
         await factory.SeedUnconfirmedUserAsync("confirm-throttled@levelup.invalid", "Password123!");
 
-        using var scope = factory.Services.CreateScope();
+        await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         await sender.Send(new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest("confirm-throttled@levelup.invalid")), cancellationToken);
 
@@ -169,7 +169,7 @@ public sealed class EmailConfirmationIntegrationTests
         Assert.Contains("error=invalid", beforeConfirmation.Headers.Location!.ToString(), StringComparison.Ordinal);
 
         var token = await factory.IssueEmailConfirmationTokenAsync(user.Id);
-        using (var scope = factory.Services.CreateScope())
+        await using (var scope = factory.Services.CreateAsyncScope())
         {
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
             await sender.Send(new ConfirmEmailCommand(new ConfirmEmailRequest(token)), cancellationToken);

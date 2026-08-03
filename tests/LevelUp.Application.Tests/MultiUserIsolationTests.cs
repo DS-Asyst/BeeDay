@@ -1,5 +1,3 @@
-using LevelUp.Application.Features.Dashboard.Handlers;
-using LevelUp.Application.Features.Dashboard.Queries;
 using LevelUp.Application.Features.Habits.Commands;
 using LevelUp.Application.Features.Habits.Handlers;
 using LevelUp.Application.Features.Tasks.Commands;
@@ -14,33 +12,32 @@ namespace LevelUp.Application.Tests;
 public sealed class MultiUserIsolationTests
 {
     [Fact]
-    public async Task Dashboard_ReturnsOnlyAuthenticatedUsersDailyData()
+    public async Task Repositories_ReturnOnlyTheAuthenticatedUsersOwnActivities()
     {
-        var repository = new FakeLevelUpRepository();
+        var repository = new FakeUnitOfWork();
         var first = AddUser(repository, "First", "first@levelup.test");
         var second = AddUser(repository, "Second", "second@levelup.test");
-        repository.Data.AddHabit(first.Id, Habit.Create("First habit", "", HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily));
-        repository.Data.AddHabit(second.Id, Habit.Create("Second habit", "", HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily));
-        repository.Data.AddTask(first.Id, RecurringTask.Create("First task", "", TaskRepeat.None));
-        repository.Data.AddTask(second.Id, RecurringTask.Create("Second task", "", TaskRepeat.None));
+        AddHabit(repository, first.Id, Habit.Create("First habit", "", HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily));
+        AddHabit(repository, second.Id, Habit.Create("Second habit", "", HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily));
+        AddTask(repository, first.Id, RecurringTask.Create("First task", "", TaskRepeat.None));
+        AddTask(repository, second.Id, RecurringTask.Create("Second task", "", TaskRepeat.None));
 
-        var handler = new GetLevelUpQueryHandler(repository, new FakeApplicationCache(), new FakeCurrentUserContext(first.Id));
-        var response = await handler.Handle(new GetLevelUpQuery(), TestContext.Current.CancellationToken);
+        var habits = await repository.Habits.ListAsync(first.Id, TestContext.Current.CancellationToken);
+        var tasks = await repository.RecurringTasks.ListAsync(first.Id, TestContext.Current.CancellationToken);
 
-        Assert.Equal(first.Id, response.Data.CurrentUserId);
-        Assert.Equal("First habit", Assert.Single(response.Data.Habits).Title);
-        Assert.Equal("First task", Assert.Single(response.Data.Tasks).Title);
-        Assert.DoesNotContain(response.Data.Habits, item => item.UserId == second.Id);
+        Assert.Equal("First habit", Assert.Single(habits).Title);
+        Assert.Equal("First task", Assert.Single(tasks).Title);
+        Assert.DoesNotContain(habits, item => item.UserId == second.Id);
     }
 
     [Fact]
     public async Task User_CannotModifyAnotherUsersHabit()
     {
-        var repository = new FakeLevelUpRepository();
+        var repository = new FakeUnitOfWork();
         var first = AddUser(repository, "First", "first@levelup.test");
         var second = AddUser(repository, "Second", "second@levelup.test");
         var habit = Habit.Create("Private habit", "", HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily);
-        repository.Data.AddHabit(second.Id, habit);
+        AddHabit(repository, second.Id, habit);
 
         var handler = new RegisterHabitPositiveCommandHandler(repository, new FakeCurrentUserContext(first.Id));
 
@@ -52,23 +49,35 @@ public sealed class MultiUserIsolationTests
     [Fact]
     public async Task ConcurrentSessions_CreateActivitiesForTheirOwnUsers()
     {
-        var repository = new FakeLevelUpRepository();
+        var repository = new FakeUnitOfWork();
         var first = AddUser(repository, "First", "first@levelup.test");
         var second = AddUser(repository, "Second", "second@levelup.test");
-        var firstHandler = new CreateTaskCommandHandler(repository, new FakeCurrentUserContext(first.Id));
-        var secondHandler = new CreateTaskCommandHandler(repository, new FakeCurrentUserContext(second.Id));
+        var firstHandler = new CreateTaskCommandHandler(repository.RecurringTasks, new FakeCurrentUserContext(first.Id));
+        var secondHandler = new CreateTaskCommandHandler(repository.RecurringTasks, new FakeCurrentUserContext(second.Id));
 
         await firstHandler.Handle(new CreateTaskCommand(new SaveTaskRequest("First task", "", TaskRepeat.None)), TestContext.Current.CancellationToken);
         await secondHandler.Handle(new CreateTaskCommand(new SaveTaskRequest("Second task", "", TaskRepeat.None)), TestContext.Current.CancellationToken);
 
-        Assert.Contains(repository.Data.Tasks, task => task.Title == "First task" && task.UserId == first.Id);
-        Assert.Contains(repository.Data.Tasks, task => task.Title == "Second task" && task.UserId == second.Id);
+        Assert.Contains(repository.RecurringTasksData, task => task.Title == "First task" && task.UserId == first.Id);
+        Assert.Contains(repository.RecurringTasksData, task => task.Title == "Second task" && task.UserId == second.Id);
     }
 
-    private static User AddUser(FakeLevelUpRepository repository, string name, string email)
+    private static User AddUser(FakeUnitOfWork repository, string name, string email)
     {
         var user = User.Create(name, email);
-        repository.Data.AddUser(user);
+        repository.UsersData.Add(user);
         return user;
+    }
+
+    private static void AddHabit(FakeUnitOfWork repository, Guid userId, Habit habit)
+    {
+        habit.AssignOwner(userId);
+        repository.HabitsData.Add(habit);
+    }
+
+    private static void AddTask(FakeUnitOfWork repository, Guid userId, RecurringTask task)
+    {
+        task.AssignOwner(userId);
+        repository.RecurringTasksData.Add(task);
     }
 }

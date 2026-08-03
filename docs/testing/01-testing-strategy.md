@@ -49,9 +49,13 @@ public abstract class UserRepositoryContractTests
 Implementações:
 
 ```text
-JsonUserRepositoryContractTests
 SqlUserRepositoryContractTests
 ```
+
+(Este padrão de dupla implementação nunca chegou a ser construído — nenhuma classe deste nome existe no
+repositório. Desde a Sprint 14.7, com o adapter JSON removido do código, só há um provider — SQL Server
+— para conformar; a classe abstrata de contrato continua útil caso um segundo provider volte a existir
+no futuro.)
 
 Repetir para:
 
@@ -124,10 +128,11 @@ dotnet test tests/LevelUp.Web.Tests/LevelUp.Web.Tests.csproj --configuration Rel
 
 ### Infraestrutura
 
-- `LevelUpWebApplicationFactory` — factory base; storage JSON isolado por instância (diretório
-  temporário único, apagado no Dispose); ambiente configurável (Development por padrão);
-  rate limiter de login com limites generosos por padrão para não interferir em testes não
-  relacionados a rate limiting.
+- `LevelUpWebApplicationFactory` — factory base; banco SQL Server LocalDB isolado por instância
+  (nome único, migration real aplicada em `CreateHost`, banco apagado — `EnsureDeleted` — no
+  `Dispose`; substituiu o diretório JSON temporário na Sprint 14.6); ambiente configurável
+  (Development por padrão); rate limiter de login com limites generosos por padrão para não
+  interferir em testes não relacionados a rate limiting.
 - `RateLimitingWebApplicationFactory` — mesma factory com limites baixos e janela curta; uma
   instância nova por teste (nunca compartilhada), para esgotar o limitador sem depender de tempo
   real.
@@ -141,7 +146,11 @@ dotnet test tests/LevelUp.Web.Tests/LevelUp.Web.Tests.csproj --configuration Rel
 - `CreateAuthenticatedScope` (na factory base) — para fluxos que só existem via MediatR/Blazor (sem
   endpoint HTTP próprio: Habits, Tasks, Projects, Todos, Wallet, Tags, Profile), constrói um
   `HttpContext` autenticado de verdade e resolve os handlers a partir dele — exercita o
-  `HttpCurrentUserContext` real; `ICurrentUserContext` nunca é substituído por um fake.
+  `HttpCurrentUserContext` real; `ICurrentUserContext` nunca é substituído por um fake. Desde a
+  Sprint 14.6, retorna `AsyncServiceScope` (`Services.CreateAsyncScope()`), não `IServiceScope` — os
+  handlers cross-Aggregate resolvem `EfUnitOfWork`, que implementa só `IAsyncDisposable`; descartar o
+  escopo de forma síncrona (`using`) faz o container lançar exceção ao encontrar esse tipo rastreado.
+  Todo teste que resolve `ISender` a partir de um escopo manual usa `await using`, nunca `using` puro.
 
 ### Cobertura
 
@@ -205,7 +214,9 @@ limiting, autorização interna) — valida apenas o comportamento observável p
   `UseKestrel(port: 0)` para expor um endpoint Kestrel real em porta dinâmica (TestServer não é
   acessível por um browser real). O `Server` da factory não pode ser tocado diretamente sob Kestrel
   (lança `NotSupportedException`); o startup é disparado via `CreateClient()` e o endereço real lido
-  de `ClientOptions.BaseAddress`. Storage JSON isolado por instância, apagado no `Dispose`.
+  de `ClientOptions.BaseAddress`. Banco SQL Server LocalDB isolado por instância (nome único, migration
+  aplicada em `CreateHost`, apagado — `EnsureDeleted` — no `Dispose`; substituiu o diretório JSON
+  temporário na Sprint 14.6).
 - `PlaywrightAppFixture` (`IAsyncLifetime`, compartilhada via `IClassFixture` por classe de teste) —
   sobe a factory acima e um único `IBrowser` Chromium por classe.
 - `E2ETestBase` — abre um `IBrowserContext`/`IPage` por teste; inicia trace do Playwright
@@ -305,22 +316,30 @@ Dois arquivos, um por fronteira, inspecionam metadados de assembly/reflexão com
 - `LevelUp.Domain.Tests/DomainAssemblyBoundaryTests.cs` (Sprint 12.8) — `LevelUp.Domain` nunca referencia
   `System.Text.Json`, `Microsoft.EntityFrameworkCore` ou `LevelUp.Infrastructure`; nenhum tipo do Domain
   carrega atributo de serialização.
-- `LevelUp.Application.Tests/PersistenceContractBoundaryTests.cs` (Sprint 13.3, estendido na 13.6) —
-  nenhum contrato em `Common.Contracts`/`*.Contracts` expõe `LevelUpData` ou qualquer tipo
-  `System.Text.Json.*` em parâmetro ou retorno (exceto `ILevelUpRepository`, a exceção legada
-  explicitamente rastreada); nenhuma interface de contrato é uma definição genérica
-  (`IRepository<T>`)/tem "UnitOfWork" no nome; `LevelUp.Application` nunca referencia
-  `LevelUp.Infrastructure`.
+- `LevelUp.Application.Tests/PersistenceContractBoundaryTests.cs` (Sprint 13.3, estendido na 13.6;
+  âncora de reflexão trocada para `IUnitOfWork` na Sprint 14.6, quando `ILevelUpRepository` foi
+  removido) — nenhum contrato em `Common.Contracts`/`*.Contracts` expõe qualquer tipo
+  `System.Text.Json.*` em parâmetro ou retorno; nenhuma interface de contrato é uma
+  definição genérica (`IRepository<T>`)/tem "UnitOfWork" no nome (exceto `IUnitOfWork` propriamente
+  dito, aprovado na Sprint 14.5); `LevelUp.Application` nunca referencia `LevelUp.Infrastructure`. O
+  guard específico "nenhum contrato expõe `LevelUpData`" existiu até a Sprint 14.7 — removido junto com
+  o helper `ExposesLevelUpData` quando `LevelUpData` deixou de existir no código (não há mais nada desse
+  tipo para vazar).
 
 Ambos falham a build (`--warnaserror` não afeta isso — são testes, falham como teste) se a fronteira for
-violada, não apenas avisam. Ver `docs/architecture/08-migration-status.md` §6 para o que esses testes
-cobrem hoje vs. o que ainda depende de `ILevelUpRepository`.
+violada, não apenas avisam. Ver `docs/architecture/08-migration-status.md` §8 para o estado atual.
 
-## 9. Fakes de teste — padronizados (Sprint 13.6)
+## 9. Fakes de teste — padronizados (Sprint 13.6; substituídos na Sprint 14.6)
 
-`LevelUp.Application.Tests` usa três fakes compartilhados (`FakeLevelUpRepository`,
-`FakeCurrentUserContext`, `FakeApplicationCache`) em vez de cópias privadas por arquivo de teste — ver
-`docs/architecture/08-migration-status.md` §6. Não criar uma nova cópia privada de `ILevelUpRepository`
-em um teste novo; reusar `FakeLevelUpRepository`. Fakes com comportamento realmente distinto entre
-cenários (ex.: `FakePasswordService` com contagem de chamadas em `AuthenticationHandlersTests`)
-permanecem locais deliberadamente — não force a consolidação de fakes com comportamento divergente.
+`LevelUp.Application.Tests` usa `FakeCurrentUserContext`/`FakeApplicationCache` (Sprint 13.6) e, desde a
+Sprint 14.6, `FakeUnitOfWork.cs` — 8 fakes por Aggregate (`FakeUserRepository`, `FakeHabitRepository`,
+etc.), mais `FakeUnitOfWork` propriamente dito (implementa `IUnitOfWork`, métodos de transação são
+no-op) — em vez do `FakeLevelUpRepository` único que existia antes (removido, zero consumidores). Desde
+a Sprint 14.7, cada um dos 8 fakes tem sua própria `List<T>` independente (`UsersData`, `HabitsData`,
+etc., expostas como propriedades somente-leitura em `FakeUnitOfWork`) em vez de todas compartilharem uma
+única `LevelUpData` em memória — nenhum tipo agrega as 8 listas, mesmo princípio de "sem documento
+único" que motivou a remoção de `LevelUpData` do Domain. Não criar uma nova cópia privada de um fake de
+repositório em um teste novo; reusar os fakes de `FakeUnitOfWork.cs`. Fakes com
+comportamento realmente distinto entre cenários (ex.: `FakePasswordService` com contagem de chamadas em
+`AuthenticationHandlersTests`) permanecem locais deliberadamente — não force a consolidação de fakes com
+comportamento divergente.

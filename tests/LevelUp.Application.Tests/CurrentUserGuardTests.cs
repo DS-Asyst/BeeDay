@@ -9,46 +9,29 @@ using LevelUp.Domain.Exceptions;
 namespace LevelUp.Application.Tests;
 
 /// <summary>
-/// Re-verifies, in the exact combined shape the Sprint 12.5 fallback-removal fix was meant to
-/// cover, that <see cref="CurrentUserGuard.RequireUserId(LevelUpData, ICurrentUserContext)"/> never falls back to
-/// <see cref="LevelUpData.CurrentUserId"/> — a persisted document-bootstrapping field, not an
-/// authentication mechanism — when the authenticated context itself has no user. The scenario:
-/// <c>LevelUpData.CurrentUserId</c> points at a real, existing user AND
-/// <see cref="ICurrentUserContext.UserId"/> is null at the same time. Before the Sprint 12.5 fix,
-/// code that read <c>data.CurrentUserId</c> directly could have treated this as "logged in as that
-/// user"; the fix requires every mutation to go through the authenticated context only.
+/// Re-verifies, in the exact combined shape the Sprint 12.5 fallback-removal fix was meant to cover,
+/// that authentication never falls back to any persisted "current user" pointer — <c>ICurrentUserContext</c>
+/// is the only source of the authenticated identity. <see cref="CurrentUserGuard.RequireUserId(ICurrentUserContext)"/>
+/// throws purely from the authenticated context, even when a real, existing user is present elsewhere
+/// in the store — there is no ambient "current user" concept left anywhere in the codebase to fall back
+/// to since Sprint 14.7 removed <c>LevelUpData</c> (the last type that ever exposed one).
 /// </summary>
 public sealed class CurrentUserGuardTests
 {
     [Fact]
-    public void RequireUserId_WithNullContextUserId_ThrowsEvenWhenDataCurrentUserIdPointsAtARealUser()
+    public async Task Handler_WithNullContextUserId_RejectsTheOperationEvenWhenAnotherUserExists()
     {
-        var repository = new FakeLevelUpRepository();
-        var user = AddUser(repository, "Real User", "real-user@levelup.test");
-        repository.Data.SetCurrentUser(user.Id);
+        var repository = new FakeUnitOfWork();
+        AddUser(repository, "Real User", "real-user@levelup.test");
 
-        Assert.Equal(user.Id, repository.Data.CurrentUserId);
-
-        var exception = Assert.Throws<InvalidDomainStateException>(() =>
-            CurrentUserGuard.RequireUserId(repository.Data, new FakeCurrentUserContext(null)));
-        Assert.Equal("An authenticated User is required.", exception.Message);
-    }
-
-    [Fact]
-    public async Task Handler_WithNullContextUserId_RejectsTheOperationEvenWhenDataCurrentUserIdPointsAtARealUser()
-    {
-        var repository = new FakeLevelUpRepository();
-        var user = AddUser(repository, "Real User", "real-user@levelup.test");
-        repository.Data.SetCurrentUser(user.Id);
-
-        var handler = new CreateHabitCommandHandler(repository, new FakeCurrentUserContext(null));
+        var handler = new CreateHabitCommandHandler(repository.Habits, new FakeCurrentUserContext(null));
         var command = new CreateHabitCommand(new SaveHabitRequest(
             "Should never be created", "", HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily));
 
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
             handler.Handle(command, TestContext.Current.CancellationToken));
 
-        Assert.Empty(repository.Data.Habits);
+        Assert.Empty(repository.HabitsData);
     }
 
     /// <summary>
@@ -75,10 +58,10 @@ public sealed class CurrentUserGuardTests
         Assert.Equal(claimedId, result);
     }
 
-    private static User AddUser(FakeLevelUpRepository repository, string name, string email)
+    private static User AddUser(FakeUnitOfWork repository, string name, string email)
     {
         var user = User.Create(name, email);
-        repository.Data.AddUser(user);
+        repository.UsersData.Add(user);
         return user;
     }
 }

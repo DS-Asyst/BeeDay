@@ -10,15 +10,14 @@ public sealed class ExperienceRewardService(IExperienceRewardPolicy? policy = nu
     private readonly IExperienceRewardPolicy _policy = policy ?? new ExperienceRewardPolicy();
 
     public ExperienceEntry? Grant(
-        LevelUpData data,
-        Guid userId,
+        User user,
         ExperienceSourceType sourceType,
         Guid sourceId,
         ExperienceRewardType rewardType,
         string? description = null,
         DateTimeOffset? grantedAtUtc = null)
     {
-        ArgumentNullException.ThrowIfNull(data);
+        ArgumentNullException.ThrowIfNull(user);
 
         if (sourceId == Guid.Empty)
         {
@@ -29,8 +28,6 @@ public sealed class ExperienceRewardService(IExperienceRewardPolicy? policy = nu
         {
             throw new DomainValidationException(nameof(rewardType), "Unsupported experience reward type.");
         }
-
-        var user = data.FindUser(userId);
 
         return user.TryAddExperience(
             ExperienceReward.Create(_policy.GetReward(sourceType)),

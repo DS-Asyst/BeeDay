@@ -25,8 +25,8 @@ public partial class CreateProfile
 
         if (_hasAuthenticatedSession && status.HasProfile)
         {
-            var data = await State.LoadDataAsync();
-            var destination = data.CurrentUser?.HasCompletedOnboarding == true
+            var user = await State.LoadDataAsync();
+            var destination = user?.HasCompletedOnboarding == true
                 ? "/daily"
                 : "/onboarding/tutorial";
             Navigation.NavigateTo(destination, forceLoad: true, replace: true);

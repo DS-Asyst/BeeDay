@@ -4,11 +4,18 @@
 connection string, convenções globais). Sprint 14.3 completou o modelo EF Core — as 10
 `IEntityTypeConfiguration<T>`, Owned Type (`UserExperience`) e Complex Type (`ExperienceSource`),
 estratégia de herança TPC escopada a `Activity`, e a migration `InitialCreate`, verificada contra um
-LocalDB real. **Sprint 14.4 implementou os 8 `Ef*Repository`** que concretizam os contratos de
-persistência por Aggregate (EPIC 13), registrados em DI. **Ainda não existem**: read service EF, Unit of
-Work, transação explícita, banco real em produção — ver `docs/architecture/08-migration-status.md` para
-o estado verificado. JSON continua sendo o único provider ativo; nenhum handler consome os novos
-repositórios.
+LocalDB real. Sprint 14.4 implementou os 8 `Ef*Repository` que concretizam os contratos de persistência
+por Aggregate (EPIC 13), registrados em DI. **Sprint 14.5 implementou `IUnitOfWork`/`EfUnitOfWork`**,
+coordenando esses 8 repositórios contra um único `LevelUpDbContext` compartilhado, com controle
+transacional explícito (`BeginTransactionAsync`/`CommitTransactionAsync`/`RollbackTransactionAsync`) e
+padronização de exceções (`EfConcurrencySaveChanges` → `PersistenceException`/`ConcurrencyConflictException`,
+nunca um tipo do EF Core cru). **O Contract Completion Step (pré-Sprint 14.6) fechou as 5 lacunas
+encontradas pela matriz de migração de handlers** (G1–G5 — persistência de mutação por Aggregate,
+operações de Todo dentro de Project, revogação em lote de UserToken, movimentação de Todo entre
+Projects, limpeza de referência WalletTag→Transaction), todas nos 8 contratos já existentes, nenhum
+contrato novo. **Ainda não existem**: read service EF, banco real em produção — ver
+`docs/architecture/08-migration-status.md` para o estado verificado. JSON continua sendo o único
+provider ativo; nenhum handler consome os novos repositórios/Unit of Work/métodos.
 
 ## 0. Sprint 14.2 — o que foi implementado
 
@@ -210,6 +217,146 @@ com paralelização desligada, evitando contenção contra a mesma instância `m
 usado por `LevelUp.E2E.Tests` para Playwright/Kestrel. Confirmado por execução real: FKs para `Users`
 exigiram criar um `User` de verdade em cada cenário (as constraints geradas na Sprint 14.3 realmente são
 aplicadas, não apenas declaradas).
+
+## 0.6 Sprint 14.5 — Unit of Work, transações e padronização de exceções
+
+- **`IUnitOfWork`** (`src/LevelUp.Application/Common/Contracts/IUnitOfWork.cs`) — novo contrato,
+  Contract-First (Application define, Infrastructure implementa), ao lado dos 8 já existentes. Expõe as
+  8 portas por Aggregate (`Users`, `UserTokens`, `Habits`, `RecurringTasks`, `Projects`, `Wallets`,
+  `WalletTags`, `Transactions`), `SaveChangesAsync`, `BeginTransactionAsync`, `CommitTransactionAsync`,
+  `RollbackTransactionAsync`. `IAsyncDisposable`.
+- **`EfUnitOfWork`** (`Persistence/SqlServer/EfUnitOfWork.cs`) — cria **um único** `LevelUpDbContext` no
+  construtor (`IDbContextFactory<LevelUpDbContext>.CreateDbContext()`, síncrono — construir a instância
+  não abre conexão), vivo até `DisposeAsync()`. Cada propriedade de repositório constrói, lazily, a
+  mesma classe `Ef*Repository` já existente, usando um **segundo construtor interno**
+  (`EfHabitRepository(LevelUpDbContext sharedContext)`) que reusa o contexto do Unit of Work em vez de
+  criar um próprio. Registrado via **`AddTransient<IUnitOfWork, EfUnitOfWork>()`** (não `AddScoped` —
+  Blazor Server tem escopo de DI por circuito; um `EfUnitOfWork` `Scoped` reproduziria o problema que
+  `AddDbContextFactory` evita, já que guardaria um contexto vivo pela vida do circuito inteiro).
+- **Comportamento transacional — preciso, não aproximado** (esclarecimento pedido explicitamente após a
+  validação desta Sprint): cada método de escrita dos 8 `Ef*Repository` continua chamando
+  `SaveChangesAsync` internamente — isso é aceito, não é um defeito a corrigir. O que muda é *onde* esse
+  `SaveChangesAsync` se encaixa:
+  1. **Uso standalone** (fora de um `EfUnitOfWork`): cada operação persiste a si mesma atomicamente, seu
+     próprio `SaveChangesAsync` já é a unidade inteira — exatamente o comportamento da Sprint 14.4, sem
+     mudança.
+  2. **Uso via `EfUnitOfWork` com transação explícita aberta** (`BeginTransactionAsync()` já chamado):
+     todo `SaveChangesAsync` interno de qualquer repositório resolvido daquele mesmo `EfUnitOfWork`
+     participa da mesma transação ambiente — comportamento nativo do EF Core, nenhum dos 8 repositórios
+     precisa saber que uma transação está aberta.
+  3. `CommitTransactionAsync()` confirma a transação SQL — só então tudo o que foi persistido por cada
+     `SaveChangesAsync` interno dentro dela se torna durável de fato.
+  4. Um rollback (explícito via `RollbackTransactionAsync()`, ou automático por `DisposeAsync()` sem
+     commit prévio) reverte **todo** `SaveChangesAsync` executado dentro daquela transação — não apenas
+     a última chamada, nem apenas a que eventualmente falhou.
+  5. `IUnitOfWork.SaveChangesAsync()` (exposto no próprio contrato) só é necessário para persistir uma
+     mutação sobre uma entidade **ainda rastreada** que nenhuma operação de repositório já persistiu
+     sozinha — o cenário testado é mutar `habit` logo após `Habits.AddAsync(habit)` (que já chamou seu
+     próprio `SaveChangesAsync`) e precisar persistir essa mutação adicional. Não é a forma normal de
+     persistir uma escrita — cada `AddAsync`/`RemoveAsync`/`ReorderAsync` já faz isso por si só.
+- **Rollback**: explícito (`RollbackTransactionAsync`) ou automático — descartar o `EfUnitOfWork` com uma
+  transação ainda aberta (nunca commitada) reverte tudo, mesma semântica de aborto já aprovada para
+  `IHabitProgressionScope` em `07-persistence-contracts.md` §9 ("`DisposeAsync` sem `CommitAsync` prévio
+  não persiste nada").
+- **Padronização de exceções**: novo helper interno `EfConcurrencySaveChanges`
+  (`Persistence/SqlServer/EfConcurrencySaveChanges.cs`) — único ponto onde todo `SaveChangesAsync` dos
+  adapters SQL Server roda; `DbUpdateConcurrencyException` → novo `ConcurrencyConflictException`
+  (`Persistence/Exceptions/`, subtipo de `PersistenceException`, ao lado dos já existentes
+  `PersistenceAccessException`/`DataFileCorruptedException`/`BackupRestoreException`);
+  `DbUpdateException` (qualquer outra) → `PersistenceException`. Nenhum tipo do EF Core cru escapa de
+  Infrastructure — mesma hierarquia pública já usada pelo provider JSON, não uma paralela. Consequência:
+  `EfWalletRepositoryTests.AddAsync_SecondWalletForSameUser_ViolatesUniqueIndex` (Sprint 14.4) passou a
+  esperar `PersistenceException` em vez do `DbUpdateException` cru que esperava antes — mudança
+  deliberada, é exatamente o que "padronizar exceções" pede.
+- **`EfRepositoryBase`** (`Persistence/SqlServer/Repositories/EfRepositoryBase.cs`) — plumbing
+  compartilhada pelos 8 repositórios, **não** uma abstração `Repository<T>`: resolve apenas "de onde vem
+  o `LevelUpDbContext` desta chamada" (contexto próprio e descartável, modo standalone; ou contexto
+  compartilhado do Unit of Work, nunca descartado pelo repositório) — nenhum conhecimento de forma de
+  entidade ou operação CRUD genérica.
+- **Gap conhecido, não fechado nesta Sprint**: `IUnitOfWork.SaveChangesAsync()` só persiste uma mutação
+  feita diretamente sobre uma entidade ainda rastreada pelo contexto compartilhado (ex.: logo após
+  `Habits.AddAsync(habit)`, mutar `habit` e chamar `SaveChangesAsync` de novo) — não existe um caminho
+  para "carregar via `GetAsync`/`ListAsync` (sempre `AsNoTracking`, decisão da Sprint 14.4, não alterada
+  aqui) e depois salvar uma mutação" separadamente, porque nenhum dos 8 contratos tinha `Update`/`Save`
+  nesta Sprint (já documentado em `07-persistence-contracts.md` §6/§10/§13). **Fechado no Contract
+  Completion Step (pré-Sprint 14.6, ver §0.7)** — não com um `Save` desanexado, mas com
+  `UpdateAsync(id, Action<T> mutation, ct)`: carrega, muta e salva na mesma chamada, evitando o problema
+  de concorrência que um `Save` desanexado teria (ver §0.7 para o porquê).
+- **Testes** (`tests/LevelUp.Infrastructure.Tests/Persistence/SqlServer/EfUnitOfWorkTests.cs`, 6 novos,
+  mesma collection/`EfLocalDbTestBase` da Sprint 14.4): commit e rollback explícitos coordenando 2
+  repositórios diferentes; dispose sem commit revertendo automaticamente; rollback por exceção
+  provando que a escrita **anterior**, já bem-sucedida, também é revertida (não só a que falhou);
+  `SaveChangesAsync` persistindo uma mutação sobre uma entidade ainda rastreada; conflito de concorrência
+  genuíno (duas instâncias de `LevelUpDbContext` competindo pela mesma linha) resultando em
+  `ConcurrencyConflictException` com `DbUpdateConcurrencyException` como `InnerException`.
+
+## 0.7 Contract Completion Step (pré-Sprint 14.6) — G1–G5 fechados nos 8 contratos existentes
+
+A matriz de migração de handlers (apresentada antes desta etapa) encontrou 4 lacunas de contrato
+(G1–G4) e uma quinta descoberta durante a própria matriz (G5) — nenhum handler real poderia migrar sem
+elas. Todas as 5 foram fechadas **nos 8 contratos/adapters já existentes** — nenhum contrato novo,
+nenhum `Repository<T>`, Todo permanece inteiramente dentro de `IProjectRepository`. Ver
+`07-persistence-contracts.md` §14 para o registro formal por gap; aqui, o detalhe técnico de
+implementação.
+
+**G1 — forma corrigida em relação ao que a Sprint 13.4 (§10) tinha aprovado nominalmente.** A forma
+original, `SaveAsync(TAggregate entity, ct)`, foi substituída por
+`Task UpdateAsync(Guid userId, Guid aggregateId, Action<TAggregate> mutation, ct = default)` (e
+variações sem `userId` onde o Aggregate já é resolvido por outro identificador — `IWalletRepository`
+por `userId` só, `IUserTokenRepository`/`ITransactionRepository` por `tokenId`/`(walletId,
+transactionId)`). Motivo, **verificado durante a implementação, não assumido**: um `SaveAsync(entity,
+ct)` receberia um objeto desanexado, de um contexto diferente e já descartado (toda leitura é
+`AsNoTracking` desde a Sprint 14.4). Reanexá-lo e marcá-lo `Modified` (`context.Update(entity)`)
+exigiria o `RowVersion` original para a checagem otimista do EF Core — mas o Domain nunca expõe
+`RowVersion` (é shadow, só existe em Infrastructure). Sem ele, a única saída seria "espiar" o
+`RowVersion` atual do banco só no momento de salvar, o que pararia de detectar exatamente o conflito que
+o `RowVersion` existe para pegar (uma escrita concorrente entre a leitura original do caller e este
+"Save"). A forma `UpdateAsync` resolve isso carregando a entidade **rastreada** dentro do mesmo
+método/contexto, aplicando a `mutation` do caller (lógica pura de Domain — `Action<T>`, nenhum tipo do
+EF Core na assinatura) e salvando imediatamente — mesmo padrão já aprovado e testado para
+`RemoveAsync`/`ReorderAsync` desde a Sprint 14.4.
+
+Implementado em `EfUserRepository`, `EfUserTokenRepository`, `EfHabitRepository`,
+`EfRecurringTaskRepository`, `EfProjectRepository` (nível Project), `EfWalletRepository`,
+`EfWalletTagRepository`, `EfTransactionRepository`.
+
+**G2/G4 — `IProjectRepository.AddTodoAsync`/`UpdateTodoAsync`/`RemoveTodoAsync`/`MoveTodoAsync`**:
+
+- `AddTodoAsync`/`RemoveTodoAsync` carregam o Project **com Todos rastreados** e chamam
+  `Project.AddTodo`/`RemoveTodo` (API pública de Domain) — preserva o `Touch()` do Project que o Domain
+  já faz nessas operações, em vez de recriar essa lógica em Infrastructure.
+- `UpdateTodoAsync` carrega só o Todo (confirmado lendo `Todo.cs`/`Activity.cs`: nenhuma mutação de Todo
+  toca o Project — só `AddTodo`/`RemoveTodo` fazem isso).
+- `MoveTodoAsync` chama `sourceProject.RemoveTodo(todoId)` seguido de `destinationProject.AddTodo(todo)`
+  — ambos API pública; `Todo.AssignTo(projectId)` é `internal` a `LevelUp.Domain` (sem
+  `InternalsVisibleTo` para Infrastructure), então só pode ser acionado indiretamente, através de
+  `Project.AddTodo`, nunca chamado direto por Infrastructure.
+
+**G3 — `IUserTokenRepository.RevokeActiveAsync`**: carrega todos os tokens ativos (`UserId`+`Type`+ainda
+não usados/revogados) rastreados, chama `token.Revoke(...)` em cada um, salva uma vez.
+
+**G5 — `ITransactionRepository.ClearTagReferencesAsync`**: espelha exatamente
+`LevelUpData.RemoveWalletTag` — carrega toda Transaction com aquele `WalletTagId` rastreada, chama
+`transaction.RemoveTag()` em cada uma, salva uma vez.
+
+**Bug real encontrado e corrigido durante os testes (não uma das 5 lacunas em si)**: a primeira versão
+de `AddTodoAsync` chamava `context.Entry(todo).Property("Position").CurrentValue = ...` antes de
+qualquer `Add()` explícito no novo Todo. `context.Entry(entity)` em uma entidade ainda não rastreada a
+anexa como `Unchanged` (comportamento documentado do EF Core), não `Added` — diferente de
+`DbSet.Add(entity)`, que propaga `Added` por todo o grafo alcançável (por isso o `AddAsync` original,
+que chama `context.Projects.Add(project)`, sempre funcionou: o `Add()` já propagava `Added` para os
+Todos do grafo antes de qualquer `context.Entry(...)` tocá-los). Sem esse `Add()` explícito, o INSERT
+pretendido virava um UPDATE que não batia com nenhuma linha (`DbUpdateConcurrencyException`, "0 rows
+affected") — descoberto pelo próprio teste de caminho feliz de `AddTodoAsync`, não por inspeção manual.
+Corrigido adicionando `context.Todos.Add(todo)` explicitamente antes de tocar `context.Entry(todo)`.
+
+**Testes**: 26 novos, mesma `EfLocalDbTestBase`/collection das Sprints anteriores — para cada
+`UpdateAsync` novo, um caminho feliz e um conflito de concorrência genuíno (a própria `mutation`
+passada ao método sob teste executa, no meio da sua execução, uma escrita concorrente via um segundo
+`LevelUpDbContext` direto na mesma linha, provando que o método detecta o conflito de verdade, não só na
+teoria); mais `RevokeActiveAsync` (3 tokens revogados, nenhum apagado), `ClearTagReferencesAsync` (2
+Transactions marcadas, 1 sem tag intocada), e os 4 métodos de Todo (posição, ownership, efeito visível
+via `GetAsync`/`GetByTodoIdAsync`).
 
 ## 1. Introdução controlada
 

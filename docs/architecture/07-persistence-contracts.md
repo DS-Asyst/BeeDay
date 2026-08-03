@@ -1,11 +1,12 @@
 # Persistence Contracts (Sprint 13.3 — adoção parcial, Sprints 13.4–13.6)
 
 **Status:** contratos definidos na Sprint 13.3. Adoção parcial: os dois read services (`IWalletReadService`,
-`IDashboardReadService`) estão totalmente adotados; as 8 portas de escrita por Aggregate agora têm um
-adapter EF Core e registro em DI (Sprint 14.4), mas ainda nenhum handler consumidor.
-`ILevelUpRepository` continua sendo o contrato efetivamente usado por todos os handlers de escrita e por
-2 dos 4 fluxos de leitura. **Ver [`08-migration-status.md`](08-migration-status.md) para o inventário
-completo e verificado — este cabeçalho é um resumo, aquele documento é a referência precisa.**
+`IDashboardReadService`) estão totalmente adotados; as 8 portas de escrita por Aggregate têm um adapter
+EF Core e registro em DI (Sprint 14.4), coordenáveis via `IUnitOfWork`/`EfUnitOfWork` (Sprint 14.5), mas
+ainda nenhum handler consumidor de nenhum dos dois. `ILevelUpRepository` continua sendo o contrato
+efetivamente usado por todos os handlers de escrita e por 2 dos 4 fluxos de leitura. **Ver
+[`08-migration-status.md`](08-migration-status.md) para o inventário completo e verificado — este
+cabeçalho é um resumo, aquele documento é a referência precisa.**
 **Escopo:** interfaces (portas) e formas de resposta derivadas exclusivamente do
 [Aggregate Map (13.1)](05-domain-aggregate-map.md) e do
 [Persistence Map (13.2)](06-domain-persistence-map.md), ambos tratados como arquitetura aprovada e não
@@ -152,23 +153,37 @@ deveria depender só de `User` (já carregado pelo handler via `IUserRepository`
 `IEmailConfirmationIssuer` deveria depender de `IUserTokenRepository`. Correção prevista para a Sprint
 de adoção.
 
-## 6. Unit of Work — necessidade identificada, não implementada
+## 6. Unit of Work — necessidade identificada (Sprint 13.3), infraestrutura implementada (Sprint 14.5)
 
-Nenhuma das portas acima expõe `SaveChangesAsync`/`Update` genérico. Isso pressupõe uma peça ainda não
-projetada: algo precisa persistir a mutação de um Aggregate já carregado (ex.: `user.SetPasswordHash(...)`
-depois de um `GetByIdAsync`). O Persistence Map (13.2 §4) já identificou duas fronteiras que **exigem**
-essa peça cobrir mais de um Aggregate na mesma unidade:
+Nenhuma das 8 portas acima expõe `SaveChangesAsync`/`Update` genérico — decisão original desta Sprint,
+que pressupunha uma peça ainda não projetada para persistir a mutação de um Aggregate já carregado (ex.:
+`user.SetPasswordHash(...)` depois de um `GetByIdAsync`). O Persistence Map (13.2 §4) identificou duas
+fronteiras que **exigem** essa peça cobrir mais de um Aggregate na mesma unidade:
 
 - `Habit ↔ User` (concessão de XP sem chave de deduplicação em `RegisterPositive`/`RegisterNegative`);
 - `UserToken ↔ User` (consumo de token de reset de senha).
 
-Só documentado, conforme pedido — nenhuma interface de Unit of Work foi criada nesta Sprint.
+**Sprint 14.5 implementou a infraestrutura**: `IUnitOfWork`/`EfUnitOfWork`
+(`docs/data/02-ef-core-strategy.md` §0.6), coordenando as 8 portas contra um único `LevelUpDbContext`
+compartilhado, com `SaveChangesAsync`/`BeginTransactionAsync`/`CommitTransactionAsync`/
+`RollbackTransactionAsync`, testado (commit/rollback com múltiplos repositórios, rollback por exceção,
+concorrência). **As duas fronteiras acima continuam não migradas** — nenhum handler foi alterado nesta
+Sprint (`RegisterPositiveCommandHandler`/`RegisterNegativeCommandHandler`/o fluxo de consumo de token
+continuam em JSON via `ILevelUpRepository`); `IUnitOfWork` existe e está testado, mas sem consumidor
+real, mesmo padrão de "porta pronta, zero handler" já visto nas Sprints 13.3/14.4. Gap também parcial:
+`SaveChangesAsync()` só persiste uma mutação sobre uma entidade **ainda rastreada** pelo contexto
+compartilhado (ex.: logo após um `AddAsync` do próprio Unit of Work) — como as 8 portas continuam sem
+`Update`/`Save` e toda leitura continua `AsNoTracking()` (decisão da Sprint 14.4, não alterada), ainda
+não existe um caminho "carregar via `GetAsync`, mutar, salvar" através destes contratos.
 
-## 7. Transações — necessidade identificada, não implementada
+## 7. Transações — necessidade identificada (Sprint 13.3), suporte genérico implementado (Sprint 14.5)
 
-Mesma decisão do §6: as duas fronteiras acima são as únicas do Domain inteiro que exigem consistência
-imediata entre tipos de Aggregate diferentes (Persistence Map 13.2 §4). Qualquer mecanismo concreto
-(transação de banco, ou outro) é decisão de tecnologia — fora do escopo desta Sprint por definição.
+As duas fronteiras do §6 continuam sendo as únicas do Domain inteiro que exigem consistência imediata
+entre tipos de Aggregate diferentes (Persistence Map 13.2 §4) — isso não mudou. O que mudou: **existe
+agora um mecanismo genérico de transação explícita** (`EfUnitOfWork.BeginTransactionAsync`/
+`CommitTransactionAsync`/`RollbackTransactionAsync`, sobre `IDbContextTransaction` do EF Core), disponível
+para qualquer Sprint futura que precise coordenar essas fronteiras (ou outras) atomicamente — mas nenhuma
+delas foi religada a esse mecanismo ainda; permanece decisão da Sprint de adoção, não desta.
 
 ## 8. Divergência de `docs/data/01-relational-model.md` (reafirmada)
 
@@ -220,10 +235,11 @@ Um adapter EF Core futuro abriria um `DbContext`/transação em `BeginAsync` e c
 
 Ainda não implementado — pertence aos Lots 5/6 (User/UserToken; XP e consistência cross-aggregate).
 
-## 10. Sprint 13.4 — Correções de granularidade aprovadas (ainda não implementadas em código)
+## 10. Sprint 13.4 — Correções de granularidade aprovadas (fechadas no Contract Completion Step, ver §14)
 
-Revisão pontual de 5 contratos (sem reabrir Aggregate Map/Persistence Map), aprovada, a aplicar nos
-Lots correspondentes:
+Revisão pontual de 5 contratos (sem reabrir Aggregate Map/Persistence Map), aprovada nesta Sprint,
+**implementada no Contract Completion Step** (pré-Sprint 14.6, ver §14 — a forma final difere da
+nominal abaixo em um ponto importante, também explicado ali):
 
 - `ITransactionRepository` — adicionar `SaveAsync(Transaction, ct)` (Lot 4).
 - `IWalletTagRepository` — adicionar `SaveAsync(WalletTag, ct)` (Lot 4).
@@ -271,10 +287,67 @@ expõe `LevelUpData`") está resolvido **apenas para o Dashboard** — o tipo `G
 existindo e sendo retornado para os 3 consumidores acima. Ver `08-migration-status.md` §1 para o
 inventário verificado.
 
-## 13. Nota sobre §9/§10 — decisões aprovadas, ainda não aplicadas ao código
+## 13. Nota sobre §9/§10 — decisões aprovadas, ainda não aplicadas ao código (histórico até o Contract Completion Step)
 
 Uma verificação de código feita na Sprint 13.7 confirmou que **nenhuma** das correções aprovadas no §10
 (os 4 métodos `SaveAsync`/`MoveTodoAsync`/`RevokeActiveAsync`) e **nenhum** dos tipos do design corrigido
 no §9 (`IHabitProgressionTransaction`, `IIdentityTokenTransaction`, seus respectivos `*Scope`) existem
 nos arquivos `.cs` atuais. §9 e §10 registram decisões de design aprovadas para quando as Sprints/Lots
 correspondentes forem executadas — não implementações parciais. Ver `08-migration-status.md` §3.1/§3.2.
+
+**Atualização — Contract Completion Step (pré-Sprint 14.6)**: os 4 métodos de §10 (G1/G3/G4, ver §14)
+foram implementados, com uma correção de forma para G1 explicada ali. §9
+(`IHabitProgressionTransaction`/`IIdentityTokenTransaction`) **continua sem implementação** — fora do
+escopo do Contract Completion Step, que resolveu apenas G1–G5 (persistência de mutação por Aggregate,
+não a abstração de transação cross-aggregate por delegate de §9, que o `IUnitOfWork` da Sprint 14.5 já
+torna redundante: coordenar `Habit`+`User` ou `UserToken`+`User` na mesma transação hoje se faz via
+`IUnitOfWork.BeginTransactionAsync()` + os `UpdateAsync` novos de cada porta, não via um tipo dedicado
+por fronteira).
+
+## 14. Contract Completion Step (pré-Sprint 14.6) — G1–G5 fechados
+
+A matriz de migração de handlers (apresentada antes desta Sprint) encontrou 4 lacunas (G1–G4) e uma
+quinta encontrada durante a própria matriz (G5), bloqueando a migração de qualquer handler real. Todas
+as 5 foram fechadas, mantendo 1 repositório por Aggregate e Todo exclusivamente dentro de
+`IProjectRepository` — nenhum contrato novo, nenhuma `Repository<T>`/`ITodoRepository`.
+
+**G1 — persistência de mutação sobre um Aggregate já carregado.** A forma nominal de §10
+(`SaveAsync(TAggregate entity, ct)`, recebendo a entidade já mutada e desanexada) foi **substituída**
+por:
+
+```csharp
+Task UpdateAsync(Guid userId, Guid aggregateId, Action<TAggregate> mutation, CancellationToken ct = default);
+```
+
+Motivo, verificado durante a implementação, não assumido: `SaveAsync(entity, ct)` receberia um objeto
+desanexado de um contexto diferente e já descartado (toda leitura é `AsNoTracking` desde a Sprint 14.4).
+Reanexá-lo e marcá-lo `Modified` exigiria o `RowVersion` original para a checagem otimista — mas o
+Domain nunca expõe `RowVersion` (é shadow, só existe em Infrastructure). Sem ele, a única saída seria
+"espiar" o `RowVersion` atual do banco só no momento de salvar, o que deixaria de detectar exatamente o
+conflito que o `RowVersion` existe para pegar (uma escrita concorrente entre a leitura original do
+caller e este `SaveAsync`). A forma `UpdateAsync(id, Action<T>, ct)` carrega a entidade **rastreada**
+dentro do mesmo método/contexto, aplica a mutação do caller, salva imediatamente — mesmo padrão já
+aprovado e testado para `RemoveAsync`/`ReorderAsync` na Sprint 14.4, e mecanicamente correto para
+concorrência (testado com um conflito genuíno de duas escritas, ver
+`docs/data/02-ef-core-strategy.md` §0.7). Implementado em `IUserRepository`, `IUserTokenRepository`,
+`IHabitRepository`, `IRecurringTaskRepository`, `IProjectRepository`, `IWalletRepository`,
+`IWalletTagRepository`, `ITransactionRepository`.
+
+**G2 — operações de `IProjectRepository` sobre um Todo de um Project já existente**: `AddTodoAsync`,
+`UpdateTodoAsync`, `RemoveTodoAsync` — Todo permanece inteiramente dentro de `IProjectRepository`,
+nenhuma `ITodoRepository` foi criada.
+
+**G3 — `IUserTokenRepository.RevokeActiveAsync`**: forma exatamente como aprovada em §10, implementada.
+
+**G4 — `IProjectRepository.MoveTodoAsync`**: forma exatamente como aprovada em §10, implementada —
+reusa `Project.RemoveTodo`/`Project.AddTodo` (API pública de Domain) em vez de qualquer atalho de
+Infrastructure, preservando `Touch()` em ambos os Projects envolvidos.
+
+**G5 — descoberta durante a própria matriz, não nomeada em G1–G4, confirmada e aprovada antes de
+implementar**: excluir uma `WalletTag` também limpa `WalletTagId` de toda `Transaction` que a referencia
+(`LevelUpData.RemoveWalletTag`) — sem contrato equivalente até então. Fechada com
+`ITransactionRepository.ClearTagReferencesAsync(Guid walletTagId, ct)`, espelhando exatamente esse
+comportamento.
+
+Detalhe completo de implementação, testes e o achado de bug real encontrado durante os testes (não
+relacionado às 5 lacunas em si) em `docs/data/02-ef-core-strategy.md` §0.7.

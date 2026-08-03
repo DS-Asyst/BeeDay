@@ -1,5 +1,4 @@
 using LevelUp.Application.Common.Contracts;
-using LevelUp.Application.Common.Messaging;
 using LevelUp.Application.Common.Security;
 using LevelUp.Application.Features.Wallets.Commands;
 using LevelUp.Domain.Entities;
@@ -8,77 +7,48 @@ using MediatR;
 
 namespace LevelUp.Application.Features.Wallets.Handlers;
 
-public sealed class EnsureCurrentWalletCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
+public sealed class EnsureCurrentWalletCommandHandler(IWalletRepository repository, ICurrentUserContext currentUser)
     : IRequestHandler<EnsureCurrentWalletCommand, Guid>
 {
     public async Task<Guid> Handle(EnsureCurrentWalletCommand request, CancellationToken cancellationToken)
     {
-        var walletId = Guid.Empty;
-        await repository.UpdateAsync(data =>
+        var userId = CurrentUserGuard.RequireUserId(currentUser);
+        var wallet = await repository.GetByUserAsync(userId, cancellationToken);
+        if (wallet is null)
         {
-            var user = data.FindUser(CurrentUserGuard.RequireUserId(data, currentUser));
-            var wallet = data.Wallets.FirstOrDefault(candidate => candidate.UserId == user.Id);
-            if (wallet is null)
-            {
-                wallet = Wallet.Create(user.Id);
-                data.AddWallet(wallet);
-            }
-            walletId = wallet.Id;
-        }, cancellationToken);
-        return walletId;
-    }
-
-    internal static User RequireCurrentUser(LevelUpData data, ICurrentUserContext currentUser) =>
-        data.FindUser(CurrentUserGuard.RequireUserId(data, currentUser));
-
-    internal static Wallet RequireCurrentWallet(LevelUpData data, ICurrentUserContext currentUser)
-    {
-        var user = RequireCurrentUser(data, currentUser);
-        return data.Wallets.FirstOrDefault(wallet => wallet.UserId == user.Id)
-            ?? throw new InvalidDomainStateException("Current User does not have a Wallet.");
-    }
-
-    internal static WalletTag RequireOwnedTag(LevelUpData data, Guid tagId, Guid userId)
-    {
-        var tag = data.FindWalletTag(tagId);
-        if (tag.UserId != userId)
-        {
-            throw new InvalidDomainStateException("Wallet tag does not belong to the current User.");
+            wallet = Wallet.Create(userId);
+            await repository.AddAsync(wallet, cancellationToken);
         }
-        return tag;
-    }
 
-    internal static Transaction RequireOwnedTransaction(LevelUpData data, Guid transactionId, Wallet wallet)
-    {
-        var transaction = data.FindTransaction(transactionId);
-        if (transaction.WalletId != wallet.Id)
-        {
-            throw new InvalidDomainStateException("Transaction does not belong to the current User.");
-        }
-        return transaction;
+        return wallet.Id;
     }
 }
 
-public sealed class CreateTransactionCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
+public sealed class CreateTransactionCommandHandler(IUnitOfWork unitOfWork, ICurrentUserContext currentUser)
     : IRequestHandler<CreateTransactionCommand, Guid>
 {
     public async Task<Guid> Handle(CreateTransactionCommand command, CancellationToken cancellationToken)
     {
+        var userId = CurrentUserGuard.RequireUserId(currentUser);
         var transactionId = Guid.Empty;
-        await repository.UpdateAsync(data =>
+
+        try
         {
-            var user = EnsureCurrentWalletCommandHandler.RequireCurrentUser(data, currentUser);
-            var wallet = data.Wallets.FirstOrDefault(candidate => candidate.UserId == user.Id);
+            await unitOfWork.BeginTransactionAsync(cancellationToken);
+
+            // Wallet is created on demand here (not just looked up) — the "Wallet + Transaction" boundary
+            // named for IUnitOfWork, since a brand-new Wallet and its first Transaction must persist together.
+            var wallet = await unitOfWork.Wallets.GetByUserAsync(userId, cancellationToken);
             if (wallet is null)
             {
-                wallet = Wallet.Create(user.Id);
-                data.AddWallet(wallet);
+                wallet = Wallet.Create(userId);
+                await unitOfWork.Wallets.AddAsync(wallet, cancellationToken);
             }
 
             var request = command.Request;
             if (request.WalletTagId is Guid tagId)
             {
-                EnsureCurrentWalletCommandHandler.RequireOwnedTag(data, tagId, user.Id);
+                await WalletLookup.RequireOwnedTagAsync(unitOfWork.WalletTags, userId, tagId, cancellationToken);
             }
 
             var transaction = Transaction.Create(
@@ -89,97 +59,184 @@ public sealed class CreateTransactionCommandHandler(ILevelUpRepository repositor
                 request.TransactionDate,
                 request.WalletTagId,
                 request.Notes);
-            data.AddTransaction(transaction);
+            await unitOfWork.Transactions.AddAsync(transaction, cancellationToken);
+            await unitOfWork.Wallets.UpdateAsync(userId, w => w.Touch(), cancellationToken);
             transactionId = transaction.Id;
-        }, cancellationToken);
+
+            await unitOfWork.CommitTransactionAsync(cancellationToken);
+        }
+        finally
+        {
+            await unitOfWork.DisposeAsync();
+        }
+
         return transactionId;
     }
 }
 
-public sealed class UpdateTransactionCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
-    : RequestHandlerBase(repository), IRequestHandler<UpdateTransactionCommand>
+public sealed class UpdateTransactionCommandHandler(IUnitOfWork unitOfWork, ICurrentUserContext currentUser)
+    : IRequestHandler<UpdateTransactionCommand>
 {
-    public Task Handle(UpdateTransactionCommand command, CancellationToken cancellationToken) =>
-        MutateAsync(data =>
+    public async Task Handle(UpdateTransactionCommand command, CancellationToken cancellationToken)
+    {
+        var userId = CurrentUserGuard.RequireUserId(currentUser);
+
+        try
         {
-            var user = EnsureCurrentWalletCommandHandler.RequireCurrentUser(data, currentUser);
-            var wallet = EnsureCurrentWalletCommandHandler.RequireCurrentWallet(data, currentUser);
-            var transaction = EnsureCurrentWalletCommandHandler.RequireOwnedTransaction(data, command.Id, wallet);
+            await unitOfWork.BeginTransactionAsync(cancellationToken);
+
+            var wallet = await WalletLookup.RequireCurrentWalletAsync(unitOfWork.Wallets, userId, cancellationToken);
+            await WalletLookup.RequireOwnedTransactionAsync(unitOfWork.Transactions, wallet.Id, command.Id, cancellationToken);
+
             var request = command.Request;
             if (request.WalletTagId is Guid tagId)
             {
-                EnsureCurrentWalletCommandHandler.RequireOwnedTag(data, tagId, user.Id);
+                await WalletLookup.RequireOwnedTagAsync(unitOfWork.WalletTags, userId, tagId, cancellationToken);
             }
 
-            transaction.Update(
-                request.Description,
-                request.Amount,
-                request.Type,
-                request.TransactionDate,
-                request.WalletTagId,
-                request.Notes);
-            wallet.Touch();
-        }, cancellationToken);
-}
+            await unitOfWork.Transactions.UpdateAsync(
+                wallet.Id,
+                command.Id,
+                transaction => transaction.Update(
+                    request.Description,
+                    request.Amount,
+                    request.Type,
+                    request.TransactionDate,
+                    request.WalletTagId,
+                    request.Notes),
+                cancellationToken);
+            await unitOfWork.Wallets.UpdateAsync(userId, w => w.Touch(), cancellationToken);
 
-public sealed class DeleteTransactionCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
-    : RequestHandlerBase(repository), IRequestHandler<DeleteTransactionCommand>
-{
-    public Task Handle(DeleteTransactionCommand command, CancellationToken cancellationToken) =>
-        MutateAsync(data =>
+            await unitOfWork.CommitTransactionAsync(cancellationToken);
+        }
+        finally
         {
-            var wallet = EnsureCurrentWalletCommandHandler.RequireCurrentWallet(data, currentUser);
-            var transaction = EnsureCurrentWalletCommandHandler.RequireOwnedTransaction(data, command.Id, wallet);
-            data.Transactions.Remove(transaction);
-            wallet.Touch();
-        }, cancellationToken);
+            await unitOfWork.DisposeAsync();
+        }
+    }
 }
 
-public sealed class CreateWalletTagCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
+public sealed class DeleteTransactionCommandHandler(IUnitOfWork unitOfWork, ICurrentUserContext currentUser)
+    : IRequestHandler<DeleteTransactionCommand>
+{
+    public async Task Handle(DeleteTransactionCommand command, CancellationToken cancellationToken)
+    {
+        var userId = CurrentUserGuard.RequireUserId(currentUser);
+
+        try
+        {
+            await unitOfWork.BeginTransactionAsync(cancellationToken);
+
+            var wallet = await WalletLookup.RequireCurrentWalletAsync(unitOfWork.Wallets, userId, cancellationToken);
+            var transaction = await WalletLookup.RequireOwnedTransactionAsync(unitOfWork.Transactions, wallet.Id, command.Id, cancellationToken);
+
+            await unitOfWork.Transactions.RemoveAsync(transaction, cancellationToken);
+            await unitOfWork.Wallets.UpdateAsync(userId, w => w.Touch(), cancellationToken);
+
+            await unitOfWork.CommitTransactionAsync(cancellationToken);
+        }
+        finally
+        {
+            await unitOfWork.DisposeAsync();
+        }
+    }
+}
+
+public sealed class CreateWalletTagCommandHandler(IWalletTagRepository repository, ICurrentUserContext currentUser)
     : IRequestHandler<CreateWalletTagCommand, Guid>
 {
     public async Task<Guid> Handle(CreateWalletTagCommand command, CancellationToken cancellationToken)
     {
-        var tagId = Guid.Empty;
-        await repository.UpdateAsync(data =>
+        var userId = CurrentUserGuard.RequireUserId(currentUser);
+        var request = command.Request;
+        var tag = WalletTag.Create(userId, request.Name, request.Color);
+
+        if (await repository.IsNameInUseAsync(userId, tag.Name, excludingTagId: null, cancellationToken))
         {
-            var user = EnsureCurrentWalletCommandHandler.RequireCurrentUser(data, currentUser);
-            var request = command.Request;
-            var tag = WalletTag.Create(user.Id, request.Name, request.Color);
-            data.AddWalletTag(tag);
-            tagId = tag.Id;
-        }, cancellationToken);
-        return tagId;
+            throw new InvalidDomainStateException($"Wallet tag '{tag.Name}' already exists for this User.");
+        }
+
+        await repository.AddAsync(tag, cancellationToken);
+        return tag.Id;
     }
 }
 
-public sealed class UpdateWalletTagCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
-    : RequestHandlerBase(repository), IRequestHandler<UpdateWalletTagCommand>
+public sealed class UpdateWalletTagCommandHandler(IWalletTagRepository repository, ICurrentUserContext currentUser)
+    : IRequestHandler<UpdateWalletTagCommand>
 {
-    public Task Handle(UpdateWalletTagCommand command, CancellationToken cancellationToken) =>
-        MutateAsync(data =>
+    public async Task Handle(UpdateWalletTagCommand command, CancellationToken cancellationToken)
+    {
+        var userId = CurrentUserGuard.RequireUserId(currentUser);
+        await WalletLookup.RequireOwnedTagAsync(repository, userId, command.Id, cancellationToken);
+
+        var request = command.Request;
+        var normalizedName = string.Join(' ', request.Name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries));
+        if (await repository.IsNameInUseAsync(userId, normalizedName, command.Id, cancellationToken))
         {
-            var user = EnsureCurrentWalletCommandHandler.RequireCurrentUser(data, currentUser);
-            var tag = EnsureCurrentWalletCommandHandler.RequireOwnedTag(data, command.Id, user.Id);
-            var normalizedName = string.Join(' ', command.Request.Name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries));
-            if (data.WalletTags.Any(candidate => candidate.Id != tag.Id && candidate.UserId == user.Id &&
-                string.Equals(candidate.Name, normalizedName, StringComparison.OrdinalIgnoreCase)))
-            {
-                throw new InvalidDomainStateException($"Wallet tag '{normalizedName}' already exists for this User.");
-            }
-            tag.Update(command.Request.Name, command.Request.Color);
-        }, cancellationToken);
+            throw new InvalidDomainStateException($"Wallet tag '{normalizedName}' already exists for this User.");
+        }
+
+        await repository.UpdateAsync(userId, command.Id, tag => tag.Update(request.Name, request.Color), cancellationToken);
+    }
 }
 
-public sealed class DeleteWalletTagCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser)
-    : RequestHandlerBase(repository), IRequestHandler<DeleteWalletTagCommand>
+public sealed class DeleteWalletTagCommandHandler(IUnitOfWork unitOfWork, ICurrentUserContext currentUser)
+    : IRequestHandler<DeleteWalletTagCommand>
 {
-    public Task Handle(DeleteWalletTagCommand command, CancellationToken cancellationToken) =>
-        MutateAsync(data =>
+    public async Task Handle(DeleteWalletTagCommand command, CancellationToken cancellationToken)
+    {
+        var userId = CurrentUserGuard.RequireUserId(currentUser);
+
+        try
         {
-            var user = EnsureCurrentWalletCommandHandler.RequireCurrentUser(data, currentUser);
-            EnsureCurrentWalletCommandHandler.RequireOwnedTag(data, command.Id, user.Id);
-            data.RemoveWalletTag(command.Id);
-            data.Wallets.FirstOrDefault(wallet => wallet.UserId == user.Id)?.Touch();
-        }, cancellationToken);
+            await unitOfWork.BeginTransactionAsync(cancellationToken);
+
+            var tag = await WalletLookup.RequireOwnedTagAsync(unitOfWork.WalletTags, userId, command.Id, cancellationToken);
+
+            // Mirrors LevelUpData.RemoveWalletTag exactly: clear every Transaction's reference to this
+            // tag before the tag itself is removed, then touch the Wallet — the "WalletTag + Transactions"
+            // boundary named for IUnitOfWork.
+            await unitOfWork.Transactions.ClearTagReferencesAsync(tag.Id, cancellationToken);
+            await unitOfWork.WalletTags.RemoveAsync(tag, cancellationToken);
+
+            var wallet = await unitOfWork.Wallets.GetByUserAsync(userId, cancellationToken);
+            if (wallet is not null)
+            {
+                await unitOfWork.Wallets.UpdateAsync(userId, w => w.Touch(), cancellationToken);
+            }
+
+            await unitOfWork.CommitTransactionAsync(cancellationToken);
+        }
+        finally
+        {
+            await unitOfWork.DisposeAsync();
+        }
+    }
+}
+
+/// <summary>Preserves the exact "not found"/"does not belong" messages the JSON-era handlers used to throw.</summary>
+internal static class WalletLookup
+{
+    public static async Task<Wallet> RequireCurrentWalletAsync(
+        IWalletRepository repository,
+        Guid userId,
+        CancellationToken cancellationToken) =>
+        await repository.GetByUserAsync(userId, cancellationToken)
+            ?? throw new InvalidDomainStateException("Current User does not have a Wallet.");
+
+    public static async Task<WalletTag> RequireOwnedTagAsync(
+        IWalletTagRepository repository,
+        Guid userId,
+        Guid tagId,
+        CancellationToken cancellationToken) =>
+        await repository.GetAsync(userId, tagId, cancellationToken)
+            ?? throw new InvalidDomainStateException("Wallet tag does not belong to the current User.");
+
+    public static async Task<Transaction> RequireOwnedTransactionAsync(
+        ITransactionRepository repository,
+        Guid walletId,
+        Guid transactionId,
+        CancellationToken cancellationToken) =>
+        await repository.GetAsync(walletId, transactionId, cancellationToken)
+            ?? throw new InvalidDomainStateException("Transaction does not belong to the current User.");
 }

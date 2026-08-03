@@ -1,7 +1,8 @@
 # ADR-003 — Repositórios por Agregado e Read Services
 
-**Status:** Aceito, com refinamentos (Sprint 13.3) — decisão implementada apenas parcialmente em
-código; ver `docs/architecture/08-migration-status.md` para o estado verificado.  
+**Status:** Aceito, com refinamentos (Sprint 13.3) — **totalmente implementado e adotado desde a
+Sprint 14.6** (todo handler de produção usa um dos 8 contratos, os 2 read services, ou `IUnitOfWork`);
+ver `docs/architecture/08-migration-status.md` §8 para o estado verificado.  
 **Data:** 2026-07-31
 
 ## Contexto
@@ -27,10 +28,12 @@ Lista original, ilustrativa — não literal. A Sprint 13.3, ao validar contra o
   (`UserExperience`), sem agregado próprio a ter uma porta.
 - `IDashboardReadService` — criado como proposto; adotado (adapter + consumidor reais).
 - `IWalletReadService` — criado como proposto; adotado (adapter + consumidor reais).
-- `IUnitOfWork` — **não criado**. A necessidade real identificada (Persistence Map 13.2 §4) é mais
-  estreita que um Unit of Work genérico — ver a correção de design em `07-persistence-contracts.md` §9
-  (portas de atomicidade explícitas, `IHabitProgressionTransaction`/`IIdentityTokenTransaction`, ainda
-  não implementadas).
+- `IUnitOfWork` — criado na Sprint 14.5 (`EfUnitOfWork`), mais estreito que um Unit of Work genérico:
+  coordena os 8 repositórios contra um único `LevelUpDbContext` compartilhado, com
+  `BeginTransactionAsync`/`CommitTransactionAsync`/`RollbackTransactionAsync` explícitos. Desde a
+  Sprint 14.6, é o único mecanismo de transação cross-Aggregate em uso — as portas de atomicidade mais
+  estreitas propostas em `07-persistence-contracts.md` §9 (`IHabitProgressionTransaction`/
+  `IIdentityTokenTransaction`) nunca foram implementadas; `IUnitOfWork` cobriu essa necessidade.
 
 Também criados, fora desta lista original: `IUserTokenRepository`, `ITransactionRepository`,
 `IWalletTagRepository` — cada um mapeado a um Aggregate Root validado no Aggregate Map que a lista

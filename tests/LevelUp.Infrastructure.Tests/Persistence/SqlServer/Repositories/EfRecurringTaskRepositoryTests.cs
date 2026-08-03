@@ -1,5 +1,6 @@
 using LevelUp.Domain.Entities;
 using LevelUp.Domain.Enums;
+using LevelUp.Infrastructure.Persistence.Exceptions;
 using LevelUp.Infrastructure.Persistence.SqlServer.Repositories;
 using Xunit;
 
@@ -69,6 +70,45 @@ public sealed class EfRecurringTaskRepositoryTests : EfLocalDbTestBase
         var loaded = await repository.GetAsync(userId, task.Id, cancellationToken);
 
         Assert.Null(loaded);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_PersistsTheMutation()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfRecurringTaskRepository(ContextFactory);
+        var userId = await CreateUserAsync(cancellationToken);
+        var task = CreateTask(userId, "Water the plants");
+        await repository.AddAsync(task, cancellationToken);
+
+        await repository.UpdateAsync(userId, task.Id, t => t.SetFeatured(true), cancellationToken);
+
+        var loaded = await repository.GetAsync(userId, task.Id, cancellationToken);
+        Assert.True(loaded!.Featured);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ConcurrentModification_ThrowsConcurrencyConflictException()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfRecurringTaskRepository(ContextFactory);
+        var userId = await CreateUserAsync(cancellationToken);
+        var task = CreateTask(userId, "Water the plants");
+        await repository.AddAsync(task, cancellationToken);
+
+        await Assert.ThrowsAsync<ConcurrencyConflictException>(() => repository.UpdateAsync(
+            userId,
+            task.Id,
+            t =>
+            {
+                using var raceContext = ContextFactory.CreateDbContext();
+                var raceTask = raceContext.RecurringTasks.Single(existing => existing.Id == task.Id);
+                raceTask.SetFeatured(true);
+                raceContext.SaveChanges();
+
+                t.SetFeatured(false);
+            },
+            cancellationToken));
     }
 
     private static RecurringTask CreateTask(Guid userId, string title)

@@ -16,28 +16,38 @@ public static class IdentityTokenLifetimes
 }
 
 public sealed class ConfirmEmailCommandHandler(
-    ILevelUpRepository repository,
+    IUnitOfWork unitOfWork,
     IUserTokenService tokenService,
     IClock clock) : IRequestHandler<ConfirmEmailCommand>
 {
-    public Task Handle(ConfirmEmailCommand command, CancellationToken cancellationToken) =>
-        repository.UpdateAsync(data =>
-        {
-            var now = clock.UtcNow;
-            var token = FindToken(data, tokenService.HashToken(command.Request.Token), UserTokenType.EmailConfirmation);
-            token.EnsureCanBeUsed(UserTokenType.EmailConfirmation, now);
-            data.FindUser(token.UserId).ConfirmEmail(now);
-            token.MarkAsUsed(UserTokenType.EmailConfirmation, now);
-        }, cancellationToken);
+    public async Task Handle(ConfirmEmailCommand command, CancellationToken cancellationToken)
+    {
+        var now = clock.UtcNow;
+        var tokenHash = tokenService.HashToken(command.Request.Token);
 
-    private static UserToken FindToken(LevelUpData data, string tokenHash, UserTokenType type) =>
-        data.UserTokens.FirstOrDefault(candidate =>
-            candidate.Type == type && string.Equals(candidate.TokenHash, tokenHash, StringComparison.Ordinal))
-        ?? throw new InvalidDomainStateException("The email confirmation token is invalid or expired.");
+        try
+        {
+            await unitOfWork.BeginTransactionAsync(cancellationToken);
+
+            var token = await unitOfWork.UserTokens.GetByHashAsync(tokenHash, UserTokenType.EmailConfirmation, cancellationToken)
+                ?? throw new InvalidDomainStateException("The email confirmation token is invalid or expired.");
+            token.EnsureCanBeUsed(UserTokenType.EmailConfirmation, now);
+
+            await unitOfWork.Users.UpdateAsync(token.UserId, user => user.ConfirmEmail(now), cancellationToken);
+            await unitOfWork.UserTokens.UpdateAsync(token.Id, t => t.MarkAsUsed(UserTokenType.EmailConfirmation, now), cancellationToken);
+
+            await unitOfWork.CommitTransactionAsync(cancellationToken);
+        }
+        finally
+        {
+            await unitOfWork.DisposeAsync();
+        }
+    }
 }
 
 public sealed class ResendEmailConfirmationCommandHandler(
-    ILevelUpRepository repository,
+    IUserRepository userRepository,
+    IUserTokenRepository userTokenRepository,
     IUserTokenService tokenService,
     IIdentityEmailComposer emailComposer,
     IEmailSender emailSender,
@@ -52,40 +62,33 @@ public sealed class ResendEmailConfirmationCommandHandler(
             throw new InvalidDomainStateException($"Please wait {Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds))} seconds before requesting another email.");
         }
 
-        EmailMessage? message = null;
-        await repository.UpdateAsync(data =>
+        var user = await userRepository.GetByEmailAsync(email, cancellationToken);
+        if (user is null || !user.IsActive || user.IsEmailConfirmed)
         {
-            var user = FindUserByEmail(data, email);
-            if (user is null || !user.IsActive || user.IsEmailConfirmed)
-            {
-                return;
-            }
+            return;
+        }
 
-            var now = clock.UtcNow;
-            data.RevokeActiveUserTokens(user.Id, UserTokenType.EmailConfirmation, now);
-            var rawToken = tokenService.GenerateToken();
-            data.AddUserToken(UserToken.Create(
+        var now = clock.UtcNow;
+        await userTokenRepository.RevokeActiveAsync(user.Id, UserTokenType.EmailConfirmation, now, cancellationToken);
+
+        var rawToken = tokenService.GenerateToken();
+        await userTokenRepository.AddAsync(
+            UserToken.Create(
                 user.Id,
                 UserTokenType.EmailConfirmation,
                 tokenService.HashToken(rawToken),
                 now,
-                now.Add(IdentityTokenLifetimes.EmailConfirmation)));
-            message = emailComposer.ComposeEmailConfirmation(user.Email, user.Name, rawToken);
-        }, cancellationToken);
+                now.Add(IdentityTokenLifetimes.EmailConfirmation)),
+            cancellationToken);
 
-        if (message is not null)
-        {
-            await emailSender.SendAsync(message, cancellationToken);
-        }
+        var message = emailComposer.ComposeEmailConfirmation(user.Email, user.Name, rawToken);
+        await emailSender.SendAsync(message, cancellationToken);
     }
-
-    private static User? FindUserByEmail(LevelUpData data, string email) =>
-        data.Users.FirstOrDefault(candidate =>
-            string.Equals(candidate.Email, email.Trim(), StringComparison.OrdinalIgnoreCase));
 }
 
 public sealed class RequestPasswordResetCommandHandler(
-    ILevelUpRepository repository,
+    IUserRepository userRepository,
+    IUserTokenRepository userTokenRepository,
     IUserTokenService tokenService,
     IIdentityEmailComposer emailComposer,
     IEmailSender emailSender,
@@ -100,56 +103,63 @@ public sealed class RequestPasswordResetCommandHandler(
             return;
         }
 
-        EmailMessage? message = null;
-        await repository.UpdateAsync(data =>
+        var user = await userRepository.GetByEmailAsync(email, cancellationToken);
+        if (user is null || !user.IsActive || !user.IsEmailConfirmed)
         {
-            var user = data.Users.FirstOrDefault(candidate =>
-                string.Equals(candidate.Email, email, StringComparison.OrdinalIgnoreCase));
-            if (user is null || !user.IsActive || !user.IsEmailConfirmed)
-            {
-                return;
-            }
+            return;
+        }
 
-            var now = clock.UtcNow;
-            data.RevokeActiveUserTokens(user.Id, UserTokenType.PasswordReset, now);
-            var rawToken = tokenService.GenerateToken();
-            data.AddUserToken(UserToken.Create(
+        var now = clock.UtcNow;
+        await userTokenRepository.RevokeActiveAsync(user.Id, UserTokenType.PasswordReset, now, cancellationToken);
+
+        var rawToken = tokenService.GenerateToken();
+        await userTokenRepository.AddAsync(
+            UserToken.Create(
                 user.Id,
                 UserTokenType.PasswordReset,
                 tokenService.HashToken(rawToken),
                 now,
-                now.Add(IdentityTokenLifetimes.PasswordReset)));
-            message = emailComposer.ComposePasswordReset(user.Email, user.Name, rawToken);
-        }, cancellationToken);
+                now.Add(IdentityTokenLifetimes.PasswordReset)),
+            cancellationToken);
 
-        if (message is not null)
-        {
-            await emailSender.SendAsync(message, cancellationToken);
-        }
+        var message = emailComposer.ComposePasswordReset(user.Email, user.Name, rawToken);
+        await emailSender.SendAsync(message, cancellationToken);
     }
 }
 
 public sealed class ResetPasswordCommandHandler(
-    ILevelUpRepository repository,
+    IUnitOfWork unitOfWork,
     IUserTokenService tokenService,
     IPasswordService passwordService,
     IClock clock) : IRequestHandler<ResetPasswordCommand>
 {
-    public Task Handle(ResetPasswordCommand command, CancellationToken cancellationToken) =>
-        repository.UpdateAsync(data =>
-        {
-            var now = clock.UtcNow;
-            var tokenHash = tokenService.HashToken(command.Request.Token);
-            var token = data.UserTokens.FirstOrDefault(candidate =>
-                candidate.Type == UserTokenType.PasswordReset &&
-                string.Equals(candidate.TokenHash, tokenHash, StringComparison.Ordinal))
-                ?? throw new InvalidDomainStateException("The password reset token is invalid or expired.");
+    public async Task Handle(ResetPasswordCommand command, CancellationToken cancellationToken)
+    {
+        var now = clock.UtcNow;
+        var tokenHash = tokenService.HashToken(command.Request.Token);
 
+        try
+        {
+            await unitOfWork.BeginTransactionAsync(cancellationToken);
+
+            var token = await unitOfWork.UserTokens.GetByHashAsync(tokenHash, UserTokenType.PasswordReset, cancellationToken)
+                ?? throw new InvalidDomainStateException("The password reset token is invalid or expired.");
             token.EnsureCanBeUsed(UserTokenType.PasswordReset, now);
-            var user = data.FindUser(token.UserId);
-            user.SetPasswordHash(passwordService.Hash(command.Request.NewPassword));
-            user.InvalidateSessions();
-            token.MarkAsUsed(UserTokenType.PasswordReset, now);
-            data.RevokeActiveUserTokens(user.Id, UserTokenType.PasswordReset, now);
-        }, cancellationToken);
+
+            await unitOfWork.Users.UpdateAsync(token.UserId, user =>
+            {
+                user.SetPasswordHash(passwordService.Hash(command.Request.NewPassword));
+                user.InvalidateSessions();
+            }, cancellationToken);
+
+            await unitOfWork.UserTokens.UpdateAsync(token.Id, t => t.MarkAsUsed(UserTokenType.PasswordReset, now), cancellationToken);
+            await unitOfWork.UserTokens.RevokeActiveAsync(token.UserId, UserTokenType.PasswordReset, now, cancellationToken);
+
+            await unitOfWork.CommitTransactionAsync(cancellationToken);
+        }
+        finally
+        {
+            await unitOfWork.DisposeAsync();
+        }
+    }
 }

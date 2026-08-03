@@ -13,7 +13,7 @@ public sealed class AccountRegistrationTests
     [Fact]
     public async Task CreateAccount_CreatesUserWithProfileAtomically()
     {
-        var repository = new FakeLevelUpRepository();
+        var repository = new FakeUnitOfWork();
         var emailSender = new FakeEmailSender();
         var handler = new CreateAccountCommandHandler(
             repository,
@@ -29,28 +29,23 @@ public sealed class AccountRegistrationTests
                 "tiago")),
             TestContext.Current.CancellationToken);
 
-        var user = Assert.Single(repository.Data.Users);
+        var user = Assert.Single(repository.UsersData);
         Assert.Equal(userId, user.Id);
         Assert.True(user.HasProfile);
         Assert.Equal("tiago", user.Nickname);
         Assert.Equal("hash:Password123", user.PasswordHash);
-        Assert.Single(repository.Data.UserTokens);
+        Assert.Single(repository.UserTokensData);
         Assert.Single(emailSender.Messages);
     }
 
 
     private sealed class FakeConfirmationIssuer : IEmailConfirmationIssuer
     {
-        public EmailMessage Issue(LevelUpData data, User user)
+        public (UserToken Token, EmailMessage Message) Issue(User user)
         {
             var now = user.CreatedAtUtc;
-            data.AddUserToken(UserToken.Create(
-                user.Id,
-                UserTokenType.EmailConfirmation,
-                "hash:confirmation",
-                now,
-                now.AddHours(24)));
-            return new EmailMessage(user.Email, "Confirm", "Body");
+            var token = UserToken.Create(user.Id, UserTokenType.EmailConfirmation, "hash:confirmation", now, now.AddHours(24));
+            return (token, new EmailMessage(user.Email, "Confirm", "Body"));
         }
     }
 

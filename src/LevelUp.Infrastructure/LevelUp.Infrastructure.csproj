@@ -16,10 +16,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Lets Infrastructure.Tests construct internal JSON adapters directly (e.g. JsonLevelUpRepository,
-         JsonLevelUpDocumentStore) to validate the real adapter, per docs/testing/01-testing-strategy.md.
-         Concrete adapter types stay internal to the rest of the solution — only the test assembly is a
-         declared friend. -->
+    <!-- Lets Infrastructure.Tests construct internal SQL Server adapters directly (e.g. Ef*Repository,
+         EfDashboardReadService, EfWalletReadService) to validate the real adapter, per
+         docs/testing/01-testing-strategy.md. Concrete adapter types stay internal to the rest of the
+         solution — only these test assemblies are declared friends. Web.Tests/E2E.Tests need
+         LevelUpDbContext specifically (internal) to apply/tear down each test's disposable LocalDB
+         database from LevelUpWebApplicationFactory/E2EWebApplicationFactory. -->
     <InternalsVisibleTo Include="LevelUp.Infrastructure.Tests" />
+    <InternalsVisibleTo Include="LevelUp.Web.Tests" />
+    <InternalsVisibleTo Include="LevelUp.E2E.Tests" />
   </ItemGroup>
 </Project>

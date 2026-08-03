@@ -1,112 +1,166 @@
 using LevelUp.Application.Common.Contracts;
 using LevelUp.Application.Common.Experience;
-using LevelUp.Application.Common.Messaging;
 using LevelUp.Application.Common.Security;
+using LevelUp.Application.Features.Projects.Handlers;
 using LevelUp.Application.Features.Todos.Commands;
 using LevelUp.Domain.Entities;
 using LevelUp.Domain.Enums;
+using LevelUp.Domain.Exceptions;
 using LevelUp.Domain.Experience;
 using MediatR;
 
 namespace LevelUp.Application.Features.Todos.Handlers;
 
-public sealed class CreateTodoCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser) : RequestHandlerBase(repository), IRequestHandler<CreateTodoCommand>
+public sealed class CreateTodoCommandHandler(IProjectRepository repository, ICurrentUserContext currentUser) : IRequestHandler<CreateTodoCommand>
 {
-    public Task Handle(CreateTodoCommand command, CancellationToken cancellationToken) => MutateAsync(data =>
+    public async Task Handle(CreateTodoCommand command, CancellationToken cancellationToken)
     {
-        var userId = CurrentUserGuard.RequireUserId(data, currentUser);
+        var userId = CurrentUserGuard.RequireUserId(currentUser);
         var request = command.Request;
-        var project = data.FindProject(userId, request.ProjectId);
+        await ProjectLookup.RequireExistsAsync(repository, userId, request.ProjectId, cancellationToken);
+
         var todo = Todo.Create(request.ProjectId, request.Title, request.Description, request.DueDate, request.Attribute);
         todo.AssignOwner(userId);
-        project.AddTodo(todo);
-    }, cancellationToken);
+        await repository.AddTodoAsync(userId, request.ProjectId, todo, cancellationToken);
+    }
 }
 
-public sealed class UpdateTodoCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser) : RequestHandlerBase(repository), IRequestHandler<UpdateTodoCommand>
+public sealed class UpdateTodoCommandHandler(
+    IProjectRepository repository,
+    IUnitOfWork unitOfWork,
+    ICurrentUserContext currentUser) : IRequestHandler<UpdateTodoCommand>
 {
-    public Task Handle(UpdateTodoCommand command, CancellationToken cancellationToken) => MutateAsync(data =>
+    public async Task Handle(UpdateTodoCommand command, CancellationToken cancellationToken)
     {
-        var userId = CurrentUserGuard.RequireUserId(data, currentUser);
+        var userId = CurrentUserGuard.RequireUserId(currentUser);
         var request = command.Request;
-        var found = data.FindTodo(userId, command.Id);
-        var destination = data.FindProject(userId, request.ProjectId);
-        if (found.Project.Id == destination.Id)
+
+        var currentProject = await TodoLookup.RequireOwningProjectAsync(repository, userId, command.Id, cancellationToken);
+        await ProjectLookup.RequireExistsAsync(repository, userId, request.ProjectId, cancellationToken);
+
+        if (currentProject.Id == request.ProjectId)
         {
-            found.Todo.Update(request.ProjectId, request.Title, request.Description, request.DueDate, request.Attribute);
+            // Same Project — a single UpdateTodoAsync call is already atomic on its own, no transaction needed.
+            await repository.UpdateTodoAsync(
+                userId,
+                command.Id,
+                todo => todo.Update(request.ProjectId, request.Title, request.Description, request.DueDate, request.Attribute),
+                cancellationToken);
             return;
         }
-        found.Project.RemoveTodo(command.Id);
-        found.Todo.Update(request.ProjectId, request.Title, request.Description, request.DueDate, request.Attribute);
-        destination.AddTodo(found.Todo);
-    }, cancellationToken);
-}
 
-public sealed class ToggleTodoCommandHandler(
-    ILevelUpRepository repository,
-    ICurrentUserContext currentUser,
-    IExperienceRewardService? rewards = null,
-    IPublisher? publisher = null) : RequestHandlerBase(repository), IRequestHandler<ToggleTodoCommand>
-{
-    public async Task Handle(ToggleTodoCommand command, CancellationToken cancellationToken)
-    {
-        ExperienceEntry? todoExperienceEntry = null;
-        ExperienceEntry? projectExperienceEntry = null;
-        Guid userId = Guid.Empty;
-
-        await MutateAsync(data =>
+        // Moving to a different Project needs both the field update and the move to persist together —
+        // two separate repository calls would not be atomic without an explicit transaction (the field
+        // update could persist while the move fails, or vice versa). This is exactly the "Project + Todo"
+        // cross-Aggregate boundary named for IUnitOfWork.
+        try
         {
-            userId = CurrentUserGuard.RequireUserId(data, currentUser);
-            var found = data.FindTodo(userId, command.Id);
-            var projectWasCompleted = found.Project.Completed;
-            var todoWasCompleted = found.Todo.Completed;
-
-            found.Todo.ToggleCompletion();
-
-            if (!todoWasCompleted && found.Todo.Completed)
-            {
-                todoExperienceEntry = (rewards ?? new ExperienceRewardService()).Grant(
-                    data,
-                    userId,
-                    ExperienceSourceType.Todo,
-                    found.Todo.Id,
-                    ExperienceRewardType.Completion,
-                    $"To-Do completed: {found.Todo.Title}");
-            }
-
-            if (!projectWasCompleted && found.Project.Completed)
-            {
-                projectExperienceEntry = (rewards ?? new ExperienceRewardService()).Grant(
-                    data,
-                    userId,
-                    ExperienceSourceType.Project,
-                    found.Project.Id,
-                    ExperienceRewardType.Completion,
-                    $"Project completed: {found.Project.Title}");
-            }
-        }, cancellationToken);
-
-        if (publisher is not null)
+            await unitOfWork.BeginTransactionAsync(cancellationToken);
+            await unitOfWork.Projects.UpdateTodoAsync(
+                userId,
+                command.Id,
+                todo => todo.Update(currentProject.Id, request.Title, request.Description, request.DueDate, request.Attribute),
+                cancellationToken);
+            await unitOfWork.Projects.MoveTodoAsync(userId, command.Id, request.ProjectId, cancellationToken);
+            await unitOfWork.CommitTransactionAsync(cancellationToken);
+        }
+        finally
         {
-            await ExperienceRewardEventPublisher.PublishAsync(
-                publisher,
-                userId,
-                todoExperienceEntry,
-                cancellationToken);
-            await ExperienceRewardEventPublisher.PublishAsync(
-                publisher,
-                userId,
-                projectExperienceEntry,
-                cancellationToken);
+            await unitOfWork.DisposeAsync();
         }
     }
 }
 
-public sealed class DeleteTodoCommandHandler(ILevelUpRepository repository, ICurrentUserContext currentUser) : RequestHandlerBase(repository), IRequestHandler<DeleteTodoCommand>
+public sealed class ToggleTodoCommandHandler(
+    IUnitOfWork unitOfWork,
+    ICurrentUserContext currentUser,
+    IExperienceRewardService? rewards = null,
+    IPublisher? publisher = null) : IRequestHandler<ToggleTodoCommand>
 {
-    public Task Handle(DeleteTodoCommand command, CancellationToken cancellationToken) => MutateAsync(data =>
+    public async Task Handle(ToggleTodoCommand command, CancellationToken cancellationToken)
     {
-        var found = data.FindTodo(CurrentUserGuard.RequireUserId(data, currentUser), command.Id);
-        found.Project.RemoveTodo(command.Id);
-    }, cancellationToken);
+        var userId = CurrentUserGuard.RequireUserId(currentUser);
+        ExperienceEntry? todoExperienceEntry = null;
+        ExperienceEntry? projectExperienceEntry = null;
+
+        try
+        {
+            await unitOfWork.BeginTransactionAsync(cancellationToken);
+
+            var found = await unitOfWork.Projects.GetByTodoIdAsync(userId, command.Id, cancellationToken)
+                ?? throw new InvalidDomainStateException($"To-Do '{command.Id}' was not found for the authenticated User.");
+            var todo = found.Todos.Single(existing => existing.Id == command.Id);
+            var projectWasCompleted = found.Completed;
+            var todoWasCompleted = todo.Completed;
+            var todoTitle = todo.Title;
+
+            var todoJustCompleted = false;
+            await unitOfWork.Projects.UpdateTodoAsync(userId, command.Id, tracked =>
+            {
+                tracked.ToggleCompletion();
+                todoJustCompleted = !todoWasCompleted && tracked.Completed;
+            }, cancellationToken);
+
+            if (todoJustCompleted)
+            {
+                await unitOfWork.Users.UpdateAsync(userId, user =>
+                {
+                    todoExperienceEntry = (rewards ?? new ExperienceRewardService()).Grant(
+                        user,
+                        ExperienceSourceType.Todo,
+                        command.Id,
+                        ExperienceRewardType.Completion,
+                        $"To-Do completed: {todoTitle}");
+                }, cancellationToken);
+            }
+
+            var reloaded = await unitOfWork.Projects.GetAsync(userId, found.Id, cancellationToken);
+            if (reloaded is not null && !projectWasCompleted && reloaded.Completed)
+            {
+                await unitOfWork.Users.UpdateAsync(userId, user =>
+                {
+                    projectExperienceEntry = (rewards ?? new ExperienceRewardService()).Grant(
+                        user,
+                        ExperienceSourceType.Project,
+                        found.Id,
+                        ExperienceRewardType.Completion,
+                        $"Project completed: {found.Title}");
+                }, cancellationToken);
+            }
+
+            await unitOfWork.CommitTransactionAsync(cancellationToken);
+        }
+        finally
+        {
+            await unitOfWork.DisposeAsync();
+        }
+
+        if (publisher is not null)
+        {
+            await ExperienceRewardEventPublisher.PublishAsync(publisher, userId, todoExperienceEntry, cancellationToken);
+            await ExperienceRewardEventPublisher.PublishAsync(publisher, userId, projectExperienceEntry, cancellationToken);
+        }
+    }
+}
+
+public sealed class DeleteTodoCommandHandler(IProjectRepository repository, ICurrentUserContext currentUser) : IRequestHandler<DeleteTodoCommand>
+{
+    public async Task Handle(DeleteTodoCommand command, CancellationToken cancellationToken)
+    {
+        var userId = CurrentUserGuard.RequireUserId(currentUser);
+        await TodoLookup.RequireOwningProjectAsync(repository, userId, command.Id, cancellationToken);
+        await repository.RemoveTodoAsync(userId, command.Id, cancellationToken);
+    }
+}
+
+/// <summary>Preserves the exact "not found" message <c>LevelUpData.FindTodo(userId, todoId)</c> used to throw.</summary>
+internal static class TodoLookup
+{
+    public static async Task<Project> RequireOwningProjectAsync(
+        IProjectRepository repository,
+        Guid userId,
+        Guid todoId,
+        CancellationToken cancellationToken) =>
+        await repository.GetByTodoIdAsync(userId, todoId, cancellationToken)
+            ?? throw new InvalidDomainStateException($"To-Do '{todoId}' was not found for the authenticated User.");
 }

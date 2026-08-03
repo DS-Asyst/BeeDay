@@ -24,4 +24,12 @@ public interface IUserRepository
         CancellationToken cancellationToken = default);
 
     public Task AddAsync(User user, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Loads the User tracked, applies <paramref name="mutation"/>, and persists the result — the
+    /// missing piece identified in docs/architecture/07-persistence-contracts.md §6/§10/§13 for
+    /// persisting a mutation on an already-loaded Aggregate. <paramref name="mutation"/> is pure Domain
+    /// logic; the adapter never exposes any Infrastructure/EF Core concept (e.g. RowVersion) here.
+    /// </summary>
+    public Task UpdateAsync(Guid userId, Action<User> mutation, CancellationToken cancellationToken = default);
 }

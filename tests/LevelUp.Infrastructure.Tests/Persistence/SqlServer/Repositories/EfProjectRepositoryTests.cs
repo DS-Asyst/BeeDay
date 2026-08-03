@@ -1,4 +1,5 @@
 using LevelUp.Domain.Entities;
+using LevelUp.Infrastructure.Persistence.Exceptions;
 using LevelUp.Infrastructure.Persistence.SqlServer.Repositories;
 using Xunit;
 
@@ -94,6 +95,116 @@ public sealed class EfProjectRepositoryTests : EfLocalDbTestBase
 
         Assert.Null(loaded);
         Assert.Null(byTodo);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_PersistsTheMutation()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfProjectRepository(ContextFactory);
+        var userId = await CreateUserAsync(cancellationToken);
+        var project = CreateProject(userId, "Launch");
+        await repository.AddAsync(project, cancellationToken);
+
+        await repository.UpdateAsync(userId, project.Id, p => p.SetArchived(true), cancellationToken);
+
+        var loaded = await repository.GetAsync(userId, project.Id, cancellationToken);
+        Assert.True(loaded!.Archived);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ConcurrentModification_ThrowsConcurrencyConflictException()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfProjectRepository(ContextFactory);
+        var userId = await CreateUserAsync(cancellationToken);
+        var project = CreateProject(userId, "Launch");
+        await repository.AddAsync(project, cancellationToken);
+
+        await Assert.ThrowsAsync<ConcurrencyConflictException>(() => repository.UpdateAsync(
+            userId,
+            project.Id,
+            p =>
+            {
+                using var raceContext = ContextFactory.CreateDbContext();
+                var raceProject = raceContext.Projects.Single(existing => existing.Id == project.Id);
+                raceProject.SetArchived(true);
+                raceContext.SaveChanges();
+
+                p.SetArchived(false);
+            },
+            cancellationToken));
+    }
+
+    [Fact]
+    public async Task AddTodoAsync_AddsATodoToAnExistingProject()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfProjectRepository(ContextFactory);
+        var userId = await CreateUserAsync(cancellationToken);
+        var project = CreateProject(userId, "Launch");
+        await repository.AddAsync(project, cancellationToken);
+
+        await repository.AddTodoAsync(userId, project.Id, CreateTodo(userId, "First todo"), cancellationToken);
+
+        var loaded = await repository.GetAsync(userId, project.Id, cancellationToken);
+        Assert.Equal(["First todo"], loaded!.Todos.Select(todo => todo.Title));
+    }
+
+    [Fact]
+    public async Task UpdateTodoAsync_PersistsTheMutation()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfProjectRepository(ContextFactory);
+        var userId = await CreateUserAsync(cancellationToken);
+        var project = CreateProject(userId, "Launch");
+        var todo = CreateTodo(userId, "First todo");
+        project.AddTodo(todo);
+        await repository.AddAsync(project, cancellationToken);
+
+        await repository.UpdateTodoAsync(userId, todo.Id, t => t.SetFeatured(true), cancellationToken);
+
+        var loaded = await repository.GetByTodoIdAsync(userId, todo.Id, cancellationToken);
+        Assert.True(loaded!.Todos.Single(existing => existing.Id == todo.Id).Featured);
+    }
+
+    [Fact]
+    public async Task RemoveTodoAsync_RemovesTheTodoAndTouchesTheProject()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfProjectRepository(ContextFactory);
+        var userId = await CreateUserAsync(cancellationToken);
+        var project = CreateProject(userId, "Launch");
+        var todo = CreateTodo(userId, "First todo");
+        project.AddTodo(todo);
+        await repository.AddAsync(project, cancellationToken);
+
+        await repository.RemoveTodoAsync(userId, todo.Id, cancellationToken);
+
+        var loaded = await repository.GetAsync(userId, project.Id, cancellationToken);
+        Assert.Empty(loaded!.Todos);
+        Assert.Null(await repository.GetByTodoIdAsync(userId, todo.Id, cancellationToken));
+    }
+
+    [Fact]
+    public async Task MoveTodoAsync_MovesTheTodoToTheDestinationProject()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfProjectRepository(ContextFactory);
+        var userId = await CreateUserAsync(cancellationToken);
+        var source = CreateProject(userId, "Source");
+        var destination = CreateProject(userId, "Destination");
+        var todo = CreateTodo(userId, "First todo");
+        source.AddTodo(todo);
+        await repository.AddAsync(source, cancellationToken);
+        await repository.AddAsync(destination, cancellationToken);
+
+        await repository.MoveTodoAsync(userId, todo.Id, destination.Id, cancellationToken);
+
+        var loadedSource = await repository.GetAsync(userId, source.Id, cancellationToken);
+        var loadedDestination = await repository.GetAsync(userId, destination.Id, cancellationToken);
+        Assert.Empty(loadedSource!.Todos);
+        Assert.Equal(["First todo"], loadedDestination!.Todos.Select(existing => existing.Title));
     }
 
     private static Project CreateProject(Guid userId, string name)

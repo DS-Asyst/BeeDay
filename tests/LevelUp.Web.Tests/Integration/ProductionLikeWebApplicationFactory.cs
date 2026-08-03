@@ -32,7 +32,6 @@ public sealed class ProductionLikeWebApplicationFactory : LevelUpWebApplicationF
             // the "real" host so ASP.NET Core's host-filtering middleware doesn't reject requests
             // — AllowedHosts still lists specific hosts, never a wildcard.
             ("AllowedHosts", "levelup.invalid;localhost"),
-            ("LevelUp__Storage__Directory", StorageDirectory),
             ("LevelUp__Hosting__DataProtectionKeysDirectory", dataProtectionKeysDirectory),
             // appsettings.Production.json enables Resend (real email delivery, needs secrets we
             // don't have here); the Development-capture sender is enough for these tests.

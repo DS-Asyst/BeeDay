@@ -24,4 +24,23 @@ public interface IUserTokenRepository
         CancellationToken cancellationToken = default);
 
     public Task AddAsync(UserToken token, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Loads the UserToken tracked by its own <paramref name="tokenId"/>, applies
+    /// <paramref name="mutation"/>, and persists the result (e.g. <c>MarkAsUsed</c>) — see
+    /// <see cref="IUserRepository.UpdateAsync"/> for why this shape, not a disconnected "Save".
+    /// </summary>
+    public Task UpdateAsync(Guid tokenId, Action<UserToken> mutation, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Revokes every currently-active token of <paramref name="type"/> for <paramref name="userId"/> —
+    /// approved in docs/architecture/07-persistence-contracts.md §10, implemented here. Used before
+    /// issuing a fresh token of the same type, so no two tokens of that type are ever simultaneously
+    /// active for the same User.
+    /// </summary>
+    public Task RevokeActiveAsync(
+        Guid userId,
+        UserTokenType type,
+        DateTimeOffset revokedAtUtc,
+        CancellationToken cancellationToken = default);
 }

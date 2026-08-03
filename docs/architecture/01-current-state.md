@@ -1,5 +1,23 @@
 # Estado Atual
 
+> **Atualização Sprint 14.6:** os quatro bloqueadores do §3.6 e a lista de "características confirmadas"
+> do §2 abaixo descrevem o estado **antes** do corte para SQL Server. Esse corte foi concluído na Sprint
+> 14.6: SQL Server é o único provider de runtime; `ILevelUpRepository`/`GetLevelUpResponse` foram
+> removidos (zero consumidores); todo handler de escrita usa um dos 8 contratos por Aggregate ou
+> `IUnitOfWork`. JSON existia apenas como código legado, não registrado em DI, sem leitura ou escrita em
+> runtime.
+>
+> **Atualização Sprint 14.7:** esse código legado foi **removido do repositório**, não apenas
+> desregistrado — `LevelUpData` (Domain), toda a pasta `Infrastructure/Persistence/Json/`,
+> `JsonStorageOptions` e `JsonStorageHealthCheck` não existem mais. Nenhum tipo mencionado nas seções
+> abaixo (`ILevelUpRepository`, `LevelUpData`, `JsonStorageGate`, `JsonDashboardReadService`,
+> `JsonWalletReadService`, `DomainJsonContractResolver`, `JsonSerializerOptionsFactory`) existe no
+> código atual — todas essas referências são puramente históricas. `JsonEventJournal` é o único
+> componente com "Json" no nome que permanece, e é auditoria de domain events (write-only), não
+> persistência funcional. Ver `docs/architecture/08-migration-status.md` §9 para o estado atual
+> completo, verificado contra o código. O restante deste documento permanece como registro histórico
+> do problema original — nenhuma seção abaixo descreve o estado presente do código.
+
 ## 1. Solução
 
 A solução atual possui quatro projetos de produção:

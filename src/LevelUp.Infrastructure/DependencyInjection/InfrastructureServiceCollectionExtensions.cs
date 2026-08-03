@@ -5,7 +5,6 @@ using LevelUp.Infrastructure.Caching;
 using LevelUp.Infrastructure.Configuration;
 using LevelUp.Infrastructure.HealthChecks;
 using LevelUp.Infrastructure.Identity;
-using LevelUp.Infrastructure.Persistence.Json;
 using LevelUp.Infrastructure.Persistence.SqlServer;
 using LevelUp.Infrastructure.Persistence.SqlServer.Repositories;
 using LevelUp.Infrastructure.Security;
@@ -48,31 +47,26 @@ public static class InfrastructureServiceCollectionExtensions
             .ValidateOnStart();
 
         services
-            .AddOptions<JsonStorageOptions>()
-            .Bind(configuration.GetSection(JsonStorageOptions.SectionName))
-            .Validate(options => !string.IsNullOrWhiteSpace(options.Directory), "Storage directory is required.")
-            .Validate(options => IsJsonFile(options.FileName), "Storage file name must be a JSON file.")
-            .Validate(options => IsSimpleDirectoryName(options.BackupDirectory), "Backup directory must be a simple relative directory name.")
-            .Validate(options => options.BackupRetention is >= 1 and <= 100, "Backup retention must be between 1 and 100.")
+            .AddOptions<SqlServerOptions>()
+            .Bind(configuration.GetSection(SqlServerOptions.SectionName))
+            .Validate(options => !string.IsNullOrWhiteSpace(options.ConnectionString), "SQL Server connection string is required.")
             .ValidateOnStart();
 
         services
-            .AddOptions<SqlServerOptions>()
-            .Bind(configuration.GetSection(SqlServerOptions.SectionName))
+            .AddOptions<EventJournalOptions>()
+            .Bind(configuration.GetSection(EventJournalOptions.SectionName))
+            .Validate(options => !string.IsNullOrWhiteSpace(options.Directory), "Event journal directory is required.")
+            .Validate(options => IsSimpleDirectoryName(options.FileName), "Event journal file name must be a simple file name.")
             .ValidateOnStart();
 
-        services.AddSingleton<JsonStoragePaths>();
-        services.AddSingleton<JsonStorageGate>();
-        services.AddSingleton<JsonStorageInitializer>();
-        services.AddSingleton<JsonAtomicFileCommitter>();
-        services.AddSingleton<JsonSerializerOptionsFactory>();
-        services.AddSingleton<JsonFileReader>();
-        services.AddSingleton<JsonFileWriter>();
-        services.AddSingleton<JsonBackupService>();
-        services.AddSingleton<JsonLevelUpDocumentStore>();
-        services.AddSingleton<ILevelUpRepository, JsonLevelUpRepository>();
-        services.AddSingleton<LevelUp.Application.Features.Wallets.Contracts.IWalletReadService, JsonWalletReadService>();
-        services.AddSingleton<LevelUp.Application.Features.Dashboard.Contracts.IDashboardReadService, JsonDashboardReadService>();
+        // JsonEventJournal (Sprint 14.7): domain-event audit log, entirely independent of application-
+        // state persistence — see the class's own XML doc. No JSON persistence provider is registered
+        // anywhere in this method; JsonEventJournal is the only "Json"-named type left, and it never
+        // reads or writes functional state.
+        services.AddSingleton<JsonEventJournal>();
+        services.AddSingleton<LevelUp.Application.Common.Auditing.IEventJournal>(sp => sp.GetRequiredService<JsonEventJournal>());
+        services.AddScoped<LevelUp.Application.Features.Wallets.Contracts.IWalletReadService, EfWalletReadService>();
+        services.AddScoped<LevelUp.Application.Features.Dashboard.Contracts.IDashboardReadService, EfDashboardReadService>();
         services.AddSingleton<LevelUp.Application.Common.Security.IPasswordService, Pbkdf2PasswordService>();
         services.AddSingleton<LevelUp.Application.Common.Identity.IClock, SystemClock>();
         services.AddSingleton<LevelUp.Application.Common.Identity.IUserTokenService, SecureUserTokenService>();
@@ -94,8 +88,6 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddMemoryCache();
         services.AddSingleton<MemoryApplicationCache>();
         services.AddSingleton<LevelUp.Application.Common.Caching.IApplicationCache>(sp => sp.GetRequiredService<MemoryApplicationCache>());
-        services.AddSingleton<JsonEventJournal>();
-        services.AddSingleton<LevelUp.Application.Common.Auditing.IEventJournal>(sp => sp.GetRequiredService<JsonEventJournal>());
         services.AddSingleton<BackgroundTaskQueue>();
         services.AddSingleton<LevelUp.Application.Common.Background.IBackgroundTaskQueue>(sp => sp.GetRequiredService<BackgroundTaskQueue>());
         services.AddHostedService<BackgroundTaskWorker>();
@@ -111,11 +103,10 @@ public static class InfrastructureServiceCollectionExtensions
             options.UseSqlServer(sqlServerOptions.ConnectionString);
         });
 
-        // Sprint 14.4: the first real adapters for the 8 per-Aggregate persistence contracts defined in
-        // EPIC 13 (docs/architecture/07-persistence-contracts.md). Registering them makes the contracts
-        // *resolvable*, not *consumed* — no handler depends on any of these interfaces yet (they all
-        // still depend on ILevelUpRepository/JSON, unchanged by this Sprint), so this does not make SQL
-        // Server the active provider.
+        // The 8 per-Aggregate persistence contracts defined in EPIC 13
+        // (docs/architecture/07-persistence-contracts.md), adapted against SQL Server (EPIC 14). Every
+        // production handler depends on one of these (or IUnitOfWork below) as of Sprint 14.6 — SQL
+        // Server is the only active runtime provider.
         services.AddScoped<IUserRepository, EfUserRepository>();
         services.AddScoped<IUserTokenRepository, EfUserTokenRepository>();
         services.AddScoped<IHabitRepository, EfHabitRepository>();
@@ -125,30 +116,25 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IWalletTagRepository, EfWalletTagRepository>();
         services.AddScoped<ITransactionRepository, EfTransactionRepository>();
 
-        services.AddHealthChecks()
-            .AddCheck<JsonStorageHealthCheck>(
-                "json-storage",
-                tags: ["ready", "storage"]);
+        // Sprint 14.5: coordinates the 8 repositories above against one shared LevelUpDbContext, for
+        // callers that need multiple writes to commit/roll back together. AddTransient, not AddScoped —
+        // EfUnitOfWork eagerly creates and holds a context for its own lifetime; a Scoped registration
+        // would let it live for the whole Blazor Server circuit (the exact problem AddDbContextFactory
+        // exists to avoid). Every resolution creates a fresh instance and a fresh context; the resolver
+        // is responsible for disposing it (await using) once its unit of work is done.
+        services.AddTransient<IUnitOfWork, EfUnitOfWork>();
 
-        // Registered only when explicitly enabled (default off — see SqlServerOptions.HealthCheckEnabled),
-        // and tagged "sql" only (never "ready"/"storage") — JSON remains the only active provider, and
-        // /health has no tag filter, so this must stay dormant until something actually depends on SQL
-        // Server being reachable.
-        var sqlServerHealthCheckEnabled = configuration.GetValue<bool>(
-            $"{SqlServerOptions.SectionName}:HealthCheckEnabled");
-        if (sqlServerHealthCheckEnabled)
-        {
-            services.AddHealthChecks()
-                .AddCheck<SqlServerHealthCheck>("sql-server", tags: ["sql"]);
-        }
+        // SQL Server is the only active runtime provider as of Sprint 14.6 — this check now takes over
+        // the "ready"/"storage" tags JsonStorageHealthCheck used to own (that check had no consumer left
+        // once the JSON document store was de-registered above, so it was removed rather than kept
+        // dormant). SqlServerOptions.HealthCheckEnabled predates this cutover and is unused now — every
+        // environment gets this check unconditionally, matching that the connection string itself is
+        // already required (see the Validate call above), not optional/local-only.
+        services.AddHealthChecks()
+            .AddCheck<SqlServerHealthCheck>("sql-server", tags: ["ready", "storage", "sql"]);
 
         return services;
     }
-
-    private static bool IsJsonFile(string? name) =>
-        !string.IsNullOrWhiteSpace(name)
-        && string.Equals(Path.GetExtension(name), ".json", StringComparison.OrdinalIgnoreCase)
-        && string.Equals(Path.GetFileName(name), name, StringComparison.Ordinal);
 
     private static bool IsRootedRelativePath(string? path) =>
         !string.IsNullOrWhiteSpace(path)

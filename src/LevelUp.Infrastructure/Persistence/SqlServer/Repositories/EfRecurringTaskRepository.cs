@@ -4,22 +4,30 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LevelUp.Infrastructure.Persistence.SqlServer.Repositories;
 
-internal sealed class EfRecurringTaskRepository(IDbContextFactory<LevelUpDbContext> contextFactory) : IRecurringTaskRepository
+internal sealed class EfRecurringTaskRepository : EfRepositoryBase, IRecurringTaskRepository
 {
+    public EfRecurringTaskRepository(IDbContextFactory<LevelUpDbContext> contextFactory) : base(contextFactory)
+    {
+    }
+
+    internal EfRecurringTaskRepository(LevelUpDbContext sharedContext) : base(sharedContext)
+    {
+    }
+
     public async Task<RecurringTask?> GetAsync(Guid userId, Guid taskId, CancellationToken cancellationToken = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        await using var lease = await AcquireContextAsync(cancellationToken);
 
-        return await context.RecurringTasks
+        return await lease.Context.RecurringTasks
             .AsNoTracking()
             .FirstOrDefaultAsync(task => task.UserId == userId && task.Id == taskId, cancellationToken);
     }
 
     public async Task<IReadOnlyList<RecurringTask>> ListAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        await using var lease = await AcquireContextAsync(cancellationToken);
 
-        return await context.RecurringTasks
+        return await lease.Context.RecurringTasks
             .AsNoTracking()
             .Where(task => task.UserId == userId)
             .OrderBy(task => EF.Property<int>(task, "Position"))
@@ -28,7 +36,8 @@ internal sealed class EfRecurringTaskRepository(IDbContextFactory<LevelUpDbConte
 
     public async Task AddAsync(RecurringTask task, CancellationToken cancellationToken = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        await using var lease = await AcquireContextAsync(cancellationToken);
+        var context = lease.Context;
 
         // See EfHabitRepository.AddAsync — Position has no database default, the repository assigns
         // the next free slot scoped by UserId.
@@ -40,17 +49,18 @@ internal sealed class EfRecurringTaskRepository(IDbContextFactory<LevelUpDbConte
         context.RecurringTasks.Add(task);
         context.Entry(task).Property("Position").CurrentValue = (maxPosition ?? -1) + 1;
 
-        await context.SaveChangesAsync(cancellationToken);
+        await EfConcurrencySaveChanges.ExecuteAsync(context, cancellationToken);
     }
 
     public async Task RemoveAsync(RecurringTask task, CancellationToken cancellationToken = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        await using var lease = await AcquireContextAsync(cancellationToken);
+        var context = lease.Context;
 
         // See EfHabitRepository.RemoveAsync for why this re-fetches by Id instead of attaching `task`.
         var tracked = await context.RecurringTasks.SingleAsync(existing => existing.Id == task.Id, cancellationToken);
         context.RecurringTasks.Remove(tracked);
-        await context.SaveChangesAsync(cancellationToken);
+        await EfConcurrencySaveChanges.ExecuteAsync(context, cancellationToken);
     }
 
     public async Task ReorderAsync(
@@ -58,7 +68,8 @@ internal sealed class EfRecurringTaskRepository(IDbContextFactory<LevelUpDbConte
         IReadOnlyList<Guid> orderedTaskIds,
         CancellationToken cancellationToken = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        await using var lease = await AcquireContextAsync(cancellationToken);
+        var context = lease.Context;
 
         var tasksById = await context.RecurringTasks
             .Where(task => task.UserId == userId)
@@ -72,6 +83,23 @@ internal sealed class EfRecurringTaskRepository(IDbContextFactory<LevelUpDbConte
             }
         }
 
-        await context.SaveChangesAsync(cancellationToken);
+        await EfConcurrencySaveChanges.ExecuteAsync(context, cancellationToken);
+    }
+
+    public async Task UpdateAsync(
+        Guid userId,
+        Guid taskId,
+        Action<RecurringTask> mutation,
+        CancellationToken cancellationToken = default)
+    {
+        await using var lease = await AcquireContextAsync(cancellationToken);
+        var context = lease.Context;
+
+        // See EfUserRepository.UpdateAsync for why tracked-and-mutated-within-this-call, not a
+        // disconnected Save.
+        var task = await context.RecurringTasks
+            .SingleAsync(existing => existing.UserId == userId && existing.Id == taskId, cancellationToken);
+        mutation(task);
+        await EfConcurrencySaveChanges.ExecuteAsync(context, cancellationToken);
     }
 }

@@ -26,4 +26,21 @@ public interface ITransactionRepository
     public Task AddAsync(Transaction transaction, CancellationToken cancellationToken = default);
 
     public Task RemoveAsync(Transaction transaction, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Loads the Transaction tracked, applies <paramref name="mutation"/>, and persists the result —
+    /// see <see cref="IUserRepository.UpdateAsync"/> for why this shape, not a disconnected "Save".
+    /// </summary>
+    public Task UpdateAsync(
+        Guid walletId,
+        Guid transactionId,
+        Action<Transaction> mutation,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Clears <c>WalletTagId</c> on every Transaction referencing <paramref name="walletTagId"/> —
+    /// mirrors <c>LevelUpData.RemoveWalletTag</c> exactly. Must run whenever a WalletTag is deleted, so
+    /// no Transaction is left pointing at a WalletTag that no longer exists.
+    /// </summary>
+    public Task ClearTagReferencesAsync(Guid walletTagId, CancellationToken cancellationToken = default);
 }

@@ -50,14 +50,14 @@ public sealed class IdentityHandlersTests
         var user = fixture.AddUser(confirmed: false);
         var previous = fixture.AddToken(user, UserTokenType.EmailConfirmation, "old-token", Now.AddHours(1));
         var handler = new ResendEmailConfirmationCommandHandler(
-            fixture.Repository, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
 
         await handler.Handle(
             new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest(user.Email)),
             TestContext.Current.CancellationToken);
 
         Assert.True(previous.IsRevoked);
-        Assert.Equal(2, fixture.Repository.Data.UserTokens.Count);
+        Assert.Equal(2, fixture.Repository.UserTokensData.Count);
         Assert.Single(fixture.Email.Messages);
     }
 
@@ -66,13 +66,13 @@ public sealed class IdentityHandlersTests
     {
         var fixture = new Fixture();
         var handler = new RequestPasswordResetCommandHandler(
-            fixture.Repository, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
 
         await handler.Handle(
             new RequestPasswordResetCommand(new RequestPasswordResetRequest("missing@levelup.invalid")),
             TestContext.Current.CancellationToken);
 
-        Assert.Empty(fixture.Repository.Data.UserTokens);
+        Assert.Empty(fixture.Repository.UserTokensData);
         Assert.Empty(fixture.Email.Messages);
     }
 
@@ -82,13 +82,13 @@ public sealed class IdentityHandlersTests
         var fixture = new Fixture();
         var user = fixture.AddUser(confirmed: true);
         var handler = new RequestPasswordResetCommandHandler(
-            fixture.Repository, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
 
         await handler.Handle(
             new RequestPasswordResetCommand(new RequestPasswordResetRequest(user.Email)),
             TestContext.Current.CancellationToken);
 
-        var token = Assert.Single(fixture.Repository.Data.UserTokens);
+        var token = Assert.Single(fixture.Repository.UserTokensData);
         Assert.Equal(UserTokenType.PasswordReset, token.Type);
         Assert.Equal(Now.AddHours(1), token.ExpiresAtUtc);
         Assert.Single(fixture.Email.Messages);
@@ -129,7 +129,7 @@ public sealed class IdentityHandlersTests
 
     private sealed class Fixture
     {
-        public FakeLevelUpRepository Repository { get; } = new();
+        public FakeUnitOfWork Repository { get; } = new();
         public FakeTokenService Tokens { get; } = new();
         public FakeClock Clock { get; } = new(Now);
         public FakeEmailComposer Composer { get; } = new();
@@ -144,14 +144,14 @@ public sealed class IdentityHandlersTests
             {
                 user.ConfirmEmail(user.CreatedAtUtc);
             }
-            Repository.Data.AddUser(user);
+            Repository.UsersData.Add(user);
             return user;
         }
 
         public UserToken AddToken(User user, UserTokenType type, string rawToken, DateTimeOffset expiresAt)
         {
             var token = UserToken.Create(user.Id, type, Tokens.HashToken(rawToken), Now.AddHours(-1), expiresAt);
-            Repository.Data.AddUserToken(token);
+            Repository.UserTokensData.Add(token);
             return token;
         }
     }

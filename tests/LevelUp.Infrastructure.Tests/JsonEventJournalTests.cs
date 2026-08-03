@@ -3,7 +3,6 @@ using LevelUp.Domain.Enums;
 using LevelUp.Domain.Events;
 using LevelUp.Infrastructure.Auditing;
 using LevelUp.Infrastructure.Configuration;
-using LevelUp.Infrastructure.Persistence.Json;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -72,6 +71,23 @@ public sealed class JsonEventJournalTests : IDisposable
         Assert.Equal("Project", payload.GetProperty("experienceSource").GetString());
     }
 
+    [Fact]
+    public async Task Uses_configured_directory_and_file_name()
+    {
+        IOptions<EventJournalOptions> options = Options.Create(new EventJournalOptions
+        {
+            Directory = "CustomAudit",
+            FileName = "custom-events.ndjson",
+        });
+        Directory.CreateDirectory(_root);
+        var journal = new JsonEventJournal(new TestHostEnvironment { ContentRootPath = _root }, options);
+
+        await journal.AppendAsync(CreateLevelUpEvent(Guid.NewGuid()), TestContext.Current.CancellationToken);
+
+        var path = Path.Combine(_root, "CustomAudit", "custom-events.ndjson");
+        Assert.True(File.Exists(path));
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_root))
@@ -87,15 +103,8 @@ public sealed class JsonEventJournalTests : IDisposable
         {
             ContentRootPath = _root,
         };
-        IOptions<JsonStorageOptions> options = Options.Create(new JsonStorageOptions
-        {
-            Directory = "Data",
-            FileName = "LevelUpBD.json",
-            WriteIndented = false,
-        });
-        var paths = new JsonStoragePaths(environment, options);
-        var serializerOptionsFactory = new JsonSerializerOptionsFactory(options);
-        return new JsonEventJournal(paths, serializerOptionsFactory);
+        IOptions<EventJournalOptions> options = Options.Create(new EventJournalOptions());
+        return new JsonEventJournal(environment, options);
     }
 
     private async Task<string[]> ReadJournalLinesAsync()

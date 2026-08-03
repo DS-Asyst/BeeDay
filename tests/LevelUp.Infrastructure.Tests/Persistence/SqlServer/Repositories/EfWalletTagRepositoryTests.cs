@@ -1,4 +1,5 @@
 using LevelUp.Domain.Entities;
+using LevelUp.Infrastructure.Persistence.Exceptions;
 using LevelUp.Infrastructure.Persistence.SqlServer.Repositories;
 using Xunit;
 
@@ -51,6 +52,45 @@ public sealed class EfWalletTagRepositoryTests : EfLocalDbTestBase
         var loaded = await repository.GetAsync(userId, tag.Id, cancellationToken);
 
         Assert.Null(loaded);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_PersistsTheMutation()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfWalletTagRepository(ContextFactory);
+        var userId = await CreateUserAsync(cancellationToken);
+        var tag = WalletTag.Create(userId, "Groceries");
+        await repository.AddAsync(tag, cancellationToken);
+
+        await repository.UpdateAsync(userId, tag.Id, t => t.Rename("Food"), cancellationToken);
+
+        var loaded = await repository.GetAsync(userId, tag.Id, cancellationToken);
+        Assert.Equal("Food", loaded!.Name);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ConcurrentModification_ThrowsConcurrencyConflictException()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfWalletTagRepository(ContextFactory);
+        var userId = await CreateUserAsync(cancellationToken);
+        var tag = WalletTag.Create(userId, "Groceries");
+        await repository.AddAsync(tag, cancellationToken);
+
+        await Assert.ThrowsAsync<ConcurrencyConflictException>(() => repository.UpdateAsync(
+            userId,
+            tag.Id,
+            t =>
+            {
+                using var raceContext = ContextFactory.CreateDbContext();
+                var raceTag = raceContext.WalletTags.Single(existing => existing.Id == tag.Id);
+                raceTag.Rename("Someone Else");
+                raceContext.SaveChanges();
+
+                t.Rename("Food");
+            },
+            cancellationToken));
     }
 
     private async Task<Guid> CreateUserAsync(CancellationToken cancellationToken)

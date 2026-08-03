@@ -10,10 +10,8 @@ public sealed class UserProfileRulesTests
     [Fact]
     public void User_UpdateAvatar_PreservesImmutableNickname()
     {
-        var data = new LevelUpData();
         var user = User.Create("Tiago", "tiago@levelup.invalid");
-        data.AddUser(user);
-        data.CompleteUserProfile(user.Id, "tiago", "old-avatar");
+        user.CompleteProfile("tiago", "old-avatar");
 
         user.UpdateAvatar("new-avatar");
 
@@ -38,25 +36,10 @@ public sealed class UserProfileRulesTests
     [Fact]
     public void CompleteUserProfile_RejectsCompletingProfileTwice()
     {
-        var data = new LevelUpData();
         var user = User.Create("Tiago", "tiago@levelup.invalid");
-        data.AddUser(user);
-        data.CompleteUserProfile(user.Id, "tiago");
+        user.CompleteProfile("tiago", null);
 
-        Assert.Throws<InvalidDomainStateException>(() => data.CompleteUserProfile(user.Id, "othernick"));
-    }
-
-    [Fact]
-    public void CompleteUserProfile_RejectsDuplicateNickname()
-    {
-        var data = new LevelUpData();
-        var first = User.Create("First", "first@levelup.invalid");
-        var second = User.Create("Second", "second@levelup.invalid");
-        data.AddUser(first);
-        data.AddUser(second);
-        data.CompleteUserProfile(first.Id, "tiago");
-
-        Assert.Throws<InvalidDomainStateException>(() => data.CompleteUserProfile(second.Id, "tiago"));
+        Assert.Throws<InvalidDomainStateException>(() => user.CompleteProfile("othernick", null));
     }
 
     [Fact]
@@ -94,10 +77,8 @@ public sealed class UserProfileRulesTests
     [Fact]
     public void Profile_ReflectsUnderlyingUserPresentationData()
     {
-        var data = new LevelUpData();
         var user = User.Create("Tiago", "tiago@levelup.invalid");
-        data.AddUser(user);
-        data.CompleteUserProfile(user.Id, "tiago", "avatar-key");
+        user.CompleteProfile("tiago", "avatar-key");
         user.UpdatePreferences(UserLanguage.Portuguese, UserTheme.Dark);
 
         var profile = user.Profile;

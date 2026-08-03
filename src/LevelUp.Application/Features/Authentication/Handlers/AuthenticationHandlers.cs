@@ -8,7 +8,7 @@ using MediatR;
 namespace LevelUp.Application.Features.Authentication.Handlers;
 
 public sealed class AuthenticateUserCommandHandler(
-    ILevelUpRepository repository,
+    IUserRepository repository,
     IPasswordService passwordService)
     : IRequestHandler<AuthenticateUserCommand, AuthenticatedUserResponse>
 {
@@ -16,40 +16,38 @@ public sealed class AuthenticateUserCommandHandler(
         AuthenticateUserCommand command,
         CancellationToken cancellationToken)
     {
-        AuthenticatedUserResponse? response = null;
+        var email = command.Request.Email.Trim();
+        var user = await repository.GetByEmailAsync(email, cancellationToken);
 
-        await repository.UpdateAsync(data =>
+        if (user is null || !user.IsActive || string.IsNullOrWhiteSpace(user.PasswordHash) ||
+            !passwordService.Verify(command.Request.Password, user.PasswordHash))
         {
-            var email = command.Request.Email.Trim();
-            var user = data.Users.FirstOrDefault(candidate =>
-                string.Equals(candidate.Email, email, StringComparison.OrdinalIgnoreCase));
+            throw new InvalidDomainStateException("Invalid email or password.");
+        }
 
-            if (user is null || !user.IsActive || string.IsNullOrWhiteSpace(user.PasswordHash) ||
-                !passwordService.Verify(command.Request.Password, user.PasswordHash))
-            {
-                throw new InvalidDomainStateException("Invalid email or password.");
-            }
+        if (!user.IsEmailConfirmed)
+        {
+            throw new InvalidDomainStateException("Invalid email or password.");
+        }
 
-            if (!user.IsEmailConfirmed)
-            {
-                throw new InvalidDomainStateException("Invalid email or password.");
-            }
-
-            if (passwordService.NeedsRehash(user.PasswordHash))
+        AuthenticatedUserResponse? response = null;
+        await repository.UpdateAsync(user.Id, tracked =>
+        {
+            if (passwordService.NeedsRehash(tracked.PasswordHash))
             {
                 // A transparent hash-format upgrade, not a security-relevant password change:
                 // must not invalidate this or any other session.
-                user.SetPasswordHash(passwordService.Hash(command.Request.Password));
+                tracked.SetPasswordHash(passwordService.Hash(command.Request.Password));
             }
 
-            user.RegisterLogin();
+            tracked.RegisterLogin();
             response = new AuthenticatedUserResponse(
-                user.Id,
-                user.Name,
-                user.Email,
-                user.HasProfile,
-                user.HasCompletedOnboarding,
-                user.SessionVersion);
+                tracked.Id,
+                tracked.Name,
+                tracked.Email,
+                tracked.HasProfile,
+                tracked.HasCompletedOnboarding,
+                tracked.SessionVersion);
         }, cancellationToken);
 
         return response!;

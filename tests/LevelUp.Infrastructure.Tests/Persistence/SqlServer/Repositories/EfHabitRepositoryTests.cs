@@ -1,5 +1,6 @@
 using LevelUp.Domain.Entities;
 using LevelUp.Domain.Enums;
+using LevelUp.Infrastructure.Persistence.Exceptions;
 using LevelUp.Infrastructure.Persistence.SqlServer.Repositories;
 using Xunit;
 
@@ -84,6 +85,45 @@ public sealed class EfHabitRepositoryTests : EfLocalDbTestBase
         var loaded = await repository.GetAsync(userId, habit.Id, cancellationToken);
 
         Assert.Null(loaded);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_PersistsTheMutation()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfHabitRepository(ContextFactory);
+        var userId = await CreateUserAsync(cancellationToken);
+        var habit = CreateHabit(userId, "Drink water");
+        await repository.AddAsync(habit, cancellationToken);
+
+        await repository.UpdateAsync(userId, habit.Id, h => h.SetFeatured(true), cancellationToken);
+
+        var loaded = await repository.GetAsync(userId, habit.Id, cancellationToken);
+        Assert.True(loaded!.Featured);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ConcurrentModification_ThrowsConcurrencyConflictException()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfHabitRepository(ContextFactory);
+        var userId = await CreateUserAsync(cancellationToken);
+        var habit = CreateHabit(userId, "Drink water");
+        await repository.AddAsync(habit, cancellationToken);
+
+        await Assert.ThrowsAsync<ConcurrencyConflictException>(() => repository.UpdateAsync(
+            userId,
+            habit.Id,
+            h =>
+            {
+                using var raceContext = ContextFactory.CreateDbContext();
+                var raceHabit = raceContext.Habits.Single(existing => existing.Id == habit.Id);
+                raceHabit.SetFeatured(true);
+                raceContext.SaveChanges();
+
+                h.SetFeatured(false);
+            },
+            cancellationToken));
     }
 
     private static Habit CreateHabit(Guid userId, string title)

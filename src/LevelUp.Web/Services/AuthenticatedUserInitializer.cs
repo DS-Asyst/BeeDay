@@ -6,7 +6,7 @@ namespace LevelUp.Web.Services;
 
 public sealed class AuthenticatedUserInitializer(
     AuthenticationStateProvider authenticationStateProvider,
-    ILevelUpRepository repository)
+    IUserRepository repository)
 {
     private Guid? _initializedUserId;
 
@@ -19,8 +19,8 @@ public sealed class AuthenticatedUserInitializer(
             return null;
         }
 
-        var data = await repository.LoadAsync(cancellationToken);
-        if (data.Users.All(user => user.Id != userId))
+        var user = await repository.GetByIdAsync(userId, cancellationToken);
+        if (user is null)
         {
             _initializedUserId = null;
             return null;

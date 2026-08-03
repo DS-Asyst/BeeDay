@@ -16,25 +16,25 @@ public sealed class WalletHandlersTests
     [Fact]
     public async Task EnsureWallet_CreatesSingleWalletForCurrentUser()
     {
-        var repo = new FakeLevelUpRepository();
+        var repo = new FakeUnitOfWork();
         var user = CreateCurrentUser(repo);
-        var handler = new EnsureCurrentWalletCommandHandler(repo, new FakeCurrentUserContext(user.Id));
+        var handler = new EnsureCurrentWalletCommandHandler(repo.Wallets, new FakeCurrentUserContext(user.Id));
         var first = await handler.Handle(new(), TestContext.Current.CancellationToken);
         var second = await handler.Handle(new(), TestContext.Current.CancellationToken);
         Assert.Equal(first, second);
-        Assert.Single(repo.Data.Wallets);
+        Assert.Single(repo.WalletsData);
     }
 
     [Fact]
     public async Task CreateTransaction_CreatesWalletAndUpdatesSummary()
     {
-        var repo = new FakeLevelUpRepository();
+        var repo = new FakeUnitOfWork();
         var user = CreateCurrentUser(repo);
         var context = new FakeCurrentUserContext(user.Id);
         var create = new CreateTransactionCommandHandler(repo, context);
         await create.Handle(new(new("Salary", 1500m, TransactionType.Income, new DateOnly(2026, 7, 25), null, null)), TestContext.Current.CancellationToken);
         await create.Handle(new(new("Internet", 80m, TransactionType.Expense, new DateOnly(2026, 7, 25), null, null)), TestContext.Current.CancellationToken);
-        var summary = await new GetWalletSummaryQueryHandler(new FakeWalletReadService(repo.Data), context).Handle(new(), TestContext.Current.CancellationToken);
+        var summary = await new GetWalletSummaryQueryHandler(new FakeWalletReadService(repo), context).Handle(new(), TestContext.Current.CancellationToken);
         Assert.NotNull(summary);
         Assert.Equal(1420m, summary.Balance);
         Assert.Equal(1500m, summary.TotalIncome);
@@ -45,12 +45,12 @@ public sealed class WalletHandlersTests
     [Fact]
     public async Task CreateTransaction_RejectsTagFromAnotherUser()
     {
-        var repo = new FakeLevelUpRepository();
+        var repo = new FakeUnitOfWork();
         var current = CreateCurrentUser(repo);
         var other = User.Create("Other", "other@levelup.invalid");
-        repo.Data.AddUser(other);
+        repo.UsersData.Add(other);
         var tag = WalletTag.Create(other.Id, "Private");
-        repo.Data.AddWalletTag(tag);
+        repo.WalletTagsData.Add(tag);
         var handler = new CreateTransactionCommandHandler(repo, new FakeCurrentUserContext(current.Id));
         await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
             new(new("Invalid", 10m, TransactionType.Expense, new DateOnly(2026, 7, 25), tag.Id, null)),
@@ -60,29 +60,29 @@ public sealed class WalletHandlersTests
     [Fact]
     public async Task DeleteTag_RemovesAssociationAndKeepsTransaction()
     {
-        var repo = new FakeLevelUpRepository();
+        var repo = new FakeUnitOfWork();
         var user = CreateCurrentUser(repo);
         var context = new FakeCurrentUserContext(user.Id);
-        var tagId = await new CreateWalletTagCommandHandler(repo, context).Handle(new(new("Food", "#123456")), TestContext.Current.CancellationToken);
+        var tagId = await new CreateWalletTagCommandHandler(repo.WalletTags, context).Handle(new(new("Food", "#123456")), TestContext.Current.CancellationToken);
         var transactionId = await new CreateTransactionCommandHandler(repo, context).Handle(
             new(new("Lunch", 20m, TransactionType.Expense, new DateOnly(2026, 7, 25), tagId, null)),
             TestContext.Current.CancellationToken);
         await new DeleteWalletTagCommandHandler(repo, context).Handle(new(tagId), TestContext.Current.CancellationToken);
-        Assert.Empty(repo.Data.WalletTags);
-        Assert.Null(repo.Data.FindTransaction(transactionId).WalletTagId);
+        Assert.Empty(repo.WalletTagsData);
+        Assert.Null(repo.TransactionsData.Single(t => t.Id == transactionId).WalletTagId);
     }
 
     [Fact]
     public async Task GetTransactions_FiltersSortsAndPaginates()
     {
-        var repo = new FakeLevelUpRepository();
+        var repo = new FakeUnitOfWork();
         var user = CreateCurrentUser(repo);
         var context = new FakeCurrentUserContext(user.Id);
         var create = new CreateTransactionCommandHandler(repo, context);
         await create.Handle(new(new("Salary", 1000m, TransactionType.Income, new DateOnly(2026, 7, 1), null, "Monthly")), TestContext.Current.CancellationToken);
         await create.Handle(new(new("Groceries", 200m, TransactionType.Expense, new DateOnly(2026, 7, 2), null, "Food")), TestContext.Current.CancellationToken);
         await create.Handle(new(new("Coffee", 10m, TransactionType.Expense, new DateOnly(2026, 7, 3), null, "Food")), TestContext.Current.CancellationToken);
-        var result = await new GetTransactionsQueryHandler(new FakeWalletReadService(repo.Data), context).Handle(
+        var result = await new GetTransactionsQueryHandler(new FakeWalletReadService(repo), context).Handle(
             new(Search: "Food", Type: TransactionType.Expense, SortBy: TransactionSortField.Amount, SortDirection: SortDirection.Descending, Page: 1, PageSize: 1),
             TestContext.Current.CancellationToken);
         Assert.Equal(2, result.TotalCount);
@@ -91,42 +91,56 @@ public sealed class WalletHandlersTests
     }
 
     [Fact]
-    public async Task UpdateTag_RejectsDuplicateNameForCurrentUser()
+    public async Task CreateTag_RejectsDuplicateNameForCurrentUser()
     {
-        var repo = new FakeLevelUpRepository();
+        var repo = new FakeUnitOfWork();
         var user = CreateCurrentUser(repo);
         var context = new FakeCurrentUserContext(user.Id);
-        var first = await new CreateWalletTagCommandHandler(repo, context).Handle(new(new("Food", null)), TestContext.Current.CancellationToken);
-        var second = await new CreateWalletTagCommandHandler(repo, context).Handle(new(new("Transport", null)), TestContext.Current.CancellationToken);
-        await Assert.ThrowsAsync<InvalidDomainStateException>(() => new UpdateWalletTagCommandHandler(repo, context).Handle(
+        var handler = new CreateWalletTagCommandHandler(repo.WalletTags, context);
+        await handler.Handle(new(new("Food", null)), TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
+            new(new("Food", null)), TestContext.Current.CancellationToken));
+        Assert.Single(repo.WalletTagsData);
+    }
+
+    [Fact]
+    public async Task UpdateTag_RejectsDuplicateNameForCurrentUser()
+    {
+        var repo = new FakeUnitOfWork();
+        var user = CreateCurrentUser(repo);
+        var context = new FakeCurrentUserContext(user.Id);
+        var first = await new CreateWalletTagCommandHandler(repo.WalletTags, context).Handle(new(new("Food", null)), TestContext.Current.CancellationToken);
+        var second = await new CreateWalletTagCommandHandler(repo.WalletTags, context).Handle(new(new("Transport", null)), TestContext.Current.CancellationToken);
+        await Assert.ThrowsAsync<InvalidDomainStateException>(() => new UpdateWalletTagCommandHandler(repo.WalletTags, context).Handle(
             new(second, new(" food ", null)), TestContext.Current.CancellationToken));
         Assert.NotEqual(first, second);
     }
 
-    private static User CreateCurrentUser(FakeLevelUpRepository repo)
+    private static User CreateCurrentUser(FakeUnitOfWork repo)
     {
         var user = User.Create("Test User", $"{Guid.NewGuid():N}@levelup.invalid");
-        repo.Data.AddUser(user);
+        repo.UsersData.Add(user);
         return user;
     }
 
     /// <summary>
     /// Minimal in-memory double for <see cref="IWalletReadService"/> — mirrors
-    /// LevelUp.Infrastructure's <c>JsonWalletReadService</c> filter/sort/paginate behavior against a
-    /// plain in-memory <see cref="LevelUpData"/> instead of the JSON file, so Application tests never
-    /// need to reference Infrastructure.
+    /// LevelUp.Infrastructure's <c>EfWalletReadService</c> filter/sort/paginate behavior against the
+    /// per-Aggregate in-memory lists on <see cref="FakeUnitOfWork"/>, so Application tests never need
+    /// to reference Infrastructure.
     /// </summary>
-    private sealed class FakeWalletReadService(LevelUpData data) : IWalletReadService
+    private sealed class FakeWalletReadService(FakeUnitOfWork data) : IWalletReadService
     {
         public Task<WalletSummaryResponse?> GetSummaryAsync(Guid userId, CancellationToken cancellationToken = default)
         {
-            var wallet = data.Wallets.FirstOrDefault(candidate => candidate.UserId == userId);
+            var wallet = data.WalletsData.FirstOrDefault(candidate => candidate.UserId == userId);
             if (wallet is null)
             {
                 return Task.FromResult<WalletSummaryResponse?>(null);
             }
 
-            var transactions = data.Transactions.Where(transaction => transaction.WalletId == wallet.Id).ToList();
+            var transactions = data.TransactionsData.Where(transaction => transaction.WalletId == wallet.Id).ToList();
             return Task.FromResult<WalletSummaryResponse?>(new WalletSummaryResponse(
                 wallet.Id,
                 wallet.CalculateBalance(transactions),
@@ -138,14 +152,14 @@ public sealed class WalletHandlersTests
 
         public Task<IReadOnlyList<WalletTagResponse>> ListTagsAsync(Guid userId, CancellationToken cancellationToken = default)
         {
-            IReadOnlyList<WalletTagResponse> tags = data.WalletTags
+            IReadOnlyList<WalletTagResponse> tags = data.WalletTagsData
                 .Where(tag => tag.UserId == userId)
                 .OrderBy(tag => tag.Name, StringComparer.OrdinalIgnoreCase)
                 .Select(tag => new WalletTagResponse(
                     tag.Id,
                     tag.Name,
                     tag.Color,
-                    data.Transactions.Count(transaction => transaction.WalletTagId == tag.Id),
+                    data.TransactionsData.Count(transaction => transaction.WalletTagId == tag.Id),
                     tag.CreatedAtUtc,
                     tag.UpdatedAtUtc))
                 .ToList();
@@ -154,25 +168,25 @@ public sealed class WalletHandlersTests
 
         public Task<TransactionResponse?> GetTransactionAsync(Guid userId, Guid transactionId, CancellationToken cancellationToken = default)
         {
-            var wallet = data.Wallets.FirstOrDefault(candidate => candidate.UserId == userId);
+            var wallet = data.WalletsData.FirstOrDefault(candidate => candidate.UserId == userId);
             if (wallet is null)
             {
                 return Task.FromResult<TransactionResponse?>(null);
             }
 
-            var transaction = data.Transactions.FirstOrDefault(candidate => candidate.Id == transactionId && candidate.WalletId == wallet.Id);
+            var transaction = data.TransactionsData.FirstOrDefault(candidate => candidate.Id == transactionId && candidate.WalletId == wallet.Id);
             return Task.FromResult(transaction is null ? null : Map(transaction));
         }
 
         public Task<PagedTransactionsResponse> ListTransactionsAsync(Guid userId, TransactionQueryFilter filter, CancellationToken cancellationToken = default)
         {
-            var wallet = data.Wallets.FirstOrDefault(candidate => candidate.UserId == userId);
+            var wallet = data.WalletsData.FirstOrDefault(candidate => candidate.UserId == userId);
             if (wallet is null)
             {
                 return Task.FromResult(new PagedTransactionsResponse([], filter.Page, filter.PageSize, 0, 0));
             }
 
-            IEnumerable<Transaction> query = data.Transactions.Where(transaction => transaction.WalletId == wallet.Id);
+            IEnumerable<Transaction> query = data.TransactionsData.Where(transaction => transaction.WalletId == wallet.Id);
             if (!string.IsNullOrWhiteSpace(filter.Search))
             {
                 var search = filter.Search.Trim();
@@ -231,7 +245,7 @@ public sealed class WalletHandlersTests
         private TransactionResponse Map(Transaction transaction)
         {
             var tag = transaction.WalletTagId is Guid tagId
-                ? data.WalletTags.FirstOrDefault(candidate => candidate.Id == tagId)
+                ? data.WalletTagsData.FirstOrDefault(candidate => candidate.Id == tagId)
                 : null;
             return new(
                 transaction.Id,

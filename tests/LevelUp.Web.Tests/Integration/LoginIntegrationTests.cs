@@ -121,8 +121,8 @@ public sealed class LoginIntegrationTests(LevelUpWebApplicationFactory factory)
         var user = await factory.SeedConfirmedUserAsync("onboarding-done@levelup.invalid", "Password123!");
         using (var scope = factory.Services.CreateScope())
         {
-            var repository = scope.ServiceProvider.GetRequiredService<ILevelUpRepository>();
-            await repository.UpdateAsync(data => data.FindUser(user.Id).CompleteOnboarding(), cancellationToken);
+            var repository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+            await repository.UpdateAsync(user.Id, u => u.CompleteOnboarding(), cancellationToken);
         }
 
         var response = await PostLoginAsync("onboarding-done@levelup.invalid", "Password123!", cancellationToken);

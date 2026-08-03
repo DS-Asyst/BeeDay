@@ -100,32 +100,6 @@ public sealed class UserIdentityTokenTests
     }
 
 
-    [Fact]
-    public void LevelUpData_AddUserToken_RequiresExistingOwner()
-    {
-        var data = new LevelUpData();
-        var token = CreateToken(UserTokenType.EmailConfirmation, Now.AddMinutes(5));
-
-        Assert.Throws<InvalidDomainStateException>(() => data.AddUserToken(token));
-    }
-
-    [Fact]
-    public void LevelUpData_RevokeActiveUserTokens_RevokesMatchingTypeOnly()
-    {
-        var data = new LevelUpData();
-        var user = User.Create("Tiago", "tiago@levelup.invalid");
-        data.AddUser(user);
-        var confirmation = UserToken.Create(user.Id, UserTokenType.EmailConfirmation, "confirmation", Now, Now.AddMinutes(5));
-        var reset = UserToken.Create(user.Id, UserTokenType.PasswordReset, "reset", Now, Now.AddMinutes(5));
-        data.AddUserToken(confirmation);
-        data.AddUserToken(reset);
-
-        data.RevokeActiveUserTokens(user.Id, UserTokenType.PasswordReset, Now.AddMinutes(1));
-
-        Assert.False(confirmation.IsRevoked);
-        Assert.True(reset.IsRevoked);
-    }
-
     private static UserToken CreateToken(UserTokenType type, DateTimeOffset expiresAtUtc) =>
         UserToken.Create(Guid.NewGuid(), type, "token-hash", Now, expiresAtUtc);
 }

@@ -51,8 +51,8 @@
         try
         {
             await UserInitializer.EnsureInitializedAsync();
-            var data = await Store.LoadAsync();
-            if (data.CurrentUser is not { HasProfile: true } user)
+            var user = await Store.GetCurrentUserAsync();
+            if (user is not { HasProfile: true })
             {
                 Navigation.NavigateTo("/profile/create", true);
                 return;

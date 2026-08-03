@@ -7,7 +7,8 @@ using LevelUp.Application.Features.Projects.Commands;
 using LevelUp.Application.Features.Tasks.Commands;
 using LevelUp.Application.Features.Todos.Commands;
 using LevelUp.Application.Features.Users.Commands;
-using LevelUp.Domain.Entities;
+using LevelUp.Application.Features.Users.Queries;
+using LevelUp.Application.Features.Users.Responses;
 using LevelUp.Domain.Enums;
 using LevelUp.Web.Components.Features.Habits.Models;
 using LevelUp.Web.Components.Features.Projects.Models;
@@ -18,7 +19,7 @@ namespace LevelUp.Web.Services;
 
 public sealed class LevelUpWebService(ISender sender)
 {
-    public async Task<LevelUpData> LoadAsync() => (await sender.Send(new GetLevelUpQuery())).Data;
+    public Task<CurrentUserResponse?> GetCurrentUserAsync() => sender.Send(new GetCurrentUserQuery());
     public Task<DashboardResponse> LoadDashboardAsync() => sender.Send(new GetDashboardQuery());
     public Task<Guid> CreateAccountAsync(string name, string email, string password, string nickname, string? avatar = null) =>
         sender.Send(new CreateAccountCommand(new(name, email, password, nickname, avatar)));
