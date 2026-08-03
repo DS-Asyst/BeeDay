@@ -151,7 +151,7 @@ builder.Services
                 return;
             }
 
-            var sessionVersionClaim = context.Principal?.FindFirstValue(LevelUpClaimTypes.SessionVersion);
+            var sessionVersionClaim = context.Principal?.FindFirstValue(BeeDayClaimTypes.SessionVersion);
             if (!int.TryParse(sessionVersionClaim, out var sessionVersion))
             {
                 context.RejectPrincipal();
@@ -179,14 +179,14 @@ builder.Services
     .AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddLevelUpApplication();
-builder.Services.AddLevelUpInfrastructure(builder.Configuration);
-builder.Services.AddScoped<LevelUpWebService>();
+builder.Services.AddBeeDayApplication();
+builder.Services.AddBeeDayInfrastructure(builder.Configuration);
+builder.Services.AddScoped<BeeDayWebService>();
 builder.Services.AddScoped<ToastService>();
 builder.Services.AddScoped<AuthenticatedUserInitializer>();
 builder.Services.AddScoped<DashboardState>();
-builder.Services.AddScoped<LevelUpFeedbackStore>();
-builder.Services.AddScoped<INotificationHandler<DomainEventNotification>, LevelUpFeedbackEventHandler>();
+builder.Services.AddScoped<BeeDayFeedbackStore>();
+builder.Services.AddScoped<INotificationHandler<DomainEventNotification>, BeeDayFeedbackEventHandler>();
 builder.Services.AddScoped<ProfileCreationState>();
 builder.Services.AddScoped<CardActionMenuCoordinator>();
 
@@ -261,7 +261,7 @@ app.MapPost("/auth/login", async (
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Name, user.Name),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(LevelUpClaimTypes.SessionVersion, user.SessionVersion.ToString(System.Globalization.CultureInfo.InvariantCulture))
+            new Claim(BeeDayClaimTypes.SessionVersion, user.SessionVersion.ToString(System.Globalization.CultureInfo.InvariantCulture))
         };
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);

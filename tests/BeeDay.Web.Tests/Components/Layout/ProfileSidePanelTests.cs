@@ -40,7 +40,7 @@ public sealed class ProfileSidePanelTests
     public void RendersLoadingStateWithoutTheAvatarLink()
     {
         using var context = new BunitContext();
-        context.Services.AddSingleton(new DashboardState(new LevelUpWebService(new PendingSender()), new ToastService()));
+        context.Services.AddSingleton(new DashboardState(new BeeDayWebService(new PendingSender()), new ToastService()));
 
         var cut = context.Render<ProfileSidePanel>(parameters => parameters
             .Add(component => component.IsOpen, true));
@@ -79,7 +79,7 @@ public sealed class ProfileSidePanelTests
     }
 
     private static DashboardState BuildState(DashboardResponse response) =>
-        new(new LevelUpWebService(new StubSender(response)), new ToastService());
+        new(new BeeDayWebService(new StubSender(response)), new ToastService());
 
     private sealed class StubSender(DashboardResponse response) : ISender
     {

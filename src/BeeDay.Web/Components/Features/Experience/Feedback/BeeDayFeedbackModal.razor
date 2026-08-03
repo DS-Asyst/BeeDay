@@ -1,0 +1,92 @@
+@if (Feedback is not null)
+{
+    <div class="level-up-feedback-backdrop"
+         role="presentation"
+         tabindex="-1"
+         @onclick="CloseAsync"
+         @onkeydown="HandleKeyDownAsync"
+         @onkeydown:stopPropagation="true">
+        <section class="level-up-feedback levelup-pixel-panel"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="level-up-feedback-title"
+                 aria-describedby="level-up-feedback-description"
+                 tabindex="-1"
+                 autofocus
+                 @ref="dialog"
+                 @onclick:stopPropagation>
+            <div class="level-up-feedback__accent" aria-hidden="true"></div>
+            <div class="level-up-feedback__content">
+                <p class="level-up-feedback__eyebrow" aria-hidden="true">Progress</p>
+                <h2 id="level-up-feedback-title">LEVEL UP</h2>
+                <p id="level-up-feedback-description" class="level-up-feedback__summary">
+                    You advanced @Feedback.LevelsGained @(Feedback.LevelsGained == 1 ? "level" : "levels").
+                </p>
+
+                <dl class="level-up-feedback__levels">
+                    <div>
+                        <dt>Previous Level</dt>
+                        <dd data-testid="previous-level">@Feedback.PreviousLevel</dd>
+                    </div>
+                    <div class="level-up-feedback__new-level">
+                        <dt>New Level</dt>
+                        <dd data-testid="new-level">@Feedback.NewLevel</dd>
+                    </div>
+                    <div>
+                        <dt>Levels Gained</dt>
+                        <dd data-testid="levels-gained">@Feedback.LevelsGained</dd>
+                    </div>
+                </dl>
+
+                <p class="level-up-feedback__xp" data-testid="experience-source">@Feedback.ExperienceSummary</p>
+
+                <section class="level-up-feedback__history" aria-labelledby="level-up-history-title">
+                    <h3 id="level-up-history-title">Recent Progress</h3>
+                    <ul>
+                        @foreach (var item in History.Take(3))
+                        {
+                            <li>
+                                <strong>@item.HistorySummary</strong>
+                                <span>@item.ExperienceSummary</span>
+                            </li>
+                        }
+                    </ul>
+                </section>
+
+                <BeeDayButton Variant="BeeDayButtonVariant.Primary" Class="levelup-pixel-cta" OnClick="CloseAsync">
+                    Continue
+                </BeeDayButton>
+            </div>
+        </section>
+    </div>
+}
+
+@code {
+    private ElementReference dialog;
+
+    [Parameter] public BeeDayFeedback? Feedback { get; set; }
+    [Parameter] public IReadOnlyList<BeeDayFeedback> History { get; set; } = [];
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Feedback is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await dialog.FocusAsync();
+        }
+        catch (InvalidOperationException)
+        {
+            // The component can be prerendered before JavaScript interop is available.
+        }
+    }
+
+    private Task CloseAsync() => OnClose.InvokeAsync();
+
+    private Task HandleKeyDownAsync(KeyboardEventArgs args) =>
+        args.Key == "Escape" ? CloseAsync() : Task.CompletedTask;
+}

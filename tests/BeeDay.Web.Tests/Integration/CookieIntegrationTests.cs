@@ -8,8 +8,8 @@ namespace BeeDay.Web.Tests.Integration;
 /// Validates the actual attributes of the "LevelUp.Auth" cookie as emitted by the real
 /// /auth/login endpoint — not just what Program.cs is expected to configure.
 /// </summary>
-public sealed class CookieIntegrationTests(LevelUpWebApplicationFactory factory)
-    : IClassFixture<LevelUpWebApplicationFactory>
+public sealed class CookieIntegrationTests(BeeDayWebApplicationFactory factory)
+    : IClassFixture<BeeDayWebApplicationFactory>
 {
     [Fact]
     public async Task AuthCookie_HasExpectedNameHttpOnlyAndSameSite()

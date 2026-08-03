@@ -10,7 +10,7 @@ namespace BeeDay.Infrastructure.Persistence.SqlServer;
 /// </summary>
 internal static class EfConcurrencySaveChanges
 {
-    public static async Task<int> ExecuteAsync(LevelUpDbContext context, CancellationToken cancellationToken)
+    public static async Task<int> ExecuteAsync(BeeDayDbContext context, CancellationToken cancellationToken)
     {
         try
         {

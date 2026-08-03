@@ -1,14 +1,14 @@
 <div class="wallet-empty-state">
-    <LevelUpEmptyState Title="No transactions found"
+    <BeeDayEmptyState Title="No transactions found"
                        Description="@(HasFilters ? "Change or clear your filters to see more results." : "Create your first transaction to start tracking your wallet.")"
                        Icon="PixelIconName.Wallet" />
     @if (HasFilters)
     {
-        <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel" Disabled="IsDisabled" OnClick="OnClearFilters">Clear filters</LevelUpButton>
+        <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel" Disabled="IsDisabled" OnClick="OnClearFilters">Clear filters</BeeDayButton>
     }
     else
     {
-        <LevelUpButton Variant="LevelUpButtonVariant.Primary" Disabled="IsDisabled" OnClick="OnCreateTransaction">Create transaction</LevelUpButton>
+        <BeeDayButton Variant="BeeDayButtonVariant.Primary" Disabled="IsDisabled" OnClick="OnCreateTransaction">Create transaction</BeeDayButton>
     }
 </div>
 

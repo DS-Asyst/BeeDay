@@ -9,7 +9,7 @@
                   OnDelete="RequestDelete">
     <HeroContent>
         <div class="editor-modal__hero">
-            <LevelUpInput Id="todo-title"
+            <BeeDayInput Id="todo-title"
                           Label="Title"
                           Required="true"
                           @bind-Value="Model.Title"
@@ -18,7 +18,7 @@
                           FieldCssClass="editor-modal__hero-field"
                           LabelCssClass="editor-modal__label-line"
                           autofocus />
-            <LevelUpTextArea Id="todo-notes"
+            <BeeDayTextArea Id="todo-notes"
                              Label="Notes"
                              @bind-Value="Model.Description"
                              Placeholder="Add notes"
@@ -32,14 +32,14 @@
     <BodyContent>
         <div class="editor-modal__body">
             <div class="editor-modal__type-summary"><PixelIcon Name="PixelIconName.Todo" Size="PixelIconSize.Large" Class="editor-modal__type-icon" Decorative="true" /><div><strong>To-Do</strong><p>An action that belongs to exactly one project.</p></div></div>
-            <LevelUpSelect TValue="Guid?" Id="todo-project" Label="Project" @bind-Value="Model.ProjectId" FieldCssClass="editor-modal__field">
+            <BeeDaySelect TValue="Guid?" Id="todo-project" Label="Project" @bind-Value="Model.ProjectId" FieldCssClass="editor-modal__field">
                 <option value="">Select a project</option>
                 @foreach (var project in Projects.Where(project => !project.Archived))
                 {
                     <option value="@project.Id">@project.Name</option>
                 }
-            </LevelUpSelect>
-            <LevelUpDateInput TValue="DateTime?"
+            </BeeDaySelect>
+            <BeeDayDateInput TValue="DateTime?"
                               Id="todo-due-date"
                               Label="Due date"
                               @bind-Value="Model.DueDate"
@@ -52,7 +52,7 @@
     </BodyContent>
 </EditorModalShell>
 
-<LevelUpConfirmDialog IsOpen="showDeleteConfirmation"
+<BeeDayConfirmDialog IsOpen="showDeleteConfirmation"
                       Title="Delete To-Do"
                       Message="Are you sure you want to delete this to-do?"
                       ItemTitle="@Model.Title"

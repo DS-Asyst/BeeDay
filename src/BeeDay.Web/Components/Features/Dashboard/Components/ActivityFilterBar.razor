@@ -36,17 +36,17 @@
                         }
                     </div>
                     <div class="filter-bar__tags-footer">
-                        <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel"
+                        <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel"
                                        Class="levelup-button--plain levelup-button--plain-danger filter-bar__clear"
                                        Disabled="@(SelectedAttributes.Count == 0)"
                                        OnClick="ClearAttributesAsync">
                             Clear all filters
-                        </LevelUpButton>
-                        <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel"
+                        </BeeDayButton>
+                        <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel"
                                        Class="levelup-button--plain levelup-button--plain-neutral"
                                        OnClick="CloseTagsMenu">
                             Cancel
-                        </LevelUpButton>
+                        </BeeDayButton>
                     </div>
                 </div>
             }
@@ -63,7 +63,7 @@
         </div>
 
         <div class="filter-bar__create">
-            <LevelUpButton Variant="LevelUpButtonVariant.Primary"
+            <BeeDayButton Variant="BeeDayButtonVariant.Primary"
                            Compact="true"
                            Icon="PixelIconName.Add"
                            Class="filter-bar__create-button levelup-button--comic levelup-button--comic-blue"
@@ -71,7 +71,7 @@
                            aria-haspopup="menu"
                            aria-expanded="@showCreateMenu">
                 Activity
-            </LevelUpButton>
+            </BeeDayButton>
             @if (showCreateMenu)
             {
                 <div class="filter-bar__menu" role="menu" aria-label="Choose activity type">

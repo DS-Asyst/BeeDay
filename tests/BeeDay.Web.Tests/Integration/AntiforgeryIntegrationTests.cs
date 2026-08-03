@@ -9,8 +9,8 @@ namespace BeeDay.Web.Tests.Integration;
 /// valid one — the behavior docs/security/01-security-baseline.md asked to be verified with
 /// integration tests.
 /// </summary>
-public sealed class AntiforgeryIntegrationTests(LevelUpWebApplicationFactory factory)
-    : IClassFixture<LevelUpWebApplicationFactory>
+public sealed class AntiforgeryIntegrationTests(BeeDayWebApplicationFactory factory)
+    : IClassFixture<BeeDayWebApplicationFactory>
 {
     [Fact]
     public async Task Login_WithoutAntiforgeryToken_IsRejected()

@@ -105,7 +105,7 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             // conflict with that already-correct relationship.
             experience.Ignore(userExperience => userExperience.Entries);
 
-            // Added here, not by LevelUpDbContext's global RowVersion loop: that loop cannot touch
+            // Added here, not by BeeDayDbContext's global RowVersion loop: that loop cannot touch
             // owned types at all (modelBuilder.Entity(Type) conflicts with an already-owned
             // classification), so each owned type that needs RowVersion configures it directly.
             // 01-relational-model.md §2 "UserExperience" lists RowVersion for this table.

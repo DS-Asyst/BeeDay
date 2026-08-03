@@ -16,7 +16,7 @@ namespace BeeDay.Infrastructure.Persistence.SqlServer;
 /// small follow-up query over the already-paged result set (Domain has no navigation property between
 /// Transaction and WalletTag), instead of an in-memory scan of the whole loaded document.
 /// </summary>
-internal sealed class EfWalletReadService(IDbContextFactory<LevelUpDbContext> contextFactory) : IWalletReadService
+internal sealed class EfWalletReadService(IDbContextFactory<BeeDayDbContext> contextFactory) : IWalletReadService
 {
     public async Task<WalletSummaryResponse?> GetSummaryAsync(Guid userId, CancellationToken cancellationToken = default)
     {

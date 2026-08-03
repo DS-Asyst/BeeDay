@@ -46,7 +46,7 @@
             {
                 @if (CompletedCount == 0)
                 {
-                    <LevelUpEmptyState Class="dashboard-column__empty"
+                    <BeeDayEmptyState Class="dashboard-column__empty"
                                        Icon="PixelIconName.Completed"
                                        Title="@CompletedEmptyTitle"
                                        Description="@CompletedEmptyDescription" />
@@ -58,7 +58,7 @@
             }
             else if (ActiveCount == 0)
             {
-                <LevelUpEmptyState Class="dashboard-column__empty"
+                <BeeDayEmptyState Class="dashboard-column__empty"
                                    Icon="@EmptyIcon"
                                    Title="@EmptyTitle"
                                    Description="@EmptyDescription" />

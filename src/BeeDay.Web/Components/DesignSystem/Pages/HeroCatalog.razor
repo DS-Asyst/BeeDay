@@ -19,9 +19,9 @@ else
             <span class="hero-catalog__eyebrow">Design System</span>
             <h1>Contextual Hero Catalog</h1>
             <p>
-                Realistic, isolated <code>LevelUpHero</code> compositions. This page exists only to review the
+                Realistic, isolated <code>BeeDayHero</code> compositions. This page exists only to review the
                 component in Development — it does not replace any production page header, and no production
-                page currently consumes <code>LevelUpHero</code>.
+                page currently consumes <code>BeeDayHero</code>.
             </p>
         </header>
 
@@ -32,15 +32,15 @@ else
                 action. No illustration is supplied.
             </p>
             <div class="hero-catalog__frame">
-                <LevelUpHero Eyebrow="Personal finance"
+                <BeeDayHero Eyebrow="Personal finance"
                              Title="Wallet"
                              Subtitle="Track your wallet, organize transactions and understand where your money goes.">
                     <PrimaryAction>
-                        <LevelUpButton Variant="LevelUpButtonVariant.Primary" Icon="PixelIconName.Add">
+                        <BeeDayButton Variant="BeeDayButtonVariant.Primary" Icon="PixelIconName.Add">
                             New transaction
-                        </LevelUpButton>
+                        </BeeDayButton>
                     </PrimaryAction>
-                </LevelUpHero>
+                </BeeDayHero>
             </div>
         </section>
 
@@ -52,7 +52,7 @@ else
                 long list.
             </p>
             <div class="hero-catalog__frame">
-                <LevelUpHero Variant="LevelUpHeroVariant.Onboarding"
+                <BeeDayHero Variant="BeeDayHeroVariant.Onboarding"
                              Eyebrow="01 — Daily"
                              Title="Your command center"
                              Subtitle="Daily keeps the actions that move your life forward in one place.">
@@ -60,38 +60,38 @@ else
                         <PixelIcon Name="PixelIconName.Daily" Size="PixelIconSize.ExtraLarge" Color="PixelIconColor.Primary" Decorative="true" />
                     </Illustration>
                     <PrimaryAction>
-                        <LevelUpButton Variant="LevelUpButtonVariant.Primary">Next</LevelUpButton>
+                        <BeeDayButton Variant="BeeDayButtonVariant.Primary">Next</BeeDayButton>
                     </PrimaryAction>
                     <SupportingContent>
                         Review today before starting, and return throughout the day.
                     </SupportingContent>
-                </LevelUpHero>
+                </BeeDayHero>
             </div>
         </section>
 
         <section class="hero-catalog__section" aria-labelledby="hero-accessibility-heading">
             <h2 id="hero-accessibility-heading">Illustration accessibility examples</h2>
             <p class="hero-catalog__note">
-                The illustration slot is an opaque <code>RenderFragment</code> — <code>LevelUpHero</code> never
+                The illustration slot is an opaque <code>RenderFragment</code> — <code>BeeDayHero</code> never
                 selects, loads, or labels the asset itself. Whether an illustration is decorative or informative
                 is entirely up to the content the consumer places inside the slot.
             </p>
             <div class="hero-catalog__examples">
                 <div class="hero-catalog__frame">
                     <p class="hero-catalog__example-label"><strong>Decorative</strong> — <code>Decorative="true"</code>, hidden from assistive technology.</p>
-                    <LevelUpHero Title="Decorative illustration example" Subtitle="The profile icon here carries no information beyond mood.">
+                    <BeeDayHero Title="Decorative illustration example" Subtitle="The profile icon here carries no information beyond mood.">
                         <Illustration>
                             <PixelIcon Name="PixelIconName.Profile" Size="PixelIconSize.ExtraLarge" Decorative="true" />
                         </Illustration>
-                    </LevelUpHero>
+                    </BeeDayHero>
                 </div>
                 <div class="hero-catalog__frame">
                     <p class="hero-catalog__example-label"><strong>Informative</strong> — explicit <code>Label</code>, exposed to assistive technology.</p>
-                    <LevelUpHero Title="Informative illustration example" Subtitle="The warning icon here communicates status and must be announced.">
+                    <BeeDayHero Title="Informative illustration example" Subtitle="The warning icon here communicates status and must be announced.">
                         <Illustration>
                             <PixelIcon Name="PixelIconName.Warning" Size="PixelIconSize.ExtraLarge" Color="PixelIconColor.Warning" Decorative="false" Label="Action required" />
                         </Illustration>
-                    </LevelUpHero>
+                    </BeeDayHero>
                 </div>
             </div>
         </section>
@@ -103,7 +103,7 @@ else
                 wrappers when their parameters are omitted.
             </p>
             <div class="hero-catalog__frame">
-                <LevelUpHero Title="Title-only Hero" />
+                <BeeDayHero Title="Title-only Hero" />
             </div>
         </section>
     </main>

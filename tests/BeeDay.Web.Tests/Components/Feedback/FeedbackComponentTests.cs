@@ -9,7 +9,7 @@ public sealed class FeedbackComponentTests
     public void EmptyStateRendersIconTitleDescriptionAndStatusRole()
     {
         using var context = new BunitContext();
-        var cut = context.Render<LevelUpEmptyState>(parameters => parameters
+        var cut = context.Render<BeeDayEmptyState>(parameters => parameters
             .Add(component => component.Title, "No tasks yet")
             .Add(component => component.Description, "Create a task to get started.")
             .Add(component => component.Icon, PixelIconName.RecurringTask)
@@ -30,7 +30,7 @@ public sealed class FeedbackComponentTests
     public void LoadingIsHiddenByDefault()
     {
         using var context = new BunitContext();
-        var cut = context.Render<LevelUpLoading>();
+        var cut = context.Render<BeeDayLoading>();
 
         Assert.Empty(cut.FindAll("[role='status']"));
     }
@@ -39,7 +39,7 @@ public sealed class FeedbackComponentTests
     public void LoadingRendersAccessibleLabelWhenVisible()
     {
         using var context = new BunitContext();
-        var cut = context.Render<LevelUpLoading>(parameters => parameters
+        var cut = context.Render<BeeDayLoading>(parameters => parameters
             .Add(component => component.IsVisible, true)
             .Add(component => component.Label, "Saving..."));
 
@@ -52,7 +52,7 @@ public sealed class FeedbackComponentTests
     public void SkeletonRendersRequestedNumberOfLines()
     {
         using var context = new BunitContext();
-        var cut = context.Render<LevelUpSkeleton>(parameters => parameters
+        var cut = context.Render<BeeDaySkeleton>(parameters => parameters
             .Add(component => component.Lines, 5)
             .Add(component => component.Class, "card-placeholder"));
 
@@ -64,7 +64,7 @@ public sealed class FeedbackComponentTests
     public void DashboardSkeletonRendersFourColumnsAndTwelveCards()
     {
         using var context = new BunitContext();
-        var cut = context.Render<LevelUpDashboardSkeleton>();
+        var cut = context.Render<BeeDayDashboardSkeleton>();
 
         Assert.Equal(4, cut.FindAll(".dashboard-skeleton__column").Count);
         Assert.Equal(12, cut.FindAll(".dashboard-skeleton__card").Count);

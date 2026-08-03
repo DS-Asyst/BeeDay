@@ -9,7 +9,7 @@ namespace BeeDay.Application.DependencyInjection;
 
 public static class ApplicationServiceCollectionExtensions
 {
-    public static IServiceCollection AddLevelUpApplication(this IServiceCollection services)
+    public static IServiceCollection AddBeeDayApplication(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
 

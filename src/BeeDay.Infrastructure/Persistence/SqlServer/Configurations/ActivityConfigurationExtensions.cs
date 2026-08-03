@@ -6,7 +6,7 @@ namespace BeeDay.Infrastructure.Persistence.SqlServer.Configurations;
 
 /// <summary>
 /// Configures the columns Habit/RecurringTask/Project/Todo inherit from the abstract Activity base.
-/// Under TPC (LevelUpDbContext.OnModelCreating) each of the four is its own fully self-contained table
+/// Under TPC (BeeDayDbContext.OnModelCreating) each of the four is its own fully self-contained table
 /// with no shared base table, so these columns must be configured once per concrete type — this helper
 /// avoids repeating the exact same property configuration in all four IEntityTypeConfiguration&lt;T&gt;
 /// files. It intentionally does not configure the UserId foreign key: Todo's is ON DELETE NO ACTION

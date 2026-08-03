@@ -14,7 +14,7 @@ namespace BeeDay.Web.Tests.Integration;
 /// <c>DevelopmentEmailSender</c> refuses to write outside the app's content root, so the capture
 /// directory must be a relative subpath under it rather than a %TEMP% path — cleaned up on Dispose.
 /// </remarks>
-public class EmailCaptureWebApplicationFactory : LevelUpWebApplicationFactory
+public class EmailCaptureWebApplicationFactory : BeeDayWebApplicationFactory
 {
     private static readonly Regex TokenPattern = new("[?&]token=([^&\"]+)", RegexOptions.Compiled);
 

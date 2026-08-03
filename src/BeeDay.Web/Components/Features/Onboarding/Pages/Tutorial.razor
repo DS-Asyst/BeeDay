@@ -1,7 +1,7 @@
 @page "/onboarding/tutorial"
 @attribute [Authorize]
 @layout BeeDay.Web.Components.Layout.OnboardingLayout
-@inject LevelUpWebService Store
+@inject BeeDayWebService Store
 @inject NavigationManager Navigation
 
 <PageTitle>Getting started | LevelUp</PageTitle>
@@ -9,7 +9,7 @@
 <section class="tutorial-page levelup-fade-in">
     <article class="tutorial-card">
         <header class="tutorial-header">
-            <LevelUpBrand />
+            <BeeDayBrand />
             <span class="tutorial-progress">STEP @(_step + 1) OF @Slides.Length</span>
         </header>
 
@@ -37,17 +37,17 @@
         </div>
 
         <footer class="tutorial-actions">
-            <LevelUpButton Variant="LevelUpButtonVariant.Back"
+            <BeeDayButton Variant="BeeDayButtonVariant.Back"
                            Disabled="@(_step == 0 || _busy)"
                            OnClick="Previous">
                 BACK
-            </LevelUpButton>
-            <LevelUpButton Variant="LevelUpButtonVariant.Primary"
+            </BeeDayButton>
+            <BeeDayButton Variant="BeeDayButtonVariant.Primary"
                            IsLoading="@_busy"
                            Disabled="@_busy"
                            OnClick="NextAsync">
                 @(_step == Slides.Length - 1 ? "ENTER DAILY" : "NEXT")
-            </LevelUpButton>
+            </BeeDayButton>
         </footer>
     </article>
 </section>

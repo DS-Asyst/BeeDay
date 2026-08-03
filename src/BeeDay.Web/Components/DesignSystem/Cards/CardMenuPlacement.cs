@@ -20,7 +20,7 @@ public readonly record struct CardMenuGeometry(
 public readonly record struct CardMenuPlacement(bool FlipUp, double HorizontalShiftPx);
 
 /// <summary>
-/// Pure, viewport-aware placement geometry for <see cref="LevelUpCardMenu"/>.
+/// Pure, viewport-aware placement geometry for <see cref="BeeDayCardMenu"/>.
 /// Deliberately framework-free (no Blazor/JS types) so it is testable with
 /// plain xUnit — no browser, no bUnit render tree required.
 /// </summary>

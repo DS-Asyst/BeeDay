@@ -59,7 +59,7 @@ public sealed class E2EWebApplicationFactory : WebApplicationFactory<Program>
         var host = base.CreateHost(builder);
 
         using var scope = host.Services.CreateScope();
-        var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<LevelUpDbContext>>();
+        var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<BeeDayDbContext>>();
         using var context = contextFactory.CreateDbContext();
         context.Database.Migrate();
 
@@ -113,7 +113,7 @@ public sealed class E2EWebApplicationFactory : WebApplicationFactory<Program>
         base.Dispose(disposing);
     }
 
-    // See LevelUpWebApplicationFactory.DropDatabaseBestEffort for why this retries: SQL Server LocalDB
+    // See BeeDayWebApplicationFactory.DropDatabaseBestEffort for why this retries: SQL Server LocalDB
     // refuses to DROP DATABASE while this same process still holds a pooled connection to it, and that
     // connection isn't always released the instant the last test method returns.
     private async Task DropDatabaseBestEffortAsync()
@@ -123,7 +123,7 @@ public sealed class E2EWebApplicationFactory : WebApplicationFactory<Program>
             try
             {
                 using var scope = Services.CreateScope();
-                var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<LevelUpDbContext>>();
+                var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<BeeDayDbContext>>();
                 await using var context = await contextFactory.CreateDbContextAsync();
 
                 Microsoft.Data.SqlClient.SqlConnection.ClearAllPools();
@@ -144,7 +144,7 @@ public sealed class E2EWebApplicationFactory : WebApplicationFactory<Program>
             try
             {
                 using var scope = Services.CreateScope();
-                var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<LevelUpDbContext>>();
+                var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<BeeDayDbContext>>();
                 using var context = contextFactory.CreateDbContext();
 
                 Microsoft.Data.SqlClient.SqlConnection.ClearAllPools();

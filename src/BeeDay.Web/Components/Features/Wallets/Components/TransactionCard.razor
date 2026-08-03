@@ -2,7 +2,7 @@
 @using BeeDay.Domain.Enums
 @using BeeDay.Web.Components.Features.Wallets.Services
 
-<LevelUpCard Class="wallet-transaction-card"
+<BeeDayCard Class="wallet-transaction-card"
              Interactive="true"
              role="button"
              tabindex="0"
@@ -37,7 +37,7 @@
             <span class="wallet-transaction-card__type"><PixelIcon Name="@TransactionTypeIcon" Size="PixelIconSize.ExtraSmall" Color="@TransactionTypeColor" /> @(Transaction.Type == TransactionType.Income ? "Income" : "Expense")</span>
         </div>
     </div>
-</LevelUpCard>
+</BeeDayCard>
 
 @code {
     [Parameter, EditorRequired] public TransactionResponse Transaction { get; set; } = default!;

@@ -1,0 +1,78 @@
+@if (IsOpen)
+{
+    <div class="delete-confirmation-backdrop"
+         role="presentation"
+         tabindex="-1"
+         @onclick="CancelAsync"
+         @onkeydown="HandleKeyDownAsync"
+         @onkeydown:stopPropagation="true">
+        <section class="delete-confirmation"
+                 role="alertdialog"
+                 aria-modal="true"
+                 aria-labelledby="levelup-confirm-title"
+                 aria-describedby="levelup-confirm-description"
+                 @onclick:stopPropagation>
+            <div class="delete-confirmation__top-border" aria-hidden="true"></div>
+            <div class="delete-confirmation__content">
+                <div class="delete-confirmation__icon" aria-hidden="true"><PixelIcon Name="PixelIconName.Delete" Size="PixelIconSize.ExtraLarge" Color="PixelIconColor.Danger" /></div>
+                <h2 id="levelup-confirm-title">@Title</h2>
+                <p id="levelup-confirm-description" class="delete-confirmation__question">@Message</p>
+
+                @if (!string.IsNullOrWhiteSpace(ItemTitle))
+                {
+                    <p class="delete-confirmation__item-title">“@ItemTitle”</p>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Warning))
+                {
+                    <div class="delete-confirmation__warning">
+                        <PixelIcon Name="PixelIconName.Warning" Size="PixelIconSize.Small" Color="PixelIconColor.Danger" Class="delete-confirmation__warning-icon" />
+                        <div>
+                            <strong>@Warning</strong>
+                            @if (!string.IsNullOrWhiteSpace(WarningDetails))
+                            {
+                                <p>@WarningDetails</p>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div class="delete-confirmation__actions">
+                    <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel"
+                                   Disabled="IsBusy"
+                                   Class="delete-confirmation__cancel-action levelup-button--comic levelup-button--comic-neutral"
+                                   OnClick="CancelAsync">
+                        @CancelLabel
+                    </BeeDayButton>
+                    <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationDanger"
+                                   Disabled="IsBusy"
+                                   IsLoading="IsBusy"
+                                   Class="delete-confirmation__confirm-action levelup-button--comic levelup-button--comic-danger"
+                                   OnClick="ConfirmAsync">
+                        @ConfirmLabel
+                    </BeeDayButton>
+                </div>
+            </div>
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Message { get; set; } = string.Empty;
+    [Parameter] public string? ItemTitle { get; set; }
+    [Parameter] public string? Warning { get; set; }
+    [Parameter] public string? WarningDetails { get; set; }
+    [Parameter] public string ConfirmLabel { get; set; } = "Confirm";
+    [Parameter] public string CancelLabel { get; set; } = "Cancel";
+    [Parameter] public EventCallback OnConfirm { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private Task ConfirmAsync() => IsBusy ? Task.CompletedTask : OnConfirm.InvokeAsync();
+    private Task CancelAsync() => IsBusy ? Task.CompletedTask : OnCancel.InvokeAsync();
+
+    private Task HandleKeyDownAsync(KeyboardEventArgs args) =>
+        args.Key == "Escape" ? CancelAsync() : Task.CompletedTask;
+}

@@ -1,26 +1,26 @@
 @using BeeDay.Web.Components.Features.Account.Models
 @using BeeDay.Domain.Enums
 
-<LevelUpSettingsSection Eyebrow="EXPERIENCE"
+<BeeDaySettingsSection Eyebrow="EXPERIENCE"
                         Title="Preferences"
                         Description="Choose how LevelUp looks and communicates with you.">
-    <LevelUpSettingsForm TModel="PreferencesFormModel" Model="Model" OnValidSubmit="OnSave"
+    <BeeDaySettingsForm TModel="PreferencesFormModel" Model="Model" OnValidSubmit="OnSave"
                          FormName="account-preferences" SubmitLabel="Save Preferences" SubmitButtonClass="levelup-button--comic levelup-button--comic-success" IsBusy="IsBusy">
         <div class="levelup-settings-form__grid">
-            <LevelUpSelect TValue="UserLanguage" Id="account-language" Label="Language"
+            <BeeDaySelect TValue="UserLanguage" Id="account-language" Label="Language"
                            @bind-Value="Model.Language">
                 <option value="@UserLanguage.English">English</option>
                 <option value="@UserLanguage.Portuguese">Portuguese</option>
-            </LevelUpSelect>
-            <LevelUpSelect TValue="UserTheme" Id="account-theme" Label="Theme"
+            </BeeDaySelect>
+            <BeeDaySelect TValue="UserTheme" Id="account-theme" Label="Theme"
                            @bind-Value="Model.Theme">
                 <option value="@UserTheme.System">System</option>
                 <option value="@UserTheme.Light">Light</option>
                 <option value="@UserTheme.Dark">Dark</option>
-            </LevelUpSelect>
+            </BeeDaySelect>
         </div>
-    </LevelUpSettingsForm>
-</LevelUpSettingsSection>
+    </BeeDaySettingsForm>
+</BeeDaySettingsSection>
 
 @code {
     [Parameter, EditorRequired] public PreferencesFormModel Model { get; set; } = default!;

@@ -20,7 +20,7 @@ public sealed class WalletComponentTests : BunitContext
     }
 
     [Fact]
-    public void Summary_CardsComposeTheSharedStaticLevelUpCardPrimitive()
+    public void Summary_CardsComposeTheSharedStaticBeeDayCardPrimitive()
     {
         var summary = new WalletSummaryResponse(Guid.NewGuid(), 125.50m, 200m, 74.50m, 3, DateTimeOffset.UtcNow);
         var cut = Render<WalletSummary>(parameters => parameters.Add(component => component.Summary, summary));

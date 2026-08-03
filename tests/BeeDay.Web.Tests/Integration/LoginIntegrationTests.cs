@@ -10,8 +10,8 @@ namespace BeeDay.Web.Tests.Integration;
 /// redirect destinations, and that failure responses never distinguish "wrong password" from
 /// "no such account".
 /// </summary>
-public sealed class LoginIntegrationTests(LevelUpWebApplicationFactory factory)
-    : IClassFixture<LevelUpWebApplicationFactory>
+public sealed class LoginIntegrationTests(BeeDayWebApplicationFactory factory)
+    : IClassFixture<BeeDayWebApplicationFactory>
 {
     [Fact]
     public async Task Login_WithValidCredentials_Succeeds()

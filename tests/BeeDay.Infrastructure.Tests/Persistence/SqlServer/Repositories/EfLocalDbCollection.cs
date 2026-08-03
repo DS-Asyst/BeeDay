@@ -8,7 +8,7 @@ namespace BeeDay.Infrastructure.Tests.Persistence.SqlServer.Repositories;
 /// CREATE DATABASE/DROP DATABASE statements against the same `mssqllocaldb` instance — the same
 /// resource-contention problem already solved for Playwright in BeeDay.E2E.Tests via
 /// `DisableTestParallelization`, scoped here to just this collection so the in-memory-only
-/// `LevelUpDbContextTests` is unaffected and keeps running in parallel.
+/// `BeeDayDbContextTests` is unaffected and keeps running in parallel.
 /// </summary>
 [CollectionDefinition("EfLocalDb", DisableParallelization = true)]
 public sealed class EfLocalDbCollection;

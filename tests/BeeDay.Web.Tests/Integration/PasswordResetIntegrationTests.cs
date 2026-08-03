@@ -86,7 +86,7 @@ public sealed class PasswordResetIntegrationTests
     public async Task ResetPassword_WithInvalidToken_Throws()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await using var factory = new LevelUpWebApplicationFactory();
+        await using var factory = new BeeDayWebApplicationFactory();
         await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
@@ -98,7 +98,7 @@ public sealed class PasswordResetIntegrationTests
     public async Task ResetPassword_WithExpiredToken_Throws()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await using var factory = new LevelUpWebApplicationFactory();
+        await using var factory = new BeeDayWebApplicationFactory();
         var user = await factory.SeedConfirmedUserAsync("reset-expired@levelup.invalid", "Password123!");
         var token = await factory.IssuePasswordResetTokenAsync(user.Id, expired: true);
 
@@ -113,7 +113,7 @@ public sealed class PasswordResetIntegrationTests
     public async Task ResetPassword_WithAlreadyUsedToken_Throws()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await using var factory = new LevelUpWebApplicationFactory();
+        await using var factory = new BeeDayWebApplicationFactory();
         var user = await factory.SeedConfirmedUserAsync("reset-reused@levelup.invalid", "Password123!");
         var token = await factory.IssuePasswordResetTokenAsync(user.Id);
 
@@ -129,7 +129,7 @@ public sealed class PasswordResetIntegrationTests
     public async Task ResetPassword_RevokesPriorOutstandingTokenForTheSameUser()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await using var factory = new LevelUpWebApplicationFactory();
+        await using var factory = new BeeDayWebApplicationFactory();
         var user = await factory.SeedConfirmedUserAsync("reset-revoked@levelup.invalid", "Password123!");
         var firstToken = await factory.IssuePasswordResetTokenAsync(user.Id);
 

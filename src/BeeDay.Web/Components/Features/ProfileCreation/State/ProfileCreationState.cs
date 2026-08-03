@@ -3,7 +3,7 @@ using BeeDay.Web.Services;
 
 namespace BeeDay.Web.Components.Features.ProfileCreation.State;
 
-public sealed class ProfileCreationState(LevelUpWebService store, ToastService toastService)
+public sealed class ProfileCreationState(BeeDayWebService store, ToastService toastService)
 {
     public ProfileCreationFormModel Model { get; } = new();
     public ProfileCreationStep Step { get; private set; } = ProfileCreationStep.Account;

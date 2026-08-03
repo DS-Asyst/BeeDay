@@ -21,7 +21,7 @@ public sealed class EmailConfirmationIntegrationTests
     public async Task ConfirmEmail_WithValidToken_MarksEmailConfirmed()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await using var factory = new LevelUpWebApplicationFactory();
+        await using var factory = new BeeDayWebApplicationFactory();
         var user = await factory.SeedUnconfirmedUserAsync("confirm-valid@levelup.invalid", "Password123!");
         var token = await factory.IssueEmailConfirmationTokenAsync(user.Id);
 
@@ -39,7 +39,7 @@ public sealed class EmailConfirmationIntegrationTests
     public async Task ConfirmEmail_WithInvalidToken_Throws()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await using var factory = new LevelUpWebApplicationFactory();
+        await using var factory = new BeeDayWebApplicationFactory();
         await using var scope = factory.Services.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
@@ -51,7 +51,7 @@ public sealed class EmailConfirmationIntegrationTests
     public async Task ConfirmEmail_WithExpiredToken_Throws()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await using var factory = new LevelUpWebApplicationFactory();
+        await using var factory = new BeeDayWebApplicationFactory();
         var user = await factory.SeedUnconfirmedUserAsync("confirm-expired@levelup.invalid", "Password123!");
         var token = await factory.IssueEmailConfirmationTokenAsync(user.Id, expired: true);
 
@@ -69,7 +69,7 @@ public sealed class EmailConfirmationIntegrationTests
     public async Task ConfirmEmail_WithAlreadyUsedToken_CannotBeReplayed()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await using var factory = new LevelUpWebApplicationFactory();
+        await using var factory = new BeeDayWebApplicationFactory();
         var user = await factory.SeedUnconfirmedUserAsync("confirm-reused@levelup.invalid", "Password123!");
         var token = await factory.IssueEmailConfirmationTokenAsync(user.Id);
 
@@ -161,7 +161,7 @@ public sealed class EmailConfirmationIntegrationTests
     public async Task Login_IsRejectedBeforeConfirmationAndSucceedsAfter()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
-        await using var factory = new LevelUpWebApplicationFactory();
+        await using var factory = new BeeDayWebApplicationFactory();
         var user = await factory.SeedUnconfirmedUserAsync("confirm-login-gate@levelup.invalid", "Password123!");
 
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });

@@ -6,11 +6,11 @@ namespace BeeDay.Infrastructure.Persistence.SqlServer.Repositories;
 
 internal sealed class EfRecurringTaskRepository : EfRepositoryBase, IRecurringTaskRepository
 {
-    public EfRecurringTaskRepository(IDbContextFactory<LevelUpDbContext> contextFactory) : base(contextFactory)
+    public EfRecurringTaskRepository(IDbContextFactory<BeeDayDbContext> contextFactory) : base(contextFactory)
     {
     }
 
-    internal EfRecurringTaskRepository(LevelUpDbContext sharedContext) : base(sharedContext)
+    internal EfRecurringTaskRepository(BeeDayDbContext sharedContext) : base(sharedContext)
     {
     }
 

@@ -6,11 +6,11 @@ namespace BeeDay.Infrastructure.Persistence.SqlServer.Repositories;
 
 internal sealed class EfWalletRepository : EfRepositoryBase, IWalletRepository
 {
-    public EfWalletRepository(IDbContextFactory<LevelUpDbContext> contextFactory) : base(contextFactory)
+    public EfWalletRepository(IDbContextFactory<BeeDayDbContext> contextFactory) : base(contextFactory)
     {
     }
 
-    internal EfWalletRepository(LevelUpDbContext sharedContext) : base(sharedContext)
+    internal EfWalletRepository(BeeDayDbContext sharedContext) : base(sharedContext)
     {
     }
 

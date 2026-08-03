@@ -11,7 +11,7 @@ using BeeDay.Web.Services;
 
 namespace BeeDay.Web.Components.Features.Dashboard.State;
 
-public sealed class DashboardState(LevelUpWebService store, ToastService toastService)
+public sealed class DashboardState(BeeDayWebService store, ToastService toastService)
 {
     private static readonly UserProfileSummary EmptyProfile = new(
         Guid.Empty, string.Empty, string.Empty, string.Empty, UserLanguage.English, UserTheme.System, 0, 1, 0, 0);

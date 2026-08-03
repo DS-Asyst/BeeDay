@@ -10,12 +10,12 @@
 
             <header class="editor-modal__header">
                 <h2 id="@TitleId">@Title</h2>
-                <LevelUpButton Type="submit"
-                               Variant="LevelUpButtonVariant.Primary"
+                <BeeDayButton Type="submit"
+                               Variant="BeeDayButtonVariant.Primary"
                                Icon="PixelIconName.Save"
                                Disabled="IsBusy"
                                IsLoading="IsBusy"
-                               Class="editor-modal__submit-action editor-modal__header-save levelup-button--comic levelup-button--comic-success">@SubmitLabel</LevelUpButton>
+                               Class="editor-modal__submit-action editor-modal__header-save levelup-button--comic levelup-button--comic-success">@SubmitLabel</BeeDayButton>
             </header>
 
             <div class="editor-modal__content">
@@ -27,20 +27,20 @@
                 <div class="editor-modal__footer-danger">
                     @if (ShowDelete)
                     {
-                        <LevelUpButton Variant="LevelUpButtonVariant.Danger"
+                        <BeeDayButton Variant="BeeDayButtonVariant.Danger"
                                        Disabled="IsBusy"
                                        Compact="true"
                                        Class="levelup-button--comic levelup-button--comic-danger"
-                                       OnClick="OnDelete">Delete</LevelUpButton>
+                                       OnClick="OnDelete">Delete</BeeDayButton>
                     }
                 </div>
 
                 <div class="editor-modal__footer-actions">
                     @SecondaryAction
-                    <LevelUpButton Variant="LevelUpButtonVariant.ConfirmationCancel"
+                    <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel"
                                    Disabled="IsBusy"
                                    Class="editor-modal__cancel-action levelup-button--comic levelup-button--comic-neutral"
-                                   OnClick="Cancel">Cancel</LevelUpButton>
+                                   OnClick="Cancel">Cancel</BeeDayButton>
                 </div>
             </footer>
         </EditForm>

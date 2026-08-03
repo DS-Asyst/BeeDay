@@ -17,11 +17,11 @@ public abstract class EfLocalDbTestBase : IAsyncLifetime
 {
     private ServiceProvider serviceProvider = null!;
 
-    // internal, not protected: LevelUpDbContext is itself internal to BeeDay.Infrastructure (with
+    // internal, not protected: BeeDayDbContext is itself internal to BeeDay.Infrastructure (with
     // InternalsVisibleTo granted to this test assembly) — a protected member of a public class cannot
     // expose a less-accessible type (CS0053), but an internal member can, and every derived test class
     // lives in this same assembly regardless.
-    internal IDbContextFactory<LevelUpDbContext> ContextFactory { get; private set; } = null!;
+    internal IDbContextFactory<BeeDayDbContext> ContextFactory { get; private set; } = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -30,10 +30,10 @@ public abstract class EfLocalDbTestBase : IAsyncLifetime
             $"Server=(localdb)\\mssqllocaldb;Database={databaseName};Trusted_Connection=True;TrustServerCertificate=True;";
 
         var services = new ServiceCollection();
-        services.AddDbContextFactory<LevelUpDbContext>(options => options.UseSqlServer(connectionString));
+        services.AddDbContextFactory<BeeDayDbContext>(options => options.UseSqlServer(connectionString));
         serviceProvider = services.BuildServiceProvider();
 
-        ContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<LevelUpDbContext>>();
+        ContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<BeeDayDbContext>>();
 
         await using var context = await ContextFactory.CreateDbContextAsync();
         await context.Database.MigrateAsync();

@@ -1,21 +1,21 @@
 @using BeeDay.Web.Components.Features.Account.Models
 
-<LevelUpSettingsSection Eyebrow="PASSWORD"
+<BeeDaySettingsSection Eyebrow="PASSWORD"
                         Title="Security"
                         Description="Protect your account with a strong, unique password.">
-    <LevelUpSettingsForm TModel="SecurityFormModel" Model="Model" OnValidSubmit="OnSave"
+    <BeeDaySettingsForm TModel="SecurityFormModel" Model="Model" OnValidSubmit="OnSave"
                          FormName="account-security" SubmitLabel="Change Password" SubmitButtonClass="levelup-button--comic levelup-button--comic-blue" IsBusy="IsBusy">
-        <LevelUpInput Id="current-password" Label="Current password" Required="true"
+        <BeeDayInput Id="current-password" Label="Current password" Required="true"
                       @bind-Value="Model.CurrentPassword" type="password" autocomplete="current-password" />
         <div class="levelup-settings-form__grid">
-            <LevelUpInput Id="new-password" Label="New password" Required="true"
+            <BeeDayInput Id="new-password" Label="New password" Required="true"
                           @bind-Value="Model.NewPassword" type="password" autocomplete="new-password" />
-            <LevelUpInput Id="confirm-password" Label="Confirm new password" Required="true"
+            <BeeDayInput Id="confirm-password" Label="Confirm new password" Required="true"
                           @bind-Value="Model.ConfirmNewPassword" type="password" autocomplete="new-password" />
         </div>
         <p class="levelup-settings-form__hint">Use at least 8 characters, including one letter and one number.</p>
-    </LevelUpSettingsForm>
-</LevelUpSettingsSection>
+    </BeeDaySettingsForm>
+</BeeDaySettingsSection>
 
 @code {
     [Parameter, EditorRequired] public SecurityFormModel Model { get; set; } = default!;

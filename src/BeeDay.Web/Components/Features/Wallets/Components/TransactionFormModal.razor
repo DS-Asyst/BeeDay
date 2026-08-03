@@ -14,7 +14,7 @@
                       OnDelete="DeleteAsync">
         <HeroContent>
             <div class="editor-modal__hero">
-                <LevelUpInput Id="transaction-description"
+                <BeeDayInput Id="transaction-description"
                               Label="Description"
                               Required="true"
                               @bind-Value="Model.Description"
@@ -23,7 +23,7 @@
                               FieldCssClass="editor-modal__hero-field"
                               LabelCssClass="editor-modal__label-line"
                               autofocus />
-                <LevelUpTextArea Id="transaction-notes"
+                <BeeDayTextArea Id="transaction-notes"
                                  Label="Notes"
                                  @bind-Value="Model.Notes"
                                  Placeholder="Add notes"
@@ -44,14 +44,14 @@
                     </div>
                 </div>
 
-                <LevelUpSelect TValue="TransactionType"
+                <BeeDaySelect TValue="TransactionType"
                                Id="transaction-type"
                                Label="Type"
                                @bind-Value="Model.Type"
                                FieldCssClass="editor-modal__field">
                     <option value="@TransactionType.Income">Income</option>
                     <option value="@TransactionType.Expense">Expense</option>
-                </LevelUpSelect>
+                </BeeDaySelect>
 
                 <label class="editor-modal__field">
                     <span>Amount</span>
@@ -59,13 +59,13 @@
                     <ValidationMessage For="@(() => Model.Amount)" />
                 </label>
 
-                <LevelUpDateInput TValue="DateTime"
+                <BeeDayDateInput TValue="DateTime"
                                   Id="transaction-date"
                                   Label="Date"
                                   @bind-Value="Model.TransactionDate"
                                   FieldCssClass="editor-modal__field" />
 
-                <LevelUpSelect TValue="Guid?"
+                <BeeDaySelect TValue="Guid?"
                                Id="transaction-tag"
                                Label="Tag"
                                @bind-Value="Model.WalletTagId"
@@ -75,7 +75,7 @@
                     {
                         <option value="@tag.Id">@tag.Name</option>
                     }
-                </LevelUpSelect>
+                </BeeDaySelect>
             </div>
         </BodyContent>
     </EditorModalShell>

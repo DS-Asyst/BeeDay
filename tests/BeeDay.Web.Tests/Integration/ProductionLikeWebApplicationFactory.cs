@@ -15,7 +15,7 @@ namespace BeeDay.Web.Tests.Integration;
 /// the very start, are not. They are set only for the lifetime of this instance and restored on
 /// dispose, since they are process-wide state.
 /// </remarks>
-public sealed class ProductionLikeWebApplicationFactory : LevelUpWebApplicationFactory
+public sealed class ProductionLikeWebApplicationFactory : BeeDayWebApplicationFactory
 {
     private readonly (string Key, string Value)[] requiredEnvironmentVariables;
     private readonly string dataProtectionKeysDirectory =

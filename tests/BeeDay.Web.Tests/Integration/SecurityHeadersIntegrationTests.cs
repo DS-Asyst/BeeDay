@@ -21,8 +21,8 @@ namespace BeeDay.Web.Tests.Integration;
 /// is a known limitation of testing HSTS via WebApplicationFactory in general, not a defect in
 /// Program.cs — see the final sprint report.
 /// </remarks>
-public sealed class SecurityHeadersIntegrationTests(LevelUpWebApplicationFactory factory)
-    : IClassFixture<LevelUpWebApplicationFactory>
+public sealed class SecurityHeadersIntegrationTests(BeeDayWebApplicationFactory factory)
+    : IClassFixture<BeeDayWebApplicationFactory>
 {
     [Fact]
     public async Task LoginPage_IncludesFrameworkProvidedFrameAncestorsAndClickjackingHeaders()

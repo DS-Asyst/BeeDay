@@ -45,9 +45,9 @@
         @if (Transactions.TotalPages > 1)
         {
             <nav class="wallet-pagination" aria-label="Transaction pages">
-                <LevelUpButton Variant="LevelUpButtonVariant.Secondary" Compact="true" Disabled="@(IsBusy || Transactions.Page <= 1)" OnClick="OnPreviousPage">Previous</LevelUpButton>
+                <BeeDayButton Variant="BeeDayButtonVariant.Secondary" Compact="true" Disabled="@(IsBusy || Transactions.Page <= 1)" OnClick="OnPreviousPage">Previous</BeeDayButton>
                 <span>@PaginationSummary · Page @Transactions.Page of @Transactions.TotalPages</span>
-                <LevelUpButton Variant="LevelUpButtonVariant.Secondary" Compact="true" Disabled="@(IsBusy || Transactions.Page >= Transactions.TotalPages)" OnClick="OnNextPage">Next</LevelUpButton>
+                <BeeDayButton Variant="BeeDayButtonVariant.Secondary" Compact="true" Disabled="@(IsBusy || Transactions.Page >= Transactions.TotalPages)" OnClick="OnNextPage">Next</BeeDayButton>
             </nav>
         }
     }

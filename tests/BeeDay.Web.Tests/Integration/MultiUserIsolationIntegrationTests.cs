@@ -22,13 +22,13 @@ namespace BeeDay.Web.Tests.Integration;
 /// <summary>
 /// Proves cross-user isolation for every user-owned aggregate (Habits, Tasks, Projects, Todos,
 /// Wallet transactions, Wallet tags, Profile) through the REAL MediatR handlers and the REAL
-/// HttpCurrentUserContext, driven by <see cref="LevelUpWebApplicationFactory.CreateAuthenticatedScope"/>.
+/// HttpCurrentUserContext, driven by <see cref="BeeDayWebApplicationFactory.CreateAuthenticatedScope"/>.
 /// These flows have no raw HTTP endpoint of their own (they're invoked from Blazor components), so
 /// this is the closest to end-to-end coverage available without faking ICurrentUserContext itself
 /// — a hard constraint for this suite.
 /// </summary>
-public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFactory factory)
-    : IClassFixture<LevelUpWebApplicationFactory>
+public sealed class MultiUserIsolationIntegrationTests(BeeDayWebApplicationFactory factory)
+    : IClassFixture<BeeDayWebApplicationFactory>
 {
     [Fact]
     public async Task Snapshot_ForOneUser_NeverIncludesAnotherUsersData()
@@ -266,11 +266,11 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
         return transaction.Id;
     }
 
-    private async Task<T> FindAsync<T>(Func<BeeDay.Infrastructure.Persistence.SqlServer.LevelUpDbContext, T> select)
+    private async Task<T> FindAsync<T>(Func<BeeDay.Infrastructure.Persistence.SqlServer.BeeDayDbContext, T> select)
     {
         await using var scope = factory.Services.CreateAsyncScope();
         var contextFactory = scope.ServiceProvider
-            .GetRequiredService<IDbContextFactory<BeeDay.Infrastructure.Persistence.SqlServer.LevelUpDbContext>>();
+            .GetRequiredService<IDbContextFactory<BeeDay.Infrastructure.Persistence.SqlServer.BeeDayDbContext>>();
         await using var context = await contextFactory.CreateDbContextAsync();
         return select(context);
     }

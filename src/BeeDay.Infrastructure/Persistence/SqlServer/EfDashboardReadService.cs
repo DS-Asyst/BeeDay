@@ -10,12 +10,12 @@ namespace BeeDay.Infrastructure.Persistence.SqlServer;
 /// <summary>
 /// SQL Server adapter for <see cref="IDashboardReadService"/> — mirrors
 /// <c>JsonDashboardReadService</c> exactly (same projections, same shape), against
-/// <see cref="LevelUpDbContext"/> instead of the whole-document JSON store. Every read is
+/// <see cref="BeeDayDbContext"/> instead of the whole-document JSON store. Every read is
 /// <c>AsNoTracking()</c>; ordering of Habits/Tasks/Projects/Todos uses the same <c>Position</c> shadow
 /// property the repositories already order by — the equivalent of the JSON document's own list order,
 /// since SQL Server has no implicit row order.
 /// </summary>
-internal sealed class EfDashboardReadService(IDbContextFactory<LevelUpDbContext> contextFactory) : IDashboardReadService
+internal sealed class EfDashboardReadService(IDbContextFactory<BeeDayDbContext> contextFactory) : IDashboardReadService
 {
     public async Task<DashboardResponse> GetAsync(Guid userId, CancellationToken cancellationToken = default)
     {

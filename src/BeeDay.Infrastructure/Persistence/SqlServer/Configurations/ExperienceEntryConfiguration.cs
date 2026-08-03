@@ -23,7 +23,7 @@ internal sealed class ExperienceEntryConfiguration : IEntityTypeConfiguration<Ex
         // Computed pass-through/alias properties (get-only, no backing field) — EF Core does not skip
         // these by convention on its own; left unignored, model validation fails with "No backing
         // field could be found ... and the property does not have a setter" (confirmed by
-        // LevelUpDbContextTests during this Sprint). The real, stored values live on the owned
+        // BeeDayDbContextTests during this Sprint). The real, stored values live on the owned
         // ExperienceSource below.
         builder.Ignore(entry => entry.SourceType);
         builder.Ignore(entry => entry.SourceId);

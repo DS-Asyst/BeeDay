@@ -8,10 +8,10 @@
 
 <section class="profile-page levelup-fade-in">
     <div class="profile-panel profile-panel--@State.CurrentStepClass">
-        <div class="profile-panel__global-brand"><LevelUpBrand /></div>
+        <div class="profile-panel__global-brand"><BeeDayBrand /></div>
         @if (State.Step == BeeDay.Web.Components.Features.ProfileCreation.State.ProfileCreationStep.Account)
         {
-            <LevelUpButton Variant="LevelUpButtonVariant.Back" Compact="true" Class="levelup-button--comic levelup-button--comic-back" OnClick="BackToLogin">Back</LevelUpButton>
+            <BeeDayButton Variant="BeeDayButtonVariant.Back" Compact="true" Class="levelup-button--comic levelup-button--comic-back" OnClick="BackToLogin">Back</BeeDayButton>
             <h1>Create your account</h1>
             <p class="profile-panel__intro">Start organizing your habits, tasks and finances.</p>
 
@@ -68,17 +68,17 @@
                     <p class="profile-validation" role="alert">@State.ValidationError</p>
                 }
 
-                <LevelUpButton Variant="LevelUpButtonVariant.Primary"
+                <BeeDayButton Variant="BeeDayButtonVariant.Primary"
                                Class="levelup-button--comic levelup-button--comic-yellow"
                                Disabled="@(!State.CanContinueAccount)"
                                OnClick="ContinueToProfile">
                     Continue
-                </LevelUpButton>
+                </BeeDayButton>
             </div>
         }
         else
         {
-            <LevelUpButton Variant="LevelUpButtonVariant.Back" Compact="true" Class="levelup-button--comic levelup-button--comic-back" OnClick="Back">Back</LevelUpButton>
+            <BeeDayButton Variant="BeeDayButtonVariant.Back" Compact="true" Class="levelup-button--comic levelup-button--comic-back" OnClick="Back">Back</BeeDayButton>
             <h1>Choose your nickname</h1>
             <p class="profile-panel__intro">This is how you'll be identified in LevelUp.</p>
 
@@ -100,13 +100,13 @@
                     <p class="profile-validation" role="alert">@State.ValidationError</p>
                 }
 
-                <LevelUpButton Variant="LevelUpButtonVariant.Primary"
+                <BeeDayButton Variant="BeeDayButtonVariant.Primary"
                                Class="levelup-button--comic levelup-button--comic-yellow"
                                IsLoading="@State.IsBusy"
                                Disabled="@State.IsBusy"
                                OnClick="CompleteProfileAsync">
                     Create account
-                </LevelUpButton>
+                </BeeDayButton>
             </div>
         }
     </div>

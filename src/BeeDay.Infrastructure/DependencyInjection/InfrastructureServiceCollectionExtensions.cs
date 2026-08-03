@@ -17,7 +17,7 @@ namespace BeeDay.Infrastructure.DependencyInjection;
 
 public static class InfrastructureServiceCollectionExtensions
 {
-    public static IServiceCollection AddLevelUpInfrastructure(
+    public static IServiceCollection AddBeeDayInfrastructure(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -95,9 +95,9 @@ public static class InfrastructureServiceCollectionExtensions
         // AddDbContextFactory, not AddDbContext: BeeDay.Web is Blazor Server, whose SignalR circuits
         // are long-lived. A DbContext registered as scoped would live for the whole circuit — unsafe
         // for a type that is not thread-safe and not meant to track state across many operations. Every
-        // future adapter must resolve IDbContextFactory<LevelUpDbContext> and create/dispose a
+        // future adapter must resolve IDbContextFactory<BeeDayDbContext> and create/dispose a
         // short-lived context per operation via CreateDbContext()/CreateDbContextAsync().
-        services.AddDbContextFactory<LevelUpDbContext>((serviceProvider, options) =>
+        services.AddDbContextFactory<BeeDayDbContext>((serviceProvider, options) =>
         {
             var sqlServerOptions = serviceProvider.GetRequiredService<IOptions<SqlServerOptions>>().Value;
             options.UseSqlServer(sqlServerOptions.ConnectionString);
@@ -116,7 +116,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IWalletTagRepository, EfWalletTagRepository>();
         services.AddScoped<ITransactionRepository, EfTransactionRepository>();
 
-        // Sprint 14.5: coordinates the 8 repositories above against one shared LevelUpDbContext, for
+        // Sprint 14.5: coordinates the 8 repositories above against one shared BeeDayDbContext, for
         // callers that need multiple writes to commit/roll back together. AddTransient, not AddScoped —
         // EfUnitOfWork eagerly creates and holds a context for its own lifetime; a Scoped registration
         // would let it live for the whole Blazor Server circuit (the exact problem AddDbContextFactory

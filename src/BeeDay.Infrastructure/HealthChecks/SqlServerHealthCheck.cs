@@ -4,10 +4,10 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace BeeDay.Infrastructure.HealthChecks;
 
-// Depends on IDbContextFactory<LevelUpDbContext>, not LevelUpDbContext directly — Blazor Server circuits
+// Depends on IDbContextFactory<BeeDayDbContext>, not BeeDayDbContext directly — Blazor Server circuits
 // are long-lived, so nothing in this codebase should hold a single scoped DbContext for the circuit's
 // lifetime. Every operation, including this check, creates and disposes its own short-lived context.
-internal sealed class SqlServerHealthCheck(IDbContextFactory<LevelUpDbContext> dbContextFactory) : IHealthCheck
+internal sealed class SqlServerHealthCheck(IDbContextFactory<BeeDayDbContext> dbContextFactory) : IHealthCheck
 {
     public async Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,

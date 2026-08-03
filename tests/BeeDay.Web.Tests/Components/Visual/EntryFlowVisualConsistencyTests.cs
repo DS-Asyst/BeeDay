@@ -20,7 +20,7 @@ public sealed class EntryFlowVisualConsistencyTests
 
         var source = string.Join('\n', pagePaths.Select(File.ReadAllText));
 
-        Assert.Contains("<LevelUpBrand", source);
+        Assert.Contains("<BeeDayBrand", source);
         Assert.DoesNotContain("identity" + "-brand", source);
         Assert.DoesNotContain("<span>LEVEL</span>" + "<span>UP</span>", source);
     }

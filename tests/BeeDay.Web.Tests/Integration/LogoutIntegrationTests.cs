@@ -9,8 +9,8 @@ namespace BeeDay.Web.Tests.Integration;
 /// protected resources, repeat-logout safety, and the distinction between "sign out this one
 /// cookie" (logout) and "invalidate every session" (SessionVersion, covered separately).
 /// </summary>
-public sealed class LogoutIntegrationTests(LevelUpWebApplicationFactory factory)
-    : IClassFixture<LevelUpWebApplicationFactory>
+public sealed class LogoutIntegrationTests(BeeDayWebApplicationFactory factory)
+    : IClassFixture<BeeDayWebApplicationFactory>
 {
     [Fact]
     public async Task Logout_ClearsTheAuthCookie()

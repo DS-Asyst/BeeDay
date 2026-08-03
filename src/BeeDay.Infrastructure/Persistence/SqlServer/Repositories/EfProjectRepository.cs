@@ -6,11 +6,11 @@ namespace BeeDay.Infrastructure.Persistence.SqlServer.Repositories;
 
 internal sealed class EfProjectRepository : EfRepositoryBase, IProjectRepository
 {
-    public EfProjectRepository(IDbContextFactory<LevelUpDbContext> contextFactory) : base(contextFactory)
+    public EfProjectRepository(IDbContextFactory<BeeDayDbContext> contextFactory) : base(contextFactory)
     {
     }
 
-    internal EfProjectRepository(LevelUpDbContext sharedContext) : base(sharedContext)
+    internal EfProjectRepository(BeeDayDbContext sharedContext) : base(sharedContext)
     {
     }
 
@@ -256,7 +256,7 @@ internal sealed class EfProjectRepository : EfRepositoryBase, IProjectRepository
         await EfConcurrencySaveChanges.ExecuteAsync(context, cancellationToken);
     }
 
-    private static IQueryable<Project> ProjectsWithOrderedTodos(LevelUpDbContext context) =>
+    private static IQueryable<Project> ProjectsWithOrderedTodos(BeeDayDbContext context) =>
         context.Projects
             .AsNoTracking()
             .Include(project => project.Todos.OrderBy(todo => EF.Property<int>(todo, "Position")));

@@ -12,8 +12,8 @@ namespace BeeDay.Web.Tests.Integration;
 /// request to an authorization-gated minimal API endpoint is rejected before antiforgery is even
 /// evaluated (CSRF-specific behavior is covered separately by AntiforgeryIntegrationTests).
 /// </summary>
-public sealed class AuthorizationIntegrationTests(LevelUpWebApplicationFactory factory)
-    : IClassFixture<LevelUpWebApplicationFactory>
+public sealed class AuthorizationIntegrationTests(BeeDayWebApplicationFactory factory)
+    : IClassFixture<BeeDayWebApplicationFactory>
 {
     public static IEnumerable<object[]> ProtectedPages { get; } =
     [

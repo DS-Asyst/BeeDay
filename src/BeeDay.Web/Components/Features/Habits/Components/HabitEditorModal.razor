@@ -10,7 +10,7 @@
                   OnDelete="RequestDelete">
     <HeroContent>
         <div class="editor-modal__hero">
-            <LevelUpInput Id="habit-title"
+            <BeeDayInput Id="habit-title"
                           Label="Title"
                           Required="true"
                           @bind-Value="Model.Title"
@@ -19,7 +19,7 @@
                           FieldCssClass="editor-modal__hero-field"
                           LabelCssClass="editor-modal__label-line"
                           autofocus />
-            <LevelUpTextArea Id="habit-notes"
+            <BeeDayTextArea Id="habit-notes"
                              Label="Notes"
                              @bind-Value="Model.Description"
                              Placeholder="Add notes"
@@ -36,7 +36,7 @@
                 <button type="button" class="habit-editor__direction-button @(AllowsPositive ? "active" : string.Empty)" @onclick="TogglePositive"><span>+</span><strong>Positive</strong></button>
                 <button type="button" class="habit-editor__direction-button @(AllowsNegative ? "active" : string.Empty)" @onclick="ToggleNegative"><span>−</span><strong>Negative</strong></button>
             </div>
-            <LevelUpSelect TValue="HabitDifficulty"
+            <BeeDaySelect TValue="HabitDifficulty"
                            Id="habit-difficulty"
                            Label="Difficulty"
                            @bind-Value="Model.Difficulty"
@@ -45,8 +45,8 @@
                 {
                     <option value="@option">@option</option>
                 }
-            </LevelUpSelect>
-            <LevelUpSelect TValue="HabitResetCounter"
+            </BeeDaySelect>
+            <BeeDaySelect TValue="HabitResetCounter"
                            Id="habit-reset-counter"
                            Label="Reset counter"
                            @bind-Value="Model.ResetCounter"
@@ -55,7 +55,7 @@
                 {
                     <option value="@option">@option</option>
                 }
-            </LevelUpSelect>
+            </BeeDaySelect>
             <ActivityAttributeSelect Id="habit-attribute"
                                       Label="Attribute"
                                       @bind-Value="Model.Attribute"
@@ -64,7 +64,7 @@
     </BodyContent>
 </EditorModalShell>
 
-<LevelUpConfirmDialog IsOpen="showDeleteConfirmation"
+<BeeDayConfirmDialog IsOpen="showDeleteConfirmation"
                       Title="Delete Habit"
                       Message="Are you sure you want to delete this habit?"
                       ItemTitle="@Model.Title"

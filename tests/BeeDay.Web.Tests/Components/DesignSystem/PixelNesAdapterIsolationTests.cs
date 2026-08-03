@@ -123,7 +123,7 @@ public sealed class PixelNesAdapterIsolationTests
             .Select(file => Path.GetFileName(file))
             .ToList();
 
-        Assert.Equal(["LevelUpFeedbackModal.razor"], consumers);
+        Assert.Equal(["BeeDayFeedbackModal.razor"], consumers);
     }
 
     [Fact]
@@ -135,6 +135,6 @@ public sealed class PixelNesAdapterIsolationTests
             .Select(file => Path.GetFileName(file))
             .ToList();
 
-        Assert.Equal(["LevelUpFeedbackModal.razor"], consumers);
+        Assert.Equal(["BeeDayFeedbackModal.razor"], consumers);
     }
 }

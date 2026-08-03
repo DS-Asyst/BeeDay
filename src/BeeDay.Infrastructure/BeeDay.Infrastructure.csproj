@@ -25,8 +25,8 @@
          EfDashboardReadService, EfWalletReadService) to validate the real adapter, per
          docs/testing/01-testing-strategy.md. Concrete adapter types stay internal to the rest of the
          solution — only these test assemblies are declared friends. Web.Tests/E2E.Tests need
-         LevelUpDbContext specifically (internal) to apply/tear down each test's disposable LocalDB
-         database from LevelUpWebApplicationFactory/E2EWebApplicationFactory. -->
+         BeeDayDbContext specifically (internal) to apply/tear down each test's disposable LocalDB
+         database from BeeDayWebApplicationFactory/E2EWebApplicationFactory. -->
     <InternalsVisibleTo Include="BeeDay.Infrastructure.Tests" />
     <InternalsVisibleTo Include="BeeDay.Web.Tests" />
     <InternalsVisibleTo Include="BeeDay.E2E.Tests" />

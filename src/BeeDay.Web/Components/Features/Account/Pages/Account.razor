@@ -4,7 +4,7 @@
 @rendermode InteractiveServer
 @using BeeDay.Web.Components.Features.Account.Components
 @using BeeDay.Web.Components.Features.Account.Models
-@inject LevelUpWebService Store
+@inject BeeDayWebService Store
 @inject ToastService Toast
 @inject NavigationManager Navigation
 @inject AuthenticatedUserInitializer UserInitializer
@@ -12,16 +12,16 @@
 <PageTitle>My Account | LevelUp</PageTitle>
 
 <main class="account-page" aria-busy="@IsAnyBusy.ToString().ToLowerInvariant()">
-    <LevelUpPageHeader Eyebrow="ACCOUNT SETTINGS"
+    <BeeDayPageHeader Eyebrow="ACCOUNT SETTINGS"
                        Title="My Account"
                        Description="Keep your profile, security and experience preferences up to date." />
 
     @if (_isLoading)
     {
         <div class="account-page__loading">
-            <LevelUpSkeleton Lines="2" />
-            <LevelUpSkeleton Lines="5" />
-            <LevelUpSkeleton Lines="4" />
+            <BeeDaySkeleton Lines="2" />
+            <BeeDaySkeleton Lines="5" />
+            <BeeDaySkeleton Lines="4" />
         </div>
     }
     else
@@ -34,7 +34,7 @@
     }
 </main>
 
-<LevelUpLoading IsVisible="@IsAnyBusy" Label="Saving your account..." />
+<BeeDayLoading IsVisible="@IsAnyBusy" Label="Saving your account..." />
 
 @code {
     private readonly ProfileFormModel _profile = new();

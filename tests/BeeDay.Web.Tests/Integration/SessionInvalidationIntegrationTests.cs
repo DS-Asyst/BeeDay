@@ -16,8 +16,8 @@ namespace BeeDay.Web.Tests.Integration;
 /// introduced: malformed/missing claims, a nonexistent or deactivated user, a stale SessionVersion
 /// after a password change or reset, and the positive control (current version stays valid).
 /// </summary>
-public sealed class SessionInvalidationIntegrationTests(LevelUpWebApplicationFactory factory)
-    : IClassFixture<LevelUpWebApplicationFactory>
+public sealed class SessionInvalidationIntegrationTests(BeeDayWebApplicationFactory factory)
+    : IClassFixture<BeeDayWebApplicationFactory>
 {
     [Fact]
     public async Task ForgedCookie_WithCurrentSessionVersion_IsAccepted()
@@ -28,7 +28,7 @@ public sealed class SessionInvalidationIntegrationTests(LevelUpWebApplicationFac
         var response = await GetWithForgedCookieAsync(
             [
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(LevelUpClaimTypes.SessionVersion, "1")
+                new Claim(BeeDayClaimTypes.SessionVersion, "1")
             ],
             cancellationToken);
 
@@ -57,7 +57,7 @@ public sealed class SessionInvalidationIntegrationTests(LevelUpWebApplicationFac
         var response = await GetWithForgedCookieAsync(
             [
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(LevelUpClaimTypes.SessionVersion, "not-a-number")
+                new Claim(BeeDayClaimTypes.SessionVersion, "not-a-number")
             ],
             cancellationToken);
 
@@ -70,7 +70,7 @@ public sealed class SessionInvalidationIntegrationTests(LevelUpWebApplicationFac
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
 
         var response = await GetWithForgedCookieAsync(
-            [new Claim(LevelUpClaimTypes.SessionVersion, "1")],
+            [new Claim(BeeDayClaimTypes.SessionVersion, "1")],
             cancellationToken);
 
         AssertRejected(response);
@@ -84,7 +84,7 @@ public sealed class SessionInvalidationIntegrationTests(LevelUpWebApplicationFac
         var response = await GetWithForgedCookieAsync(
             [
                 new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
-                new Claim(LevelUpClaimTypes.SessionVersion, "1")
+                new Claim(BeeDayClaimTypes.SessionVersion, "1")
             ],
             cancellationToken);
 

@@ -2,21 +2,21 @@
 @using BeeDay.Web.Components.Features.Wallets.Services
 
 <section class="wallet-summary" aria-label="Wallet summary">
-    <LevelUpCard Class="@($"wallet-summary__card wallet-summary__card--balance {(HighlightBalance ? "wallet-summary__card--updated" : string.Empty)}")">
+    <BeeDayCard Class="@($"wallet-summary__card wallet-summary__card--balance {(HighlightBalance ? "wallet-summary__card--updated" : string.Empty)}")">
         <span class="wallet-summary__label"><PixelIcon Name="PixelIconName.Wallet" Size="PixelIconSize.Small" /> Current balance</span>
         <strong>@FormatMoney(Summary?.Balance ?? 0)</strong>
         <small>@(Summary?.TransactionCount ?? 0) transactions</small>
-    </LevelUpCard>
-    <LevelUpCard Class="wallet-summary__card wallet-summary__card--income">
+    </BeeDayCard>
+    <BeeDayCard Class="wallet-summary__card wallet-summary__card--income">
         <span class="wallet-summary__label"><PixelIcon Name="PixelIconName.Income" Size="PixelIconSize.Small" Color="PixelIconColor.Success" /> Total income</span>
         <strong>@FormatMoney(Summary?.TotalIncome ?? 0)</strong>
         <small>Money added</small>
-    </LevelUpCard>
-    <LevelUpCard Class="wallet-summary__card wallet-summary__card--expense">
+    </BeeDayCard>
+    <BeeDayCard Class="wallet-summary__card wallet-summary__card--expense">
         <span class="wallet-summary__label"><PixelIcon Name="PixelIconName.Expense" Size="PixelIconSize.Small" Color="PixelIconColor.Danger" /> Total expenses</span>
         <strong>@FormatMoney(Summary?.TotalExpenses ?? 0)</strong>
         <small>Money spent</small>
-    </LevelUpCard>
+    </BeeDayCard>
 </section>
 
 @code {

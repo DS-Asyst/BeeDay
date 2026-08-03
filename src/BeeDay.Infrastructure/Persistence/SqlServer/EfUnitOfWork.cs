@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 namespace BeeDay.Infrastructure.Persistence.SqlServer;
 
 /// <summary>
-/// Coordinates the 8 <c>Ef*Repository</c> adapters against a single <see cref="LevelUpDbContext"/> for
+/// Coordinates the 8 <c>Ef*Repository</c> adapters against a single <see cref="BeeDayDbContext"/> for
 /// the lifetime of this instance — created fresh per unit of work (never resolved as a long-lived
 /// scoped/singleton object; see <c>InfrastructureServiceCollectionExtensions</c>'s
 /// <c>AddTransient&lt;IUnitOfWork, EfUnitOfWork&gt;</c> registration), disposed by the caller via
@@ -17,7 +17,7 @@ namespace BeeDay.Infrastructure.Persistence.SqlServer;
 /// </summary>
 internal sealed class EfUnitOfWork : IUnitOfWork
 {
-    private readonly LevelUpDbContext context;
+    private readonly BeeDayDbContext context;
     private IDbContextTransaction? transaction;
 
     private IUserRepository? users;
@@ -29,7 +29,7 @@ internal sealed class EfUnitOfWork : IUnitOfWork
     private IWalletTagRepository? walletTags;
     private ITransactionRepository? transactions;
 
-    public EfUnitOfWork(IDbContextFactory<LevelUpDbContext> contextFactory)
+    public EfUnitOfWork(IDbContextFactory<BeeDayDbContext> contextFactory)
     {
         // Synchronous CreateDbContext(): constructing the context does not open a connection, so no
         // async/await is needed here — keeps the 8 repository properties below plain synchronous

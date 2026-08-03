@@ -6,11 +6,11 @@ namespace BeeDay.Infrastructure.Persistence.SqlServer.Repositories;
 
 internal sealed class EfUserRepository : EfRepositoryBase, IUserRepository
 {
-    public EfUserRepository(IDbContextFactory<LevelUpDbContext> contextFactory) : base(contextFactory)
+    public EfUserRepository(IDbContextFactory<BeeDayDbContext> contextFactory) : base(contextFactory)
     {
     }
 
-    internal EfUserRepository(LevelUpDbContext sharedContext) : base(sharedContext)
+    internal EfUserRepository(BeeDayDbContext sharedContext) : base(sharedContext)
     {
     }
 

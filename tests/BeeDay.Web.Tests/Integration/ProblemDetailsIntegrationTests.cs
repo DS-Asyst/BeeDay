@@ -33,8 +33,8 @@ namespace BeeDay.Web.Tests.Integration;
 /// instead exercises the ApplicationValidationException path, which reliably reaches
 /// GlobalExceptionHandler in both environments and still proves the "no internals leak" property.
 /// </remarks>
-public sealed class ProblemDetailsIntegrationTests(LevelUpWebApplicationFactory factory)
-    : IClassFixture<LevelUpWebApplicationFactory>
+public sealed class ProblemDetailsIntegrationTests(BeeDayWebApplicationFactory factory)
+    : IClassFixture<BeeDayWebApplicationFactory>
 {
     [Fact]
     public async Task MalformedRequest_MissingAntiforgeryToken_ReturnsWellFormedProblemDetails()
