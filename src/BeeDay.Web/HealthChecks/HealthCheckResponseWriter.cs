@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace LevelUp.Web.HealthChecks;
+namespace BeeDay.Web.HealthChecks;
 
 public static class HealthCheckResponseWriter
 {

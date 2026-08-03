@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Hosting;
 
-namespace LevelUp.Web.Tests.Integration;
+namespace BeeDay.Web.Tests.Integration;
 
 /// <summary>
 /// Used by tests that need to observe the real content of an outgoing identity email (password

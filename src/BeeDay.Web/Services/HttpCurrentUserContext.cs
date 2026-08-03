@@ -1,7 +1,7 @@
 using System.Security.Claims;
-using LevelUp.Application.Common.Security;
+using BeeDay.Application.Common.Security;
 
-namespace LevelUp.Web.Services;
+namespace BeeDay.Web.Services;
 
 public sealed class HttpCurrentUserContext(IHttpContextAccessor httpContextAccessor) : ICurrentUserContext
 {

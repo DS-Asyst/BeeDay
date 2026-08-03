@@ -1,7 +1,7 @@
-using LevelUp.Application.Features.Users.Requests;
+using BeeDay.Application.Features.Users.Requests;
 using MediatR;
 
-namespace LevelUp.Application.Features.Users.Commands;
+namespace BeeDay.Application.Features.Users.Commands;
 
 public sealed record CreateUserCommand(CreateUserRequest Request) : IRequest<Guid>;
 public sealed record CreateAccountCommand(CreateAccountRequest Request) : IRequest<Guid>;

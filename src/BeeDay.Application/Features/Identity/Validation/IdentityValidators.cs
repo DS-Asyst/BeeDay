@@ -1,8 +1,8 @@
+using BeeDay.Application.Common.Security;
+using BeeDay.Application.Features.Identity.Commands;
 using FluentValidation;
-using LevelUp.Application.Common.Security;
-using LevelUp.Application.Features.Identity.Commands;
 
-namespace LevelUp.Application.Features.Identity.Validation;
+namespace BeeDay.Application.Features.Identity.Validation;
 
 public sealed class ConfirmEmailCommandValidator : AbstractValidator<ConfirmEmailCommand>
 {

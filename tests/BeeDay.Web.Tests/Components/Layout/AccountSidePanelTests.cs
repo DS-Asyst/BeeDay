@@ -1,6 +1,6 @@
-using LevelUp.Web.Components.Layout;
+using BeeDay.Web.Components.Layout;
 
-namespace LevelUp.Web.Tests.Components.Layout;
+namespace BeeDay.Web.Tests.Components.Layout;
 
 public sealed class AccountSidePanelTests
 {

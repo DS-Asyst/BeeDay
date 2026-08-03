@@ -1,6 +1,6 @@
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Application.Features.Projects.Requests;
+namespace BeeDay.Application.Features.Projects.Requests;
 
 public sealed record SaveProjectRequest(
     string Name,

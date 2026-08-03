@@ -1,7 +1,7 @@
-using LevelUp.Web.Components.DesignSystem.Forms;
+using BeeDay.Web.Components.DesignSystem.Forms;
 using Microsoft.AspNetCore.Components.Forms;
 
-namespace LevelUp.Web.Tests.Components.Forms;
+namespace BeeDay.Web.Tests.Components.Forms;
 
 public sealed class LevelUpFormTests
 {

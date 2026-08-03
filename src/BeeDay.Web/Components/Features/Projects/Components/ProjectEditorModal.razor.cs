@@ -1,8 +1,8 @@
-using LevelUp.Web.Components.Features.Projects.Models;
+using BeeDay.Web.Components.Features.Projects.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
-namespace LevelUp.Web.Components.Features.Projects.Components;
+namespace BeeDay.Web.Components.Features.Projects.Components;
 
 public partial class ProjectEditorModal
 {

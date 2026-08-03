@@ -1,7 +1,7 @@
-using LevelUp.Web.Components.DesignSystem.Modals;
+using BeeDay.Web.Components.DesignSystem.Modals;
 using Microsoft.AspNetCore.Components;
 
-namespace LevelUp.Web.Tests.Components.DesignSystem;
+namespace BeeDay.Web.Tests.Components.DesignSystem;
 
 public sealed class EditorModalShellTests : BunitContext
 {

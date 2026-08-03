@@ -1,10 +1,10 @@
-using LevelUp.Application.Common.Security;
-using LevelUp.Application.Features.Dashboard.Contracts;
-using LevelUp.Application.Features.Dashboard.Queries;
-using LevelUp.Application.Features.Dashboard.Responses;
+using BeeDay.Application.Common.Security;
+using BeeDay.Application.Features.Dashboard.Contracts;
+using BeeDay.Application.Features.Dashboard.Queries;
+using BeeDay.Application.Features.Dashboard.Responses;
 using MediatR;
 
-namespace LevelUp.Application.Features.Dashboard.Handlers;
+namespace BeeDay.Application.Features.Dashboard.Handlers;
 
 public sealed class GetDashboardQueryHandler(IDashboardReadService dashboardReadService, ICurrentUserContext currentUser)
     : IRequestHandler<GetDashboardQuery, DashboardResponse>

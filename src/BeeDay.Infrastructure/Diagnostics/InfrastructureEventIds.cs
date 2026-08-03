@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace LevelUp.Infrastructure.Diagnostics;
+namespace BeeDay.Infrastructure.Diagnostics;
 
 public static class InfrastructureEventIds
 {

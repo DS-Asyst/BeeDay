@@ -1,14 +1,14 @@
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Experience;
-using LevelUp.Infrastructure.Configuration;
-using LevelUp.Infrastructure.DependencyInjection;
-using LevelUp.Infrastructure.Persistence.SqlServer;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Experience;
+using BeeDay.Infrastructure.Configuration;
+using BeeDay.Infrastructure.DependencyInjection;
+using BeeDay.Infrastructure.Persistence.SqlServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace LevelUp.Infrastructure.Tests;
+namespace BeeDay.Infrastructure.Tests;
 
 public sealed class LevelUpDbContextTests
 {
@@ -174,7 +174,7 @@ public sealed class LevelUpDbContextTests
     {
         // LevelUpDbContext itself is deliberately not resolvable directly from the container — only
         // IDbContextFactory<LevelUpDbContext> is registered (AddDbContextFactory, not AddDbContext),
-        // because LevelUp.Web is Blazor Server and a scoped DbContext would live for the whole
+        // because BeeDay.Web is Blazor Server and a scoped DbContext would live for the whole
         // long-lived circuit. Every consumer creates and disposes its own short-lived context.
         var services = new ServiceCollection();
         var configuration = new ConfigurationBuilder()

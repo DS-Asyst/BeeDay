@@ -1,11 +1,11 @@
-using LevelUp.Application.Exceptions;
-using LevelUp.Domain.Exceptions;
-using LevelUp.Infrastructure.Persistence.Exceptions;
+using BeeDay.Application.Exceptions;
+using BeeDay.Domain.Exceptions;
+using BeeDay.Infrastructure.Persistence.Exceptions;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LevelUp.Web.Diagnostics;
+namespace BeeDay.Web.Diagnostics;
 
 public sealed class GlobalExceptionHandler(
     IProblemDetailsService problemDetailsService,

@@ -1,8 +1,8 @@
+using BeeDay.Application.Exceptions;
 using FluentValidation;
-using LevelUp.Application.Exceptions;
 using MediatR;
 
-namespace LevelUp.Application.Common.Behaviors;
+namespace BeeDay.Application.Common.Behaviors;
 
 public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators)
     : IPipelineBehavior<TRequest, TResponse>

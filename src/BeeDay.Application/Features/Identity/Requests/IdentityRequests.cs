@@ -1,4 +1,4 @@
-namespace LevelUp.Application.Features.Identity.Requests;
+namespace BeeDay.Application.Features.Identity.Requests;
 
 public sealed record ConfirmEmailRequest(string Token);
 public sealed record ResendEmailConfirmationRequest(string Email);

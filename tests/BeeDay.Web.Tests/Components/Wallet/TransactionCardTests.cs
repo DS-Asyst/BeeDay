@@ -1,9 +1,9 @@
-using LevelUp.Application.Features.Wallets.Responses;
-using LevelUp.Domain.Enums;
-using LevelUp.Web.Components.Features.Wallets.Components;
-using LevelUp.Web.Components.Features.Wallets.Services;
+using BeeDay.Application.Features.Wallets.Responses;
+using BeeDay.Domain.Enums;
+using BeeDay.Web.Components.Features.Wallets.Components;
+using BeeDay.Web.Components.Features.Wallets.Services;
 
-namespace LevelUp.Web.Tests.Components.Wallet;
+namespace BeeDay.Web.Tests.Components.Wallet;
 
 public sealed class TransactionCardTests : BunitContext
 {

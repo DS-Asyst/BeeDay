@@ -1,6 +1,6 @@
-using LevelUp.Domain.Exceptions;
+using BeeDay.Domain.Exceptions;
 
-namespace LevelUp.Domain.Experience;
+namespace BeeDay.Domain.Experience;
 
 public sealed class LinearExperienceCurve : IExperienceCurve
 {

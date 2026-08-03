@@ -1,6 +1,6 @@
-using LevelUp.Domain.Events;
+using BeeDay.Domain.Events;
 
-namespace LevelUp.Application.Common.Auditing;
+namespace BeeDay.Application.Common.Auditing;
 
 public interface IEventJournal
 {

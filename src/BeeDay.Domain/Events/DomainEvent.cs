@@ -1,4 +1,4 @@
-namespace LevelUp.Domain.Events;
+namespace BeeDay.Domain.Events;
 
 public abstract record DomainEvent : IDomainEvent
 {

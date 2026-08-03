@@ -1,7 +1,7 @@
-using LevelUp.Domain.Entities;
+using BeeDay.Domain.Entities;
 using Xunit;
 
-namespace LevelUp.Domain.Tests;
+namespace BeeDay.Domain.Tests;
 
 public sealed class UserSessionHardeningTests
 {

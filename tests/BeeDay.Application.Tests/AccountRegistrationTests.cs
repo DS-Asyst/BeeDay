@@ -1,12 +1,12 @@
-using LevelUp.Application.Common.Identity;
-using LevelUp.Application.Common.Security;
-using LevelUp.Application.Features.Users.Commands;
-using LevelUp.Application.Features.Users.Handlers;
-using LevelUp.Application.Features.Users.Requests;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
+using BeeDay.Application.Common.Identity;
+using BeeDay.Application.Common.Security;
+using BeeDay.Application.Features.Users.Commands;
+using BeeDay.Application.Features.Users.Handlers;
+using BeeDay.Application.Features.Users.Requests;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Application.Tests;
+namespace BeeDay.Application.Tests;
 
 public sealed class AccountRegistrationTests
 {

@@ -1,8 +1,8 @@
-using LevelUp.Web.Components.DesignSystem.Icons;
-using LevelUp.Web.Components.DesignSystem.Layout;
+using BeeDay.Web.Components.DesignSystem.Icons;
+using BeeDay.Web.Components.DesignSystem.Layout;
 using Microsoft.AspNetCore.Components.Rendering;
 
-namespace LevelUp.Web.Tests.Components.Layout;
+namespace BeeDay.Web.Tests.Components.Layout;
 
 public sealed class LevelUpHeroTests
 {

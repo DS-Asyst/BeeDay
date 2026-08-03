@@ -1,8 +1,8 @@
-using LevelUp.Application.Features.Dashboard.Responses;
-using LevelUp.Web.Components.Features.Todos.Models;
+using BeeDay.Application.Features.Dashboard.Responses;
+using BeeDay.Web.Components.Features.Todos.Models;
 using Microsoft.AspNetCore.Components;
 
-namespace LevelUp.Web.Components.Features.Todos.Components;
+namespace BeeDay.Web.Components.Features.Todos.Components;
 
 public partial class TodoEditorModal
 {

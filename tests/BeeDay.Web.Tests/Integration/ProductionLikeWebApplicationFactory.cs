@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Tests.Integration;
+namespace BeeDay.Web.Tests.Integration;
 
 /// <summary>
 /// Boots the app in the Production environment (satisfying every production-only startup guard

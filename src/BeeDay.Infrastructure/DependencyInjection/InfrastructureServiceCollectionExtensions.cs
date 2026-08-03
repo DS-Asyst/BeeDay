@@ -1,19 +1,19 @@
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Infrastructure.Auditing;
-using LevelUp.Infrastructure.Background;
-using LevelUp.Infrastructure.Caching;
-using LevelUp.Infrastructure.Configuration;
-using LevelUp.Infrastructure.HealthChecks;
-using LevelUp.Infrastructure.Identity;
-using LevelUp.Infrastructure.Persistence.SqlServer;
-using LevelUp.Infrastructure.Persistence.SqlServer.Repositories;
-using LevelUp.Infrastructure.Security;
+using BeeDay.Application.Common.Contracts;
+using BeeDay.Infrastructure.Auditing;
+using BeeDay.Infrastructure.Background;
+using BeeDay.Infrastructure.Caching;
+using BeeDay.Infrastructure.Configuration;
+using BeeDay.Infrastructure.HealthChecks;
+using BeeDay.Infrastructure.Identity;
+using BeeDay.Infrastructure.Persistence.SqlServer;
+using BeeDay.Infrastructure.Persistence.SqlServer.Repositories;
+using BeeDay.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace LevelUp.Infrastructure.DependencyInjection;
+namespace BeeDay.Infrastructure.DependencyInjection;
 
 public static class InfrastructureServiceCollectionExtensions
 {
@@ -64,18 +64,18 @@ public static class InfrastructureServiceCollectionExtensions
         // anywhere in this method; JsonEventJournal is the only "Json"-named type left, and it never
         // reads or writes functional state.
         services.AddSingleton<JsonEventJournal>();
-        services.AddSingleton<LevelUp.Application.Common.Auditing.IEventJournal>(sp => sp.GetRequiredService<JsonEventJournal>());
-        services.AddScoped<LevelUp.Application.Features.Wallets.Contracts.IWalletReadService, EfWalletReadService>();
-        services.AddScoped<LevelUp.Application.Features.Dashboard.Contracts.IDashboardReadService, EfDashboardReadService>();
-        services.AddSingleton<LevelUp.Application.Common.Security.IPasswordService, Pbkdf2PasswordService>();
-        services.AddSingleton<LevelUp.Application.Common.Identity.IClock, SystemClock>();
-        services.AddSingleton<LevelUp.Application.Common.Identity.IUserTokenService, SecureUserTokenService>();
-        services.AddSingleton<LevelUp.Application.Common.Identity.IIdentityRequestThrottle, MemoryIdentityRequestThrottle>();
-        services.AddSingleton<LevelUp.Application.Common.Identity.IIdentityEmailComposer, IdentityEmailComposer>();
+        services.AddSingleton<BeeDay.Application.Common.Auditing.IEventJournal>(sp => sp.GetRequiredService<JsonEventJournal>());
+        services.AddScoped<BeeDay.Application.Features.Wallets.Contracts.IWalletReadService, EfWalletReadService>();
+        services.AddScoped<BeeDay.Application.Features.Dashboard.Contracts.IDashboardReadService, EfDashboardReadService>();
+        services.AddSingleton<BeeDay.Application.Common.Security.IPasswordService, Pbkdf2PasswordService>();
+        services.AddSingleton<BeeDay.Application.Common.Identity.IClock, SystemClock>();
+        services.AddSingleton<BeeDay.Application.Common.Identity.IUserTokenService, SecureUserTokenService>();
+        services.AddSingleton<BeeDay.Application.Common.Identity.IIdentityRequestThrottle, MemoryIdentityRequestThrottle>();
+        services.AddSingleton<BeeDay.Application.Common.Identity.IIdentityEmailComposer, IdentityEmailComposer>();
         var resendEnabled = configuration.GetValue<bool>($"{ResendOptions.SectionName}:Enabled");
         if (resendEnabled)
         {
-            services.AddHttpClient<LevelUp.Application.Common.Identity.IEmailSender, ResendEmailSender>(client =>
+            services.AddHttpClient<BeeDay.Application.Common.Identity.IEmailSender, ResendEmailSender>(client =>
             {
                 client.BaseAddress = new Uri("https://api.resend.com/");
                 client.Timeout = TimeSpan.FromSeconds(30);
@@ -83,16 +83,16 @@ public static class InfrastructureServiceCollectionExtensions
         }
         else
         {
-            services.AddSingleton<LevelUp.Application.Common.Identity.IEmailSender, DevelopmentEmailSender>();
+            services.AddSingleton<BeeDay.Application.Common.Identity.IEmailSender, DevelopmentEmailSender>();
         }
         services.AddMemoryCache();
         services.AddSingleton<MemoryApplicationCache>();
-        services.AddSingleton<LevelUp.Application.Common.Caching.IApplicationCache>(sp => sp.GetRequiredService<MemoryApplicationCache>());
+        services.AddSingleton<BeeDay.Application.Common.Caching.IApplicationCache>(sp => sp.GetRequiredService<MemoryApplicationCache>());
         services.AddSingleton<BackgroundTaskQueue>();
-        services.AddSingleton<LevelUp.Application.Common.Background.IBackgroundTaskQueue>(sp => sp.GetRequiredService<BackgroundTaskQueue>());
+        services.AddSingleton<BeeDay.Application.Common.Background.IBackgroundTaskQueue>(sp => sp.GetRequiredService<BackgroundTaskQueue>());
         services.AddHostedService<BackgroundTaskWorker>();
 
-        // AddDbContextFactory, not AddDbContext: LevelUp.Web is Blazor Server, whose SignalR circuits
+        // AddDbContextFactory, not AddDbContext: BeeDay.Web is Blazor Server, whose SignalR circuits
         // are long-lived. A DbContext registered as scoped would live for the whole circuit — unsafe
         // for a type that is not thread-safe and not meant to track state across many operations. Every
         // future adapter must resolve IDbContextFactory<LevelUpDbContext> and create/dispose a

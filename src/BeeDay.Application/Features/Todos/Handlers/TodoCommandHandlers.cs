@@ -1,15 +1,15 @@
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Application.Common.Experience;
-using LevelUp.Application.Common.Security;
-using LevelUp.Application.Features.Projects.Handlers;
-using LevelUp.Application.Features.Todos.Commands;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Exceptions;
-using LevelUp.Domain.Experience;
+using BeeDay.Application.Common.Contracts;
+using BeeDay.Application.Common.Experience;
+using BeeDay.Application.Common.Security;
+using BeeDay.Application.Features.Projects.Handlers;
+using BeeDay.Application.Features.Todos.Commands;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
+using BeeDay.Domain.Experience;
 using MediatR;
 
-namespace LevelUp.Application.Features.Todos.Handlers;
+namespace BeeDay.Application.Features.Todos.Handlers;
 
 public sealed class CreateTodoCommandHandler(IProjectRepository repository, ICurrentUserContext currentUser) : IRequestHandler<CreateTodoCommand>
 {

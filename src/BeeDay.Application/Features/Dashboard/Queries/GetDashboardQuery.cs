@@ -1,6 +1,6 @@
-using LevelUp.Application.Features.Dashboard.Responses;
+using BeeDay.Application.Features.Dashboard.Responses;
 using MediatR;
-namespace LevelUp.Application.Features.Dashboard.Queries;
+namespace BeeDay.Application.Features.Dashboard.Queries;
 
 /// <summary>
 /// The Dashboard page's read query, backed by <c>IDashboardReadService</c> (JSON through Sprint 13.4,

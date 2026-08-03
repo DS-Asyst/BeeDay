@@ -1,8 +1,8 @@
-using LevelUp.Domain.Exceptions;
-using LevelUp.Domain.ValueObjects;
+using BeeDay.Domain.Exceptions;
+using BeeDay.Domain.ValueObjects;
 using Xunit;
 
-namespace LevelUp.Domain.Tests;
+namespace BeeDay.Domain.Tests;
 
 public sealed class ValueObjectTests
 {

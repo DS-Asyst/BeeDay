@@ -1,6 +1,6 @@
-using LevelUp.Domain.Exceptions;
+using BeeDay.Domain.Exceptions;
 
-namespace LevelUp.Application.Common.Security;
+namespace BeeDay.Application.Common.Security;
 
 public static class CurrentUserGuard
 {

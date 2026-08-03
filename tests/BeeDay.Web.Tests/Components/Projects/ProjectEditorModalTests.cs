@@ -1,7 +1,7 @@
-using LevelUp.Web.Components.Features.Projects.Components;
-using LevelUp.Web.Components.Features.Projects.Models;
+using BeeDay.Web.Components.Features.Projects.Components;
+using BeeDay.Web.Components.Features.Projects.Models;
 
-namespace LevelUp.Web.Tests.Components.Projects;
+namespace BeeDay.Web.Tests.Components.Projects;
 
 public sealed class ProjectEditorModalTests : BunitContext
 {

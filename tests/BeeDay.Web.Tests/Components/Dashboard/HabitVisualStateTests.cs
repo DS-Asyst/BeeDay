@@ -1,6 +1,6 @@
-using LevelUp.Web.Components.Features.Habits;
+using BeeDay.Web.Components.Features.Habits;
 
-namespace LevelUp.Web.Tests.Components.Dashboard;
+namespace BeeDay.Web.Tests.Components.Dashboard;
 
 public sealed class HabitVisualStateTests
 {

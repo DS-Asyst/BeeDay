@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace LevelUp.Web.Tests.Components.DesignSystem;
+namespace BeeDay.Web.Tests.Components.DesignSystem;
 
 /// <summary>
 /// Guards the Sprint 11.3 pixel adapter's isolation boundary: NES.css-derived

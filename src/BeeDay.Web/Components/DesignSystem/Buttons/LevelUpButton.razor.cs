@@ -1,8 +1,8 @@
-using LevelUp.Web.Components.DesignSystem.Icons;
+using BeeDay.Web.Components.DesignSystem.Icons;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
-namespace LevelUp.Web.Components.DesignSystem.Buttons;
+namespace BeeDay.Web.Components.DesignSystem.Buttons;
 
 public partial class LevelUpButton
 {

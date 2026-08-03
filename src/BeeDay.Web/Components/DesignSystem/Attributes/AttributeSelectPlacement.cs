@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Components.DesignSystem.Attributes;
+namespace BeeDay.Web.Components.DesignSystem.Attributes;
 
 /// <summary>
 /// Raw geometry measured from the real DOM (trigger, the menu panel itself,

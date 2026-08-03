@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Web.Components.Features.Todos.Models;
+namespace BeeDay.Web.Components.Features.Todos.Models;
 
 public sealed class TodoEditorModel
 {

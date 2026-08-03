@@ -1,4 +1,4 @@
-namespace LevelUp.Domain.Exceptions;
+namespace BeeDay.Domain.Exceptions;
 
 public sealed class DomainValidationException : DomainException
 {

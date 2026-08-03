@@ -1,4 +1,4 @@
-namespace LevelUp.Infrastructure.Persistence.Exceptions;
+namespace BeeDay.Infrastructure.Persistence.Exceptions;
 
 public class PersistenceException : Exception
 {

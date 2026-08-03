@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
-using LevelUp.Domain.Abstractions;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Domain.Abstractions;
+using BeeDay.Domain.Exceptions;
 
-namespace LevelUp.Domain.Entities;
+namespace BeeDay.Domain.Entities;
 
 public sealed partial class WalletTag : Entity
 {

@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Domain.Exceptions;
 
-namespace LevelUp.Domain.ValueObjects;
+namespace BeeDay.Domain.ValueObjects;
 
 public readonly record struct ProjectColor
 {

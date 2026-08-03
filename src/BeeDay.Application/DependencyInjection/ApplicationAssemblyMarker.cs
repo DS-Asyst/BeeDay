@@ -1,6 +1,6 @@
-namespace LevelUp.Application.DependencyInjection;
+namespace BeeDay.Application.DependencyInjection;
 
 /// <summary>
-/// Marker type used to locate the LevelUp.Application assembly during dependency registration.
+/// Marker type used to locate the BeeDay.Application assembly during dependency registration.
 /// </summary>
 internal sealed class ApplicationAssemblyMarker;

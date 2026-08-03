@@ -1,4 +1,4 @@
-namespace LevelUp.Application.Common.Caching;
+namespace BeeDay.Application.Common.Caching;
 
 public interface IApplicationCache
 {

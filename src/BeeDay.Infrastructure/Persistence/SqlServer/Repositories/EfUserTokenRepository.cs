@@ -1,9 +1,9 @@
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
+using BeeDay.Application.Common.Contracts;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace LevelUp.Infrastructure.Persistence.SqlServer.Repositories;
+namespace BeeDay.Infrastructure.Persistence.SqlServer.Repositories;
 
 internal sealed class EfUserTokenRepository : EfRepositoryBase, IUserTokenRepository
 {

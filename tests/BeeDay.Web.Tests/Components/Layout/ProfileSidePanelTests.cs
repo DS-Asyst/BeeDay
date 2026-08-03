@@ -1,12 +1,12 @@
-using LevelUp.Application.Features.Dashboard.Queries;
-using LevelUp.Application.Features.Dashboard.Responses;
-using LevelUp.Domain.Enums;
-using LevelUp.Web.Components.Features.Dashboard.State;
-using LevelUp.Web.Components.Layout;
-using LevelUp.Web.Services;
+using BeeDay.Application.Features.Dashboard.Queries;
+using BeeDay.Application.Features.Dashboard.Responses;
+using BeeDay.Domain.Enums;
+using BeeDay.Web.Components.Features.Dashboard.State;
+using BeeDay.Web.Components.Layout;
+using BeeDay.Web.Services;
 using MediatR;
 
-namespace LevelUp.Web.Tests.Components.Layout;
+namespace BeeDay.Web.Tests.Components.Layout;
 
 public sealed class ProfileSidePanelTests
 {

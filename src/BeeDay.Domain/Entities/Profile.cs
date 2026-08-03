@@ -1,7 +1,7 @@
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Experience;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Experience;
 
-namespace LevelUp.Domain.Entities;
+namespace BeeDay.Domain.Entities;
 
 /// <summary>
 /// Presentation-facing view of a <see cref="User"/>: nickname, display name, avatar,

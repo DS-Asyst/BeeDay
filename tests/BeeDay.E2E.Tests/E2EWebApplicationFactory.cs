@@ -1,7 +1,7 @@
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Application.Common.Security;
-using LevelUp.Domain.Entities;
-using LevelUp.Infrastructure.Persistence.SqlServer;
+using BeeDay.Application.Common.Contracts;
+using BeeDay.Application.Common.Security;
+using BeeDay.Domain.Entities;
+using BeeDay.Infrastructure.Persistence.SqlServer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -9,12 +9,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace LevelUp.E2E.Tests;
+namespace BeeDay.E2E.Tests;
 
 /// <summary>
 /// Hosts the real LevelUp application on a real Kestrel TCP endpoint (not TestServer's in-memory
 /// transport) so a genuine Chromium instance can navigate to it. Self-contained: does not inherit
-/// from or reference any type in LevelUp.Web.Tests — only the production LevelUp.Web project.
+/// from or reference any type in BeeDay.Web.Tests — only the production BeeDay.Web project.
 /// Storage is an isolated, disposable SQL Server LocalDB database per instance (migrated on startup,
 /// dropped on Dispose) — the Sprint 14.6 SQL Server cutover replaced the JSON temp-directory isolation
 /// this class used before, re-implemented here in miniature since sharing the actual Web.Tests factory

@@ -1,8 +1,8 @@
-using LevelUp.Domain.Enums;
-using LevelUp.Web.Components.Features.Common;
+using BeeDay.Domain.Enums;
+using BeeDay.Web.Components.Features.Common;
 using Microsoft.AspNetCore.Components;
 
-namespace LevelUp.Web.Components.Features.Dashboard.Components;
+namespace BeeDay.Web.Components.Features.Dashboard.Components;
 
 public partial class ActivityFilterBar : IDisposable
 {

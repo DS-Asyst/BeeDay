@@ -1,6 +1,6 @@
-using LevelUp.Domain.Exceptions;
+using BeeDay.Domain.Exceptions;
 
-namespace LevelUp.Domain.Common;
+namespace BeeDay.Domain.Common;
 
 internal static class EnumValidation
 {

@@ -1,4 +1,4 @@
-namespace LevelUp.Domain.Enums;
+namespace BeeDay.Domain.Enums;
 
 public enum ExperienceRewardType
 {

@@ -1,13 +1,13 @@
-using LevelUp.Domain.Abstractions;
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Abstractions;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Domain.Experience;
+namespace BeeDay.Domain.Experience;
 
 public sealed class ExperienceTransaction : Entity
 {
     public long Amount { get; private set; }
 
-    public ExperienceSource Source { get; private set; } = ExperienceSource.Create(LevelUp.Domain.Enums.ExperienceSourceType.System);
+    public ExperienceSource Source { get; private set; } = ExperienceSource.Create(BeeDay.Domain.Enums.ExperienceSourceType.System);
 
     public ExperienceSourceType SourceType => Source.Type;
 

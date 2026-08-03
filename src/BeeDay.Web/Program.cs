@@ -1,20 +1,20 @@
 using System.Security.Claims;
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Application.Common.Events;
-using LevelUp.Application.DependencyInjection;
-using LevelUp.Application.Features.Authentication.Commands;
-using LevelUp.Application.Features.Authentication.Requests;
-using LevelUp.Domain.Exceptions;
-using LevelUp.Infrastructure.DependencyInjection;
-using LevelUp.Web.Components;
-using LevelUp.Web.Components.Features.Dashboard.State;
-using LevelUp.Web.Components.Features.Experience.Feedback;
-using LevelUp.Web.Components.Features.ProfileCreation.State;
-using LevelUp.Web.Configuration;
-using LevelUp.Web.Diagnostics;
-using LevelUp.Web.HealthChecks;
-using LevelUp.Web.Services;
-using LevelUp.Web.Services.Authentication;
+using BeeDay.Application.Common.Contracts;
+using BeeDay.Application.Common.Events;
+using BeeDay.Application.DependencyInjection;
+using BeeDay.Application.Features.Authentication.Commands;
+using BeeDay.Application.Features.Authentication.Requests;
+using BeeDay.Domain.Exceptions;
+using BeeDay.Infrastructure.DependencyInjection;
+using BeeDay.Web.Components;
+using BeeDay.Web.Components.Features.Dashboard.State;
+using BeeDay.Web.Components.Features.Experience.Feedback;
+using BeeDay.Web.Components.Features.ProfileCreation.State;
+using BeeDay.Web.Configuration;
+using BeeDay.Web.Diagnostics;
+using BeeDay.Web.HealthChecks;
+using BeeDay.Web.Services;
+using BeeDay.Web.Services.Authentication;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -172,7 +172,7 @@ builder.Services
 builder.Services.AddAuthorization();
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<LevelUp.Application.Common.Security.ICurrentUserContext, HttpCurrentUserContext>();
+builder.Services.AddScoped<BeeDay.Application.Common.Security.ICurrentUserContext, HttpCurrentUserContext>();
 builder.Services.AddCascadingAuthenticationState();
 
 builder.Services

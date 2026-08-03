@@ -1,6 +1,6 @@
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Application.Features.Tasks.Requests;
+namespace BeeDay.Application.Features.Tasks.Requests;
 
 public sealed record SaveTaskRequest(
     string Title,

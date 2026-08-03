@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Components;
 
-namespace LevelUp.Web.Components.DesignSystem.Forms;
+namespace BeeDay.Web.Components.DesignSystem.Forms;
 
 public partial class LevelUpSelect<TValue>
 {

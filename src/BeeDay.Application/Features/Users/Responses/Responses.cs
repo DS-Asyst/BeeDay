@@ -1,6 +1,6 @@
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Application.Features.Users.Responses;
+namespace BeeDay.Application.Features.Users.Responses;
 
 /// <summary>
 /// Identity and account-settings view of the current User — <c>Name</c>, <c>Nickname</c>,

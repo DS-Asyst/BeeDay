@@ -1,7 +1,7 @@
-using LevelUp.Application.Features.Wallets.Responses;
-using LevelUp.Domain.Enums;
+using BeeDay.Application.Features.Wallets.Responses;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Application.Features.Wallets.Contracts;
+namespace BeeDay.Application.Features.Wallets.Contracts;
 
 /// <summary>
 /// Read-only projections spanning Wallet, Transaction, and WalletTag for the Wallet screens

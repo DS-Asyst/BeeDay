@@ -1,14 +1,14 @@
-using LevelUp.Application.Common.Security;
-using LevelUp.Application.Features.Wallets.Contracts;
-using LevelUp.Application.Features.Wallets.Queries;
-using LevelUp.Application.Features.Wallets.Responses;
+using BeeDay.Application.Common.Security;
+using BeeDay.Application.Features.Wallets.Contracts;
+using BeeDay.Application.Features.Wallets.Queries;
+using BeeDay.Application.Features.Wallets.Responses;
 using MediatR;
-using FilterSortDirection = LevelUp.Application.Features.Wallets.Contracts.SortDirection;
-using FilterSortField = LevelUp.Application.Features.Wallets.Contracts.TransactionSortField;
-using QuerySortDirection = LevelUp.Application.Features.Wallets.Queries.SortDirection;
-using QuerySortField = LevelUp.Application.Features.Wallets.Queries.TransactionSortField;
+using FilterSortDirection = BeeDay.Application.Features.Wallets.Contracts.SortDirection;
+using FilterSortField = BeeDay.Application.Features.Wallets.Contracts.TransactionSortField;
+using QuerySortDirection = BeeDay.Application.Features.Wallets.Queries.SortDirection;
+using QuerySortField = BeeDay.Application.Features.Wallets.Queries.TransactionSortField;
 
-namespace LevelUp.Application.Features.Wallets.Handlers;
+namespace BeeDay.Application.Features.Wallets.Handlers;
 
 public sealed class GetWalletSummaryQueryHandler(IWalletReadService walletReadService, ICurrentUserContext currentUser)
     : IRequestHandler<GetWalletSummaryQuery, WalletSummaryResponse?>

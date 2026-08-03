@@ -1,6 +1,6 @@
-using LevelUp.Domain.Exceptions;
+using BeeDay.Domain.Exceptions;
 
-namespace LevelUp.Web.Components.Features.Dashboard.Pages;
+namespace BeeDay.Web.Components.Features.Dashboard.Pages;
 
 public partial class Home : IDisposable
 {

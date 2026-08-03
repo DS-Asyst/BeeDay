@@ -1,6 +1,6 @@
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Application.Features.Habits.Requests;
+namespace BeeDay.Application.Features.Habits.Requests;
 
 public sealed record SaveHabitRequest(
     string Title,

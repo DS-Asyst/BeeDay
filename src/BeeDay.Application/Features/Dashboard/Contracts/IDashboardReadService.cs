@@ -1,6 +1,6 @@
-using LevelUp.Application.Features.Dashboard.Responses;
+using BeeDay.Application.Features.Dashboard.Responses;
 
-namespace LevelUp.Application.Features.Dashboard.Contracts;
+namespace BeeDay.Application.Features.Dashboard.Contracts;
 
 /// <summary>
 /// Read-only projection spanning User, Habit, RecurringTask, Project/Todo, and Wallet — the one

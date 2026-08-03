@@ -1,11 +1,11 @@
-using LevelUp.Domain.Abstractions;
-using LevelUp.Domain.Common;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Exceptions;
-using LevelUp.Domain.Experience;
-using LevelUp.Domain.ValueObjects;
+using BeeDay.Domain.Abstractions;
+using BeeDay.Domain.Common;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
+using BeeDay.Domain.Experience;
+using BeeDay.Domain.ValueObjects;
 
-namespace LevelUp.Domain.Entities;
+namespace BeeDay.Domain.Entities;
 
 public sealed class User : Entity
 {
@@ -137,7 +137,7 @@ public sealed class User : Entity
             throw new InvalidDomainStateException("A User can only complete their profile once.");
         }
 
-        Nickname = LevelUp.Domain.ValueObjects.Nickname.Create(nickname).Value;
+        Nickname = BeeDay.Domain.ValueObjects.Nickname.Create(nickname).Value;
         Avatar = (avatar ?? string.Empty).Trim();
         Touch();
     }

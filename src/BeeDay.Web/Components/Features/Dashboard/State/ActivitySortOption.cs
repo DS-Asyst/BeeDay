@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Components.Features.Dashboard.State;
+namespace BeeDay.Web.Components.Features.Dashboard.State;
 
 public enum ActivitySortOption
 {

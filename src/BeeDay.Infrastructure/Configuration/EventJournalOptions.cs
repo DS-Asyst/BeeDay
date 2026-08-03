@@ -1,4 +1,4 @@
-namespace LevelUp.Infrastructure.Configuration;
+namespace BeeDay.Infrastructure.Configuration;
 
 /// <summary>
 /// Configuration for <see cref="Auditing.JsonEventJournal"/>'s own append-only audit log — deliberately

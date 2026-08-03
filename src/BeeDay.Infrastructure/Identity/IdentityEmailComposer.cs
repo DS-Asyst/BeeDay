@@ -1,9 +1,9 @@
 using System.Net;
-using LevelUp.Application.Common.Identity;
-using LevelUp.Infrastructure.Configuration;
+using BeeDay.Application.Common.Identity;
+using BeeDay.Infrastructure.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace LevelUp.Infrastructure.Identity;
+namespace BeeDay.Infrastructure.Identity;
 
 public sealed class IdentityEmailComposer(IOptions<IdentityEmailOptions> options) : IIdentityEmailComposer
 {

@@ -1,15 +1,15 @@
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Application.Common.Identity;
-using LevelUp.Application.Common.Security;
-using LevelUp.Application.Features.Users.Commands;
-using LevelUp.Application.Features.Users.Queries;
-using LevelUp.Application.Features.Users.Responses;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Exceptions;
-using LevelUp.Domain.ValueObjects;
+using BeeDay.Application.Common.Contracts;
+using BeeDay.Application.Common.Identity;
+using BeeDay.Application.Common.Security;
+using BeeDay.Application.Features.Users.Commands;
+using BeeDay.Application.Features.Users.Queries;
+using BeeDay.Application.Features.Users.Responses;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Exceptions;
+using BeeDay.Domain.ValueObjects;
 using MediatR;
 
-namespace LevelUp.Application.Features.Users.Handlers;
+namespace BeeDay.Application.Features.Users.Handlers;
 
 public sealed class CreateUserCommandHandler(
     IUnitOfWork unitOfWork,

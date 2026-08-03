@@ -1,8 +1,8 @@
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
-namespace LevelUp.Web.Components.Features.Dashboard.Components;
+namespace BeeDay.Web.Components.Features.Dashboard.Components;
 
 public partial class ActivityCard
 {

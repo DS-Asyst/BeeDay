@@ -1,4 +1,4 @@
-namespace LevelUp.Application.Common.Contracts;
+namespace BeeDay.Application.Common.Contracts;
 
 /// <summary>
 /// Coordinates multiple Aggregate repositories against a single, shared persistence session so their

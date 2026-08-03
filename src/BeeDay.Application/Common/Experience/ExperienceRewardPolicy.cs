@@ -1,7 +1,7 @@
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
 
-namespace LevelUp.Application.Common.Experience;
+namespace BeeDay.Application.Common.Experience;
 
 public sealed class ExperienceRewardPolicy : IExperienceRewardPolicy
 {

@@ -1,8 +1,8 @@
-using LevelUp.Application.Features.Dashboard.Responses;
-using LevelUp.Domain.Enums;
+using BeeDay.Application.Features.Dashboard.Responses;
+using BeeDay.Domain.Enums;
 using Microsoft.AspNetCore.Components;
 
-namespace LevelUp.Web.Components.Features.Projects.Components;
+namespace BeeDay.Web.Components.Features.Projects.Components;
 
 public partial class ProjectWorkspace
 {

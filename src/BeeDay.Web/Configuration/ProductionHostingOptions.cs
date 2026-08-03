@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.HttpOverrides;
 
-namespace LevelUp.Web.Configuration;
+namespace BeeDay.Web.Configuration;
 
 public sealed class ProductionHostingOptions
 {

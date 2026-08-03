@@ -1,7 +1,7 @@
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Application.Common.Contracts;
+namespace BeeDay.Application.Common.Contracts;
 
 /// <summary>
 /// Persistence boundary for the <c>UserToken</c> Aggregate (email confirmation and password reset

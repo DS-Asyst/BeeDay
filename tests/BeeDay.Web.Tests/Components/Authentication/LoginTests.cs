@@ -1,6 +1,6 @@
-using LevelUp.Web.Components.Features.Authentication.Pages;
+using BeeDay.Web.Components.Features.Authentication.Pages;
 
-namespace LevelUp.Web.Tests.Components.Authentication;
+namespace BeeDay.Web.Tests.Components.Authentication;
 
 public sealed class LoginTests
 {

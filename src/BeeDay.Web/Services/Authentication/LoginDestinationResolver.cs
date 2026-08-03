@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Services.Authentication;
+namespace BeeDay.Web.Services.Authentication;
 
 public static class LoginDestinationResolver
 {

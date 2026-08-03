@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Services;
+namespace BeeDay.Web.Services;
 
 /// <summary>
 /// Coordinates LevelUpCardMenu instances within a single circuit so opening one

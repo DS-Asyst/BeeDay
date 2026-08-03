@@ -1,11 +1,11 @@
-using LevelUp.Application.Common.Security;
-using LevelUp.Application.Features.Authentication.Commands;
-using LevelUp.Application.Features.Authentication.Handlers;
-using LevelUp.Application.Features.Authentication.Requests;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Application.Common.Security;
+using BeeDay.Application.Features.Authentication.Commands;
+using BeeDay.Application.Features.Authentication.Handlers;
+using BeeDay.Application.Features.Authentication.Requests;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Exceptions;
 
-namespace LevelUp.Application.Tests;
+namespace BeeDay.Application.Tests;
 
 public sealed class AuthenticationHandlersTests
 {

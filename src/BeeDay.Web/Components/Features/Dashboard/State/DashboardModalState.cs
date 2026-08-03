@@ -1,11 +1,11 @@
-using LevelUp.Application.Features.Dashboard.Responses;
-using LevelUp.Web.Components.Features.Common;
-using LevelUp.Web.Components.Features.Habits.Models;
-using LevelUp.Web.Components.Features.Projects.Models;
-using LevelUp.Web.Components.Features.Tasks.Models;
-using LevelUp.Web.Components.Features.Todos.Models;
+using BeeDay.Application.Features.Dashboard.Responses;
+using BeeDay.Web.Components.Features.Common;
+using BeeDay.Web.Components.Features.Habits.Models;
+using BeeDay.Web.Components.Features.Projects.Models;
+using BeeDay.Web.Components.Features.Tasks.Models;
+using BeeDay.Web.Components.Features.Todos.Models;
 
-namespace LevelUp.Web.Components.Features.Dashboard.State;
+namespace BeeDay.Web.Components.Features.Dashboard.State;
 
 public sealed class DashboardModalState
 {

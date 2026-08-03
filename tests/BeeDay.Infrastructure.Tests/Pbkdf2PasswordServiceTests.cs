@@ -1,7 +1,7 @@
-using LevelUp.Infrastructure.Security;
+using BeeDay.Infrastructure.Security;
 using Xunit;
 
-namespace LevelUp.Infrastructure.Tests;
+namespace BeeDay.Infrastructure.Tests;
 
 public sealed class Pbkdf2PasswordServiceTests
 {

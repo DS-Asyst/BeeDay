@@ -1,13 +1,13 @@
-using LevelUp.Application.Features.Habits.Commands;
-using LevelUp.Application.Features.Habits.Handlers;
-using LevelUp.Application.Features.Tasks.Commands;
-using LevelUp.Application.Features.Tasks.Handlers;
-using LevelUp.Application.Features.Tasks.Requests;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Application.Features.Habits.Commands;
+using BeeDay.Application.Features.Habits.Handlers;
+using BeeDay.Application.Features.Tasks.Commands;
+using BeeDay.Application.Features.Tasks.Handlers;
+using BeeDay.Application.Features.Tasks.Requests;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
 
-namespace LevelUp.Application.Tests;
+namespace BeeDay.Application.Tests;
 
 public sealed class MultiUserIsolationTests
 {

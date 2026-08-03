@@ -1,6 +1,6 @@
 using System.Threading.RateLimiting;
 
-namespace LevelUp.Web.Services.Authentication;
+namespace BeeDay.Web.Services.Authentication;
 
 /// <summary>
 /// Builds the brute-force protection for <c>/auth/login</c>: two independent sliding-window

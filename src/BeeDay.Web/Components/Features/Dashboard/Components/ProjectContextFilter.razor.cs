@@ -1,7 +1,7 @@
-using LevelUp.Application.Features.Dashboard.Responses;
+using BeeDay.Application.Features.Dashboard.Responses;
 using Microsoft.AspNetCore.Components;
 
-namespace LevelUp.Web.Components.Features.Dashboard.Components;
+namespace BeeDay.Web.Components.Features.Dashboard.Components;
 
 public partial class ProjectContextFilter
 {

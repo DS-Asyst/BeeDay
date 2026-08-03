@@ -1,4 +1,4 @@
-namespace LevelUp.Application.Common.Security;
+namespace BeeDay.Application.Common.Security;
 
 public static class PasswordPolicy
 {

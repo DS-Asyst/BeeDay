@@ -1,4 +1,4 @@
-namespace LevelUp.Domain.Events;
+namespace BeeDay.Domain.Events;
 
 public sealed record ApplicationActionDomainEvent(
     string Action,

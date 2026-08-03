@@ -1,7 +1,7 @@
+using BeeDay.Application.Features.Ordering.Requests;
 using FluentValidation;
-using LevelUp.Application.Features.Ordering.Requests;
 
-namespace LevelUp.Application.Features.Ordering.Validation;
+namespace BeeDay.Application.Features.Ordering.Validation;
 
 public sealed class ReorderActivitiesRequestValidator : AbstractValidator<ReorderActivitiesRequest>
 {

@@ -1,9 +1,9 @@
-using LevelUp.Application.Common.Auditing;
-using LevelUp.Application.Common.Background;
+using BeeDay.Application.Common.Auditing;
+using BeeDay.Application.Common.Background;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace LevelUp.Application.Common.Events;
+namespace BeeDay.Application.Common.Events;
 
 public sealed class AuditDomainEventHandler(
     IBackgroundTaskQueue backgroundTaskQueue,

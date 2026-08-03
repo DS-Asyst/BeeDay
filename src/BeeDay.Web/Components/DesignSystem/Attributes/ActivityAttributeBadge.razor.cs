@@ -1,7 +1,7 @@
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 using Microsoft.AspNetCore.Components;
 
-namespace LevelUp.Web.Components.DesignSystem.Attributes;
+namespace BeeDay.Web.Components.DesignSystem.Attributes;
 
 public partial class ActivityAttributeBadge
 {

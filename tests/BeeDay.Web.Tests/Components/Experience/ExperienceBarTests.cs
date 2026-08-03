@@ -1,7 +1,7 @@
-using LevelUp.Web.Components.Features.Experience.Components;
-using LevelUp.Web.Components.Features.Experience.Models;
+using BeeDay.Web.Components.Features.Experience.Components;
+using BeeDay.Web.Components.Features.Experience.Models;
 
-namespace LevelUp.Web.Tests.Components.Experience;
+namespace BeeDay.Web.Tests.Components.Experience;
 
 public sealed class ExperienceBarTests
 {

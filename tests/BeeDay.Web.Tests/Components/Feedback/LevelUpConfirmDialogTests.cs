@@ -1,6 +1,6 @@
-using LevelUp.Web.Components.DesignSystem.Feedback;
+using BeeDay.Web.Components.DesignSystem.Feedback;
 
-namespace LevelUp.Web.Tests.Components.Feedback;
+namespace BeeDay.Web.Tests.Components.Feedback;
 
 public sealed class LevelUpConfirmDialogTests
 {

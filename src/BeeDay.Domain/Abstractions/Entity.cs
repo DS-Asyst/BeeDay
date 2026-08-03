@@ -1,6 +1,6 @@
-using LevelUp.Domain.Exceptions;
+using BeeDay.Domain.Exceptions;
 
-namespace LevelUp.Domain.Abstractions;
+namespace BeeDay.Domain.Abstractions;
 
 public abstract class Entity
 {

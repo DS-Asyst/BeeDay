@@ -1,12 +1,12 @@
-using LevelUp.Application.Common.Events;
-using LevelUp.Application.Common.Experience;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Events;
-using LevelUp.Domain.Experience;
+using BeeDay.Application.Common.Events;
+using BeeDay.Application.Common.Experience;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Events;
+using BeeDay.Domain.Experience;
 using MediatR;
 
-namespace LevelUp.Application.Tests;
+namespace BeeDay.Application.Tests;
 
 public sealed class LevelUpEventTests
 {

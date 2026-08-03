@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Services.Authentication;
+namespace BeeDay.Web.Services.Authentication;
 
 /// <summary>
 /// Tunable limits for <see cref="LoginRateLimiterFactory"/>. Defaults match production; bound

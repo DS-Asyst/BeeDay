@@ -1,13 +1,13 @@
-using LevelUp.Application.Common.Identity;
-using LevelUp.Application.Common.Security;
-using LevelUp.Application.Features.Identity.Commands;
-using LevelUp.Application.Features.Identity.Handlers;
-using LevelUp.Application.Features.Identity.Requests;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Application.Common.Identity;
+using BeeDay.Application.Common.Security;
+using BeeDay.Application.Features.Identity.Commands;
+using BeeDay.Application.Features.Identity.Handlers;
+using BeeDay.Application.Features.Identity.Requests;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
 
-namespace LevelUp.Application.Tests;
+namespace BeeDay.Application.Tests;
 
 public sealed class IdentityHandlersTests
 {

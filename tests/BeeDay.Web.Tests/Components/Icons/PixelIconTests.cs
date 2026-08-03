@@ -1,6 +1,6 @@
-using LevelUp.Web.Components.DesignSystem.Icons;
+using BeeDay.Web.Components.DesignSystem.Icons;
 
-namespace LevelUp.Web.Tests.Components.Icons;
+namespace BeeDay.Web.Tests.Components.Icons;
 
 public sealed class PixelIconTests
 {

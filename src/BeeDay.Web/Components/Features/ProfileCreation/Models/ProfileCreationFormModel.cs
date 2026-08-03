@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-namespace LevelUp.Web.Components.Features.ProfileCreation.Models;
+namespace BeeDay.Web.Components.Features.ProfileCreation.Models;
 
 public sealed class ProfileCreationFormModel
 {

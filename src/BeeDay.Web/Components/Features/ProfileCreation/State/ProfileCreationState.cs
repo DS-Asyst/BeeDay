@@ -1,7 +1,7 @@
-using LevelUp.Web.Components.Features.ProfileCreation.Models;
-using LevelUp.Web.Services;
+using BeeDay.Web.Components.Features.ProfileCreation.Models;
+using BeeDay.Web.Services;
 
-namespace LevelUp.Web.Components.Features.ProfileCreation.State;
+namespace BeeDay.Web.Components.Features.ProfileCreation.State;
 
 public sealed class ProfileCreationState(LevelUpWebService store, ToastService toastService)
 {
@@ -11,7 +11,7 @@ public sealed class ProfileCreationState(LevelUpWebService store, ToastService t
     public string? ValidationError { get; private set; }
     public bool HasAuthenticatedSession { get; private set; }
 
-    public Task<LevelUp.Application.Features.Users.Responses.CurrentUserResponse?> LoadDataAsync() => store.GetCurrentUserAsync();
+    public Task<BeeDay.Application.Features.Users.Responses.CurrentUserResponse?> LoadDataAsync() => store.GetCurrentUserAsync();
 
     public string NormalizedName => Model.Name.Trim();
     public string NormalizedNickname => Model.Nickname.Trim().TrimStart('@');

@@ -1,4 +1,4 @@
-namespace LevelUp.Application.Common.Identity;
+namespace BeeDay.Application.Common.Identity;
 
 public interface IEmailSender
 {

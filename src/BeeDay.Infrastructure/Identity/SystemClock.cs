@@ -1,6 +1,6 @@
-using LevelUp.Application.Common.Identity;
+using BeeDay.Application.Common.Identity;
 
-namespace LevelUp.Infrastructure.Identity;
+namespace BeeDay.Infrastructure.Identity;
 
 public sealed class SystemClock : IClock
 {

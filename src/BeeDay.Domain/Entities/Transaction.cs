@@ -1,9 +1,9 @@
-using LevelUp.Domain.Abstractions;
-using LevelUp.Domain.Common;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Domain.Abstractions;
+using BeeDay.Domain.Common;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
 
-namespace LevelUp.Domain.Entities;
+namespace BeeDay.Domain.Entities;
 
 public sealed class Transaction : Entity
 {

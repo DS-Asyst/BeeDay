@@ -1,4 +1,4 @@
-namespace LevelUp.Application.Features.Ordering.Requests;
+namespace BeeDay.Application.Features.Ordering.Requests;
 
 public enum ActivityCollection
 {

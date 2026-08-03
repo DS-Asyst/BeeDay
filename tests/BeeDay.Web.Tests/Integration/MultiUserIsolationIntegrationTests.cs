@@ -1,23 +1,23 @@
-using LevelUp.Application.Features.Dashboard.Queries;
-using LevelUp.Application.Features.Habits.Commands;
-using LevelUp.Application.Features.Habits.Requests;
-using LevelUp.Application.Features.Projects.Commands;
-using LevelUp.Application.Features.Projects.Requests;
-using LevelUp.Application.Features.Tasks.Commands;
-using LevelUp.Application.Features.Tasks.Requests;
-using LevelUp.Application.Features.Todos.Commands;
-using LevelUp.Application.Features.Todos.Requests;
-using LevelUp.Application.Features.Users.Commands;
-using LevelUp.Application.Features.Users.Requests;
-using LevelUp.Application.Features.Wallets.Commands;
-using LevelUp.Application.Features.Wallets.Requests;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Application.Features.Dashboard.Queries;
+using BeeDay.Application.Features.Habits.Commands;
+using BeeDay.Application.Features.Habits.Requests;
+using BeeDay.Application.Features.Projects.Commands;
+using BeeDay.Application.Features.Projects.Requests;
+using BeeDay.Application.Features.Tasks.Commands;
+using BeeDay.Application.Features.Tasks.Requests;
+using BeeDay.Application.Features.Todos.Commands;
+using BeeDay.Application.Features.Todos.Requests;
+using BeeDay.Application.Features.Users.Commands;
+using BeeDay.Application.Features.Users.Requests;
+using BeeDay.Application.Features.Wallets.Commands;
+using BeeDay.Application.Features.Wallets.Requests;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace LevelUp.Web.Tests.Integration;
+namespace BeeDay.Web.Tests.Integration;
 
 /// <summary>
 /// Proves cross-user isolation for every user-owned aggregate (Habits, Tasks, Projects, Todos,
@@ -266,11 +266,11 @@ public sealed class MultiUserIsolationIntegrationTests(LevelUpWebApplicationFact
         return transaction.Id;
     }
 
-    private async Task<T> FindAsync<T>(Func<LevelUp.Infrastructure.Persistence.SqlServer.LevelUpDbContext, T> select)
+    private async Task<T> FindAsync<T>(Func<BeeDay.Infrastructure.Persistence.SqlServer.LevelUpDbContext, T> select)
     {
         await using var scope = factory.Services.CreateAsyncScope();
         var contextFactory = scope.ServiceProvider
-            .GetRequiredService<IDbContextFactory<LevelUp.Infrastructure.Persistence.SqlServer.LevelUpDbContext>>();
+            .GetRequiredService<IDbContextFactory<BeeDay.Infrastructure.Persistence.SqlServer.LevelUpDbContext>>();
         await using var context = await contextFactory.CreateDbContextAsync();
         return select(context);
     }

@@ -1,6 +1,6 @@
-using LevelUp.Web.Components.Features.Dashboard.Components;
+using BeeDay.Web.Components.Features.Dashboard.Components;
 
-namespace LevelUp.Web.Tests.Components.DesignSystem;
+namespace BeeDay.Web.Tests.Components.DesignSystem;
 
 public sealed class ActivityComponentsTests
 {

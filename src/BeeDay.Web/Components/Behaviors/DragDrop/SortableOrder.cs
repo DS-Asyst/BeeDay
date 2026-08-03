@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Components.Behaviors.DragDrop;
+namespace BeeDay.Web.Components.Behaviors.DragDrop;
 
 public static class SortableOrder
 {

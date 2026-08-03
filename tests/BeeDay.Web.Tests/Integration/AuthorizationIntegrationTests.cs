@@ -1,7 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace LevelUp.Web.Tests.Integration;
+namespace BeeDay.Web.Tests.Integration;
 
 /// <summary>
 /// Validates route-level authorization as actually enforced by the real ASP.NET Core pipeline

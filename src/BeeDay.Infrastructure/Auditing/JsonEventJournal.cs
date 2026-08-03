@@ -1,12 +1,12 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using LevelUp.Application.Common.Auditing;
-using LevelUp.Domain.Events;
-using LevelUp.Infrastructure.Configuration;
+using BeeDay.Application.Common.Auditing;
+using BeeDay.Domain.Events;
+using BeeDay.Infrastructure.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
-namespace LevelUp.Infrastructure.Auditing;
+namespace BeeDay.Infrastructure.Auditing;
 
 /// <summary>
 /// Append-only audit log for domain events — entirely independent of application-state persistence.

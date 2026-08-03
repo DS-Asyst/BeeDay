@@ -1,5 +1,5 @@
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Application.Features.Users.Requests;
+namespace BeeDay.Application.Features.Users.Requests;
 
 public sealed record UpdateUserPreferencesRequest(UserLanguage Language, UserTheme Theme);

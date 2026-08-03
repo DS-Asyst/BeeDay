@@ -1,7 +1,7 @@
-using LevelUp.Infrastructure.Persistence.Exceptions;
+using BeeDay.Infrastructure.Persistence.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
-namespace LevelUp.Infrastructure.Persistence.SqlServer;
+namespace BeeDay.Infrastructure.Persistence.SqlServer;
 
 /// <summary>
 /// Single point where every <c>SaveChangesAsync</c> call in the SQL Server adapters (repositories and

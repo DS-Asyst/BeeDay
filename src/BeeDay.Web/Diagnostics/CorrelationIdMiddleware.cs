@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Primitives;
 
-namespace LevelUp.Web.Diagnostics;
+namespace BeeDay.Web.Diagnostics;
 
 public sealed class CorrelationIdMiddleware(RequestDelegate next, ILogger<CorrelationIdMiddleware> logger)
 {

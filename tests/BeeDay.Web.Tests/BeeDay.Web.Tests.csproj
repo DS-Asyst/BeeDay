@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
   <PropertyGroup>
+    <AssemblyName>BeeDay.Web.Tests</AssemblyName>
+    <RootNamespace>BeeDay.Web.Tests</RootNamespace>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 

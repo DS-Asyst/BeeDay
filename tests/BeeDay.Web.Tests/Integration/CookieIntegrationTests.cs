@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Net.Http.Headers;
 
-namespace LevelUp.Web.Tests.Integration;
+namespace BeeDay.Web.Tests.Integration;
 
 /// <summary>
 /// Validates the actual attributes of the "LevelUp.Auth" cookie as emitted by the real

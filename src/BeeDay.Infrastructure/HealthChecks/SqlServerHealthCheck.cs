@@ -1,8 +1,8 @@
-using LevelUp.Infrastructure.Persistence.SqlServer;
+using BeeDay.Infrastructure.Persistence.SqlServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace LevelUp.Infrastructure.HealthChecks;
+namespace BeeDay.Infrastructure.HealthChecks;
 
 // Depends on IDbContextFactory<LevelUpDbContext>, not LevelUpDbContext directly — Blazor Server circuits
 // are long-lived, so nothing in this codebase should hold a single scoped DbContext for the circuit's

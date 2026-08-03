@@ -1,8 +1,8 @@
 using System.Globalization;
 using System.Security.Cryptography;
-using LevelUp.Application.Common.Security;
+using BeeDay.Application.Common.Security;
 
-namespace LevelUp.Infrastructure.Security;
+namespace BeeDay.Infrastructure.Security;
 
 public sealed class Pbkdf2PasswordService : IPasswordService
 {

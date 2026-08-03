@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-namespace LevelUp.Web.Components.Behaviors.DragDrop;
+namespace BeeDay.Web.Components.Behaviors.DragDrop;
 
 public partial class LevelUpSortable : IAsyncDisposable
 {

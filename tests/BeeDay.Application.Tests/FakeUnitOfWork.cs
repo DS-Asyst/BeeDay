@@ -1,8 +1,8 @@
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
+using BeeDay.Application.Common.Contracts;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Application.Tests;
+namespace BeeDay.Application.Tests;
 
 /// <summary>
 /// Shared in-memory double for the 8 per-Aggregate persistence contracts plus <see cref="IUnitOfWork"/>

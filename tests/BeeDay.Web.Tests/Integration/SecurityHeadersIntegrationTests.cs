@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Tests.Integration;
+namespace BeeDay.Web.Tests.Integration;
 
 /// <summary>
 /// Verifies the security response headers this app ACTUALLY sends today, rather than assuming from

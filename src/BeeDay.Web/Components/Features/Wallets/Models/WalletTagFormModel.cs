@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace LevelUp.Web.Components.Features.Wallets.Models;
+namespace BeeDay.Web.Components.Features.Wallets.Models;
 
 public sealed class WalletTagFormModel
 {

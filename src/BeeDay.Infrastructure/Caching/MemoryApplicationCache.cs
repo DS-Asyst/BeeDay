@@ -1,7 +1,7 @@
-using LevelUp.Application.Common.Caching;
+using BeeDay.Application.Common.Caching;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace LevelUp.Infrastructure.Caching;
+namespace BeeDay.Infrastructure.Caching;
 
 public sealed class MemoryApplicationCache(IMemoryCache memoryCache) : IApplicationCache
 {

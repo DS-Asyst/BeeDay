@@ -1,8 +1,8 @@
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Domain.Entities;
+using BeeDay.Application.Common.Contracts;
+using BeeDay.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace LevelUp.Infrastructure.Persistence.SqlServer.Repositories;
+namespace BeeDay.Infrastructure.Persistence.SqlServer.Repositories;
 
 internal sealed class EfRecurringTaskRepository : EfRepositoryBase, IRecurringTaskRepository
 {

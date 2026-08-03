@@ -1,8 +1,8 @@
-using LevelUp.Domain.Entities;
+using BeeDay.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace LevelUp.Infrastructure.Persistence.SqlServer.Configurations;
+namespace BeeDay.Infrastructure.Persistence.SqlServer.Configurations;
 
 /// <summary>
 /// Configures the columns Habit/RecurringTask/Project/Todo inherit from the abstract Activity base.

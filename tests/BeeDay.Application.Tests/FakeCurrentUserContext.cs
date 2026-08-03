@@ -1,6 +1,6 @@
-using LevelUp.Application.Common.Security;
+using BeeDay.Application.Common.Security;
 
-namespace LevelUp.Application.Tests;
+namespace BeeDay.Application.Tests;
 
 /// <summary>
 /// Shared <see cref="ICurrentUserContext"/> fake — consolidates what used to be nine identical

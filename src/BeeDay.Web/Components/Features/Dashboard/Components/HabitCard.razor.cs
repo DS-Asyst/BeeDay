@@ -1,9 +1,9 @@
-using LevelUp.Domain.Enums;
-using LevelUp.Web.Components.Features.Habits;
+using BeeDay.Domain.Enums;
+using BeeDay.Web.Components.Features.Habits;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
-namespace LevelUp.Web.Components.Features.Dashboard.Components;
+namespace BeeDay.Web.Components.Features.Dashboard.Components;
 
 public partial class HabitCard
 {

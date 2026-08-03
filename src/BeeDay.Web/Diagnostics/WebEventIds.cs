@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Diagnostics;
+namespace BeeDay.Web.Diagnostics;
 
 public static class WebEventIds
 {

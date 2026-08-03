@@ -1,9 +1,9 @@
-using LevelUp.Domain.Enums;
-using LevelUp.Web.Components.Features.Habits.Models;
+using BeeDay.Domain.Enums;
+using BeeDay.Web.Components.Features.Habits.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
-namespace LevelUp.Web.Components.Features.Habits.Components;
+namespace BeeDay.Web.Components.Features.Habits.Components;
 
 public partial class HabitEditorModal
 {

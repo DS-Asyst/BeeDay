@@ -1,11 +1,11 @@
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Application.Common.Security;
-using LevelUp.Application.Features.Wallets.Commands;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Application.Common.Contracts;
+using BeeDay.Application.Common.Security;
+using BeeDay.Application.Features.Wallets.Commands;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Exceptions;
 using MediatR;
 
-namespace LevelUp.Application.Features.Wallets.Handlers;
+namespace BeeDay.Application.Features.Wallets.Handlers;
 
 public sealed class EnsureCurrentWalletCommandHandler(IWalletRepository repository, ICurrentUserContext currentUser)
     : IRequestHandler<EnsureCurrentWalletCommand, Guid>

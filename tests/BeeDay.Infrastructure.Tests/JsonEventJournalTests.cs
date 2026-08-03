@@ -1,14 +1,14 @@
 using System.Text.Json;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Events;
-using LevelUp.Infrastructure.Auditing;
-using LevelUp.Infrastructure.Configuration;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Events;
+using BeeDay.Infrastructure.Auditing;
+using BeeDay.Infrastructure.Configuration;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Xunit;
 
-namespace LevelUp.Infrastructure.Tests;
+namespace BeeDay.Infrastructure.Tests;
 
 public sealed class JsonEventJournalTests : IDisposable
 {
@@ -127,7 +127,7 @@ public sealed class JsonEventJournalTests : IDisposable
     private sealed class TestHostEnvironment : IHostEnvironment
     {
         public string EnvironmentName { get; set; } = Environments.Development;
-        public string ApplicationName { get; set; } = "LevelUp.Infrastructure.Tests";
+        public string ApplicationName { get; set; } = "BeeDay.Infrastructure.Tests";
         public string ContentRootPath { get; set; } = string.Empty;
         public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
     }

@@ -1,10 +1,10 @@
-using LevelUp.Application.Features.Identity.Commands;
-using LevelUp.Application.Features.Identity.Requests;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Application.Features.Identity.Commands;
+using BeeDay.Application.Features.Identity.Requests;
+using BeeDay.Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace LevelUp.Web.Tests.Integration;
+namespace BeeDay.Web.Tests.Integration;
 
 /// <summary>
 /// Exercises the full password-reset flow through the real MediatR handlers

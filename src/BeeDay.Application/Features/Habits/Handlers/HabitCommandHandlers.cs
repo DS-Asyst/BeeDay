@@ -1,14 +1,14 @@
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Application.Common.Experience;
-using LevelUp.Application.Common.Security;
-using LevelUp.Application.Features.Habits.Commands;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Exceptions;
-using LevelUp.Domain.Experience;
+using BeeDay.Application.Common.Contracts;
+using BeeDay.Application.Common.Experience;
+using BeeDay.Application.Common.Security;
+using BeeDay.Application.Features.Habits.Commands;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
+using BeeDay.Domain.Experience;
 using MediatR;
 
-namespace LevelUp.Application.Features.Habits.Handlers;
+namespace BeeDay.Application.Features.Habits.Handlers;
 
 public sealed class CreateHabitCommandHandler(IHabitRepository repository, ICurrentUserContext currentUser) : IRequestHandler<CreateHabitCommand>
 {

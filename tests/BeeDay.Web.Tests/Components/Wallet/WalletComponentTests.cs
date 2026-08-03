@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using LevelUp.Application.Features.Wallets.Responses;
-using LevelUp.Web.Components.Features.Wallets.Components;
-using LevelUp.Web.Components.Features.Wallets.Models;
+using BeeDay.Application.Features.Wallets.Responses;
+using BeeDay.Web.Components.Features.Wallets.Components;
+using BeeDay.Web.Components.Features.Wallets.Models;
 
-namespace LevelUp.Web.Tests.Components.Wallet;
+namespace BeeDay.Web.Tests.Components.Wallet;
 
 public sealed class WalletComponentTests : BunitContext
 {
@@ -56,8 +56,8 @@ public sealed class WalletComponentTests : BunitContext
     [Fact]
     public void CurrencyFormatter_UsesEnUs()
     {
-        Assert.Equal("$125.50", LevelUp.Web.Components.Features.Wallets.Services.WalletCurrencyFormatter.Format(125.50m));
-        Assert.Equal("-$89.90", LevelUp.Web.Components.Features.Wallets.Services.WalletCurrencyFormatter.Format(-89.90m));
+        Assert.Equal("$125.50", BeeDay.Web.Components.Features.Wallets.Services.WalletCurrencyFormatter.Format(125.50m));
+        Assert.Equal("-$89.90", BeeDay.Web.Components.Features.Wallets.Services.WalletCurrencyFormatter.Format(-89.90m));
     }
 
     [Theory]
@@ -66,7 +66,7 @@ public sealed class WalletComponentTests : BunitContext
     [InlineData("invalid", "#ffffff")]
     public void TagContrastCalculator_ReturnsReadableText(string color, string expected)
     {
-        Assert.Equal(expected, LevelUp.Web.Components.Features.Wallets.Services.TagContrastCalculator.GetTextColor(color));
+        Assert.Equal(expected, BeeDay.Web.Components.Features.Wallets.Services.TagContrastCalculator.GetTextColor(color));
     }
 }
 
@@ -75,7 +75,7 @@ public sealed class WalletPageStateTests
     [Fact]
     public void ClearFilters_ResetsFilterValuesAndPage()
     {
-        var state = new LevelUp.Web.Components.Features.Wallets.State.WalletPageState
+        var state = new BeeDay.Web.Components.Features.Wallets.State.WalletPageState
         {
             Search = "rent",
             TypeFilter = "Expense",
@@ -99,7 +99,7 @@ public sealed class WalletPageStateTests
     [Fact]
     public void ActiveFilterCount_CountsSearchTypeTagAndDateBounds()
     {
-        var state = new LevelUp.Web.Components.Features.Wallets.State.WalletPageState
+        var state = new BeeDay.Web.Components.Features.Wallets.State.WalletPageState
         {
             Search = "rent",
             TypeFilter = "Expense",
@@ -118,7 +118,7 @@ public sealed class WalletInteractionStateTests
     [Fact]
     public void TryBegin_PreventsConcurrentOperations()
     {
-        var state = new LevelUp.Web.Components.Features.Wallets.State.WalletInteractionState();
+        var state = new BeeDay.Web.Components.Features.Wallets.State.WalletInteractionState();
 
         Assert.True(state.TryBegin("save-transaction"));
         Assert.True(state.IsBusy);

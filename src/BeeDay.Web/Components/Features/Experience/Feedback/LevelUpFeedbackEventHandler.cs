@@ -1,8 +1,8 @@
-using LevelUp.Application.Common.Events;
-using LevelUp.Domain.Events;
+using BeeDay.Application.Common.Events;
+using BeeDay.Domain.Events;
 using MediatR;
 
-namespace LevelUp.Web.Components.Features.Experience.Feedback;
+namespace BeeDay.Web.Components.Features.Experience.Feedback;
 
 public sealed class LevelUpFeedbackEventHandler(LevelUpFeedbackStore store)
     : INotificationHandler<DomainEventNotification>

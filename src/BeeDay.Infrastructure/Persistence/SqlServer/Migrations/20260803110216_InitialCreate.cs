@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace LevelUp.Infrastructure.Persistence.SqlServer.Migrations;
+namespace BeeDay.Infrastructure.Persistence.SqlServer.Migrations;
 
 /// <inheritdoc />
 public partial class InitialCreate : Migration

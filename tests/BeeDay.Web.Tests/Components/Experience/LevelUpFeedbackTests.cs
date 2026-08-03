@@ -1,9 +1,9 @@
-using LevelUp.Application.Common.Events;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Events;
-using LevelUp.Web.Components.Features.Experience.Feedback;
+using BeeDay.Application.Common.Events;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Events;
+using BeeDay.Web.Components.Features.Experience.Feedback;
 
-namespace LevelUp.Web.Tests.Components.Experience;
+namespace BeeDay.Web.Tests.Components.Experience;
 
 public sealed class LevelUpFeedbackTests
 {

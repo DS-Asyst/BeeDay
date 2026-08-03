@@ -1,8 +1,8 @@
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Experience;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Experience;
 using Microsoft.EntityFrameworkCore;
 
-namespace LevelUp.Infrastructure.Persistence.SqlServer;
+namespace BeeDay.Infrastructure.Persistence.SqlServer;
 
 internal sealed class LevelUpDbContext(DbContextOptions<LevelUpDbContext> options) : DbContext(options)
 {

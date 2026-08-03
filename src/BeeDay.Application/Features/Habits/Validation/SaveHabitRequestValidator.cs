@@ -1,8 +1,8 @@
+using BeeDay.Application.Features.Habits.Requests;
+using BeeDay.Domain.ValueObjects;
 using FluentValidation;
-using LevelUp.Application.Features.Habits.Requests;
-using LevelUp.Domain.ValueObjects;
 
-namespace LevelUp.Application.Features.Habits.Validation;
+namespace BeeDay.Application.Features.Habits.Validation;
 
 public sealed class SaveHabitRequestValidator : AbstractValidator<SaveHabitRequest>
 {

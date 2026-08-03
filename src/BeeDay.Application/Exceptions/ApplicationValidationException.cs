@@ -1,6 +1,6 @@
 using FluentValidation.Results;
 
-namespace LevelUp.Application.Exceptions;
+namespace BeeDay.Application.Exceptions;
 
 public sealed class ApplicationValidationException : Exception
 {

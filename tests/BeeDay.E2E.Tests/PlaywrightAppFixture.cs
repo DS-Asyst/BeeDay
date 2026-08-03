@@ -1,6 +1,6 @@
 using Microsoft.Playwright;
 
-namespace LevelUp.E2E.Tests;
+namespace BeeDay.E2E.Tests;
 
 /// <summary>
 /// One Chromium instance and one hosted app per test class (via IClassFixture), shared across that

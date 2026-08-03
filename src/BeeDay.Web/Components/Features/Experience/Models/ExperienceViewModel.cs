@@ -1,7 +1,7 @@
-using LevelUp.Application.Features.Dashboard.Responses;
-using LevelUp.Domain.Experience;
+using BeeDay.Application.Features.Dashboard.Responses;
+using BeeDay.Domain.Experience;
 
-namespace LevelUp.Web.Components.Features.Experience.Models;
+namespace BeeDay.Web.Components.Features.Experience.Models;
 
 public sealed record ExperienceViewModel(
     int Level,

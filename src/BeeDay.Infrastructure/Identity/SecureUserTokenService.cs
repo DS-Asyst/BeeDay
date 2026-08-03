@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
 using System.Text;
-using LevelUp.Application.Common.Identity;
+using BeeDay.Application.Common.Identity;
 
-namespace LevelUp.Infrastructure.Identity;
+namespace BeeDay.Infrastructure.Identity;
 
 public sealed class SecureUserTokenService : IUserTokenService
 {

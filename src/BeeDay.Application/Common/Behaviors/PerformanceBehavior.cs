@@ -2,7 +2,7 @@ using System.Diagnostics;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace LevelUp.Application.Common.Behaviors;
+namespace BeeDay.Application.Common.Behaviors;
 
 public sealed class PerformanceBehavior<TRequest, TResponse>(
     ILogger<PerformanceBehavior<TRequest, TResponse>> logger)

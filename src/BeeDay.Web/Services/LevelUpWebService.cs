@@ -1,21 +1,21 @@
-using LevelUp.Application.Features.Dashboard.Queries;
-using LevelUp.Application.Features.Dashboard.Responses;
-using LevelUp.Application.Features.Habits.Commands;
-using LevelUp.Application.Features.Ordering.Commands;
-using LevelUp.Application.Features.Ordering.Requests;
-using LevelUp.Application.Features.Projects.Commands;
-using LevelUp.Application.Features.Tasks.Commands;
-using LevelUp.Application.Features.Todos.Commands;
-using LevelUp.Application.Features.Users.Commands;
-using LevelUp.Application.Features.Users.Queries;
-using LevelUp.Application.Features.Users.Responses;
-using LevelUp.Domain.Enums;
-using LevelUp.Web.Components.Features.Habits.Models;
-using LevelUp.Web.Components.Features.Projects.Models;
-using LevelUp.Web.Components.Features.Tasks.Models;
-using LevelUp.Web.Components.Features.Todos.Models;
+using BeeDay.Application.Features.Dashboard.Queries;
+using BeeDay.Application.Features.Dashboard.Responses;
+using BeeDay.Application.Features.Habits.Commands;
+using BeeDay.Application.Features.Ordering.Commands;
+using BeeDay.Application.Features.Ordering.Requests;
+using BeeDay.Application.Features.Projects.Commands;
+using BeeDay.Application.Features.Tasks.Commands;
+using BeeDay.Application.Features.Todos.Commands;
+using BeeDay.Application.Features.Users.Commands;
+using BeeDay.Application.Features.Users.Queries;
+using BeeDay.Application.Features.Users.Responses;
+using BeeDay.Domain.Enums;
+using BeeDay.Web.Components.Features.Habits.Models;
+using BeeDay.Web.Components.Features.Projects.Models;
+using BeeDay.Web.Components.Features.Tasks.Models;
+using BeeDay.Web.Components.Features.Todos.Models;
 using MediatR;
-namespace LevelUp.Web.Services;
+namespace BeeDay.Web.Services;
 
 public sealed class LevelUpWebService(ISender sender)
 {

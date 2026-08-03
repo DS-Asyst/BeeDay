@@ -1,7 +1,7 @@
 @page "/profile/create"
 @attribute [AllowAnonymous]
-@layout LevelUp.Web.Components.Layout.OnboardingLayout
-@inject LevelUp.Web.Components.Features.ProfileCreation.State.ProfileCreationState State
+@layout BeeDay.Web.Components.Layout.OnboardingLayout
+@inject BeeDay.Web.Components.Features.ProfileCreation.State.ProfileCreationState State
 @inject NavigationManager Navigation
 
 <PageTitle>Get started | LevelUp</PageTitle>
@@ -9,7 +9,7 @@
 <section class="profile-page levelup-fade-in">
     <div class="profile-panel profile-panel--@State.CurrentStepClass">
         <div class="profile-panel__global-brand"><LevelUpBrand /></div>
-        @if (State.Step == LevelUp.Web.Components.Features.ProfileCreation.State.ProfileCreationStep.Account)
+        @if (State.Step == BeeDay.Web.Components.Features.ProfileCreation.State.ProfileCreationStep.Account)
         {
             <LevelUpButton Variant="LevelUpButtonVariant.Back" Compact="true" Class="levelup-button--comic levelup-button--comic-back" OnClick="BackToLogin">Back</LevelUpButton>
             <h1>Create your account</h1>

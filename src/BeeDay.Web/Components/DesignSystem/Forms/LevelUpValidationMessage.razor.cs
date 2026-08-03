@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 
-namespace LevelUp.Web.Components.DesignSystem.Forms;
+namespace BeeDay.Web.Components.DesignSystem.Forms;
 
 public partial class LevelUpValidationMessage<TValue> : IDisposable
 {

@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Services;
+namespace BeeDay.Web.Services;
 
 public sealed class ToastService
 {

@@ -1,10 +1,10 @@
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Exceptions;
-using LevelUp.Domain.Experience;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
+using BeeDay.Domain.Experience;
 using Xunit;
 
-namespace LevelUp.Domain.Tests;
+namespace BeeDay.Domain.Tests;
 
 public sealed class ExperienceDomainTests
 {

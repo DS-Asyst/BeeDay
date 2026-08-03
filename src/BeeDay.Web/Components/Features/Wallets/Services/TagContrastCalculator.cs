@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Components.Features.Wallets.Services;
+namespace BeeDay.Web.Components.Features.Wallets.Services;
 
 public static class TagContrastCalculator
 {

@@ -1,8 +1,8 @@
-using LevelUp.Application.Features.Wallets.Responses;
-using LevelUp.Domain.Enums;
-using LevelUp.Web.Components.Features.Wallets.Components;
+using BeeDay.Application.Features.Wallets.Responses;
+using BeeDay.Domain.Enums;
+using BeeDay.Web.Components.Features.Wallets.Components;
 
-namespace LevelUp.Web.Tests.Components.Wallet;
+namespace BeeDay.Web.Tests.Components.Wallet;
 
 public sealed class WalletFiltersTests : BunitContext
 {
@@ -196,7 +196,7 @@ public sealed class WalletEmptyStateTests : BunitContext
 public sealed class TransactionListTests : BunitContext
 {
     public TransactionListTests() =>
-        Services.AddScoped<LevelUp.Web.Services.CardActionMenuCoordinator>();
+        Services.AddScoped<BeeDay.Web.Services.CardActionMenuCoordinator>();
 
     [Fact]
     public void RendersRefreshStateAndTransactions()

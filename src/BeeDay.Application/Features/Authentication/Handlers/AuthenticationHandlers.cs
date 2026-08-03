@@ -1,11 +1,11 @@
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Application.Common.Security;
-using LevelUp.Application.Features.Authentication.Commands;
-using LevelUp.Application.Features.Authentication.Responses;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Application.Common.Contracts;
+using BeeDay.Application.Common.Security;
+using BeeDay.Application.Features.Authentication.Commands;
+using BeeDay.Application.Features.Authentication.Responses;
+using BeeDay.Domain.Exceptions;
 using MediatR;
 
-namespace LevelUp.Application.Features.Authentication.Handlers;
+namespace BeeDay.Application.Features.Authentication.Handlers;
 
 public sealed class AuthenticateUserCommandHandler(
     IUserRepository repository,

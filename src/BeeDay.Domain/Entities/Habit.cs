@@ -1,7 +1,7 @@
-using LevelUp.Domain.Common;
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Common;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Domain.Entities;
+namespace BeeDay.Domain.Entities;
 
 public sealed class Habit : Activity
 {

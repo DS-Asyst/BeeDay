@@ -1,7 +1,7 @@
 using System.Threading.Channels;
-using LevelUp.Application.Common.Background;
+using BeeDay.Application.Common.Background;
 
-namespace LevelUp.Infrastructure.Background;
+namespace BeeDay.Infrastructure.Background;
 
 public sealed class BackgroundTaskQueue : IBackgroundTaskQueue
 {

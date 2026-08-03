@@ -1,9 +1,9 @@
-using LevelUp.Application.Common.Events;
-using LevelUp.Domain.Events;
-using LevelUp.Domain.Experience;
+using BeeDay.Application.Common.Events;
+using BeeDay.Domain.Events;
+using BeeDay.Domain.Experience;
 using MediatR;
 
-namespace LevelUp.Application.Common.Experience;
+namespace BeeDay.Application.Common.Experience;
 
 public static class ExperienceRewardEventPublisher
 {

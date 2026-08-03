@@ -1,11 +1,11 @@
 using System.Globalization;
 using System.Security.Claims;
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Application.Common.Identity;
-using LevelUp.Application.Common.Security;
-using LevelUp.Domain.Entities;
-using LevelUp.Infrastructure.Persistence.SqlServer;
-using LevelUp.Web.Services.Authentication;
+using BeeDay.Application.Common.Contracts;
+using BeeDay.Application.Common.Identity;
+using BeeDay.Application.Common.Security;
+using BeeDay.Domain.Entities;
+using BeeDay.Infrastructure.Persistence.SqlServer;
+using BeeDay.Web.Services.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Hosting;
@@ -16,7 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
-namespace LevelUp.Web.Tests.Integration;
+namespace BeeDay.Web.Tests.Integration;
 
 /// <summary>
 /// Boots the real application (Development environment, so the production-only startup guards
@@ -114,7 +114,7 @@ public class LevelUpWebApplicationFactory : WebApplicationFactory<Program>
             .Where(char.IsLetterOrDigit)
             .ToArray())
             .ToLowerInvariant();
-        var nickname = rawNickname.Length <= LevelUp.Domain.ValueObjects.Nickname.MaximumLength
+        var nickname = rawNickname.Length <= BeeDay.Domain.ValueObjects.Nickname.MaximumLength
             ? rawNickname
             : rawNickname[..14] + Math.Abs(rawNickname.GetHashCode()).ToString(CultureInfo.InvariantCulture).PadLeft(6, '0')[..6];
 
@@ -223,12 +223,12 @@ public class LevelUpWebApplicationFactory : WebApplicationFactory<Program>
     /// reset token is actually consumed.
     /// </summary>
     public Task<string> IssuePasswordResetTokenAsync(Guid userId, bool expired = false) =>
-        IssueTokenAsync(userId, LevelUp.Domain.Enums.UserTokenType.PasswordReset, expired);
+        IssueTokenAsync(userId, BeeDay.Domain.Enums.UserTokenType.PasswordReset, expired);
 
     public Task<string> IssueEmailConfirmationTokenAsync(Guid userId, bool expired = false) =>
-        IssueTokenAsync(userId, LevelUp.Domain.Enums.UserTokenType.EmailConfirmation, expired);
+        IssueTokenAsync(userId, BeeDay.Domain.Enums.UserTokenType.EmailConfirmation, expired);
 
-    private async Task<string> IssueTokenAsync(Guid userId, LevelUp.Domain.Enums.UserTokenType type, bool expired)
+    private async Task<string> IssueTokenAsync(Guid userId, BeeDay.Domain.Enums.UserTokenType type, bool expired)
     {
         using var scope = Services.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IUserTokenRepository>();
@@ -239,7 +239,7 @@ public class LevelUpWebApplicationFactory : WebApplicationFactory<Program>
         var now = clock.UtcNow;
         var createdAt = expired ? now.AddHours(-2) : now;
         var expiresAt = expired ? now.AddHours(-1) : now.AddHours(1);
-        await repository.AddAsync(LevelUp.Domain.Entities.UserToken.Create(userId, type, tokenService.HashToken(rawToken), createdAt, expiresAt));
+        await repository.AddAsync(BeeDay.Domain.Entities.UserToken.Create(userId, type, tokenService.HashToken(rawToken), createdAt, expiresAt));
 
         return rawToken;
     }

@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
-namespace LevelUp.E2E.Tests;
+namespace BeeDay.E2E.Tests;
 
 /// <summary>
 /// Account journeys driven entirely through the real browser: registration, login (which also

@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <AssemblyName>BeeDay.Application.Tests</AssemblyName>
+    <RootNamespace>BeeDay.Application.Tests</RootNamespace>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 

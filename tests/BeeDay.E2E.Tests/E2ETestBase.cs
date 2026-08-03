@@ -1,6 +1,6 @@
 using Microsoft.Playwright;
 
-namespace LevelUp.E2E.Tests;
+namespace BeeDay.E2E.Tests;
 
 /// <summary>
 /// Gives each test method its own isolated BrowserContext/Page (fresh cookies/storage per test,

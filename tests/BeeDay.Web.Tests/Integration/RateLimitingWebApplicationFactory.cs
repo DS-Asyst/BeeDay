@@ -1,6 +1,6 @@
-using LevelUp.Web.Services.Authentication;
+using BeeDay.Web.Services.Authentication;
 
-namespace LevelUp.Web.Tests.Integration;
+namespace BeeDay.Web.Tests.Integration;
 
 /// <summary>
 /// Used only by <c>RateLimitingIntegrationTests</c>, which deliberately exhausts the login rate

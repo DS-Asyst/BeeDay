@@ -1,14 +1,14 @@
 using System.Net;
 using System.Security.Claims;
-using LevelUp.Application.Features.Identity.Commands;
-using LevelUp.Application.Features.Identity.Requests;
-using LevelUp.Application.Features.Users.Commands;
-using LevelUp.Application.Features.Users.Requests;
-using LevelUp.Web.Services.Authentication;
+using BeeDay.Application.Features.Identity.Commands;
+using BeeDay.Application.Features.Identity.Requests;
+using BeeDay.Application.Features.Users.Commands;
+using BeeDay.Application.Features.Users.Requests;
+using BeeDay.Web.Services.Authentication;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace LevelUp.Web.Tests.Integration;
+namespace BeeDay.Web.Tests.Integration;
 
 /// <summary>
 /// Validates the real <c>OnValidatePrincipal</c> handler in Program.cs — never Domain or handler

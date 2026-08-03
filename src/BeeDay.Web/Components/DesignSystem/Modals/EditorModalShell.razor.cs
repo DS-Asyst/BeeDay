@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
 
-namespace LevelUp.Web.Components.DesignSystem.Modals;
+namespace BeeDay.Web.Components.DesignSystem.Modals;
 
 public partial class EditorModalShell
 {

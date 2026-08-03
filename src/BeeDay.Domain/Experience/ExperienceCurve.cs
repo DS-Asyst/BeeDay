@@ -1,4 +1,4 @@
-namespace LevelUp.Domain.Experience;
+namespace BeeDay.Domain.Experience;
 
 public static class ExperienceCurve
 {

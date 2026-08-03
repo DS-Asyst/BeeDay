@@ -1,7 +1,7 @@
-using LevelUp.Web.Components.Features.Wallets.Components;
-using LevelUp.Web.Components.Features.Wallets.Models;
+using BeeDay.Web.Components.Features.Wallets.Components;
+using BeeDay.Web.Components.Features.Wallets.Models;
 
-namespace LevelUp.Web.Tests.Components.Wallet;
+namespace BeeDay.Web.Tests.Components.Wallet;
 
 public sealed class TransactionFormModalTests : BunitContext
 {

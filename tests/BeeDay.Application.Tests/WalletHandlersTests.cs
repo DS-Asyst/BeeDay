@@ -1,15 +1,15 @@
-using LevelUp.Application.Features.Wallets.Handlers;
-using LevelUp.Application.Features.Wallets.Queries;
-using LevelUp.Application.Features.Wallets.Responses;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Exceptions;
-using FilterSortDirection = LevelUp.Application.Features.Wallets.Contracts.SortDirection;
-using FilterSortField = LevelUp.Application.Features.Wallets.Contracts.TransactionSortField;
-using IWalletReadService = LevelUp.Application.Features.Wallets.Contracts.IWalletReadService;
-using TransactionQueryFilter = LevelUp.Application.Features.Wallets.Contracts.TransactionQueryFilter;
+using BeeDay.Application.Features.Wallets.Handlers;
+using BeeDay.Application.Features.Wallets.Queries;
+using BeeDay.Application.Features.Wallets.Responses;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
+using FilterSortDirection = BeeDay.Application.Features.Wallets.Contracts.SortDirection;
+using FilterSortField = BeeDay.Application.Features.Wallets.Contracts.TransactionSortField;
+using IWalletReadService = BeeDay.Application.Features.Wallets.Contracts.IWalletReadService;
+using TransactionQueryFilter = BeeDay.Application.Features.Wallets.Contracts.TransactionQueryFilter;
 
-namespace LevelUp.Application.Tests;
+namespace BeeDay.Application.Tests;
 
 public sealed class WalletHandlersTests
 {
@@ -126,7 +126,7 @@ public sealed class WalletHandlersTests
 
     /// <summary>
     /// Minimal in-memory double for <see cref="IWalletReadService"/> — mirrors
-    /// LevelUp.Infrastructure's <c>EfWalletReadService</c> filter/sort/paginate behavior against the
+    /// BeeDay.Infrastructure's <c>EfWalletReadService</c> filter/sort/paginate behavior against the
     /// per-Aggregate in-memory lists on <see cref="FakeUnitOfWork"/>, so Application tests never need
     /// to reference Infrastructure.
     /// </summary>

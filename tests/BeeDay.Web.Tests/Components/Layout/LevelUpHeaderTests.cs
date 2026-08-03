@@ -1,6 +1,6 @@
-using LevelUp.Web.Components.DesignSystem.Layout;
+using BeeDay.Web.Components.DesignSystem.Layout;
 
-namespace LevelUp.Web.Tests.Components.Layout;
+namespace BeeDay.Web.Tests.Components.Layout;
 
 public sealed class LevelUpHeaderTests
 {

@@ -1,4 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>BeeDay.Application</AssemblyName>
+    <RootNamespace>BeeDay.Application</RootNamespace>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="../BeeDay.Domain/BeeDay.Domain.csproj" />
   </ItemGroup>

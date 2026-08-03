@@ -1,8 +1,8 @@
-using LevelUp.Web.Diagnostics;
+using BeeDay.Web.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace LevelUp.Web.Tests.Diagnostics;
+namespace BeeDay.Web.Tests.Diagnostics;
 
 public sealed class CorrelationIdMiddlewareTests
 {

@@ -1,7 +1,7 @@
-using LevelUp.Domain.Abstractions;
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Abstractions;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Domain.Experience;
+namespace BeeDay.Domain.Experience;
 
 public sealed class ExperienceEntry : Entity
 {

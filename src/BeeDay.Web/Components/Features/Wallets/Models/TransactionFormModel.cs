@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Web.Components.Features.Wallets.Models;
+namespace BeeDay.Web.Components.Features.Wallets.Models;
 
 public sealed class TransactionFormModel
 {

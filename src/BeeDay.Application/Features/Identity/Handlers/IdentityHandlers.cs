@@ -1,13 +1,13 @@
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Application.Common.Identity;
-using LevelUp.Application.Common.Security;
-using LevelUp.Application.Features.Identity.Commands;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Application.Common.Contracts;
+using BeeDay.Application.Common.Identity;
+using BeeDay.Application.Common.Security;
+using BeeDay.Application.Features.Identity.Commands;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
 using MediatR;
 
-namespace LevelUp.Application.Features.Identity.Handlers;
+namespace BeeDay.Application.Features.Identity.Handlers;
 
 public static class IdentityTokenLifetimes
 {

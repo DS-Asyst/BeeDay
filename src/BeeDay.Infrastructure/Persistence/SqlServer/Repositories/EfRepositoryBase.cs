@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace LevelUp.Infrastructure.Persistence.SqlServer.Repositories;
+namespace BeeDay.Infrastructure.Persistence.SqlServer.Repositories;
 
 /// <summary>
 /// Shared context-acquisition plumbing for the 8 <c>Ef*Repository</c> adapters — not a generic

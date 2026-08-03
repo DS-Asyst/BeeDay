@@ -1,10 +1,10 @@
+using BeeDay.Application.Features.Wallets.Queries;
+using BeeDay.Application.Features.Wallets.Requests;
+using BeeDay.Application.Features.Wallets.Validation;
+using BeeDay.Domain.Enums;
 using FluentValidation;
-using LevelUp.Application.Features.Wallets.Queries;
-using LevelUp.Application.Features.Wallets.Requests;
-using LevelUp.Application.Features.Wallets.Validation;
-using LevelUp.Domain.Enums;
 
-namespace LevelUp.Application.Tests;
+namespace BeeDay.Application.Tests;
 
 public sealed class WalletValidatorTests
 {

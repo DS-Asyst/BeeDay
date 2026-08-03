@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
-namespace LevelUp.E2E.Tests;
+namespace BeeDay.E2E.Tests;
 
 /// <summary>
 /// Habit and Task creation/completion as seen in the browser, including that completing an

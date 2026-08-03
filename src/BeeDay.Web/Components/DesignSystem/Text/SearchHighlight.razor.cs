@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace LevelUp.Web.Components.DesignSystem.Text;
+namespace BeeDay.Web.Components.DesignSystem.Text;
 
 public partial class SearchHighlight
 {

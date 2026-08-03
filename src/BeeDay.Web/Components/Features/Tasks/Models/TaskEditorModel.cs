@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Web.Components.Features.Tasks.Models;
+namespace BeeDay.Web.Components.Features.Tasks.Models;
 
 public sealed class TaskEditorModel
 {
@@ -12,7 +12,7 @@ public sealed class TaskEditorModel
     [StringLength(500, ErrorMessage = "Notes cannot exceed 500 characters.")]
     public string Description { get; set; } = string.Empty;
 
-    public LevelUp.Domain.Enums.TaskRepeat Repeat { get; set; } = LevelUp.Domain.Enums.TaskRepeat.Daily;
+    public BeeDay.Domain.Enums.TaskRepeat Repeat { get; set; } = BeeDay.Domain.Enums.TaskRepeat.Daily;
 
     public ActivityAttribute? Attribute { get; set; }
 }

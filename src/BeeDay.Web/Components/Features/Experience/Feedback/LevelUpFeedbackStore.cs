@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Components.Features.Experience.Feedback;
+namespace BeeDay.Web.Components.Features.Experience.Feedback;
 
 public sealed class LevelUpFeedbackStore
 {

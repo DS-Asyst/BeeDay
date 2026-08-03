@@ -1,8 +1,8 @@
-using LevelUp.Domain.Common;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Domain.Common;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
 
-namespace LevelUp.Domain.Experience;
+namespace BeeDay.Domain.Experience;
 
 public sealed class ExperienceSource
 {

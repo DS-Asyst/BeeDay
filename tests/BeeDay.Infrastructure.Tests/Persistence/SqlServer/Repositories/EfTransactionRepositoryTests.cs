@@ -1,10 +1,10 @@
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
-using LevelUp.Infrastructure.Persistence.Exceptions;
-using LevelUp.Infrastructure.Persistence.SqlServer.Repositories;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
+using BeeDay.Infrastructure.Persistence.Exceptions;
+using BeeDay.Infrastructure.Persistence.SqlServer.Repositories;
 using Xunit;
 
-namespace LevelUp.Infrastructure.Tests.Persistence.SqlServer.Repositories;
+namespace BeeDay.Infrastructure.Tests.Persistence.SqlServer.Repositories;
 
 [Collection("EfLocalDb")]
 public sealed class EfTransactionRepositoryTests : EfLocalDbTestBase

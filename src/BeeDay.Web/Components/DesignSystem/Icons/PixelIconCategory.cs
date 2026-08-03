@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Components.DesignSystem.Icons;
+namespace BeeDay.Web.Components.DesignSystem.Icons;
 
 public enum PixelIconCategory
 {

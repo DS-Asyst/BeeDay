@@ -1,13 +1,13 @@
-using LevelUp.Application.Common.Experience;
-using LevelUp.Application.Features.Tasks.Commands;
-using LevelUp.Application.Features.Tasks.Handlers;
-using LevelUp.Application.Features.Todos.Commands;
-using LevelUp.Application.Features.Todos.Handlers;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Experience;
+using BeeDay.Application.Common.Experience;
+using BeeDay.Application.Features.Tasks.Commands;
+using BeeDay.Application.Features.Tasks.Handlers;
+using BeeDay.Application.Features.Todos.Commands;
+using BeeDay.Application.Features.Todos.Handlers;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Experience;
 
-namespace LevelUp.Application.Tests;
+namespace BeeDay.Application.Tests;
 
 public sealed class ExperienceRewardPipelineTests
 {
@@ -83,7 +83,7 @@ public sealed class ExperienceRewardPipelineTests
         Assert.Equal(5L, policy.GetReward(ExperienceSourceType.Task));
         Assert.Equal(7L, policy.GetReward(ExperienceSourceType.Todo));
         Assert.Equal(20L, policy.GetReward(ExperienceSourceType.Project));
-        Assert.Throws<LevelUp.Domain.Exceptions.DomainValidationException>(() => policy.GetReward(ExperienceSourceType.System));
+        Assert.Throws<BeeDay.Domain.Exceptions.DomainValidationException>(() => policy.GetReward(ExperienceSourceType.System));
     }
 
     [Fact]
@@ -93,11 +93,11 @@ public sealed class ExperienceRewardPipelineTests
         var habit = Habit.Create("Drink water", null, HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily);
         habit.AssignOwner(user.Id);
         repository.HabitsData.Add(habit);
-        var handler = new LevelUp.Application.Features.Habits.Handlers.RegisterHabitPositiveCommandHandler(
+        var handler = new BeeDay.Application.Features.Habits.Handlers.RegisterHabitPositiveCommandHandler(
             repository, new FakeCurrentUserContext(user.Id), new ExperienceRewardService());
 
-        await handler.Handle(new LevelUp.Application.Features.Habits.Commands.RegisterHabitPositiveCommand(habit.Id), TestContext.Current.CancellationToken);
-        await handler.Handle(new LevelUp.Application.Features.Habits.Commands.RegisterHabitPositiveCommand(habit.Id), TestContext.Current.CancellationToken);
+        await handler.Handle(new BeeDay.Application.Features.Habits.Commands.RegisterHabitPositiveCommand(habit.Id), TestContext.Current.CancellationToken);
+        await handler.Handle(new BeeDay.Application.Features.Habits.Commands.RegisterHabitPositiveCommand(habit.Id), TestContext.Current.CancellationToken);
 
         Assert.Equal(2L, user.Experience.TotalExperience);
         Assert.Equal(2, user.Experience.Entries.Count);
@@ -113,7 +113,7 @@ public sealed class ExperienceRewardPipelineTests
     {
         var policy = new ExperienceRewardPolicy();
 
-        Assert.Throws<LevelUp.Domain.Exceptions.DomainValidationException>(() => policy.GetReward(sourceType));
+        Assert.Throws<BeeDay.Domain.Exceptions.DomainValidationException>(() => policy.GetReward(sourceType));
     }
 
     private static (FakeUnitOfWork Repository, User User) CreateRepository()

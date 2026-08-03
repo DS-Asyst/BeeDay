@@ -1,14 +1,14 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using LevelUp.Application.Common.Identity;
-using LevelUp.Infrastructure.Configuration;
-using LevelUp.Infrastructure.Identity;
+using BeeDay.Application.Common.Identity;
+using BeeDay.Infrastructure.Configuration;
+using BeeDay.Infrastructure.Identity;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Xunit;
 
-namespace LevelUp.Infrastructure.Tests;
+namespace BeeDay.Infrastructure.Tests;
 
 public sealed class IdentityInfrastructureTests
 {

@@ -1,4 +1,4 @@
-namespace LevelUp.Application.Common.Background;
+namespace BeeDay.Application.Common.Background;
 
 public interface IBackgroundTaskQueue
 {

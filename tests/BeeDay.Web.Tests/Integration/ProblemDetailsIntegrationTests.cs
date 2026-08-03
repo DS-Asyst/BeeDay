@@ -2,7 +2,7 @@ using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace LevelUp.Web.Tests.Integration;
+namespace BeeDay.Web.Tests.Integration;
 
 /// <summary>
 /// Validates the real <c>application/problem+json</c> contract (GlobalExceptionHandler) as it
@@ -153,7 +153,7 @@ public sealed class ProblemDetailsIntegrationTests(LevelUpWebApplicationFactory 
         using var document = JsonDocument.Parse(body);
         Assert.Equal("Validation failed", document.RootElement.GetProperty("title").GetString());
         Assert.DoesNotContain(".cs:", body, StringComparison.Ordinal);
-        Assert.DoesNotContain("at LevelUp.", body, StringComparison.Ordinal);
+        Assert.DoesNotContain("at BeeDay.", body, StringComparison.Ordinal);
         Assert.DoesNotContain("at Microsoft.", body, StringComparison.Ordinal);
         Assert.False(document.RootElement.TryGetProperty("innerException", out _));
     }

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace LevelUp.Web.Components.Features.Account.Models;
+namespace BeeDay.Web.Components.Features.Account.Models;
 
 public sealed class SecurityFormModel
 {

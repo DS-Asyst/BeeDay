@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace LevelUp.Web.Tests.Components.Visual;
+namespace BeeDay.Web.Tests.Components.Visual;
 
 public sealed class EntryFlowVisualConsistencyTests
 {

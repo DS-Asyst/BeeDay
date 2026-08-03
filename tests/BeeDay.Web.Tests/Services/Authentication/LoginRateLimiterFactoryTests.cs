@@ -1,9 +1,9 @@
 using System.Net;
-using LevelUp.Web.Services.Authentication;
+using BeeDay.Web.Services.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 
-namespace LevelUp.Web.Tests.Services.Authentication;
+namespace BeeDay.Web.Tests.Services.Authentication;
 
 public sealed class LoginRateLimiterFactoryTests
 {

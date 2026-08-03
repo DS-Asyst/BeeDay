@@ -1,7 +1,7 @@
-using LevelUp.Application.Features.Identity.Requests;
+using BeeDay.Application.Features.Identity.Requests;
 using MediatR;
 
-namespace LevelUp.Application.Features.Identity.Commands;
+namespace BeeDay.Application.Features.Identity.Commands;
 
 public sealed record ConfirmEmailCommand(ConfirmEmailRequest Request) : IRequest;
 public sealed record ResendEmailConfirmationCommand(ResendEmailConfirmationRequest Request) : IRequest;

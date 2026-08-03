@@ -1,9 +1,9 @@
+using BeeDay.Application.Common.Security;
+using BeeDay.Application.Features.Users.Commands;
+using BeeDay.Domain.ValueObjects;
 using FluentValidation;
-using LevelUp.Application.Common.Security;
-using LevelUp.Application.Features.Users.Commands;
-using LevelUp.Domain.ValueObjects;
 
-namespace LevelUp.Application.Features.Users.Validation;
+namespace BeeDay.Application.Features.Users.Validation;
 
 public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 {

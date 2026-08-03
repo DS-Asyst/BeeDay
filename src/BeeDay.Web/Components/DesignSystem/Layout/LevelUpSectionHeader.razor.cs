@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace LevelUp.Web.Components.DesignSystem.Layout;
+namespace BeeDay.Web.Components.DesignSystem.Layout;
 
 public partial class LevelUpSectionHeader
 {

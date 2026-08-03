@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Components.DesignSystem.Layout;
+namespace BeeDay.Web.Components.DesignSystem.Layout;
 
 public enum LevelUpHeroVariant
 {

@@ -1,7 +1,7 @@
+using BeeDay.Application.Features.Authentication.Commands;
 using FluentValidation;
-using LevelUp.Application.Features.Authentication.Commands;
 
-namespace LevelUp.Application.Features.Authentication.Validation;
+namespace BeeDay.Application.Features.Authentication.Validation;
 
 public sealed class AuthenticateUserCommandValidator : AbstractValidator<AuthenticateUserCommand>
 {

@@ -1,6 +1,6 @@
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Application.Features.Wallets.Responses;
+namespace BeeDay.Application.Features.Wallets.Responses;
 
 public sealed record WalletSummaryResponse(
     Guid WalletId,

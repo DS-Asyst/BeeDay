@@ -1,6 +1,6 @@
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Web.Components.Features.Experience.Feedback;
+namespace BeeDay.Web.Components.Features.Experience.Feedback;
 
 public sealed record LevelUpFeedback(
     Guid EventId,

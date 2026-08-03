@@ -1,7 +1,7 @@
+using BeeDay.Application.Features.Habits.Commands;
 using FluentValidation;
-using LevelUp.Application.Features.Habits.Commands;
 
-namespace LevelUp.Application.Features.Habits.Validation;
+namespace BeeDay.Application.Features.Habits.Validation;
 
 public sealed class CreateHabitCommandValidator : AbstractValidator<CreateHabitCommand>
 {

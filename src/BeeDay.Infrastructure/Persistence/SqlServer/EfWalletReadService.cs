@@ -1,9 +1,9 @@
-using LevelUp.Application.Features.Wallets.Contracts;
-using LevelUp.Application.Features.Wallets.Responses;
-using LevelUp.Domain.Entities;
+using BeeDay.Application.Features.Wallets.Contracts;
+using BeeDay.Application.Features.Wallets.Responses;
+using BeeDay.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace LevelUp.Infrastructure.Persistence.SqlServer;
+namespace BeeDay.Infrastructure.Persistence.SqlServer;
 
 /// <summary>
 /// SQL Server adapter for <see cref="IWalletReadService"/> — mirrors <c>JsonWalletReadService</c>'s

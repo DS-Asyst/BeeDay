@@ -1,8 +1,8 @@
-using LevelUp.Domain.Entities;
+using BeeDay.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace LevelUp.Infrastructure.Persistence.SqlServer.Configurations;
+namespace BeeDay.Infrastructure.Persistence.SqlServer.Configurations;
 
 internal sealed class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
 {

@@ -1,4 +1,4 @@
-namespace LevelUp.Domain.Exceptions;
+namespace BeeDay.Domain.Exceptions;
 
 public abstract class DomainException : Exception
 {

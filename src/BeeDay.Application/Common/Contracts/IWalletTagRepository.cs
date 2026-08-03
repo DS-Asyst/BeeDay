@@ -1,6 +1,6 @@
-using LevelUp.Domain.Entities;
+using BeeDay.Domain.Entities;
 
-namespace LevelUp.Application.Common.Contracts;
+namespace BeeDay.Application.Common.Contracts;
 
 /// <summary>
 /// Persistence boundary for the <c>WalletTag</c> Aggregate. Owned by <c>UserId</c>, not

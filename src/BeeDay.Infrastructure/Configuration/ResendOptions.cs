@@ -1,4 +1,4 @@
-namespace LevelUp.Infrastructure.Configuration;
+namespace BeeDay.Infrastructure.Configuration;
 
 public sealed class ResendOptions
 {

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 
-namespace LevelUp.Web.Components.DesignSystem.Cards;
+namespace BeeDay.Web.Components.DesignSystem.Cards;
 
 public partial class LevelUpCardMenu : IAsyncDisposable
 {

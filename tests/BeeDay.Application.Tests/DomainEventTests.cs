@@ -1,8 +1,8 @@
-using LevelUp.Application.Common.Caching;
-using LevelUp.Application.Common.Events;
-using LevelUp.Domain.Events;
+using BeeDay.Application.Common.Caching;
+using BeeDay.Application.Common.Events;
+using BeeDay.Domain.Events;
 
-namespace LevelUp.Application.Tests;
+namespace BeeDay.Application.Tests;
 
 public sealed class DomainEventTests
 {

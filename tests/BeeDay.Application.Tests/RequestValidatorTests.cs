@@ -1,22 +1,22 @@
-using LevelUp.Application.Features.Habits.Requests;
-using LevelUp.Application.Features.Habits.Validation;
-using LevelUp.Application.Features.Identity.Commands;
-using LevelUp.Application.Features.Identity.Requests;
-using LevelUp.Application.Features.Identity.Validation;
-using LevelUp.Application.Features.Ordering.Requests;
-using LevelUp.Application.Features.Ordering.Validation;
-using LevelUp.Application.Features.Projects.Requests;
-using LevelUp.Application.Features.Projects.Validation;
-using LevelUp.Application.Features.Tasks.Requests;
-using LevelUp.Application.Features.Tasks.Validation;
-using LevelUp.Application.Features.Todos.Requests;
-using LevelUp.Application.Features.Todos.Validation;
-using LevelUp.Application.Features.Users.Commands;
-using LevelUp.Application.Features.Users.Requests;
-using LevelUp.Application.Features.Users.Validation;
-using LevelUp.Domain.Enums;
+using BeeDay.Application.Features.Habits.Requests;
+using BeeDay.Application.Features.Habits.Validation;
+using BeeDay.Application.Features.Identity.Commands;
+using BeeDay.Application.Features.Identity.Requests;
+using BeeDay.Application.Features.Identity.Validation;
+using BeeDay.Application.Features.Ordering.Requests;
+using BeeDay.Application.Features.Ordering.Validation;
+using BeeDay.Application.Features.Projects.Requests;
+using BeeDay.Application.Features.Projects.Validation;
+using BeeDay.Application.Features.Tasks.Requests;
+using BeeDay.Application.Features.Tasks.Validation;
+using BeeDay.Application.Features.Todos.Requests;
+using BeeDay.Application.Features.Todos.Validation;
+using BeeDay.Application.Features.Users.Commands;
+using BeeDay.Application.Features.Users.Requests;
+using BeeDay.Application.Features.Users.Validation;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Application.Tests;
+namespace BeeDay.Application.Tests;
 
 public sealed class RequestValidatorTests
 {

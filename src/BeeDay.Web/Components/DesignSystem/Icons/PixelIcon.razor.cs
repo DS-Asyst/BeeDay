@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace LevelUp.Web.Components.DesignSystem.Icons;
+namespace BeeDay.Web.Components.DesignSystem.Icons;
 
 public partial class PixelIcon
 {

@@ -1,7 +1,7 @@
-using LevelUp.Application.Features.Todos.Requests;
+using BeeDay.Application.Features.Todos.Requests;
 using MediatR;
 
-namespace LevelUp.Application.Features.Todos.Commands;
+namespace BeeDay.Application.Features.Todos.Commands;
 
 public sealed record CreateTodoCommand(SaveTodoRequest Request) : IRequest;
 public sealed record UpdateTodoCommand(Guid Id, SaveTodoRequest Request) : IRequest;

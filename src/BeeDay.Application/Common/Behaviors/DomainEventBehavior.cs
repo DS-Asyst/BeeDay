@@ -1,8 +1,8 @@
-using LevelUp.Application.Common.Events;
-using LevelUp.Domain.Events;
+using BeeDay.Application.Common.Events;
+using BeeDay.Domain.Events;
 using MediatR;
 
-namespace LevelUp.Application.Common.Behaviors;
+namespace BeeDay.Application.Common.Behaviors;
 
 public sealed class DomainEventBehavior<TRequest, TResponse>(IPublisher publisher)
     : IPipelineBehavior<TRequest, TResponse>

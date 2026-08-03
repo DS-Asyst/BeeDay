@@ -1,11 +1,11 @@
 using System.Reflection;
-using LevelUp.Domain.Entities;
+using BeeDay.Domain.Entities;
 using Xunit;
 
-namespace LevelUp.Domain.Tests;
+namespace BeeDay.Domain.Tests;
 
 /// <summary>
-/// Locks the Sprint 12.8 boundary: LevelUp.Domain must never again reference a serialization or
+/// Locks the Sprint 12.8 boundary: BeeDay.Domain must never again reference a serialization or
 /// persistence technology. Inspects the actual compiled assembly's metadata references — not
 /// source text — so a transitive `using` in a single file cannot slip past a string search.
 /// </summary>
@@ -15,7 +15,7 @@ public sealed class DomainAssemblyBoundaryTests
     [
         "System.Text.Json",
         "Microsoft.EntityFrameworkCore",
-        "LevelUp.Infrastructure",
+        "BeeDay.Infrastructure",
     ];
 
     [Fact]

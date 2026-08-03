@@ -1,7 +1,7 @@
-using LevelUp.Application.Features.Wallets.Responses;
-using LevelUp.Domain.Enums;
+using BeeDay.Application.Features.Wallets.Responses;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Application.Features.Dashboard.Responses;
+namespace BeeDay.Application.Features.Dashboard.Responses;
 
 /// <summary>
 /// Replaced <c>GetLevelUpResponse</c> (removed on the Sprint 14.6 cutover), which exposed

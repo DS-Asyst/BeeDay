@@ -1,6 +1,6 @@
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Application.Features.Wallets.Requests;
+namespace BeeDay.Application.Features.Wallets.Requests;
 
 public sealed record SaveTransactionRequest(
     string Description,

@@ -92,8 +92,8 @@
 
         try
         {
-            await Sender.Send(new LevelUp.Application.Features.Identity.Commands.ConfirmEmailCommand(
-                new LevelUp.Application.Features.Identity.Requests.ConfirmEmailRequest(Token)));
+            await Sender.Send(new BeeDay.Application.Features.Identity.Commands.ConfirmEmailCommand(
+                new BeeDay.Application.Features.Identity.Requests.ConfirmEmailRequest(Token)));
             _state = ConfirmationPageState.Confirmed;
         }
         catch (Exception exception)

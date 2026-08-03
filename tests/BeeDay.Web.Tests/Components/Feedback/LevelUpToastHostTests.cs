@@ -1,7 +1,7 @@
-using LevelUp.Web.Components.DesignSystem.Feedback;
-using LevelUp.Web.Services;
+using BeeDay.Web.Components.DesignSystem.Feedback;
+using BeeDay.Web.Services;
 
-namespace LevelUp.Web.Tests.Components.Feedback;
+namespace BeeDay.Web.Tests.Components.Feedback;
 
 public sealed class LevelUpToastHostTests
 {

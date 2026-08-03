@@ -1,8 +1,8 @@
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Exceptions;
 using Xunit;
 
-namespace LevelUp.Domain.Tests;
+namespace BeeDay.Domain.Tests;
 
 public sealed class WalletTagTests
 {

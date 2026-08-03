@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Components.DesignSystem.Buttons;
+namespace BeeDay.Web.Components.DesignSystem.Buttons;
 
 public enum LevelUpButtonVariant
 {

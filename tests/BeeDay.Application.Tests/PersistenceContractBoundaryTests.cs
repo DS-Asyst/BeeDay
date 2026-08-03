@@ -1,11 +1,11 @@
-using LevelUp.Application.Common.Contracts;
+using BeeDay.Application.Common.Contracts;
 
-namespace LevelUp.Application.Tests;
+namespace BeeDay.Application.Tests;
 
 /// <summary>
 /// Locks the Sprint 13.3/13.4 persistence-contract boundary: inspects compiled member signatures
 /// (not source text) of every interface in <c>Common.Contracts</c> or any feature-scoped
-/// <c>*.Contracts</c> namespace. Mirrors <c>LevelUp.Domain.Tests.DomainAssemblyBoundaryTests</c>'s
+/// <c>*.Contracts</c> namespace. Mirrors <c>BeeDay.Domain.Tests.DomainAssemblyBoundaryTests</c>'s
 /// approach for the Domain/Infrastructure boundary. <c>ILevelUpRepository</c> was the one deliberate
 /// exception — the legacy whole-document contract — until it was removed on the Sprint 14.6 SQL
 /// Server cutover; every contract is checked with no exception from that Sprint onward.
@@ -14,7 +14,7 @@ namespace LevelUp.Application.Tests;
 ///
 /// Extended in Sprint 13.6 to also guard, across the same contract set: no <c>System.Text.Json</c>
 /// type in any signature, no generic repository/unit-of-work abstraction, and that
-/// <c>LevelUp.Application</c> itself never references <c>LevelUp.Infrastructure</c>.
+/// <c>BeeDay.Application</c> itself never references <c>BeeDay.Infrastructure</c>.
 ///
 /// Sprint 14.5 approved and implemented <see cref="IUnitOfWork"/> (see
 /// docs/architecture/07-persistence-contracts.md §6/§9/§10/§13) — the guard below now allows exactly
@@ -75,14 +75,14 @@ public sealed class PersistenceContractBoundaryTests
             .Select(assemblyName => assemblyName.Name)
             .ToArray();
 
-        Assert.DoesNotContain("LevelUp.Infrastructure", referenced);
+        Assert.DoesNotContain("BeeDay.Infrastructure", referenced);
     }
 
     private static List<Type> GetContractInterfaces() =>
         [.. typeof(IUnitOfWork).Assembly.GetTypes()
             .Where(type => type.IsInterface)
             .Where(type => type.Namespace is not null &&
-                (type.Namespace == "LevelUp.Application.Common.Contracts"
+                (type.Namespace == "BeeDay.Application.Common.Contracts"
                     || type.Namespace.EndsWith(".Contracts", StringComparison.Ordinal)))];
 
     private static bool ExposesSystemTextJson(Type type)

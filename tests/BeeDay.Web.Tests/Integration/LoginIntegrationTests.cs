@@ -1,8 +1,8 @@
 using System.Net;
-using LevelUp.Application.Common.Contracts;
+using BeeDay.Application.Common.Contracts;
 using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace LevelUp.Web.Tests.Integration;
+namespace BeeDay.Web.Tests.Integration;
 
 /// <summary>
 /// Exercises POST /auth/login against the real pipeline: valid/invalid credentials, normalized

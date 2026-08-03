@@ -1,6 +1,6 @@
-using LevelUp.Web.Components.DesignSystem.Cards;
+using BeeDay.Web.Components.DesignSystem.Cards;
 
-namespace LevelUp.Web.Tests.Components.Cards;
+namespace BeeDay.Web.Tests.Components.Cards;
 
 /// <summary>
 /// Exercises the pure placement geometry in isolation from any DOM/browser —

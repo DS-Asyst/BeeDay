@@ -1,7 +1,7 @@
-using LevelUp.Web.Components.DesignSystem.Icons;
+using BeeDay.Web.Components.DesignSystem.Icons;
 using Microsoft.AspNetCore.Components;
 
-namespace LevelUp.Web.Components.Features.Dashboard.Components;
+namespace BeeDay.Web.Components.Features.Dashboard.Components;
 
 public partial class DashboardColumn
 {

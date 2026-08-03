@@ -1,10 +1,10 @@
+using BeeDay.Application.Features.Wallets.Commands;
+using BeeDay.Application.Features.Wallets.Queries;
+using BeeDay.Application.Features.Wallets.Requests;
+using BeeDay.Domain.Entities;
 using FluentValidation;
-using LevelUp.Application.Features.Wallets.Commands;
-using LevelUp.Application.Features.Wallets.Queries;
-using LevelUp.Application.Features.Wallets.Requests;
-using LevelUp.Domain.Entities;
 
-namespace LevelUp.Application.Features.Wallets.Validation;
+namespace BeeDay.Application.Features.Wallets.Validation;
 
 public sealed class SaveTransactionRequestValidator : AbstractValidator<SaveTransactionRequest>
 {

@@ -1,8 +1,8 @@
-using LevelUp.Web.Components.Features.Tasks.Models;
+using BeeDay.Web.Components.Features.Tasks.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
-namespace LevelUp.Web.Components.Features.Tasks.Components;
+namespace BeeDay.Web.Components.Features.Tasks.Components;
 
 public partial class TaskEditorModal
 {

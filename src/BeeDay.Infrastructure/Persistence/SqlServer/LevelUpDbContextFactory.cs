@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace LevelUp.Infrastructure.Persistence.SqlServer;
+namespace BeeDay.Infrastructure.Persistence.SqlServer;
 
 /// <summary>
 /// Lets `dotnet ef migrations` build a <see cref="LevelUpDbContext"/> without starting the full
-/// LevelUp.Web host (production guard clauses, rate limiter, email sender, health checks). Used only by
+/// BeeDay.Web host (production guard clauses, rate limiter, email sender, health checks). Used only by
 /// EF Core tooling at design time — never resolved by the running application.
 /// </summary>
 internal sealed class LevelUpDbContextFactory : IDesignTimeDbContextFactory<LevelUpDbContext>

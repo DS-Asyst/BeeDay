@@ -1,7 +1,7 @@
+using BeeDay.Application.Features.Tasks.Commands;
 using FluentValidation;
-using LevelUp.Application.Features.Tasks.Commands;
 
-namespace LevelUp.Application.Features.Tasks.Validation;
+namespace BeeDay.Application.Features.Tasks.Validation;
 
 public sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
 {

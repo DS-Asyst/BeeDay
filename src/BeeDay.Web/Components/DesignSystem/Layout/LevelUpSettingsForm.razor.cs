@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 
-namespace LevelUp.Web.Components.DesignSystem.Layout;
+namespace BeeDay.Web.Components.DesignSystem.Layout;
 
 public partial class LevelUpSettingsForm<TModel>
 {

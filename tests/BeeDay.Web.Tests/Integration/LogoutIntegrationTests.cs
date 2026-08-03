@@ -1,7 +1,7 @@
 using System.Net;
 using Microsoft.Net.Http.Headers;
 
-namespace LevelUp.Web.Tests.Integration;
+namespace BeeDay.Web.Tests.Integration;
 
 /// <summary>
 /// Covers logout scenarios not already exercised by AntiforgeryIntegrationTests (missing/valid

@@ -1,9 +1,9 @@
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Infrastructure.Persistence.SqlServer.Repositories;
+using BeeDay.Application.Common.Contracts;
+using BeeDay.Infrastructure.Persistence.SqlServer.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace LevelUp.Infrastructure.Persistence.SqlServer;
+namespace BeeDay.Infrastructure.Persistence.SqlServer;
 
 /// <summary>
 /// Coordinates the 8 <c>Ef*Repository</c> adapters against a single <see cref="LevelUpDbContext"/> for

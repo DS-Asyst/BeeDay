@@ -1,9 +1,9 @@
-using LevelUp.Domain.Abstractions;
-using LevelUp.Domain.Common;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.ValueObjects;
+using BeeDay.Domain.Abstractions;
+using BeeDay.Domain.Common;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.ValueObjects;
 
-namespace LevelUp.Domain.Entities;
+namespace BeeDay.Domain.Entities;
 
 public abstract class Activity : Entity
 {

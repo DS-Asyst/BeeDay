@@ -1,6 +1,6 @@
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Application.Features.Todos.Requests;
+namespace BeeDay.Application.Features.Todos.Requests;
 
 public sealed record SaveTodoRequest(
     Guid ProjectId,

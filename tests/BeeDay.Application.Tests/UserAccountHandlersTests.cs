@@ -1,13 +1,13 @@
-using LevelUp.Application.Common.Security;
-using LevelUp.Application.Features.Users.Commands;
-using LevelUp.Application.Features.Users.Handlers;
-using LevelUp.Application.Features.Users.Queries;
-using LevelUp.Application.Features.Users.Requests;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Application.Common.Security;
+using BeeDay.Application.Features.Users.Commands;
+using BeeDay.Application.Features.Users.Handlers;
+using BeeDay.Application.Features.Users.Queries;
+using BeeDay.Application.Features.Users.Requests;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
 
-namespace LevelUp.Application.Tests;
+namespace BeeDay.Application.Tests;
 
 public sealed class UserAccountHandlersTests
 {

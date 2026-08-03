@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Components.Features.Common;
+namespace BeeDay.Web.Components.Features.Common;
 
 public enum ActivityType
 {

@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Components.Features.Habits;
+namespace BeeDay.Web.Components.Features.Habits;
 
 public static class HabitVisualState
 {

@@ -1,6 +1,6 @@
-using LevelUp.Application.Common.Caching;
+using BeeDay.Application.Common.Caching;
 
-namespace LevelUp.Application.Tests;
+namespace BeeDay.Application.Tests;
 
 /// <summary>
 /// Shared no-op <see cref="IApplicationCache"/> fake — always calls straight through to the factory,

@@ -1,7 +1,7 @@
-using LevelUp.Web.Components.DesignSystem.Cards;
-using LevelUp.Web.Services;
+using BeeDay.Web.Components.DesignSystem.Cards;
+using BeeDay.Web.Services;
 
-namespace LevelUp.Web.Tests.Components.Cards;
+namespace BeeDay.Web.Tests.Components.Cards;
 
 public sealed class LevelUpCardMenuTests
 {

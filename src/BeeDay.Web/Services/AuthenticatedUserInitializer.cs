@@ -1,8 +1,8 @@
 using System.Security.Claims;
-using LevelUp.Application.Common.Contracts;
+using BeeDay.Application.Common.Contracts;
 using Microsoft.AspNetCore.Components.Authorization;
 
-namespace LevelUp.Web.Services;
+namespace BeeDay.Web.Services;
 
 public sealed class AuthenticatedUserInitializer(
     AuthenticationStateProvider authenticationStateProvider,

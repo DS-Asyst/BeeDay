@@ -1,6 +1,6 @@
 using AngleSharp.Html.Parser;
 
-namespace LevelUp.Web.Tests.Integration;
+namespace BeeDay.Web.Tests.Integration;
 
 /// <summary>Shared helper for scraping a real antiforgery token out of a server-rendered page.</summary>
 internal static class AntiforgeryTestHelper

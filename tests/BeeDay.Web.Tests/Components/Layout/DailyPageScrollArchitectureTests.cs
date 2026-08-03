@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace LevelUp.Web.Tests.Components.Layout;
+namespace BeeDay.Web.Tests.Components.Layout;
 
 /// <summary>
 /// Guards the single-document-scroll contract for the app shell and the Daily

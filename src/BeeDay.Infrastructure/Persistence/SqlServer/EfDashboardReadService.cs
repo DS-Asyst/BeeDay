@@ -1,11 +1,11 @@
-using LevelUp.Application.Features.Dashboard.Contracts;
-using LevelUp.Application.Features.Dashboard.Responses;
-using LevelUp.Application.Features.Wallets.Responses;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Application.Features.Dashboard.Contracts;
+using BeeDay.Application.Features.Dashboard.Responses;
+using BeeDay.Application.Features.Wallets.Responses;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
-namespace LevelUp.Infrastructure.Persistence.SqlServer;
+namespace BeeDay.Infrastructure.Persistence.SqlServer;
 
 /// <summary>
 /// SQL Server adapter for <see cref="IDashboardReadService"/> — mirrors

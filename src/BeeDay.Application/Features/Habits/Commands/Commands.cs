@@ -1,7 +1,7 @@
-using LevelUp.Application.Features.Habits.Requests;
+using BeeDay.Application.Features.Habits.Requests;
 using MediatR;
 
-namespace LevelUp.Application.Features.Habits.Commands;
+namespace BeeDay.Application.Features.Habits.Commands;
 
 public sealed record CreateHabitCommand(SaveHabitRequest Request) : IRequest;
 public sealed record UpdateHabitCommand(Guid Id, SaveHabitRequest Request) : IRequest;

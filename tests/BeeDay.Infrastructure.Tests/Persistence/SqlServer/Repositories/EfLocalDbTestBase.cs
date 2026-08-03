@@ -1,9 +1,9 @@
-using LevelUp.Infrastructure.Persistence.SqlServer;
+using BeeDay.Infrastructure.Persistence.SqlServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace LevelUp.Infrastructure.Tests.Persistence.SqlServer.Repositories;
+namespace BeeDay.Infrastructure.Tests.Persistence.SqlServer.Repositories;
 
 /// <summary>
 /// Creates a uniquely-named, disposable SQL Server LocalDB database per test instance (xunit creates a
@@ -17,7 +17,7 @@ public abstract class EfLocalDbTestBase : IAsyncLifetime
 {
     private ServiceProvider serviceProvider = null!;
 
-    // internal, not protected: LevelUpDbContext is itself internal to LevelUp.Infrastructure (with
+    // internal, not protected: LevelUpDbContext is itself internal to BeeDay.Infrastructure (with
     // InternalsVisibleTo granted to this test assembly) — a protected member of a public class cannot
     // expose a less-accessible type (CS0053), but an internal member can, and every derived test class
     // lives in this same assembly regardless.

@@ -1,6 +1,6 @@
-using LevelUp.Web.Components.DesignSystem.Attributes;
+using BeeDay.Web.Components.DesignSystem.Attributes;
 
-namespace LevelUp.Web.Tests.Components.Attributes;
+namespace BeeDay.Web.Tests.Components.Attributes;
 
 /// <summary>
 /// Exercises the pure placement geometry in isolation from any DOM/browser —

@@ -1,7 +1,7 @@
-using LevelUp.Web.Components.DesignSystem.Buttons;
-using LevelUp.Web.Components.DesignSystem.Icons;
+using BeeDay.Web.Components.DesignSystem.Buttons;
+using BeeDay.Web.Components.DesignSystem.Icons;
 
-namespace LevelUp.Web.Tests.Components.Buttons;
+namespace BeeDay.Web.Tests.Components.Buttons;
 
 public sealed class LevelUpButtonTests
 {

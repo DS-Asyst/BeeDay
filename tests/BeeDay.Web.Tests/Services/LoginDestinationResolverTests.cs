@@ -1,6 +1,6 @@
-using LevelUp.Web.Services.Authentication;
+using BeeDay.Web.Services.Authentication;
 
-namespace LevelUp.Web.Tests.Services;
+namespace BeeDay.Web.Tests.Services;
 
 public sealed class LoginDestinationResolverTests
 {

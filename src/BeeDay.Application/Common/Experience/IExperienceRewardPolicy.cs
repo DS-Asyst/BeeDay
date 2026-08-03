@@ -1,6 +1,6 @@
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Application.Common.Experience;
+namespace BeeDay.Application.Common.Experience;
 
 public interface IExperienceRewardPolicy
 {

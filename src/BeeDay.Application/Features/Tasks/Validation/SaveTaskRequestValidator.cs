@@ -1,8 +1,8 @@
+using BeeDay.Application.Features.Tasks.Requests;
+using BeeDay.Domain.ValueObjects;
 using FluentValidation;
-using LevelUp.Application.Features.Tasks.Requests;
-using LevelUp.Domain.ValueObjects;
 
-namespace LevelUp.Application.Features.Tasks.Validation;
+namespace BeeDay.Application.Features.Tasks.Validation;
 
 public sealed class SaveTaskRequestValidator : AbstractValidator<SaveTaskRequest>
 {

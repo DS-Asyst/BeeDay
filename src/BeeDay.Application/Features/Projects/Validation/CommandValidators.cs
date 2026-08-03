@@ -1,7 +1,7 @@
+using BeeDay.Application.Features.Projects.Commands;
 using FluentValidation;
-using LevelUp.Application.Features.Projects.Commands;
 
-namespace LevelUp.Application.Features.Projects.Validation;
+namespace BeeDay.Application.Features.Projects.Validation;
 
 public sealed class CreateProjectCommandValidator : AbstractValidator<CreateProjectCommand>
 {

@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Components.Features.Wallets.State;
+namespace BeeDay.Web.Components.Features.Wallets.State;
 
 public sealed class WalletInteractionState
 {

@@ -1,6 +1,6 @@
-using LevelUp.Web.Components.Behaviors.DragDrop;
+using BeeDay.Web.Components.Behaviors.DragDrop;
 
-namespace LevelUp.Web.Tests.Components.Behaviors;
+namespace BeeDay.Web.Tests.Components.Behaviors;
 
 public sealed class SortableOrderTests
 {

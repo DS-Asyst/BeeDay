@@ -1,8 +1,8 @@
-using LevelUp.Web.Services;
+using BeeDay.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 
-namespace LevelUp.Web.Components.Features.ProfileCreation.Pages;
+namespace BeeDay.Web.Components.Features.ProfileCreation.Pages;
 
 public partial class CreateProfile
 {

@@ -1,7 +1,7 @@
-using LevelUp.Application.Common.Caching;
+using BeeDay.Application.Common.Caching;
 using MediatR;
 
-namespace LevelUp.Application.Common.Events;
+namespace BeeDay.Application.Common.Events;
 
 public sealed class InvalidateDashboardCacheHandler(IApplicationCache cache)
     : INotificationHandler<DomainEventNotification>

@@ -1,4 +1,4 @@
-namespace LevelUp.Domain.Enums;
+namespace BeeDay.Domain.Enums;
 
 /// <summary>
 /// Optional productivity classifier for tagging which focus area an activity builds

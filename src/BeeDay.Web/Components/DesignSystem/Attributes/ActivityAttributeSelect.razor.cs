@@ -1,9 +1,9 @@
 using System.Globalization;
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-namespace LevelUp.Web.Components.DesignSystem.Attributes;
+namespace BeeDay.Web.Components.DesignSystem.Attributes;
 
 public partial class ActivityAttributeSelect : IAsyncDisposable
 {

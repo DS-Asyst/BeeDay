@@ -1,8 +1,8 @@
-using LevelUp.Application.Features.Identity.Handlers;
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.Enums;
+using BeeDay.Application.Features.Identity.Handlers;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Application.Common.Identity;
+namespace BeeDay.Application.Common.Identity;
 
 public interface IEmailConfirmationIssuer
 {

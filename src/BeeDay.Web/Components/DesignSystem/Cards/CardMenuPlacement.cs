@@ -1,4 +1,4 @@
-namespace LevelUp.Web.Components.DesignSystem.Cards;
+namespace BeeDay.Web.Components.DesignSystem.Cards;
 
 /// <summary>
 /// Raw geometry measured from the real DOM (trigger, the menu panel itself,

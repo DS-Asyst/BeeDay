@@ -1,6 +1,6 @@
-using LevelUp.Domain.Enums;
+using BeeDay.Domain.Enums;
 
-namespace LevelUp.Domain.Events;
+namespace BeeDay.Domain.Events;
 
 public sealed record ExperienceGrantedDomainEvent(
     Guid UserId,

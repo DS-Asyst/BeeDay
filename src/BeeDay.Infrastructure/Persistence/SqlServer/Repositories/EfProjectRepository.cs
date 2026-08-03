@@ -1,8 +1,8 @@
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Domain.Entities;
+using BeeDay.Application.Common.Contracts;
+using BeeDay.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace LevelUp.Infrastructure.Persistence.SqlServer.Repositories;
+namespace BeeDay.Infrastructure.Persistence.SqlServer.Repositories;
 
 internal sealed class EfProjectRepository : EfRepositoryBase, IProjectRepository
 {
@@ -242,7 +242,7 @@ internal sealed class EfProjectRepository : EfRepositoryBase, IProjectRepository
         var todo = sourceProject.Todos.Single(existing => existing.Id == todoId);
 
         // Both calls are the same public Domain API AddTodoAsync/RemoveTodoAsync already use — Todo's
-        // internal AssignTo(projectId) only runs from inside LevelUp.Domain (via Project.AddTodo),
+        // internal AssignTo(projectId) only runs from inside BeeDay.Domain (via Project.AddTodo),
         // Infrastructure never calls it directly.
         sourceProject.RemoveTodo(todoId);
         destinationProject.AddTodo(todo);

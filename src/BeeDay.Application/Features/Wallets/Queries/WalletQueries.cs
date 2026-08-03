@@ -1,8 +1,8 @@
-using LevelUp.Application.Features.Wallets.Responses;
-using LevelUp.Domain.Enums;
+using BeeDay.Application.Features.Wallets.Responses;
+using BeeDay.Domain.Enums;
 using MediatR;
 
-namespace LevelUp.Application.Features.Wallets.Queries;
+namespace BeeDay.Application.Features.Wallets.Queries;
 
 public sealed record GetWalletSummaryQuery : IRequest<WalletSummaryResponse?>;
 public sealed record GetWalletTagsQuery : IRequest<IReadOnlyList<WalletTagResponse>>;

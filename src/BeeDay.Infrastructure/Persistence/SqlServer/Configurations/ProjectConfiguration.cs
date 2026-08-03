@@ -1,9 +1,9 @@
-using LevelUp.Domain.Entities;
-using LevelUp.Domain.ValueObjects;
+using BeeDay.Domain.Entities;
+using BeeDay.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace LevelUp.Infrastructure.Persistence.SqlServer.Configurations;
+namespace BeeDay.Infrastructure.Persistence.SqlServer.Configurations;
 
 internal sealed class ProjectConfiguration : IEntityTypeConfiguration<Project>
 {

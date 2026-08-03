@@ -1,7 +1,7 @@
-using LevelUp.Domain.Enums;
-using LevelUp.Web.Components.DesignSystem.Attributes;
+using BeeDay.Domain.Enums;
+using BeeDay.Web.Components.DesignSystem.Attributes;
 
-namespace LevelUp.Web.Tests.Components.Attributes;
+namespace BeeDay.Web.Tests.Components.Attributes;
 
 public sealed class ActivityAttributeSelectTests
 {

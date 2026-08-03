@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 
-namespace LevelUp.Web.Components.DesignSystem.Icons;
+namespace BeeDay.Web.Components.DesignSystem.Icons;
 
 public static class PixelIconRegistry
 {

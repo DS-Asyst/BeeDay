@@ -1,6 +1,6 @@
-using LevelUp.Web.Components.DesignSystem.Text;
+using BeeDay.Web.Components.DesignSystem.Text;
 
-namespace LevelUp.Web.Tests.Components.Text;
+namespace BeeDay.Web.Tests.Components.Text;
 
 public sealed class SearchHighlightTests
 {

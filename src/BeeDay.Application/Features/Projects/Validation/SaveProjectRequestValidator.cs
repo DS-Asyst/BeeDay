@@ -1,8 +1,8 @@
+using BeeDay.Application.Features.Projects.Requests;
+using BeeDay.Domain.ValueObjects;
 using FluentValidation;
-using LevelUp.Application.Features.Projects.Requests;
-using LevelUp.Domain.ValueObjects;
 
-namespace LevelUp.Application.Features.Projects.Validation;
+namespace BeeDay.Application.Features.Projects.Validation;
 
 public sealed class SaveProjectRequestValidator : AbstractValidator<SaveProjectRequest>
 {

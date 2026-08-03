@@ -1,8 +1,8 @@
+using BeeDay.Application.Features.Todos.Requests;
+using BeeDay.Domain.ValueObjects;
 using FluentValidation;
-using LevelUp.Application.Features.Todos.Requests;
-using LevelUp.Domain.ValueObjects;
 
-namespace LevelUp.Application.Features.Todos.Validation;
+namespace BeeDay.Application.Features.Todos.Validation;
 
 public sealed class SaveTodoRequestValidator : AbstractValidator<SaveTodoRequest>
 {

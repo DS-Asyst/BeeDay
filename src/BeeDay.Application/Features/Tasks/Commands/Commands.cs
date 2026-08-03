@@ -1,7 +1,7 @@
-using LevelUp.Application.Features.Tasks.Requests;
+using BeeDay.Application.Features.Tasks.Requests;
 using MediatR;
 
-namespace LevelUp.Application.Features.Tasks.Commands;
+namespace BeeDay.Application.Features.Tasks.Commands;
 
 public sealed record CreateTaskCommand(SaveTaskRequest Request) : IRequest;
 public sealed record UpdateTaskCommand(Guid Id, SaveTaskRequest Request) : IRequest;

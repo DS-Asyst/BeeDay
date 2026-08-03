@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace LevelUp.Web.Components.DesignSystem.Cards;
+namespace BeeDay.Web.Components.DesignSystem.Cards;
 
 public partial class LevelUpCard
 {

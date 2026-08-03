@@ -1,11 +1,11 @@
+using BeeDay.Application.Common.Behaviors;
+using BeeDay.Application.Common.Experience;
+using BeeDay.Application.Common.Identity;
 using FluentValidation;
-using LevelUp.Application.Common.Behaviors;
-using LevelUp.Application.Common.Experience;
-using LevelUp.Application.Common.Identity;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LevelUp.Application.DependencyInjection;
+namespace BeeDay.Application.DependencyInjection;
 
 public static class ApplicationServiceCollectionExtensions
 {

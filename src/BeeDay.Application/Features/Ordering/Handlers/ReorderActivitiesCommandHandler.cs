@@ -1,11 +1,11 @@
-using LevelUp.Application.Common.Contracts;
-using LevelUp.Application.Common.Security;
-using LevelUp.Application.Features.Ordering.Commands;
-using LevelUp.Application.Features.Ordering.Requests;
-using LevelUp.Domain.Exceptions;
+using BeeDay.Application.Common.Contracts;
+using BeeDay.Application.Common.Security;
+using BeeDay.Application.Features.Ordering.Commands;
+using BeeDay.Application.Features.Ordering.Requests;
+using BeeDay.Domain.Exceptions;
 using MediatR;
 
-namespace LevelUp.Application.Features.Ordering.Handlers;
+namespace BeeDay.Application.Features.Ordering.Handlers;
 
 public sealed class ReorderActivitiesCommandHandler(
     IHabitRepository habitRepository,

@@ -1,14 +1,14 @@
 @page "/wallet"
 @attribute [Authorize]
 @rendermode InteractiveServer
-@using LevelUp.Application.Features.Wallets.Commands
-@using LevelUp.Application.Features.Wallets.Queries
-@using LevelUp.Application.Features.Wallets.Requests
-@using LevelUp.Application.Features.Wallets.Responses
-@using LevelUp.Web.Components.Features.Wallets.Components
-@using LevelUp.Web.Components.Features.Wallets.Models
-@using LevelUp.Web.Components.Features.Wallets.Services
-@using LevelUp.Web.Components.Features.Wallets.State
+@using BeeDay.Application.Features.Wallets.Commands
+@using BeeDay.Application.Features.Wallets.Queries
+@using BeeDay.Application.Features.Wallets.Requests
+@using BeeDay.Application.Features.Wallets.Responses
+@using BeeDay.Web.Components.Features.Wallets.Components
+@using BeeDay.Web.Components.Features.Wallets.Models
+@using BeeDay.Web.Components.Features.Wallets.Services
+@using BeeDay.Web.Components.Features.Wallets.State
 @inject MediatR.ISender Sender
 @inject AuthenticatedUserInitializer UserInitializer
 @inject ToastService Toast
