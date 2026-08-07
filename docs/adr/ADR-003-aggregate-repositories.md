@@ -2,7 +2,8 @@
 
 **Status:** Aceito, com refinamentos (Sprint 13.3) — **totalmente implementado e adotado desde a
 Sprint 14.6** (todo handler de produção usa um dos 8 contratos, os 2 read services, ou `IUnitOfWork`);
-ver `docs/architecture/08-migration-status.md` §8 para o estado verificado.  
+ver `docs/history/migration-status.md` §8 para o estado verificado (caminho atualizado na Sprint
+16.10 — ver [`docs/history/README.md`](../history/README.md)).  
 **Data:** 2026-07-31
 
 ## Contexto

@@ -37,7 +37,7 @@ Remover, não apenas desregistrar:
   `HealthChecks/JsonStorageHealthCheck.cs`.
 - `src/LevelUp.Domain/Entities/LevelUpData.cs` e `LevelUpData.Persistence.cs` — todos os ~55 membros
   foram rastreados individualmente antes da remoção (inventário completo em
-  `docs/architecture/08-migration-status.md` §9.2): cada invariante que ainda tinha sentido já estava
+  `docs/history/migration-status.md` §9.2 — caminho atualizado na Sprint 16.10): cada invariante que ainda tinha sentido já estava
   duplicada em um handler de Application e/ou em um índice único do SQL Server; o restante era
   bootstrapping de documento único (sem equivalente necessário — SQL Server nasce vazio, ADR-002) ou o
   padrão de "usuário atual" ambiente, já morto como mecanismo de autenticação desde a Sprint 12.5.
@@ -90,17 +90,18 @@ subtipos) são records imutáveis com propriedades públicas `init` — não pre
   `LevelUp.Application` nunca referencia `LevelUp.Infrastructure`) continuam intactos.
 - Toda a suíte de testes (742 testes: 93 Domain, 72 Application, 120 Infrastructure, 7 E2E, 450 Web) roda
   limpa após a remoção, sem redução de cobertura — cada teste removido tem uma linha em
-  `docs/architecture/08-migration-status.md` §9.5 apontando o equivalente que já existia ou o teste novo
-  criado antes da remoção.
+  `docs/history/migration-status.md` §9.5 (caminho atualizado na Sprint 16.10) apontando o equivalente
+  que já existia ou o teste novo criado antes da remoção.
 - Risco de corrida em invariantes de unicidade sob SQL Server (documentado, não introduzido por esta
-  Sprint): ver `docs/architecture/08-migration-status.md` §9.9.
+  Sprint): ver `docs/history/migration-status.md` §9.9 (caminho atualizado na Sprint 16.10).
 
 ## Referências
 
-- `docs/architecture/08-migration-status.md` §9 — estado de código verificado após a remoção,
+- `docs/history/migration-status.md` §9 — estado de código verificado após a remoção (caminho
+  atualizado na Sprint 16.10),
   inventário completo arquivo por arquivo.
-- `docs/data/03-json-to-sql-transition.md` §"Sprint 14.7" — fecha a transição JSON → SQL no sentido de
-  código, não apenas runtime.
+- `docs/history/json-to-sql-transition.md` §"Sprint 14.7" (caminho atualizado na Sprint 16.10) — fecha
+  a transição JSON → SQL no sentido de código, não apenas runtime.
 - ADR-002 — decisão de banco vazio, sem importação de dados (inalterada por esta ADR).
 - ADR-004 — corte de runtime (Sprint 14.6); este ADR completa a decisão que aquele deliberadamente
   adiou.

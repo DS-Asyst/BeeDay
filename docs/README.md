@@ -23,14 +23,14 @@ testes em `tests/BeeDay.Web.Tests`". Ver [`CONVENTIONS.md`](CONVENTIONS.md).
 | [`domain/`](domain/README.md) | Aggregates, Entities, Value Objects, Domain Events, Business Rules | Correto — reconstruído por completo na Sprint 16.4 a partir do código atual |
 | [`application/`](application/README.md) | CQRS, Use Cases, Pipeline, Contracts, Exceptions, Dependency Flow | Correto — reconstruído por completo na Sprint 16.5 a partir do código atual |
 | [`infrastructure/`](infrastructure/README.md) | Repositories, Unit of Work, SQL Server, Concurrency, Event Journal, Identity/Email/Cache/Health/Background, Dependency Injection | Correto — reconstruído por completo na Sprint 16.6 a partir do código atual |
-| [`web/`](web/README.md) | Composition root, páginas Blazor Server | Reservado — sem conteúdo próprio ainda |
+| [`web/`](web/README.md) | Composition root, páginas Blazor Server, Feature components, layouts, integração com Design System | Correto — reconstruído por completo na Sprint 16.7 a partir do código atual |
 | [`persistence/`](persistence/README.md) | Modelo relacional, estratégia EF Core | Correto — reconstruído por completo na Sprint 16.6 a partir do código atual |
 | [`authentication/`](authentication/README.md) | Cookies, confirmação de e-mail, rate limiting | Reservado — ver `security/` enquanto isso |
-| [`security/`](security/README.md) | Baseline de segurança | Correto |
-| [`deployment/`](deployment/README.md) | Ambiente, backup/restore, CI/CD | Correto/parcialmente correto |
-| [`testing/`](testing/README.md) | Estratégia e infraestrutura de testes | Parcialmente correto |
-| [`design-system/`](design-system/README.md) | Design System Blazor, Pixel Icon System | Reservado — sem conteúdo próprio ainda |
-| [`ux/`](ux/README.md) | Fluxos de usuário e jornadas | Reservado — ver `architecture/05-runtime-flows.md` enquanto isso |
+| [`security/`](security/README.md) | Baseline de segurança, segurança operacional | Correto — `02-operational-security.md` reconstruído na Sprint 16.9; nomenclatura residual de `01-security-baseline.md` corrigida na Sprint 16.10 |
+| [`deployment/`](deployment/README.md) | Deploy, GitHub Actions, runtime configuration, observabilidade, operações | Correto — reconstruído por completo na Sprint 16.9 a partir do código atual |
+| [`testing/`](testing/README.md) | Estratégia e infraestrutura de testes | Correto — reconstruído por completo na Sprint 16.9 a partir do código atual |
+| [`design-system/`](design-system/README.md) | Design System Blazor, Pixel Icon System, Foundations, Componentes, Forms | Correto — reconstruído por completo na Sprint 16.8 a partir do código atual |
+| [`ux/`](ux/README.md) | Diretrizes de UX, acessibilidade, responsividade | Correto — reconstruído por completo na Sprint 16.8 a partir do código atual |
 | [`api/`](api/README.md) | Especificação OpenAPI | Não reauditado quanto ao conteúdo |
 | [`adr/`](adr/README.md) | Registros de decisão arquitetural | Correto (histórico, imutável) |
 | [`developer/`](developer/README.md) | Guia de contribuição, setup de ambiente | Reservado — ver `README.md` da raiz enquanto isso |

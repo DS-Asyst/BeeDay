@@ -1,345 +1,177 @@
-# Estratégia de Testes
+# Testing Strategy
 
-## 1. Pirâmide
+**Fonte da verdade:** verificado diretamente em `tests/BeeDay.Domain.Tests/`,
+`tests/BeeDay.Application.Tests/`, `tests/BeeDay.Infrastructure.Tests/`, `tests/BeeDay.Web.Tests/`,
+`tests/BeeDay.E2E.Tests/`, `BeeDay.slnx`, e confirmado por execução real de
+`dotnet test BeeDay.slnx --configuration Release --no-build` nesta Sprint (16.9).
 
-### Domain tests
+**Última verificação:** 2026-08-07. Reconstrução completa desta Sprint — substitui o documento
+anterior, que usava nomenclatura `LevelUp.slnx`/`tests/LevelUp.*.Tests` e uma seção de "Testes de
+banco" prescritiva (nunca verificada contra `EfLocalDbTestBase` real).
 
-Validam invariantes sem infraestrutura.
+## 1. Pirâmide — os 5 projetos de teste e o que cada um verifica
 
-### Application tests
+| Projeto | Arquivos `.cs` (sem `bin`/`obj`) | O que valida | Infraestrutura real usada |
+|---|---|---|---|
+| `BeeDay.Domain.Tests` | 12 | Invariantes de Aggregate/Entity/Value Object, sem nenhuma infraestrutura | Nenhuma — só o assembly `BeeDay.Domain` |
+| `BeeDay.Application.Tests` | 18 | Handlers de Command/Query com portas fakes | `FakeUnitOfWork` + 8 fakes de repositório, `FakeCurrentUserContext`, `FakeApplicationCache` |
+| `BeeDay.Infrastructure.Tests` | 17 | Repositórios EF Core, Identity, hashing de senha, Event Journal contra um SQL Server LocalDB real | `EfLocalDbTestBase`/`EfLocalDbCollection` — ver §4 |
+| `BeeDay.Web.Tests` | 61 | Componentes Blazor (bUnit) + integração HTTP real (`WebApplicationFactory`) | `BeeDayWebApplicationFactory` e variantes — documentado em [`docs/web/06-testing.md`](../web/06-testing.md) |
+| `BeeDay.E2E.Tests` | 7 (+ infraestrutura) | Fluxos de usuário reais via Chromium/Playwright | `PlaywrightAppFixture`/`E2EWebApplicationFactory` — documentado em [`docs/web/06-testing.md`](../web/06-testing.md) |
 
-Validam handlers com portas simuladas ou fakes controlados.
+Total confirmado por execução real nesta Sprint: **742 testes, 0 falhas** (93 Domain, 72
+Application, 120 Infrastructure, 450 Web, 7 E2E) — ver §7.
 
-### Contract tests
+## 2. Domain.Tests — invariantes sem infraestrutura
 
-Validam que qualquer adapter cumpre a mesma semântica.
+12 arquivos cobrindo os Aggregates (`Habit`, `RecurringTask`, `Project`, `Todo`, `Transaction`,
+`User`, `Wallet`, `WalletTag`, `UserToken`) e `DomainAssemblyBoundaryTests.cs` — teste
+arquitetural (Sprint 12.8) que inspeciona metadados de assembly via reflexão: `BeeDay.Domain` nunca
+referencia `System.Text.Json`, `Microsoft.EntityFrameworkCore` ou `BeeDay.Infrastructure`; nenhum
+tipo do Domain carrega atributo de serialização. Falha a build como teste (não apenas avisa) se a
+fronteira for violada.
 
-### Integration tests
+## 3. Application.Tests — handlers com portas fakes
 
-Validam JSON, SQL Server, autenticação, antiforgery e e-mail fake.
+18 arquivos. `PersistenceContractBoundaryTests.cs` (Sprint 13.3, estendida na 13.6, âncora de
+reflexão trocada para `IUnitOfWork` na 14.6) — nenhum contrato em `Common.Contracts`/`*.Contracts`
+expõe tipo `System.Text.Json.*`; nenhuma interface de contrato é genérica (`IRepository<T>`) ou tem
+"UnitOfWork" no nome (exceto `IUnitOfWork` propriamente dito); `BeeDay.Application` nunca referencia
+`BeeDay.Infrastructure`.
 
-### Component tests
+**Fakes** (não recriar cópias locais — reusar estes): `FakeUnitOfWork.cs` implementa `IUnitOfWork`
+(métodos de transação são no-op) e expõe 8 listas independentes (`UsersData`, `HabitsData`, etc.) —
+nenhum tipo agrega as 8 num documento único, mesmo princípio de "sem estado global" que motivou a
+remoção de `LevelUpData` do Domain (Sprint 14.7). `FakeCurrentUserContext`/`FakeApplicationCache`
+completam o conjunto padrão. Fakes com comportamento realmente divergente entre cenários (ex.:
+contagem de chamadas em um teste específico de autenticação) permanecem locais deliberadamente — não
+force a consolidação de fakes com comportamento distinto.
 
-Validam componentes Blazor com bUnit.
+## 4. Infrastructure.Tests — contra SQL Server LocalDB real
 
-### E2E
+17 arquivos: 4 na raiz (`BeeDayDbContextTests`, `IdentityInfrastructureTests`,
+`JsonEventJournalTests`, `Pbkdf2PasswordServiceTests`) + 13 sob `Persistence/SqlServer/` (3 direto:
+`EfDashboardReadServiceTests`, `EfUnitOfWorkTests`, `EfWalletReadServiceTests`; 10 sob
+`Repositories/`: os 8 repositórios por Aggregate + `EfLocalDbCollection`/`EfLocalDbTestBase`).
 
-Validam fluxos reais com Playwright.
+### Test Database — `EfLocalDbTestBase`
 
-## 2. Contract test kit
+Cada classe de teste que herda `EfLocalDbTestBase` (`IAsyncLifetime`) cria, no `InitializeAsync`, um
+banco LocalDB com nome único (`BeeDay_EfTests_{Guid}`), aplica a migration real via
+`Database.MigrateAsync()` — deliberadamente não `EnsureCreated()`, que pularia a migration inteira
+(incluindo o índice `UX_ExperienceEntries_Dedup`, SQL raw, e derrotaria o propósito de testar contra
+a migration real) — e derruba o banco (`EnsureDeletedAsync`) no `DisposeAsync`. Cada teste tem seu
+próprio banco, nunca compartilhado.
 
-Criar classes abstratas reutilizáveis:
+`EfLocalDbCollection` (`[CollectionDefinition("EfLocalDb", DisableParallelization = true)]`)
+desabilita paralelismo **apenas** para as classes `Ef*RepositoryTests` — muitas `CREATE
+DATABASE`/`DROP DATABASE` concorrentes contra a mesma instância `mssqllocaldb` causam contenção;
+`BeeDayDbContextTests` (que não usa `EfLocalDbTestBase`) continua rodando em paralelo, não afetado.
+Esse é o mesmo tipo de contenção de recurso observado entre projetos de teste diferentes ao rodar
+`dotnet test` na solução inteira — ver §7.
 
-```csharp
-public abstract class UserRepositoryContractTests
-{
-    protected abstract Task<IUserRepositoryFixture> CreateFixtureAsync();
+## 5. Web.Tests e E2E.Tests
 
-    [Fact]
-    public async Task Email_lookup_is_normalized() { }
+Mapeamento componente→teste, infraestrutura de `WebApplicationFactory` (`BeeDayWebApplicationFactory`
+e as 4 variantes especializadas), infraestrutura Playwright
+(`PlaywrightAppFixture`/`E2ETestBase`/`E2EWebApplicationFactory`) e os 7 fluxos E2E cobertos estão
+documentados por completo em [`docs/web/06-testing.md`](../web/06-testing.md) (Sprint 16.7) — este
+documento não duplica esse conteúdo.
 
-    [Fact]
-    public async Task Duplicate_email_is_rejected() { }
+### Limitações conhecidas de testar via `WebApplicationFactory`/TestServer
 
-    [Fact]
-    public async Task User_from_another_owner_is_not_exposed() { }
-}
-```
+`TestServer` (usado por toda `Ef*WebApplicationFactory`) nunca realiza handshake TLS real —
+`HttpContext.Request.IsHttps` é sempre `false`, mesmo com um `BaseAddress` `https://`. Duas
+consequências reais, confirmadas por captura de HTTP real, não presumidas:
 
-Implementações:
-
-```text
-SqlUserRepositoryContractTests
-```
-
-(Este padrão de dupla implementação nunca chegou a ser construído — nenhuma classe deste nome existe no
-repositório. Desde a Sprint 14.7, com o adapter JSON removido do código, só há um provider — SQL Server
-— para conformar; a classe abstrata de contrato continua útil caso um segundo provider volte a existir
-no futuro.)
-
-Repetir para:
-
-- atividades;
-- projetos;
-- Wallet;
-- experiência;
-- tokens;
-- unit of work.
-
-## 3. E2E mínimo
-
-Escopo planejado inicialmente para uma futura Sprint de hardening de sessão/segurança (troca de
-senha, invalidação de sessão anterior, isolamento entre dois usuários reais via browser). O
-subconjunto de jornada de usuário abaixo foi implementado na Sprint 12.7 — ver seção 7:
-
-1. criar conta;
-2. autenticar (com onboarding);
-3. criar hábito e concluir, validando atualização visual de XP;
-4. criar tarefa e concluir;
-5. criar tag e transação no Wallet, validando saldo atualizado;
-6. editar perfil;
-7. logout.
-
-Ainda não implementado (fora do escopo da Sprint 12.7): confirmação de e-mail por fake sender via
-browser, troca de senha, invalidação de sessão anterior, segundo usuário sem acesso aos dados do
-primeiro — esses já são cobertos por `tests/LevelUp.Web.Tests/Integration/` (seção 6) a nível de
-HTTP e não duplicados aqui.
-
-## 4. Testes de banco
-
-- migration inicial cria banco vazio;
-- unicidade de e-mail;
-- unicidade de nickname;
-- ownership por FK e consulta;
-- cascade behavior explícito;
-- rowversion gera conflito;
-- idempotência de XP;
-- exclusão de tag em uso;
-- transação atômica.
-
-## 5. Quality gate
-
-```powershell
-dotnet restore LevelUp.slnx
-dotnet format LevelUp.slnx --verify-no-changes --no-restore
-dotnet build LevelUp.slnx -c Release --no-restore --warnaserror
-dotnet test LevelUp.slnx -c Release --no-build
-```
-
-Apenas os testes E2E:
-
-```powershell
-dotnet test tests/LevelUp.E2E.Tests/LevelUp.E2E.Tests.csproj -c Release
-```
-
-## 6. Integration tests (Web) — implementado (Sprint 12.6)
-
-`tests/LevelUp.Web.Tests/Integration/` contém testes de integração reais contra a aplicação
-completa, via `Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<Program>` — TestServer real,
-pipeline HTTP real, cookies reais, antiforgery real, `OnValidatePrincipal` real. Mocks só isolam
-armazenamento (JSON em diretório temporário) e envio de e-mail (capturado em disco em vez de SMTP
-real); o mecanismo sob teste nunca é substituído.
-
-Executar apenas esses testes:
-
-```powershell
-dotnet test tests/LevelUp.Web.Tests/LevelUp.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~Integration"
-```
-
-### Infraestrutura
-
-- `LevelUpWebApplicationFactory` — factory base; banco SQL Server LocalDB isolado por instância
-  (nome único, migration real aplicada em `CreateHost`, banco apagado — `EnsureDeleted` — no
-  `Dispose`; substituiu o diretório JSON temporário na Sprint 14.6); ambiente configurável
-  (Development por padrão); rate limiter de login com limites generosos por padrão para não
-  interferir em testes não relacionados a rate limiting.
-- `RateLimitingWebApplicationFactory` — mesma factory com limites baixos e janela curta; uma
-  instância nova por teste (nunca compartilhada), para esgotar o limitador sem depender de tempo
-  real.
-- `ProductionLikeWebApplicationFactory` — sobe a aplicação em `Environment = Production`,
-  satisfazendo todos os guard clauses de produção do `Program.cs` com valores de teste (variáveis
-  de ambiente, já que esses guards leem `builder.Configuration` antes do `Build()`).
-- `EmailCaptureWebApplicationFactory` — habilita o `DevelopmentEmailSender` real (não um fake) com
-  um diretório de captura único por instância, usado para recuperar o token bruto de e-mails de
-  reset de senha/confirmação de e-mail a partir do link real enviado.
-- `AntiforgeryTestHelper` — extrai o token antiforgery real de uma página renderizada.
-- `CreateAuthenticatedScope` (na factory base) — para fluxos que só existem via MediatR/Blazor (sem
-  endpoint HTTP próprio: Habits, Tasks, Projects, Todos, Wallet, Tags, Profile), constrói um
-  `HttpContext` autenticado de verdade e resolve os handlers a partir dele — exercita o
-  `HttpCurrentUserContext` real; `ICurrentUserContext` nunca é substituído por um fake. Desde a
-  Sprint 14.6, retorna `AsyncServiceScope` (`Services.CreateAsyncScope()`), não `IServiceScope` — os
-  handlers cross-Aggregate resolvem `EfUnitOfWork`, que implementa só `IAsyncDisposable`; descartar o
-  escopo de forma síncrona (`using`) faz o container lançar exceção ao encontrar esse tipo rastreado.
-  Todo teste que resolve `ISender` a partir de um escopo manual usa `await using`, nunca `using` puro.
-
-### Cobertura
-
-- Antiforgery/CSRF (login, logout);
-- Login (credenciais válidas/inválidas, normalização de e-mail, conta desativada/não confirmada,
-  cookie + claim de SessionVersion, redirecionamento pós-login, não vazamento de dados sensíveis);
-- Rate limiting via HTTP real (IP, e-mail normalizado, genericidade do 429, não afeta outros
-  endpoints);
-- Cookies (nome, HttpOnly, Secure por ambiente, SameSite, Path, expiração, remember-me);
-- Logout (limpeza de cookie, revogação de acesso, idempotência, escopo local por dispositivo);
-- Invalidação de sessão via `OnValidatePrincipal` real (cookie forjado com claim ausente/inválida/
-  antiga, usuário inexistente/desativado, e o cenário real de troca de senha/reset/desativação
-  invalidando um cookie previamente emitido);
-- Autorização (páginas protegidas/públicas, endpoints protegidos por `RequireAuthorization()`);
-- Isolamento multiusuário (Habits, Tasks, Projects, Todos, Wallet, Tags, Profile) via
-  `CreateAuthenticatedScope`;
-- Reset de senha e confirmação de e-mail, fluxo completo (token real capturado do e-mail, inválido,
-  expirado, já usado, revogação, indistinguibilidade existente/inexistente, throttle);
-- Problem Details (status, content-type, estrutura, correlationId, ausência de vazamento);
-- Security headers (o que está de fato configurado hoje).
-
-### Limitações conhecidas (documentadas, não contornadas artificialmente)
-
-- **HSTS não pôde ser verificado via TestServer**: `HstsMiddleware` só adiciona o header quando
-  `HttpContext.Request.IsHttps` é verdadeiro; o TestServer do `Microsoft.AspNetCore.Mvc.Testing`
-  nunca realiza um handshake TLS real — um `BaseAddress` `https://` só afeta a construção de URLs
-  relativas, não `Request.IsHttps`. Confirmado via observação direta (resposta real em produção,
-  status 200, sem o header). Limitação conhecida de se testar HSTS via `WebApplicationFactory`, não
-  um defeito do `Program.cs`.
-- **Antiforgery em "Production" retorna 400 com corpo vazio**: sob `ProductionLikeWebApplicationFactory`,
+- **HSTS não pode ser verificado via `WebApplicationFactory`**: `HstsMiddleware` só adiciona o
+  header quando `Request.IsHttps` é verdadeiro — nunca acontece em teste. Limitação de testar HSTS
+  por esse mecanismo, não um defeito de `Program.cs`.
+- **Antiforgery em `Production` retorna 400 com corpo vazio**: sob `ProductionLikeWebApplicationFactory`,
   uma requisição sem token antiforgery retorna 400 sem nenhum corpo/log do `GlobalExceptionHandler`
-  — diferente do Development, onde o mesmo cenário chega ao handler e retorna
-  `application/problem+json` completo. A rejeição em si (400, nenhuma sessão emitida) está correta
-  e não vaza mais informação que em Development; a causa mais provável é a mesma limitação de
-  `IsHttps` acima interagindo com a máquina de antiforgery, mas isso não foi confirmado com certeza
-  nesta Sprint. Ver `ProblemDetailsIntegrationTests.cs` para o teste que documenta isso.
+  — diferente de Development, onde o mesmo cenário chega ao handler e retorna
+  `application/problem+json` completo. A rejeição em si (400, nenhuma sessão emitida) está correta e
+  não vaza mais informação que em Development; causa mais provável é a mesma limitação de `IsHttps`
+  interagindo com a máquina de antiforgery — não totalmente root-caused. Ver comentário de classe em
+  `tests/BeeDay.Web.Tests/Integration/ProblemDetailsIntegrationTests.cs`.
+
+Duas limitações adicionais, não relacionadas a TLS:
+
 - **Códigos 404/409/500/503 do `GlobalExceptionHandler`** (`ActivityNotFoundException`,
   `InvalidDomainStateException` fora do catch local de `/auth/login`, `PersistenceException`, erro
-  não mapeado) não são alcançáveis por uma requisição HTTP real hoje: a superfície HTTP desta
-  aplicação é só `/auth/login`, `/auth/logout`, `/health*` e páginas Blazor — nenhuma delas deixa
-  esses tipos de exceção escaparem de um MediatR handler para o pipeline HTTP (isso só acontece a
-  partir do circuito SignalR do Blazor). Não foi criado um endpoint artificial só para forçar esses
-  códigos.
+  não mapeado) não são alcançáveis por uma requisição HTTP real: a superfície HTTP desta aplicação é
+  só `/auth/login`, `/auth/logout`, `/health*` e páginas Blazor — nenhuma delas deixa esses tipos de
+  exceção escaparem de um handler MediatR para o pipeline HTTP (só acontece a partir do circuito
+  SignalR do Blazor). Nenhum endpoint artificial foi criado só para forçar esses códigos.
 - **429 do rate limiter não usa `application/problem+json`**: `/auth/login`'s `AddEndpointFilter`
-  responde com `Results.Text(...)`, texto simples, diferente de todo outro caminho de erro da
-  aplicação. Comportamento real, documentado e testado (`ProblemDetailsIntegrationTests.cs`); não é
-  uma falha de segurança (o corpo já era genérico), mas é uma inconsistência de contrato que pode
-  valer a pena alinhar em uma Sprint futura.
+  responde com `Results.Text(...)` — texto simples, diferente de todo outro caminho de erro da
+  aplicação. Comportamento real, testado (`ProblemDetailsIntegrationTests.cs`), não uma falha de
+  segurança (o corpo já era genérico) — ver
+  [`docs/web/01-composition-root.md`](../web/01-composition-root.md) §9.
 
-## 7. E2E tests (Playwright) — implementado (Sprint 12.7)
+## 6. Testes arquiteturais — os 2 guardas de fronteira
 
-`tests/LevelUp.E2E.Tests/` dirige a aplicação real através de um Chromium real (headless), sem
-substituir nada do pipeline HTTP/SignalR. Não duplica o que a Sprint 12.6 já cobre via
-`WebApplicationFactory`/TestServer (antiforgery, cookies, `SessionVersion`, `CurrentUser`, rate
-limiting, autorização interna) — valida apenas o comportamento observável pelo usuário.
+| Teste | Verifica |
+|---|---|
+| `BeeDay.Domain.Tests/DomainAssemblyBoundaryTests.cs` | `BeeDay.Domain` nunca referencia `System.Text.Json`/EF Core/`BeeDay.Infrastructure` |
+| `BeeDay.Application.Tests/PersistenceContractBoundaryTests.cs` | Nenhum contrato expõe tipo `System.Text.Json.*`; nenhuma interface genérica de repositório; `BeeDay.Application` nunca referencia `BeeDay.Infrastructure` |
 
-### Infraestrutura
+Ambos falham a build como teste (não apenas avisam) se a fronteira for violada — a única forma de
+"quebrar" a Dependency Rule (ver [`docs/architecture/04-dependency-rules.md`](../architecture/04-dependency-rules.md))
+sem que um teste falhe é adicionar uma nova violação de um tipo que nenhum dos dois testes inspeciona
+ainda.
 
-- `E2EWebApplicationFactory` — `WebApplicationFactory<Program>` própria (não referencia
-  `LevelUp.Web.Tests`; apenas o projeto de produção `LevelUp.Web`), usando a API nativa do .NET 10
-  `UseKestrel(port: 0)` para expor um endpoint Kestrel real em porta dinâmica (TestServer não é
-  acessível por um browser real). O `Server` da factory não pode ser tocado diretamente sob Kestrel
-  (lança `NotSupportedException`); o startup é disparado via `CreateClient()` e o endereço real lido
-  de `ClientOptions.BaseAddress`. Banco SQL Server LocalDB isolado por instância (nome único, migration
-  aplicada em `CreateHost`, apagado — `EnsureDeleted` — no `Dispose`; substituiu o diretório JSON
-  temporário na Sprint 14.6).
-- `PlaywrightAppFixture` (`IAsyncLifetime`, compartilhada via `IClassFixture` por classe de teste) —
-  sobe a factory acima e um único `IBrowser` Chromium por classe.
-- `E2ETestBase` — abre um `IBrowserContext`/`IPage` por teste; inicia trace do Playwright
-  (screenshots + snapshots + sources) em todo teste; ao final, descarta o trace silenciosamente se o
-  teste passou, ou grava screenshot full-page + `trace.zip` em `e2e-artifacts/` (apagado apenas se o
-  teste falhar) usando `Xunit.TestContext.Current.TestState` (mecanismo do xunit v3) para saber o
-  resultado do teste dentro do próprio `DisposeAsync`.
-- `[assembly: CollectionBehavior(DisableTestParallelization = true)]` — cada classe de teste sobe seu
-  próprio Chromium + Kestrel; rodar classes em paralelo (padrão do xunit) satura a máquina e produz
-  falhas por contenção de recursos, não por defeito real.
+## 7. Fluxo de execução e cobertura
 
-### Navegador
-
-Apenas Chromium (headless). Firefox/WebKit não fazem parte do escopo — não há necessidade de
-cobertura cross-browser nesta Sprint e rodar múltiplos navegadores só aumentaria o tempo de
-execução sem adicionar confiança.
-
-### Seletores
-
-Preferência por `GetByRole`/`GetByLabel`/texto estável, nunca CSS frágil, índice ou XPath. Onde o
-sinal mais óbvio (ex.: `aria-expanded` de um menu) se mostrou não confiável por um defeito real de
-acessibilidade pré-existente (ver abaixo), o teste passou a depender de um sinal alternativo
-igualmente real (o próprio rótulo acessível do elemento gatilho, ou a visibilidade do próprio
-container do menu) em vez de contornar com um seletor frágil.
-
-### Esperas
-
-Apenas auto-waiting nativo do Playwright (`Locator.ClickAsync`, `Expect(locator).ToBeVisibleAsync()`
-etc.) — nenhum `Thread.Sleep`/`Task.Delay`/timeout arbitrário. Uma navegação disparada por um
-redirecionamento do servidor (login bem-sucedido, clique num link) estabelece seu próprio circuito
-SignalR que o `WaitForLoadStateAsync(NetworkIdle)` de uma navegação explícita anterior não cobre —
-por isso os helpers de login/navegação repetem essa espera logo após o clique que dispara o
-redirecionamento.
-
-### Fluxos cobertos (7 testes)
-
-1. `CreateAccount_ReachesEmailConfirmationPending` — criação de conta até a tela de confirmação.
-2. `Login_CompletesOnboarding_ReachesDashboard` — login, onboarding completo, chegada ao dashboard.
-3. `Logout_EndsSessionAndBlocksDashboard` — logout e bloqueio de acesso subsequente ao dashboard.
-4. `EditProfile_UpdatesName` — edição de perfil.
-5. `CreateAndCompleteHabit_UpdatesBalanceAndXp` — criação/conclusão de hábito com atualização visual
-   de saldo e XP (sem validar o cálculo interno, já coberto por testes unitários).
-6. `CreateAndCompleteTask_TogglesCompletion` — criação/conclusão de tarefa; ver nota abaixo sobre a
-   visão Completed/Active do `DashboardColumn`.
-7. `CreateTagAndTransaction_UpdatesBalance` — criação de tag e transação no Wallet com saldo
-   atualizado.
-
-### Defeitos reais encontrados (reportados, não corrigidos nesta Sprint — fora de escopo)
-
-- `ActivityFilterBar.razor` renderiza `aria-expanded="@showCreateMenu"` com o `bool.ToString()`
-  padrão do C# (`"True"`/`"False"`, maiúsculo), enquanto a spec ARIA exige `"true"`/`"false"`
-  minúsculo — diferente do padrão correto já usado em `ProjectContextFilter.razor`
-  (`isOpen.ToString().ToLowerInvariant()`). O filtro `Expanded` do Playwright nunca casa com o valor
-  quebrado; o teste passou a verificar a visibilidade do próprio menu em vez do atributo.
-
-### Uma investigação que não era um defeito
-
-A conclusão de uma tarefa pareceu, à primeira vista, recarregar a página (dashboard vazio na tela
-final). Uma captura completa de logs do servidor + rede/WebSocket do Playwright confirmou que o
-circuito SignalR nunca cai (nenhum `_blazor/disconnect`, nenhum `GET /daily` repetido) e que o
-`ToggleTaskCommand`/persistência JSON são bem-sucedidos. A causa real: `DashboardColumn` só renderiza
-`CompletedContent` quando seu próprio toggle interno `showCompleted` está ativo
-(`DashboardColumn.razor:45`); ao completar a única tarefa ativa, `ActiveCount` cai a zero e a coluna
-mostra o empty state em vez do card. Era uma suposição incorreta do teste (que nunca alternava para
-a visão Completed antes de asserir), não um defeito de produção — corrigido apenas no teste
-(`HabitAndTaskTests.cs`), que agora clica em "Show completed tasks" antes de validar o card
-concluído.
-
-### Executar localmente
+### Local
 
 ```powershell
-dotnet build tests/LevelUp.E2E.Tests/LevelUp.E2E.Tests.csproj --configuration Release
-pwsh tests/LevelUp.E2E.Tests/bin/Release/net10.0/playwright.ps1 install chromium
-dotnet test tests/LevelUp.E2E.Tests/LevelUp.E2E.Tests.csproj --configuration Release
+dotnet restore BeeDay.slnx
+dotnet format BeeDay.slnx --verify-no-changes --no-restore
+dotnet build BeeDay.slnx --configuration Release --no-restore --warnaserror
+dotnet test BeeDay.slnx --configuration Release --no-build
 ```
 
-### Falhas: screenshot e trace
-
-Gerados apenas quando um teste falha, em
-`tests/LevelUp.E2E.Tests/bin/Release/net10.0/e2e-artifacts/<nome-do-teste>.png` e `.trace.zip`.
-Visualizar um trace:
+Apenas um projeto:
 
 ```powershell
-pwsh tests/LevelUp.E2E.Tests/bin/Release/net10.0/playwright.ps1 show-trace tests/LevelUp.E2E.Tests/bin/Release/net10.0/e2e-artifacts/<nome-do-teste>.trace.zip
+dotnet test tests/BeeDay.Web.Tests/BeeDay.Web.Tests.csproj --configuration Release --no-build
 ```
 
-### CI
+### CI (`.github/workflows/ci.yml`/`deploy-prd.yml`)
 
-O workflow `.github/workflows/ci.yml` instala o Chromium do Playwright após o build (o script de
-instalação é gerado no output de build) e publica `e2e-artifacts/` como artefato sempre que existir
-conteúdo (só existe em caso de falha).
+Idêntico, mais `--logger "trx;LogFileName=beeday-tests.trx" --results-directory ...` e, só em
+`ci.yml`, instalação do Chromium do Playwright antes de rodar os testes (necessário para
+`BeeDay.E2E.Tests`) — ver [`docs/deployment/01-deployment.md`](../deployment/01-deployment.md) §3.
 
-## 8. Testes arquiteturais — implementado (Sprints 12.8, 13.6)
+### Resultado desta Sprint (16.9), executado localmente
 
-Dois arquivos, um por fronteira, inspecionam metadados de assembly/reflexão compilados — não texto-fonte:
+742 testes, 0 falhas: 93 Domain, 72 Application, 120 Infrastructure, 450 Web, 7 E2E — mesma
+contagem confirmada nas Sprints 16.7 e 16.8. Uma execução da solução completa em paralelo pode
+ocasionalmente reportar falha transiente em `BeeDay.Web.Tests`/`BeeDay.E2E.Tests` por contenção de
+LocalDB/porta Kestrel entre os dois projetos rodando ao mesmo tempo (observado e diagnosticado na
+Sprint 16.7); os mesmos testes passam 100% quando o projeto afetado roda isolado, e uma nova
+execução da solução completa tipicamente passa 742/742.
 
-- `LevelUp.Domain.Tests/DomainAssemblyBoundaryTests.cs` (Sprint 12.8) — `LevelUp.Domain` nunca referencia
-  `System.Text.Json`, `Microsoft.EntityFrameworkCore` ou `LevelUp.Infrastructure`; nenhum tipo do Domain
-  carrega atributo de serialização.
-- `LevelUp.Application.Tests/PersistenceContractBoundaryTests.cs` (Sprint 13.3, estendido na 13.6;
-  âncora de reflexão trocada para `IUnitOfWork` na Sprint 14.6, quando `ILevelUpRepository` foi
-  removido) — nenhum contrato em `Common.Contracts`/`*.Contracts` expõe qualquer tipo
-  `System.Text.Json.*` em parâmetro ou retorno; nenhuma interface de contrato é uma
-  definição genérica (`IRepository<T>`)/tem "UnitOfWork" no nome (exceto `IUnitOfWork` propriamente
-  dito, aprovado na Sprint 14.5); `LevelUp.Application` nunca referencia `LevelUp.Infrastructure`. O
-  guard específico "nenhum contrato expõe `LevelUpData`" existiu até a Sprint 14.7 — removido junto com
-  o helper `ExposesLevelUpData` quando `LevelUpData` deixou de existir no código (não há mais nada desse
-  tipo para vazar).
+### Cobertura formal (`dotnet test --collect:"XPlat Code Coverage"` ou equivalente)
 
-Ambos falham a build (`--warnaserror` não afeta isso — são testes, falham como teste) se a fronteira for
-violada, não apenas avisam. Ver `docs/architecture/08-migration-status.md` §8 para o estado atual.
+Não configurada neste repositório — nenhum step de CI coleta métrica de cobertura de linha/branch,
+nenhum arquivo `.runsettings`/`coverlet.runsettings` foi encontrado. A "cobertura" real e verificável
+hoje é a lista de cenários por classe de teste documentada neste arquivo e em
+[`docs/web/06-testing.md`](../web/06-testing.md), não uma porcentagem calculada.
 
-## 9. Fakes de teste — padronizados (Sprint 13.6; substituídos na Sprint 14.6)
+## 8. Fontes consultadas
 
-`LevelUp.Application.Tests` usa `FakeCurrentUserContext`/`FakeApplicationCache` (Sprint 13.6) e, desde a
-Sprint 14.6, `FakeUnitOfWork.cs` — 8 fakes por Aggregate (`FakeUserRepository`, `FakeHabitRepository`,
-etc.), mais `FakeUnitOfWork` propriamente dito (implementa `IUnitOfWork`, métodos de transação são
-no-op) — em vez do `FakeLevelUpRepository` único que existia antes (removido, zero consumidores). Desde
-a Sprint 14.7, cada um dos 8 fakes tem sua própria `List<T>` independente (`UsersData`, `HabitsData`,
-etc., expostas como propriedades somente-leitura em `FakeUnitOfWork`) em vez de todas compartilharem uma
-única `LevelUpData` em memória — nenhum tipo agrega as 8 listas, mesmo princípio de "sem documento
-único" que motivou a remoção de `LevelUpData` do Domain. Não criar uma nova cópia privada de um fake de
-repositório em um teste novo; reusar os fakes de `FakeUnitOfWork.cs`. Fakes com
-comportamento realmente distinto entre cenários (ex.: `FakePasswordService` com contagem de chamadas em
-`AuthenticationHandlersTests`) permanecem locais deliberadamente — não force a consolidação de fakes com
-comportamento divergente.
+- Contagem de arquivos `.cs` (excluindo `bin`/`obj`) em `tests/BeeDay.Domain.Tests/`,
+  `tests/BeeDay.Application.Tests/`, `tests/BeeDay.Infrastructure.Tests/`.
+- `tests/BeeDay.Application.Tests/FakeUnitOfWork.cs`, `FakeCurrentUserContext.cs`,
+  `FakeApplicationCache.cs`, `PersistenceContractBoundaryTests.cs`.
+- `tests/BeeDay.Domain.Tests/DomainAssemblyBoundaryTests.cs`.
+- `tests/BeeDay.Infrastructure.Tests/Persistence/SqlServer/Repositories/EfLocalDbTestBase.cs`,
+  `EfLocalDbCollection.cs`.
+- `tests/BeeDay.Web.Tests/Integration/ProblemDetailsIntegrationTests.cs` (comentário de classe —
+  limitações de `WebApplicationFactory`/TestServer, §5).
+- `dotnet test BeeDay.slnx --configuration Release --no-build`, executado nesta sessão (742/742).
+- `.github/workflows/ci.yml`, `deploy-prd.yml` (fluxo de execução em CI).
+- [`docs/web/06-testing.md`](../web/06-testing.md) (Web.Tests/E2E.Tests, Sprint 16.7, reaproveitado
+  sem duplicar).

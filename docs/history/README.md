@@ -19,6 +19,8 @@ reverificado contra o código atual e não deve ser tratado como se tivesse sido
 | [`persistence-contracts.md`](persistence-contracts.md) | ex `architecture/07-persistence-contracts.md` | Diário de definição de contratos de persistência, Sprints 13.3–14.6. |
 | [`migration-status.md`](migration-status.md) | ex `architecture/08-migration-status.md` | Estado do código verificado ao final da migração JSON→SQL Server (Sprint 14.7). |
 | [`json-to-sql-transition.md`](json-to-sql-transition.md) | ex `data/03-json-to-sql-transition.md` | Estratégia de transição JSON→SQL Server, passos A–G, hoje concluída. |
+| [`hmg-production-observability-planning.md`](hmg-production-observability-planning.md) | ex `deployment/01-operations.md` | Checklist prescritivo de ambientes/observabilidade escrito antes da Sprint 16.9 verificar `.github/workflows/`/`scripts/`/`Program.cs` reais — substituído por `deployment/01-deployment.md` e `deployment/03-observability.md`. |
+| [`backup-restore-planning.md`](backup-restore-planning.md) | ex `deployment/02-backup-and-restore.md` | Checklist prescritivo de backup/restore escrito antes de `Deploy-BeeDay.ps1` existir — substituído por `deployment/04-operations.md`. |
 
 ## Ordem de leitura recomendada
 

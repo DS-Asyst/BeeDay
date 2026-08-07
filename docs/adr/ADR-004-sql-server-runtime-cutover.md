@@ -59,9 +59,11 @@ acontecendo por esse caminho enquanto a aplicação roda. `JsonEventJournal` (au
 
 ## Referências
 
-- `docs/architecture/08-migration-status.md` §8 — estado de código verificado após o corte.
-- `docs/data/03-json-to-sql-transition.md` — estratégia de transição original (Passos A–G); este ADR
-  fecha os Passos A–D no sentido de código/runtime local.
+- `docs/history/migration-status.md` §8 — estado de código verificado após o corte (caminho
+  atualizado na Sprint 16.10; era `docs/architecture/08-migration-status.md`).
+- `docs/history/json-to-sql-transition.md` — estratégia de transição original (Passos A–G); este ADR
+  fecha os Passos A–D no sentido de código/runtime local (caminho atualizado na Sprint 16.10; era
+  `docs/data/03-json-to-sql-transition.md`).
 - ADR-002 — decisão de banco vazio, sem importação de dados (inalterada por este ADR).
 - ADR-003 — decisão de repositórios por Aggregate (agora totalmente adotada; ver a atualização de
   status naquele documento).

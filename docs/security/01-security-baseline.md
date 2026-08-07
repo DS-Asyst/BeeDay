@@ -1,11 +1,20 @@
 # Baseline de Segurança
 
+**Fonte da verdade:** verificado em Sprints anteriores desta migração contra
+`src/BeeDay.Infrastructure/Security` e `src/BeeDay.Web/Services` (declaração movida para dentro do
+documento na Sprint 16.10 — antes vivia apenas em `docs/security/README.md`, inconsistente com o
+padrão inline usado por todo o restante do corpus). Nomenclatura de caminho/tipo corrigida na
+Sprint 16.10 (`LevelUp*` → `BeeDay*` em referências de código atual); mantidas as menções
+históricas a `LevelUpData` (tipo removido no código, não renomeado) e ao valor literal da claim
+`"levelup:session_version"` (ainda presente assim no código atual — ver
+[`docs/architecture/README.md`](../architecture/README.md)).
+
 ## 1. Fase imediata — status: implementado (Sprint 12.5)
 
 ### Rate limiting de login — implementado
 
-`/auth/login` é protegido por `LevelUpClaimTypes`/`LoginRateLimiterFactory`
-(`src/LevelUp.Web/Services/Authentication/LoginRateLimiterFactory.cs`), aplicado ao endpoint via
+`/auth/login` é protegido por `BeeDayClaimTypes`/`LoginRateLimiterFactory`
+(`src/BeeDay.Web/Services/Authentication/LoginRateLimiterFactory.cs`), aplicado ao endpoint via
 `AddEndpointFilter` em `Program.cs`:
 
 - limite por IP: sliding window, 10 tentativas/minuto;
@@ -16,15 +25,18 @@
   e-mail pertencer a uma conta real;
 - o log de rejeição registra apenas `TraceId`, nunca e-mail ou senha.
 
-Cobertura de testes: `tests/LevelUp.Web.Tests/Services/Authentication/LoginRateLimiterFactoryTests.cs`.
+Cobertura de testes: `tests/BeeDay.Web.Tests/Services/Authentication/LoginRateLimiterFactoryTests.cs`.
 
 ### Invalidação de sessão — implementado
 
-`User.SessionVersion` (`src/LevelUp.Domain/Entities/User.cs`), iniciado em `1`.
+`User.SessionVersion` (`src/BeeDay.Domain/Entities/User.cs`), iniciado em `1`.
 
 No login (`Program.cs`, `/auth/login`):
 
-- emitida a claim `levelup:session_version` (`LevelUpClaimTypes.SessionVersion`) com o valor atual.
+- emitida a claim `levelup:session_version` (`BeeDayClaimTypes.SessionVersion`) com o valor atual —
+  o valor literal da claim continua `"levelup:session_version"` mesmo após o rebrand (achado já
+  documentado em [`docs/architecture/README.md`](../architecture/README.md), não uma referência
+  desatualizada deste documento).
 
 Na validação do cookie (`OnValidatePrincipal`):
 
@@ -58,11 +70,14 @@ antiforgery automaticamente nos Minimal APIs do ASP.NET Core; os formulários Ra
 (`Login.razor`, `AccountSidePanel.razor`) renderizam `<AntiforgeryToken />`.
 
 Testes de integração reais (`WebApplicationFactory<Program>`,
-`tests/LevelUp.Web.Tests/Integration/`) cobrem, contra uma instância real da aplicação com
-armazenamento JSON isolado por execução de teste: antiforgery/CSRF, login, rate limiting, cookies,
+`tests/BeeDay.Web.Tests/Integration/`) cobrem, contra uma instância real da aplicação com um banco
+SQL Server LocalDB isolado por execução de teste (substituiu o armazenamento JSON isolado por
+execução de teste no corte da Sprint 14.6 — ver [`docs/web/06-testing.md`](../web/06-testing.md)):
+antiforgery/CSRF, login, rate limiting, cookies,
 logout, invalidação de sessão via `OnValidatePrincipal` real, autorização por rota, isolamento
 multiusuário, reset de senha, confirmação de e-mail, Problem Details e security headers. Ver
-`docs/testing/01-testing-strategy.md` seção 6 para a lista completa, comandos de execução e
+[`docs/testing/01-testing-strategy.md`](../testing/01-testing-strategy.md) §5 e
+[`docs/web/06-testing.md`](../web/06-testing.md) para a lista completa, comandos de execução e
 limitações conhecidas.
 
 **Bugs reais encontrados e corrigidos por esses testes:**
@@ -70,7 +85,7 @@ limitações conhecidas.
 - `GlobalExceptionHandler` não tinha um caso para `BadHttpRequestException`/
   `AntiforgeryValidationException` — qualquer requisição com token ausente, inválido, ou corpo
   malformado retornava **500 Internal Server Error** em vez de **400 Bad Request**. Corrigido em
-  `src/LevelUp.Web/Diagnostics/GlobalExceptionHandler.cs`.
+  `src/BeeDay.Web/Diagnostics/GlobalExceptionHandler.cs`.
 - `Program.cs` lia `LoginRateLimiterOptions` de `builder.Configuration` **antes** de `Build()`;
   overrides de configuração injetados por testes (`WebApplicationFactory.ConfigureAppConfiguration`)
   só são mesclados ao redor do `Build()`, então o limitador real usava os valores padrão de
@@ -78,7 +93,7 @@ limitações conhecidas.
   `app.Configuration` após `Build()`.
 
 **Re-verificação do fix de remoção de fallback (Sprint 12.5):** `CurrentUserGuardTests` (em
-`tests/LevelUp.Application.Tests/`) prova que, mesmo com um usuário real existente no repositório e
+`tests/BeeDay.Application.Tests/`) prova que, mesmo com um usuário real existente no repositório e
 `ICurrentUserContext.UserId` nulo, a operação é rejeitada — nunca há fallback para nenhum "usuário
 atual" implícito. Até a Sprint 14.7, o cenário testado era literalmente `LevelUpData.CurrentUserId`
 apontando para esse usuário; com `LevelUpData` removido, o teste (renomeado
@@ -110,7 +125,7 @@ em si, parte da garantia.
 - HTTPS obrigatório;
 - HSTS — configurado em `Program.cs` (`UseHsts()`, fora de Development); não pôde ser verificado via
   `WebApplicationFactory`/TestServer, que nunca realiza handshake TLS real (ver
-  `docs/testing/01-testing-strategy.md` seção 6);
+  [`docs/testing/01-testing-strategy.md`](../testing/01-testing-strategy.md) §5);
 - cookies HttpOnly e Secure — testado via integração (`CookieIntegrationTests`);
 - SameSite documentado — testado (`Lax`);
 - AllowedHosts explícito — testado indiretamente (produção só aceita hosts configurados);
