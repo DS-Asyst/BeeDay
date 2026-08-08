@@ -13,96 +13,16 @@ concurrency:
 
 permissions:
   contents: read
+  actions: read
+  pull-requests: read
 
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
-  validate:
-    name: Validate Production Artifact
-
-    runs-on: windows-latest
-    timeout-minutes: 20
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Configure .NET 10
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "10.0.x"
-
-      - name: Restore dependencies
-        shell: powershell
-        run: dotnet restore BeeDay.slnx
-
-      - name: Verify formatting
-        shell: powershell
-        run: dotnet format BeeDay.slnx --verify-no-changes --no-restore
-
-      - name: Build solution
-        shell: powershell
-        run: |
-          dotnet build BeeDay.slnx `
-            --configuration Release `
-            --no-restore `
-            --warnaserror
-
-      - name: Run tests
-        shell: powershell
-        run: |
-          dotnet test BeeDay.slnx `
-            --configuration Release `
-            --no-build `
-            --verbosity normal `
-            --logger "trx;LogFileName=beeday-tests.trx" `
-            --results-directory "${{ runner.temp }}\TestResults"
-
-      - name: Publish BeeDay
-        shell: powershell
-        run: |
-          dotnet publish `
-            ".\src\BeeDay.Web\BeeDay.Web.csproj" `
-            --configuration Release `
-            --no-build `
-            --output "${{ runner.temp }}\BeeDayPublish"
-
-      - name: Validate published files
-        shell: powershell
-        run: |
-          $publishPath = Join-Path "${{ runner.temp }}" "BeeDayPublish"
-          $requiredFiles = @("BeeDay.Web.dll", "web.config")
-
-          foreach ($file in $requiredFiles) {
-              $fullPath = Join-Path $publishPath $file
-              if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
-                  throw "Required published file was not found: $fullPath"
-              }
-          }
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: beeday-production-test-results
-          path: ${{ runner.temp }}\TestResults
-          if-no-files-found: warn
-          retention-days: 30
-
-      - name: Upload validated production artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: beeday-production-publish
-          path: ${{ runner.temp }}\BeeDayPublish
-          if-no-files-found: error
-          retention-days: 7
-
   deploy:
     name: Deploy to SERV3-WEB1
-    needs: validate
-
     runs-on:
       - self-hosted
       - Windows
@@ -115,11 +35,77 @@ jobs:
       - name: Checkout deployment scripts
         uses: actions/checkout@v4
 
-      - name: Download validated production artifact
+      # Build Once, Deploy Many: prd is promoted from hmg exclusively via pull request (per the
+      # project's promotion policy), so the commit that lands on prd is a merge/squash commit with
+      # a different SHA than anything BeeDay CI ever built. To prove this commit was actually
+      # validated, we trace it back to the hmg -> prd pull request that introduced it, read that
+      # PR's hmg head_sha (the exact commit BeeDay CI built and tested), and require a successful
+      # BeeDay CI run on hmg for that exact head_sha. If any link in that chain is missing, this
+      # fails closed - no artifact is downloaded and nothing is deployed.
+      - name: Resolve validated BeeDay CI run for this production commit
+        id: resolve-run
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const commitSha = context.sha;
+            core.info(`Resolving originating pull request for production commit ${commitSha}`);
+
+            const prsForCommit = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: commitSha
+            });
+
+            const originatingPr = prsForCommit.data.find(
+              (pr) => pr.base.ref === 'prd' && pr.head.ref === 'hmg'
+            );
+
+            if (!originatingPr) {
+              core.setFailed(
+                `No hmg -> prd pull request found for commit ${commitSha}. ` +
+                'Refusing to deploy: cannot prove this commit was validated by BeeDay CI.'
+              );
+              return '';
+            }
+
+            const validatedHeadSha = originatingPr.head.sha;
+            core.info(`Originating PR #${originatingPr.number}: hmg head_sha ${validatedHeadSha}`);
+
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ci.yml',
+              branch: 'hmg',
+              status: 'success',
+              per_page: 100
+            });
+
+            const matchingRun = runs.data.workflow_runs.find(
+              (run) => run.head_sha === validatedHeadSha
+            );
+
+            if (!matchingRun) {
+              core.setFailed(
+                `No successful BeeDay CI run found on hmg for head_sha ${validatedHeadSha}. ` +
+                'Refusing to deploy: the promoted commit cannot be traced to a green BeeDay CI run.'
+              );
+              return '';
+            }
+
+            core.info(`Using validated BeeDay CI run id ${matchingRun.id} (head_sha ${matchingRun.head_sha})`);
+            return `${matchingRun.id}`;
+
+      # run-id pins this to the exact BeeDay CI execution resolved above - never "latest", never
+      # a rebuild, never another branch or commit. This is the same artifact already deployed to
+      # HMG.
+      - name: Download validated publish artifact
         uses: actions/download-artifact@v4
         with:
-          name: beeday-production-publish
+          name: beeday-publish
           path: ${{ runner.temp }}\BeeDayPublish
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.resolve-run.outputs.result }}
 
       - name: Validate deployment secrets
         shell: powershell

@@ -62,12 +62,35 @@ jobs:
       - name: Run tests
         shell: powershell
         run: |
-          dotnet test BeeDay.slnx `
-            --configuration Release `
-            --no-build `
-            --verbosity normal `
-            --logger "trx;LogFileName=beeday-tests.trx" `
-            --results-directory "${{ runner.temp }}\TestResults"
+          # Each test project is invoked individually (instead of `dotnet test BeeDay.slnx` as a
+          # single call) so each gets its own uniquely named .trx via LogFileName. Running the
+          # whole solution in one call makes every project's test host share the same file name,
+          # which caused "WARNING: Overwriting results file". All projects still run to completion
+          # regardless of earlier failures, and the step throws (failing the job) if any failed -
+          # no continue-on-error, no swallowed exit codes.
+          $testProjects = Get-ChildItem -Path "tests" -Filter "*.csproj" -Recurse
+          $resultsDirectory = "${{ runner.temp }}\TestResults"
+          $anyFailed = $false
+
+          foreach ($project in $testProjects) {
+              Write-Host "Running tests: $($project.Name)"
+
+              dotnet test $project.FullName `
+                --configuration Release `
+                --no-build `
+                --verbosity normal `
+                --logger "trx;LogFileName=$($project.BaseName).trx" `
+                --results-directory $resultsDirectory
+
+              if ($LASTEXITCODE -ne 0) {
+                  Write-Host "FAILED: $($project.Name) (exit code $LASTEXITCODE)"
+                  $anyFailed = $true
+              }
+          }
+
+          if ($anyFailed) {
+              throw "One or more test projects failed. See logs above for details."
+          }
 
       - name: Publish BeeDay
         shell: powershell
