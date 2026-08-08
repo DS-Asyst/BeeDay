@@ -135,6 +135,13 @@ $privilegedIisTaskName = "HMG-IisControl"
 $privilegedIisRequestPath = "C:\Ops\BeeDay\IisControl\Requests\request.txt"
 $privilegedIisResultPath = "C:\Ops\BeeDay\IisControl\Results\result.json"
 
+# Carries the CONFIGURE operation's payload (App Pool environment variables, including
+# BeeDay__Persistence__SqlServer__ConnectionString when set) - never request.txt/result.json, and
+# never logged. Same trust model as request.txt: svc_beeday_runner can only overwrite its content
+# (Write Data, no Read Data), so it can never read back what it wrote; SYSTEM reads it, applies it,
+# and immediately overwrites it with an empty placeholder afterwards.
+$privilegedIisEnvConfigPath = "C:\Ops\BeeDay\IisControl\Requests\env-config.secret"
+
 $backupRoot = "C:\Apps\BeeDay-Backups"
 $externalRoot = "C:\Apps\BeeDay-Data"
 $dataPath = Join-Path $externalRoot "Data"
@@ -204,8 +211,49 @@ function Test-BeeDayUsesPrivilegedIisControl {
 # FileAccess.Write matches the narrow grant exactly and was confirmed working. The result read below
 # uses [System.IO.File]::ReadAllText for the same reason: Get-Content needed Read Extended
 # Attributes in addition to Read Data to succeed for this account.
+function Write-BeeDayFileStreamContent {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Content
+    )
+
+    $contentBytes = [System.Text.Encoding]::UTF8.GetBytes($Content)
+
+    # SetLength(0) truncates before writing so a shorter value never leaves trailing bytes from a
+    # longer previous one. Dispose runs in finally so the handle is always released, success or
+    # failure. FileMode.Open never creates - the target must already be pre-provisioned.
+    $fileStream = $null
+    try {
+        $fileStream = New-Object System.IO.FileStream(
+            $Path,
+            [System.IO.FileMode]::Open,
+            [System.IO.FileAccess]::Write,
+            [System.IO.FileShare]::Read
+        )
+        $fileStream.SetLength(0)
+        $fileStream.Write($contentBytes, 0, $contentBytes.Length)
+        $fileStream.Flush()
+    }
+    finally {
+        if ($fileStream) {
+            $fileStream.Dispose()
+        }
+    }
+}
+
 function Invoke-BeeDayPrivilegedIisControl {
-    param([Parameter(Mandatory = $true)][ValidateSet('STOP', 'START')][string]$Operation)
+    param(
+        [Parameter(Mandatory = $true)][ValidateSet('STOP', 'START', 'CONFIGURE')][string]$Operation,
+
+        # Only used for CONFIGURE. Written to env-config.secret (never request.txt/result.json,
+        # never logged) before request.txt is written, so it's already in place by the time the
+        # privileged task reads the operation and acts on it.
+        [hashtable]$EnvironmentVariables
+    )
+
+    if ($Operation -eq 'CONFIGURE' -and -not $EnvironmentVariables) {
+        throw "EnvironmentVariables is required when Operation is CONFIGURE."
+    }
 
     Write-DeployMessage "Requesting privileged IIS control: $Operation (site=$privilegedIisSiteName, pool=$privilegedIisAppPoolName)..."
 
@@ -220,29 +268,26 @@ function Invoke-BeeDayPrivilegedIisControl {
     # could be misread as this invocation's outcome.
     $previousLastRunTime = (Get-ScheduledTaskInfo -TaskPath $privilegedIisTaskPath -TaskName $privilegedIisTaskName).LastRunTime
 
+    # Generated once, shared by both files below - this is what lets the privileged script prove
+    # the env-config.secret payload it's about to apply is the one written for THIS invocation,
+    # not a stale leftover from an earlier CONFIGURE that failed before being invalidated.
     $requestId = [guid]::NewGuid().ToString()
-    $requestBytes = [System.Text.Encoding]::UTF8.GetBytes("$Operation`n$requestId")
 
-    # SetLength(0) truncates before writing so a shorter value (e.g. "STOP`n<guid>") never leaves
-    # trailing bytes from a longer previous one (e.g. "START`n<guid>"). Dispose runs in finally so
-    # the handle is always released, success or failure.
-    $requestStream = $null
-    try {
-        $requestStream = New-Object System.IO.FileStream(
-            $privilegedIisRequestPath,
-            [System.IO.FileMode]::Open,
-            [System.IO.FileAccess]::Write,
-            [System.IO.FileShare]::Read
-        )
-        $requestStream.SetLength(0)
-        $requestStream.Write($requestBytes, 0, $requestBytes.Length)
-        $requestStream.Flush()
-    }
-    finally {
-        if ($requestStream) {
-            $requestStream.Dispose()
+    if ($Operation -eq 'CONFIGURE') {
+        # Written BEFORE request.txt, and never through Write-DeployMessage/Write-Host - only the
+        # variable count is logged, never names or values. requestId travels inside the payload
+        # (not just in request.txt) so the privileged script can reject a stale/mismatched payload
+        # before ever reading $variables out of it.
+        Write-DeployMessage "Writing App Pool environment configuration payload ($($EnvironmentVariables.Count) variable(s))..."
+        $payload = [ordered]@{
+            requestId = $requestId
+            variables = $EnvironmentVariables
         }
+        $payloadJson = $payload | ConvertTo-Json -Compress
+        Write-BeeDayFileStreamContent -Path $privilegedIisEnvConfigPath -Content $payloadJson
     }
+
+    Write-BeeDayFileStreamContent -Path $privilegedIisRequestPath -Content "$Operation`n$requestId"
 
     $previousResultWriteTimeUtc = if (Test-Path -LiteralPath $privilegedIisResultPath) {
         (Get-Item -LiteralPath $privilegedIisResultPath).LastWriteTimeUtc
@@ -523,6 +568,12 @@ function Invoke-BeeDayHealthCheck {
     throw "Readiness health check failed after 6 attempts. Last error: $lastError"
 }
 
+# Building $variables never itself touches applicationHost.config - it only decides WHAT should be
+# set, exactly as before. Applying it does: for BeeDay-HMG that now goes through the same privileged
+# Scheduled Task as Stop-BeeDayIis/Start-BeeDayIis (svc_beeday_runner has no access to
+# applicationHost.config, confirmed on SERV3WEB - Add-WebConfigurationProperty/
+# Remove-WebConfigurationProperty failed with "insufficient permissions" on redirection.config);
+# any other target keeps using the direct WebAdministration calls exactly as before.
 function Set-BeeDayEnvironmentVariables {
     Write-DeployMessage "Configuring IIS application-pool environment variables (Environment=$Environment)..."
 
@@ -550,6 +601,11 @@ function Set-BeeDayEnvironmentVariables {
         $variables["BeeDay__Email__Resend__ApiKey"] = $ResendApiKey
         $variables["BeeDay__Email__Resend__FromAddress"] = $ResendFromAddress
         $variables["BeeDay__Email__Resend__FromName"] = $ResendFromName
+    }
+
+    if (Test-BeeDayUsesPrivilegedIisControl) {
+        Invoke-BeeDayPrivilegedIisControl -Operation "CONFIGURE" -EnvironmentVariables $variables
+        return
     }
 
     foreach ($entry in $variables.GetEnumerator()) {
