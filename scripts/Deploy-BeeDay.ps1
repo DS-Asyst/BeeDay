@@ -142,6 +142,22 @@ $privilegedIisResultPath = "C:\Ops\BeeDay\IisControl\Results\result.json"
 # and immediately overwrites it with an empty placeholder afterwards.
 $privilegedIisEnvConfigPath = "C:\Ops\BeeDay\IisControl\Requests\env-config.secret"
 
+# Timing/retry knobs for Invoke-BeeDayPrivilegedIisControl below. Split into two distinct budgets
+# per a real SERV3WEB race: (1) time allowed waiting for a PREVIOUS run to leave State=Running
+# before we ever trigger, and (2) time allowed waiting for OUR OWN triggered run to go from
+# Start-ScheduledTask back to State=Ready. Confounding these into one timeout would make the error
+# messages useless for telling "the last operation is stuck" apart from "this operation is stuck".
+$privilegedIisPollIntervalSeconds = 2
+$privilegedIisReadyTimeoutSeconds = 60
+$privilegedIisRunTimeoutSeconds = 60
+
+# MultipleInstances=IgnoreNew can still silently swallow a trigger even after waiting for
+# State=Ready (a Start-ScheduledTask call can lose a narrow race against the task engine's own
+# internal state settling) - bounded retry lets that specific case self-heal instead of failing
+# the whole deploy, without ever allowing two executions to run concurrently (each retry only
+# fires after Ready is re-confirmed).
+$privilegedIisMaxTriggerAttempts = 2
+
 $backupRoot = "C:\Apps\BeeDay-Backups"
 $externalRoot = "C:\Apps\BeeDay-Data"
 $dataPath = Join-Path $externalRoot "Data"
@@ -241,6 +257,36 @@ function Write-BeeDayFileStreamContent {
     }
 }
 
+# Blocks until the privileged task's State (Get-ScheduledTask, NOT Get-ScheduledTaskInfo) reaches
+# $TargetState - almost always 'Ready' here. Deliberately state-based rather than
+# LastRunTime-based: a real SERV3WEB incident showed Get-ScheduledTaskInfo's LastRunTime failing
+# to advance for a run that had, in fact, genuinely executed and produced a correctly-correlated
+# result.json, so LastRunTime is treated as diagnostic-only everywhere in this file - never as a
+# gate. 'Disabled' fails immediately (waiting out the timeout would never help); any other
+# non-target state (Running/Queued/Unknown) is polled until $TargetState or the timeout.
+function Wait-BeeDayPrivilegedIisTaskState {
+    param(
+        [Parameter(Mandatory = $true)][string]$TargetState,
+        [Parameter(Mandatory = $true)][int]$TimeoutSeconds,
+        [Parameter(Mandatory = $true)][string]$TimeoutMessage
+    )
+
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    while ($true) {
+        $observedState = (Get-ScheduledTask -TaskPath $privilegedIisTaskPath -TaskName $privilegedIisTaskName -ErrorAction Stop).State
+        if ($observedState -eq $TargetState) {
+            return
+        }
+        if ($observedState -eq 'Disabled') {
+            throw "Privileged IIS control task '$privilegedIisTaskPath$privilegedIisTaskName' is Disabled - cannot proceed."
+        }
+        if ((Get-Date) -ge $deadline) {
+            throw "$TimeoutMessage (last observed state: $observedState, waited ${TimeoutSeconds}s)."
+        }
+        Start-Sleep -Seconds $privilegedIisPollIntervalSeconds
+    }
+}
+
 function Invoke-BeeDayPrivilegedIisControl {
     param(
         [Parameter(Mandatory = $true)][ValidateSet('STOP', 'START', 'CONFIGURE')][string]$Operation,
@@ -257,20 +303,23 @@ function Invoke-BeeDayPrivilegedIisControl {
 
     Write-DeployMessage "Requesting privileged IIS control: $Operation (site=$privilegedIisSiteName, pool=$privilegedIisAppPoolName)..."
 
-    $task = Get-ScheduledTask -TaskPath $privilegedIisTaskPath -TaskName $privilegedIisTaskName -ErrorAction Stop
-    if ($task.State -eq 'Running') {
-        throw "Privileged IIS control task '$privilegedIisTaskPath$privilegedIisTaskName' is already running from a previous invocation. Refusing to trigger a new one concurrently."
-    }
-
-    # Captured before triggering so a silently-ignored trigger (e.g. a race that
-    # MultipleInstances=IgnoreNew swallows, despite the pre-check above) can be detected below by
-    # LastRunTime never advancing - otherwise a stale LastTaskResult from an earlier, unrelated run
-    # could be misread as this invocation's outcome.
-    $previousLastRunTime = (Get-ScheduledTaskInfo -TaskPath $privilegedIisTaskPath -TaskName $privilegedIisTaskName).LastRunTime
+    # Wait for any previous invocation (ours or a stray manual trigger) to fully leave Running -
+    # a one-shot point-in-time check here is exactly the race that hit SERV3WEB in practice: STOP's
+    # result.json was already valid and had been read successfully, but the Scheduled Task's own
+    # State had not yet settled back to Ready, so the immediately-following CONFIGURE's
+    # Start-ScheduledTask call was silently swallowed by MultipleInstances=IgnoreNew.
+    Wait-BeeDayPrivilegedIisTaskState -TargetState 'Ready' -TimeoutSeconds $privilegedIisReadyTimeoutSeconds `
+        -TimeoutMessage "Privileged IIS control task ($Operation) could not be started because a previous run never became Ready"
 
     # Generated once, shared by both files below - this is what lets the privileged script prove
-    # the env-config.secret payload it's about to apply is the one written for THIS invocation,
-    # not a stale leftover from an earlier CONFIGURE that failed before being invalidated.
+    # the env-config.secret payload it's about to apply is the one written for THIS invocation, not
+    # a stale leftover from an earlier CONFIGURE that failed before being invalidated. It is also
+    # now the PRIMARY (not merely supporting) proof that a given result.json belongs to this
+    # invocation - see the correlation loop below. LastRunTime/LastTaskResult are still read for
+    # diagnostics and for the final exit-code check, but a real SERV3WEB run demonstrated
+    # Get-ScheduledTaskInfo.LastRunTime failing to advance for a run that had, in fact, genuinely
+    # executed and produced a correctly-correlated result.json - so LastRunTime alone must never be
+    # able to reject a result whose requestId matches.
     $requestId = [guid]::NewGuid().ToString()
 
     if ($Operation -eq 'CONFIGURE') {
@@ -289,52 +338,66 @@ function Invoke-BeeDayPrivilegedIisControl {
 
     Write-BeeDayFileStreamContent -Path $privilegedIisRequestPath -Content "$Operation`n$requestId"
 
-    $previousResultWriteTimeUtc = if (Test-Path -LiteralPath $privilegedIisResultPath) {
-        (Get-Item -LiteralPath $privilegedIisResultPath).LastWriteTimeUtc
-    }
-    else {
-        [datetime]::MinValue
-    }
+    # Bounded retry: each iteration triggers the task, waits for it to return to Ready, and then
+    # checks whether result.json actually correlates with THIS invocation (requestId + operation).
+    # A mismatch after Ready means the trigger was swallowed (Start-ScheduledTask lost a narrow
+    # race against the task engine's own state settling, even after the wait above) - Ready is
+    # re-confirmed before every retry, so a retry can never overlap a still-running execution and
+    # MultipleInstances=IgnoreNew is never relied upon to protect against a double-fire from here.
+    $result = $null
+    $attempt = 0
+    while ($true) {
+        $attempt++
 
-    Start-ScheduledTask -TaskPath $privilegedIisTaskPath -TaskName $privilegedIisTaskName
+        # Diagnostic only (see comment on $requestId above) - never used to accept or reject a
+        # result below.
+        $preTriggerLastRunTime = (Get-ScheduledTaskInfo -TaskPath $privilegedIisTaskPath -TaskName $privilegedIisTaskName).LastRunTime
 
-    $timeoutAt = (Get-Date).AddSeconds(60)
-    $finished = $false
-    do {
-        Start-Sleep -Seconds 2
-        $currentState = (Get-ScheduledTask -TaskPath $privilegedIisTaskPath -TaskName $privilegedIisTaskName).State
-        if ($currentState -ne 'Running') {
-            $finished = $true
+        try {
+            Start-ScheduledTask -TaskPath $privilegedIisTaskPath -TaskName $privilegedIisTaskName -ErrorAction Stop
         }
-    } while (-not $finished -and (Get-Date) -lt $timeoutAt)
+        catch {
+            throw "Privileged IIS control task ($Operation) could not be triggered (attempt $attempt): $($_.Exception.Message)"
+        }
 
-    if (-not $finished) {
-        throw "Privileged IIS control task ($Operation) did not complete within the timeout."
+        # This intentionally does not distinguish "never started" from "ran and finished" - State
+        # alone cannot make that distinction reliably (a fast run can already be back to Ready by
+        # the first poll). That distinction is made below, from result.json's requestId, which is
+        # the one signal proven trustworthy for it.
+        Wait-BeeDayPrivilegedIisTaskState -TargetState 'Ready' -TimeoutSeconds $privilegedIisRunTimeoutSeconds `
+            -TimeoutMessage "Privileged IIS control task ($Operation) exceeded its execution timeout (attempt $attempt)"
+
+        if (-not (Test-Path -LiteralPath $privilegedIisResultPath)) {
+            throw "Privileged IIS control task ($Operation) finished but produced no result file (attempt $attempt)."
+        }
+
+        # Get-Content also failed for this account on SERV3WEB even with Read Data granted (needed
+        # Read Extended Attributes too - now granted by provisioning); ReadAllText matches the
+        # narrow ACL and was confirmed working.
+        $candidateResult = [System.IO.File]::ReadAllText($privilegedIisResultPath) | ConvertFrom-Json
+
+        if ($candidateResult.requestId -eq $requestId -and $candidateResult.operation -eq $Operation) {
+            $result = $candidateResult
+            break
+        }
+
+        $postAttemptLastRunTime = (Get-ScheduledTaskInfo -TaskPath $privilegedIisTaskPath -TaskName $privilegedIisTaskName).LastRunTime
+        Write-DeployMessage "Privileged IIS control task ($Operation) attempt $attempt produced no correlated result (result.json has requestId=$($candidateResult.requestId), operation=$($candidateResult.operation); expected requestId=$requestId; LastRunTime before=$preTriggerLastRunTime after=$postAttemptLastRunTime, diagnostic only) - the trigger was likely swallowed by MultipleInstances=IgnoreNew."
+
+        if ($attempt -ge $privilegedIisMaxTriggerAttempts) {
+            throw "Privileged IIS control task ($Operation) never actually started a new run after $attempt attempt(s) - no result.json update correlates with requestId $requestId. Refusing to trust an unrelated result."
+        }
+
+        # Re-confirm Ready before retrying - the same guard as the very first wait above, applied
+        # again defensively so the retry's own trigger cannot overlap a run that is somehow still
+        # in flight.
+        Wait-BeeDayPrivilegedIisTaskState -TargetState 'Ready' -TimeoutSeconds $privilegedIisReadyTimeoutSeconds `
+            -TimeoutMessage "Privileged IIS control task ($Operation) did not return to Ready before retrying the trigger (after attempt $attempt)"
     }
 
+    # Read only after Ready + requestId correlation are both established above - LastTaskResult is
+    # a secondary check alongside result.exitCode, never the sole basis for trusting the outcome.
     $taskInfo = Get-ScheduledTaskInfo -TaskPath $privilegedIisTaskPath -TaskName $privilegedIisTaskName
-
-    if ($taskInfo.LastRunTime -eq $previousLastRunTime) {
-        throw "Privileged IIS control task ($Operation) never actually started a new run (LastRunTime did not advance) - refusing to trust LastTaskResult from a previous invocation."
-    }
-
-    if (-not (Test-Path -LiteralPath $privilegedIisResultPath)) {
-        throw "Privileged IIS control task ($Operation) finished but produced no result file."
-    }
-
-    $resultWriteTimeUtc = (Get-Item -LiteralPath $privilegedIisResultPath).LastWriteTimeUtc
-    if ($resultWriteTimeUtc -le $previousResultWriteTimeUtc) {
-        throw "Privileged IIS control task ($Operation) finished but the result file was not updated - cannot confirm the outcome."
-    }
-
-    # Get-Content also failed for this account on SERV3WEB even with Read Data granted (needed Read
-    # Extended Attributes too - now granted by provisioning); ReadAllText matches the narrow ACL and
-    # was confirmed working. Parsing/validation below is unchanged.
-    $result = [System.IO.File]::ReadAllText($privilegedIisResultPath) | ConvertFrom-Json
-
-    if ($result.requestId -ne $requestId) {
-        throw "Privileged IIS control result does not match the request just issued (expected requestId $requestId, got $($result.requestId)) - refusing to trust it."
-    }
 
     Write-DeployMessage "Privileged IIS control result: operation=$($result.operation) exitCode=$($result.exitCode) siteState=$($result.siteState) poolState=$($result.poolState)"
 
