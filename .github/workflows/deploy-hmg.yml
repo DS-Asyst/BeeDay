@@ -1,0 +1,178 @@
+name: BeeDay Homologation Deploy
+
+on:
+  push:
+    branches:
+      - hmg
+
+  workflow_dispatch:
+
+concurrency:
+  group: beeday-homologation
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  validate:
+    name: Validate Homologation Artifact
+
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore dependencies
+        shell: powershell
+        run: dotnet restore BeeDay.slnx
+
+      - name: Verify formatting
+        shell: powershell
+        run: dotnet format BeeDay.slnx --verify-no-changes --no-restore
+
+      - name: Build solution
+        shell: powershell
+        run: |
+          dotnet build BeeDay.slnx `
+            --configuration Release `
+            --no-restore `
+            --warnaserror
+
+      # deploy-prd.yml's validate job skips this step, which leaves the E2E Playwright tests
+      # (part of `dotnet test BeeDay.slnx`) without a browser to drive — a known, documented gap.
+      # HMG is where those tests actually need to prove something before a real deploy, so this
+      # job installs Chromium the same way ci.yml already does.
+      - name: Install Playwright Chromium
+        shell: powershell
+        run: pwsh tests/BeeDay.E2E.Tests/bin/Release/net10.0/playwright.ps1 install chromium
+
+      - name: Run tests
+        shell: powershell
+        run: |
+          dotnet test BeeDay.slnx `
+            --configuration Release `
+            --no-build `
+            --verbosity normal `
+            --logger "trx;LogFileName=beeday-tests.trx" `
+            --results-directory "${{ runner.temp }}\TestResults"
+
+      - name: Publish BeeDay
+        shell: powershell
+        run: |
+          dotnet publish `
+            ".\src\BeeDay.Web\BeeDay.Web.csproj" `
+            --configuration Release `
+            --no-build `
+            --output "${{ runner.temp }}\BeeDayPublish"
+
+      - name: Validate published files
+        shell: powershell
+        run: |
+          $publishPath = Join-Path "${{ runner.temp }}" "BeeDayPublish"
+          $requiredFiles = @("BeeDay.Web.dll", "web.config")
+
+          foreach ($file in $requiredFiles) {
+              $fullPath = Join-Path $publishPath $file
+              if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
+                  throw "Required published file was not found: $fullPath"
+              }
+          }
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: beeday-homologation-test-results
+          path: ${{ runner.temp }}\TestResults
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload E2E failure artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: beeday-homologation-e2e-artifacts
+          path: tests\BeeDay.E2E.Tests\bin\Release\net10.0\e2e-artifacts
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload validated publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: beeday-homologation-publish
+          path: ${{ runner.temp }}\BeeDayPublish
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    name: Deploy to SERV3WEB
+    needs: validate
+
+    runs-on:
+      - self-hosted
+      - Windows
+      - X64
+      - hmg
+
+    timeout-minutes: 25
+    environment: homologation
+
+    steps:
+      - name: Checkout deployment scripts
+        uses: actions/checkout@v4
+
+      - name: Download validated publish artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: beeday-homologation-publish
+          path: ${{ runner.temp }}\BeeDayPublish
+
+      # Deploy-BeeDay.ps1 now shells out to `dotnet ef` for migrations — the self-hosted runner
+      # doesn't otherwise need the SDK (only IIS cmdlets), so it's installed here explicitly
+      # rather than assumed to already be present on SERV3WEB.
+      - name: Configure .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Deploy to IIS with rollback
+        shell: powershell
+        env:
+          BEEDAY_PUBLIC_BASE_URL: ${{ secrets.BEEDAY_PUBLIC_BASE_URL }}
+          BEEDAY_RESEND_API_KEY: ${{ secrets.BEEDAY_RESEND_API_KEY }}
+          BEEDAY_RESEND_FROM_ADDRESS: ${{ secrets.BEEDAY_RESEND_FROM_ADDRESS }}
+          BEEDAY_RESEND_FROM_NAME: ${{ secrets.BEEDAY_RESEND_FROM_NAME }}
+          BEEDAY_ALLOWED_HOSTS: ${{ secrets.BEEDAY_ALLOWED_HOSTS }}
+          BEEDAY_APP_CONNECTION: ${{ secrets.BEEDAY_APP_CONNECTION }}
+          BEEDAY_MIGRATOR_CONNECTION: ${{ secrets.BEEDAY_MIGRATOR_CONNECTION }}
+        run: |
+          $publishPath = Join-Path "${{ runner.temp }}" "BeeDayPublish"
+
+          & ".\scripts\Deploy-BeeDay.ps1" `
+              -PublishPath $publishPath `
+              -PublicBaseUrl $env:BEEDAY_PUBLIC_BASE_URL `
+              -ResendApiKey $env:BEEDAY_RESEND_API_KEY `
+              -ResendFromAddress $env:BEEDAY_RESEND_FROM_ADDRESS `
+              -ResendFromName $env:BEEDAY_RESEND_FROM_NAME `
+              -AllowedHosts $env:BEEDAY_ALLOWED_HOSTS `
+              -SiteName "BeeDay-HMG" `
+              -AppPoolName "BeeDay-Web-AppPool" `
+              -DestinationPath "C:\Apps\BeeDay.Web" `
+              -Environment "Homologation" `
+              -HealthCheckUrl "https://h-beeday.com.br/health/ready" `
+              -HealthCheckHostHeader "" `
+              -AppConnectionString $env:BEEDAY_APP_CONNECTION `
+              -RunMigrations `
+              -MigrationConnectionString $env:BEEDAY_MIGRATOR_CONNECTION
