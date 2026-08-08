@@ -10,13 +10,16 @@ namespace BeeDay.Infrastructure.Persistence.SqlServer;
 /// </summary>
 internal sealed class BeeDayDbContextFactory : IDesignTimeDbContextFactory<BeeDayDbContext>
 {
+    // Placeholder credential only — the real beeday_dev password must never be committed. Set
+    // BEEDAY_DESIGNTIME_CONNECTION locally (mirrors the User Secrets value used by BeeDay.Web) to
+    // override this before running `dotnet ef` commands.
     private const string FallbackConnectionString =
-        "Server=(localdb)\\mssqllocaldb;Database=BeeDayDev;Trusted_Connection=True;TrustServerCertificate=True;";
+        "Server=SERV4SQL;Database=BeeDay_Dev;User Id=beeday_dev;Password=CHANGEME;Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=True;Connect Timeout=30";
 
     public BeeDayDbContext CreateDbContext(string[] args)
     {
         var connectionString =
-            Environment.GetEnvironmentVariable("LEVELUP_DESIGNTIME_CONNECTION")
+            Environment.GetEnvironmentVariable("BEEDAY_DESIGNTIME_CONNECTION")
             ?? FallbackConnectionString;
 
         var optionsBuilder = new DbContextOptionsBuilder<BeeDayDbContext>();
