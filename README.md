@@ -188,3 +188,5 @@ use the same versioned source of truth.
 Proprietary — see [`LICENSE`](LICENSE). No license is granted to copy, modify, distribute,
 publish, sublicense, or use this software except with the copyright holder's prior written
 permission.
+
+<!-- CI/CD validation after default branch migration -->
