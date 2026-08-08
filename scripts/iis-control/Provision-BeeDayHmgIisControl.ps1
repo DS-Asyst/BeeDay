@@ -27,11 +27,14 @@
 #   4. Pre-creates request.txt (sentinel content "NONE") and result.json
 #      (sentinel placeholder), then grants svc_beeday_runner a narrow,
 #      file-level ACE directly on each: (S,RC,WD,RA) - Write Data only, no
-#      Read Data - on request.txt; (S,RC,RD,RA) - Read Data only, no Write
-#      Data - on result.json. Both files are meant to live forever and only
-#      ever be overwritten in place (see the comments in
-#      Invoke-BeeDayIisControl.ps1 for why: a rename-replace would silently
-#      drop these file-level grants).
+#      Read Data - on request.txt; (S,RC,RD,RA,REA) - Read Data + Read
+#      Extended Attributes, no Write Data - on result.json. REA was added
+#      after confirming on SERV3WEB that [System.IO.File]::ReadAllText (used
+#      by Deploy-BeeDay.ps1 instead of Get-Content, which needs even more
+#      than RD/REA for this account) requires it in addition to RD. Both
+#      files are meant to live forever and only ever be overwritten in place
+#      (see the comments in Invoke-BeeDayIisControl.ps1 for why: a
+#      rename-replace would silently drop these file-level grants).
 #   5. Registers the \BeeDay\HMG-IisControl Scheduled Task: on-demand only, no
 #      recurring trigger, runs as SYSTEM, RunLevel Highest, a single fixed
 #      action, MultipleInstances=IgnoreNew so a second trigger while one run
@@ -119,7 +122,7 @@ Write-Host "`n=== 5. result.json - pre-created, svc_beeday_runner: Read Data onl
 if (-not (Test-Path -LiteralPath $resultFilePath)) {
     Set-Content -LiteralPath $resultFilePath -Value $resultSentinel -Encoding utf8 -NoNewline
 }
-icacls $resultFilePath /grant "${runnerAccount}:(S,RC,RD,RA)" | Out-Null
+icacls $resultFilePath /grant "${runnerAccount}:(S,RC,RD,RA,REA)" | Out-Null
 
 Write-Host "`n=== 6. Scheduled Task: $taskPath$taskName (SYSTEM, on-demand only) ==="
 $action = New-ScheduledTaskAction -Execute "powershell.exe" `
@@ -165,8 +168,10 @@ Write-Host "  (as LAB\svc_beeday_runner, must succeed) icacls '$requestsFolder'"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) icacls '$requestFilePath'"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) icacls '$resultsFolder'"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) icacls '$resultFilePath'"
-Write-Host "  (as LAB\svc_beeday_runner, must succeed) Set-Content '$requestFilePath' -Value 'STOP'"
-Write-Host "  (as LAB\svc_beeday_runner, must succeed) Get-Content '$resultFilePath'"
+Write-Host "  (as LAB\svc_beeday_runner, must succeed) `$s = New-Object System.IO.FileStream('$requestFilePath',[System.IO.FileMode]::Open,[System.IO.FileAccess]::Write,[System.IO.FileShare]::Read); `$s.Dispose()"
+Write-Host "  (as LAB\svc_beeday_runner, must succeed) [System.IO.File]::ReadAllText('$resultFilePath')"
+Write-Host "  (as LAB\svc_beeday_runner, EXPECTED to fail - Deploy-BeeDay.ps1 does not use these cmdlets for this reason) Set-Content '$requestFilePath' -Value 'STOP'"
+Write-Host "  (as LAB\svc_beeday_runner, EXPECTED to fail - Deploy-BeeDay.ps1 does not use these cmdlets for this reason) Get-Content '$resultFilePath'"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) Get-ScheduledTask -TaskPath '$taskPath' -TaskName '$taskName'"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) Start-ScheduledTask -TaskPath '$taskPath' -TaskName '$taskName'"
 Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Get-Content '$requestFilePath'"
