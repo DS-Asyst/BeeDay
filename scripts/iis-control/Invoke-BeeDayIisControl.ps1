@@ -103,6 +103,8 @@ function Assert-BeeDayNotReparsePoint {
 function Set-BeeDayAppPoolEnvironmentVariables {
     param([Parameter(Mandatory = $true)][hashtable]$Variables)
 
+    $script:currentStage = 'VALIDATE_VARIABLES'
+    $script:currentErrorCode = 'VARIABLE_NOT_ALLOWED'
     foreach ($key in $Variables.Keys) {
         if ($key -notin $allowedEnvironmentVariableNames) {
             throw "Rejected environment variable name: '$key' is not in the allowed list."
@@ -110,15 +112,32 @@ function Set-BeeDayAppPoolEnvironmentVariables {
     }
 
     try {
+        # Read-only canary before any mutation: confirms WebAdministration can actually enumerate
+        # the App Pool's environmentVariables collection right now. Its result is intentionally
+        # discarded - this exists purely so a provider-level problem (e.g. an applicationHost.config
+        # section that has become unreadable) surfaces here, tagged READ_EXISTING_ENV, instead of
+        # failing more ambiguously a few lines later inside the Remove/Add loop.
+        $script:currentStage = 'READ_EXISTING_ENV'
+        $script:currentErrorCode = 'ENV_READ_FAILED'
+        Get-WebConfigurationProperty `
+            -PSPath "MACHINE/WEBROOT/APPHOST" `
+            -Filter "system.applicationHost/applicationPools/add[@name='$AppPoolName']/environmentVariables" `
+            -Name "." `
+            -ErrorAction Stop | Out-Null
+
         foreach ($entry in $Variables.GetEnumerator()) {
             $filter = "system.applicationHost/applicationPools/add[@name='$AppPoolName']/environmentVariables/add[@name='$($entry.Key)']"
 
+            $script:currentStage = 'REMOVE_EXISTING_ENV'
+            $script:currentErrorCode = 'ENV_REMOVE_FAILED'
             Remove-WebConfigurationProperty `
                 -PSPath "MACHINE/WEBROOT/APPHOST" `
                 -Filter $filter `
                 -Name "." `
                 -ErrorAction SilentlyContinue
 
+            $script:currentStage = 'ADD_ENV_VARIABLE'
+            $script:currentErrorCode = 'ENV_ADD_FAILED'
             Add-WebConfigurationProperty `
                 -PSPath "MACHINE/WEBROOT/APPHOST" `
                 -Filter "system.applicationHost/applicationPools/add[@name='$AppPoolName']/environmentVariables" `
@@ -137,16 +156,27 @@ function Write-BeeDayIisControlResult {
         [Parameter(Mandatory = $true)][string]$Operation,
         [Parameter(Mandatory = $true)][int]$ExitCode,
         [Parameter(Mandatory = $true)][string]$SiteState,
-        [Parameter(Mandatory = $true)][string]$PoolState
+        [Parameter(Mandatory = $true)][string]$PoolState,
+
+        # Diagnostic only - always one of the fixed constants in $script:currentStage/
+        # $script:currentErrorCode below, NEVER derived from an exception's own message. Absent/
+        # $null on every successful run (rendered as JSON null - deliberately untyped so a $null
+        # argument survives as $null instead of being coerced to "" by a [string] parameter type);
+        # only ever set from the outer catch. Never pass $_.Exception.Message (or anything built
+        # from it) here - see the constant lists next to $script:currentStage's declaration for why.
+        $ErrorStage = $null,
+        $ErrorCode = $null
     )
 
     $result = [ordered]@{
-        requestId = $RequestId
-        operation = $Operation
-        exitCode  = $ExitCode
-        siteState = $SiteState
-        poolState = $PoolState
-        timestamp = (Get-Date -Format "o")
+        requestId  = $RequestId
+        operation  = $Operation
+        exitCode   = $ExitCode
+        siteState  = $SiteState
+        poolState  = $PoolState
+        errorStage = $ErrorStage
+        errorCode  = $ErrorCode
+        timestamp  = (Get-Date -Format "o")
     }
 
     # In-place overwrite (truncate the existing file, same file object) - never
@@ -157,6 +187,17 @@ function Write-BeeDayIisControlResult {
     # to keep the file's own ACL stable across runs.
     $result | ConvertTo-Json -Compress | Set-Content -LiteralPath $resultFilePath -Encoding utf8 -NoNewline -Force
 }
+
+# Structured, secret-free failure diagnostics for the outer catch below. Both are updated
+# immediately BEFORE each sensitive operation (never derived from the exception afterwards) so
+# that whatever the outer catch sees reflects exactly which step was in progress when something
+# threw - never the exception's own text, which is the only thing on this script's boundary that
+# could ever carry a fragment of a secret (e.g. a WebAdministration error echoing an invalid
+# value). $currentErrorCode is a best-effort default for the active stage, overridden right at a
+# specific throw site when one stage can fail for more than one reason (e.g. VALIDATE_REQUEST_ID
+# covers both a malformed GUID and a requestId that doesn't match).
+$script:currentStage = $null
+$script:currentErrorCode = $null
 
 $operation = $null
 $requestId = $null
@@ -192,6 +233,8 @@ try {
         throw "Rejected request: '$operation' is not an allowed operation. Only STOP, START, and CONFIGURE are accepted."
     }
 
+    $script:currentStage = 'VALIDATE_REQUEST_ID'
+    $script:currentErrorCode = 'REQUEST_ID_INVALID'
     $parsedGuid = [guid]::Empty
     if (-not [guid]::TryParse($requestId, [ref]$parsedGuid)) {
         throw "Rejected request: request id is not a well-formed GUID."
@@ -204,34 +247,47 @@ try {
     # next read, the same way an empty/never-provisioned file would.
     Set-Content -LiteralPath $requestFilePath -Value "NONE" -Encoding ascii -NoNewline -Force
 
-    Import-Module WebAdministration -ErrorAction Stop
+    if ($operation -eq 'STOP' -or $operation -eq 'START') {
+        # STOP/START never touch env-config.secret, so their own Import-Module has no cleanup to
+        # protect - it stays outside any try/finally, tagged only for the duration of the call
+        # itself. A failure here surfaces with errorStage=IMPORT_WEBADMINISTRATION/
+        # errorCode=IIS_IMPORT_FAILED, same as CONFIGURE's below; anything past this point in
+        # STOP/START is left without further per-step stage tracking (errorStage reverts to $null,
+        # errorCode defaults to UNKNOWN_FAILURE in the outer catch), exactly as before this
+        # diagnostic feature existed.
+        $script:currentStage = 'IMPORT_WEBADMINISTRATION'
+        $script:currentErrorCode = 'IIS_IMPORT_FAILED'
+        Import-Module WebAdministration -ErrorAction Stop
+        $script:currentStage = $null
+        $script:currentErrorCode = $null
 
-    if ($operation -eq 'STOP') {
-        # Idempotent: WebAdministration's Stop-Website/Stop-WebAppPool throw ("Object on target
-        # path is already stopped.") when asked to stop something already stopped, which would
-        # otherwise turn a no-op into a false failure. Querying current state first and only
-        # calling Stop-* when it isn't already the target state is what makes "already stopped"
-        # a success, not an error. Mandatory order: Site before Pool.
-        $currentSiteState = (Get-WebsiteState -Name $SiteName -ErrorAction Stop).Value
-        if ($currentSiteState -ne 'Stopped') {
-            Stop-Website -Name $SiteName -ErrorAction Stop
-        }
+        if ($operation -eq 'STOP') {
+            # Idempotent: WebAdministration's Stop-Website/Stop-WebAppPool throw ("Object on target
+            # path is already stopped.") when asked to stop something already stopped, which would
+            # otherwise turn a no-op into a false failure. Querying current state first and only
+            # calling Stop-* when it isn't already the target state is what makes "already stopped"
+            # a success, not an error. Mandatory order: Site before Pool.
+            $currentSiteState = (Get-WebsiteState -Name $SiteName -ErrorAction Stop).Value
+            if ($currentSiteState -ne 'Stopped') {
+                Stop-Website -Name $SiteName -ErrorAction Stop
+            }
 
-        $currentPoolState = (Get-WebAppPoolState -Name $AppPoolName -ErrorAction Stop).Value
-        if ($currentPoolState -ne 'Stopped') {
-            Stop-WebAppPool -Name $AppPoolName -ErrorAction Stop
+            $currentPoolState = (Get-WebAppPoolState -Name $AppPoolName -ErrorAction Stop).Value
+            if ($currentPoolState -ne 'Stopped') {
+                Stop-WebAppPool -Name $AppPoolName -ErrorAction Stop
+            }
         }
-    }
-    elseif ($operation -eq 'START') {
-        # Same idempotency reasoning as STOP, in reverse. Mandatory order: Pool before Site.
-        $currentPoolState = (Get-WebAppPoolState -Name $AppPoolName -ErrorAction Stop).Value
-        if ($currentPoolState -ne 'Started') {
-            Start-WebAppPool -Name $AppPoolName -ErrorAction Stop
-        }
+        else {
+            # Same idempotency reasoning as STOP, in reverse. Mandatory order: Pool before Site.
+            $currentPoolState = (Get-WebAppPoolState -Name $AppPoolName -ErrorAction Stop).Value
+            if ($currentPoolState -ne 'Started') {
+                Start-WebAppPool -Name $AppPoolName -ErrorAction Stop
+            }
 
-        $currentSiteState = (Get-WebsiteState -Name $SiteName -ErrorAction Stop).Value
-        if ($currentSiteState -ne 'Started') {
-            Start-Website -Name $SiteName -ErrorAction Stop
+            $currentSiteState = (Get-WebsiteState -Name $SiteName -ErrorAction Stop).Value
+            if ($currentSiteState -ne 'Started') {
+                Start-Website -Name $SiteName -ErrorAction Stop
+            }
         }
     }
     else {
@@ -242,22 +298,39 @@ try {
             throw "Environment configuration payload not found at '$envConfigFilePath'. It must be pre-provisioned - see Provision-BeeDayHmgIisControl.ps1."
         }
 
-        # Past this point the path is confirmed to be a real file, not a reparse point - safe to
-        # unconditionally clear in finally below regardless of what happens while consuming it.
-        # Every failure mode from here on (malformed JSON, empty payload, a rejected key, a
-        # WebAdministration failure, or anything else) must still result in env-config.secret
-        # ending up wiped - this is the whole point of the try/finally: cleanup must not depend on
-        # reaching a specific line of "happy path" code.
+        # Validated (not a reparse point) BEFORE the try/finally below is ever entered - the
+        # finally's unconditional cleanup write must only ever go through a path already proven
+        # safe, never through one that hasn't been checked yet.
         Assert-BeeDayNotReparsePoint -Path $envConfigFilePath
 
         $cleanupFailed = $false
+
+        # Set only on the last line of the try block below (nothing throws after it) - lets the
+        # finally block tell "the try block itself failed" apart from "the try block succeeded and
+        # only the cleanup write below failed", so a cleanup that succeeds never overwrites the
+        # true failing stage/code of an earlier exception with SECRET_CLEANUP, and a cleanup that
+        # fails is never misattributed to whatever stage happened to run last on the happy path.
+        $tryBlockSucceeded = $false
         try {
+            # Import-Module now runs INSIDE this try/finally (unlike STOP/START above) precisely so
+            # its failure is covered by the same unconditional cleanup as every other CONFIGURE
+            # failure mode below - env-config.secret already carries this invocation's real payload
+            # (the runner wrote it before the Scheduled Task even started) by the time this line
+            # runs, so a WebAdministration import failure must not be able to leave it behind.
+            $script:currentStage = 'IMPORT_WEBADMINISTRATION'
+            $script:currentErrorCode = 'IIS_IMPORT_FAILED'
+            Import-Module WebAdministration -ErrorAction Stop
+
+            $script:currentStage = 'READ_PAYLOAD'
+            $script:currentErrorCode = 'PAYLOAD_READ_FAILED'
             $payloadRaw = Get-Content -LiteralPath $envConfigFilePath -Raw
 
             # A parse failure here must never echo $payloadRaw back - it may contain a connection
             # string mid-corruption - so the caught exception is replaced with a fixed message,
             # the same discipline Deploy-BeeDay.ps1 already applies to SqlConnectionStringBuilder
             # parse failures.
+            $script:currentStage = 'PARSE_PAYLOAD'
+            $script:currentErrorCode = 'PAYLOAD_INVALID'
             try {
                 $parsedPayload = $payloadRaw | ConvertFrom-Json
             }
@@ -273,6 +346,8 @@ try {
             # than direct member access - Set-StrictMode -Version Latest throws on referencing a
             # property that doesn't exist on a PSCustomObject, so a payload missing requestId
             # entirely must not itself become an unhandled/uninformative error.
+            $script:currentStage = 'VALIDATE_REQUEST_ID'
+            $script:currentErrorCode = 'REQUEST_ID_INVALID'
             $requestIdProperty = $parsedPayload.PSObject.Properties['requestId']
             if (-not $requestIdProperty -or [string]::IsNullOrWhiteSpace([string]$requestIdProperty.Value)) {
                 throw "Environment configuration payload is missing requestId."
@@ -284,9 +359,12 @@ try {
             }
 
             if ($payloadRequestGuid -ne $parsedGuid) {
+                $script:currentErrorCode = 'REQUEST_ID_MISMATCH'
                 throw "Environment configuration payload requestId does not match the request just read from request.txt - rejecting a stale or mismatched payload."
             }
 
+            $script:currentStage = 'VALIDATE_VARIABLES'
+            $script:currentErrorCode = 'PAYLOAD_INVALID'
             $variablesProperty = $parsedPayload.PSObject.Properties['variables']
             if (-not $variablesProperty) {
                 throw "Environment configuration payload is missing the variables object."
@@ -305,7 +383,11 @@ try {
                 throw "Environment configuration payload was empty - nothing to configure."
             }
 
+            # Set-BeeDayAppPoolEnvironmentVariables advances $script:currentStage/$currentErrorCode
+            # itself through VALIDATE_VARIABLES (allow-list) / READ_EXISTING_ENV /
+            # REMOVE_EXISTING_ENV / ADD_ENV_VARIABLE as it goes.
             Set-BeeDayAppPoolEnvironmentVariables -Variables $variablesToApply
+            $tryBlockSucceeded = $true
         }
         finally {
             # Runs on every path out of the try block above: success, a thrown exception from
@@ -315,6 +397,10 @@ try {
             # a terminating error and could mask whatever exception is already propagating out of
             # the try block - the failure is recorded in a flag instead and only acted on below,
             # after the finally block has fully completed.
+            if ($tryBlockSucceeded) {
+                $script:currentStage = 'SECRET_CLEANUP'
+                $script:currentErrorCode = 'SECRET_CLEANUP_FAILED'
+            }
             try {
                 Set-Content -LiteralPath $envConfigFilePath -Value "{}" -Encoding utf8 -NoNewline -Force
             }
@@ -330,11 +416,20 @@ try {
             # already applied successfully.
             throw "Environment configuration was applied, but clearing the payload file afterwards failed - failing closed (details withheld)."
         }
+
+        $script:currentStage = $null
+        $script:currentErrorCode = $null
     }
 
+    # Common to STOP/START/CONFIGURE alike - a failure here (state query) is tagged FINALIZE rather
+    # than left attributed to whichever operation-specific stage happened to run last.
+    $script:currentStage = 'FINALIZE'
+    $script:currentErrorCode = $null
     Start-Sleep -Seconds 2
     $siteState = (Get-WebsiteState -Name $SiteName -ErrorAction Stop).Value
     $poolState = (Get-WebAppPoolState -Name $AppPoolName -ErrorAction Stop).Value
+    $script:currentStage = $null
+    $script:currentErrorCode = $null
 
     if ($operation -eq 'CONFIGURE') {
         # No target site/pool state to compare against - reaching this point without an exception
@@ -361,8 +456,16 @@ catch {
     $failedRequestId = if ($requestId) { $requestId } else { "unknown" }
     $failedOperation = if ($operation) { $operation } else { "unknown" }
 
+    # $script:currentStage/$currentErrorCode were set BEFORE the operation that actually threw -
+    # never derived from $_ here. $currentErrorCode falls back to the fixed constant
+    # UNKNOWN_FAILURE (never to anything built from $_.Exception.Message) for any failure point
+    # that predates the first stage marker, or that isn't one of the stages this diagnostic feature
+    # covers (e.g. an unexpected STOP/START failure).
+    $failedErrorCode = if ($script:currentErrorCode) { $script:currentErrorCode } else { 'UNKNOWN_FAILURE' }
+
     Write-BeeDayIisControlResult -RequestId $failedRequestId -Operation $failedOperation `
-        -ExitCode 1 -SiteState "Unknown" -PoolState "Unknown"
+        -ExitCode 1 -SiteState "Unknown" -PoolState "Unknown" `
+        -ErrorStage $script:currentStage -ErrorCode $failedErrorCode
 
     Write-Error "Privileged IIS control failed: $($_.Exception.Message)"
     exit 1
