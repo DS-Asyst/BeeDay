@@ -141,8 +141,8 @@ function Set-BeeDayEnvironmentVariables {
     Write-DeployMessage "Configuring IIS application-pool environment variables..."
 
     $variables = @{
-        ASPNETCORE_ENVIRONMENT = "Production"
-        DOTNET_ENVIRONMENT = "Production"
+        ASPNETCORE_ENVIRONMENT = "Homologation"
+        DOTNET_ENVIRONMENT = "Homologation"
         AllowedHosts = $AllowedHosts
         BeeDay__IdentityEmail__PublicBaseUrl = $PublicBaseUrl
         BeeDay__Email__Resend__ApiKey = $ResendApiKey
