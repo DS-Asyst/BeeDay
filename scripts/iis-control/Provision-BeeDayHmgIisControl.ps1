@@ -24,17 +24,22 @@
 #      granting svc_beeday_runner the same narrow (RC,RA,X,S) on each folder
 #      object - enough to traverse into it and have icacls/Get-Acl succeed,
 #      not enough to list its contents, create, or delete anything.
-#   4. Pre-creates request.txt (sentinel content "NONE") and result.json
-#      (sentinel placeholder), then grants svc_beeday_runner a narrow,
-#      file-level ACE directly on each: (S,RC,WD,RA) - Write Data only, no
-#      Read Data - on request.txt; (S,RC,RD,RA,REA) - Read Data + Read
-#      Extended Attributes, no Write Data - on result.json. REA was added
-#      after confirming on SERV3WEB that [System.IO.File]::ReadAllText (used
-#      by Deploy-BeeDay.ps1 instead of Get-Content, which needs even more
-#      than RD/REA for this account) requires it in addition to RD. Both
-#      files are meant to live forever and only ever be overwritten in place
-#      (see the comments in Invoke-BeeDayIisControl.ps1 for why: a
-#      rename-replace would silently drop these file-level grants).
+#   4. Pre-creates request.txt (sentinel content "NONE"), env-config.secret
+#      (sentinel "{}"), and result.json (sentinel placeholder), then grants
+#      svc_beeday_runner a narrow, file-level ACE directly on each: (S,RC,
+#      WD,RA) - Write Data only, no Read Data - on request.txt AND on
+#      env-config.secret (the CONFIGURE operation's payload - App Pool
+#      environment variables, which may include
+#      BeeDay__Persistence__SqlServer__ConnectionString - never request.txt
+#      or result.json, and never readable back by svc_beeday_runner once
+#      written); (S,RC,RD,RA,REA) - Read Data + Read Extended Attributes, no
+#      Write Data - on result.json. REA was added after confirming on
+#      SERV3WEB that [System.IO.File]::ReadAllText (used by Deploy-BeeDay.ps1
+#      instead of Get-Content, which needs even more than RD/REA for this
+#      account) requires it in addition to RD. All three files are meant to
+#      live forever and only ever be overwritten in place (see the comments
+#      in Invoke-BeeDayIisControl.ps1 for why: a rename-replace would
+#      silently drop these file-level grants).
 #   5. Registers the \BeeDay\HMG-IisControl Scheduled Task: on-demand only, no
 #      recurring trigger, runs as SYSTEM, RunLevel Highest, a single fixed
 #      action, MultipleInstances=IgnoreNew so a second trigger while one run
@@ -61,6 +66,7 @@ $rootFolder = "C:\Ops\BeeDay\IisControl"
 $requestsFolder = Join-Path $rootFolder "Requests"
 $resultsFolder = Join-Path $rootFolder "Results"
 $requestFilePath = Join-Path $requestsFolder "request.txt"
+$envConfigFilePath = Join-Path $requestsFolder "env-config.secret"
 $resultFilePath = Join-Path $resultsFolder "result.json"
 $scriptDestination = Join-Path $rootFolder "Invoke-BeeDayIisControl.ps1"
 $scriptSource = Join-Path $PSScriptRoot "Invoke-BeeDayIisControl.ps1"
@@ -69,6 +75,7 @@ $scriptSource = Join-Path $PSScriptRoot "Invoke-BeeDayIisControl.ps1"
 # lines), so a task run before any real request was ever issued fails closed instead of doing
 # nothing silently or erroring in a confusing way.
 $requestSentinel = "NONE"
+$envConfigSentinel = "{}"
 $resultSentinel = (
     [ordered]@{
         requestId = "00000000-0000-0000-0000-000000000000"
@@ -112,6 +119,12 @@ if (-not (Test-Path -LiteralPath $requestFilePath)) {
 }
 icacls $requestFilePath /grant "${runnerAccount}:(S,RC,WD,RA)" | Out-Null
 
+Write-Host "`n=== 3b. env-config.secret - pre-created, svc_beeday_runner: Write Data only (no read/delete) ==="
+if (-not (Test-Path -LiteralPath $envConfigFilePath)) {
+    Set-Content -LiteralPath $envConfigFilePath -Value $envConfigSentinel -Encoding utf8 -NoNewline
+}
+icacls $envConfigFilePath /grant "${runnerAccount}:(S,RC,WD,RA)" | Out-Null
+
 Write-Host "`n=== 4. Results folder - svc_beeday_runner: traverse-through only (no list/create/delete) ==="
 New-Item -ItemType Directory -Path $resultsFolder -Force | Out-Null
 icacls $resultsFolder /inheritance:r | Out-Null
@@ -132,7 +145,7 @@ $settings = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -Execution
 
 Register-ScheduledTask -TaskPath $taskPath -TaskName $taskName `
     -Action $action -Principal $principal -Settings $settings -Force `
-    -Description "Fixed, parameterless STOP/START of site BeeDay-HMG / pool BeeDay-Web-AppPool only. Action and principal are not modifiable by LAB\svc_beeday_runner." |
+    -Description "Fixed, parameterless STOP/START/CONFIGURE of site BeeDay-HMG / pool BeeDay-Web-AppPool only. Action and principal are not modifiable by LAB\svc_beeday_runner." |
     Out-Null
 
 Write-Host "`n=== 7. Restricting who can trigger this ONE task ==="
@@ -166,18 +179,22 @@ Write-Host "`n=== Done. Verify with: ==="
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) icacls '$rootFolder'"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) icacls '$requestsFolder'"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) icacls '$requestFilePath'"
+Write-Host "  (as LAB\svc_beeday_runner, must succeed) icacls '$envConfigFilePath'"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) icacls '$resultsFolder'"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) icacls '$resultFilePath'"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) `$s = New-Object System.IO.FileStream('$requestFilePath',[System.IO.FileMode]::Open,[System.IO.FileAccess]::Write,[System.IO.FileShare]::Read); `$s.Dispose()"
+Write-Host "  (as LAB\svc_beeday_runner, must succeed) `$s = New-Object System.IO.FileStream('$envConfigFilePath',[System.IO.FileMode]::Open,[System.IO.FileAccess]::Write,[System.IO.FileShare]::Read); `$s.Dispose()"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) [System.IO.File]::ReadAllText('$resultFilePath')"
 Write-Host "  (as LAB\svc_beeday_runner, EXPECTED to fail - Deploy-BeeDay.ps1 does not use these cmdlets for this reason) Set-Content '$requestFilePath' -Value 'STOP'"
 Write-Host "  (as LAB\svc_beeday_runner, EXPECTED to fail - Deploy-BeeDay.ps1 does not use these cmdlets for this reason) Get-Content '$resultFilePath'"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) Get-ScheduledTask -TaskPath '$taskPath' -TaskName '$taskName'"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) Start-ScheduledTask -TaskPath '$taskPath' -TaskName '$taskName'"
 Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Get-Content '$requestFilePath'"
+Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Get-Content '$envConfigFilePath'"
 Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Set-Content '$resultFilePath' -Value 'forged'"
 Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Get-Content '$scriptDestination'"
 Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Get-ChildItem '$rootFolder'"
 Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Get-ChildItem '$requestsFolder'"
 Write-Host "  (as LAB\svc_beeday_runner, must FAIL) New-Item '$requestsFolder\other.txt'"
 Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Remove-Item '$requestFilePath'"
+Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Remove-Item '$envConfigFilePath'"
