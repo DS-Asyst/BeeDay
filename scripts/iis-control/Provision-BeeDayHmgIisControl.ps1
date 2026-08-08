@@ -26,20 +26,34 @@
 #      not enough to list its contents, create, or delete anything.
 #   4. Pre-creates request.txt (sentinel content "NONE"), env-config.secret
 #      (sentinel "{}"), and result.json (sentinel placeholder), then grants
-#      svc_beeday_runner a narrow, file-level ACE directly on each: (S,RC,
-#      WD,RA) - Write Data only, no Read Data - on request.txt AND on
-#      env-config.secret (the CONFIGURE operation's payload - App Pool
-#      environment variables, which may include
-#      BeeDay__Persistence__SqlServer__ConnectionString - never request.txt
-#      or result.json, and never readable back by svc_beeday_runner once
-#      written); (S,RC,RD,RA,REA) - Read Data + Read Extended Attributes, no
-#      Write Data - on result.json. REA was added after confirming on
-#      SERV3WEB that [System.IO.File]::ReadAllText (used by Deploy-BeeDay.ps1
-#      instead of Get-Content, which needs even more than RD/REA for this
-#      account) requires it in addition to RD. All three files are meant to
-#      live forever and only ever be overwritten in place (see the comments
-#      in Invoke-BeeDayIisControl.ps1 for why: a rename-replace would
-#      silently drop these file-level grants).
+#      svc_beeday_runner a narrow, file-level ACE directly on each:
+#        - request.txt and env-config.secret: (W,RC,RA). Both are written by
+#          Deploy-BeeDay.ps1 via a raw FileStream(FileMode.Open,
+#          FileAccess.Write) (see the comments above
+#          Invoke-BeeDayPrivilegedIisControl in Deploy-BeeDay.ps1 for why),
+#          which resolves to CreateFile's GENERIC_WRITE. The file object's
+#          generic mapping expands GENERIC_WRITE to FILE_WRITE_DATA |
+#          FILE_WRITE_ATTRIBUTES | FILE_WRITE_EA | FILE_APPEND_DATA |
+#          READ_CONTROL | SYNCHRONIZE - icacls's "W" - not just
+#          FILE_WRITE_DATA. A narrower grant of just (S,RC,WD,RA) was
+#          confirmed on SERV3WEB to produce Access Denied for exactly this
+#          FileStream pattern on a freshly-granted file; (W,RC,RA) is the
+#          from-scratch grant confirmed to work, still without Read Data, no
+#          Delete, no Delete Child, no Write DAC, no Write Owner.
+#          env-config.secret additionally carries the CONFIGURE operation's
+#          payload (App Pool environment variables, which may include
+#          BeeDay__Persistence__SqlServer__ConnectionString - never
+#          request.txt or result.json, and never readable back by
+#          svc_beeday_runner once written).
+#        - result.json: (S,RC,RD,RA,REA) - Read Data + Read Extended
+#          Attributes, no Write Data. REA was added after confirming on
+#          SERV3WEB that [System.IO.File]::ReadAllText (used by
+#          Deploy-BeeDay.ps1 instead of Get-Content, which needs even more
+#          than RD/REA for this account) requires it in addition to RD.
+#      All three files are meant to live forever and only ever be
+#      overwritten in place (see the comments in Invoke-BeeDayIisControl.ps1
+#      for why: a rename-replace would silently drop these file-level
+#      grants).
 #   5. Registers the \BeeDay\HMG-IisControl Scheduled Task: on-demand only, no
 #      recurring trigger, runs as SYSTEM, RunLevel Highest, a single fixed
 #      action, MultipleInstances=IgnoreNew so a second trigger while one run
@@ -113,17 +127,22 @@ icacls $requestsFolder /inheritance:r | Out-Null
 icacls $requestsFolder /grant:r "SYSTEM:(OI)(CI)F" "BUILTIN\Administrators:(OI)(CI)F" | Out-Null
 icacls $requestsFolder /grant $folderTraverseGrant | Out-Null
 
-Write-Host "`n=== 3. request.txt - pre-created, svc_beeday_runner: Write Data only (no read/delete) ==="
+Write-Host "`n=== 3. request.txt - pre-created, svc_beeday_runner: Write only (no read/delete) ==="
 if (-not (Test-Path -LiteralPath $requestFilePath)) {
     Set-Content -LiteralPath $requestFilePath -Value $requestSentinel -Encoding ascii -NoNewline
 }
-icacls $requestFilePath /grant "${runnerAccount}:(S,RC,WD,RA)" | Out-Null
+# (S,RC,WD,RA) alone was confirmed on SERV3WEB to produce Access Denied for the FileStream(Open,
+# Write) pattern Deploy-BeeDay.ps1 uses: FileAccess.Write maps to CreateFile's GENERIC_WRITE, which
+# needs the full FILE_GENERIC_WRITE mapping (icacls "W"), not just Write Data. (W,RC,RA) is the
+# from-scratch grant confirmed to work - still no Read Data, no Delete, no Delete Child, no Write
+# DAC, no Write Owner.
+icacls $requestFilePath /grant "${runnerAccount}:(W,RC,RA)" | Out-Null
 
-Write-Host "`n=== 3b. env-config.secret - pre-created, svc_beeday_runner: Write Data only (no read/delete) ==="
+Write-Host "`n=== 3b. env-config.secret - pre-created, svc_beeday_runner: Write only, same grant as request.txt (no read/delete) ==="
 if (-not (Test-Path -LiteralPath $envConfigFilePath)) {
     Set-Content -LiteralPath $envConfigFilePath -Value $envConfigSentinel -Encoding utf8 -NoNewline
 }
-icacls $envConfigFilePath /grant "${runnerAccount}:(S,RC,WD,RA)" | Out-Null
+icacls $envConfigFilePath /grant "${runnerAccount}:(W,RC,RA)" | Out-Null
 
 Write-Host "`n=== 4. Results folder - svc_beeday_runner: traverse-through only (no list/create/delete) ==="
 New-Item -ItemType Directory -Path $resultsFolder -Force | Out-Null
