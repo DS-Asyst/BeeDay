@@ -48,7 +48,7 @@ jobs:
       # which is what a bare checkout would resolve to under a workflow_run event. Falls back to
       # github.sha (the ref picked at dispatch time) for the manual workflow_dispatch path.
       - name: Checkout deployment scripts
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
@@ -57,7 +57,7 @@ jobs:
       # *successful* BeeDay CI run on hmg via the REST API — never "the latest run of any kind."
       - name: Resolve BeeDay CI run to deploy
         id: resolve-run
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9.0.0
         with:
           result-encoding: string
           script: |
@@ -88,20 +88,41 @@ jobs:
       # (the default actions/download-artifact would otherwise assume), never "latest", never
       # another branch or commit.
       - name: Download validated publish artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: beeday-publish
           path: ${{ runner.temp }}\BeeDayPublish
           github-token: ${{ github.token }}
           run-id: ${{ steps.resolve-run.outputs.result }}
 
-      # Deploy-BeeDay.ps1 shells out to `dotnet ef` for migrations — the self-hosted runner
-      # doesn't otherwise need the SDK (only IIS cmdlets), so it's installed here explicitly
-      # rather than assumed to already be present on SERV3WEB.
-      - name: Configure .NET 10
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "10.0.x"
+      # SERV3WEB already has .NET SDK 10.0.302 provisioned machine-wide, so actions/setup-dotnet is
+      # not used on this self-hosted job and must not be reintroduced: the runner executes as the
+      # low-privilege svc_beeday_runner@lab.local service account, which is not guaranteed to be
+      # able to install anything under Program Files, and re-installing an SDK that is already
+      # present would just be redundant work on a shared deploy target. This step only verifies
+      # what is already installed and fails fast with a clear message - Deploy-BeeDay.ps1 shells
+      # out to `dotnet ef` for migrations, so a missing/wrong SDK should be caught here, not
+      # halfway through a migration.
+      - name: Verify .NET SDK 10 is available
+        shell: powershell
+        run: |
+          $dotnetCommand = Get-Command dotnet -ErrorAction SilentlyContinue
+          if (-not $dotnetCommand) {
+              throw "dotnet was not found on PATH. SERV3WEB must have the .NET SDK installed and available to the svc_beeday_runner account."
+          }
+
+          Write-Host "dotnet found at: $($dotnetCommand.Source)"
+
+          $installedSdks = dotnet --list-sdks
+          Write-Host "Installed SDKs:"
+          $installedSdks | ForEach-Object { Write-Host "  $_" }
+
+          $sdk10 = $installedSdks | Where-Object { $_ -match '^10\.0\.' } | Select-Object -First 1
+          if (-not $sdk10) {
+              throw "No .NET SDK 10.x was found on this runner. Deploy-BeeDay.ps1 requires SDK 10.x for 'dotnet tool restore' and 'dotnet ef database update'."
+          }
+
+          Write-Host "Using .NET SDK: $sdk10"
 
       - name: Deploy to IIS with rollback
         shell: powershell
