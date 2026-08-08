@@ -75,7 +75,7 @@ jobs:
           dotnet publish `
             ".\src\BeeDay.Web\BeeDay.Web.csproj" `
             --configuration Release `
-            --no-build `
+            --no-restore `
             --output "${{ runner.temp }}\BeeDayPublish"
 
       - name: Validate published files

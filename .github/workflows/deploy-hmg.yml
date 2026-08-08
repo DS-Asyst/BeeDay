@@ -1,9 +1,11 @@
 name: BeeDay Homologation Deploy
 
 on:
-  push:
-    branches:
-      - hmg
+  workflow_run:
+    workflows:
+      - BeeDay CI
+    types:
+      - completed
 
   workflow_dispatch:
 
@@ -13,112 +15,24 @@ concurrency:
 
 permissions:
   contents: read
+  actions: read
 
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
-  validate:
-    name: Validate Homologation Artifact
-
-    runs-on: windows-latest
-    timeout-minutes: 20
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Configure .NET 10
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "10.0.x"
-
-      - name: Restore dependencies
-        shell: powershell
-        run: dotnet restore BeeDay.slnx
-
-      - name: Verify formatting
-        shell: powershell
-        run: dotnet format BeeDay.slnx --verify-no-changes --no-restore
-
-      - name: Build solution
-        shell: powershell
-        run: |
-          dotnet build BeeDay.slnx `
-            --configuration Release `
-            --no-restore `
-            --warnaserror
-
-      # deploy-prd.yml's validate job skips this step, which leaves the E2E Playwright tests
-      # (part of `dotnet test BeeDay.slnx`) without a browser to drive — a known, documented gap.
-      # HMG is where those tests actually need to prove something before a real deploy, so this
-      # job installs Chromium the same way ci.yml already does.
-      - name: Install Playwright Chromium
-        shell: powershell
-        run: pwsh tests/BeeDay.E2E.Tests/bin/Release/net10.0/playwright.ps1 install chromium
-
-      - name: Run tests
-        shell: powershell
-        run: |
-          dotnet test BeeDay.slnx `
-            --configuration Release `
-            --no-build `
-            --verbosity normal `
-            --logger "trx;LogFileName=beeday-tests.trx" `
-            --results-directory "${{ runner.temp }}\TestResults"
-
-      - name: Publish BeeDay
-        shell: powershell
-        run: |
-          dotnet publish `
-            ".\src\BeeDay.Web\BeeDay.Web.csproj" `
-            --configuration Release `
-            --no-build `
-            --output "${{ runner.temp }}\BeeDayPublish"
-
-      - name: Validate published files
-        shell: powershell
-        run: |
-          $publishPath = Join-Path "${{ runner.temp }}" "BeeDayPublish"
-          $requiredFiles = @("BeeDay.Web.dll", "web.config")
-
-          foreach ($file in $requiredFiles) {
-              $fullPath = Join-Path $publishPath $file
-              if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
-                  throw "Required published file was not found: $fullPath"
-              }
-          }
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: beeday-homologation-test-results
-          path: ${{ runner.temp }}\TestResults
-          if-no-files-found: warn
-          retention-days: 14
-
-      - name: Upload E2E failure artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: beeday-homologation-e2e-artifacts
-          path: tests\BeeDay.E2E.Tests\bin\Release\net10.0\e2e-artifacts
-          if-no-files-found: ignore
-          retention-days: 14
-
-      - name: Upload validated publish artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: beeday-homologation-publish
-          path: ${{ runner.temp }}\BeeDayPublish
-          if-no-files-found: error
-          retention-days: 7
-
   deploy:
     name: Deploy to SERV3WEB
-    needs: validate
+    # Automatic path: only deploy when the triggering BeeDay CI run succeeded on hmg specifically
+    # (head_branch also excludes PR-validation runs of BeeDay CI, whose head_branch is the PR's
+    # source branch, not hmg). Manual path: workflow_dispatch has no workflow_run payload to gate
+    # on, so it's allowed through — "controlled manual deploy" means a human deliberately running
+    # it, and the run resolved below is still always the latest *successful* CI run on hmg, never
+    # an arbitrary/broken one.
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'hmg')
 
     runs-on:
       - self-hosted
@@ -130,16 +44,58 @@ jobs:
     environment: homologation
 
     steps:
+      # Checked out at the exact commit BeeDay CI validated — not the repository's default branch,
+      # which is what a bare checkout would resolve to under a workflow_run event. Falls back to
+      # github.sha (the ref picked at dispatch time) for the manual workflow_dispatch path.
       - name: Checkout deployment scripts
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
+      # Resolves which BeeDay CI run's artifact to deploy. workflow_run already carries the exact
+      # run id in its payload. workflow_dispatch has no such payload, so it looks up the latest
+      # *successful* BeeDay CI run on hmg via the REST API — never "the latest run of any kind."
+      - name: Resolve BeeDay CI run to deploy
+        id: resolve-run
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            if (context.eventName === 'workflow_run') {
+              core.info(`Using triggering workflow_run id ${context.payload.workflow_run.id}`);
+              return `${context.payload.workflow_run.id}`;
+            }
+
+            core.info('workflow_dispatch: resolving latest successful BeeDay CI run on hmg');
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ci.yml',
+              branch: 'hmg',
+              status: 'success',
+              per_page: 1
+            });
+
+            if (runs.data.workflow_runs.length === 0) {
+              throw new Error('No successful BeeDay CI run found on branch hmg.');
+            }
+
+            const runId = runs.data.workflow_runs[0].id;
+            core.info(`Using latest successful BeeDay CI run id ${runId}`);
+            return `${runId}`;
+
+      # run-id pins this to the exact BeeDay CI execution resolved above — never the current run
+      # (the default actions/download-artifact would otherwise assume), never "latest", never
+      # another branch or commit.
       - name: Download validated publish artifact
         uses: actions/download-artifact@v4
         with:
-          name: beeday-homologation-publish
+          name: beeday-publish
           path: ${{ runner.temp }}\BeeDayPublish
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.resolve-run.outputs.result }}
 
-      # Deploy-BeeDay.ps1 now shells out to `dotnet ef` for migrations — the self-hosted runner
+      # Deploy-BeeDay.ps1 shells out to `dotnet ef` for migrations — the self-hosted runner
       # doesn't otherwise need the SDK (only IIS cmdlets), so it's installed here explicitly
       # rather than assumed to already be present on SERV3WEB.
       - name: Configure .NET 10
