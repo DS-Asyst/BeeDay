@@ -86,6 +86,27 @@ if (-not [string]::IsNullOrWhiteSpace($AppConnectionString) `
     throw "AppConnectionString and MigrationConnectionString must not be the same value - the application must never use the migrator credential."
 }
 
+# Exception messages can echo back raw parameter values verbatim (e.g. a malformed connection
+# string thrown by SqlConnectionStringBuilder, or a driver error that embeds its input). GitHub
+# Actions masks known secrets in the runner's own log capture, but that masking never reaches
+# $deployLogsPath below - it's a plain file written directly to disk on the deploy target, outside
+# any log pipeline GitHub controls. Every message that reaches Write-DeployMessage or Write-Error
+# is scrubbed of these literal values first, so the real error text is preserved but a credential
+# can never end up persisted on disk in the clear.
+$script:secretValuesToRedact = @($MigrationConnectionString, $AppConnectionString, $ResendApiKey) |
+    Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+
+function Protect-DeploySecret {
+    param([AllowEmptyString()][Parameter(Mandatory = $true)][string]$Message)
+
+    $sanitized = $Message
+    foreach ($secret in $script:secretValuesToRedact) {
+        $sanitized = $sanitized.Replace($secret, "[REDACTED]")
+    }
+
+    return $sanitized
+}
+
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $migrationsProjectPath = Join-Path $repoRoot "src\BeeDay.Infrastructure"
 $toolManifestPath = Join-Path $repoRoot "dotnet-tools.json"
@@ -122,7 +143,7 @@ function Start-DeployLog {
 function Write-DeployMessage {
     param([Parameter(Mandatory = $true)][string]$Message)
 
-    $line = "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] $Message"
+    $line = "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] $(Protect-DeploySecret $Message)"
     Write-Host ""
     Write-Host $line
 
@@ -398,7 +419,7 @@ try {
     Write-Host "Data backup: $dataBackupPath"
 }
 catch {
-    $deploymentError = $_.Exception.Message
+    $deploymentError = Protect-DeploySecret $_.Exception.Message
     Write-Error "Deployment failed: $deploymentError"
 
     Write-DeployMessage "Starting rollback to the previous application version..."
@@ -412,7 +433,7 @@ catch {
         Write-DeployMessage "Rollback completed and previous version is healthy."
     }
     catch {
-        Write-Error "Rollback also failed: $($_.Exception.Message)"
+        Write-Error "Rollback also failed: $(Protect-DeploySecret $_.Exception.Message)"
     }
 
     throw "Deployment failed and rollback was attempted. Original error: $deploymentError"
