@@ -118,6 +118,23 @@ function Protect-DeploySecret {
 
 $currentIdentityName = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 
+# SERV3WEB restricts applicationHost.config/redirection.config to TrustedInstaller/SYSTEM/
+# Administrators only - this account cannot be added to Administrators or granted any access there,
+# so it cannot control IIS directly (Stop-Website/Start-WebAppPool both need to read and commit
+# changes through that config store). Controlling BeeDay-HMG / BeeDay-Web-AppPool instead goes
+# through a single privileged Scheduled Task (\BeeDay\HMG-IisControl, runs as SYSTEM) that this
+# account can only trigger and query - never modify - via a Generic Read + Generic Execute grant on
+# that one task's own security descriptor (a completely separate ACL namespace from IIS config).
+# These constants are used only when $SiteName/$AppPoolName are exactly these two literals (see
+# Stop-BeeDayIis/Start-BeeDayIis below); any other target keeps using direct WebAdministration calls
+# exactly as before, so deploy-prd.yml's current behavior is unaffected.
+$privilegedIisSiteName = "BeeDay-HMG"
+$privilegedIisAppPoolName = "BeeDay-Web-AppPool"
+$privilegedIisTaskPath = "\BeeDay\"
+$privilegedIisTaskName = "HMG-IisControl"
+$privilegedIisRequestPath = "C:\Ops\BeeDay\IisControl\Requests\request.txt"
+$privilegedIisResultPath = "C:\Ops\BeeDay\IisControl\Results\result.json"
+
 $backupRoot = "C:\Apps\BeeDay-Backups"
 $externalRoot = "C:\Apps\BeeDay-Data"
 $dataPath = Join-Path $externalRoot "Data"
@@ -159,7 +176,101 @@ function Write-DeployMessage {
     }
 }
 
+function Test-BeeDayUsesPrivilegedIisControl {
+    return ($SiteName -eq $privilegedIisSiteName) -and ($AppPoolName -eq $privilegedIisAppPoolName)
+}
+
+# Requests a STOP or START from the privileged Scheduled Task and blocks until it either confirms
+# success or the timeout elapses - the task itself is asynchronous (Start-ScheduledTask returns
+# immediately), so this polls Task Scheduler's own state/LastRunTime/LastTaskResult (native
+# mechanisms) plus a small result file the task writes, rather than inventing a custom IPC protocol.
+#
+# Never passes $SiteName/$AppPoolName (or anything else) to the task: the only data that crosses
+# this boundary is the fixed operation string and a correlation GUID, written into request.txt's
+# content, which the task then validates against its own hardcoded STOP/START allow-list. There is
+# no argument, script block, or path handed to the task from here - Start-ScheduledTask takes only
+# the task's identity.
+#
+# request.txt is a permanent fixture (pre-created by provisioning), overwritten in place rather than
+# written-then-renamed: svc_beeday_runner's ACL on it is Write Data only (no Delete/Create anywhere
+# in that folder), and a same-volume rename-replace would need Delete on the file being replaced -
+# which this account deliberately does not have.
+function Invoke-BeeDayPrivilegedIisControl {
+    param([Parameter(Mandatory = $true)][ValidateSet('STOP', 'START')][string]$Operation)
+
+    Write-DeployMessage "Requesting privileged IIS control: $Operation (site=$privilegedIisSiteName, pool=$privilegedIisAppPoolName)..."
+
+    $task = Get-ScheduledTask -TaskPath $privilegedIisTaskPath -TaskName $privilegedIisTaskName -ErrorAction Stop
+    if ($task.State -eq 'Running') {
+        throw "Privileged IIS control task '$privilegedIisTaskPath$privilegedIisTaskName' is already running from a previous invocation. Refusing to trigger a new one concurrently."
+    }
+
+    # Captured before triggering so a silently-ignored trigger (e.g. a race that
+    # MultipleInstances=IgnoreNew swallows, despite the pre-check above) can be detected below by
+    # LastRunTime never advancing - otherwise a stale LastTaskResult from an earlier, unrelated run
+    # could be misread as this invocation's outcome.
+    $previousLastRunTime = (Get-ScheduledTaskInfo -TaskPath $privilegedIisTaskPath -TaskName $privilegedIisTaskName).LastRunTime
+
+    $requestId = [guid]::NewGuid().ToString()
+    Set-Content -LiteralPath $privilegedIisRequestPath -Value "$Operation`n$requestId" -Encoding ascii -NoNewline -Force
+
+    $previousResultWriteTimeUtc = if (Test-Path -LiteralPath $privilegedIisResultPath) {
+        (Get-Item -LiteralPath $privilegedIisResultPath).LastWriteTimeUtc
+    }
+    else {
+        [datetime]::MinValue
+    }
+
+    Start-ScheduledTask -TaskPath $privilegedIisTaskPath -TaskName $privilegedIisTaskName
+
+    $timeoutAt = (Get-Date).AddSeconds(60)
+    $finished = $false
+    do {
+        Start-Sleep -Seconds 2
+        $currentState = (Get-ScheduledTask -TaskPath $privilegedIisTaskPath -TaskName $privilegedIisTaskName).State
+        if ($currentState -ne 'Running') {
+            $finished = $true
+        }
+    } while (-not $finished -and (Get-Date) -lt $timeoutAt)
+
+    if (-not $finished) {
+        throw "Privileged IIS control task ($Operation) did not complete within the timeout."
+    }
+
+    $taskInfo = Get-ScheduledTaskInfo -TaskPath $privilegedIisTaskPath -TaskName $privilegedIisTaskName
+
+    if ($taskInfo.LastRunTime -eq $previousLastRunTime) {
+        throw "Privileged IIS control task ($Operation) never actually started a new run (LastRunTime did not advance) - refusing to trust LastTaskResult from a previous invocation."
+    }
+
+    if (-not (Test-Path -LiteralPath $privilegedIisResultPath)) {
+        throw "Privileged IIS control task ($Operation) finished but produced no result file."
+    }
+
+    $resultWriteTimeUtc = (Get-Item -LiteralPath $privilegedIisResultPath).LastWriteTimeUtc
+    if ($resultWriteTimeUtc -le $previousResultWriteTimeUtc) {
+        throw "Privileged IIS control task ($Operation) finished but the result file was not updated - cannot confirm the outcome."
+    }
+
+    $result = Get-Content -LiteralPath $privilegedIisResultPath -Raw | ConvertFrom-Json
+
+    if ($result.requestId -ne $requestId) {
+        throw "Privileged IIS control result does not match the request just issued (expected requestId $requestId, got $($result.requestId)) - refusing to trust it."
+    }
+
+    Write-DeployMessage "Privileged IIS control result: operation=$($result.operation) exitCode=$($result.exitCode) siteState=$($result.siteState) poolState=$($result.poolState)"
+
+    if ($taskInfo.LastTaskResult -ne 0 -or $result.exitCode -ne 0) {
+        throw "Privileged IIS control task ($Operation) failed (LastTaskResult=$($taskInfo.LastTaskResult), reported exitCode=$($result.exitCode)). Site state: $($result.siteState), Pool state: $($result.poolState)."
+    }
+}
+
 function Stop-BeeDayIis {
+    if (Test-BeeDayUsesPrivilegedIisControl) {
+        Invoke-BeeDayPrivilegedIisControl -Operation "STOP"
+        return
+    }
+
     Write-DeployMessage "Stopping IIS site '$SiteName'..."
     Stop-Website -Name $SiteName -ErrorAction SilentlyContinue
 
@@ -170,6 +281,11 @@ function Stop-BeeDayIis {
 }
 
 function Start-BeeDayIis {
+    if (Test-BeeDayUsesPrivilegedIisControl) {
+        Invoke-BeeDayPrivilegedIisControl -Operation "START"
+        return
+    }
+
     $appPoolState = Get-WebAppPoolState -Name $AppPoolName -ErrorAction SilentlyContinue
     if ($null -eq $appPoolState) {
         throw "Application pool was not found: $AppPoolName"
