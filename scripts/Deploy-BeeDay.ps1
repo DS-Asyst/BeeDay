@@ -57,9 +57,14 @@ param(
     [string]$AppConnectionString,
 
     # Migrations. The application never runs them — only beeday_hmg_migrator (or the production
-    # equivalent) does, via a connection string that is never the app's own.
+    # equivalent) does, via a connection string that is never the app's own. Applied by executing
+    # an EF Core migration bundle (a self-sufficient executable produced by BeeDay CI, embedding
+    # the compiled migrations and model) rather than `dotnet ef database update` - the bundle needs
+    # no project restore, no NuGet access, and no .NET SDK on this machine, only the shared .NET
+    # runtime. MigrationBundlePath is where deploy-hmg.yml downloads that artifact to.
     [switch]$RunMigrations,
     [string]$MigrationConnectionString,
+    [string]$MigrationBundlePath,
 
     # Database backup. Implemented but intentionally not wired into any workflow yet — BACKUP
     # DATABASE runs on the SQL Server itself, so DatabaseBackupDirectory must be a path that
@@ -74,6 +79,10 @@ Set-StrictMode -Version Latest
 
 if ($RunMigrations -and [string]::IsNullOrWhiteSpace($MigrationConnectionString)) {
     throw "MigrationConnectionString is required when RunMigrations is set."
+}
+
+if ($RunMigrations -and [string]::IsNullOrWhiteSpace($MigrationBundlePath)) {
+    throw "MigrationBundlePath is required when RunMigrations is set."
 }
 
 if ($BackupDatabase -and [string]::IsNullOrWhiteSpace($DatabaseBackupDirectory)) {
@@ -107,9 +116,7 @@ function Protect-DeploySecret {
     return $sanitized
 }
 
-$repoRoot = Split-Path -Parent $PSScriptRoot
-$migrationsProjectPath = Join-Path $repoRoot "src\BeeDay.Infrastructure"
-$toolManifestPath = Join-Path $repoRoot "dotnet-tools.json"
+$currentIdentityName = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 
 $backupRoot = "C:\Apps\BeeDay-Backups"
 $externalRoot = "C:\Apps\BeeDay-Data"
@@ -205,6 +212,135 @@ function Clear-DirectoryContents {
         Remove-Item -Recurse -Force
 }
 
+# NTFS ACLs on the IIS-facing directories are infrastructure and are provisioned administratively,
+# once, ahead of time on the deploy target - never by the deploy itself. LAB\svc_beeday_runner
+# (the account this script runs as) is deliberately low-privilege and must never be granted
+# WRITE_DAC or Full Control just so the deploy can call Set-Acl. These two functions only verify
+# that the access the deploy actually needs is already in place; Assert-BeeDayRequiredAccess below
+# fails loudly - naming the directory, the expected identity, and the missing right - if it isn't.
+#
+# Test-BeeDayWriteAccess probes the *effective* access of whichever account is currently running
+# (a real create+delete of a throwaway file) rather than pattern-matching a hardcoded account name
+# in the ACL - that stays correct even if the runner account is renamed or differs between
+# environments, and it also naturally accounts for group membership and inheritance instead of
+# requiring an exact identity-string match.
+#
+# Test-BeeDayAppPoolAccess cannot use the same probe: this script never runs as the IIS AppPool
+# identity, so it inspects the target directory's ACL (including inherited entries, which is what
+# `.Access` returns) for an explicit Allow entry granting at least the required rights.
+function Test-BeeDayWriteAccess {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Container)) {
+        return $false
+    }
+
+    $probeFile = Join-Path $Path ".beeday-acl-probe-$([guid]::NewGuid().ToString('N')).tmp"
+    try {
+        [System.IO.File]::WriteAllText($probeFile, "")
+        return $true
+    }
+    catch {
+        return $false
+    }
+    finally {
+        Remove-Item -LiteralPath $probeFile -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Test-BeeDayAppPoolAccess {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$AppPoolIdentity,
+        [Parameter(Mandatory = $true)][System.Security.AccessControl.FileSystemRights]$RequiredRights
+    )
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Container)) {
+        return $false
+    }
+
+    # Simulates the real NTFS access-check algorithm instead of just looking for "an Allow ACE with
+    # the right bits" - a Deny ACE for this identity must be able to veto an Allow that would
+    # otherwise satisfy the check, and precedence is explicit deny > explicit allow > inherited deny
+    # > inherited allow, not "any Deny beats any Allow". .Access returns ACEs in actual DACL order,
+    # which for any canonically-formed ACL (the normal state after icacls/Set-Acl/the ACL editor UI)
+    # already reflects that precedence - explicit before inherited - so walking it in order while
+    # tracking which requested bits are still pending, exactly like Windows does, reproduces the
+    # real evaluation: a Deny ACE that still covers a pending bit fails the whole check immediately;
+    # an Allow ACE grants its bits toward the pending set; success once every requested bit has been
+    # granted before any covering Deny is reached.
+    #
+    # Known limitation: this only recognizes the exact identity string passed in, not group
+    # membership the identity might inherit rights or denials through (e.g. IIS_IUSRS, which every
+    # IIS AppPool virtual identity implicitly belongs to). A Deny scoped to such a group would not
+    # be detected here. Resolving full group membership for a virtual AppPool identity from a
+    # differently-privileged script is not practical without new tooling/dependencies, so
+    # provisioning must not rely on group-scoped Deny ACEs for these directories.
+    $acl = Get-Acl -LiteralPath $Path
+    $grantedRights = [System.Security.AccessControl.FileSystemRights]0
+
+    foreach ($rule in $acl.Access) {
+        if (-not $rule.IdentityReference.Value.Equals($AppPoolIdentity, [System.StringComparison]::OrdinalIgnoreCase)) {
+            continue
+        }
+
+        $pendingRights = $RequiredRights -band (-bnot $grantedRights)
+
+        if ($rule.AccessControlType -eq [System.Security.AccessControl.AccessControlType]::Deny) {
+            if (($rule.FileSystemRights -band $pendingRights) -ne 0) {
+                return $false
+            }
+            continue
+        }
+
+        $grantedRights = $grantedRights -bor $rule.FileSystemRights
+
+        if (($grantedRights -band $RequiredRights) -eq $RequiredRights) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+# Collects every missing grant before throwing (rather than stopping at the first one) so whoever
+# provisions the server on SERV3WEB gets the complete list in a single failed run instead of
+# discovering them one deploy at a time.
+function Assert-BeeDayRequiredAccess {
+    param([Parameter(Mandatory = $true)][string]$AppPoolName)
+
+    $appPoolIdentity = "IIS AppPool\$AppPoolName"
+
+    $writeChecks = @($DestinationPath, $backupRoot, $externalRoot)
+
+    $appPoolChecks = @(
+        @{ Path = $DestinationPath; Rights = [System.Security.AccessControl.FileSystemRights]::ReadAndExecute; Description = "Read & Execute" }
+        @{ Path = $dataPath; Rights = [System.Security.AccessControl.FileSystemRights]::Modify; Description = "Modify" }
+        @{ Path = (Join-Path $externalRoot "DataProtection-Keys"); Rights = [System.Security.AccessControl.FileSystemRights]::Modify; Description = "Modify" }
+        @{ Path = (Join-Path $externalRoot "Emails"); Rights = [System.Security.AccessControl.FileSystemRights]::Modify; Description = "Modify" }
+        @{ Path = (Join-Path $externalRoot "Logs"); Rights = [System.Security.AccessControl.FileSystemRights]::Modify; Description = "Modify" }
+    )
+
+    $missing = @()
+
+    foreach ($path in $writeChecks) {
+        if (-not (Test-BeeDayWriteAccess -Path $path)) {
+            $missing += "Directory: '$path' | Expected identity: $currentIdentityName (the account running this deploy) | Required right: Modify (write)"
+        }
+    }
+
+    foreach ($check in $appPoolChecks) {
+        if (-not (Test-BeeDayAppPoolAccess -Path $check.Path -AppPoolIdentity $appPoolIdentity -RequiredRights $check.Rights)) {
+            $missing += "Directory: '$($check.Path)' | Expected identity: $appPoolIdentity | Required right: $($check.Description)"
+        }
+    }
+
+    if ($missing.Count -gt 0) {
+        $details = $missing -join "`n  "
+        throw "Required NTFS permissions are missing. ACLs are provisioned administratively on the deploy target and are never modified by this script. Missing:`n  $details"
+    }
+}
+
 function Invoke-BeeDayHealthCheck {
     $lastError = $null
     $headers = @{}
@@ -284,41 +420,42 @@ function Set-BeeDayEnvironmentVariables {
     }
 }
 
-# Applies pending EF Core migrations using $ConnectionString exclusively — never the application's
-# own connection string. The design-time factory (BeeDayDbContextFactory) still builds the model as
-# usual; --connection overrides which database the migration actually runs against, so no C# code
-# needs to know about the migrator credential.
+# Applies pending EF Core migrations by running the migration bundle BeeDay CI produced alongside
+# this exact publish artifact - never `dotnet ef database update`. The bundle already embeds the
+# compiled migrations and model (built and validated in CI, where a full restore is normal and
+# cheap), so running it here needs no MSBuild project load, no project.assets.json, and no NuGet
+# access at all on this machine - only the shared .NET runtime. $ConnectionString is the migrator
+# credential exclusively, passed only at the moment of execution (never written to disk, never
+# baked into the bundle) - never the application's own connection string.
 #
-# Never assumes dotnet-ef is installed globally on the runner: `dotnet tool restore
-# --tool-manifest` resolves it as a LOCAL tool from this repo's dotnet-tools.json, which pins the
-# exact EF Core CLI version — the version the repo declares is the version that runs, regardless
-# of whatever else may or may not be installed machine-wide. Running `dotnet ef` from $repoRoot
-# afterwards (via Push-Location) lets the dotnet muxer resolve it as that restored local tool.
+# The bundle's own stdout/stderr is captured rather than left to stream straight to the console:
+# a bad connection string can surface inside the bundle's own error text, and routing every line
+# through Write-DeployMessage (which already redacts known secret values) is what keeps it out of
+# both the console and $deployLogsPath, exactly like every other message in this script.
 function Invoke-BeeDayMigration {
-    param([Parameter(Mandatory = $true)][string]$ConnectionString)
+    param(
+        [Parameter(Mandatory = $true)][string]$BundlePath,
+        [Parameter(Mandatory = $true)][string]$ConnectionString
+    )
 
-    Push-Location $repoRoot
-    try {
-        Write-DeployMessage "Restoring EF Core tool manifest (local tool, pinned version)..."
-        dotnet tool restore --tool-manifest $toolManifestPath
-        if ($LASTEXITCODE -ne 0) {
-            throw "dotnet tool restore failed with exit code $LASTEXITCODE."
-        }
-
-        Write-DeployMessage "Applying EF Core migrations via the migrator connection..."
-        dotnet ef database update `
-            --project $migrationsProjectPath `
-            --startup-project $migrationsProjectPath `
-            --connection $ConnectionString
-        if ($LASTEXITCODE -ne 0) {
-            throw "EF Core migration failed with exit code $LASTEXITCODE."
-        }
-
-        Write-DeployMessage "Migrations applied successfully."
+    if (-not (Test-Path -LiteralPath $BundlePath -PathType Leaf)) {
+        throw "Migration bundle was not found: $BundlePath"
     }
-    finally {
-        Pop-Location
+
+    Write-DeployMessage "Applying EF Core migrations via the migration bundle..."
+
+    $bundleOutput = & $BundlePath --connection $ConnectionString 2>&1
+    $bundleExitCode = $LASTEXITCODE
+
+    foreach ($line in $bundleOutput) {
+        Write-DeployMessage "[migration-bundle] $line"
     }
+
+    if ($bundleExitCode -ne 0) {
+        throw "Migration bundle failed with exit code $bundleExitCode."
+    }
+
+    Write-DeployMessage "Migrations applied successfully."
 }
 
 # BACKUP DATABASE runs on the SQL Server itself, not on this machine — BackupDirectory must be a
@@ -373,20 +510,8 @@ foreach ($requiredFile in $requiredFiles) {
 @($DestinationPath, $backupRoot, $applicationBackupRoot, $dataBackupRoot) + $externalDirectories |
     ForEach-Object { New-Item -ItemType Directory -Path $_ -Force | Out-Null }
 
-$appPoolIdentity = "IIS AppPool\$AppPoolName"
-$accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
-    $appPoolIdentity,
-    "Modify",
-    "ContainerInherit,ObjectInherit",
-    "None",
-    "Allow"
-)
-
-foreach ($directory in $externalDirectories) {
-    $acl = Get-Acl -LiteralPath $directory
-    $acl.SetAccessRule($accessRule)
-    Set-Acl -LiteralPath $directory -AclObject $acl
-}
+Write-DeployMessage "Validating required NTFS permissions (ACLs are provisioned administratively - this deploy never modifies them)..."
+Assert-BeeDayRequiredAccess -AppPoolName $AppPoolName
 
 Write-DeployMessage "Backing up current application to '$applicationBackupPath'..."
 Copy-DirectoryContents -Source $DestinationPath -Destination $applicationBackupPath
@@ -400,7 +525,7 @@ try {
     }
 
     if ($RunMigrations) {
-        Invoke-BeeDayMigration -ConnectionString $MigrationConnectionString
+        Invoke-BeeDayMigration -BundlePath $MigrationBundlePath -ConnectionString $MigrationConnectionString
     }
 
     Stop-BeeDayIis

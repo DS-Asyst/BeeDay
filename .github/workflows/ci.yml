@@ -114,6 +114,52 @@ jobs:
               }
           }
 
+      # dotnet-ef is restored as a LOCAL tool pinned by dotnet-tools.json - never installed
+      # globally - so the exact EF Core CLI version the repo declares is the version that builds
+      # the bundle below.
+      - name: Restore EF Core tool (local, pinned)
+        shell: powershell
+        run: dotnet tool restore --tool-manifest dotnet-tools.json
+
+      # A migration bundle is a self-sufficient executable: it embeds the compiled migrations and
+      # model, so running it later requires no MSBuild project load, no project.assets.json, and no
+      # NuGet access at all - unlike `dotnet ef database update`, which needs the Infrastructure
+      # project restored to run. --no-build reuses the Release build already produced above (Build
+      # Once). --target-runtime win-x64 without --self-contained keeps it framework-dependent: the
+      # deploy target already has the .NET 10 runtime installed, so bundling a full runtime copy
+      # would only add size for no benefit. BeeDayDbContextFactory's connection string is a
+      # placeholder never actually connected to at bundle-build time (EF only reflects over the
+      # already-compiled migrations here), so no secret is involved in producing this artifact.
+      - name: Generate EF Core migration bundle (win-x64)
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Path "${{ runner.temp }}\BeeDayMigrations" -Force | Out-Null
+
+          dotnet ef migrations bundle `
+            --project "src\BeeDay.Infrastructure\BeeDay.Infrastructure.csproj" `
+            --startup-project "src\BeeDay.Infrastructure\BeeDay.Infrastructure.csproj" `
+            --configuration Release `
+            --no-build `
+            --target-runtime win-x64 `
+            --output "${{ runner.temp }}\BeeDayMigrations\efbundle.exe" `
+            --force
+
+      - name: Validate migration bundle
+        shell: powershell
+        run: |
+          $bundlePath = Join-Path "${{ runner.temp }}" "BeeDayMigrations\efbundle.exe"
+          if (-not (Test-Path -LiteralPath $bundlePath -PathType Leaf)) {
+              throw "Migration bundle was not found: $bundlePath"
+          }
+
+          # --help never touches a database - this only proves the produced executable actually
+          # runs on this runner's architecture and isn't corrupt, without needing any connection
+          # string.
+          & $bundlePath --help | Out-Null
+          if ($LASTEXITCODE -ne 0) {
+              throw "Migration bundle exists but failed to execute (exit code $LASTEXITCODE)."
+          }
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v7.0.1
@@ -137,5 +183,13 @@ jobs:
         with:
           name: beeday-publish
           path: ${{ runner.temp }}\BeeDayPublish
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload migration bundle artifact
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: beeday-migrations
+          path: ${{ runner.temp }}\BeeDayMigrations
           if-no-files-found: error
           retention-days: 7

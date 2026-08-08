@@ -95,13 +95,26 @@ jobs:
           github-token: ${{ github.token }}
           run-id: ${{ steps.resolve-run.outputs.result }}
 
+      # Same run-id as beeday-publish above - the migration bundle applied here must be the one
+      # BeeDay CI built and validated alongside this exact publish artifact, never a different or
+      # "latest" run.
+      - name: Download validated migration bundle artifact
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: beeday-migrations
+          path: ${{ runner.temp }}\BeeDayMigrations
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.resolve-run.outputs.result }}
+
       # SERV3WEB already has .NET SDK 10.0.302 provisioned machine-wide, so actions/setup-dotnet is
       # not used on this self-hosted job and must not be reintroduced: the runner executes as the
       # low-privilege svc_beeday_runner@lab.local service account, which must not receive
       # Write/Modify on C:\Program Files\dotnet, and setup-dotnet's attempt to install there is
-      # exactly what made the deploy fail. This step only verifies what is already installed and
-      # fails fast with a clear message - Deploy-BeeDay.ps1 shells out to `dotnet ef` for
-      # migrations, so a missing/wrong SDK should be caught here, not halfway through a migration.
+      # exactly what made the deploy fail. Deploy-BeeDay.ps1 no longer shells out to `dotnet ef`
+      # (migrations now run from the precompiled bundle downloaded above, which needs only the
+      # shared .NET runtime, not the SDK or a project restore) - this step now exists because the
+      # published application itself still needs the .NET runtime to run under IIS, so a
+      # missing/wrong installation should still be caught here, not by a failing site.
       - name: Verify .NET SDK 10 is available
         shell: powershell
         run: |
@@ -118,7 +131,7 @@ jobs:
 
           $sdk10 = $installedSdks | Where-Object { $_ -match '^10\.0\.' } | Select-Object -First 1
           if (-not $sdk10) {
-              throw "No .NET SDK 10.x was found on this runner. Deploy-BeeDay.ps1 requires SDK 10.x for 'dotnet tool restore' and 'dotnet ef database update'."
+              throw "No .NET SDK 10.x was found on this runner."
           }
 
           Write-Host "Using .NET SDK: $sdk10"
@@ -135,6 +148,7 @@ jobs:
           BEEDAY_MIGRATOR_CONNECTION: ${{ secrets.BEEDAY_MIGRATOR_CONNECTION }}
         run: |
           $publishPath = Join-Path "${{ runner.temp }}" "BeeDayPublish"
+          $migrationBundlePath = Join-Path "${{ runner.temp }}" "BeeDayMigrations\efbundle.exe"
 
           & ".\scripts\Deploy-BeeDay.ps1" `
               -PublishPath $publishPath `
@@ -151,4 +165,5 @@ jobs:
               -HealthCheckHostHeader "" `
               -AppConnectionString $env:BEEDAY_APP_CONNECTION `
               -RunMigrations `
+              -MigrationBundlePath $migrationBundlePath `
               -MigrationConnectionString $env:BEEDAY_MIGRATOR_CONNECTION
