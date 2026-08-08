@@ -1,0 +1,134 @@
+name: BeeDay Homologation Deploy
+
+on:
+  workflow_run:
+    workflows:
+      - BeeDay CI
+    types:
+      - completed
+
+  workflow_dispatch:
+
+concurrency:
+  group: beeday-homologation
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  deploy:
+    name: Deploy to SERV3WEB
+    # Automatic path: only deploy when the triggering BeeDay CI run succeeded on hmg specifically
+    # (head_branch also excludes PR-validation runs of BeeDay CI, whose head_branch is the PR's
+    # source branch, not hmg). Manual path: workflow_dispatch has no workflow_run payload to gate
+    # on, so it's allowed through — "controlled manual deploy" means a human deliberately running
+    # it, and the run resolved below is still always the latest *successful* CI run on hmg, never
+    # an arbitrary/broken one.
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'hmg')
+
+    runs-on:
+      - self-hosted
+      - Windows
+      - X64
+      - hmg
+
+    timeout-minutes: 25
+    environment: homologation
+
+    steps:
+      # Checked out at the exact commit BeeDay CI validated — not the repository's default branch,
+      # which is what a bare checkout would resolve to under a workflow_run event. Falls back to
+      # github.sha (the ref picked at dispatch time) for the manual workflow_dispatch path.
+      - name: Checkout deployment scripts
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
+      # Resolves which BeeDay CI run's artifact to deploy. workflow_run already carries the exact
+      # run id in its payload. workflow_dispatch has no such payload, so it looks up the latest
+      # *successful* BeeDay CI run on hmg via the REST API — never "the latest run of any kind."
+      - name: Resolve BeeDay CI run to deploy
+        id: resolve-run
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            if (context.eventName === 'workflow_run') {
+              core.info(`Using triggering workflow_run id ${context.payload.workflow_run.id}`);
+              return `${context.payload.workflow_run.id}`;
+            }
+
+            core.info('workflow_dispatch: resolving latest successful BeeDay CI run on hmg');
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ci.yml',
+              branch: 'hmg',
+              status: 'success',
+              per_page: 1
+            });
+
+            if (runs.data.workflow_runs.length === 0) {
+              throw new Error('No successful BeeDay CI run found on branch hmg.');
+            }
+
+            const runId = runs.data.workflow_runs[0].id;
+            core.info(`Using latest successful BeeDay CI run id ${runId}`);
+            return `${runId}`;
+
+      # run-id pins this to the exact BeeDay CI execution resolved above — never the current run
+      # (the default actions/download-artifact would otherwise assume), never "latest", never
+      # another branch or commit.
+      - name: Download validated publish artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: beeday-publish
+          path: ${{ runner.temp }}\BeeDayPublish
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.resolve-run.outputs.result }}
+
+      # Deploy-BeeDay.ps1 shells out to `dotnet ef` for migrations — the self-hosted runner
+      # doesn't otherwise need the SDK (only IIS cmdlets), so it's installed here explicitly
+      # rather than assumed to already be present on SERV3WEB.
+      - name: Configure .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Deploy to IIS with rollback
+        shell: powershell
+        env:
+          BEEDAY_PUBLIC_BASE_URL: ${{ secrets.BEEDAY_PUBLIC_BASE_URL }}
+          BEEDAY_RESEND_API_KEY: ${{ secrets.BEEDAY_RESEND_API_KEY }}
+          BEEDAY_RESEND_FROM_ADDRESS: ${{ secrets.BEEDAY_RESEND_FROM_ADDRESS }}
+          BEEDAY_RESEND_FROM_NAME: ${{ secrets.BEEDAY_RESEND_FROM_NAME }}
+          BEEDAY_ALLOWED_HOSTS: ${{ secrets.BEEDAY_ALLOWED_HOSTS }}
+          BEEDAY_APP_CONNECTION: ${{ secrets.BEEDAY_APP_CONNECTION }}
+          BEEDAY_MIGRATOR_CONNECTION: ${{ secrets.BEEDAY_MIGRATOR_CONNECTION }}
+        run: |
+          $publishPath = Join-Path "${{ runner.temp }}" "BeeDayPublish"
+
+          & ".\scripts\Deploy-BeeDay.ps1" `
+              -PublishPath $publishPath `
+              -PublicBaseUrl $env:BEEDAY_PUBLIC_BASE_URL `
+              -ResendApiKey $env:BEEDAY_RESEND_API_KEY `
+              -ResendFromAddress $env:BEEDAY_RESEND_FROM_ADDRESS `
+              -ResendFromName $env:BEEDAY_RESEND_FROM_NAME `
+              -AllowedHosts $env:BEEDAY_ALLOWED_HOSTS `
+              -SiteName "BeeDay-HMG" `
+              -AppPoolName "BeeDay-Web-AppPool" `
+              -DestinationPath "C:\Apps\BeeDay.Web" `
+              -Environment "Homologation" `
+              -HealthCheckUrl "https://h-beeday.com.br/health/ready" `
+              -HealthCheckHostHeader "" `
+              -AppConnectionString $env:BEEDAY_APP_CONNECTION `
+              -RunMigrations `
+              -MigrationConnectionString $env:BEEDAY_MIGRATOR_CONNECTION
