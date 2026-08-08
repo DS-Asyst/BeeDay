@@ -113,9 +113,18 @@ Register-ScheduledTask -TaskPath $taskPath -TaskName $taskName `
 Write-Host "`n=== 7. Restricting who can trigger this ONE task ==="
 $sid = (New-Object System.Security.Principal.NTAccount($runnerAccount)).Translate([System.Security.Principal.SecurityIdentifier]).Value
 
+# Schedule.Service's COM GetFolder() rejects a trailing backslash (HRESULT 0x8007007B - "The
+# filename, directory name, or volume label syntax is incorrect"), unlike the ScheduledTasks
+# PowerShell module's -TaskPath, which expects one. $taskPath stays "\BeeDay\" for
+# Get-ScheduledTask/Register-ScheduledTask above; only the COM call gets a trimmed copy.
+$comTaskPath = $taskPath.TrimEnd('\')
+if ([string]::IsNullOrWhiteSpace($comTaskPath)) {
+    $comTaskPath = "\"
+}
+
 $service = New-Object -ComObject "Schedule.Service"
 $service.Connect()
-$folder = $service.GetFolder($taskPath)
+$folder = $service.GetFolder($comTaskPath)
 $task = $folder.GetTask($taskName)
 $currentSd = $task.GetSecurityDescriptor(0xF)
 
