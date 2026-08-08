@@ -17,11 +17,18 @@
 # caller other than the content of a single, permanently-existing request
 # file. LAB\svc_beeday_runner can only trigger the task (Generic Read +
 # Generic Execute on the task object) and overwrite that one file's content
-# (Write Data only, granted directly on the file - no rights on the Requests
-# folder itself beyond Traverse, so it cannot list, create, delete, or rename
-# anything there) - it has no path into this script's logic beyond the two
-# literal values below, which this script validates against a strict
-# allow-list before ever using them.
+# (Write Data granted directly on the file - no rights on the Requests folder
+# itself beyond traversing through it, so it cannot list, create, delete, or
+# rename anything there) - it has no path into this script's logic beyond the
+# two literal values below, which this script validates against a strict
+# allow-list before ever using them. On the caller's side (Deploy-BeeDay.ps1),
+# that write is done via a raw FileStream rather than Set-Content, and the
+# result below is read via [System.IO.File]::ReadAllText rather than
+# Get-Content - confirmed on SERV3WEB that those cmdlets need broader access
+# than this account's narrow per-file grants allow (Set-Content additionally
+# wants Read Data; Get-Content additionally wants Read Extended Attributes).
+# This script itself runs as SYSTEM, which already has Full Control
+# regardless, so Set-Content/Get-Content remain fine to use below.
 #
 # request.txt and result.json are both permanent fixtures, pre-created once by
 # Provision-BeeDayHmgIisControl.ps1, and are only ever overwritten in place -
@@ -30,8 +37,7 @@
 # not the destination's, so a temp-file-then-rename pattern would silently
 # wipe out the narrow per-file ACL granted to svc_beeday_runner on every
 # write. In-place overwrite (Set-Content -Force, which truncates the existing
-# file rather than replacing it) needs only Write Data and preserves the
-# file's own ACL indefinitely.
+# file rather than replacing it) preserves the file's own ACL indefinitely.
 #
 # Site and App Pool names are hardcoded here on purpose - never a parameter,
 # never an environment variable, never taken from the request file. This is
@@ -134,15 +140,32 @@ try {
     Import-Module WebAdministration -ErrorAction Stop
 
     if ($operation -eq 'STOP') {
-        # Idempotent: stopping an already-stopped site/pool is not an error -
-        # only the final observed state matters.
-        Stop-Website -Name $SiteName -ErrorAction Stop
-        Stop-WebAppPool -Name $AppPoolName -ErrorAction Stop
+        # Idempotent: WebAdministration's Stop-Website/Stop-WebAppPool throw ("Object on target
+        # path is already stopped.") when asked to stop something already stopped, which would
+        # otherwise turn a no-op into a false failure. Querying current state first and only
+        # calling Stop-* when it isn't already the target state is what makes "already stopped"
+        # a success, not an error. Mandatory order: Site before Pool.
+        $currentSiteState = (Get-WebsiteState -Name $SiteName -ErrorAction Stop).Value
+        if ($currentSiteState -ne 'Stopped') {
+            Stop-Website -Name $SiteName -ErrorAction Stop
+        }
+
+        $currentPoolState = (Get-WebAppPoolState -Name $AppPoolName -ErrorAction Stop).Value
+        if ($currentPoolState -ne 'Stopped') {
+            Stop-WebAppPool -Name $AppPoolName -ErrorAction Stop
+        }
     }
     else {
-        # Mandatory order: App Pool before Site.
-        Start-WebAppPool -Name $AppPoolName -ErrorAction Stop
-        Start-Website -Name $SiteName -ErrorAction Stop
+        # Same idempotency reasoning as STOP, in reverse. Mandatory order: Pool before Site.
+        $currentPoolState = (Get-WebAppPoolState -Name $AppPoolName -ErrorAction Stop).Value
+        if ($currentPoolState -ne 'Started') {
+            Start-WebAppPool -Name $AppPoolName -ErrorAction Stop
+        }
+
+        $currentSiteState = (Get-WebsiteState -Name $SiteName -ErrorAction Stop).Value
+        if ($currentSiteState -ne 'Started') {
+            Start-Website -Name $SiteName -ErrorAction Stop
+        }
     }
 
     Start-Sleep -Seconds 2

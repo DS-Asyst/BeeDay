@@ -195,6 +195,15 @@ function Test-BeeDayUsesPrivilegedIisControl {
 # written-then-renamed: svc_beeday_runner's ACL on it is Write Data only (no Delete/Create anywhere
 # in that folder), and a same-volume rename-replace would need Delete on the file being replaced -
 # which this account deliberately does not have.
+#
+# The request write itself uses a raw FileStream instead of Set-Content: confirmed on SERV3WEB that
+# Set-Content fails for this account even with Write Data granted (the cmdlet opens the destination
+# in a way that also needs Read Data, most likely for encoding/BOM detection - access this account
+# deliberately does not have, since request.txt must never be readable by the runner). A FileStream
+# opened with exactly FileMode.Open (never creates - the file must already be pre-provisioned) and
+# FileAccess.Write matches the narrow grant exactly and was confirmed working. The result read below
+# uses [System.IO.File]::ReadAllText for the same reason: Get-Content needed Read Extended
+# Attributes in addition to Read Data to succeed for this account.
 function Invoke-BeeDayPrivilegedIisControl {
     param([Parameter(Mandatory = $true)][ValidateSet('STOP', 'START')][string]$Operation)
 
@@ -212,7 +221,28 @@ function Invoke-BeeDayPrivilegedIisControl {
     $previousLastRunTime = (Get-ScheduledTaskInfo -TaskPath $privilegedIisTaskPath -TaskName $privilegedIisTaskName).LastRunTime
 
     $requestId = [guid]::NewGuid().ToString()
-    Set-Content -LiteralPath $privilegedIisRequestPath -Value "$Operation`n$requestId" -Encoding ascii -NoNewline -Force
+    $requestBytes = [System.Text.Encoding]::UTF8.GetBytes("$Operation`n$requestId")
+
+    # SetLength(0) truncates before writing so a shorter value (e.g. "STOP`n<guid>") never leaves
+    # trailing bytes from a longer previous one (e.g. "START`n<guid>"). Dispose runs in finally so
+    # the handle is always released, success or failure.
+    $requestStream = $null
+    try {
+        $requestStream = New-Object System.IO.FileStream(
+            $privilegedIisRequestPath,
+            [System.IO.FileMode]::Open,
+            [System.IO.FileAccess]::Write,
+            [System.IO.FileShare]::Read
+        )
+        $requestStream.SetLength(0)
+        $requestStream.Write($requestBytes, 0, $requestBytes.Length)
+        $requestStream.Flush()
+    }
+    finally {
+        if ($requestStream) {
+            $requestStream.Dispose()
+        }
+    }
 
     $previousResultWriteTimeUtc = if (Test-Path -LiteralPath $privilegedIisResultPath) {
         (Get-Item -LiteralPath $privilegedIisResultPath).LastWriteTimeUtc
@@ -252,7 +282,10 @@ function Invoke-BeeDayPrivilegedIisControl {
         throw "Privileged IIS control task ($Operation) finished but the result file was not updated - cannot confirm the outcome."
     }
 
-    $result = Get-Content -LiteralPath $privilegedIisResultPath -Raw | ConvertFrom-Json
+    # Get-Content also failed for this account on SERV3WEB even with Read Data granted (needed Read
+    # Extended Attributes too - now granted by provisioning); ReadAllText matches the narrow ACL and
+    # was confirmed working. Parsing/validation below is unchanged.
+    $result = [System.IO.File]::ReadAllText($privilegedIisResultPath) | ConvertFrom-Json
 
     if ($result.requestId -ne $requestId) {
         throw "Privileged IIS control result does not match the request just issued (expected requestId $requestId, got $($result.requestId)) - refusing to trust it."
