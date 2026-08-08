@@ -420,6 +420,49 @@ function Set-BeeDayEnvironmentVariables {
     }
 }
 
+# Diagnoses SQL Server error 18456 ("Login failed") without ever touching the credential itself.
+# Parses $ConnectionString with SqlConnectionStringBuilder and logs only a fixed allow-list of
+# non-secret fields - Server, Database, User, whether a password is present (boolean, never the
+# value), Encrypt, TrustServerCertificate - each on its own Write-DeployMessage call rather than
+# concatenated into one string, so a single log line can never end up looking like (or containing)
+# a real connection string. A wrong Server, Database, or User Id is the far more common cause of a
+# "right password, still 18456" report than the password itself, and this is exactly what surfaces
+# that without ever printing the value that would prove it.
+#
+# Never lets the raw exception from a failed parse propagate: some malformed-string parse failures
+# can embed fragments of the offending input in their Message, so the catch block below always
+# throws a fixed, generic message instead of forwarding $_.Exception.Message.
+function Assert-BeeDayMigrationConnection {
+    param([Parameter(Mandatory = $true)][string]$ConnectionString)
+
+    try {
+        $builder = New-Object System.Data.SqlClient.SqlConnectionStringBuilder($ConnectionString)
+    }
+    catch {
+        throw "MigrationConnectionString could not be parsed as a valid SQL Server connection string."
+    }
+
+    $hasPassword = -not [string]::IsNullOrEmpty($builder.Password)
+
+    Write-DeployMessage "Migration connection metadata:"
+    Write-DeployMessage "  Server=$($builder.DataSource)"
+    Write-DeployMessage "  Database=$($builder.InitialCatalog)"
+    Write-DeployMessage "  User=$($builder.UserID)"
+    Write-DeployMessage "  PasswordPresent=$hasPassword"
+    Write-DeployMessage "  Encrypt=$($builder.Encrypt)"
+    Write-DeployMessage "  TrustServerCertificate=$($builder.TrustServerCertificate)"
+
+    $missingFields = @()
+    if ([string]::IsNullOrWhiteSpace($builder.DataSource)) { $missingFields += "Server/Data Source" }
+    if ([string]::IsNullOrWhiteSpace($builder.InitialCatalog)) { $missingFields += "Database/Initial Catalog" }
+    if ([string]::IsNullOrWhiteSpace($builder.UserID)) { $missingFields += "User ID" }
+    if (-not $hasPassword) { $missingFields += "Password" }
+
+    if ($missingFields.Count -gt 0) {
+        throw "MigrationConnectionString is missing required field(s): $($missingFields -join ', ')."
+    }
+}
+
 # Applies pending EF Core migrations by running the migration bundle BeeDay CI produced alongside
 # this exact publish artifact - never `dotnet ef database update`. The bundle already embeds the
 # compiled migrations and model (built and validated in CI, where a full restore is normal and
@@ -441,6 +484,8 @@ function Invoke-BeeDayMigration {
     if (-not (Test-Path -LiteralPath $BundlePath -PathType Leaf)) {
         throw "Migration bundle was not found: $BundlePath"
     }
+
+    Assert-BeeDayMigrationConnection -ConnectionString $ConnectionString
 
     Write-DeployMessage "Applying EF Core migrations via the migration bundle..."
 
