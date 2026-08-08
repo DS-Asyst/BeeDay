@@ -112,37 +112,55 @@ function Set-BeeDayAppPoolEnvironmentVariables {
     }
 
     try {
+        # $environmentVariablesFilter always points at the COLLECTION itself, never at a specific
+        # add[@name='...'] element directly - both the read canary below and Remove-/
+        # Add-WebConfigurationProperty inside the loop reuse it. Removal identifies the element to
+        # remove via -AtElement (not via a collection-item filter + bare -Name ".", which silently
+        # no-ops against this WebAdministration provider instead of removing anything): confirmed
+        # directly on SERV3WEB that a filter targeting the item and -Name "." leaves the existing
+        # entry in place, so the following Add-WebConfigurationProperty then fails with
+        # 0x800700B7 "Cannot add duplicate collection entry" - the true failure was always here in
+        # the remove step, even though it previously only ever surfaced downstream, in ADD_ENV_VARIABLE.
+        $environmentVariablesFilter = "system.applicationHost/applicationPools/add[@name='$AppPoolName']/environmentVariables"
+
         # Read-only canary before any mutation: confirms WebAdministration can actually enumerate
-        # the App Pool's environmentVariables collection right now. Its result is intentionally
-        # discarded - this exists purely so a provider-level problem (e.g. an applicationHost.config
-        # section that has become unreadable) surfaces here, tagged READ_EXISTING_ENV, instead of
-        # failing more ambiguously a few lines later inside the Remove/Add loop.
+        # the App Pool's environmentVariables collection right now, tagged READ_EXISTING_ENV instead
+        # of failing more ambiguously a few lines later inside the Remove/Add loop. Its result is
+        # also reused below to decide, per variable, whether a removal is even needed - this is what
+        # keeps CONFIGURE idempotent (an entry that doesn't exist yet must never be treated as a
+        # removal failure) without resorting to -ErrorAction SilentlyContinue, which would just as
+        # readily swallow a genuine WebAdministration failure on an entry that DOES exist.
         $script:currentStage = 'READ_EXISTING_ENV'
         $script:currentErrorCode = 'ENV_READ_FAILED'
-        Get-WebConfigurationProperty `
-            -PSPath "MACHINE/WEBROOT/APPHOST" `
-            -Filter "system.applicationHost/applicationPools/add[@name='$AppPoolName']/environmentVariables" `
-            -Name "." `
-            -ErrorAction Stop | Out-Null
+        $existingVariableNames = @(
+            Get-WebConfigurationProperty `
+                -PSPath "MACHINE/WEBROOT/APPHOST" `
+                -Filter $environmentVariablesFilter `
+                -Name "." `
+                -ErrorAction Stop |
+                ForEach-Object { $_.name }
+        )
 
         foreach ($entry in $Variables.GetEnumerator()) {
-            $filter = "system.applicationHost/applicationPools/add[@name='$AppPoolName']/environmentVariables/add[@name='$($entry.Key)']"
-
-            $script:currentStage = 'REMOVE_EXISTING_ENV'
-            $script:currentErrorCode = 'ENV_REMOVE_FAILED'
-            Remove-WebConfigurationProperty `
-                -PSPath "MACHINE/WEBROOT/APPHOST" `
-                -Filter $filter `
-                -Name "." `
-                -ErrorAction SilentlyContinue
+            if ($existingVariableNames -contains $entry.Key) {
+                $script:currentStage = 'REMOVE_EXISTING_ENV'
+                $script:currentErrorCode = 'ENV_REMOVE_FAILED'
+                Remove-WebConfigurationProperty `
+                    -PSPath "MACHINE/WEBROOT/APPHOST" `
+                    -Filter $environmentVariablesFilter `
+                    -Name "." `
+                    -AtElement @{ name = $entry.Key } `
+                    -ErrorAction Stop
+            }
 
             $script:currentStage = 'ADD_ENV_VARIABLE'
             $script:currentErrorCode = 'ENV_ADD_FAILED'
             Add-WebConfigurationProperty `
                 -PSPath "MACHINE/WEBROOT/APPHOST" `
-                -Filter "system.applicationHost/applicationPools/add[@name='$AppPoolName']/environmentVariables" `
+                -Filter $environmentVariablesFilter `
                 -Name "." `
-                -Value @{ name = $entry.Key; value = $entry.Value }
+                -Value @{ name = $entry.Key; value = $entry.Value } `
+                -ErrorAction Stop
         }
     }
     catch {
