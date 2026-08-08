@@ -26,7 +26,6 @@
 #      not enough to list its contents, create, or delete anything.
 #   4. Pre-creates request.txt (sentinel content "NONE"), env-config.secret
 #      (sentinel "{}"), and result.json (sentinel placeholder), then grants
-<<<<<<< HEAD
 #      svc_beeday_runner a narrow, file-level ACE directly on each:
 #        - request.txt and env-config.secret: (W,RC,RA). Both are written by
 #          Deploy-BeeDay.ps1 via a raw FileStream(FileMode.Open,
@@ -55,22 +54,6 @@
 #      overwritten in place (see the comments in Invoke-BeeDayIisControl.ps1
 #      for why: a rename-replace would silently drop these file-level
 #      grants).
-=======
-#      svc_beeday_runner a narrow, file-level ACE directly on each: (S,RC,
-#      WD,RA) - Write Data only, no Read Data - on request.txt AND on
-#      env-config.secret (the CONFIGURE operation's payload - App Pool
-#      environment variables, which may include
-#      BeeDay__Persistence__SqlServer__ConnectionString - never request.txt
-#      or result.json, and never readable back by svc_beeday_runner once
-#      written); (S,RC,RD,RA,REA) - Read Data + Read Extended Attributes, no
-#      Write Data - on result.json. REA was added after confirming on
-#      SERV3WEB that [System.IO.File]::ReadAllText (used by Deploy-BeeDay.ps1
-#      instead of Get-Content, which needs even more than RD/REA for this
-#      account) requires it in addition to RD. All three files are meant to
-#      live forever and only ever be overwritten in place (see the comments
-#      in Invoke-BeeDayIisControl.ps1 for why: a rename-replace would
-#      silently drop these file-level grants).
->>>>>>> origin/hmg
 #   5. Registers the \BeeDay\HMG-IisControl Scheduled Task: on-demand only, no
 #      recurring trigger, runs as SYSTEM, RunLevel Highest, a single fixed
 #      action, MultipleInstances=IgnoreNew so a second trigger while one run
@@ -160,12 +143,6 @@ if (-not (Test-Path -LiteralPath $envConfigFilePath)) {
     Set-Content -LiteralPath $envConfigFilePath -Value $envConfigSentinel -Encoding utf8 -NoNewline
 }
 icacls $envConfigFilePath /grant "${runnerAccount}:(W,RC,RA)" | Out-Null
-
-Write-Host "`n=== 3b. env-config.secret - pre-created, svc_beeday_runner: Write Data only (no read/delete) ==="
-if (-not (Test-Path -LiteralPath $envConfigFilePath)) {
-    Set-Content -LiteralPath $envConfigFilePath -Value $envConfigSentinel -Encoding utf8 -NoNewline
-}
-icacls $envConfigFilePath /grant "${runnerAccount}:(S,RC,WD,RA)" | Out-Null
 
 Write-Host "`n=== 4. Results folder - svc_beeday_runner: traverse-through only (no list/create/delete) ==="
 New-Item -ItemType Directory -Path $resultsFolder -Force | Out-Null
