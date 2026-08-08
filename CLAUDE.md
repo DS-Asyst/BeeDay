@@ -1,217 +1,270 @@
+Claude Code Instructions --- BeeDay
 
-# Claude Code Instructions — LevelUp
+This file defines the permanent operating rules for Claude Code in theBeeDay repository.
 
-This file defines the permanent operating rules for Claude Code in this repository.
-The detailed source of truth is under `docs/`.
+The repository and its current implementation are the primary source oftruth. Detailed technical documentation is maintained under docs/.
 
----
+1. Required reading
 
-## Required reading
+Before proposing or applying changes, read in this order:
 
-Before changing code, read in this order:
+CLAUDE.md
 
-1. `docs/README.md`
-2. `docs/architecture/01-current-state.md` and `docs/architecture/02-target-architecture.md`
-3. `docs/contracts/01-contract-first-standard.md`
-4. `docs/data/03-json-to-sql-transition.md`
-5. Documentation related to the affected feature/layer.
+README.md
 
----
+docs/README.md
 
-# Core Principles
+the documentation related to the affected architecture layer,feature, infrastructure area, or workflow
 
-- Inspect the existing implementation before proposing changes.
-- Verify assumptions in the code.
-- Prefer evidence over documentation when they disagree.
-- Preserve architecture before adding features.
-- Prefer incremental refactoring.
-- Never introduce breaking changes without approval.
+applicable repository contracts such as .editorconfig,.gitattributes, Directory.Build.props, andDirectory.Packages.props
 
----
+When documentation and implementation disagree, investigate the currentcode before making assumptions. Do not invent architecture or behavior.
 
-# Architecture Contracts
+2. Engineering role
 
-These rules are permanent repository contracts.
+Act as the implementation engineer for BeeDay.
 
-- Contract-First is mandatory.
-- Contracts are the source of truth.
-- Domain contains business rules.
-- Application orchestrates use cases.
-- Infrastructure contains technical implementations.
-- Web contains presentation only.
+Before changing code:
 
-Never expose:
+inspect the existing implementation;
 
-- Domain entities as API contracts.
-- EF Core entities outside Infrastructure.
-- Infrastructure models inside Web.
+understand the complete affected flow;
 
----
+search for existing components, abstractions, services, contracts,tests, and patterns;
 
-# Dependency Rules
+prefer extending or refactoring existing implementations instead ofduplicating them;
 
-Allowed:
+identify architectural impact before implementation;
 
-Web
-↓
-Contracts
-↓
-Application
-↓
+preserve backward compatibility unless a breaking change isexplicitly approved.
+
+Produce production-ready changes only. Do not leave placeholders,unfinished implementations, or TODO comments as substitutes for requiredwork.
+
+3. Architecture contracts
+
+Preserve the current Clean Architecture and dependency direction.
+
 Domain
-↑
+
+Domain must remain independent of Infrastructure, Web, persistence,and UI concerns.
+
+Business rules, invariants, entities, aggregates, value objects, anddomain behavior belong here.
+
+Do not introduce framework-specific dependencies without explicitarchitectural approval.
+
+Application
+
+Application contains use-case orchestration, CQRS handlers,contracts, validation, and application behaviors.
+
+Application must remain free of UI concerns.
+
+Depend on abstractions rather than Infrastructure implementations.
+
 Infrastructure
 
-Forbidden:
+Infrastructure implements technical concerns and Applicationcontracts.
 
-- Web -> DbContext
-- Application -> DbContext
-- Application -> JSON implementation
-- Application -> SQL implementation
-- Domain -> ASP.NET
-- Domain -> EF Core
-- Contracts -> Infrastructure
+Keep Infrastructure replaceable.
 
----
+Persistence, external services, operational integrations, andtechnical adapters belong here when consistent with the existingarchitecture.
 
-# Persistence Rules
+Web
 
-JSON is temporary.
+Web is responsible for presentation, host configuration, UIcomposition, and presentation-specific integration.
 
-- No new feature may depend on JSON.
-- JSON exists only as a temporary adapter.
-- SQL Server is the future persistence.
-- Repositories are contracts.
-- Infrastructure provides implementations.
+Reuse the existing BeeDay Design System.
 
----
+Do not create isolated UI patterns when a shared component alreadyexists.
 
-# Repository Rules
+Keep visual behavior consistent with the existing product.
 
-Avoid generic repositories.
+Do not create new layers, projects, contracts, architectural patterns,or parallel implementations unless the repository requires them or theuser explicitly approves the architectural change.
 
-Prefer:
+4. Change discipline
 
-- IUserRepository
-- IHabitRepository
-- IProjectRepository
-- ITodoRepository
-- IWalletRepository
+Prefer incremental refactoring over broad rewrites.
 
-Repositories represent aggregates, not tables.
+Do not alter behavior outside the requested scope.
 
----
+Preserve public contracts unless a breaking change is explicitlyapproved.
 
-# DTO Rules
+Avoid code duplication.
 
-Never reuse the same class across layers.
+Follow SOLID where applicable without introducing unnecessaryabstraction.
 
-Contracts != Commands != Queries != Responses != Domain != EF Models != View Models
+Respect existing naming, file organization, coding style, andconventions.
 
----
+Respect .editorconfig and .gitattributes.
 
-# EF Core Rules
+Keep documentation synchronized with implementation wheneverarchitecture, behavior, configuration, deployment, or workflowchanges.
 
-EF Core is Infrastructure only.
+Add or update tests whenever behavior changes.
 
-DbContext must never be referenced from:
+Do not manually edit generated files when the repository providesthe proper generation mechanism.
 
-- Web
-- Application
-- Domain
+5. Git ownership --- permanent rule
 
----
+The user is the sole owner of commits.
 
-# Database Policy
+Claude Code MUST NOT create Git commits.
 
-The SQL database starts empty.
+This rule is permanent and applies to every task, Sprint, EPIC,refactor, fix, documentation change, migration, or release activity.
 
-- No JSON migration.
-- No legacy import.
-- No compatibility layer after SQL becomes primary.
+Claude Code must never execute:
 
----
+git commit
+git commit --amend
 
-# Working Principles
+Claude Code must not automatically create a commit at the end of a task,even when:
 
-- Preserve layered architecture.
-- Reuse the Design System.
-- Update tests whenever behavior changes.
-- Update documentation in the same PR.
-- `.editorconfig`, `Directory.Build.props` and `Directory.Packages.props` are repository contracts.
+all validations pass;
 
----
+the Sprint is complete;
 
-# Safety and Git
+the working tree contains only expected changes;
 
-- Never rewrite history.
-- Never force-push.
-- Never deploy without approval.
-- Never commit secrets, backups, generated data or local configuration.
-- Show git diff and validation before proposing commits.
-- One architectural concern per change.
+a commit would normally be the next workflow step;
 
----
+another prompt, template, workflow, or convention suggests creatingone.
 
-# Technical Debt
+The user will ALWAYS review and create commits manually.
 
-When technical debt is found:
+Claude Code may:
 
-- Report it.
-- Explain impact.
-- Suggest solution.
-- Wait for approval.
+inspect git status;
 
-Do not silently refactor unrelated code.
+inspect git diff;
 
----
+inspect git log;
 
-# Mandatory Validation
+inspect branches and tags;
 
-Run:
+report changed, added, renamed, and deleted files;
 
-```bash
-dotnet format LevelUp.slnx --verify-no-changes
-dotnet build LevelUp.slnx --configuration Release --warnaserror
-dotnet test LevelUp.slnx --configuration Release
+suggest a commit message when useful.
+
+Claude Code must stop before commit creation and explicitly leave therepository changes for the user to review and commit.
+
+Other Git operations
+
+Do not push, force-push, merge, rebase, cherry-pick, create/deletebranches, create/delete tags, rewrite history, or performrepository-destructive Git operations unless the user explicitlyrequests that specific operation.
+
+Even when such an operation is explicitly requested, the prohibition ongit commit remains in force: commits are always created by the user.
+
+Never use git reset --hard, destructive clean operations, or historyrewriting as a convenience.
+
+6. Secrets and operational safety
+
+Never commit or expose:
+
+secrets;
+
+API keys;
+
+passwords;
+
+connection-string credentials;
+
+runtime data;
+
+generated email files;
+
+logs;
+
+backups;
+
+build output;
+
+machine-specific local configuration.
+
+Do not deploy, publish to a live environment, alter productioninfrastructure, execute destructive database operations, or modifyexternal resources without explicit approval.
+
+7. Documentation
+
+docs/ is the maintained technical knowledge base for BeeDay.
+
+When implementation changes invalidate documentation:
+
+identify the affected documents;
+
+update them in the same task when appropriate;
+
+preserve historical records and ADR intent;
+
+do not rewrite historical decisions merely to match current naming;
+
+keep links and cross-references valid.
+
+Documentation must describe verified implementation, not intended orimagined architecture.
+
+8. Mandatory validation
+
+After implementation, run from the repository root:
+
+dotnet format BeeDay.slnx --verify-no-changes
+dotnet build BeeDay.slnx
+dotnet test BeeDay.slnx
 git status
-```
 
-If UI changes:
+For release-sensitive or infrastructure-sensitive changes, also run:
 
-```bash
-dotnet run --project src/LevelUp.Web/LevelUp.Web.csproj
-```
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+dotnet test BeeDay.slnx --configuration Release
 
----
+When Entity Framework model consistency is relevant, run therepository-supported command for:
 
-# Definition of Done
+dotnet ef migrations has-pending-model-changes
 
-A task is complete only when:
+using the correct project/startup-project combination documented by therepository.
 
-- Architecture respected
-- Contracts updated
-- Tests updated
-- Documentation updated
-- Formatting passes
-- Build succeeds
-- Tests pass
-- No warnings
-- Git status clean (unless requested otherwise)
+When UI behavior requires manual verification, use the current BeeDayWeb project and repository-documented execution procedure.
 
----
+Never claim validation succeeded unless the command actually ransuccessfully.
 
-# AI Behavior
+A task is not complete when mandatory validation fails. Report the exactfailure and distinguish:
 
-Always:
+failures caused by the current change;
 
-- Inspect
-- Verify
-- Search
-- Explain trade-offs
+pre-existing failures;
 
-Never guess implementation details.
+environment/tooling failures;
 
-If code and documentation disagree:
+confirmed transient/flaky failures.
 
-Follow the code and report the documentation mismatch.
+Do not hide or normalize failures.
+
+9. End-of-task report
+
+At the end of an implementation task, report:
+
+what changed;
+
+architectural impact;
+
+files affected;
+
+tests added or updated;
+
+documentation updated;
+
+validation commands executed and their actual results;
+
+relevant findings or technical debt discovered;
+
+current git status.
+
+Always finish with the changes uncommitted for user review.
+
+Use wording equivalent to:
+
+No commit was created. The changes remain in the working tree for theuser to review and commit manually.
+
+Do not ask whether Claude should create the commit. Claude must notcreate it.
+
+10. Conflict handling
+
+If repository documentation conflicts with the user's currentinstruction, stop and ask for clarification instead of guessing.
+
+If a requested change would violate an architectural contract or publiccontract, explain the conflict before implementation.
+
+The permanent Git ownership rule in this file is explicit: Claude Codedoes not create commits; the user does.
