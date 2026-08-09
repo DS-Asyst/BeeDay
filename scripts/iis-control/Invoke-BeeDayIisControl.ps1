@@ -130,15 +130,25 @@ function Set-BeeDayAppPoolEnvironmentVariables {
         # keeps CONFIGURE idempotent (an entry that doesn't exist yet must never be treated as a
         # removal failure) without resorting to -ErrorAction SilentlyContinue, which would just as
         # readily swallow a genuine WebAdministration failure on an entry that DOES exist.
+        #
+        # Get-WebConfigurationProperty -Name "." against a collection filter returns a single
+        # Microsoft.IIs.PowerShell.Framework.ConfigurationElement wrapping the whole collection, not
+        # one object per <add> in the pipeline - confirmed directly on SERV3WEB. The individual <add>
+        # elements live under its .Collection property, each exposing its name via
+        # .Attributes["name"].Value; the wrapper itself has no .name property at all. Under
+        # Set-StrictMode -Version Latest (script-wide), referencing $_.name directly on the wrapper
+        # threw a PropertyNotFoundStrict error on every call, which is why this failed at
+        # READ_EXISTING_ENV/ENV_READ_FAILED before a single Remove/Add ever ran.
         $script:currentStage = 'READ_EXISTING_ENV'
         $script:currentErrorCode = 'ENV_READ_FAILED'
+        $existingEnvironmentVariables = Get-WebConfigurationProperty `
+            -PSPath "MACHINE/WEBROOT/APPHOST" `
+            -Filter $environmentVariablesFilter `
+            -Name "." `
+            -ErrorAction Stop
         $existingVariableNames = @(
-            Get-WebConfigurationProperty `
-                -PSPath "MACHINE/WEBROOT/APPHOST" `
-                -Filter $environmentVariablesFilter `
-                -Name "." `
-                -ErrorAction Stop |
-                ForEach-Object { $_.name }
+            $existingEnvironmentVariables.Collection |
+                ForEach-Object { $_.Attributes["name"].Value }
         )
 
         foreach ($entry in $Variables.GetEnumerator()) {
