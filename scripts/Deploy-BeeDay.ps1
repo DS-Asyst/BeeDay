@@ -161,6 +161,12 @@ $privilegedIisMaxTriggerAttempts = 2
 $backupRoot = "C:\Apps\BeeDay-Backups"
 $externalRoot = "C:\Apps\BeeDay-Data"
 $dataPath = Join-Path $externalRoot "Data"
+# JsonEventJournal.AppendAsync self-creates this directory on first write (Directory.CreateDirectory),
+# so its absence never blocked a deploy - but that also means it was never explicitly verified here,
+# silently relying on whatever NTFS inheritance the App Pool identity happens to have on $externalRoot.
+# Provisioned and ACL-checked explicitly now so a future permission change can't silently break Event
+# Journal writes without this pre-flight check catching it first.
+$eventJournalPath = Join-Path $externalRoot "EventJournal"
 $dataBackupRoot = Join-Path $backupRoot "Data"
 $applicationBackupRoot = Join-Path $backupRoot "Application"
 $deployLogsPath = Join-Path $externalRoot "DeployLogs"
@@ -182,6 +188,7 @@ $script:lastConfigureRequestId = $null
 $externalDirectories = @(
     $dataPath,
     (Join-Path $dataPath "Backups"),
+    $eventJournalPath,
     (Join-Path $externalRoot "DataProtection-Keys"),
     (Join-Path $externalRoot "Emails"),
     (Join-Path $externalRoot "Logs"),
@@ -631,6 +638,7 @@ function Assert-BeeDayRequiredAccess {
     $appPoolChecks = @(
         @{ Path = $DestinationPath; Rights = [System.Security.AccessControl.FileSystemRights]::ReadAndExecute; Description = "Read & Execute" }
         @{ Path = $dataPath; Rights = [System.Security.AccessControl.FileSystemRights]::Modify; Description = "Modify" }
+        @{ Path = $eventJournalPath; Rights = [System.Security.AccessControl.FileSystemRights]::Modify; Description = "Modify" }
         @{ Path = (Join-Path $externalRoot "DataProtection-Keys"); Rights = [System.Security.AccessControl.FileSystemRights]::Modify; Description = "Modify" }
         @{ Path = (Join-Path $externalRoot "Emails"); Rights = [System.Security.AccessControl.FileSystemRights]::Modify; Description = "Modify" }
         @{ Path = (Join-Path $externalRoot "Logs"); Rights = [System.Security.AccessControl.FileSystemRights]::Modify; Description = "Modify" }

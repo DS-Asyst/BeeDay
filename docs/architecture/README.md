@@ -75,9 +75,11 @@ graph TD
 - `BeeDay.Application.csproj` declara `FrameworkReference Microsoft.AspNetCore.App` sem nenhum uso
   aparente de namespace ASP.NET Core no código da camada.
 - A claim `BeeDayClaimTypes.SessionVersion` tem valor literal `"levelup:session_version"`.
-- `src/BeeDay.Web/web.config` e `appsettings.Production.json` ainda referenciam o caminho antigo
-  `C:\Apps\LevelUp-Data\...` em vez de `C:\Apps\BeeDay-Data\...`.
-- O step de validação de secrets em `deploy-prd.yml` não inclui `BEEDAY_RESEND_FROM_NAME` na lista
-  de 4 secrets pré-validados, embora o step de deploy seguinte o consuma.
+- `src/BeeDay.Web/web.config` e `appsettings.Production.json` referenciavam o caminho antigo
+  `C:\Apps\LevelUp-Data\...` em vez de `C:\Apps\BeeDay-Data\...` — corrigido na Sprint 18.4 (ver
+  `docs/deployment/02-runtime-configuration.md` §5; migração operacional do `stdout` de HMG ainda
+  pendente).
+- O step de validação de secrets em `deploy-prd.yml` não incluía `BEEDAY_RESEND_FROM_NAME` na lista
+  de secrets pré-validados, embora o step de deploy seguinte o consuma — corrigido na Sprint 18.4.
 
 Ver o relatório final da Sprint 16.3 para detalhes e impacto de cada achado.

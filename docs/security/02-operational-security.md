@@ -65,13 +65,15 @@ enviado.
 `Program.cs`: fora de Development, `AddDataProtection().SetApplicationName("BeeDay")
 .PersistKeysToFileSystem(...)`, mais `ProtectKeysWithDpapi(protectToLocalMachine: true)` quando
 `OperatingSystem.IsWindows()`. `DataProtectionKeysDirectory` deve ser um caminho absoluto (guarda de
-startup, ver [`02-runtime-configuration.md`](../deployment/02-runtime-configuration.md) §4.1) — mas
-o caminho configurado em produção (`C:\Apps\LevelUp-Data\DataProtection-Keys`) diverge do caminho
-que `Deploy-BeeDay.ps1` de fato prepara e protege (`C:\Apps\BeeDay-Data\DataProtection-Keys`) — ver
-achado consolidado em
-[`docs/deployment/README.md`](../deployment/README.md#achados-relevantes-reportados-não-corrigidos).
-Sem chaves persistidas corretamente, toda reciclagem do Application Pool invalida cookies de
-autenticação e tokens de antiforgery emitidos antes da reciclagem.
+startup, ver [`02-runtime-configuration.md`](../deployment/02-runtime-configuration.md) §4.1). Em
+HMG, o caminho real (`appsettings.Homologation.json`, `C:\Apps\BeeDay-Data\DataProtection-Keys`) já
+batia com o que `Deploy-BeeDay.ps1` prepara e protege — confirmado ativo com chaves existentes por
+verificação direta do servidor (Sprint 18.4), sem divergência. `appsettings.Production.json` também
+apontava para `C:\Apps\LevelUp-Data\DataProtection-Keys` (divergente), mas esse arquivo não
+corresponde a nenhum ambiente provisionado hoje (PRD não existe — ver
+[`docs/deployment/02-runtime-configuration.md`](../deployment/02-runtime-configuration.md) §5.1);
+corrigido por consistência de nomenclatura na Sprint 18.4, sem migração de chaves necessária (nunca
+esteve em uso).
 
 ## 7. Identity / Password Hashing
 

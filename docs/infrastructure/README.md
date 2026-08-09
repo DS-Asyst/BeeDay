@@ -101,8 +101,6 @@ mesma Sprint.
   `PersistenceAccessException.cs` — as 3 nunca são lançadas, capturadas, ou referenciadas em
   nenhum outro arquivo além de si mesmas. `DataFileCorruptedException`'s mensagem cita
   literalmente "The JSON data file" — confirma origem do pipeline JSON removido.
-- `SqlServerOptions.HealthCheckEnabled` — propriedade sem nenhum efeito hoje; o health check roda
-  incondicionalmente desde que o SQL Server se tornou o único provider.
 - Comentários de código em `EfConcurrencySaveChanges.cs` e `EventJournalOptions.cs` ainda
   mencionam "o provider JSON" como referência histórica — comentários, não comportamento; fora do
   escopo alterar (código).
