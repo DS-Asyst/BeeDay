@@ -1,8 +1,9 @@
 name: Validate Promotion
 
 # Policy gate only: proves a pull request follows the approved BeeDay promotion path
-# (Sprint/fix -> hmg -> main -> prd). It does not build, test, deploy, or modify the
-# repository, and it does not replace or duplicate BeeDay CI (ci.yml).
+# (Sprint/fix -> hmg -> main -> prd) from a branch of this same repository, never a fork.
+# It does not build, test, deploy, or modify the repository, and it does not replace or
+# duplicate BeeDay CI (ci.yml).
 on:
   pull_request:
     branches:
@@ -29,8 +30,19 @@ jobs:
         env:
           TARGET_BRANCH: ${{ github.event.pull_request.base.ref }}
           SOURCE_BRANCH: ${{ github.event.pull_request.head.ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          BASE_REPO: ${{ github.repository }}
         run: |
           echo "Promotion pull request: ${SOURCE_BRANCH} -> ${TARGET_BRANCH}"
+          echo "Source repository: ${HEAD_REPO:-<none>}"
+
+          # Branch names alone are not a trustworthy signal: a fork can name its own branch
+          # "hmg" or "main" to imitate an internal promotion. Only a pull request whose head
+          # repository is this same repository can be a legitimate promotion.
+          if [ "$HEAD_REPO" != "$BASE_REPO" ]; then
+            echo "::error::Invalid promotion source repository '${HEAD_REPO:-<unknown>}'. Promotions into '${TARGET_BRANCH}' must come from a branch of this repository (${BASE_REPO}), not a fork."
+            exit 1
+          fi
 
           case "$TARGET_BRANCH" in
             main)
@@ -51,4 +63,4 @@ jobs:
               ;;
           esac
 
-          echo "Promotion path '${SOURCE_BRANCH} -> ${TARGET_BRANCH}' is valid."
+          echo "Promotion path '${SOURCE_BRANCH} -> ${TARGET_BRANCH}' from '${HEAD_REPO}' is valid."
