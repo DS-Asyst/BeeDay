@@ -47,13 +47,21 @@ jobs:
       - name: Checkout deployment scripts
         uses: actions/checkout@v4
 
-      # Build Once, Deploy Many: prd is promoted from hmg exclusively via pull request (per the
-      # project's promotion policy), so the commit that lands on prd is a merge/squash commit with
-      # a different SHA than anything BeeDay CI ever built. To prove this commit was actually
-      # validated, we trace it back to the hmg -> prd pull request that introduced it, read that
-      # PR's hmg head_sha (the exact commit BeeDay CI built and tested), and require a successful
-      # BeeDay CI run on hmg for that exact head_sha. If any link in that chain is missing, this
-      # fails closed - no artifact is downloaded and nothing is deployed.
+      # Build Once, Deploy Many across hmg -> main -> prd: prd is promoted from main exclusively
+      # via pull request, and main is promoted from hmg exclusively via pull request (per the
+      # project's promotion policy, enforced by the Validate Promotion workflow). The commit that
+      # lands on prd is therefore two promotion hops away from the commit BeeDay CI actually built
+      # and tested on hmg. A pull request's head SHA always identifies the real source-branch
+      # commit regardless of which merge method (merge commit, squash, or rebase) landed it on the
+      # target branch, so we walk that chain hop by hop instead of assuming SHA equality anywhere:
+      #   1. resolve the main -> prd pull request that introduced the commit pushed to prd, and
+      #      read its head SHA (main's tip at promotion time);
+      #   2. resolve the hmg -> main pull request associated with that main commit, and read its
+      #      head SHA (hmg's tip at promotion time - the exact commit BeeDay CI built and tested);
+      #   3. require a successful BeeDay CI run on hmg for that exact head SHA.
+      # If any link in that chain is missing, this fails closed - no artifact is downloaded and
+      # nothing is deployed. No artifact is ever rebuilt: the one BeeDay CI produced on hmg is the
+      # one deployed to both HMG and PRD.
       #
       # Stays pinned at v7 for the same runner-validation reason as the checkout step above -
       # github-script v8+ also requires Runner >= 2.327.1. Our script only uses the injected
@@ -68,26 +76,47 @@ jobs:
             const commitSha = context.sha;
             core.info(`Resolving originating pull request for production commit ${commitSha}`);
 
-            const prsForCommit = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+            const prdPrs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
               owner: context.repo.owner,
               repo: context.repo.repo,
               commit_sha: commitSha
             });
 
-            const originatingPr = prsForCommit.data.find(
-              (pr) => pr.base.ref === 'prd' && pr.head.ref === 'hmg'
+            const mainToPrdPr = prdPrs.data.find(
+              (pr) => pr.base.ref === 'prd' && pr.head.ref === 'main'
             );
 
-            if (!originatingPr) {
+            if (!mainToPrdPr) {
               core.setFailed(
-                `No hmg -> prd pull request found for commit ${commitSha}. ` +
-                'Refusing to deploy: cannot prove this commit was validated by BeeDay CI.'
+                `No main -> prd pull request found for commit ${commitSha}. ` +
+                'Refusing to deploy: cannot prove this commit was promoted from main.'
               );
               return '';
             }
 
-            const validatedHeadSha = originatingPr.head.sha;
-            core.info(`Originating PR #${originatingPr.number}: hmg head_sha ${validatedHeadSha}`);
+            const mainHeadSha = mainToPrdPr.head.sha;
+            core.info(`Originating PR #${mainToPrdPr.number}: main head_sha ${mainHeadSha}`);
+
+            const mainPrs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: mainHeadSha
+            });
+
+            const hmgToMainPr = mainPrs.data.find(
+              (pr) => pr.base.ref === 'main' && pr.head.ref === 'hmg'
+            );
+
+            if (!hmgToMainPr) {
+              core.setFailed(
+                `No hmg -> main pull request found for main commit ${mainHeadSha}. ` +
+                'Refusing to deploy: cannot trace this promotion back to a validated hmg commit.'
+              );
+              return '';
+            }
+
+            const validatedHeadSha = hmgToMainPr.head.sha;
+            core.info(`Originating PR #${hmgToMainPr.number}: hmg head_sha ${validatedHeadSha}`);
 
             // Paginates through every successful BeeDay CI run on hmg instead of trusting a single
             // 100-run page - a promotion PR opened well after its hmg commit was validated (or a
