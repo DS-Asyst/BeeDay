@@ -103,9 +103,6 @@ mesma Sprint.
   literalmente "The JSON data file" — confirma origem do pipeline JSON removido.
 - `SqlServerOptions.HealthCheckEnabled` — propriedade sem nenhum efeito hoje; o health check roda
   incondicionalmente desde que o SQL Server se tornou o único provider.
-- `BeeDayDbContextFactory` (usada por `dotnet ef` em design-time) lê a variável de ambiente
-  `LEVELUP_DESIGNTIME_CONNECTION` — prefixo `LEVELUP_`, não `BEEDAY_`, residual da migração de
-  nome.
 - Comentários de código em `EfConcurrencySaveChanges.cs` e `EventJournalOptions.cs` ainda
   mencionam "o provider JSON" como referência histórica — comentários, não comportamento; fora do
   escopo alterar (código).

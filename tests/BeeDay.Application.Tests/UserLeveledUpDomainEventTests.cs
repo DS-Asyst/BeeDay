@@ -8,7 +8,7 @@ using MediatR;
 
 namespace BeeDay.Application.Tests;
 
-public sealed class LevelUpEventTests
+public sealed class UserLeveledUpDomainEventTests
 {
     [Fact]
     public async Task Reward_without_level_change_does_not_publish_level_up_event()

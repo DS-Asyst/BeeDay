@@ -121,8 +121,8 @@ flowchart TD
 `Features/Habits/Handlers/HabitCommandHandlers.cs`, `Features/Tasks/Handlers/TaskCommandHandlers.cs`,
 `Features/Todos/Handlers/TodoCommandHandlers.cs`.
 **Testes consultados:** `tests/BeeDay.Application.Tests/DomainEventTests.cs`,
-`ExperienceRewardPipelineTests.cs`, `LevelUpEventTests.cs` (nome de arquivo com nomenclatura
-"LevelUp" residual — achado, não corrigido, fora do escopo desta Sprint).
+`ExperienceRewardPipelineTests.cs`, `UserLeveledUpDomainEventTests.cs` (renomeado de
+`LevelUpEventTests.cs` na Sprint 18.2 para bater com o tipo testado, `UserLeveledUpDomainEvent`).
 **Entidades relacionadas:** [`user.md`](user.md) §Experience, [`habit.md`](habit.md),
 [`recurring-task.md`](recurring-task.md), [`project.md`](project.md).
 **Documentação relacionada:** `docs/architecture/08-deployment-architecture.md` (Event Journal não

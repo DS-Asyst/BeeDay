@@ -103,9 +103,8 @@ banco greenfield (ADR-002: sem migração de dados legados, banco começa vazio)
 - **Em design-time** (`dotnet ef migrations add`/`dotnet ef database update` executados por um
   desenvolvedor): `BeeDayDbContextFactory` (`IDesignTimeDbContextFactory<BeeDayDbContext>`)
   constrói o `DbContext` sem subir o host completo do `BeeDay.Web` (evita as guardas de produção,
-  rate limiter, etc.), usando a variável de ambiente `LEVELUP_DESIGNTIME_CONNECTION` (nome
-  residual do rebrand — já reportado em `docs/infrastructure/README.md`) ou, na ausência dela, o
-  fallback hardcoded `Server=(localdb)\mssqllocaldb;Database=BeeDayDev;...`.
+  rate limiter, etc.), usando a variável de ambiente `BEEDAY_DESIGNTIME_CONNECTION` ou, na
+  ausência dela, o fallback hardcoded `Server=(localdb)\mssqllocaldb;Database=BeeDayDev;...`.
 
 ## 6. Versionamento e branches
 
@@ -163,5 +162,4 @@ tudo listado abaixo é uma tarefa manual, não automatizada:
 - [`docs/adr/ADR-002-greenfield-database.md`](../adr/ADR-002-greenfield-database.md) (decisão de
   banco greenfield, referenciada não re-explicada).
 - [`02-runtime-configuration.md`](02-runtime-configuration.md), [`03-observability.md`](03-observability.md),
-  [`docs/infrastructure/README.md`](../infrastructure/README.md) (achado de
-  `LEVELUP_DESIGNTIME_CONNECTION`, Sprint 16.6, reaproveitado).
+  [`docs/infrastructure/README.md`](../infrastructure/README.md).
