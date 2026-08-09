@@ -25,6 +25,7 @@ linkado a partir daqui onde relevante em vez de duplicado.
 | [`02-runtime-configuration.md`](02-runtime-configuration.md) | `appsettings*`, variáveis de ambiente, binding de configuração, Options, secrets, guardas de startup |
 | [`03-observability.md`](03-observability.md) | Logging, Event Journal, health checks, diagnostics, ciclo de vida da aplicação |
 | [`04-operations.md`](04-operations.md) | Backup, restore, recovery, migrations, versionamento, processo de release, manutenção |
+| [`05-privileged-iis-control.md`](05-privileged-iis-control.md) | Boundary privilegiada de controle do IIS em HMG (STOP/START/CONFIGURE/RESTORE via SYSTEM) e a automação de promoção do script operacional (`HMG-IisControl-Updater`, Sprint 17.17) |
 
 ## Ordem de leitura recomendada
 
@@ -32,6 +33,8 @@ linkado a partir daqui onde relevante em vez de duplicado.
 2. `02-runtime-configuration.md` — o que esse binário lê ao iniciar.
 3. `03-observability.md` — o que dá para ver depois que ele está rodando.
 4. `04-operations.md` — o que fazer quando algo dá errado.
+5. `05-privileged-iis-control.md` — como o runner de baixo privilégio controla o IIS em HMG sem
+   nunca virar administrador.
 
 ## Achados relevantes (reportados, não corrigidos)
 

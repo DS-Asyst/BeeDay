@@ -136,6 +136,20 @@ jobs:
 
           Write-Host "Using .NET SDK: $sdk10"
 
+      # Promotes scripts/iis-control/Invoke-BeeDayIisControl.ps1 (this checkout's copy) into
+      # C:\Ops\BeeDay\IisControl\Invoke-BeeDayIisControl.ps1 via the \BeeDay\HMG-IisControl-Updater
+      # Scheduled Task (SYSTEM) - the runner itself never writes into that privileged location. A
+      # no-op (exits 0 without triggering the task) when the installed script's SHA-256 already
+      # matches this checkout's copy. Runs BEFORE Deploy-BeeDay.ps1 and has no continue-on-error: if
+      # promotion fails, this step fails and the job stops here - the deploy must never proceed
+      # against a possibly-stale or possibly-inconsistent privileged control script. No secrets are
+      # required or produced by this step.
+      - name: Promote privileged IIS control script if changed
+        shell: powershell
+        run: |
+          & ".\scripts\iis-control\Request-BeeDayIisControlPromotion.ps1" `
+              -CommitSha "${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}"
+
       - name: Deploy to IIS with rollback
         shell: powershell
         env:
