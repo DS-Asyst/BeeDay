@@ -485,44 +485,118 @@ try {
         # STOP/START never touch env-config.secret, so their own Import-Module has no cleanup to
         # protect - it stays outside any try/finally, tagged only for the duration of the call
         # itself. A failure here surfaces with errorStage=IMPORT_WEBADMINISTRATION/
-        # errorCode=IIS_IMPORT_FAILED, same as CONFIGURE's below; anything past this point in
-        # STOP/START is left without further per-step stage tracking (errorStage reverts to $null,
-        # errorCode defaults to UNKNOWN_FAILURE in the outer catch), exactly as before this
-        # diagnostic feature existed.
+        # errorCode=IIS_IMPORT_FAILED, same as CONFIGURE's below.
         $script:currentStage = 'IMPORT_WEBADMINISTRATION'
         $script:currentErrorCode = 'IIS_IMPORT_FAILED'
         Import-Module WebAdministration -ErrorAction Stop
-        $script:currentStage = $null
-        $script:currentErrorCode = $null
 
+        # Idempotent AND resilient to a transient WebAdministration error: every read/transition
+        # step below is wrapped in its own try/catch that swallows whatever it throws and moves on
+        # - a real SERV3WEB run showed Get-WebsiteState/Get-WebAppPoolState/Stop-Website/
+        # Stop-WebAppPool occasionally throwing even though the underlying state change had, in
+        # fact, already taken effect (confirmed immediately after the "failed" run by querying
+        # state directly - both Site and Pool were already Stopped). Swallowing here does NOT mask
+        # a real failure: the shared FINALIZE block below (Get-WebsiteState/Get-WebAppPoolState
+        # with -ErrorAction Stop, unchanged) is the one authoritative, un-swallowed check that
+        # actually decides $success - if the site/pool genuinely never reaches the target state,
+        # or FINALIZE's own read fails, this operation still fails, exactly as before. What changes
+        # is that a transient hiccup in one of these individual steps no longer aborts the whole
+        # operation before FINALIZE ever gets a chance to prove the transition actually worked.
+        # Each step is tagged with its own fixed stage/errorCode immediately before running, purely
+        # for diagnostics should something outside this try/catch pattern ever throw here.
         if ($operation -eq 'STOP') {
-            # Idempotent: WebAdministration's Stop-Website/Stop-WebAppPool throw ("Object on target
-            # path is already stopped.") when asked to stop something already stopped, which would
-            # otherwise turn a no-op into a false failure. Querying current state first and only
-            # calling Stop-* when it isn't already the target state is what makes "already stopped"
-            # a success, not an error. Mandatory order: Site before Pool.
-            $currentSiteState = (Get-WebsiteState -Name $SiteName -ErrorAction Stop).Value
-            if ($currentSiteState -ne 'Stopped') {
-                Stop-Website -Name $SiteName -ErrorAction Stop
+            # Mandatory order: Site before Pool.
+            $script:currentStage = 'READ_SITE_STATE'
+            $script:currentErrorCode = 'SITE_READ_FAILED'
+            $currentSiteState = $null
+            try {
+                $currentSiteState = (Get-WebsiteState -Name $SiteName -ErrorAction Stop).Value
+            }
+            catch {
+                # Transient - FINALIZE below is the authoritative check.
             }
 
-            $currentPoolState = (Get-WebAppPoolState -Name $AppPoolName -ErrorAction Stop).Value
+            if ($currentSiteState -ne 'Stopped') {
+                $script:currentStage = 'STOP_SITE'
+                $script:currentErrorCode = 'SITE_STOP_FAILED'
+                try {
+                    Stop-Website -Name $SiteName -ErrorAction Stop
+                }
+                catch {
+                    # Transient (e.g. "already stopped", or a provider hiccup) - FINALIZE below is
+                    # the authoritative check.
+                }
+            }
+
+            $script:currentStage = 'READ_POOL_STATE'
+            $script:currentErrorCode = 'POOL_READ_FAILED'
+            $currentPoolState = $null
+            try {
+                $currentPoolState = (Get-WebAppPoolState -Name $AppPoolName -ErrorAction Stop).Value
+            }
+            catch {
+                # Transient - FINALIZE below is the authoritative check.
+            }
+
             if ($currentPoolState -ne 'Stopped') {
-                Stop-WebAppPool -Name $AppPoolName -ErrorAction Stop
+                $script:currentStage = 'STOP_POOL'
+                $script:currentErrorCode = 'POOL_STOP_FAILED'
+                try {
+                    Stop-WebAppPool -Name $AppPoolName -ErrorAction Stop
+                }
+                catch {
+                    # Transient - FINALIZE below is the authoritative check.
+                }
             }
         }
         else {
-            # Same idempotency reasoning as STOP, in reverse. Mandatory order: Pool before Site.
-            $currentPoolState = (Get-WebAppPoolState -Name $AppPoolName -ErrorAction Stop).Value
-            if ($currentPoolState -ne 'Started') {
-                Start-WebAppPool -Name $AppPoolName -ErrorAction Stop
+            # Mandatory order: Pool before Site.
+            $script:currentStage = 'READ_POOL_STATE'
+            $script:currentErrorCode = 'POOL_READ_FAILED'
+            $currentPoolState = $null
+            try {
+                $currentPoolState = (Get-WebAppPoolState -Name $AppPoolName -ErrorAction Stop).Value
+            }
+            catch {
+                # Transient - FINALIZE below is the authoritative check.
             }
 
-            $currentSiteState = (Get-WebsiteState -Name $SiteName -ErrorAction Stop).Value
+            if ($currentPoolState -ne 'Started') {
+                $script:currentStage = 'START_POOL'
+                $script:currentErrorCode = 'POOL_START_FAILED'
+                try {
+                    Start-WebAppPool -Name $AppPoolName -ErrorAction Stop
+                }
+                catch {
+                    # Transient - FINALIZE below is the authoritative check.
+                }
+            }
+
+            $script:currentStage = 'READ_SITE_STATE'
+            $script:currentErrorCode = 'SITE_READ_FAILED'
+            $currentSiteState = $null
+            try {
+                $currentSiteState = (Get-WebsiteState -Name $SiteName -ErrorAction Stop).Value
+            }
+            catch {
+                # Transient - FINALIZE below is the authoritative check.
+            }
+
             if ($currentSiteState -ne 'Started') {
-                Start-Website -Name $SiteName -ErrorAction Stop
+                $script:currentStage = 'START_SITE'
+                $script:currentErrorCode = 'SITE_START_FAILED'
+                try {
+                    Start-Website -Name $SiteName -ErrorAction Stop
+                }
+                catch {
+                    # Transient (e.g. "already started", or a provider hiccup) - FINALIZE below is
+                    # the authoritative check.
+                }
             }
         }
+
+        $script:currentStage = $null
+        $script:currentErrorCode = $null
     }
     elseif ($operation -eq 'CONFIGURE') {
         # CONFIGURE: applies App Pool environment variables (env-config.secret's payload) via the
@@ -691,13 +765,22 @@ try {
         $success = ($siteState -eq $expectedState) -and ($poolState -eq $expectedState)
     }
 
-    Write-BeeDayIisControlResult -RequestId $requestId -Operation $operation `
-        -ExitCode ([int](-not $success)) -SiteState $siteState -PoolState $poolState
-
     if (-not $success) {
+        # STOP/START only - CONFIGURE/RESTORE always have $success=$true above. The transitional
+        # steps for STOP/START now tolerate transient errors and treat this FINALIZE read as the
+        # sole authoritative check (see the comment above the STOP/START block); if the site/pool
+        # genuinely never converged to the target state, that is a real failure and is now tagged
+        # distinctly, rather than the errorStage=null/errorCode=null this path used to report (this
+        # branch never went through the outer catch below, so nothing used to set them here).
+        Write-BeeDayIisControlResult -RequestId $requestId -Operation $operation `
+            -ExitCode 1 -SiteState $siteState -PoolState $poolState `
+            -ErrorStage 'FINALIZE' -ErrorCode 'STATE_MISMATCH'
         Write-Error "Operation '$operation' completed but final state was not fully '$expectedState' (site=$siteState, pool=$poolState)."
         exit 1
     }
+
+    Write-BeeDayIisControlResult -RequestId $requestId -Operation $operation `
+        -ExitCode 0 -SiteState $siteState -PoolState $poolState
 
     exit 0
 }
