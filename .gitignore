@@ -56,7 +56,6 @@ src/BeeDay.Web/Data/*
 !src/BeeDay.Web/Data/.gitkeep
 **/Backups/
 **/*.local.json
-**/LevelUpBD.json
 
 #####################################################
 # Test and Coverage Output

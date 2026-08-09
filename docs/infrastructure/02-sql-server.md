@@ -58,7 +58,7 @@ comentário explica que `EnsureCreated` pularia a migration inteira, inclusive o
 
 Ver `docs/persistence/02-ef-core-strategy.md` §`BeeDayDbContextFactory` para o detalhamento
 completo. Resumo: usada só por `dotnet ef` (CLI de migrations), nunca pela aplicação em execução;
-lê `LEVELUP_DESIGNTIME_CONNECTION` (variável de ambiente, prefixo residual — achado reportado) ou
+lê `BEEDAY_DESIGNTIME_CONNECTION` (variável de ambiente) ou
 cai para uma connection string hardcoded apontando para
 `(localdb)\mssqllocaldb;Database=BeeDayDev`.
 
@@ -107,8 +107,6 @@ sequenceDiagram
 - **`SqlServerOptions.HealthCheckEnabled` não utilizado**: `SqlServerHealthCheck` roda
   incondicionalmente desde que SQL Server é o único provider — a propriedade não é lida em nenhum
   lugar além de sua própria classe.
-- **`LEVELUP_DESIGNTIME_CONNECTION`**: variável de ambiente de design-time ainda usa o prefixo
-  antigo `LEVELUP_`, não `BEEDAY_`.
 - **Nenhuma migração automática no startup do host**: aplicar `InitialCreate` a um ambiente novo é
   uma etapa manual/operacional não documentada em código de aplicação — só em testes o processo é
   automatizado (`EfLocalDbTestBase`).
