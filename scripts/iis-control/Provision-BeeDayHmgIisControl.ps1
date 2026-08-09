@@ -54,6 +54,13 @@
 #      overwritten in place (see the comments in Invoke-BeeDayIisControl.ps1
 #      for why: a rename-replace would silently drop these file-level
 #      grants).
+#   4b. Pre-creates env-config-snapshot.secret directly under the root folder
+#       (sentinel "{}") - the CONFIGURE/RESTORE undo record described in
+#       Invoke-BeeDayIisControl.ps1. Unlike the three files above, this one
+#       gets NO icacls grant for svc_beeday_runner at all: it inherits the
+#       root folder's own admin-only ACL (step 1) exactly like the script
+#       file itself, because svc_beeday_runner never writes, reads, or
+#       otherwise needs to know this file exists.
 #   5. Registers the \BeeDay\HMG-IisControl Scheduled Task: on-demand only, no
 #      recurring trigger, runs as SYSTEM, RunLevel Highest, a single fixed
 #      action, MultipleInstances=IgnoreNew so a second trigger while one run
@@ -82,6 +89,7 @@ $resultsFolder = Join-Path $rootFolder "Results"
 $requestFilePath = Join-Path $requestsFolder "request.txt"
 $envConfigFilePath = Join-Path $requestsFolder "env-config.secret"
 $resultFilePath = Join-Path $resultsFolder "result.json"
+$envConfigSnapshotFilePath = Join-Path $rootFolder "env-config-snapshot.secret"
 $scriptDestination = Join-Path $rootFolder "Invoke-BeeDayIisControl.ps1"
 $scriptSource = Join-Path $PSScriptRoot "Invoke-BeeDayIisControl.ps1"
 
@@ -90,6 +98,7 @@ $scriptSource = Join-Path $PSScriptRoot "Invoke-BeeDayIisControl.ps1"
 # nothing silently or erroring in a confusing way.
 $requestSentinel = "NONE"
 $envConfigSentinel = "{}"
+$envConfigSnapshotSentinel = "{}"
 $resultSentinel = (
     [ordered]@{
         requestId = "00000000-0000-0000-0000-000000000000"
@@ -120,6 +129,11 @@ if (-not (Test-Path -LiteralPath $scriptSource)) {
 }
 Copy-Item -LiteralPath $scriptSource -Destination $scriptDestination -Force
 Write-Host "Installed: $scriptDestination (no ACE for ${runnerAccount} - not readable by it)"
+
+Write-Host "`n=== 1b. env-config-snapshot.secret - pre-created, admin-only (no ACE for ${runnerAccount} at all - inherits the root folder's own ACL, same as the script file above) ==="
+if (-not (Test-Path -LiteralPath $envConfigSnapshotFilePath)) {
+    Set-Content -LiteralPath $envConfigSnapshotFilePath -Value $envConfigSnapshotSentinel -Encoding utf8 -NoNewline
+}
 
 Write-Host "`n=== 2. Requests folder - svc_beeday_runner: traverse-through only (no list/create/delete) ==="
 New-Item -ItemType Directory -Path $requestsFolder -Force | Out-Null
@@ -201,6 +215,7 @@ Write-Host "  (as LAB\svc_beeday_runner, must succeed) icacls '$requestFilePath'
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) icacls '$envConfigFilePath'"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) icacls '$resultsFolder'"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) icacls '$resultFilePath'"
+Write-Host "  (as LAB\svc_beeday_runner, must FAIL - no ACE at all, not even Read Control) icacls '$envConfigSnapshotFilePath'"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) `$s = New-Object System.IO.FileStream('$requestFilePath',[System.IO.FileMode]::Open,[System.IO.FileAccess]::Write,[System.IO.FileShare]::Read); `$s.Dispose()"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) `$s = New-Object System.IO.FileStream('$envConfigFilePath',[System.IO.FileMode]::Open,[System.IO.FileAccess]::Write,[System.IO.FileShare]::Read); `$s.Dispose()"
 Write-Host "  (as LAB\svc_beeday_runner, must succeed) [System.IO.File]::ReadAllText('$resultFilePath')"
@@ -212,6 +227,8 @@ Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Get-Content '$requestFilePat
 Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Get-Content '$envConfigFilePath'"
 Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Set-Content '$resultFilePath' -Value 'forged'"
 Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Get-Content '$scriptDestination'"
+Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Get-Content '$envConfigSnapshotFilePath'"
+Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Set-Content '$envConfigSnapshotFilePath' -Value 'forged'"
 Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Get-ChildItem '$rootFolder'"
 Write-Host "  (as LAB\svc_beeday_runner, must FAIL) Get-ChildItem '$requestsFolder'"
 Write-Host "  (as LAB\svc_beeday_runner, must FAIL) New-Item '$requestsFolder\other.txt'"

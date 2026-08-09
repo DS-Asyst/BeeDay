@@ -30,7 +30,7 @@
 # itself runs as SYSTEM, which already has Full Control regardless, so
 # Set-Content/Get-Content remain fine to use below.
 #
-# request.txt carries the operation (STOP/START/CONFIGURE) and a correlation
+# request.txt carries the operation (STOP/START/CONFIGURE/RESTORE) and a correlation
 # GUID - never anything else. env-config.secret carries CONFIGURE's payload as
 # {"requestId": "<same GUID as request.txt>", "variables": {...}} (App Pool
 # environment variables, which may include
@@ -52,6 +52,46 @@
 # existing file rather than replacing it) preserves the file's own ACL
 # indefinitely.
 #
+# env-config-snapshot.secret exists purely so a failed CONFIGURE (partial or
+# total) can be undone. Immediately before CONFIGURE changes anything, it
+# durably records the PRE-CONFIGURE state of only the keys that CONFIGURE is
+# about to touch ({"requestId": "<the SAME requestId as this CONFIGURE's own
+# request.txt entry>", "variables": {"<key>": {"existed": true, "value": "..."}
+# | {"existed": false}, ...}}) - if that write itself fails, CONFIGURE aborts
+# before mutating anything, so a CONFIGURE that has progressed past this point
+# always has a corresponding undo record on disk, tagged with its own requestId.
+#
+# RESTORE (triggered only by Deploy-BeeDay.ps1's own rollback path, never
+# directly by a caller choice) is asked to undo a SPECIFIC requestId - not
+# "whatever snapshot happens to be on disk". Deploy-BeeDay.ps1 deliberately
+# reuses the CONFIGURE call's own requestId as RESTORE's request.txt requestId
+# (instead of generating a fresh one, unlike every other operation), and this
+# script only ever applies the snapshot if the snapshot's OWN stored requestId
+# matches request.txt's exactly. This is what stops a stale snapshot from an
+# EARLIER, already-successful deploy (never consumed, since that deploy never
+# rolled back) from being silently reapplied by a LATER, unrelated deploy's
+# rollback - e.g.: Deploy A's CONFIGURE snapshots V1 and applies V2, succeeds;
+# the V1 snapshot is left on disk, still tagged with Deploy A's requestId;
+# Deploy B fails before its own CONFIGURE ever runs (so V2 was never touched
+# this attempt, nothing needs undoing); Deploy B's rollback must NOT restore
+# V1 - and it does not, because it has no CONFIGURE requestId of its own to
+# ask for (Deploy-BeeDay.ps1 skips triggering RESTORE entirely in that case),
+# and even if it did, that id would never match Deploy A's leftover snapshot.
+# A key that existed is set back to its exact prior value; a key that did not
+# exist is removed outright, never left at an empty string. On a successful
+# match, the snapshot is reset to "{}" afterwards so it can never be matched
+# by requestId again (belt-and-suspenders on top of the requestId check, which
+# alone already makes reuse practically impossible). Any mismatch - wrong
+# requestId, no requestId, or no snapshot at all - is treated as "nothing to
+# restore", not a failure: environment variables are left completely
+# untouched in every one of those cases.
+#
+# Unlike request.txt/env-config.secret, svc_beeday_runner has NO access
+# whatsoever to this file - not even Read Control - because it is written and
+# read exclusively by this script itself (SYSTEM); it lives directly under
+# the root folder and inherits that folder's admin-only ACL (see
+# Provision-BeeDayHmgIisControl.ps1) rather than needing any per-file grant.
+#
 # Site and App Pool names are hardcoded here on purpose - never a parameter,
 # never an environment variable, never taken from the request file. This is
 # what makes it structurally impossible for a caller of this script to target
@@ -68,6 +108,12 @@ $requestFilePath = Join-Path $requestsFolder "request.txt"
 $envConfigFilePath = Join-Path $requestsFolder "env-config.secret"
 $resultsFolder = "C:\Ops\BeeDay\IisControl\Results"
 $resultFilePath = Join-Path $resultsFolder "result.json"
+
+# Admin-only, no ACE for svc_beeday_runner at all (see the header comment above and
+# Provision-BeeDayHmgIisControl.ps1) - lives directly under the root folder, not under Requests/
+# Results, because unlike every other file here it is never touched by the runner in either
+# direction.
+$envConfigSnapshotFilePath = "C:\Ops\BeeDay\IisControl\env-config-snapshot.secret"
 
 # CONFIGURE's payload (env-config.secret) can only ever set these exact names - anything else in
 # the payload is rejected outright rather than silently ignored, even though the payload's shape
@@ -94,6 +140,92 @@ function Assert-BeeDayNotReparsePoint {
     }
 }
 
+$environmentVariablesFilter = "system.applicationHost/applicationPools/add[@name='$AppPoolName']/environmentVariables"
+
+# Shared by Set-BeeDayAppPoolEnvironmentVariables (CONFIGURE) and Restore-BeeDayAppPoolEnvironmentVariables
+# (RESTORE) - both need to know, at the start of their own run, exactly what currently exists in the
+# App Pool's environmentVariables collection and with which values.
+#
+# Get-WebConfigurationProperty -Name "." against a collection filter returns a single
+# Microsoft.IIs.PowerShell.Framework.ConfigurationElement wrapping the whole collection, not one
+# object per <add> in the pipeline - confirmed directly on SERV3WEB. The individual <add> elements
+# live under its .Collection property, each exposing name/value via .Attributes["name"].Value/
+# .Attributes["value"].Value; the wrapper itself has neither property directly. Under
+# Set-StrictMode -Version Latest (script-wide), referencing $_.name directly on the wrapper threw a
+# PropertyNotFoundStrict error on every call, which is why this once failed at
+# READ_EXISTING_ENV/ENV_READ_FAILED before a single Remove/Add ever ran.
+function Get-BeeDayAppPoolEnvironmentVariablesSnapshot {
+    $existingEnvironmentVariables = Get-WebConfigurationProperty `
+        -PSPath "MACHINE/WEBROOT/APPHOST" `
+        -Filter $environmentVariablesFilter `
+        -Name "." `
+        -ErrorAction Stop
+
+    $values = @{}
+    foreach ($item in $existingEnvironmentVariables.Collection) {
+        $values[$item.Attributes["name"].Value] = $item.Attributes["value"].Value
+    }
+    return $values
+}
+
+# Converges a single App Pool environment variable to the desired state - the one place both
+# CONFIGURE and RESTORE actually touch applicationHost.config, so a fix to this mechanic (like the
+# -AtElement one above) only ever needs to happen once. Removal identifies the element via
+# -AtElement (never a collection-item filter + bare -Name ".", which silently no-ops against this
+# WebAdministration provider instead of removing anything - confirmed directly on SERV3WEB; leaving
+# the old entry in place made the following Add-WebConfigurationProperty fail with 0x800700B7
+# "Cannot add duplicate collection entry"). $Value $null means "remove only, do not re-add" - used by
+# RESTORE for a key that did not exist before the CONFIGURE being undone; it must end up absent
+# again, never set back to an empty string, which would be a different value.
+function Set-BeeDayAppPoolEnvironmentVariable {
+    param(
+        [Parameter(Mandatory = $true)][string]$Key,
+        [Parameter(Mandatory = $true)][bool]$KeyCurrentlyExists,
+        [AllowNull()]$Value
+    )
+
+    if ($KeyCurrentlyExists) {
+        $script:currentStage = 'REMOVE_EXISTING_ENV'
+        $script:currentErrorCode = 'ENV_REMOVE_FAILED'
+        Remove-WebConfigurationProperty `
+            -PSPath "MACHINE/WEBROOT/APPHOST" `
+            -Filter $environmentVariablesFilter `
+            -Name "." `
+            -AtElement @{ name = $Key } `
+            -ErrorAction Stop
+    }
+
+    if ($null -ne $Value) {
+        $script:currentStage = 'ADD_ENV_VARIABLE'
+        $script:currentErrorCode = 'ENV_ADD_FAILED'
+        Add-WebConfigurationProperty `
+            -PSPath "MACHINE/WEBROOT/APPHOST" `
+            -Filter $environmentVariablesFilter `
+            -Name "." `
+            -Value @{ name = $Key; value = $Value } `
+            -ErrorAction Stop
+    }
+}
+
+# Durably records, BEFORE any mutation, exactly what Set-BeeDayAppPoolEnvironmentVariables is about
+# to change - see the header comment above for the file/format. Never logs $Variables - same
+# discipline as the rest of this file. Admin-only file (see $envConfigSnapshotFilePath) - SYSTEM has
+# Full Control regardless of prior state, so a plain Set-Content (unlike request.txt/env-config.secret,
+# which need the FileStream workaround for svc_beeday_runner's narrow grant) is fine here.
+function Write-BeeDayEnvironmentVariableSnapshot {
+    param(
+        [Parameter(Mandatory = $true)][string]$RequestId,
+        [Parameter(Mandatory = $true)][System.Collections.Specialized.OrderedDictionary]$Variables
+    )
+
+    $snapshot = [ordered]@{
+        requestId = $RequestId
+        variables = $Variables
+    }
+    $snapshot | ConvertTo-Json -Compress -Depth 5 |
+        Set-Content -LiteralPath $envConfigSnapshotFilePath -Encoding utf8 -NoNewline -Force
+}
+
 # Moved verbatim from Deploy-BeeDay.ps1's Set-BeeDayEnvironmentVariables: this is the actual write
 # to applicationHost.config (via the App Pool's environmentVariables collection), which is why it
 # now only ever runs here, as SYSTEM. Never logs $Variables - callers must not either. Any failure
@@ -101,7 +233,10 @@ function Assert-BeeDayNotReparsePoint {
 # embed a value (e.g. an invalid-value error echoing the offending string), and
 # BeeDay__Persistence__SqlServer__ConnectionString may be one of those values.
 function Set-BeeDayAppPoolEnvironmentVariables {
-    param([Parameter(Mandatory = $true)][hashtable]$Variables)
+    param(
+        [Parameter(Mandatory = $true)][hashtable]$Variables,
+        [Parameter(Mandatory = $true)][string]$RequestId
+    )
 
     $script:currentStage = 'VALIDATE_VARIABLES'
     $script:currentErrorCode = 'VARIABLE_NOT_ALLOWED'
@@ -112,17 +247,6 @@ function Set-BeeDayAppPoolEnvironmentVariables {
     }
 
     try {
-        # $environmentVariablesFilter always points at the COLLECTION itself, never at a specific
-        # add[@name='...'] element directly - both the read canary below and Remove-/
-        # Add-WebConfigurationProperty inside the loop reuse it. Removal identifies the element to
-        # remove via -AtElement (not via a collection-item filter + bare -Name ".", which silently
-        # no-ops against this WebAdministration provider instead of removing anything): confirmed
-        # directly on SERV3WEB that a filter targeting the item and -Name "." leaves the existing
-        # entry in place, so the following Add-WebConfigurationProperty then fails with
-        # 0x800700B7 "Cannot add duplicate collection entry" - the true failure was always here in
-        # the remove step, even though it previously only ever surfaced downstream, in ADD_ENV_VARIABLE.
-        $environmentVariablesFilter = "system.applicationHost/applicationPools/add[@name='$AppPoolName']/environmentVariables"
-
         # Read-only canary before any mutation: confirms WebAdministration can actually enumerate
         # the App Pool's environmentVariables collection right now, tagged READ_EXISTING_ENV instead
         # of failing more ambiguously a few lines later inside the Remove/Add loop. Its result is
@@ -130,51 +254,133 @@ function Set-BeeDayAppPoolEnvironmentVariables {
         # keeps CONFIGURE idempotent (an entry that doesn't exist yet must never be treated as a
         # removal failure) without resorting to -ErrorAction SilentlyContinue, which would just as
         # readily swallow a genuine WebAdministration failure on an entry that DOES exist.
-        #
-        # Get-WebConfigurationProperty -Name "." against a collection filter returns a single
-        # Microsoft.IIs.PowerShell.Framework.ConfigurationElement wrapping the whole collection, not
-        # one object per <add> in the pipeline - confirmed directly on SERV3WEB. The individual <add>
-        # elements live under its .Collection property, each exposing its name via
-        # .Attributes["name"].Value; the wrapper itself has no .name property at all. Under
-        # Set-StrictMode -Version Latest (script-wide), referencing $_.name directly on the wrapper
-        # threw a PropertyNotFoundStrict error on every call, which is why this failed at
-        # READ_EXISTING_ENV/ENV_READ_FAILED before a single Remove/Add ever ran.
         $script:currentStage = 'READ_EXISTING_ENV'
         $script:currentErrorCode = 'ENV_READ_FAILED'
-        $existingEnvironmentVariables = Get-WebConfigurationProperty `
-            -PSPath "MACHINE/WEBROOT/APPHOST" `
-            -Filter $environmentVariablesFilter `
-            -Name "." `
-            -ErrorAction Stop
-        $existingVariableNames = @(
-            $existingEnvironmentVariables.Collection |
-                ForEach-Object { $_.Attributes["name"].Value }
-        )
+        $existingVariableValues = Get-BeeDayAppPoolEnvironmentVariablesSnapshot
+
+        # Snapshot BEFORE any mutation, and only for the keys this call is about to touch - exactly
+        # what a later RESTORE would need to undo it, no more. If this write itself fails, the
+        # thrown exception (ENV_SNAPSHOT_FAILED) aborts before the Remove/Add loop below ever runs -
+        # this CONFIGURE never mutates anything it hasn't first durably recorded how to undo.
+        $script:currentStage = 'SNAPSHOT_EXISTING_ENV'
+        $script:currentErrorCode = 'ENV_SNAPSHOT_FAILED'
+        $snapshotVariables = [ordered]@{}
+        foreach ($key in $Variables.Keys) {
+            if ($existingVariableValues.ContainsKey($key)) {
+                $snapshotVariables[$key] = [ordered]@{ existed = $true; value = $existingVariableValues[$key] }
+            }
+            else {
+                $snapshotVariables[$key] = [ordered]@{ existed = $false }
+            }
+        }
+        Write-BeeDayEnvironmentVariableSnapshot -RequestId $RequestId -Variables $snapshotVariables
 
         foreach ($entry in $Variables.GetEnumerator()) {
-            if ($existingVariableNames -contains $entry.Key) {
-                $script:currentStage = 'REMOVE_EXISTING_ENV'
-                $script:currentErrorCode = 'ENV_REMOVE_FAILED'
-                Remove-WebConfigurationProperty `
-                    -PSPath "MACHINE/WEBROOT/APPHOST" `
-                    -Filter $environmentVariablesFilter `
-                    -Name "." `
-                    -AtElement @{ name = $entry.Key } `
-                    -ErrorAction Stop
-            }
-
-            $script:currentStage = 'ADD_ENV_VARIABLE'
-            $script:currentErrorCode = 'ENV_ADD_FAILED'
-            Add-WebConfigurationProperty `
-                -PSPath "MACHINE/WEBROOT/APPHOST" `
-                -Filter $environmentVariablesFilter `
-                -Name "." `
-                -Value @{ name = $entry.Key; value = $entry.Value } `
-                -ErrorAction Stop
+            Set-BeeDayAppPoolEnvironmentVariable -Key $entry.Key `
+                -KeyCurrentlyExists $existingVariableValues.ContainsKey($entry.Key) -Value $entry.Value
         }
     }
     catch {
         throw "Failed to configure App Pool environment variables (details withheld - the underlying error may reference configuration values)."
+    }
+}
+
+# RESTORE: reapplies the pre-CONFIGURE snapshot (env-config-snapshot.secret) - only ever triggered
+# by Deploy-BeeDay.ps1's own rollback path, after CONFIGURE has run (fully or partially) and a later
+# step failed. $RequestId is request.txt's own requestId, which Deploy-BeeDay.ps1 deliberately sets
+# to the SAME id the CONFIGURE it wants undone used (see $script:lastConfigureRequestId in
+# Deploy-BeeDay.ps1) - never a freshly generated one, unlike every other operation. The snapshot is
+# only ever applied if its OWN stored requestId matches this exactly; any mismatch - a snapshot from
+# an earlier, unrelated deploy that was never consumed, a snapshot that predates this deploy's
+# CONFIGURE ever running, or a caller asking to restore an id with no corresponding snapshot at all -
+# is treated exactly like an absent snapshot: nothing to restore, success, no variable touched. This
+# is what stops a stale snapshot left over from a PREVIOUS successful deploy from being silently
+# reapplied by a LATER deploy's rollback (see the header comment for the concrete scenario this
+# closes). On a successful match, the snapshot is reset to "{}" afterwards (best-effort - see below)
+# so it can never be matched again, even in principle. Never logs variable values - same discipline
+# as Set-BeeDayAppPoolEnvironmentVariables, and any WebAdministration failure is re-thrown as a
+# fixed, generic message for the same reason (a raw error could echo back a value being restored,
+# e.g. a connection string).
+function Restore-BeeDayAppPoolEnvironmentVariables {
+    param([Parameter(Mandatory = $true)][string]$RequestId)
+
+    $script:currentStage = 'READ_SNAPSHOT'
+    $script:currentErrorCode = 'SNAPSHOT_READ_FAILED'
+
+    if (-not (Test-Path -LiteralPath $envConfigSnapshotFilePath -PathType Leaf)) {
+        return
+    }
+
+    Assert-BeeDayNotReparsePoint -Path $envConfigSnapshotFilePath
+    $snapshotRaw = Get-Content -LiteralPath $envConfigSnapshotFilePath -Raw
+
+    $script:currentErrorCode = 'SNAPSHOT_INVALID'
+    try {
+        $parsedSnapshot = $snapshotRaw | ConvertFrom-Json
+    }
+    catch {
+        throw "Environment configuration snapshot could not be parsed as valid JSON."
+    }
+
+    # Correlation gate: see the function comment above. Deliberately compared BEFORE looking at
+    # $variablesProperty at all - a snapshot belonging to a different requestId must never influence
+    # anything below this point, not even to decide whether it "looks" empty or populated.
+    $script:currentStage = 'VALIDATE_SNAPSHOT_REQUEST_ID'
+    $snapshotRequestIdProperty = $parsedSnapshot.PSObject.Properties['requestId']
+    if (-not $snapshotRequestIdProperty -or [string]$snapshotRequestIdProperty.Value -ne $RequestId) {
+        return
+    }
+
+    $script:currentErrorCode = 'SNAPSHOT_INVALID'
+    $variablesProperty = $parsedSnapshot.PSObject.Properties['variables']
+    if (-not $variablesProperty) {
+        return
+    }
+
+    $snapshotEntries = @($variablesProperty.Value.PSObject.Properties)
+    if ($snapshotEntries.Count -eq 0) {
+        return
+    }
+
+    try {
+        $script:currentStage = 'READ_EXISTING_ENV'
+        $script:currentErrorCode = 'ENV_READ_FAILED'
+        $existingVariableValues = Get-BeeDayAppPoolEnvironmentVariablesSnapshot
+
+        foreach ($property in $snapshotEntries) {
+            $key = $property.Name
+
+            $existedProperty = $property.Value.PSObject.Properties['existed']
+            $existedBeforeConfigure = [bool]($existedProperty -and $existedProperty.Value)
+
+            $restoredValue = $null
+            if ($existedBeforeConfigure) {
+                $valueProperty = $property.Value.PSObject.Properties['value']
+                if ($valueProperty) {
+                    $restoredValue = [string]$valueProperty.Value
+                }
+            }
+
+            Set-BeeDayAppPoolEnvironmentVariable -Key $key `
+                -KeyCurrentlyExists $existingVariableValues.ContainsKey($key) -Value $restoredValue
+        }
+    }
+    catch {
+        throw "Failed to restore App Pool environment variables (details withheld - the underlying error may reference configuration values)."
+    }
+
+    # Consume the snapshot now that it has been successfully applied - it must never be eligible to
+    # match a future RequestId comparison again (the id is now already reflected in live IIS state,
+    # not just on disk). Best-effort and never fatal: unlike env-config.secret's cleanup (which
+    # CONFIGURE fails closed on), the restore above already fully succeeded and is not undone by a
+    # failure here - the correlation check already makes any leftover snapshot permanently
+    # unmatchable by construction (every future CONFIGURE generates a fresh GUID), so this is
+    # hygiene on top of that guarantee, not something a later RESTORE could be tricked by.
+    try {
+        Set-Content -LiteralPath $envConfigSnapshotFilePath -Value "{}" -Encoding utf8 -NoNewline -Force
+    }
+    catch {
+        # Intentionally swallowed - see comment above.
     }
 }
 
@@ -257,8 +463,8 @@ try {
     $operation = $requestLines[0].Trim()
     $requestId = $requestLines[1].Trim()
 
-    if ($operation -notin @('STOP', 'START', 'CONFIGURE')) {
-        throw "Rejected request: '$operation' is not an allowed operation. Only STOP, START, and CONFIGURE are accepted."
+    if ($operation -notin @('STOP', 'START', 'CONFIGURE', 'RESTORE')) {
+        throw "Rejected request: '$operation' is not an allowed operation. Only STOP, START, CONFIGURE, and RESTORE are accepted."
     }
 
     $script:currentStage = 'VALIDATE_REQUEST_ID'
@@ -318,7 +524,7 @@ try {
             }
         }
     }
-    else {
+    elseif ($operation -eq 'CONFIGURE') {
         # CONFIGURE: applies App Pool environment variables (env-config.secret's payload) via the
         # same applicationHost.config write Deploy-BeeDay.ps1 used to attempt directly as
         # svc_beeday_runner - moved here because that account has no access to it at all.
@@ -413,8 +619,8 @@ try {
 
             # Set-BeeDayAppPoolEnvironmentVariables advances $script:currentStage/$currentErrorCode
             # itself through VALIDATE_VARIABLES (allow-list) / READ_EXISTING_ENV /
-            # REMOVE_EXISTING_ENV / ADD_ENV_VARIABLE as it goes.
-            Set-BeeDayAppPoolEnvironmentVariables -Variables $variablesToApply
+            # SNAPSHOT_EXISTING_ENV / REMOVE_EXISTING_ENV / ADD_ENV_VARIABLE as it goes.
+            Set-BeeDayAppPoolEnvironmentVariables -Variables $variablesToApply -RequestId $requestId
             $tryBlockSucceeded = $true
         }
         finally {
@@ -448,9 +654,24 @@ try {
         $script:currentStage = $null
         $script:currentErrorCode = $null
     }
+    else {
+        # RESTORE: never touches env-config.secret/request.txt beyond the correlation already
+        # handled above - it reads only env-config-snapshot.secret (see the header comment and
+        # Restore-BeeDayAppPoolEnvironmentVariables), which the caller cannot write, read, or
+        # otherwise influence. Import-Module failure here is tagged the same way STOP/START tag it
+        # above, for the same reason (RESTORE has no secret payload of its own to protect via a
+        # finally block).
+        $script:currentStage = 'IMPORT_WEBADMINISTRATION'
+        $script:currentErrorCode = 'IIS_IMPORT_FAILED'
+        Import-Module WebAdministration -ErrorAction Stop
+        $script:currentStage = $null
+        $script:currentErrorCode = $null
 
-    # Common to STOP/START/CONFIGURE alike - a failure here (state query) is tagged FINALIZE rather
-    # than left attributed to whichever operation-specific stage happened to run last.
+        Restore-BeeDayAppPoolEnvironmentVariables -RequestId $requestId
+    }
+
+    # Common to STOP/START/CONFIGURE/RESTORE alike - a failure here (state query) is tagged FINALIZE
+    # rather than left attributed to whichever operation-specific stage happened to run last.
     $script:currentStage = 'FINALIZE'
     $script:currentErrorCode = $null
     Start-Sleep -Seconds 2
@@ -459,7 +680,7 @@ try {
     $script:currentStage = $null
     $script:currentErrorCode = $null
 
-    if ($operation -eq 'CONFIGURE') {
+    if ($operation -eq 'CONFIGURE' -or $operation -eq 'RESTORE') {
         # No target site/pool state to compare against - reaching this point without an exception
         # is success. States are still reported, purely for visibility, to keep the result schema
         # uniform with STOP/START.

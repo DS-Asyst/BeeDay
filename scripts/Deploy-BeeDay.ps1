@@ -171,6 +171,14 @@ $deployStartedAt = Get-Date
 $deploymentSucceeded = $false
 $script:logFilePath = $null
 
+# Set only when a CONFIGURE actually runs during THIS deploy attempt (Invoke-BeeDayPrivilegedIisControl
+# below) - never left over from a previous process, since every deploy is a fresh PowerShell
+# invocation. This is the only thing that lets Restore-BeeDayIisEnvironmentVariables ask RESTORE to
+# undo the RIGHT CONFIGURE (see Restore-BeeDayAppPoolEnvironmentVariables's own correlation check) -
+# a rollback triggered before CONFIGURE ever ran this attempt must never touch environment variables
+# at all, which is why this stays $null in that case rather than being backfilled with a guess.
+$script:lastConfigureRequestId = $null
+
 $externalDirectories = @(
     $dataPath,
     (Join-Path $dataPath "Backups"),
@@ -203,16 +211,17 @@ function Test-BeeDayUsesPrivilegedIisControl {
     return ($SiteName -eq $privilegedIisSiteName) -and ($AppPoolName -eq $privilegedIisAppPoolName)
 }
 
-# Requests a STOP or START from the privileged Scheduled Task and blocks until it either confirms
-# success or the timeout elapses - the task itself is asynchronous (Start-ScheduledTask returns
-# immediately), so this polls Task Scheduler's own state/LastRunTime/LastTaskResult (native
-# mechanisms) plus a small result file the task writes, rather than inventing a custom IPC protocol.
+# Requests an operation (STOP/START/CONFIGURE/RESTORE) from the privileged Scheduled Task and blocks
+# until it either confirms success or the timeout elapses - the task itself is asynchronous
+# (Start-ScheduledTask returns immediately), so this polls Task Scheduler's own state/LastRunTime/
+# LastTaskResult (native mechanisms) plus a small result file the task writes, rather than inventing
+# a custom IPC protocol.
 #
 # Never passes $SiteName/$AppPoolName (or anything else) to the task: the only data that crosses
 # this boundary is the fixed operation string and a correlation GUID, written into request.txt's
-# content, which the task then validates against its own hardcoded STOP/START allow-list. There is
-# no argument, script block, or path handed to the task from here - Start-ScheduledTask takes only
-# the task's identity.
+# content, which the task then validates against its own hardcoded allow-list. There is no argument,
+# script block, or path handed to the task from here - Start-ScheduledTask takes only the task's
+# identity.
 #
 # request.txt is a permanent fixture (pre-created by provisioning), overwritten in place rather than
 # written-then-renamed: svc_beeday_runner's ACL on it is Write Data only (no Delete/Create anywhere
@@ -289,16 +298,27 @@ function Wait-BeeDayPrivilegedIisTaskState {
 
 function Invoke-BeeDayPrivilegedIisControl {
     param(
-        [Parameter(Mandatory = $true)][ValidateSet('STOP', 'START', 'CONFIGURE')][string]$Operation,
+        [Parameter(Mandatory = $true)][ValidateSet('STOP', 'START', 'CONFIGURE', 'RESTORE')][string]$Operation,
 
         # Only used for CONFIGURE. Written to env-config.secret (never request.txt/result.json,
         # never logged) before request.txt is written, so it's already in place by the time the
         # privileged task reads the operation and acts on it.
-        [hashtable]$EnvironmentVariables
+        [hashtable]$EnvironmentVariables,
+
+        # RESTORE only - the requestId of the CONFIGURE (earlier in this same deploy attempt) whose
+        # snapshot should be undone. Reused as-is for request.txt below, rather than a fresh GUID
+        # like every other operation gets, so the privileged script can prove the on-disk snapshot
+        # actually belongs to it before touching anything - see
+        # Restore-BeeDayAppPoolEnvironmentVariables and $script:lastConfigureRequestId.
+        [string]$RequestId
     )
 
     if ($Operation -eq 'CONFIGURE' -and -not $EnvironmentVariables) {
         throw "EnvironmentVariables is required when Operation is CONFIGURE."
+    }
+
+    if ($Operation -eq 'RESTORE' -and [string]::IsNullOrWhiteSpace($RequestId)) {
+        throw "RequestId is required when Operation is RESTORE."
     }
 
     Write-DeployMessage "Requesting privileged IIS control: $Operation (site=$privilegedIisSiteName, pool=$privilegedIisAppPoolName)..."
@@ -311,18 +331,29 @@ function Invoke-BeeDayPrivilegedIisControl {
     Wait-BeeDayPrivilegedIisTaskState -TargetState 'Ready' -TimeoutSeconds $privilegedIisReadyTimeoutSeconds `
         -TimeoutMessage "Privileged IIS control task ($Operation) could not be started because a previous run never became Ready"
 
-    # Generated once, shared by both files below - this is what lets the privileged script prove
-    # the env-config.secret payload it's about to apply is the one written for THIS invocation, not
-    # a stale leftover from an earlier CONFIGURE that failed before being invalidated. It is also
-    # now the PRIMARY (not merely supporting) proof that a given result.json belongs to this
-    # invocation - see the correlation loop below. LastRunTime/LastTaskResult are still read for
-    # diagnostics and for the final exit-code check, but a real SERV3WEB run demonstrated
-    # Get-ScheduledTaskInfo.LastRunTime failing to advance for a run that had, in fact, genuinely
-    # executed and produced a correctly-correlated result.json - so LastRunTime alone must never be
-    # able to reject a result whose requestId matches.
-    $requestId = [guid]::NewGuid().ToString()
+    # Every operation except RESTORE generates its own fresh correlation GUID here, same as always.
+    # RESTORE instead reuses the CONFIGURE requestId it was called with - see the $RequestId param
+    # comment above. Shared by both files below for CONFIGURE - this is what lets the privileged
+    # script prove the env-config.secret payload it's about to apply is the one written for THIS
+    # invocation, not a stale leftover from an earlier CONFIGURE that failed before being
+    # invalidated. It is also now the PRIMARY (not merely supporting) proof that a given result.json
+    # belongs to this invocation - see the correlation loop below. LastRunTime/LastTaskResult are
+    # still read for diagnostics and for the final exit-code check, but a real SERV3WEB run
+    # demonstrated Get-ScheduledTaskInfo.LastRunTime failing to advance for a run that had, in fact,
+    # genuinely executed and produced a correctly-correlated result.json - so LastRunTime alone must
+    # never be able to reject a result whose requestId matches.
+    $requestId = if ($Operation -eq 'RESTORE') { $RequestId } else { [guid]::NewGuid().ToString() }
 
     if ($Operation -eq 'CONFIGURE') {
+        # Recorded right before request.txt/env-config.secret are written, so it reflects "CONFIGURE
+        # is actually being dispatched to the privileged script with this id" regardless of whether
+        # it goes on to succeed or fail partway through. If the Ready-wait above times out instead
+        # (CONFIGURE never dispatched at all this attempt), this line is never reached, so
+        # $script:lastConfigureRequestId stays $null - Restore-BeeDayIisEnvironmentVariables then
+        # correctly skips triggering RESTORE altogether rather than asking the privileged script to
+        # correlate against an id nothing was ever written for.
+        $script:lastConfigureRequestId = $requestId
+
         # Written BEFORE request.txt, and never through Write-DeployMessage/Write-Host - only the
         # variable count is logged, never names or values. requestId travels inside the payload
         # (not just in request.txt) so the privileged script can reject a stale/mismatched payload
@@ -446,6 +477,33 @@ function Start-BeeDayIis {
         Write-DeployMessage "Starting IIS site '$SiteName'..."
         Start-Website -Name $SiteName
     }
+}
+
+# Reverts the App Pool environment variables CONFIGURE may have changed earlier in THIS deploy
+# attempt, using the privileged script's own pre-CONFIGURE snapshot (env-config-snapshot.secret -
+# never written, read, or seen by this account; see Invoke-BeeDayIisControl.ps1). Only called from
+# the rollback path below, and only for BeeDay-HMG - production today applies environment variables
+# directly via WebAdministration (Set-BeeDayEnvironmentVariables's own non-privileged branch), which
+# has no snapshot/restore mechanism and is out of scope here. A no-op when CONFIGURE never ran or
+# never changed anything this attempt - see Restore-BeeDayAppPoolEnvironmentVariables.
+function Restore-BeeDayIisEnvironmentVariables {
+    if (-not (Test-BeeDayUsesPrivilegedIisControl)) {
+        return
+    }
+
+    if (-not $script:lastConfigureRequestId) {
+        # CONFIGURE never ran this deploy attempt (the failure happened earlier - e.g. during
+        # migration or an NTFS permission check) - there is provably no snapshot on disk that could
+        # belong to it, and environment variables were never touched, so there is nothing to
+        # restore. Skipping the trigger entirely - rather than calling RESTORE with no id and
+        # relying on the privileged script alone to no-op it - means the Scheduled Task is never
+        # even invoked for a rollback that has no environment-variable work to do.
+        Write-DeployMessage "CONFIGURE did not run this deploy attempt - App Pool environment variables were never touched, nothing to restore."
+        return
+    }
+
+    Write-DeployMessage "Restoring App Pool environment variables to their pre-deploy state..."
+    Invoke-BeeDayPrivilegedIisControl -Operation "RESTORE" -RequestId $script:lastConfigureRequestId
 }
 
 function Copy-DirectoryContents {
@@ -864,6 +922,7 @@ catch {
 
     try {
         Stop-BeeDayIis
+        Restore-BeeDayIisEnvironmentVariables
         Clear-DirectoryContents -Path $DestinationPath
         Copy-DirectoryContents -Source $applicationBackupPath -Destination $DestinationPath
         Start-BeeDayIis
