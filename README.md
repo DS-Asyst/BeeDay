@@ -163,12 +163,15 @@ On failure, a screenshot and a Playwright trace are written to
 
 ## Branch strategy
 
-- `hmg`: integration and validation
-- `prd`: production
-- temporary branches: `feature/*`, `fix/*`, `refactor/*`, `docs/*`, or `chore/*`
+- `hmg`: integration and homologation — default base for new Sprint/fix branches.
+- `main`: consolidated version approved after homologation, promoted from `hmg` only.
+- `prd`: production — promoted from `main` only.
+- temporary branches: `sprint/*`, `feature/*`, `fix/*`, `refactor/*`, `docs/*`, or `chore/*`.
 
-Changes should reach `prd` only after validation in `hmg`. See
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml) and
+Changes flow `Sprint/fix branch → hmg → main → prd`. The
+[`Validate Promotion`](.github/workflows/validate-promotion.yml) workflow enforces that pull
+requests targeting `main` come from `hmg` and pull requests targeting `prd` come from `main`. See
+also [`.github/workflows/ci.yml`](.github/workflows/ci.yml) and
 [`.github/workflows/deploy-prd.yml`](.github/workflows/deploy-prd.yml).
 
 ## Documentation

@@ -1,0 +1,54 @@
+name: Validate Promotion
+
+# Policy gate only: proves a pull request follows the approved BeeDay promotion path
+# (Sprint/fix -> hmg -> main -> prd). It does not build, test, deploy, or modify the
+# repository, and it does not replace or duplicate BeeDay CI (ci.yml).
+on:
+  pull_request:
+    branches:
+      - main
+      - prd
+
+concurrency:
+  group: beeday-validate-promotion-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate-promotion:
+    name: Validate Promotion
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Validate promotion source branch
+        shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.base.ref }}
+          SOURCE_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          echo "Promotion pull request: ${SOURCE_BRANCH} -> ${TARGET_BRANCH}"
+
+          case "$TARGET_BRANCH" in
+            main)
+              if [ "$SOURCE_BRANCH" != "hmg" ]; then
+                echo "::error::Invalid promotion path '${SOURCE_BRANCH} -> main'. Only 'hmg -> main' is an allowed promotion source."
+                exit 1
+              fi
+              ;;
+            prd)
+              if [ "$SOURCE_BRANCH" != "main" ]; then
+                echo "::error::Invalid promotion path '${SOURCE_BRANCH} -> prd'. Only 'main -> prd' is an allowed promotion source."
+                exit 1
+              fi
+              ;;
+            *)
+              echo "::error::Unexpected target branch '${TARGET_BRANCH}' for Validate Promotion."
+              exit 1
+              ;;
+          esac
+
+          echo "Promotion path '${SOURCE_BRANCH} -> ${TARGET_BRANCH}' is valid."

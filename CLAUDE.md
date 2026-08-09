@@ -120,6 +120,32 @@ silently discard pre-existing local changes.
 
 If unrelated local work prevents safe branch creation or checkout, stop and report the conflict.
 
+1.2 Source of truth priority
+
+When repository sources disagree with each other, resolve the conflict using this priority order, highest first:
+
+1. an explicit requirement approved by the person responsible for the repository;
+
+2. current architectural contracts and documentation (docs/, ADRs, this file);
+
+3. automated tests;
+
+4. existing implementation;
+
+5. historical comments or documentation.
+
+Existing implementation is evidence of the current state. Existing implementation is not automatically the intended architecture.
+
+When implementation and an architectural contract diverge:
+
+do not silently preserve the violation;
+
+do not silently expand the current task's scope to fix it;
+
+report the divergence explicitly;
+
+determine whether resolving it belongs to the current task or to a different one before acting.
+
 2. Engineering role
 
 Act as the implementation engineer for BeeDay.
@@ -590,15 +616,45 @@ main
 
 main represents the consolidated version already approved after homologation and before production promotion.
 
+A pull request into main is only valid when its source branch is hmg.
+
 Do not treat main as a development branch.
 
 prd
 
 prd represents production.
 
+A pull request into prd is only valid when its source branch is main.
+
 Never deploy, merge, or promote to prd without explicit user approval.
 
 Production operations require a deliberate approval boundary even when all prior checks are green.
+
+5.7.1 Automated promotion path validation
+
+The Validate Promotion GitHub Actions workflow (.github/workflows/validate-promotion.yml) runs on pull requests targeting main and prd and fails when the source branch does not match the required promotion path above.
+
+This workflow is a policy gate only: it does not build, test, deploy, or modify the repository, and it does not replace or duplicate BeeDay CI.
+
+The Protect HMG and Protect Main GitHub Rulesets are external repository configuration, not managed by code in this repository. They currently require the BeeDay CI status check; Validate Promotion's check should be added to Protect Main (and to an equivalent ruleset for prd, once one exists) as an additional required status check.
+
+Do not attempt to modify GitHub Rulesets through code changes in this repository.
+
+5.7.2 Build Once, Deploy Many across hmg -> main -> prd
+
+BeeDay CI builds and validates an artifact once, on hmg. That artifact is what deploy-hmg.yml deploys to homologation and what deploy-prd.yml deploys to production — it is never rebuilt for main or prd.
+
+deploy-prd.yml proves this chain by tracing pull request provenance, not by assuming a specific merge strategy:
+
+it resolves the main -> prd pull request that introduced the commit pushed to prd, and reads that pull request's head commit (main's tip at the time);
+
+it then resolves the hmg -> main pull request associated with that main commit, and reads that pull request's head commit (hmg's tip at the time);
+
+it requires a successful BeeDay CI run on hmg for that exact commit before downloading the validated publish and migration bundle artifacts.
+
+A pull request's recorded head commit always identifies the actual source-branch commit regardless of whether the target branch merge used a merge commit, squash, or rebase, so this chain remains valid under any merge method allowed by the Protect HMG / Protect Main rulesets.
+
+If any link in this chain is missing, deploy-prd.yml fails closed and does not deploy.
 
 5.8 Local branch lifecycle
 
@@ -923,6 +979,24 @@ clearly list residual operational risks.
 When an environment-specific manual bootstrap is required, document it separately from normal recurring operation.
 
 A one-time bootstrap must not silently become a permanent manual deployment dependency.
+
+8.2 Repository state vs. environment state
+
+Maintain this distinction explicitly, especially for privileged scripts, IIS, Scheduled Tasks, operational configuration, deploy scripts, and HMG/PRD infrastructure:
+
+Repository State: what is committed and merged in Git.
+
+Promoted / Installed State: what has actually been copied or installed onto the target environment through the repository-supported promotion mechanism.
+
+Runtime State: what is actually running and observed in that environment right now.
+
+A file existing in the repository does not prove it is installed. A file being installed does not prove it is the version currently running. Never infer one state from another without verifying it directly.
+
+Code Complete: implementation and its code-level validations (formatting, build, tests) are finished.
+
+Environment Validated: the change was actually promoted or executed in the target environment and its behavior was directly confirmed there.
+
+Code Complete does not imply Environment Validated. State which one applies whenever infrastructure-sensitive work is reported.
 
 9. End-of-task workflow and report
 

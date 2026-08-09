@@ -28,10 +28,9 @@
     <File Path="LICENSE" />
     <File Path="README.md" />
     <File Path="docs/README.md" />
-    <File Path="docs/ai/README.md" />
     <File Path="docs/architecture/README.md" />
     <File Path="docs/design-system/README.md" />
-    <File Path="docs/development/README.md" />
+    <File Path="docs/developer/README.md" />
     <File Path="docs/domain/README.md" />
   </Folder>
 </Solution>
