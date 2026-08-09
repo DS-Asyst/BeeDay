@@ -775,7 +775,14 @@ try {
         Write-BeeDayIisControlResult -RequestId $requestId -Operation $operation `
             -ExitCode 1 -SiteState $siteState -PoolState $poolState `
             -ErrorStage 'FINALIZE' -ErrorCode 'STATE_MISMATCH'
-        Write-Error "Operation '$operation' completed but final state was not fully '$expectedState' (site=$siteState, pool=$poolState)."
+        # -ErrorAction Continue overrides the script-wide $ErrorActionPreference = "Stop" for this
+        # one call - without it, Write-Error itself becomes a terminating error (same hazard already
+        # documented above CONFIGURE's finally block) that would skip exit 1 below and fall into the
+        # outer catch, which would then overwrite the accurate result.json just written above
+        # (siteState/poolState=real values, errorStage=FINALIZE, errorCode=STATE_MISMATCH) with its
+        # generic fallback (siteState/poolState="Unknown", errorStage=$null, errorCode=UNKNOWN_FAILURE)
+        # - this is exactly the failure mode observed on SERV3WEB.
+        Write-Error "Operation '$operation' completed but final state was not fully '$expectedState' (site=$siteState, pool=$poolState)." -ErrorAction Continue
         exit 1
     }
 
@@ -799,6 +806,10 @@ catch {
         -ExitCode 1 -SiteState "Unknown" -PoolState "Unknown" `
         -ErrorStage $script:currentStage -ErrorCode $failedErrorCode
 
-    Write-Error "Privileged IIS control failed: $($_.Exception.Message)"
+    # -ErrorAction Continue for the same reason as the STATE_MISMATCH branch above: result.json was
+    # already written once, correctly, immediately above - a terminating Write-Error here has no
+    # further catch to fall into, but would still skip exit 1 below and let PowerShell's own uncaught-
+    # exception unwind decide the process exit code instead of the explicit one below.
+    Write-Error "Privileged IIS control failed: $($_.Exception.Message)" -ErrorAction Continue
     exit 1
 }
