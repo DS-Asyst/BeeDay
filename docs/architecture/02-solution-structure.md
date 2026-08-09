@@ -74,17 +74,16 @@ e de `BeeDay.Infrastructure` para registrar `AddBeeDayInfrastructure(configurati
 | Projeto | Referências notáveis |
 |---|---|
 | `BeeDay.Domain` | Nenhuma. |
-| `BeeDay.Application` | `FrameworkReference Microsoft.AspNetCore.App`; `PackageReference FluentValidation`, `FluentValidation.DependencyInjectionExtensions`, `MediatR`. |
+| `BeeDay.Application` | `PackageReference FluentValidation`, `FluentValidation.DependencyInjectionExtensions`, `MediatR`. |
 | `BeeDay.Infrastructure` | `FrameworkReference Microsoft.AspNetCore.App`; `PackageReference Microsoft.EntityFrameworkCore.SqlServer`, `Microsoft.EntityFrameworkCore.Design` (`PrivateAssets=all`); `InternalsVisibleTo` para `BeeDay.Infrastructure.Tests`, `BeeDay.Web.Tests`, `BeeDay.E2E.Tests`. |
 | `BeeDay.Web` | Nenhum `PackageReference` próprio além do SDK Web (Blazor Server vem do SDK). |
 
-**Observação verificada, não uma violação de regra documentada, mas digna de nota:**
-`BeeDay.Application.csproj` declara `<FrameworkReference Include="Microsoft.AspNetCore.App" />`,
-mas nenhum arquivo `.cs` sob `src/BeeDay.Application` importa um namespace `Microsoft.AspNetCore.*`
-— os únicos `using` de framework encontrados são `Microsoft.Extensions.DependencyInjection` e
-`Microsoft.Extensions.Logging`, ambos disponíveis independentemente do `FrameworkReference` a
-`Microsoft.AspNetCore.App`. A referência parece não utilizada hoje; não foi removida nesta Sprint
-por estar fora do escopo ("não alterar código").
+`BeeDay.Application.csproj` declarava `<FrameworkReference Include="Microsoft.AspNetCore.App" />`
+desde o commit inicial do projeto, mas nenhum arquivo `.cs` sob `src/BeeDay.Application` jamais
+importou um namespace `Microsoft.AspNetCore.*` — os únicos `using` de framework usados são
+`Microsoft.Extensions.DependencyInjection` e `Microsoft.Extensions.Logging`, ambos disponíveis
+independentemente dessa `FrameworkReference`. Confirmado via build isolado do projeto e da solução
+completa sem a referência (0 erros). Removida na Sprint 18.3.
 
 ## 4. `Solution Items` (arquivos sem pasta de projeto própria)
 

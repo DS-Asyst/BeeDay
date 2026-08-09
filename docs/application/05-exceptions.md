@@ -7,13 +7,13 @@ documentadas em profundidade, já que Infrastructure é fora do escopo desta Spr
 
 ## Achado estrutural
 
-Application define **apenas 2 exceções próprias**. Concorrência e persistência — que a Fase 7 desta
+Application define **apenas 1 exceção própria**. Concorrência e persistência — que a Fase 7 desta
 Sprint pediu para documentar — **não são exceções de Application**: vivem em
 `BeeDay.Infrastructure.Persistence.Exceptions`. O que Application faz é deixá-las atravessar sem
 capturar (nenhum `catch` de `ConcurrencyConflictException`/`PersistenceException` foi encontrado em
 nenhum Handler durante a leitura desta Sprint).
 
-## Exceções próprias de Application (2)
+## Exceções próprias de Application (1)
 
 ### `ApplicationValidationException`
 
@@ -25,22 +25,6 @@ nenhum Handler durante a leitura desta Sprint).
   propriedade em `camelCase`, deduplica mensagens por propriedade
   (`Distinct(StringComparer.Ordinal)`), expõe `IDictionary<string, string[]> Errors`.
 - Mensagem base fixa: `"One or more validation errors occurred."`.
-
-### `ActivityNotFoundException`
-
-`src/BeeDay.Application/Exceptions/ActivityNotFoundException.cs`:
-
-```csharp
-public sealed class ActivityNotFoundException(Guid id)
-    : KeyNotFoundException($"Activity '{id}' was not found.")
-{
-    public Guid ActivityId { get; } = id;
-}
-```
-
-Deriva de `System.Collections.Generic.KeyNotFoundException`, não de `ApplicationValidationException`
-nem de nenhuma base própria — é uma família de exceção totalmente separada. `ActivityId` expõe o
-identificador que não foi encontrado.
 
 ## Exceções de Domain que cruzam Application sem tradução
 
@@ -70,23 +54,12 @@ Application depende dessas traduções acontecerem em Infrastructure precisament
 conhecer `Microsoft.EntityFrameworkCore.DbUpdateException` — mas não faz nada especial com o
 resultado traduzido além de deixá-lo subir.
 
-## `ActivityNotFoundException` — achado confirmado: exceção nunca lançada, só mapeada
-
-Busca exaustiva (`grep -r "throw new ActivityNotFoundException" src/`) não encontra nenhuma
-ocorrência em todo o repositório — a exceção nunca é lançada por nenhum Handler hoje. Ainda assim,
-`src/BeeDay.Web/Diagnostics/GlobalExceptionHandler.cs` contém um `case ActivityNotFoundException`
-mapeando-a para HTTP 404 — um branch morto, nunca alcançado em runtime.
-
-O motivo está documentado no próprio código: o comentário de `HabitLookup.RequireExistsAsync`
-(`src/BeeDay.Application/Features/Habits/Handlers/HabitCommandHandlers.cs:114-119`) afirma
-explicitamente que `ActivityNotFoundException` "só esteve conectada ao helper não utilizado
-`RequestHandlerBase.Find`... nunca a nenhum handler de Habit" — e `RequestHandlerBase` não existe
-mais em lugar nenhum de `src/` (confirmado por grep). Ou seja: um helper base que lançava essa
-exceção foi removido em algum momento anterior a esta Sprint, mas a exceção em si e seu mapeamento
-em `GlobalExceptionHandler` não foram removidos junto. Hoje, "não encontrado" é sinalizado
-lançando `InvalidDomainStateException` diretamente (ver `HabitLookup.RequireExistsAsync`), não
-`ActivityNotFoundException`. Reportado como achado; não corrigido (fora do escopo — "não alterar
-código").
+`ActivityNotFoundException` existia como exceção própria de Application, mas uma busca exaustiva
+(`grep -r "throw new ActivityNotFoundException" src/`) não encontrava nenhuma ocorrência em todo o
+repositório — nunca era lançada por nenhum Handler. O helper que a lançava
+(`RequestHandlerBase.Find`) já havia sido removido em Sprint anterior; hoje "não encontrado" é
+sinalizado lançando `InvalidDomainStateException` diretamente (ver `HabitLookup.RequireExistsAsync`).
+Removida, junto com o `case` morto correspondente em `GlobalExceptionHandler.cs`, na Sprint 18.3.
 
 ## Fluxo de propagação
 
@@ -113,7 +86,7 @@ essa tradução, se existir, acontece em `BeeDay.Web` (`GlobalExceptionHandler`,
 ## Fontes de verdade
 
 **Arquivos consultados:** `src/BeeDay.Application/Exceptions/ApplicationValidationException.cs`,
-`ActivityNotFoundException.cs`, `src/BeeDay.Domain/Exceptions/DomainException.cs`,
+`src/BeeDay.Domain/Exceptions/DomainException.cs`,
 `DomainValidationException.cs`, `InvalidDomainStateException.cs`,
 `src/BeeDay.Infrastructure/Persistence/Exceptions/PersistenceException.cs`,
 `ConcurrencyConflictException.cs` (estas duas últimas citadas por completude, não como fonte

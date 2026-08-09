@@ -31,7 +31,7 @@ src/BeeDay.Application/
 │   ├── Identity/           IClock, IEmailSender, IIdentityEmailComposer, IIdentityRequestThrottle, IUserTokenService
 │   └── Security/            ICurrentUserContext, IPasswordService, PasswordPolicy, CurrentUserGuard
 ├── DependencyInjection/    AddBeeDayApplication() — único ponto de registro DI desta camada
-├── Exceptions/              ApplicationValidationException, ActivityNotFoundException
+├── Exceptions/              ApplicationValidationException
 └── Features/                 9 pastas, cada uma com Commands/, Queries/ (se houver),
                                 Handlers/, Requests/, Responses/ (se houver), Validation/
 ```
