@@ -497,11 +497,12 @@ try {
         # fact, already taken effect (confirmed immediately after the "failed" run by querying
         # state directly - both Site and Pool were already Stopped). Swallowing here does NOT mask
         # a real failure: the shared FINALIZE block below (Get-WebsiteState/Get-WebAppPoolState
-        # with -ErrorAction Stop, unchanged) is the one authoritative, un-swallowed check that
-        # actually decides $success - if the site/pool genuinely never reaches the target state,
-        # or FINALIZE's own read fails, this operation still fails, exactly as before. What changes
-        # is that a transient hiccup in one of these individual steps no longer aborts the whole
-        # operation before FINALIZE ever gets a chance to prove the transition actually worked.
+        # with -ErrorAction Stop on every poll iteration - see Sprint 17.18) is the one authoritative,
+        # un-swallowed check that actually decides $success - if the site/pool genuinely never reach
+        # the target state within FINALIZE's own poll timeout, or a FINALIZE read itself fails, this
+        # operation still fails. What changes here is that a transient hiccup in one of these
+        # individual steps no longer aborts the whole operation before FINALIZE ever gets a chance to
+        # prove the transition actually worked.
         # Each step is tagged with its own fixed stage/errorCode immediately before running, purely
         # for diagnostics should something outside this try/catch pattern ever throw here.
         if ($operation -eq 'STOP') {
@@ -748,22 +749,46 @@ try {
     # rather than left attributed to whichever operation-specific stage happened to run last.
     $script:currentStage = 'FINALIZE'
     $script:currentErrorCode = $null
-    Start-Sleep -Seconds 2
-    $siteState = (Get-WebsiteState -Name $SiteName -ErrorAction Stop).Value
-    $poolState = (Get-WebAppPoolState -Name $AppPoolName -ErrorAction Stop).Value
-    $script:currentStage = $null
-    $script:currentErrorCode = $null
 
     if ($operation -eq 'CONFIGURE' -or $operation -eq 'RESTORE') {
         # No target site/pool state to compare against - reaching this point without an exception
-        # is success. States are still reported, purely for visibility, to keep the result schema
-        # uniform with STOP/START.
+        # is success. The settle delay and single read are kept exactly as before - only for
+        # visibility, to keep the result schema uniform with STOP/START - and never used to decide
+        # $success.
+        Start-Sleep -Seconds 2
+        $siteState = (Get-WebsiteState -Name $SiteName -ErrorAction Stop).Value
+        $poolState = (Get-WebAppPoolState -Name $AppPoolName -ErrorAction Stop).Value
         $success = $true
     }
     else {
+        # STOP/START converge to Site=$expectedState and Pool=$expectedState asynchronously - IIS
+        # can still report a transitional state (e.g. Pool=Stopping right after Stop-WebAppPool
+        # returns) for a few seconds. A single read after a fixed delay (the previous behavior)
+        # could observe that transitional state and report STATE_MISMATCH even though the site/pool
+        # would have converged moments later - confirmed on SERV3WEB (Site=Stopped/Pool=Stopping on
+        # the first deploy attempt, both Stopped on an immediate retry). Poll instead, up to
+        # $finalizeTimeoutSeconds, so real-but-slow convergence is not misreported as a failure;
+        # only a genuine non-convergence within that window still fails.
         $expectedState = if ($operation -eq 'STOP') { 'Stopped' } else { 'Started' }
-        $success = ($siteState -eq $expectedState) -and ($poolState -eq $expectedState)
+        $finalizeTimeoutSeconds = 30
+        $finalizePollIntervalSeconds = 1
+        $finalizeDeadline = (Get-Date).AddSeconds($finalizeTimeoutSeconds)
+
+        while ($true) {
+            $siteState = (Get-WebsiteState -Name $SiteName -ErrorAction Stop).Value
+            $poolState = (Get-WebAppPoolState -Name $AppPoolName -ErrorAction Stop).Value
+            $success = ($siteState -eq $expectedState) -and ($poolState -eq $expectedState)
+
+            if ($success -or (Get-Date) -ge $finalizeDeadline) {
+                break
+            }
+
+            Start-Sleep -Seconds $finalizePollIntervalSeconds
+        }
     }
+
+    $script:currentStage = $null
+    $script:currentErrorCode = $null
 
     if (-not $success) {
         # STOP/START only - CONFIGURE/RESTORE always have $success=$true above. The transitional
