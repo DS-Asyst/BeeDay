@@ -97,9 +97,9 @@ consequências reais, confirmadas por captura de HTTP real, não presumidas:
 
 Duas limitações adicionais, não relacionadas a TLS:
 
-- **Códigos 404/409/500/503 do `GlobalExceptionHandler`** (`ActivityNotFoundException`,
-  `InvalidDomainStateException` fora do catch local de `/auth/login`, `PersistenceException`, erro
-  não mapeado) não são alcançáveis por uma requisição HTTP real: a superfície HTTP desta aplicação é
+- **Códigos 409/500/503 do `GlobalExceptionHandler`** (`InvalidDomainStateException` fora do catch
+  local de `/auth/login`, `PersistenceException`, erro não mapeado) não são alcançáveis por uma
+  requisição HTTP real: a superfície HTTP desta aplicação é
   só `/auth/login`, `/auth/logout`, `/health*` e páginas Blazor — nenhuma delas deixa esses tipos de
   exceção escaparem de um handler MediatR para o pipeline HTTP (só acontece a partir do circuito
   SignalR do Blazor). Nenhum endpoint artificial foi criado só para forçar esses códigos.

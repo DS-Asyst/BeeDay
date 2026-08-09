@@ -113,10 +113,11 @@ public sealed class DeleteHabitCommandHandler(IHabitRepository repository, ICurr
 
 /// <summary>
 /// Preserves the exact "not found" message <c>LevelUpData.FindHabit</c> used to throw
-/// (<see cref="InvalidDomainStateException"/>, not <c>ActivityNotFoundException</c> — that type was only
-/// ever wired to the unused <c>RequestHandlerBase.Find</c> helper, confirmed by source search, never to
-/// any Habit handler) — repository methods throw a generic EF/LINQ exception on a missing row, which
-/// would otherwise change the HTTP status this maps to via <c>GlobalExceptionHandler</c>.
+/// (<see cref="InvalidDomainStateException"/> — the old activity-not-found-specific exception
+/// mapping was removed together with the legacy <c>RequestHandlerBase.Find</c> helper it was only
+/// ever wired to, confirmed by source search, never to any Habit handler) — repository methods
+/// throw a generic EF/LINQ exception on a missing row, which would otherwise change the HTTP
+/// status this maps to via <c>GlobalExceptionHandler</c>.
 /// </summary>
 internal static class HabitLookup
 {

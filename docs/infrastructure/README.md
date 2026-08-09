@@ -25,12 +25,12 @@ src/BeeDay.Infrastructure/
 ├── Caching/               MemoryApplicationCache (IMemoryCache)
 ├── Configuration/          5 classes Options (SqlServer, IdentityEmail, Resend, DevelopmentEmail, EventJournal)
 ├── DependencyInjection/     InfrastructureServiceCollectionExtensions — único ponto de registro
-├── Diagnostics/             InfrastructureEventIds (achado: não utilizado)
+├── Diagnostics/             (vazio — InfrastructureEventIds removido na Sprint 18.3, era código morto)
 ├── HealthChecks/            SqlServerHealthCheck
 ├── Identity/                 SystemClock, SecureUserTokenService, MemoryIdentityRequestThrottle,
 │                              IdentityEmailComposer, ResendEmailSender, DevelopmentEmailSender
 ├── Persistence/
-│   ├── Exceptions/           PersistenceException + 4 subtipos (2 ativos, 3 mortos)
+│   ├── Exceptions/           PersistenceException + ConcurrencyConflictException (ambos ativos)
 │   └── SqlServer/            BeeDayDbContext, Configurations/, Migrations/, Repositories/,
 │                               EfUnitOfWork, EfDashboardReadService, EfWalletReadService,
 │                               EfConcurrencySaveChanges
@@ -104,5 +104,10 @@ mesma Sprint.
 - Comentários de código em `EfConcurrencySaveChanges.cs` e `EventJournalOptions.cs` ainda
   mencionam "o provider JSON" como referência histórica — comentários, não comportamento; fora do
   escopo alterar (código).
+
+`Diagnostics/InfrastructureEventIds.cs` e os 3 subtipos mortos de
+`Persistence/Exceptions/` (`BackupRestoreException.cs`, `DataFileCorruptedException.cs`,
+`PersistenceAccessException.cs`) foram removidos na Sprint 18.3 — eram código morto comprovado,
+vocabulário residual do pipeline JSON removido pela ADR-005.
 
 Ver cada documento individual para achados adicionais específicos de sua área.

@@ -94,14 +94,6 @@ public sealed class GlobalExceptionHandler(
                 StatusCodes.Status400BadRequest,
                 "Malformed request",
                 includeTechnicalDetails ? exception.Message : "The request could not be processed. Reload the page and try again."),
-            ActivityNotFoundException notFound => new ProblemDetails
-            {
-                Status = StatusCodes.Status404NotFound,
-                Title = "Activity not found",
-                Detail = notFound.Message,
-                Type = "https://httpstatuses.com/404",
-                Extensions = { ["activityId"] = notFound.ActivityId }
-            },
             PersistenceException => Create(
                 StatusCodes.Status503ServiceUnavailable,
                 "Persistence unavailable",

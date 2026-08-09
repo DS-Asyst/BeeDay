@@ -116,14 +116,12 @@ qualquer outro código só pode enfileirar (`QueueAsync`, via a interface públi
 Event Journal como trabalho em background — mantém a escrita do journal fora do caminho crítico de
 uma requisição.
 
-## `InfrastructureEventIds` — achado: definido, nunca usado
+## `InfrastructureEventIds` — removido na Sprint 18.3
 
-`Diagnostics/InfrastructureEventIds.cs` define 8 `EventId` estáticos (`DataFileCreated=6001`,
-`DataFileLoaded=6002`, `DataFileSaved=6003`, `DataFileInvalid=6004`, `BackupCreated=6010`,
-`BackupRemoved=6011`, `BackupInvalid=6012`, `BackupRestored=6013`). Busca em todo `src/`/`tests/`
-não encontra nenhuma referência além da própria declaração — nenhuma classe de logging estruturado
-os utiliza hoje. O vocabulário ("DataFile", "Backup") é típico do pipeline JSON removido
-(ADR-005), reforçando que são resíduos não removidos junto com o resto daquele pipeline.
+`Diagnostics/InfrastructureEventIds.cs` definia 8 `EventId` estáticos (`DataFileCreated`,
+`DataFileLoaded`, `DataFileSaved`, `DataFileInvalid`, `BackupCreated`, `BackupRemoved`,
+`BackupInvalid`, `BackupRestored`) sem nenhuma referência além da própria declaração — vocabulário
+típico do pipeline JSON removido (ADR-005). Confirmado código morto e removido nesta Sprint.
 
 ## Fontes de verdade
 
@@ -132,7 +130,7 @@ os utiliza hoje. O vocabulário ("DataFile", "Backup") é típico do pipeline JS
 `ResendEmailSender.cs`, `DevelopmentEmailSender.cs`, `Security/Pbkdf2PasswordService.cs`,
 `Caching/MemoryApplicationCache.cs`, `HealthChecks/SqlServerHealthCheck.cs`,
 `Background/BackgroundTaskQueue.cs`, `BackgroundTaskWorker.cs`,
-`Diagnostics/InfrastructureEventIds.cs`, os 5 arquivos de `Configuration/`,
+os 5 arquivos de `Configuration/`,
 `DependencyInjection/InfrastructureServiceCollectionExtensions.cs` (para lifetime de cada
 registro).
 **Testes consultados:** `tests/BeeDay.Infrastructure.Tests/JsonEventJournalTests.cs`
