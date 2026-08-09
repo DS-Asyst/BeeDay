@@ -25,12 +25,12 @@ src/BeeDay.Infrastructure/
 ├── Caching/               MemoryApplicationCache (IMemoryCache)
 ├── Configuration/          5 classes Options (SqlServer, IdentityEmail, Resend, DevelopmentEmail, EventJournal)
 ├── DependencyInjection/     InfrastructureServiceCollectionExtensions — único ponto de registro
-├── Diagnostics/             InfrastructureEventIds (achado: não utilizado)
+├── Diagnostics/             (vazio — InfrastructureEventIds removido na Sprint 18.3, era código morto)
 ├── HealthChecks/            SqlServerHealthCheck
 ├── Identity/                 SystemClock, SecureUserTokenService, MemoryIdentityRequestThrottle,
 │                              IdentityEmailComposer, ResendEmailSender, DevelopmentEmailSender
 ├── Persistence/
-│   ├── Exceptions/           PersistenceException + 4 subtipos (2 ativos, 3 mortos)
+│   ├── Exceptions/           PersistenceException + ConcurrencyConflictException (ambos ativos)
 │   └── SqlServer/            BeeDayDbContext, Configurations/, Migrations/, Repositories/,
 │                               EfUnitOfWork, EfDashboardReadService, EfWalletReadService,
 │                               EfConcurrencySaveChanges
@@ -93,18 +93,15 @@ mesma Sprint.
 
 ## Achados relevantes (reportados, não corrigidos)
 
-- `Diagnostics/InfrastructureEventIds.cs` define 8 `EventId` (`DataFileCreated`, `DataFileLoaded`,
-  `DataFileSaved`, `DataFileInvalid`, `BackupCreated`, `BackupRemoved`, `BackupInvalid`,
-  `BackupRestored`) sem nenhuma referência em `src/`/`tests/` além da própria definição — código
-  morto, vocabulário de arquivo/backup típico do pipeline JSON removido (ADR-005).
-- `Persistence/Exceptions/BackupRestoreException.cs`, `DataFileCorruptedException.cs`,
-  `PersistenceAccessException.cs` — as 3 nunca são lançadas, capturadas, ou referenciadas em
-  nenhum outro arquivo além de si mesmas. `DataFileCorruptedException`'s mensagem cita
-  literalmente "The JSON data file" — confirma origem do pipeline JSON removido.
 - `SqlServerOptions.HealthCheckEnabled` — propriedade sem nenhum efeito hoje; o health check roda
   incondicionalmente desde que o SQL Server se tornou o único provider.
 - Comentários de código em `EfConcurrencySaveChanges.cs` e `EventJournalOptions.cs` ainda
   mencionam "o provider JSON" como referência histórica — comentários, não comportamento; fora do
   escopo alterar (código).
+
+`Diagnostics/InfrastructureEventIds.cs` e os 3 subtipos mortos de
+`Persistence/Exceptions/` (`BackupRestoreException.cs`, `DataFileCorruptedException.cs`,
+`PersistenceAccessException.cs`) foram removidos na Sprint 18.3 — eram código morto comprovado,
+vocabulário residual do pipeline JSON removido pela ADR-005.
 
 Ver cada documento individual para achados adicionais específicos de sua área.

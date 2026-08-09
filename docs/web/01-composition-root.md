@@ -123,7 +123,6 @@ UseForwardedHeaders (se produção + habilitado)
   | `DomainValidationException` | 400 | Inclui `field` como extension |
   | `InvalidDomainStateException` | 409 | — |
   | `AntiforgeryValidationException` / `BadHttpRequestException` | 400 | Mensagem técnica só em `IsDevelopment()` |
-  | `ActivityNotFoundException` | 404 | Inclui `activityId` |
   | `PersistenceException` | 503 | Mensagem genérica sempre |
   | `OperationCanceledException` (request abortada) | 499 | — |
   | qualquer outra | 500 | Mensagem técnica só em `IsDevelopment()` |

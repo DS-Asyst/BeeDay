@@ -9,7 +9,7 @@ namespace BeeDay.Web.Tests.Integration;
 /// actually appears over HTTP: status code, content type, structure, correlation id, and that no
 /// exception internals leak in Production. Only scenarios genuinely reachable through this app's
 /// real HTTP surface are covered here — Blazor Server has no minimal API route that lets
-/// ActivityNotFoundException/InvalidDomainStateException/PersistenceException/an unexpected 500
+/// InvalidDomainStateException/PersistenceException/an unexpected 500
 /// reach the HTTP exception handler (those exceptions only occur inside MediatR calls made from
 /// Razor components over the SignalR circuit, never from a raw HTTP request), so this suite does
 /// not fabricate an endpoint just to force those codes — see the final sprint report for that
