@@ -95,14 +95,6 @@ mesma Sprint.
 
 ## Achados relevantes (reportados, não corrigidos)
 
-- `Diagnostics/InfrastructureEventIds.cs` define 8 `EventId` (`DataFileCreated`, `DataFileLoaded`,
-  `DataFileSaved`, `DataFileInvalid`, `BackupCreated`, `BackupRemoved`, `BackupInvalid`,
-  `BackupRestored`) sem nenhuma referência em `src/`/`tests/` além da própria definição — código
-  morto, vocabulário de arquivo/backup típico do pipeline JSON removido (ADR-005).
-- `Persistence/Exceptions/BackupRestoreException.cs`, `DataFileCorruptedException.cs`,
-  `PersistenceAccessException.cs` — as 3 nunca são lançadas, capturadas, ou referenciadas em
-  nenhum outro arquivo além de si mesmas. `DataFileCorruptedException`'s mensagem cita
-  literalmente "The JSON data file" — confirma origem do pipeline JSON removido.
 - Comentários de código em `EfConcurrencySaveChanges.cs` e `EventJournalOptions.cs` ainda
   mencionam "o provider JSON" como referência histórica — comentários, não comportamento; fora do
   escopo alterar (código).

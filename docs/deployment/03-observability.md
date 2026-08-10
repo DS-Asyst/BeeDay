@@ -4,9 +4,12 @@
 `src/BeeDay.Web/Diagnostics/`, `src/BeeDay.Web/HealthChecks/`,
 `src/BeeDay.Infrastructure/Auditing/JsonEventJournal.cs`,
 `src/BeeDay.Infrastructure/Background/BackgroundTaskWorker.cs`,
-`src/BeeDay.Infrastructure/HealthChecks/SqlServerHealthCheck.cs`.
+`src/BeeDay.Infrastructure/HealthChecks/SqlServerHealthCheck.cs`,
+`src/BeeDay.Application/Common/Behaviors/*.cs`, `src/BeeDay.Domain/Events/*.cs`.
 
-**Última verificação:** 2026-08-07.
+**Última verificação:** 2026-08-09 (Sprint 18.5 — classificação do Event Journal como Audit/Business
+History e auditoria exaustiva de `EventId`; seções anteriores a esta data cobriam só logging de
+`Program.cs`).
 
 ## 1. Objetivo
 
@@ -36,8 +39,15 @@ Eventos nomeados observados nesta auditoria (`LogInformation`/`LogWarning` com m
 `Categoria.Evento`, não apenas texto livre): `Authentication.LoginSucceeded`,
 `Authentication.LoginFailed`, `Authentication.LoginRateLimited`, `Authentication.LogoutSucceeded` —
 todos em `Program.cs`, categoria de logger fixa `"BeeDay.Authentication"` (não o nome de classe
-convencional `ILogger<T>`). `WebEventIds.RequestFailed` (`EventId` 6100) é o único `EventId`
-tipado do projeto Web, usado por `GlobalExceptionHandler`.
+convencional `ILogger<T>`). `WebEventIds.RequestFailed` (`EventId` 6100) é o **único** `EventId`
+tipado em todo o repositório (confirmado por auditoria exaustiva na Sprint 18.5 — `Infrastructure`
+e `Domain` não definem nenhum outro), usado por `GlobalExceptionHandler`.
+
+**Logging estruturado por request (pipeline MediatR):** além do que está descrito acima,
+`LoggingBehavior<,>`/`PerformanceBehavior<,>` (`BeeDay.Application`) logam Information/Warning/Error
+para **todo** Command/Query que passa por `ISender.Send` — mecanismo separado do logging de
+`Program.cs`, documentado em detalhe em
+[`docs/application/03-pipeline.md`](../application/03-pipeline.md) §1-2 (não duplicado aqui).
 
 ## 3. Health Checks
 
@@ -56,14 +66,27 @@ Corpo de resposta: `status`, `durationMs`, `correlationId`, e por check `name`/`
 `description`/`durationMs`/`data`. Nenhum dos 3 endpoints exige autenticação — ver
 [`docs/security/02-operational-security.md`](../security/02-operational-security.md) §10.
 
-## 4. Event Journal — o log de auditoria de domain events
+## 4. Event Journal — trilha de auditoria de negócio (não logging técnico)
 
-`JsonEventJournal` (`IEventJournal`, `src/BeeDay.Infrastructure/Auditing/`): log de auditoria
-append-only, formato NDJSON (uma linha JSON por evento), completamente independente da persistência
-de estado funcional (SQL Server) — grava em arquivo próprio, nunca lido de volta pela aplicação
-(write-only, sem API de leitura). Cada linha: `Type` (nome da classe do evento), `EventId`,
-`OccurredOnUtc`, `Summary` (texto legível só para `UserLeveledUpDomainEvent`; `null` para os
-demais), `Payload` (o domain event serializado por completo).
+**Classificação confirmada na Sprint 18.5, após auditoria dedicada:** o Event Journal **não é um
+mecanismo de logging/observabilidade técnica** — é uma trilha de auditoria de histórico de negócio.
+A distinção importa porque `DomainEventBehavior` (ver
+[`docs/application/03-pipeline.md`](../application/03-pipeline.md) §4) publica um
+`ApplicationActionDomainEvent` para **todo Command que termina com sucesso** — o journal registra
+sistematicamente "qual ação de negócio aconteceu, quando, sobre qual entidade", não "o que o
+processo estava fazendo tecnicamente" (isso é papel do logging estruturado, §2 acima). Os 2 domain
+events específicos de XP (`ExperienceGrantedDomainEvent`, `UserLeveledUpDomainEvent`) somam-se a
+essa mesma trilha. Nenhum dos 3 domain events carrega dado pessoal — só identificadores opacos
+(`Guid`), enums, valores numéricos e timestamps; `Action`/`Category` do `ApplicationActionDomainEvent`
+vêm sempre do nome do tipo C# do Command, nunca de texto livre digitado pelo usuário.
+
+`JsonEventJournal` (`IEventJournal`, `src/BeeDay.Infrastructure/Auditing/`): append-only, formato
+NDJSON (uma linha JSON por evento), completamente independente da persistência de estado funcional
+(SQL Server) — grava em arquivo próprio, nunca lido de volta pela aplicação (write-only, sem API de
+leitura; nenhuma ferramenta operacional deste repositório o lê de volta). Cada linha: `Type` (nome
+da classe do evento), `EventId`, `OccurredOnUtc`, `Summary` (texto legível só para
+`UserLeveledUpDomainEvent`; `null` para os demais), `Payload` (o domain event serializado por
+completo).
 
 **Deduplicação**: antes de gravar, `ContainsAsync` lê o arquivo inteiro linha a linha procurando o
 mesmo `EventId` (ou, para level-up, o mesmo `ExperienceEntryId`) — evita duplicata se o mesmo evento
@@ -119,7 +142,10 @@ toda resposta de erro carrega `correlationId`/`requestId` como extension do `Pro
   própria.
 - Sem rotação/retenção configurada para o Event Journal (§4) nem para o log de stdout do IIS — a
   responsabilidade de gerenciar o crescimento de ambos os arquivos não está automatizada em nenhum
-  script deste repositório.
+  script deste repositório. Risco operacional conhecido, registrado na Sprint 18.5 (auditoria de
+  observabilidade) — implementar rotação seria introduzir comportamento novo, fora do escopo dessa
+  Sprint (correção de código, não auditoria); recomendação para uma Sprint futura, não implementada
+  silenciosamente.
 - Nenhum alerta automatizado (e-mail, Slack, PagerDuty) configurado a partir de qualquer sinal
   descrito acima — o único consumidor automatizado de `/health/ready` é `Deploy-BeeDay.ps1`, e
   apenas durante a janela do próprio deploy (6 tentativas, então para de verificar).
@@ -131,6 +157,9 @@ toda resposta de erro carrega `correlationId`/`requestId` como extension do `Pro
 - `src/BeeDay.Infrastructure/Auditing/JsonEventJournal.cs`,
   `Background/BackgroundTaskWorker.cs`, `Background/BackgroundTaskQueue.cs`,
   `HealthChecks/SqlServerHealthCheck.cs`.
+- `src/BeeDay.Application/Common/Behaviors/LoggingBehavior.cs`, `PerformanceBehavior.cs`,
+  `DomainEventBehavior.cs`; `src/BeeDay.Domain/Events/*.cs` (verificação de ausência de PII nos
+  domain events, Sprint 18.5).
 - Busca por "Serilog", `IHostApplicationLifetime`, `BackgroundService` em `src/BeeDay.Web/` e
   `src/BeeDay.Infrastructure/`.
 - [`docs/web/01-composition-root.md`](../web/01-composition-root.md),
