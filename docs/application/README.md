@@ -8,6 +8,10 @@ reverificação direta no código.
 **Fonte da verdade:** cada documento abaixo declara individualmente as fontes exatas usadas para
 validá-lo, na seção final "Fontes de verdade".
 
+**Última verificação:** 2026-08-09 (Sprint 18.6) — `Common/Caching/IApplicationCache.cs` e
+`Common/Events/InvalidateDashboardCacheHandler.cs` removidos (código morto comprovado: o cache que
+esse handler invalidava nunca era populado em produção).
+
 ## Responsabilidade da camada
 
 `BeeDay.Application` orquestra casos de uso: recebe um Command ou Query (via MediatR), aplica
@@ -24,9 +28,8 @@ src/BeeDay.Application/
 │   ├── Auditing/       IEventJournal
 │   ├── Background/      IBackgroundTaskQueue
 │   ├── Behaviors/        4 IPipelineBehavior<,> do MediatR
-│   ├── Caching/          IApplicationCache
 │   ├── Contracts/        8 interfaces de repositório + IUnitOfWork
-│   ├── Events/            DomainEventNotification + 2 INotificationHandler genéricos
+│   ├── Events/            DomainEventNotification + 1 INotificationHandler genérico
 │   ├── Experience/         Motor de concessão de XP (Service + Policy)
 │   ├── Identity/           IClock, IEmailSender, IIdentityEmailComposer, IIdentityRequestThrottle, IUserTokenService
 │   └── Security/            ICurrentUserContext, IPasswordService, PasswordPolicy, CurrentUserGuard

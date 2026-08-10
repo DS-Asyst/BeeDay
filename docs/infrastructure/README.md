@@ -8,13 +8,16 @@ sprints anteriores sem reverificação direta no código.
 **Fonte da verdade:** cada documento abaixo declara individualmente as fontes exatas usadas para
 validá-lo, na seção final "Fontes de verdade".
 
+**Última verificação:** 2026-08-09 (Sprint 18.6) — `Caching/MemoryApplicationCache.cs` removido
+(código morto comprovado: seu único cache nunca era populado em produção; ver `04-services.md`).
+
 ## Responsabilidade
 
 `BeeDay.Infrastructure` é a única camada que conhece tecnologia concreta de persistência (EF Core/
 SQL Server) e de integração externa (Resend, sistema de arquivos para e-mails de desenvolvimento e
-Event Journal, `IMemoryCache`). Implementa toda interface definida em `BeeDay.Application` que
-precisa de uma tecnologia real por trás — repositórios, read services, hashing de senha, envio de
-e-mail, relógio, cache, fila de background, journal de auditoria, health check.
+Event Journal). Implementa toda interface definida em `BeeDay.Application` que precisa de uma
+tecnologia real por trás — repositórios, read services, hashing de senha, envio de e-mail, relógio,
+fila de background, journal de auditoria, health check.
 
 ## Organização
 
@@ -22,7 +25,6 @@ e-mail, relógio, cache, fila de background, journal de auditoria, health check.
 src/BeeDay.Infrastructure/
 ├── Auditing/            JsonEventJournal (log de domain events, append-only, NDJSON)
 ├── Background/           BackgroundTaskQueue + BackgroundTaskWorker (fila + worker)
-├── Caching/               MemoryApplicationCache (IMemoryCache)
 ├── Configuration/          5 classes Options (SqlServer, IdentityEmail, Resend, DevelopmentEmail, EventJournal)
 ├── DependencyInjection/     InfrastructureServiceCollectionExtensions — único ponto de registro
 ├── Diagnostics/             (vazio — InfrastructureEventIds removido na Sprint 18.3, era código morto)
@@ -39,10 +41,10 @@ src/BeeDay.Infrastructure/
 
 ## Integração com Application
 
-Toda dependência é por interface — Infrastructure implementa 18 interfaces definidas em
+Toda dependência é por interface — Infrastructure implementa 17 interfaces definidas em
 `BeeDay.Application` (8 repositórios, `IUnitOfWork`, 2 read services, `IPasswordService`, `IClock`,
 `IUserTokenService`, `IIdentityRequestThrottle`, `IIdentityEmailComposer`, `IEmailSender`,
-`IEventJournal`, `IApplicationCache`, `IBackgroundTaskQueue`). Confirmado por teste real
+`IEventJournal`, `IBackgroundTaskQueue`). Confirmado por teste real
 (`PersistenceContractBoundaryTests.ApplicationAssembly_DoesNotReferenceInfrastructure`, em
 `tests/BeeDay.Application.Tests/`): a dependência é sempre `Infrastructure → Application`, nunca o
 inverso.
@@ -76,8 +78,8 @@ documentado em `docs/architecture/07-security-architecture.md`, fora do escopo d
 | [`01-repositories.md`](01-repositories.md) | Os 8 repositórios, `EfUnitOfWork`, 2 read services — mecânica interna de Add/Update/Remove/Reorder |
 | [`02-sql-server.md`](02-sql-server.md) | Connection string, `SqlServerOptions`, migrations, ciclo de vida do banco, startup |
 | [`03-concurrency.md`](03-concurrency.md) | RowVersion, `DbUpdateConcurrencyException`, tradução de exceções, fluxo completo |
-| [`04-services.md`](04-services.md) | Event Journal, Identity, hashing de senha, e-mail, cache, health check, background |
-| [`05-dependency-injection.md`](05-dependency-injection.md) | Os 32 registros de `InfrastructureServiceCollectionExtensions`, lifetimes, `IDbContextFactory` |
+| [`04-services.md`](04-services.md) | Event Journal, Identity, hashing de senha, e-mail, health check, background |
+| [`05-dependency-injection.md`](05-dependency-injection.md) | Os 29 registros de `InfrastructureServiceCollectionExtensions`, lifetimes, `IDbContextFactory` |
 
 Para o mapeamento objeto-relacional em si (DbSets, Configurations, TPC, Owned/Complex Type,
 migration strategy), ver [`docs/persistence/`](../persistence/README.md) — reconstruído nesta
@@ -89,7 +91,7 @@ mesma Sprint.
 2. `docs/persistence/` — o modelo de dados.
 3. `01-repositories.md` — como o modelo é persistido/consultado na prática.
 4. `02-sql-server.md` e `03-concurrency.md` — o que acontece por baixo de cada `SaveChangesAsync`.
-5. `04-services.md` — os serviços de suporte (e-mail, cache, background, auditoria).
+5. `04-services.md` — os serviços de suporte (e-mail, background, auditoria).
 
 ## Achados relevantes (reportados, não corrigidos)
 

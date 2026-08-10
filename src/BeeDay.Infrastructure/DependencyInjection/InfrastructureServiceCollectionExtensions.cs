@@ -1,7 +1,6 @@
 using BeeDay.Application.Common.Contracts;
 using BeeDay.Infrastructure.Auditing;
 using BeeDay.Infrastructure.Background;
-using BeeDay.Infrastructure.Caching;
 using BeeDay.Infrastructure.Configuration;
 using BeeDay.Infrastructure.HealthChecks;
 using BeeDay.Infrastructure.Identity;
@@ -85,9 +84,6 @@ public static class InfrastructureServiceCollectionExtensions
         {
             services.AddSingleton<BeeDay.Application.Common.Identity.IEmailSender, DevelopmentEmailSender>();
         }
-        services.AddMemoryCache();
-        services.AddSingleton<MemoryApplicationCache>();
-        services.AddSingleton<BeeDay.Application.Common.Caching.IApplicationCache>(sp => sp.GetRequiredService<MemoryApplicationCache>());
         services.AddSingleton<BackgroundTaskQueue>();
         services.AddSingleton<BeeDay.Application.Common.Background.IBackgroundTaskQueue>(sp => sp.GetRequiredService<BackgroundTaskQueue>());
         services.AddHostedService<BackgroundTaskWorker>();
