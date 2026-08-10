@@ -36,20 +36,24 @@ linkado a partir daqui onde relevante em vez de duplicado.
 5. `05-privileged-iis-control.md` — como o runner de baixo privilégio controla o IIS em HMG sem
    nunca virar administrador.
 
+## Estado real de HMG e PRD (Sprint 18.4)
+
+**PRD não está provisionado, por decisão arquitetural deliberada.** O único ambiente runtime real
+hoje é HMG (SERV3WEB) — confirmado diretamente no servidor na Sprint 18.4. `prd` (branch Git) e
+`deploy-prd.yml` são artefatos preparatórios para um provisionamento futuro em Azure, ainda não
+executado contra nenhum servidor real. Ver [`02-runtime-configuration.md`](02-runtime-configuration.md)
+§5 para o detalhamento completo, incluindo por que `appsettings.Production.json` não corresponde a
+nenhum Runtime State existente.
+
 ## Achados relevantes (reportados, não corrigidos)
 
-- **`appsettings.Production.json` e `web.config` referenciam `C:\Apps\LevelUp-Data\...`** (3 pontos:
-  `DataProtectionKeysDirectory`, `Auditing:EventJournal:Directory`, `stdoutLogFile`) **enquanto
-  `scripts/Deploy-BeeDay.ps1` cria e protege ACL apenas em `C:\Apps\BeeDay-Data\...`** — não é uma
-  divergência cosmética: se implantado como está hoje no repositório, o processo da aplicação
-  tentaria escrever chaves de Data Protection, o Event Journal e o log de stdout em um caminho
-  (`LevelUp-Data`) para o qual `IIS AppPool\BeeDayPool` nunca recebe permissão `Modify` pelo script
-  de deploy. Detalhado em [`02-runtime-configuration.md`](02-runtime-configuration.md) §5 e
-  [`04-operations.md`](04-operations.md) §4.
-- **`deploy-prd.yml`'s step "Validate deployment secrets" não inclui `BEEDAY_RESEND_FROM_NAME`**
-  na lista de 4 secrets pré-validados, embora o step seguinte ("Deploy to IIS with rollback") o
-  consuma — já reportado em `docs/architecture/README.md` (Sprint 16.3); detalhado com o valor
-  padrão de fallback em [`01-deployment.md`](01-deployment.md) §5.
+- `deploy-prd.yml`'s step "Validate deployment secrets" não inclui `BEEDAY_MIGRATOR_CONNECTION`/
+  `BEEDAY_APP_CONNECTION` entre os secrets — consistente com o achado acima: produção não tem
+  connection string própria nem executa migrations, pois o ambiente ainda não existe. Corrigido
+  nesta mesma Sprint apenas quanto a `BEEDAY_RESEND_FROM_NAME` (já consumido pelo step seguinte,
+  mas ausente do pré-check — achado original reportado em `docs/architecture/README.md`, Sprint
+  16.3); os dois secrets de connection string permanecem intencionalmente ausentes até o
+  provisionamento real de PRD.
 - Os documentos anteriores desta pasta (`01-operations.md`, `02-backup-and-restore.md`) eram
   checklists prescritivos escritos antes da infraestrutura real (`Deploy-BeeDay.ps1`, os 2
   workflows) existir — movidos para [`docs/history/`](../history/README.md), substituídos pelos 4

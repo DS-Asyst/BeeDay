@@ -1,16 +1,18 @@
 # Runtime Configuration
 
 **Fonte da verdade:** verificado diretamente em `src/BeeDay.Web/appsettings.json`,
-`appsettings.Development.json`, `appsettings.Production.json`, `src/BeeDay.Web/Program.cs`,
-`src/BeeDay.Web/Configuration/ProductionHostingOptions.cs`,
+`appsettings.Development.json`, `appsettings.Homologation.json`, `appsettings.Production.json`,
+`src/BeeDay.Web/Program.cs`, `src/BeeDay.Web/Configuration/ProductionHostingOptions.cs`,
 `src/BeeDay.Infrastructure/Configuration/*.cs`,
-`src/BeeDay.Infrastructure/DependencyInjection/InfrastructureServiceCollectionExtensions.cs`.
+`src/BeeDay.Infrastructure/DependencyInjection/InfrastructureServiceCollectionExtensions.cs`, e
+Runtime State real de SERV3WEB/HMG verificado diretamente no servidor na Sprint 18.4.
 
-**Última verificação:** 2026-08-07.
+**Última verificação:** 2026-08-09 (Sprint 18.4 — inclui os 4 arquivos `appsettings*.json` e
+verificação de Runtime State em HMG; seções anteriores a esta data cobriam só 3 arquivos).
 
 ## 1. Objetivo
 
-Documentar toda fonte de configuração de runtime do BeeDay: os 3 arquivos `appsettings*.json`, as
+Documentar toda fonte de configuração de runtime do BeeDay: os 4 arquivos `appsettings*.json`, as
 variáveis de ambiente que os sobrescrevem, o binding para `Options`, e as guardas que impedem o
 processo de iniciar com configuração inválida.
 
@@ -28,13 +30,14 @@ Nenhum provider de configuração customizado foi encontrado em `Program.cs` —
 exatamente o pipeline padrão de `WebApplication.CreateBuilder(args)`, sem `AddAzureKeyVault`,
 `AddJsonFile` extra, ou equivalente.
 
-## 3. Os 3 arquivos `appsettings*.json`
+## 3. Os 4 arquivos `appsettings*.json`
 
 | Arquivo | `SqlServer:ConnectionString` | Propósito |
 |---|---|---|
 | `appsettings.json` (base) | `Server=(localdb)\mssqllocaldb;Database=BeeDayDev;...` (valor commitado — ver nota abaixo) | Valores de desenvolvimento local por padrão |
 | `appsettings.Development.json` | (não definido — herda do base) | Só ajusta `Logging:LogLevel` (mais verboso para `Microsoft.AspNetCore`, silencia `Circuits`) |
-| `appsettings.Production.json` | `""` (vazio — **deve** ser injetado via variável de ambiente/secret) | Único arquivo com `Hosting:ForwardedHeaders` habilitado, `Resend:Enabled: true` |
+| `appsettings.Homologation.json` | `Server=SERV4SQL;Database=BeeDay_HMG;Trusted_Connection=True;...` (commitado; `deploy-hmg.yml` sobrescreve via `BEEDAY_APP_CONNECTION`) | **É o arquivo que HMG realmente carrega hoje** — `ASPNETCORE_ENVIRONMENT=Homologation` é fixado em `web.config` e passado explicitamente por `deploy-hmg.yml`, confirmado por Runtime State real (Sprint 18.4). `AllowedHosts=h-beeday.com.br`, `Resend:Enabled=false`, `Email:Development:Enabled=true` |
+| `appsettings.Production.json` | `""` (vazio — **deve** ser injetado via variável de ambiente/secret) | **Não corresponde a nenhum ambiente provisionado hoje** — ver §5. `Hosting:ForwardedHeaders` habilitado, `Resend:Enabled: true` |
 
 **Nota sobre o arquivo local no momento desta auditoria:** o `appsettings.json` neste checkout tem
 uma modificação não commitada (`git diff` confirma) — `ConnectionString` aponta para
@@ -84,47 +87,60 @@ primeira requisição. Isso significa que um deploy com configuração quebrada 
 `BeeDay__Email__Resend__FromAddress`, `BeeDay__Email__Resend__FromName` — 7 no total, contando as 2
 de ambiente.
 
-## 5. Divergência de caminho — `LevelUp-Data` vs. `BeeDay-Data`
+## 5. `LevelUp-Data` vs. `BeeDay-Data` e o estado real de HMG/PRD (Sprint 18.4)
 
-3 valores em `appsettings.Production.json` apontam para `C:\Apps\LevelUp-Data\...`:
+### 5.1 PRD não está provisionado — decisão arquitetural
 
-```json
-"Hosting": { "DataProtectionKeysDirectory": "C:\\Apps\\LevelUp-Data\\DataProtection-Keys" },
-"Auditing": { "EventJournal": { "Directory": "C:\\Apps\\LevelUp-Data\\Data" } },
-"Email": { "Development": { "Directory": "C:\\Apps\\LevelUp-Data\\Emails" } }
-```
+**PRD não existe como ambiente runtime hoje, por decisão deliberada.** O único ambiente real em
+execução é HMG (SERV3WEB). A branch Git `prd` e o workflow `deploy-prd.yml` são artefatos
+preparatórios/futuros — `deploy-prd.yml` nunca foi executado com sua configuração atual (sem
+`-Environment`, sem `-AppConnectionString`, sem `-RunMigrations`) contra um servidor real, e não há
+GitHub Environment `production` provisionado. Produção será provisionada futuramente em Azure,
+quando decidido — nesse momento, `appsettings.Production.json` e `deploy-prd.yml` provavelmente
+serão redesenhados para a infraestrutura real escolhida, não apenas corrigidos incrementalmente.
 
-`scripts/Deploy-BeeDay.ps1` (`$externalRoot = "C:\Apps\BeeDay-Data"`) cria e concede permissão
-`Modify` a `IIS AppPool\BeeDayPool` apenas em:
+Consequência direta: **`appsettings.Production.json` não corresponde a nenhum Runtime State
+existente.** Nenhum mecanismo commitado hoje (nem `web.config`, que fixa
+`ASPNETCORE_ENVIRONMENT=Homologation`, nem `deploy-hmg.yml`, que passa `-Environment "Homologation"`
+explicitamente, nem `deploy-prd.yml`, que usa o default `"Homologation"` de `Deploy-BeeDay.ps1` por
+nunca sobrescrevê-lo) jamais seleciona `ASPNETCORE_ENVIRONMENT=Production` — logo esse arquivo nunca
+é carregado por nenhum processo real hoje.
 
-```text
-C:\Apps\BeeDay-Data\Data
-C:\Apps\BeeDay-Data\Data\Backups
-C:\Apps\BeeDay-Data\DataProtection-Keys
-C:\Apps\BeeDay-Data\Emails
-C:\Apps\BeeDay-Data\Logs
-```
+### 5.2 Runtime State de HMG confirmado (Sprint 18.4)
 
-**Nenhuma dessas 3 configurações é sobrescrita por variável de ambiente no deploy** (`Set-BeeDayEnvironmentVariables`
-só define os 5 `BeeDay__*` da tabela §4.3, nenhum deles relacionado a `Hosting`/`Auditing`) — ou
-seja, com o repositório como está hoje, um deploy real usaria os caminhos `LevelUp-Data` do
-`appsettings.Production.json` sem que o script de deploy jamais tenha criado essas pastas ou
-concedido permissão de escrita nelas ao pool do IIS. Efeito esperado: `DataProtectionKeysDirectory`
-falhando por falta de permissão impediria a persistência de chaves de criptografia entre reciclagens
-do pool (cookies de autenticação seriam invalidados a cada reciclagem); `EventJournal` falhando ao
-escrever perderia silenciosamente o log de auditoria de domain events (o `AppendAsync` não é
-aguardado de forma síncrona pelo caminho principal de negócio — ver
-[`03-observability.md`](03-observability.md) §2). Não corrigido (`appsettings.Production.json` é
-configuração, fora do escopo de alteração desta Sprint).
+Verificado diretamente em SERV3WEB: Site `BeeDay-HMG`, App Pool `BeeDay-Web-AppPool`,
+`physicalPath=C:\Apps\BeeDay.Web`, `ASPNETCORE_ENVIRONMENT=Homologation`,
+`DOTNET_ENVIRONMENT=Homologation`, banco `SERV4SQL/BeeDay_HMG` (com override de connection string
+presente no App Pool, via `BEEDAY_APP_CONNECTION`). Confirma que `appsettings.Homologation.json` é
+o arquivo real em uso.
+
+| Item | Path configurado (`appsettings.Homologation.json`) | Provisionado/ACL por `Deploy-BeeDay.ps1`? | Runtime State confirmado |
+|---|---|---|---|
+| Data Protection Keys | `C:\Apps\BeeDay-Data\DataProtection-Keys` | Sim | Ativo, chaves existentes — **correto, sem divergência** |
+| Event Journal | `C:\Apps\BeeDay-Data\EventJournal` | Não explicitamente (só `...\Data` era verificado) — corrigido na Sprint 18.4 | Ativo, `BeeDayEvents.ndjson` existente — funcionava por permissão não verificada explicitamente; `Deploy-BeeDay.ps1` agora cria/verifica ACL nesse path também, sem mover o arquivo existente |
+| DevelopmentEmail | Era `App_Data\Emails` (relativo, resolvia dentro de `$DestinationPath` — apagado a cada deploy) | Não (path nunca era externo) | `App_Data\Emails` não existia; `C:\Apps\BeeDay-Data\Emails` existia vazio — corrigido na Sprint 18.4 para apontar ao path externo já provisionado, sem perda de dado |
+| stdout (`web.config`) | Fixo em `web.config`, não depende de `appsettings` | Não (`Deploy-BeeDay.ps1` só protege `...\Logs` sob `BeeDay-Data`) | Confirmado ativo em `C:\Apps\LevelUp-Data\Logs` — corrigido no repositório para `BeeDay-Data\Logs` na Sprint 18.4; **migração operacional (promoção + validação pós-deploy) ainda pendente**, path antigo não foi apagado |
+
+### 5.3 `appsettings.Production.json` corrigido por consistência, não por uso real
+
+As mesmas 3 chaves foram corrigidas de `LevelUp-Data` para `BeeDay-Data` nesta Sprint, alinhando ao
+padrão de nomenclatura já usado em `Deploy-BeeDay.ps1`/`appsettings.Homologation.json` — mas, como
+§5.1 estabelece, isso é reconciliação de nomenclatura em um arquivo hoje inerte, não uma correção de
+comportamento observável (nada muda em runtime, pois nada carrega este arquivo).
 
 ## 6. Fontes consultadas
 
-- `src/BeeDay.Web/appsettings.json`, `appsettings.Development.json`, `appsettings.Production.json`.
-- `src/BeeDay.Web/Program.cs`, `Configuration/ProductionHostingOptions.cs`.
-- `src/BeeDay.Infrastructure/Configuration/*.cs` (5 classes Options),
+- `src/BeeDay.Web/appsettings.json`, `appsettings.Development.json`, `appsettings.Homologation.json`,
+  `appsettings.Production.json`.
+- `src/BeeDay.Web/Program.cs`, `Configuration/ProductionHostingOptions.cs`, `web.config`.
+- `src/BeeDay.Infrastructure/Configuration/*.cs`,
   `DependencyInjection/InfrastructureServiceCollectionExtensions.cs`.
 - `scripts/Deploy-BeeDay.ps1`.
+- `.github/workflows/deploy-hmg.yml`, `deploy-prd.yml`.
 - `git diff`/`git show HEAD` sobre `src/BeeDay.Web/appsettings.json` (confirmação do valor
   commitado vs. o valor local não commitado).
+- Runtime State real de SERV3WEB/HMG, verificado diretamente no servidor (Sprint 18.4): Site, App
+  Pool, `physicalPath`, `ASPNETCORE_ENVIRONMENT`/`DOTNET_ENVIRONMENT` efetivos, presença de Data
+  Protection keys, Event Journal e diretórios de e-mail, `web.config` instalado.
 - [`docs/web/01-composition-root.md`](../web/01-composition-root.md) (guardas de produção,
   reaproveitado da Sprint 16.7).

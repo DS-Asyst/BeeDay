@@ -25,12 +25,12 @@ apenas).
 
 `CorrelationIdMiddleware` (ver [`docs/web/01-composition-root.md`](../web/01-composition-root.md)
 §7) abre um `logger.BeginScope` por requisição com `CorrelationId`/`RequestId` — todo log emitido
-durante essa requisição carrega esses 2 campos automaticamente via `IncludeScopes`. Em produção, o
-IIS grava a saída padrão do processo em `stdoutLogFile` (`web.config`, atualmente apontando para
-`C:\Apps\LevelUp-Data\Logs\stdout` — ver
-[`02-runtime-configuration.md`](02-runtime-configuration.md) §5) — não há um sink de arquivo próprio
-da aplicação; a persistência do log em disco é responsabilidade do `AspNetCoreModuleV2` do IIS, não
-de `Program.cs`.
+durante essa requisição carrega esses 2 campos automaticamente via `IncludeScopes`. Em HMG, o IIS
+grava a saída padrão do processo em `stdoutLogFile` (`web.config`, corrigido na Sprint 18.4 para
+`C:\Apps\BeeDay-Data\Logs\stdout` — era `LevelUp-Data`, confirmado ativo nesse path por verificação
+direta do servidor antes da correção; ver [`02-runtime-configuration.md`](02-runtime-configuration.md)
+§5) — não há um sink de arquivo próprio da aplicação; a persistência do log em disco é
+responsabilidade do `AspNetCoreModuleV2` do IIS, não de `Program.cs`.
 
 Eventos nomeados observados nesta auditoria (`LogInformation`/`LogWarning` com mensagem em formato
 `Categoria.Evento`, não apenas texto livre): `Authentication.LoginSucceeded`,
@@ -76,9 +76,10 @@ diferentes escrevendo o mesmo arquivo simultaneamente).
 
 **Caminho de resolução**: relativo a `IHostEnvironment.ContentRootPath` quando
 `EventJournalOptions.Directory` não é absoluto (caso do `appsettings.json` base, `"Data"`), absoluto
-quando já é (caso do `appsettings.Production.json`, que aponta para `C:\Apps\LevelUp-Data\Data` —
-ver a divergência de caminho documentada em
-[`02-runtime-configuration.md`](02-runtime-configuration.md) §5).
+quando já é (caso de `appsettings.Homologation.json`, `C:\Apps\BeeDay-Data\EventJournal` — o path
+real em HMG, confirmado ativo com dados existentes na Sprint 18.4; ver
+[`02-runtime-configuration.md`](02-runtime-configuration.md) §5 para a análise completa, incluindo
+`appsettings.Production.json`, que não corresponde a nenhum ambiente provisionado hoje).
 
 **Quem escreve**: `AuditDomainEventHandler` (não lido nesta auditoria em detalhe — Application
 layer, ver [`docs/application/`](../application/README.md)), disparado de forma fire-and-forget via

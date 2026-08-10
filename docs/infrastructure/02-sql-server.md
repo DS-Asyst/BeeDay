@@ -11,7 +11,6 @@
 ```csharp
 public const string SectionName = "BeeDay:Persistence:SqlServer";
 public string ConnectionString { get; set; } = string.Empty;
-public bool HealthCheckEnabled { get; set; } = false;  // não utilizado hoje — ver achado abaixo
 ```
 
 Vinculada via `AddOptions<SqlServerOptions>().Bind(...).Validate(...).ValidateOnStart()` em
@@ -104,9 +103,6 @@ sequenceDiagram
 
 ## Achados relevantes
 
-- **`SqlServerOptions.HealthCheckEnabled` não utilizado**: `SqlServerHealthCheck` roda
-  incondicionalmente desde que SQL Server é o único provider — a propriedade não é lida em nenhum
-  lugar além de sua própria classe.
 - **Nenhuma migração automática no startup do host**: aplicar `InitialCreate` a um ambiente novo é
   uma etapa manual/operacional não documentada em código de aplicação — só em testes o processo é
   automatizado (`EfLocalDbTestBase`).

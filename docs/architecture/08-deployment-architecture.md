@@ -72,12 +72,18 @@ BeeDay__Email__Resend__FromName = <parâmetro, default "BeeDay">
 ## 4. Hospedagem IIS (`src/BeeDay.Web/web.config`)
 
 `AspNetCoreModuleV2`, `hostingModel="inprocess"`, `processPath="dotnet"`,
-`arguments=".\BeeDay.Web.dll"`. Define `ASPNETCORE_ENVIRONMENT`/`DOTNET_ENVIRONMENT=Production`
-diretamente no XML.
+`arguments=".\BeeDay.Web.dll"`. Define `ASPNETCORE_ENVIRONMENT`/`DOTNET_ENVIRONMENT=Homologation`
+diretamente no XML — **não `Production`** (afirmação anterior deste documento estava desatualizada;
+corrigida na Sprint 18.4 após verificação direta do arquivo). Esse valor é o mesmo usado tanto para
+HMG (`deploy-hmg.yml` também passa `-Environment "Homologation"` explicitamente) quanto para PRD
+(`deploy-prd.yml` nunca sobrescreve, herdando o default `"Homologation"` de `Deploy-BeeDay.ps1`) —
+ver `docs/deployment/02-runtime-configuration.md` §5 para a análise completa, incluindo por que PRD
+não está provisionado hoje.
 
-**Achado verificado:** `stdoutLogFile` aponta para `C:\Apps\LevelUp-Data\Logs\stdout` — caminho
-antigo, não atualizado para `C:\Apps\BeeDay-Data\Logs\stdout` na migração de nome. Reportado,
-não corrigido (fora do escopo desta Sprint — arquivo de hosting, não documentação).
+`stdoutLogFile` apontava para `C:\Apps\LevelUp-Data\Logs\stdout` — confirmado ativo em HMG (Runtime
+State real, Sprint 18.4) enquanto `Deploy-BeeDay.ps1` só protege ACL em `C:\Apps\BeeDay-Data\Logs`.
+Corrigido no repositório na Sprint 18.4; migração operacional (promoção + validação pós-deploy)
+ainda pendente.
 
 ## 5. Configuração e opções validadas no startup
 
@@ -105,14 +111,17 @@ Duas outras opções são vinculadas manualmente em `Program.cs`, **sem** `Valid
 - `appsettings.json`: `Logging`, `AllowedHosts`, `BeeDay` (`Persistence`, `Auditing`,
   `IdentityEmail`, `Email`).
 - `appsettings.Development.json`: apenas `Logging`.
+- `appsettings.Homologation.json`: `AllowedHosts`, `BeeDay` (`Persistence`, `Hosting`, `Auditing`,
+  `IdentityEmail`, `Email`) — **é o arquivo que HMG realmente carrega** (`ASPNETCORE_ENVIRONMENT`
+  efetivo é `Homologation`, não `Production` — ver §4).
 - `appsettings.Production.json`: `AllowedHosts`, `Logging`, `BeeDay` (`Persistence`, `Hosting`,
-  `Auditing`, `IdentityEmail`, `Email`).
-- Não existe `appsettings.Staging.json` nem outros ambientes.
+  `Auditing`, `IdentityEmail`, `Email`) — não corresponde a nenhum ambiente provisionado hoje (PRD
+  não existe por decisão arquitetural, ver `docs/deployment/02-runtime-configuration.md` §5.1).
 
-**Achado verificado:** `appsettings.Production.json` ainda hardcoda
-`BeeDay:Hosting:DataProtectionKeysDirectory` e `BeeDay:Auditing:EventJournal:Directory` apontando
-para `C:\Apps\LevelUp-Data\...` (caminho antigo). Reportado, não corrigido (fora do escopo desta
-Sprint — mesma natureza do achado do `web.config`, §4).
+`appsettings.Production.json` hardcodava `BeeDay:Hosting:DataProtectionKeysDirectory` e
+`BeeDay:Auditing:EventJournal:Directory` apontando para `C:\Apps\LevelUp-Data\...` — corrigido para
+`BeeDay-Data` na Sprint 18.4 por consistência de nomenclatura (não por uso real, já que o arquivo
+está inerte hoje).
 
 ## 7. Cadeia de configuração em runtime
 

@@ -992,6 +992,8 @@ Runtime State: what is actually running and observed in that environment right n
 
 A file existing in the repository does not prove it is installed. A file being installed does not prove it is the version currently running. Never infer one state from another without verifying it directly.
 
+The existence of the prd branch, deploy-prd.yml, or appsettings.Production.json does not prove a production environment is provisioned. As of Sprint 18.4, prd has no runtime environment — this is a deliberate architectural decision, not a gap to silently treat as drift. HMG (SERV3WEB) is the only real runtime environment today. Do not assume prd readiness from repository state alone; confirm current status before treating anything production-related as live.
+
 Code Complete: implementation and its code-level validations (formatting, build, tests) are finished.
 
 Environment Validated: the change was actually promoted or executed in the target environment and its behavior was directly confirmed there.
