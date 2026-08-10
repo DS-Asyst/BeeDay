@@ -503,10 +503,10 @@ smoke (GAP, §19).
 
 | Gap | Evidência | Sprint |
 |---|---|---|
-| `dotnet ef migrations has-pending-model-changes` não roda em CI | Ausente em `ci.yml`/`deploy-hmg.yml`/`deploy-prd.yml`, só documentado como passo manual em `README.md` | 19.7 |
-| Nenhuma suite de smoke pós-deploy real | Nenhum step aponta para URL de HMG além do health check embutido no deploy | 19.6 |
-| Readiness não é um step/check distinto e observável | Embutido dentro de `Deploy-BeeDay.ps1`, sem check próprio no GitHub | 19.6 |
-| Nenhuma ferramenta de scanning de segurança (SAST/dependência) | `.github/` sem CodeQL/Dependabot | 19.7 (avaliar se cabe) |
+| ~~`dotnet ef migrations has-pending-model-changes` não roda em CI~~ | Ausente em `ci.yml`/`deploy-hmg.yml`/`deploy-prd.yml`, só documentado como passo manual em `README.md` | 19.7 — **FECHADO**: automatizado em `release-quality-gate.yml`, ver [`11-release-quality-gate.md`](11-release-quality-gate.md) §6 |
+| ~~Nenhuma suite de smoke pós-deploy real~~ | Nenhum step aponta para URL de HMG além do health check embutido no deploy | 19.6 — **FECHADO**, ver [`10-hmg-deployment-verification.md`](10-hmg-deployment-verification.md) |
+| ~~Readiness não é um step/check distinto e observável~~ | Embutido dentro de `Deploy-BeeDay.ps1`, sem check próprio no GitHub | 19.6 — **FECHADO**, ver [`10-hmg-deployment-verification.md`](10-hmg-deployment-verification.md) |
+| Nenhuma ferramenta de scanning de segurança (SAST/dependência) | `.github/` sem CodeQL/Dependabot | 19.7 — reavaliado, permanece `NOT CURRENTLY IMPLEMENTED` (nenhuma ferramenta inventada), ver [`11-release-quality-gate.md`](11-release-quality-gate.md) §8 |
 | Artifact provenance em HMG é implícito (só log), não um step de verificação distinto | `deploy-hmg.yml` não tem step equivalente ao de `deploy-prd.yml` que resolve/prova a cadeia | 19.8 |
 | Nenhuma medição contínua de duração/flakiness (só amostras pontuais desta Sprint) | Sem dashboard/histórico agregado | 19.9 |
 | Nenhum teste de integração dedicado a `/health*` (achado já registrado em `docs/web/06-testing.md`) | Confirmado por essa mesma fonte | fora da EPIC 19 — é lacuna de teste de produto, não de pipeline |

@@ -1,0 +1,217 @@
+name: BeeDay — Release Quality Gate
+
+# hmg -> main is a promotion boundary, not just another PR - CLAUDE.md's own promotion flow treats
+# it as the fronteira where the highest validation rigor belongs, and where more time is an
+# accepted trade-off. This workflow answers exactly one question: "does this state have enough
+# quality to enter main?" - it never decides WHETHER a PR is a legitimate promotion (that remains
+# BeeDay — Promotion Policy's job, validate-promotion.yml) and never deploys anything. Deliberately
+# a full, independent re-validation of the code landing on main - not a reuse of hmg's BeeDay CI
+# artifacts - because Build Once/Deploy Many across this boundary is explicitly out of scope until
+# Sprint 19.8's provenance work; see docs/deployment/11-release-quality-gate.md.
+on:
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+concurrency:
+  group: beeday-release-quality-gate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality-gate:
+    name: Release Quality Gate
+
+    # GitHub Actions' pull_request trigger can only filter by target (base) branch, not source
+    # (head) branch - branches: [main] above already limits this to PRs targeting main, but any
+    # source branch would match it. This job-level guard restricts actual execution to the one
+    # legitimate promotion path (hmg -> main), consistent with (not a replacement for) what
+    # BeeDay — Promotion Policy already enforces independently. A PR to main from anything other
+    # than hmg still shows this check as never-reported, which - once main's Ruleset requires it -
+    # blocks merge the same way an explicit rejection would (see docs/deployment/11-release-quality-gate.md
+    # for why the Ruleset has NOT been updated yet).
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event.pull_request.head.ref == 'hmg'
+
+    runs-on: windows-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Configure .NET 10
+        uses: actions/setup-dotnet@v6.0.0
+        with:
+          dotnet-version: "10.0.x"
+          # Same native NuGet cache strategy as ci.yml (Sprint 19.5/19.5.1) - reused here because it
+          # preserves determinism (cache miss falls back to a normal full restore; dotnet restore
+          # below always runs regardless of hit/miss) while avoiding paying for the same download
+          # twice within this gate's own execution.
+          cache: true
+          cache-dependency-path: |
+            Directory.Packages.props
+            **/*.csproj
+
+      - name: Restore dependencies
+        shell: powershell
+        run: dotnet restore BeeDay.slnx
+
+      - name: Verify formatting
+        shell: powershell
+        run: dotnet format BeeDay.slnx --verify-no-changes --no-restore
+
+      - name: Build solution (Release)
+        shell: powershell
+        run: |
+          dotnet build BeeDay.slnx `
+            --configuration Release `
+            --no-restore `
+            --warnaserror
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('Directory.Packages.props') }}
+
+      - name: Install Playwright Chromium
+        shell: powershell
+        run: pwsh tests/BeeDay.E2E.Tests/bin/Release/net10.0/playwright.ps1 install chromium
+
+      # Full suite, every project, including the 2 architecture/boundary tests embedded in
+      # Domain.Tests/Application.Tests - the 19.3 matrix classified none of the 5 projects as
+      # excludable from this boundary, and E2E stays REQUIRED here even though it is SELECTIVE
+      # for Fast PR (docs/deployment/07-validation-matrix.md #15/#22). Same per-project invocation
+      # pattern as ci.yml (unique .trx per project - see the comment there for why a single
+      # `dotnet test BeeDay.slnx` call doesn't work).
+      - name: Run full test suite
+        shell: powershell
+        run: |
+          $testProjects = Get-ChildItem -Path "tests" -Filter "*.csproj" -Recurse
+          $resultsDirectory = "${{ runner.temp }}\TestResults"
+          $anyFailed = $false
+
+          foreach ($project in $testProjects) {
+              Write-Host "Running tests: $($project.Name)"
+
+              dotnet test $project.FullName `
+                --configuration Release `
+                --no-build `
+                --no-restore `
+                --verbosity normal `
+                --logger "trx;LogFileName=$($project.BaseName).trx" `
+                --results-directory $resultsDirectory
+
+              if ($LASTEXITCODE -ne 0) {
+                  Write-Host "FAILED: $($project.Name) (exit code $LASTEXITCODE)"
+                  $anyFailed = $true
+              }
+          }
+
+          if ($anyFailed) {
+              throw "One or more test projects failed. See logs above for details."
+          }
+
+      - name: Publish BeeDay
+        shell: powershell
+        run: |
+          dotnet publish `
+            ".\src\BeeDay.Web\BeeDay.Web.csproj" `
+            --configuration Release `
+            --no-restore `
+            --no-build `
+            --output "${{ runner.temp }}\BeeDayPublish"
+
+      - name: Validate published files
+        shell: powershell
+        run: |
+          $publishPath = Join-Path "${{ runner.temp }}" "BeeDayPublish"
+          $requiredFiles = @("BeeDay.Web.dll", "web.config")
+
+          foreach ($file in $requiredFiles) {
+              $fullPath = Join-Path $publishPath $file
+              if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
+                  throw "Required published file was not found: $fullPath"
+              }
+          }
+
+      - name: Restore EF Core tool (local, pinned)
+        shell: powershell
+        run: dotnet tool restore --tool-manifest dotnet-tools.json
+
+      # Closes the GAP the Sprint 19.3 matrix identified: documented in README.md's manual quality
+      # gate checklist since before this EPIC, but never automated anywhere. Verified locally
+      # before wiring this in (Sprint 19.7): exits 0 ("No changes have been made to the model since
+      # the last migration") when the compiled model matches the last migration, and exits 1
+      # ("Changes have been made to the model...") when it doesn't - confirmed with a temporary,
+      # reverted-before-commit model change, never persisted. --no-build reuses the Release build
+      # above; the connection string BeeDayDbContextFactory falls back to is a placeholder never
+      # actually connected to (this command only compares compiled models, like `migrations bundle`
+      # already does two steps below - see the comment there).
+      - name: Check for pending EF model changes
+        shell: powershell
+        run: |
+          dotnet ef migrations has-pending-model-changes `
+            --project src\BeeDay.Infrastructure `
+            --startup-project src\BeeDay.Infrastructure `
+            --configuration Release `
+            --no-build
+
+      - name: Generate EF Core migration bundle (win-x64)
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Path "${{ runner.temp }}\BeeDayMigrations" -Force | Out-Null
+
+          dotnet ef migrations bundle `
+            --project "src\BeeDay.Infrastructure\BeeDay.Infrastructure.csproj" `
+            --startup-project "src\BeeDay.Infrastructure\BeeDay.Infrastructure.csproj" `
+            --configuration Release `
+            --no-build `
+            --target-runtime win-x64 `
+            --output "${{ runner.temp }}\BeeDayMigrations\efbundle.exe" `
+            --force
+
+      - name: Validate migration bundle
+        shell: powershell
+        run: |
+          $bundlePath = Join-Path "${{ runner.temp }}" "BeeDayMigrations\efbundle.exe"
+          if (-not (Test-Path -LiteralPath $bundlePath -PathType Leaf)) {
+              throw "Migration bundle was not found: $bundlePath"
+          }
+
+          & $bundlePath --help | Out-Null
+          if ($LASTEXITCODE -ne 0) {
+              throw "Migration bundle exists but failed to execute (exit code $LASTEXITCODE)."
+          }
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: beeday-release-gate-test-results
+          path: ${{ runner.temp }}\TestResults
+          if-no-files-found: warn
+          retention-days: 14
+
+      # Minimal summary (Sprint 19.7, Fase 27) - not the full observability platform reserved for
+      # Sprint 19.9. Written last, after every prior step already succeeded (a step never runs
+      # after an earlier one throws), so reaching here means the whole gate passed.
+      - name: Record gate summary
+        if: always()
+        shell: powershell
+        run: |
+          "## BeeDay — Release Quality Gate" >> $env:GITHUB_STEP_SUMMARY
+          "" >> $env:GITHUB_STEP_SUMMARY
+          "| Field | Value |" >> $env:GITHUB_STEP_SUMMARY
+          "|---|---|" >> $env:GITHUB_STEP_SUMMARY
+          "| Source SHA | ``${{ github.event.pull_request.head.sha || github.sha }}`` |" >> $env:GITHUB_STEP_SUMMARY
+          "| PR | ${{ github.event.pull_request.number && format('#{0}', github.event.pull_request.number) || 'workflow_dispatch' }} |" >> $env:GITHUB_STEP_SUMMARY
+          "| Source branch | ${{ github.event.pull_request.head.ref || github.ref_name }} |" >> $env:GITHUB_STEP_SUMMARY
+          "| Target branch | ${{ github.event.pull_request.base.ref || 'main' }} |" >> $env:GITHUB_STEP_SUMMARY
+          "| Result | ${{ job.status }} |" >> $env:GITHUB_STEP_SUMMARY

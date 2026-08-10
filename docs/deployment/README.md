@@ -21,7 +21,7 @@ linkado a partir daqui onde relevante em vez de duplicado.
 
 | Documento | Conteúdo |
 |---|---|
-| [`01-deployment.md`](01-deployment.md) | Deploy manual e automatizado, os workflows do GitHub Actions (`ci.yml`, `deploy-hmg.yml`, `verify-hmg.yml`, `deploy-prd.yml`), pipeline, publicação, rollback, ambientes HMG/Produção |
+| [`01-deployment.md`](01-deployment.md) | Deploy manual e automatizado, os workflows do GitHub Actions (`ci.yml`, `deploy-hmg.yml`, `verify-hmg.yml`, `release-quality-gate.yml`, `deploy-prd.yml`), pipeline, publicação, rollback, ambientes HMG/Produção |
 | [`02-runtime-configuration.md`](02-runtime-configuration.md) | `appsettings*`, variáveis de ambiente, binding de configuração, Options, secrets, guardas de startup |
 | [`03-observability.md`](03-observability.md) | Logging, Event Journal, health checks, diagnostics, ciclo de vida da aplicação |
 | [`04-operations.md`](04-operations.md) | Backup, restore, recovery, migrations, versionamento, processo de release, manutenção |
@@ -31,6 +31,7 @@ linkado a partir daqui onde relevante em vez de duplicado.
 | [`08-fast-pr-validation-decision.md`](08-fast-pr-validation-decision.md) | Registro de decisão da Sprint 19.4: por que `BeeDay CI` ainda não pode ser renomeado para `BeeDay — Pull Request Validation` (dependências rastreadas até 19.7/19.8), decisão formal de manter E2E em toda PR, e a remoção de `prd` do trigger `pull_request` (única mudança estrutural segura daquela Sprint) |
 | [`09-pipeline-performance.md`](09-pipeline-performance.md) | Baseline de performance medido (6 execuções reais), achado confirmado de rebuild redundante em `dotnet publish` (11.3s eliminados), cache de NuGet e de browsers Playwright, e candidatos de otimização rejeitados com justificativa — EPIC 19, Sprint 19.5 |
 | [`10-hmg-deployment-verification.md`](10-hmg-deployment-verification.md) | Eliminação estrutural do deployment duplicado em HMG (causa raiz da 19.1), novo workflow `BeeDay — HMG Verification` (Readiness + Smoke reais contra o ambiente implantado), decisão de manter `push:hmg` em `BeeDay CI` com justificativa explícita — EPIC 19, Sprint 19.6 |
+| [`11-release-quality-gate.md`](11-release-quality-gate.md) | Novo workflow `BeeDay — Release Quality Gate` para `hmg → main`, automação do GAP `has-pending-model-changes` (verificado localmente, caminho positivo e negativo), e por que a ativação (mutação de Ruleset + remoção de `pull_request:main` de `BeeDay CI`) foi deliberadamente adiada até validação remota real — EPIC 19, Sprint 19.7 |
 
 ## Ordem de leitura recomendada
 
@@ -51,6 +52,8 @@ linkado a partir daqui onde relevante em vez de duplicado.
    perder cobertura.
 10. `10-hmg-deployment-verification.md` — como o deployment duplicado em HMG foi eliminado e como
     `BeeDay — HMG Verification` prova que o ambiente implantado está utilizável.
+11. `11-release-quality-gate.md` — o que protege `hmg → main` hoje e o que falta para a proteção
+    definitiva entrar em vigor.
 
 ## Estado real de HMG e PRD (Sprint 18.4)
 
