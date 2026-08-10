@@ -5,6 +5,9 @@
 `src/BeeDay.Infrastructure/DependencyInjection/InfrastructureServiceCollectionExtensions.cs`, e os
 `.csproj` de `src/*` (`ProjectReference`).
 
+**Última verificação:** 2026-08-09 (Sprint 18.6) — `IApplicationCache`/`MemoryApplicationCache`
+removidos (código morto comprovado, ver `docs/infrastructure/04-services.md`).
+
 ## Visão geral
 
 ```mermaid
@@ -44,7 +47,6 @@ flowchart TD
 | `IUserTokenService` | `SecureUserTokenService` | Infrastructure |
 | `IEventJournal` | `JsonEventJournal` | Infrastructure |
 | `IBackgroundTaskQueue` | `BackgroundTaskQueue` | Infrastructure |
-| `IApplicationCache` | `MemoryApplicationCache` | Infrastructure |
 | **`ICurrentUserContext`** | `HttpCurrentUserContext` | **Web** (única interface de Application implementada fora de Infrastructure — depende de `IHttpContextAccessor`, um conceito de hospedagem HTTP, não de dados) |
 | `IExperienceRewardPolicy`, `IExperienceRewardService` | `ExperienceRewardPolicy`, `ExperienceRewardService` | **Application** (as únicas duas interfaces cuja implementação vive na própria Application, não injetada de fora) |
 
@@ -65,7 +67,7 @@ implementação vive na própria Application (`IEmailConfirmationIssuer`, `IExpe
 
 `AddBeeDayInfrastructure(configuration)` registra todo o restante — as 8 implementações de
 repositório, `EfUnitOfWork`, os 2 read services, e os serviços técnicos (senha, e-mail, tokens,
-cache, fila de background, journal de auditoria).
+fila de background, journal de auditoria).
 
 ## Diagrama de dependência de projeto (revisão, ver `docs/architecture/04-dependency-rules.md` para o detalhe completo)
 

@@ -1,9 +1,12 @@
 # Infrastructure Services
 
 **Fonte da verdade:** verificado diretamente em `src/BeeDay.Infrastructure/Auditing/JsonEventJournal.cs`,
-`Identity/*.cs`, `Security/Pbkdf2PasswordService.cs`, `Caching/MemoryApplicationCache.cs`,
+`Identity/*.cs`, `Security/Pbkdf2PasswordService.cs`,
 `HealthChecks/SqlServerHealthCheck.cs`, `Background/*.cs`, `Configuration/*.cs`, e
 `InfrastructureServiceCollectionExtensions.cs` (para lifetime/registro).
+
+**Última verificação:** 2026-08-09 (Sprint 18.6) — `Caching/MemoryApplicationCache.cs` removido
+(ver achado abaixo).
 
 ## Event Journal — `JsonEventJournal`
 
@@ -42,6 +45,16 @@ Nenhuma rotação ou limite de tamanho — o arquivo cresce indefinidamente.
 throttle não sobrevive a um restart nem é compartilhado entre múltiplas instâncias da aplicação —
 suficiente para um único processo, mas não é uma garantia distribuída.
 
+**Cleanup do dicionário (Sprint 18.6):** até a Sprint 18.6, nenhuma entrada era jamais removida de
+`_requests` — o dicionário crescia indefinidamente com cada par distinto `operação:assunto` já
+solicitado. A correção usa expurgo oportunista e amortizado: um contador de chamadas
+(`Interlocked.Increment`) dispara uma varredura completa do dicionário a cada 128 chamadas de
+`TryAcquire` (`CleanupInterval`), removendo entradas cujo cooldown já expirou
+(`entry.Value <= now`) via `ConcurrentDictionary.TryRemove(KeyValuePair)` — que só remove se o
+valor não mudou desde a leitura, então uma renovação concorrente do mesmo cooldown nunca é
+descartada por engano. Sem lock global, sem `BackgroundService`/`Timer` novo, sem alteração de
+`IIdentityRequestThrottle`.
+
 ## Email — `ResendEmailSender` vs. `DevelopmentEmailSender` (mutuamente exclusivos)
 
 | | `ResendEmailSender` | `DevelopmentEmailSender` |
@@ -69,21 +82,18 @@ nunca em runtime por requisição.
 `Verify` rejeita graciosamente (retorna `false`, nunca lança) entradas nulas/vazias, formato
 malformado, contagem de iterações fora de `1..1_000_000`, ou tamanho de salt/hash incorreto.
 
-## `MemoryApplicationCache`
+## Application Cache — removido na Sprint 18.6
 
-| | |
-|---|---|
-| Interface | `IApplicationCache` |
-| Lifetime | Singleton, sobre `IMemoryCache` (também registrado via `AddMemoryCache()`) |
-| `GetOrCreateAsync` | Implementação manual (não usa a extensão nativa do `IMemoryCache`): `TryGetValue`, se hit retorna direto; senão invoca a `factory` e armazena com `Set(key, value, duration)` |
-| `Remove` | Delegação direta a `memoryCache.Remove(key)` |
-
-**Achado:** `GetOrCreateAsync` não tem nenhuma trava contra corrida em cache-miss concorrente —
-duas chamadas simultâneas para a mesma chave ausente podem ambas invocar `factory` (não há
-semáforo por chave nem `Lazy<T>`). Consumidor conhecido:
-`InvalidateDashboardCacheHandler`/dashboard (`docs/application/04-contracts.md`) — impacto
-provável baixo (recomputação redundante, não corrupção de dado), mas não avaliado a fundo nesta
-Sprint (fora do escopo — apenas documentar).
+`IApplicationCache`/`MemoryApplicationCache` (wrapper sobre `IMemoryCache`) e
+`InvalidateDashboardCacheHandler` existiam desde antes da Sprint 18.6, mas nunca formavam um cache
+funcional: `GetOrCreateAsync` (o único método que gravava algo) não tinha nenhum chamador de
+produção em todo `src/` — apenas `Remove(CacheKeys.Dashboard)` era exercitado, pelo handler de
+invalidação, disparado a cada Command bem-sucedido do sistema, sempre removendo uma chave que nunca
+havia sido escrita. `GetDashboardQueryHandler` sempre consultou `IDashboardReadService.GetAsync`
+diretamente contra o SQL Server, nunca este cache. Confirmado código morto por busca exaustiva e
+removido integralmente (interface, implementação, handler de invalidação, `CacheKeys.Dashboard`,
+`AddMemoryCache()`, registros de DI, fakes de teste). Não foi substituído por nenhum outro
+mecanismo de cache.
 
 ## `SqlServerHealthCheck`
 
@@ -128,13 +138,15 @@ típico do pipeline JSON removido (ADR-005). Confirmado código morto e removido
 **Arquivos consultados:** `Auditing/JsonEventJournal.cs`, `Identity/SystemClock.cs`,
 `SecureUserTokenService.cs`, `MemoryIdentityRequestThrottle.cs`, `IdentityEmailComposer.cs`,
 `ResendEmailSender.cs`, `DevelopmentEmailSender.cs`, `Security/Pbkdf2PasswordService.cs`,
-`Caching/MemoryApplicationCache.cs`, `HealthChecks/SqlServerHealthCheck.cs`,
+`HealthChecks/SqlServerHealthCheck.cs`,
 `Background/BackgroundTaskQueue.cs`, `BackgroundTaskWorker.cs`,
 os 5 arquivos de `Configuration/`,
 `DependencyInjection/InfrastructureServiceCollectionExtensions.cs` (para lifetime de cada
 registro).
 **Testes consultados:** `tests/BeeDay.Infrastructure.Tests/JsonEventJournalTests.cs`
 (`Repeated_event_id_is_written_only_once`, `Level_up_entry_contains_summary_and_structured_payload`),
+`MemoryIdentityRequestThrottleTests.cs` (comportamento de cooldown, independência por chave,
+concorrência, expurgo amortizado de entradas expiradas),
 `IdentityInfrastructureTests.cs` (`ResendSender_WhenDisabled_DoesNotCallApi`,
 `ResendSender_SendsExpectedAuthenticatedRequest`,
 `ResendSender_WhenApiRejectsRequest_ThrowsWithoutExposingApiKey`), `Pbkdf2PasswordServiceTests.cs`.

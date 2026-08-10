@@ -4,7 +4,12 @@
 `src/BeeDay.Application/Common/Behaviors/DomainEventBehavior.cs`,
 `src/BeeDay.Application/Common/Experience/ExperienceRewardEventPublisher.cs`,
 `src/BeeDay.Application/Common/Events/DomainEventNotification.cs`,
-`InvalidateDashboardCacheHandler.cs`, `AuditDomainEventHandler.cs`.
+`AuditDomainEventHandler.cs`.
+
+**Última verificação:** 2026-08-09 (Sprint 18.6) — `InvalidateDashboardCacheHandler` removido por
+ser código morto comprovado (seu `IApplicationCache.GetOrCreateAsync` nunca tinha chamador de
+produção; o handler só invalidava uma chave que nunca era escrita). `AuditDomainEventHandler` é
+hoje o único `INotificationHandler<DomainEventNotification>` do repositório.
 
 ## Achado estrutural importante
 
@@ -76,12 +81,10 @@ Application apenas lê os dois valores já computados pelo Domain para decidir s
 
 ## Quem consome
 
-Exatamente 2 `INotificationHandler<DomainEventNotification>` existem em todo o repositório —
-ambos genéricos, nenhum discrimina por tipo concreto de evento:
+Exatamente 1 `INotificationHandler<DomainEventNotification>` existe em todo o repositório:
 
 | Handler | Arquivo | Ação |
 |---|---|---|
-| `InvalidateDashboardCacheHandler` | `Common/Events/InvalidateDashboardCacheHandler.cs` | `cache.Remove(CacheKeys.Dashboard)` — para **qualquer** evento recebido |
 | `AuditDomainEventHandler` | `Common/Events/AuditDomainEventHandler.cs` | Enfileira `IEventJournal.AppendAsync(notification.DomainEvent, ...)` via `IBackgroundTaskQueue` (fire-and-forget), registrando em log se falhar |
 
 `DomainEventNotification` (`Common/Events/DomainEventNotification.cs`) é o envelope único:
@@ -106,7 +109,6 @@ flowchart TD
     EGE --> Notif
     ULE --> Notif
 
-    Notif --> Cache["InvalidateDashboardCacheHandler<br/>(remove cache do dashboard)"]
     Notif --> Audit["AuditDomainEventHandler<br/>(grava no Event Journal, background)"]
 ```
 
@@ -117,7 +119,7 @@ flowchart TD
 `src/BeeDay.Application/Common/Behaviors/DomainEventBehavior.cs`,
 `Common/Experience/ExperienceRewardEventPublisher.cs`, `ExperienceRewardService.cs`,
 `ExperienceRewardPolicy.cs`, `Common/Events/DomainEventNotification.cs`,
-`InvalidateDashboardCacheHandler.cs`, `AuditDomainEventHandler.cs`,
+`AuditDomainEventHandler.cs`,
 `Features/Habits/Handlers/HabitCommandHandlers.cs`, `Features/Tasks/Handlers/TaskCommandHandlers.cs`,
 `Features/Todos/Handlers/TodoCommandHandlers.cs`.
 **Testes consultados:** `tests/BeeDay.Application.Tests/DomainEventTests.cs`,

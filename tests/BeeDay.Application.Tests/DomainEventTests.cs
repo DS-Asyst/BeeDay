@@ -1,5 +1,3 @@
-using BeeDay.Application.Common.Caching;
-using BeeDay.Application.Common.Events;
 using BeeDay.Domain.Events;
 
 namespace BeeDay.Application.Tests;
@@ -13,31 +11,5 @@ public sealed class DomainEventTests
 
         Assert.NotEqual(Guid.Empty, domainEvent.EventId);
         Assert.True(domainEvent.OccurredOnUtc <= DateTimeOffset.UtcNow);
-    }
-
-    [Fact]
-    public async Task CacheHandler_InvalidatesDashboardCache()
-    {
-        var cache = new TrackingCache();
-        var handler = new InvalidateDashboardCacheHandler(cache);
-        var notification = new DomainEventNotification(
-            new ApplicationActionDomainEvent("UpdateTodoCommand", "UpdateTodo"));
-
-        await handler.Handle(notification, TestContext.Current.CancellationToken);
-
-        Assert.Equal(CacheKeys.Dashboard, cache.RemovedKey);
-    }
-
-    private sealed class TrackingCache : IApplicationCache
-    {
-        public string? RemovedKey { get; private set; }
-
-        public Task<T> GetOrCreateAsync<T>(
-            string key,
-            Func<CancellationToken, Task<T>> factory,
-            TimeSpan duration,
-            CancellationToken cancellationToken) => factory(cancellationToken);
-
-        public void Remove(string key) => RemovedKey = key;
     }
 }
