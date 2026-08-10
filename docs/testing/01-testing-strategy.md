@@ -5,22 +5,21 @@
 `tests/BeeDay.E2E.Tests/`, `BeeDay.slnx`, e confirmado por execução real de
 `dotnet test BeeDay.slnx --configuration Release --no-build` nesta Sprint (16.9).
 
-**Última verificação:** 2026-08-07. Reconstrução completa desta Sprint — substitui o documento
-anterior, que usava nomenclatura `LevelUp.slnx`/`tests/LevelUp.*.Tests` e uma seção de "Testes de
-banco" prescritiva (nunca verificada contra `EfLocalDbTestBase` real).
+**Última verificação:** 2026-08-10 (Sprint 18.8) — contagens de teste e composição de arquivos
+atualizadas após as adições das Sprints 18.5/18.6; conteúdo estrutural desta Sprint 16.9 preservado.
 
 ## 1. Pirâmide — os 5 projetos de teste e o que cada um verifica
 
 | Projeto | Arquivos `.cs` (sem `bin`/`obj`) | O que valida | Infraestrutura real usada |
 |---|---|---|---|
 | `BeeDay.Domain.Tests` | 12 | Invariantes de Aggregate/Entity/Value Object, sem nenhuma infraestrutura | Nenhuma — só o assembly `BeeDay.Domain` |
-| `BeeDay.Application.Tests` | 18 | Handlers de Command/Query com portas fakes | `FakeUnitOfWork` + 8 fakes de repositório, `FakeCurrentUserContext`, `FakeApplicationCache` |
-| `BeeDay.Infrastructure.Tests` | 17 | Repositórios EF Core, Identity, hashing de senha, Event Journal contra um SQL Server LocalDB real | `EfLocalDbTestBase`/`EfLocalDbCollection` — ver §4 |
+| `BeeDay.Application.Tests` | 18 | Handlers de Command/Query com portas fakes | `FakeUnitOfWork` + 8 fakes de repositório, `FakeCurrentUserContext` |
+| `BeeDay.Infrastructure.Tests` | 19 | Repositórios EF Core, Identity, hashing de senha, Event Journal, health check contra um SQL Server LocalDB real | `EfLocalDbTestBase`/`EfLocalDbCollection` — ver §4 |
 | `BeeDay.Web.Tests` | 61 | Componentes Blazor (bUnit) + integração HTTP real (`WebApplicationFactory`) | `BeeDayWebApplicationFactory` e variantes — documentado em [`docs/web/06-testing.md`](../web/06-testing.md) |
 | `BeeDay.E2E.Tests` | 7 (+ infraestrutura) | Fluxos de usuário reais via Chromium/Playwright | `PlaywrightAppFixture`/`E2EWebApplicationFactory` — documentado em [`docs/web/06-testing.md`](../web/06-testing.md) |
 
-Total confirmado por execução real nesta Sprint: **742 testes, 0 falhas** (93 Domain, 72
-Application, 120 Infrastructure, 450 Web, 7 E2E) — ver §7.
+Total confirmado por execução real na Sprint 18.7: **752 testes, 0 falhas** (93 Domain, 73
+Application, 129 Infrastructure, 450 Web, 7 E2E) — ver §7.
 
 ## 2. Domain.Tests — invariantes sem infraestrutura
 
@@ -42,15 +41,18 @@ expõe tipo `System.Text.Json.*`; nenhuma interface de contrato é genérica (`I
 **Fakes** (não recriar cópias locais — reusar estes): `FakeUnitOfWork.cs` implementa `IUnitOfWork`
 (métodos de transação são no-op) e expõe 8 listas independentes (`UsersData`, `HabitsData`, etc.) —
 nenhum tipo agrega as 8 num documento único, mesmo princípio de "sem estado global" que motivou a
-remoção de `LevelUpData` do Domain (Sprint 14.7). `FakeCurrentUserContext`/`FakeApplicationCache`
-completam o conjunto padrão. Fakes com comportamento realmente divergente entre cenários (ex.:
+remoção de `LevelUpData` do Domain (Sprint 14.7). `FakeCurrentUserContext` completa o conjunto
+padrão (`FakeApplicationCache` foi removido na Sprint 18.6, junto com o `IApplicationCache` que
+implementava — código morto comprovado, nunca populado em produção). Fakes com comportamento
+realmente divergente entre cenários (ex.:
 contagem de chamadas em um teste específico de autenticação) permanecem locais deliberadamente — não
 force a consolidação de fakes com comportamento distinto.
 
 ## 4. Infrastructure.Tests — contra SQL Server LocalDB real
 
-17 arquivos: 4 na raiz (`BeeDayDbContextTests`, `IdentityInfrastructureTests`,
-`JsonEventJournalTests`, `Pbkdf2PasswordServiceTests`) + 13 sob `Persistence/SqlServer/` (3 direto:
+19 arquivos: 5 na raiz (`BeeDayDbContextTests`, `IdentityInfrastructureTests`,
+`JsonEventJournalTests`, `MemoryIdentityRequestThrottleTests`, `Pbkdf2PasswordServiceTests`) + 1 sob
+`HealthChecks/` (`SqlServerHealthCheckTests`) + 13 sob `Persistence/SqlServer/` (3 direto:
 `EfDashboardReadServiceTests`, `EfUnitOfWorkTests`, `EfWalletReadServiceTests`; 10 sob
 `Repositories/`: os 8 repositórios por Aggregate + `EfLocalDbCollection`/`EfLocalDbTestBase`).
 
@@ -144,14 +146,14 @@ Idêntico, mais `--logger "trx;LogFileName=beeday-tests.trx" --results-directory
 `ci.yml`, instalação do Chromium do Playwright antes de rodar os testes (necessário para
 `BeeDay.E2E.Tests`) — ver [`docs/deployment/01-deployment.md`](../deployment/01-deployment.md) §3.
 
-### Resultado desta Sprint (16.9), executado localmente
+### Resultado mais recente (Sprint 18.7), executado localmente
 
-742 testes, 0 falhas: 93 Domain, 72 Application, 120 Infrastructure, 450 Web, 7 E2E — mesma
-contagem confirmada nas Sprints 16.7 e 16.8. Uma execução da solução completa em paralelo pode
-ocasionalmente reportar falha transiente em `BeeDay.Web.Tests`/`BeeDay.E2E.Tests` por contenção de
-LocalDB/porta Kestrel entre os dois projetos rodando ao mesmo tempo (observado e diagnosticado na
-Sprint 16.7); os mesmos testes passam 100% quando o projeto afetado roda isolado, e uma nova
-execução da solução completa tipicamente passa 742/742.
+752 testes, 0 falhas: 93 Domain, 73 Application, 129 Infrastructure, 450 Web, 7 E2E. Uma execução
+da solução completa em paralelo pode ocasionalmente reportar falha transiente em
+`BeeDay.Web.Tests`/`BeeDay.E2E.Tests` por contenção de LocalDB/porta Kestrel entre os dois projetos
+rodando ao mesmo tempo (observado e diagnosticado na Sprint 16.7); os mesmos testes passam 100%
+quando o projeto afetado roda isolado, e uma nova execução da solução completa tipicamente passa
+752/752.
 
 ### Cobertura formal (`dotnet test --collect:"XPlat Code Coverage"` ou equivalente)
 
@@ -165,13 +167,14 @@ hoje é a lista de cenários por classe de teste documentada neste arquivo e em
 - Contagem de arquivos `.cs` (excluindo `bin`/`obj`) em `tests/BeeDay.Domain.Tests/`,
   `tests/BeeDay.Application.Tests/`, `tests/BeeDay.Infrastructure.Tests/`.
 - `tests/BeeDay.Application.Tests/FakeUnitOfWork.cs`, `FakeCurrentUserContext.cs`,
-  `FakeApplicationCache.cs`, `PersistenceContractBoundaryTests.cs`.
+  `PersistenceContractBoundaryTests.cs`.
 - `tests/BeeDay.Domain.Tests/DomainAssemblyBoundaryTests.cs`.
 - `tests/BeeDay.Infrastructure.Tests/Persistence/SqlServer/Repositories/EfLocalDbTestBase.cs`,
-  `EfLocalDbCollection.cs`.
+  `EfLocalDbCollection.cs`, `HealthChecks/SqlServerHealthCheckTests.cs`,
+  `MemoryIdentityRequestThrottleTests.cs` (Sprints 18.5/18.6).
 - `tests/BeeDay.Web.Tests/Integration/ProblemDetailsIntegrationTests.cs` (comentário de classe —
   limitações de `WebApplicationFactory`/TestServer, §5).
-- `dotnet test BeeDay.slnx --configuration Release --no-build`, executado nesta sessão (742/742).
+- `dotnet test BeeDay.slnx --configuration Release --no-build`, executado na Sprint 18.7 (752/752).
 - `.github/workflows/ci.yml`, `deploy-prd.yml` (fluxo de execução em CI).
 - [`docs/web/06-testing.md`](../web/06-testing.md) (Web.Tests/E2E.Tests, Sprint 16.7, reaproveitado
   sem duplicar).

@@ -122,16 +122,16 @@ dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructu
 
 ## Tests
 
-742 tests currently pass across five projects:
+752 tests currently pass across five projects:
 
 | Project | Tests |
 |---|---|
 | `BeeDay.Domain.Tests` | 93 |
-| `BeeDay.Application.Tests` | 72 |
-| `BeeDay.Infrastructure.Tests` | 120 |
+| `BeeDay.Application.Tests` | 73 |
+| `BeeDay.Infrastructure.Tests` | 129 |
 | `BeeDay.Web.Tests` | 450 |
 | `BeeDay.E2E.Tests` | 7 |
-| **Total** | **742** |
+| **Total** | **752** |
 
 All Infrastructure and Web integration tests run against a real, disposable SQL Server LocalDB
 instance created per test run — never InMemory or SQLite. See
