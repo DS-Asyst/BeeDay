@@ -72,6 +72,28 @@ public sealed class JsonEventJournalTests : IDisposable
     }
 
     [Fact]
+    public async Task Malformed_line_is_skipped_without_failing_the_append()
+    {
+        Directory.CreateDirectory(Path.Combine(_root, "Data"));
+        string path = Path.Combine(_root, "Data", "BeeDayEvents.ndjson");
+        await File.WriteAllTextAsync(
+            path,
+            "{ this is not valid json" + Environment.NewLine,
+            TestContext.Current.CancellationToken);
+
+        JsonEventJournal journal = CreateJournal();
+        UserLeveledUpDomainEvent domainEvent = CreateLevelUpEvent(Guid.NewGuid());
+
+        await journal.AppendAsync(domainEvent, TestContext.Current.CancellationToken);
+
+        string[] lines = await ReadJournalLinesAsync();
+        Assert.Equal(2, lines.Length);
+        Assert.Equal("{ this is not valid json", lines[0]);
+        using JsonDocument document = JsonDocument.Parse(lines[1]);
+        Assert.Equal(domainEvent.EventId, document.RootElement.GetProperty("eventId").GetGuid());
+    }
+
+    [Fact]
     public async Task Uses_configured_directory_and_file_name()
     {
         IOptions<EventJournalOptions> options = Options.Create(new EventJournalOptions
