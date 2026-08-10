@@ -116,8 +116,10 @@ passar silenciosamente até o e-mail de fato ser enviado com remetente em branco
 - Nenhum workflow implanta em HMG — apenas `ci.yml` valida pushes/PRs para `hmg`. Se existe um
   processo de deploy HMG, ele está fora deste repositório (manual, ou outra automação não
   versionada aqui) — não confirmado.
-- `web.config` (`stdoutLogFile="C:\Apps\LevelUp-Data\Logs\stdout"`) — ver achado consolidado em
-  [`README.md`](README.md#achados-relevantes-reportados-não-corrigidos).
+- `web.config` (`stdoutLogFile`) corrigido para `C:\Apps\BeeDay-Data\Logs\stdout` na Sprint 18.4
+  (era `LevelUp-Data`, path confirmado ativo em HMG antes da correção — ver
+  [`02-runtime-configuration.md`](02-runtime-configuration.md) §5). Migração operacional (promoção
+  + validação pós-deploy de que o novo stdout é escrito com sucesso) ainda pendente.
 - Rollback (`Deploy-BeeDay.ps1`) restaura apenas os **arquivos da aplicação** a partir do backup —
   nunca restaura schema/dados do SQL Server. Uma migration aplicada por uma versão com bug, seguida
   de rollback do binário, deixa o schema na versão nova enquanto o código volta à versão antiga —

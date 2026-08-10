@@ -1,6 +1,6 @@
 # Devicon — Attribution
 
-LevelUp uses Devicon only for supported brands, technologies and development tools that Devicon actually provides.
+BeeDay uses Devicon only for supported brands, technologies and development tools that Devicon actually provides.
 
 - **Source**: https://devicon.dev/
 - **Repository**: https://github.com/devicons/devicon
@@ -8,7 +8,7 @@ LevelUp uses Devicon only for supported brands, technologies and development too
 
 ## What this covers
 
-The files under this folder (`design/icons/source/devicon/`) are the immutable, unmodified source assets as downloaded from the Devicon repository (`icons/{name}/{name}-original.svg`). A subset was copied into the application's production icon library at `src/LevelUp.Web/wwwroot/icons/devicon/`, re-exported as standalone SVG sprite symbols under LevelUp's own semantic naming — see `docs/design-system/icons.md` for the full pipeline and the current source→semantic mapping.
+The files under this folder (`design/icons/source/devicon/`) are the immutable, unmodified source assets as downloaded from the Devicon repository (`icons/{name}/{name}-original.svg`). A subset was copied into the application's production icon library at `src/BeeDay.Web/wwwroot/icons/devicon/`, re-exported as standalone SVG sprite symbols under BeeDay's own semantic naming — see `docs/design-system/03-icons.md` for the full pipeline and the current source→semantic mapping.
 
 Currently used: GitHub, Facebook, LinkedIn.
 
@@ -19,4 +19,4 @@ Devicon's MIT license covers the SVG markup/artwork files themselves. The brand 
 ## Rules for this folder
 
 - These are reference source files only. Never modify, rename, or delete them. Recoloring is only acceptable where a brand's own guidelines explicitly allow monochrome/single-color use.
-- Never reference these files directly from application code — the application must only consume icons through `PixelIcon`/`PixelIconRegistry`, which point at `src/LevelUp.Web/wwwroot/icons/devicon/`.
+- Never reference these files directly from application code — the application must only consume icons through `PixelIcon`/`PixelIconRegistry`, which point at `src/BeeDay.Web/wwwroot/icons/devicon/`.

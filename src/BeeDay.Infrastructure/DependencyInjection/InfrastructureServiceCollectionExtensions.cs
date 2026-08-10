@@ -1,7 +1,6 @@
 using BeeDay.Application.Common.Contracts;
 using BeeDay.Infrastructure.Auditing;
 using BeeDay.Infrastructure.Background;
-using BeeDay.Infrastructure.Caching;
 using BeeDay.Infrastructure.Configuration;
 using BeeDay.Infrastructure.HealthChecks;
 using BeeDay.Infrastructure.Identity;
@@ -85,9 +84,6 @@ public static class InfrastructureServiceCollectionExtensions
         {
             services.AddSingleton<BeeDay.Application.Common.Identity.IEmailSender, DevelopmentEmailSender>();
         }
-        services.AddMemoryCache();
-        services.AddSingleton<MemoryApplicationCache>();
-        services.AddSingleton<BeeDay.Application.Common.Caching.IApplicationCache>(sp => sp.GetRequiredService<MemoryApplicationCache>());
         services.AddSingleton<BackgroundTaskQueue>();
         services.AddSingleton<BeeDay.Application.Common.Background.IBackgroundTaskQueue>(sp => sp.GetRequiredService<BackgroundTaskQueue>());
         services.AddHostedService<BackgroundTaskWorker>();
@@ -127,9 +123,8 @@ public static class InfrastructureServiceCollectionExtensions
         // SQL Server is the only active runtime provider as of Sprint 14.6 — this check now takes over
         // the "ready"/"storage" tags JsonStorageHealthCheck used to own (that check had no consumer left
         // once the JSON document store was de-registered above, so it was removed rather than kept
-        // dormant). SqlServerOptions.HealthCheckEnabled predates this cutover and is unused now — every
-        // environment gets this check unconditionally, matching that the connection string itself is
-        // already required (see the Validate call above), not optional/local-only.
+        // dormant). Runs unconditionally in every environment, matching that the connection string
+        // itself is already required (see the Validate call above), not optional/local-only.
         services.AddHealthChecks()
             .AddCheck<SqlServerHealthCheck>("sql-server", tags: ["ready", "storage", "sql"]);
 

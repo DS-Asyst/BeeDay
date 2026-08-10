@@ -52,8 +52,9 @@ Header fixo com 3 regiões: botão de marca (abre/fecha `ProfileSidePanel`, íco
 `ChevronLeft`/`ChevronRight` conforme estado), navegação central (`NavLink` para `/daily` e
 `/wallet`, `Match="NavLinkMatch.Prefix"`), botão de menu (abre/fecha `AccountSidePanel`, ícone
 `Close`/`Menu`). Renderiza o texto da marca como
-`<span class="top-navigation__brand-level">LEVEL</span><span class="top-navigation__brand-up">UP</span>`
-— literal, não `BeeDayBrand` — ver achado em [`README.md`](README.md#achados-relevantes-reportados-não-corrigidos).
+`<span class="top-navigation__brand-bee">BEE</span><span class="top-navigation__brand-day">DAY</span>`
+— literal, não `BeeDayBrand`. Nomes de classe atualizados na Sprint 18.7 (antes `brand-level`/
+`brand-up`, resíduo semântico do branding anterior "LevelUp").
 
 ## 5. Painéis laterais
 

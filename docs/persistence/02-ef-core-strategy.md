@@ -156,12 +156,10 @@ usada exclusivamente por `dotnet ef migrations`/`dotnet ef database update`, nun
 em execução. Propósito documentado: permitir que a ferramenta construa o `DbContext` sem subir o
 host `BeeDay.Web` inteiro (guard clauses de produção, rate limiter, email sender, health checks).
 
-Resolução da connection string: `Environment.GetEnvironmentVariable("LEVELUP_DESIGNTIME_CONNECTION")`
+Resolução da connection string: `Environment.GetEnvironmentVariable("BEEDAY_DESIGNTIME_CONNECTION")`
 tem prioridade se definida; senão usa um valor hardcoded
 (`"Server=(localdb)\\mssqllocaldb;Database=BeeDayDev;Trusted_Connection=True;TrustServerCertificate=True;"`).
-**Não lê `appsettings.json`.** **Achado:** a variável de ambiente ainda usa o prefixo `LEVELUP_`,
-não `BEEDAY_` — nomenclatura residual da migração de marca (reportado, não corrigido — fora do
-escopo desta Sprint).
+**Não lê `appsettings.json`.**
 
 ## Fontes de verdade
 

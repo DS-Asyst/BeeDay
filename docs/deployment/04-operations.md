@@ -65,15 +65,19 @@ IIS à mão; nenhum script automatiza esse cenário.
 
 ## 4. Recovery — o que falha se os caminhos de dados estiverem errados
 
-Combinado com o achado de [`02-runtime-configuration.md`](02-runtime-configuration.md) §5
-(`appsettings.Production.json` aponta para `C:\Apps\LevelUp-Data\...`, não
-`C:\Apps\BeeDay-Data\...`): num cenário real de disaster recovery onde o servidor precisa ser
-reconstruído do zero, seguir literalmente o `appsettings.Production.json` versionado faria a
-aplicação tentar escrever Data Protection Keys/Event Journal num caminho que
-`Deploy-BeeDay.ps1` nunca prepara — o deploy em si teria sucesso (o script não valida que os
-caminhos internos da configuração da aplicação batem com os caminhos externos que ele mesmo
-prepara), mas funcionalidades dependentes (persistência de cookie entre reciclagens do pool,
-auditoria de domain events) falhariam silenciosamente até alguém notar.
+`appsettings.Production.json` já foi corrigido na Sprint 18.4 para usar `C:\Apps\BeeDay-Data\...`,
+consistente com o que `Deploy-BeeDay.ps1` provisiona — mas isso é reconciliação de nomenclatura, não
+prova de funcionamento real: **PRD não está provisionado hoje** (decisão arquitetural, ver
+[`02-runtime-configuration.md`](02-runtime-configuration.md) §5.1), então nenhum disaster recovery
+real de produção foi ou pode ser exercitado a partir deste arquivo ainda. Quando PRD for
+provisionado, `Deploy-BeeDay.ps1` continua sem validar que os caminhos internos da configuração da
+aplicação batem com os caminhos externos que ele mesmo prepara — vale revalidar isso no momento do
+provisionamento real, não assumir que a correção de nomenclatura desta Sprint já cobre o cenário.
+
+Para HMG, o mesmo tipo de divergência (`stdout` em `web.config` apontando para `LevelUp-Data`
+enquanto `Deploy-BeeDay.ps1` só protege `BeeDay-Data`) foi confirmado ativo em produção real (Sprint
+18.4 verificou Runtime State em SERV3WEB) e corrigido no repositório — migração operacional
+(promoção + validação pós-deploy) ainda pendente, path antigo não apagado.
 
 ## 5. Migrations
 
@@ -103,9 +107,8 @@ banco greenfield (ADR-002: sem migração de dados legados, banco começa vazio)
 - **Em design-time** (`dotnet ef migrations add`/`dotnet ef database update` executados por um
   desenvolvedor): `BeeDayDbContextFactory` (`IDesignTimeDbContextFactory<BeeDayDbContext>`)
   constrói o `DbContext` sem subir o host completo do `BeeDay.Web` (evita as guardas de produção,
-  rate limiter, etc.), usando a variável de ambiente `LEVELUP_DESIGNTIME_CONNECTION` (nome
-  residual do rebrand — já reportado em `docs/infrastructure/README.md`) ou, na ausência dela, o
-  fallback hardcoded `Server=(localdb)\mssqllocaldb;Database=BeeDayDev;...`.
+  rate limiter, etc.), usando a variável de ambiente `BEEDAY_DESIGNTIME_CONNECTION` ou, na
+  ausência dela, o fallback hardcoded `Server=(localdb)\mssqllocaldb;Database=BeeDayDev;...`.
 
 ## 6. Versionamento e branches
 
@@ -163,5 +166,4 @@ tudo listado abaixo é uma tarefa manual, não automatizada:
 - [`docs/adr/ADR-002-greenfield-database.md`](../adr/ADR-002-greenfield-database.md) (decisão de
   banco greenfield, referenciada não re-explicada).
 - [`02-runtime-configuration.md`](02-runtime-configuration.md), [`03-observability.md`](03-observability.md),
-  [`docs/infrastructure/README.md`](../infrastructure/README.md) (achado de
-  `LEVELUP_DESIGNTIME_CONNECTION`, Sprint 16.6, reaproveitado).
+  [`docs/infrastructure/README.md`](../infrastructure/README.md).

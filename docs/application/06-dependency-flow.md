@@ -5,6 +5,9 @@
 `src/BeeDay.Infrastructure/DependencyInjection/InfrastructureServiceCollectionExtensions.cs`, e os
 `.csproj` de `src/*` (`ProjectReference`).
 
+**Última verificação:** 2026-08-09 (Sprint 18.6) — `IApplicationCache`/`MemoryApplicationCache`
+removidos (código morto comprovado, ver `docs/infrastructure/04-services.md`).
+
 ## Visão geral
 
 ```mermaid
@@ -26,7 +29,7 @@ flowchart TD
 | Application → Domain | Tipos concretos (`Habit`, `User`, `Project`, etc.) e suas exceções (`DomainValidationException`, `InvalidDomainStateException`) | Application depende de Domain diretamente — é a única direção de dependência de tipo concreto neste fluxo (Domain não expõe interfaces para Application implementar) |
 | Application → Infrastructure | **Nenhuma dependência de tipo** — apenas as 8 interfaces de repositório + 2 de read service + `IUnitOfWork`, todas *definidas* em Application | Infrastructure depende de Application (implementa as interfaces), não o contrário — confirmado por teste real (`PersistenceContractBoundaryTests.ApplicationAssembly_DoesNotReferenceInfrastructure`) |
 | Infrastructure → SQL Server | `BeeDayDbContext` (EF Core) | Só Infrastructure conhece EF Core/SQL Server — ver `docs/architecture/06-persistence-architecture.md` |
-| Web → Domain | Tipos de exceção apenas (`InvalidDomainStateException` em `Program.cs`, `ActivityNotFoundException` em `GlobalExceptionHandler.cs`) | `BeeDay.Web.csproj` referencia `BeeDay.Domain` diretamente (ver `docs/architecture/02-solution-structure.md` §3), mas o uso observado é limitado a tratamento de exceção, não a lógica de negócio |
+| Web → Domain | Tipos de exceção apenas (`InvalidDomainStateException` em `Program.cs`) | `BeeDay.Web.csproj` referencia `BeeDay.Domain` diretamente (ver `docs/architecture/02-solution-structure.md` §3), mas o uso observado é limitado a tratamento de exceção, não a lógica de negócio |
 | Web → Infrastructure | `AddBeeDayInfrastructure(configuration)` (registro de DI) | Único ponto de contato: `Program.cs` chama a extensão de DI; nenhum componente Blazor referencia um tipo concreto de Infrastructure |
 
 ## Quem implementa cada interface de Application, e em qual camada
@@ -44,7 +47,6 @@ flowchart TD
 | `IUserTokenService` | `SecureUserTokenService` | Infrastructure |
 | `IEventJournal` | `JsonEventJournal` | Infrastructure |
 | `IBackgroundTaskQueue` | `BackgroundTaskQueue` | Infrastructure |
-| `IApplicationCache` | `MemoryApplicationCache` | Infrastructure |
 | **`ICurrentUserContext`** | `HttpCurrentUserContext` | **Web** (única interface de Application implementada fora de Infrastructure — depende de `IHttpContextAccessor`, um conceito de hospedagem HTTP, não de dados) |
 | `IExperienceRewardPolicy`, `IExperienceRewardService` | `ExperienceRewardPolicy`, `ExperienceRewardService` | **Application** (as únicas duas interfaces cuja implementação vive na própria Application, não injetada de fora) |
 
@@ -65,7 +67,7 @@ implementação vive na própria Application (`IEmailConfirmationIssuer`, `IExpe
 
 `AddBeeDayInfrastructure(configuration)` registra todo o restante — as 8 implementações de
 repositório, `EfUnitOfWork`, os 2 read services, e os serviços técnicos (senha, e-mail, tokens,
-cache, fila de background, journal de auditoria).
+fila de background, journal de auditoria).
 
 ## Diagrama de dependência de projeto (revisão, ver `docs/architecture/04-dependency-rules.md` para o detalhe completo)
 

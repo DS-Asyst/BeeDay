@@ -67,14 +67,11 @@ classDiagram
 `ConcurrencyConflictException` é `sealed`, deriva de `PersistenceException` (também usada
 diretamente, não só como base) — ambas em `BeeDay.Infrastructure.Persistence.Exceptions`.
 
-**Achado: 3 dos 5 tipos desta pasta são código morto.** `BackupRestoreException`,
-`DataFileCorruptedException`, `PersistenceAccessException` também derivam de `PersistenceException`,
-mas busca exaustiva em `src/`/`tests/` não encontra nenhuma referência a nenhuma das três além de
-sua própria declaração — nunca lançadas, nunca capturadas. `DataFileCorruptedException` monta a
-mensagem `"The JSON data file '{path}' is corrupted..."` — cita "JSON data file" literalmente,
-confirmando que são resíduos do pipeline JSON removido (ADR-005), não código relacionado a SQL
-Server. Só `PersistenceException` (base) e `ConcurrencyConflictException` são efetivamente usadas
-hoje.
+A pasta `Persistence/Exceptions/` continha 3 outros subtipos (`BackupRestoreException`,
+`DataFileCorruptedException`, `PersistenceAccessException`) — resíduos do pipeline JSON removido
+(ADR-005), sem nenhuma referência além da própria declaração. Removidos na Sprint 18.3. Só
+`PersistenceException` (base) e `ConcurrencyConflictException` existem hoje nesta pasta, ambas
+efetivamente usadas.
 
 ## Fluxo completo
 
@@ -128,8 +125,10 @@ cobre o mesmo cenário através de `IUnitOfWork.SaveChangesAsync` diretamente.
 ## Fontes de verdade
 
 **Arquivos consultados:** `EfConcurrencySaveChanges.cs`, `PersistenceException.cs`,
-`ConcurrencyConflictException.cs`, `BackupRestoreException.cs`, `DataFileCorruptedException.cs`,
-`PersistenceAccessException.cs`, `BeeDayDbContext.cs` (para a configuração de `RowVersion`).
+`ConcurrencyConflictException.cs`, `BeeDayDbContext.cs` (para a configuração de `RowVersion`).
+`BackupRestoreException.cs`, `DataFileCorruptedException.cs`, `PersistenceAccessException.cs`
+foram consultados antes de sua remoção (Sprint 18.3) e não existem mais no repositório — ver
+achado acima.
 **Testes consultados:** os 7 testes `UpdateAsync_ConcurrentModification_ThrowsConcurrencyConflictException`
 citados acima + `EfUnitOfWorkTests.SaveChangesAsync_ConcurrentModification_ThrowsConcurrencyConflictException`.
 **Contratos relacionados:** nenhuma interface própria — mecanismo interno de Infrastructure.

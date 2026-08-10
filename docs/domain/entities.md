@@ -2,13 +2,13 @@
 
 **Fonte da verdade:** verificado diretamente em `src/BeeDay.Domain/Entities/Activity.cs`,
 `Entities/Todo.cs`, `Entities/Profile.cs`, `src/BeeDay.Domain/Experience/ExperienceEntry.cs`,
-`Experience/ExperienceTransaction.cs`, e os Handlers de Application citados por seção.
+e os Handlers de Application citados por seção.
 
 Este documento cobre entidades com identidade própria (`Guid Id`, exceto `Profile`, que não tem
 identidade) que **não** são Aggregate Roots — ou porque são uma base abstrata compartilhada
 (`Activity`), ou porque só existem dentro da fronteira de outro agregado (`Todo`, dentro de
 `Project`; `ExperienceEntry`, dentro de `User`), ou porque são uma projeção computada
-(`Profile`), ou porque não são utilizadas em lugar nenhum (`ExperienceTransaction`).
+(`Profile`).
 
 ## Activity (base abstrata)
 
@@ -108,23 +108,10 @@ Ver [`user.md`](user.md) §Experience para o detalhamento funcional completo. Re
 - **Quem a possui:** `User`, via `UserExperience.Entries` (lista imutável, substituída por inteiro
   a cada `Add` — `Entries = [.. Entries, entry]`).
 
-## ExperienceTransaction (não utilizada — código morto)
-
-**Arquivo:** `src/BeeDay.Domain/Experience/ExperienceTransaction.cs`
-
-- **Responsabilidade declarada pelo código:** estruturalmente idêntica a `ExperienceEntry` (mesmos
-  campos: `Amount`, `Source`, `RewardType`, `GrantedAtUtc`), mas sem `UserId`.
-- **Achado confirmado nesta Sprint:** busca por `ExperienceTransaction` em todo `src/` e `tests/`
-  não retorna nenhuma referência fora do próprio arquivo — não é instanciada, não é referenciada
-  por nenhuma outra classe, não tem `DbSet` correspondente em `BeeDayDbContext`
-  (confirmado na Sprint 16.3: apenas `ExperienceEntries` existe como `DbSet`), e não tem nenhum
-  teste. É código morto. Reportado aqui; não removido (fora do escopo desta Sprint —
-  "não alterar código").
-
 ## Fontes de verdade
 
 **Arquivos consultados:** `src/BeeDay.Domain/Entities/Activity.cs`, `Entities/Todo.cs`,
-`Entities/Profile.cs`, `Experience/ExperienceEntry.cs`, `Experience/ExperienceTransaction.cs`,
+`Entities/Profile.cs`, `Experience/ExperienceEntry.cs`,
 `src/BeeDay.Application/Features/Todos/Handlers/TodoCommandHandlers.cs`,
 `Features/Projects/Handlers/ProjectCommandHandlers.cs`,
 `src/BeeDay.Infrastructure/Persistence/SqlServer/Configurations/UserConfiguration.cs` (citado

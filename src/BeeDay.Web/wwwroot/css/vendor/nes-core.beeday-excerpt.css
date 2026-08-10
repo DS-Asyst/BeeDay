@@ -4,7 +4,7 @@
  * This file exists solely for license/version auditing. It is never linked
  * from App.razor and is never referenced by any component. Do not add a
  * <link> to it. The actual stylesheet the application loads is
- * ../pixel-nes.css, which is LevelUp-authored and recolored with LevelUp
+ * ../pixel-nes.css, which is BeeDay-authored and recolored with BeeDay
  * design tokens — see that file and NES_ATTRIBUTION.md in this folder for
  * details of the adaptation.
  *
@@ -41,7 +41,7 @@
  * including their pseudo-elements and interactive states, exactly as they
  * appear upstream — EXCEPT the `cursor: url(data:image/png;base64,...) ...`
  * declaration inside the .nes-btn base rule, which has been stripped even
- * from this provenance copy (LevelUp owns cursor styling globally via
+ * from this provenance copy (BeeDay owns cursor styling globally via
  * wwwroot/css/cursors.css; shipping an unused embedded cursor asset serves
  * no purpose here). That is the only textual change in this file; every
  * other selector, property, and value below is byte-identical to upstream.
@@ -56,7 +56,7 @@
  * `.is-disabled`; `.nes-btn input[type="file"]`; and every other NES.css
  * component family (badge, dialog, balloon, icon, table, field, select,
  * radio, checkbox, progress, list, container variants, etc.) — none of
- * these have a real LevelUp consumer.
+ * these have a real BeeDay consumer.
  */
 
 .nes-container {

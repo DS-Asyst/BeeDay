@@ -136,10 +136,6 @@ contexto (comportamento nativo do EF Core ao descartar uma transação sem commi
 em `InfrastructureServiceCollectionExtensions.cs` — a aplicação recusa iniciar sem uma connection
 string configurada.
 
-`SqlServerOptions.HealthCheckEnabled` é uma propriedade não utilizada hoje (comentário no código a
-marca como obsoleta desde que o health check de SQL Server se tornou incondicional) — reportado
-aqui como observação, não corrigido (fora do escopo desta Sprint).
-
 ## 10. Cobertura de teste (verificado por contagem de arquivos, não por execução nesta seção)
 
 `tests/BeeDay.Infrastructure.Tests/Persistence/SqlServer/`: 65 testes (`[Fact]`/`[Theory]`)

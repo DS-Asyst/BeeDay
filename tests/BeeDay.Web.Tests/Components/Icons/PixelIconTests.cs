@@ -217,7 +217,7 @@ public sealed class PixelIconContractTests
     [Fact]
     public void EveryRegistryEntryUsesTheOfficialAssetRoot()
     {
-        var knownProviderFolders = new[] { "material-symbols/", "devicon/", "official-brand/", "levelup-custom/" };
+        var knownProviderFolders = new[] { "material-symbols/", "devicon/", "official-brand/", "beeday-custom/" };
 
         foreach (var entry in PixelIconRegistry.All)
         {
@@ -301,7 +301,7 @@ internal enum IconProvider
     MaterialSymbols,
     Devicon,
     OfficialBrand,
-    LevelUpCustom
+    BeeDayCustom
 }
 
 public sealed class IconMappingCsvTests

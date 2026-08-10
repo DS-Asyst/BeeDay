@@ -74,7 +74,7 @@ Ver [`relationships.md`](relationships.md) para o mapa completo de relacionament
 
 | Documento | Conteúdo |
 |---|---|
-| [`entities.md`](entities.md) | Entidades que não são Aggregate Roots: `Todo`, `Activity`, `Profile`, `ExperienceEntry`, `ExperienceTransaction` (código morto) |
+| [`entities.md`](entities.md) | Entidades que não são Aggregate Roots: `Todo`, `Activity`, `Profile`, `ExperienceEntry` |
 | [`value-objects.md`](value-objects.md) | Os 6 Value Objects + `ExperienceReward`/`ExperienceSource` |
 | [`domain-events.md`](domain-events.md) | Os 3 Domain Events, quem publica, quem consome, diagrama de fluxo |
 | [`business-rules.md`](business-rules.md) | Toda invariante extraída do código, com arquivo/método/teste |

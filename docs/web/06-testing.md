@@ -124,10 +124,9 @@ não o código JS isoladamente.
 
 ## 9. Contagem de referência
 
-`docs/testing/README.md` registra 742 testes aprovados (93 Domain, 72 Application, 120
-Infrastructure, 450 Web, 7 E2E). Reconfirmado nesta Sprint pelo quality gate (`dotnet test
-BeeDay.slnx --configuration Release`, 2026-08-07): os mesmos 742 testes, 0 falhas, mesma
-distribuição por projeto — a contagem permanece válida.
+`docs/testing/01-testing-strategy.md` §1 é a fonte canônica da contagem de testes por projeto —
+752 testes aprovados (93 Domain, 73 Application, 129 Infrastructure, 450 Web, 7 E2E), confirmado
+pelo quality gate na Sprint 18.7 (não repetido aqui em detalhe para evitar duplicação).
 
 ## 10. Achado
 

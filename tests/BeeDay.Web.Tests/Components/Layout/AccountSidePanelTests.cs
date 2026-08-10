@@ -11,8 +11,8 @@ public sealed class AccountSidePanelTests
         var cut = context.Render<AccountSidePanel>(parameters => parameters
             .Add(component => component.IsOpen, true));
 
-        Assert.Contains("LEVEL", cut.Find(".support-drawer__brand-level").TextContent, StringComparison.Ordinal);
-        Assert.Contains("UP", cut.Find(".support-drawer__brand-up").TextContent, StringComparison.Ordinal);
+        Assert.Contains("BEE", cut.Find(".support-drawer__brand-bee").TextContent, StringComparison.Ordinal);
+        Assert.Contains("DAY", cut.Find(".support-drawer__brand-day").TextContent, StringComparison.Ordinal);
         Assert.Equal("GAMIFYING YOUR LIFE", cut.Find(".support-drawer__tagline").TextContent);
 
         Assert.DoesNotContain("SOCIAL", cut.Markup, StringComparison.OrdinalIgnoreCase);

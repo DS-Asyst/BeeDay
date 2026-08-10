@@ -256,8 +256,8 @@
     letter-spacing: .04em;
 }
 
-.support-drawer__brand-level { color: #fff; }
-.support-drawer__brand-up { color: #ffc800; }
+.support-drawer__brand-bee { color: #fff; }
+.support-drawer__brand-day { color: #ffc800; }
 
 .support-drawer__tagline {
     margin: 0;
