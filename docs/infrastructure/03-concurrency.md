@@ -125,8 +125,10 @@ cobre o mesmo cenário através de `IUnitOfWork.SaveChangesAsync` diretamente.
 ## Fontes de verdade
 
 **Arquivos consultados:** `EfConcurrencySaveChanges.cs`, `PersistenceException.cs`,
-`ConcurrencyConflictException.cs`, `BackupRestoreException.cs`, `DataFileCorruptedException.cs`,
-`PersistenceAccessException.cs`, `BeeDayDbContext.cs` (para a configuração de `RowVersion`).
+`ConcurrencyConflictException.cs`, `BeeDayDbContext.cs` (para a configuração de `RowVersion`).
+`BackupRestoreException.cs`, `DataFileCorruptedException.cs`, `PersistenceAccessException.cs`
+foram consultados antes de sua remoção (Sprint 18.3) e não existem mais no repositório — ver
+achado acima.
 **Testes consultados:** os 7 testes `UpdateAsync_ConcurrentModification_ThrowsConcurrencyConflictException`
 citados acima + `EfUnitOfWorkTests.SaveChangesAsync_ConcurrentModification_ThrowsConcurrencyConflictException`.
 **Contratos relacionados:** nenhuma interface própria — mecanismo interno de Infrastructure.

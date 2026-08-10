@@ -22,7 +22,7 @@ testes em `tests/BeeDay.Web.Tests`". Ver [`CONVENTIONS.md`](CONVENTIONS.md).
 | [`architecture/`](architecture/README.md) | Visão geral, estrutura da solução, camadas, dependências, runtime, persistência, segurança, deployment | Correto — reconstruído por completo na Sprint 16.3 a partir do código atual |
 | [`domain/`](domain/README.md) | Aggregates, Entities, Value Objects, Domain Events, Business Rules | Correto — reconstruído por completo na Sprint 16.4 a partir do código atual |
 | [`application/`](application/README.md) | CQRS, Use Cases, Pipeline, Contracts, Exceptions, Dependency Flow | Correto — reconstruído por completo na Sprint 16.5 a partir do código atual |
-| [`infrastructure/`](infrastructure/README.md) | Repositories, Unit of Work, SQL Server, Concurrency, Event Journal, Identity/Email/Cache/Health/Background, Dependency Injection | Correto — reconstruído por completo na Sprint 16.6 a partir do código atual |
+| [`infrastructure/`](infrastructure/README.md) | Repositories, Unit of Work, SQL Server, Concurrency, Event Journal, Identity/Email/Health/Background, Dependency Injection | Correto — reconstruído por completo na Sprint 16.6 a partir do código atual; cache de aplicação removido na Sprint 18.6 (código morto) |
 | [`web/`](web/README.md) | Composition root, páginas Blazor Server, Feature components, layouts, integração com Design System | Correto — reconstruído por completo na Sprint 16.7 a partir do código atual |
 | [`persistence/`](persistence/README.md) | Modelo relacional, estratégia EF Core | Correto — reconstruído por completo na Sprint 16.6 a partir do código atual |
 | [`authentication/`](authentication/README.md) | Cookies, confirmação de e-mail, rate limiting | Reservado — ver `security/` enquanto isso |
