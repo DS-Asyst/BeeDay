@@ -8,6 +8,9 @@ afirmação vem de `docs/history/` ou de sprints anteriores sem reverificação 
 **Fonte da verdade:** cada documento abaixo declara individualmente as fontes exatas usadas para
 validá-lo, na seção final "Fontes consultadas".
 
+**Última verificação:** 2026-08-10 (Sprint 18.7) — contagem de folhas de CSS globais corrigida de
+19 para 20.
+
 ## Objetivo
 
 Dar a qualquer pessoa que for construir uma tela nova em `BeeDay.Web` uma resposta direta a três
@@ -20,7 +23,7 @@ próprio `BeeDay.Web`, consumida diretamente pelos componentes de Feature (ver
 ## Escopo
 
 Dentro: os 26 componentes reutilizáveis sob `Components/DesignSystem/` (Buttons, Cards, Forms,
-Feedback, Icons, Layout, Modals, Attributes, Text), as 19 folhas de CSS sob `wwwroot/css/`, os 3
+Feedback, Icons, Layout, Modals, Attributes, Text), as 20 folhas de CSS sob `wwwroot/css/`, os 3
 módulos de interop JS que servem componentes do Design System, e o Pixel Icon System
 (`PixelIconRegistry`, sprite único). Fora: componentes de Feature (`Components/Features/*` — ver
 [`docs/web/04-feature-components.md`](../web/04-feature-components.md)), layouts de página
