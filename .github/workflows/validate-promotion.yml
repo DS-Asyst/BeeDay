@@ -1,4 +1,4 @@
-name: Validate Promotion
+name: BeeDay — Promotion Policy
 
 # Policy gate only: proves a pull request follows the approved BeeDay promotion path
 # (Sprint/fix -> hmg -> main -> prd) from a branch of this same repository, never a fork.
