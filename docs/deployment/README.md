@@ -21,15 +21,16 @@ linkado a partir daqui onde relevante em vez de duplicado.
 
 | Documento | Conteúdo |
 |---|---|
-| [`01-deployment.md`](01-deployment.md) | Deploy manual e automatizado, os 3 workflows do GitHub Actions (`ci.yml`, `deploy-hmg.yml`, `deploy-prd.yml`), pipeline, publicação, rollback, ambientes HMG/Produção |
+| [`01-deployment.md`](01-deployment.md) | Deploy manual e automatizado, os workflows do GitHub Actions (`ci.yml`, `deploy-hmg.yml`, `verify-hmg.yml`, `deploy-prd.yml`), pipeline, publicação, rollback, ambientes HMG/Produção |
 | [`02-runtime-configuration.md`](02-runtime-configuration.md) | `appsettings*`, variáveis de ambiente, binding de configuração, Options, secrets, guardas de startup |
 | [`03-observability.md`](03-observability.md) | Logging, Event Journal, health checks, diagnostics, ciclo de vida da aplicação |
 | [`04-operations.md`](04-operations.md) | Backup, restore, recovery, migrations, versionamento, processo de release, manutenção |
 | [`05-privileged-iis-control.md`](05-privileged-iis-control.md) | Boundary privilegiada de controle do IIS em HMG (STOP/START/CONFIGURE/RESTORE via SYSTEM) e a automação de promoção do script operacional (`HMG-IisControl-Updater`, Sprint 17.17) |
-| [`06-cicd-pipeline-discovery-baseline.md`](06-cicd-pipeline-discovery-baseline.md) | Registro histórico congelado do baseline empírico AS-IS coletado na Sprint 19.1 (workflows, triggers, timing, deployments duplicados confirmados, Rulesets, provenance) — EPIC 19. As divergências que este documento encontrou em `01-deployment.md` (§19) foram corrigidas na Sprint 19.2; o achado de deployment duplicado em HMG (§6/§12) permanece ativo e não corrigido até a Sprint 19.6 |
+| [`06-cicd-pipeline-discovery-baseline.md`](06-cicd-pipeline-discovery-baseline.md) | Registro histórico congelado do baseline empírico AS-IS coletado na Sprint 19.1 (workflows, triggers, timing, deployments duplicados confirmados, Rulesets, provenance) — EPIC 19. As divergências que este documento encontrou em `01-deployment.md` (§19) foram corrigidas na Sprint 19.2; o achado de deployment duplicado em HMG (§6/§12) foi estruturalmente corrigido na Sprint 19.6 |
 | [`07-validation-matrix.md`](07-validation-matrix.md) | Matriz oficial `Validation × Stage` — inventário de todos os testes/validações do BeeDay, duração/criticidade/dependências/flakiness medidas, e classificação de estágio atual vs. recomendado — EPIC 19, Sprint 19.3. Entrada oficial para as Sprints 19.4-19.9 |
-| [`08-fast-pr-validation-decision.md`](08-fast-pr-validation-decision.md) | Registro de decisão da Sprint 19.4: por que `BeeDay CI` ainda não pode ser renomeado para `BeeDay — Pull Request Validation` (dependências rastreadas até 19.6/19.7), decisão formal de manter E2E em toda PR, e a remoção de `prd` do trigger `pull_request` (única mudança estrutural segura desta Sprint) |
+| [`08-fast-pr-validation-decision.md`](08-fast-pr-validation-decision.md) | Registro de decisão da Sprint 19.4: por que `BeeDay CI` ainda não pode ser renomeado para `BeeDay — Pull Request Validation` (dependências rastreadas até 19.7/19.8), decisão formal de manter E2E em toda PR, e a remoção de `prd` do trigger `pull_request` (única mudança estrutural segura daquela Sprint) |
 | [`09-pipeline-performance.md`](09-pipeline-performance.md) | Baseline de performance medido (6 execuções reais), achado confirmado de rebuild redundante em `dotnet publish` (11.3s eliminados), cache de NuGet e de browsers Playwright, e candidatos de otimização rejeitados com justificativa — EPIC 19, Sprint 19.5 |
+| [`10-hmg-deployment-verification.md`](10-hmg-deployment-verification.md) | Eliminação estrutural do deployment duplicado em HMG (causa raiz da 19.1), novo workflow `BeeDay — HMG Verification` (Readiness + Smoke reais contra o ambiente implantado), decisão de manter `push:hmg` em `BeeDay CI` com justificativa explícita — EPIC 19, Sprint 19.6 |
 
 ## Ordem de leitura recomendada
 
@@ -48,6 +49,8 @@ linkado a partir daqui onde relevante em vez de duplicado.
    Sprint 19.4 efetivamente mudou.
 9. `09-pipeline-performance.md` — onde o tempo de CI realmente vai e o que foi acelerado sem
    perder cobertura.
+10. `10-hmg-deployment-verification.md` — como o deployment duplicado em HMG foi eliminado e como
+    `BeeDay — HMG Verification` prova que o ambiente implantado está utilizável.
 
 ## Estado real de HMG e PRD (Sprint 18.4)
 

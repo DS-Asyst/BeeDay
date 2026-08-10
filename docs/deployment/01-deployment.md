@@ -11,8 +11,8 @@ Discovery da Sprint 19.1, ver [`06-cicd-pipeline-discovery-baseline.md`](06-cicd
 ## 1. Objetivo
 
 Descrever exatamente como um commit vira um binário publicado e como esse binário chega aos
-servidores IIS de homologação e produção — dos 3 workflows do GitHub Actions (`ci.yml`,
-`deploy-hmg.yml`, `deploy-prd.yml`) ao script de deploy com rollback.
+servidores IIS de homologação e produção — dos workflows do GitHub Actions (`ci.yml`,
+`deploy-hmg.yml`, `verify-hmg.yml`, `deploy-prd.yml`) ao script de deploy com rollback.
 
 ## 2. Branches e ambientes
 
@@ -100,12 +100,21 @@ sequenceDiagram
 `environment: homologation` (GitHub Environment existente, mas sem `protection_rules` configuradas
 hoje — ver [`06-cicd-pipeline-discovery-baseline.md`](06-cicd-pipeline-discovery-baseline.md) §15).
 
-**Achado ativo (não corrigido nesta Sprint):** como qualquer conclusão bem-sucedida de `ci.yml`
-cujo `head_branch` seja `hmg` dispara este job — e `ci.yml` roda tanto em `push` para `hmg` quanto
-em `pull_request` com `hmg` como origem (ex.: a PR de promoção `hmg → main`) — o mesmo commit pode
-disparar **dois** deployments completos e independentes em sequência. Comprovado com evidência de
-log direta pela Sprint 19.1 (`06-cicd-pipeline-discovery-baseline.md` §12); correção é escopo da
-Sprint 19.6, não deste documento.
+**Corrigido na Sprint 19.6:** até então, qualquer conclusão bem-sucedida de `ci.yml` cujo
+`head_branch` fosse `hmg` disparava este job — e `ci.yml` roda tanto em `push` para `hmg` quanto em
+`pull_request` com `hmg` como origem (ex.: a PR de promoção `hmg → main`), então o mesmo commit
+podia disparar **dois** deployments completos e independentes em sequência (comprovado com
+evidência de log direta pela Sprint 19.1, `06-cicd-pipeline-discovery-baseline.md` §12). O guard
+agora exige também `workflow_run.event == 'push'` — a execução de `ci.yml` disparada pela PR
+`hmg→main` (evento `pull_request`) não satisfaz mais a condição, mesmo com `head_branch=='hmg'`.
+Estruturalmente eliminado; validação remota ainda pendente — ver
+[`10-hmg-deployment-verification.md`](10-hmg-deployment-verification.md).
+
+Após um deploy bem-sucedido, o job expõe o SHA implantado (`outputs.deployed-sha`) e publica um
+artifact `beeday-hmg-deployment-info`, consumido por
+[`BeeDay — HMG Verification`](10-hmg-deployment-verification.md) (`verify-hmg.yml`, Sprint 19.6) —
+`workflow_run` encadeado, que roda `Verify Readiness` (re-checagem explícita de `/health/ready`) e
+`Run Smoke Tests` (`GET /login` contra o ambiente real implantado) após todo deploy bem-sucedido.
 
 ### 4.2 Job `deploy` (`deploy-prd.yml`, job display name "Deploy Production")
 
@@ -173,10 +182,10 @@ passar silenciosamente até o e-mail de fato ser enviado com remetente em branco
 
 - **HMG recebe deploy automatizado** por `deploy-hmg.yml` — a versão anterior deste documento
   afirmava o contrário; corrigido na Sprint 19.2 a partir da evidência da Sprint 19.1 (ver §4.1).
-- **Deployment duplicado em HMG para o mesmo estado** é um problema ativo e comprovado (não
-  hipotético) — ver §4.1 e
-  [`06-cicd-pipeline-discovery-baseline.md`](06-cicd-pipeline-discovery-baseline.md) §6/§12.
-  Correção é escopo da Sprint 19.6.
+- **Deployment duplicado em HMG para o mesmo estado** — comprovado pela Sprint 19.1
+  (`06-cicd-pipeline-discovery-baseline.md` §6/§12), **estruturalmente corrigido na Sprint 19.6**
+  (ver §4.1 e [`10-hmg-deployment-verification.md`](10-hmg-deployment-verification.md)); validação
+  remota (observar 0 duplicações num push/PR real) ainda pendente.
 - **`environment: production` não tem GitHub Environment correspondente configurado** — ver §4.2.
 - PRD não roda migrations nem tem connection string própria (`deploy-prd.yml` não baixa
   `beeday-migrations`) — consistente com PRD ser Not Provisioned by Design (ver
@@ -193,7 +202,8 @@ passar silenciosamente até o e-mail de fato ser enviado com remetente em branco
 
 ## 7. Fontes consultadas
 
-- `.github/workflows/ci.yml`, `.github/workflows/deploy-hmg.yml`, `.github/workflows/deploy-prd.yml`.
+- `.github/workflows/ci.yml`, `.github/workflows/deploy-hmg.yml`, `.github/workflows/verify-hmg.yml`,
+  `.github/workflows/deploy-prd.yml`.
 - `scripts/Deploy-BeeDay.ps1`.
 - `src/BeeDay.Web/web.config`.
 - [`06-cicd-pipeline-discovery-baseline.md`](06-cicd-pipeline-discovery-baseline.md) (Sprint 19.1 —

@@ -1,0 +1,174 @@
+name: BeeDay — HMG Verification
+
+# Separate concern from BeeDay — HMG Deployment (Sprint 19.6): deployment succeeding proves the
+# new build was installed and the app came up; verification proves the deployed state is actually
+# usable. Deliberately a separate workflow file, not a second job inside deploy-hmg.yml, so the
+# canonical taxonomy name is real (not just a job display name) - see
+# docs/deployment/10-hmg-deployment-verification.md for the full design rationale, including why
+# SHA correlation is done via the beeday-hmg-deployment-info artifact (run-id is reliable in the
+# workflow_run payload) instead of github.event.workflow_run.head_sha (proven unreliable for
+# workflow_run chains in docs/deployment/06-cicd-pipeline-discovery-baseline.md #6.1 - that field
+# reflects the default branch at trigger time, not the deployed SHA).
+on:
+  workflow_run:
+    workflows:
+      - BeeDay — HMG Deployment
+    types:
+      - completed
+
+  workflow_dispatch:
+
+# Read-only against a live but non-mutating target (HTTP GET only) - unlike deployment, cancelling
+# a stale verification mid-flight has no risk of leaving anything in an inconsistent state, so the
+# newest state's verification result is always the one worth keeping.
+concurrency:
+  group: beeday-hmg-verification
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  verify:
+    name: Verify HMG
+    # deploy-hmg.yml's own "deploy" job already gates on event == 'push' and head_branch == 'hmg'
+    # (Sprint 19.6) - by the time this workflow observes a successful "BeeDay — HMG Deployment"
+    # completion, that filtering has already happened once. No need to re-derive/re-check
+    # head_branch here (and github.event.workflow_run.head_branch would be unreliable for this
+    # workflow_run hop regardless - same reason head_sha is, see the note above).
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    runs-on:
+      - self-hosted
+      - Windows
+      - X64
+      - hmg
+
+    timeout-minutes: 10
+    environment: homologation
+
+    steps:
+      # workflow_run already carries the exact triggering run's id. workflow_dispatch has no such
+      # payload, so it looks up the latest *successful* HMG Deployment run via the REST API - same
+      # pattern already proven in deploy-hmg.yml's own "Resolve BeeDay CI run to deploy" step.
+      - name: Resolve HMG Deployment run to verify
+        id: resolve-run
+        uses: actions/github-script@v9.0.0
+        with:
+          result-encoding: string
+          script: |
+            if (context.eventName === 'workflow_run') {
+              core.info(`Using triggering workflow_run id ${context.payload.workflow_run.id}`);
+              return `${context.payload.workflow_run.id}`;
+            }
+
+            core.info('workflow_dispatch: resolving latest successful BeeDay — HMG Deployment run');
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy-hmg.yml',
+              status: 'success',
+              per_page: 1
+            });
+
+            if (runs.data.workflow_runs.length === 0) {
+              throw new Error('No successful BeeDay — HMG Deployment run found.');
+            }
+
+            const runId = runs.data.workflow_runs[0].id;
+            core.info(`Using latest successful HMG Deployment run id ${runId}`);
+            return `${runId}`;
+
+      - name: Download deployment info
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: beeday-hmg-deployment-info
+          path: ${{ runner.temp }}\DeploymentInfo
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.resolve-run.outputs.result }}
+
+      - name: Read deployed SHA
+        id: deployed
+        shell: powershell
+        run: |
+          $infoPath = Join-Path "${{ runner.temp }}" "DeploymentInfo\deployment-info.json"
+          $info = Get-Content -LiteralPath $infoPath -Raw | ConvertFrom-Json
+          Write-Host "Verifying deployment of SHA: $($info.sha)"
+          "sha=$($info.sha)" >> $env:GITHUB_OUTPUT
+
+      # Readiness answers "is the deployed app available and able to reach its dependencies?" -
+      # the same /health/ready endpoint Deploy-BeeDay.ps1 already polls internally as part of its
+      # own success/rollback decision (SqlServerHealthCheck, tag "ready" - see
+      # src/BeeDay.Web/Program.cs and docs/deployment/03-observability.md #3). Re-checking it here,
+      # explicitly, as its own named/observable step, is deliberate: today that check is invisible
+      # inside a PowerShell script's internal retry loop, not something anyone can see pass/fail on
+      # its own. Bounded retry, not a fixed sleep - fails clearly on timeout rather than hanging.
+      - name: Verify Readiness
+        shell: powershell
+        run: |
+          $url = "https://h-beeday.com.br/health/ready"
+          $maxAttempts = 6
+          $delaySeconds = 5
+          $ready = $false
+
+          for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+              try {
+                  $response = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 10
+                  if ($response.StatusCode -eq 200) {
+                      Write-Host "Readiness OK on attempt $attempt (HTTP $($response.StatusCode))"
+                      $ready = $true
+                      break
+                  }
+                  Write-Host "Attempt $attempt`: HTTP $($response.StatusCode), retrying..."
+              } catch {
+                  Write-Host "Attempt $attempt`: $($_.Exception.Message), retrying..."
+              }
+
+              if ($attempt -lt $maxAttempts) {
+                  Start-Sleep -Seconds $delaySeconds
+              }
+          }
+
+          if (-not $ready) {
+              throw "HMG did not become ready after $maxAttempts attempts against $url."
+          }
+
+      # Smoke proves a minimal real user-facing flow works against the actually deployed
+      # environment - readiness only proves the health endpoint (JSON, no rendering, no IIS
+      # static/Blazor pipeline) responds. This deliberately does NOT reuse BeeDay.E2E.Tests: those
+      # run pre-deploy against a local Kestrel instance with a real browser (Sprint 19.3 confirmed
+      # they are not HMG smoke). This check is read-only (GET only), non-destructive, and does not
+      # create any state - it fetches the public login page and asserts it actually rendered.
+      - name: Run Smoke Tests
+        shell: powershell
+        run: |
+          $url = "https://h-beeday.com.br/login"
+          $response = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 15
+
+          if ($response.StatusCode -ne 200) {
+              throw "Smoke check failed: GET $url returned HTTP $($response.StatusCode)."
+          }
+
+          if ($response.Content -notmatch "BeeDay") {
+              throw "Smoke check failed: GET $url returned 200 but the page did not contain the expected marker."
+          }
+
+          Write-Host "Smoke OK: $url returned HTTP 200 with expected content."
+
+      - name: Record verification summary
+        if: always()
+        shell: powershell
+        run: |
+          $result = "${{ job.status }}"
+
+          "## BeeDay — HMG Verification" >> $env:GITHUB_STEP_SUMMARY
+          "" >> $env:GITHUB_STEP_SUMMARY
+          "| Field | Value |" >> $env:GITHUB_STEP_SUMMARY
+          "|---|---|" >> $env:GITHUB_STEP_SUMMARY
+          "| Verified SHA | ``${{ steps.deployed.outputs.sha }}`` |" >> $env:GITHUB_STEP_SUMMARY
+          "| Target environment | homologation |" >> $env:GITHUB_STEP_SUMMARY
+          "| Job result | $result |" >> $env:GITHUB_STEP_SUMMARY
+          "| Timestamp (UTC) | $((Get-Date).ToUniversalTime().ToString('o')) |" >> $env:GITHUB_STEP_SUMMARY
