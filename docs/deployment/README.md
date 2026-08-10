@@ -26,15 +26,19 @@ linkado a partir daqui onde relevante em vez de duplicado.
 | [`03-observability.md`](03-observability.md) | Logging, Event Journal, health checks, diagnostics, ciclo de vida da aplicação |
 | [`04-operations.md`](04-operations.md) | Backup, restore, recovery, migrations, versionamento, processo de release, manutenção |
 | [`05-privileged-iis-control.md`](05-privileged-iis-control.md) | Boundary privilegiada de controle do IIS em HMG (STOP/START/CONFIGURE/RESTORE via SYSTEM) e a automação de promoção do script operacional (`HMG-IisControl-Updater`, Sprint 17.17) |
+| [`06-cicd-pipeline-discovery-baseline.md`](06-cicd-pipeline-discovery-baseline.md) | Baseline empírico AS-IS do pipeline de CI/CD (workflows, triggers, timing, deployments duplicados confirmados, Rulesets, provenance) — EPIC 19, Sprint 19.1. **Nota:** identifica divergências não corrigidas em `01-deployment.md` (ver §19 deste documento) — tratar `06-` como a fonte mais recente para comportamento de `deploy-hmg.yml`/`deploy-prd.yml` até `01-deployment.md` ser sincronizado |
 
 ## Ordem de leitura recomendada
 
-1. `01-deployment.md` — como o binário chega ao servidor.
+1. `01-deployment.md` — como o binário chega ao servidor (ver ressalva de desatualização em
+   `06-cicd-pipeline-discovery-baseline.md` §19).
 2. `02-runtime-configuration.md` — o que esse binário lê ao iniciar.
 3. `03-observability.md` — o que dá para ver depois que ele está rodando.
 4. `04-operations.md` — o que fazer quando algo dá errado.
 5. `05-privileged-iis-control.md` — como o runner de baixo privilégio controla o IIS em HMG sem
    nunca virar administrador.
+6. `06-cicd-pipeline-discovery-baseline.md` — o baseline real do pipeline, para quem for trabalhar
+   na EPIC 19 (CI/CD Architecture, Performance & Developer Experience).
 
 ## Estado real de HMG e PRD (Sprint 18.4)
 
