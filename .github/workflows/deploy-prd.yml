@@ -1,4 +1,4 @@
-name: BeeDay Production Deploy
+name: BeeDay — Production Deployment
 
 on:
   push:
@@ -22,7 +22,7 @@ env:
 
 jobs:
   deploy:
-    name: Deploy to SERV3-WEB1
+    name: Deploy Production
     runs-on:
       - self-hosted
       - Windows

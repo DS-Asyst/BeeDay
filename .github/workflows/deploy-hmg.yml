@@ -1,4 +1,4 @@
-name: BeeDay Homologation Deploy
+name: BeeDay — HMG Deployment
 
 on:
   workflow_run:
@@ -23,7 +23,7 @@ env:
 
 jobs:
   deploy:
-    name: Deploy to SERV3WEB
+    name: Deploy HMG
     # Automatic path: only deploy when the triggering BeeDay CI run succeeded on hmg specifically
     # (head_branch also excludes PR-validation runs of BeeDay CI, whose head_branch is the PR's
     # source branch, not hmg). Manual path: workflow_dispatch has no workflow_run payload to gate
