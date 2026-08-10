@@ -52,28 +52,28 @@
     gap: .2rem;
 }
 
-.top-navigation__brand-level,
-.top-navigation__brand-up {
+.top-navigation__brand-bee,
+.top-navigation__brand-day {
     font-size: 1.45rem;
     font-weight: 700;
     letter-spacing: .02em;
 }
 
-.top-navigation__brand-level { color: #fff; }
-.top-navigation__brand-up { color: #ffc800; }
+.top-navigation__brand-bee { color: #fff; }
+.top-navigation__brand-day { color: #ffc800; }
 
-.top-navigation__brand-level,
-.top-navigation__brand-up {
+.top-navigation__brand-bee,
+.top-navigation__brand-day {
     transition:
         font-size 180ms cubic-bezier(.2, .8, .2, 1),
         font-weight 180ms ease,
         letter-spacing 180ms ease;
 }
 
-.top-navigation__brand-button:hover .top-navigation__brand-level,
-.top-navigation__brand-button:hover .top-navigation__brand-up,
-.top-navigation__brand-button:focus-visible .top-navigation__brand-level,
-.top-navigation__brand-button:focus-visible .top-navigation__brand-up {
+.top-navigation__brand-button:hover .top-navigation__brand-bee,
+.top-navigation__brand-button:hover .top-navigation__brand-day,
+.top-navigation__brand-button:focus-visible .top-navigation__brand-bee,
+.top-navigation__brand-button:focus-visible .top-navigation__brand-day {
     font-size: 1.55rem;
     font-weight: 700;
     letter-spacing: .035em;
@@ -183,7 +183,7 @@
     .top-navigation__content { grid-template-columns: 1fr auto; padding-left: .4rem; }
     .top-navigation__brand-button { min-width: 0; justify-content: flex-start; }
     .top-navigation__links { display: none; }
-    .top-navigation__brand-level, .top-navigation__brand-up { font-size: 1.05rem; }
+    .top-navigation__brand-bee, .top-navigation__brand-day { font-size: 1.05rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -3,10 +3,11 @@
 **Fonte da verdade:** verificado diretamente em `src/BeeDay.Web/wwwroot/css/variables.css`,
 `theme.css`, `typography.css`, `typography-policy.css`, `utilities.css`, `polish.css`, e um
 levantamento completo de todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css`
-(19 arquivos) e `src/BeeDay.Web/Components/**/*.razor.css` (30 arquivos de CSS isolado por
+(20 arquivos) e `src/BeeDay.Web/Components/**/*.razor.css` (30 arquivos de CSS isolado por
 componente).
 
-**Última verificação:** 2026-08-07.
+**Última verificação:** 2026-08-10 (Sprint 18.7) — contagem de folhas globais corrigida de 19 para
+20 (`Glob` direto de `wwwroot/css/*.css` confirma 20 arquivos hoje).
 
 ## 1. Objetivo
 
@@ -150,7 +151,7 @@ graph TD
 
 ## 9. Duas camadas de CSS: global e isolado por componente
 
-Além das 19 folhas globais em `wwwroot/css/` (3.939 linhas, carregadas por `<link>` em `App.razor`
+Além das 20 folhas globais em `wwwroot/css/` (carregadas por `<link>` em `App.razor`
 — ver [`docs/web/05-design-system-integration.md`](../web/05-design-system-integration.md) §3),
 o repositório tem **30 arquivos de CSS isolado por componente** (`*.razor.css`, 3.886 linhas —
 quase o mesmo volume que as folhas globais), compilados pelo SDK Blazor em
@@ -176,7 +177,7 @@ colapsados, mantendo consistência *entre si*, mas não com o token central.
 
 **Não existe um token de breakpoint.** Toda `@media (max-width: ...)`/`(min-width: ...)` do
 repositório usa um valor literal, por arquivo, sem referência a uma variável compartilhada —
-verdade tanto para as 19 folhas globais quanto para os 30 arquivos de CSS isolado do §9. A lista
+verdade tanto para as 20 folhas globais quanto para os 30 arquivos de CSS isolado do §9. A lista
 completa (29 breakpoints distintos: 26 em `max-width`, 2 em `min-width`, 1 em `max-height`) está em
 [`docs/ux/03-responsive.md`](../ux/03-responsive.md) §2, junto com os casos em que o mesmo
 propósito visual usa cortes diferentes (ex.: `650px` em `cards.css` vs. `640px` em `wallet.css`;
@@ -195,7 +196,7 @@ a 2 e depois 1 coluna via `@media`; `.wallet-summary`: `1.4fr 1fr 1fr`, etc.).
 
 - `src/BeeDay.Web/wwwroot/css/variables.css`, `theme.css`, `typography.css`,
   `typography-policy.css`, `utilities.css`, `polish.css`, `activity-design-system.css`.
-- Todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css` (19 arquivos) e em todo
+- Todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css` (20 arquivos) e em todo
   `src/BeeDay.Web/Components/**/*.razor.css` (30 arquivos) — levantamento completo de ambas as
   camadas de CSS.
 - `src/BeeDay.Web/Components/Layout/TopNavigation.razor.css`, `MainLayout.razor.css` (cores

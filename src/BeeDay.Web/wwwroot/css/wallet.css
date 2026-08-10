@@ -59,8 +59,10 @@
 
 /* .wallet-summary__card, .wallet-main-panel, and .wallet-tags-panel also carry the
    shared, non-interactive .beeday-card class (no hover) — the exact border/background/shadow
-   values are still declared explicitly here rather than left to design-system.css, since the
-   legacy dark-theme rules earlier in this file load after it and would otherwise win the cascade. */
+   values are still declared explicitly here rather than left to design-system.css. The
+   dark-theme rules that originally motivated this duplication no longer exist in this file
+   (Sprint 18.7 audit found no other reference to dark theme here) — kept explicit rather than
+   removed because equivalence with design-system.css's cascade was not verified this Sprint. */
 .wallet-summary__card,
 .wallet-main-panel,
 .wallet-tags-panel {
