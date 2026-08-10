@@ -39,6 +39,16 @@ jobs:
         uses: actions/setup-dotnet@v6.0.0
         with:
           dotnet-version: "10.0.x"
+          # Native NuGet cache (backed by actions/cache internally), not a hand-rolled
+          # actions/cache step - see docs/deployment/09-pipeline-performance.md (Sprint 19.5) for
+          # why setup-dotnet's own cache was chosen over a manual one, and why this is safe with
+          # no packages.lock.json in the repo (Central Package Management already pins exact
+          # versions via Directory.Packages.props; cache miss falls back to a normal full
+          # restore, never a functional requirement for correctness).
+          cache: true
+          cache-dependency-path: |
+            Directory.Packages.props
+            **/*.csproj
 
       - name: Show .NET information
         shell: powershell
@@ -59,6 +69,17 @@ jobs:
             --configuration Release `
             --no-restore `
             --warnaserror
+
+      # Path confirmed empirically from a real run's install log (Sprint 19.5): Playwright's .NET
+      # tool installs Chromium/FFmpeg to %LOCALAPPDATA%\ms-playwright on windows-latest, unrelated
+      # to the NuGet cache above. Keyed on Microsoft.Playwright's pinned version in
+      # Directory.Packages.props, so a version bump invalidates the cache automatically. Safe on
+      # cache miss: the install step below still runs unconditionally and re-downloads if needed.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('Directory.Packages.props') }}
 
       - name: Install Playwright Chromium
         shell: powershell
@@ -83,6 +104,7 @@ jobs:
               dotnet test $project.FullName `
                 --configuration Release `
                 --no-build `
+                --no-restore `
                 --verbosity normal `
                 --logger "trx;LogFileName=$($project.BaseName).trx" `
                 --results-directory $resultsDirectory
@@ -97,6 +119,11 @@ jobs:
               throw "One or more test projects failed. See logs above for details."
           }
 
+      # --no-build added in Sprint 19.5: dotnet publish re-evaluates/re-links the whole dependency
+      # graph (Domain/Application/Infrastructure/Web) by default even though the Release build
+      # above already produced identical, up-to-date outputs with the same configuration and no
+      # source changes in between - measured locally at ~13s (rebuild) vs ~2s (--no-build) for the
+      # same publish, see docs/deployment/09-pipeline-performance.md.
       - name: Publish BeeDay
         shell: powershell
         run: |
@@ -104,6 +131,7 @@ jobs:
             ".\src\BeeDay.Web\BeeDay.Web.csproj" `
             --configuration Release `
             --no-restore `
+            --no-build `
             --output "${{ runner.temp }}\BeeDayPublish"
 
       - name: Validate published files
