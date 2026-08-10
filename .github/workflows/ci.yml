@@ -9,7 +9,11 @@ on:
     branches:
       - hmg
       - main
-      - prd
+    # prd intentionally excluded: no Ruleset on prd requires "BeeDay CI" (or any check), and
+    # nothing downstream consumes a ci.yml run triggered by a main->prd PR - deploy-prd.yml
+    # verifies provenance back to hmg's own BeeDay CI run independently (see deploy-prd.yml).
+    # Running the full build+test suite again here was pure waste with zero required-check
+    # consumer. Sprint 19.4 (EPIC 19) - see docs/deployment/08-fast-pr-validation-decision.md.
 
   workflow_dispatch:
 

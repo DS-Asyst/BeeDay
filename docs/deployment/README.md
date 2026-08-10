@@ -28,6 +28,7 @@ linkado a partir daqui onde relevante em vez de duplicado.
 | [`05-privileged-iis-control.md`](05-privileged-iis-control.md) | Boundary privilegiada de controle do IIS em HMG (STOP/START/CONFIGURE/RESTORE via SYSTEM) e a automação de promoção do script operacional (`HMG-IisControl-Updater`, Sprint 17.17) |
 | [`06-cicd-pipeline-discovery-baseline.md`](06-cicd-pipeline-discovery-baseline.md) | Registro histórico congelado do baseline empírico AS-IS coletado na Sprint 19.1 (workflows, triggers, timing, deployments duplicados confirmados, Rulesets, provenance) — EPIC 19. As divergências que este documento encontrou em `01-deployment.md` (§19) foram corrigidas na Sprint 19.2; o achado de deployment duplicado em HMG (§6/§12) permanece ativo e não corrigido até a Sprint 19.6 |
 | [`07-validation-matrix.md`](07-validation-matrix.md) | Matriz oficial `Validation × Stage` — inventário de todos os testes/validações do BeeDay, duração/criticidade/dependências/flakiness medidas, e classificação de estágio atual vs. recomendado — EPIC 19, Sprint 19.3. Entrada oficial para as Sprints 19.4-19.9 |
+| [`08-fast-pr-validation-decision.md`](08-fast-pr-validation-decision.md) | Registro de decisão da Sprint 19.4: por que `BeeDay CI` ainda não pode ser renomeado para `BeeDay — Pull Request Validation` (dependências rastreadas até 19.6/19.7), decisão formal de manter E2E em toda PR, e a remoção de `prd` do trigger `pull_request` (única mudança estrutural segura desta Sprint) |
 
 ## Ordem de leitura recomendada
 
@@ -42,6 +43,8 @@ linkado a partir daqui onde relevante em vez de duplicado.
    na EPIC 19 (CI/CD Architecture, Performance & Developer Experience).
 7. `07-validation-matrix.md` — o que cada teste/validação prova, custa e onde deveria rodar, para
    quem for implementar as Sprints 19.4 em diante.
+8. `08-fast-pr-validation-decision.md` — por que o rename de `ci.yml` continua bloqueado e o que a
+   Sprint 19.4 efetivamente mudou.
 
 ## Estado real de HMG e PRD (Sprint 18.4)
 

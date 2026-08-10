@@ -20,7 +20,7 @@ servidores IIS de homologação e produção — dos 3 workflows do GitHub Actio
 |---|---|---|
 | `hmg` (push) | `ci.yml` → dispara `deploy-hmg.yml` (via `workflow_run`, se `ci.yml` concluir com sucesso e `head_branch == hmg`) | Validação, depois deploy automático em SERV3WEB (job `deploy`, "Deploy HMG") |
 | `prd` (push) | `deploy-prd.yml` | Deploy direto — **sem validação própria**: resolve e reutiliza o artefato já validado por `ci.yml` em `hmg` via cadeia de proveniência de Pull Requests (§4.2), nunca reconstrói (Build Once, Deploy Many — ver `CLAUDE.md` §5.7.2) |
-| PR para `hmg`/`main`/`prd` | `ci.yml` (pull_request) | Validação apenas, sem deploy — mas **pode** disparar `deploy-hmg.yml` indiretamente se a PR tiver `hmg` como branch de origem (ver achado sobre deployment duplicado, §6) |
+| PR para `hmg`/`main` | `ci.yml` (pull_request) | Validação apenas, sem deploy — mas **pode** disparar `deploy-hmg.yml` indiretamente se a PR tiver `hmg` como branch de origem (ver achado sobre deployment duplicado, §6). `prd` removido deste trigger na Sprint 19.4 — nenhum Ruleset em `prd` exige `BeeDay CI`, e `deploy-prd.yml` já prova proveniência de forma independente (§4.2); rodar a suíte inteira de novo numa PR `main→prd` não tinha consumidor (ver `08-fast-pr-validation-decision.md`) |
 | qualquer | `workflow_dispatch` nos 3 | Execução manual sob demanda |
 
 `ci.yml` tem `concurrency: cancel-in-progress: true` (uma nova execução cancela a anterior do mesmo
