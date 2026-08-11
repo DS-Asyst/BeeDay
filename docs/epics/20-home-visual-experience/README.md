@@ -257,12 +257,41 @@ Riscos ativos da EPIC, a serem verificados a cada Sprint antes de introduzir alg
   aprovados) devem vir de um contrato apropriado da Application Layer, nunca de acesso direto da
   Web a Infrastructure/persistência.
 
+## Sprint 20.2 — Visual Foundations Adoption (Audit Results)
+
+**Última verificação:** 2026-08-11 (Sprint 20.2, branch `sprint/20.2-visual-foundations-adoption`).
+**Fonte da verdade:** leitura direta de `src/BeeDay.Web/wwwroot/css/{variables,typography,
+typography-policy,utilities,polish,design-system,activity-design-system}.css`, `BeeDayHero.razor`/
+`.razor.cs`, busca repo-wide por `clamp(` e por consumidores de `--beeday-type-display`.
+
+**Resultado: NO CHANGE.** Cada categoria de foundation avaliada abaixo já é suficiente para a
+futura Home — nenhum arquivo de CSS/token foi alterado nesta Sprint.
+
+| Categoria | Decisão | Evidência |
+|---|---|---|
+| Color | REUSE | Paleta de marca/status/atividade/botão/comic (`variables.css`) já cobre as necessidades identificadas; nenhum gap concreto comprovado |
+| Typography | REUSE | `--beeday-type-display` (2.2rem, Inter) já existe para display numérico; `.beeday-hero__content h1` (`design-system.css:515`) já é fluido via `clamp(2rem, 5vw, 3.2rem)` e já herda Jersey 25 pela regra genérica `h1` de `typography-policy.css`; precedente adicional de headline oversized já existe página a página (`Entry.razor.css` `clamp(2rem,6vw,4rem)`, `Welcome.razor.css` `clamp(2.5rem,8vw,6rem)`, `Tutorial.razor.css` `clamp(2.8rem,8vw,4.7rem)`). Nenhum consumidor real (a Home ainda não existe) comprova que o teto atual de `BeeDayHero` é insuficiente — decisão é REUSE agora, reavaliar com evidência real na Sprint 20.5 se necessário |
+| Spacing | REUSE / DEFER | Escala canônica = `variables.css` (9 degraus); `polish.css` (`--beeday-grid`, `--beeday-control-height-*`, `--beeday-page-gutter`, `--beeday-section-gap`) já são os aliases de ritmo de página reutilizáveis pela Home; `activity-design-system.css` permanece uma escala paralela pré-existente, escopada a cards de atividade — não consolidada nesta Sprint (fora de escopo) |
+| Radius | REUSE | 6 degraus (`xs`→`pill`) já cobrem superfícies de card/botão; `--beeday-radius-xl` (1.25rem) representa semanticamente a intenção "superfície bem arredondada" da referência sem copiar o valor físico literal (26px) |
+| Elevation / Game Shadows | REUSE | 4 degraus de elevação com blur + `--beeday-game-shadow-{sm,md,lg}` (offset sólido, sem blur) já implementam tanto a sombra suave de card quanto o efeito "botão pressionável" da referência |
+| Buttons | REUSE | `BeeDayButton` + modificadores `--comic`/`--comic-press`/`--skew-press` (`design-system.css`, confirmado nesta Sprint) já implementam a linguagem visual pressionável observada na referência |
+| Focus | NO CHANGE | `focus-visible` global e `--beeday-focus-outline`/`--beeday-focus-ring` preservados intactos — nenhuma alteração, nenhum risco de redução de visibilidade/contraste |
+| Motion | NO CHANGE | Tokens de duração/easing existentes (padrão + "pixel") são semanticamente suficientes como placeholder; nenhum novo token criado sem consumidor aprovado; scroll-reveal/`IntersectionObserver` permanecem fora de escopo (pertencem à composição, Sprints 20.5/20.7) |
+| Controls | REUSE | `--beeday-control-height-{sm,md,lg}` já reutilizável |
+| Containers | REUSE | `.beeday-container` (`min(100% - 2rem, 1440px)`) e `--beeday-reading-width` (72rem, 100% abaixo de 60rem) já comportam a largura de shell da referência (~1140px) sem necessidade de token novo |
+| Breakpoints | DEFER | 29 valores hardcoded confirmados (herdado da Sprint 20.1); nenhum preprocessor/build tooling de CSS existe no repositório (confirmado: sem `package.json`, sem PostCSS/Sass em `src/BeeDay.Web`) — um token de breakpoint compartilhado não pode ser usado dentro de condições `@media` em CSS puro sem ferramenta nova, que esta Sprint está proibida de introduzir. Estratégia registrada para quando a Home for composta: reutilizar um valor já estabelecido de uma família existente (ex.: a família `760px` já compartilhada por 4 arquivos de `Components/Layout/` para o corte "shell mobile", ou a família `672px`/`42rem` já compartilhada por `BeeDayPageHeader`/`BeeDayHero`/`polish.css` para o corte "cabeçalho estreito") em vez de introduzir um 30º valor arbitrário. Migração completa dos 29 valores permanece fora de escopo, deferida à 20.7 |
+| Z-index / Layers | DEFER | Inversão pré-existente do token `--beeday-z-modal` não afetada; nenhuma foundation da Home depende disso ainda |
+
+Nenhuma paleta paralela, terceira família tipográfica, escala paralela de spacing/radius/shadow ou
+breakpoint arbitrário foi introduzido. Nenhum componente específico da Home foi criado. Nenhum
+código da página-modelo foi copiado.
+
 ## Sprint Roadmap
 
 ```text
 20.1 Reference Home & Current UI Discovery — COMPLETE
 
-20.2 Visual Foundations Adoption
+20.2 Visual Foundations Adoption — COMPLETE (NO CHANGE — existing foundations judged sufficient)
 
 20.3 Native Cursor & Global Visual Cleanup
 
