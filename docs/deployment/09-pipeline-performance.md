@@ -419,7 +419,7 @@ continua fora do pipeline, reservada para a Sprint 19.7.
 
 ---
 
-## 26. Fontes consultadas
+## 26. Fontes consultadas (Sprints 19.5)
 
 - `.github/workflows/ci.yml` (antes e depois desta Sprint).
 - `Directory.Packages.props`, `Directory.Build.props`, ausência de `global.json`/`NuGet.config`/
@@ -431,3 +431,193 @@ continua fora do pipeline, reservada para a Sprint 19.7.
 - `docs/testing/01-testing-strategy.md` §7 (contenção de LocalDB já documentada).
 - `docs/deployment/06-cicd-pipeline-discovery-baseline.md`, `07-validation-matrix.md`,
   `08-fast-pr-validation-decision.md`.
+
+---
+
+## 27. Sprint 19.5.2 — Remote CI Validation
+
+**Fonte da verdade:** `gh pr checks`, `gh run view --json/--log` sobre a execução real falha
+(`31443485421`) e uma execução anterior bem-sucedida (`31378253170`, #165, pré-19.5) da PR #55;
+reprodução local controlada em estado limpo (2026-08-11).
+
+**Contexto:** a Sprint 19.5 passou em todas as validações locais, mas a execução real do
+`BeeDay CI` no GitHub Actions, disparada pela publicação da branch, **falhou**. Esta seção
+documenta a investigação, causa-raiz e correção da Sprint 19.5.2.
+
+### 27.1 Falha remota original
+
+| Campo | Valor |
+|---|---|
+| PR | #55 (`sprint/19.5-pipeline-performance` → `hmg`) |
+| Workflow | `BeeDay CI` |
+| Run | `31443485421` |
+| Job | `BeeDay CI` |
+| Step | `Publish BeeDay` (step 11 de 19) |
+| Comando | `dotnet publish .\src\BeeDay.Web\BeeDay.Web.csproj --configuration Release --no-restore --no-build --output ...` |
+| Erro | `Manifest file at 'obj\Release\net10.0\staticwebassets.build.json' not found.` (`Microsoft.NET.Sdk.StaticWebAssets.References.targets(16,5)`) |
+| Exit code | 1 |
+| Steps anteriores | Todos com sucesso, incluindo Restore, Format, Build, cache Playwright, Install Playwright, **Run tests (752/752)** |
+| Steps posteriores | Todos `skipped` (Validate published files, Restore EF tool, Generate/Validate EF bundle, upload de publish/migrations) |
+
+Achado colateral, não relacionado: `gh pr checks 55` também reportou `Validate Promotion` como
+`fail` — investigado e confirmado **não pertencer à Sprint 19.5**: é o resultado (correto,
+esperado) da PR #54, já fechada, que havia sido aberta por engano diretamente contra `main` em vez
+de `hmg` a partir da mesma branch. `Validate Promotion` rejeitou corretamente essa PR
+(`Invalid promotion path 'sprint/19.5-pipeline-performance -> main'`), cumprindo exatamente sua
+função. Fora de escopo desta Sprint.
+
+### 27.2 Failure Reproduction Matrix
+
+| Environment | Command/Step | Result | Evidence |
+|---|---|---|---|
+| Local (estado com resíduos de sessões anteriores) | `dotnet publish ... --no-build` | PASS (falso positivo) | Relatório original da Sprint 19.5 |
+| GitHub Actions (`31443485421`) | `dotnet publish ... --no-build` | **FAIL** | Log real, exit code 1 |
+| Local, estado limpo (obj/bin removidos para os 4 projetos `src/`) | `dotnet publish ... --no-build` | **FAIL, erro idêntico** | Reproduzido nesta Sprint |
+| Local, estado limpo | `dotnet publish ...` (sem `--no-build`, corrigido) | PASS | Reproduzido nesta Sprint, `exit 0` |
+| GitHub Actions, após correção | `dotnet publish ...` (corrigido) | Ver §27.9 | `gh run view` pós-push |
+
+### 27.3 Root Cause
+
+```
+SYMPTOM
+  dotnet publish --no-build falha no GitHub Actions com
+  "Manifest file at 'obj\Release\net10.0\staticwebassets.build.json' not found."
+↓
+IMMEDIATE FAILURE
+  O manifesto de Static Web Assets em configuração Release para BeeDay.Web não existe
+  no momento em que o publish (com --no-build) o procura.
+↓
+TECHNICAL CAUSE
+  `dotnet build BeeDay.slnx --configuration Release` NÃO builda os 4 projetos de
+  src/ (Domain, Application, Infrastructure, Web) em configuração Release — grava
+  os outputs em bin/Debug + obj/Debug apesar da flag --configuration Release.
+  Confirmado IDENTICAMENTE no log real da execução falha (`31443485421`) e em
+  reprodução local limpa — não é diferença de ambiente. Os 5 projetos de teste,
+  em contraste, resolvem Release corretamente na mesma invocação.
+↓
+ROOT CAUSE
+  Comportamento pré-existente (não introduzido pela Sprint 19.5) do build via
+  `BeeDay.slnx` — o novo formato de solução XML não tem seção explícita de
+  mapeamento de configuração por projeto (diferente do GlobalSection
+  ProjectConfigurationPlatforms do .sln legado). Isso sempre existiu, mas era
+  invisível: `dotnet publish` sem `--no-build` sempre fazia seu próprio rebuild
+  implícito de todo o grafo de dependências (Domain→Application→Infrastructure→Web),
+  que — como um build de projeto único, sem a ambiguidade do build de solução —
+  sempre resolveu Release corretamente. Esse rebuild implícito produzia, como
+  efeito colateral, TODOS os outputs Release corretos, incluindo o manifesto de
+  Static Web Assets E o build Release de BeeDay.Infrastructure, do qual o step
+  seguinte (`dotnet ef migrations bundle --configuration Release --no-build`)
+  sempre dependeu implicitamente, sem que isso fosse percebido. A Sprint 19.5
+  removeu esse efeito colateral ao adicionar `--no-build` ao publish, expondo
+  pela primeira vez um defeito que já existia.
+```
+
+**Evidência decisiva** (reprodução local limpa, `git checkout`-reversível, outputs regenerados):
+
+```
+$ rm -rf src/BeeDay.{Domain,Application,Infrastructure,Web}/{bin,obj}
+$ dotnet build BeeDay.slnx --configuration Release --warnaserror
+  BeeDay.Web -> ...\src\BeeDay.Web\bin\Debug\net10.0\BeeDay.Web.dll     ← Debug, apesar de -c Release
+  [...]
+  0 Aviso(s)  0 Erro(s)
+
+$ dotnet publish .\src\BeeDay.Web\BeeDay.Web.csproj -c Release --no-restore --no-build
+error : Manifest file at 'obj\Release\net10.0\staticwebassets.build.json' not found.   ← reproduzido
+
+$ dotnet build src/BeeDay.Web/BeeDay.Web.csproj --configuration Release --no-restore
+  BeeDay.Web -> ...\src\BeeDay.Web\bin\Release\net10.0\BeeDay.Web.dll   ← Release correto, projeto direto
+```
+
+O mesmo padrão (`bin/Debug` para os 4 projetos de `src/`, `bin/Release` para os 5 de `tests/`) foi
+confirmado linha a linha no log da própria execução `31443485421` que falhou no GitHub Actions —
+não é uma diferença local × CI, é o mesmo comportamento nos dois ambientes.
+
+### 27.4 Local × GitHub Runner Difference
+
+`FACT`: **não há diferença de ambiente relevante** — o defeito é idêntico local e remotamente
+(mesma versão de SDK, `10.0.302`, confirmada nos dois lados). A única diferença real foi que o
+workspace local desta sessão continha `obj/Release/net10.0/staticwebassets.build.json`
+**residual**, gerado por execuções anteriores de `dotnet publish` completas (sem `--no-build`)
+feitas durante a própria auditoria da Sprint 19.5 — um falso positivo local clássico, exatamente
+como o prompt desta Sprint antecipou.
+
+### 27.5 Clean-State Investigation
+
+Método usado (reversível, documentado): remoção de `bin/`+`obj/` dos 4 projetos de produção
+(`src/BeeDay.Domain`, `BeeDay.Application`, `BeeDay.Infrastructure`, `BeeDay.Web`) — diretórios de
+output gerados, não rastreados pelo Git, seguros de remover e idempotentemente regeneráveis via
+`dotnet restore`/`build`. Nenhum arquivo rastreado ou não-rastreado do usuário foi tocado.
+
+### 27.6 Verdicts
+
+| # | Otimização | Veredito |
+|---|---|---|
+| 8 | `dotnet publish --no-build` | **UNSAFE** — falha comprovada em runner limpo (local e remoto). Corrigido: `--no-build` removido. |
+| 9 | Cache NuGet (`setup-dotnet`) | **SAFE, CONFIRMED REMOTELY** — reportou `Dotnet cache is not found` (miss esperado, primeira execução), caiu corretamente para restore normal, que teve sucesso. |
+| 10 | Cache de browsers Playwright | **SAFE, CONFIRMED REMOTELY** — reportou `Cache not found for input keys: ...` (miss esperado), instalação normal teve sucesso. |
+| 11 | `dotnet test --no-restore` | **SAFE, CONFIRMED REMOTELY** — as 5 invocações de teste completaram com sucesso (752/752) antes mesmo do publish falhar. |
+
+### 27.7 Fix Implemented
+
+Removida a flag `--no-build` do step `Publish BeeDay` em `ci.yml`. Nenhuma outra linha do step foi
+alterada. `--no-restore` foi mantido (não relacionado ao defeito — o restore em si nunca foi o
+problema).
+
+### 27.8 Minimality Analysis
+
+Não foi necessário alterar o step `Generate EF Core migration bundle` (que também usa
+`--configuration Release --no-build`), apesar de depender do mesmo tipo de output Release de
+`BeeDay.Infrastructure`: a ordem dos steps em `ci.yml` coloca `Publish BeeDay` **antes** de
+`Generate EF Core migration bundle` — o rebuild implícito do publish corrigido já produz o output
+Release de `BeeDay.Infrastructure` como efeito colateral, exatamente como sempre fez antes da
+Sprint 19.5 (confirmado por reprodução local: `dotnet ef migrations bundle --no-build` teve
+sucesso imediatamente após o publish corrigido, em estado limpo). Alterar o step de EF bundle
+também teria sido uma mudança desnecessária — não implementada.
+
+Não foi feita nenhuma tentativa de corrigir a causa raiz mais profunda (o build de solução não
+resolver Release para os 4 projetos de `src/`) — isso exigiria investigar/alterar o formato
+`.slnx` ou a forma como `dotnet build` é invocado no nível de solução em toda a EPIC 19, uma
+mudança de escopo muito maior que uma correção mínima de CI. Registrado como débito explícito
+(§27.10), não escondido.
+
+### 27.9 Performance Impact
+
+| Optimization | 19.5 | 19.5.2 | Reason |
+|---|---|---|---|
+| NuGet cache | enabled | enabled | Validated remotely (miss → fallback OK) |
+| Playwright cache | enabled | enabled | Validated remotely (miss → fallback OK) |
+| `dotnet test --no-restore` | enabled | enabled | Validated remotely (752/752 passed) |
+| `dotnet publish --no-build` | enabled | **removed** | Clean-runner incompatibility (confirmado local + remoto) |
+
+**Regressão de performance assumida:** o ganho de ~11.3s medido na Sprint 19.5 para o step
+`Publish BeeDay` (13.1s → 1.8s local) **não se realiza** — o step volta ao comportamento anterior
+(~11s, rebuild completo do grafo de dependências). Isso é reportado explicitamente, não escondido.
+Os demais ganhos (cache de NuGet/Playwright, quando houver cache hit; `--no-restore` nos testes)
+permanecem válidos.
+
+### 27.10 Remaining Debt (novo, descoberto nesta Sprint)
+
+`dotnet build BeeDay.slnx --configuration Release` builda os 4 projetos de `src/` em Debug, não
+Release — defeito **pré-existente**, não introduzido por nenhuma Sprint da EPIC 19, presente desde
+antes da Sprint 19.1. Permaneceu invisível porque nada dependia diretamente dos outputs Release da
+solução até a Sprint 19.5 introduzir `--no-build` no publish. Não corrigido nesta Sprint (fora do
+princípio de correção mínima). Recomendação: investigação dedicada de por que `BeeDay.slnx` não
+propaga `--configuration Release` para os 4 projetos de `src/` (mas propaga corretamente para os 5
+de `tests/`) — candidata a uma Sprint futura de correção de build, não necessariamente dentro do
+escopo restante da EPIC 19.
+
+### 27.11 Local Validation Results (pós-correção)
+
+| Comando | Executado | Resultado |
+|---|---|---|
+| `dotnet restore BeeDay.slnx` | Sim | Sucesso |
+| `dotnet format BeeDay.slnx --verify-no-changes` | Sim | Sucesso |
+| `dotnet build BeeDay.slnx -c Release --warnaserror` | Sim | Sucesso, 0 avisos, 0 erros |
+| `dotnet test BeeDay.slnx -c Release --no-build` | Sim | 752/752 aprovados |
+| `dotnet publish ... ` (corrigido, estado limpo) | Sim | Sucesso, `exit 0` |
+| `dotnet ef migrations bundle --no-build` (estado limpo, pós-publish) | Sim | Sucesso |
+| `git diff --check` | Sim | Limpo |
+
+### 27.12 Remote Validation Results
+
+Ver §27.13 abaixo — preenchido após push autorizado e observação real do GitHub Actions.

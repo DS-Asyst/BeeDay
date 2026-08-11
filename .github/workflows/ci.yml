@@ -119,11 +119,22 @@ jobs:
               throw "One or more test projects failed. See logs above for details."
           }
 
-      # --no-build added in Sprint 19.5: dotnet publish re-evaluates/re-links the whole dependency
-      # graph (Domain/Application/Infrastructure/Web) by default even though the Release build
-      # above already produced identical, up-to-date outputs with the same configuration and no
-      # source changes in between - measured locally at ~13s (rebuild) vs ~2s (--no-build) for the
-      # same publish, see docs/deployment/09-pipeline-performance.md.
+      # --no-build was added in Sprint 19.5 and REVERTED in Sprint 19.5.2 after a real GitHub
+      # Actions run failed: "Manifest file at 'obj\Release\net10.0\staticwebassets.build.json' not
+      # found." Root cause (confirmed identically on the failed run's own log and in a local
+      # clean-state reproduction): `dotnet build BeeDay.slnx --configuration Release` above does
+      # NOT actually build the 4 src/ projects (Domain/Application/Infrastructure/Web) in the
+      # Release configuration - it silently writes their outputs to bin/Debug + obj/Debug despite
+      # the --configuration Release flag (only the 5 test projects correctly resolve Release this
+      # way). This is a pre-existing solution-build quirk, not something Sprint 19.5 introduced -
+      # it was invisible before because `dotnet publish` (without --no-build) always performed its
+      # own implicit rebuild of its whole dependency graph, which correctly resolves Release for a
+      # single-project build graph and silently produced the missing Release outputs (including
+      # this manifest, and - critically - Infrastructure's Release build that the EF migration
+      # bundle step below has always implicitly depended on) as a side effect. Removing --no-build
+      # restores that side effect. The deeper "solution build silently uses Debug for
+      # non-test projects" defect itself is NOT fixed here - out of scope for a minimal CI
+      # correction - see docs/deployment/09-pipeline-performance.md, Sprint 19.5.2 section.
       - name: Publish BeeDay
         shell: powershell
         run: |
@@ -131,7 +142,6 @@ jobs:
             ".\src\BeeDay.Web\BeeDay.Web.csproj" `
             --configuration Release `
             --no-restore `
-            --no-build `
             --output "${{ runner.temp }}\BeeDayPublish"
 
       - name: Validate published files
