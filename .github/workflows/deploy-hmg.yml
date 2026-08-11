@@ -25,14 +25,27 @@ jobs:
   deploy:
     name: Deploy HMG
     # Automatic path: only deploy when the triggering BeeDay CI run succeeded on hmg specifically
-    # (head_branch also excludes PR-validation runs of BeeDay CI, whose head_branch is the PR's
-    # source branch, not hmg). Manual path: workflow_dispatch has no workflow_run payload to gate
-    # on, so it's allowed through — "controlled manual deploy" means a human deliberately running
-    # it, and the run resolved below is still always the latest *successful* CI run on hmg, never
-    # an arbitrary/broken one.
+    # AND was itself triggered by a push (not a pull_request). BeeDay CI still runs on both push
+    # (post-merge, on hmg) and pull_request (validation, including the hmg->main promotion PR,
+    # whose head_branch is also "hmg"). Before Sprint 19.6, both completions satisfied this guard
+    # independently, producing two real deployments of the same state (confirmed with direct log
+    # evidence in docs/deployment/06-cicd-pipeline-discovery-baseline.md #6/#12 - HMG Deploy
+    # #57/#58 and #77/#78). Restricting to event == 'push' closes that path structurally: a
+    # pull_request-triggered BeeDay CI run, even one with head_branch == 'hmg', can no longer
+    # trigger a deployment. See docs/deployment/10-hmg-deployment-verification.md for the full
+    # analysis of why this - not decoupling from BeeDay CI's workflow_run entirely - was chosen:
+    # deployment still consumes artifacts BeeDay CI exclusively produces, and there is no
+    # provenance mechanism yet (reserved for Sprint 19.8) to resolve them independently.
+    # Manual path: workflow_dispatch has no workflow_run payload to gate on, so it's allowed
+    # through — "controlled manual deploy" means a human deliberately running it, and the run
+    # resolved below is still always the latest *successful* CI run on hmg, never an
+    # arbitrary/broken one. A manual retry of the same SHA via workflow_dispatch is a deliberate
+    # human action, not accidental duplication.
     if: |
       github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'hmg')
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'hmg' &&
+       github.event.workflow_run.event == 'push')
 
     runs-on:
       - self-hosted
@@ -43,6 +56,9 @@ jobs:
     timeout-minutes: 25
     environment: homologation
 
+    outputs:
+      deployed-sha: ${{ steps.resolve-sha.outputs.sha }}
+
     steps:
       # Checked out at the exact commit BeeDay CI validated — not the repository's default branch,
       # which is what a bare checkout would resolve to under a workflow_run event. Falls back to
@@ -51,6 +67,20 @@ jobs:
         uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
+      # Exposes the SHA this run actually deploys as a job output, consumed by verify-hmg.yml
+      # (Sprint 19.6) to correlate readiness/smoke results back to the deployed state. Not read
+      # from this job's own run metadata by a downstream workflow_run listener - that metadata
+      # reflects the default branch at trigger time, not the deployed SHA (proven in
+      # docs/deployment/06-cicd-pipeline-discovery-baseline.md #6.1). verify-hmg.yml instead reads
+      # this value from the beeday-hmg-deployment-info artifact uploaded below.
+      - name: Resolve deployed SHA
+        id: resolve-sha
+        shell: powershell
+        run: |
+          $sha = "${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}"
+          Write-Host "Deployed SHA: $sha"
+          "sha=$sha" >> $env:GITHUB_OUTPUT
 
       # Resolves which BeeDay CI run's artifact to deploy. workflow_run already carries the exact
       # run id in its payload. workflow_dispatch has no such payload, so it looks up the latest
@@ -181,3 +211,42 @@ jobs:
               -RunMigrations `
               -MigrationBundlePath $migrationBundlePath `
               -MigrationConnectionString $env:BEEDAY_MIGRATOR_CONNECTION
+
+      # Minimal deployment record (Sprint 19.6, Fase 14) - not the full observability platform
+      # reserved for Sprint 19.9. Written only after Deploy-BeeDay.ps1 above returned successfully
+      # (a step never runs after a prior step throws, so reaching here already means success).
+      # The uploaded file is how verify-hmg.yml learns which SHA to verify - see the note on
+      # "Resolve deployed SHA" above for why this artifact, not workflow_run head_sha metadata, is
+      # the propagation mechanism.
+      - name: Record deployment info
+        shell: powershell
+        run: |
+          $info = [ordered]@{
+            sha         = "${{ steps.resolve-sha.outputs.sha }}"
+            workflowRun = "${{ github.run_id }}"
+            result      = "success"
+            environment = "homologation"
+            timestampUtc = (Get-Date).ToUniversalTime().ToString("o")
+          }
+
+          New-Item -ItemType Directory -Path "${{ runner.temp }}\DeploymentInfo" -Force | Out-Null
+          $infoPath = Join-Path "${{ runner.temp }}" "DeploymentInfo\deployment-info.json"
+          $info | ConvertTo-Json | Set-Content -LiteralPath $infoPath
+
+          "## BeeDay — HMG Deployment" >> $env:GITHUB_STEP_SUMMARY
+          "" >> $env:GITHUB_STEP_SUMMARY
+          "| Field | Value |" >> $env:GITHUB_STEP_SUMMARY
+          "|---|---|" >> $env:GITHUB_STEP_SUMMARY
+          "| Source SHA | ``$($info.sha)`` |" >> $env:GITHUB_STEP_SUMMARY
+          "| Workflow run | [$($info.workflowRun)](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> $env:GITHUB_STEP_SUMMARY
+          "| Result | $($info.result) |" >> $env:GITHUB_STEP_SUMMARY
+          "| Environment | $($info.environment) |" >> $env:GITHUB_STEP_SUMMARY
+          "| Timestamp (UTC) | $($info.timestampUtc) |" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Upload deployment info
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: beeday-hmg-deployment-info
+          path: ${{ runner.temp }}\DeploymentInfo
+          if-no-files-found: error
+          retention-days: 14

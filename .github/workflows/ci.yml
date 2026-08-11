@@ -1,6 +1,15 @@
 name: BeeDay CI
 
 on:
+  # Kept deliberately, not legacy: Sprint 19.6 re-evaluated this trigger and decided NOT to remove
+  # it. BeeDay — HMG Deployment (deploy-hmg.yml) still consumes the beeday-publish/beeday-migrations
+  # artifacts this push-triggered run produces, and no provenance mechanism exists yet (reserved
+  # for Sprint 19.8) to let deployment resolve them independently of a CI run on this exact push.
+  # What Sprint 19.6 DID fix is the duplicate-deployment consequence of also keeping
+  # pull_request -> main below: deploy-hmg.yml's guard now requires the triggering BeeDay CI run's
+  # own event to have been 'push', so the hmg->main promotion PR's BeeDay CI run (pull_request,
+  # head_branch also 'hmg') can no longer independently trigger a second deployment of the same
+  # state. See docs/deployment/10-hmg-deployment-verification.md.
   push:
     branches:
       - hmg

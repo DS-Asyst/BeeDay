@@ -155,8 +155,19 @@ cadeia de causalidade completamente rastreada e comprovada (não apenas inferida
 
 | Responsabilidade emprestada | Razão | Dono atual | Dono futuro | Sprint de remoção |
 |---|---|---|---|---|
-| `push: hmg` em `ci.yml` | Único gatilho confiável de `deploy-hmg.yml` hoje | `ci.yml` | `BeeDay — HMG Deployment` (redesenhado) ou mecanismo de proveniência dedicado | 19.6 |
+| `push: hmg` em `ci.yml` | Único gatilho confiável de `deploy-hmg.yml` hoje | `ci.yml` | Proveniência final (Build Once/Deploy Many) | **19.8** (atualizado pela Sprint 19.6 — ver nota abaixo) |
 | `pull_request: main` em `ci.yml` | Satisfaz o required check `"BeeDay CI"` do Ruleset de `main` | `ci.yml` | `BeeDay — Release Quality Gate` | 19.7 |
+
+**Atualização da Sprint 19.6:** a Sprint 19.6 investigou remover `push: hmg` de `ci.yml`
+completamente e concluiu que isso exigiria implementar resolução de proveniência independente para
+`deploy-hmg.yml` (equivalente ao que `deploy-prd.yml` já faz para `main→prd`) — explicitamente fora
+do escopo da 19.6 ("não invente Build Once/Deploy Many nesta Sprint"). Em vez disso, a 19.6
+**eliminou o dano concreto** (deployment duplicado) restringindo o guard de `deploy-hmg.yml` a
+`workflow_run.event == 'push'`, mantendo a dependência de `push: hmg` como uma responsabilidade
+deliberada e documentada, não mais uma dívida esquecida. Status: `PARTIALLY RESOLVED` — ver
+[`10-hmg-deployment-verification.md`](10-hmg-deployment-verification.md) §23 para a análise
+completa. O "Sprint de remoção" desta linha foi corrigido de 19.6 para **19.8**, que é quando a
+proveniência final poderá de fato substituir essa dependência.
 
 **Condição de desbloqueio do rename:** o rename `BeeDay CI → BeeDay — Pull Request Validation`
 (workflow e, separadamente, o job/check — sujeito a mutação de Ruleset com plano de transição
