@@ -645,3 +645,180 @@ mesmo caminho que `Record deployment info` continua produzindo (`$infoPath` inal
 **`NOT YET VALIDATED REMOTELY`.** Depende de commit/push autorizados e de um novo push real em
 `hmg` (merge desta correção) produzindo uma execução completa de `deploy-hmg.yml` até `Upload
 deployment info`, seguida da primeira execução real de `verify-hmg.yml`.
+
+**Atualização (validado posteriormente):** `gh run list --workflow=deploy-hmg.yml` confirma runs
+`push`/`hmg` bem-sucedidos após o merge desta correção (ex.: `31480023629`, `31481910386`), ambos
+completando `Record deployment info`/`Upload deployment info` sem erro — a correção da 19.8.1 está
+**`REMOTE VALIDATED`**.
+
+---
+
+## 36. Sprint 19.8.3 — HMG Verification Provenance Trigger Hardening
+
+**Fonte da verdade:** `gh run view`/`gh run list` (evidência real de múltiplos runs),
+`git show`/`git log` (conteúdo real de `deploy-hmg.yml` em `main` antes da PR #64), leitura
+integral de `deploy-hmg.yml`/`verify-hmg.yml` no estado atual.
+
+**Escopo:** endurecer a fronteira `HMG Deployment → HMG Verification` para que `verify-hmg.yml`
+nunca tente validar um deployment cujo próprio evento de disparo seja incompatível com o contrato
+atual — mantendo comportamento fail-closed. Nenhuma mudança em artifact provenance, Release
+Quality Gate, ou Rulesets.
+
+### 36.1 Incidente real
+
+`FACT`: `BeeDay — HMG Verification` (run `31482750014`, disparado logo após a PR #64 `hmg→main`)
+falhou no step `Download deployment info` — `Artifact not found for name:
+beeday-hmg-deployment-info`. Steps seguintes (`Read deployed SHA`, `Verify Readiness`, `Run Smoke
+Tests`) `skipped`. `Record verification summary` (`if: always()`) executou normalmente, reportando
+`Job result: failure`.
+
+### 36.2 Cadeia causal reconstruída (comprovada, não presumida)
+
+`EVIDENCE`: `gh run view 31482750014 --log` confirma o resolver usou
+`context.payload.workflow_run.id` cegamente: `Using triggering workflow_run id 31482602788`.
+
+`EVIDENCE`: `gh run view 31482602788` mostra `event: "workflow_run"`, `headBranch: "main"`,
+`headSha: edc41c8` (tip **anterior** de `main`, antes da PR #64), job `"Deploy to SERV3WEB"`, step
+`"Resolve BeeDay CI run to deploy"` — nomes que **não existem** na versão atual do arquivo.
+
+`FACT`: `MSYS_NO_PATHCONV=1 git show "edc41c8:.github/workflows/deploy-hmg.yml"` confirma que essa
+era a versão **legada** (`name: BeeDay Homologation Deploy`, gatilho `workflow_run: [BeeDay CI]`
+com guard `head_branch == 'hmg'`, sem nenhum step `Record deployment info`/`Upload deployment
+info` — o contrato de `beeday-hmg-deployment-info` não existia nessa versão, introduzido só na
+Sprint 19.6 e estendido na 19.8).
+
+`FACT`: `git log --oneline edc41c8` mostra que o commit anterior de `main` era `d5b9390` (PR #48),
+**anterior a toda a EPIC 19** (Sprint 19.1 em diante) — `main` nunca recebeu nenhuma mudança da
+EPIC 19 até a PR #64, a primeira promoção `hmg→main` real desta EPIC.
+
+`EVIDENCE`: `gh run list --workflow=ci.yml` mostra a run `31482098907` (`pull_request`,
+`head_branch=hmg`, `head_sha=9889ebd`, `success`, `10:24:59Z`) — a validação `BeeDay CI` da própria
+PR #64. `deploy-hmg.yml` legado em `main` (`workflow_run: [BeeDay CI]` + `head_branch=='hmg'`)
+disparou ao completar essa run (`10:31:44Z`, antes do merge em `10:32:56Z`), porque o GitHub
+Actions resolve listeners de `workflow_run` usando a cópia do workflow registrada na branch
+**default** (`main`) no momento do evento — não a cópia de `hmg` ou de qualquer commit específico.
+`main` ainda tinha a versão legada registrada, pois o merge da PR #64 só ocorreu **depois**.
+
+**Cadeia completa:**
+
+```text
+PR #64 (hmg->main) aberta
+  -> ci.yml pull_request:main dispara "BeeDay CI" (head_branch=hmg, run 31482098907)
+  -> "BeeDay CI" completa (10:31:xx, ANTES do merge)
+  -> GitHub resolve listeners de workflow_run:[BeeDay CI] usando main (default branch) NAQUELE
+     MOMENTO -> main ainda tem deploy-hmg.yml LEGADO (name: BeeDay Homologation Deploy)
+  -> legado dispara, guard head_branch=='hmg' satisfeito -> deploy real executado com sucesso
+     (run 31482602788) mas SEM produzir beeday-hmg-deployment-info (contrato não existe nessa
+     versão)
+  -> PR #64 mergeada (10:32:56Z) -> main agora tem o deploy-hmg.yml ATUAL
+  -> verify-hmg.yml (já registrado via hmg, escuta por NOME "BeeDay — HMG Deployment", nome
+     idêntico em toda versão do arquivo) casa com a conclusão do run legado -> tenta baixar
+     beeday-hmg-deployment-info do run 31482602788 -> FALHA (artifact nunca existiu)
+```
+
+### 36.3 Achado adicional: duplicação de deployment não relatada no prompt
+
+`FACT`, descoberto durante a investigação, não hipótese: `gh run list --workflow=deploy-hmg.yml`
+mostra que esse mesmo mecanismo legado disparou **repetidamente** ao longo de toda a sessão
+sempre que uma execução de `BeeDay CI` teve `head_branch=='hmg'` (a maioria `skipped`, pois PRs de
+sprint têm `head_branch` diferente de `hmg` — mas **duas** vezes resultou em deployment real e
+bem-sucedido, redundante ao deployment oficial: runs `31455318044` (03:24:56Z, coincidindo com o
+push:hmg da Sprint 19.7) e `31482602788` (o próprio incidente desta Sprint). Ambos deployaram o
+mesmo conteúdo (mesmos artifacts `beeday-publish`/`beeday-migrations`, produzidos por `ci.yml`
+independente de qual `deploy-hmg.yml` os consome) via automação duplicada — não uma inconsistência
+de conteúdo, mas execução redundante e, agora, a causa direta da falha de `verify-hmg.yml`.
+
+**Confirmado eliminado após a PR #64:** nenhuma execução `workflow_run`/`headBranch=main` ocorreu
+desde `10:32:56Z` (quando `main` passou a ter o `deploy-hmg.yml` atual, que não escuta mais
+`workflow_run` nenhum). `main` sincronizada com `hmg` remove esse listener legado por completo.
+
+### 36.4 Historical Trigger Analysis / Incident Classification
+
+| Cenário | Classificação |
+|---|---|
+| A. Continua reproduzível no estado atual | **NÃO** — `main` e `hmg` compartilham hoje o mesmo `deploy-hmg.yml` (`push: hmg` direto, sem `workflow_run` algum); o listener legado que causou o incidente não existe mais em nenhuma branch |
+| B. Efeito transitório da promoção que atualizou os workflows | **SIM** — a condição habilitadora (main sem NENHUMA mudança da EPIC 19 desde antes da Sprint 19.1) é um evento único, não recorrente na mesma escala |
+| C. Fragilidade estrutural | **SIM, residual** — `verify-hmg.yml` confiava incondicionalmente em `context.payload.workflow_run.id` sem checar se o evento que disparou o deployment observado era um dos eventos que `deploy-hmg.yml` realmente suporta hoje; isso permanece uma fraqueza genérica mesmo que ESTE caminho específico de recorrência esteja fechado |
+| D. Combinação B + C | **`SELECIONADO`** — o incidente foi majoritariamente transitório (não pode recorrer via este exato mecanismo), mas a fragilidade de confiança irrestrita em `workflow_run.id` é real e vale a pena fechar com uma correção barata e comprovadamente segura |
+
+### 36.5 Deployment Info Contract (confirmado inalterado)
+
+`FACT`: `deployment-info.json` continua com os 8 campos da Sprint 19.8 (`sourceSha`, `mergeSha`,
+`pullRequest`, `validationRunId`, `workflowRun`, `result`, `environment`, `timestampUtc`), produzido
+apenas por `deploy-hmg.yml` no step `Record deployment info`, artifact `beeday-hmg-deployment-info`,
+`retention-days: 14`. `verify-hmg.yml` usa `run-id: ${{ steps.resolve-run.outputs.result }}`
+corretamente — o mecanismo de download em si nunca esteve errado; o problema era **qual** `run-id`
+chegava até ele.
+
+### 36.6 Estratégias avaliadas
+
+| Estratégia | Classificação | Motivo |
+|---|---|---|
+| A — nenhuma alteração funcional | `REJECTED` | Embora o caminho exato não possa recorrer, a fragilidade de confiança irrestrita em `workflow_run.id` (§36.4-C) é real, barata de fechar, e diretamente relacionada ao incidente — documentação sozinha deixaria a mesma classe de fragilidade sem tratamento |
+| B — guard no HMG Verification | `SUPPORTED` — **selecionada** | Usa uma propriedade confiável e já comprovada pela evidência (`workflow_run.event`, campo padrão do payload, não uma heurística) para recusar runs cujo evento de origem não é um dos que `deploy-hmg.yml` produz hoje (`push`/`workflow_dispatch`) |
+| C — contract marker adicional | `UNNECESSARY` | `workflow_run.event` já é uma propriedade suficiente e confiável — introduzir um marcador novo no artifact duplicaria informação sem consumidor adicional |
+| D — trigger hardening no `on:` | `REJECTED` (tecnicamente inviável) | GitHub Actions não suporta filtrar `workflow_run` pelo evento que disparou o run observado diretamente na chave `on:` — esse filtro só é possível na expressão `if:` do job, que é exatamente a Estratégia B |
+
+### 36.7 Selected Strategy / Why This Is The Minimum Safe Fix
+
+Estratégia B. Uma alteração: o `if:` do job `verify` em `verify-hmg.yml` passa a exigir
+`github.event_name == 'workflow_run'` explicitamente, `conclusion == 'success'`, e
+`github.event.workflow_run.event == 'push' || github.event.workflow_run.event ==
+'workflow_dispatch'`. A checagem explícita de `github.event_name` foi adicionada após revisão do
+usuário — funcionalmente equivalente à forma anterior (que dependia do acesso null-safe de
+expressões do GitHub Actions, já usado em outros pontos deste repositório, ex.:
+`deploy-prd.yml`'s `github.event.pull_request.head.sha || github.sha`), mas mais explícita e
+autodocumentada. Mínima porque:
+
+- usa um campo já presente no payload padrão do GitHub Actions, sem lógica nova de resolução;
+- não introduz artifact, manifest, ou consulta à API adicional;
+- não altera o mecanismo de download nem a leitura do JSON;
+- não afeta o caminho `workflow_dispatch` (primeira cláusula do `if:`, inalterada);
+- não enfraquece o fail-closed de um deployment `push`-legítimo com artifact realmente ausente —
+  esse caso continua falhando no step `Download deployment info` exatamente como antes.
+
+### 36.8 Changes Implemented
+
+`verify-hmg.yml`, job `verify`, bloco `if:` — condição adicional sobre `workflow_run.event`.
+Comentário substituído (o anterior descrevia o guard antigo de `deploy-hmg.yml`, pré-19.8, e
+estava desatualizado) por um novo que documenta o incidente, a cadeia causal, e a justificativa da
+correção.
+
+### 36.9 Fail-Closed Behavior (verificado, não apenas assumido)
+
+| Cenário | Resultado do job `verify` |
+|---|---|
+| `workflow_dispatch` manual | Roda (inalterado) |
+| Deployment `push`-triggered, `success`, artifact presente | Roda, valida normalmente |
+| Deployment `push`-triggered, `success`, artifact ausente (defeito real futuro) | Roda, falha em `Download deployment info` — **inalterado, ainda fail-closed** |
+| Deployment `workflow_run`-triggered (legado/indireto, como o incidente) | **`skipped`** — job nunca inicia, nunca produz um `Download` falho nem um falso positivo |
+| Deployment com `conclusion != 'success'` | `skipped` (comportamento pré-existente, inalterado) |
+
+Em nenhum cenário o verification passa a validar um deployment diferente do que foi observado, nem
+mascara ausência de provenance como sucesso.
+
+### 36.10 Artifact Provenance Preservation
+
+`FACT`: `deploy-hmg.yml` não foi tocado nesta Sprint (apenas lido/consultado). Resolução de PR,
+validação de mesmo-repositório, paginação, match de `head_sha`, `run-id`, download de artifacts —
+todos inalterados. `push: hmg` continua ausente de `ci.yml`.
+
+### 36.11 Local Validation
+
+YAML validado (`python -c yaml.safe_load`); lógica do `if:` verificada manualmente contra os 4
+cenários da tabela §36.9; sintaxe de expressão idêntica a um padrão já usado e executado com
+sucesso em versões anteriores de `deploy-hmg.yml` (parênteses aninhados com `&&`/`||`).
+
+### 36.12 Remote Validation Status
+
+**`NOT YET VALIDATED REMOTELY`.** A validação real ocorrerá na próxima vez que um deployment
+`workflow_run`-triggered incompatível surgir (cenário raro agora que `main`/`hmg` estão
+sincronizadas) — não há forma de testar remotamente o caminho negativo sem recriar
+artificialmente a condição legada, o que não foi feito. O caminho positivo (deployment `push`
+normal) será revalidado organicamente no próximo merge em `hmg`.
+
+### 36.13 Remaining Debt
+
+Nenhuma dívida nova. Débitos pré-existentes inalterados: `BeeDay.slnx` Release configuration
+behavior; promoção final a PRD; achado não corrigido do Sprint 19.8 sobre `deploy-prd.yml` não ter
+checagem de `head.repo` equivalente à de `deploy-hmg.yml`.
