@@ -33,6 +33,7 @@ linkado a partir daqui onde relevante em vez de duplicado.
 | [`10-hmg-deployment-verification.md`](10-hmg-deployment-verification.md) | Eliminação estrutural do deployment duplicado em HMG (causa raiz da 19.1), novo workflow `BeeDay — HMG Verification` (Readiness + Smoke reais contra o ambiente implantado), decisão de manter `push:hmg` em `BeeDay CI` com justificativa explícita — EPIC 19, Sprint 19.6 |
 | [`11-release-quality-gate.md`](11-release-quality-gate.md) | Workflow `BeeDay — Release Quality Gate` para `hmg → main` (Sprint 19.7), correção de compatibilidade com Windows PowerShell 5.1 (Sprint 19.8.2), e a ativação real do Ruleset — mutação de `main` (`BeeDay CI` → `Release Quality Gate` como required check) com read-back confirmado e remoção de `pull_request:main` de `BeeDay CI` (Sprint 19.8.4) — EPIC 19 |
 | [`12-artifact-provenance.md`](12-artifact-provenance.md) | Eliminação da segunda execução completa de `BeeDay CI` após todo merge em `hmg` (Sprint 19.8), correção de compatibilidade com Windows PowerShell 5.1 no bookkeeping pós-deploy (Sprint 19.8.1), e o endurecimento do gatilho de `BeeDay — HMG Verification` contra deployments legados após o incidente real da primeira promoção `hmg → main` (Sprint 19.8.3) — EPIC 19 |
+| [`13-epic19-final-architecture-report.md`](13-epic19-final-architecture-report.md) | Relatório final de encerramento da EPIC 19 — inventário final de workflows/Rulesets, AS-IS × TO-BE, métricas reais before/after, auditoria de duplicação/cache/observabilidade/proveniência com evidência remota, os 17 critérios de aceite da EPIC (todos `PASS`), e veredito final `EPIC 19 — COMPLETE` — Sprint 19.9 |
 
 ## Ordem de leitura recomendada
 
@@ -56,6 +57,8 @@ linkado a partir daqui onde relevante em vez de duplicado.
     `BeeDay — HMG Verification` prova que o ambiente implantado está utilizável.
 11. `11-release-quality-gate.md` — o que protege `hmg → main` hoje e o que falta para a proteção
     definitiva entrar em vigor.
+12. `13-epic19-final-architecture-report.md` — o encerramento da EPIC 19: arquitetura final,
+    métricas reais, critérios de aceite, e veredito.
 
 ## Estado real de HMG e PRD (Sprint 18.4)
 
