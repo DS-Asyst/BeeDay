@@ -10,10 +10,19 @@ on:
   # instead of triggering a second CI run - see docs/deployment/12-artifact-provenance.md for the
   # full investigation, decision matrix, and why this is safe under Protect HMG's Ruleset (which
   # allows merge, squash, AND rebase merges, not just merge commits).
+  # main REMOVED in Sprint 19.8.4. BeeDay CI temporarily satisfied main's required_status_checks
+  # (Ruleset "Protect Main") because no independent hmg->main quality gate existed yet - a
+  # borrowed responsibility documented and tracked since Sprint 19.4
+  # (docs/deployment/08-fast-pr-validation-decision.md). Release Quality Gate
+  # (release-quality-gate.yml) now has two real, successful hmg->main runs (PRs #64, #66) and was
+  # made the required check in this Ruleset ahead of this exact commit landing on main (mutation
+  # verified read-back before this trigger was touched, per the mandatory ordering in
+  # docs/deployment/12-artifact-provenance.md, Sprint 19.8.4 section) - BeeDay CI no longer has
+  # any consumer for a main-targeting PR. It remains the required check for hmg (Ruleset "Protect
+  # HMG", unchanged this Sprint).
   pull_request:
     branches:
       - hmg
-      - main
     # prd intentionally excluded: no Ruleset on prd requires "BeeDay CI" (or any check), and
     # nothing downstream consumes a ci.yml run triggered by a main->prd PR - deploy-prd.yml
     # verifies provenance back to hmg's own BeeDay CI run independently (see deploy-prd.yml).
