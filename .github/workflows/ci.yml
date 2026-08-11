@@ -1,5 +1,17 @@
-name: BeeDay CI
+name: BeeDay — Pull Request Validation
 
+# Sprint 19.8.6: renamed from "BeeDay CI" now that its responsibility genuinely matches this name
+# - since Sprint 19.8.5 it validates exactly sprint/*->hmg PRs (Fast Gate: Restore, Build,
+# Domain.Tests, Application.Tests, Publish, EF bundle), not a general-purpose CI. Format,
+# Infrastructure.Tests, Web.Tests, and E2E.Tests moved to BeeDay — Release Quality Gate, which
+# already validates the full suite unconditionally before main. The job name below (not this
+# workflow name) is what GitHub reports as the check-run context - confirmed empirically in this
+# same repository for both other workflows (release-quality-gate.yml: workflow "BeeDay — Release
+# Quality Gate", job/check "Release Quality Gate"; validate-promotion.yml: workflow "BeeDay —
+# Promotion Policy", job/check "Validate Promotion") - so renaming this workflow's display name
+# alone does not change what Protect HMG's Ruleset must require; see the job `name:` below and
+# docs/deployment/08-fast-pr-validation-decision.md, Sprint 19.8.6 section, for the full
+# transition evidence (context discovery, Ruleset mutation, read-back, remote validation).
 on:
   # push: branches: [hmg] REMOVED in Sprint 19.8. It existed solely so BeeDay — HMG Deployment
   # (deploy-hmg.yml) had a fresh beeday-publish/beeday-migrations artifact to consume after every
@@ -18,8 +30,10 @@ on:
   # made the required check in this Ruleset ahead of this exact commit landing on main (mutation
   # verified read-back before this trigger was touched, per the mandatory ordering in
   # docs/deployment/12-artifact-provenance.md, Sprint 19.8.4 section) - BeeDay CI no longer has
-  # any consumer for a main-targeting PR. It remains the required check for hmg (Ruleset "Protect
-  # HMG", unchanged this Sprint).
+  # any consumer for a main-targeting PR. This workflow (and its job, the required check itself)
+  # was renamed in Sprint 19.8.6 to "BeeDay — Pull Request Validation" / "Pull Request Validation"
+  # - Protect HMG's Ruleset was mutated to require the new context only after a real PR proved it
+  # producible, never leaving hmg without an enforceable required check.
   pull_request:
     branches:
       - hmg
@@ -40,7 +54,7 @@ permissions:
 
 jobs:
   ci:
-    name: BeeDay CI
+    name: Pull Request Validation
 
     runs-on: windows-latest
     timeout-minutes: 20
