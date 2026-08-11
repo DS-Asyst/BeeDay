@@ -32,14 +32,33 @@ permissions:
 jobs:
   verify:
     name: Verify HMG
-    # deploy-hmg.yml's own "deploy" job already gates on event == 'push' and head_branch == 'hmg'
-    # (Sprint 19.6) - by the time this workflow observes a successful "BeeDay — HMG Deployment"
-    # completion, that filtering has already happened once. No need to re-derive/re-check
-    # head_branch here (and github.event.workflow_run.head_branch would be unreliable for this
-    # workflow_run hop regardless - same reason head_sha is, see the note above).
+    # Sprint 19.8.3: also requires the triggering deployment run's own event to be one
+    # deploy-hmg.yml actually produces today (push or workflow_dispatch - see its `on:` block,
+    # Sprint 19.8). Real incident: the first hmg->main promotion (PR #64) merged into a `main`
+    # that had never received ANY EPIC 19 workflow change until that exact PR - so at the moment
+    # PR #64's own "BeeDay CI" pull_request run completed (before the merge landed), GitHub still
+    # had `main`'s ancient, pre-Sprint-19.6 deploy-hmg.yml registered as a `workflow_run: [BeeDay
+    # CI]` listener (workflow_run listener resolution uses the default branch's copy of the
+    # listening workflow at event time, not any particular commit's copy). That legacy run
+    # (id 31482602788, its own event: "workflow_run", job "Deploy to SERV3WEB") deployed
+    # successfully but predates deployment-info.json entirely (introduced Sprint 19.6, extended
+    # 19.8) - it could never satisfy this workflow's contract. HMG Verification run 31482750014
+    # still matched it purely by workflow NAME ("BeeDay — HMG Deployment", unchanged across every
+    # version) and failed at "Download deployment info" ("Artifact not found"). The specific
+    # enabling condition (main lagging that far behind) cannot recur now that main and hmg share
+    # the same workflow set and the current deploy-hmg.yml no longer listens to workflow_run at
+    # all - but trusting workflow_run.id unconditionally remains a general fragility. Every
+    # legitimate deploy-hmg.yml run today has event 'push' or 'workflow_dispatch' - a run whose
+    # own event is 'workflow_run' cannot be one, so this guard skips the job cleanly (not a red
+    # failure) instead of starting an execution destined to fail on artifact download. This does
+    # NOT weaken fail-closed behavior for a genuinely missing/corrupted artifact on a legitimate
+    # push-triggered deployment - that path is unaffected and still hard-fails at download. See
+    # docs/deployment/12-artifact-provenance.md, Sprint 19.8.3 section, for the full reconstruction.
     if: |
       github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_dispatch'))
 
     runs-on:
       - self-hosted
