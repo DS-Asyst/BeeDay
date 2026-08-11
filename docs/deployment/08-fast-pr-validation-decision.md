@@ -266,7 +266,119 @@ da mudança de trigger. Busca por `prd` em referências a `ci.yml`/`BeeDay CI` n
 
 ---
 
-## 12. Fontes consultadas
+## 12. Sprint 19.8.5 — Fast HMG Developer Feedback (revisão desta decisão)
+
+**Fonte da verdade:** `gh run view --json jobs`/`--log` de 5 execuções reais recentes de `BeeDay
+CI` (timing por step e, extraído do log bruto, por projeto de teste); leitura integral de
+`ci.yml`/`release-quality-gate.yml`; `docs/deployment/07-validation-matrix.md` §14/§18/§19
+(candidatos já identificados na Sprint 19.3, nunca implementados por falta, na época, de uma
+fronteira de release independente).
+
+### 12.1 Por que esta Sprint pode revisar a decisão da 19.4
+
+A decisão original (§5 acima) manteve toda a suíte em `ci.yml` para PRs `sprint/*→hmg` porque, na
+Sprint 19.4, `ci.yml` era a **única** validação real que existia — não havia `BeeDay — Release
+Quality Gate` (criado só na 19.7) nem a fronteira `hmg→main` protegida (ativada só na 19.8.4).
+Manter tudo era a escolha correta *para aquele estado*. Hoje, com `Release Quality Gate` validado
+remotamente duas vezes (PRs #64, #66) e sendo o required check real de `main`, a mesma suíte
+completa roda de qualquer forma antes de qualquer promoção — o que muda é **quando** cada
+validação é mais valiosa, exatamente a pergunta que a Sprint 19.8.5 formaliza: `Sprint→HMG`
+responde "qualidade mínima para integrar e testar em homologação?"; `HMG→MAIN` responde "qualidade
+suficiente para a linha de release?".
+
+### 12.2 Baseline remoto real (5 execuções, `pull_request`→`hmg`, `windows-latest`)
+
+| Run | Branch origem | Duração total |
+|---|---|---|
+| `31487328668` | `sprint/19.8.4-main-ruleset-transition` | 6m11s |
+| `31485737898` | `hmg` (promoção `hmg→main` pré-19.8.4) | 6m22s |
+| `31484479264` | `sprint/19.8.3-hmg-verification-provenance-hardening` | 5m00s |
+| `31482098907` | `hmg` (promoção `hmg→main` pré-19.8.4) | 6m43s |
+| `31481327596` | `sprint/19.8.2-release-gate-powershell-compatibility` | 7m39s |
+
+**Before: média 6m23s, mediana 6m22s, min 5m00s, max 7m39s.**
+
+Nota de honestidade metodológica: 2 das 5 amostras (`898`, `907`) são execuções de `ci.yml`
+disparadas pela PR de promoção `hmg→main` (antes da Sprint 19.8.4 remover esse trigger), não por
+uma PR `sprint/*→hmg`. O job em si não distingue a origem — mesmo comando, mesmo custo — então a
+medição permanece representativa do "critical path real de `BeeDay CI`", não distorcida pela
+origem da PR.
+
+### 12.3 Critical path real (por projeto de teste, extraído do log bruto de 3 runs)
+
+| Projeto | Amostra 1 | Amostra 2 | Amostra 3 | Média |
+|---|---|---|---|---|
+| Application.Tests | 3.8s | 2.9s | 3.2s | **3.3s** |
+| Domain.Tests | 2.8s | 2.1s | 2.0s | **2.3s** |
+| E2E.Tests | 54.3s | 46.3s | 61.1s | **53.9s** |
+| Infrastructure.Tests | 67.6s | 51.4s | 124.8s | **81.3s** |
+| Web.Tests | 39.0s | 30.4s | 65.4s | **44.9s** |
+
+Infrastructure.Tests confirma empiricamente, com dado remoto real (não só a variância local já
+registrada em `07-validation-matrix.md` §5/§11), a maior variância absoluta (51.4s–124.8s,
++143%) — consistente com a contenção de `CREATE`/`DROP DATABASE` já documentada, agora também
+observável em produção do pipeline, não só em amostra local.
+
+### 12.4 Decisão: Fast HMG Gate (novo `ci.yml`)
+
+| Validação | Decisão | Justificativa |
+|---|---|---|
+| Restore, Build (`--warnaserror`) | `KEEP` | `CRITICAL` — sem build, nada mais é válido; necessário de qualquer forma para produzir `beeday-publish`/`beeday-migrations` |
+| Domain.Tests + `DomainAssemblyBoundaryTests` | `KEEP` | ~2.3s, `SELF-CONTAINED`, `CRITICAL` (único guard de arquitetura do Domain) |
+| Application.Tests + `PersistenceContractBoundaryTests` | `KEEP` | ~3.3s, `SELF-CONTAINED`, `CRITICAL` (único guard de arquitetura da Application) |
+| Publish, validação do publish | `KEEP` | Produz `beeday-publish` — contrato de artifact, não pode sair (ver §12.6) |
+| EF tool restore, EF bundle, validação do bundle | `KEEP` | Produz `beeday-migrations` — contrato de artifact, não pode sair |
+| Format (`dotnet format --verify-no-changes`) | `MOVE TO RELEASE GATE ONLY` | ~42s; zero risco funcional (não afeta comportamento em runtime); já roda em `release-quality-gate.yml`; risco de bloquear a promoção de `main` para *todos* que compartilham o estado de `hmg` até ser corrigido é aceito — ver §12.7 |
+| Infrastructure.Tests | `MOVE TO RELEASE GATE ONLY` | ~81.3s média, alta variância confirmada; `HIGH` risco, mas coberto integralmente por `Release Quality Gate` antes de `main`; `hmg` é o próprio ambiente de homologação onde isso seria exercitado manualmente |
+| Web.Tests | `MOVE TO RELEASE GATE ONLY` | ~44.9s; mesma justificativa — `HIGH` risco coberto pela fronteira de release, não pela fronteira de integração |
+| E2E.Tests + cache/install Playwright | `MOVE TO RELEASE GATE ONLY` | ~54s (teste) + ~15s (Playwright) ≈ 69s; `CI DEPENDENCY` pesada (browser+TCP); já `REQUIRED` em `Release Quality Gate`; cobertura na fronteira `hmg→main` **não reduzida** |
+
+**Nenhuma seleção por path implementada** — decisão binária e determinística (Domain+Application
+sempre; Infrastructure+Web+E2E+Format nunca, neste gate), evitando a complexidade que a própria
+Sprint 19.4 já havia rejeitado para E2E por falta de uma regra comprovadamente segura.
+
+### 12.5 Before × Expected After
+
+| | Before (medido remotamente) | After (simulação local) |
+|---|---|---|
+| Total | 6m23s (média) | ver `09-pipeline-performance.md` §Sprint 19.8.5 |
+
+Classificação de evidência obrigatória por tipo de medição no relatório final desta Sprint —
+`MEASURED REMOTELY` (before) vs `MEASURED LOCALLY` (simulação do novo gate) vs `ESTIMATED`
+(projeção remota do novo gate, ainda não observada).
+
+### 12.6 Artifact Contract (reconfirmado, não alterado)
+
+`deploy-hmg.yml` consome exatamente `beeday-publish` e `beeday-migrations` (confirmado via
+`grep -n "name: beeday" deploy-hmg.yml`). Nenhuma das duas deixou de ser produzida — os steps
+`Publish BeeDay`, `Generate EF Core migration bundle`, e os dois uploads correspondentes não foram
+tocados. `beeday-e2e-artifacts` (sem consumidor downstream confirmado) foi removida junto com a
+remoção de E2E deste workflow — `beeday-test-results` continua sendo produzida, agora só com os
+resultados de Domain+Application.
+
+### 12.7 Format — decisão explícita (não automática)
+
+Avaliado individualmente conforme exigido: Format não protege nenhum defeito funcional — código
+mal formatado compila e roda de forma idêntica. O risco de removê-lo do Fast Gate é puramente
+operacional (uma PR com formatação incorreta some despercebida até a promoção `hmg→main`, onde
+`Release Quality Gate` bloqueia — potencialmente represando também outras mudanças já integradas
+no mesmo estado de `hmg`). Decisão: `MOVE`, aceitando esse risco operacional porque (a) é
+inteiramente evitável (`dotnet format` local antes do push), (b) não ameaça a testabilidade
+funcional em HMG — que é exatamente a pergunta que este gate precisa responder — e (c) o custo
+(~42s, o segundo maior item individual depois da suíte de testes) é desproporcional a um problema
+sem nenhum impacto em runtime.
+
+### 12.8 Release Quality Gate — preservação confirmada
+
+`release-quality-gate.yml` **não foi tocado nesta Sprint** (`git diff --stat` confirma). Continua
+executando: Format, Build (`--warnaserror`), os 5 projetos de teste completos (incluindo os 2
+boundary tests embutidos), Publish + validação, `has-pending-model-changes`, EF bundle +
+validação. Nenhuma cobertura desaparece de nenhuma das duas fronteiras — apenas muda de qual
+fronteira a exige.
+
+---
+
+## 13. Fontes consultadas
 
 - `.github/workflows/ci.yml`, `deploy-hmg.yml`, `deploy-prd.yml`, `validate-promotion.yml`.
 - `gh api repos/tiagoarrigoni/BeeDay/rules/branches/{hmg,main,prd}` (reconsultado nesta Sprint).

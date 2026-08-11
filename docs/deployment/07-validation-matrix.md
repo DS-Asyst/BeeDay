@@ -358,7 +358,19 @@ não é uma redundância planejada por estágio, é a mesma causa-raiz documenta
 
 ## 14. Recommended Stage Matrix
 
-`RECOMMENDATION` — candidatos, não implementação. Critério de `SELECTIVE` sempre explicado.
+**Atualização (Sprint 19.8.5):** as recomendações abaixo — Infrastructure/Web `REQUIRED (Fast)`,
+E2E `SELECTIVE` — refletiam o estado da Sprint 19.3, quando não existia nenhuma fronteira de
+release independente e `ci.yml` era a única validação real do repositório. A Sprint 19.8.5
+substituiu essa recomendação por uma decisão diferente, tomada com evidência remota real e um
+`Release Quality Gate` já validado duas vezes em produção: mover Infrastructure/Web/E2E/Format
+integralmente para `Release Quality Gate` (não `SELECTIVE` — decisão binária e determinística,
+evitando a complexidade de path-filtering que a própria 19.4 já havia rejeitado por falta de
+regra comprovadamente segura). Tabela original preservada abaixo como registro histórico da
+análise da Sprint 19.3 — não reescrita. Decisão final e evidência completa:
+[`08-fast-pr-validation-decision.md`](08-fast-pr-validation-decision.md) §12.
+
+`RECOMMENDATION` (Sprint 19.3) — candidatos, não implementação à época. Critério de `SELECTIVE`
+sempre explicado.
 
 | Validação | PR→HMG recomendado | HMG Deploy | HMG Verification | HMG→Main | Main→PRD |
 |---|---|---|---|---|---|

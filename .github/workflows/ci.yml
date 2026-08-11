@@ -72,10 +72,6 @@ jobs:
         shell: powershell
         run: dotnet restore BeeDay.slnx
 
-      - name: Verify formatting
-        shell: powershell
-        run: dotnet format BeeDay.slnx --verify-no-changes --no-restore
-
       - name: Build solution
         shell: powershell
         run: |
@@ -84,47 +80,52 @@ jobs:
             --no-restore `
             --warnaserror
 
-      # Path confirmed empirically from a real run's install log (Sprint 19.5): Playwright's .NET
-      # tool installs Chromium/FFmpeg to %LOCALAPPDATA%\ms-playwright on windows-latest, unrelated
-      # to the NuGet cache above. Keyed on Microsoft.Playwright's pinned version in
-      # Directory.Packages.props, so a version bump invalidates the cache automatically. Safe on
-      # cache miss: the install step below still runs unconditionally and re-downloads if needed.
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~\AppData\Local\ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('Directory.Packages.props') }}
-
-      - name: Install Playwright Chromium
-        shell: powershell
-        run: pwsh tests/BeeDay.E2E.Tests/bin/Release/net10.0/playwright.ps1 install chromium
-
+      # Sprint 19.8.5: Format, Infrastructure.Tests, Web.Tests, E2E.Tests (+ the Playwright cache/
+      # install steps that existed solely to run E2E here) moved to BeeDay — Release Quality Gate
+      # only. This is not "removing slow tests" - it is recognizing that a two-stage architecture
+      # now exists that did NOT exist when Sprint 19.4 decided to keep everything in this Fast PR
+      # gate: every merge into hmg is re-validated by Release Quality Gate (full suite, Format,
+      # Build --warnaserror, has-pending-model-changes) before it can reach main, and hmg is HMG's
+      # own explicitly-stated purpose - an integration/homologation environment where a human
+      # exercises the feature, not the release boundary itself. Domain.Tests and Application.Tests
+      # stay REQUIRED here: measured on 3 real remote runs, they cost ~5.6s combined (vs.
+      # Infrastructure ~81s with confirmed high contention-driven variance, Web ~45s, E2E ~54s +
+      # ~15s of Playwright cache/install) and carry the only two embedded architecture/boundary
+      # tests (DomainAssemblyBoundaryTests, PersistenceContractBoundaryTests) - CRITICAL per
+      # docs/deployment/07-validation-matrix.md, and self-contained (no LocalDB/browser/TestServer).
+      # Full analysis, evidence, and the decision this overrides: docs/deployment/
+      # 08-fast-pr-validation-decision.md, Sprint 19.8.5 section.
       - name: Run tests
         shell: powershell
         run: |
-          # Each test project is invoked individually (instead of `dotnet test BeeDay.slnx` as a
-          # single call) so each gets its own uniquely named .trx via LogFileName. Running the
-          # whole solution in one call makes every project's test host share the same file name,
-          # which caused "WARNING: Overwriting results file". All projects still run to completion
-          # regardless of earlier failures, and the step throws (failing the job) if any failed -
-          # no continue-on-error, no swallowed exit codes.
-          $testProjects = Get-ChildItem -Path "tests" -Filter "*.csproj" -Recurse
+          # Explicit list (Sprint 19.8.5), not Get-ChildItem discovery - this gate now runs exactly
+          # 2 projects, deterministically, not "whatever's found in tests/". Each still gets its own
+          # uniquely named .trx via LogFileName (single dotnet test BeeDay.slnx would share one file
+          # name across hosts). Both run to completion regardless of the other's outcome, and the
+          # step throws (failing the job) if either failed - no continue-on-error, no swallowed exit
+          # codes.
+          $testProjects = @(
+            "tests\BeeDay.Domain.Tests\BeeDay.Domain.Tests.csproj",
+            "tests\BeeDay.Application.Tests\BeeDay.Application.Tests.csproj"
+          )
           $resultsDirectory = "${{ runner.temp }}\TestResults"
           $anyFailed = $false
 
-          foreach ($project in $testProjects) {
-              Write-Host "Running tests: $($project.Name)"
+          foreach ($projectPath in $testProjects) {
+              $projectName = Split-Path -Leaf $projectPath
+              $projectBaseName = [System.IO.Path]::GetFileNameWithoutExtension($projectPath)
+              Write-Host "Running tests: $projectName"
 
-              dotnet test $project.FullName `
+              dotnet test $projectPath `
                 --configuration Release `
                 --no-build `
                 --no-restore `
                 --verbosity normal `
-                --logger "trx;LogFileName=$($project.BaseName).trx" `
+                --logger "trx;LogFileName=$projectBaseName.trx" `
                 --results-directory $resultsDirectory
 
               if ($LASTEXITCODE -ne 0) {
-                  Write-Host "FAILED: $($project.Name) (exit code $LASTEXITCODE)"
+                  Write-Host "FAILED: $projectName (exit code $LASTEXITCODE)"
                   $anyFailed = $true
               }
           }
@@ -224,15 +225,6 @@ jobs:
           name: beeday-test-results
           path: ${{ runner.temp }}\TestResults
           if-no-files-found: warn
-          retention-days: 14
-
-      - name: Upload E2E failure artifacts
-        if: always()
-        uses: actions/upload-artifact@v7.0.1
-        with:
-          name: beeday-e2e-artifacts
-          path: tests\BeeDay.E2E.Tests\bin\Release\net10.0\e2e-artifacts
-          if-no-files-found: ignore
           retention-days: 14
 
       - name: Upload validated publish artifact
