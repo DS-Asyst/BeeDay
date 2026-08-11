@@ -115,6 +115,11 @@
     box-shadow: var(--beeday-focus-ring), var(--beeday-shadow-sm);
 }
 
+.activity-card__body--openable,
+.habit-card__body--openable {
+    cursor: pointer;
+}
+
 .activity-card__body--openable:hover h3,
 .habit-card__body--openable:hover h3 {
     color: color-mix(in srgb, var(--beeday-color-primary) 55%, currentColor);

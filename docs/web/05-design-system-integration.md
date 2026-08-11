@@ -53,7 +53,6 @@ app.css
 → css/identity.css
 → BeeDay.Web.styles.css          (bundle isolado, gerado pelo SDK a partir de todo *.razor.css)
 → css/typography-policy.css
-→ css/cursors.css
 → css/pixel-nes.css              (excerto do tema NES.css — ver css/vendor/NES_ATTRIBUTION.md)
 ```
 
