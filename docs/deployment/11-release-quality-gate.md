@@ -423,3 +423,129 @@ Sprint, não corrigida, continua candidata a investigação dedicada futura.
 6. Só então, com autorização explícita separada: remover `pull_request: main` de `ci.yml`.
 
 Nenhum desses passos foi executado nesta Sprint.
+
+---
+
+## 24. Sprint 19.8.2 — Windows PowerShell 5.1 Compatibility
+
+**Fonte da verdade:** auditoria própria do arquivo atual (varredura por código Python de todos os
+blocos `run: |`), reprodução real com `powershell.exe` (Windows PowerShell 5.1, não `pwsh`),
+`gh run view --log` de um run real de `ci.yml` (`31457503268`) para confirmar o shell resolvido em
+`windows-latest`, e a evidência já registrada em `docs/deployment/12-artifact-provenance.md` §35
+(Sprint 19.8.1).
+
+### 24.1 Origem do achado
+
+Durante a auditoria da Sprint 19.8.1 (correção de `deploy-hmg.yml`/`verify-hmg.yml` após a falha
+real do run `31456637128`), uma varredura por `—` em todos os workflows encontrou o mesmo padrão em
+`release-quality-gate.yml` linha 237 (step `Record gate summary`). Registrado como débito técnico
+naquela Sprint, deliberadamente não corrigido ali (fronteira `hmg→main`, fora do escopo de uma
+Sprint sobre `Sprint→HMG`). Esta Sprint resolve esse débito antes da primeira execução real do gate.
+
+### 24.2 Relação com a falha remota da 19.8/evidência da 19.8.1
+
+`FACT`: o run `31456637128` (`BeeDay — HMG Deployment`) comprovou remotamente que um em dash
+(`—`, U+2014) dentro de um literal PowerShell escrito em `$env:GITHUB_STEP_SUMMARY`, executado via
+`shell: powershell`, falha com `Unexpected token` no runner self-hosted (SERV3WEB) — Windows
+PowerShell 5.1 decodifica o script `.ps1` temporário gerado pelo Actions runner (sem BOM) usando o
+codepage legado do sistema, produzindo mojibake que inclui um caractere de aspas curvas aceito pelo
+tokenizer como delimitador de string. `deploy-hmg.yml` e `verify-hmg.yml` foram corrigidos e
+**validados remotamente** na Sprint 19.8.1 (deployment subsequente completou `Record deployment
+info` e `Upload deployment info` com sucesso).
+
+### 24.3 Release Quality Gate Inspection
+
+`FACT`, confirmado por leitura direta e varredura automatizada: `release-quality-gate.yml` linha
+237, step `Record gate summary` — `"## BeeDay — Release Quality Gate" >> $env:GITHUB_STEP_SUMMARY`
+— mesmo padrão exato (em dash dentro de literal PowerShell, `shell: powershell`, escrevendo
+`$GITHUB_STEP_SUMMARY`).
+
+### 24.4 PowerShell Runtime Analysis
+
+`FACT`, verificado empiricamente (não presumido por analogia): `release-quality-gate.yml` roda em
+`runs-on: windows-latest` (GitHub-hosted), diferente do runner self-hosted (SERV3WEB) usado por
+`deploy-hmg.yml`/`verify-hmg.yml`. Antes de aplicar a mesma correção, confirmado via
+`gh run view --log` de um run real e bem-sucedido de `ci.yml` (`31457503268`, também
+`windows-latest` + `shell: powershell`) que o shell resolvido é **o mesmo binário exato**:
+`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.EXE` (Windows PowerShell 5.1) — `shell:
+powershell` sempre resolve para PS 5.1 em runners Windows, hospedados ou self-hosted; a distinção
+hosted/self-hosted não é o fator relevante. Equivalência técnica confirmada, não copiada
+cegamente.
+
+### 24.5 Unicode Audit
+
+`FACT`: varredura automatizada (script Python) de **todos** os blocos `run: |` do arquivo (14
+steps com `shell: powershell`) encontrou exatamente **1** ocorrência de caractere não-ASCII —
+linha 237, o em dash já identificado. Nenhum outro caractere Unicode em código PowerShell
+efetivamente executado. Os em dashes nos comentários YAML (`#`, ex.: linhas 3, 7, 33) e no `name:`
+do workflow (linha 1) não são código PowerShell executado — YAML/comentários são processados pelo
+parser YAML do GitHub Actions, não pelo interpretador PowerShell, e não geram o arquivo `.ps1`
+temporário vulnerável. Nenhuma limpeza indiscriminada de Unicode foi feita.
+
+### 24.6 Root Cause Equivalence
+
+| | Classificação |
+|---|---|
+| SYMPTOM POTENCIAL | `Record gate summary` falharia com `Unexpected token`/erros em cascata na primeira execução real, mesmo com todas as validações do gate passando |
+| TECHNICAL CAUSE | Em dash em literal PowerShell → mojibake sob decodificação de codepage legado do PS 5.1 → caractere de aspas curvas aceito como delimitador de string |
+| ROOT CAUSE | Caractere Unicode não-ASCII em string PowerShell executada via `shell: powershell` (PS 5.1) sem BOM no script gerado |
+| EVIDENCE | Idêntica ao run `31456637128` (19.8.1) + reprodução local nova com o literal real deste arquivo (§24.7) + confirmação do mesmo binário `powershell.exe` via log real de `ci.yml` |
+| FIX STRATEGY | Substituição mínima do caractere (em dash → hífen ASCII), idêntica à 19.8.1, aplicada apenas após confirmar equivalência técnica real |
+
+### 24.7 Local Reproduction
+
+Reproduzido com `powershell.exe` real (não `pwsh`), usando o literal exato do arquivo:
+
+| Cenário | Comando | Resultado |
+|---|---|---|
+| Literal ANTES (em dash) | `powershell.exe -File old.ps1` | **FALHA**: `Token 'Release' inesperado na expressão ou instrução` — mesma classe de erro do run `31456637128` |
+| Literal DEPOIS (hífen ASCII) | `powershell.exe -File fixed.ps1` | **Sucesso** (exit 0), Markdown gerado corretamente |
+
+Sem resíduos — arquivos temporários criados em `$env:TEMP` e removidos ao final da reprodução.
+
+### 24.8 Fix Implemented
+
+`release-quality-gate.yml`, step `Record gate summary`: `"## BeeDay — Release Quality Gate"` →
+`"## BeeDay - Release Quality Gate"` (em dash → hífen ASCII). Comentário explicativo adicionado,
+citando a evidência da 19.8.1 e a confirmação do binário PS 5.1 real. Nenhuma migração para
+`shell: pwsh`.
+
+### 24.9 Why This Fix Is Minimal
+
+Uma linha alterada (um caractere), mais comentário explicativo. Nenhuma mudança de trigger,
+validação, ordem de steps, ou estratégia de artifact.
+
+### 24.10 Release Quality Gate Preservation
+
+`FACT`, reconfirmado por leitura completa do arquivo após a correção: todas as validações
+permanecem — Format, Build (Release, `--warnaserror`), cache/install Playwright, suíte completa de
+testes (5 projetos + boundary embutidos), Publish, validação do publish, restore da ferramenta EF,
+`has-pending-model-changes`, EF migration bundle, validação do bundle, upload de test results.
+Nenhuma removida.
+
+### 24.11 Sprint 19.7.1 Fix Preservation
+
+`FACT`, confirmado via `grep -n "no-build"`: `Publish BeeDay` continua **sem** `--no-build`;
+`Check for pending EF model changes` e `Generate EF Core migration bundle` continuam **com**
+`--no-build`, na mesma ordem (depois de Publish) — a correção da 19.7.1 está intacta, não tocada
+por esta Sprint.
+
+### 24.12 Trigger Preservation
+
+`FACT`: `on: pull_request: branches: [main]` + `workflow_dispatch` inalterados. `if:` guard
+(`workflow_dispatch` ou `head.ref == 'hmg'`) inalterado. `concurrency` inalterado.
+
+### 24.13 Documentation Updated
+
+Este documento (`11-release-quality-gate.md`), nova seção §24. Nenhum documento duplicado criado.
+
+### 24.14 Local Validation Status
+
+Ver relatório da Sprint (seção correspondente) — `dotnet format/build/test`, `git diff --check`,
+YAML válido, reprodução PS 5.1 real (bug + fix).
+
+### 24.15 Remote Validation Status
+
+**`NOT YET VALIDATED REMOTELY`.** Este workflow nunca executou numa PR `hmg → main` real até hoje
+(nenhuma PR desse tipo existiu ainda). A validação remota ocorrerá na primeira execução real,
+quando a sequência de ativação do §23.11 for retomada — não nesta Sprint.

@@ -230,11 +230,22 @@ jobs:
       # Minimal summary (Sprint 19.7, Fase 27) - not the full observability platform reserved for
       # Sprint 19.9. Written last, after every prior step already succeeded (a step never runs
       # after an earlier one throws), so reaching here means the whole gate passed.
+      #
+      # ASCII hyphen, not an em dash (Sprint 19.8.2): the identical defect confirmed remotely in
+      # deploy-hmg.yml's "Record deployment info" step (Sprint 19.8.1, run 31456637128) and
+      # reproduced locally here with this exact literal - an em dash inside a PowerShell
+      # double-quoted string written to a temp .ps1 file gets misdecoded by Windows PowerShell 5.1
+      # (confirmed to be the actual shell here too: windows-latest's `shell: powershell` resolves
+      # to the same C:\Windows\System32\WindowsPowerShell\v1.0\powershell.EXE binary as the
+      # self-hosted HMG runner, verified from a real ci.yml run's log) when the file has no BOM,
+      # producing a mojibake "smart quote" character that PS 5.1's tokenizer treats as a string
+      # terminator. Fixed here proactively, before this gate's first real hmg->main execution -
+      # see docs/deployment/11-release-quality-gate.md, Sprint 19.8.2 section.
       - name: Record gate summary
         if: always()
         shell: powershell
         run: |
-          "## BeeDay — Release Quality Gate" >> $env:GITHUB_STEP_SUMMARY
+          "## BeeDay - Release Quality Gate" >> $env:GITHUB_STEP_SUMMARY
           "" >> $env:GITHUB_STEP_SUMMARY
           "| Field | Value |" >> $env:GITHUB_STEP_SUMMARY
           "|---|---|" >> $env:GITHUB_STEP_SUMMARY
