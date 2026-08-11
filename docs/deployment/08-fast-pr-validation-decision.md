@@ -156,7 +156,7 @@ cadeia de causalidade completamente rastreada e comprovada (não apenas inferida
 | Responsabilidade emprestada | Razão | Dono atual | Dono futuro | Sprint de remoção |
 |---|---|---|---|---|
 | `push: hmg` em `ci.yml` | Único gatilho confiável de `deploy-hmg.yml` até a 19.8 | ~~`ci.yml`~~ **REMOVIDO na Sprint 19.8** | Proveniência final (Build Once/Deploy Many) | **RESOLVIDO na 19.8** (ver nota abaixo) |
-| `pull_request: main` em `ci.yml` | Satisfaz o required check `"BeeDay CI"` do Ruleset de `main` | `ci.yml` | `BeeDay — Release Quality Gate` | **Implementado na 19.7, ativação pendente** (ver nota abaixo) |
+| `pull_request: main` em `ci.yml` | Satisfaz o required check `"BeeDay CI"` do Ruleset de `main` | ~~`ci.yml`~~ **REMOVIDO na Sprint 19.8.4** | `BeeDay — Release Quality Gate` | **RESOLVIDO na 19.8.4** (ver nota abaixo) |
 
 **Atualização da Sprint 19.7:** `BeeDay — Release Quality Gate` (`release-quality-gate.yml`) foi
 criado e validado localmente, mas **não foi ativado** — o Ruleset de `main` ainda exige
@@ -184,17 +184,26 @@ proveniência final poderá de fato substituir essa dependência.
 disparar diretamente em `push: branches: [hmg]`, resolvendo o artefato já validado pela PR via uma
 cadeia de proveniência baseada na API de Pull Requests do GitHub (o mesmo padrão que
 `deploy-prd.yml` já usava para `main→prd`, aplicado um hop antes) — não uma reconstrução, não um
-novo `workflow_run`. Esta linha da tabela está **RESOLVIDA**. A linha `pull_request: main`
-permanece **NOT RESOLVED**: o rename continua bloqueado até a ativação do Release Quality Gate
-(inalterada por esta Sprint). Ver [`12-artifact-provenance.md`](12-artifact-provenance.md) para a
-investigação completa, incluindo por que a resolução não pode se basear em topologia de commits
-Git (o Ruleset de `hmg` permite merge commit, squash, **e** rebase — apenas merge commit preserva
-uma relação de ancestralidade Git verificável com o PR HEAD SHA).
+novo `workflow_run`. Esta linha da tabela está **RESOLVIDA**. Ver
+[`12-artifact-provenance.md`](12-artifact-provenance.md) para a investigação completa, incluindo
+por que a resolução não pode se basear em topologia de commits Git (o Ruleset de `hmg` permite
+merge commit, squash, **e** rebase — apenas merge commit preserva uma relação de ancestralidade
+Git verificável com o PR HEAD SHA).
 
-**Condição de desbloqueio do rename:** o rename `BeeDay CI → BeeDay — Pull Request Validation`
-(workflow e, separadamente, o job/check — sujeito a mutação de Ruleset com plano de transição
-próprio) só deve ser reavaliado depois que **ambas** as linhas da tabela acima tiverem um dono
-futuro implementado e funcional.
+**Atualização da Sprint 19.8.4:** com `BeeDay — Release Quality Gate` já possuindo duas execuções
+reais bem-sucedidas em `hmg→main` (PRs #64 e #66, Sprint 19.8.3), o Ruleset de `main` foi mutado
+(`"BeeDay CI"` → `"Release Quality Gate"` como required check, `"Validate Promotion"` preservado —
+read-back confirmado, ver [`11-release-quality-gate.md`](11-release-quality-gate.md) §25) e
+**somente depois** `pull_request: main` foi removido de `ci.yml`. Ambas as linhas da tabela acima
+estão agora **RESOLVIDAS**.
+
+**Condição de desbloqueio do rename:** com ambas as linhas resolvidas, o rename `BeeDay CI →
+BeeDay — Pull Request Validation` está tecnicamente desbloqueado quanto a essas duas dependências
+— mas o Ruleset de `hmg` ainda exige literalmente o contexto `"BeeDay CI"`, então o rename em si
+exigiria uma **segunda e separada** mutação de Ruleset (desta vez em `hmg`), deliberadamente não
+executada na Sprint 19.8.4 para não misturar duas mudanças remotas de governança na mesma rodada —
+ver [`11-release-quality-gate.md`](11-release-quality-gate.md) §25.4 para a análise completa
+(`REQUIRES HMG RULESET TRANSITION`, `DEFERRED`).
 
 ---
 
@@ -205,7 +214,7 @@ futuro implementado e funcional.
 | Branch | Ruleset | Required Check Atual | Required Check Alvo | Migração necessária agora? |
 |---|---|---|---|---|
 | `hmg` | 20580759 | `BeeDay CI` | inalterado | Não |
-| `main` | 20608232 | `BeeDay CI`, `Validate Promotion` | inalterado | Não |
+| `main` | 20608232 | ~~`BeeDay CI`~~ **`Release Quality Gate`**, `Validate Promotion` | — | Mutado na Sprint 19.8.4 (ver `11-release-quality-gate.md` §25) |
 | `prd` | nenhum | — | — | Não |
 
 ## 8. Remote Mutations

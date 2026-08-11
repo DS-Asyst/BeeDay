@@ -546,6 +546,85 @@ YAML válido, reprodução PS 5.1 real (bug + fix).
 
 ### 24.15 Remote Validation Status
 
-**`NOT YET VALIDATED REMOTELY`.** Este workflow nunca executou numa PR `hmg → main` real até hoje
-(nenhuma PR desse tipo existiu ainda). A validação remota ocorrerá na primeira execução real,
-quando a sequência de ativação do §23.11 for retomada — não nesta Sprint.
+**`NOT YET VALIDATED REMOTELY`** no momento em que esta seção foi escrita (nenhuma PR `hmg→main`
+existia ainda). **Atualização (Sprint 19.8.3):** a primeira PR real `hmg→main` (PR #64) e uma
+segunda (PR #66) já ocorreram, ambas com `BeeDay — Release Quality Gate` `SUCCESS` — ver
+`12-artifact-provenance.md` e a seção 25 abaixo. `REMOTE VALIDATED`.
+
+---
+
+## 25. Sprint 19.8.4 — Main Ruleset Activation (Executed)
+
+**Fonte da verdade:** `gh api repos/tiagoarrigoni/BeeDay/rulesets/20608232` (before/after,
+read-back real), `gh api .../commits/{sha}/check-runs` (contexto real do check), execução real do
+fluxo Sprint→hmg→main (PRs subsequentes desta Sprint).
+
+**Escopo:** executar a sequência de ativação definida em §13/§14 — Passo 3 (mutar Ruleset) e
+Passo 4 (remover `pull_request: main` de `ci.yml`) — agora que `BeeDay — Release Quality Gate`
+tem duas execuções reais bem-sucedidas em `hmg→main` (PRs #64 e #66, Sprint 19.8.3).
+
+### 25.1 Contexto real confirmado antes da mutação
+
+`FACT`, via `gh api repos/tiagoarrigoni/BeeDay/commits/721e2551.../check-runs`: o check-run
+reportado pelo GitHub para o job `quality-gate` de `release-quality-gate.yml` é literalmente
+`"Release Quality Gate"` (nome do **job** — `jobs.quality-gate.name`, linha 27 do arquivo — não o
+nome do workflow `"BeeDay — Release Quality Gate"`), consistente com o padrão já usado por
+`"BeeDay CI"` e `"Validate Promotion"` (ambos nomes de job, não de workflow).
+
+### 25.2 Mutação do Ruleset de `main`
+
+`FACT`: `gh api --method PUT repos/tiagoarrigoni/BeeDay/rulesets/20608232` com o corpo completo do
+Ruleset, alterando apenas `required_status_checks[0].context` de `"BeeDay CI"` para `"Release
+Quality Gate"`. Todas as demais regras (`deletion`, `non_fast_forward`, `pull_request` com
+`allowed_merge_methods: [merge, squash, rebase]`, `bypass_actors: []`, `enforcement: active`,
+`conditions`) preservadas byte-a-byte — confirmado por diff estrutural JSON entre o snapshot
+capturado antes da mutação e o read-back imediatamente depois: a única diferença encontrada foi o
+`context` esperado.
+
+**BEFORE:**
+
+- `BeeDay CI`
+- `Validate Promotion`
+
+**AFTER:**
+
+- `Release Quality Gate`
+- `Validate Promotion`
+
+### 25.3 Remoção de `pull_request: main` de `ci.yml`
+
+Executada **somente depois** do read-back confirmar a mutação do Ruleset — ordem exigida pela
+Sprint para nunca criar uma janela em que `main` exija um check que nenhum workflow ainda produz.
+`ci.yml` passa a disparar `pull_request` apenas para `branches: [hmg]`. `workflow_dispatch`
+preservado. Nenhuma outra validação alterada.
+
+### 25.4 Rename Impact Analysis — `BeeDay CI` → `BeeDay — Pull Request Validation`
+
+`FACT`: o Ruleset de `hmg` (id `20580759`, **não tocado nesta Sprint**) continua exigindo
+literalmente o contexto `"BeeDay CI"`. Renomear o `name:` do workflow e/ou do job mudaria o
+contexto reportado, quebrando esse required check.
+
+| Classificação | Resultado |
+|---|---|
+| `SAFE NOW` | Não |
+| `REQUIRES HMG RULESET TRANSITION` | **Sim** — renomear exige uma segunda mutação de Ruleset, desta vez em `hmg`, fora do escopo autorizado desta Sprint |
+| `DEFER` | **Decisão desta Sprint** — rename explicitamente adiado para uma Sprint dedicada (ou consolidação futura), sem misturar duas mutações remotas de governança na mesma rodada |
+
+`ci.yml`, `deploy-hmg.yml` e `deploy-prd.yml` também contêm dezenas de referências textuais em
+comentários/logs a "BeeDay CI" — nenhuma delas é funcional (usam `workflow_id: 'ci.yml'`, por
+caminho de arquivo, não pelo `name:`), então o rename não quebraria essas partes, mas ainda assim
+não é executado nesta Sprint.
+
+### 25.5 Read-Back Confirmation
+
+`FACT`: `gh api repos/tiagoarrigoni/BeeDay/rulesets/20608232` consultado imediatamente após a
+mutação — diff estrutural (Python `difflib`, JSON normalizado, `updated_at` excluído da
+comparação) confirma que a única mudança é o `context` do `required_status_checks`. Nenhuma
+propriedade inesperada alterada.
+
+### 25.6 Status Final
+
+`"BeeDay CI"` deixa de ser required em `main`. `main` agora exige exclusivamente `"Release Quality
+Gate"` + `"Validate Promotion"`. `hmg` continua exigindo `"BeeDay CI"`, inalterado. `pull_request:
+main` removido de `ci.yml` — `BeeDay CI` passa a ser exclusivamente responsável pela validação de
+PR para `hmg`.
