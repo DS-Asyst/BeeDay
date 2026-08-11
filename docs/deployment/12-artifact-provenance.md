@@ -468,3 +468,180 @@ exatamente uma vez por mudança, na PR.
   (dívida original documentada, agora resolvida).
 - `docs/deployment/11-release-quality-gate.md` (Ruleset de `main`, sequência de ativação — não
   tocada).
+
+---
+
+## 35. Sprint 19.8.1 — Remote Deployment Summary Correction
+
+**Fonte da verdade:** `gh run view 31456637128` (jobs, steps, log bruto real); reprodução local
+com `powershell.exe` (Windows PowerShell 5.1, não `pwsh`); leitura integral de `deploy-hmg.yml`,
+`verify-hmg.yml`.
+
+**Escopo:** corrigir exclusivamente a falha pós-deployment em `Record deployment info`. Nenhuma
+mudança na arquitetura de proveniência validada nesta mesma Sprint 19.8 (§13 acima).
+
+### 35.1 Run remoto analisado
+
+| Campo | Valor |
+|---|---|
+| Workflow | `BeeDay — HMG Deployment` (run `31456637128`) |
+| Trigger | `push`, merge SHA `80546a7` (PR #61, branch `sprint/19.8-artifact-provenance`) |
+| Conclusion | `failure` |
+| Source SHA validado | `3a9d8e8` |
+| BeeDay CI run resolvido | `31456327054` |
+
+### 35.2 O que passou (deployment real)
+
+`FACT`, confirmado via `gh run view --json jobs`: steps 1-8 (`Set up job` até `Deploy to IIS with
+rollback`) todos `success`. Log bruto confirma: migrations aplicadas (`No migrations were applied.
+The database is already up to date.` seguido de `Migrations applied successfully.`), IIS
+STOP/CONFIGURE/START todos `exitCode=0`, readiness OK, `Deployment completed successfully.`, tempo
+total `00:00:36.0350676`.
+
+**`DEPLOYMENT = SUCCESS`** — o mecanismo de proveniência da Sprint 19.8 (resolução de PR, SHA
+validado, run de `BeeDay CI` verde, download de artifacts por `run-id`) funcionou integralmente em
+produção real. Isto não é reavaliado ou redesenhado nesta Sprint.
+
+### 35.3 O que falhou
+
+Step 9 (`Record deployment info`): `failure`. Step 10 (`Upload deployment info`): `skipped` (efeito
+direto — nunca executa após falha do step anterior sem `if: always()`).
+
+### 35.4 Root Cause
+
+`SYMPTOM`: workflow termina com `conclusion: failure`, mesmo com deployment real bem-sucedido.
+
+`IMMEDIATE FAILURE`: `gh run view --log` mostra o script gerado pelo runner contendo:
+
+```text
++ "## BeeDay â€” HMG Deployment" >> $env:GITHUB_STEP_SUMMARY
++                ~~~
+Unexpected token 'HMG' in expression or statement.
+```
+
+seguido de erros em cascata (`Expressions are only allowed as the first element of a pipeline.`,
+`Missing expression after unary operator '-'.`) em todas as linhas subsequentes do bloco.
+
+`TECHNICAL CAUSE`: o caractere em dash (`—`, U+2014) presente no literal PowerShell
+`"## BeeDay — HMG Deployment"` (fonte YAML) foi escrito pelo runner do GitHub Actions no arquivo
+`.ps1` temporário como UTF-8. O shell real deste job — confirmado no próprio log
+(`shell: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.EXE`) — é **Windows PowerShell
+5.1**, não `pwsh`. Ao ler um arquivo `.ps1` sem BOM, o PowerShell 5.1 usa o codepage legado do
+sistema (não UTF-8) para decodificar o conteúdo — diferente do `pwsh` (PowerShell 7+), que assume
+UTF-8 por padrão. Os 3 bytes UTF-8 do em dash (`0xE2 0x80 0x94`) decodificados byte-a-byte nesse
+codepage produzem `â€”` — três caracteres distintos, o último dos quais (`0x94` → U+201D, ASPAS
+CURVAS DUPLAS DE FECHAMENTO) é tratado pelo tokenizer do PowerShell como delimitador de string
+válido (PowerShell aceita aspas curvas como equivalentes às aspas retas `"` por compatibilidade com
+texto colado de editores rich-text). Isso fecha a string prematuramente logo após `â€`, deixando
+`HMG Deployment" >> $env:GITHUB_STEP_SUMMARY` como tokens soltos fora de qualquer string — a causa
+exata de `Unexpected token 'HMG'` e de toda a cascata de erros nas linhas seguintes (o desbalanço
+de aspas corrompe o parsing do restante do script).
+
+`ROOT CAUSE`: um caractere Unicode não-ASCII (em dash) dentro de um literal de string PowerShell
+executado via `shell: powershell` (Windows PowerShell 5.1) em um runner que grava o script como
+UTF-8 sem BOM — combinação que não existe em `shell: pwsh` (PowerShell 7+, que lê UTF-8
+corretamente por padrão) nem em texto fora de literais de string (comentários `#` são ignorados
+independentemente do encoding, pois não abrem nem fecham nada).
+
+**Reproduzido localmente, não apenas inferido:** o mesmo conteúdo (em dash, escrito como UTF-8 sem
+BOM, executado via `powershell.exe` real) produziu exatamente `Token 'HMG' inesperado na expressão
+ou instrução` — a mesma classe de erro do log remoto, na mesma posição. Ver §35.7.
+
+### 35.5 Windows PowerShell 5.1 Analysis
+
+`FACT`: confirmado que o runner real usa `powershell.exe` (Windows PowerShell 5.1), não `pwsh`,
+para todo step com `shell: powershell` neste workflow — evidência direta do log
+(`shell: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.EXE -command ". '{0}'"`). A
+correção não pode assumir comportamento de PowerShell 7. `ConvertTo-Json`/`Set-Content` (§35.6) e a
+sintaxe `>>` para `$env:GITHUB_STEP_SUMMARY` já são compatíveis com PS 5.1 (usadas há múltiplas
+Sprints sem erro relacionado a elas mesmas) — o defeito é exclusivamente do caractere não-ASCII, não
+desses mecanismos.
+
+### 35.6 Deployment Info Contract
+
+`FACT`, confirmado por leitura de código antes de qualquer alteração: `deployment-info.json`
+carrega `sourceSha`, `mergeSha`, `pullRequest`, `validationRunId`, `workflowRun`, `result`,
+`environment`, `timestampUtc` — todos os 8 campos definidos na Sprint 19.8, nenhum removido ou
+renomeado nesta Sprint corretiva. `verify-hmg.yml`'s step `Read deployed SHA` consome
+`$info.sourceSha` (Sprint 19.8) — inalterado por esta Sprint.
+
+### 35.7 JSON Encoding Analysis
+
+`FACT`, verificado empiricamente com `powershell.exe` real (não apenas lido): `$info | ConvertTo-Json
+| Set-Content -LiteralPath $infoPath` já produzia (e continua produzindo, sem alteração) JSON
+válido — reproduzido localmente, com o `deployment-info.json` resultante relido com sucesso via
+`ConvertFrom-Json`, todos os 8 campos preservados corretamente. Este mecanismo **não fazia parte do
+defeito** e não foi alterado.
+
+### 35.8 Step Summary Analysis
+
+Reproduzido localmente com `powershell.exe` (Windows PowerShell 5.1 real, arquivo `.ps1` escrito
+como UTF-8 sem BOM, mesma condição do runner real):
+
+| Cenário | Comando | Resultado |
+|---|---|---|
+| Conteúdo ANTES da correção (em dash) | `powershell.exe -File old.ps1` | **FALHA**: `Token 'HMG' inesperado na expressão ou instrução` — reproduz exatamente o erro remoto |
+| Conteúdo DEPOIS da correção (hífen ASCII) | `powershell.exe -File fixed.ps1` | **Sucesso** (exit 0) — Markdown gerado corretamente, todas as 8 linhas da tabela presentes, backticks/links preservados |
+
+### 35.9 Fix Implemented
+
+`deploy-hmg.yml` (step `Record deployment info`) e `verify-hmg.yml` (step `Record verification
+summary`): `"## BeeDay — HMG Deployment"`/`"## BeeDay — HMG Verification"` → `"## BeeDay - HMG
+Deployment"`/`"## BeeDay - HMG Verification"` (em dash → hífen ASCII). Comentário explicativo
+adicionado a cada step, citando a evidência real (run `31456637128`) e proibindo reintrodução do
+caractere. Auditoria completa de ambos os blocos (script Python, varredura de código de ponto >127
+em cada linha do step) confirma **nenhum outro caractere não-ASCII** restante em nenhum dos dois
+blocos corrigidos.
+
+**Por que `verify-hmg.yml` foi incluído**, mesmo o prompt desta Sprint focando em
+`deploy-hmg.yml`: o mesmo padrão exato (`"## BeeDay — HMG Verification" >> $env:GITHUB_STEP_SUMMARY`)
+existe em `verify-hmg.yml`, ainda não exercido remotamente porque `deploy-hmg.yml` falhou antes de
+`verify-hmg.yml` sequer disparar. Corrigir apenas `deploy-hmg.yml` garantiria que a **próxima**
+execução bem-sucedida (produzida exatamente por esta correção) travasse imediatamente no mesmo
+defeito em `verify-hmg.yml` — o que violaria diretamente o critério de aceite "`verify-hmg.yml`
+continua compatível". Reportado explicitamente aqui, não corrigido silenciosamente.
+
+**Achado relacionado, não corrigido (fora do escopo desta Sprint):** `release-quality-gate.yml`
+(step `Record gate summary`, linha 237) tem o **mesmo defeito exato**
+(`"## BeeDay — Release Quality Gate" >> $env:GITHUB_STEP_SUMMARY`, também `shell: powershell`).
+Esse workflow nunca executou remotamente (nenhuma PR `hmg→main` existiu até hoje — ver
+`11-release-quality-gate.md`), então o defeito é latente, não confirmado em produção, e pertence a
+uma fronteira (`hmg→main`) fora do escopo desta Sprint corretiva (que trata exclusivamente de
+`Sprint → HMG`). Registrado como débito técnico (§35.13) para correção na próxima vez que aquele
+workflow for tocado — deliberadamente não corrigido aqui para não expandir o escopo desta Sprint
+sem necessidade comprovada por uma falha real observada naquele workflow especificamente.
+
+### 35.10 Why This Fix Is Minimal
+
+Nenhuma mudança de arquitetura, mecanismo de resolução de proveniência, contrato de artifact, ou
+lógica de negócio. Duas linhas de string literal alteradas (caractere único cada), mais comentários
+explicativos. Nenhuma migração para `shell: pwsh` (rejeitada — sem evidência de necessidade além
+deste caractere específico, e mudaria o shell de todos os outros steps do mesmo job
+desnecessariamente).
+
+### 35.11 Provenance Preservation
+
+`FACT`: nenhuma linha do step `Resolve validated source commit and BeeDay CI run` foi tocada —
+busca de PR, validação de mesmo-repositório, paginação de `listWorkflowRuns`, match de `head_sha`,
+`run-id`, download de artifacts, política fail-closed — todos idênticos ao estado pós-19.8.
+`push: hmg` **não foi reintroduzido** em `ci.yml` (confirmado: arquivo não tocado nesta Sprint).
+
+### 35.12 Artifact Upload Contract
+
+`FACT`, verificado por leitura de código: `Upload deployment info` (nome `beeday-hmg-deployment-info`,
+path `${{ runner.temp }}\DeploymentInfo`, `retention-days: 14`) não foi alterado — aponta para o
+mesmo caminho que `Record deployment info` continua produzindo (`$infoPath` inalterado).
+
+### 35.13 Remaining Debt (desta Sprint)
+
+- `release-quality-gate.yml` tem o mesmo defeito latente (§35.9) — não corrigido, recomendado para
+  a próxima Sprint que tocar aquele workflow ou uma corretiva dedicada antes de sua primeira
+  execução remota real.
+- Dívidas pré-existentes não relacionadas (inalteradas): `BeeDay.slnx` Release configuration
+  behavior; ativação do Ruleset do Release Quality Gate; promoção final a PRD.
+
+### 35.14 Remote Validation Status
+
+**`NOT YET VALIDATED REMOTELY`.** Depende de commit/push autorizados e de um novo push real em
+`hmg` (merge desta correção) produzindo uma execução completa de `deploy-hmg.yml` até `Upload
+deployment info`, seguida da primeira execução real de `verify-hmg.yml`.
