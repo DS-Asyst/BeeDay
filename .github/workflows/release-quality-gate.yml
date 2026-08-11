@@ -118,6 +118,19 @@ jobs:
               throw "One or more test projects failed. See logs above for details."
           }
 
+      # --no-build removed in Sprint 19.7.1 after empirical clean-state testing (Sprint 19.5.2's
+      # finding applies here too, reconfirmed independently, not assumed): `dotnet build
+      # BeeDay.slnx --configuration Release` above does not build the 4 src/ projects
+      # (Domain/Application/Infrastructure/Web) in the Release configuration - it silently writes
+      # them to bin/Debug + obj/Debug despite the flag, only the 5 test projects resolve Release
+      # correctly. `dotnet publish --no-build` on a clean runner then fails with "Manifest file at
+      # 'obj\Release\net10.0\staticwebassets.build.json' not found." Removing --no-build lets
+      # publish perform its own implicit rebuild of its whole dependency graph, which - like a
+      # direct single-project build - correctly resolves Release and produces every Release
+      # output as a side effect, including the two steps below that also depend on
+      # BeeDay.Infrastructure's Release build (see the note on those steps for why THEIR
+      # --no-build was kept, not removed). See docs/deployment/11-release-quality-gate.md,
+      # Sprint 19.7.1 section, for the full clean-state evidence.
       - name: Publish BeeDay
         shell: powershell
         run: |
@@ -125,7 +138,6 @@ jobs:
             ".\src\BeeDay.Web\BeeDay.Web.csproj" `
             --configuration Release `
             --no-restore `
-            --no-build `
             --output "${{ runner.temp }}\BeeDayPublish"
 
       - name: Validate published files
@@ -150,10 +162,21 @@ jobs:
       # before wiring this in (Sprint 19.7): exits 0 ("No changes have been made to the model since
       # the last migration") when the compiled model matches the last migration, and exits 1
       # ("Changes have been made to the model...") when it doesn't - confirmed with a temporary,
-      # reverted-before-commit model change, never persisted. --no-build reuses the Release build
-      # above; the connection string BeeDayDbContextFactory falls back to is a placeholder never
-      # actually connected to (this command only compares compiled models, like `migrations bundle`
-      # already does two steps below - see the comment there).
+      # reverted-before-commit model change, never persisted. The connection string
+      # BeeDayDbContextFactory falls back to is a placeholder never actually connected to (this
+      # command only compares compiled models, like `migrations bundle` already does two steps
+      # below - see the comment there).
+      #
+      # --no-build here is SAFE ONLY BECAUSE it runs after the Publish step above, not on its own
+      # merit (Sprint 19.7.1 finding, empirically tested both ways): run in isolation right after
+      # "Build solution (Release)" with no publish in between, this command fails with "The
+      # specified deps.json [...\bin\Release\net10.0\BeeDay.Infrastructure.deps.json] does not
+      # exist" - the same Debug-instead-of-Release solution-build defect that affected Publish
+      # (see the note there), just surfacing as a different EF-tooling error message instead of
+      # the StaticWebAssets one. Publish's own rebuild (now --no-build-free) produces
+      # Infrastructure's Release output as a side effect before this step runs, which is what
+      # makes --no-build safe to keep here. This coupling is intentional, not hidden: do not
+      # reorder this step to run before Publish.
       - name: Check for pending EF model changes
         shell: powershell
         run: |
@@ -163,6 +186,11 @@ jobs:
             --configuration Release `
             --no-build
 
+      # Same "SAFE ONLY AFTER PUBLISH" coupling as the pending-model-changes step above (Sprint
+      # 19.7.1, empirically confirmed): --no-build here depends on Publish's implicit rebuild
+      # having already produced BeeDay.Infrastructure's Release output. Tested isolated
+      # (immediately after "Build solution (Release)", no publish in between) and it fails with
+      # the same missing-deps.json error. Do not reorder this step to run before Publish.
       - name: Generate EF Core migration bundle (win-x64)
         shell: powershell
         run: |

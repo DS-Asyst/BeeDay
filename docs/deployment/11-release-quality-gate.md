@@ -276,7 +276,7 @@ continuam sendo exclusivamente responsabilidade da 19.6.
 
 ---
 
-## 22. Fontes consultadas
+## 22. Fontes consultadas (Sprint 19.7)
 
 - `.github/workflows/release-quality-gate.yml` (novo), `ci.yml`, `validate-promotion.yml`.
 - `gh api repos/tiagoarrigoni/BeeDay/rules/branches/main` (reconsultado nesta Sprint).
@@ -289,3 +289,137 @@ continuam sendo exclusivamente responsabilidade da 19.6.
 - `docs/deployment/10-hmg-deployment-verification.md` (dívida da 19.8, referenciada sem
   reescrever).
 - `CLAUDE.md` §5.7 ("main possui Full Quality Gate").
+
+---
+
+## 23. Sprint 19.7.1 — Clean-Runner Compatibility Correction
+
+**Fonte da verdade:** reprodução local controlada em estado limpo (2026-08-11), aplicando
+diretamente a descoberta empírica da Sprint 19.5.2
+(`docs/deployment/09-pipeline-performance.md` §27) a `release-quality-gate.yml`. A PR original da
+Sprint 19.7 foi fechada sem merge deliberadamente — esta correção deveria existir antes de
+reabri-la.
+
+### 23.1 Achado da 19.5.2 e sua relevância aqui
+
+`FACT`, reconfirmado (não apenas herdado por suposição): `dotnet build BeeDay.slnx --configuration
+Release` continua, no estado atual do repositório, gravando os 4 projetos de `src/`
+(`Domain`/`Application`/`Infrastructure`/`Web`) em `bin/Debug`/`obj/Debug`, não `bin/Release`/
+`obj/Release`, apesar da flag — só os 5 projetos de `tests/` resolvem Release corretamente.
+Reconfirmado por reprodução limpa nesta própria Sprint, idêntico ao observado na 19.5.2.
+
+### 23.2 Ordem real dos steps do Release Gate (do YAML, não suposta)
+
+```text
+Checkout → Configure .NET 10 (cache NuGet) → Restore → Format → Build (Release, --warnaserror)
+  → Cache/Install Playwright → Run full test suite → Publish BeeDay → Validate published files
+  → Restore EF tool → Check for pending EF model changes → Generate EF Core migration bundle
+  → Validate migration bundle → Upload test results → Record gate summary
+```
+
+### 23.3 Clean-State Reproduction
+
+Método: remoção de `bin/`+`obj/` dos 4 projetos de produção antes de cada teste, seguida de
+`dotnet restore` (outputs gerados, não rastreados, seguros de remover e regeneráveis). Cada step
+relevante foi executado **na ordem real do gate**, isolado E encadeado, replicando exatamente os
+comandos do YAML (incluindo `--configuration Release`/`--no-build` conforme cada step realmente
+usa).
+
+### 23.4 Publish Analysis
+
+| Campo | Valor |
+|---|---|
+| Command (antes) | `dotnet publish .\src\BeeDay.Web\BeeDay.Web.csproj -c Release --no-restore --no-build` |
+| Resultado em estado limpo | `error : Manifest file at 'obj\Release\net10.0\staticwebassets.build.json' not found.` (idêntico à 19.5.2) |
+| Verdict | **`UNSAFE`** |
+| Fix | `--no-build` removido — idêntico à correção já aplicada em `ci.yml` na 19.5.2 |
+
+### 23.5 `has-pending-model-changes` Analysis
+
+`FACT` — testado isoladamente (logo após "Build solution (Release)", sem publish antes) **e**
+após o publish corrigido, nessa ordem, para não presumir nada:
+
+| Cenário | Comando | Resultado |
+|---|---|---|
+| Isolado, sem publish antes | `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure -c Release --no-build` | **FALHA**: `The specified deps.json [...\bin\Release\net10.0\BeeDay.Infrastructure.deps.json] does not exist` |
+| Após o publish corrigido (ordem real do gate) | mesmo comando | **Sucesso**: `No changes have been made to the model since the last migration.` |
+
+**Verdict: `SAFE ONLY AFTER PUBLISH`.** O acoplamento é real e não escondido — documentado
+diretamente no comentário do step em `release-quality-gate.yml`. `--no-build` **preservado**
+(não removido), porque a ordem real do gate já garante a dependência.
+
+*Nota metodológica:* a primeira tentativa de teste desta Sprint usou barras invertidas
+(`src\BeeDay.Infrastructure`) executadas via Git Bash, que interpretou `\` como caractere de
+escape e corrompeu o argumento, produzindo um erro enganoso (`Unable to retrieve project
+metadata`) não relacionado ao defeito real. Identificado e corrigido antes de registrar qualquer
+conclusão — os resultados acima usam barras normais, equivalentes ao que o PowerShell do runner
+real interpreta corretamente com barras invertidas.
+
+### 23.6 EF Bundle Analysis
+
+Mesma metodologia, mesmo resultado:
+
+| Cenário | Resultado |
+|---|---|
+| Isolado, sem publish antes | **FALHA**: mesmo erro de `deps.json` ausente |
+| Após o publish corrigido (ordem real do gate) | **Sucesso**: `Done. Migrations Bundle: ...\efbundle.exe` |
+
+**Verdict: `SAFE ONLY AFTER PUBLISH`.** `--no-build` preservado, dependência documentada no
+comentário do step.
+
+### 23.7 Clean-Runner Compatibility Matrix
+
+| Step | Command | Clean state (isolado) | Depende do step anterior | Verdict |
+|---|---|---|---|---|
+| Build | `dotnet build -c Release --warnaserror` | PASS (mas produz outputs Debug para `src/`) | — | `N/A` — dívida separada, não corrigida (§23.9) |
+| Publish | `dotnet publish ... --no-build` (antes) | **FAIL** | Build (insuficiente) | `UNSAFE` → corrigido |
+| Pending Model | `has-pending-model-changes --no-build` | **FAIL** isolado | Build (insuficiente) sozinho; **Publish corrigido** | `SAFE ONLY AFTER PUBLISH` → mantido |
+| EF Bundle | `migrations bundle --no-build` | **FAIL** isolado | Build (insuficiente) sozinho; **Publish corrigido** | `SAFE ONLY AFTER PUBLISH` → mantido |
+
+### 23.8 Changes Implemented / Not Implemented
+
+**Implementado:** `--no-build` removido apenas do step `Publish BeeDay`. Comentários adicionados
+aos steps `Check for pending EF model changes` e `Generate EF Core migration bundle` documentando
+explicitamente a dependência de que rodem **depois** de `Publish BeeDay`.
+
+**Não implementado:**
+
+- `--no-build` de `has-pending-model-changes`/EF bundle **não foi removido** — comprovadamente
+  seguro na ordem real do gate, removê-lo seria uma mudança desnecessária (reintroduziria
+  recompilação redundante sem ganho de correção).
+- `BeeDay.slnx`/`Directory.Build.props`/topologia MSBuild **não alterados** — dívida estrutural
+  separada (§23.9), fora do princípio de correção mínima desta Sprint.
+- Nenhuma validação removida — Format, Build, 5 suítes de teste (+ boundary embutidos), E2E,
+  publish, `has-pending-model-changes`, EF bundle continuam todos presentes e `REQUIRED`.
+- Nenhuma otimização nova introduzida (cache NuGet/Playwright, `--no-restore` nos testes
+  preservados sem alteração).
+- Ruleset de `main` **não alterado** — continua exigindo `BeeDay CI` + `Validate Promotion`.
+- `pull_request: main` **não removido** de `ci.yml`.
+
+### 23.9 BeeDay.slnx Remaining Debt (inalterada)
+
+Mesma dívida já registrada em `09-pipeline-performance.md` §27.10 — `dotnet build BeeDay.slnx
+-c Release` não propaga a configuração Release para os 4 projetos de `src/`. Reconfirmada nesta
+Sprint, não corrigida, continua candidata a investigação dedicada futura.
+
+### 23.10 Local Validation Results
+
+| Comando | Executado | Resultado |
+|---|---|---|
+| `dotnet restore BeeDay.slnx` | Sim | Sucesso |
+| `dotnet format BeeDay.slnx --verify-no-changes` | Sim | Sucesso |
+| `dotnet build BeeDay.slnx -c Release --warnaserror` | Sim | Sucesso, 0 avisos, 0 erros |
+| `dotnet test BeeDay.slnx -c Release --no-build` | Sim | 752/752 aprovados |
+| Reprodução completa da sequência real do gate (9 passos, estado limpo) | Sim | Todos os 9 passos com sucesso, incluindo publish, `has-pending-model-changes` e EF bundle |
+| `git diff --check` | Sim | Limpo |
+
+### 23.11 Remaining Activation Sequence (inalterada desde a 19.7)
+
+1. Reabrir/usar a PR da 19.7 (com esta correção).
+2. Merge em `hmg`.
+3. Abrir PR `hmg → main`.
+4. Observar `BeeDay — Release Quality Gate` executar e passar pela primeira vez.
+5. Só então, com autorização explícita separada: mutar o Ruleset de `main`.
+6. Só então, com autorização explícita separada: remover `pull_request: main` de `ci.yml`.
+
+Nenhum desses passos foi executado nesta Sprint.
