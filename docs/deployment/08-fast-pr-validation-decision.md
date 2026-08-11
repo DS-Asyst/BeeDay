@@ -156,7 +156,18 @@ cadeia de causalidade completamente rastreada e comprovada (não apenas inferida
 | Responsabilidade emprestada | Razão | Dono atual | Dono futuro | Sprint de remoção |
 |---|---|---|---|---|
 | `push: hmg` em `ci.yml` | Único gatilho confiável de `deploy-hmg.yml` hoje | `ci.yml` | Proveniência final (Build Once/Deploy Many) | **19.8** (atualizado pela Sprint 19.6 — ver nota abaixo) |
-| `pull_request: main` em `ci.yml` | Satisfaz o required check `"BeeDay CI"` do Ruleset de `main` | `ci.yml` | `BeeDay — Release Quality Gate` | 19.7 |
+| `pull_request: main` em `ci.yml` | Satisfaz o required check `"BeeDay CI"` do Ruleset de `main` | `ci.yml` | `BeeDay — Release Quality Gate` | **Implementado na 19.7, ativação pendente** (ver nota abaixo) |
+
+**Atualização da Sprint 19.7:** `BeeDay — Release Quality Gate` (`release-quality-gate.yml`) foi
+criado e validado localmente, mas **não foi ativado** — o Ruleset de `main` ainda exige
+`"BeeDay CI"`, e `pull_request: main` ainda não foi removido de `ci.yml`. Trocar isso agora, antes
+de o novo check ter sido reportado ao GitHub pelo menos uma vez, criaria exatamente o risco que a
+própria Sprint 19.7 mandou evitar: `main` permanentemente bloqueada esperando um check que nunca
+apareceu, ou um Ruleset exigindo um check que `ci.yml` parou de produzir antes do substituto existir
+de fato. Sequência de ativação completa (merge → 1 execução real bem-sucedida → mutação de
+Ruleset autorizada → remoção de `pull_request: main`) documentada em
+[`11-release-quality-gate.md`](11-release-quality-gate.md) §13-14. Status: `NOT RESOLVED` (ver
+§19 daquele documento) — implementação pronta, ativação pendente de validação remota.
 
 **Atualização da Sprint 19.6:** a Sprint 19.6 investigou remover `push: hmg` de `ci.yml`
 completamente e concluiu que isso exigiria implementar resolução de proveniência independente para
