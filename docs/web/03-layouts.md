@@ -2,7 +2,9 @@
 
 **Fonte da verdade:** verificado diretamente em `src/BeeDay.Web/Components/Layout/`.
 
-**Última verificação:** 2026-08-07.
+**Última verificação:** 2026-08-11 (Sprint 20.4) — §5/§6 corrigidos: o texto de marca `LEVEL`/`UP`
+em `AccountSidePanel` e o link para o repositório `LevelUp` em `AppFooter` já não existem no código
+(achados desatualizados, corrigidos); demais seções preservadas da verificação de 2026-08-07.
 
 ## 1. Objetivo
 
@@ -72,17 +74,20 @@ o usuário nunca tenha visitado `/daily` nesta sessão (abrir o painel em qualqu
 
 Puramente estático/de navegação: liga para `/account` e para um `<form method="post"
 action="/auth/logout">` com `<AntiforgeryToken />` — não injeta nenhum serviço, apenas
-`[Parameter] IsOpen`/`OnClose`. Contém o mesmo texto de marca duplicado (`LEVEL`/`UP`) do
-`TopNavigation` — mesmo achado.
+`[Parameter] IsOpen`/`OnClose`. Renderiza o mesmo padrão de marca própria (`BEE`/`DAY`, classes
+`support-drawer__brand-bee`/`-day`) que `TopNavigation` — mesma observação: markup próprio, não
+`BeeDayBrand` (verificado diretamente na Sprint 20.4; o achado anterior de texto `LEVEL`/`UP` estava
+desatualizado, ver `README.md`).
 
 ## 6. `AppFooter.razor`
 
 Estático, sem `@code`. Três colunas de links (`BeeDay`/`Developers`/`Social`) — a maioria são
 placeholders (`href="#"`: News, Contact, Documentation, GitHub, Release Notes, Community, Privacy
 Policy, Terms of Service) exceto os dois links de "Social" (LinkedIn, GitHub pessoal do mantenedor,
-reais) e "About", que aponta para
-`https://github.com/tiagoarrigoni/LevelUp` — nome de repositório antigo, ver achado no
-[`README.md`](README.md#achados-relevantes-reportados-não-corrigidos).
+reais) e "About", que aponta para `https://github.com/tiagoarrigoni/BeeDay` (corrigido; o achado
+anterior de link para o repositório `LevelUp` estava desatualizado, ver `README.md`). Conteúdo
+genérico o suficiente para ser reutilizado sem alteração em contextos autenticados e públicos —
+reaproveitado diretamente por `PublicLayout` na Sprint 20.4 (EPIC 20).
 
 ## 7. `ReconnectModal.razor`
 

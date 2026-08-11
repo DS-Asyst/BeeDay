@@ -1,0 +1,24 @@
+<header class="public-header">
+    <div class="public-header__content beeday-container">
+        <a class="public-header__brand" href="/" aria-label="BeeDay home">
+            <BeeDayBrand />
+        </a>
+
+        <AuthorizeView>
+            <Authorized>
+                <BeeDayButton Compact="true" OnClick="GoToDaily">Go to Daily</BeeDayButton>
+            </Authorized>
+            <NotAuthorized>
+                <BeeDayButton Compact="true" OnClick="GoToLogin">Log in</BeeDayButton>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</header>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    private void GoToLogin() => Navigation.NavigateTo("/login");
+
+    private void GoToDaily() => Navigation.NavigateTo("/daily");
+}

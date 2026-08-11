@@ -78,13 +78,19 @@ injetam `MediatR.ISender` diretamente e nunca passam por `BeeDayWebService` — 
   diretamente"** — essa afirmação está desatualizada/incorreta: `Wallet.razor` e as 5 páginas de
   `Features/Identity/Pages/` fazem exatamente isso (`@inject MediatR.ISender Sender`). Fora do
   escopo desta Sprint corrigir `docs/architecture/`; reportado aqui para correção em Sprint futura.
-- `Components/Layout/TopNavigation.razor` e `Components/Layout/AccountSidePanel.razor` ainda
-  renderizam a marca dividida em `<span>LEVEL</span><span>UP</span>` (texto literal, não CSS) em vez
-  de "BeeDay" — resíduo do rebrand `LevelUp` → `BeeDay` (commits `523728d`, `b1e9f53`, `6ae465b`).
-  `Components/DesignSystem/Text/BeeDayBrand.razor` (usado em todo `OnboardingLayout`) já usa o nome
-  correto; os dois arquivos acima não foram atualizados.
-- `Components/Layout/AppFooter.razor` linka `https://github.com/tiagoarrigoni/LevelUp` (nome de
-  repositório antigo) em "About".
+- **Achado resolvido (verificado diretamente na Sprint 20.4, EPIC 20):** o texto literal
+  `<span>LEVEL</span><span>UP</span>` em `Components/Layout/TopNavigation.razor` e
+  `Components/Layout/AccountSidePanel.razor`, e o link para `https://github.com/tiagoarrigoni/LevelUp`
+  em `Components/Layout/AppFooter.razor`, **não existem mais** — ambos os componentes já renderizam
+  `BEE`/`DAY` (classes `top-navigation__brand-bee`/`-day`, `support-drawer__brand-bee`/`-day`;
+  corrigido em commits anteriores à EPIC 19, `09486d2`/`bb2502b`) e `AppFooter.razor`'s "About" já
+  aponta para `https://github.com/tiagoarrigoni/BeeDay`. O achado ficou desatualizado neste documento
+  por não ter sido revalidado desde então — corrigido aqui. Ponto que **permanece** válido:
+  `TopNavigation`/`AccountSidePanel` ainda usam markup próprio em vez de delegar a
+  `Components/DesignSystem/Text/BeeDayBrand.razor` — não é mais um erro de conteúdo, apenas ausência
+  de reuso do componente compartilhado (motivo: contexto de header escuro exige tratamento de cor
+  diferente do padrão claro de `BeeDayBrand`; ver `docs/epics/20-home-visual-experience/README.md`,
+  Sprint 20.4).
 - `Components/Features/ProfileCreation/Pages/Welcome.razor` (rota `/welcome`) define
   `<PageTitle>Login | BeeDay</PageTitle>` — título incorreto para uma página que só redireciona para
   `/login`. A rota `/` (`Entry.razor`) já resolve o destino real via estado de autenticação; `/welcome`
