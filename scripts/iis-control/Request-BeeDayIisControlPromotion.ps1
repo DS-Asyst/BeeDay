@@ -28,9 +28,13 @@
 #
 # -ScriptPath defaults to the file sitting right next to this one in the
 # checkout (scripts/iis-control/Invoke-BeeDayIisControl.ps1) - the exact
-# source-of-truth copy deploy-hmg.yml already checked out at the commit BeeDay
-# CI validated. -CommitSha is audit-only metadata (see manifest.commitSha in
-# Invoke-BeeDayIisControlUpdater.ps1) - never a security check.
+# source-of-truth copy deploy-hmg.yml already checked out at hmg's current tip
+# (Sprint 19.8: the commit that triggered this deployment, not necessarily the
+# literal commit BeeDay CI's check ran against - see
+# docs/deployment/12-artifact-provenance.md for why the APPLICATION artifact
+# is resolved separately via provenance instead). -CommitSha is audit-only
+# metadata (see manifest.commitSha in Invoke-BeeDayIisControlUpdater.ps1) -
+# never a security check.
 
 param(
     [string]$ScriptPath = (Join-Path $PSScriptRoot "Invoke-BeeDayIisControl.ps1"),

@@ -4,9 +4,12 @@
 `.github/workflows/deploy-hmg.yml`, `.github/workflows/deploy-prd.yml`,
 `scripts/Deploy-BeeDay.ps1`, `src/BeeDay.Web/web.config`.
 
-**Última verificação:** 2026-08-10 (Sprint 19.2 — corrige divergências materiais encontradas pelo
-Discovery da Sprint 19.1, ver [`06-cicd-pipeline-discovery-baseline.md`](06-cicd-pipeline-discovery-baseline.md)
-§19 para o registro completo do que estava desatualizado e por quê).
+**Última verificação:** 2026-08-11 (Sprint 19.8 — §2/§4.1 atualizados para o trigger direto
+`push: hmg` de `deploy-hmg.yml` e resolução de proveniência via API de Pull Requests, ver
+[`12-artifact-provenance.md`](12-artifact-provenance.md); Sprint 19.2 original corrigiu
+divergências materiais encontradas pelo Discovery da Sprint 19.1, ver
+[`06-cicd-pipeline-discovery-baseline.md`](06-cicd-pipeline-discovery-baseline.md) §19 para o
+registro completo do que estava desatualizado e por quê).
 
 ## 1. Objetivo
 
@@ -18,9 +21,9 @@ servidores IIS de homologação e produção — dos workflows do GitHub Actions
 
 | Branch/Evento | Workflow acionado | Ambiente |
 |---|---|---|
-| `hmg` (push) | `ci.yml` → dispara `deploy-hmg.yml` (via `workflow_run`, se `ci.yml` concluir com sucesso e `head_branch == hmg`) | Validação, depois deploy automático em SERV3WEB (job `deploy`, "Deploy HMG") |
+| `hmg` (push) | `deploy-hmg.yml` diretamente (`push: branches: [hmg]`, Sprint 19.8) — resolve o artefato já validado pela PR via cadeia de proveniência de Pull Requests (§4.1), nunca dispara `ci.yml` novamente | Deploy automático em SERV3WEB (job `deploy`, "Deploy HMG") |
 | `prd` (push) | `deploy-prd.yml` | Deploy direto — **sem validação própria**: resolve e reutiliza o artefato já validado por `ci.yml` em `hmg` via cadeia de proveniência de Pull Requests (§4.2), nunca reconstrói (Build Once, Deploy Many — ver `CLAUDE.md` §5.7.2) |
-| PR para `hmg`/`main` | `ci.yml` (pull_request) | Validação apenas, sem deploy — mas **pode** disparar `deploy-hmg.yml` indiretamente se a PR tiver `hmg` como branch de origem (ver achado sobre deployment duplicado, §6). `prd` removido deste trigger na Sprint 19.4 — nenhum Ruleset em `prd` exige `BeeDay CI`, e `deploy-prd.yml` já prova proveniência de forma independente (§4.2); rodar a suíte inteira de novo numa PR `main→prd` não tinha consumidor (ver `08-fast-pr-validation-decision.md`) |
+| PR para `hmg`/`main` | `ci.yml` (pull_request) | Validação apenas, sem deploy direto — `deploy-hmg.yml` não escuta mais `ci.yml` (Sprint 19.8); é o **merge** subsequente em `hmg` (evento `push`) que dispara o deploy, resolvendo o artefato desta mesma execução de `ci.yml` por proveniência. `prd` removido deste trigger na Sprint 19.4 — nenhum Ruleset em `prd` exige `BeeDay CI`, e `deploy-prd.yml` já prova proveniência de forma independente (§4.2); rodar a suíte inteira de novo numa PR `main→prd` não tinha consumidor (ver `08-fast-pr-validation-decision.md`) |
 | qualquer | `workflow_dispatch` nos 3 | Execução manual sob demanda |
 
 `ci.yml` tem `concurrency: cancel-in-progress: true` (uma nova execução cancela a anterior do mesmo
@@ -70,18 +73,28 @@ e baixam os artifacts já prontos por `run-id` pinado (nunca "latest" implícito
 
 ### 4.1 Job `deploy` (`deploy-hmg.yml`, job display name "Deploy HMG")
 
-Disparado por `workflow_run` (workflow `ci.yml`, tipo `completed`) ou `workflow_dispatch`. Roda
-apenas se `github.event.workflow_run.head_branch == 'hmg'` (ou se foi disparo manual).
+**Redesenhado na Sprint 19.8.** Disparado diretamente por `push: branches: [hmg]` (não mais via
+`workflow_run` de `ci.yml`) ou `workflow_dispatch`. Nunca dispara uma segunda execução de
+`ci.yml` — em vez disso resolve, via API de Pull Requests do GitHub, qual execução `pull_request`
+de `ci.yml` já validou o commit que está sendo mergeado, e baixa o artifact dessa execução por
+`run-id` pinado. Ver [`12-artifact-provenance.md`](12-artifact-provenance.md) para a investigação
+completa (evidência real de duplicação, análise de estratégia de merge, matriz de decisão, race
+conditions).
 
 ```mermaid
 sequenceDiagram
-    participant GH as GitHub Actions (workflow_run de ci.yml)
+    participant GH as GitHub Actions (push em hmg)
     participant Runner as Runner self-hosted (SERV3WEB, label hmg)
+    participant API as GitHub REST API
     participant IIS
     participant FS as Sistema de arquivos
 
-    GH->>Runner: Checkout no head_sha resolvido do workflow_run
-    Runner->>Runner: Resolve BeeDay CI run a implantar (id do workflow_run, ou latest bem-sucedida em hmg se manual)
+    GH->>Runner: Checkout em github.sha (ponta de hmg)
+    Runner->>API: listPullRequestsAssociatedWithCommit(mergeSha)
+    API-->>Runner: PR (base.ref == hmg), head.sha validado, head.repo
+    Runner->>Runner: Rejeita se head.repo != este repositório (fail closed)
+    Runner->>API: Busca run ci.yml (pull_request, success, head_sha == validado)
+    API-->>Runner: run-id exato (ou falha fechada se não encontrado)
     Runner->>Runner: Download beeday-publish + beeday-migrations (run-id pinado)
     Runner->>Runner: Verifica .NET SDK 10 instalado
     Runner->>Runner: Promove script privilegiado de controle IIS se mudou (ver 05-privileged-iis-control.md)
@@ -100,18 +113,16 @@ sequenceDiagram
 `environment: homologation` (GitHub Environment existente, mas sem `protection_rules` configuradas
 hoje — ver [`06-cicd-pipeline-discovery-baseline.md`](06-cicd-pipeline-discovery-baseline.md) §15).
 
-**Corrigido na Sprint 19.6:** até então, qualquer conclusão bem-sucedida de `ci.yml` cujo
-`head_branch` fosse `hmg` disparava este job — e `ci.yml` roda tanto em `push` para `hmg` quanto em
-`pull_request` com `hmg` como origem (ex.: a PR de promoção `hmg → main`), então o mesmo commit
-podia disparar **dois** deployments completos e independentes em sequência (comprovado com
-evidência de log direta pela Sprint 19.1, `06-cicd-pipeline-discovery-baseline.md` §12). O guard
-agora exige também `workflow_run.event == 'push'` — a execução de `ci.yml` disparada pela PR
-`hmg→main` (evento `pull_request`) não satisfaz mais a condição, mesmo com `head_branch=='hmg'`.
-Estruturalmente eliminado; validação remota ainda pendente — ver
-[`10-hmg-deployment-verification.md`](10-hmg-deployment-verification.md).
+**Histórico:** a Sprint 19.6 eliminou o deployment duplicado (mesmo commit disparando dois
+deployments — evidência em `06-cicd-pipeline-discovery-baseline.md` §12) restringindo o guard do
+antigo trigger `workflow_run` a `event == 'push'`. A Sprint 19.8 elimina a causa raiz que exigia
+esse guard: ao trocar `workflow_run` por `push: hmg` direto, não existe mais um trigger
+compartilhado com a PR de promoção `hmg→main` para desambiguar — cada `push` em `hmg` dispara
+exatamente uma resolução, isolada por commit.
 
 Após um deploy bem-sucedido, o job expõe o SHA implantado (`outputs.deployed-sha`) e publica um
-artifact `beeday-hmg-deployment-info`, consumido por
+artifact `beeday-hmg-deployment-info` (agora com `sourceSha`/`mergeSha`/`pullRequest`/
+`validationRunId`, Sprint 19.8), consumido por
 [`BeeDay — HMG Verification`](10-hmg-deployment-verification.md) (`verify-hmg.yml`, Sprint 19.6) —
 `workflow_run` encadeado, que roda `Verify Readiness` (re-checagem explícita de `/health/ready`) e
 `Run Smoke Tests` (`GET /login` contra o ambiente real implantado) após todo deploy bem-sucedido.
@@ -184,8 +195,14 @@ passar silenciosamente até o e-mail de fato ser enviado com remetente em branco
   afirmava o contrário; corrigido na Sprint 19.2 a partir da evidência da Sprint 19.1 (ver §4.1).
 - **Deployment duplicado em HMG para o mesmo estado** — comprovado pela Sprint 19.1
   (`06-cicd-pipeline-discovery-baseline.md` §6/§12), **estruturalmente corrigido na Sprint 19.6**
-  (ver §4.1 e [`10-hmg-deployment-verification.md`](10-hmg-deployment-verification.md)); validação
-  remota (observar 0 duplicações num push/PR real) ainda pendente.
+  (ver [`10-hmg-deployment-verification.md`](10-hmg-deployment-verification.md)) e a causa raiz
+  que exigia aquele guard **eliminada na Sprint 19.8** (`push: hmg` direto substitui o
+  `workflow_run` compartilhado com a PR `hmg→main` — ver §4.1 e
+  [`12-artifact-provenance.md`](12-artifact-provenance.md)); validação remota (observar exatamente
+  1 execução de `BeeDay CI` por merge) ainda pendente.
+- **Segunda execução completa de `BeeDay CI` após todo merge em `hmg`** — comprovado com evidência
+  real (PR #60, ~6.6 min duplicados) e **eliminado na Sprint 19.8** via resolução de proveniência;
+  ver [`12-artifact-provenance.md`](12-artifact-provenance.md) §3/§32. Validação remota pendente.
 - **`environment: production` não tem GitHub Environment correspondente configurado** — ver §4.2.
 - PRD não roda migrations nem tem connection string própria (`deploy-prd.yml` não baixa
   `beeday-migrations`) — consistente com PRD ser Not Provisioned by Design (ver
@@ -206,6 +223,8 @@ passar silenciosamente até o e-mail de fato ser enviado com remetente em branco
   `.github/workflows/deploy-prd.yml`.
 - `scripts/Deploy-BeeDay.ps1`.
 - `src/BeeDay.Web/web.config`.
+- [`12-artifact-provenance.md`](12-artifact-provenance.md) (Sprint 19.8 — redesenho do trigger e
+  resolução de proveniência de `deploy-hmg.yml`, evidência real de duplicação).
 - [`06-cicd-pipeline-discovery-baseline.md`](06-cicd-pipeline-discovery-baseline.md) (Sprint 19.1 —
   baseline empírico que identificou as divergências corrigidas nesta revisão).
 - [`docs/architecture/README.md`](../architecture/README.md) (achado de `BEEDAY_RESEND_FROM_NAME`
