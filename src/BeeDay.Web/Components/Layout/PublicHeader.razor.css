@@ -1,0 +1,32 @@
+.public-header {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 100;
+    width: 100%;
+    min-height: 3.75rem;
+    background: var(--beeday-color-surface);
+    border-bottom: 1px solid var(--beeday-color-border);
+    box-shadow: var(--beeday-shadow-sm);
+}
+
+.public-header__content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 3.75rem;
+    gap: 1rem;
+}
+
+.public-header__brand {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+@media (max-width: 42rem) {
+    .public-header__content {
+        min-height: 3.25rem;
+    }
+}

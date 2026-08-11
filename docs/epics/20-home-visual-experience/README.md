@@ -9,7 +9,7 @@ de referência visual local. Nenhuma afirmação de "estado atual" abaixo vem de
 documento evoluir em Sprints futuras, cada atualização deve reverificar contra o código antes de
 alterar uma afirmação de estado atual.
 
-**Última verificação:** 2026-08-11 (Sprint 20.3 — Native Cursor & Global Visual Cleanup, COMPLETE).
+**Última verificação:** 2026-08-11 (Sprint 20.4 — Application Shell & Navigation, COMPLETE).
 
 **Escopo:** evolução da experiência visual do BeeDay — primeira Home oficial, evolução do Design
 System existente, Application Shell/navegação, remoção do cursor personalizado, responsividade e
@@ -244,9 +244,14 @@ Riscos ativos da EPIC, a serem verificados a cada Sprint antes de introduzir alg
   deve ser introduzida.
 - **Button duplication** — o efeito visual "pressionável" da referência já tem equivalente no
   Design System (`BeeDayButton` + sombras "game").
-- **Brand duplication** — `BeeDayBrand` deve ser o contrato de marca preferencial; `TopNavigation`/
-  `AccountSidePanel` ainda renderizam a marca como texto literal residual (`LEVEL`/`UP`) — achado
-  pré-existente, correção potencialmente relevante à Sprint 20.4, não decidida aqui.
+- **Brand duplication** — `BeeDayBrand` deve ser o contrato de marca preferencial. **Correção
+  (Sprint 20.4):** o achado original de texto literal residual `LEVEL`/`UP` em `TopNavigation`/
+  `AccountSidePanel` estava desatualizado — verificado diretamente que ambos já renderizam `BEE`/
+  `DAY` corretamente (corrigido em commits anteriores à EPIC 19). O que permanece é apenas
+  estrutural: os dois componentes têm markup próprio em vez de delegar a `BeeDayBrand` — decisão
+  deliberada nesta Sprint de não migrar (contexto de header escuro exige tratamento de cor diferente
+  do padrão claro do componente compartilhado; migrar exigiria estender `BeeDayBrand` sem
+  necessidade direta comprovada por este Sprint).
 - **Breakpoint proliferation** — 29 valores de breakpoint hardcoded já existem; novos componentes
   não devem simplesmente somar mais um sem analisar os existentes.
 - **Navigation duplication** — shell público e autenticado podem ter composições distintas (ver
@@ -328,6 +333,156 @@ nativos do navegador/sistema operacional em toda a aplicação.
 - 752 testes continuam passando; nenhum teste existente asserta sobre `cursors.css`/`<link>`, nenhum
   teste artificial foi criado.
 
+## Sprint 20.4 — Application Shell & Navigation (Results)
+
+**Última verificação:** 2026-08-11 (Sprint 20.4, branch `sprint/20.4-application-shell-navigation`).
+**Fonte da verdade:** leitura direta de `MainLayout.razor(.css)`, `OnboardingLayout.razor(.css)`,
+`TopNavigation.razor(.css)`, `AccountSidePanel.razor`, `AppFooter.razor(.css)`,
+`BeeDayBrand.razor(.css)`, `BeeDayButton.razor(.cs)`, `Routes.razor`, `_Imports.razor`, todas as
+rotas `@page`/`@layout` atuais (`grep` direto, não a documentação), `polish.css`; execução real de
+`dotnet build`/`dotnet test`.
+
+**Arquitetura escolhida:** um novo layout separado, `PublicLayout` (opção C do §12 do prompt da
+Sprint), **não aplicado a nenhuma rota nesta Sprint** — `OnboardingLayout` permanece
+byte-a-byte preservado, sem nenhuma alteração.
+
+- **Por quê:** os 9 consumidores atuais de `OnboardingLayout` (`/`, `/welcome`, `/login`,
+  `/profile/create`, as 5 rotas de `Identity`, `/onboarding/tutorial`) são, com exceção de `/`, fluxos
+  autocontidos de card centralizado que já injetam seu próprio `BeeDayBrand` individualmente —
+  confirmado por leitura direta de todos os 9 arquivos. Aplicar um header/nav público persistente a
+  eles introduziria navegação onde hoje não existe por design (foco no formulário, sem distração),
+  contrariando o comportamento atual sem necessidade comprovada. Apenas `/` se tornará a Home
+  pública (Decisão 1 do checkpoint) — e essa mudança é explicitamente da Sprint 20.5, não desta.
+- **Alternativas rejeitadas:** (A) substituir `OnboardingLayout` inteiro pelo shell público — rejeitada,
+  quebraria as 8 páginas de auth/onboarding sem necessidade; (B) `OnboardingLayout` incorporar o
+  shell opcionalmente via parâmetro — rejeitada, adicionaria uma ramificação condicional a um layout
+  hoje deliberadamente mínimo, sem um segundo consumidor real ainda (viola §18, "só extraia quando
+  houver pelo menos dois consumidores reais").
+
+## Public Shell Implementation
+
+Dois componentes novos em `src/BeeDay.Web/Components/Layout/` (mesma pasta/convenção dos layouts
+existentes, CSS isolado via `.razor.css` como todo o resto da pasta):
+
+- **`PublicLayout.razor`** — `<PublicHeader />` + `<main class="beeday-main">@Body</main>` +
+  `<AppFooter />` + `<BeeDayToastHost />`. Define `--beeday-top-navigation-height: 3.75rem` e
+  `padding-top` no wrapper — mesmo contrato de nome/valor que `MainLayout.razor.css` já usa para
+  compensar seu header fixo (reaproveitado, não duplicado; `polish.css`'s
+  `scroll-padding-top: calc(var(--beeday-top-navigation-height, 3.75rem) + ...)` também se beneficia
+  automaticamente).
+- **`PublicHeader.razor`** — `<header class="public-header">` fixo (`position: fixed; z-index: 100`,
+  mesmo padrão de `TopNavigation.razor.css`) contendo: link de marca (`<BeeDayBrand />` sem
+  modificação, envolto em `<a href="/" aria-label="BeeDay home">`) e um único CTA reativo ao estado
+  de autenticação via `<AuthorizeView>` nativo do Blazor (`Log in` → `/login` para anônimo; `Go to
+  Daily` → `/daily` para autenticado).
+
+**Nenhuma rota foi alterada para usar esses componentes** — validação apenas via testes de
+componente (bUnit), conforme §25 do prompt da Sprint ("catálogo existente; teste de componente...
+não uma nova route pública artificial"). `/` continua exatamente como a Sprint 20.1 a documentou.
+
+## Reused Design System Contracts
+
+| Contrato | Uso | Alteração necessária |
+|---|---|---|
+| `BeeDayBrand` | Marca do `PublicHeader` | Nenhuma — API já suficiente (componente sem parâmetros, cor `--beeday-color-primary` já legível sobre o fundo claro escolhido para o header público) |
+| `BeeDayButton` | CTA do `PublicHeader` (`Compact`, `OnClick`) | Nenhuma — mesmo padrão já usado por `Tutorial.razor` para navegar via `NavigationManager.NavigateTo` a partir de um clique |
+| `AppFooter` | Footer do `PublicLayout` | Nenhuma — conteúdo já genérico o suficiente (nenhum link/ação exclusivo de usuário autenticado) |
+| `BeeDayToastHost` | Toast global do `PublicLayout` | Nenhuma — mesmo uso de `MainLayout`/`OnboardingLayout` |
+| `.beeday-container` | Largura do conteúdo interno do header | Nenhuma |
+| `.beeday-main` (utilitário global de `polish.css`) | `<main>` do `PublicLayout` | Nenhuma |
+| `--beeday-top-navigation-height`, `--beeday-shadow-sm`, `--beeday-color-surface`/`-border`, foco global (`theme.css`/`polish.css`) | Estrutura/elevação/foco do `PublicHeader` | Nenhuma |
+| `<AuthorizeView>` (Blazor nativo, já importado globalmente via `_Imports.razor`) | CTA reativo a auth | Nenhuma — primeiro uso deste componente nativo no repositório, mas não é um contrato do BeeDay a preservar/estender, é infraestrutura do próprio framework |
+
+**Nenhum componente/token novo foi criado no Design System.** `CREATE` só foi usado para a
+*composição* (`PublicHeader`/`PublicLayout` em si, responsabilidade que genuinamente não existia).
+
+## Public Navigation Behavior
+
+- **Decisão deliberada:** o `PublicHeader` **não tem lista de links de navegação nesta Sprint** —
+  apenas marca + 1 CTA. Não existem destinos reais para linkar ainda (a Home não tem seções — Sprint
+  20.5/20.6) e o prompt da Sprint proíbe explicitamente inventar âncoras para conteúdo inexistente
+  (§10). Consequência: **o gap de mobile nav que a Sprint 20.1 encontrou em `TopNavigation`
+  (`.top-navigation__links { display: none }` em 680px, sem alternativa) não pode se repetir aqui —
+  não há lista de links para esconder.**
+- Comportamento responsivo real: `flex` com `justify-content: space-between` mantém marca (esquerda)
+  e CTA (direita) sempre visíveis e alcançáveis em qualquer largura testada — nenhum elemento essencial
+  recebe `display: none`. Único ajuste em viewport estreita: `min-height` do header reduz de 3.75rem
+  para 3.25rem no breakpoint `42rem` (ver §Breakpoints abaixo).
+- Quando a Sprint 20.5/20.6 introduzir seções reais da Home com âncoras, a estratégia mobile
+  (disclosure/drawer vs. links reorganizados) deverá ser decidida então, com conteúdo real — não
+  antecipada aqui.
+
+## Authentication-Aware Behavior
+
+CTA usa `<AuthorizeView>` (cascata de `Routes.razor`'s `<CascadingAuthenticationState>`, já
+disponível em toda a árvore) — **dois estados apenas, sem replicar a árvore
+perfil→onboarding→destino**:
+
+- Anônimo → `Log in` → `Navigation.NavigateTo("/login")`.
+- Autenticado → `Go to Daily` → `Navigation.NavigateTo("/daily")`.
+
+**Gap registrado, não resolvido (deliberado):** ao contrário de `LoginDestinationResolver.Resolve`
+(que decide entre `/profile/create`, `/onboarding/tutorial` ou `/daily` conforme perfil/onboarding),
+o CTA autenticado do `PublicHeader` sempre aponta para `/daily`, mesmo que o usuário não tenha perfil
+ou onboarding completo. Isso **não é a quarta cópia da árvore de decisão** — é uma regra
+deliberadamente mais simples ("autenticado → oferecer entrada no produto"), não uma tentativa de
+replicar a mesma lógica. Sem impacto em runtime nesta Sprint (`PublicHeader` não está montado em
+nenhuma rota real ainda). Antes da Sprint 20.5 montar `PublicLayout` em `/`, esta decisão deve ser
+revisitada: usar `LoginDestinationResolver.Resolve(...)` (reutilizável, é `static`) ou aceitar o
+comportamento simplificado. Ver "Deferred Decisions".
+
+## Onboarding Compatibility
+
+Impacto: **zero.** `OnboardingLayout.razor` e as 9 páginas que o usam (Login, as 5 de Identity,
+Tutorial, CreateProfile, Entry) não foram tocadas — nenhuma linha alterada. Confirmado por
+`git diff` vazio para esses arquivos.
+
+## Authenticated Shell Impact
+
+Impacto: **zero.** `MainLayout.razor`/`TopNavigation.razor`/`AccountSidePanel.razor` não foram
+alterados. Avaliado deliberadamente (§14 do prompt) se a marca residual justificava uma correção
+direta — não justificava, porque **o achado estava desatualizado**: `TopNavigation`/
+`AccountSidePanel` já renderizam `BEE`/`DAY` corretamente (ver correção em
+[`docs/web/README.md`](../../web/README.md#achados-relevantes-reportados-não-corrigidos) e
+[`docs/web/03-layouts.md`](../../web/03-layouts.md)). O único ponto real remanescente — não
+delegarem a `BeeDayBrand` — é estrutural, não um bug, e não foi alterado por não haver necessidade
+direta desta Sprint.
+
+## Accessibility (Sprint 20.4)
+
+- `<header>` como landmark único por página (nunca coexiste com o `<header>` de `TopNavigation`,
+  pois pertencem a layouts mutuamente exclusivos) — sem `aria-label` redundante, mesmo padrão de
+  `TopNavigation.razor`.
+- `<nav>` **deliberadamente omitido** — não existe lista de navegação real ainda; um `<nav>` vazio
+  seria pior prática que a ausência do landmark.
+- Marca: link real (`<a href="/">`) com `aria-label="BeeDay home"` (padrão comum de "logo linka para
+  home"), conteúdo via `BeeDayBrand` (que já tem seu próprio `aria-label="Bee Day"`).
+- CTA: `<button>` real (via `BeeDayButton`), não `div role="button"` — navegação por clique, mesmo
+  padrão já usado pelo botão "ENTER DAILY" de `Tutorial.razor` (`BeeDayButton` + `OnClick` →
+  `Navigation.NavigateTo`).
+- `focus-visible`, `scroll-margin` e o anel de foco (`--beeday-focus-ring`) aplicam-se automaticamente
+  aos dois elementos focáveis (link e botão) via as regras globais já existentes em
+  `theme.css`/`polish.css` — nenhum CSS de foco novo foi necessário.
+- `prefers-reduced-motion`: nenhuma transição/animação nova foi introduzida no CSS do
+  `PublicHeader`/`PublicLayout` — nada para guardar.
+- Nenhum `div role="button"`/`onclick` sem semântica foi usado em lugar nenhum do novo código.
+
+## Responsive Behavior (Sprint 20.4)
+
+Breakpoint reutilizado: **`42rem` (672px)** — a mesma família já compartilhada por
+`BeeDayPageHeader`/`BeeDayHero`/`polish.css` para o corte "cabeçalho estreito" (`polish.css:88`),
+não um valor novo. Nenhuma migração de breakpoints existentes foi feita; nenhum 30º valor foi
+introduzido.
+
+## Deferred Decisions (atualização Sprint 20.4)
+
+Adicionadas às pendências já registradas no checkpoint:
+
+- Se o CTA autenticado do `PublicHeader` deve reutilizar `LoginDestinationResolver.Resolve(...)` em
+  vez do destino fixo `/daily` — decidir antes de `/` ser transformado na Home (Sprint 20.5).
+- Se `TopNavigation`/`AccountSidePanel` devem migrar para `BeeDayBrand` com uma variante de cor para
+  header escuro — avaliado, não decidido (baixa prioridade, não é mais um bug).
+
 ## Sprint Roadmap
 
 ```text
@@ -337,7 +492,7 @@ nativos do navegador/sistema operacional em toda a aplicação.
 
 20.3 Native Cursor & Global Visual Cleanup — COMPLETE
 
-20.4 Application Shell & Navigation
+20.4 Application Shell & Navigation — COMPLETE (PublicLayout/PublicHeader created, not yet wired to any route)
 
 20.5 BeeDay Home Structure
 
@@ -366,9 +521,10 @@ permanecem aqui):
   Sprint 20.2/20.7.
 - Se vale introduzir uma ferramenta de acessibilidade automatizada (axe-core/Pa11y) e/ou de
   regressão visual — nenhuma decisão tomada; nenhuma delas deve ser assumida como aprovada.
-- Correção da marca residual (`LEVEL`/`UP` em `TopNavigation`/`AccountSidePanel`) e do link antigo
-  em `AppFooter` — pré-existentes, relevantes à Sprint 20.4 mas não decididos como parte do escopo
-  dela neste checkpoint.
+- Se `TopNavigation`/`AccountSidePanel` devem migrar para `BeeDayBrand` (com uma variante de cor
+  para header escuro) em vez de manter markup próprio — avaliado na Sprint 20.4 e deliberadamente
+  não decidido/implementado por não ser diretamente necessário ao shell público; permanece uma
+  melhoria de reuso de baixa prioridade, não um bug (o texto de marca já está correto).
 
 ## Deferred Findings (pré-existentes, não corrigir nesta EPIC salvo decisão futura)
 
@@ -376,6 +532,10 @@ permanecem aqui):
 - `wwwroot/css/feedback.css:20` — declaração `animation` sintaticamente inválida.
 - Inversão de z-index: o token `--beeday-z-modal` (900) é menor que dois z-index literais de modal
   real (1200, 1400).
-- Link para repositório antigo (`github.com/tiagoarrigoni/LevelUp`) em `AppFooter.razor`.
 - Múltiplas escalas visuais paralelas (spacing, radius, sombra) já existentes antes da EPIC 20.
 - Ausência de ferramenta automatizada de acessibilidade e de regressão visual automatizada.
+
+**Resolvido (não era mais verdade, corrigido na Sprint 20.4):** o link para o repositório antigo
+`github.com/tiagoarrigoni/LevelUp` em `AppFooter.razor` — verificado que já aponta para
+`github.com/tiagoarrigoni/BeeDay`. Documentado aqui só para registrar que o achado original da
+Sprint 20.1 estava desatualizado, não porque algo foi alterado nesta Sprint.
