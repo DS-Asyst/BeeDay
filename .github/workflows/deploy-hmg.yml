@@ -1,11 +1,22 @@
-name: BeeDay Homologation Deploy
+name: BeeDay — HMG Deployment
 
+# Sprint 19.8: triggers directly on push to hmg, no longer via workflow_run on BeeDay CI. Before
+# this Sprint, deployment depended on BeeDay CI running AGAIN after every merge (push: hmg in
+# ci.yml) purely to produce a fresh beeday-publish/beeday-migrations artifact for this workflow to
+# consume - full validation the PR into hmg had already paid for once, minutes earlier. That
+# dependency is now replaced by a provenance chain (the "Resolve validated source commit and
+# BeeDay CI run" step below): the same GitHub PR-association pattern deploy-prd.yml already uses
+# for main->prd, applied one hop earlier for sprint/*->hmg. See
+# docs/deployment/12-artifact-provenance.md for the full investigation, decision matrix, and race/
+# security analysis - including why this could NOT be done in Sprint 19.6 (no provenance mechanism
+# existed yet) and why the resolution logic here trusts the GitHub Pull Request API's recorded
+# head SHA rather than git merge-commit parent topology (Protect HMG's Ruleset allows merge,
+# squash, AND rebase - only merge commits carry a provable parent relationship to the PR HEAD SHA
+# via git ancestry; squash/rebase do not, so git parent-walking is not a safe strategy here).
 on:
-  workflow_run:
-    workflows:
-      - BeeDay CI
-    types:
-      - completed
+  push:
+    branches:
+      - hmg
 
   workflow_dispatch:
 
@@ -16,6 +27,9 @@ concurrency:
 permissions:
   contents: read
   actions: read
+  # Needed for listPullRequestsAssociatedWithCommit in the provenance resolution step below - same
+  # minimal addition deploy-prd.yml already carries for its own PR-association chain.
+  pull-requests: read
 
 env:
   DOTNET_NOLOGO: true
@@ -23,17 +37,13 @@ env:
 
 jobs:
   deploy:
-    name: Deploy to SERV3WEB
-    # Automatic path: only deploy when the triggering BeeDay CI run succeeded on hmg specifically
-    # (head_branch also excludes PR-validation runs of BeeDay CI, whose head_branch is the PR's
-    # source branch, not hmg). Manual path: workflow_dispatch has no workflow_run payload to gate
-    # on, so it's allowed through — "controlled manual deploy" means a human deliberately running
-    # it, and the run resolved below is still always the latest *successful* CI run on hmg, never
-    # an arbitrary/broken one.
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'hmg')
-
+    name: Deploy HMG
+    # No if: guard needed (Sprint 19.8): this job now triggers directly on push: hmg, which
+    # GitHub only fires for an actual ref update on hmg - never for a pull_request event, and never
+    # twice for the same push. This structurally removes the entire class of ambiguity Sprint 19.6
+    # had to guard against (BeeDay CI's workflow_run firing with head_branch=='hmg' for BOTH a
+    # push AND the hmg->main promotion PR's pull_request run) - there is no longer a shared trigger
+    # to disambiguate between. workflow_dispatch remains the deliberate manual path.
     runs-on:
       - self-hosted
       - Windows
@@ -43,46 +53,106 @@ jobs:
     timeout-minutes: 25
     environment: homologation
 
-    steps:
-      # Checked out at the exact commit BeeDay CI validated — not the repository's default branch,
-      # which is what a bare checkout would resolve to under a workflow_run event. Falls back to
-      # github.sha (the ref picked at dispatch time) for the manual workflow_dispatch path.
-      - name: Checkout deployment scripts
-        uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+    outputs:
+      deployed-sha: ${{ steps.resolve-provenance.outputs.source-sha }}
 
-      # Resolves which BeeDay CI run's artifact to deploy. workflow_run already carries the exact
-      # run id in its payload. workflow_dispatch has no such payload, so it looks up the latest
-      # *successful* BeeDay CI run on hmg via the REST API — never "the latest run of any kind."
-      - name: Resolve BeeDay CI run to deploy
-        id: resolve-run
+    steps:
+      # Default checkout resolves to github.sha - reliably the pushed commit on hmg for a push
+      # event, and the dispatched ref's tip for workflow_dispatch. No ref: override needed anymore:
+      # unlike the old workflow_run trigger (whose head_sha metadata was proven unreliable for
+      # chained runs, see docs/deployment/06-cicd-pipeline-discovery-baseline.md #6.1), a direct
+      # push trigger's github.sha is the standard, documented, reliable GitHub Actions behavior.
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      # Provenance resolution (Sprint 19.8): finds the pull request that merged into hmg at this
+      # commit, reads its recorded HEAD SHA (the exact commit BeeDay CI validated as a PR check -
+      # trusted per CLAUDE.md #5.7.2: a PR's head SHA identifies the real source-branch commit
+      # regardless of merge method), then finds the successful BeeDay CI pull_request run for that
+      # exact SHA. Never "latest successful run", never a branch-name guess - every artifact
+      # downloaded below is pinned to this run's id. Fails closed (throws, no fallback to a rebuild
+      # or to "latest") if any link in the chain is missing - see
+      # docs/deployment/12-artifact-provenance.md #18/#28 for the full race-condition and
+      # failure-semantics analysis.
+      - name: Resolve validated source commit and BeeDay CI run
+        id: resolve-provenance
         uses: actions/github-script@v9.0.0
         with:
           result-encoding: string
           script: |
-            if (context.eventName === 'workflow_run') {
-              core.info(`Using triggering workflow_run id ${context.payload.workflow_run.id}`);
-              return `${context.payload.workflow_run.id}`;
+            const mergeSha = context.sha;
+            core.info(`Resolving originating pull request for HMG commit ${mergeSha}`);
+
+            const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: mergeSha
+            });
+
+            const sourcePr = prs.data.find((pr) => pr.base.ref === 'hmg');
+
+            if (!sourcePr) {
+              core.setFailed(
+                `No pull request targeting hmg found for commit ${mergeSha}. ` +
+                'Refusing to deploy: cannot prove this commit was promoted through a validated pull request.'
+              );
+              return '';
             }
 
-            core.info('workflow_dispatch: resolving latest successful BeeDay CI run on hmg');
-            const runs = await github.rest.actions.listWorkflowRuns({
+            // Security boundary: only trust a PR whose head repository is this same repository,
+            // never a fork - branch/PR names alone are not a trustworthy signal (same principle
+            // validate-promotion.yml already applies to hmg->main/main->prd, not yet covered for
+            // sprint/*->hmg before this Sprint).
+            const expectedRepo = `${context.repo.owner}/${context.repo.repo}`;
+            const headRepo = sourcePr.head.repo ? sourcePr.head.repo.full_name : null;
+            if (headRepo !== expectedRepo) {
+              core.setFailed(
+                `Source pull request #${sourcePr.number} head repository '${headRepo ?? '<unknown>'}' ` +
+                `is not '${expectedRepo}'. Refusing to trust its artifact.`
+              );
+              return '';
+            }
+
+            const validatedSha = sourcePr.head.sha;
+            core.info(`Source PR #${sourcePr.number} (${sourcePr.head.ref}): validated head_sha ${validatedSha}`);
+
+            // Paginates defensively instead of trusting a single 100-run page, same pattern
+            // deploy-prd.yml already uses for its own hmg-side lookup - a busy hmg branch with
+            // >100 successful BeeDay CI pull_request runs since must still resolve correctly.
+            const maxPages = 20;
+            const iterator = github.paginate.iterator(github.rest.actions.listWorkflowRuns, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'ci.yml',
-              branch: 'hmg',
+              event: 'pull_request',
               status: 'success',
-              per_page: 1
+              per_page: 100
             });
 
-            if (runs.data.workflow_runs.length === 0) {
-              throw new Error('No successful BeeDay CI run found on branch hmg.');
+            let matchingRun = null;
+            let pagesScanned = 0;
+
+            for await (const response of iterator) {
+              pagesScanned++;
+              matchingRun = response.data.find((run) => run.head_sha === validatedSha);
+              if (matchingRun || pagesScanned >= maxPages) {
+                break;
+              }
             }
 
-            const runId = runs.data.workflow_runs[0].id;
-            core.info(`Using latest successful BeeDay CI run id ${runId}`);
-            return `${runId}`;
+            if (!matchingRun) {
+              core.setFailed(
+                `No successful BeeDay CI pull_request run found for validated head_sha ${validatedSha} ` +
+                `(PR #${sourcePr.number}) within the ${pagesScanned * 100} most recent successful runs scanned. ` +
+                'Refusing to deploy: the merged commit cannot be traced to a green BeeDay CI run.'
+              );
+              return '';
+            }
+
+            core.info(`Using validated BeeDay CI run id ${matchingRun.id} (head_sha ${matchingRun.head_sha})`);
+            core.setOutput('source-sha', validatedSha);
+            core.setOutput('pr-number', `${sourcePr.number}`);
+            return `${matchingRun.id}`;
 
       # run-id pins this to the exact BeeDay CI execution resolved above — never the current run
       # (the default actions/download-artifact would otherwise assume), never "latest", never
@@ -93,7 +163,7 @@ jobs:
           name: beeday-publish
           path: ${{ runner.temp }}\BeeDayPublish
           github-token: ${{ github.token }}
-          run-id: ${{ steps.resolve-run.outputs.result }}
+          run-id: ${{ steps.resolve-provenance.outputs.result }}
 
       # Same run-id as beeday-publish above - the migration bundle applied here must be the one
       # BeeDay CI built and validated alongside this exact publish artifact, never a different or
@@ -104,7 +174,7 @@ jobs:
           name: beeday-migrations
           path: ${{ runner.temp }}\BeeDayMigrations
           github-token: ${{ github.token }}
-          run-id: ${{ steps.resolve-run.outputs.result }}
+          run-id: ${{ steps.resolve-provenance.outputs.result }}
 
       # SERV3WEB already has .NET SDK 10.0.302 provisioned machine-wide, so actions/setup-dotnet is
       # not used on this self-hosted job and must not be reintroduced: the runner executes as the
@@ -143,12 +213,15 @@ jobs:
       # matches this checkout's copy. Runs BEFORE Deploy-BeeDay.ps1 and has no continue-on-error: if
       # promotion fails, this step fails and the job stops here - the deploy must never proceed
       # against a possibly-stale or possibly-inconsistent privileged control script. No secrets are
-      # required or produced by this step.
+      # required or produced by this step. -CommitSha is the checked-out hmg tip (github.sha) - the
+      # actual source of the promoted script file, distinct from the validated application source
+      # SHA above (see the note on "Record deployment info" below); still audit-only metadata, never
+      # a security check (see scripts/iis-control/Request-BeeDayIisControlPromotion.ps1).
       - name: Promote privileged IIS control script if changed
         shell: powershell
         run: |
           & ".\scripts\iis-control\Request-BeeDayIisControlPromotion.ps1" `
-              -CommitSha "${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}"
+              -CommitSha "${{ github.sha }}"
 
       - name: Deploy to IIS with rollback
         shell: powershell
@@ -181,3 +254,60 @@ jobs:
               -RunMigrations `
               -MigrationBundlePath $migrationBundlePath `
               -MigrationConnectionString $env:BEEDAY_MIGRATOR_CONNECTION
+
+      # Deployment record, extended in Sprint 19.8 with full provenance (sourceSha/pullRequest/
+      # validationRunId alongside the pre-existing mergeSha/workflowRun/result/environment/
+      # timestampUtc) rather than introducing a separate manifest file - this is the only consumer
+      # (verify-hmg.yml) and it already reads this exact artifact; see
+      # docs/deployment/12-artifact-provenance.md #17 for why a dedicated provenance-manifest file
+      # was evaluated and rejected. sourceSha is the PR HEAD SHA that BeeDay CI actually validated
+      # and whose artifact was just deployed; mergeSha is hmg's tip that triggered this run - kept
+      # distinct and both recorded, since they answer different provenance questions (WHAT was
+      # validated vs. WHICH push produced this HMG state).
+      - name: Record deployment info
+        shell: powershell
+        run: |
+          $info = [ordered]@{
+            sourceSha       = "${{ steps.resolve-provenance.outputs.source-sha }}"
+            mergeSha        = "${{ github.sha }}"
+            pullRequest     = "${{ steps.resolve-provenance.outputs.pr-number }}"
+            validationRunId = "${{ steps.resolve-provenance.outputs.result }}"
+            workflowRun     = "${{ github.run_id }}"
+            result          = "success"
+            environment     = "homologation"
+            timestampUtc    = (Get-Date).ToUniversalTime().ToString("o")
+          }
+
+          New-Item -ItemType Directory -Path "${{ runner.temp }}\DeploymentInfo" -Force | Out-Null
+          $infoPath = Join-Path "${{ runner.temp }}" "DeploymentInfo\deployment-info.json"
+          $info | ConvertTo-Json | Set-Content -LiteralPath $infoPath
+
+          # ASCII hyphen, not an em dash (Sprint 19.8.1): GitHub Actions writes this run: block to a
+          # temp .ps1 file that Windows PowerShell 5.1 (this runner's actual shell, confirmed from
+          # a real failed run's log - C:\Windows\System32\WindowsPowerShell\v1.0\powershell.EXE) can
+          # decode using the legacy system codepage instead of UTF-8 when the file has no BOM. An
+          # em dash (U+2014) misdecoded that way produces a mojibake sequence that includes U+201D
+          # (a "smart quote" character) - which PS 5.1's tokenizer accepts as a string terminator,
+          # closing the quoted string early and cascading into "Unexpected token" parse errors for
+          # every line after it. Confirmed directly from run 31456637128's own generated script
+          # (see docs/deployment/12-artifact-provenance.md, Sprint 19.8.1 section) - not assumed.
+          "## BeeDay - HMG Deployment" >> $env:GITHUB_STEP_SUMMARY
+          "" >> $env:GITHUB_STEP_SUMMARY
+          "| Field | Value |" >> $env:GITHUB_STEP_SUMMARY
+          "|---|---|" >> $env:GITHUB_STEP_SUMMARY
+          "| Source SHA (validated) | ``$($info.sourceSha)`` |" >> $env:GITHUB_STEP_SUMMARY
+          "| Merge SHA (hmg tip) | ``$($info.mergeSha)`` |" >> $env:GITHUB_STEP_SUMMARY
+          "| Pull request | #$($info.pullRequest) |" >> $env:GITHUB_STEP_SUMMARY
+          "| Validated BeeDay CI run | [$($info.validationRunId)](${{ github.server_url }}/${{ github.repository }}/actions/runs/$($info.validationRunId)) |" >> $env:GITHUB_STEP_SUMMARY
+          "| Workflow run | [$($info.workflowRun)](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> $env:GITHUB_STEP_SUMMARY
+          "| Result | $($info.result) |" >> $env:GITHUB_STEP_SUMMARY
+          "| Environment | $($info.environment) |" >> $env:GITHUB_STEP_SUMMARY
+          "| Timestamp (UTC) | $($info.timestampUtc) |" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Upload deployment info
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: beeday-hmg-deployment-info
+          path: ${{ runner.temp }}\DeploymentInfo
+          if-no-files-found: error
+          retention-days: 14

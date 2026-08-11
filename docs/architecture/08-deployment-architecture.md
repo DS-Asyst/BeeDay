@@ -16,7 +16,8 @@ publica artefatos (`beeday-test-results`, `beeday-e2e-artifacts`, `beeday-publis
 
 ## 2. Pipeline de deploy de produção (`.github/workflows/deploy-prd.yml`)
 
-Nome: `BeeDay Production Deploy`. Dispara em `push` para `prd` e `workflow_dispatch`. Concurrency
+Nome: `BeeDay — Production Deployment` (renomeado na Sprint 19.2.1; nome de job/comportamento
+inalterados). Dispara em `push` para `prd` e `workflow_dispatch`. Concurrency
 group `beeday-production`, `cancel-in-progress: false` (deploys nunca são cancelados no meio).
 
 ```mermaid

@@ -21,20 +21,40 @@ linkado a partir daqui onde relevante em vez de duplicado.
 
 | Documento | Conteúdo |
 |---|---|
-| [`01-deployment.md`](01-deployment.md) | Deploy manual e automatizado, os 2 workflows do GitHub Actions, pipeline, publicação, rollback, ambientes HMG/Produção |
+| [`01-deployment.md`](01-deployment.md) | Deploy manual e automatizado, os workflows do GitHub Actions (`ci.yml`, `deploy-hmg.yml`, `verify-hmg.yml`, `release-quality-gate.yml`, `deploy-prd.yml`), pipeline, publicação, rollback, ambientes HMG/Produção |
 | [`02-runtime-configuration.md`](02-runtime-configuration.md) | `appsettings*`, variáveis de ambiente, binding de configuração, Options, secrets, guardas de startup |
 | [`03-observability.md`](03-observability.md) | Logging, Event Journal, health checks, diagnostics, ciclo de vida da aplicação |
 | [`04-operations.md`](04-operations.md) | Backup, restore, recovery, migrations, versionamento, processo de release, manutenção |
 | [`05-privileged-iis-control.md`](05-privileged-iis-control.md) | Boundary privilegiada de controle do IIS em HMG (STOP/START/CONFIGURE/RESTORE via SYSTEM) e a automação de promoção do script operacional (`HMG-IisControl-Updater`, Sprint 17.17) |
+| [`06-cicd-pipeline-discovery-baseline.md`](06-cicd-pipeline-discovery-baseline.md) | Registro histórico congelado do baseline empírico AS-IS coletado na Sprint 19.1 (workflows, triggers, timing, deployments duplicados confirmados, Rulesets, provenance) — EPIC 19. As divergências que este documento encontrou em `01-deployment.md` (§19) foram corrigidas na Sprint 19.2; o achado de deployment duplicado em HMG (§6/§12) foi estruturalmente corrigido na Sprint 19.6 |
+| [`07-validation-matrix.md`](07-validation-matrix.md) | Matriz oficial `Validation × Stage` — inventário de todos os testes/validações do BeeDay, duração/criticidade/dependências/flakiness medidas, e classificação de estágio atual vs. recomendado — EPIC 19, Sprint 19.3. Entrada oficial para as Sprints 19.4-19.9 |
+| [`08-fast-pr-validation-decision.md`](08-fast-pr-validation-decision.md) | Registro de decisão da Sprint 19.4: por que `BeeDay CI` ainda não pode ser renomeado para `BeeDay — Pull Request Validation` (dependências rastreadas até 19.7/19.8), decisão formal de manter E2E em toda PR, e a remoção de `prd` do trigger `pull_request` (única mudança estrutural segura daquela Sprint) |
+| [`09-pipeline-performance.md`](09-pipeline-performance.md) | Baseline de performance medido (6 execuções reais), achado confirmado de rebuild redundante em `dotnet publish` (11.3s eliminados), cache de NuGet e de browsers Playwright, e candidatos de otimização rejeitados com justificativa — EPIC 19, Sprint 19.5 |
+| [`10-hmg-deployment-verification.md`](10-hmg-deployment-verification.md) | Eliminação estrutural do deployment duplicado em HMG (causa raiz da 19.1), novo workflow `BeeDay — HMG Verification` (Readiness + Smoke reais contra o ambiente implantado), decisão de manter `push:hmg` em `BeeDay CI` com justificativa explícita — EPIC 19, Sprint 19.6 |
+| [`11-release-quality-gate.md`](11-release-quality-gate.md) | Novo workflow `BeeDay — Release Quality Gate` para `hmg → main`, automação do GAP `has-pending-model-changes` (verificado localmente, caminho positivo e negativo), e por que a ativação (mutação de Ruleset + remoção de `pull_request:main` de `BeeDay CI`) foi deliberadamente adiada até validação remota real — EPIC 19, Sprint 19.7 |
+| [`12-artifact-provenance.md`](12-artifact-provenance.md) | Eliminação da segunda execução completa de `BeeDay CI` após todo merge em `hmg` — resolução de proveniência via API de Pull Requests do GitHub (mesma cadeia que `deploy-prd.yml` já usava para `main→prd`, aplicada um hop antes), decisão de manter `pull_request:main` intacto, e por que topologia Git de commits não é uma base segura dado que `merge`/`squash`/`rebase` são todos permitidos pelo Ruleset — EPIC 19, Sprint 19.8 |
 
 ## Ordem de leitura recomendada
 
-1. `01-deployment.md` — como o binário chega ao servidor.
+1. `01-deployment.md` — como o binário chega ao servidor (sincronizado com a implementação atual
+   na Sprint 19.2).
 2. `02-runtime-configuration.md` — o que esse binário lê ao iniciar.
 3. `03-observability.md` — o que dá para ver depois que ele está rodando.
 4. `04-operations.md` — o que fazer quando algo dá errado.
 5. `05-privileged-iis-control.md` — como o runner de baixo privilégio controla o IIS em HMG sem
    nunca virar administrador.
+6. `06-cicd-pipeline-discovery-baseline.md` — o baseline real do pipeline, para quem for trabalhar
+   na EPIC 19 (CI/CD Architecture, Performance & Developer Experience).
+7. `07-validation-matrix.md` — o que cada teste/validação prova, custa e onde deveria rodar, para
+   quem for implementar as Sprints 19.4 em diante.
+8. `08-fast-pr-validation-decision.md` — por que o rename de `ci.yml` continua bloqueado e o que a
+   Sprint 19.4 efetivamente mudou.
+9. `09-pipeline-performance.md` — onde o tempo de CI realmente vai e o que foi acelerado sem
+   perder cobertura.
+10. `10-hmg-deployment-verification.md` — como o deployment duplicado em HMG foi eliminado e como
+    `BeeDay — HMG Verification` prova que o ambiente implantado está utilizável.
+11. `11-release-quality-gate.md` — o que protege `hmg → main` hoje e o que falta para a proteção
+    definitiva entrar em vigor.
 
 ## Estado real de HMG e PRD (Sprint 18.4)
 
@@ -55,6 +75,6 @@ nenhum Runtime State existente.
   16.3); os dois secrets de connection string permanecem intencionalmente ausentes até o
   provisionamento real de PRD.
 - Os documentos anteriores desta pasta (`01-operations.md`, `02-backup-and-restore.md`) eram
-  checklists prescritivos escritos antes da infraestrutura real (`Deploy-BeeDay.ps1`, os 2
-  workflows) existir — movidos para [`docs/history/`](../history/README.md), substituídos pelos 4
+  checklists prescritivos escritos antes da infraestrutura real (`Deploy-BeeDay.ps1`, os workflows
+  de deploy) existir — movidos para [`docs/history/`](../history/README.md), substituídos pelos
   documentos acima.
