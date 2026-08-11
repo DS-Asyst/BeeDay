@@ -39,6 +39,16 @@ jobs:
         uses: actions/setup-dotnet@v6.0.0
         with:
           dotnet-version: "10.0.x"
+          # Native NuGet cache (backed by actions/cache internally), not a hand-rolled
+          # actions/cache step - see docs/deployment/09-pipeline-performance.md (Sprint 19.5) for
+          # why setup-dotnet's own cache was chosen over a manual one, and why this is safe with
+          # no packages.lock.json in the repo (Central Package Management already pins exact
+          # versions via Directory.Packages.props; cache miss falls back to a normal full
+          # restore, never a functional requirement for correctness).
+          cache: true
+          cache-dependency-path: |
+            Directory.Packages.props
+            **/*.csproj
 
       - name: Show .NET information
         shell: powershell
@@ -59,6 +69,17 @@ jobs:
             --configuration Release `
             --no-restore `
             --warnaserror
+
+      # Path confirmed empirically from a real run's install log (Sprint 19.5): Playwright's .NET
+      # tool installs Chromium/FFmpeg to %LOCALAPPDATA%\ms-playwright on windows-latest, unrelated
+      # to the NuGet cache above. Keyed on Microsoft.Playwright's pinned version in
+      # Directory.Packages.props, so a version bump invalidates the cache automatically. Safe on
+      # cache miss: the install step below still runs unconditionally and re-downloads if needed.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('Directory.Packages.props') }}
 
       - name: Install Playwright Chromium
         shell: powershell
@@ -83,6 +104,7 @@ jobs:
               dotnet test $project.FullName `
                 --configuration Release `
                 --no-build `
+                --no-restore `
                 --verbosity normal `
                 --logger "trx;LogFileName=$($project.BaseName).trx" `
                 --results-directory $resultsDirectory
@@ -97,6 +119,22 @@ jobs:
               throw "One or more test projects failed. See logs above for details."
           }
 
+      # --no-build was added in Sprint 19.5 and REVERTED in Sprint 19.5.2 after a real GitHub
+      # Actions run failed: "Manifest file at 'obj\Release\net10.0\staticwebassets.build.json' not
+      # found." Root cause (confirmed identically on the failed run's own log and in a local
+      # clean-state reproduction): `dotnet build BeeDay.slnx --configuration Release` above does
+      # NOT actually build the 4 src/ projects (Domain/Application/Infrastructure/Web) in the
+      # Release configuration - it silently writes their outputs to bin/Debug + obj/Debug despite
+      # the --configuration Release flag (only the 5 test projects correctly resolve Release this
+      # way). This is a pre-existing solution-build quirk, not something Sprint 19.5 introduced -
+      # it was invisible before because `dotnet publish` (without --no-build) always performed its
+      # own implicit rebuild of its whole dependency graph, which correctly resolves Release for a
+      # single-project build graph and silently produced the missing Release outputs (including
+      # this manifest, and - critically - Infrastructure's Release build that the EF migration
+      # bundle step below has always implicitly depended on) as a side effect. Removing --no-build
+      # restores that side effect. The deeper "solution build silently uses Debug for
+      # non-test projects" defect itself is NOT fixed here - out of scope for a minimal CI
+      # correction - see docs/deployment/09-pipeline-performance.md, Sprint 19.5.2 section.
       - name: Publish BeeDay
         shell: powershell
         run: |
