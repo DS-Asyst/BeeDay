@@ -266,8 +266,16 @@ Não declaro a duplicação eliminada empiricamente até observar uma execução
 
 | Responsabilidade emprestada | Razão | Dono futuro | Sprint de remoção |
 |---|---|---|---|
-| `push: hmg` em `BeeDay CI` (produz artifact para `deploy-hmg.yml`) | Sem proveniência independente ainda | Cadeia de proveniência completa (Build Once/Deploy Many final) | 19.8 |
+| `push: hmg` em `BeeDay CI` (produz artifact para `deploy-hmg.yml`) | Sem proveniência independente ainda | Cadeia de proveniência completa (Build Once/Deploy Many final) | **19.8 — RESOLVIDO, ver nota abaixo** |
 | `pull_request: main` em `BeeDay CI` (satisfaz required check de `main`) | Sem `BeeDay — Release Quality Gate` ainda | Release Quality Gate | 19.7 |
+
+**Atualização da Sprint 19.8:** a alternativa considerada e rejeitada em §4 acima ("Por que não
+`push: hmg` direto em `deploy-hmg.yml`") foi implementada nesta Sprint, agora que a cadeia de
+proveniência que faltava existe. `deploy-hmg.yml` dispara em `push: hmg` diretamente e resolve o
+artefato já validado pela PR via API de Pull Requests do GitHub — `push: hmg` foi removido de
+`ci.yml`. A decisão original registrada em §4/§6 permanece válida como registro histórico do que
+era verdade na 19.6 (não reescrita); ver
+[`12-artifact-provenance.md`](12-artifact-provenance.md) para a implementação completa.
 
 ## 23. Resolução da dívida da Sprint 19.4
 

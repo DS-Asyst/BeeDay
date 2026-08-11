@@ -90,14 +90,17 @@ jobs:
           github-token: ${{ github.token }}
           run-id: ${{ steps.resolve-run.outputs.result }}
 
+      # Sprint 19.8: deployment-info.json's field was renamed sha -> sourceSha (now one of several
+      # provenance fields - see deploy-hmg.yml's "Record deployment info" step) to distinguish the
+      # validated application source SHA from the hmg merge SHA that triggered the deployment.
       - name: Read deployed SHA
         id: deployed
         shell: powershell
         run: |
           $infoPath = Join-Path "${{ runner.temp }}" "DeploymentInfo\deployment-info.json"
           $info = Get-Content -LiteralPath $infoPath -Raw | ConvertFrom-Json
-          Write-Host "Verifying deployment of SHA: $($info.sha)"
-          "sha=$($info.sha)" >> $env:GITHUB_OUTPUT
+          Write-Host "Verifying deployment of SHA: $($info.sourceSha)"
+          "sha=$($info.sourceSha)" >> $env:GITHUB_OUTPUT
 
       # Readiness answers "is the deployed app available and able to reach its dependencies?" -
       # the same /health/ready endpoint Deploy-BeeDay.ps1 already polls internally as part of its
