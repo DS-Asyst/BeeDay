@@ -167,7 +167,16 @@ jobs:
         run: |
           $result = "${{ job.status }}"
 
-          "## BeeDay — HMG Verification" >> $env:GITHUB_STEP_SUMMARY
+          # ASCII hyphen, not an em dash (Sprint 19.8.1): the identical defect confirmed remotely in
+          # deploy-hmg.yml's "Record deployment info" step (run 31456637128) - an em dash inside a
+          # PowerShell double-quoted string written to a temp .ps1 file gets misdecoded by Windows
+          # PowerShell 5.1 (this runner's actual shell) when the file has no BOM, producing a
+          # mojibake "smart quote" character that PS 5.1's tokenizer treats as a string terminator.
+          # This step was never actually exercised remotely before (deploy-hmg.yml's failure meant
+          # verify-hmg.yml never triggered), but carried the exact same latent defect - fixed here
+          # proactively rather than left to fail identically on the next successful deployment. See
+          # docs/deployment/12-artifact-provenance.md, Sprint 19.8.1 section.
+          "## BeeDay - HMG Verification" >> $env:GITHUB_STEP_SUMMARY
           "" >> $env:GITHUB_STEP_SUMMARY
           "| Field | Value |" >> $env:GITHUB_STEP_SUMMARY
           "|---|---|" >> $env:GITHUB_STEP_SUMMARY

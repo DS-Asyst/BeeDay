@@ -282,7 +282,16 @@ jobs:
           $infoPath = Join-Path "${{ runner.temp }}" "DeploymentInfo\deployment-info.json"
           $info | ConvertTo-Json | Set-Content -LiteralPath $infoPath
 
-          "## BeeDay — HMG Deployment" >> $env:GITHUB_STEP_SUMMARY
+          # ASCII hyphen, not an em dash (Sprint 19.8.1): GitHub Actions writes this run: block to a
+          # temp .ps1 file that Windows PowerShell 5.1 (this runner's actual shell, confirmed from
+          # a real failed run's log - C:\Windows\System32\WindowsPowerShell\v1.0\powershell.EXE) can
+          # decode using the legacy system codepage instead of UTF-8 when the file has no BOM. An
+          # em dash (U+2014) misdecoded that way produces a mojibake sequence that includes U+201D
+          # (a "smart quote" character) - which PS 5.1's tokenizer accepts as a string terminator,
+          # closing the quoted string early and cascading into "Unexpected token" parse errors for
+          # every line after it. Confirmed directly from run 31456637128's own generated script
+          # (see docs/deployment/12-artifact-provenance.md, Sprint 19.8.1 section) - not assumed.
+          "## BeeDay - HMG Deployment" >> $env:GITHUB_STEP_SUMMARY
           "" >> $env:GITHUB_STEP_SUMMARY
           "| Field | Value |" >> $env:GITHUB_STEP_SUMMARY
           "|---|---|" >> $env:GITHUB_STEP_SUMMARY
