@@ -256,3 +256,24 @@ jobs:
           path: ${{ runner.temp }}\BeeDayMigrations
           if-no-files-found: error
           retention-days: 7
+
+      # Sprint 19.9: this is the most-executed workflow in the whole pipeline (every sprint/*->hmg
+      # PR) but was the only one of the four PR/deploy/verification/release workflows without a
+      # step summary - HMG Deployment, HMG Verification, and Release Quality Gate all already have
+      # one. Same minimal, proven-safe pattern as those three (if: always(), ASCII hyphen - not an
+      # em dash, per the Sprint 19.8.1/19.8.2 Windows PowerShell 5.1 finding documented in
+      # docs/deployment/12-artifact-provenance.md and 11-release-quality-gate.md). Written last, so
+      # reaching it with job.status == success already means every prior step passed.
+      - name: Record validation summary
+        if: always()
+        shell: powershell
+        run: |
+          "## BeeDay - Pull Request Validation" >> $env:GITHUB_STEP_SUMMARY
+          "" >> $env:GITHUB_STEP_SUMMARY
+          "| Field | Value |" >> $env:GITHUB_STEP_SUMMARY
+          "|---|---|" >> $env:GITHUB_STEP_SUMMARY
+          "| Source SHA | ``${{ github.event.pull_request.head.sha || github.sha }}`` |" >> $env:GITHUB_STEP_SUMMARY
+          "| PR | ${{ github.event.pull_request.number && format('#{0}', github.event.pull_request.number) || 'workflow_dispatch' }} |" >> $env:GITHUB_STEP_SUMMARY
+          "| Source branch | ${{ github.event.pull_request.head.ref || github.ref_name }} |" >> $env:GITHUB_STEP_SUMMARY
+          "| Target branch | ${{ github.event.pull_request.base.ref || 'hmg' }} |" >> $env:GITHUB_STEP_SUMMARY
+          "| Result | ${{ job.status }} |" >> $env:GITHUB_STEP_SUMMARY

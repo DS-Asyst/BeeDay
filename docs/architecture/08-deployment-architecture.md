@@ -1,45 +1,64 @@
 # Deployment Architecture
 
-**Fonte da verdade:** verificado diretamente em `.github/workflows/ci.yml`,
-`.github/workflows/deploy-prd.yml`, `scripts/Deploy-BeeDay.ps1`, `src/BeeDay.Web/web.config`,
-`src/BeeDay.Web/appsettings*.json`, e as classes `*Options.cs` em
-`src/BeeDay.Infrastructure/Configuration/`.
+**Fonte da verdade:** verificado diretamente em `.github/workflows/*.yml`,
+`scripts/Deploy-BeeDay.ps1`, `src/BeeDay.Web/web.config`, `src/BeeDay.Web/appsettings*.json`, e as
+classes `*Options.cs` em `src/BeeDay.Infrastructure/Configuration/`.
 
-## 1. Pipeline de CI (`.github/workflows/ci.yml`)
+**Reconciliado na Sprint 19.9** (EPIC 19) — §1/§2 estavam materialmente desatualizados (job
+`validate` que não existe mais, triggers obsoletos, estrutura de dois jobs em `deploy-prd.yml` já
+substituída desde a Sprint 18.4). §3-§9 permanecem precisos (`Deploy-BeeDay.ps1`, IIS, health
+checks, configuração — não mudaram nesta EPIC) e não foram reescritos.
 
-Nome: `BeeDay CI`. Dispara em `push` para `hmg`, `pull_request` para `hmg`/`prd`, e
-`workflow_dispatch`. Um job (`validate`, `windows-latest`): checkout → `setup-dotnet` 10.0.x →
-`dotnet restore BeeDay.slnx` → `dotnet format --verify-no-changes` → `dotnet build --warnaserror`
-→ instala Playwright Chromium → `dotnet test` (logger trx) → `dotnet publish
-src/BeeDay.Web/BeeDay.Web.csproj` → valida presença de `BeeDay.Web.dll`/`web.config` no output →
-publica artefatos (`beeday-test-results`, `beeday-e2e-artifacts`, `beeday-publish`).
+## 1. Pipeline CI/CD atual (visão resumida — ver `docs/deployment/` para o detalhamento completo)
+
+A arquitetura completa de CI/CD (6 workflows, artifact provenance, Rulesets, Release Quality
+Gate) é mantida em `docs/deployment/`, não duplicada aqui. Resumo apenas dos pontos que afetam
+diretamente o deployment:
+
+- **`BeeDay — Pull Request Validation`** (`.github/workflows/ci.yml`) — valida PRs `sprint/*→hmg`
+  (Fast Gate: Restore, Build, `Domain.Tests`, `Application.Tests`, Publish, EF bundle). Produz os
+  artifacts `beeday-publish`/`beeday-migrations` que `BeeDay — HMG Deployment` consome por
+  proveniência (`run-id` pinado, nunca "latest"). Ver
+  [`docs/deployment/08-fast-pr-validation-decision.md`](../deployment/08-fast-pr-validation-decision.md).
+- **`BeeDay — HMG Deployment`** (`deploy-hmg.yml`) — dispara em `push` para `hmg`, roda no runner
+  self-hosted (label `hmg`), implanta em SERV3WEB. Ver
+  [`docs/deployment/10-hmg-deployment-verification.md`](../deployment/10-hmg-deployment-verification.md),
+  [`docs/deployment/12-artifact-provenance.md`](../deployment/12-artifact-provenance.md).
+- **`BeeDay — HMG Verification`** (`verify-hmg.yml`) — readiness + smoke pós-deploy contra HMG real.
+- **`BeeDay — Release Quality Gate`** (`release-quality-gate.yml`) + **`BeeDay — Promotion Policy`**
+  (`validate-promotion.yml`) — fronteira `hmg → main`. Ver
+  [`docs/deployment/11-release-quality-gate.md`](../deployment/11-release-quality-gate.md).
 
 ## 2. Pipeline de deploy de produção (`.github/workflows/deploy-prd.yml`)
 
-Nome: `BeeDay — Production Deployment` (renomeado na Sprint 19.2.1; nome de job/comportamento
-inalterados). Dispara em `push` para `prd` e `workflow_dispatch`. Concurrency
-group `beeday-production`, `cancel-in-progress: false` (deploys nunca são cancelados no meio).
+Nome: `BeeDay — Production Deployment`. Dispara em `push` para `prd` e `workflow_dispatch`.
+Concurrency group `beeday-production`, `cancel-in-progress: false` (deploys nunca são cancelados
+no meio). **Um único job** (`deploy`, self-hosted) — a estrutura antiga de dois jobs
+(`validate`+`deploy`) não existe desde a Sprint 18.4: o job atual nunca builda/testa, apenas
+resolve e baixa o artifact `beeday-publish` já validado em `hmg` via cadeia de proveniência de
+Pull Requests (Build Once, Deploy Many — `CLAUDE.md` §5.7.2).
 
 ```mermaid
 flowchart TD
-    A[push para prd] --> B["Job validate<br/>windows-latest"]
-    B -->|restore/format/build/test/publish| C[artefato beeday-production-publish]
-    C --> D["Job deploy<br/>self-hosted Windows X64<br/>environment: production"]
-    D --> E[Validar 4 secrets obrigatórios]
+    A[push para prd] --> B["Job deploy<br/>self-hosted Windows X64<br/>environment: production"]
+    B --> C[Resolve proveniência: prd←main←hmg via PRs associadas ao commit]
+    C --> D[Download beeday-publish validado por run-id pinado]
+    D --> E[Validar 5 secrets obrigatórios]
     E --> F[Deploy-BeeDay.ps1]
-    F --> G[IIS: BeeDayPool / site BeeDay]
+    F --> G["IIS: BeeDay-Web-AppPool / site (ver Deploy-BeeDay.ps1)"]
     G --> H["/health/ready"]
 ```
 
-- Job `deploy`: `needs: validate`, roda no runner self-hosted `SERV3-WEB1`
-  (`runs-on: [self-hosted, Windows, X64]`), `environment: production`.
+- Job `deploy` (único), roda no runner self-hosted (`runs-on: [self-hosted, Windows, X64]`),
+  `environment: production`. Nenhum job `validate` separado.
 - Secrets consumidos: `BEEDAY_PUBLIC_BASE_URL`, `BEEDAY_RESEND_API_KEY`,
-  `BEEDAY_RESEND_FROM_ADDRESS`, `BEEDAY_RESEND_FROM_NAME`, `BEEDAY_ALLOWED_HOSTS`.
-- **Achado verificado:** o step "Validate deployment secrets" checa apenas 4 dos 5 secrets usados
-  pelo step de deploy seguinte — `BEEDAY_RESEND_FROM_NAME` não está na lista pré-validada, embora
-  seja passado ao script (`-ResendFromName $env:BEEDAY_RESEND_FROM_NAME`). Não é necessariamente
-  um bug (o script tem um valor default `"BeeDay"` para esse parâmetro), mas é uma inconsistência
-  na validação — reportado, não corrigido (fora do escopo desta Sprint).
+  `BEEDAY_RESEND_FROM_ADDRESS`, `BEEDAY_RESEND_FROM_NAME`, `BEEDAY_ALLOWED_HOSTS` — todos os 5
+  checados hoje pelo step "Validate deployment secrets" (achado anterior sobre
+  `BEEDAY_RESEND_FROM_NAME` ausente da checagem já não se aplica ao arquivo atual — reconfirmado
+  por leitura direta nesta Sprint).
+- **Nunca executado com sucesso:** todos os runs históricos de `deploy-prd.yml` têm `conclusion:
+  failure` — consistente com PRD não estar provisionado (ver §9 e
+  [`docs/deployment/README.md`](../deployment/README.md) "Estado real de HMG e PRD").
 
 ## 3. `scripts/Deploy-BeeDay.ps1`
 
