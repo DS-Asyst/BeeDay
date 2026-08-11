@@ -32,11 +32,19 @@ branch); `deploy-hmg.yml` (`beeday-homologation`) e `deploy-prd.yml` (`beeday-pr
 `concurrency: cancel-in-progress: false` (deploys nunca são cancelados por um novo evento —
 enfileiram, o que serializa mas **não deduplica** execuções concorrentes do mesmo estado — ver §6).
 
-## 3. Pipeline de validação (`ci.yml`, job `ci` — Fast HMG Gate)
+## 3. Pipeline de validação (`ci.yml`, job `ci` — `BeeDay — Pull Request Validation`)
 
 `ci.yml` é o workflow que valida toda PR `sprint/*→hmg` e produz os artifacts que `deploy-hmg.yml`
 consome — `deploy-hmg.yml` e `deploy-prd.yml` nunca rebuildam nem re-testam, ambos apenas baixam,
 por `run-id` pinado, os artifacts já validados (Build Once, Deploy Many — `CLAUDE.md` §5.7.2).
+
+**Renomeado na Sprint 19.8.6** de `BeeDay CI` para `BeeDay — Pull Request Validation` (job:
+`Pull Request Validation`) — nome anterior ficou semanticamente incorreto após o redesenho da
+19.8.5 (§ abaixo). `deploy-hmg.yml`/`deploy-prd.yml` resolvem este workflow por `workflow_id:
+'ci.yml'` (caminho do arquivo, confirmado por leitura direta) — o rename não exigiu nenhuma
+mudança nesses consumidores. Ver
+[`08-fast-pr-validation-decision.md`](08-fast-pr-validation-decision.md) §14 para a descoberta
+empírica do check context e a transição do Ruleset de `hmg`.
 
 **Redesenhado na Sprint 19.8.5** para responder exclusivamente "esta alteração tem qualidade
 mínima para ser integrada e testada em homologação?" — não mais a suíte completa de release.

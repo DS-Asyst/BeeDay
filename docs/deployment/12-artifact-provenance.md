@@ -822,3 +822,14 @@ normal) será revalidado organicamente no próximo merge em `hmg`.
 Nenhuma dívida nova. Débitos pré-existentes inalterados: `BeeDay.slnx` Release configuration
 behavior; promoção final a PRD; achado não corrigido do Sprint 19.8 sobre `deploy-prd.yml` não ter
 checagem de `head.repo` equivalente à de `deploy-hmg.yml`.
+
+---
+
+## 37. Sprint 19.8.6 — Provenance Resolution Unaffected by Workflow Rename
+
+`FACT`, confirmado por leitura direta (não suposto): `deploy-hmg.yml` e `deploy-prd.yml` resolvem
+a execução de `ci.yml` a validar via `workflow_id: 'ci.yml'` (`grep -n "workflow_id"` em ambos os
+arquivos) — o **caminho do arquivo**, uma identidade estável do GitHub Actions, nunca o `name:` de
+exibição do workflow. O rename de `ci.yml` para `BeeDay — Pull Request Validation`
+(`08-fast-pr-validation-decision.md` §14) não exige nem exigiu nenhuma mudança em `deploy-hmg.yml`
+ou `deploy-prd.yml` — confirmado empiricamente antes do rename ser implementado, não assumido.

@@ -378,9 +378,104 @@ fronteira a exige.
 
 ---
 
-## 13. Fontes consultadas
+## 14. Sprint 19.8.6 — Fast HMG Gate Identity & Ruleset Transition
 
-- `.github/workflows/ci.yml`, `deploy-hmg.yml`, `deploy-prd.yml`, `validate-promotion.yml`.
-- `gh api repos/tiagoarrigoni/BeeDay/rules/branches/{hmg,main,prd}` (reconsultado nesta Sprint).
-- `docs/deployment/06-cicd-pipeline-discovery-baseline.md`, `07-validation-matrix.md`.
+**Fonte da verdade:** `gh api` em runs reais (`31490432167`, PR #69), `check-runs` do commit real,
+leitura integral de `ci.yml`/`release-quality-gate.yml`/`validate-promotion.yml`, snapshot
+completo do Ruleset de `hmg` antes e depois da mutação (read-back estrutural).
+
+### 14.1 Motivação
+
+Desde a Sprint 19.8.5, `ci.yml` não é mais um CI genérico — valida exclusivamente PRs
+`sprint/*→hmg` com um Fast Gate (Restore, Build, `Domain.Tests`, `Application.Tests`, Publish, EF
+bundle). O nome `BeeDay CI` ficou semanticamente incorreto. Esta Sprint finaliza a identidade do
+workflow, renomeando-o para `BeeDay — Pull Request Validation`, e transiciona o Ruleset de `hmg`
+para exigir o novo check em vez do antigo.
+
+### 14.2 Check Context Discovery (evidência, não suposição)
+
+`FACT`, confirmado empiricamente via `gh api repos/.../commits/{sha}/check-runs` em **três**
+workflows reais deste repositório — não apenas inferido de documentação genérica do GitHub:
+
+| Workflow | Workflow `name:` | Job `name:` | Check context reportado (real) |
+|---|---|---|---|
+| `ci.yml` (antes desta Sprint) | `BeeDay CI` | `BeeDay CI` | `BeeDay CI` (idênticos, não distinguível isoladamente) |
+| `release-quality-gate.yml` | `BeeDay — Release Quality Gate` | `Release Quality Gate` | `Release Quality Gate` — **job**, não workflow |
+| `validate-promotion.yml` | `BeeDay — Promotion Policy` | `Validate Promotion` | `Validate Promotion` — **job**, não workflow |
+
+**Conclusão determinística:** o check-run context reportado ao GitHub (e portanto o que um
+Ruleset de `required_status_checks` deve exigir) é o **nome do job** (`jobs.<id>.name`), nunca o
+`name:` do workflow. Confirmado de forma cruzada em dois workflows já existentes neste mesmo
+repositório — não uma suposição isolada sobre `ci.yml`.
+
+### 14.3 HMG Ruleset BEFORE (snapshot completo)
+
+```json
+{
+  "id": 20580759,
+  "name": "Protect HMG",
+  "enforcement": "active",
+  "conditions": {"ref_name": {"include": ["refs/heads/hmg"]}},
+  "bypass_actors": [],
+  "rules": [
+    {"type": "deletion"},
+    {"type": "non_fast_forward"},
+    {"type": "pull_request", "parameters": {"required_approving_review_count": 0, "allowed_merge_methods": ["merge","squash","rebase"], "required_review_thread_resolution": false}},
+    {"type": "required_status_checks", "parameters": {"strict_required_status_checks_policy": true, "required_status_checks": [{"context": "BeeDay CI", "integration_id": 15368}]}}
+  ]
+}
+```
+
+Nota: `strict_required_status_checks_policy: true` em `hmg` — **diferente** de `main`
+(`false`, ver `11-release-quality-gate.md` §25). Preservado exatamente na mutação (§14.5).
+
+### 14.4 Transition Risk Analysis / Selected Strategy
+
+Estratégias avaliadas:
+
+| Estratégia | Classificação |
+|---|---|
+| A — renomear → PR real → novo context aparece → só então mutar Ruleset | `SELECTED` |
+| B — produzir temporariamente os dois contexts (job duplicado) → mutar → remover o antigo | `REJECTED` — desnecessária dado que a Estratégia A não requer nenhuma duplicação, mesmo padrão já usado com sucesso na Sprint 19.8.4 para `main` |
+
+**Por que a Estratégia A é segura:** o rename acontece na branch da própria Sprint
+(`sprint/19.8.6-...`). Até a mutação do Ruleset, `hmg` continua exigindo literalmente `"BeeDay
+CI"` — inalterado para qualquer outra PR aberta contra `hmg` nesse intervalo. A PR desta Sprint
+roda sua própria CI (já com o job renomeado) e produz o check-run `"Pull Request Validation"` para
+seu próprio `head_sha` — a mutação do Ruleset só ocorre **depois** de confirmar esse check-run
+real via API, e a leitura de volta (`read-back`) é imediata. Nunca existe uma janela em que `hmg`
+exija um check que nenhum workflow real ainda produziu.
+
+### 14.5 HMG Ruleset AFTER / Structural Diff
+
+Preenchido após a mutação real — ver relatório da Sprint (seções correspondentes) para o diff
+estrutural completo (esperado: exclusivamente `"context": "BeeDay CI"` → `"context": "Pull
+Request Validation"`, todo o resto idêntico).
+
+### 14.6 Rename Implemented
+
+`ci.yml`: `name:` do workflow → `BeeDay — Pull Request Validation`; `name:` do job `ci` →
+`Pull Request Validation`. Nenhuma mudança funcional nos steps — confirmado por `git diff`
+(apenas 2 linhas `name:` + comentários).
+
+### 14.7 Remote Validation
+
+Ver relatório da Sprint para: run real da PR, duração, comparação com a 19.8.5 (2m07s), validação
+de `beeday-publish`/`beeday-migrations`, merge em `hmg`, `HMG Deployment`, `HMG Verification`.
+
+**Débito atualizado:** rename final de `BeeDay CI` — **`RESOLVED — Sprint 19.8.6`** somente se
+toda a cadeia acima for confirmada com evidência remota real (não antes).
+
+---
+
+## 15. Fontes consultadas
+
+- `.github/workflows/ci.yml`, `deploy-hmg.yml`, `deploy-prd.yml`, `validate-promotion.yml`,
+  `release-quality-gate.yml`.
+- `gh api repos/tiagoarrigoni/BeeDay/rules/branches/{hmg,main,prd}`,
+  `gh api repos/tiagoarrigoni/BeeDay/rulesets/{20580759,20608232}` (reconsultado nesta Sprint).
+- `gh api repos/tiagoarrigoni/BeeDay/commits/{sha}/check-runs` (evidência real de check context,
+  Sprint 19.8.6).
+- `docs/deployment/06-cicd-pipeline-discovery-baseline.md`, `07-validation-matrix.md`,
+  `11-release-quality-gate.md` (precedente de mutação de Ruleset, Sprint 19.8.4).
 - `CLAUDE.md` (governança de mutação remota, seção 5.11).

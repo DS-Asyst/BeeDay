@@ -670,4 +670,17 @@ real confirmar — ver §32 do relatório da Sprint para o status.
 | Before (6m23s média) | `MEASURED REMOTELY` |
 | Simulação do novo gate | `MEASURED LOCALLY` |
 | Redução esperada (~64%) | `ESTIMATED` |
-| Redução real após merge | `UNKNOWN` até validação remota — ver relatório da Sprint |
+| Redução real após merge | `MEASURED REMOTELY` |
+
+**Atualização — validado remotamente (PR #69, run `31490432167`):** `BeeDay CI` reduzido rodou em
+**2m07s**, contra a média baseline de 6m23s — economia absoluta de **4m16s**, redução real de
+**66.8%** (vs. média e vs. mediana), superando a estimativa de ~64%. `beeday-publish`/
+`beeday-migrations` produzidos corretamente; `BeeDay CI` pós-merge continuou `ELIMINATED`;
+`BeeDay — HMG Deployment` e `BeeDay — HMG Verification` ambos `SUCCESS`. `REMOTE VALIDATED`.
+
+### 28.5 Sprint 19.8.6 — Rename (identidade, não performance)
+
+`ci.yml` renomeado para `BeeDay — Pull Request Validation` (job `Pull Request Validation`) — ver
+[`08-fast-pr-validation-decision.md`](08-fast-pr-validation-decision.md) §14. Nenhuma mudança de
+conteúdo do gate; duração esperada permanece na mesma faixa (~2m). Ver relatório da Sprint para a
+duração real medida após o rename.
