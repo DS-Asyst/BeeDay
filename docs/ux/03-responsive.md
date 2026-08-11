@@ -1,12 +1,13 @@
 # Responsiveness
 
 **Fonte da verdade:** levantamento completo de toda ocorrência de `@media` em
-`src/BeeDay.Web/wwwroot/css/*.css` (20 arquivos) e `src/BeeDay.Web/Components/**/*.razor.css`
-(30 arquivos) — 50 arquivos de CSS no total, cada um lido integralmente ou varrido por `@media`
+`src/BeeDay.Web/wwwroot/css/*.css` (19 arquivos) e `src/BeeDay.Web/Components/**/*.razor.css`
+(30 arquivos) — 49 arquivos de CSS no total, cada um lido integralmente ou varrido por `@media`
 nesta Sprint (16.7 havia enumerado apenas as 19 folhas globais).
 
-**Última verificação:** 2026-08-10 (Sprint 18.7) — contagem de folhas globais corrigida de 19 para
-20 (`Glob` direto de `wwwroot/css/*.css` confirma 20 arquivos hoje).
+**Última verificação:** 2026-08-11 (Sprint 20.3) — contagem de folhas globais corrigida de 20 para
+19 (`css/cursors.css` removido; sem `@media` próprio, então os 29 breakpoints do §2 permanecem
+inalterados). Verificação anterior: 2026-08-10 (Sprint 18.7) — contagem corrigida de 19 para 20.
 
 ## 1. Objetivo
 
@@ -112,8 +113,8 @@ sem coordenação entre si:
 
 ## 6. Fontes consultadas
 
-- Todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css` (20 arquivos) e
-  `src/BeeDay.Web/Components/**/*.razor.css` (30 arquivos) — 50 arquivos, levantamento completo,
+- Todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css` (19 arquivos) e
+  `src/BeeDay.Web/Components/**/*.razor.css` (30 arquivos) — 49 arquivos, levantamento completo,
   contagem cruzada manual (26 `max-width` + 2 `min-width` + 1 `max-height` = 29).
 - [`docs/design-system/01-foundations.md`](../design-system/01-foundations.md) §9-10 (camadas de
   CSS, cross-referenciado, não duplicado).

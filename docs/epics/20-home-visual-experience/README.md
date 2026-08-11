@@ -9,7 +9,7 @@ de referência visual local. Nenhuma afirmação de "estado atual" abaixo vem de
 documento evoluir em Sprints futuras, cada atualização deve reverificar contra o código antes de
 alterar uma afirmação de estado atual.
 
-**Última verificação:** 2026-08-11 (Decision Checkpoint pós-Sprint 20.1).
+**Última verificação:** 2026-08-11 (Sprint 20.3 — Native Cursor & Global Visual Cleanup, COMPLETE).
 
 **Escopo:** evolução da experiência visual do BeeDay — primeira Home oficial, evolução do Design
 System existente, Application Shell/navegação, remoção do cursor personalizado, responsividade e
@@ -286,6 +286,48 @@ Nenhuma paleta paralela, terceira família tipográfica, escala paralela de spac
 breakpoint arbitrário foi introduzido. Nenhum componente específico da Home foi criado. Nenhum
 código da página-modelo foi copiado.
 
+## Sprint 20.3 — Native Cursor & Global Visual Cleanup (Results)
+
+**Última verificação:** 2026-08-11 (Sprint 20.3, branch `sprint/20.3-native-cursor-cleanup`).
+**Fonte da verdade:** reauditoria repo-wide direta (`cursor`, `pointer*`, `mouse*`, `clientX/Y`,
+`pageX/Y`) em `src/`, `tests/`, `docs/`, excluindo `bin`/`obj`; leitura direta de `cursors.css`,
+`dragdrop.css`, `cards.css`, `App.razor`, `beeday-sortable.js`, `beeday-card-menu.js` antes e depois
+da remoção; busca residual final confirmando zero ocorrências ativas.
+
+**Resultado:** o cursor gráfico personalizado foi removido estruturalmente. O BeeDay usa cursores
+nativos do navegador/sistema operacional em toda a aplicação.
+
+- **Removido:** `src/BeeDay.Web/wwwroot/css/cursors.css`;
+  `src/BeeDay.Web/wwwroot/cursors/cursor-normal.png`;
+  `src/BeeDay.Web/wwwroot/cursors/cursor-click.png` (pasta ficou vazia e foi removida junto);
+  a linha `<link rel="stylesheet" href="@Assets["css/cursors.css"]" />` em `Components/App.razor`
+  (ordem e carregamento dos demais 18 stylesheets preservados, sem reorganização).
+- **Semântica nativa preservada, movida para os stylesheets já proprietários dos seletores** (sem
+  novo stylesheet global de cursor, sem override artificial):
+  - `cursor: grab`/`grabbing` para `.beeday-sortable__item` (e o corpo aberto do card dentro dele)
+    — movido para `dragdrop.css`, que já possuía os comentários apontando essa
+    responsabilidade e as demais regras não-cursor do sortable;
+  - `cursor: pointer` para `.activity-card__body--openable`/`.habit-card__body--openable`
+    (`role="button"`, corpo clicável de card fora do sortable) — adicionado em `cards.css`, que já
+    possui esses seletores.
+  - `cursor: not-allowed` em `BeeDayButton:disabled` (`design-system.css`) e
+    `.beeday-field__control:disabled`/`[readonly]` (`forms.css`) já existiam de forma independente
+    de `cursors.css` — confirmado, não precisaram de nenhuma alteração.
+- **Lógica de pointer/mouse funcional preservada, intocada:** `beeday-sortable.js`
+  (`pointerdown`/`pointermove`/`clientX`/`clientY` — mecanismo de reordenação em si) e
+  `beeday-card-menu.js` (`pointerdown` — detecção de clique fora do menu) — confirmados como não
+  relacionados ao cursor gráfico, nenhuma linha alterada.
+- **Nenhum override global artificial criado** (ex.: `cursor: auto !important` em `body *`) — o
+  objetivo foi deixar o navegador voltar ao comportamento padrão, não escondê-lo.
+- Documentação sincronizada: `docs/ux/02-accessibility.md` §8 (achado atualizado de "tensão ativa"
+  para "removido, histórico"), `docs/web/05-design-system-integration.md` (ordem de CSS),
+  `docs/design-system/{README,01-foundations}.md` e `docs/ux/03-responsive.md` (contagem de folhas
+  globais corrigida de 20 para 19 — `cursors.css` não tinha `@media` próprio, os 29 breakpoints
+  permanecem inalterados), `css/vendor/NES_ATTRIBUTION.md`/`nes-core.beeday-excerpt.css` (comentário
+  de proveniência que citava `cursors.css` como dono da estilização de cursor).
+- 752 testes continuam passando; nenhum teste existente asserta sobre `cursors.css`/`<link>`, nenhum
+  teste artificial foi criado.
+
 ## Sprint Roadmap
 
 ```text
@@ -293,7 +335,7 @@ código da página-modelo foi copiado.
 
 20.2 Visual Foundations Adoption — COMPLETE (NO CHANGE — existing foundations judged sufficient)
 
-20.3 Native Cursor & Global Visual Cleanup
+20.3 Native Cursor & Global Visual Cleanup — COMPLETE
 
 20.4 Application Shell & Navigation
 

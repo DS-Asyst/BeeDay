@@ -41,9 +41,10 @@
  * including their pseudo-elements and interactive states, exactly as they
  * appear upstream — EXCEPT the `cursor: url(data:image/png;base64,...) ...`
  * declaration inside the .nes-btn base rule, which has been stripped even
- * from this provenance copy (BeeDay owns cursor styling globally via
- * wwwroot/css/cursors.css; shipping an unused embedded cursor asset serves
- * no purpose here). That is the only textual change in this file; every
+ * from this provenance copy (BeeDay never shipped this embedded cursor
+ * asset; as of Sprint 20.3, BeeDay uses native browser cursors throughout,
+ * so shipping it here would serve no purpose regardless). That is the
+ * only textual change in this file; every
  * other selector, property, and value below is byte-identical to upstream.
  *
  * Explicitly and intentionally excluded from this excerpt (present upstream,
