@@ -32,35 +32,37 @@ branch); `deploy-hmg.yml` (`beeday-homologation`) e `deploy-prd.yml` (`beeday-pr
 `concurrency: cancel-in-progress: false` (deploys nunca são cancelados por um novo evento —
 enfileiram, o que serializa mas **não deduplica** execuções concorrentes do mesmo estado — ver §6).
 
-## 3. Pipeline de validação (`ci.yml`, job `ci` — único workflow que builda/testa)
+## 3. Pipeline de validação (`ci.yml`, job `ci` — Fast HMG Gate)
 
-`ci.yml` é hoje o **único** workflow que builda e testa a aplicação. `deploy-hmg.yml` e
-`deploy-prd.yml` nunca rebuildam nem re-testam — ambos apenas baixam, por `run-id` pinado, os
-artifacts que uma execução de `ci.yml` já validou em `hmg` (Build Once, Deploy Many — `CLAUDE.md`
-§5.7.2). Isso substitui a descrição anterior deste documento, que descrevia um job `validate`
-equivalente dentro de `deploy-prd.yml` — esse job não existe mais na versão atual do arquivo
-(reescrito em `9439bd8`, Sprint 18.4; ver
-[`06-cicd-pipeline-discovery-baseline.md`](06-cicd-pipeline-discovery-baseline.md) §19.2).
+`ci.yml` é o workflow que valida toda PR `sprint/*→hmg` e produz os artifacts que `deploy-hmg.yml`
+consome — `deploy-hmg.yml` e `deploy-prd.yml` nunca rebuildam nem re-testam, ambos apenas baixam,
+por `run-id` pinado, os artifacts já validados (Build Once, Deploy Many — `CLAUDE.md` §5.7.2).
+
+**Redesenhado na Sprint 19.8.5** para responder exclusivamente "esta alteração tem qualidade
+mínima para ser integrada e testada em homologação?" — não mais a suíte completa de release.
+Format, `Infrastructure.Tests`, `Web.Tests`, `E2E.Tests` (+ setup do Playwright) foram movidos
+para `BeeDay — Release Quality Gate` (ver [`11-release-quality-gate.md`](11-release-quality-gate.md)), que já os executa
+obrigatoriamente antes de `main` — nenhuma cobertura foi removida, apenas realocada para a
+fronteira onde a EPIC 19 decidiu que cada validação agora tem mais valor. Decisão completa,
+evidência remota e justificativa por item:
+[`08-fast-pr-validation-decision.md`](08-fast-pr-validation-decision.md) §12.
 
 ```mermaid
 flowchart TD
     A[actions/checkout@v7] --> B[setup-dotnet .NET 10]
     B --> C[dotnet restore BeeDay.slnx]
-    C --> D["dotnet format --verify-no-changes"]
-    D --> E["dotnet build -c Release --warnaserror"]
-    E --> F[Playwright install chromium]
-    F --> G["dotnet test -c Release --logger trx<br/>(por projeto, ver Sprint 19.1)"]
-    G --> H["dotnet publish BeeDay.Web.csproj -c Release"]
-    H --> I[Validar BeeDay.Web.dll + web.config existem no publish]
-    I --> J["dotnet ef migrations bundle (win-x64)"]
-    J --> K[Upload artifacts: test-results, e2e-artifacts,<br/>publish validado, migration bundle]
+    C --> D["dotnet build -c Release --warnaserror"]
+    D --> E["dotnet test -c Release --logger trx<br/>(Domain.Tests + Application.Tests apenas)"]
+    E --> F["dotnet publish BeeDay.Web.csproj -c Release"]
+    F --> G[Validar BeeDay.Web.dll + web.config existem no publish]
+    G --> H["dotnet ef migrations bundle (win-x64)"]
+    H --> I[Upload artifacts: test-results,<br/>publish validado, migration bundle]
 ```
 
-`ci.yml` roda em `windows-latest` (hospedado pela GitHub) e tem um passo extra específico
-(`Upload E2E failure artifacts`, `if: always()`, `if-no-files-found: ignore`) que publica
-`tests/BeeDay.E2E.Tests/bin/Release/net10.0/e2e-artifacts` — a pasta de screenshot/trace do
-Playwright, que só tem conteúdo quando um teste E2E falha (ver
-[`docs/testing/`](../testing/README.md)).
+`ci.yml` roda em `windows-latest` (hospedado pela GitHub). Format, cache/instalação do Playwright,
+`Infrastructure.Tests`, `Web.Tests`, `E2E.Tests`, e o upload de `beeday-e2e-artifacts` (sem
+consumidor downstream) não fazem mais parte deste workflow — todos continuam rodando
+integralmente em `release-quality-gate.yml` (ver [`docs/testing/`](../testing/README.md)).
 
 `dotnet publish` produz um diretório de arquivos (framework-dependent, implícito por não haver
 `-r`/`--self-contained` no comando), consumido diretamente pelo IIS via `AspNetCoreModuleV2`. Não

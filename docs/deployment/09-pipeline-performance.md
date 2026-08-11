@@ -621,3 +621,53 @@ escopo restante da EPIC 19.
 ### 27.12 Remote Validation Results
 
 Ver §27.13 abaixo — preenchido após push autorizado e observação real do GitHub Actions.
+
+---
+
+## 28. Sprint 19.8.5 — Fast HMG Developer Feedback
+
+**Escopo:** reduzir o tempo de `BeeDay CI` (fronteira `Sprint→HMG`) movendo Format,
+Infrastructure.Tests, Web.Tests, E2E.Tests (+ setup do Playwright) para `Release Quality Gate`,
+que já os executa obrigatoriamente antes de `main`. Decisão completa, com evidência e
+justificativa por item: [`08-fast-pr-validation-decision.md`](08-fast-pr-validation-decision.md)
+§12.
+
+### 28.1 Before (MEASURED REMOTELY)
+
+5 execuções reais recentes de `BeeDay CI` (`pull_request`→`hmg`, `windows-latest`):
+
+| Métrica | Valor |
+|---|---|
+| Média | 6m23s |
+| Mediana | 6m22s |
+| Mínimo | 5m00s |
+| Máximo | 7m39s |
+
+### 28.2 Local Fast-Gate Simulation (MEASURED LOCALLY)
+
+Ver relatório da Sprint (seção correspondente) para a execução local passo a passo dos comandos
+que permanecem no novo `ci.yml`, na mesma ordem, medindo `Restore`/`Build`/`Domain+Application
+Tests`/`Publish`/`EF bundle` individualmente. Simulação local não prova comportamento em runner
+limpo (`windows-latest`) — apenas a corretude da sequência e dos exit codes.
+
+### 28.3 Expected After (ESTIMATED, não medido remotamente ainda)
+
+Soma dos custos médios remotos reais dos itens que **permanecem** (Checkout, Configure .NET +
+Restore ≈48s combinados, Build ≈28s, Domain+Application ≈5.6s, Publish ≈11s, EF tool restore + EF
+bundle ≈19s, uploads ≈10s, `Show .NET information` ≈9s, mantido fora de escopo) menos os itens
+**removidos** (Format ≈42s, Cache+Install Playwright ≈10-21s, Infrastructure.Tests ≈81.3s,
+Web.Tests ≈44.9s, E2E.Tests ≈53.9s):
+
+**Estimativa: ≈2m10s-2m20s** (`ESTIMATED` — projeção a partir de médias remotas reais dos steps
+mantidos, não uma nova execução remota do gate reduzido). Redução absoluta estimada: **≈4 minutos
+(~64%)** frente à média Before de 6m23s. Não tratar como resultado real até uma execução remota
+real confirmar — ver §32 do relatório da Sprint para o status.
+
+### 28.4 Classificação de evidência
+
+| Medição | Classificação |
+|---|---|
+| Before (6m23s média) | `MEASURED REMOTELY` |
+| Simulação do novo gate | `MEASURED LOCALLY` |
+| Redução esperada (~64%) | `ESTIMATED` |
+| Redução real após merge | `UNKNOWN` até validação remota — ver relatório da Sprint |
