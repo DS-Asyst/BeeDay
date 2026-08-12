@@ -7,7 +7,9 @@ interop-equivalente aos demais). Componentes de Forms e o `PixelIcon` têm parâ
 [`04-forms.md`](04-forms.md) e [`03-icons.md`](03-icons.md) respectivamente — este documento os
 resume e linka em vez de duplicar (`docs/CONVENTIONS.md` §12).
 
-**Última verificação:** 2026-08-07.
+**Última verificação:** 2026-08-11 (Sprint 20.5, EPIC 20) — §5 (`BeeDayHero`) atualizado: primeiro
+consumidor de produto real (`Home.razor`, rota `/`). Demais seções preservadas da verificação de
+2026-08-07.
 
 ## 1. Objetivo
 
@@ -121,10 +123,10 @@ abrir um `BeeDayCardMenu` fecha qualquer outro já aberto no mesmo circuito, via
 de ilustração + uma única ação emphasized; `BeeDayPageHeader` para o caso comum sem ilustração.
 
 **Consumidores:** `BeeDayPageHeader` em `Account.razor`; `BeeDaySettingsSection`/`Form` nas 3 seções
-de `Account.razor` (Profile/Security/Preferences); `BeeDayHero`/`BeeDaySectionHeader` usados
-principalmente nas páginas de catálogo (`HeroCatalog.razor`) — nenhuma página de produto fora de
-`Account` foi encontrada usando `BeeDayHero` nesta auditoria, o que sugere um componente construído
-para um caso de uso ainda não adotado amplamente.
+de `Account.razor` (Profile/Security/Preferences); `BeeDaySectionHeader` usado principalmente nas
+páginas de catálogo (`HeroCatalog.razor`). **`BeeDayHero` teve seu primeiro consumidor de produto
+real na Sprint 20.5 (EPIC 20):** `Features/Home/Pages/Home.razor` (rota `/`, variante `Default`,
+sem ilustração) — até então só era usado em `HeroCatalog.razor`.
 
 ## 6. Modals
 

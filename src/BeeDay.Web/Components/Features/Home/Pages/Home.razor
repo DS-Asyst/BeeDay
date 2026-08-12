@@ -1,0 +1,79 @@
+@page "/"
+@attribute [AllowAnonymous]
+@layout BeeDay.Web.Components.Layout.PublicLayout
+@using BeeDay.Web.Services.Authentication
+@inject NavigationManager Navigation
+@inject AuthenticatedEntryDestinationResolver DestinationResolver
+
+<PageTitle>BeeDay — Be better every day</PageTitle>
+
+<article class="home-page">
+    <BeeDayHero Eyebrow="BEEDAY"
+                Title="Be better every day"
+                Subtitle="A simple daily loop for habits, tasks, projects, and money — with light gamification that keeps your progress visible.">
+        <PrimaryAction>
+            <AuthorizeView>
+                <Authorized>
+                    <BeeDayButton OnClick="ContinueToBeeDay">Continue to BeeDay</BeeDayButton>
+                </Authorized>
+                <NotAuthorized>
+                    <BeeDayButton OnClick="GoToLogin">Get started</BeeDayButton>
+                </NotAuthorized>
+            </AuthorizeView>
+        </PrimaryAction>
+    </BeeDayHero>
+
+    <section class="home-page__section" id="capabilities" aria-labelledby="capabilities-heading">
+        <h2 id="capabilities-heading">Everything you need for your day</h2>
+
+        <div class="home-page__cards">
+            <BeeDayCard Padded="true" Class="home-page__card">
+                <PixelIcon Name="PixelIconName.Daily" Size="PixelIconSize.Large" Color="PixelIconColor.Primary" />
+                <h3>Daily</h3>
+                <p>Daily keeps the actions that move your life forward in one place.</p>
+            </BeeDayCard>
+
+            <BeeDayCard Padded="true" Class="home-page__card">
+                <PixelIcon Name="PixelIconName.Streak" Size="PixelIconSize.Large" Color="PixelIconColor.Primary" />
+                <h3>Habits</h3>
+                <p>Habits are recurring behaviors. Register progress consistently and watch momentum grow.</p>
+            </BeeDayCard>
+
+            <BeeDayCard Padded="true" Class="home-page__card">
+                <PixelIcon Name="PixelIconName.RecurringTask" Size="PixelIconSize.Large" Color="PixelIconColor.Primary" />
+                <h3>Tasks</h3>
+                <p>Tasks can repeat daily, weekly or monthly and are completed manually.</p>
+            </BeeDayCard>
+
+            <BeeDayCard Padded="true" Class="home-page__card">
+                <PixelIcon Name="PixelIconName.Project" Size="PixelIconSize.Large" Color="PixelIconColor.Primary" />
+                <h3>Projects</h3>
+                <p>Projects represent objectives. Their To-Dos define the work and calculate completion.</p>
+            </BeeDayCard>
+
+            <BeeDayCard Padded="true" Class="home-page__card">
+                <PixelIcon Name="PixelIconName.Wallet" Size="PixelIconSize.Large" Color="PixelIconColor.Primary" />
+                <h3>Wallet</h3>
+                <p>Track transactions, organize tags, and understand where your money goes.</p>
+            </BeeDayCard>
+        </div>
+    </section>
+
+    <section class="home-page__section home-page__section--progress" id="progress" aria-labelledby="progress-heading">
+        <h2 id="progress-heading">Progress you can see</h2>
+        <p>
+            Every habit, task, and project you complete earns experience and grows your level — a light,
+            visible way to feel your consistency add up, without turning your day into a game.
+        </p>
+    </section>
+</article>
+
+@code {
+    private void GoToLogin() => Navigation.NavigateTo("/login");
+
+    private async Task ContinueToBeeDay()
+    {
+        var destination = await DestinationResolver.ResolveAsync();
+        Navigation.NavigateTo(destination, forceLoad: true, replace: true);
+    }
+}

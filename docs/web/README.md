@@ -37,7 +37,7 @@ src/BeeDay.Web/
 │   ├── DesignSystem/                 Buttons, Cards, Forms, Feedback, Icons, Layout, Modals, Text —
 │   │                                  ver docs/design-system/ (reservado) e §5 abaixo
 │   ├── Behaviors/DragDrop/            BeeDaySortable (JS interop de reordenação)
-│   ├── Features/                       12 áreas de funcionalidade — ver 04-feature-components.md
+│   ├── Features/                       13 áreas de funcionalidade — ver 04-feature-components.md
 │   └── Pages/                           NotFound, Error
 └── wwwroot/                               css/, js/ (3 módulos ES), icons/ (sprite SVG), images/
 ```
@@ -49,7 +49,7 @@ src/BeeDay.Web/
 | [`01-composition-root.md`](01-composition-root.md) | `Program.cs`: DI, pipeline HTTP, autenticação por cookie, endpoints `/auth/*`, rate limiting, health checks |
 | [`02-routing-and-pages.md`](02-routing-and-pages.md) | `Routes.razor`, `App.razor`, as 18 rotas `@page`, layout e atributo de autorização de cada uma |
 | [`03-layouts.md`](03-layouts.md) | `MainLayout`, `OnboardingLayout`, navegação, painéis laterais, rodapé, `ReconnectModal` |
-| [`04-feature-components.md`](04-feature-components.md) | As 12 áreas de `Components/Features/` — componentes, state, models, como cada uma chama Application |
+| [`04-feature-components.md`](04-feature-components.md) | As 13 áreas de `Components/Features/` — componentes, state, models, como cada uma chama Application |
 | [`05-design-system-integration.md`](05-design-system-integration.md) | Como a Web compõe o Design System, os 3 módulos de JS interop, ordem de carregamento de CSS |
 | [`06-testing.md`](06-testing.md) | Mapeamento componente → teste em `BeeDay.Web.Tests` (bUnit + integração) e `BeeDay.E2E.Tests` (Playwright) |
 

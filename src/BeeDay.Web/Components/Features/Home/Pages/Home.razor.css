@@ -1,0 +1,55 @@
+.home-page {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: var(--beeday-reading-width);
+    margin-inline: auto;
+    padding-block: var(--beeday-spacing-xl) var(--beeday-spacing-3xl);
+    gap: var(--beeday-spacing-3xl);
+}
+
+.home-page__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--beeday-spacing-lg);
+}
+
+.home-page__section h2 {
+    margin: 0;
+    color: var(--beeday-color-text-primary);
+    font-size: var(--beeday-font-size-2xl);
+}
+
+.home-page__section--progress p {
+    max-width: 42rem;
+    color: var(--beeday-color-text-secondary);
+}
+
+.home-page__cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: var(--beeday-spacing-lg);
+}
+
+.home-page__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--beeday-spacing-sm);
+}
+
+.home-page__card h3 {
+    margin: 0;
+    color: var(--beeday-color-text-primary);
+}
+
+.home-page__card p {
+    margin: 0;
+    color: var(--beeday-color-text-secondary);
+}
+
+@media (max-width: 42rem) {
+    .home-page {
+        padding-block: var(--beeday-spacing-lg) var(--beeday-spacing-2xl);
+        gap: var(--beeday-spacing-2xl);
+    }
+}
