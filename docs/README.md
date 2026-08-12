@@ -36,6 +36,7 @@ testes em `tests/BeeDay.Web.Tests`". Ver [`CONVENTIONS.md`](CONVENTIONS.md).
 | [`developer/`](developer/README.md) | Guia de contribuição, setup de ambiente | Reservado — ver `README.md` da raiz enquanto isso |
 | [`history/`](history/README.md) | Diários de sprint e transições já concluídas | Correto (histórico, congelado) |
 | [`epics/20-home-visual-experience/`](epics/20-home-visual-experience/README.md) | EPIC 20 — Home & Visual Experience: decisões aprovadas, discovery transversal, Visual Adoption Map, roadmap de Sprints | Em andamento — iniciado na Sprint 20.1 |
+| [`epics/21-lingo-product-experience/`](epics/21-lingo-product-experience/README.md) | EPIC 21 — Lingo-Based Product Experience & Design System: especificação de migração Lingo → BeeDay, component mapping, gamification capability matrix | Em andamento — iniciado na Sprint 21.1 |
 
 ## Templates
 
