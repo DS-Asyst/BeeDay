@@ -5,7 +5,7 @@
     left: 0;
     z-index: 100;
     width: 100%;
-    min-height: 3.75rem;
+    min-height: 4.25rem;
     background: var(--beeday-color-surface);
     border-bottom: 1px solid var(--beeday-color-border);
     box-shadow: var(--beeday-shadow-sm);
@@ -15,7 +15,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    min-height: 3.75rem;
+    min-height: 4.25rem;
     gap: 1rem;
 }
 
@@ -25,8 +25,17 @@
     text-decoration: none;
 }
 
+/* PublicHeader is a first consumer of the canonical brand primary (see variables.css) — this ::deep
+   override recolors "BEE" only within the public header's own DOM subtree (BeeDayBrand's shared
+   default stays legacy purple for its other 8 consumers: Login, the 5 Identity pages, Tutorial,
+   CreateProfile — all explicitly out of scope this Sprint). */
+.public-header ::deep .beeday-brand {
+    color: var(--beeday-color-brand-primary);
+}
+
 @media (max-width: 42rem) {
+    .public-header,
     .public-header__content {
-        min-height: 3.25rem;
+        min-height: 3.75rem;
     }
 }

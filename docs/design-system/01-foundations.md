@@ -6,11 +6,13 @@ levantamento completo de todas as ocorrências de `@media` em `src/BeeDay.Web/ww
 (19 arquivos) e `src/BeeDay.Web/Components/**/*.razor.css` (30 arquivos de CSS isolado por
 componente).
 
-**Última verificação:** 2026-08-11 (Sprint 20.3) — contagem de folhas globais corrigida de 20 para
-19 (`css/cursors.css` removido: remoção estrutural do cursor gráfico personalizado, sem `@media`
-próprio, então a lista de breakpoints do §10 permanece inalterada). Verificação anterior: 2026-08-10
-(Sprint 18.7) — contagem corrigida de 19 para 20 (`Glob` direto de `wwwroot/css/*.css` confirmava 20
-arquivos naquele momento).
+**Última verificação:** 2026-08-12 (Sprint 20.6, EPIC 20) — §2/§3/§5 atualizados: novo degrau
+`--beeday-radius-2xl`, novo token de escala `--beeday-font-size-hero`, novo peso
+`--beeday-font-weight-black`, nova família canônica `--beeday-color-brand-primary` (+ `-hover`/
+`-active`/`-light`) e evolução de `--beeday-font-body` (Inter → Nunito) — todos adicionados/alterados
+como parte da migração canônica do Design System para o target visual da página-modelo (ver
+`docs/epics/20-home-visual-experience/README.md`, seção "Sprint 20.6"). Verificação anterior:
+2026-08-11 (Sprint 20.3) — contagem de folhas globais corrigida de 20 para 19.
 
 ## 1. Objetivo
 
@@ -27,7 +29,8 @@ produto; linha 253: paleta "game"/pixel-console; linha 271: tokens de motion pix
 
 ```mermaid
 graph TD
-    Brand["Marca<br/>primary #673ab7, primary-hover, primary-active,<br/>primary-light, primary-soft, accent #f29b24"]
+    Brand["Marca (legada)<br/>primary #673ab7, primary-hover, primary-active,<br/>primary-light, primary-soft, accent #f29b24"]
+    BrandNew["Marca (canônica, Sprint 20.6)<br/>brand-primary #2538d2, -hover, -active, -light"]
     Surface["Superfícies<br/>background, surface, surface-muted,<br/>surface-subtle, overlay"]
     Content["Conteúdo<br/>text-primary, text-secondary, text-muted,<br/>text-inverse, border, border-strong"]
     Status["Status<br/>success, warning, danger, info<br/>(cada um com variante -soft)"]
@@ -43,6 +46,19 @@ graph TD
 Nenhuma cor é definida duas vezes com valores diferentes sob o mesmo nome — cada família (Brand,
 Status, Activity, Attribute, Habit, Button, Comic, Card, Chrome) tem seu próprio namespace de
 token, então uma alteração em uma família nunca risca colidir com outra.
+
+**Migração de marca em andamento (Sprint 20.6, EPIC 20):** `--beeday-color-brand-primary`
+(`#2538d2`, extraído diretamente da página-modelo) é a cor primária **canônica** — a direção de
+marca vinculante para todo consumidor futuro. `--beeday-color-primary` (`#673ab7`, roxo) é mantida,
+com o mesmo valor de sempre, como família de **compatibilidade** para os 40+ consumidores ainda não
+migrados (`TopNavigation`, `AccountSidePanel`, `ProfileSidePanel`, `DashboardColumn`, `cards.css`,
+`wallet.css`, `feedback.css`, `forms.css`, `identity.css`, `pixel-ui.css`, `theme.css`,
+`editor-modal.css`, `dragdrop.css`) — nenhum deles foi tocado nesta Sprint. Primeiros consumidores
+reais da família canônica: `Home.razor.css` (gradiente do hero/CTA, eyebrows, ícones) e
+`PublicHeader.razor.css` (marca "BEE", via `::deep` escopado só ao header). A Sprint 20.7 repovoa os
+consumidores restantes; `--beeday-color-primary` é removida quando essa migração terminar. O amarelo
+de acento da referência (`#ffd326`/`#ffb72e`) não ganhou token novo — `--beeday-game-yellow`
+(`#ffc928`) já é próximo o suficiente e foi reutilizado como está.
 
 ### 2.2 Paleta "game" (pixel-console)
 
@@ -68,12 +84,26 @@ usada — funciona como uma política de tipografia executável, não apenas uma
 
 | Papel | Fonte | Uso documentado em `typography-policy.css` |
 |---|---|---|
-| `--beeday-font-body` | `"Inter", "Segoe UI", sans-serif` | Todo texto de UI regular: parágrafos, descrições, formulários, inputs, tabelas, dialogs, navegação, menus, valores, contadores, estatísticas, saldos |
+| `--beeday-font-body` | `"Nunito", "Segoe UI", sans-serif` (Sprint 20.6/EPIC 20 — era `"Inter"`) | Todo texto de UI regular: parágrafos, descrições, formulários, inputs, tabelas, dialogs, navegação, menus, valores, contadores, estatísticas, saldos |
 | `--beeday-font-ui` (= `--beeday-font-family`) | `"Jersey 25", "Segoe UI", sans-serif` | Reservada a títulos de página/card, botões estilizados (`BeeDayButton`) e marca (`BeeDayBrand`) |
 
-Escala de tamanho (8 degraus, `xs` .75rem → `3xl` 2.2rem), peso (5: regular 400 → extrabold 700 —
-`extrabold` e `bold` compartilham o mesmo valor 700, não há um peso 800 real), altura de linha (3:
-tight 1.2, normal 1.5, relaxed 1.65), `letter-spacing-label` (.04em) e 7 tokens compostos
+**Migração canônica (Sprint 20.6, EPIC 20):** `--beeday-font-body` evoluiu de Inter para Nunito —
+troca de valor imediata e project-wide (toda a UI regular do produto já renderiza Nunito), extraída
+diretamente da página-modelo (fonte dominante de toda a referência) e aplicada de uma vez porque é
+uma substituição puramente tipográfica, sem contrato de layout/comportamento em risco. `Google
+Fonts` em `App.razor` foi atualizado (`family=Nunito:wght@400;600;700;800;900`). `--beeday-font-ui`
+(Jersey 25) **não foi migrada** — permanece a identidade exclusiva do chrome pixel-console/retro-game
+(`BeeDayButton`, reforçado com `!important` em `typography-policy.css`; `BeeDayBrand`; títulos de
+página/card; `pixel-ui.css`), uma responsabilidade de marca real e formalmente documentada
+anteriormente a esta Sprint, não apenas compatibilidade visual histórica.
+
+Escala de tamanho (8 degraus, `xs` .75rem → `3xl` 2.2rem, mais o degrau fluido
+`--beeday-font-size-hero: clamp(2.75rem, 7vw, 5.5rem)` acrescentado na Sprint 20.6/EPIC 20 para
+headlines de hero/marketing em escala full-bleed — usado por `Home.razor.css`), peso (6: regular 400
+→ black 900 — `extrabold` e `bold` compartilham o mesmo valor 700, não há um peso 800 real;
+`--beeday-font-weight-black: 900` acrescentado na Sprint 20.6/EPIC 20 para o peso de display da
+headline/eyebrow do hero, igualando o peso 900 consistentemente usado pela página-modelo), altura de
+linha (3: tight 1.2, normal 1.5, relaxed 1.65), `letter-spacing-label` (.04em) e 7 tokens compostos
 `--beeday-type-*` (`display`, `title`, `subtitle`, `label`, `body`, `small`, `button`) que combinam
 peso/tamanho/altura de linha/família num único valor `font` shorthand.
 
@@ -102,9 +132,11 @@ coincidem numericamente com o início da escala principal, mas são tokens disti
 
 ## 5. Border radius
 
-6 degraus em `variables.css`: `xs` .2rem, `sm` .375rem, `md` .625rem, `lg` .875rem, `xl` 1.25rem,
-`pill` 999px. `activity-design-system.css` define mais dois, próprios (`--activity-radius-sm` .25rem,
-`--activity-radius-md` .4rem) — mesmo padrão de escala paralela do §4.
+7 degraus em `variables.css`: `xs` .2rem, `sm` .375rem, `md` .625rem, `lg` .875rem, `xl` 1.25rem,
+`2xl` 1.75rem (Sprint 20.6, EPIC 20 — preenche o gap entre `xl` e `pill` para superfícies generosas
+de marketing/showcase, ex. `.beeday-card--soft`), `pill` 999px. `activity-design-system.css` define
+mais dois, próprios (`--activity-radius-sm` .25rem, `--activity-radius-md` .4rem) — mesmo padrão de
+escala paralela do §4.
 
 ## 6. Elevação (sombra)
 

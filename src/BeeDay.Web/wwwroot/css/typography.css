@@ -1,5 +1,17 @@
 :root {
-    --beeday-font-body: "Inter", "Segoe UI", sans-serif;
+    /* Body/reading copy family — evolved from Inter to Nunito in Sprint 20.6 (EPIC 20) as the
+       canonical Design System target, per the reference page-model direction-change decision. This
+       is a project-wide, immediate value change (every existing --beeday-font-body consumer now
+       renders Nunito) because the substitution is purely typographic (a clean rounded sans
+       replacing another) and carries no layout/behavioral contract that would regress. --beeday-
+       font-ui (Jersey 25) is intentionally NOT touched here — see its own comment below. */
+    --beeday-font-body: "Nunito", "Segoe UI", sans-serif;
+    /* Reserved for the shared pixel-console/retro game identity — BeeDayButton (enforced via
+       typography-policy.css's `.beeday-button { font-family: var(--beeday-font-ui) !important; }`),
+       BeeDayBrand, PixelIcon captions, page/card titles, and the wider pixel-ui.css game chrome.
+       This is a real, pre-existing, formally documented brand responsibility (typography-policy.css
+       predates Sprint 20.6), not mere historical/visual compatibility, so it is kept as-is rather
+       than migrated to Nunito. */
     --beeday-font-ui: "Jersey 25", "Segoe UI", sans-serif;
     --beeday-font-family: var(--beeday-font-ui);
 
@@ -11,12 +23,20 @@
     --beeday-font-size-xl: 1.5rem;
     --beeday-font-size-2xl: 1.8rem;
     --beeday-font-size-3xl: 2.2rem;
+    /* Hero/marketing display headline — added Sprint 20.6 (EPIC 20) as the reference page-model's
+       target headline scale; fluid by design (clamp), reused wherever a full-bleed hero/closing CTA
+       headline is composed, not only by Home. */
+    --beeday-font-size-hero: clamp(2.75rem, 7vw, 5.5rem);
 
     --beeday-font-weight-regular: 400;
     --beeday-font-weight-medium: 500;
     --beeday-font-weight-semibold: 600;
     --beeday-font-weight-bold: 700;
     --beeday-font-weight-extrabold: 700;
+    /* Display-black weight — added Sprint 20.6 (EPIC 20) for hero/marketing display type; the
+       reference page-model's headline/eyebrow/button weight is consistently 900, one step past the
+       existing extrabold (700) step. */
+    --beeday-font-weight-black: 900;
 
     --beeday-line-height-tight: 1.2;
     --beeday-line-height-normal: 1.5;
