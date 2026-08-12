@@ -9,7 +9,7 @@ de referência visual local. Nenhuma afirmação de "estado atual" abaixo vem de
 documento evoluir em Sprints futuras, cada atualização deve reverificar contra o código antes de
 alterar uma afirmação de estado atual.
 
-**Última verificação:** 2026-08-11 (Sprint 20.4 — Application Shell & Navigation, COMPLETE).
+**Última verificação:** 2026-08-11 (Sprint 20.5 — BeeDay Home Structure, COMPLETE).
 
 **Escopo:** evolução da experiência visual do BeeDay — primeira Home oficial, evolução do Design
 System existente, Application Shell/navegação, remoção do cursor personalizado, responsividade e
@@ -476,12 +476,185 @@ introduzido.
 
 ## Deferred Decisions (atualização Sprint 20.4)
 
-Adicionadas às pendências já registradas no checkpoint:
-
-- Se o CTA autenticado do `PublicHeader` deve reutilizar `LoginDestinationResolver.Resolve(...)` em
-  vez do destino fixo `/daily` — decidir antes de `/` ser transformado na Home (Sprint 20.5).
 - Se `TopNavigation`/`AccountSidePanel` devem migrar para `BeeDayBrand` com uma variante de cor para
   header escuro — avaliado, não decidido (baixa prioridade, não é mais um bug).
+
+**Resolvida na Sprint 20.5:** o CTA autenticado do `PublicHeader` passou a reutilizar
+`LoginDestinationResolver.Resolve(...)` via `AuthenticatedEntryDestinationResolver` — ver abaixo.
+
+## Sprint 20.5 — BeeDay Home Structure (Results)
+
+**Última verificação:** 2026-08-11 (Sprint 20.5, branch `sprint/20.5-beeday-home-structure`).
+**Fonte da verdade:** leitura direta de `Entry.razor` (antes de removido), `LoginDestinationResolver`,
+`CreateProfile.razor.cs`, `BeeDayHero`/`BeeDayCard`/`PixelIcon`/`PixelIconRegistry`,
+`Tutorial.razor` (copy institucional estabelecida), `AuthorizationIntegrationTests.cs`,
+`EntryFlowVisualConsistencyTests.cs`; execução real de `dotnet build`/`dotnet test`.
+
+**Resultado:** `/` é agora a Home pública oficial do BeeDay — sem redirecionamento automático, para
+visitante anônimo ou autenticado.
+
+### `/` routing change
+
+| | Antes (até Sprint 20.4) | Depois (Sprint 20.5) |
+|---|---|---|
+| Arquivo | `Features/ProfileCreation/Pages/Entry.razor` | `Features/Home/Pages/Home.razor` (nova área `Home`, 13ª de `Components/Features/`) |
+| Layout | `OnboardingLayout` | `PublicLayout` (Sprint 20.4) |
+| Comportamento | Loading state + redirect silencioso (`NavigateTo(..., forceLoad: true, replace: true)`) para `/login`, `/profile/create`, `/onboarding/tutorial` ou `/daily` conforme estado | Renderiza a Home diretamente para qualquer visitante — nenhum redirect |
+| `@rendermode` | `InteractiveServer` explícito | Implícito (herdado de `App.razor`) |
+
+`Entry.razor`/`Entry.razor.css` foram removidos — busca repo-wide confirmou zero outros
+consumidores (nenhum teste, nenhuma outra página o referenciava por nome/tipo).
+
+### Entry resolver refactoring — a política de destino foi preservada, não apagada
+
+A árvore de decisão perfil → onboarding → `/daily` continua ativa exatamente onde já vivia:
+
+- `LoginDestinationResolver.Resolve` (`Program.cs`, endpoint `/auth/login`) — inalterado.
+- `CreateProfile.razor.cs` (pós-conclusão de perfil) — inalterado.
+
+O terceiro consumidor histórico (a cópia inline dentro do próprio `Entry.razor`) foi **substituído,
+não duplicado**: `Services/Authentication/AuthenticatedEntryDestinationResolver.cs` (novo, `Scoped`)
+envolve `BeeDayWebService.GetCurrentUserAsync()` + `LoginDestinationResolver.Resolve(...)` — reusa a
+regra existente em vez de reimplementá-la. Usado pelo CTA autenticado de `PublicHeader` e de
+`Home.razor` (ver "Authentication-Aware Behavior" abaixo). **Nenhuma quarta implementação da árvore
+foi criada.**
+
+### Home architecture
+
+- **Owner:** `Features/Home/Pages/Home.razor` (+ `Home.razor.css`, composição local — grid dos
+  cards, ritmo vertical, `max-width` reaproveitando `--beeday-reading-width`).
+- **Layout:** `PublicLayout` (Sprint 20.4) — `PublicHeader` + `@Body` + `AppFooter` +
+  `BeeDayToastHost`, sem alteração.
+- **Landmark:** um único `<article class="home-page">` como raiz (não um segundo `<main>` — ver
+  "Deferred Findings"; `PublicLayout` já fornece o único `<main class="beeday-main">` da página).
+
+### Visual reference translation
+
+**Absorvido da referência:** composição hero→capabilities→progress (ritmo vertical de seções),
+hierarquia eyebrow→título→subtítulo→CTA (via `BeeDayHero`, já existente), grid de cards de feature,
+CTA como ação principal visível sem rolar.
+
+**Rejeitado deliberadamente:** paleta azul/amarela e fonte Nunito da referência (usa
+`--beeday-color-primary`/Inter/Jersey 25 do BeeDay); métricas fictícias da referência ("84%
+consistência", "21 hábitos concluídos") — nenhum número aparece na Home; ilustração/imagem de hero
+(nenhum asset apropriado existe — `BeeDayHero` sem `Illustration` é um padrão de primeira classe já
+documentado no catálogo, não uma degradação); HTML/CSS/JS copiados — zero.
+
+### Home sections
+
+| Seção | Conteúdo | Justificativa de produto |
+|---|---|---|
+| Hero (`BeeDayHero`, variante `Default`) | Eyebrow "BEEDAY", título "Be better every day", subtítulo institucional, CTA | Apresentação imediata da marca e proposta, sem depender de dados |
+| `#capabilities` | 5 `BeeDayCard`: Daily, Habits, Tasks, Projects, Wallet | As 5 capacidades reais confirmadas no discovery (README + `DashboardResponse`); texto de Daily/Habits/Tasks/Projects copiado quase literalmente de `Tutorial.razor` (terminologia já estabelecida); Wallet baseado em `README.md`/`HeroCatalog.razor` |
+| `#progress` | Parágrafo institucional sobre XP/Level, sem números | Capacidade real confirmada (`UserProfileSummary.TotalExperience`/`CurrentLevel`), mas nenhum dado do visitante é buscado — texto puramente institucional |
+
+**Character/Inventory não aparecem** — reconfirmado nesta Sprint que não existem como features reais
+(nenhuma pasta `Components/Features/Character` ou `Inventory`; README explicita que os atributos de
+atividade não são stats de personagem).
+
+### Design System reuse
+
+| Contrato | Uso | Alteração |
+|---|---|---|
+| `BeeDayHero` | Hero da Home, variante `Default`, sem `Illustration` | Nenhuma — primeiro consumidor de produto real (antes só usado no catálogo) |
+| `BeeDayBrand` | Via `PublicHeader` (Sprint 20.4) | Nenhuma |
+| `BeeDayButton` | CTA do Hero e do `PublicHeader` | Nenhuma |
+| `BeeDayCard` (`Padded`) | 5 cards de capability | Nenhuma |
+| `PixelIcon` | `Daily`, `Streak`, `RecurringTask`, `Project`, `Wallet` (todos já existentes no registry, `Decorative` padrão — cada card já tem `<h3>` como nome acessível) | Nenhuma |
+| Foundations (`--beeday-reading-width`, `--beeday-spacing-*`, cores de texto) | `Home.razor.css` | Nenhuma — nenhum token novo |
+
+**Nenhum `HomeHero`/`HomeFeatureCard` foi criado.**
+
+### PublicHeader final behavior
+
+`AuthorizeView` com dois ramos:
+
+- **Anônimo:** "Log in" → `/login`.
+- **Autenticado:** "Continue to BeeDay" → `AuthenticatedEntryDestinationResolver.ResolveAsync()` →
+  `/profile/create` (sem perfil) | `/onboarding/tutorial` (onboarding incompleto) | `/daily`
+  (pronto) — os 3 estados testados individualmente (ver Tests).
+
+O mesmo padrão é usado pelo CTA principal da própria `Home.razor` (Hero `PrimaryAction`).
+
+### Product capability accuracy
+
+Toda capacidade apresentada foi confirmada como real antes de ser escrita:
+
+- Daily/Habits/Tasks/Projects: texto copiado de `Tutorial.razor` (copy institucional já aprovada
+  pelo produto, reutilizada verbatim/quase-verbatim).
+- Wallet: confirmado em `README.md` ("Wallet: transactions, tags, filters...") e
+  `HeroCatalog.razor`.
+- XP/Level (seção Progress): confirmado em `UserProfileSummary`
+  (`TotalExperience`/`CurrentLevel`/...) e no README ("experience curve... level-up feedback").
+- Nenhum número/porcentagem/streak-count aparece — confirmado por teste
+  (`HomeTests.DoesNotPresentFabricatedMetrics`).
+
+### Navigation / anchors — reavaliado, mantido sem links
+
+A Sprint 20.1 já havia decidido não adicionar links por falta de destinos reais; agora existem
+(`#capabilities`, `#progress`). Reavaliado explicitamente e **mantida a decisão de não adicionar
+links de âncora ao `PublicHeader` nesta Sprint**, por dois motivos: (1) para uma página de rolagem
+única com apenas 2 seções, o valor de wayfinding de uma âncora é marginal — tudo está a um scroll de
+distância; (2) adicionar 2+ links de texto ao `PublicHeader` exigiria uma estratégia de colapso
+mobile real (o `PublicHeader` hoje só tem marca+1 CTA, que cabe em qualquer largura sem esconder
+nada — adicionar links agora arriscaria reproduzir, apressadamente, o mesmo gap que a Sprint 20.1
+encontrou em `TopNavigation`). As duas seções já têm `id` estável (`#capabilities`, `#progress`),
+prontas para uma futura âncora sem exigir nova alteração da Home. Decisão registrada para
+reavaliação na Sprint 20.6/20.7, quando o conteúdo da Home estiver mais consolidado.
+
+### Responsive behavior
+
+Grid de cards (`repeat(auto-fit, minmax(15rem, 1fr))`) reflui sem nenhum breakpoint — técnica CSS
+fluida que dispensa `@media`. Único breakpoint usado: **`42rem` (672px)**, mesma família já
+reutilizada pelo `PublicHeader` (Sprint 20.4)/`BeeDayPageHeader`/`BeeDayHero`. Nenhum valor novo.
+
+### Accessibility
+
+Um único `<h1>` (dentro de `BeeDayHero`), `<h2>` por seção, `<h3>` por card — hierarquia contínua.
+`<article>` como raiz da página (não um segundo `<main>` — ver Deferred Findings sobre
+`Account.razor`/`Wallet.razor`). Ícones decorativos (`Decorative` padrão do `PixelIcon`, cada card
+já nomeado pelo `<h3>` adjacente). CTA como `<button>` real via `BeeDayButton`. `focus-visible`
+herdado globalmente, nenhum CSS de foco novo. Nenhuma informação comunicada só por cor. Nenhum
+motion novo introduzido (scroll reveal explicitamente fora de escopo).
+
+### Tests
+
+- `PublicHeaderTests.cs` atualizado: CTA autenticado agora testado nos 3 estados reais (sem perfil →
+  `/profile/create`; onboarding incompleto → `/onboarding/tutorial`; pronto → `/daily`) via um
+  `ISender` stub para `GetCurrentUserQuery`, não mais um destino fixo `/daily`.
+- `PublicLayoutTests.cs` atualizado (precisa do resolver registrado, já que `PublicLayout` renderiza
+  `PublicHeader`).
+- `HomeTests.cs` (novo, 6 testes): `h1` único com a mensagem de marca; as 5 capacidades reais e
+  somente elas; ausência de métricas fabricadas (regex `\d+\s*(%|day|days)`); CTA para anônimo;
+  CTA para autenticado; IDs de âncora estáveis.
+- `AuthorizationIntegrationTests.cs` — **sem alteração necessária**: `Anonymous_CanAccessPublicPage("/")`
+  já validava 200 OK sem redirect HTTP (o antigo redirect de `Entry.razor` acontecia via SignalR
+  após a resposta HTTP inicial, nunca como 3xx) — continua passando exatamente como antes.
+- `EntryFlowVisualConsistencyTests.cs` — revisado, sem alteração necessária (escaneia apenas
+  `Features/{Authentication,Identity,ProfileCreation,Onboarding}`; `Entry.razor` nunca usava
+  `BeeDayBrand` e não fazia parte do conjunto de arquivos relevante para a asserção).
+
+### E2E
+
+Novo `HomeTests.cs` (`BeeDay.E2E.Tests`, 2 fluxos): visitante anônimo acessa `/` sem redirect e vê o
+`h1` "Be better every day"; clique em "Get started" alcança `/login`. `AccountLifecycleTests.cs`
+preservado sem alteração (todos os fluxos partem de `/login` diretamente, não de `/`).
+
+## Deferred to Sprint 20.6 (Home Content & Product Integration)
+
+- Dados reais/pessoais na Home (ex.: um resumo do progresso do próprio visitante autenticado) —
+  deliberadamente não implementado; a Home atual é 100% institucional/estática.
+- Investigar se um campo de "streak"/dias consecutivos existe ou vale a pena expor via Application.
+- Decidir um "% de consistência" agregado, se aprovado (gap de Application já registrado desde a
+  Sprint 20.1).
+- Reavaliar estratégia de navegação por âncora no `PublicHeader` com o conteúdo da Home consolidado.
+
+## Deferred to Sprint 20.7 (Responsive & Accessibility Pass)
+
+- Auditoria transversal de responsividade/acessibilidade da Home (validação manual em navegador
+  real — não executada nesta Sprint, sem ambiente disponível).
+- Decisão sobre ferramenta de a11y automatizada (axe-core/Pa11y) e regressão visual — nenhuma
+  introduzida nesta Sprint.
 
 ## Sprint Roadmap
 
@@ -494,7 +667,7 @@ Adicionadas às pendências já registradas no checkpoint:
 
 20.4 Application Shell & Navigation — COMPLETE (PublicLayout/PublicHeader created, not yet wired to any route)
 
-20.5 BeeDay Home Structure
+20.5 BeeDay Home Structure — COMPLETE (/ is now the public Home; Entry.razor removed; destination policy preserved and reused, not duplicated)
 
 20.6 Home Content & Product Integration
 

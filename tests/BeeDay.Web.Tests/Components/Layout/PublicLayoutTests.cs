@@ -12,6 +12,7 @@ public sealed class PublicLayoutTests
         using var context = new BunitContext();
         context.AddAuthorization().SetNotAuthorized();
         context.Services.AddSingleton(new ToastService());
+        PublicHeaderTests.RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
 
         RenderFragment body = builder =>
         {

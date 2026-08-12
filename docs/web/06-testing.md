@@ -1,13 +1,15 @@
 # Web Testing Map
 
-**Fonte da verdade:** enumerado diretamente em `tests/BeeDay.Web.Tests/` (61 arquivos `.cs`) e
-`tests/BeeDay.E2E.Tests/` (7 arquivos `.cs` + o `.csproj`). A estratégia de teste em si (pirâmide, infraestrutura de
+**Fonte da verdade:** enumerado diretamente em `tests/BeeDay.Web.Tests/` (64 arquivos `.cs`) e
+`tests/BeeDay.E2E.Tests/` (8 arquivos `.cs` + o `.csproj`). A estratégia de teste em si (pirâmide, infraestrutura de
 integração, infraestrutura E2E) já é descrita em detalhe em
 [`docs/testing/01-testing-strategy.md`](../testing/01-testing-strategy.md) — este documento não a
 duplica; mapeia especificamente qual arquivo de teste cobre qual parte da árvore de
 `src/BeeDay.Web/` descrita nos 5 documentos anteriores.
 
-**Última verificação:** 2026-08-07.
+**Última verificação:** 2026-08-11 (Sprint 20.5, EPIC 20) — `PublicHeader`/`PublicLayout`/`Home`
+(rota `/`) mapeados; contagem de arquivos corrigida (Web.Tests 61→64, E2E.Tests 7→8). Demais seções
+preservadas da verificação de 2026-08-07.
 
 ## 1. Objetivo
 
@@ -54,10 +56,12 @@ Assert.Contains(expectedClass, cut.Find("button").ClassList);
 | `Login.razor` (componente, sem HTTP) | `Components/Authentication/LoginTests.cs` |
 | `/wallet` fim a fim | `Components/Wallet/WalletComponentTests.cs`, `WalletUiCoverageTests.cs` |
 | `/daily` — arquitetura de scroll da página | `Components/Layout/DailyPageScrollArchitectureTests.cs` |
-| Consistência visual entre páginas de entrada (`/`, `/welcome`, `/login`, `/profile/create`) | `Components/Visual/EntryFlowVisualConsistencyTests.cs` |
+| Consistência visual entre páginas de entrada sob `OnboardingLayout` (`/welcome`, `/login`, `/profile/create`, Identity, Tutorial) | `Components/Visual/EntryFlowVisualConsistencyTests.cs` — nome preservado da Sprint 16.7; `/` saiu deste grupo na Sprint 20.5 (agora `PublicLayout`, não `OnboardingLayout`), ver linha abaixo |
+| `/` — Home pública (EPIC 20, Sprint 20.5) | `Components/Home/HomeTests.cs` (h1 único, capacidades reais, ausência de métricas fabricadas, CTA anônimo/autenticado, IDs de âncora) |
 | Fluxo real via browser: criar conta → confirmação pendente | `E2E: AccountLifecycleTests.CreateAccount_ReachesEmailConfirmationPending` |
 | Fluxo real via browser: login → onboarding → `/daily` | `E2E: AccountLifecycleTests.Login_CompletesOnboarding_ReachesDashboard` |
 | Fluxo real via browser: logout | `E2E: AccountLifecycleTests.Logout_EndsSessionAndBlocksDashboard` |
+| Fluxo real via browser: visitante anônimo em `/`, sem redirect, CTA para `/login` | `E2E: HomeTests.AnonymousVisitor_SeesHomeWithoutRedirect`, `HomeTests.AnonymousVisitor_GetStartedCtaReachesLogin` (Sprint 20.5) |
 
 Nenhum teste de componente/integração dedicado foi encontrado para as 5 páginas de `Identity`
 individualmente (`ConfirmEmail`, `ResetPassword`, `ForgotPassword`, `ResendConfirmation`,
@@ -73,7 +77,8 @@ renderização do componente Razor em si via bUnit.
 | `AccountSidePanel.razor` | `Components/Layout/AccountSidePanelTests.cs` |
 | `BeeDayPageHeader`/`BeeDaySectionHeader` (Design System, usado por `Account`/`Wallet`) | `Components/Layout/BeeDayHeaderTests.cs` — nome do arquivo sugere `TopNavigation`, mas testa os cabeçalhos do Design System, não a navegação |
 | `BeeDaySettingsForm`/`BeeDaySettingsSection` (Design System, usado por `Account`) | `Components/Layout/BeeDaySettingsTests.cs` |
-| `BeeDayHero` (Design System, catálogo) | `Components/Layout/BeeDayHeroTests.cs` |
+| `BeeDayHero` (Design System, catálogo — primeiro consumidor de produto real desde a Sprint 20.5, ver `Home.razor`) | `Components/Layout/BeeDayHeroTests.cs` |
+| `PublicHeader.razor`/`PublicLayout.razor` (EPIC 20, Sprint 20.4/20.5) | `Components/Layout/PublicHeaderTests.cs`, `PublicLayoutTests.cs` |
 
 `MainLayout.razor`, `OnboardingLayout.razor`, `TopNavigation.razor` e `AppFooter.razor` não têm
 arquivo de teste dedicado identificado nesta auditoria.
@@ -112,7 +117,7 @@ não o código JS isoladamente.
 
 ## 8. `BeeDay.E2E.Tests`
 
-3 classes de teste, 7 fluxos, sobre a infraestrutura descrita em
+4 classes de teste, 9 fluxos, sobre a infraestrutura descrita em
 `docs/testing/01-testing-strategy.md` §7 (`PlaywrightAppFixture`, `E2ETestBase`,
 `E2EWebApplicationFactory`):
 
@@ -121,12 +126,13 @@ não o código JS isoladamente.
 | `AccountLifecycleTests.cs` | Criar conta → confirmação pendente; login → onboarding → `/daily`; logout; editar perfil |
 | `HabitAndTaskTests.cs` | Criar/completar hábito (saldo + XP visíveis); criar/completar task |
 | `WalletTests.cs` | Criar tag + transação no Wallet, saldo atualizado |
+| `HomeTests.cs` (Sprint 20.5, EPIC 20) | Visitante anônimo vê a Home em `/` sem redirect; CTA "Get started" alcança `/login` |
 
 ## 9. Contagem de referência
 
 `docs/testing/01-testing-strategy.md` §1 é a fonte canônica da contagem de testes por projeto —
-752 testes aprovados (93 Domain, 73 Application, 129 Infrastructure, 450 Web, 7 E2E), confirmado
-pelo quality gate na Sprint 18.7 (não repetido aqui em detalhe para evitar duplicação).
+768 testes aprovados (93 Domain, 73 Application, 129 Infrastructure, 464 Web, 9 E2E), confirmado
+por execução real na Sprint 20.5 (não repetido aqui em detalhe para evitar duplicação).
 
 ## 10. Achado
 
@@ -136,9 +142,12 @@ pelo quality gate na Sprint 18.7 (não repetido aqui em detalhe para evitar dupl
 
 ## 11. Fontes de verdade
 
-- Lista de arquivos de `tests/BeeDay.Web.Tests/**/*.cs` (61 arquivos) e `tests/BeeDay.E2E.Tests/*.cs`
-  (7 arquivos, mais `E2EWebApplicationFactory.cs`/`PlaywrightAppFixture.cs`/`E2ETestBase.cs` como
-  infraestrutura).
+- Lista de arquivos de `tests/BeeDay.Web.Tests/**/*.cs` (64 arquivos, `Glob` direto nesta Sprint —
+  61 na Sprint 18.8, `+1` de `Components/Home/HomeTests.cs`; a diferença residual de +2 não é
+  atribuída a esta Sprint especificamente, não reauditada arquivo a arquivo) e
+  `tests/BeeDay.E2E.Tests/*.cs` (8 arquivos — `+1` de `HomeTests.cs`, Sprint 20.5), incluindo
+  `E2EWebApplicationFactory.cs`/`PlaywrightAppFixture.cs`/`E2ETestBase.cs`/`Usings.cs` como
+  infraestrutura.
 - `tests/BeeDay.Web.Tests/BeeDay.Web.Tests.csproj`, `tests/BeeDay.E2E.Tests/BeeDay.E2E.Tests.csproj`.
 - [`docs/testing/01-testing-strategy.md`](../testing/01-testing-strategy.md) para a infraestrutura
   compartilhada (não reverificada em detalhe nesta Sprint — a leitura desta sessão confirma que a

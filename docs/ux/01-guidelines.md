@@ -5,7 +5,9 @@
 arquivo onde foi observado. Não é uma lista de recomendações novas: é uma descrição do que o código
 atual faz de forma consistente (ou não).
 
-**Última verificação:** 2026-08-07.
+**Última verificação:** 2026-08-11 (Sprint 20.5, EPIC 20) — §5 atualizado: `/` deixou de ser um
+resolvedor de redirect e passou a ser a Home pública; demais seções preservadas da verificação de
+2026-08-07.
 
 ## 1. Objetivo
 
@@ -72,10 +74,11 @@ do repositório passa por uma confirmação.
 
 ```mermaid
 flowchart TD
-    Entry["/ (Entry.razor)"] -->|não autenticado| Login["/login"]
-    Entry -->|autenticado, sem perfil| CreateProfile["/profile/create"]
-    Entry -->|autenticado, perfil sem onboarding| Tutorial["/onboarding/tutorial"]
-    Entry -->|autenticado, onboarding completo| Daily["/daily"]
+    Home["/ (Home.razor, PublicLayout) — Home pública, sem redirect"] -->|anônimo, CTA \"Get started\"| Login["/login"]
+    Home -->|autenticado, CTA \"Continue to BeeDay\"| EntryResolver["AuthenticatedEntryDestinationResolver"]
+    EntryResolver --> CreateProfile["/profile/create"]
+    EntryResolver --> Tutorial["/onboarding/tutorial"]
+    EntryResolver --> Daily["/daily"]
 
     Login -->|POST /auth/login bem-sucedido| Resolver["LoginDestinationResolver.Resolve"]
     Resolver --> CreateProfile
@@ -88,11 +91,17 @@ flowchart TD
     Tutorial -->|5 slides, ENTER DAILY no último| Daily
 ```
 
-A mesma árvore de decisão (perfil → onboarding → destino) aparece em 3 lugares independentes do
-código: `LoginDestinationResolver.Resolve` (pós-login), `Entry.razor` (acesso direto a `/`) e
-`CreateProfile.razor.cs` (pós-conclusão de perfil) — três implementações da mesma regra de negócio
-de navegação, não uma função compartilhada. Ver
-[`docs/web/04-feature-components.md`](../web/04-feature-components.md) §7.
+**Atualizado na Sprint 20.5 (EPIC 20):** até então, `/` era resolvida por `Entry.razor`, que
+replicava a árvore de decisão (perfil → onboarding → destino) de forma independente — 3 cópias
+paralelas da mesma regra. `Entry.razor` foi removido; `/` agora é a Home pública (`Home.razor`,
+sem nenhum redirect automático). A regra de destino continua vivendo em
+`LoginDestinationResolver.Resolve` (`Program.cs`, pós-login) e em `CreateProfile.razor.cs`
+(pós-conclusão de perfil) — mas o antigo terceiro consumidor foi substituído por
+`AuthenticatedEntryDestinationResolver` (`Services/Authentication/`), que **reutiliza**
+`LoginDestinationResolver.Resolve` em vez de reimplementá-lo, para o CTA de um usuário autenticado
+que visita `/` e escolhe continuar. Ver
+[`docs/web/04-feature-components.md`](../web/04-feature-components.md) e
+[`docs/web/02-routing-and-pages.md`](../web/02-routing-and-pages.md) §8.
 
 ## 6. Microinterações
 
