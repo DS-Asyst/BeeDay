@@ -40,19 +40,31 @@ estados internos, eventos, dependências, interop JS (quando existe) e quem cons
 | `ChildContent` | `RenderFragment?` | — | Texto/conteúdo do botão |
 | `AdditionalAttributes` | `IReadOnlyDictionary<string,object>?` | — | `CaptureUnmatchedValues` |
 
-**Estados visuais** (`design-system.css`): default, `:hover`, `:active` (translateY(4px), efeito de
-"pressionar pixel"), `:focus-visible` (anel de foco + sombra do botão), `:disabled` (paleta cinza
-fixa, `cursor: not-allowed`, opacidade .62), loading (ícone `PixelIconName.Loading` com
-`beeday-spin` — `steps(8, end)`, respeitando `prefers-reduced-motion`).
+**Estados visuais, default canônico desde a Sprint 20.8** (`design-system.css`): sem borda,
+`border-radius: pill`, sombra `--beeday-shadow-md`; `:hover` (`translateY(-2px)` + `shadow-lg`),
+`:active` (`translateY(0)` + `shadow-sm`), `:focus-visible` (`shadow-md` + `--beeday-focus-ring`,
+anel canônico azul), `:disabled` (paleta cinza fixa, `cursor: not-allowed`, opacidade .62), loading
+(ícone `PixelIconName.Loading` com `beeday-spin` — `steps(8, end)`, respeitando
+`prefers-reduced-motion`). **Decisão final de default (Sprint 20.8, EPIC 20):** este era o
+modificador opt-in `--soft` introduzido na Sprint 20.6 — auditados repo-wide todos os 40+
+consumidores de `<BeeDayButton` antes de decidir; a grande maioria já usa um dos modificadores de
+forma abaixo (que se auto-declaram por completo e são, portanto, totalmente não afetados), então o
+modificador foi incorporado ao default (removido como classe separada) sem risco real para eles —
+apenas ~9 consumidores sem modificador de forma (paginação/estado vazio do Wallet, submits de
+recuperação de senha, navegação do Tutorial) passam a herdar a nova aparência, exatamente a
+convergência pretendida para ações secundárias/utilitárias.
 
 **Modificadores opt-in via `Class`** (não são `Variant` — são combináveis por cima de qualquer
-variante): `--skew-press` (botão inclinado, ação operacional principal), `--comic-press` (contorno
-grosso, sombra offset, usado em confirmações destrutivas), `--comic` + 7 paletas (`-blue`, `-yellow`,
-`-back`, `-danger`, `-neutral`, `-success`, `-orange`, `-magenta` — estilo "quadrinho", usado nos
-CTAs primários de Wallet/Login/Tutorial), `--plain` + `--plain-danger`/`--plain-neutral` (ação de
-texto puro, sem chrome, para popovers/filtros), **`--soft`** (Sprint 20.6, EPIC 20 — sem borda,
-`border-radius: pill`, elevação `--beeday-shadow-md`→`-lg` no hover em vez do "press" de pixel;
-target visual da página-modelo da EPIC 20; usado por `PublicHeader` e pelos CTAs de `Home.razor`).
+variante; cada um redeclara sua própria forma por completo — borda/radius/shadow — e por isso não é
+afetado pelo default acima): `--skew-press` (botão inclinado, ação operacional principal),
+`--comic-press` (contorno grosso, sombra offset, usado em confirmações destrutivas), `--comic` + 7
+paletas (`-blue`, `-yellow`, `-back`, `-danger`, `-neutral`, `-success`, `-orange`, `-magenta` —
+estilo "quadrinho", a linguagem de **ênfase operacional primária** já estabelecida e preservada
+intacta: Save/Delete/Sign in/Create em Wallet, editores de atividade, Login, Identity, Account),
+`--plain` + `--plain-danger`/`--plain-neutral` (ação de texto puro, sem chrome, para popovers/
+filtros), `--pixel-cta` (`pixel-nes.css` — experiência pixel única e deliberadamente restrita ao
+modal de celebração de Level Up; ganhou `border-width`/`border-style` explícitos na Sprint 20.8
+porque deixou de poder depender da borda da base, agora `0`).
 
 **Consumidores:** todo componente do repositório com uma ação — 40+ pontos de uso confirmados por
 busca de `<BeeDayButton`.
@@ -63,12 +75,22 @@ busca de `<BeeDayButton`.
 
 Container genérico (`Class`, `Padded`, `Muted`, `Interactive` — este último ativa hover
 `translateY(-2px)` + sombra `md`, `ChildContent`, `AdditionalAttributes`). Sem estado interno, sem
-JS. Modificador opt-in via `Class`: **`--soft`** (Sprint 20.6, EPIC 20 — sem borda,
-`--beeday-radius-2xl`, `--beeday-shadow-lg`; target visual da página-modelo; usado pelas seções de
-capabilities/progress de `Home.razor`). Consumido por telas de catálogo (`HeroCatalog`), pela Home
-pública e como base de composição avulsa — a maioria dos cards de produto (Activity/Habit) **não**
-usa `BeeDayCard`; têm markup próprio em `Features/Dashboard/Components/` estilizado por `cards.css`
-diretamente (ver [`docs/web/04-feature-components.md`](../web/04-feature-components.md) §3).
+JS. **Default canônico desde a Sprint 20.8** (era o modificador opt-in `--soft` da Sprint 20.6, agora
+incorporado): sem borda, `--beeday-radius-2xl`, `--beeday-shadow-lg`. **Decisão final de default
+(Sprint 20.8, EPIC 20):** auditados todos os consumidores reais antes de decidir — Wallet
+(`.wallet-summary__card`/`.wallet-tag-item`/`.wallet-transaction-card`), a página Account
+(`.beeday-settings-section`) e os cards de atividade (ver abaixo) **já redeclaram por completo**
+sua própria borda/radius/sombra, então o novo default não os afeta visualmente; só a Home realmente
+dependia da aparência default (usava a classe `--soft` explicitamente, agora redundante e removida
+dos seus 2 consumidores). **Correção de achado desatualizado:** a documentação anterior afirmava que
+"a maioria dos cards de produto (Activity/Habit) não usa `BeeDayCard`" — verificado diretamente nesta
+Sprint que isso está incorreto: `HabitCard.razor`/`ActivityCard.razor`
+(`Features/Dashboard/Components/`) **renderizam `<BeeDayCard Class="@CardCssClass">` como raiz**;
+o que é verdade é que `cards.css` estiliza as classes computadas (`.habit-card`, `.activity-card` +
+variantes de cor) com sua própria borda/radius/sombra completas (`.habit-card` inclusive com
+`!important`), então visualmente eles não herdam nada do default de `BeeDayCard` além de layout/
+comportamento genérico — mas arquitetural e semanticamente, eles **são** consumidores reais do
+componente compartilhado, não markup paralelo independente.
 
 ### `BeeDayCardMenu`
 

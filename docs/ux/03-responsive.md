@@ -2,12 +2,17 @@
 
 **Fonte da verdade:** levantamento completo de toda ocorrência de `@media` em
 `src/BeeDay.Web/wwwroot/css/*.css` (19 arquivos) e `src/BeeDay.Web/Components/**/*.razor.css`
-(30 arquivos) — 49 arquivos de CSS no total, cada um lido integralmente ou varrido por `@media`
+(29 arquivos) — 48 arquivos de CSS no total, cada um lido integralmente ou varrido por `@media`
 nesta Sprint (16.7 havia enumerado apenas as 19 folhas globais).
 
-**Última verificação:** 2026-08-11 (Sprint 20.3) — contagem de folhas globais corrigida de 20 para
-19 (`css/cursors.css` removido; sem `@media` próprio, então os 29 breakpoints do §2 permanecem
-inalterados). Verificação anterior: 2026-08-10 (Sprint 18.7) — contagem corrigida de 19 para 20.
+**Última verificação:** 2026-08-12 (Sprint 20.8) — contagem de CSS isolado por componente corrigida
+de 30 para 29 (`LoginBackground.razor.css` removido junto com o componente — background de imagem
+descontinuado, ver `docs/epics/20-home-visual-experience/README.md` seção "Sprint 20.8"); o valor
+640px/40rem que ele compartilhava com `OnboardingLayout.razor.css` permanece (este último manteve seu
+próprio bloco `@media`), então os 29 valores distintos de breakpoint do §2 permanecem inalterados.
+Verificação anterior: 2026-08-11 (Sprint 20.3) — contagem de folhas globais corrigida de 20 para 19
+(`css/cursors.css` removido; sem `@media` próprio). Verificação anterior: 2026-08-10 (Sprint 18.7) —
+contagem corrigida de 19 para 20.
 
 ## 1. Objetivo
 
@@ -35,7 +40,7 @@ valores de `max-width`, 2 de `min-width`, 1 de `max-height`.
 | 580 | — | `CreateProfile.razor.css` |
 | 600 | — | `editor-modal.css`, `Tutorial.razor.css` (×2 regras) |
 | 620 | — | `Home.razor.css` |
-| 640 | 40rem (2×) | `wallet.css` (×2), `OnboardingLayout.razor.css`, `LoginBackground.razor.css`, `IconCatalog.razor.css`, `HeroCatalog.razor.css` |
+| 640 | 40rem (2×) | `wallet.css` (×2), `OnboardingLayout.razor.css`, `IconCatalog.razor.css`, `HeroCatalog.razor.css` |
 | 650 | — | `cards.css` (×5 regras) |
 | 672 | 42rem | `design-system.css`, `polish.css` |
 | 680 | — | `TopNavigation.razor.css` |

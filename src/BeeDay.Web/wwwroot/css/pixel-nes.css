@@ -42,13 +42,20 @@
 }
 
 /* Level Up celebration "Continue" CTA: pixel-corner outline layered over
-   the existing, unmodified BeeDayButton Primary variant. Every other
-   button state (hover, active, focus-visible, disabled, loading) is the
-   existing BeeDayButton behavior from design-system.css — this class adds
-   only the border-image outline, deliberately not NES's own ::after
-   depth-shadow mechanic, which would duplicate/conflict with the 3D-press
-   effect BeeDayButton already implements. */
+   the existing BeeDayButton Primary variant. Every other button state
+   (hover, active, focus-visible, disabled, loading) is the existing
+   BeeDayButton behavior from design-system.css — this class adds only the
+   border-image outline, deliberately not NES's own ::after depth-shadow
+   mechanic, which would duplicate/conflict with BeeDayButton's own
+   elevation effect. Sprint 20.8 (EPIC 20): the base .beeday-button border
+   became `0` (canonical "soft" default, borderless) — border-image needs a
+   non-zero border-width to render at all, so this class now declares its
+   own explicit border-width/style instead of relying on the base's, to
+   keep this genuine one-off pixel experience intact regardless of the
+   base button's own border. */
 .beeday-pixel-cta {
+    border-width: var(--beeday-pixel-unit);
+    border-style: solid;
     border-image-slice: 2;
     border-image-width: 2;
     border-image-repeat: stretch;
