@@ -25,13 +25,11 @@
     text-decoration: none;
 }
 
-/* PublicHeader is a first consumer of the canonical brand primary (see variables.css) — this ::deep
-   override recolors "BEE" only within the public header's own DOM subtree (BeeDayBrand's shared
-   default stays legacy purple for its other 8 consumers: Login, the 5 Identity pages, Tutorial,
-   CreateProfile — all explicitly out of scope this Sprint). */
-.public-header ::deep .beeday-brand {
-    color: var(--beeday-color-brand-primary);
-}
+/* Sprint 20.6 needed a ::deep override here because BeeDayBrand's shared default was still legacy
+   purple. Sprint 20.7 made --beeday-color-brand-primary the component's own default (via the
+   --beeday-brand-color hook, see BeeDayBrand.razor.css) once Login/Identity/Onboarding — its other
+   consumers — were migrated too, so no override is needed here anymore: PublicHeader is a light
+   surface and simply inherits the shared default. */
 
 @media (max-width: 42rem) {
     .public-header,

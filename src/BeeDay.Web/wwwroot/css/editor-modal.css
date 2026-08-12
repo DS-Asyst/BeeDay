@@ -111,15 +111,15 @@
 .editor-modal__hero textarea:hover,
 .editor-modal__field input:hover,
 .editor-modal__field select:hover {
-    border-color: color-mix(in srgb, var(--beeday-color-primary) 45%, var(--beeday-color-border));
+    border-color: color-mix(in srgb, var(--beeday-color-brand-primary) 45%, var(--beeday-color-border));
 }
 
 .editor-modal__hero input:focus,
 .editor-modal__hero textarea:focus,
 .editor-modal__field input:focus,
 .editor-modal__field select:focus {
-    border-color: var(--beeday-color-primary);
-    box-shadow: 0 0 0 3px rgb(103 58 183 / 15%);
+    border-color: var(--beeday-color-brand-primary);
+    box-shadow: 0 0 0 3px rgb(37 56 210 / 15%);
 }
 
 .editor-modal .validation-message {
@@ -154,7 +154,7 @@
     place-items: center;
     border: 1px solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-md);
-    background: var(--beeday-color-primary);
+    background: var(--beeday-color-brand-primary);
     box-shadow: 3px 3px 0 var(--beeday-game-ink);
     color: var(--beeday-color-surface);
 }

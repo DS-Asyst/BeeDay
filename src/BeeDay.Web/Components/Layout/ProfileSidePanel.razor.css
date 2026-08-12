@@ -5,7 +5,7 @@
     flex: 0 0 var(--beeday-left-panel-width);
     overflow-y: auto;
     color: #fff;
-    background: #5b1095;
+    background: var(--beeday-color-brand-primary-active);
     box-shadow: .5rem 0 1.6rem rgb(28 6 48 / 18%);
     box-sizing: border-box;
     opacity: 0;
@@ -162,7 +162,7 @@
 @media (max-width: 760px) {
     .side-drawer {
         position: fixed;
-        top: 3.75rem;
+        top: 4.25rem;
         bottom: 0;
         left: 0;
         height: auto;
@@ -179,6 +179,6 @@
 /* Seamless connection with the Top Navigation. */
 .side-drawer,
 .side-drawer.is-open {
-    background: #5b1095;
+    background: var(--beeday-color-brand-primary-active);
     border: 0;
 }

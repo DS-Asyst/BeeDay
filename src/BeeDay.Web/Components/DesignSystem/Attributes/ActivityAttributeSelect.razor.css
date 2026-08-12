@@ -24,13 +24,13 @@
 }
 
 .activity-attribute-select__trigger:hover {
-    border-color: color-mix(in srgb, var(--beeday-color-primary) 45%, var(--beeday-color-border));
+    border-color: color-mix(in srgb, var(--beeday-color-brand-primary) 45%, var(--beeday-color-border));
 }
 
 .activity-attribute-select__trigger:focus-visible {
     outline: none;
-    border-color: var(--beeday-color-primary);
-    box-shadow: 0 0 0 3px rgb(103 58 183 / 15%);
+    border-color: var(--beeday-color-brand-primary);
+    box-shadow: 0 0 0 3px rgb(37 56 210 / 15%);
 }
 
 .activity-attribute-select__trigger:disabled {

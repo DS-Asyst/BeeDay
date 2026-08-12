@@ -48,7 +48,7 @@
     }
 
         .app-footer__column a:hover {
-            color: var(--beeday-color-primary);
+            color: var(--beeday-color-brand-primary);
             text-decoration: underline;
         }
 
@@ -80,7 +80,7 @@
     }
 
         .app-footer__legal a:hover {
-            color: var(--beeday-color-primary);
+            color: var(--beeday-color-brand-primary);
             text-decoration: underline;
         }
 

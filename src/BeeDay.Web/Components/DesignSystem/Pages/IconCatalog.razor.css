@@ -20,7 +20,7 @@
 }
 
 .icon-catalog__eyebrow {
-    color: var(--beeday-color-primary);
+    color: var(--beeday-color-brand-primary);
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.12em;
@@ -90,7 +90,7 @@
     display: grid;
     place-items: center;
     min-height: 5rem;
-    color: var(--beeday-color-primary);
+    color: var(--beeday-color-brand-primary);
     background: var(--beeday-color-background);
 }
 

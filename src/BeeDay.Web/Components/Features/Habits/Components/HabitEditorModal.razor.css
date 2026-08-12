@@ -12,7 +12,7 @@
     min-width: 4rem;
     border: 0;
     background: transparent;
-    color: var(--beeday-color-primary);
+    color: var(--beeday-color-brand-primary);
     cursor: pointer;
 }
 
@@ -36,7 +36,7 @@
     font-weight: var(--beeday-font-weight-bold);
 }
 
-.habit-editor__direction-button.active span { background: var(--beeday-color-primary); }
+.habit-editor__direction-button.active span { background: var(--beeday-color-brand-primary); }
 
 .habit-editor__error {
     margin: 0;

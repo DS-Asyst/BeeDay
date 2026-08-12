@@ -1,6 +1,12 @@
+/* Sprint 20.7 (EPIC 20): "BEE" reads from --beeday-brand-color, a reusable, opt-in CSS custom
+   property (not a new Razor parameter, so the component's public API stays unchanged) that any
+   ancestor container can set to recolor the mark for its own surface — e.g. a dark/brand-colored
+   context sets `--beeday-brand-color: var(--beeday-color-text-inverse);` on itself. The fallback
+   (no override present) is the canonical brand primary, used by every default (light-surface)
+   consumer: Login, Identity pages, Tutorial, CreateProfile. */
 .beeday-brand {
     display: inline-flex;
-    color: var(--beeday-color-primary);
+    color: var(--beeday-brand-color, var(--beeday-color-brand-primary));
     font-family: var(--beeday-font-ui);
     font-size: 1.2rem;
     font-weight: 700;

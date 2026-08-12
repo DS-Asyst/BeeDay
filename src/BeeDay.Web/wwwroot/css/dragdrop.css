@@ -62,8 +62,8 @@
     z-index: 40;
     height: 3px;
     border-radius: var(--beeday-radius-pill);
-    background: var(--beeday-color-primary);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--beeday-color-primary) 18%, transparent);
+    background: var(--beeday-color-brand-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--beeday-color-brand-primary) 18%, transparent);
     content: "";
 }
 

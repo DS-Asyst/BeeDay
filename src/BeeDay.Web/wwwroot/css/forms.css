@@ -27,8 +27,8 @@
 }
 
 .beeday-field__control:focus {
-    border-color: var(--beeday-color-primary-light);
-    box-shadow: 0 0 0 2px rgb(103 58 183 / 16%);
+    border-color: var(--beeday-color-brand-primary-light);
+    box-shadow: 0 0 0 2px rgb(37 56 210 / 16%);
 }
 
 .beeday-field__control:disabled,
@@ -54,7 +54,7 @@
 .beeday-checkbox__control {
     width: 1.05rem;
     height: 1.05rem;
-    accent-color: var(--beeday-color-primary);
+    accent-color: var(--beeday-color-brand-primary);
 }
 
 .beeday-checkbox__label {
@@ -89,4 +89,4 @@
 .beeday-checkbox__checked { opacity: 0; }
 .beeday-checkbox__control:checked + .beeday-checkbox__visual .beeday-checkbox__unchecked { opacity: 0; }
 .beeday-checkbox__control:checked + .beeday-checkbox__visual .beeday-checkbox__checked { opacity: 1; }
-.beeday-checkbox__control:focus-visible + .beeday-checkbox__visual { outline: 2px solid var(--beeday-color-primary-light); outline-offset: 2px; }
+.beeday-checkbox__control:focus-visible + .beeday-checkbox__visual { outline: 2px solid var(--beeday-color-brand-primary-light); outline-offset: 2px; }

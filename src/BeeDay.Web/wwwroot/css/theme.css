@@ -85,6 +85,6 @@ h4,
 }
 
 ::selection {
-    background: var(--beeday-color-primary-soft);
+    background: var(--beeday-color-brand-primary-soft);
     color: var(--beeday-color-text-primary);
 }

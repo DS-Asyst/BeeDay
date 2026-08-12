@@ -9,8 +9,8 @@ de referência visual local. Nenhuma afirmação de "estado atual" abaixo vem de
 documento evoluir em Sprints futuras, cada atualização deve reverificar contra o código antes de
 alterar uma afirmação de estado atual.
 
-**Última verificação:** 2026-08-12 (Sprint 20.6 — Reference Design System Extraction & Home
-Migration, CURRENT).
+**Última verificação:** 2026-08-12 (Sprint 20.7 — Design System Project-Wide Migration, PARTIAL —
+ver "Sprint Roadmap").
 
 **Escopo:** evolução da experiência visual do BeeDay — primeira Home oficial, migração do Design
 System existente para o target visual da página-modelo, Application Shell/navegação, remoção do
@@ -305,11 +305,12 @@ Riscos ativos da EPIC, a serem verificados a cada Sprint antes de introduzir alg
 - **Brand duplication** — `BeeDayBrand` deve ser o contrato de marca preferencial. **Correção
   (Sprint 20.4):** o achado original de texto literal residual `LEVEL`/`UP` em `TopNavigation`/
   `AccountSidePanel` estava desatualizado — verificado diretamente que ambos já renderizam `BEE`/
-  `DAY` corretamente (corrigido em commits anteriores à EPIC 19). O que permanece é apenas
-  estrutural: os dois componentes têm markup próprio em vez de delegar a `BeeDayBrand` — decisão
-  deliberada nesta Sprint de não migrar (contexto de header escuro exige tratamento de cor diferente
-  do padrão claro do componente compartilhado; migrar exigiria estender `BeeDayBrand` sem
-  necessidade direta comprovada por este Sprint).
+  `DAY` corretamente (corrigido em commits anteriores à EPIC 19). **Resolvido estruturalmente
+  (Sprint 20.7):** o único ponto real remanescente — os dois componentes tinham markup próprio em vez
+  de delegar a `BeeDayBrand` — foi corrigido: `BeeDayBrand.razor.css` ganhou um hook reutilizável
+  (`--beeday-brand-color`, custom property CSS opt-in, sem novo parâmetro Razor) que qualquer
+  superfície escura pode usar para recolorir "BEE"; `TopNavigation`/`AccountSidePanel` agora renderizam
+  `<BeeDayBrand />` diretamente. Risco encerrado.
 - **Breakpoint proliferation** — 29 valores de breakpoint hardcoded já existem; novos componentes
   não devem simplesmente somar mais um sem analisar os existentes.
 - **Navigation duplication** — shell público e autenticado podem ter composições distintas (ver
@@ -944,6 +945,218 @@ estrutura full-bleed/split/CTA duplo da referência. O único desvio remanescent
 (fundo do header ainda claro, por falta de uma variante de `BeeDayBrand` para fundo escuro — não uma
 rejeição de paleta), registrado como candidato explícito para a Sprint 20.7.
 
+## Sprint 20.7 — Design System Project-Wide Migration (Results)
+
+**Última verificação:** 2026-08-12 (Sprint 20.7, branch `sprint/20.7-design-system-migration`, criada
+a partir de `hmg` já sincronizado com o merge da Sprint 20.6, `0794ea4`).
+**Fonte da verdade:** busca repo-wide direta de todo consumidor de `--beeday-color-primary` (`src/`,
+excluindo `obj/` gerado) antes e depois de cada alteração; leitura direta de `TopNavigation.razor(.css)`,
+`MainLayout.razor(.css)`, `AccountSidePanel.razor(.css)`, `ProfileSidePanel.razor.css`,
+`BeeDayBrand.razor(.css)`, `PublicHeader.razor.css`, `DashboardColumn.razor.css`, `Account.razor.css`,
+`app.css`, `polish.css`; execução real de `dotnet format --verify-no-changes`/`dotnet build`/
+`dotnet test` após cada lote de mudanças.
+
+**Resultado geral: PARTIAL.** A migração de **cor/tipografia/foco** (foundations) foi auditada e
+concluída de ponta a ponta — não parcialmente. A migração da **linguagem "soft" de forma** (radius
+generoso, sombra elevada, botões sem borda pixel) para as superfícies densas/funcionais do produto
+(`/daily`, cards de atividade, `/wallet`, `/account`) foi deliberadamente **não** propagada nesta
+Sprint — ver "Deferred" abaixo para o raciocínio.
+
+### Consumer audit methodology
+
+Busca repo-wide por `--beeday-color-primary\b` em `src/` (não em `obj/`, que é build output
+regenerado, não fonte). Cada ocorrência foi lida em contexto e classificada antes de qualquer edição:
+**brand/generic UI chrome** (focus rings, links, badges, hovers, seleção, drag handle) → migrada;
+**status** (`success`/`warning`/`danger`/`info`) → nenhuma ocorrência real encontrada usando
+`--beeday-color-primary` para status, nada a migrar; **activity semantics**
+(`task`/`todo`/`project`/`attribute`/`habit`) → nenhuma ocorrência real usando `--beeday-color-primary`
+para distinguir tipos de atividade lado a lado (`ProjectWorkspace.razor.css` foi avaliada
+especificamente por usar a cor dentro de uma view de um único Project, não para categorização — ver
+"Color Migration" abaixo). Nenhum search/replace cego foi executado sem essa classificação prévia.
+
+### Color Migration — complete, not partial
+
+Ao final da auditoria, **zero consumidores reais restantes** de `--beeday-color-primary` em todo o
+`src/` — confirmado por nova busca repo-wide após cada lote de edições. Como consequência,
+`--beeday-color-primary` (e `-hover`/`-active`/`-light`/`-soft`) foi **removida** de `variables.css`
+em vez de mantida como alias permanente — não sobrou nenhum consumidor a compatibilizar.
+
+**Arquivos migrados** (22 arquivos CSS globais + CSS isolado, todos `--beeday-color-primary*` →
+`--beeday-color-brand-primary*`, mais os literais RGB duplicados `rgb(103 58 183 / ..%)`/
+`rgb(101 64 159 / ..%)` → `rgb(37 56 210 / ..%)` que pareavam com eles):
+`design-system.css`, `dragdrop.css`, `cards.css`, `wallet.css`, `feedback.css`, `forms.css`,
+`identity.css`, `pixel-ui.css`, `theme.css`, `editor-modal.css`, `app.css` (inclui o
+`:focus-visible` **global** de todo elemento focável do produto — a mudança de maior alcance desta
+Sprint para consistência de teclado), `BeeDayBrand.razor.css`, `AppFooter.razor.css`,
+`IconCatalog.razor.css`, `HeroCatalog.razor.css`, `ActivityAttributeSelect.razor.css`,
+`PixelIcon.razor.css`, `Login.razor.css`, `HabitEditorModal.razor.css`,
+`BeeDayFeedbackModal.razor.css`, `ReconnectModal.razor.css`, `Tutorial.razor.css`,
+`ProjectContextFilter.razor.css`, `ProjectWorkspace.razor.css`, `CreateProfile.razor.css` (literal
+RGB companion apenas).
+
+**`--beeday-focus-color`/`--beeday-focus-ring`** (`variables.css`) também migrados diretamente
+(sem alias) — diferente de `--beeday-color-primary`, este token tem um único papel bem definido (cor
+do anel de foco), não o papel amplo/sobrecarregado de superfície/texto, então migrá-lo diretamente não
+arrisca a mesma regressão de fundo/texto em rede: recolore consistentemente um indicador de interação
+transitório, em todo o produto, de uma vez.
+
+**`ProjectWorkspace.razor.css`** — avaliada e migrada para `--beeday-color-brand-primary` (não para
+`--beeday-color-project`): os usos ali (eyebrow, barra de progresso, botão "add", toggle de lista) são
+chrome genérico de uma view de edição de UM projeto já selecionado, não uma categorização lado a lado
+de tipos de atividade (que é o papel real de `--beeday-color-project`, usado em `DashboardColumn`'s
+badge de contagem e nos cards do board — ambos **não tocados**, confirmado semanticamente corretos).
+
+**Nova foundation canônica** (`variables.css`): `--beeday-color-brand-primary-soft` adicionada (faltava
+na família criada na Sprint 20.6), consumida por `design-system.css`/`feedback.css`.
+
+### Typography — no further action needed
+
+`--beeday-font-body` (Nunito) já era canônica e sem consumidores pendentes desde a Sprint 20.6.
+`--beeday-font-ui` (Jersey 25) reavaliada: continua reservada ao chrome pixel-console/retro-game
+(`BeeDayButton` via `!important` em `typography-policy.css`, `BeeDayBrand`, títulos de página/card,
+`pixel-ui.css`) — responsabilidade de marca real, formalmente documentada antes desta Sprint, não
+apenas legado. Nenhum consumidor usa Jersey 25 "só por legado" sem essa responsabilidade — auditado
+diretamente, nenhuma migração necessária.
+
+### BeeDayBrand — reusable color-variant hook (non-breaking)
+
+`.beeday-brand { color: var(--beeday-brand-color, var(--beeday-color-brand-primary)); }` —
+`--beeday-brand-color` é uma custom property CSS opcional (não um novo parâmetro Razor, API pública
+100% inalterada) que qualquer container ancestral pode definir para recolorir "BEE" no seu próprio
+contexto (ex.: `--beeday-brand-color: var(--beeday-color-text-inverse);` para superfícies escuras).
+O fallback (nenhum override) é a marca canônica — usado por todo consumidor de superfície clara:
+`PublicHeader` (que teve seu `::deep` override da Sprint 20.6 removido, pois o default já é o
+canônico agora), Login, as 5 páginas de Identity, `Tutorial`, `CreateProfile` (nenhuma delas exigiu
+edição própria — herdam a nova cor automaticamente via o componente compartilhado).
+
+### TopNavigation Migration
+
+- **Brand delegation:** substituído o markup literal `<span class="top-navigation__brand-bee">BEE</span>`/
+  `day` por `<BeeDayBrand />`, resolvendo o achado histórico "Brand duplication" (ver "Risks", registrado
+  desde a Sprint 20.1, deliberadamente não resolvido nas Sprints 20.4/20.5 por falta de necessidade
+  comprovada — agora resolvido porque esta Sprint exige exatamente essa convergência). `--beeday-brand-color:
+  var(--beeday-color-text-inverse)` aplicado localmente (superfície escura). Efeito colateral positivo:
+  corrige uma inconsistência de matiz pré-existente entre "DAY" (`#ffc800` aqui vs. `#ffc928` no resto do
+  produto) — agora ambos usam `--beeday-game-yellow`.
+- **Color:** fundo migrado do literal `#5b1095` para `var(--beeday-color-brand-primary-active)`.
+  Durante a migração, encontradas **3 declarações `.top-navigation { background: ... }` conflitantes**
+  no mesmo arquivo (resultado de edições incrementais anteriores) — a última (`#5b1095` flat) sempre
+  vencia a cascata, tornando um gradiente roxo intermediário código morto. Consolidadas em uma única
+  declaração canônica.
+- **Height:** `3.75rem` → `4.25rem`, igualando `PublicHeader` (Sprint 20.6) — "spacing language"
+  compartilhada entre os dois shells.
+- **Tokens:** `#ffc800`/`#ffc928`/`#171321` literais → `var(--beeday-game-yellow)`/`var(--beeday-game-ink)`.
+- **Arquitetura preservada:** `TopNavigation` não foi transformado em `PublicHeader` — continua um
+  componente próprio, com sua responsabilidade autenticada (painel de perfil, links Daily/Wallet, menu
+  de suporte) intacta.
+
+### MainLayout Migration
+
+- Rails colapsados (`.beeday-side-slot`) migrados de `#5b1095` para `var(--beeday-color-brand-primary-active)`
+  — mesmo token de `TopNavigation`/`AccountSidePanel`/`ProfileSidePanel` (um único "authenticated shell
+  surface" canônico, não mais um hex repetido em 4 arquivos).
+- **Bug pré-existente corrigido como parte da mesma consolidação:** havia 3 blocos de regra parcialmente
+  conflitantes para `.beeday-side-slot`; um deles pretendia tornar o rail transparente quando seu painel
+  está aberto (evitar uma barra escura dupla), mas um bloco posterior de mesma especificidade re-aplicava
+  o fundo escuro por cima, tornando essa regra código morto. Consolidado em um único bloco que restaura o
+  comportamento aparentemente pretendido.
+- `--beeday-top-navigation-height` (`.beeday-app`) `3.75rem` → `4.25rem`; `background: #f4f3f5` (literal
+  quase idêntico ao token existente) → `var(--beeday-color-background)`.
+- `polish.css`'s fallback de `scroll-padding-top` atualizado para `4.25rem` (mesmo valor).
+- **Lógica do layout não alterada** — apenas backgrounds/superfícies/spacing, conforme pedido.
+
+### AccountSidePanel / ProfileSidePanel Migration
+
+- Mesma migração de cor de fundo (`#5b1095` → `var(--beeday-color-brand-primary-active)`).
+- `AccountSidePanel`: brand delegado a `<BeeDayBrand />` (mesmo mecanismo de `TopNavigation`), resolvendo
+  a mesma duplicação de marca.
+- `top: 3.75rem` (posicionamento mobile fixo, abaixo da barra fixa) → `4.25rem` em ambos, para continuar
+  alinhado com a nova altura de `TopNavigation`.
+
+### Component Impact Analysis (BeeDayButton / BeeDayCard)
+
+Avaliado explicitamente se `--soft` (Sprint 20.6) deveria se tornar o default de `BeeDayButton`/
+`BeeDayCard` ("current default → new canonical default", conforme solicitado). **Decisão: não
+flipado nesta Sprint.** `BeeDayButton` tem 40+ consumidores confirmados; validação visual não está
+disponível neste ambiente (mesma limitação de todas as Sprints anteriores — sem conectividade de
+banco de dados). Trocar o default cegamente recoloriria/reformaria instantaneamente toda a interface
+"pixel/comic" do produto (badges, botões de pontuação de hábito, confirmações destrutivas) sem
+qualquer verificação visual possível — um risco de regressão desproporcional ao que pode ser
+verificado nesta Sprint. Mantida a estratégia já validada na Sprint 20.6 (canônico como modificador
+opt-in + migração deliberada por consumidor real) em vez de um flip global. **Não é uma decisão
+final** — registrada como candidata explícita para avaliação futura, com validação visual real.
+
+### Deferred — "soft" visual language propagation
+
+**Não implementado nesta Sprint, com motivo explícito:** propagar radius generoso (`--radius-2xl`)/
+sombra elevada/formato sem borda para as superfícies **densas e funcionais** do produto —
+`DashboardColumn` (board Kanban compacto, já auditado: usa somente tokens compartilhados corretos,
+nenhuma cor legada, radius pequeno deliberado para densidade), cards de Habits/Tasks/Todos/Projects em
+`cards.css` (linguagem "pixel/comic" com paletas por tipo de atividade — `--beeday-color-task`/`-todo`/
+`-project`/habit colors — preservadas intactas, conforme exigido), `/wallet` (`wallet.css`, já com cor
+migrada, mas sem radius/shadow "soft" aplicado), `/account` (`Account.razor.css`, auditado — não usa
+cor legada, mas também não usa `--soft`). **Motivo:** a intensidade de forma "generosa/marketing" do
+`--soft` foi desenhada e validada para a Home (uma landing page); aplicá-la a um board de Kanban denso
+ou a cards de atividade compactos mudaria sua função visual (menos itens visíveis, hierarquia diferente)
+sem qualquer verificação visual disponível — risco desproporcional, igual ao do item anterior.
+Cor/tipografia/foco (a base) convergem; a composição/densidade de cada superfície permanece a que já
+existia, deliberadamente, seguindo a mesma lógica que a própria Sprint autoriza para Login/Onboarding
+("a composição pode continuar específica de cada jornada").
+
+### Legacy CSS
+
+`--beeday-color-primary` e seus 4 modificadores foram **removidos** (não apenas marcados como
+"a remover depois") de `variables.css`, já que a auditoria confirmou zero consumidores restantes.
+Nenhum outro token/modificador ficou órfão nesta Sprint — `--soft` (Sprint 20.6) continua consumido
+por `PublicHeader`/`Home.razor`; nenhum CSS duplicado foi introduzido (os dois casos de duplicação
+pré-existente encontrados — `TopNavigation`'s 3 blocos `.top-navigation`, `MainLayout`'s 3 blocos
+`.beeday-side-slot` — foram consolidados, não somados).
+
+### Responsiveness
+
+Verificado por leitura de código (mesma limitação de ambiente das Sprints anteriores — sem navegador
+disponível): alturas de header/nav (`4.25rem`) e os pontos de corte mobile dependentes dela
+(`top: 4.25rem` em `AccountSidePanel`/`ProfileSidePanel`) permanecem consistentes entre si após a
+mudança; nenhum breakpoint novo introduzido; `TopNavigation`'s colapso mobile (680px, esconde
+`__links`) não alterado, apenas a marca dentro dele.
+
+### Accessibility
+
+`:focus-visible` global (`app.css`) agora consistente em azul canônico em todo o produto — melhoria de
+consistência de indicador de foco, não uma regressão (mesma opacidade/espessura de anel, só a cor
+migrou). `BeeDayBrand`'s `aria-label="Bee Day"` preservado nos dois novos consumidores (`TopNavigation`,
+`AccountSidePanel`) dentro de wrappers `aria-hidden="true"` já existentes (a ação real é comunicada
+pelo `aria-label` do botão/link ancestral, como antes). Nenhuma landmark, hierarquia de heading ou
+`prefers-reduced-motion` alterada — a transição de `font-size` do brand-hover em `TopNavigation` foi
+adicionada à lista de seletores já neutralizados sob `prefers-reduced-motion: reduce`.
+
+### Tests
+
+`AccountSidePanelTests.RendersInstitutionalBrandingInsteadOfSocialMedia` atualizado: as asserções que
+liam `.support-drawer__brand-bee`/`.support-drawer__brand-day` (classes removidas com a migração para
+`<BeeDayBrand />`) agora leem `.beeday-brand`/`.beeday-brand__accent` dentro de `.support-drawer__brand-mark`.
+Nenhum outro teste existente assumia as classes/markup legados de `TopNavigation` (não há
+`TopNavigationTests.cs`/`MainLayoutTests.cs` dedicados no repositório). `BeeDayBrandTests`,
+`PublicHeaderTests`, `PublicLayoutTests`, `HomeTests`, `EntryFlowVisualConsistencyTests`,
+`DailyPageScrollArchitectureTests` executados como suíte focada após as mudanças estruturais — todos
+aprovados sem alteração necessária.
+
+### Visual Validation
+
+```text
+NOT EXECUTED
+```
+
+Mesma limitação de todas as Sprints anteriores desta EPIC — sem conectividade real de banco de dados
+neste ambiente. Nenhuma aprovação visual simulada ou declarada.
+
+### Documentation
+
+Este documento (extração/migração de cor documentadas acima); `docs/design-system/01-foundations.md`
+(ver seção "Migração de marca em andamento" — a atualizar para refletir a conclusão nesta Sprint);
+"Deferred to Sprint 20.7" (abaixo) reescrita para refletir o que foi de fato concluído vs. o que
+genuinamente permanece.
+
 ## Deferred (product content — no longer on the EPIC 20 critical path)
 
 A antiga Sprint "Home Content & Product Integration" (dados reais/pessoais na Home, streak,
@@ -957,22 +1170,27 @@ da EPIC:
   Sprint 20.1).
 - Reavaliar estratégia de navegação por âncora no `PublicHeader` com o conteúdo da Home consolidado.
 
-## Deferred to Sprint 20.7 (Design System Component Migration)
+## Deferred to Sprint 20.7 (Design System Component Migration) — histórico, ver Results acima
 
-- Propagação sistemática dos tokens canônicos (`--beeday-color-brand-primary` família, `--soft`,
-  `--beeday-radius-2xl`, `--beeday-font-size-hero`, `--beeday-font-weight-black`) pelas demais
-  superfícies/componentes do produto — `/daily`, `/wallet`, `/account`, `TopNavigation`,
-  `OnboardingLayout` continuam lendo `--beeday-color-primary` (roxo, inalterado, compat) até serem
-  migrados deliberadamente.
-- Componentes/superfícies ainda na cor legada: `TopNavigation`, `AccountSidePanel`,
-  `ProfileSidePanel`, `DashboardColumn`, `MainLayout`, `Login`/Identity/Onboarding (via
-  `OnboardingLayout`, inclui os outros 8 consumidores de `BeeDayBrand`), `Account.razor`,
-  `Wallet.razor`, Dashboard (`/daily`) e todos os cards de atividade/hábito.
+**Concluído na Sprint 20.7** (registrado aqui apenas para preservar o histórico do que este bloco
+pedia originalmente, sem apagá-lo): a migração de cor (`--beeday-color-primary` → canônico, com
+remoção do token legado por ausência de consumidores restantes) e a migração de `TopNavigation`/
+`MainLayout`/`AccountSidePanel`/`ProfileSidePanel` — ver "Sprint 20.7 — Results" acima para o
+detalhamento completo.
+
+## Deferred to Sprint 20.8+ (genuinely remaining)
+
+- **Propagação da linguagem "soft" de forma** (radius generoso, sombra elevada, botão/card sem
+  borda pixel) para superfícies densas/funcionais: `DashboardColumn` (board Kanban), cards de
+  Habits/Tasks/Todos/Projects (`cards.css`), `/wallet`, `/account` — deliberadamente não feito na
+  Sprint 20.7 sem validação visual real disponível (ver "Component Impact Analysis" na Sprint 20.7).
+- **Decisão sobre `BeeDayButton`/`BeeDayCard` default** — se `--soft` deve se tornar o novo default
+  em vez de permanecer opt-in — avaliada, não decidida, mesma razão acima.
 - Variante de cor inversa para `BeeDayBrand` (fundo escuro), candidata para permitir inverter o
-  fundo do `PublicHeader` para a direção escura da referência (`#17203b`) — avaliado nesta Sprint,
-  não implementado (mudança de componente compartilhado com escopo próprio).
-- Remoção de `--beeday-color-primary` quando todos os consumidores acima migrarem para
-  `--beeday-color-brand-primary`.
+  fundo do `PublicHeader` para a direção escura da referência (`#17203b`) — avaliado nas Sprints
+  20.6/20.7, não implementado (mudança de componente compartilhado com escopo próprio).
+- `Login`/Identity/Onboarding: convergiram em cor/tipografia/foco (Sprint 20.7, automático via
+  `BeeDayBrand`/tokens globais), mas não receberam nenhuma revisão de composição própria além disso.
 
 ## Deferred to Sprint 20.8 (Responsive, Accessibility & Final Visual Consistency)
 
@@ -994,9 +1212,9 @@ da EPIC:
 
 20.5 BeeDay Home Functional Structure — COMPLETE
 
-20.6 Reference Design System Extraction & Home Migration — CURRENT
+20.6 Reference Design System Extraction & Home Migration — COMPLETE
 
-20.7 Design System Component Migration
+20.7 Design System Project-Wide Migration — PARTIAL (foundations/color/typography/focus/shell: complete; "soft" shape language propagation to dense surfaces: deferred — see Results)
 
 20.8 Responsive, Accessibility & Final Visual Consistency
 ```
