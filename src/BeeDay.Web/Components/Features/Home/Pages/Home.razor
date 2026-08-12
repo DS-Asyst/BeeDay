@@ -19,10 +19,10 @@
             <div class="home-hero__actions">
                 <AuthorizeView>
                     <Authorized>
-                        <BeeDayButton Class="beeday-button--soft" OnClick="ContinueToBeeDay">Continue to BeeDay</BeeDayButton>
+                        <BeeDayButton OnClick="ContinueToBeeDay">Continue to BeeDay</BeeDayButton>
                     </Authorized>
                     <NotAuthorized>
-                        <BeeDayButton Class="beeday-button--soft" OnClick="GoToLogin">Get started</BeeDayButton>
+                        <BeeDayButton OnClick="GoToLogin">Get started</BeeDayButton>
                     </NotAuthorized>
                 </AuthorizeView>
                 <a class="home-hero__secondary-action" href="#capabilities">See what's inside</a>
@@ -41,7 +41,7 @@
                 </p>
             </div>
 
-            <BeeDayCard Padded="true" Class="beeday-card--soft home-page__showcase" aria-label="BeeDay capabilities">
+            <BeeDayCard Padded="true" Class="home-page__showcase" aria-label="BeeDay capabilities">
                 <div class="home-page__showcase-row">
                     <PixelIcon Name="PixelIconName.Daily" Size="PixelIconSize.Medium" Color="PixelIconColor.Primary" />
                     <div>
@@ -91,7 +91,7 @@
                 </p>
             </div>
 
-            <BeeDayCard Padded="true" Class="beeday-card--soft home-page__progress-visual" aria-hidden="true">
+            <BeeDayCard Padded="true" Class="home-page__progress-visual" aria-hidden="true">
                 <div class="home-page__progress-icons">
                     <PixelIcon Name="PixelIconName.Experience" Size="PixelIconSize.ExtraLarge" Color="PixelIconColor.Primary" />
                     <PixelIcon Name="PixelIconName.Level" Size="PixelIconSize.ExtraLarge" Color="PixelIconColor.Primary" />
@@ -107,10 +107,10 @@
             <p>Start small. Come back tomorrow. Be better every day.</p>
             <AuthorizeView>
                 <Authorized>
-                    <BeeDayButton Class="beeday-button--soft" OnClick="ContinueToBeeDay">Continue to BeeDay</BeeDayButton>
+                    <BeeDayButton OnClick="ContinueToBeeDay">Continue to BeeDay</BeeDayButton>
                 </Authorized>
                 <NotAuthorized>
-                    <BeeDayButton Class="beeday-button--soft" OnClick="GoToLogin">Get started</BeeDayButton>
+                    <BeeDayButton OnClick="GoToLogin">Get started</BeeDayButton>
                 </NotAuthorized>
             </AuthorizeView>
         </div>

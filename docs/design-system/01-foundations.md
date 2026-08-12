@@ -3,19 +3,25 @@
 **Fonte da verdade:** verificado diretamente em `src/BeeDay.Web/wwwroot/css/variables.css`,
 `theme.css`, `typography.css`, `typography-policy.css`, `utilities.css`, `polish.css`, e um
 levantamento completo de todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css`
-(19 arquivos) e `src/BeeDay.Web/Components/**/*.razor.css` (30 arquivos de CSS isolado por
-componente).
+(19 arquivos) e `src/BeeDay.Web/Components/**/*.razor.css` (29 arquivos de CSS isolado por
+componente — `LoginBackground.razor.css` removido na Sprint 20.8, ver abaixo).
 
-**Última verificação:** 2026-08-12 (Sprint 20.7, EPIC 20) — §2 atualizado: `--beeday-color-primary`
-(roxo legado) **removida** — a Sprint 20.7 auditou repo-wide todo consumidor real e confirmou zero
-restantes após migrá-los para `--beeday-color-brand-primary`, então o token de compatibilidade
-temporário introduzido na Sprint 20.6 foi removido em vez de mantido indefinidamente; nova foundation
-`--beeday-color-brand-primary-soft` adicionada; `--beeday-focus-color`/`--beeday-focus-ring` também
-migrados (papel único — cor do anel de foco — então migrados diretamente, sem alias). Verificação
-anterior: 2026-08-12 (Sprint 20.6) — §2/§3/§5: novo degrau `--beeday-radius-2xl`, novo token de escala
-`--beeday-font-size-hero`, novo peso `--beeday-font-weight-black`, nova família `--beeday-color-brand-primary`
-(introduzida como canônica ao lado da legada) e evolução de `--beeday-font-body` (Inter → Nunito) — ver
-`docs/epics/20-home-visual-experience/README.md`, seções "Sprint 20.6"/"Sprint 20.7".
+**Última verificação:** 2026-08-12 (Sprint 20.8, EPIC 20, Sprint final da EPIC) — `--beeday-color-accent`/
+`-hover` (`#f29b24`, sem consumidor real confirmado repo-wide) removida; `.beeday-button`/`.beeday-card`
+tiveram seu default canônico decidido — a geometria antes opt-in em `--soft` (Sprint 20.6) tornou-se o
+default de ambos, e o modificador `--soft` foi removido (ver `02-components.md` §2/§3); background de
+imagem do `OnboardingLayout` (Login/Identity/Onboarding/ProfileCreation/Tutorial) removido —
+`--beeday-color-background` agora usado. Verificação anterior: 2026-08-12 (Sprint 20.7) — §2:
+`--beeday-color-primary` (roxo legado) **removida** — a Sprint 20.7 auditou repo-wide todo consumidor
+real e confirmou zero restantes após migrá-los para `--beeday-color-brand-primary`, então o token de
+compatibilidade temporário introduzido na Sprint 20.6 foi removido em vez de mantido indefinidamente;
+nova foundation `--beeday-color-brand-primary-soft` adicionada; `--beeday-focus-color`/
+`--beeday-focus-ring` também migrados (papel único — cor do anel de foco — então migrados diretamente,
+sem alias). Verificação anterior: 2026-08-12 (Sprint 20.6) — §2/§3/§5: novo degrau
+`--beeday-radius-2xl`, novo token de escala `--beeday-font-size-hero`, novo peso
+`--beeday-font-weight-black`, nova família `--beeday-color-brand-primary` (introduzida como canônica
+ao lado da legada) e evolução de `--beeday-font-body` (Inter → Nunito) — ver
+`docs/epics/20-home-visual-experience/README.md`, seções "Sprint 20.6"/"20.7"/"20.8".
 
 ## 1. Objetivo
 
@@ -135,10 +141,13 @@ coincidem numericamente com o início da escala principal, mas são tokens disti
 ## 5. Border radius
 
 7 degraus em `variables.css`: `xs` .2rem, `sm` .375rem, `md` .625rem, `lg` .875rem, `xl` 1.25rem,
-`2xl` 1.75rem (Sprint 20.6, EPIC 20 — preenche o gap entre `xl` e `pill` para superfícies generosas
-de marketing/showcase, ex. `.beeday-card--soft`), `pill` 999px. `activity-design-system.css` define
-mais dois, próprios (`--activity-radius-sm` .25rem, `--activity-radius-md` .4rem) — mesmo padrão de
-escala paralela do §4.
+`2xl` 1.75rem (Sprint 20.6, EPIC 20 — preenche o gap entre `xl` e `pill` para superfícies generosas;
+desde a Sprint 20.8 é o radius default do `BeeDayCard` em si, não mais um modificador opt-in), `pill`
+999px (desde a Sprint 20.8, também o radius default do `BeeDayButton`). `activity-design-system.css`
+define mais dois, próprios (`--activity-radius-sm` .25rem, `--activity-radius-md` .4rem) — mesmo
+padrão de escala paralela do §4; não afetados pela mudança de default de `BeeDayCard` porque
+`.activity-card`/`.habit-card` (`cards.css`) já redeclaram sua própria borda/radius/sombra por
+completo, mesmo renderizando `<BeeDayCard>` como raiz (ver `02-components.md` §3).
 
 ## 6. Elevação (sombra)
 

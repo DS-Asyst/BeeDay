@@ -9,8 +9,9 @@ de referência visual local. Nenhuma afirmação de "estado atual" abaixo vem de
 documento evoluir em Sprints futuras, cada atualização deve reverificar contra o código antes de
 alterar uma afirmação de estado atual.
 
-**Última verificação:** 2026-08-12 (Sprint 20.7 — Design System Project-Wide Migration, PARTIAL —
-ver "Sprint Roadmap").
+**Última verificação:** 2026-08-12 (Sprint 20.8 — Full Visual Convergence, Responsive, Accessibility
+& Final Audit, PARTIAL — Sprint final da EPIC 20. EPIC 20 status: READY FOR HMG VISUAL VALIDATION,
+não COMPLETE — ver "Sprint 20.8 — Results" e "Sprint Roadmap").
 
 **Escopo:** evolução da experiência visual do BeeDay — primeira Home oficial, migração do Design
 System existente para o target visual da página-modelo, Application Shell/navegação, remoção do
@@ -1157,7 +1158,205 @@ Este documento (extração/migração de cor documentadas acima); `docs/design-s
 "Deferred to Sprint 20.7" (abaixo) reescrita para refletir o que foi de fato concluído vs. o que
 genuinamente permanece.
 
-## Deferred (product content — no longer on the EPIC 20 critical path)
+## Sprint 20.8 — Full Visual Convergence, Responsive, Accessibility & Final Audit (Results)
+
+**Última verificação:** 2026-08-12 (Sprint 20.8, branch `sprint/20.8-final-visual-convergence`, criada
+a partir de `hmg` já sincronizado com o merge da Sprint 20.7, `932f4be`). Sprint final da EPIC 20.
+**Fonte da verdade:** busca repo-wide direta de todo consumidor de `<BeeDayButton`/`<BeeDayCard`
+(40+ e 9 pontos respectivamente, cada um lido com contexto completo, não amostrado) antes de decidir
+os defaults; leitura direta de `LoginBackground.razor(.css)`, `OnboardingLayout.razor(.css)`,
+`HabitCard.razor`/`ActivityCard.razor`/`cards.css`, `wallet.css`, `settings.css`,
+`pixel-nes.css`/`NES_ATTRIBUTION.md`; execução real de `dotnet format --verify-no-changes`/
+`dotnet build`/`dotnet test` após cada lote de mudanças.
+
+**Resultado geral: PARTIAL.** Ver §25 (critério de conclusão) — a EPIC não pode ser declarada
+COMPLETE sem validação visual real em HMG, que não ocorreu nesta Sprint (mesma limitação de
+ambiente de todas as Sprints anteriores). Trabalho real de auditoria + correção + implementação foi
+executado (não apenas um audit), com escopo e evidência explícitos abaixo.
+
+### Login Background Removal
+
+Investigação repo-wide encontrou **dois sistemas de background distintos**, não um:
+
+1. **`LoginBackground.razor`/`.razor.css`** (`Features/Authentication/Components/`) — um componente
+   elaborado de "nuvens" animadas em parallax (4 PNGs em `wwwroot/images/authentication/clouds-1/` +
+   `LICENSE.txt` de atribuição, `@keyframes` de drift/float, guarda de `prefers-reduced-motion`).
+   Busca por `<LoginBackground` em todo `src/` confirmou **zero consumidores reais** — nunca foi
+   montado por `Login.razor` nem por `OnboardingLayout.razor`. Código morto, órfão.
+2. **`OnboardingLayout.razor.css`** — o fundo **realmente renderizado**: `background-image:
+   url('/images/onboarding/auth-galaxy.png')` (starfield escuro + overlay gradiente) na própria
+   `.onboarding-layout`, o layout compartilhado por Login, os 5 Identity pages, ProfileCreation
+   (`CreateProfile`/`Welcome`) e Tutorial — 9 páginas ao todo.
+
+**Ação:** removida a implementação de ambos.
+`.onboarding-layout` passou a usar `background: var(--beeday-color-background)` (mesmo token
+canônico de fundo já usado por `MainLayout`/`.beeday-app`) — sem gradiente novo, sem imagem
+substituta, conforme instruído. `LoginBackground.razor`/`.razor.css` removidos (zero consumidores).
+`wwwroot/images/authentication/` (pasta inteira, exclusiva do componente removido) e
+`wwwroot/images/onboarding/` (continha apenas `auth-galaxy.png`, exclusiva do fundo removido)
+removidas. `ResourcePreloader` (`App.razor`) verificado — não referencia esses caminhos
+especificamente, framework-level, nada a ajustar.
+
+**Teste de regressão estrutural adicionado:** `EntryFlowVisualConsistencyTests.OnboardingLayoutHasNoBackgroundImage`
+— confirma ausência de `background-image`/`url(` em `OnboardingLayout.razor.css`, ausência do arquivo
+`LoginBackground.razor` e ausência das duas pastas de imagem, para impedir reintrodução silenciosa.
+
+**Documentação corrigida:** `docs/ux/02-accessibility.md` §6 (lista de blocos `reduced-motion`,
+`LoginBackground.razor.css` removido da lista) e `docs/ux/03-responsive.md` §2.1 (linha 640px/40rem,
+arquivo removido da célula; contagem de arquivos CSS isolados 30→29).
+
+### BeeDayButton — Final Decision
+
+**Decisão: `--soft` (Sprint 20.6) tornou-se o default canônico do `.beeday-button` base.** Não
+mantido como "old default + new soft variant" permanente.
+
+**Auditoria que fundamentou a decisão** (repo-wide, `<BeeDayButton`, todo consumidor lido com
+contexto completo — não uma amostra): dos 40+ pontos de uso, a **grande maioria (30+) já usa
+`--comic`/`--comic-press`/`--plain`/`--pixel-cta`**, modificadores que redeclaram border/radius/
+shadow por completo e são, portanto, **totalmente não afetados** pela mudança do default — essa é a
+linguagem de "ênfase operacional primária" já estabelecida (Save/Delete/Sign in/Create em Wallet,
+editores de atividade via `EditorModalShell`, `BeeDayConfirmDialog`, Login, Identity, Account via
+`BeeDaySettingsForm`) e **preservada intacta**, exatamente como pedido ("preserve variantes
+funcionais reais"). Apenas **~9 consumidores sem modificador de forma** (Wallet: paginação de
+`TransactionList`, "Try again"/"Clear filters"/"Create transaction" de `WalletEmptyState`;
+`ForgotPassword`/`ResetPassword` submits; Tutorial's `BACK`/`NEXT`/`ENTER DAILY`) herdam a nova
+aparência — a convergência pretendida para ações secundárias/utilitárias.
+
+**Implementação:** geometria de `--soft` (sem borda, `border-radius: pill`, `box-shadow: shadow-md`,
+hover `translateY(-2px)`+`shadow-lg`, active `translateY(0)`+`shadow-sm`, focus-visible `shadow-md`+
+`--beeday-focus-ring`) movida para dentro de `.beeday-button` base em `design-system.css`; o
+modificador `.beeday-button--soft` **removido** (redundante); os 6 consumidores (`PublicHeader`×2,
+`Home.razor`×4) tiveram `Class="beeday-button--soft"` removido de seu markup.
+
+**Efeito colateral identificado e corrigido:** `.beeday-pixel-cta` (`pixel-nes.css` — experiência
+pixel única e deliberadamente restrita ao modal de celebração de Level Up, documentada como
+"RESTRICTED USE") dependia do `border-width` da base (antes `2px solid`) para seu mecanismo
+`border-image` renderizar. Com a base agora `border: 0`, essa dependência quebraria silenciosamente.
+Corrigido: `.beeday-pixel-cta` ganhou `border-width: var(--beeday-pixel-unit); border-style: solid;`
+explícitos, tornando-se autossuficiente independente da borda da base.
+
+### BeeDayCard — Final Decision
+
+**Decisão: `--soft` (Sprint 20.6) tornou-se o default canônico do `.beeday-card` base**, mesma lógica.
+
+**Auditoria:** todo consumidor real de `<BeeDayCard` foi lido — Wallet
+(`.wallet-summary__card`/`.wallet-main-panel`/`.wallet-tags-panel`/`.wallet-tag-item`/
+`.wallet-transaction-card`, `wallet.css`), a página Account (`.beeday-settings-section`,
+`settings.css`) — **todos já redeclaram border/border-radius/background/box-shadow por completo**
+(um deles com comentário pré-existente explicando exatamente por quê, `wallet.css` linha ~60).
+**Achado corrigido nesta Sprint:** a documentação anterior (`02-components.md` §3) afirmava que "a
+maioria dos cards de produto (Activity/Habit) não usa `BeeDayCard`" — verificado diretamente que isso
+está **incorreto**: `HabitCard.razor`/`ActivityCard.razor` renderizam `<BeeDayCard Class="@CardCssClass">`
+como raiz; o que é verdade é que `cards.css` estiliza as classes computadas
+(`.habit-card`/`.activity-card` + variantes) com border/radius/shadow própria e completa (`.habit-card`
+inclusive com `!important`) — arquitetural e semanticamente são consumidores reais do componente
+compartilhado, apenas visualmente autossuficientes. **Conclusão da auditoria: o novo default não tem
+nenhum efeito visual sobre nenhum desses consumidores** — só a Home dependia de fato do default (já
+usava `--soft` explicitamente). Modificador `.beeday-card--soft` removido; os 2 consumidores
+(`Home.razor`) tiveram a classe removida do markup.
+
+### Daily / Activity Cards / Wallet / Account — shape convergence status
+
+**Resultado honesto: tokens/cor/tipografia/foco convergiram (Sprints 20.6-20.8); a linguagem de
+forma "generosa" (radius grande, sombra elevada, sem borda) da Home **não** foi propagada à
+composição desses cards** — e a auditoria acima explica exatamente por quê: `.activity-card`/
+`.habit-card`/`.wallet-transaction-card`/`.wallet-tag-item`/`.beeday-settings-section` têm sua
+própria forma completa e deliberadamente compacta (radius pequeno, borda fina, sombra sutil),
+apropriada à densidade funcional dessas superfícies (grades de Kanban, listas de transação,
+formulários de configuração) — mudar essa forma exigiria reescrever cada um desses sistemas CSS
+individualmente (não uma mudança de um ponto central como o default de `BeeDayButton`/`BeeDayCard`),
+sem nenhuma validação visual disponível para verificar o resultado em superfícies tão densas e
+usadas constantemente. Isso está alinhado com a própria instrução da Sprint ("Isso NÃO significa
+torná-los idênticos... Não transforme Daily em uma landing page") mas significa que a "sensação" de
+Daily/Wallet/Account continua visualmente distinta (mais compacta, mais "pixel/funcional") da Home
+(mais espaçosa, mais "soft/marketing") — convergência de identidade (cor, tipografia, foco,
+linguagem de botão para ações secundárias), não de composição/densidade. Registrado explicitamente
+como item que impede COMPLETE — ver §25.
+
+### Brand — Final State
+
+Confirmado (nenhuma ação nova necessária): `--beeday-brand-color` (Sprint 20.7) já resolve os 4
+contextos pedidos — light surface (default do componente, usado por Login/Identity/Onboarding/
+`PublicHeader`), dark/brand surface (`TopNavigation`/`AccountSidePanel` via
+`--beeday-brand-color: var(--beeday-color-text-inverse)`), public navigation (`PublicHeader`),
+authenticated navigation (`TopNavigation`). Nenhum override local frágil (`::deep` cru) restante —
+confirmado por busca repo-wide, único consumo de `--beeday-brand-color` fora do próprio
+`BeeDayBrand.razor.css` é `TopNavigation.razor.css`/`AccountSidePanel.razor.css`, ambos via a custom
+property, não overrides diretos de seletor.
+
+### Typography — Jersey 25 Final Role
+
+Confirmado, sem mudança necessária: `--beeday-font-ui` (Jersey 25) reservado ao chrome
+pixel-console/retro-game (`BeeDayButton` via `!important` em `typography-policy.css`, `BeeDayBrand`,
+títulos de página/card, `pixel-ui.css`) — responsabilidade de marca real e formalmente documentada,
+não uso legado. `--beeday-font-body` (Nunito) é a família de corpo canônica, sem consumidores
+pendentes. Nenhuma família tipográfica concorrente sem semântica explícita encontrada.
+
+### Colors — Final Sweep
+
+Confirmado repo-wide: zero consumidores de `--beeday-color-primary` (removida na Sprint 20.7, apenas
+menções em comentário histórico permanecem). **Removida nesta Sprint:** `--beeday-color-accent`/
+`-hover` (`#f29b24`/`#d9820d`) — token órfão pré-existente (não introduzido pela EPIC 20), zero
+consumidores confirmados por busca repo-wide, evidência clara antes da remoção. Nenhuma cor
+semântica de status/atividade foi alterada — `--beeday-color-success`/`-warning`/`-danger`/`-info` e
+a família `task`/`todo`/`project`/atributos/hábitos permanecem exatamente como estavam.
+
+### Legacy CSS/Tokens Removed
+
+- `--beeday-color-primary` + `-hover`/`-active`/`-light`/`-soft` (Sprint 20.7).
+- `--beeday-color-accent`/`-hover` (esta Sprint — órfão pré-existente).
+- `.beeday-button--soft` (modificador, incorporado ao default desta Sprint).
+- `.beeday-card--soft` (modificador, incorporado ao default desta Sprint).
+- `LoginBackground.razor`/`.razor.css` + `wwwroot/images/authentication/` +
+  `wwwroot/images/onboarding/` (código morto + assets exclusivos).
+
+### Responsive Audit
+
+Revisão por leitura de código (mesma limitação de ambiente — sem navegador disponível para as
+Sprints desta EPIC): nenhuma mudança estrutural de grid/breakpoint foi introduzida nesta Sprint
+(apenas forma/cor/background de superfícies existentes); `.beeday-button--compact`/`--full-width`
+verificados compatíveis com a nova geometria pill (não sobrescrevem radius); `OnboardingLayout`'s
+breakpoint `40rem` preservado (só o `background-position` morto foi removido). **Não executado:**
+verificação visual real em wide desktop/desktop/tablet/mobile/narrow mobile — requer HMG.
+
+### Accessibility Audit
+
+Revisão por leitura de código: `:focus-visible` do botão/card agora usa exclusivamente
+`--beeday-focus-ring` (mesmo anel canônico azul já usado em todo o resto do produto desde a Sprint
+20.7) — nenhuma perda de indicador de foco, opacidade/espessura inalteradas. `--comic`/`--comic-press`/
+`--skew-press`/`--plain`/`--pixel-cta` mantêm seus próprios `focus-visible` já existentes, inalterados.
+Estados `:disabled` inalterados (paleta cinza, `cursor: not-allowed`, opacidade). `aria-label`s de
+`BeeDayBrand` preservados nos consumidores existentes. Nenhuma landmark, hierarquia de heading,
+`prefers-reduced-motion` (novo teste de reduced-motion não necessário — remoção de background não
+introduziu motion novo) alterada. **Não executado:** verificação de contraste/zoom/teclado real em
+navegador — requer HMG.
+
+### Interaction States Consistency
+
+`--comic` (ênfase primária) e o novo default `--soft`-based (ações secundárias/utilitárias) agora
+formam dois papéis semânticos claros e coerentes, aplicados de forma consistente em todo o produto —
+não uma mistura arbitrária por página. `:disabled` idêntico em ambos. `:focus-visible` usa o mesmo
+anel canônico em ambos (exceto onde os modificadores comic/pixel definem o próprio, por design,
+desde antes desta Sprint).
+
+### Tests
+
+`AccountSidePanelTests.cs` (Sprint 20.7, inalterado nesta Sprint). Novo:
+`EntryFlowVisualConsistencyTests.OnboardingLayoutHasNoBackgroundImage`. Nenhum teste frágil de
+valor CSS literal foi criado. Suíte completa executada integralmente após cada lote de mudanças —
+770/770 aprovados (suite cresceu de 769 para 770 com o novo teste), sem flakiness.
+
+### Visual Validation
+
+```text
+NOT EXECUTED
+```
+
+Mesma limitação de todas as Sprints da EPIC 20 — sem conectividade real de banco de dados neste
+ambiente. Nenhuma aprovação visual simulada ou declarada. **A revisão visual em HMG é obrigatória
+antes de a EPIC 20 poder ser declarada COMPLETE** (§25 do prompt de execução desta Sprint).
+
+
 
 A antiga Sprint "Home Content & Product Integration" (dados reais/pessoais na Home, streak,
 "% de consistência", integração de Application) **não pertence mais ao caminho crítico da EPIC 20**
@@ -1178,26 +1377,32 @@ remoção do token legado por ausência de consumidores restantes) e a migraçã
 `MainLayout`/`AccountSidePanel`/`ProfileSidePanel` — ver "Sprint 20.7 — Results" acima para o
 detalhamento completo.
 
-## Deferred to Sprint 20.8+ (genuinely remaining)
+## Resolved in Sprint 20.8 (histórico, ver Results acima)
 
-- **Propagação da linguagem "soft" de forma** (radius generoso, sombra elevada, botão/card sem
-  borda pixel) para superfícies densas/funcionais: `DashboardColumn` (board Kanban), cards de
-  Habits/Tasks/Todos/Projects (`cards.css`), `/wallet`, `/account` — deliberadamente não feito na
-  Sprint 20.7 sem validação visual real disponível (ver "Component Impact Analysis" na Sprint 20.7).
-- **Decisão sobre `BeeDayButton`/`BeeDayCard` default** — se `--soft` deve se tornar o novo default
-  em vez de permanecer opt-in — avaliada, não decidida, mesma razão acima.
+Itens antes listados como "deferred to 20.8" e agora resolvidos nesta Sprint — preservados aqui como
+registro, não apagados: decisão final de default `BeeDayButton`/`BeeDayCard` (`--soft` incorporado
+como default, auditado, implementado); remoção do background de imagem do `OnboardingLayout`/Login;
+remoção do token órfão `--beeday-color-accent`; confirmação de que o contrato `--beeday-brand-color`
+já resolve todos os contextos pedidos, sem overrides frágeis restantes.
+
+## Deferred beyond EPIC 20 (genuinely remaining)
+
+- **Propagação da linguagem "soft" de forma** (radius generoso, sombra elevada, sem borda) para a
+  composição de superfícies densas/funcionais — `DashboardColumn`, cards de Habits/Tasks/Todos/
+  Projects (`cards.css`), `.wallet-transaction-card`/`.wallet-tag-item`/`.wallet-summary__card`,
+  `.beeday-settings-section` — cada uma dessas classes já se auto-declara border/radius/shadow por
+  completo (não herdam mais nada do default de `BeeDayCard`), então propagar a forma exigiria
+  reescrever cada sistema CSS individualmente, não mudar um ponto central; não feito sem validação
+  visual real disponível (ver "Daily / Activity Cards / Wallet / Account — shape convergence status"
+  na Sprint 20.8).
 - Variante de cor inversa para `BeeDayBrand` (fundo escuro), candidata para permitir inverter o
   fundo do `PublicHeader` para a direção escura da referência (`#17203b`) — avaliado nas Sprints
-  20.6/20.7, não implementado (mudança de componente compartilhado com escopo próprio).
-- `Login`/Identity/Onboarding: convergiram em cor/tipografia/foco (Sprint 20.7, automático via
-  `BeeDayBrand`/tokens globais), mas não receberam nenhuma revisão de composição própria além disso.
-
-## Deferred to Sprint 20.8 (Responsive, Accessibility & Final Visual Consistency)
-
-- Auditoria transversal de responsividade/acessibilidade da Home e do restante do produto
-  (validação manual em navegador real — não executada nesta Sprint, sem ambiente disponível).
+  20.6/20.7/20.8, não implementado (mudança de componente compartilhado com escopo próprio).
+- Auditoria transversal de responsividade/acessibilidade com navegador real (wide desktop → narrow
+  mobile) — não executada em nenhuma Sprint desta EPIC, sem ambiente disponível; **obrigatória em
+  HMG antes de a EPIC 20 poder ser declarada COMPLETE**.
 - Decisão sobre ferramenta de a11y automatizada (axe-core/Pa11y) e regressão visual — nenhuma
-  introduzida nesta Sprint.
+  introduzida em nenhuma Sprint desta EPIC.
 
 ## Sprint Roadmap
 
@@ -1214,10 +1419,13 @@ detalhamento completo.
 
 20.6 Reference Design System Extraction & Home Migration — COMPLETE
 
-20.7 Design System Project-Wide Migration — PARTIAL (foundations/color/typography/focus/shell: complete; "soft" shape language propagation to dense surfaces: deferred — see Results)
+20.7 Design System Project-Wide Migration — COMPLETE (foundations/color/typography/focus/shell converged; shape-language propagation deferred — see 20.8)
 
-20.8 Responsive, Accessibility & Final Visual Consistency
+20.8 Full Visual Convergence, Responsive, Accessibility & Final Audit — PARTIAL (Button/Card default decided, Login background removed, legacy tokens swept; shape-language propagation to dense surfaces and real HMG visual/responsive/accessibility validation remain — see Results)
 ```
+
+EPIC 20 status: **READY FOR HMG VISUAL VALIDATION**, não COMPLETE — ver critério de conclusão na
+seção "Sprint 20.8 — Results" acima.
 
 Numeração não obriga artificialmente a implementação — se a análise real de uma Sprint revelar uma
 fronteira tecnicamente inadequada, isso deve ser reportado antes de alterar o plano, não decidido
@@ -1238,10 +1446,9 @@ permanecem aqui):
   Sprint 20.2/20.7.
 - Se vale introduzir uma ferramenta de acessibilidade automatizada (axe-core/Pa11y) e/ou de
   regressão visual — nenhuma decisão tomada; nenhuma delas deve ser assumida como aprovada.
-- Se `TopNavigation`/`AccountSidePanel` devem migrar para `BeeDayBrand` (com uma variante de cor
-  para header escuro) em vez de manter markup próprio — avaliado na Sprint 20.4 e deliberadamente
-  não decidido/implementado por não ser diretamente necessário ao shell público; permanece uma
-  melhoria de reuso de baixa prioridade, não um bug (o texto de marca já está correto).
+- ~~Se `TopNavigation`/`AccountSidePanel` devem migrar para `BeeDayBrand`~~ — **resolvida na Sprint
+  20.7:** ambos migraram para `<BeeDayBrand />` via o hook `--beeday-brand-color`, ver seção
+  "TopNavigation Migration" da Sprint 20.7. Não permanece pendente.
 
 ## Deferred Findings (pré-existentes, não corrigir nesta EPIC salvo decisão futura)
 
