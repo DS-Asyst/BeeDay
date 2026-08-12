@@ -83,11 +83,11 @@ body {
 
 ::selection {
     color: var(--beeday-color-text-primary);
-    background: var(--beeday-color-primary-soft);
+    background: var(--beeday-color-brand-primary-soft);
 }
 
 :where(button, a, input, select, textarea, [role="button"]):focus-visible {
-    outline: 2px solid var(--beeday-color-primary);
+    outline: 2px solid var(--beeday-color-brand-primary);
     outline-offset: 2px;
     box-shadow: var(--beeday-focus-ring);
 }
@@ -118,7 +118,7 @@ body {
 }
 
 *::-webkit-scrollbar-thumb:hover {
-    background: var(--beeday-color-primary-light);
+    background: var(--beeday-color-brand-primary-light);
     background-clip: padding-box;
 }
 

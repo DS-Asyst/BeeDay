@@ -1,27 +1,23 @@
 :root {
-    /* Brand */
-    --beeday-color-primary: #673ab7;
-    --beeday-color-primary-hover: #523384;
-    --beeday-color-primary-active: #432874;
-    --beeday-color-primary-light: #8b61c7;
-    --beeday-color-primary-soft: #ede4fa;
-    --beeday-color-accent: #f29b24;
-    --beeday-color-accent-hover: #d9820d;
-
-    /* Canonical brand primary — added Sprint 20.6 (EPIC 20) as the Design System's target primary
-       brand color, extracted directly from the reference page-model (#2538d2/#4458dc). This is the
-       primary color going forward; --beeday-color-primary above is kept, unchanged, as the
-       compatibility value for the 40+ not-yet-migrated consumers across the authenticated product
-       (TopNavigation, AccountSidePanel, ProfileSidePanel, DashboardColumn, cards.css, wallet.css,
-       feedback.css, forms.css, identity.css, pixel-ui.css, theme.css, editor-modal.css, dragdrop.css)
-       so migrating Home/PublicHeader to the new color carries zero regression risk for them. Sprint
-       20.7 repoints the remaining consumers to this canonical family; --beeday-color-primary is
-       removed once that migration completes. The reference's accent yellow is not duplicated here —
+    /* Brand — canonical since Sprint 20.7 (EPIC 20). --beeday-color-brand-primary was added in
+       Sprint 20.6, extracted directly from the reference page-model (#2538d2/#4458dc), alongside a
+       legacy --beeday-color-primary (#673ab7) kept as a compatibility value for not-yet-migrated
+       consumers. Sprint 20.7 audited every real consumer of the legacy token across the repository
+       (src/, excluding generated obj/ build output) and classified each by semantics — brand/generic
+       UI chrome (focus rings, links, badges, hovers, selection, drag handles) vs. status
+       (success/warning/danger/info, untouched) vs. activity (task/todo/project/attribute/habit,
+       untouched) — migrating every brand-semantic consumer to this family, never with a blind
+       search/replace. That audit found zero remaining consumers of --beeday-color-primary, so it —
+       and its -hover/-active/-light/-soft variants — were removed rather than kept as a permanent
+       second brand color. The reference's accent yellow is not duplicated as a token —
        --beeday-game-yellow (#ffc928) is already close enough (#ffd326/#ffb72e) to reuse as-is. */
     --beeday-color-brand-primary: #2538d2;
     --beeday-color-brand-primary-hover: #1d2fb8;
     --beeday-color-brand-primary-active: #16268c;
     --beeday-color-brand-primary-light: #4458dc;
+    --beeday-color-brand-primary-soft: #e6e9fb;
+    --beeday-color-accent: #f29b24;
+    --beeday-color-accent-hover: #d9820d;
 
     /* Surfaces */
     --beeday-color-background: #f2f1f3;
@@ -246,8 +242,12 @@
     --beeday-shadow-md: 0 4px 12px rgb(47 36 56 / 10%), 0 10px 28px rgb(47 36 56 / 8%);
     --beeday-shadow-lg: 0 1.5rem 4rem rgb(12 6 22 / 42%);
 
-    /* Focus */
-    --beeday-focus-color: rgb(103 58 183 / 20%);
+    /* Focus — migrated to the canonical brand blue in Sprint 20.7 (EPIC 20): this token has a single,
+       well-defined role (the default focus-visible ring color) rather than the broad, overloaded
+       surface/text role of --beeday-color-primary, so migrating it directly — instead of keeping a
+       legacy alias — does not risk the same product-wide background/text regression; it only
+       recolors a transient interaction indicator, consistently, everywhere. */
+    --beeday-focus-color: rgb(37 56 210 / 20%);
     --beeday-focus-ring: 0 0 0 3px var(--beeday-focus-color);
 
     /* Motion */

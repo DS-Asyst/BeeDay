@@ -21,13 +21,13 @@
 }
 
 .beeday-feedback:focus-visible {
-    outline: 3px solid var(--beeday-color-primary);
+    outline: 3px solid var(--beeday-color-brand-primary);
     outline-offset: 3px;
 }
 
 .beeday-feedback__accent {
     height: .45rem;
-    background: var(--beeday-color-primary);
+    background: var(--beeday-color-brand-primary);
 }
 
 .beeday-feedback__content {
@@ -49,7 +49,7 @@
 
 .beeday-feedback h2 {
     margin: 0;
-    color: var(--beeday-color-primary);
+    color: var(--beeday-color-brand-primary);
     font: var(--beeday-type-display);
 }
 
@@ -89,15 +89,15 @@
 }
 
 .beeday-feedback__new-level dd {
-    color: var(--beeday-color-primary);
+    color: var(--beeday-color-brand-primary);
 }
 
 .beeday-feedback__xp {
     margin: 0;
     padding: .65rem 1rem;
     border-radius: var(--beeday-radius-pill);
-    background: var(--beeday-color-primary-soft);
-    color: var(--beeday-color-primary-active);
+    background: var(--beeday-color-brand-primary-soft);
+    color: var(--beeday-color-brand-primary-active);
     font-weight: 700;
 }
 

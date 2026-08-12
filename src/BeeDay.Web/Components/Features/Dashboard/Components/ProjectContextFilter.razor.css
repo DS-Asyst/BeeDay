@@ -20,17 +20,17 @@
 }
 
 .project-context-filter__trigger:hover {
-    color: var(--beeday-color-primary);
+    color: var(--beeday-color-brand-primary);
     background: #f2eef7;
 }
 
 .project-context-filter__trigger[aria-expanded="true"] {
-    color: var(--beeday-color-primary);
+    color: var(--beeday-color-brand-primary);
     background: #f2eef7;
 }
 
 .project-context-filter__trigger:focus-visible {
-    outline: 2px solid var(--beeday-color-primary);
+    outline: 2px solid var(--beeday-color-brand-primary);
     outline-offset: 1px;
 }
 

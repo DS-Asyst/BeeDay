@@ -6,13 +6,16 @@ levantamento completo de todas as ocorrências de `@media` em `src/BeeDay.Web/ww
 (19 arquivos) e `src/BeeDay.Web/Components/**/*.razor.css` (30 arquivos de CSS isolado por
 componente).
 
-**Última verificação:** 2026-08-12 (Sprint 20.6, EPIC 20) — §2/§3/§5 atualizados: novo degrau
-`--beeday-radius-2xl`, novo token de escala `--beeday-font-size-hero`, novo peso
-`--beeday-font-weight-black`, nova família canônica `--beeday-color-brand-primary` (+ `-hover`/
-`-active`/`-light`) e evolução de `--beeday-font-body` (Inter → Nunito) — todos adicionados/alterados
-como parte da migração canônica do Design System para o target visual da página-modelo (ver
-`docs/epics/20-home-visual-experience/README.md`, seção "Sprint 20.6"). Verificação anterior:
-2026-08-11 (Sprint 20.3) — contagem de folhas globais corrigida de 20 para 19.
+**Última verificação:** 2026-08-12 (Sprint 20.7, EPIC 20) — §2 atualizado: `--beeday-color-primary`
+(roxo legado) **removida** — a Sprint 20.7 auditou repo-wide todo consumidor real e confirmou zero
+restantes após migrá-los para `--beeday-color-brand-primary`, então o token de compatibilidade
+temporário introduzido na Sprint 20.6 foi removido em vez de mantido indefinidamente; nova foundation
+`--beeday-color-brand-primary-soft` adicionada; `--beeday-focus-color`/`--beeday-focus-ring` também
+migrados (papel único — cor do anel de foco — então migrados diretamente, sem alias). Verificação
+anterior: 2026-08-12 (Sprint 20.6) — §2/§3/§5: novo degrau `--beeday-radius-2xl`, novo token de escala
+`--beeday-font-size-hero`, novo peso `--beeday-font-weight-black`, nova família `--beeday-color-brand-primary`
+(introduzida como canônica ao lado da legada) e evolução de `--beeday-font-body` (Inter → Nunito) — ver
+`docs/epics/20-home-visual-experience/README.md`, seções "Sprint 20.6"/"Sprint 20.7".
 
 ## 1. Objetivo
 
@@ -47,18 +50,17 @@ Nenhuma cor é definida duas vezes com valores diferentes sob o mesmo nome — c
 Status, Activity, Attribute, Habit, Button, Comic, Card, Chrome) tem seu próprio namespace de
 token, então uma alteração em uma família nunca risca colidir com outra.
 
-**Migração de marca em andamento (Sprint 20.6, EPIC 20):** `--beeday-color-brand-primary`
-(`#2538d2`, extraído diretamente da página-modelo) é a cor primária **canônica** — a direção de
-marca vinculante para todo consumidor futuro. `--beeday-color-primary` (`#673ab7`, roxo) é mantida,
-com o mesmo valor de sempre, como família de **compatibilidade** para os 40+ consumidores ainda não
-migrados (`TopNavigation`, `AccountSidePanel`, `ProfileSidePanel`, `DashboardColumn`, `cards.css`,
-`wallet.css`, `feedback.css`, `forms.css`, `identity.css`, `pixel-ui.css`, `theme.css`,
-`editor-modal.css`, `dragdrop.css`) — nenhum deles foi tocado nesta Sprint. Primeiros consumidores
-reais da família canônica: `Home.razor.css` (gradiente do hero/CTA, eyebrows, ícones) e
-`PublicHeader.razor.css` (marca "BEE", via `::deep` escopado só ao header). A Sprint 20.7 repovoa os
-consumidores restantes; `--beeday-color-primary` é removida quando essa migração terminar. O amarelo
-de acento da referência (`#ffd326`/`#ffb72e`) não ganhou token novo — `--beeday-game-yellow`
-(`#ffc928`) já é próximo o suficiente e foi reutilizado como está.
+**Migração de marca concluída (Sprint 20.7, EPIC 20):** `--beeday-color-brand-primary` (`#2538d2`,
+extraído diretamente da página-modelo) é a cor primária **canônica** de todo o produto. Introduzida na
+Sprint 20.6 ao lado de `--beeday-color-primary` (`#673ab7`, roxo) mantida como compatibilidade
+temporária; a Sprint 20.7 auditou repo-wide todo consumidor real de `--beeday-color-primary`
+(classificando cada um por semântica — brand vs. status vs. activity, nunca um search/replace cego),
+migrou todos os que eram genuinamente de marca/chrome genérico, e confirmou **zero consumidores
+restantes** — por isso `--beeday-color-primary` foi **removida** de `variables.css`, em vez de mantida
+indefinidamente. Cores de status (`success`/`warning`/`danger`/`info`) e de atividade
+(`task`/`todo`/`project`/atributos/hábitos) nunca usaram este token para sua própria semântica — não
+foram tocadas. O amarelo de acento da referência (`#ffd326`/`#ffb72e`) não ganhou token novo —
+`--beeday-game-yellow` (`#ffc928`) já é próximo o suficiente e foi reutilizado como está.
 
 ### 2.2 Paleta "game" (pixel-console)
 
@@ -202,11 +204,11 @@ nunca vazam para outros componentes nem são sobrescritas por eles, ao contrári
 ver [`README.md`](README.md#achados-relevantes-reportados-não-corrigidos)).
 
 **Consequência para tokens:** nem todo componente com CSS isolado usa exclusivamente tokens
-`--beeday-*`. Exemplo confirmado: `Layout/TopNavigation.razor.css` declara `background: #5b1095`
-como cor literal — próxima de, mas diferente de, `--beeday-color-primary` (`#673ab7`) — então a
-barra de navegação superior tem uma cor de marca que não é a mesma variável usada pelo resto do
-produto. `Layout/MainLayout.razor.css` repete o mesmo literal `#5b1095` para os trilhos laterais
-colapsados, mantendo consistência *entre si*, mas não com o token central.
+`--beeday-*`. **Resolvido (Sprint 20.7):** `Layout/TopNavigation.razor.css`, `Layout/MainLayout.razor.css`,
+`Layout/AccountSidePanel.razor.css` e `Layout/ProfileSidePanel.razor.css` declaravam `background: #5b1095`
+como cor literal (repetida em 4 arquivos) em vez de um token — migrado para
+`var(--beeday-color-brand-primary-active)`, um único token canônico para a superfície "authenticated
+shell" compartilhada pelos quatro.
 
 ## 10. Breakpoints e grid
 

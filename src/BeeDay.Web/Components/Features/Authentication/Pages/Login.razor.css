@@ -69,7 +69,7 @@
 
 .auth-field input:focus {
     background: var(--beeday-game-paper);
-    border-color: var(--beeday-color-primary);
+    border-color: var(--beeday-color-brand-primary);
     box-shadow: var(--beeday-focus-ring);
     outline: none;
 }
@@ -117,17 +117,17 @@
 }
 
 .auth-action-link:hover {
-    color: var(--beeday-color-primary);
+    color: var(--beeday-color-brand-primary);
 }
 
 .auth-action-link:focus-visible {
     border-radius: 2px;
-    outline: 2px solid var(--beeday-color-primary);
+    outline: 2px solid var(--beeday-color-brand-primary);
     outline-offset: 3px;
 }
 
 .auth-action-link:active {
-    color: var(--beeday-color-primary-active);
+    color: var(--beeday-color-brand-primary-active);
 }
 
 @media (max-width: 34rem) {
@@ -137,7 +137,7 @@
 }
 
 .auth-form__help { margin: -.25rem 0 0; text-align: right; }
-.auth-form__help a, .auth-feedback a { color: var(--beeday-color-primary); font-weight: 700; }
+.auth-form__help a, .auth-feedback a { color: var(--beeday-color-brand-primary); font-weight: 700; }
 
 .auth-form__options {
     display: flex;
@@ -157,7 +157,7 @@
 .auth-remember input {
     width: 1rem;
     height: 1rem;
-    accent-color: var(--beeday-color-primary);
+    accent-color: var(--beeday-color-brand-primary);
 }
 
 @media (max-width: 28rem) {

@@ -178,7 +178,7 @@
 
 .beeday-toast--success { border-left-color: var(--beeday-color-success); }
 .beeday-toast--error { border-left-color: var(--beeday-color-danger); }
-.beeday-toast--info { border-left-color: var(--beeday-color-primary); }
+.beeday-toast--info { border-left-color: var(--beeday-color-brand-primary); }
 
 .beeday-toast__icon {
     display: grid;
@@ -186,8 +186,8 @@
     width: 1.75rem;
     height: 1.75rem;
     border-radius: 50%;
-    background: var(--beeday-color-primary-soft);
-    color: var(--beeday-color-primary-hover);
+    background: var(--beeday-color-brand-primary-soft);
+    color: var(--beeday-color-brand-primary-hover);
     font-weight: 700;
 }
 

@@ -11,7 +11,7 @@
     --beeday-reading-width: 72rem;
 }
 
-html { scroll-padding-top: calc(var(--beeday-top-navigation-height, 3.75rem) + var(--beeday-grid)); }
+html { scroll-padding-top: calc(var(--beeday-top-navigation-height, 4.25rem) + var(--beeday-grid)); }
 body { min-width: 20rem; }
 
 /* Consistent page rhythm */

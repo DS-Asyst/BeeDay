@@ -20,7 +20,7 @@ button:disabled .pixel-icon,
 }
 
 .pixel-icon--color-current { color: currentcolor; }
-.pixel-icon--color-primary { color: var(--beeday-color-primary); }
+.pixel-icon--color-primary { color: var(--beeday-color-brand-primary); }
 .pixel-icon--color-secondary { color: var(--beeday-color-text-secondary); }
 .pixel-icon--color-muted { color: var(--beeday-color-text-muted); }
 .pixel-icon--color-success { color: var(--beeday-color-success); }

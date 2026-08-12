@@ -11,7 +11,7 @@
 
 .beeday-card--interactive:hover,
 .beeday-card--interactive:focus-within {
-    border-color: var(--beeday-color-primary);
+    border-color: var(--beeday-color-brand-primary);
     transform: translateY(-3px);
     box-shadow: var(--beeday-shadow-md);
 }
@@ -35,7 +35,7 @@
 .beeday-field textarea:hover:not(:disabled),
 .beeday-input:hover:not(:disabled),
 .beeday-select:hover:not(:disabled) {
-    border-color: var(--beeday-color-primary-light);
+    border-color: var(--beeday-color-brand-primary-light);
 }
 
 /* Shared hover and entrance utilities */

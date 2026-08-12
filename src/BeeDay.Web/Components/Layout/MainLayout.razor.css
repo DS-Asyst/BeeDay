@@ -1,5 +1,5 @@
 .beeday-app {
-    --beeday-top-navigation-height: 3.75rem;
+    --beeday-top-navigation-height: 4.25rem;
     --beeday-left-panel-width: 17rem;
     --beeday-right-panel-width: 24rem;
     --beeday-collapsed-panel-width: 1.35rem;
@@ -10,7 +10,7 @@
     flex-direction: column;
     padding-top: var(--beeday-top-navigation-height);
     overflow-x: clip;
-    background: #f4f3f5;
+    background: var(--beeday-color-background);
 }
 
 .beeday-workspace {
@@ -116,9 +116,20 @@
     }
 }
 
-/* Collapsed side rails follow the Top Navigation identity. */
-.beeday-side-slot {
-    background: #5b1095;
+/* Collapsed side rails follow the Top Navigation identity (Sprint 20.7, EPIC 20: migrated off the
+   literal #5b1095 shared by TopNavigation/AccountSidePanel/ProfileSidePanel to the canonical
+   --beeday-color-brand-primary-active — one token, one dark "authenticated shell" surface, instead
+   of a hex literal repeated across 4 files). Consolidated from what were three separate,
+   partially-conflicting `.beeday-side-slot` rule blocks (a leftover from incremental edits) into
+   one: collapsed rails are opaque; the rail on the side whose drawer is open goes transparent (the
+   open drawer itself already provides the surface, avoiding a double-dark-bar seam) — that
+   open-panel rule had become unreachable dead code because a later, more specific-looking block
+   re-set the background afterward; restored here. */
+.beeday-side-slot,
+.beeday-side-slot--left,
+.beeday-side-slot--right {
+    background: var(--beeday-color-brand-primary-active);
+    border: 0;
 }
 
 .beeday-side-slot--left {
@@ -140,18 +151,4 @@
         background: transparent;
         border: 0;
     }
-}
-
-/* The collapsed rails and open drawers visually continue the Top Navigation. */
-.beeday-side-slot,
-.beeday-side-slot--left,
-.beeday-side-slot--right {
-    background: #5b1095;
-    border: 0;
-}
-
-.beeday-workspace.has-left-panel .beeday-side-slot--left,
-.beeday-workspace.has-right-panel .beeday-side-slot--right {
-    background: #5b1095;
-    border: 0;
 }

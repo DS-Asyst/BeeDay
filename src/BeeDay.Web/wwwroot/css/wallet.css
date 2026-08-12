@@ -127,7 +127,7 @@
 .wallet-panel-header--transactions {
     padding: 1.35rem 1.5rem;
     border-bottom: 1px solid var(--beeday-color-border);
-    background: linear-gradient(180deg, color-mix(in srgb, var(--beeday-color-primary) 7%, transparent), transparent);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--beeday-color-brand-primary) 7%, transparent), transparent);
 }
 
 .wallet-tags-panel > .wallet-panel-header {
@@ -162,7 +162,7 @@
 
 .wallet-filters input:focus,
 .wallet-filters select:focus {
-    outline: 2px solid color-mix(in srgb, var(--beeday-color-primary) 45%, transparent);
+    outline: 2px solid color-mix(in srgb, var(--beeday-color-brand-primary) 45%, transparent);
 }
 
 .wallet-empty-state {
@@ -206,7 +206,7 @@
 
 @keyframes wallet-balance-pulse {
     0%, 100% { box-shadow: var(--beeday-shadow-sm); }
-    45% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--beeday-color-primary) 28%, transparent), var(--beeday-shadow-md); }
+    45% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--beeday-color-brand-primary) 28%, transparent), var(--beeday-shadow-md); }
 }
 
 .wallet-transaction-card {
@@ -497,7 +497,7 @@
 .wallet-filter-field input:focus-visible,
 .wallet-filter-field select:focus-visible,
 .wallet-alert button:focus-visible {
-    outline: 3px solid var(--beeday-color-primary);
+    outline: 3px solid var(--beeday-color-brand-primary);
     outline-offset: 3px;
 }
 
