@@ -7,9 +7,14 @@ interop-equivalente aos demais). Componentes de Forms e o `PixelIcon` têm parâ
 [`04-forms.md`](04-forms.md) e [`03-icons.md`](03-icons.md) respectivamente — este documento os
 resume e linka em vez de duplicar (`docs/CONVENTIONS.md` §12).
 
-**Última verificação:** 2026-08-11 (Sprint 20.5, EPIC 20) — §5 (`BeeDayHero`) atualizado: primeiro
-consumidor de produto real (`Home.razor`, rota `/`). Demais seções preservadas da verificação de
-2026-08-07.
+**Última verificação:** 2026-08-12 (Sprint 20.6, EPIC 20) — §2 (`BeeDayButton`) e §3 (`BeeDayCard`)
+atualizados: novo modificador opt-in `--soft` em ambos, target visual da página-modelo (ver
+`docs/epics/20-home-visual-experience/README.md`). Correção na mesma Sprint: a cor sob `--soft`
+migrou de `--beeday-color-primary` (legado) para a família canônica `--beeday-color-brand-primary`
+(ver `01-foundations.md` §2.1/§3) nos dois primeiros consumidores (`PublicHeader`, `Home.razor`); o
+modificador `--soft` em si (forma/radius/shadow) não mudou. Verificação anterior: 2026-08-11 (Sprint 20.5) —
+§5 (`BeeDayHero`) atualizado: primeiro consumidor de produto real (`Home.razor`, rota `/`). Demais
+seções preservadas da verificação de 2026-08-07.
 
 ## 1. Objetivo
 
@@ -45,7 +50,9 @@ variante): `--skew-press` (botão inclinado, ação operacional principal), `--c
 grosso, sombra offset, usado em confirmações destrutivas), `--comic` + 7 paletas (`-blue`, `-yellow`,
 `-back`, `-danger`, `-neutral`, `-success`, `-orange`, `-magenta` — estilo "quadrinho", usado nos
 CTAs primários de Wallet/Login/Tutorial), `--plain` + `--plain-danger`/`--plain-neutral` (ação de
-texto puro, sem chrome, para popovers/filtros).
+texto puro, sem chrome, para popovers/filtros), **`--soft`** (Sprint 20.6, EPIC 20 — sem borda,
+`border-radius: pill`, elevação `--beeday-shadow-md`→`-lg` no hover em vez do "press" de pixel;
+target visual da página-modelo da EPIC 20; usado por `PublicHeader` e pelos CTAs de `Home.razor`).
 
 **Consumidores:** todo componente do repositório com uma ação — 40+ pontos de uso confirmados por
 busca de `<BeeDayButton`.
@@ -56,10 +63,12 @@ busca de `<BeeDayButton`.
 
 Container genérico (`Class`, `Padded`, `Muted`, `Interactive` — este último ativa hover
 `translateY(-2px)` + sombra `md`, `ChildContent`, `AdditionalAttributes`). Sem estado interno, sem
-JS. Consumido por telas de catálogo (`HeroCatalog`) e como base de composição avulsa — a maioria
-dos cards de produto (Activity/Habit) **não** usa `BeeDayCard`; têm markup próprio em
-`Features/Dashboard/Components/` estilizado por `cards.css` diretamente (ver
-[`docs/web/04-feature-components.md`](../web/04-feature-components.md) §3).
+JS. Modificador opt-in via `Class`: **`--soft`** (Sprint 20.6, EPIC 20 — sem borda,
+`--beeday-radius-2xl`, `--beeday-shadow-lg`; target visual da página-modelo; usado pelas seções de
+capabilities/progress de `Home.razor`). Consumido por telas de catálogo (`HeroCatalog`), pela Home
+pública e como base de composição avulsa — a maioria dos cards de produto (Activity/Habit) **não**
+usa `BeeDayCard`; têm markup próprio em `Features/Dashboard/Components/` estilizado por `cards.css`
+diretamente (ver [`docs/web/04-feature-components.md`](../web/04-feature-components.md) §3).
 
 ### `BeeDayCardMenu`
 

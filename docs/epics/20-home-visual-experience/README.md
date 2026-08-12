@@ -9,21 +9,68 @@ de referência visual local. Nenhuma afirmação de "estado atual" abaixo vem de
 documento evoluir em Sprints futuras, cada atualização deve reverificar contra o código antes de
 alterar uma afirmação de estado atual.
 
-**Última verificação:** 2026-08-11 (Sprint 20.5 — BeeDay Home Structure, COMPLETE).
+**Última verificação:** 2026-08-12 (Sprint 20.6 — Reference Design System Extraction & Home
+Migration, CURRENT).
 
-**Escopo:** evolução da experiência visual do BeeDay — primeira Home oficial, evolução do Design
-System existente, Application Shell/navegação, remoção do cursor personalizado, responsividade e
-acessibilidade. Não é um redesenho de arquitetura nem do CI/CD.
+**Escopo:** evolução da experiência visual do BeeDay — primeira Home oficial, migração do Design
+System existente para o target visual da página-modelo, Application Shell/navegação, remoção do
+cursor personalizado, responsividade e acessibilidade. Não é um redesenho de arquitetura nem do
+CI/CD.
 
 ---
 
-## Objective
+## Direction Change (Sprint 20.6) — Binding Decision
+
+**Este registro não apaga o histórico anterior** — as seções abaixo (Objective, Visual Adoption
+Principles, Sprint 20.1/20.2 results) permanecem como estavam, preservadas como registro do que foi
+decidido e verificado em cada momento. Esta seção documenta a **evolução** da decisão.
+
+1. A Sprint 20.5 entregou a estrutura funcional correta da Home (`/` pública, routing, CTA
+   autenticado reutilizando `LoginDestinationResolver`).
+2. A revisão visual pós-20.5 identificou desalinhamento: a Home absorveu pouco da composição da
+   página-modelo e ficou visualmente próxima demais do Design System legado do BeeDay.
+3. A interpretação da EPIC até a Sprint 20.5 tratava o Design System atual como *target* visual a
+   preservar, e a página-modelo como inspiração secundária — **essa interpretação está revogada.**
+4. **Nova decisão vinculante:** o repositório BeeDay continua fonte de verdade para arquitetura,
+   Domain, Application, Infrastructure, contratos, funcionalidades, routing, autenticação,
+   comportamento e dependency direction. **A página-modelo passa a ser a fonte de verdade visual de
+   destino** — paleta, tipografia, escala, buttons, cards, navigation, containers, spacing, borders,
+   radius, shadows, surfaces, hierarchy, composition, interaction states, responsive behavior.
+5. A conclusão da Sprint 20.2 ("as foundations atuais são suficientes") **deixa de ser vinculante
+   como decisão visual** — permanece válida apenas como documentação do baseline encontrado naquele
+   momento (ver seção "Sprint 20.2", preservada sem edição abaixo).
+6. A Sprint 20.6 inicia a migração do Design System usando a página-modelo como target, provada
+   através da Home — ver "Sprint 20.6 — Results" abaixo.
+7. **Correção registrada, não silenciosa, dentro da mesma Sprint:** a primeira passagem de
+   implementação da Sprint 20.6 leu o conflito de escopo (impacto em consumidores existentes) como
+   motivo para **não adotar** a cor primária e a família tipográfica de corpo da referência,
+   mantendo `--beeday-color-primary`/Inter como target. O responsável pelo repositório corrigiu essa
+   leitura: a decisão vinculante do ponto 4 já determina que a página-modelo é a fonte de verdade
+   visual, incluindo paleta e tipografia — impacto em consumidores é um problema de **migração**
+   (tokens canônicos novos + compatibilidade temporária + consumidores migrados nesta Sprint +
+   consumidores deferred à 20.7), não uma justificativa para preservar o alvo visual anterior.
+   Corrigido na mesma Sprint, sem abrir uma Sprint nova — ver "Color Migration"/"Typography
+   Migration" abaixo para a estratégia efetivamente implementada.
+8. **O que permanece deliberadamente não migrado, e por quê — agora por bloqueio técnico concreto,
+   não por impacto amplo:** `--beeday-font-ui` (Jersey 25) continua reservado ao chrome
+   pixel-console/retro-game do BeeDay (responsabilidade de marca real, documentada antes desta
+   Sprint em `typography-policy.css`); o fundo do `PublicHeader` continua claro (`BeeDayBrand` não
+   tem hoje uma variante de cor para fundo escuro — introduzi-la é uma mudança de componente
+   compartilhado com escopo próprio). Ambos registrados como candidatos explícitos para a Sprint
+   20.7, não como decisões pendentes de confirmação.
+
+---
+
+## Objective (histórico — Sprints 20.1–20.5)
 
 Evoluir a experiência visual do BeeDay — criar a primeira Home oficial do produto, evoluir a
 linguagem visual e o Design System existentes, melhorar o Application Shell e a navegação, e
 remover estruturalmente o cursor personalizado — preservando integralmente a arquitetura, os
 contratos públicos e o Design System já estabelecidos. A EPIC usa uma página-modelo externa como
 referência de intenção visual, não como implementação a copiar.
+
+**Superseded pela Sprint 20.6:** a cláusula "preservando integralmente... o Design System já
+estabelecidos" não é mais a leitura vinculante — ver "Direction Change" acima.
 
 ## Source of Truth
 
@@ -215,14 +262,23 @@ estruturais mantidas rastreáveis aqui:
 - Pixel Icon System (`PixelIcon`/`PixelIconRegistry`, sprite único);
 - foundations existentes (cor, tipografia, radius, elevação, motion, focus).
 
-**REJECT** — conflita com identidade, acessibilidade ou Design System já estabelecidos:
+**REJECT** (Sprint 20.1, ver "Direction Change" — os dois primeiros itens foram **revogados como
+regra permanente** na Sprint 20.6; o restante permanece válido):
 
-- importar a paleta azul/amarelo da página-modelo como nova identidade do BeeDay;
-- introduzir "Nunito" como terceira família tipográfica (Inter/Jersey 25 são as famílias vigentes);
-- utilizar métricas fictícias da página-modelo (ex.: "84% consistência", "21 hábitos concluídos");
-- copiar HTML/CSS da referência diretamente;
+- ~~importar a paleta azul/amarelo da página-modelo como nova identidade do BeeDay~~ — revogado.
+  **Sprint 20.6:** implementado — `--beeday-color-brand-primary` (`#2538d2`, literal da referência)
+  é agora a cor canônica, consumida por Home/`PublicHeader`; `--beeday-color-primary` (roxo) mantida
+  só como compatibilidade para consumidores ainda não migrados — ver "Color Migration";
+- ~~introduzir "Nunito" como terceira família tipográfica~~ — revogado como regra de princípio.
+  **Sprint 20.6:** implementado, mas como evolução de `--beeday-font-body` (Inter → Nunito), não
+  como terceira família — `--beeday-font-ui` (Jersey 25) permanece a segunda família, reservada ao
+  chrome pixel-console por responsabilidade de marca real e pré-documentada — ver "Typography
+  Migration";
+- utilizar métricas fictícias da página-modelo (ex.: "84% consistência", "21 hábitos concluídos") —
+  **permanece válido**;
+- copiar HTML/CSS da referência diretamente — **permanece válido**;
 - importar as lacunas de acessibilidade da referência (sem skip-link, sem guarda de
-  `prefers-reduced-motion` no scroll-reveal).
+  `prefers-reduced-motion` no scroll-reveal) — **permanece válido**.
 
 **EXTEND / EVALUATE** — decisão adiada para a Sprint correspondente, não resolvida aqui:
 
@@ -240,8 +296,10 @@ Riscos ativos da EPIC, a serem verificados a cada Sprint antes de introduzir alg
 - **Foundation duplication** — já existem 3 escalas paralelas de spacing e 2 de radius/sombra
   (`variables.css`, `polish.css`, `activity-design-system.css`). A Sprint 20.2 não deve criar mais
   uma inadvertidamente.
-- **Typography duplication** — Inter/Jersey 25 são as famílias vigentes; "Nunito" da referência não
-  deve ser introduzida.
+- **Typography duplication** — Nunito substituiu Inter como `--beeday-font-body` (troca de valor,
+  não uma terceira família); Jersey 25 (`--beeday-font-ui`) permanece a segunda família, por
+  responsabilidade de marca real e já documentada antes da Sprint 20.6, não risco de duplicação —
+  ver "Typography Migration".
 - **Button duplication** — o efeito visual "pressionável" da referência já tem equivalente no
   Design System (`BeeDayButton` + sombras "game").
 - **Brand duplication** — `BeeDayBrand` deve ser o contrato de marca preferencial. **Correção
@@ -640,19 +698,286 @@ Novo `HomeTests.cs` (`BeeDay.E2E.Tests`, 2 fluxos): visitante anônimo acessa `/
 `h1` "Be better every day"; clique em "Get started" alcança `/login`. `AccountLifecycleTests.cs`
 preservado sem alteração (todos os fluxos partem de `/login` diretamente, não de `/`).
 
-## Deferred to Sprint 20.6 (Home Content & Product Integration)
+## Sprint 20.6 — Reference Design System Extraction & Home Migration (Results)
 
-- Dados reais/pessoais na Home (ex.: um resumo do progresso do próprio visitante autenticado) —
-  deliberadamente não implementado; a Home atual é 100% institucional/estática.
+**Última verificação:** 2026-08-12 (Sprint 20.6, branch `sprint/20.6-reference-design-system-home`) —
+inclui uma correção de leitura da estratégia de cor/tipografia feita dentro da própria Sprint (ver
+"Direction Change" pontos 7-8): a paleta e a família de corpo canônicas da referência foram
+efetivamente migradas via tokens novos + compatibilidade temporária, não mais deixadas como
+"decisão pendente".
+**Fonte da verdade:** reinspeção direta de `Index.cshtml`/`site.css`/`_Layout.cshtml`/`site.js` da
+página-modelo (incluindo uma segunda reinspeção de `site.css` durante a correção, para confirmar os
+valores literais `#2538d2`/`#4458dc`/`#ffd326`/`#ffb72e`/Nunito); leitura direta de `variables.css`,
+`typography.css`, `typography-policy.css`, `design-system.css`, `App.razor`,
+`BeeDayButton.razor(.cs)`, `BeeDayCard.razor(.cs)`, `BeeDayBrand.razor(.css)`, `PixelIcon.razor.css`,
+`PublicHeader.razor(.css)`, `PublicLayout.razor.css`, `Home.razor(.css)`; busca repo-wide de
+consumidores de `--beeday-color-primary`/`--beeday-font-body`/`--beeday-font-ui`/`BeeDayBrand` antes
+de alterar qualquer token; execução real de `dotnet format --verify-no-changes`/`dotnet build`/
+`dotnet test` após cada rodada de mudanças.
+
+### Reference Design System Extraction
+
+| Category | Reference | Previous BeeDay | New BeeDay | Action |
+|---|---|---|---|---|
+| Primary color | `#2538d2`/`#4458dc` (blue) | `--beeday-color-primary` `#673ab7` (purple) | **Novo canônico:** `--beeday-color-brand-primary` `#2538d2` (+ `-hover`/`-active`/`-light`); `--beeday-color-primary` mantida, inalterada, como compat para consumidores não migrados | EVOLVE (novo token canônico + alias de compatibilidade temporário — ver "Color Migration") |
+| Accent color | `#ffd326`/`#ffb72e` (yellow) | `--beeday-game-yellow` `#ffc928` | **Inalterado** — já próximo do target | REUSE (quase idêntico, sem token novo) |
+| Page background | `#fff` | `--beeday-color-surface` `#fff` | Inalterado | REUSE |
+| Text/ink | `#253143` | `--beeday-color-text-primary` `#2f2737` | Inalterado | REUSE |
+| Muted text | `#687386` | `--beeday-color-text-secondary` `#514858` | Inalterado | REUSE |
+| Border | `#e7eaf1` | `--beeday-color-border` `#d7d2da` | Inalterado | REUSE |
+| Body font | Nunito | Inter | **Migrado (canônico, todo o produto):** `--beeday-font-body` agora `"Nunito"` | EVOLVE (troca de valor de token existente, ver "Typography Migration") |
+| Display font | Nunito 900 | Jersey 25 (`--beeday-font-ui`) | Inalterado — Jersey 25 | KEEP (responsabilidade de marca real e documentada — ver "Typography Migration") |
+| Display weight | 900 | extrabold 700 (teto anterior da escala) | **Novo:** `--beeday-font-weight-black: 900` | EXTEND (novo token, sistêmico) |
+| Display scale | wordmark 88–168px / h1 42–66px | `.beeday-hero__content h1` clamp 32–51px | **Novo:** `--beeday-font-size-hero: clamp(2.75rem, 7vw, 5.5rem)` (44–88px) | EXTEND (novo token, sistêmico) |
+| Radius (surfaces) | 26–36px | topo da escala = `xl` 20px, sem degrau intermediário até `pill` | **Novo:** `--beeday-radius-2xl: 1.75rem` (28px) | EXTEND (preenche gap real na escala) |
+| Radius (buttons) | 15px | `.beeday-button` base = 3px (pixel/8-bit) | **Novo modificador opt-in:** `.beeday-button--soft` (`border-radius: pill`) | EXTEND (modificador, não redesenho do padrão default) |
+| Shadow | `0 18px 60px rgba(30,45,120,.12)` | `--beeday-shadow-lg` `0 1.5rem 4rem rgba(12,6,22,.42)` | Inalterado (reutilizado via `--soft`) | REUSE |
+| Container | 1140px | `--beeday-reading-width` 1152px (72rem) | Inalterado — já quase idêntico | REUSE |
+| Buttons (shape) | radius 15px, sem borda, sombra 0 6px 0 (offset), hover lift | radius 3px, borda pixel 2px, sombra offset pixel, hover -1px, active +4px (press) | **Novo modificador `.beeday-button--soft`:** sem borda, radius pill, `--beeday-shadow-md`→`-lg` no hover, sem "press" pixel | EXTEND `BeeDayButton` (opt-in, zero impacto em 40+ consumidores existentes) |
+| Cards | radius 26–36px, sem borda, sombra suave | `.beeday-card` radius `xs` (3.2px), borda 1px, sombra `sm` | **Novo modificador `.beeday-card--soft`:** sem borda, `radius-2xl`, `shadow-lg` | EXTEND `BeeDayCard` (opt-in) |
+| Navigation (header) | altura 78px, fundo escuro, brand + nav + CTA outline | `PublicHeader` altura 60px, fundo claro, brand + 1 CTA | Altura ajustada para 68px (`4.25rem`); CTA usa `--soft`; marca "BEE" recolorida para `--beeday-color-brand-primary`; fundo permanece claro (ver "PublicHeader Migration") | REFINE (altura/CTA/cor da marca), fundo claro mantido por decisão explícita escopada |
+| Breakpoints | 900px/600px | 29 valores hardcoded, sem token | Reutilizado `56.25rem`/900px (precedente já existente em `feedback.css`/Dashboard `Home.razor.css`) para colapso dos splits | REUSE (precedente existente, não um 30º valor arbitrário) |
+| Motion (hero) | fade/slide on scroll (`IntersectionObserver`) | nenhum | **Não implementado** — fora de escopo desta Sprint (não pedido, risco de regressão de acessibilidade sem tratamento de `prefers-reduced-motion` próprio da referência) | OUT OF SCOPE (deliberado) |
+
+### Color Migration
+
+**Correção registrada (mesma Sprint):** a primeira passagem desta Sprint rejeitou a paleta azul da
+referência por impacto em consumidores existentes. O responsável pelo repositório corrigiu essa
+leitura: a decisão vinculante da EPIC 20 já determina que a página-modelo é a fonte de verdade
+visual de destino — impacto em consumidores é um problema de **migração** a resolver (tokens
+canônicos + compatibilidade temporária + migração faseada), não um motivo para preservar a paleta
+anterior como target. Esta seção documenta a estratégia corrigida, efetivamente implementada.
+
+**Decisão:** `--beeday-color-brand-primary` (`#2538d2`, extraído diretamente de `site.css` da
+página-modelo) é adicionado como a cor primária **canônica** do Design System — a direção de marca
+vinculante daqui para frente, com `-hover`/`-active`/`-light` completando a família.
+`--beeday-color-primary` (`#673ab7`, roxo) **é mantida, com o mesmo valor de sempre**, como alias de
+compatibilidade para os consumidores ainda não migrados. `--beeday-game-yellow` (`#ffc928`) não
+ganhou um token novo — já está próximo o bastante do amarelo da referência (`#ffd326`/`#ffb72e`)
+para ser reutilizado como está (extend, não duplicate).
+
+**Por que essa estratégia, e não uma troca de valor direta:** `--beeday-color-primary` é consumido
+por dezenas de pontos em todo o produto autenticado (variantes de `BeeDayButton`, anéis de foco,
+badges, links, `TopNavigation`, `AccountSidePanel`, `ProfileSidePanel`, `DashboardColumn`,
+`cards.css`, `wallet.css`, `feedback.css`, `forms.css`, `identity.css`, `pixel-ui.css`, `theme.css`,
+`editor-modal.css`, `dragdrop.css` — confirmados nesta Sprint via busca repo-wide, ver "Existing
+Consumer Compatibility"). Trocar o *valor* desse token recolore instantaneamente todos esses pontos
+de uma vez — inclusive páginas fora do escopo desta Sprint (Daily, Wallet, Login, Onboarding).
+Introduzir a cor canônica sob um **nome de token novo** (em vez de sobrescrever o valor do token
+existente) permite que Home/PublicHeader consumam a direção final imediatamente, com **zero risco de
+regressão** para os consumidores restantes, que continuam lendo o valor antigo sob o nome antigo até
+serem migrados deliberadamente.
+
+**Consumidores já migrados nesta Sprint** (primeiros consumidores reais da família canônica):
+
+- `Home.razor.css` — gradiente do hero/CTA (`brand-primary` → `brand-primary-light`, mesma direção
+  de gradiente clara→mais-clara que `site.css`'s `.section-blue`), eyebrows, ícones
+  (`PixelIconColor.Primary`, recolorido via `::deep` escopado só ao DOM da Home).
+- `PublicHeader.razor.css` — a metade "BEE" da marca (`::deep .beeday-brand`, escopado só ao DOM do
+  header; os outros 8 consumidores de `BeeDayBrand` continuam roxo).
+
+**Consumidores deferred para a Sprint 20.7** (continuam lendo `--beeday-color-primary`, valor
+inalterado, zero regressão): `TopNavigation`, `AccountSidePanel`, `ProfileSidePanel`,
+`DashboardColumn`, `MainLayout`, `OnboardingLayout` (Login/Identity/Onboarding/`BeeDayBrand` nos
+outros 8 pontos), `Account.razor`, `Wallet.razor`, Dashboard (`/daily`) e todos os cards de
+atividade/hábito.
+
+### Typography Migration
+
+**Correção registrada (mesma Sprint):** mesma correção de leitura do Color Migration — ver acima.
+
+**Decisão:** `--beeday-font-body` evolui de `"Inter"` para `"Nunito"` — mudança de **valor**, não de
+nome de token, aplicada imediatamente a todo o produto (toda UI regular já renderiza Nunito). Isso é
+seguro como troca direta (diferente da cor) porque é uma substituição puramente tipográfica: nenhuma
+regra CSS do repositório depende de métricas específicas de Inter, e Nunito é extraída diretamente
+de `site.css`/`_Layout.cshtml` da página-modelo, onde é literalmente a única família usada em toda a
+página (corpo e display). `Google Fonts` em `App.razor` foi atualizado com
+`family=Nunito:wght@400;600;700;800;900`.
+
+**`--beeday-font-ui` (Jersey 25) permanece — não é compatibilidade histórica, é responsabilidade de
+marca real e já formalmente documentada:** `typography-policy.css` (132 linhas, pré-existente a esta
+Sprint) é uma política tipográfica executável que reserva Jersey 25 exclusivamente ao chrome
+pixel-console/retro-game do BeeDay — reforçada com `!important` para `.beeday-button` especificamente
+("nenhuma variante/modificador/classe legada consiga renderizar o botão fora dessa família"),
+`BeeDayBrand`, títulos de página/card, e o restante do `pixel-ui.css`. Migrar essa família para
+Nunito removeria a identidade "8-bit"/pixel do BeeDay, deliberadamente construída ao longo de
+múltiplas Sprints anteriores (Pixel Icon System, `pixel-ui.css`, paletas "comic" de `BeeDayButton`,
+NES adapter) — não é o mesmo tipo de "impacto amplo por falta de estratégia" do Color Migration; é
+uma responsabilidade de marca distinta e intencional, que a própria correção desta Sprint autoriza
+manter quando documentada (ver `docs/design-system/01-foundations.md` §3).
+
+**O que migrou como consequência direta:** o peso/escala de display — `--beeday-font-weight-black:
+900` (novo token, iguala o peso 900 consistente da referência) e `--beeday-font-size-hero`
+(pré-existente desta Sprint) agora aplicados sobre `--beeday-font-body` (Nunito), não mais sobre
+`--beeday-font-ui` (Jersey 25) — a headline/eyebrow/CTA final da Home usam Nunito 900 em escala
+hero, igualando a família E a presença da referência, não apenas a escala como na primeira passagem
+desta Sprint.
+
+**Consumidores deferred para a Sprint 20.7:** nenhum, para o corpo — `--beeday-font-body` já é
+canônico e migrado em todo o produto (troca de token global, sem consumidores pendentes). Para o
+display: nenhuma migração de `--beeday-font-ui` está planejada — permanece a família definitiva do
+chrome pixel-console, não uma migração pendente.
+
+### Spacing / Radius / Shadow / Container Migration
+
+- **Spacing:** nenhuma escala global alterada; ritmo generoso do tipo "landing page" (a referência
+  usa ~110px de padding vertical por seção) implementado via composição local em `Home.razor.css`
+  (`clamp(3.5rem, 8vw, 6rem)` para o ritmo entre seções, `clamp(4rem, 10vw, 7rem)` para o hero) — CSS
+  local de composição, não uma foundation nova (§23 do prompt: "section arrangement" é exemplo
+  explícito de composição local).
+- **Radius:** `--beeday-radius-2xl` adicionado (preenche um gap real: a escala saltava de `xl`
+  20px direto para `pill` 999px, sem um degrau de "superfície generosa"). Consumido pelo novo
+  modificador `.beeday-card--soft`.
+- **Shadow:** nenhum token novo — `--beeday-shadow-md`/`-lg` já existentes (e já na faixa "suave e
+  grande" pretendida pela referência) reutilizados pelos novos modificadores `--soft`.
+- **Container:** `--beeday-reading-width` (1152px) já é quase idêntico ao `shell` da referência
+  (1140px) — reutilizado sem alteração.
+
+### Component Impact Analysis
+
+Antes de alterar `BeeDayButton`/`BeeDayCard`, os consumidores existentes foram buscados
+repo-wide: `BeeDayButton` tem 40+ pontos de uso confirmados (Sprints 16.7/20.1); `BeeDayCard` é
+usado por páginas de catálogo e composições diversas. **Nenhum desses consumidores foi alterado** —
+os dois novos modificadores (`--soft`) são estritamente opt-in via o parâmetro `Class` já existente
+em ambos os componentes (o mesmo mecanismo que já sustenta `--comic`/`--skew-press`/`--plain` em
+`BeeDayButton` e `--padded`/`--muted`/`--interactive` em `BeeDayCard`) — a aparência default de
+ambos os componentes é bit-a-bit idêntica à anterior para todo consumidor que não passar a nova
+classe.
+
+### BeeDayButton Migration
+
+**EXTEND, não substituição.** Novo modificador `.beeday-button--soft` em `design-system.css`
+(propriedade compartilhada do Design System, não CSS local da Home — §23): remove a borda pixel e o
+radius de 3px, aplica `border-radius: pill`, substitui a sombra offset "pixel press" por
+`--beeday-shadow-md`→`-lg` no hover (elevação, não "afundar"), preserva o mecanismo de cor
+(`--beeday-button-background`/`-foreground`/etc.) para continuar compondo com qualquer `Variant`
+(Primary/Secondary/...). Usado por `PublicHeader` e pelos 3 CTAs de `Home.razor` (hero, seção final).
+API pública de `BeeDayButton` (`Variant`, `Compact`, `OnClick`, `Class`, ...) **inalterada** —
+nenhum parâmetro novo, nenhuma quebra de contrato.
+
+### BeeDayCard Migration
+
+**EXTEND, não substituição.** Novo modificador `.beeday-card--soft` em `design-system.css`: remove a
+borda de 1px, aplica `--beeday-radius-2xl`, `--beeday-shadow-lg`. Usado pela seção de capacidades
+(`#capabilities`) e pela seção de progresso (`#progress`) de `Home.razor`. API pública de
+`BeeDayCard` (`Padded`, `Muted`, `Interactive`, `Class`, ...) **inalterada**.
+
+### BeeDayHero Migration
+
+**Não migrado — decisão mantida da Sprint 20.5, reavaliada e confirmada.** `BeeDayHero` continua
+representando corretamente o padrão "painel introdutório em caixa" (usado potencialmente por outras
+páginas operacionais no futuro, como o catálogo já demonstra para Wallet/Account). O Hero da Home
+precisa de uma banda full-bleed colorida — uma responsabilidade estrutural genuinamente diferente
+que só a Home consome hoje. Forçar essa responsabilidade em `BeeDayHero` exigiria uma variante nova
+usada por um único consumidor real (viola a regra de só estender com 2+ consumidores). A composição
+do hero da Home é, portanto, local (`.home-hero` em `Home.razor.css`), reutilizando tokens
+compartilhados (cor, tipografia, radius, shadow) mas não o componente `BeeDayHero` em si.
+`BeeDayHero` permanece disponível e correto para seu papel original.
+
+### PublicHeader Migration
+
+Arquitetura preservada — `PublicHeader` continua o shell público, não foi transformado em
+`TopNavigation` nem misturado com navegação autenticada. Migração visual: altura de `3.75rem` (60px)
+para `4.25rem` (68px, mais próxima dos 78px da referência que dos 60px anteriores, mantendo
+proporção com a densidade compacta do resto do produto); CTA passou a usar `.beeday-button--soft`
+para consistência de forma com os CTAs da Home; a metade "BEE" de `BeeDayBrand` passou a usar
+`--beeday-color-brand-primary` (canônico) via `::deep .beeday-brand` escopado só ao DOM do
+`PublicHeader` — sem alterar o componente `BeeDayBrand` compartilhado (seus outros 8 consumidores
+— Login, as 5 páginas de Identity, Tutorial, CreateProfile — continuam roxo, fora de escopo).
+
+**Fundo permanece claro** (`--beeday-color-surface`), diferente do header escuro (`#17203b`) da
+referência — decisão escopada, não uma continuação da rejeição de paleta já corrigida acima: inverter
+o fundo exigiria uma variante de cor clara/inversa de `BeeDayBrand` (hoje o componente só define uma
+cor fixa por metade da marca, sem variante para fundo escuro) e reavaliar contraste/foco de todos os
+elementos do header — uma mudança de componente compartilhado com escopo próprio, não uma
+consequência direta e de baixo risco da migração de paleta como a recoloração de "BEE". Registrada
+como candidata explícita para a Sprint 20.7, junto com uma eventual variante inversa de `BeeDayBrand`.
+`PublicLayout.razor.css`'s `--beeday-top-navigation-height` atualizado de `3.75rem` para `4.25rem`
+para continuar compensando corretamente o header fixo (consumidor direto da mudança de altura,
+identificado e corrigido).
+
+### Home Migration
+
+Reescrita completa de `Home.razor`/`Home.razor.css`, preservando 100% o routing, autenticação e
+`AuthenticatedEntryDestinationResolver` da Sprint 20.5:
+
+- **Hero:** banda full-bleed (`margin-inline: calc(-1 * var(--beeday-page-gutter))` para escapar do
+  padding de `.beeday-main`), gradiente `--beeday-color-brand-primary`→`-brand-primary-light`
+  (mesma direção clara→mais-clara de `site.css`'s `.section-blue`), headline em
+  `--beeday-font-size-hero` + `--beeday-font-weight-black` sobre `--beeday-font-body` (Nunito, não
+  mais Jersey 25), CTA duplo (`BeeDayButton --soft` + link secundário âncora para `#capabilities`,
+  estilizado localmente como botão-fantasma).
+- **Split "capabilities":** texto (eyebrow/h2/p) + `BeeDayCard --soft` com as 5 capacidades reais em
+  linhas (não mais grid uniforme de 5 cards separados).
+- **Split "progress" (invertido):** texto + `BeeDayCard --soft` com ícones institucionais
+  (Experience/Level) — sem números, sem ring de progresso fictício.
+- **CTA final:** nova seção full-bleed antes do footer, mesmo tratamento visual do hero, mesmo
+  padrão de CTA duplo/reutilizado.
+- **Footer:** `AppFooter` via `PublicLayout`, inalterado.
+
+### Visual Showcase
+
+A referência usa um "dashboard-card" com anel de progresso e barras com números fictícios — **não
+reproduzido** (dado fictício proibido, §18 do prompt de execução). A **função visual** (elemento
+visual ao lado do texto, na seção de progresso) foi traduzida usando capacidades reais do BeeDay:
+ícones `PixelIconName.Experience`/`Level` dentro do novo `BeeDayCard --soft`, com o texto
+institucional "Level up as you go" — sem simular um valor específico de XP/nível.
+
+### Reference Fidelity
+
+| Aspecto | Alinhamento | Evidência |
+|---|---|---|
+| Palette | **HIGH ALIGNMENT** | `--beeday-color-brand-primary` (`#2538d2`) é o valor literal da referência, consumido pelo hero/CTA/eyebrows/ícones da Home e pela marca do `PublicHeader`. Bloqueio técnico concreto restante: header não invertido para fundo escuro (ver "PublicHeader Migration") — único ponto não HIGH, tratado à parte abaixo |
+| Typography | **HIGH ALIGNMENT** | `--beeday-font-body` é Nunito (valor literal da referência) em todo o produto; headline/eyebrow/CTA final da Home usam Nunito peso 900 (`--beeday-font-weight-black`), igualando família E presença. `--beeday-font-ui` (Jersey 25) mantido por responsabilidade de marca real e pré-documentada (chrome pixel-console/`BeeDayButton`) — não é uma família rejeitada, é uma segunda família com papel distinto do da referência, que não tem equivalente |
+| Hero | **HIGH ALIGNMENT** | Banda full-bleed em azul canônico, headline Nunito 900 em escala hero, CTA duplo, whitespace generoso — cor, família e composição agora alinhadas |
+| Header/Navigation | **PARTIAL ALIGNMENT** | Marca "BEE" recolorida para o azul canônico e altura/CTA aproximados; fundo permanece claro (bloqueio técnico concreto: `BeeDayBrand` não tem variante de cor para fundo escuro hoje — inverter exigiria essa variante nova, escopo de componente compartilhado, não uma consequência direta da migração de paleta) — candidato explícito para a Sprint 20.7 |
+| Buttons | **HIGH ALIGNMENT** | `--soft` modifier reproduz forma (pill, sem borda, sombra suave); cor de fundo (`--beeday-game-yellow`, variante Primary padrão) já era próxima do amarelo da referência |
+| Cards | **HIGH ALIGNMENT** | `--soft` modifier reproduz radius/sombra generosos da referência |
+| Spacing/Section rhythm | **HIGH ALIGNMENT** | Ritmo vertical generoso via `clamp()` local, split layouts alternados |
+| Composition (split layouts) | **HIGH ALIGNMENT** | Duas seções split (texto+visual), uma invertida, replicando diretamente o padrão `split-grid`/`split-grid.reverse` da referência |
+| Responsive behavior | **HIGH ALIGNMENT** | Colapso de splits em 900px (mesmo breakpoint conceitual da referência), reutilizando precedente já existente no repositório |
+
+**Avaliação qualitativa (pergunta obrigatória do prompt de execução):** "se alguém olhar a
+referência e depois a Home BeeDay, é evidente que pertencem à mesma direção visual?" — sim, em cor,
+tipografia e composição: o hero usa o mesmo azul, a mesma família tipográfica em peso 900, a mesma
+estrutura full-bleed/split/CTA duplo da referência. O único desvio remanescente é escopado e técnico
+(fundo do header ainda claro, por falta de uma variante de `BeeDayBrand` para fundo escuro — não uma
+rejeição de paleta), registrado como candidato explícito para a Sprint 20.7.
+
+## Deferred (product content — no longer on the EPIC 20 critical path)
+
+A antiga Sprint "Home Content & Product Integration" (dados reais/pessoais na Home, streak,
+"% de consistência", integração de Application) **não pertence mais ao caminho crítico da EPIC 20**
+(ver roadmap abaixo) — registrada aqui como evolução futura de produto, não como uma Sprint numerada
+da EPIC:
+
+- Dados reais/pessoais na Home (ex.: um resumo do progresso do próprio visitante autenticado).
 - Investigar se um campo de "streak"/dias consecutivos existe ou vale a pena expor via Application.
 - Decidir um "% de consistência" agregado, se aprovado (gap de Application já registrado desde a
   Sprint 20.1).
 - Reavaliar estratégia de navegação por âncora no `PublicHeader` com o conteúdo da Home consolidado.
 
-## Deferred to Sprint 20.7 (Responsive & Accessibility Pass)
+## Deferred to Sprint 20.7 (Design System Component Migration)
 
-- Auditoria transversal de responsividade/acessibilidade da Home (validação manual em navegador
-  real — não executada nesta Sprint, sem ambiente disponível).
+- Propagação sistemática dos tokens canônicos (`--beeday-color-brand-primary` família, `--soft`,
+  `--beeday-radius-2xl`, `--beeday-font-size-hero`, `--beeday-font-weight-black`) pelas demais
+  superfícies/componentes do produto — `/daily`, `/wallet`, `/account`, `TopNavigation`,
+  `OnboardingLayout` continuam lendo `--beeday-color-primary` (roxo, inalterado, compat) até serem
+  migrados deliberadamente.
+- Componentes/superfícies ainda na cor legada: `TopNavigation`, `AccountSidePanel`,
+  `ProfileSidePanel`, `DashboardColumn`, `MainLayout`, `Login`/Identity/Onboarding (via
+  `OnboardingLayout`, inclui os outros 8 consumidores de `BeeDayBrand`), `Account.razor`,
+  `Wallet.razor`, Dashboard (`/daily`) e todos os cards de atividade/hábito.
+- Variante de cor inversa para `BeeDayBrand` (fundo escuro), candidata para permitir inverter o
+  fundo do `PublicHeader` para a direção escura da referência (`#17203b`) — avaliado nesta Sprint,
+  não implementado (mudança de componente compartilhado com escopo próprio).
+- Remoção de `--beeday-color-primary` quando todos os consumidores acima migrarem para
+  `--beeday-color-brand-primary`.
+
+## Deferred to Sprint 20.8 (Responsive, Accessibility & Final Visual Consistency)
+
+- Auditoria transversal de responsividade/acessibilidade da Home e do restante do produto
+  (validação manual em navegador real — não executada nesta Sprint, sem ambiente disponível).
 - Decisão sobre ferramenta de a11y automatizada (axe-core/Pa11y) e regressão visual — nenhuma
   introduzida nesta Sprint.
 
@@ -661,24 +986,25 @@ preservado sem alteração (todos os fluxos partem de `/login` diretamente, não
 ```text
 20.1 Reference Home & Current UI Discovery — COMPLETE
 
-20.2 Visual Foundations Adoption — COMPLETE (NO CHANGE — existing foundations judged sufficient)
+20.2 Current Visual Foundations Audit — COMPLETE (baseline audit only; not a visual-preservation decision — see Direction Change)
 
 20.3 Native Cursor & Global Visual Cleanup — COMPLETE
 
-20.4 Application Shell & Navigation — COMPLETE (PublicLayout/PublicHeader created, not yet wired to any route)
+20.4 Application Shell & Navigation — COMPLETE
 
-20.5 BeeDay Home Structure — COMPLETE (/ is now the public Home; Entry.razor removed; destination policy preserved and reused, not duplicated)
+20.5 BeeDay Home Functional Structure — COMPLETE
 
-20.6 Home Content & Product Integration
+20.6 Reference Design System Extraction & Home Migration — CURRENT
 
-20.7 Responsive & Accessibility Pass
+20.7 Design System Component Migration
 
-20.8 Visual Consistency & Final Audit
+20.8 Responsive, Accessibility & Final Visual Consistency
 ```
 
 Numeração não obriga artificialmente a implementação — se a análise real de uma Sprint revelar uma
 fronteira tecnicamente inadequada, isso deve ser reportado antes de alterar o plano, não decidido
-silenciosamente.
+silenciosamente. A antiga "Home Content & Product Integration" saiu do caminho crítico numerado da
+EPIC — ver "Deferred (product content)" acima.
 
 ## Deferred Decisions
 

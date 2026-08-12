@@ -419,6 +419,32 @@
 .beeday-button.beeday-button--plain-danger { color: var(--beeday-color-danger); }
 .beeday-button.beeday-button--plain-neutral { color: var(--beeday-color-text-secondary); }
 
+/* Soft, rounded CTA — added Sprint 20.6 (EPIC 20) as an opt-in modifier matching the reference
+   page-model's target button language (pill radius, no pixel border/outline, elevation-based hover
+   instead of the pixel press-down). Composes with any color variant (Primary/Secondary/...); does
+   not alter the default .beeday-button appearance, so existing consumers are unaffected. */
+.beeday-button.beeday-button--soft {
+    border: 0;
+    border-radius: var(--beeday-radius-pill);
+    box-shadow: var(--beeday-shadow-md);
+    transition: transform var(--beeday-transition-fast), box-shadow var(--beeday-transition-fast);
+}
+
+.beeday-button.beeday-button--soft:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: var(--beeday-shadow-lg);
+}
+
+.beeday-button.beeday-button--soft:not(:disabled):active {
+    transform: translateY(0);
+    box-shadow: var(--beeday-shadow-sm);
+}
+
+.beeday-button.beeday-button--soft:focus-visible {
+    outline: 0;
+    box-shadow: var(--beeday-shadow-md), var(--beeday-focus-ring);
+}
+
 .beeday-button--full-width { width: 100%; }
 .beeday-button--compact { min-height: 2.25rem; padding: .5rem .8rem .58rem; font-size: .78rem; }
 .beeday-button__label { position: relative; z-index: 1; display: inline-flex; min-width: 0; align-items: center; white-space: nowrap; }
@@ -481,6 +507,16 @@
 .beeday-card--muted { background: var(--beeday-color-surface-muted); }
 .beeday-card--interactive { transition: transform var(--beeday-transition-normal), box-shadow var(--beeday-transition-normal); }
 .beeday-card--interactive:hover { transform: translateY(-2px); box-shadow: var(--beeday-shadow-md); }
+
+/* Generous, borderless surface — added Sprint 20.6 (EPIC 20) as an opt-in modifier matching the
+   reference page-model's target card language (large radius, soft shadow instead of a hairline
+   border). Composes with --padded/--muted/--interactive; does not alter the default .beeday-card
+   appearance, so existing consumers are unaffected. */
+.beeday-card--soft {
+    border: 0;
+    border-radius: var(--beeday-radius-2xl);
+    box-shadow: var(--beeday-shadow-lg);
+}
 
 .beeday-page-header,
 .beeday-section-header,

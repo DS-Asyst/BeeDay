@@ -29,7 +29,7 @@ public sealed class HomeTests
 
         var cut = context.Render<HomePage>();
 
-        var cardHeadings = cut.FindAll(".home-page__card h3").Select(h => h.TextContent.Trim()).ToArray();
+        var cardHeadings = cut.FindAll(".home-page__showcase-row h3").Select(h => h.TextContent.Trim()).ToArray();
         Assert.Equal(["Daily", "Habits", "Tasks", "Projects", "Wallet"], cardHeadings);
     }
 
@@ -81,5 +81,18 @@ public sealed class HomeTests
 
         Assert.NotNull(cut.Find("#capabilities"));
         Assert.NotNull(cut.Find("#progress"));
+    }
+
+    [Fact]
+    public void HeroSecondaryActionLinksToCapabilities()
+    {
+        using var context = new BunitContext();
+        context.AddAuthorization().SetNotAuthorized();
+        PublicHeaderTests.RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
+
+        var cut = context.Render<HomePage>();
+
+        var secondaryAction = cut.Find("a.home-hero__secondary-action");
+        Assert.Equal("#capabilities", secondaryAction.GetAttribute("href"));
     }
 }

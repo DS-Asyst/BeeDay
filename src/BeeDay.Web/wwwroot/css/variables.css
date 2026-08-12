@@ -8,6 +8,21 @@
     --beeday-color-accent: #f29b24;
     --beeday-color-accent-hover: #d9820d;
 
+    /* Canonical brand primary — added Sprint 20.6 (EPIC 20) as the Design System's target primary
+       brand color, extracted directly from the reference page-model (#2538d2/#4458dc). This is the
+       primary color going forward; --beeday-color-primary above is kept, unchanged, as the
+       compatibility value for the 40+ not-yet-migrated consumers across the authenticated product
+       (TopNavigation, AccountSidePanel, ProfileSidePanel, DashboardColumn, cards.css, wallet.css,
+       feedback.css, forms.css, identity.css, pixel-ui.css, theme.css, editor-modal.css, dragdrop.css)
+       so migrating Home/PublicHeader to the new color carries zero regression risk for them. Sprint
+       20.7 repoints the remaining consumers to this canonical family; --beeday-color-primary is
+       removed once that migration completes. The reference's accent yellow is not duplicated here —
+       --beeday-game-yellow (#ffc928) is already close enough (#ffd326/#ffb72e) to reuse as-is. */
+    --beeday-color-brand-primary: #2538d2;
+    --beeday-color-brand-primary-hover: #1d2fb8;
+    --beeday-color-brand-primary-active: #16268c;
+    --beeday-color-brand-primary-light: #4458dc;
+
     /* Surfaces */
     --beeday-color-background: #f2f1f3;
     --beeday-color-surface: #ffffff;
@@ -219,6 +234,10 @@
     --beeday-radius-md: .625rem;
     --beeday-radius-lg: .875rem;
     --beeday-radius-xl: 1.25rem;
+    /* Generous surface radius (large marketing/showcase cards, soft CTAs) — added Sprint 20.6
+       (EPIC 20) to represent the reference page-model's target visual language; the scale had no
+       step between xl (1.25rem) and pill (999px) for a rounded, non-pill surface. */
+    --beeday-radius-2xl: 1.75rem;
     --beeday-radius-pill: 999px;
 
     /* Elevation */
