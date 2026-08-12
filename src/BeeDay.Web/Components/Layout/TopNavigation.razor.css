@@ -178,6 +178,16 @@
     .top-navigation__brand-text ::deep .beeday-brand { font-size: 1.05rem; }
 }
 
+/* Sprint 21.2 (EPIC 21): DesktopSidebar takes over primary navigation at this width — see
+   docs/epics/21-lingo-product-experience/README.md §10. Kept as the explicit, transitory
+   mobile/tablet fallback below 1024px (§8 of the Sprint) rather than removed outright; its own
+   680px/920px breakpoints above continue to govern that narrower range unchanged. */
+@media (min-width: 1024px) {
+    .top-navigation {
+        display: none;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .top-navigation__brand-button,
     .top-navigation__brand-text ::deep .beeday-brand,

@@ -1,0 +1,32 @@
+<aside class="desktop-sidebar" aria-label="Primary navigation">
+    <button type="button"
+            class="desktop-sidebar__brand-button"
+            aria-label="@(IsProfilePanelOpen ? "Close profile panel" : "Open profile panel")"
+            aria-expanded="@IsProfilePanelOpen"
+            @onclick="OnToggleProfilePanel">
+        <BeeDayBrand />
+    </button>
+
+    <nav class="desktop-sidebar__links" aria-label="Main navigation">
+        <NavLink href="/daily" Match="NavLinkMatch.Prefix">Daily</NavLink>
+        <NavLink href="/wallet" Match="NavLinkMatch.Prefix">Wallet</NavLink>
+    </nav>
+
+    <button type="button"
+            class="desktop-sidebar__menu-button"
+            aria-label="@(IsMenuPanelOpen ? "Close support menu" : "Open support menu")"
+            aria-expanded="@IsMenuPanelOpen"
+            @onclick="OnToggleMenuPanel">
+        <span class="desktop-sidebar__menu-icon" aria-hidden="true">
+            <PixelIcon Name="@(IsMenuPanelOpen ? PixelIconName.Close : PixelIconName.Menu)" Size="PixelIconSize.Medium" />
+        </span>
+        <span>Menu</span>
+    </button>
+</aside>
+
+@code {
+    [Parameter] public bool IsProfilePanelOpen { get; set; }
+    [Parameter] public bool IsMenuPanelOpen { get; set; }
+    [Parameter] public EventCallback OnToggleProfilePanel { get; set; }
+    [Parameter] public EventCallback OnToggleMenuPanel { get; set; }
+}
