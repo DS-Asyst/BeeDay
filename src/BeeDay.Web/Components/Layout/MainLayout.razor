@@ -7,22 +7,31 @@
                    OnToggleProfilePanel="ToggleProfilePanel"
                    OnToggleMenuPanel="ToggleMenuPanel" />
 
-    <div class="beeday-workspace @GetWorkspaceClass()">
-        <div class="beeday-side-slot beeday-side-slot--left">
-            <ProfileSidePanel IsOpen="@_isProfilePanelOpen" OnClose="ClosePanels" />
+    <div class="beeday-shell">
+        <DesktopSidebar IsProfilePanelOpen="@_isProfilePanelOpen"
+                         IsMenuPanelOpen="@_isMenuPanelOpen"
+                         OnToggleProfilePanel="ToggleProfilePanel"
+                         OnToggleMenuPanel="ToggleMenuPanel" />
+
+        <div class="beeday-workspace @GetWorkspaceClass()">
+            <div class="beeday-side-slot beeday-side-slot--left">
+                <ProfileSidePanel IsOpen="@_isProfilePanelOpen" OnClose="ClosePanels" />
+            </div>
+
+            <div class="beeday-content-shell">
+                <main class="beeday-main">
+                    @Body
+                </main>
+
+                <AppFooter />
+            </div>
+
+            <div class="beeday-side-slot beeday-side-slot--right">
+                <AccountSidePanel IsOpen="@_isMenuPanelOpen" OnClose="ClosePanels" />
+            </div>
         </div>
 
-        <div class="beeday-content-shell">
-            <main class="beeday-main">
-                @Body
-            </main>
-
-            <AppFooter />
-        </div>
-
-        <div class="beeday-side-slot beeday-side-slot--right">
-            <AccountSidePanel IsOpen="@_isMenuPanelOpen" OnClose="ClosePanels" />
-        </div>
+        <RightRail />
     </div>
 
     <BeeDayToastHost />

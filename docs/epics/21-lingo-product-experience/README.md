@@ -10,13 +10,15 @@ afirmação de "estado atual" abaixo vem de memória — quando este documento e
 futuras, cada atualização deve reverificar contra o código antes de alterar uma afirmação de
 estado atual.
 
-**Última verificação:** 2026-08-12 (Sprint 21.1 — Lingo Architecture & Design System Mapping,
-COMPLETE — especificação técnica, nenhuma implementação visual realizada).
+**Última verificação:** 2026-08-12 (Sprint 21.2 — BeeDay Shell Foundation, COMPLETE — primeira
+Sprint de implementação da EPIC; ver "Sprint 21.2 — Results" ao final deste documento). Sprint
+21.1 — Lingo Architecture & Design System Mapping, COMPLETE — especificação técnica, nenhuma
+implementação visual realizada (seções 1-21 abaixo, preservadas como registro dessa Sprint).
 
-**Escopo desta Sprint:** transformar a referência visual genérica do Lingo/Duolingo Clone em uma
-especificação técnica concreta de migração para o BeeDay — medidas, componentes, contratos,
-equivalências e decisões. **Não inclui implementação de código de produção** — nenhuma alteração
-em `src/BeeDay.Web/` ocorreu nesta Sprint.
+**Escopo da Sprint 21.1 (seções 1-21 abaixo):** transformar a referência visual genérica do
+Lingo/Duolingo Clone em uma especificação técnica concreta de migração para o BeeDay — medidas,
+componentes, contratos, equivalências e decisões. Não incluiu implementação de código de produção.
+A Sprint 21.2 (resultados ao final deste documento) é a primeira a alterar `src/BeeDay.Web/`.
 
 ---
 
@@ -697,4 +699,192 @@ Recomendação, não decisão — a Sprint 21.2 só será definida após revisã
   20-home-visual-experience/README.md`, `docs/design-system/*`.
 
 Nenhum arquivo do Lingo foi criado, editado ou commitado. Nenhum arquivo de código de produção do
-BeeDay foi alterado nesta Sprint.
+BeeDay foi alterado na Sprint 21.1 (ver "Sprint 21.2 — Results" abaixo para a primeira Sprint que
+altera `src/BeeDay.Web/`).
+
+---
+
+## Sprint 21.2 — BeeDay Shell Foundation — Results
+
+**Branch:** `sprint/21.2-beeday-shell-foundation` (criada a partir de `hmg` já sincronizado com a
+Sprint 21.1 mergeada).
+
+**Status:** COMPLETE — primeira Sprint de implementação da EPIC 21. Fundação estrutural do shell
+estabelecida; nenhum acabamento visual final (navegação, ícones, conteúdo da Right Rail) foi
+tentado, por escopo explícito da Sprint.
+
+### Shell implementado
+
+Estrutura DOM de `MainLayout` (autenticado) evoluiu de:
+
+```text
+TopNavigation (fixo, todas as larguras)
+  → beeday-workspace (grid 3 colunas: ProfileSidePanel | conteúdo | AccountSidePanel)
+  → BeeDayToastHost
+```
+
+para:
+
+```text
+TopNavigation (fixo, visível só abaixo de 1024px)
+  → .beeday-shell (linha flex)
+      → DesktopSidebar (fixo, visível só a partir de 1024px)
+      → beeday-workspace (grid 3 colunas, inalterado: ProfileSidePanel | conteúdo | AccountSidePanel)
+      → RightRail (visível só a partir de 1024px)
+  → BeeDayToastHost
+```
+
+`1024px` é o mesmo breakpoint estrutural único documentado para o Lingo na Sprint 21.1 (§3/§13) —
+`TopNavigation` e `DesktopSidebar`/`RightRail` nunca ficam visíveis ao mesmo tempo, eliminando o
+risco de "dois shells desktop concorrentes" apontado no escopo da Sprint.
+
+### Componentes criados
+
+- `Components/Layout/DesktopSidebar.razor(.css)` — região persistente de navegação primária
+  (256px/16rem, fixa, visível ≥1024px). Reaproveita, sem redesenho, os mesmos três gatilhos que
+  `TopNavigation` já expunha: botão de marca (`<BeeDayBrand />`, abre/fecha `ProfileSidePanel`),
+  `NavLink` para `/daily`/`/wallet`, botão de menu (abre/fecha `AccountSidePanel`). Design final de
+  navegação (ícones por item, estados ativos elaborados, item set completo) deliberadamente **não**
+  incluído — escopo da Sprint 21.3.
+- `Components/Layout/RightRail.razor(.css)` — região estrutural vazia (368px/23rem, sticky, visível
+  ≥1024px). Nenhum conteúdo, nenhum serviço injetado — existe só para provar a geometria. XP/Nível
+  e resumos de Habits/Tasks/Projects/Wallet (já `SUPPORTED NOW` per a Gamification Capability
+  Matrix da Sprint 21.1, §15) ficam para a Sprint 21.6; Quests/Streak/Achievements permanecem sem
+  suporte de Domain e não foram simulados.
+
+### Componentes modificados
+
+- `Components/Layout/MainLayout.razor` — adiciona o wrapper `.beeday-shell` e os elementos
+  `<DesktopSidebar>`/`<RightRail>`; `beeday-workspace` (painéis Profile/Account) preservado sem
+  alteração de comportamento.
+- `Components/Layout/MainLayout.razor.css` — três novas custom properties em `.beeday-app`
+  (`--beeday-sidebar-width: 16rem`, `--beeday-right-rail-width: 23rem`,
+  `--beeday-content-max-width: 66rem`), seguindo o padrão já existente de tokens de shell escopados
+  (mesmo mecanismo de `--beeday-top-navigation-height`/`--beeday-left-panel-width`/
+  `--beeday-right-panel-width` — nenhuma infraestrutura de tokens nova); `.beeday-app` redefine
+  `--beeday-top-navigation-height` para `0px` a partir de `1024px` (cascata automática para
+  `.beeday-workspace`/`.beeday-side-slot`, que já derivavam dessa variável); `.beeday-workspace`
+  ganha `padding-left: var(--beeday-sidebar-width)` a partir de `1024px` para compensar
+  `DesktopSidebar` (`position: fixed`, fora do fluxo — mesma técnica usada pelo próprio Lingo,
+  `lg:pl-[256px]`); `.beeday-content-shell` ganha `max-width: var(--beeday-content-max-width)` +
+  `margin-inline: auto`.
+- `Components/Layout/TopNavigation.razor.css` — uma regra nova (`display: none` a partir de
+  `1024px`); nenhuma outra alteração visual.
+
+Nenhum componente de `Components/DesignSystem/` foi alterado — a fundação do shell não duplicou
+nem tocou o Design System existente.
+
+### Decisões tomadas
+
+1. **Gatilhos de Profile/Account reaproveitados, não redesenhados.** `DesktopSidebar` dispara
+   exatamente os mesmos dois `EventCallback`s (`ToggleProfilePanel`/`ToggleMenuPanel`) que
+   `MainLayout` já passava para `TopNavigation` — nenhuma navegação fictícia foi criada para
+   preencher a sidebar, conforme exigido pelo escopo da Sprint.
+2. **`TopNavigation` preservado como fallback mobile explícito**, não removido — abaixo de `1024px`
+   continua sendo o único acesso à navegação/aos painéis, papel agora documentado como transitório
+   até a Sprint 21.3/21.11 (docs/web/03-layouts.md §4).
+3. **Right Rail nasce genuinamente vazia**, sem card de XP/placeholder visual permanente — decisão
+   explícita para não antecipar a Sprint 21.6 nem simular funcionalidade inexistente (Streak/Quests
+   não têm suporte de Domain, confirmado na Sprint 21.1 §15).
+4. **Larguras do shell viraram tokens escopados em `.beeday-app`**, não literais repetidos — `256px`
+   (16rem), `368px` (23rem) e `1056px` (66rem) aparecem uma vez cada, no bloco de custom properties
+   já existente, evoluindo a infraestrutura atual em vez de criar uma paralela.
+5. **`--beeday-color-brand-primary` (`#2538d2` → `#1023C8`) não foi remigrado nesta Sprint** — a
+   Sprint 21.1 §21 havia levantado adiantar essa remigração; ficou explicitamente para a Sprint de
+   Visual Foundations (21.4), conforme o escopo desta Sprint (§13 do prompt da Sprint) determinou.
+   Nenhum elemento novo introduzido nesta Sprint usa cor hardcoded fora do sistema de tokens.
+
+### Comportamento desktop (≥1024px, validado)
+
+`DesktopSidebar` (256px, fixa) e `RightRail` (368px, sticky, vazia) visíveis; `TopNavigation`
+oculta; `.beeday-workspace` desloca-se `256px` para compensar a sidebar fixa; conteúdo principal
+centralizado com `max-width: 1056px`.
+
+### Comportamento responsivo (validado)
+
+Abaixo de `1024px`: `DesktopSidebar`/`RightRail` ocultas, `TopNavigation` visível e funcional
+exatamente como antes desta Sprint — nenhuma regressão. Entre `760px` e `1024px`, os painéis
+Profile/Account já operam em modo coluna de grid (comportamento pré-existente, breakpoint
+independente) enquanto `DesktopSidebar`/`RightRail` continuam ausentes — os dois breakpoints não se
+coordenam entre si nessa faixa intermediária, registrado como observação para a Sprint 21.11
+(Responsive & Mobile Experience), não corrigido aqui (fora do escopo desta Sprint).
+
+### Compatibilidade temporária necessária
+
+`TopNavigation` continua sendo renderizado e funcional em todas as larguras — apenas ocultado via
+CSS acima de `1024px` — exatamente o mecanismo transitório e explícito autorizado pelo escopo da
+Sprint (§8). Nenhuma outra compatibilidade temporária foi necessária: `ProfileSidePanel`,
+`AccountSidePanel`, o formulário de logout e o `AppFooter` continuam inalterados e acessíveis.
+
+### Responsabilidades deixadas explicitamente para Sprints futuras
+
+- **Sprint 21.3 (BeeDay Navigation):** design final de `DesktopSidebar` — ícones por item, estados
+  ativos, item set completo, navegação mobile definitiva (hoje ainda é o `TopNavigation` herdado).
+- **Sprint 21.4 (Visual Foundations & Typography):** remigração de `--beeday-color-brand-primary`
+  (`#2538d2` → `#1023C8`), decisão sobre `Jersey 25`, migração tipográfica global.
+- **Sprint 21.5 (Interactive Components):** geometria física do `BeeDayButton`, migração dos
+  consumidores `--comic*`.
+- **Sprint 21.6 (Progress & Right Rail):** conteúdo real da `RightRail` (XP/Nível via
+  `ExperienceBar` relocado, resumos de Habits/Tasks/Projects/Wallet via `DashboardResponse`).
+- **Sprint 21.11 (Responsive & Mobile Experience):** consolidação de breakpoints (agora 30 valores
+  distintos, ver `docs/ux/03-responsive.md`), incluindo a faixa `760px`-`1024px` sem coordenação
+  entre os painéis existentes e o novo shell, registrada acima.
+
+### Testes adicionados
+
+- `tests/BeeDay.Web.Tests/Components/Layout/DesktopSidebarTests.cs` (3 testes, bUnit) — gatilhos,
+  estados `aria-expanded`/`aria-label`, callbacks.
+- `tests/BeeDay.Web.Tests/Components/Layout/RightRailTests.cs` (1 teste, bUnit) — região vazia,
+  sem conteúdo simulado.
+- `tests/BeeDay.Web.Tests/Components/Layout/ShellFoundationTests.cs` (6 testes, contrato
+  texto/CSS) — composição do `MainLayout` sem remoção de região existente; visibilidade
+  condicional `DesktopSidebar`/`RightRail`/`TopNavigation` no breakpoint `1024px`; recálculo de
+  `--beeday-top-navigation-height`; `max-width` do conteúdo principal.
+- `tests/BeeDay.E2E.Tests/ShellResponsiveLayoutTests.cs` (2 testes, Playwright/Chromium real) —
+  geometria real (largura da sidebar ≈256px, da rail ≈368px), visibilidade condicional real,
+  ausência de overflow horizontal real (`scrollWidth`/`clientWidth`), e que o gatilho de
+  `ProfileSidePanel` continua funcional via `TopNavigation` em viewport estreito.
+
+Nenhum teste pré-existente precisou de ajuste — os 49 testes de `Components.Layout`/
+`Components.Visual` do `BeeDay.Web.Tests` e os 11 testes de `BeeDay.E2E.Tests` (9 pré-existentes +
+2 novos) passaram sem modificação.
+
+### Documentação atualizada
+
+- `docs/web/03-layouts.md` — composição do shell reescrita (§2-§6); corrige dois achados
+  desatualizados descobertos incidentalmente nesta Sprint (não introduzidos por ela): `TopNavigation`
+  e `AccountSidePanel` já delegavam a `<BeeDayBrand />` desde a Sprint 20.7/20.4, mas esta seção
+  ainda descrevia markup `BEE`/`DAY` literal para ambos.
+- `docs/ux/03-responsive.md` — novo breakpoint `min-width: 1024px` (§2.2), contraexemplo de corte
+  coordenado entre arquivos (§3), comportamento adaptativo de `MainLayout`/`TopNavigation`/
+  `DesktopSidebar`/`RightRail` (§5); corrige uma inconsistência de contagem de arquivos
+  pré-existente e independente desta Sprint entre o cabeçalho do documento e sua própria seção de
+  fontes consultadas (29/48 vs. 30/49 — nenhum batia com a contagem direta; verdade agora é 33/52).
+- `docs/design-system/01-foundations.md` §10 — novos tokens de shell, novo breakpoint, contagem de
+  CSS isolado corrigida.
+- Este documento (`docs/epics/21-lingo-product-experience/README.md`).
+
+### Validação executada
+
+- `dotnet format BeeDay.slnx --verify-no-changes` — sucesso.
+- `dotnet build BeeDay.slnx` — 0 erros, 0 avisos.
+- `dotnet test BeeDay.slnx` — todos os projetos, incluindo os 10 testes novos de
+  `BeeDay.Web.Tests` e a suíte completa de `BeeDay.E2E.Tests` (Playwright/Chromium real, servidor
+  Kestrel real, usuário seedado real via `SeedUserAsync`).
+- `git status` — apenas os arquivos intencionais desta Sprint.
+
+**Environment Validated, não apenas Code Complete:** a geometria responsiva do shell foi
+confirmada em um Chromium real (`BeeDay.E2E.Tests`), não apenas em CSS lido estaticamente —
+largura da sidebar (~256px) e da rail (~368px) medidas via `BoundingBoxAsync`, visibilidade
+condicional e ausência de overflow horizontal confirmadas via `scrollWidth`/`clientWidth` reais,
+em viewport desktop (1280×800) e mobile (390×844). Isso cobre o ambiente de teste E2E local — não
+substitui validação em HMG, que segue pendente do fluxo normal de promoção do repositório.
+
+### Riscos residuais
+
+- A faixa `760px`-`1024px` (painéis em modo coluna de grid, mas `DesktopSidebar`/`RightRail` ainda
+  ausentes) não foi projetada deliberadamente — é uma consequência de dois breakpoints
+  independentes coexistindo. Não causa overflow nem quebra funcionalidade (validado por E2E), mas
+  merece revisão de composição visual na Sprint 21.11.
+- `DesktopSidebar` tem estilo intencionalmente neutro/mínimo — qualquer comparação visual lado a
+  lado com o Lingo antes da Sprint 21.3 vai parecer incompleta por design, não por erro.

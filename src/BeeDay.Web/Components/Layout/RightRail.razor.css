@@ -1,0 +1,17 @@
+.right-rail {
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    .right-rail {
+        display: block;
+        flex: 0 0 var(--beeday-right-rail-width);
+        width: var(--beeday-right-rail-width);
+        min-width: 0;
+        position: sticky;
+        top: var(--beeday-top-navigation-height);
+        align-self: flex-start;
+        height: calc(100dvh - var(--beeday-top-navigation-height));
+        overflow-y: auto;
+    }
+}
