@@ -42,4 +42,18 @@ public sealed class BeeDayProgressBarTests
         Assert.Equal("10", progress.GetAttribute("aria-valuemax"));
         Assert.Equal("10 of 10 completed", progress.GetAttribute("aria-valuetext"));
     }
+
+    [Fact]
+    public void ExposesRewardToneWithoutChangingProgressSemantics()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<BeeDayProgressBar>(parameters => parameters
+            .Add(component => component.Label, "Experience progress")
+            .Add(component => component.Value, 25)
+            .Add(component => component.Maximum, 100)
+            .Add(component => component.Tone, BeeDayProgressTone.Reward));
+
+        Assert.Equal("reward", cut.Find(".beeday-progress").GetAttribute("data-tone"));
+        Assert.Equal("25", cut.Find("[role='progressbar']").GetAttribute("aria-valuenow"));
+    }
 }

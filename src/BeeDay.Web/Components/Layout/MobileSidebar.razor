@@ -7,7 +7,7 @@
        @onkeydown="HandleKeyDown">
     <div class="mobile-nav-drawer__header">
         <NavLink href="/daily" Match="NavLinkMatch.Prefix" class="mobile-nav-drawer__brand" @onclick="HandleNavigate">
-            <BeeDayBrand />
+            <BeeDayBrand OnDarkSurface="true" />
         </NavLink>
 
         <button type="button" class="mobile-nav-drawer__close" aria-label="Close" @onclick="OnClose" @ref="closeButtonElement">

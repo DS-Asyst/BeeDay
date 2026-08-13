@@ -1,3 +1,11 @@
-<span class="beeday-brand" aria-label="Bee Day">
-    <span>BEE</span><span class="beeday-brand__accent">DAY</span>
+<span class="beeday-brand @(OnDarkSurface ? "beeday-brand--contrast" : null)">
+    <img class="beeday-brand__wordmark"
+         src="/beeday-wordmark.png"
+         width="904"
+         height="276"
+         alt="BeeDay" />
 </span>
+
+@code {
+    [Parameter] public bool OnDarkSurface { get; set; }
+}

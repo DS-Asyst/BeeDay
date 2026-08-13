@@ -8,11 +8,11 @@ componente — quatro novos na Sprint 21.3 (`Layout/{NavigationItem,NavigationIt
 MobileSidebar}.razor.css`), um removido (`Layout/TopNavigation.razor.css`, componente deletado —
 ver `docs/web/03-layouts.md`), ver abaixo e `docs/ux/03-responsive.md`).
 
-**Última verificação:** 2026-08-12 (Sprint 21.4, EPIC 21 — Visual Foundations & Typography).
-A família brand existente foi migrada para `#1023C8`/`#1E33ED`/`#0C1B99`; o amarelo funcional
-usa `#FACF39`/`#FBDB6B`; superfícies, bordas, sombras e foco globais foram limpos e mantidos no
-namespace BeeDay existente. Nunito agora é a única família tipográfica do produto, com hierarquia
-por peso/tamanho/line-height; Jersey 25, `--beeday-font-ui` e seu import foram removidos.
+**Última verificação:** 2026-08-13 (Sprint 21.9, EPIC 21 — Brand Identity).
+A família azul existente foi evoluída para `#185ABD`/`#1654B0`/`#124490`; a família amarela de
+marca/recompensa usa `#FFE88D`/`#FBDB6B`. Nenhum namespace paralelo foi criado. Nunito continua
+sendo a única tipografia de produto; a tipografia própria da marca existe apenas dentro do asset
+oficial `beeday-wordmark.png`.
 
 Verificação anterior: 2026-08-12 (Sprint 21.3, EPIC 21 — BeeDay Navigation) — contagem de CSS
 isolado corrigida de 33 para 36 (+4 novos, -1 removido); §10 atualizado (5 arquivos agora
@@ -75,11 +75,18 @@ Nenhuma cor é definida duas vezes com valores diferentes sob o mesmo nome — c
 Status, Activity, Attribute, Habit, Button, Comic, Card, Chrome) tem seu próprio namespace de
 token, então uma alteração em uma família nunca risca colidir com outra.
 
-**Migração de marca atual (Sprint 21.4, EPIC 21):** `--beeday-color-brand-primary` é `#1023C8`,
-com hover `#1E33ED`, active/depth `#0C1B99` e soft `#EEF0FF`. A família existente foi evoluída
-diretamente, sem aliases ou namespace paralelo. O amarelo já existente passou a `#FACF39`, com
-o hover funcional `#FBDB6B`. Cores semânticas de status e identidades de atividade permaneceram
-independentes da marca.
+**Migração de marca atual (Sprint 21.9, EPIC 21):** `--beeday-color-brand-primary` é `#185ABD`,
+com hover `#1654B0`, active/depth `#124490` e soft `#EEF0FF`. Azul é estrutura e ação: primary
+buttons, links importantes, navegação/foco/seleção e progresso funcional. A segunda metade da
+identidade é canônica em `--beeday-color-brand-yellow` (`#FFE88D`) e `-hover` (`#FBDB6B`): reward,
+XP, milestones e highlights de alta relevância, sempre com foreground escuro. O antigo namespace
+`--beeday-game-yellow*` foi removido. Cores de status (`success`, `warning`, `danger`, `info`),
+atividades e Wallet permanecem semanticamente independentes; brand yellow nunca significa warning
+automaticamente e brand blue não substitui info.
+
+Surfaces permanecem neutras. Azul e amarelo devem ganhar importância por contraste e hierarquia,
+não por preencher indiscriminadamente cards ou páginas. É proibido criar famílias `new`/`v2`, usar
+texto branco sobre amarelo, ou codificar os HEX de marca diretamente em componentes/assets.
 
 **Histórico (Sprint 20.7, EPIC 20):** `--beeday-color-brand-primary` (`#2538d2`,
 extraído diretamente da página-modelo) é a cor primária **canônica** de todo o produto. Introduzida na
@@ -95,8 +102,8 @@ foram tocadas. O amarelo de acento da referência (`#ffd326`/`#ffb72e`) não gan
 
 ### 2.2 Paleta "game" (pixel-console)
 
-Bloco `:root` separado (linha 253): `--beeday-game-ink`, `-ink-soft`, `-paper`, `-panel`, `-blue`,
-`-blue-dark`, `-yellow`, `-yellow-dark`, `-red`, `-green`, mais 3 tokens de borda/sombra
+Bloco `:root` separado: `--beeday-game-ink`, `-ink-soft`, `-paper`, `-panel`, `-blue`,
+`-blue-dark`, `-red`, `-green`, mais 3 tokens de borda/sombra
 pixel-style (`-border`, `-shadow-sm/md/lg`). Consumida pelos botões "comic"/"skew-press"/
 "comic-press" (`design-system.css`) e pelo adapter NES (`pixel-nes.css`).
 
@@ -119,9 +126,11 @@ usada — funciona como uma política de tipografia executável, não apenas uma
 |---|---|---|
 | `--beeday-font-body` (= `--beeday-font-family`) | `"Nunito", "Segoe UI", sans-serif` | Toda a UI: corpo, títulos, marca, navegação, botões, dialogs, cards e métricas |
 
-**Consolidação canônica (Sprint 21.4, EPIC 21):** Jersey 25 foi retirada integralmente da UI e do
-carregamento de fontes. `BeeDayBrand` preserva seu contrato e agora usa Nunito 800. Títulos usam
-Nunito 700/800 e botões Nunito 700; o antigo `--beeday-font-ui` foi removido, não mantido como alias.
+**Consolidação canônica (Sprints 21.4/21.9, EPIC 21):** Jersey 25 foi retirada integralmente da UI
+e do carregamento de fontes. Títulos usam Nunito 700/800 e botões Nunito 700; o antigo
+`--beeday-font-ui` foi removido. `BeeDayBrand` não compõe mais a marca com uma fonte de produto:
+encapsula a wordmark oficial, cuja tipografia própria está desenhada no PNG. Brand typography e
+product typography são responsabilidades distintas.
 
 **Histórico (Sprint 20.6, EPIC 20):** `--beeday-font-body` evoluiu de Inter para Nunito —
 troca de valor imediata e project-wide (toda a UI regular do produto já renderiza Nunito), extraída

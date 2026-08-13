@@ -1,19 +1,23 @@
-/* Sprint 20.7 (EPIC 20): "BEE" reads from --beeday-brand-color, a reusable, opt-in CSS custom
-   property (not a new Razor parameter, so the component's public API stays unchanged) that any
-   ancestor container can set to recolor the mark for its own surface — e.g. a dark/brand-colored
-   context sets `--beeday-brand-color: var(--beeday-color-text-inverse);` on itself. The fallback
-   (no override present) is the canonical brand primary, used by every default (light-surface)
-   consumer: Login, Identity pages, Tutorial, CreateProfile. */
 .beeday-brand {
     display: inline-flex;
-    color: var(--beeday-brand-color, var(--beeday-color-brand-primary));
-    font-family: var(--beeday-font-body);
-    font-size: 1.5rem;
-    font-weight: var(--beeday-font-weight-extrabold);
-    letter-spacing: .055em;
-    line-height: 1;
+    max-width: 100%;
+    align-items: center;
+    padding: var(--beeday-brand-padding, 0);
+    background: var(--beeday-brand-background, transparent);
+    border-radius: var(--beeday-brand-radius, 0);
+    line-height: 0;
 }
 
-.beeday-brand__accent {
-    color: var(--beeday-game-yellow);
+.beeday-brand__wordmark {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: var(--beeday-brand-height, 1.75rem);
+    object-fit: contain;
+}
+
+.beeday-brand--contrast {
+    padding: .3rem .45rem;
+    background: var(--beeday-color-surface);
+    border-radius: var(--beeday-radius-sm);
 }

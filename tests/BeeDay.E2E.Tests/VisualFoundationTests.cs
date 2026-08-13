@@ -16,10 +16,11 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
 
         await GotoAsync("/");
         await AssertGlobalFoundationAsync();
-        await Expect(Page.Locator(".beeday-brand").First).ToBeVisibleAsync();
+        await AssertWordmarkAsync(Page.Locator(".public-header .beeday-brand").First);
 
         await GotoAsync("/login");
         await AssertGlobalFoundationAsync();
+        await AssertWordmarkAsync(Page.Locator(".auth-card .beeday-brand").First);
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Level = 1 })).ToBeVisibleAsync();
     }
 
@@ -30,6 +31,17 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
         await LoginToDailyAsync();
         await AssertGlobalFoundationAsync();
         await Expect(Page.Locator(".desktop-sidebar")).ToBeVisibleAsync();
+        var desktopBrand = Page.Locator(".desktop-sidebar .beeday-brand");
+        await AssertWordmarkAsync(desktopBrand);
+        Assert.Equal("rgb(255, 255, 255)", await desktopBrand.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+
+        var experienceProgress = Page.Locator(".right-rail .experience-card .beeday-progress");
+        await Expect(experienceProgress).ToHaveAttributeAsync("data-tone", "reward");
+        Assert.Equal("rgb(255, 232, 141)", await experienceProgress.Locator(".beeday-progress__fill")
+            .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+
+        Assert.Equal("#185abd", await Page.Locator("html").EvaluateAsync<string>(
+            "element => getComputedStyle(element).getPropertyValue('--beeday-color-brand-primary').trim()"));
 
         var wallet = Page.GetByRole(AriaRole.Link, new() { Name = "Wallet" });
         await wallet.FocusAsync();
@@ -50,7 +62,12 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
         await Page.SetViewportSizeAsync(390, 844);
         await Expect(Page.Locator(".mobile-header")).ToBeVisibleAsync();
         await Expect(Page.Locator(".desktop-sidebar")).ToBeHiddenAsync();
+        await AssertWordmarkAsync(Page.Locator(".mobile-header .beeday-brand"));
         await AssertGlobalFoundationAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Open navigation menu" }).ClickAsync();
+        await AssertWordmarkAsync(Page.Locator("#mobile-navigation .beeday-brand"));
+        await Expect(Page.Locator("#mobile-navigation")).ToBeVisibleAsync();
     }
 
     private async Task AssertGlobalFoundationAsync()
@@ -62,6 +79,21 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
         Assert.Contains("Nunito", fontFamily, StringComparison.OrdinalIgnoreCase);
         Assert.Equal("none", backgroundImage);
         Assert.False(await Page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
+    }
+
+    private async Task AssertWordmarkAsync(ILocator brand)
+    {
+        await Expect(brand).ToBeVisibleAsync();
+        var image = brand.Locator("img.beeday-brand__wordmark");
+        await Expect(image).ToHaveAttributeAsync("alt", "BeeDay");
+        await Expect(image).ToHaveAttributeAsync("src", "/beeday-wordmark.png");
+
+        var dimensions = await image.EvaluateAsync<double[]>("""
+            element => [element.naturalWidth, element.naturalHeight, element.getBoundingClientRect().width, element.getBoundingClientRect().height]
+            """);
+        Assert.Equal(904d, dimensions[0]);
+        Assert.Equal(276d, dimensions[1]);
+        Assert.InRange(dimensions[2] / dimensions[3], 3.27d, 3.29d);
     }
 
     private async Task LoginToDailyAsync()

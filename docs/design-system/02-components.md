@@ -230,7 +230,7 @@ padrão de `CardMenuPlacementCalculator`) — decide `FlipUp`, `TopPx`, `MaxHeig
 
 | Componente | Objetivo |
 |---|---|
-| `BeeDayBrand` | Marca oficial: `<span class="beeday-brand">` com "BEE" + "DAY" (acento) — usado em todo `OnboardingLayout`, e também por `AccountSidePanel`/`DesktopSidebar`/`MobileHeader`/`MobileSidebar` (achado histórico de markup `LEVEL`/`UP` próprio corrigido na Sprint 20.4/20.7, ver `docs/web/03-layouts.md`; `TopNavigation` foi removida na Sprint 21.3, EPIC 21). |
+| `BeeDayBrand` | Única primitive da marca. Renderiza `/beeday-wordmark.png` com dimensões intrínsecas 904×276 e `alt="BeeDay"`; CSS preserva aspect ratio e aceita apenas hooks de apresentação (`--beeday-brand-height`, `-padding`, `-background`, `-radius`). Contextos escuros fornecem uma surface branca para não recolorir nem perder o “bee” azul. Não use `<img>` direto, Nunito, recortes ou símbolos inventados para representar a marca. |
 | `SearchHighlight` | Divide `Text` em segmentos por ocorrência de `SearchTerm` (case-insensitive, `IndexOf` iterativo, sem regex) e envolve cada match em `<mark>`/span destacado (`beeday-search-highlight`, fundo `#ffe49a`). Lógica de segmentação (`BuildSegments`) é `internal static`, testável isoladamente. |
 
 ## 9. Interop — `BeeDaySortable` (fora de `DesignSystem/`, documentado aqui por simetria)

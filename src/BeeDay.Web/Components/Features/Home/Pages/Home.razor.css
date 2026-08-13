@@ -10,7 +10,7 @@
 .home-cta {
     margin-inline: calc(-1 * var(--beeday-page-gutter));
     padding-inline: var(--beeday-page-gutter);
-    background: linear-gradient(120deg, var(--beeday-color-brand-primary) 0%, var(--beeday-color-brand-primary-light) 100%);
+    background: var(--beeday-color-brand-primary);
     text-align: center;
 }
 

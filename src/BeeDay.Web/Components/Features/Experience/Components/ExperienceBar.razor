@@ -20,6 +20,7 @@ else if (Model is not null)
         </div>
 
         <BeeDayProgressBar Label="Experience progress"
+                           Tone="BeeDayProgressTone.Reward"
                            Value="@Model.CurrentExperience"
                            Maximum="@Model.RequiredExperience"
                            ValueText="@ExperienceText" />

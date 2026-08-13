@@ -1,6 +1,6 @@
 @using System.Globalization
 
-<div class="beeday-progress" data-state="@State">
+<div class="beeday-progress" data-state="@State" data-tone="@Tone.ToString().ToLowerInvariant()">
     <div class="beeday-progress__heading">
         <span>@Label</span>
         @if (!string.IsNullOrWhiteSpace(ValueText))
@@ -26,6 +26,7 @@
     [Parameter] public double Value { get; set; }
     [Parameter] public double Maximum { get; set; } = 100d;
     [Parameter] public string? ValueText { get; set; }
+    [Parameter] public BeeDayProgressTone Tone { get; set; } = BeeDayProgressTone.Primary;
 
     private bool HasValidMaximum => double.IsFinite(Maximum) && Maximum > 0d;
     private double SafeValue => double.IsFinite(Value) ? Value : 0d;

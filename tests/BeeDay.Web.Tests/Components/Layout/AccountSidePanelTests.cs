@@ -11,8 +11,9 @@ public sealed class AccountSidePanelTests
         var cut = context.Render<AccountSidePanel>(parameters => parameters
             .Add(component => component.IsOpen, true));
 
-        Assert.Equal("BEEDAY", cut.Find(".support-drawer__brand-mark .beeday-brand").TextContent.Trim());
-        Assert.Contains("DAY", cut.Find(".support-drawer__brand-mark .beeday-brand__accent").TextContent);
+        var wordmark = cut.Find(".support-drawer__brand-mark .beeday-brand__wordmark");
+        Assert.Equal("BeeDay", wordmark.GetAttribute("alt"));
+        Assert.Equal("/beeday-wordmark.png", wordmark.GetAttribute("src"));
         Assert.Equal("GAMIFYING YOUR LIFE", cut.Find(".support-drawer__tagline").TextContent);
 
         Assert.DoesNotContain("SOCIAL", cut.Markup, StringComparison.OrdinalIgnoreCase);
