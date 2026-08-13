@@ -105,7 +105,8 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
         await Page.GetByLabel("Email").FillAsync(email);
         await Page.GetByLabel("Password").FillAsync(Password);
         await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
-        await Expect(Page).ToHaveURLAsync(new Regex("/daily$"));
+        await Expect(Page).ToHaveURLAsync(new Regex("/home$"));
+        await GotoAsync("/daily");
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
     }
 }

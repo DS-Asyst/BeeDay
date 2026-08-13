@@ -139,6 +139,7 @@ por presença do parâmetro `Href`:
 
 | Item | Tipo | Destino/ação |
 |---|---|---|
+| Home | Rota | `/home` |
 | Daily | Rota | `/daily` |
 | Wallet | Rota | `/wallet` |
 | Profile | Ação | `OnToggleProfilePanel` (abre `ProfileSidePanel`) |

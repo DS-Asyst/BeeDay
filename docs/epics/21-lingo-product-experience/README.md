@@ -1258,3 +1258,26 @@ Riscos e decisões adiadas: o PNG é raster, embora adequado aos tamanhos atuais
 oficial deve substituir a mesma primitive se for fornecida. Favicon e símbolo compacto permanecem
 inalterados porque a wordmark horizontal não autoriza recorte. Dark mode e dívida 760–1024px seguem
 fora do escopo. Nenhuma mudança ocorreu em Domain, Application ou Infrastructure.
+
+---
+
+## Sprint 21.10 — BeeDay Home Experience — Results
+
+**Status:** COMPLETE — uma Home autenticada action-first foi criada em `/home`, separada da Home
+pública (`/`) e do quadro operacional Daily (`/daily`).
+
+- Login, conclusão de perfil/onboarding e links de marca agora entram em `/home`; retornos locais
+  explícitos continuam preservados. A navegação distingue Home, Daily e Wallet.
+- A composição reaproveita feed principal + right rail observados no Lingo, sem copiar lições,
+  quests, hearts, streaks ou gamificação inexistente no BeeDay.
+- A página consome a mesma instância scoped e idempotente de `DashboardState` usada pelo rail. Não
+  foram criados requests, stores, modelos de domínio ou dados fictícios.
+- A próxima ação apresenta tarefas, todos e hábitos reais pendentes pelos cards existentes. Um
+  projeto ativo real pode ser destacado; loading, unavailable e vazio/concluído são distintos.
+- Desktop preserva Sidebar + conteúdo + RightRail. Em mobile/tablet o rail desaparece e o progresso
+  essencial reutiliza `ExperienceBar` no fluxo, sem overflow horizontal.
+- `/daily` permanece a experiência completa de planejar, criar, editar, filtrar e reordenar; Home
+  resume e orienta, sem duplicar o board.
+
+Validação: contratos, integração de rotas/login/navegação e cenários Chromium desktop, tablet e
+mobile, incluindo uma tarefa real criada no Daily e concluída pela Home.

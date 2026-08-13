@@ -12,9 +12,10 @@ public sealed class NavigationItemsTests
         var cut = context.Render<NavigationItems>();
 
         var routeLinks = cut.FindAll("nav.navigation-items a");
-        Assert.Equal(2, routeLinks.Count);
-        Assert.Equal("/daily", routeLinks[0].GetAttribute("href"));
-        Assert.Equal("/wallet", routeLinks[1].GetAttribute("href"));
+        Assert.Equal(3, routeLinks.Count);
+        Assert.Equal("/home", routeLinks[0].GetAttribute("href"));
+        Assert.Equal("/daily", routeLinks[1].GetAttribute("href"));
+        Assert.Equal("/wallet", routeLinks[2].GetAttribute("href"));
         Assert.All(routeLinks, link => Assert.NotEqual("#", link.GetAttribute("href")));
 
         var actionButtons = cut.FindAll(".navigation-items--actions button");
@@ -30,11 +31,14 @@ public sealed class NavigationItemsTests
         var cut = context.Render<NavigationItems>(parameters => parameters
             .Add(component => component.OnNavigate, () => navigateCount++));
 
-        cut.Find("a[href='/daily']").Click();
+        cut.Find("a[href='/home']").Click();
         Assert.Equal(1, navigateCount);
 
-        cut.Find("a[href='/wallet']").Click();
+        cut.Find("a[href='/daily']").Click();
         Assert.Equal(2, navigateCount);
+
+        cut.Find("a[href='/wallet']").Click();
+        Assert.Equal(3, navigateCount);
     }
 
     [Fact]
