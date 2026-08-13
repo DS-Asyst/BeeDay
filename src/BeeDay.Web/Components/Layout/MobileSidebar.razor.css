@@ -10,13 +10,13 @@
     background: rgb(35 25 45 / 55%);
     opacity: 0;
     visibility: hidden;
-    transition: opacity 220ms ease, visibility 0s linear 220ms;
+    transition: opacity var(--beeday-transition-emphasized), var(--beeday-transition-visibility);
 }
 
 .mobile-nav-backdrop.is-open {
     opacity: 1;
     visibility: visible;
-    transition: opacity 220ms ease, visibility 0s linear 0s;
+    transition: opacity var(--beeday-transition-emphasized), visibility 0s linear 0s;
 }
 
 .mobile-nav-drawer {
@@ -34,7 +34,7 @@
     box-shadow: var(--beeday-shadow-lg);
     transform: translateX(-100%);
     visibility: hidden;
-    transition: transform 300ms cubic-bezier(.2, .8, .2, 1), visibility 0s linear 300ms;
+    transition: transform var(--beeday-transition-emphasized), var(--beeday-transition-visibility);
     overflow-y: auto;
 }
 
@@ -45,7 +45,7 @@
 .mobile-nav-drawer.is-open {
     transform: translateX(0);
     visibility: visible;
-    transition: transform 300ms cubic-bezier(.2, .8, .2, 1), visibility 0s linear 0s;
+    transition: transform var(--beeday-transition-emphasized), visibility 0s linear 0s;
 }
 
 @media (min-width: 1024px) {
@@ -79,7 +79,7 @@
     border: 0;
     border-radius: var(--beeday-radius-xs);
     cursor: pointer;
-    transition: color 160ms ease, background-color 180ms ease;
+    transition: color var(--beeday-transition-normal), background-color var(--beeday-transition-normal);
 }
 
 .mobile-nav-drawer__close:hover,
@@ -89,8 +89,9 @@
 }
 
 .mobile-nav-drawer__close:focus-visible {
-    outline: 2px solid var(--beeday-game-yellow);
+    outline: var(--beeday-border-width) solid var(--beeday-focus-color-inverse);
     outline-offset: 2px;
+    box-shadow: var(--beeday-focus-ring-inverse);
 }
 
 @media (prefers-reduced-motion: reduce) {

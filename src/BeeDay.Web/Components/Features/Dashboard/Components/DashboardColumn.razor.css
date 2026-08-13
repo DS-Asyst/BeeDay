@@ -36,7 +36,7 @@
     margin: 0;
     overflow: hidden;
     color: #17121d;
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: 1.42rem;
     font-weight: 700;
     letter-spacing: -.035em;
@@ -109,7 +109,7 @@
 }
 
 .dashboard-column__heading h2 {
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: 1.65rem;
     font-weight: var(--beeday-font-weight-regular);
     letter-spacing: -.015em;
@@ -169,7 +169,7 @@
 
 /* UX / Visual Refinement — Sprint 6.1: retro UI column headings */
 .dashboard-column__heading h2 {
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: 1.48rem;
     font-weight: var(--beeday-font-weight-semibold);
     letter-spacing: 0;

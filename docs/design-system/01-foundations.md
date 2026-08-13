@@ -8,7 +8,13 @@ componente — quatro novos na Sprint 21.3 (`Layout/{NavigationItem,NavigationIt
 MobileSidebar}.razor.css`), um removido (`Layout/TopNavigation.razor.css`, componente deletado —
 ver `docs/web/03-layouts.md`), ver abaixo e `docs/ux/03-responsive.md`).
 
-**Última verificação:** 2026-08-12 (Sprint 21.3, EPIC 21 — BeeDay Navigation) — contagem de CSS
+**Última verificação:** 2026-08-12 (Sprint 21.4, EPIC 21 — Visual Foundations & Typography).
+A família brand existente foi migrada para `#1023C8`/`#1E33ED`/`#0C1B99`; o amarelo funcional
+usa `#FACF39`/`#FBDB6B`; superfícies, bordas, sombras e foco globais foram limpos e mantidos no
+namespace BeeDay existente. Nunito agora é a única família tipográfica do produto, com hierarquia
+por peso/tamanho/line-height; Jersey 25, `--beeday-font-ui` e seu import foram removidos.
+
+Verificação anterior: 2026-08-12 (Sprint 21.3, EPIC 21 — BeeDay Navigation) — contagem de CSS
 isolado corrigida de 33 para 36 (+4 novos, -1 removido); §10 atualizado (5 arquivos agora
 coordenam o breakpoint `min-width: 1024px`, `TopNavigation` substituída por `MobileHeader`/
 `MobileSidebar`). Verificação anterior: 2026-08-12 (Sprint 21.2, EPIC 21 — BeeDay Shell
@@ -69,7 +75,13 @@ Nenhuma cor é definida duas vezes com valores diferentes sob o mesmo nome — c
 Status, Activity, Attribute, Habit, Button, Comic, Card, Chrome) tem seu próprio namespace de
 token, então uma alteração em uma família nunca risca colidir com outra.
 
-**Migração de marca concluída (Sprint 20.7, EPIC 20):** `--beeday-color-brand-primary` (`#2538d2`,
+**Migração de marca atual (Sprint 21.4, EPIC 21):** `--beeday-color-brand-primary` é `#1023C8`,
+com hover `#1E33ED`, active/depth `#0C1B99` e soft `#EEF0FF`. A família existente foi evoluída
+diretamente, sem aliases ou namespace paralelo. O amarelo já existente passou a `#FACF39`, com
+o hover funcional `#FBDB6B`. Cores semânticas de status e identidades de atividade permaneceram
+independentes da marca.
+
+**Histórico (Sprint 20.7, EPIC 20):** `--beeday-color-brand-primary` (`#2538d2`,
 extraído diretamente da página-modelo) é a cor primária **canônica** de todo o produto. Introduzida na
 Sprint 20.6 ao lado de `--beeday-color-primary` (`#673ab7`, roxo) mantida como compatibilidade
 temporária; a Sprint 20.7 auditou repo-wide todo consumidor real de `--beeday-color-primary`
@@ -105,10 +117,13 @@ usada — funciona como uma política de tipografia executável, não apenas uma
 
 | Papel | Fonte | Uso documentado em `typography-policy.css` |
 |---|---|---|
-| `--beeday-font-body` | `"Nunito", "Segoe UI", sans-serif` (Sprint 20.6/EPIC 20 — era `"Inter"`) | Todo texto de UI regular: parágrafos, descrições, formulários, inputs, tabelas, dialogs, navegação, menus, valores, contadores, estatísticas, saldos |
-| `--beeday-font-ui` (= `--beeday-font-family`) | `"Jersey 25", "Segoe UI", sans-serif` | Reservada a títulos de página/card, botões estilizados (`BeeDayButton`) e marca (`BeeDayBrand`) |
+| `--beeday-font-body` (= `--beeday-font-family`) | `"Nunito", "Segoe UI", sans-serif` | Toda a UI: corpo, títulos, marca, navegação, botões, dialogs, cards e métricas |
 
-**Migração canônica (Sprint 20.6, EPIC 20):** `--beeday-font-body` evoluiu de Inter para Nunito —
+**Consolidação canônica (Sprint 21.4, EPIC 21):** Jersey 25 foi retirada integralmente da UI e do
+carregamento de fontes. `BeeDayBrand` preserva seu contrato e agora usa Nunito 800. Títulos usam
+Nunito 700/800 e botões Nunito 700; o antigo `--beeday-font-ui` foi removido, não mantido como alias.
+
+**Histórico (Sprint 20.6, EPIC 20):** `--beeday-font-body` evoluiu de Inter para Nunito —
 troca de valor imediata e project-wide (toda a UI regular do produto já renderiza Nunito), extraída
 diretamente da página-modelo (fonte dominante de toda a referência) e aplicada de uma vez porque é
 uma substituição puramente tipográfica, sem contrato de layout/comportamento em risco. `Google
@@ -153,8 +168,8 @@ coincidem numericamente com o início da escala principal, mas são tokens disti
 
 ## 5. Border radius
 
-7 degraus em `variables.css`: `xs` .2rem, `sm` .375rem, `md` .625rem, `lg` .875rem, `xl` 1.25rem,
-`2xl` 1.75rem (Sprint 20.6, EPIC 20 — preenche o gap entre `xl` e `pill` para superfícies generosas;
+7 degraus em `variables.css`: `xs` .2rem, `sm` .375rem, `md` .625rem, `lg` .75rem, `xl` 1rem,
+`2xl` 1.5rem (consolidados na Sprint 21.4 para controles, navegação, cards e dialogs;
 desde a Sprint 20.8 é o radius default do `BeeDayCard` em si, não mais um modificador opt-in), `pill`
 999px (desde a Sprint 20.8, também o radius default do `BeeDayButton`). `activity-design-system.css`
 define mais dois, próprios (`--activity-radius-sm` .25rem, `--activity-radius-md` .4rem) — mesmo
@@ -169,6 +184,11 @@ camadas para `sm`/`md`). `activity-design-system.css` acrescenta `--activity-sha
 `-hover`, valores próprios não derivados dos 4 degraus principais. A paleta "game" acrescenta 3
 sombras "pixel" (`--beeday-game-shadow-sm/md/lg`) — offset sólido sem blur (`0 3px 0 var(--beeday-game-ink)`),
 usadas pelos botões "comic"/"comic-press" em vez das sombras com blur do sistema principal.
+
+A Sprint 21.4 reduziu os quatro níveis globais para elevação sutil/controlada e acrescentou
+`--beeday-depth-sm/md/lg` (2/4/8px) como foundation física de borda para componentes futuros, sem
+aplicá-la antecipadamente ao `BeeDayButton`. `--beeday-border-width` (2px) e
+`--beeday-color-border-interactive` completam o contrato de bordas reutilizável.
 
 ## 7. Movimento
 

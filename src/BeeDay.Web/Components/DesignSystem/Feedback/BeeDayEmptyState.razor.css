@@ -31,7 +31,7 @@
 .beeday-empty-state__title {
     margin: 0;
     color: var(--beeday-color-text-primary);
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: 1.12rem;
     font-weight: 700;
     line-height: 1.25;

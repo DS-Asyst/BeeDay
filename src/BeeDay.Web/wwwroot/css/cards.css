@@ -187,7 +187,7 @@
 
 .activity-card h3,
 .habit-card__title h3 {
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: .95rem;
     font-weight: var(--beeday-font-weight-semibold);
     line-height: 1.15;
@@ -197,7 +197,7 @@
 .activity-card p,
 .habit-card__body p {
     margin-top: .18rem;
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: .78rem;
     line-height: 1.25;
 }
@@ -205,7 +205,7 @@
 .activity-card__meta {
     margin-top: .28rem;
     padding: .1rem .3rem;
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: .68rem;
     font-weight: var(--beeday-font-weight-semibold);
     line-height: 1.1;
@@ -428,7 +428,7 @@
 .activity-card__title-row h3,
 .habit-card__title h3 {
     min-width: 0;
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: .95rem;
     font-weight: var(--beeday-font-weight-semibold);
     line-height: 1.15;

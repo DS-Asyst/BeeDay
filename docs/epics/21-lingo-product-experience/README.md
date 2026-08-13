@@ -1061,3 +1061,31 @@ HMG, que segue pendente do fluxo normal de promoção do repositório.
   (§6/§8 do prompt) — não passou pela consolidação tipográfica/cromática global da Sprint 21.4
   (`Jersey 25`, `--beeday-color-brand-primary`), então cores/tipografia atuais são as mesmas de
   antes da EPIC 21 aplicadas à nova geometria, não a paleta final `#1023C8` etc.
+
+---
+
+## Sprint 21.4 — Visual Foundations & Typography — Results
+
+**Status:** COMPLETE — as foundations globais foram migradas para a direção visual da Epic 21 sem
+criar um segundo Design System.
+
+- A família existente `--beeday-color-brand-primary*` agora usa `#1023C8`, `#1E33ED`,
+  `#0C1B99` e um soft funcional derivado; `--beeday-game-yellow` passou a `#FACF39` e o hover
+  amarelo funcional a `#FBDB6B`. Nenhum namespace `lingo`/`epic21` foi criado.
+- Cores semânticas de success/warning/danger/info e identidades de atividade foram preservadas.
+- Background, superfícies, bordas, overlay, sombras e focus ring globais foram ajustados para
+  fundos sólidos, bordas claras e profundidade controlada; a textura global foi removida.
+- Nunito é a única família tipográfica carregada e consumida. Jersey 25, seu import e o token
+  `--beeday-font-ui` foram removidos; `BeeDayBrand` preserva o mesmo contrato com apresentação
+  Nunito 800.
+- Os tokens compostos de display/title/subtitle/button agora expressam a hierarquia Nunito; o peso
+  extrabold foi corrigido para 800 e `BeeDayButton` passou a Nunito 700. Sua geometria física
+  continua reservada à Sprint 21.5.
+- `VisualFoundationTests` (unitário/estrutural e E2E/Chromium) protege paleta, ausência de
+  namespaces paralelos/Jersey, fundo sólido, Nunito real, foco e ausência de overflow nas
+  superfícies públicas e autenticadas em desktop/mobile.
+- A escala de radius foi consolidada para `3.2/6/10/12/16/24px`, mais pill/círculo; foram
+  adicionados tokens globais mínimos de border-width (`2px`), physical depth (`2/4/8px`), focus em
+  brand surfaces e visibility transition. Spacing foi preservado por já cobrir os contratos reais.
+- Dívida comic/pixel, geometria de `BeeDayButton`, cards, ícones e breakpoints 760–1024px permanecem
+  deliberadamente para as Sprints 21.5+; nenhum contrato público foi alterado e a RightRail segue vazia.

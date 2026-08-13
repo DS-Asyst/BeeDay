@@ -77,7 +77,7 @@
 }
 
 .identity-navigation-link--primary { color: var(--beeday-color-brand-primary); }
-.identity-navigation-link:hover { color: var(--beeday-color-brand-primary); background: rgb(37 56 210 / 8%); }
+.identity-navigation-link:hover { color: var(--beeday-color-brand-primary); background: var(--beeday-color-brand-primary-soft); }
 .identity-navigation-link:focus-visible { outline: 3px solid var(--beeday-color-brand-primary); outline-offset: 2px; }
 
 .identity-feedback,
