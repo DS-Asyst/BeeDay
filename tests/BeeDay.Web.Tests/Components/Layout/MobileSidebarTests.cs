@@ -109,17 +109,14 @@ public sealed class MobileSidebarTests
     }
 
     [Fact]
-    public void ActivatingProfileOrAccountFromTheDrawer_InvokesTheirOwnCallback()
+    public void ContainsProfileAccountAndLogoutWithoutLegacyPanelTriggers()
     {
         using var context = new BunitContext();
         context.JSInterop.Mode = JSRuntimeMode.Loose;
-        var profileToggled = false;
-
-        var cut = context.Render<MobileSidebar>(parameters => parameters
-            .Add(component => component.IsOpen, true)
-            .Add(component => component.OnToggleProfilePanel, () => profileToggled = true));
-
-        cut.Find("button[aria-label='Open profile panel']").Click();
-        Assert.True(profileToggled);
+        var cut = context.Render<MobileSidebar>(parameters => parameters.Add(component => component.IsOpen, true));
+        Assert.NotNull(cut.Find("a[href='/account']"));
+        Assert.NotNull(cut.Find("a[href='/settings']"));
+        Assert.NotNull(cut.Find("form[action='/auth/logout'] button[type='submit']"));
+        Assert.Empty(cut.FindAll("button[aria-expanded]"));
     }
 }

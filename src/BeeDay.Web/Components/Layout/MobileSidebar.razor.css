@@ -1,8 +1,6 @@
 /* Sprint 21.3 (EPIC 21) — mobile equivalent of the Lingo Sheet-wrapped Sidebar documented in
    docs/epics/21-lingo-product-experience/README.md §3 (w-3/4 capped sm:max-w-sm). Reuses
-   --beeday-left-panel-width as the cap (the existing "left drawer" width token, MainLayout.razor.css)
-   instead of introducing a new literal, and the same slide transition timing already used by
-   ProfileSidePanel/AccountSidePanel for a consistent shell-wide drawer feel. */
+   a compact cap matching the desktop navigation proportions. */
 .mobile-nav-backdrop {
     position: fixed;
     inset: 0;
@@ -26,11 +24,12 @@
     left: 0;
     z-index: 150;
     display: flex;
-    width: min(85vw, var(--beeday-left-panel-width));
+    width: min(85vw, 18rem);
     flex-direction: column;
     padding: var(--beeday-spacing-md);
-    color: var(--beeday-color-text-inverse);
-    background: var(--beeday-color-brand-primary-active);
+    color: var(--beeday-color-text-primary);
+    background: var(--beeday-color-surface);
+    border-right: 2px solid var(--beeday-color-border);
     box-shadow: var(--beeday-shadow-lg);
     transform: translateX(-100%);
     visibility: hidden;
@@ -48,7 +47,7 @@
     transition: transform var(--beeday-transition-emphasized), visibility 0s linear 0s;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1200px) {
     .mobile-nav-backdrop,
     .mobile-nav-drawer {
         display: none;
@@ -74,7 +73,7 @@
     width: 2.65rem;
     height: 2.65rem;
     place-items: center;
-    color: rgb(255 255 255 / 86%);
+    color: var(--beeday-color-brand-primary);
     background: transparent;
     border: 0;
     border-radius: var(--beeday-radius-xs);
@@ -84,14 +83,14 @@
 
 .mobile-nav-drawer__close:hover,
 .mobile-nav-drawer__close:focus-visible {
-    color: #fff;
-    background: rgb(255 255 255 / 10%);
+    color: var(--beeday-color-brand-primary-active);
+    background: var(--beeday-color-brand-primary-soft);
 }
 
 .mobile-nav-drawer__close:focus-visible {
-    outline: var(--beeday-border-width) solid var(--beeday-focus-color-inverse);
+    outline: var(--beeday-border-width) solid var(--beeday-color-brand-primary);
     outline-offset: 2px;
-    box-shadow: var(--beeday-focus-ring-inverse);
+    box-shadow: var(--beeday-focus-ring);
 }
 
 @media (prefers-reduced-motion: reduce) {

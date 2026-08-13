@@ -44,11 +44,24 @@ else if (State.Data?.Profile.HasProfile == true)
             <BeeDayButton Icon="BeeDayIconName.Daily" OnClick="GoToDaily">Open Daily</BeeDayButton>
         </header>
 
-        <div class="product-home__mobile-progress">
+        <section class="product-home__progress" aria-label="Your progress">
             <ExperienceBar Model="ExperienceViewModel.From(dashboard.Profile)"
                            ExperienceGain="State.LatestExperienceGain"
                            FeedbackKey="State.ExperienceFeedbackVersion" />
-        </div>
+            <ProgressMetricCard Title="Tasks"
+                                ProgressLabel="Task completion"
+                                Completed="@dashboard.Tasks.Count(task => task.Completed)"
+                                Total="@dashboard.Tasks.Count"
+                                EmptyText="No tasks yet." />
+            @if (dashboard.Projects.SelectMany(project => project.Todos).Any())
+            {
+                var projectTodos = dashboard.Projects.SelectMany(project => project.Todos).ToList();
+                <ProgressMetricCard Title="Project tasks"
+                                    ProgressLabel="Project task completion"
+                                    Completed="@projectTodos.Count(todo => todo.Completed)"
+                                    Total="@projectTodos.Count" />
+            }
+        </section>
 
         @if (!hasActionableWork && activeProject is null)
         {

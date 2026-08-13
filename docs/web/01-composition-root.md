@@ -86,7 +86,7 @@ Blazor):
 | `BeeDayWebService` | Fachada MediatR — ver [`docs/web/README.md`](README.md) "Integração com Application" |
 | `ToastService` | Fila de notificações in-memory, consumida por `BeeDayToastHost.razor` |
 | `AuthenticatedUserInitializer` | Garante que o `User` do cookie ainda existe antes de qualquer página autenticada renderizar dados |
-| `DashboardState` | Estado agregado compartilhado por `/home`, `/daily` e RightRail — ver `04-feature-components.md` |
+| `DashboardState` | Estado agregado compartilhado por `/home` e `/daily` — ver `04-feature-components.md` |
 | `BeeDayFeedbackStore` + `INotificationHandler<DomainEventNotification>` → `BeeDayFeedbackEventHandler` | Escuta `UserLeveledUpDomainEvent` via pipeline MediatR e alimenta o feedback visual de level-up |
 | `ProfileCreationState` | Estado do fluxo de criação de conta/perfil (`/profile/create`) |
 | `CardActionMenuCoordinator` | Coordena `BeeDayCardMenu` para que abrir um menu feche qualquer outro já aberto no mesmo circuito |
@@ -134,7 +134,7 @@ UseForwardedHeaders (se produção + habilitado)
   desta aplicação é só `/auth/login`, `/auth/logout`, `/health*` e páginas Blazor).
 - `UseHsts`/`UseHttpsRedirection` só fora de Development.
 - `UseAntiforgery` protege os formulários HTML puros (`/auth/login`, `/auth/logout`, e o
-  `<form method="post">` usado por `AccountSidePanel` para logout — o único componente de Layout
+  `<form method="post">` usado por `NavigationItems` para logout — a única navegação autenticada
   que renderiza esse form; `DesktopSidebar`/`MobileHeader`/`MobileSidebar` só disparam o botão que
   abre esse painel) — os componentes Blazor interativos usam `EditForm`/`AntiforgeryToken` própria
   do framework.

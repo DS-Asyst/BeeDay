@@ -80,14 +80,7 @@ public sealed class AccountLifecycleTests(PlaywrightAppFixture fixture) : E2ETes
         await LoginAsync(email);
         await Expect(Page).ToHaveURLAsync(new Regex("/home$"));
 
-        // The drawer panel stays in the DOM at all times and is only moved off-screen via a CSS
-        // transform when closed, so its own visibility is not a reliable "is it open" signal
-        // (Playwright's Visible check is display/visibility/size only, not viewport position). The
-        // toggle button's accessible name flipping to "Close support menu" is the real, render-
-        // confirmed signal that IsMenuPanelOpen became true server-side.
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Open support menu" }).ClickAsync();
-        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Close support menu" })).ToBeVisibleAsync();
-        await Page.GetByRole(AriaRole.Button, new() { NameRegex = new Regex("LOGOUT") }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Log out of BeeDay" }).ClickAsync();
 
         await Expect(Page).ToHaveURLAsync(new Regex("/login"));
 

@@ -33,9 +33,10 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
         await Expect(Page.Locator(".desktop-sidebar")).ToBeVisibleAsync();
         var desktopBrand = Page.Locator(".desktop-sidebar .beeday-brand");
         await AssertWordmarkAsync(desktopBrand);
-        Assert.Equal("rgb(255, 255, 255)", await desktopBrand.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+        Assert.Equal("rgba(0, 0, 0, 0)", await desktopBrand.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
 
-        var experienceProgress = Page.Locator(".right-rail .experience-card .beeday-progress");
+        await GotoAsync("/home");
+        var experienceProgress = Page.Locator(".product-home__progress .experience-card .beeday-progress");
         await Expect(experienceProgress).ToHaveAttributeAsync("data-tone", "reward");
         Assert.Equal("rgb(255, 232, 141)", await experienceProgress.Locator(".beeday-progress__fill")
             .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
@@ -53,11 +54,8 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
         await Expect(Page).ToHaveURLAsync(new Regex("/wallet$"));
         await AssertGlobalFoundationAsync();
 
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Open profile panel" }).ClickAsync();
-        await Expect(Page.GetByRole(AriaRole.Complementary, new() { Name = "Profile panel" })).ToBeVisibleAsync();
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Close profile panel" }).ClickAsync();
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Open support menu" }).ClickAsync();
-        await Expect(Page.GetByRole(AriaRole.Complementary, new() { Name = "Support and account menu" })).ToBeVisibleAsync();
+        await Expect(Page.Locator(".desktop-sidebar a[href='/account']")).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Log out of BeeDay" })).ToBeVisibleAsync();
 
         await Page.SetViewportSizeAsync(390, 844);
         await Expect(Page.Locator(".mobile-header")).ToBeVisibleAsync();

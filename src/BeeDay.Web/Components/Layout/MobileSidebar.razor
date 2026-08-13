@@ -7,7 +7,7 @@
        @onkeydown="HandleKeyDown">
     <div class="mobile-nav-drawer__header">
         <NavLink href="/home" Match="NavLinkMatch.Prefix" class="mobile-nav-drawer__brand" @onclick="HandleNavigate">
-            <BeeDayBrand OnDarkSurface="true" />
+            <BeeDayBrand />
         </NavLink>
 
         <button type="button" class="mobile-nav-drawer__close" aria-label="Close" @onclick="OnClose" @ref="closeButtonElement">
@@ -15,9 +15,5 @@
         </button>
     </div>
 
-    <NavigationItems IsProfilePanelOpen="IsProfilePanelOpen"
-                      IsMenuPanelOpen="IsMenuPanelOpen"
-                      OnToggleProfilePanel="OnToggleProfilePanel"
-                      OnToggleMenuPanel="OnToggleMenuPanel"
-                      OnNavigate="HandleNavigate" />
+    <NavigationItems OnNavigate="HandleNavigate" />
 </aside>

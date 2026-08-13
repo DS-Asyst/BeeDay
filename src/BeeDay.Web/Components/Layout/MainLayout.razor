@@ -5,38 +5,17 @@
     <MobileHeader IsNavOpen="@_isMobileNavOpen" OnToggleNav="ToggleMobileNav" />
 
     <div class="beeday-shell">
-        <DesktopSidebar IsProfilePanelOpen="@_isProfilePanelOpen"
-                         IsMenuPanelOpen="@_isMenuPanelOpen"
-                         OnToggleProfilePanel="ToggleProfilePanel"
-                         OnToggleMenuPanel="ToggleMenuPanel" />
+        <DesktopSidebar />
 
-        <div class="beeday-workspace @GetWorkspaceClass()">
-            <div class="beeday-side-slot beeday-side-slot--left">
-                <ProfileSidePanel IsOpen="@_isProfilePanelOpen" OnClose="ClosePanels" />
-            </div>
-
-            <div class="beeday-content-shell">
-                <main class="beeday-main">
-                    @Body
-                </main>
-
-                <AppFooter />
-            </div>
-
-            <div class="beeday-side-slot beeday-side-slot--right">
-                <AccountSidePanel IsOpen="@_isMenuPanelOpen" OnClose="ClosePanels" />
-            </div>
+        <div class="beeday-workspace">
+            <main class="beeday-main beeday-main--authenticated">
+                @Body
+            </main>
         </div>
-
-        <RightRail />
     </div>
 
     <MobileSidebar IsOpen="@_isMobileNavOpen"
-                   OnClose="CloseMobileNav"
-                   IsProfilePanelOpen="@_isProfilePanelOpen"
-                   IsMenuPanelOpen="@_isMenuPanelOpen"
-                   OnToggleProfilePanel="ToggleProfilePanel"
-                   OnToggleMenuPanel="ToggleMenuPanel" />
+                   OnClose="CloseMobileNav" />
 
     <BeeDayToastHost />
 </div>
@@ -47,45 +26,8 @@
         await AuthenticatedUserInitializer.EnsureInitializedAsync();
     }
 
-    private bool _isProfilePanelOpen;
-    private bool _isMenuPanelOpen;
     private bool _isMobileNavOpen;
-
-    private void ToggleProfilePanel()
-    {
-        _isProfilePanelOpen = !_isProfilePanelOpen;
-        _isMenuPanelOpen = false;
-        _isMobileNavOpen = false;
-    }
-
-    private void ToggleMenuPanel()
-    {
-        _isMenuPanelOpen = !_isMenuPanelOpen;
-        _isProfilePanelOpen = false;
-        _isMobileNavOpen = false;
-    }
-
-    // Deliberately does not force-close Profile/Account: opening the drawer while one of them is
-    // already open (only reachable by reopening it, since Profile/Account can only be toggled from
-    // inside the drawer on mobile) is how a mobile user reaches "Close profile/support panel" again
-    // — MobileSidebar's higher z-index simply draws over the panel in that moment. Forcing them
-    // closed here previously trapped an opened panel permanently open on mobile (no other trigger
-    // exists to close it), caught by BeeDay.E2E.Tests.ShellResponsiveLayoutTests.
     private void ToggleMobileNav() => _isMobileNavOpen = !_isMobileNavOpen;
 
     private void CloseMobileNav() => _isMobileNavOpen = false;
-
-    private void ClosePanels()
-    {
-        _isProfilePanelOpen = false;
-        _isMenuPanelOpen = false;
-        _isMobileNavOpen = false;
-    }
-
-    private string GetWorkspaceClass() =>
-        _isProfilePanelOpen
-            ? "has-left-panel"
-            : _isMenuPanelOpen
-                ? "has-right-panel"
-                : string.Empty;
 }
