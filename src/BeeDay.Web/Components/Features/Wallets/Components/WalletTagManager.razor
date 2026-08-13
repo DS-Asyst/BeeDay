@@ -3,7 +3,7 @@
 <section class="wallet-tags-panel beeday-card" aria-labelledby="wallet-tags-title" aria-busy="@IsBusy.ToString().ToLowerInvariant()">
     <header class="wallet-panel-header">
         <div><span class="wallet-eyebrow">Organization</span><h2 id="wallet-tags-title">Tags</h2></div>
-        <BeeDayButton Variant="BeeDayButtonVariant.Primary" Compact="true" Disabled="IsBusy" Class="beeday-button--comic beeday-button--comic-magenta" OnClick="RaiseCreate">New tag</BeeDayButton>
+        <BeeDayButton Variant="BeeDayButtonVariant.Primary" Compact="true" Disabled="IsBusy" OnClick="RaiseCreate">New tag</BeeDayButton>
     </header>
 
     @if (Tags.Count == 0)

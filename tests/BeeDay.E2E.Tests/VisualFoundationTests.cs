@@ -42,10 +42,10 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
         await GotoAsync("/profile");
         var experienceProgress = Page.Locator(".product-home__progress .experience-card .beeday-progress");
         await Expect(experienceProgress).ToHaveAttributeAsync("data-tone", "reward");
-        Assert.Equal("rgb(255, 232, 141)", await experienceProgress.Locator(".beeday-progress__fill")
+        Assert.Equal("rgb(255, 211, 38)", await experienceProgress.Locator(".beeday-progress__fill")
             .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
 
-        Assert.Equal("#185abd", await Page.Locator("html").EvaluateAsync<string>(
+        Assert.Equal("#3044d6", await Page.Locator("html").EvaluateAsync<string>(
             "element => getComputedStyle(element).getPropertyValue('--beeday-color-brand-primary').trim()"));
 
         var wallet = Page.GetByRole(AriaRole.Link, new() { Name = "Wallet" });
@@ -86,16 +86,10 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
     private async Task AssertWordmarkAsync(ILocator brand)
     {
         await Expect(brand).ToBeVisibleAsync();
-        var image = brand.Locator("img.beeday-brand__wordmark");
-        await Expect(image).ToHaveAttributeAsync("alt", "BeeDay");
-        await Expect(image).ToHaveAttributeAsync("src", "/beeday-wordmark.png");
-
-        var dimensions = await image.EvaluateAsync<double[]>("""
-            element => [element.naturalWidth, element.naturalHeight, element.getBoundingClientRect().width, element.getBoundingClientRect().height]
-            """);
-        Assert.Equal(904d, dimensions[0]);
-        Assert.Equal(276d, dimensions[1]);
-        Assert.InRange(dimensions[2] / dimensions[3], 3.27d, 3.29d);
+        await Expect(brand).ToHaveAttributeAsync("role", "img");
+        await Expect(brand).ToHaveAttributeAsync("aria-label", "BeeDay");
+        await Expect(brand.Locator(".beeday-brand__bee")).ToHaveTextAsync("bee");
+        await Expect(brand.Locator(".beeday-brand__day")).ToHaveTextAsync("day");
     }
 
     private async Task LoginToDailyAsync()

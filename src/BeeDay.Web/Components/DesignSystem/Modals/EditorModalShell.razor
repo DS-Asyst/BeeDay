@@ -15,7 +15,7 @@
                                Icon="BeeDayIconName.Save"
                                Disabled="IsBusy"
                                IsLoading="IsBusy"
-                               Class="editor-modal__submit-action editor-modal__header-save beeday-button--comic beeday-button--comic-success">@SubmitLabel</BeeDayButton>
+                               Class="editor-modal__submit-action editor-modal__header-save">@SubmitLabel</BeeDayButton>
             </header>
 
             <div class="editor-modal__content">
@@ -30,7 +30,7 @@
                         <BeeDayButton Variant="BeeDayButtonVariant.Danger"
                                        Disabled="IsBusy"
                                        Compact="true"
-                                       Class="beeday-button--comic beeday-button--comic-danger"
+                                       Class="editor-modal__delete-action"
                                        OnClick="OnDelete">Delete</BeeDayButton>
                     }
                 </div>
@@ -39,7 +39,7 @@
                     @SecondaryAction
                     <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel"
                                    Disabled="IsBusy"
-                                   Class="editor-modal__cancel-action beeday-button--comic beeday-button--comic-neutral"
+                                   Class="editor-modal__cancel-action"
                                    OnClick="Cancel">Cancel</BeeDayButton>
                 </div>
             </footer>

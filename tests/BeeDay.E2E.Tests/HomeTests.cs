@@ -13,7 +13,7 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         await GotoAsync("/");
 
         await Expect(Page).ToHaveURLAsync(new Regex(@"/$"));
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { NameRegex = new Regex("one day at a time", RegexOptions.IgnoreCase), Level = 1 })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { NameRegex = new Regex("one step at a time", RegexOptions.IgnoreCase), Level = 1 })).ToBeVisibleAsync();
         await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Log in" })).ToBeVisibleAsync();
         await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Get started" }).First).ToBeVisibleAsync();
 
@@ -35,7 +35,7 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         await Page.SetViewportSizeAsync(width, height);
         await GotoAsync("/");
 
-        await Expect(Page.Locator(".home-preview")).ToBeVisibleAsync();
+        await Expect(Page.Locator(".home-hero__brand .beeday-brand")).ToBeVisibleAsync();
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "How BeeDay works", Level = 2 })).ToBeVisibleAsync();
         await Expect(Page.GetByRole(AriaRole.Contentinfo)).ToBeVisibleAsync();
         Assert.False(await Page.EvaluateAsync<bool>(
@@ -70,11 +70,11 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         Assert.InRange(Math.Abs((headerBox!.Y + headerBox.Height) - heroBox!.Y), 0, 1);
 
         var heroActions = Page.Locator(".home-hero__actions");
-        Assert.Equal("rgb(255, 255, 255)", await heroActions.GetByRole(AriaRole.Link, new() { Name = "Get started" })
+        Assert.Equal("rgb(48, 68, 214)", await heroActions.GetByRole(AriaRole.Link, new() { Name = "Get started" })
             .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
-        Assert.Equal("rgb(255, 232, 141)", await heroActions.GetByRole(AriaRole.Link, new() { Name = "I already have an account" })
+        Assert.Equal("rgba(0, 0, 0, 0)", await heroActions.GetByRole(AriaRole.Link, new() { Name = "I already have an account" })
             .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
-        Assert.Equal("rgb(23, 32, 59)", await Page.GetByRole(AriaRole.Contentinfo)
+        Assert.Equal("rgb(247, 247, 247)", await Page.GetByRole(AriaRole.Contentinfo)
             .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
     }
 }

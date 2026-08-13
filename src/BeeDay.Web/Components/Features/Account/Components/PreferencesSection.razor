@@ -5,7 +5,7 @@
                         Title="Preferences"
                         Description="Choose how BeeDay looks and communicates with you.">
     <BeeDaySettingsForm TModel="PreferencesFormModel" Model="Model" OnValidSubmit="OnSave"
-                         FormName="account-preferences" SubmitLabel="Save Preferences" SubmitButtonClass="beeday-button--comic beeday-button--comic-success" IsBusy="IsBusy">
+                         FormName="account-preferences" SubmitLabel="Save Preferences" IsBusy="IsBusy">
         <div class="beeday-settings-form__grid">
             <BeeDaySelect TValue="UserLanguage" Id="account-language" Label="Language"
                            @bind-Value="Model.Language">

@@ -153,7 +153,7 @@ textarea {
 
 .beeday-checkbox__control,
 .activity-card__checkbox {
-    accent-color: var(--beeday-game-blue);
+    accent-color: var(--beeday-color-brand-primary);
 }
 
 @media (prefers-reduced-motion: reduce) {

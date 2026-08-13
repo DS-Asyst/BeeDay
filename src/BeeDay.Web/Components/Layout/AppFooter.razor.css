@@ -1,16 +1,10 @@
-.app-footer { width: 100%; border-top: 1px solid rgb(255 255 255 / 12%); background: #17203B; }
+.app-footer { width: 100%; border-top: 1px solid var(--beeday-color-border); background: var(--beeday-color-surface-muted); }
 .app-footer__content { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--beeday-spacing-xl); padding-block: var(--beeday-spacing-xl); }
 .app-footer__identity { display: grid; gap: var(--beeday-spacing-sm); }
-.app-footer__identity { --beeday-brand-background: var(--beeday-color-surface); --beeday-brand-padding: .25rem .4rem; --beeday-brand-radius: var(--beeday-radius-sm); }
-.app-footer__identity p,
-.app-footer__copyright { margin: 0; color: rgb(255 255 255 / 78%); }
+.app-footer__identity p, .app-footer__copyright { margin: 0; color: var(--beeday-color-text-muted); }
 .app-footer__links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--beeday-spacing-lg); }
-.app-footer__links a { color: var(--beeday-color-surface); font-weight: var(--beeday-font-weight-bold); text-decoration: none; }
-.app-footer__links a:hover { color: var(--beeday-color-brand-yellow); text-decoration: underline; text-underline-offset: 3px; }
-.app-footer__links a:focus-visible { border-radius: 2px; outline: var(--beeday-border-width) solid var(--beeday-color-brand-yellow); outline-offset: 3px; box-shadow: var(--beeday-focus-ring-inverse); }
-.app-footer__copyright { grid-column: 1 / -1; padding-top: var(--beeday-spacing-md); border-top: 1px solid rgb(255 255 255 / 16%); font-size: var(--beeday-font-size-sm); }
-
-@media (max-width: 40rem) {
-    .app-footer__content { grid-template-columns: 1fr; align-items: start; }
-    .app-footer__links { justify-content: flex-start; }
-}
+.app-footer__links a { color: var(--beeday-color-brand-primary); font-weight: var(--beeday-font-weight-bold); text-decoration: none; }
+.app-footer__links a:hover { color: var(--beeday-color-brand-primary-hover); text-decoration: underline; text-underline-offset: 3px; }
+.app-footer__links a:focus-visible { border-radius: 2px; outline: var(--beeday-border-width) solid var(--beeday-color-brand-primary); outline-offset: 3px; box-shadow: var(--beeday-focus-ring); }
+.app-footer__copyright { grid-column: 1 / -1; padding-top: var(--beeday-spacing-md); border-top: 1px solid var(--beeday-color-border); font-size: var(--beeday-font-size-sm); }
+@media (max-width: 40rem) { .app-footer__content { grid-template-columns: 1fr; align-items: start; } .app-footer__links { justify-content: flex-start; } }

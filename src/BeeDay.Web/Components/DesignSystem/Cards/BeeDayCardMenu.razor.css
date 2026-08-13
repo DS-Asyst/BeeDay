@@ -65,16 +65,13 @@
     outline: none;
 }
 
-/* "Comic panel" treatment: a bold ink outline and hard offset shadow that
-   inverts on hover and settles into the shadow on press. Reuses the shared
-   pixel-UI ink/shadow tokens and the existing danger palette. */
 .card-action-menu__item--delete {
     margin-top: .2rem;
-    border: var(--beeday-game-border);
+    border: 1px solid transparent;
     border-radius: var(--beeday-radius-sm);
     color: #fff;
     background: var(--beeday-color-danger);
-    box-shadow: 3px 3px 0 var(--beeday-game-ink);
+    box-shadow: none;
     transition:
         background-color var(--beeday-transition-normal),
         color var(--beeday-transition-normal),
@@ -88,15 +85,14 @@
     background: #fff;
     color: var(--beeday-color-danger);
     border-color: var(--beeday-color-danger);
-    box-shadow: 3px 3px 0 var(--beeday-color-danger);
+    box-shadow: none;
     outline: none;
 }
 
 .card-action-menu__item--delete:active {
     background: var(--beeday-color-danger-hover);
     color: #fff;
-    box-shadow: 1px 1px 0 var(--beeday-game-ink);
-    transform: translate(2px, 2px);
+    box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -14,7 +14,7 @@ public sealed class HomeTests
 
         var headings = cut.FindAll("h1");
         Assert.Single(headings);
-        Assert.Contains("one day at a time", headings[0].TextContent, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("one step at a time", headings[0].TextContent, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -34,8 +34,8 @@ public sealed class HomeTests
         var cut = context.Render<HomePage>();
 
         Assert.Equal(["Define", "Practice", "Evolve"], cut.FindAll(".home-steps h3").Select(element => element.TextContent.Trim()));
-        Assert.Equal(["Habits", "Progress", "Consistency"], cut.FindAll(".home-values h3").Select(element => element.TextContent.Trim()));
-        Assert.Contains("Experience becomes level progress", cut.Markup, StringComparison.Ordinal);
+        Assert.NotNull(cut.Find(".home-hero__brand .beeday-brand"));
+        Assert.Empty(cut.FindAll(".home-preview, .home-values, .home-growth, .home-cta"));
     }
 
     [Fact]
