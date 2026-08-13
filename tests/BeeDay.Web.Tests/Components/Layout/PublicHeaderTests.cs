@@ -12,7 +12,7 @@ namespace BeeDay.Web.Tests.Components.Layout;
 public sealed class PublicHeaderTests
 {
     [Fact]
-    public void RendersHeaderLandmarkWithBrandAndLoginCtaForAnonymousUser()
+    public void RendersHeaderLandmarkWithLoginAndRegistrationForAnonymousUser()
     {
         using var context = new BunitContext();
         context.AddAuthorization().SetNotAuthorized();
@@ -23,8 +23,8 @@ public sealed class PublicHeaderTests
         Assert.NotNull(cut.Find("header.public-header"));
         Assert.NotNull(cut.Find(".public-header__brand .beeday-brand"));
 
-        var cta = cut.Find("button");
-        Assert.Equal("Log in", cta.TextContent.Trim());
+        Assert.Equal("/login", cut.Find("a.public-header__login").GetAttribute("href"));
+        Assert.Equal("/profile/create", cut.Find("a.public-header__create").GetAttribute("href"));
     }
 
     [Fact]
@@ -41,17 +41,15 @@ public sealed class PublicHeaderTests
     }
 
     [Fact]
-    public void LoginCtaNavigatesToLogin()
+    public void AnonymousActionsUseRealRoutes()
     {
         using var context = new BunitContext();
         context.AddAuthorization().SetNotAuthorized();
         RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
 
         var cut = context.Render<PublicHeader>();
-        cut.Find("button").Click();
-
-        var navigation = context.Services.GetRequiredService<NavigationManager>();
-        Assert.EndsWith("/login", navigation.Uri, StringComparison.Ordinal);
+        Assert.Equal("/login", cut.Find("a.public-header__login").GetAttribute("href"));
+        Assert.Equal("/profile/create", cut.Find("a.public-header__create").GetAttribute("href"));
     }
 
     [Fact]

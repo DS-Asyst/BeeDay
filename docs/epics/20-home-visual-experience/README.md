@@ -1463,3 +1463,19 @@ permanecem aqui):
 `github.com/tiagoarrigoni/LevelUp` em `AppFooter.razor` — verificado que já aponta para
 `github.com/tiagoarrigoni/BeeDay`. Documentado aqui só para registrar que o achado original da
 Sprint 20.1 estava desatualizado, não porque algo foi alterado nesta Sprint.
+## Sprint 20.14 — Home Pública BeeDay — Results
+
+**Status:** COMPLETE — `/` consolida a entrada pública oficial com proposta de valor, preview honesto
+do produto e caminhos explícitos para cadastro e Login.
+
+- `PublicHeader` apresenta BeeDay, Login e cadastro para visitantes; usuários autenticados mantêm
+  o destino resolvido por `AuthenticatedEntryDestinationResolver`.
+- O Hero comunica evolução diária e direciona `Get started` para `/profile/create` e a ação
+  secundária para `/login`. O X da Sprint 20.13 fecha o ciclo de volta para `/`.
+- A demonstração usa somente Daily, Habits, Tasks e Projects existentes. As seções seguintes
+  explicam Define, Practice e Evolve, os pilares Habits/Progress/Consistency e XP/Level reais.
+  Streak, conquistas e métricas fabricadas não são apresentados.
+- `AppFooter` foi reduzido a identidade, tagline, copyright e dois links externos reais; rotas
+  vazias de Terms, Privacy, News, Contact e Community não foram inventadas.
+- A composição reutiliza `PublicLayout`, `BeeDayBrand`, `BeeDayButton` e `BeeDayIcon`, sem novos
+  componentes, imagens, JavaScript, dependências ou mudanças de autenticação.

@@ -25,6 +25,13 @@
     text-decoration: none;
 }
 
+.public-header__actions { display: flex; align-items: center; gap: var(--beeday-spacing-md); }
+.public-header__actions a { min-height: 2.75rem; text-decoration: none; }
+.public-header__login { display: inline-flex; align-items: center; padding-inline: var(--beeday-spacing-sm); color: var(--beeday-color-text-primary); font-weight: var(--beeday-font-weight-bold); }
+.public-header__login:hover { color: var(--beeday-color-brand-primary); }
+.public-header__login:focus-visible,
+.public-header__create:focus-visible { border-radius: var(--beeday-radius-sm); outline: var(--beeday-border-width) solid var(--beeday-color-brand-primary); outline-offset: 3px; box-shadow: var(--beeday-focus-ring); }
+
 /* Sprint 20.6 needed a ::deep override here because BeeDayBrand's shared default was still legacy
    purple. Sprint 20.7 made --beeday-color-brand-primary the component's own default (via the
    --beeday-brand-color hook, see BeeDayBrand.razor.css) once Login/Identity/Onboarding — its other
@@ -36,4 +43,7 @@
     .public-header__content {
         min-height: 3.75rem;
     }
+
+    .public-header__actions { gap: var(--beeday-spacing-xs); }
+    .public-header__create { padding-inline: var(--beeday-spacing-sm); font-size: var(--beeday-font-size-xs); }
 }

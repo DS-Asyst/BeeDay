@@ -8,109 +8,91 @@
 <PageTitle>BeeDay — Be better every day</PageTitle>
 
 <article class="home-page">
-    <section class="home-hero">
+    <section class="home-hero" aria-labelledby="home-heading">
         <div class="home-hero__inner">
-            <span class="home-hero__eyebrow">BEEDAY</span>
-            <h1 class="home-hero__headline">Be better every day</h1>
-            <p class="home-hero__subtitle">
-                A simple daily loop for habits, tasks, projects, and money — with light gamification
-                that keeps your progress visible.
-            </p>
-            <div class="home-hero__actions">
-                <AuthorizeView>
-                    <Authorized>
-                        <BeeDayButton OnClick="ContinueToBeeDay">Continue to BeeDay</BeeDayButton>
-                    </Authorized>
-                    <NotAuthorized>
-                        <BeeDayButton OnClick="GoToLogin">Get started</BeeDayButton>
-                    </NotAuthorized>
-                </AuthorizeView>
-                <a class="home-hero__secondary-action" href="#capabilities">See what's inside</a>
+            <div class="home-hero__copy">
+                <span class="home-page__eyebrow home-page__eyebrow--inverse">BE BETTER EVERY DAY</span>
+                <h1 id="home-heading">Build a better version of yourself, one day at a time.</h1>
+                <p>Turn goals into small actions, keep your daily priorities together, and make your progress visible.</p>
+
+                <div class="home-hero__actions">
+                    <AuthorizeView>
+                        <Authorized>
+                            <BeeDayButton OnClick="ContinueToBeeDay">Continue to BeeDay</BeeDayButton>
+                        </Authorized>
+                        <NotAuthorized>
+                            <a class="beeday-button beeday-button--primary" href="/profile/create">Get started</a>
+                            <a class="beeday-button beeday-button--secondary" href="/login">I already have an account</a>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </div>
+            </div>
+
+            <div class="home-preview" aria-label="Preview of how BeeDay organizes your day">
+                <div class="home-preview__header">
+                    <div><span>TODAY</span><strong>Your daily focus</strong></div>
+                    <BeeDayIcon Name="BeeDayIconName.Daily" Size="BeeDayIconSize.Large" Color="BeeDayIconColor.Primary" Decorative="true" />
+                </div>
+                <div class="home-preview__items">
+                    <div class="home-preview__item"><BeeDayIcon Name="BeeDayIconName.Habit" Size="BeeDayIconSize.Medium" Color="BeeDayIconColor.Primary" Decorative="true" /><div><strong>Build a habit</strong><span>Register the actions you want to repeat.</span></div></div>
+                    <div class="home-preview__item"><BeeDayIcon Name="BeeDayIconName.RecurringTask" Size="BeeDayIconSize.Medium" Color="BeeDayIconColor.Primary" Decorative="true" /><div><strong>Complete a task</strong><span>Keep recurring responsibilities visible.</span></div></div>
+                    <div class="home-preview__item"><BeeDayIcon Name="BeeDayIconName.Project" Size="BeeDayIconSize.Medium" Color="BeeDayIconColor.Primary" Decorative="true" /><div><strong>Move a project forward</strong><span>Connect To-Dos to the objective they support.</span></div></div>
+                </div>
             </div>
         </div>
     </section>
 
     <div class="home-page__content">
-        <section class="home-page__split" id="capabilities" aria-labelledby="capabilities-heading">
-            <div class="home-page__split-text">
-                <span class="home-page__eyebrow">CONSISTENCY OVER INTENSITY</span>
-                <h2 id="capabilities-heading">Small actions, every day</h2>
-                <p>
-                    BeeDay keeps your habits, tasks, projects, and money in one daily loop, so progress
-                    stays visible instead of scattered across notes and reminders.
-                </p>
+        <section class="home-section" aria-labelledby="how-heading">
+            <div class="home-section__heading">
+                <span class="home-page__eyebrow">A SIMPLE DAILY LOOP</span>
+                <h2 id="how-heading">How BeeDay works</h2>
+                <p>Start with what matters, turn it into action, and let consistency build the result.</p>
             </div>
-
-            <BeeDayCard Padded="true" Prominent="true" Class="home-page__showcase" aria-label="BeeDay capabilities">
-                <div class="home-page__showcase-row">
-                    <BeeDayIcon Name="BeeDayIconName.Daily" Size="BeeDayIconSize.Medium" Color="BeeDayIconColor.Primary" />
-                    <div>
-                        <h3>Daily</h3>
-                        <p>Daily keeps the actions that move your life forward in one place.</p>
-                    </div>
-                </div>
-                <div class="home-page__showcase-row">
-                    <BeeDayIcon Name="BeeDayIconName.Habit" Size="BeeDayIconSize.Medium" Color="BeeDayIconColor.Primary" />
-                    <div>
-                        <h3>Habits</h3>
-                        <p>Habits are recurring behaviors. Register progress consistently and watch momentum grow.</p>
-                    </div>
-                </div>
-                <div class="home-page__showcase-row">
-                    <BeeDayIcon Name="BeeDayIconName.RecurringTask" Size="BeeDayIconSize.Medium" Color="BeeDayIconColor.Primary" />
-                    <div>
-                        <h3>Tasks</h3>
-                        <p>Tasks can repeat daily, weekly or monthly and are completed manually.</p>
-                    </div>
-                </div>
-                <div class="home-page__showcase-row">
-                    <BeeDayIcon Name="BeeDayIconName.Project" Size="BeeDayIconSize.Medium" Color="BeeDayIconColor.Primary" />
-                    <div>
-                        <h3>Projects</h3>
-                        <p>Projects represent objectives. Their To-Dos define the work and calculate completion.</p>
-                    </div>
-                </div>
-                <div class="home-page__showcase-row">
-                    <BeeDayIcon Name="BeeDayIconName.Wallet" Size="BeeDayIconSize.Medium" Color="BeeDayIconColor.Primary" />
-                    <div>
-                        <h3>Wallet</h3>
-                        <p>Track transactions, organize tags, and understand where your money goes.</p>
-                    </div>
-                </div>
-            </BeeDayCard>
+            <ol class="home-steps">
+                <li><span>1</span><div><h3>Define</h3><p>Choose what you want to improve and organize it as a habit, task, or project.</p></div></li>
+                <li><span>2</span><div><h3>Practice</h3><p>Use Daily to keep small, realistic actions in view and complete them with intention.</p></div></li>
+                <li><span>3</span><div><h3>Evolve</h3><p>See completed work become experience and level progress over time.</p></div></li>
+            </ol>
         </section>
 
-        <section class="home-page__split home-page__split--reverse" id="progress" aria-labelledby="progress-heading">
-            <div class="home-page__split-text">
-                <span class="home-page__eyebrow">GROWTH, NOT PRESSURE</span>
-                <h2 id="progress-heading">Progress you can see</h2>
-                <p>
-                    Every habit, task, and project you complete earns experience and grows your level —
-                    a light, visible way to feel your consistency add up, without turning your day into
-                    a game.
-                </p>
+        <section class="home-section home-section--value" aria-labelledby="value-heading">
+            <div class="home-section__heading">
+                <span class="home-page__eyebrow">SMALL STEPS, MEANINGFUL CHANGE</span>
+                <h2 id="value-heading">One place for personal progress</h2>
             </div>
+            <div class="home-values">
+                <div><BeeDayIcon Name="BeeDayIconName.Habit" Size="BeeDayIconSize.Large" Color="BeeDayIconColor.Primary" Decorative="true" /><h3>Habits</h3><p>Practice behaviors that fit your real routine.</p></div>
+                <div><BeeDayIcon Name="BeeDayIconName.Progress" Size="BeeDayIconSize.Large" Color="BeeDayIconColor.Primary" Decorative="true" /><h3>Progress</h3><p>Keep projects, To-Dos, and completed work visible.</p></div>
+                <div><BeeDayIcon Name="BeeDayIconName.Daily" Size="BeeDayIconSize.Large" Color="BeeDayIconColor.Primary" Decorative="true" /><h3>Consistency</h3><p>Return to a clear daily view instead of scattered reminders.</p></div>
+            </div>
+        </section>
 
-            <BeeDayCard Padded="true" Prominent="true" Class="home-page__progress-visual" aria-hidden="true">
-                <div class="home-page__progress-icons">
-                    <BeeDayIcon Name="BeeDayIconName.Experience" Size="BeeDayIconSize.ExtraLarge" Color="BeeDayIconColor.Primary" />
-                    <BeeDayIcon Name="BeeDayIconName.Level" Size="BeeDayIconSize.ExtraLarge" Color="BeeDayIconColor.Primary" />
-                </div>
-                <span>Level up as you go</span>
-            </BeeDayCard>
+        <section class="home-growth" aria-labelledby="growth-heading">
+            <div>
+                <span class="home-page__eyebrow">MOTIVATION WITHOUT PRESSURE</span>
+                <h2 id="growth-heading">See your effort add up</h2>
+                <p>Completing real activities earns experience and advances your level. BeeDay uses that progress as encouragement, not competition.</p>
+            </div>
+            <div class="home-growth__visual" aria-label="BeeDay supports experience and levels">
+                <BeeDayIcon Name="BeeDayIconName.Experience" Size="BeeDayIconSize.ExtraLarge" Color="BeeDayIconColor.Primary" Decorative="true" />
+                <span aria-hidden="true">→</span>
+                <BeeDayIcon Name="BeeDayIconName.Level" Size="BeeDayIconSize.ExtraLarge" Color="BeeDayIconColor.Primary" Decorative="true" />
+                <strong>Experience becomes level progress</strong>
+            </div>
         </section>
     </div>
 
     <section class="home-cta" aria-labelledby="home-cta-heading">
         <div class="home-cta__inner">
-            <h2 id="home-cta-heading">Make today count.</h2>
-            <p>Start small. Come back tomorrow. Be better every day.</p>
+            <h2 id="home-cta-heading">Start today.</h2>
+            <p>You do not need to change everything at once. You only need a clear first step.</p>
             <AuthorizeView>
                 <Authorized>
                     <BeeDayButton OnClick="ContinueToBeeDay">Continue to BeeDay</BeeDayButton>
                 </Authorized>
                 <NotAuthorized>
-                    <BeeDayButton OnClick="GoToLogin">Get started</BeeDayButton>
+                    <a class="beeday-button beeday-button--primary" href="/profile/create">Get started</a>
                 </NotAuthorized>
             </AuthorizeView>
         </div>
@@ -118,8 +100,6 @@
 </article>
 
 @code {
-    private void GoToLogin() => Navigation.NavigateTo("/login");
-
     private async Task ContinueToBeeDay()
     {
         var destination = await DestinationResolver.ResolveAsync();
