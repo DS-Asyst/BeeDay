@@ -1479,3 +1479,19 @@ do produto e caminhos explícitos para cadastro e Login.
   vazias de Terms, Privacy, News, Contact e Community não foram inventadas.
 - A composição reutiliza `PublicLayout`, `BeeDayBrand`, `BeeDayButton` e `BeeDayIcon`, sem novos
   componentes, imagens, JavaScript, dependências ou mudanças de autenticação.
+## Sprint 20.15 — Refinamento Visual da Experiência Pública — Results
+
+**Status:** COMPLETE — Home, Login e Create Account agora compartilham uma direção visual pública
+coerente em azul, branco, amarelo e superfícies neutras.
+
+- A faixa Header/Hero foi rastreada ao `padding-block` global de `.beeday-main` em `polish.css`.
+  `PublicLayout` neutraliza esse padding na origem; border e shadow divisórios do Header também foram
+  removidos, sem margem negativa ou workaround no Hero.
+- CTAs em superfícies azuis usam variantes contextuais branca e amarela sem alterar o sistema global
+  de botões. O amarelo permanece accent. O Footer público usa `#17203B` com texto, links, hover e
+  focus de alto contraste.
+- Login e Create Account compartilham `PublicAuthActions` para X → `/` e ação contextual à direita.
+  Create Account perdeu o card e as cores/botões comic legados, reutiliza `beeday-field__control` e
+  mantém integralmente seu state machine, validações, disabled/loading e fluxo de confirmação.
+- Não existe infraestrutura de localização. A área pública permanece em inglês nesta Sprint; uma
+  estratégia de i18n continua fora do escopo e deve ser decidida separadamente.

@@ -56,4 +56,25 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         await Page.Keyboard.PressAsync("Tab");
         await Expect(Page.Locator(".public-header__create")).ToBeFocusedAsync();
     }
+
+    [Fact]
+    public async Task HeaderHeroColorsAndFooterFollowPublicVisualHierarchy()
+    {
+        await Page.SetViewportSizeAsync(1280, 800);
+        await GotoAsync("/");
+
+        var headerBox = await Page.Locator(".public-header").BoundingBoxAsync();
+        var heroBox = await Page.Locator(".home-hero").BoundingBoxAsync();
+        Assert.NotNull(headerBox);
+        Assert.NotNull(heroBox);
+        Assert.InRange(Math.Abs((headerBox!.Y + headerBox.Height) - heroBox!.Y), 0, 1);
+
+        var heroActions = Page.Locator(".home-hero__actions");
+        Assert.Equal("rgb(255, 255, 255)", await heroActions.GetByRole(AriaRole.Link, new() { Name = "Get started" })
+            .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+        Assert.Equal("rgb(255, 232, 141)", await heroActions.GetByRole(AriaRole.Link, new() { Name = "I already have an account" })
+            .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+        Assert.Equal("rgb(23, 32, 59)", await Page.GetByRole(AriaRole.Contentinfo)
+            .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+    }
 }

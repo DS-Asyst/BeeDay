@@ -1,150 +1,69 @@
 .profile-page {
+    position: relative;
     display: grid;
-    min-height: auto;
+    width: 100%;
+    min-height: calc(100dvh - 4rem);
     place-items: center;
-    padding: 0;
-    box-sizing: border-box;
-    background: transparent;
+    padding: clamp(5.5rem, 12vh, 7rem) var(--beeday-spacing-lg) var(--beeday-spacing-2xl);
 }
 
-.profile-panel {
-    width: min(100%, 30rem);
-    padding: clamp(1.6rem, 4vw, 2.25rem);
-    box-sizing: border-box;
-    border: 1px solid var(--beeday-color-border);
-    border-radius: var(--beeday-radius-xs);
-    background: var(--beeday-game-paper);
-    box-shadow: var(--beeday-shadow-lg);
-}
-
-.profile-panel__global-brand {
-    margin-bottom: 1.5rem;
-}
-
-.profile-panel__brand {
-    color: #6133a8;
-    font-size: .7rem;
-    font-weight: 700;
-    letter-spacing: .14em;
-    text-shadow: 1px 1px 0 #fff;
-}
+.profile-panel { width: min(100%, 27rem); }
+.profile-panel__global-brand { margin-bottom: var(--beeday-spacing-xl); text-align: center; }
+.profile-panel__global-brand ::deep .beeday-brand { --beeday-brand-height: 2.25rem; }
 
 .profile-panel h1 {
-    margin: .55rem 0 .4rem;
-    color: #2f2638;
-    font-size: clamp(1.65rem, 4vw, 2.1rem);
-    line-height: 1.15;
-    text-shadow: 2px 2px 0 var(--beeday-focus-color);
+    margin: 0;
+    color: var(--beeday-color-text-primary);
+    font-size: clamp(2rem, 6vw, 2.6rem);
+    line-height: 1.05;
+    text-align: center;
 }
 
 .profile-panel__intro {
-    margin: 0 0 1.6rem;
-    color: #746a7c;
-    font-size: .92rem;
+    margin: var(--beeday-spacing-sm) 0 var(--beeday-spacing-xl);
+    color: var(--beeday-color-text-muted);
+    line-height: 1.5;
+    text-align: center;
 }
 
-.profile-form {
-    display: grid;
-    gap: .65rem;
-}
-
-.profile-field {
-    display: grid;
-    gap: .5rem;
-}
-
-.profile-field span {
-    color: #4a4052;
-    font-size: var(--beeday-font-size-md);
-    font-weight: 700;
-}
-
-.profile-field input {
-    min-height: 3rem;
-    padding: 0 .9rem;
-    border: 1px solid var(--beeday-color-border);
-    border-radius: var(--beeday-radius-xs);
-    outline: none;
-    color: #302638;
-    background: var(--beeday-color-surface);
-    font: inherit;
-    transition: border-color var(--beeday-transition-fast), box-shadow var(--beeday-transition-fast);
-}
-
-.profile-field input:focus {
-    border-color: #7548b7;
-    box-shadow: var(--beeday-focus-ring);
-}
+.profile-form { display: grid; gap: var(--beeday-spacing-md); }
+.profile-field { display: grid; gap: var(--beeday-spacing-xs); color: var(--beeday-color-text-primary); font-weight: var(--beeday-font-weight-bold); }
+.profile-field__input { width: 100%; }
 
 .profile-password-hint {
-    margin: -.1rem 0 .2rem;
-    color: #716877;
-    font-size: var(--beeday-font-size-md);
+    margin: calc(-1 * var(--beeday-spacing-sm)) 0 0;
+    color: var(--beeday-color-text-muted);
+    font-size: var(--beeday-font-size-sm);
     line-height: 1.45;
 }
 
-.profile-password-hint--valid {
-    color: #237a3b;
-    font-weight: 700;
-}
-
-.profile-validation {
-    margin: .15rem 0 0;
-    color: #b3261e;
-    font-size: .76rem;
-    font-weight: 700;
-    line-height: 1.4;
-}
+.profile-password-hint--valid { color: var(--beeday-color-success); font-weight: var(--beeday-font-weight-bold); }
+.profile-validation { margin: 0; color: var(--beeday-color-danger-text, #b3261e); font-size: var(--beeday-font-size-sm); font-weight: var(--beeday-font-weight-bold); line-height: 1.4; }
 
 .profile-nickname-field {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
-    min-height: 3rem;
     overflow: hidden;
-    border: 1px solid var(--beeday-color-border);
-    border-radius: var(--beeday-radius-xs);
+    border: var(--beeday-border-width) solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-lg);
     background: var(--beeday-color-surface);
     transition: border-color var(--beeday-transition-fast), box-shadow var(--beeday-transition-fast);
 }
 
-.profile-nickname-field:focus-within {
-    border-color: #7548b7;
-    box-shadow: var(--beeday-focus-ring);
+.profile-nickname-field:focus-within { border-color: var(--beeday-color-brand-primary); box-shadow: var(--beeday-focus-ring); }
+.profile-nickname-field__prefix { display: grid; align-self: stretch; min-width: 2.75rem; place-items: center; color: var(--beeday-color-brand-primary); background: var(--beeday-color-brand-primary-soft); }
+.profile-field .profile-nickname-field__input { min-width: 0; border: 0; border-radius: 0; box-shadow: none; }
+.profile-field .profile-nickname-field__input:focus { border-color: transparent; box-shadow: none; }
+
+.profile-form ::deep .beeday-button--primary { min-height: 3.25rem; margin-top: var(--beeday-spacing-xs); font-size: var(--beeday-font-size-md); }
+.profile-form ::deep .profile-form__back { justify-self: start; margin-bottom: var(--beeday-spacing-sm); }
+
+@media (max-width: 40rem) {
+    .profile-page { min-height: calc(100dvh - 2rem); padding: 5.25rem 0 var(--beeday-spacing-xl); }
 }
 
-.profile-nickname-field__prefix {
-    display: grid;
-    align-self: stretch;
-    place-items: center;
-    min-width: 2.65rem;
-    color: #65409f;
-    background: #f3eef9;
-    font-size: .9rem !important;
-    font-weight: 700 !important;
+@media (max-width: 28rem) {
+    .profile-panel__global-brand { margin-bottom: var(--beeday-spacing-lg); }
+    .profile-panel__intro { margin-bottom: var(--beeday-spacing-lg); }
 }
-
-.profile-field .profile-nickname-field__input {
-    min-width: 0;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-}
-
-.profile-field .profile-nickname-field__input:focus {
-    border-color: transparent;
-    box-shadow: none;
-}
-
-@media (max-width: 580px) {
-    .profile-page { place-items: start center; padding: 0; }
-    .profile-panel { padding: 1.35rem; }
-}
-
-/* Official button placement only; visual states live in BeeDayButton. */
-.profile-form ::deep .beeday-button--primary {
-    justify-self: end;
-    min-width: 10.5rem;
-    margin-top: .4rem;
-}
-.profile-panel > ::deep .beeday-button--back { margin-bottom: 1rem; }

@@ -7,8 +7,6 @@
     width: 100%;
     min-height: 4.25rem;
     background: var(--beeday-color-surface);
-    border-bottom: 1px solid var(--beeday-color-border);
-    box-shadow: var(--beeday-shadow-sm);
 }
 
 .public-header__content {

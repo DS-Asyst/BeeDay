@@ -1,0 +1,13 @@
+<nav class="public-auth-actions" aria-label="@Label">
+    <a class="public-auth-actions__close" href="/" aria-label="@CloseLabel">
+        <BeeDayIcon Name="BeeDayIconName.Close" Size="BeeDayIconSize.Medium" Decorative="true" />
+    </a>
+    <a class="beeday-button beeday-button--secondary public-auth-actions__destination" href="@DestinationHref">@DestinationLabel</a>
+</nav>
+
+@code {
+    [Parameter, EditorRequired] public string DestinationHref { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string DestinationLabel { get; set; } = string.Empty;
+    [Parameter] public string CloseLabel { get; set; } = "Close and return to Home";
+    [Parameter] public string Label { get; set; } = "Authentication actions";
+}
