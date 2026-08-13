@@ -20,8 +20,12 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
 
         await GotoAsync("/login");
         await AssertGlobalFoundationAsync();
-        await AssertWordmarkAsync(Page.Locator(".auth-card .beeday-brand").First);
+        await AssertWordmarkAsync(Page.Locator(".auth-login .beeday-brand").First);
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Level = 1 })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Close login and return to Home" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Create account" })).ToBeVisibleAsync();
+        await Expect(Page.Locator(".auth-card")).ToHaveCountAsync(0);
+        Assert.False(await Page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
     }
 
     [Fact]
