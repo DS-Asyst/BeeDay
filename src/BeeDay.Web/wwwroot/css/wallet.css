@@ -5,7 +5,7 @@
 .wallet-eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;font-weight:700}
 .wallet-summary{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:1rem;margin-bottom:1rem}.wallet-summary__card span,.wallet-summary__card small{display:block}.wallet-summary__card strong{display:block;margin:.3rem 0;font-size:1.65rem}
 .wallet-workspace{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:1rem;align-items:start}.wallet-tags-panel{padding:1rem;position:sticky;top:5rem}.wallet-panel-header{display:flex;align-items:center;justify-content:space-between;gap:1rem}.wallet-panel-header--transactions{padding:1.1rem 1.2rem}.wallet-panel-header h2{font-size:2rem}.wallet-result-count{font-size:.82rem}
-.wallet-filters{display:grid;grid-template-columns:minmax(180px,1fr) repeat(3,minmax(130px,auto));gap:.6rem;padding:1rem 1.2rem}.wallet-filters input,.wallet-filters select{width:100%;box-sizing:border-box;border-radius:7px;padding:.68rem .75rem;font:inherit}.wallet-filters input:focus,.wallet-filters select:focus{outline-offset:1px}
+.wallet-filters{display:grid;grid-template-columns:minmax(180px,1fr) repeat(3,minmax(130px,auto));gap:.6rem;padding:1rem 1.2rem}
 .wallet-tag-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .5rem;border-radius:99px;font-size:.78rem}.wallet-tag-badge i{width:.55rem;height:.55rem;border-radius:50%;background:var(--tag-color,var(--beeday-color-tag-default))}.wallet-pagination{display:flex;align-items:center;justify-content:center;gap:1rem;padding:1rem}
 .wallet-empty-state{text-align:center;padding:3.5rem 1rem}.wallet-empty-state>div{font-size:3rem}.wallet-empty-state h3{margin:.5rem 0}.wallet-alert{display:flex;justify-content:space-between;gap:1rem;margin-bottom:1rem;padding:.8rem 1rem;border-radius:8px}
 .wallet-tag-list{display:grid;gap:.45rem;margin-top:1rem}.wallet-tag-item{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:.55rem;padding:.65rem}.wallet-tag-dot{width:.7rem;height:.7rem;border-radius:50%}.wallet-tag-item strong,.wallet-tag-item small{display:block}.wallet-tag-item small{font-size:.72rem}.wallet-color-field{display:grid;grid-template-columns:1fr 48px;gap:.5rem}.wallet-color-field>span,.wallet-color-field>div{grid-column:1/-1}.wallet-color-field input[type=color]{height:42px;padding:.2rem}
@@ -141,19 +141,6 @@
 .wallet-filters {
     border-bottom: 1px solid var(--beeday-color-border);
     background: var(--beeday-color-surface);
-}
-
-.wallet-filters input,
-.wallet-filters select {
-    border: 1px solid var(--beeday-color-border);
-    border-radius: var(--beeday-radius-xs);
-    background: var(--beeday-color-surface);
-    color: var(--beeday-color-text-primary);
-}
-
-.wallet-filters input:focus,
-.wallet-filters select:focus {
-    outline: 2px solid color-mix(in srgb, var(--beeday-color-brand-primary) 45%, transparent);
 }
 
 .wallet-empty-state {

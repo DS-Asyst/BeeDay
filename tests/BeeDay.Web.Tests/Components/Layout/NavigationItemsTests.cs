@@ -10,7 +10,7 @@ public sealed class NavigationItemsTests
         using var context = new BunitContext();
         var cut = context.Render<NavigationItems>();
         var links = cut.FindAll("a.navigation-item");
-        Assert.Equal(["/home", "/daily", "/wallet", "/account", "/settings"], links.Select(link => link.GetAttribute("href")));
+        Assert.Equal(["/profile", "/daily", "/wallet", "/settings"], links.Select(link => link.GetAttribute("href")));
         var logout = cut.Find("form[method='post'][action='/auth/logout'] button[type='submit']");
         Assert.Equal("Log out of BeeDay", logout.GetAttribute("aria-label"));
     }
@@ -25,6 +25,6 @@ public sealed class NavigationItemsTests
         {
             link.Click();
         }
-        Assert.Equal(5, count);
+        Assert.Equal(4, count);
     }
 }

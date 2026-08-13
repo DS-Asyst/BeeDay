@@ -4,8 +4,9 @@
 `src/BeeDay.Web/Components/**/*.razor` e leitura das 3 primeiras linhas de cada arquivo resultante
 (`@page`, `@attribute`, `@layout`/`@rendermode`), mais `Components/Routes.razor` e `Components/App.razor`.
 
-**Última verificação:** 2026-08-13 (Sprint 21.10, EPIC 21) — `/home` é a Home autenticada e o
-destino normal após login/onboarding; `/daily` permanece o quadro operacional. Em 2026-08-11,
+**Última verificação:** 2026-08-13 (Sprint 21.12, EPIC 21) — `/profile` é a experiência pessoal
+autenticada e o destino normal após login/onboarding; `/home` redireciona para `/profile` por
+compatibilidade; `/daily` permanece o quadro operacional. Em 2026-08-11,
 Sprint 20.5 da EPIC 20, `/` deixou de redirecionar
 (`Entry.razor` removido) e passou a servir a Home pública oficial
 (`Features/Home/Pages/Home.razor`, layout `PublicLayout`); demais rotas preservadas da verificação
@@ -13,7 +14,7 @@ de 2026-08-07.
 
 ## 1. Objetivo
 
-Mapear as 19 rotas `@page` do repositório, seu layout e atributo de autorização, e descrever o
+Mapear as 20 rotas `@page` do repositório, seu layout e atributo de autorização, e descrever o
 shell HTML (`App.razor`) e o `Router` (`Routes.razor`) que as hospedam.
 
 ## 2. Shell e Router
@@ -71,7 +72,8 @@ e `<HeadOutlet />`. O `<body>` contém apenas `<Routes @rendermode="InteractiveS
 | `/account/confirm-email` | `Features/Identity/Pages/ConfirmEmail.razor` | `OnboardingLayout` | `AllowAnonymous` | — |
 | `/account/reset-password` | `Features/Identity/Pages/ResetPassword.razor` | `OnboardingLayout` | `AllowAnonymous` | — |
 | `/onboarding/tutorial` | `Features/Onboarding/Pages/Tutorial.razor` | `OnboardingLayout` | `Authorize` | — |
-| `/home` | `Features/Dashboard/Pages/DashboardHome.razor` | `MainLayout` (padrão) | `Authorize` | `InteractiveServer` |
+| `/profile` | `Features/Dashboard/Pages/DashboardHome.razor` | `MainLayout` (padrão) | `Authorize` | `InteractiveServer` |
+| `/home` | `Features/Dashboard/Pages/LegacyHomeRedirect.razor` | `MainLayout` (padrão) | `Authorize`; redirect para `/profile` | — |
 | `/daily` | `Features/Dashboard/Pages/Home.razor` | `MainLayout` (padrão) | `Authorize` | `InteractiveServer` |
 | `/wallet` | `Features/Wallets/Pages/Wallet.razor` | `MainLayout` (padrão) | `Authorize` | `InteractiveServer` |
 | `/account`, `/settings` (mesmo componente, 2 rotas) | `Features/Account/Pages/Account.razor` | `MainLayout` (padrão) | `Authorize` | `InteractiveServer` |
@@ -80,11 +82,11 @@ e `<HeadOutlet />`. O `<body>` contém apenas `<Routes @rendermode="InteractiveS
 | `/not-found` | `Pages/NotFound.razor` | `MainLayout` (explícito) | `AllowAnonymous` | — |
 | `/Error` | `Pages/Error.razor` | `MainLayout` (padrão) | `AllowAnonymous` | — |
 
-19 rotas em 18 arquivos `.razor` (`Account.razor` declara duas rotas para o mesmo componente).
+20 rotas em 19 arquivos `.razor` (`Account.razor` declara duas rotas para o mesmo componente).
 
 ## 4. Páginas com `@rendermode` explícito vs. implícito
 
-A Home autenticada (`/home`), o Daily (`/daily`), `Wallet` e `Account` declaram
+O Profile autenticado (`/profile`), o Daily (`/daily`), `Wallet` e `Account` declaram
 `@rendermode InteractiveServer` por página
 — 4 páginas desde a Sprint 21.10: o antigo `Entry.razor` (que declarava
 `@rendermode InteractiveServer`) foi removido junto com a rota `/` que resolvia; a nova
@@ -131,7 +133,7 @@ repo-wide) e `/` passou a ser atendida por `Features/Home/Pages/Home.razor`, sob
 uma Home pública real, com conteúdo institucional, visível tanto para visitantes anônimos quanto
 para usuários autenticados, sem nenhum redirecionamento automático.
 
-A política de destino pós-autenticação (perfil → onboarding → `/home`) **não foi removida** — ela
+A política de destino pós-autenticação (perfil → onboarding → `/profile`) **não foi removida** — ela
 continua ativa em `LoginDestinationResolver.Resolve` (pós-login, `Program.cs`) e em
 `CreateProfile.razor.cs` (pós-criação de perfil). Um terceiro consumidor foi adicionado:
 `AuthenticatedEntryDestinationResolver` (`Services/Authentication/`), que envolve
@@ -141,9 +143,9 @@ existente em vez de duplicá-la uma quarta vez.
 
 ## 9. Fontes de verdade
 
-- Busca `@page` em `src/BeeDay.Web/Components/**/*.razor` (18 ocorrências, 17 arquivos — contagem
-  inalterada após a Sprint 20.5: `Entry.razor` removido, `Features/Home/Pages/Home.razor` criado).
-- Primeiras linhas de cada um dos 17 arquivos resultantes.
+- Busca `@page` em `src/BeeDay.Web/Components/**/*.razor` (20 ocorrências, 19 arquivos após a rota
+  de compatibilidade `LegacyHomeRedirect.razor` adicionada na Sprint 21.12).
+- Primeiras linhas de cada um dos 19 arquivos resultantes.
 - `src/BeeDay.Web/Components/Routes.razor`, `App.razor`.
 - `src/BeeDay.Web/Components/Features/Home/Pages/Home.razor`,
   `src/BeeDay.Web/Components/Layout/PublicLayout.razor`, `PublicHeader.razor`,

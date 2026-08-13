@@ -2,7 +2,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: .6rem;
+    gap: var(--beeday-spacing-md);
     color: var(--beeday-game-ink);
 }
 
@@ -23,14 +23,14 @@
 
 .experience-card__header strong {
     color: var(--beeday-game-ink);
-    font-size: var(--beeday-font-size-xl);
+    font-size: clamp(2rem, 5vw, 3rem);
     line-height: 1;
 }
 
 .experience-card__values {
-    display: flex;
-    flex-direction: column;
-    gap: .16rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--beeday-spacing-sm);
     color: var(--beeday-game-ink);
     font-weight: 700;
     line-height: 1.3;
@@ -43,6 +43,10 @@
 .experience-card__values span:last-child {
     color: var(--beeday-color-text-muted);
     font-size: var(--beeday-font-size-xs);
+}
+
+@media (max-width: 36rem) {
+    .experience-card__values { grid-template-columns: 1fr; }
 }
 
 .experience-card__gain {

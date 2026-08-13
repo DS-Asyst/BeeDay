@@ -11,10 +11,9 @@ public sealed class DesktopSidebarTests
         using var context = new BunitContext();
         var cut = context.Render<DesktopSidebar>();
 
-        Assert.Equal("/home", cut.Find("a.desktop-sidebar__brand-link").GetAttribute("href"));
+        Assert.Equal("/profile", cut.Find("a.desktop-sidebar__brand-link").GetAttribute("href"));
         var primary = cut.FindAll("nav.navigation-items a.navigation-item");
-        Assert.Equal(["/home", "/daily", "/wallet"], primary.Select(link => link.GetAttribute("href")));
-        Assert.NotNull(cut.Find(".navigation-items--actions a[href='/account']"));
+        Assert.Equal(["/profile", "/daily", "/wallet"], primary.Select(link => link.GetAttribute("href")));
         Assert.NotNull(cut.Find(".navigation-items--actions a[href='/settings']"));
         Assert.Equal("/auth/logout", cut.Find("form.navigation-items__logout-form").GetAttribute("action"));
     }

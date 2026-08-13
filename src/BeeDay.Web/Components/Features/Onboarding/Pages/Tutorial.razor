@@ -81,7 +81,7 @@
 
         if (user.HasCompletedOnboarding)
         {
-            Navigation.NavigateTo("/home", forceLoad: true, replace: true);
+            Navigation.NavigateTo("/profile", forceLoad: true, replace: true);
         }
     }
 
@@ -105,7 +105,7 @@
         try
         {
             await Store.CompleteOnboardingAsync();
-            Navigation.NavigateTo("/home", forceLoad: true, replace: true);
+            Navigation.NavigateTo("/profile", forceLoad: true, replace: true);
         }
         finally
         {

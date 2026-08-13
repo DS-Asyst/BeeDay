@@ -77,7 +77,7 @@ public sealed class InteractiveComponentsTests(PlaywrightAppFixture fixture) : E
         await Page.GetByLabel("Email").FillAsync(email);
         await Page.GetByLabel("Password").FillAsync(Password);
         await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
-        await Expect(Page).ToHaveURLAsync(new Regex("/home$"));
+        await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
         await GotoAsync("/daily");
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
     }

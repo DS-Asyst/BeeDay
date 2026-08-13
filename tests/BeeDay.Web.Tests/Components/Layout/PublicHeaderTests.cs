@@ -93,7 +93,7 @@ public sealed class PublicHeaderTests
         cut.Find("button").Click();
 
         var navigation = context.Services.GetRequiredService<NavigationManager>();
-        Assert.EndsWith("/home", navigation.Uri, StringComparison.Ordinal);
+        Assert.EndsWith("/profile", navigation.Uri, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -11,7 +11,6 @@ Filter,filter,Lucide,list-filter,actions,Actions,Outline-Stroke2,ISC
 Calendar,calendar,Lucide,calendar-days,actions,Actions,Outline-Stroke2,ISC
 Repeat,repeat,Lucide,repeat-2,actions,Actions,Outline-Stroke2,ISC
 Tag,tag,Lucide,tag,actions,Actions,Outline-Stroke2,ISC
-Attribute,attribute,Lucide,tags,actions,Actions,Outline-Stroke2,ISC
 Cancel,cancel,Lucide,circle-x,actions,Actions,Outline-Stroke2,ISC
 Check,check,Lucide,check,feedback,Feedback,Outline-Stroke2,ISC
 Habit,habit,Lucide,activity,habits,Activities,Outline-Stroke2,ISC
@@ -34,7 +33,6 @@ ChevronLeft,chevron-left,Lucide,chevron-left,navigation,Navigation,Outline-Strok
 ChevronRight,chevron-right,Lucide,chevron-right,navigation,Navigation,Outline-Stroke2,ISC
 Library,library,Lucide,book-open,books,Navigation,Outline-Stroke2,ISC
 Daily,daily,Lucide,calendar-check,navigation,Navigation,Outline-Stroke2,ISC
-Home,home,Lucide,house,navigation,Navigation,Outline-Stroke2,ISC
 Profile,profile,Lucide,circle-user-round,profile,Navigation,Outline-Stroke2,ISC
 Donate,donate,Lucide,heart-handshake,navigation,Navigation,Outline-Stroke2,ISC
 Logout,logout,Lucide,log-out,navigation,Navigation,Outline-Stroke2,ISC

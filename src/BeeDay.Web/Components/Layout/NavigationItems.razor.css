@@ -11,3 +11,5 @@
 }
 
 .navigation-items__logout-form { margin: 0; }
+.navigation-items__logout-form ::deep .navigation-item { color: var(--beeday-color-danger); }
+.navigation-items__logout-form ::deep .navigation-item:hover { color: var(--beeday-color-danger); background: var(--beeday-color-danger-soft); }

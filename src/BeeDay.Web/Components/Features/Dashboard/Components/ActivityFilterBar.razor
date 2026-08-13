@@ -1,77 +1,15 @@
 @using BeeDay.Domain.Enums
-@using BeeDay.Web.Components.DesignSystem.Attributes
-@using BeeDay.Web.Components.DesignSystem.Buttons
 
 <div class="filter-bar" aria-label="Dashboard controls">
     <div class="filter-bar__main">
-        <div class="filter-bar__filters">
-            <button type="button"
-                    class="beeday-icon-toggle filter-bar__tags-toggle"
-                    @onclick="ToggleTagsMenu"
-                    aria-haspopup="dialog"
-                    aria-expanded="@showTagsMenu"
-                    aria-label="Filter by tags">
-                <BeeDayIcon Name="BeeDayIconName.Filter" Size="BeeDayIconSize.Small" Decorative="true" />
-                @if (SelectedAttributes.Count > 0)
-                {
-                    <span class="filter-bar__filter-count" aria-hidden="true">@SelectedAttributes.Count</span>
-                }
-            </button>
-
-            @if (showTagsMenu)
-            {
-                <div class="filter-bar__tags-menu" role="dialog" aria-label="Filter activities by tags">
-                    <div class="filter-bar__tags-heading">Tags</div>
-                    <div class="filter-bar__tags-grid">
-                        @foreach (var activityAttribute in Attributes)
-                        {
-                            var selected = SelectedAttributes.Contains(activityAttribute);
-                            <label class="filter-bar__tag-option @(selected ? "filter-bar__tag-option--selected" : null)">
-                                <input type="checkbox"
-                                       value="@activityAttribute"
-                                       checked="@selected"
-                                       @onchange="_ => ToggleAttributeAsync(activityAttribute)" />
-                                <ActivityAttributeBadge Attribute="activityAttribute" />
-                            </label>
-                        }
-                    </div>
-                    <div class="filter-bar__tags-footer">
-                        <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel"
-                                       Class="beeday-button--plain beeday-button--plain-danger filter-bar__clear"
-                                       Disabled="@(SelectedAttributes.Count == 0)"
-                                       OnClick="ClearAttributesAsync">
-                            Clear all filters
-                        </BeeDayButton>
-                        <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel"
-                                       Class="beeday-button--plain beeday-button--plain-neutral"
-                                       OnClick="CloseTagsMenu">
-                            Cancel
-                        </BeeDayButton>
-                    </div>
-                </div>
-            }
-        </div>
-
         <div class="filter-bar__search" role="search">
-            <input id="dashboard-search"
-                   class="filter-bar__input"
-                   type="search"
-                   aria-label="Search activities"
-                   placeholder="Search"
-                   value="@inputValue"
-                   @oninput="OnInput" />
+            <input id="dashboard-search" class="filter-bar__input" type="search"
+                   aria-label="Search activities" placeholder="Search" value="@inputValue" @oninput="OnInput" />
         </div>
-
         <div class="filter-bar__create">
-            <BeeDayButton Variant="BeeDayButtonVariant.Primary"
-                           Compact="true"
-                           Icon="BeeDayIconName.Add"
-                           Class="filter-bar__create-button beeday-button--comic beeday-button--comic-blue"
-                           OnClick="ToggleCreateMenu"
-                           aria-haspopup="menu"
-                           aria-expanded="@showCreateMenu">
-                Activity
-            </BeeDayButton>
+            <BeeDayButton Variant="BeeDayButtonVariant.Primary" Compact="true" Icon="BeeDayIconName.Add"
+                          Class="filter-bar__create-button" OnClick="ToggleCreateMenu"
+                          aria-haspopup="menu" aria-expanded="@showCreateMenu">Activity</BeeDayButton>
             @if (showCreateMenu)
             {
                 <div class="filter-bar__menu" role="menu" aria-label="Choose activity type">

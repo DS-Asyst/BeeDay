@@ -86,7 +86,7 @@ Blazor):
 | `BeeDayWebService` | Fachada MediatR — ver [`docs/web/README.md`](README.md) "Integração com Application" |
 | `ToastService` | Fila de notificações in-memory, consumida por `BeeDayToastHost.razor` |
 | `AuthenticatedUserInitializer` | Garante que o `User` do cookie ainda existe antes de qualquer página autenticada renderizar dados |
-| `DashboardState` | Estado agregado compartilhado por `/home` e `/daily` — ver `04-feature-components.md` |
+| `DashboardState` | Estado agregado compartilhado por `/profile` e `/daily` — ver `04-feature-components.md` |
 | `BeeDayFeedbackStore` + `INotificationHandler<DomainEventNotification>` → `BeeDayFeedbackEventHandler` | Escuta `UserLeveledUpDomainEvent` via pipeline MediatR e alimenta o feedback visual de level-up |
 | `ProfileCreationState` | Estado do fluxo de criação de conta/perfil (`/profile/create`) |
 | `CardActionMenuCoordinator` | Coordena `BeeDayCardMenu` para que abrir um menu feche qualquer outro já aberto no mesmo circuito |
@@ -167,7 +167,7 @@ Só dois endpoints HTTP fora de Blazor e health checks, ambos em `Program.cs`:
 ```csharp
 if (!hasProfile) return "/profile/create";
 if (!hasCompletedOnboarding) return "/onboarding/tutorial";
-return IsLocalPath(returnUrl) ? returnUrl! : "/home";
+return IsLocalPath(returnUrl) ? returnUrl! : "/profile";
 ```
 
 `IsLocalPath` exige que o valor comece com `/` e não com `//` nem `/\` — mitiga open redirect via

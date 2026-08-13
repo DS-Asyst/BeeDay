@@ -90,13 +90,13 @@ sua própria versão do mesmo padrão visual (campo com borda, foco, erro):
 | `forms.css` | Componentes `Forms/` do Design System | É a origem de `.beeday-field*` |
 | `editor-modal.css` | Os 4 editores de atividade (Habit/Task/Todo/Project) | Não — declara `.editor-modal__hero input`, `.editor-modal__field input` com seu próprio border/box-shadow/focus, valores próximos mas não idênticos aos de `.beeday-field__control` |
 | `identity.css` | As 7 páginas de Login/Identity | Não — declara `.identity-field input` com seu próprio conjunto de regras, incluindo um `background: var(--beeday-color-surface-subtle)` que os outros dois não têm |
-| `wallet.css` | `WalletFilters`, `TransactionFormModal`, `TagFormModal` | Não — `.wallet-filters input/select` com regras próprias, mais compactas |
+| `wallet.css` | `WalletFilters`, `TransactionFormModal`, `TagFormModal` | Parcial — `WalletFilters` reutiliza `.beeday-field__control`; os modais mantêm composição especializada |
 
 As 4 implementações convergem visualmente (mesma paleta de token, mesma ideia de borda + foco) mas
 divergem em detalhe (raio, box-shadow exato, cor de fundo em repouso) porque nenhuma delas
 referencia as outras — um ajuste em `.beeday-field__control` não se propaga para
-`.editor-modal__field input`, `.identity-field input` ou `.wallet-filters input`. Não é um bug
-funcional (cada tela renderiza corretamente), mas é 4 pontos de manutenção para uma única
+`.editor-modal__field input` ou `.identity-field input`. `WalletFilters` foi convergido para a
+foundation na Sprint 21.12. Não é um bug funcional, mas ainda há pontos de manutenção para uma única
 intenção visual.
 
 ## 6. Botões dentro de formulários
@@ -134,7 +134,7 @@ aparece como exceção capturada no `catch` do método de submit do componente, 
   `BeeDayDateInput.razor(.cs)`, `BeeDaySelect.razor(.cs)`, `BeeDayTextArea.razor(.cs)`,
   `BeeDayValidationMessage.razor(.cs)`.
 - `src/BeeDay.Web/wwwroot/css/forms.css`, `polish.css`, `editor-modal.css`, `identity.css`,
-  `wallet.css` (seletores `.wallet-filters input/select`).
+  `wallet.css` (layout responsivo dos filtros; chrome dos controles vem de `forms.css`).
 - [`docs/web/04-feature-components.md`](../web/04-feature-components.md) (padrões de submit por
   página, reaproveitado da Sprint 16.7).
 - [`docs/application/03-pipeline.md`](../application/03-pipeline.md) (validação FluentValidation no

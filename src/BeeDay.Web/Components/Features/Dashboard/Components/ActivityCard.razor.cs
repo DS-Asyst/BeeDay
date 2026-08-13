@@ -1,4 +1,3 @@
-using BeeDay.Domain.Enums;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
@@ -11,7 +10,6 @@ public partial class ActivityCard
     [Parameter] public string SearchTerm { get; set; } = string.Empty;
     [Parameter] public string Meta { get; set; } = string.Empty;
     [Parameter] public string Variant { get; set; } = "task";
-    [Parameter] public ActivityAttribute? Attribute { get; set; }
     [Parameter] public bool Featured { get; set; }
     [Parameter] public bool Completed { get; set; }
     [Parameter] public EventCallback OnToggle { get; set; }

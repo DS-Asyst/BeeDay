@@ -61,12 +61,11 @@ observado nesta auditoria viola isso na prática, mas a fronteira não é impost
 
 ## Contagem de componentes (corrige contagem anterior)
 
-26 componentes reutilizáveis (`.razor` com `@code`/`.razor.cs` próprio, excluindo páginas de
+24 componentes reutilizáveis (`.razor` com `@code`/`.razor.cs` próprio, excluindo páginas de
 catálogo e enums/modelos de suporte):
 
 | Pasta | Componentes |
 |---|---|
-| `Attributes/` | `ActivityAttributeBadge`, `ActivityAttributeSelect` |
 | `Buttons/` | `BeeDayButton` |
 | `Cards/` | `BeeDayCard`, `BeeDayCardMenu` |
 | `Feedback/` | `BeeDayConfirmDialog`, `BeeDayDashboardSkeleton`, `BeeDayEmptyState`, `BeeDayLoading`, `BeeDaySkeleton`, `BeeDayToastHost` |
@@ -76,8 +75,8 @@ catálogo e enums/modelos de suporte):
 | `Modals/` | `EditorModalShell` |
 | `Text/` | `BeeDayBrand`, `SearchHighlight` |
 
-O `README.md` anterior desta pasta (placeholder, nunca publicado) citava "24 componentes
-confirmados" — número não verificado nesta auditoria; a contagem atual é 26.
+Os dois componentes Web de Attribute foram removidos na Sprint 21.12 após auditoria cross-layer;
+a capacidade de domínio, persistência e contratos permaneceram intactos.
 `DesignSystem/Pages/{IconCatalog,HeroCatalog}.razor` são páginas roteáveis de catálogo visual, não
 componentes reutilizáveis — documentadas em
 [`docs/web/02-routing-and-pages.md`](../web/02-routing-and-pages.md) §6, não contadas aqui.

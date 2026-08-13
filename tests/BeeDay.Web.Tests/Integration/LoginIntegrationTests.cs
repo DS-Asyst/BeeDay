@@ -127,7 +127,7 @@ public sealed class LoginIntegrationTests(BeeDayWebApplicationFactory factory)
 
         var response = await PostLoginAsync("onboarding-done@beeday.invalid", "Password123!", cancellationToken);
 
-        Assert.Equal("/home", response.Headers.Location!.ToString());
+        Assert.Equal("/profile", response.Headers.Location!.ToString());
     }
 
     [Fact]

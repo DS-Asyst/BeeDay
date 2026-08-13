@@ -50,7 +50,7 @@ public sealed class LoginDestinationResolverTests
             hasCompletedOnboarding: true,
             returnUrl);
 
-        Assert.Equal("/home", destination);
+        Assert.Equal("/profile", destination);
     }
 }
 

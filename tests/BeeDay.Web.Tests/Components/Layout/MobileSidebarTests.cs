@@ -88,7 +88,7 @@ public sealed class MobileSidebarTests
 
         var routeLinks = cut.FindAll("nav.navigation-items a");
         Assert.Equal(3, routeLinks.Count);
-        Assert.Equal("/home", routeLinks[0].GetAttribute("href"));
+        Assert.Equal("/profile", routeLinks[0].GetAttribute("href"));
         Assert.Equal("/daily", routeLinks[1].GetAttribute("href"));
         Assert.Equal("/wallet", routeLinks[2].GetAttribute("href"));
     }
@@ -109,12 +109,12 @@ public sealed class MobileSidebarTests
     }
 
     [Fact]
-    public void ContainsProfileAccountAndLogoutWithoutLegacyPanelTriggers()
+    public void ContainsProfileSettingsAndLogoutWithoutLegacyPanelTriggers()
     {
         using var context = new BunitContext();
         context.JSInterop.Mode = JSRuntimeMode.Loose;
         var cut = context.Render<MobileSidebar>(parameters => parameters.Add(component => component.IsOpen, true));
-        Assert.NotNull(cut.Find("a[href='/account']"));
+        Assert.NotNull(cut.Find("a[href='/profile']"));
         Assert.NotNull(cut.Find("a[href='/settings']"));
         Assert.NotNull(cut.Find("form[action='/auth/logout'] button[type='submit']"));
         Assert.Empty(cut.FindAll("button[aria-expanded]"));

@@ -27,7 +27,7 @@ public partial class CreateProfile
         {
             var user = await State.LoadDataAsync();
             var destination = user?.HasCompletedOnboarding == true
-                ? "/home"
+                ? "/profile"
                 : "/onboarding/tutorial";
             Navigation.NavigateTo(destination, forceLoad: true, replace: true);
         }
