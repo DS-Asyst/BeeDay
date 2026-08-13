@@ -1,0 +1,45 @@
+using BeeDay.Web.Components.DesignSystem.Progress;
+
+namespace BeeDay.Web.Tests.Components.DesignSystem;
+
+public sealed class BeeDayProgressBarTests
+{
+    [Theory]
+    [InlineData(0, 100, "empty", "width: 0%")]
+    [InlineData(25, 100, "partial", "width: 25%")]
+    [InlineData(100, 100, "complete", "width: 100%")]
+    [InlineData(150, 100, "complete", "width: 100%")]
+    [InlineData(20, 0, "unavailable", "width: 0%")]
+    public void RepresentsProgressStatesSafely(double value, double maximum, string state, string width)
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<BeeDayProgressBar>(parameters => parameters
+            .Add(component => component.Label, "Task completion")
+            .Add(component => component.Value, value)
+            .Add(component => component.Maximum, maximum));
+
+        var root = cut.Find(".beeday-progress");
+        var progress = cut.Find("[role='progressbar']");
+        Assert.Equal(state, root.GetAttribute("data-state"));
+        Assert.Equal("Task completion", progress.GetAttribute("aria-label"));
+        Assert.Equal("0", progress.GetAttribute("aria-valuemin"));
+        Assert.Contains(width, cut.Find(".beeday-progress__fill").GetAttribute("style"));
+    }
+
+    [Fact]
+    public void ExposesClampedAccessibleValuesAndVisibleLabel()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<BeeDayProgressBar>(parameters => parameters
+            .Add(component => component.Label, "Project task completion")
+            .Add(component => component.Value, 12)
+            .Add(component => component.Maximum, 10)
+            .Add(component => component.ValueText, "10 of 10 completed"));
+
+        var progress = cut.Find("[role='progressbar']");
+        Assert.Contains("Project task completion", cut.Markup);
+        Assert.Equal("10", progress.GetAttribute("aria-valuenow"));
+        Assert.Equal("10", progress.GetAttribute("aria-valuemax"));
+        Assert.Equal("10 of 10 completed", progress.GetAttribute("aria-valuetext"));
+    }
+}

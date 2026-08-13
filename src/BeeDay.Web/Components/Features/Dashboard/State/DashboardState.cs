@@ -20,10 +20,12 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
     private string search = string.Empty;
     private readonly HashSet<ActivityAttribute> selectedAttributes = [];
     private Guid? selectedProjectId;
+    private Task? initializationTask;
 
     public DashboardModalState Modals { get; } = new();
     public DashboardResponse? Data => data;
     public bool IsLoading => data is null;
+    public bool IsUnavailable { get; private set; }
     public bool IsBusy { get; private set; }
     public long LatestExperienceGain { get; private set; }
     public long ExperienceFeedbackVersion { get; private set; }
@@ -97,7 +99,9 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
 
     public int FilteredItems => FilteredHabits.Count() + FilteredTasks.Count() + FilteredTodos.Count() + FilteredProjects.Count();
 
-    public async Task InitializeAsync()
+    public Task InitializeAsync() => initializationTask ??= InitializeCoreAsync();
+
+    private async Task InitializeCoreAsync()
     {
         try
         {
@@ -107,6 +111,8 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
         {
             toastService.ShowError("The dashboard data could not be loaded. Try refreshing the page.");
             data = new DashboardResponse(EmptyProfile, [], [], [], null);
+            IsUnavailable = true;
+            Changed?.Invoke();
         }
     }
 
@@ -229,11 +235,14 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
     private async Task ReloadAsync()
     {
         data = await store.LoadDashboardAsync();
+        IsUnavailable = false;
 
         if (selectedProjectId is Guid projectId && !data.Projects.Any(project => project.Id == projectId))
         {
             selectedProjectId = null;
         }
+
+        Changed?.Invoke();
     }
 
     private Task ReorderAsync(

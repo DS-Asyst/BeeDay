@@ -1,0 +1,23 @@
+<section class="progress-metric-card" aria-label="@Title">
+    <div class="progress-metric-card__header">
+        <span>@Title</span>
+        <strong>@Completed / @Total</strong>
+    </div>
+    @if (Total > 0)
+    {
+        <BeeDayProgressBar Label="@ProgressLabel" Value="@Completed" Maximum="@Total" ValueText="@ValueText" />
+    }
+    else
+    {
+        <p>@EmptyText</p>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string ProgressLabel { get; set; } = string.Empty;
+    [Parameter] public int Completed { get; set; }
+    [Parameter] public int Total { get; set; }
+    [Parameter] public string EmptyText { get; set; } = "No items yet.";
+    private string ValueText => $"{Math.Clamp(Completed, 0, Total)} of {Total} completed";
+}

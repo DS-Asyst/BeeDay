@@ -247,7 +247,19 @@ usado pelas 4 colunas do Dashboard.
 nunca lê posição de mouse/touch, só recebe o resultado final. `SortableOrder.Move` (C# puro,
 testável) calcula a nova ordem a partir desse resultado.
 
-## 10. Fontes consultadas
+## 10. Progress
+
+`BeeDayProgressBar` é a primitive linear oficial. Recebe `Label`, `Value`, `Maximum` e
+`ValueText`; limita valores fora da faixa, diferencia `empty`, `partial`, `complete` e
+`unavailable`, e expõe `role="progressbar"` com nome e valores ARIA. O marcador claro dentro do
+preenchimento mantém a leitura visual sem depender somente da cor. `Maximum <= 0` não é tratado
+como conclusão: a barra fica vazia e anuncia progresso indisponível.
+
+Consumidores atuais: `ExperienceBar` (XP no nível), `ProgressMetricCard` para tarefas e para todos
+de projetos no RightRail. A primitive não calcula regras de produto; recebe somente valores já
+estabelecidos pelo contrato consumidor.
+
+## 11. Fontes consultadas
 
 - Todos os arquivos `.razor`/`.razor.cs`/`.cs` sob `src/BeeDay.Web/Components/DesignSystem/`
   (exceto `Forms/` e `Icons/`, documentados em `04-forms.md`/`03-icons.md`).

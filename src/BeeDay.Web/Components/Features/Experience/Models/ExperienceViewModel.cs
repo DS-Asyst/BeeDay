@@ -7,7 +7,8 @@ public sealed record ExperienceViewModel(
     int Level,
     long CurrentExperience,
     long RequiredExperience,
-    long RemainingExperience)
+    long RemainingExperience,
+    long TotalExperience = 0)
 {
     public double ProgressPercentage => RequiredExperience <= 0
         ? 100d
@@ -21,7 +22,8 @@ public sealed record ExperienceViewModel(
             experience.CurrentLevel,
             experience.CurrentLevelExperience,
             experience.ExperienceRequiredForCurrentLevel,
-            experience.ExperienceForNextLevel);
+            experience.ExperienceForNextLevel,
+            experience.TotalExperience);
     }
 
     public static ExperienceViewModel From(UserProfileSummary profile)
@@ -32,6 +34,7 @@ public sealed record ExperienceViewModel(
             profile.CurrentLevel,
             profile.CurrentLevelExperience,
             profile.ExperienceRequiredForCurrentLevel,
-            profile.ExperienceRequiredForCurrentLevel - profile.CurrentLevelExperience);
+            Math.Max(0, profile.ExperienceRequiredForCurrentLevel - profile.CurrentLevelExperience),
+            profile.TotalExperience);
     }
 }

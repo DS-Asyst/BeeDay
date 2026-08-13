@@ -93,7 +93,9 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
         await Page.GetByRole(AriaRole.Button, new() { Name = "Open profile panel" }).ClickAsync();
         var closeButton = Page.GetByRole(AriaRole.Button, new() { Name = "Close profile panel" });
         await Expect(closeButton).ToBeVisibleAsync();
-        var text = await Page.GetByText(new Regex(@"\d+\s*/\s*\d+ XP")).InnerTextAsync();
+        var text = await Page.GetByRole(AriaRole.Complementary, new() { Name = "Profile panel", Exact = true })
+            .GetByText(new Regex(@"\d+\s*/\s*\d+ XP"))
+            .InnerTextAsync();
         await closeButton.ClickAsync();
         return text;
     }

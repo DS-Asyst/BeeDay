@@ -1109,3 +1109,47 @@ mecânica física do Lingo com identidade BeeDay.
   consumir a primitive visual e editors foram alinhados sem mudanças de composição/contrato.
 - Icon toggles passaram a 40px, radius/timing globais; navegação mobile/desktop mantém seus contratos.
 - Cards, Icon System, layouts de páginas e RightRail não foram alterados além dos controles contidos.
+
+---
+
+## Sprint 21.6 — Progress & Right Rail — Results
+
+**Status:** COMPLETE — o `RightRail` de 368px deixou de ser vazio em desktop e apresenta somente
+progresso comprovado pelo modelo BeeDay.
+
+### Capability matrix confirmada
+
+| Conceito | Estado | Evidência/decisão |
+|---|---|---|
+| XP e Level | **SUPPORTED** | `UserExperience` → `GetDashboardQuery`/`DashboardResponse.Profile` → `DashboardState` → `ExperienceBar` |
+| XP até o próximo Level | **SUPPORTED** | `CurrentLevelExperience` e `ExperienceRequiredForCurrentLevel` vêm do domínio; a Web apenas apresenta e limita visualmente |
+| Tasks concluídas / totais | **SUPPORTED** | `TaskSummary.Completed` sobre o mesmo conjunto de `DashboardResponse.Tasks` |
+| Project progress | **SUPPORTED** | `ProjectSummary.ProgressPercentage` já existe; no rail, o resumo usa todos concluídos/totais do mesmo conjunto de todos retornado pelos projetos |
+| Habits progress | **PARTIALLY SUPPORTED** | há contadores positivo/negativo, mas não completed/total; não virou porcentagem |
+| Daily progress | **PARTIALLY SUPPORTED** | métricas separadas existem, mas não há agregação canônica; não foi somado artificialmente |
+| Streak, Achievements, Quests/Goals, Ranking/League | **NOT SUPPORTED** | nenhum conceito/regra de domínio confirmado; deliberadamente não implementados |
+
+### Implementação e fluxo
+
+- `BeeDayProgressBar` é a primitive acessível reutilizável, cobrindo zero, parcial, completo,
+  clamping e máximo inválido sem confundir indisponibilidade com conclusão.
+- `ExperienceBar` foi refatorado para consumir a primitive e mostra Level, XP total, progresso no
+  nível e XP restante usando exclusivamente os thresholds existentes.
+- `ProgressMetricCard` resume tarefas e todos de projetos. Não lista conteúdo operacional e não
+  agrega hábitos, tarefas e projetos em um “daily progress” fictício.
+- `RightRail` compõe loading, unavailable e dados carregados. Continua sticky, com largura de
+  368px, e permanece `display:none` abaixo de 1024px.
+- `DashboardState.InitializeAsync` agora é idempotente e notifica seus consumidores. Home,
+  ProfileSidePanel e RightRail compartilham a mesma instância scoped e a mesma carga do
+  `DashboardResponse`, sem polling ou request paralelo. Falha de carga é marcada como unavailable,
+  em vez de ser apresentada como zero.
+- Nenhuma alteração foi necessária em Domain, Application ou Infrastructure. Decisões sobre
+  hábitos, progresso diário agregado e seleção de um projeto destacado permanecem adiadas.
+
+### Acessibilidade e riscos
+
+As barras possuem label visível, `role="progressbar"`, `aria-valuemin/max/now/text` e pista visual
+além da cor; loading usa `aria-busy` e unavailable usa `role="status"`. O rail é informativo e não
+recebe affordance falsa de clique. Risco residual: o estado indisponível não oferece retry local;
+a recuperação continua seguindo o tratamento/refresh já existente do dashboard. A faixa
+760–1024px e uma experiência mobile própria continuam reservadas às sprints responsivas futuras.
