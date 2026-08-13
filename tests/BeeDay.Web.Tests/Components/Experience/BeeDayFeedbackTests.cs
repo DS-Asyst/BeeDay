@@ -107,7 +107,8 @@ public sealed class BeeDayFeedbackTests
 
         var dialog = cut.Find("[role='dialog']");
         Assert.Contains("beeday-pixel-panel", dialog.ClassList);
-        Assert.Contains("beeday-pixel-cta", cut.Find("button").ClassList);
+        Assert.Contains("beeday-button--primary", cut.Find("button").ClassList);
+        Assert.DoesNotContain("beeday-pixel-cta", cut.Find("button").ClassList);
     }
 
     [Fact]

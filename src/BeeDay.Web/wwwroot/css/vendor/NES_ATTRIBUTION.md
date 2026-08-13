@@ -25,7 +25,7 @@ The Bootstrap 4.1.3 Reboot/Normalize preamble; every bare-element selector (`htm
 
 ## How BeeDay's shipped adapter (`../pixel-nes.css`) differs from this excerpt
 
-`pixel-nes.css` is the file the application actually loads. It does **not** contain any `.nes-*` class name — it defines exactly two BeeDay-owned classes, `.beeday-pixel-panel` and `.beeday-pixel-cta`, reproducing the border-image pixel-corner *mechanic* above but recolored:
+`pixel-nes.css` is the file the application actually loads. It does **not** contain any `.nes-*` class name — after Sprint 21.5 it defines only the BeeDay-owned `.beeday-pixel-panel` class. The former `.beeday-pixel-cta` was removed when every button converged on the canonical physical `BeeDayButton` mechanic.
 
 - The container's pixel-corner fill is baked from `--beeday-game-ink` (`#171321`).
 - The button's pixel-corner fill is baked from the Primary button variant's `--beeday-button-outline` (`#8d6500`).
@@ -36,7 +36,7 @@ Border-image `data:` URIs cannot reliably resolve `currentColor`/CSS custom prop
 
 ## Restricted use
 
-`.beeday-pixel-panel` and `.beeday-pixel-cta` are internal Design System adapter classes for a genuine, one-off special pixel experience — not general-purpose styling hooks. See `docs/design-system/foundations.md` for the required review process before applying either class to any new consumer.
+`.beeday-pixel-panel` is an internal Design System adapter class for a genuine, one-off special pixel experience — not a general-purpose styling hook. See the Design System documentation for the required review process before applying it to any new consumer.
 
 ## Rules for this folder
 

@@ -89,17 +89,17 @@
 .editor-modal__field input,
 .editor-modal__field select {
     width: 100%;
-    min-height: 2.65rem;
+    min-height: 3rem;
     box-sizing: border-box;
     padding: .65rem .75rem;
-    border: 1px solid var(--beeday-color-border);
-    border-radius: var(--beeday-radius-md);
+    border: var(--beeday-border-width) solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-lg);
     background: var(--beeday-color-surface);
     color: var(--beeday-color-text-primary);
-    box-shadow: 0 2px 0 rgb(23 19 33 / 10%);
+    box-shadow: none;
     font: var(--beeday-type-body);
     outline: none;
-    transition: border-color var(--beeday-transition-normal), box-shadow var(--beeday-transition-normal), background-color var(--beeday-transition-normal);
+    transition: border-color var(--beeday-transition-fast), box-shadow var(--beeday-transition-fast), background-color var(--beeday-transition-fast);
 }
 
 .editor-modal__hero textarea {

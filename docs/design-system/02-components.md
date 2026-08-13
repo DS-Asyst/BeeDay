@@ -7,7 +7,8 @@ interop-equivalente aos demais). Componentes de Forms e o `PixelIcon` têm parâ
 [`04-forms.md`](04-forms.md) e [`03-icons.md`](03-icons.md) respectivamente — este documento os
 resume e linka em vez de duplicar (`docs/CONVENTIONS.md` §12).
 
-**Última verificação:** 2026-08-12 (Sprint 20.6, EPIC 20) — §2 (`BeeDayButton`) e §3 (`BeeDayCard`)
+**Última verificação:** 2026-08-12 (Sprint 21.5, EPIC 21) — §2 (`BeeDayButton`) migrado para a
+linguagem física Lingo/BeeDay. Verificação anterior: 2026-08-12 (Sprint 20.6, EPIC 20) — §2 e §3
 atualizados: novo modificador opt-in `--soft` em ambos, target visual da página-modelo (ver
 `docs/epics/20-home-visual-experience/README.md`). Correção na mesma Sprint: a cor sob `--soft`
 migrou de `--beeday-color-primary` (legado) para a família canônica `--beeday-color-brand-primary`
@@ -35,12 +36,19 @@ estados internos, eventos, dependências, interop JS (quando existe) e quem cons
 | `FullWidth`, `Compact` | `bool` | `false` | Modificadores de layout |
 | `Icon` | `PixelIconName?` | `null` | Ícone opcional antes do texto |
 | `IconSize` | `PixelIconSize` | `Small` | — |
-| `Class` | `string?` | `null` | Classes extras — é assim que os modificadores opt-in (`beeday-button--comic`, `--comic-blue`, `--skew-press`, `--comic-press`, `--plain`, `--plain-danger`, `--plain-neutral`) são aplicados, já que não existem como `Variant` |
+| `Class` | `string?` | `null` | Classes extras; nomes `comic`/`skew-press` existentes são aliases legados, não novas variantes visuais |
 | `OnClick` | `EventCallback<MouseEventArgs>` | — | Não dispara se `IsDisabled` |
 | `ChildContent` | `RenderFragment?` | — | Texto/conteúdo do botão |
 | `AdditionalAttributes` | `IReadOnlyDictionary<string,object>?` | — | `CaptureUnmatchedValues` |
 
-**Estados visuais, default canônico desde a Sprint 20.8** (`design-system.css`): sem borda,
+**Estados visuais canônicos desde a Sprint 21.5** (`design-system.css`): altura 44px (36px compact),
+padding horizontal 16px, radius 12px, borda 2px com depth inferior 4px, Nunito 700 uppercase.
+Hover altera somente a surface; pressed colapsa o depth para zero e desloca 4px; focus-visible usa
+outline + ring; disabled usa surfaces/tokens neutros sem hover/press. Loading mantém label no layout
+com `visibility:hidden`, centraliza o spinner e bloqueia interação via `disabled`/`aria-busy`, sem
+mudança de largura.
+
+**Histórico anterior:** sem borda,
 `border-radius: pill`, sombra `--beeday-shadow-md`; `:hover` (`translateY(-2px)` + `shadow-lg`),
 `:active` (`translateY(0)` + `shadow-sm`), `:focus-visible` (`shadow-md` + `--beeday-focus-ring`,
 anel canônico azul), `:disabled` (paleta cinza fixa, `cursor: not-allowed`, opacidade .62), loading
@@ -54,7 +62,13 @@ apenas ~9 consumidores sem modificador de forma (paginação/estado vazio do Wal
 recuperação de senha, navegação do Tutorial) passam a herdar a nova aparência, exatamente a
 convergência pretendida para ações secundárias/utilitárias.
 
-**Modificadores opt-in via `Class`** (não são `Variant` — são combináveis por cima de qualquer
+**Compatibilidade:** `--comic*`, `--comic-press` e `--skew-press` continuam aceitos pelos consumidores
+existentes, porém são remapeados para a geometria canônica e paletas semânticas; não possuem mais
+sombra offset, skew, contorno preto ou cores comic e não devem receber novos usos. `--pixel-cta`
+foi removido inclusive do Level Up. `--plain` permanece como responsabilidade legítima de ação de
+texto leve.
+
+**Histórico de modificadores opt-in via `Class`** (não são `Variant` — eram combináveis por cima de qualquer
 variante; cada um redeclara sua própria forma por completo — borda/radius/shadow — e por isso não é
 afetado pelo default acima): `--skew-press` (botão inclinado, ação operacional principal),
 `--comic-press` (contorno grosso, sombra offset, usado em confirmações destrutivas), `--comic` + 7

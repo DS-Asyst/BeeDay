@@ -18,26 +18,6 @@
 
 .beeday-card--interactive:active { transform: translateY(1px); }
 
-/* Form microinteractions */
-.beeday-field input,
-.beeday-field select,
-.beeday-field textarea,
-.beeday-input,
-.beeday-select {
-    transition:
-        border-color var(--beeday-duration-interaction) var(--beeday-easing-standard),
-        box-shadow var(--beeday-duration-interaction) var(--beeday-easing-standard),
-        background-color var(--beeday-duration-interaction) var(--beeday-easing-standard);
-}
-
-.beeday-field input:hover:not(:disabled),
-.beeday-field select:hover:not(:disabled),
-.beeday-field textarea:hover:not(:disabled),
-.beeday-input:hover:not(:disabled),
-.beeday-select:hover:not(:disabled) {
-    border-color: var(--beeday-color-brand-primary-light);
-}
-
 /* Shared hover and entrance utilities */
 .beeday-pixel-hover {
     transition:

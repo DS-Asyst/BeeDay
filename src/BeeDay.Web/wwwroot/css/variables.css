@@ -50,24 +50,22 @@
     /* Wallet */
     --beeday-color-tag-default: #7a4fcb;
 
-    /* BeeDayButton variant palettes — single source for every semantic button
-       variant's pressable-pixel palette (background/hover/foreground/outline/
-       depth/shadow[/focus]), consumed by design-system.css. */
-    --beeday-color-button-focus-default: rgb(122 79 203 / 36%);
+    /* BeeDayButton semantic palettes. Depth is a physical bottom border, not a shadow. */
+    --beeday-color-button-focus-default: var(--beeday-focus-color);
 
-    --beeday-color-button-primary-bg: var(--beeday-game-yellow);
-    --beeday-color-button-primary-bg-hover: #fbdb6b;
-    --beeday-color-button-primary-fg: #171321;
-    --beeday-color-button-primary-outline: #8d6500;
-    --beeday-color-button-primary-depth: #d28b00;
-    --beeday-color-button-primary-shadow: #2b2415;
+    --beeday-color-button-primary-bg: var(--beeday-color-brand-primary);
+    --beeday-color-button-primary-bg-hover: var(--beeday-color-brand-primary-hover);
+    --beeday-color-button-primary-fg: var(--beeday-color-text-inverse);
+    --beeday-color-button-primary-outline: var(--beeday-color-brand-primary-active);
+    --beeday-color-button-primary-depth: var(--beeday-color-brand-primary-active);
+    --beeday-color-button-primary-shadow: var(--beeday-color-brand-primary-active);
 
-    --beeday-color-button-secondary-bg: var(--beeday-game-purple, #65409f);
-    --beeday-color-button-secondary-bg-hover: #7650b5;
-    --beeday-color-button-secondary-fg: #ffffff;
-    --beeday-color-button-secondary-outline: #44296f;
-    --beeday-color-button-secondary-depth: #4f3280;
-    --beeday-color-button-secondary-shadow: #27193d;
+    --beeday-color-button-secondary-bg: var(--beeday-color-surface);
+    --beeday-color-button-secondary-bg-hover: var(--beeday-color-surface-muted);
+    --beeday-color-button-secondary-fg: var(--beeday-color-brand-primary);
+    --beeday-color-button-secondary-outline: var(--beeday-color-border-strong);
+    --beeday-color-button-secondary-depth: var(--beeday-color-border-strong);
+    --beeday-color-button-secondary-shadow: var(--beeday-color-border-strong);
 
     --beeday-color-button-success-bg: #36a866;
     --beeday-color-button-success-bg-hover: #46b976;
@@ -83,12 +81,12 @@
     --beeday-color-button-warning-depth: #c9820d;
     --beeday-color-button-warning-shadow: #5f410d;
 
-    --beeday-color-button-back-bg: color-mix(in srgb, var(--beeday-game-purple, #65409f) 72%, #27202f);
-    --beeday-color-button-back-bg-hover: var(--beeday-game-purple, #65409f);
-    --beeday-color-button-back-fg: #ffffff;
-    --beeday-color-button-back-outline: #322046;
-    --beeday-color-button-back-depth: #3c2853;
-    --beeday-color-button-back-shadow: #21152f;
+    --beeday-color-button-back-bg: var(--beeday-color-surface);
+    --beeday-color-button-back-bg-hover: var(--beeday-color-surface-muted);
+    --beeday-color-button-back-fg: var(--beeday-color-text-secondary);
+    --beeday-color-button-back-outline: var(--beeday-color-border-strong);
+    --beeday-color-button-back-depth: var(--beeday-color-border-strong);
+    --beeday-color-button-back-shadow: var(--beeday-color-border-strong);
 
     --beeday-color-button-danger-bg: var(--beeday-game-red);
     --beeday-color-button-danger-bg-hover: #d94c57;
@@ -146,60 +144,53 @@
     --beeday-habit-color-red-strong: #d71920;
     --beeday-habit-color-red-strong-dark: #a90f15;
 
-    /* Comic button palette — single source for BeeDayButton's 8 opt-in
-       beeday-button--comic-* modifiers (see docs/design-system/components.md). */
-    --beeday-color-comic-blue: #14adff;
-    --beeday-color-comic-blue-hover: #2cbaff;
-    --beeday-color-comic-blue-pressed: #0080d4;
-    --beeday-color-comic-blue-foreground: #ffffff;
-    --beeday-color-comic-blue-focus: rgb(20 173 255 / 35%);
-
-    --beeday-color-comic-yellow: #ffc928;
-    --beeday-color-comic-yellow-hover: #fbdb6b;
-    --beeday-color-comic-yellow-pressed: #d28b00;
-    --beeday-color-comic-yellow-foreground: #000000;
-    --beeday-color-comic-yellow-focus: rgb(255 201 40 / 40%);
-
-    --beeday-color-comic-back: #ffffff;
-    --beeday-color-comic-back-hover: #9c1bff;
-    --beeday-color-comic-back-pressed: #6512a6;
-    --beeday-color-comic-back-foreground: #000000;
-    --beeday-color-comic-back-hover-foreground: #ffffff;
-    --beeday-color-comic-back-pressed-foreground: #ffffff;
-    --beeday-color-comic-back-focus: rgb(156 27 255 / 35%);
-
-    --beeday-color-comic-danger: #ffffff;
-    --beeday-color-comic-danger-hover: #ef4455;
-    --beeday-color-comic-danger-pressed: #d63d4c;
-    --beeday-color-comic-danger-foreground: #000000;
-    --beeday-color-comic-danger-hover-foreground: #ffffff;
-    --beeday-color-comic-danger-pressed-foreground: #ffffff;
-    --beeday-color-comic-danger-focus: rgb(239 68 85 / 35%);
-
-    --beeday-color-comic-neutral: #ffffff;
-    --beeday-color-comic-neutral-hover: #e3e3e3;
-    --beeday-color-comic-neutral-pressed: #afaeb0;
-    --beeday-color-comic-neutral-foreground: #000000;
-    --beeday-color-comic-neutral-pressed-foreground: #ffffff;
-    --beeday-color-comic-neutral-focus: rgb(175 174 176 / 38%);
-
-    --beeday-color-comic-success: #bef264;
-    --beeday-color-comic-success-hover: #bef264;
-    --beeday-color-comic-success-pressed: #84cc16;
-    --beeday-color-comic-success-foreground: #000000;
-    --beeday-color-comic-success-focus: rgb(190 242 100 / 42%);
-
-    --beeday-color-comic-orange: #f08d2e;
-    --beeday-color-comic-orange-hover: #ff9731;
-    --beeday-color-comic-orange-pressed: #d17c29;
-    --beeday-color-comic-orange-foreground: #000000;
-    --beeday-color-comic-orange-focus: rgb(240 141 46 / 38%);
-
-    --beeday-color-comic-magenta: #d40fde;
-    --beeday-color-comic-magenta-hover: #f311ff;
-    --beeday-color-comic-magenta-pressed: #b90dc2;
-    --beeday-color-comic-magenta-foreground: #ffffff;
-    --beeday-color-comic-magenta-focus: rgb(212 15 222 / 35%);
+    /* Deprecated compatibility aliases for existing `comic-*` class strings. They intentionally
+       resolve to the canonical semantic palettes and must not receive new consumers. */
+    --beeday-color-comic-blue: var(--beeday-color-button-primary-bg);
+    --beeday-color-comic-blue-hover: var(--beeday-color-button-primary-bg-hover);
+    --beeday-color-comic-blue-pressed: var(--beeday-color-button-primary-depth);
+    --beeday-color-comic-blue-foreground: var(--beeday-color-button-primary-fg);
+    --beeday-color-comic-blue-focus: var(--beeday-focus-color);
+    --beeday-color-comic-yellow: var(--beeday-color-button-primary-bg);
+    --beeday-color-comic-yellow-hover: var(--beeday-color-button-primary-bg-hover);
+    --beeday-color-comic-yellow-pressed: var(--beeday-color-button-primary-depth);
+    --beeday-color-comic-yellow-foreground: var(--beeday-color-button-primary-fg);
+    --beeday-color-comic-yellow-focus: var(--beeday-focus-color);
+    --beeday-color-comic-back: var(--beeday-color-button-back-bg);
+    --beeday-color-comic-back-hover: var(--beeday-color-button-back-bg-hover);
+    --beeday-color-comic-back-pressed: var(--beeday-color-button-back-depth);
+    --beeday-color-comic-back-foreground: var(--beeday-color-button-back-fg);
+    --beeday-color-comic-back-hover-foreground: var(--beeday-color-button-back-fg);
+    --beeday-color-comic-back-pressed-foreground: var(--beeday-color-button-back-fg);
+    --beeday-color-comic-back-focus: var(--beeday-focus-color);
+    --beeday-color-comic-danger: var(--beeday-color-button-danger-bg);
+    --beeday-color-comic-danger-hover: var(--beeday-color-button-danger-bg-hover);
+    --beeday-color-comic-danger-pressed: var(--beeday-color-button-danger-depth);
+    --beeday-color-comic-danger-foreground: var(--beeday-color-button-danger-fg);
+    --beeday-color-comic-danger-hover-foreground: var(--beeday-color-button-danger-fg);
+    --beeday-color-comic-danger-pressed-foreground: var(--beeday-color-button-danger-fg);
+    --beeday-color-comic-danger-focus: var(--beeday-focus-color);
+    --beeday-color-comic-neutral: var(--beeday-color-button-confirmation-cancel-bg);
+    --beeday-color-comic-neutral-hover: var(--beeday-color-button-confirmation-cancel-bg-hover);
+    --beeday-color-comic-neutral-pressed: var(--beeday-color-button-confirmation-cancel-depth);
+    --beeday-color-comic-neutral-foreground: var(--beeday-color-button-confirmation-cancel-fg);
+    --beeday-color-comic-neutral-pressed-foreground: var(--beeday-color-button-confirmation-cancel-fg);
+    --beeday-color-comic-neutral-focus: var(--beeday-focus-color);
+    --beeday-color-comic-success: var(--beeday-color-button-success-bg);
+    --beeday-color-comic-success-hover: var(--beeday-color-button-success-bg-hover);
+    --beeday-color-comic-success-pressed: var(--beeday-color-button-success-depth);
+    --beeday-color-comic-success-foreground: var(--beeday-color-button-success-fg);
+    --beeday-color-comic-success-focus: var(--beeday-focus-color);
+    --beeday-color-comic-orange: var(--beeday-color-button-primary-bg);
+    --beeday-color-comic-orange-hover: var(--beeday-color-button-primary-bg-hover);
+    --beeday-color-comic-orange-pressed: var(--beeday-color-button-primary-depth);
+    --beeday-color-comic-orange-foreground: var(--beeday-color-button-primary-fg);
+    --beeday-color-comic-orange-focus: var(--beeday-focus-color);
+    --beeday-color-comic-magenta: var(--beeday-color-button-primary-bg);
+    --beeday-color-comic-magenta-hover: var(--beeday-color-button-primary-bg-hover);
+    --beeday-color-comic-magenta-pressed: var(--beeday-color-button-primary-depth);
+    --beeday-color-comic-magenta-foreground: var(--beeday-color-button-primary-fg);
+    --beeday-color-comic-magenta-focus: var(--beeday-focus-color);
 
     /* Spacing scale */
     --beeday-spacing-2xs: .125rem;
@@ -274,6 +265,7 @@
     --beeday-game-blue: #27a8e8;
     --beeday-game-blue-dark: #0879b5;
     --beeday-game-yellow: #facf39;
+    --beeday-game-yellow-soft: #fbdb6b;
     --beeday-game-yellow-dark: #d3a900;
     --beeday-game-red: #ef4455;
     --beeday-game-green: #45c46b;

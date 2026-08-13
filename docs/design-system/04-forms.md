@@ -4,7 +4,7 @@
 (6 componentes) e `src/BeeDay.Web/wwwroot/css/forms.css`, `polish.css`, `editor-modal.css`,
 `identity.css` (cada área de produto tem seu próprio CSS de formulário — ver §5).
 
-**Última verificação:** 2026-08-07.
+**Última verificação:** 2026-08-12 (Sprint 21.5, EPIC 21 — Interactive Components).
 
 ## 1. Objetivo
 
@@ -56,13 +56,16 @@ comportamento do `ValidationMessage` nativo do .NET não se propaga automaticame
 
 | Estado | Regra CSS |
 |---|---|
-| Default | `border: 1px solid var(--beeday-color-border)`, `box-shadow: 0 1px 2px rgb(33 22 43 / 7%)` |
-| `:focus` | `border-color: var(--beeday-color-primary-light)`, `box-shadow: 0 0 0 2px rgb(103 58 183 / 16%)` (`.beeday-field__control:focus`) — `polish.css` sobrescreve para `:focus-visible` com `outline: var(--beeday-focus-outline)` (3px sólido azul "game"), não apenas `box-shadow` |
-| `:disabled`/`[readonly]` | `cursor: not-allowed`, fundo `#f2f0f3`, texto `#82788a` |
-| `:hover` (não desabilitado) | `border-color: var(--beeday-color-primary-light)` (`pixel-ui.css`) |
+| Default | altura mínima 48px, borda neutra 2px, radius 12px, surface sólida, sem sombra |
+| `:focus-visible` | borda interactive + `--beeday-focus-ring`; não depende apenas de cor |
+| `:disabled`/`[readonly]` | cursor bloqueado, surface/text muted e opacidade controlada |
+| `:hover` (não desabilitado) | borda neutra forte, transition global fast |
+| Erro | borda danger via `.invalid`/`aria-invalid=true`, além da mensagem com `role=alert` |
 | Erro de validação | `.beeday-validation-message` — texto `var(--beeday-color-danger)`, ícone à esquerda, peso bold |
 
-`polish.css` unifica a altura mínima de todo controle de formulário
+`forms.css` é agora o único owner da geometria/motion das primitives; regras duplicadas de fields
+foram removidas de `polish.css` e `pixel-ui.css`. `polish.css` mantém somente layout/touch policy.
+Ele unifica a altura mínima de todo controle de formulário
 (`--beeday-control-height-md`, 3rem) e a eleva para 3rem fixo sob `(pointer: coarse)` — telas de
 toque recebem alvos maiores independente do valor base.
 
@@ -77,7 +80,9 @@ indicador de foco do teclado nunca desaparece, mesmo com o controle nativo ocult
 
 ## 5. CSS de formulário é fragmentado por área de produto
 
-Não existe um único arquivo "forms.css" que todo formulário do produto use — cada área reimplementa
+As primitives oficiais e o Login agora consomem `forms.css`; os editores foram alinhados aos mesmos
+valores de height/border/radius/focus sem reestruturar sua composição. Ainda existem casos
+especializados em Identity e Wallet. Historicamente, cada área reimplementava
 sua própria versão do mesmo padrão visual (campo com borda, foco, erro):
 
 | Arquivo | Escopo | Reaproveita `.beeday-field`? |
