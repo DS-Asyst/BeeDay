@@ -18,6 +18,6 @@
     }
 
     .right-rail__content { display: grid; gap: var(--beeday-spacing-md); }
-    .right-rail__unavailable { display: grid; gap: var(--beeday-spacing-sm); padding: var(--beeday-spacing-lg); background: var(--beeday-color-surface); border: 1px solid var(--beeday-color-border); border-radius: var(--beeday-radius-lg); }
+    .right-rail__unavailable { display: grid; gap: var(--beeday-spacing-sm); }
     .right-rail__unavailable span { color: var(--beeday-color-text-muted); font-size: var(--beeday-font-size-sm); }
 }

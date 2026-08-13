@@ -7,7 +7,8 @@ interop-equivalente aos demais). Componentes de Forms e o `PixelIcon` têm parâ
 [`04-forms.md`](04-forms.md) e [`03-icons.md`](03-icons.md) respectivamente — este documento os
 resume e linka em vez de duplicar (`docs/CONVENTIONS.md` §12).
 
-**Última verificação:** 2026-08-12 (Sprint 21.5, EPIC 21) — §2 (`BeeDayButton`) migrado para a
+**Última verificação:** 2026-08-13 (Sprint 21.7, EPIC 21) — §3 (`BeeDayCard`) consolidado como
+linguagem oficial de content surfaces. Verificação anterior: 2026-08-12 (Sprint 21.5, EPIC 21) — §2 (`BeeDayButton`) migrado para a
 linguagem física Lingo/BeeDay. Verificação anterior: 2026-08-12 (Sprint 20.6, EPIC 20) — §2 e §3
 atualizados: novo modificador opt-in `--soft` em ambos, target visual da página-modelo (ver
 `docs/epics/20-home-visual-experience/README.md`). Correção na mesma Sprint: a cor sob `--soft`
@@ -87,24 +88,27 @@ busca de `<BeeDayButton`.
 
 ### `BeeDayCard`
 
-Container genérico (`Class`, `Padded`, `Muted`, `Interactive` — este último ativa hover
-`translateY(-2px)` + sombra `md`, `ChildContent`, `AdditionalAttributes`). Sem estado interno, sem
-JS. **Default canônico desde a Sprint 20.8** (era o modificador opt-in `--soft` da Sprint 20.6, agora
-incorporado): sem borda, `--beeday-radius-2xl`, `--beeday-shadow-lg`. **Decisão final de default
-(Sprint 20.8, EPIC 20):** auditados todos os consumidores reais antes de decidir — Wallet
-(`.wallet-summary__card`/`.wallet-tag-item`/`.wallet-transaction-card`), a página Account
-(`.beeday-settings-section`) e os cards de atividade (ver abaixo) **já redeclaram por completo**
-sua própria borda/radius/sombra, então o novo default não os afeta visualmente; só a Home realmente
-dependia da aparência default (usava a classe `--soft` explicitamente, agora redundante e removida
-dos seus 2 consumidores). **Correção de achado desatualizado:** a documentação anterior afirmava que
-"a maioria dos cards de produto (Activity/Habit) não usa `BeeDayCard`" — verificado diretamente nesta
-Sprint que isso está incorreto: `HabitCard.razor`/`ActivityCard.razor`
-(`Features/Dashboard/Components/`) **renderizam `<BeeDayCard Class="@CardCssClass">` como raiz**;
-o que é verdade é que `cards.css` estiliza as classes computadas (`.habit-card`, `.activity-card` +
-variantes de cor) com sua própria borda/radius/sombra completas (`.habit-card` inclusive com
-`!important`), então visualmente eles não herdam nada do default de `BeeDayCard` além de layout/
-comportamento genérico — mas arquitetural e semanticamente, eles **são** consumidores reais do
-componente compartilhado, não markup paralelo independente.
+Primitive oficial de unidade de conteúdo, sem estado interno, busca de dados ou JS. Parâmetros:
+`Class`, `Padded`, `Muted`, `Prominent`, `Interactive`, `ChildContent` e `AdditionalAttributes`.
+
+- Default: surface sólida neutra, border de 2px, radius 12px e nenhuma shadow.
+- `Padded`: padding padrão de 16px; com `Prominent`, 24px.
+- `Muted`: apenas muda a surface para o token muted.
+- `Prominent`: radius 24px, border strong e depth discreta `shadow-sm`; usado apenas quando a
+  hierarquia justifica, como os dois showcase cards da Home pública.
+- `Interactive`: cursor, border/background em hover e focus ring; não aplica press/depth de botão.
+  O consumidor continua responsável por fornecer elemento/atributos semânticos (`role`,
+  `tabindex`, teclado) quando torna o card acionável.
+
+Cards informativos não devem definir `Interactive`, receber `tabindex` ou hover decorativo.
+Containers estruturais, panels, dialogs, chips e itens de navegação não são cards. Feature CSS
+pode controlar layout, conteúdo, accent rails e métricas, mas não deve redeclarar todo o chrome
+base. Consumidores reais incluem RightRail (`ExperienceBar`, `ProgressMetricCard`, unavailable),
+Daily (`ActivityCard`, `HabitCard`), Wallet (summary, transaction e tag cards), Account settings e
+Home. `BeeDayProgressBar` permanece uma primitive independente composta dentro dos cards.
+
+Anti-patterns: `<div @onclick>` sem teclado/semântica, hover em informação estática, shadow grande
+como default, radius/hex literal por feature e usar Card para representar panel/modal.
 
 ### `BeeDayCardMenu`
 

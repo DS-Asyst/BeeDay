@@ -1153,3 +1153,48 @@ além da cor; loading usa `aria-busy` e unavailable usa `role="status"`. O rail 
 recebe affordance falsa de clique. Risco residual: o estado indisponível não oferece retry local;
 a recuperação continua seguindo o tratamento/refresh já existente do dashboard. A faixa
 760–1024px e uma experiência mobile própria continuam reservadas às sprints responsivas futuras.
+
+---
+
+## Sprint 21.7 — Cards & Content Surfaces — Results
+
+**Status:** COMPLETE — a primitive `BeeDayCard` existente foi consolidada; nenhum sistema paralelo
+foi criado.
+
+### Auditoria e decisão
+
+- **Reusable card:** `BeeDayCard` já era consumido por Daily, Wallet, Settings e Home, mas seu
+  default legado era borderless/radius 24px/shadow-lg.
+- **Feature-specific interactive cards:** Activity/Habit, Transaction e WalletTag possuem ações
+  reais e preservam layout/accent/teclado próprios, agora herdando o chrome compartilhado.
+- **Informational surfaces:** Experience, ProgressMetric e WalletSummary foram migrados para o
+  card oficial sem hover ou tab order.
+- **Panels/structural containers:** Wallet workspace panels, shell, drawers e page regions foram
+  mantidos semanticamente separados, mesmo quando usam foundations visuais comuns.
+- **Still specialized:** dialogs/modals, navigation, filters/popovers, badges/chips, project
+  workspace e marketing sections. Forçá-los em Card confundiria responsabilidades.
+- **Deferred:** menu de card e dívida retro interna de controles/ícones; migração global desses
+  sistemas não pertence a esta Sprint.
+
+### Contrato e consumidores migrados
+
+O default oficial usa surface neutra, border 2px, radius 12px, padding opt-in de 16px e nenhuma
+shadow. `Muted` preserva a variante neutra; `Prominent` é opt-in para hierarquia forte (radius
+24px, border strong, shadow-sm); `Interactive` oferece apenas affordance/focus de card, nunca a
+physical press language de botão. Home optou explicitamente por `Prominent`, preservando sua
+hierarquia. RightRail passou a compor `BeeDayCard` nos estados loading/loaded/unavailable sem
+alterar dados, progress, XP, Level ou `DashboardState`. Wallet summaries usam o padding oficial;
+Activity/Habit e Wallet interactive cards removeram chrome duplicado, mantendo somente layout e
+regras específicas.
+
+Foram removidas redefinições redundantes de background, border, radius, shadow, padding e hover
+em RightRail, Daily e Wallet. `BeeDayProgressBar` segue independente. Não houve alterações em
+Domain, Application, Infrastructure, requests, state ownership ou regras de produto.
+
+### Acessibilidade e dívida residual
+
+Cards informativos permanecem artigos sem cursor, hover ou foco. Cards realmente acionáveis
+preservam `role="button"`, `tabindex`, Enter/Space e focus-visible existentes. A responsabilidade
+semântica não é inferida pela primitive. Permanecem especializados os grandes panels da Wallet e
+os dialogs; alguns CSS legados desses componentes ainda têm valores históricos e serão tratados
+somente em suas sprints próprias. A dívida sistêmica 760–1024px continua inalterada.

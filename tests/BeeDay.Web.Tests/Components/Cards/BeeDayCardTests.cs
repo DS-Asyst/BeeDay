@@ -23,11 +23,13 @@ public sealed class BeeDayCardTests
         var cut = context.Render<BeeDayCard>(parameters => parameters
             .Add(component => component.Padded, true)
             .Add(component => component.Muted, true)
+            .Add(component => component.Prominent, true)
             .Add(component => component.Interactive, true));
 
         var article = cut.Find("article");
         Assert.Contains("beeday-card--padded", article.ClassList);
         Assert.Contains("beeday-card--muted", article.ClassList);
+        Assert.Contains("beeday-card--prominent", article.ClassList);
         Assert.Contains("beeday-card--interactive", article.ClassList);
     }
 

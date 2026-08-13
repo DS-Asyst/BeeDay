@@ -7,6 +7,7 @@ public partial class BeeDayCard
     [Parameter] public string Class { get; set; } = string.Empty;
     [Parameter] public bool Padded { get; set; }
     [Parameter] public bool Muted { get; set; }
+    [Parameter] public bool Prominent { get; set; }
     [Parameter] public bool Interactive { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter(CaptureUnmatchedValues = true)]
@@ -17,6 +18,7 @@ public partial class BeeDayCard
         "beeday-card",
         Padded ? "beeday-card--padded" : null,
         Muted ? "beeday-card--muted" : null,
+        Prominent ? "beeday-card--prominent" : null,
         Interactive ? "beeday-card--interactive" : null,
         Class
     }.Where(value => !string.IsNullOrWhiteSpace(value)));

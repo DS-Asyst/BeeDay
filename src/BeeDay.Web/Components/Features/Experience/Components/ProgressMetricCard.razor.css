@@ -1,4 +1,4 @@
-.progress-metric-card { display: grid; gap: var(--beeday-spacing-md); padding: var(--beeday-spacing-lg); background: var(--beeday-color-surface); border: 1px solid var(--beeday-color-border); border-radius: var(--beeday-radius-lg); }
+.progress-metric-card { display: grid; gap: var(--beeday-spacing-md); }
 .progress-metric-card__header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--beeday-spacing-smd); }
 .progress-metric-card__header span { color: var(--beeday-color-text-muted); font-size: var(--beeday-font-size-sm); font-weight: 700; }
 .progress-metric-card__header strong { color: var(--beeday-color-text); font-size: var(--beeday-font-size-lg); }

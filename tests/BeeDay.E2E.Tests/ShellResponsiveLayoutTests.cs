@@ -41,6 +41,12 @@ public sealed class ShellResponsiveLayoutTests(PlaywrightAppFixture fixture) : E
         await Expect(experienceProgress).ToBeVisibleAsync();
         Assert.NotNull(await experienceProgress.GetAttributeAsync("aria-valuenow"));
         Assert.NotNull(await experienceProgress.GetAttributeAsync("aria-valuemax"));
+        var experienceCard = rightRail.Locator(".experience-card");
+        Assert.Equal("2px", await experienceCard.EvaluateAsync<string>("element => getComputedStyle(element).borderTopWidth"));
+        Assert.Equal("12px", await experienceCard.EvaluateAsync<string>("element => getComputedStyle(element).borderTopLeftRadius"));
+        Assert.Equal("none", await experienceCard.EvaluateAsync<string>("element => getComputedStyle(element).boxShadow"));
+        Assert.Null(await experienceCard.GetAttributeAsync("role"));
+        Assert.Null(await experienceCard.GetAttributeAsync("tabindex"));
 
         await Expect(Page.Locator(".mobile-header")).ToBeHiddenAsync();
 
