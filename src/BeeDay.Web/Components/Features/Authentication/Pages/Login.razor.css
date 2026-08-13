@@ -51,29 +51,6 @@
     font-weight: 700;
 }
 
-.auth-field input {
-    width: 100%;
-    min-height: 3rem;
-    padding: .7rem .8rem;
-    border: 1px solid var(--beeday-color-border);
-    border-radius: var(--beeday-radius-xs);
-    background: var(--beeday-color-surface-subtle);
-    color: var(--beeday-color-text-primary);
-    font: inherit;
-    box-shadow: inset 0 -2px 0 rgb(23 19 33 / 8%);
-}
-
-.auth-field input:hover {
-    background: var(--beeday-game-paper);
-}
-
-.auth-field input:focus {
-    background: var(--beeday-game-paper);
-    border-color: var(--beeday-color-brand-primary);
-    box-shadow: var(--beeday-focus-ring);
-    outline: none;
-}
-
 .auth-card ::deep .auth-submit {
     min-height: 3.25rem;
     margin-top: .25rem;

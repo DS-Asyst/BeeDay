@@ -172,7 +172,6 @@ textarea {
 .auth-card > p { margin: .5rem 0 1.5rem; }
 .auth-form { display: grid; gap: 1rem; }
 .auth-field { display: grid; gap: .4rem; font-weight: 700; }
-.auth-field input { width: 100%; min-height: 2.9rem; padding: .7rem .8rem; border: 1px solid var(--border-color, #cfc7dc); border-radius: .55rem; background: var(--surface-primary, #fff); color: inherit; font: inherit; }
 .auth-submit { min-height: 3rem; border: 0; border-radius: .55rem; background: #7a4fcb; color: #fff; font-family: var(--beeday-font-family); font-size: 1rem; font-weight: 700; cursor: pointer; }
 .auth-submit:hover { filter: brightness(1.06); }
 .auth-feedback { margin-bottom: 1rem; padding: .75rem .9rem; border-radius: .5rem; }

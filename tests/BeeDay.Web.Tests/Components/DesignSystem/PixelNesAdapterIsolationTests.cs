@@ -127,14 +127,9 @@ public sealed class PixelNesAdapterIsolationTests
     }
 
     [Fact]
-    public void PixelCtaClassAppearsOnlyInApprovedConsumer()
+    public void PixelButtonAdapterWasRetiredWithTheCanonicalPhysicalButtonMigration()
     {
-        var componentsRoot = Path.Combine(ResolveRepoRoot(), "src", "BeeDay.Web", "Components");
-        var consumers = Directory.EnumerateFiles(componentsRoot, "*.razor", SearchOption.AllDirectories)
-            .Where(file => File.ReadAllText(file).Contains("beeday-pixel-cta", StringComparison.Ordinal))
-            .Select(file => Path.GetFileName(file))
-            .ToList();
-
-        Assert.Equal(["BeeDayFeedbackModal.razor"], consumers);
+        var css = ReadRepoFile("src", "BeeDay.Web", "wwwroot", "css", "pixel-nes.css");
+        Assert.DoesNotContain("beeday-pixel-cta", css, StringComparison.Ordinal);
     }
 }

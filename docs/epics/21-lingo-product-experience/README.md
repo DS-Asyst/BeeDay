@@ -1089,3 +1089,23 @@ criar um segundo Design System.
   brand surfaces e visibility transition. Spacing foi preservado por já cobrir os contratos reais.
 - Dívida comic/pixel, geometria de `BeeDayButton`, cards, ícones e breakpoints 760–1024px permanecem
   deliberadamente para as Sprints 21.5+; nenhum contrato público foi alterado e a RightRail segue vazia.
+
+---
+
+## Sprint 21.5 — Interactive Components — Results
+
+**Status:** COMPLETE — `BeeDayButton` permanece a única primitive oficial e agora reproduz a
+mecânica física do Lingo com identidade BeeDay.
+
+- Base: 44px, compact 36px, radius 12px, border 2px + bottom depth 4px, Nunito 700 uppercase,
+  hover por surface e pressed por colapso do depth + translateY(4px), sem sombra SaaS/comic.
+- Variantes públicas foram preservadas. Primary usa a brand oficial; Secondary/Back/Cancel usam
+  surface neutra; Success/Warning/Danger mantêm responsabilidade semântica.
+- Loading preserva a largura pelo label invisível, mantém `aria-busy`/disabled e spinner central;
+  disabled não recebe hover/pressed. FullWidth, Compact, Icon e AdditionalAttributes foram preservados.
+- Classes `comic*`/`skew-press` continuam como aliases temporários para consumidores existentes,
+  remapeados à geometria e paletas semânticas. Nenhum novo uso foi criado. `beeday-pixel-cta` foi removido.
+- Inputs/TextArea/Select/Date/Checkbox oficiais foram consolidados em `forms.css`; Login passou a
+  consumir a primitive visual e editors foram alinhados sem mudanças de composição/contrato.
+- Icon toggles passaram a 40px, radius/timing globais; navegação mobile/desktop mantém seus contratos.
+- Cards, Icon System, layouts de páginas e RightRail não foram alterados além dos controles contidos.

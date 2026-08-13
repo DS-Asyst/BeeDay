@@ -40,6 +40,7 @@ public partial class BeeDayButton
             {
                 "beeday-button",
                 variantClass,
+                IsLoading ? "beeday-button--loading" : null,
                 FullWidth ? "beeday-button--full-width" : null,
                 Compact ? "beeday-button--compact" : null,
                 Class
