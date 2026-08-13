@@ -14,7 +14,7 @@
                  @onclick:stopPropagation>
             <div class="delete-confirmation__top-border" aria-hidden="true"></div>
             <div class="delete-confirmation__content">
-                <div class="delete-confirmation__icon" aria-hidden="true"><PixelIcon Name="PixelIconName.Delete" Size="PixelIconSize.ExtraLarge" Color="PixelIconColor.Danger" /></div>
+                <div class="delete-confirmation__icon" aria-hidden="true"><BeeDayIcon Name="BeeDayIconName.Delete" Size="BeeDayIconSize.ExtraLarge" Color="BeeDayIconColor.Danger" /></div>
                 <h2 id="beeday-confirm-title">@Title</h2>
                 <p id="beeday-confirm-description" class="delete-confirmation__question">@Message</p>
 
@@ -26,7 +26,7 @@
                 @if (!string.IsNullOrWhiteSpace(Warning))
                 {
                     <div class="delete-confirmation__warning">
-                        <PixelIcon Name="PixelIconName.Warning" Size="PixelIconSize.Small" Color="PixelIconColor.Danger" Class="delete-confirmation__warning-icon" />
+                        <BeeDayIcon Name="BeeDayIconName.Warning" Size="BeeDayIconSize.Small" Color="BeeDayIconColor.Danger" Class="delete-confirmation__warning-icon" />
                         <div>
                             <strong>@Warning</strong>
                             @if (!string.IsNullOrWhiteSpace(WarningDetails))

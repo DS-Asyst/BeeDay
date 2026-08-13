@@ -7,6 +7,6 @@ public partial class BeeDayEmptyState
 {
     [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
     [Parameter, EditorRequired] public string Description { get; set; } = string.Empty;
-    [Parameter] public PixelIconName? Icon { get; set; }
+    [Parameter] public BeeDayIconName? Icon { get; set; }
     [Parameter] public string? Class { get; set; }
 }

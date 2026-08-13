@@ -446,7 +446,7 @@
 }
 
 .activity-card--project .activity-card__project-status svg,
-.activity-card--project .activity-card__project-status .pixel-icon {
+.activity-card--project .activity-card__project-status .beeday-icon {
     color: #fff;
     fill: currentColor;
 }

@@ -11,7 +11,7 @@ public partial class DashboardColumn
     [Parameter, EditorRequired] public string EmptyLabel { get; set; } = "items";
     [Parameter, EditorRequired] public string EmptyTitle { get; set; } = string.Empty;
     [Parameter, EditorRequired] public string EmptyDescription { get; set; } = string.Empty;
-    [Parameter] public PixelIconName EmptyIcon { get; set; } = PixelIconName.Information;
+    [Parameter] public BeeDayIconName EmptyIcon { get; set; } = BeeDayIconName.Information;
     [Parameter] public string? SingularLabel { get; set; }
     [Parameter] public int ActiveCount { get; set; }
     [Parameter] public int CompletedCount { get; set; }
@@ -26,7 +26,7 @@ public partial class DashboardColumn
     private string HeadingId => $"dashboard-{NormalizedTitle}";
     private string ResolvedSingularLabel => string.IsNullOrWhiteSpace(SingularLabel) ? Title.TrimEnd('s') : SingularLabel;
     private string CurrentViewLabel => showCompleted ? "Completed" : "Active";
-    private PixelIconName CurrentViewIcon => showCompleted ? PixelIconName.Completed : PixelIconName.Repeat;
+    private BeeDayIconName CurrentViewIcon => showCompleted ? BeeDayIconName.Completed : BeeDayIconName.Repeat;
     private int CurrentCount => showCompleted && ShowCompletedSection ? CompletedCount : ActiveCount;
     private string CurrentCountLabel => $"{CurrentCount} {CurrentViewLabel.ToLowerInvariant()} {EmptyLabel}";
     private string AriaPressed => showCompleted ? "true" : "false";

@@ -3,7 +3,7 @@
 **Fonte da verdade:** verificado diretamente em cada arquivo `.razor`/`.razor.cs` sob
 `src/BeeDay.Web/Components/DesignSystem/`, mais `src/BeeDay.Web/Components/Behaviors/DragDrop/`
 para `BeeDaySortable` (fisicamente fora desta pasta, mas documentado aqui por ser
-interop-equivalente aos demais). Componentes de Forms e o `PixelIcon` têm parâmetros completos em
+interop-equivalente aos demais). Componentes de Forms e o `BeeDayIcon` têm parâmetros completos em
 [`04-forms.md`](04-forms.md) e [`03-icons.md`](03-icons.md) respectivamente — este documento os
 resume e linka em vez de duplicar (`docs/CONVENTIONS.md` §12).
 
@@ -35,8 +35,8 @@ estados internos, eventos, dependências, interop JS (quando existe) e quem cons
 | `Type` | `string` | `"button"` | Atributo HTML `type` |
 | `Disabled`, `IsLoading` | `bool` | `false` | `IsDisabled` combina os dois; `IsLoading` também desabilita |
 | `FullWidth`, `Compact` | `bool` | `false` | Modificadores de layout |
-| `Icon` | `PixelIconName?` | `null` | Ícone opcional antes do texto |
-| `IconSize` | `PixelIconSize` | `Small` | — |
+| `Icon` | `BeeDayIconName?` | `null` | Ícone opcional antes do texto |
+| `IconSize` | `BeeDayIconSize` | `Small` | — |
 | `Class` | `string?` | `null` | Classes extras; nomes `comic`/`skew-press` existentes são aliases legados, não novas variantes visuais |
 | `OnClick` | `EventCallback<MouseEventArgs>` | — | Não dispara se `IsDisabled` |
 | `ChildContent` | `RenderFragment?` | — | Texto/conteúdo do botão |
@@ -53,7 +53,7 @@ mudança de largura.
 `border-radius: pill`, sombra `--beeday-shadow-md`; `:hover` (`translateY(-2px)` + `shadow-lg`),
 `:active` (`translateY(0)` + `shadow-sm`), `:focus-visible` (`shadow-md` + `--beeday-focus-ring`,
 anel canônico azul), `:disabled` (paleta cinza fixa, `cursor: not-allowed`, opacidade .62), loading
-(ícone `PixelIconName.Loading` com `beeday-spin` — `steps(8, end)`, respeitando
+(ícone `BeeDayIconName.Loading` com `beeday-spin` — `steps(8, end)`, respeitando
 `prefers-reduced-motion`). **Decisão final de default (Sprint 20.8, EPIC 20):** este era o
 modificador opt-in `--soft` introduzido na Sprint 20.6 — auditados repo-wide todos os 40+
 consumidores de `<BeeDayButton` antes de decidir; a grande maioria já usa um dos modificadores de

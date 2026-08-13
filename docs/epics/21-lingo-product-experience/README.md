@@ -322,24 +322,24 @@ do Lingo.
 **Fonte Lingo:** `package.json` (`lucide-react@^1.25.0`), uso disperso em 21 arquivos, mais SVGs
 brutos em `public/` (`mascot.svg`, `heart.svg`, `points.svg`, ícones de nav, bandeiras/personagens).
 
-**Fonte BeeDay:** `Components/DesignSystem/Icons/PixelIcon.razor(.cs/.css)`,
-`PixelIconRegistry.cs`, `PixelIconName.cs`.
+**Fonte BeeDay:** `Components/DesignSystem/Icons/BeeDayIcon.razor(.cs/.css)`,
+`BeeDayIconRegistry.cs`, `BeeDayIconName.cs`.
 
 | | Lingo | BeeDay hoje |
 |---|---|---|
 | Biblioteca funcional | `lucide-react` (ícones utilitários: menu, X, loader, seta) | Sprite SVG único (`/icons/sprite.svg`), 61 ícones nomeados, fonte = Material Symbols + Devicon (não pixel-art, apesar do nome do componente) |
 | Ilustrações/marca | SVGs/PNGs soltos em `public/`, consumidos via `next/image`, sem abstração central | Não inventariado nesta leitura — presumivelmente inexistente hoje (BeeDay não tem mascote) |
-| Abstração central | **Nenhuma** — cada call site escolhe `lucide-react` ou `<Image>` diretamente, tamanhos definidos ad hoc por classe Tailwind em cada uso | `PixelIcon` — componente tipado (`PixelIconName` enum, 61 valores), `PixelIconSize` enum (12/16/20/24/32px), `PixelIconColor` enum mapeado a tokens semânticos, **contrato de acessibilidade obrigatório** (lança exceção se `Decorative=false` sem `Label`) |
-| Categorias | Implícitas por diretório (`public/`) | Explícitas (`PixelIconCategory`: Actions, Feedback, System, Navigation, Social, Activities, Forms, Statistics) — já inclui ícones de Statistics (`Experience`, `Level`, `Streak`, `Wallet`, `Progress`, etc.) |
+| Abstração central | **Nenhuma** — cada call site escolhe `lucide-react` ou `<Image>` diretamente, tamanhos definidos ad hoc por classe Tailwind em cada uso | `BeeDayIcon` — componente tipado (`BeeDayIconName` enum, 61 valores), `BeeDayIconSize` enum (12/16/20/24/32px), `BeeDayIconColor` enum mapeado a tokens semânticos, **contrato de acessibilidade obrigatório** (lança exceção se `Decorative=false` sem `Label`) |
+| Categorias | Implícitas por diretório (`public/`) | Explícitas (`BeeDayIconCategory`: Actions, Feedback, System, Navigation, Social, Activities, Forms, Statistics) — já inclui ícones de Statistics (`Experience`, `Level`, `Streak`, `Wallet`, `Progress`, etc.) |
 
 ### Recomendação
 
-**KEEP ARCHITECTURE / REPLACE VISUAL SOURCE.** A abstração tipada do `PixelIcon` (enum + registry
+**KEEP ARCHITECTURE / REPLACE VISUAL SOURCE.** A abstração tipada do `BeeDayIcon` (enum + registry
 + contrato de acessibilidade) é estruturalmente superior à abordagem ad hoc do próprio Lingo — não
 há razão técnica para substituí-la. O que precisa mudar é o *conteúdo visual* do sprite: hoje vem
 de Material Symbols/Devicon (linguagem geométrica neutra), e a fidelidade ao Lingo pede um traço
 mais próximo do estilo arredondado/preenchido usado nos ícones de navegação e nós de lição do
-Lingo. Isso é substituição de asset dentro do contrato existente (`PixelIconRegistry`), não
+Lingo. Isso é substituição de asset dentro do contrato existente (`BeeDayIconRegistry`), não
 mudança de arquitetura — mudança confinada à camada Web, sem impacto em Application/Domain.
 
 ---
@@ -399,7 +399,7 @@ StickyWrapper (368px, lg:block only)
 | Resumo de Habits/Tasks/Projects | **SUPPORTED NOW** — `DashboardResponse` já expõe `HabitSummary`/`TaskSummary`/`ProjectSummary` (este último já com `ProgressPercentage` real) |
 | Resumo de Wallet | **SUPPORTED NOW** — `WalletSummaryResponse` (Balance/TotalIncome/TotalExpenses) já incluso no `DashboardResponse` |
 | Quests / Goals (diário ou semanal) | **REQUIRES PRODUCT/DOMAIN WORK** — não existe `Quest`/`Goal` no Domain (ver Seção 14); não deve ser simulado com dado decorativo |
-| Streak | **REQUIRES PRODUCT/DOMAIN WORK** — não existe conceito de continuidade consecutiva no Domain; o ícone `Streak` já existe no `PixelIconRegistry` mas sem lógica por trás |
+| Streak | **REQUIRES PRODUCT/DOMAIN WORK** — não existe conceito de continuidade consecutiva no Domain; o ícone `Streak` já existe no `BeeDayIconRegistry` mas sem lógica por trás |
 | Achievements/Badges | **REQUIRES PRODUCT/DOMAIN WORK** — não existe no Domain |
 | Promo (upsell) | Sem equivalente de produto no BeeDay — não aplicável, não incluir |
 
@@ -526,7 +526,7 @@ de moeda/pontos de gamificação e não deve ser tratado como tal em nenhum desi
 | `components/ui/dialog.tsx` (Radix) | Superfície modal | `EditorModalShell.razor` + `BeeDayConfirmDialog.razor` (duas implementações distintas hoje) | **EVOLVE** — convergir linguagem visual (radius/backdrop/animação) entre os dois, sem fundir seus contratos comportamentais | 21.5 |
 | `components/ui/sheet.tsx` (Radix, drawer genérico) | Primitive de drawer lateral | Padrão de CSS duplicado em `ProfileSidePanel`/`AccountSidePanel` | **REFACTOR** — extrair um primitive de drawer compartilhado para a futura sidebar mobile reutilizar | 21.3 |
 | Auth pages (`app/(auth)/`) | Apresentação de login | `Login.razor` (comportamento preservado) | **EVOLVE** — só geometria do `.auth-card` | 21.5 (ou Sprint dedicada) |
-| Ícones (lucide + SVG solto) | Iconografia | `PixelIcon.razor` + `PixelIconRegistry` | **KEEP ARCHITECTURE / REPLACE VISUAL SOURCE** | 21.4 |
+| Ícones (lucide + SVG solto) | Iconografia | `BeeDayIcon.razor` + `BeeDayIconRegistry` | **KEEP ARCHITECTURE / REPLACE VISUAL SOURCE** | 21.4 |
 | `unit-banner.tsx` | Banner de seção/contexto | `BeeDaySectionHeader.razor`/`BeeDayPageHeader.razor` | **EVOLVE** | 21.7+ |
 
 Legenda usada: `REUSE` (nenhum equivalente aplicável nesta leitura — nenhum componente do BeeDay
@@ -964,8 +964,8 @@ uma rota — é acessado hoje via `ProfileSidePanel`, um drawer, não uma págin
    independente do nome do atributo, o que já divergia da string `"true"`/`"false"` que a ARIA
    espera; padrão pré-existente em `DesktopSidebar`/`TopNavigation` (Sprint 21.2), corrigido nos
    componentes novos desta Sprint, não retroativamente nos já removidos/substituídos.
-5. **Ícones**: nenhum novo — `PixelIconName.Daily`/`Wallet`/`Profile`/`Account`/`Menu`/`Close` já
-   existiam no registry (`PixelIconRegistry.cs`) e cobrem exatamente os destinos reais; nenhuma
+5. **Ícones**: nenhum novo — `BeeDayIconName.Daily`/`Wallet`/`Profile`/`Account`/`Menu`/`Close` já
+   existiam no registry (`BeeDayIconRegistry.cs`) e cobrem exatamente os destinos reais; nenhuma
    biblioteca nova, nenhuma migração global (Sprint 21.3 §11).
 
 ### Comportamento desktop (≥1024px, validado)
@@ -1198,3 +1198,28 @@ preservam `role="button"`, `tabindex`, Enter/Space e focus-visible existentes. A
 semântica não é inferida pela primitive. Permanecem especializados os grandes panels da Wallet e
 os dialogs; alguns CSS legados desses componentes ainda têm valores históricos e serão tratados
 somente em suas sprints próprias. A dívida sistêmica 760–1024px continua inalterada.
+
+---
+
+## Sprint 21.8 — Icon System — Results
+
+**Status:** COMPLETE — o sistema tipado e o sprite único foram preservados, com uma linguagem
+visual outline moderna e consistente.
+
+- `BeeDayIcon` substitui integralmente o nome legado `PixelIcon`; enum, registry, tamanhos, cores,
+  testes, catálogos e todos os consumidores foram migrados sem alias paralelo.
+- Os 54 ícones funcionais usam SVGs Lucide locais com stroke 2px, cantos arredondados e
+  `currentColor`. As seis marcas sociais continuam em Devicon/assets oficiais. Não há dependência
+  JavaScript, icon font, CDN ou custo extra de runtime.
+- Navegação desktop/mobile, RightRail, botões, cards, Daily, Wallet, Profile/Account, formulários,
+  feedback e superfícies públicas consomem a mesma primitive sem imports SVG dispersos.
+- `Streak` foi removido por não existir no domínio; os usos ilustrativos foram corrigidos para
+  `Habit`. Nenhum dado, regra ou affordance de produto foi inventado.
+- O catálogo CSV e o script de geração agora preservam atributos de stroke, limpam outputs antigos
+  e produzem os assets publicados e um sprite de 60 símbolos.
+- Material Symbols e 663 fontes Streamline Pixel sem consumidores foram removidos. Fontes Lucide,
+  licença ISC e atribuição foram versionadas em `design/icons/source/lucide/`.
+- A escala real de cinco tamanhos (12/16/20/24/32px), cores semânticas e contratos de
+  acessibilidade foram preservados e protegidos por testes.
+
+Não houve mudanças em Domain, Application, Infrastructure, layout ou regras de negócio.

@@ -75,7 +75,7 @@
 .beeday-field__control--select { appearance: none; }
 .beeday-field__control-icon { position: absolute; top: 50%; right: .7rem; transform: translateY(-50%); pointer-events: none; }
 
-/* BeeDayDateInput already renders its own decorative Calendar PixelIcon;
+/* BeeDayDateInput already renders its own decorative Calendar BeeDayIcon;
    suppress the browser's native date-picker glyph so only one calendar icon
    shows, while keeping the native picker itself openable from anywhere in
    the field (a fully transparent, full-size indicator, not display:none). */
@@ -90,11 +90,11 @@
     cursor: pointer;
 }
 .beeday-validation-message { display: flex; align-items: flex-start; gap: .35rem; color: var(--beeday-color-danger); font: var(--beeday-type-small); font-weight: var(--beeday-font-weight-bold); }
-.beeday-validation-message .pixel-icon { margin-top: .08rem; }
+.beeday-validation-message .beeday-icon { margin-top: .08rem; }
 .beeday-checkbox { position: relative; }
 .beeday-checkbox__control { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .beeday-checkbox__visual { display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: var(--beeday-radius-sm); }
-.beeday-checkbox__visual .pixel-icon { grid-area: 1 / 1; }
+.beeday-checkbox__visual .beeday-icon { grid-area: 1 / 1; }
 .beeday-checkbox__checked { opacity: 0; }
 .beeday-checkbox__control:checked + .beeday-checkbox__visual .beeday-checkbox__unchecked { opacity: 0; }
 .beeday-checkbox__control:checked + .beeday-checkbox__visual .beeday-checkbox__checked { opacity: 1; }

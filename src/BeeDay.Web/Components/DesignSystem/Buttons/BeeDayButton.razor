@@ -6,11 +6,11 @@
         @attributes="AdditionalAttributes">
     @if (IsLoading)
     {
-        <PixelIcon Name="PixelIconName.Loading" Size="@IconSize" Class="beeday-button__loader" />
+        <BeeDayIcon Name="BeeDayIconName.Loading" Size="@IconSize" Class="beeday-button__loader" />
     }
     else if (Icon is not null)
     {
-        <PixelIcon Name="@Icon.Value" Size="@IconSize" />
+        <BeeDayIcon Name="@Icon.Value" Size="@IconSize" />
     }
     <span class="beeday-button__label" aria-hidden="@IsLoading.ToString().ToLowerInvariant()">@ChildContent</span>
 </button>

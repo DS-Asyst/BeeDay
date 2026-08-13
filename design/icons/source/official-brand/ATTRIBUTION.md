@@ -27,6 +27,6 @@ The CC0 license applies only to the SVG markup files, not to the brand marks the
 ## Rules for this folder
 
 - These are reference source files only. Never modify, rename, or recolor them beyond what each brand's own guidelines permit for single-color/monochrome usage.
-- Never reference these files directly from application code — the application must only consume icons through `PixelIcon`/`PixelIconRegistry`, which point at `src/BeeDay.Web/wwwroot/icons/official-brand/`.
+- Never reference these files directly from application code — the application must only consume icons through `BeeDayIcon`/`BeeDayIconRegistry`, which point at `src/BeeDay.Web/wwwroot/icons/official-brand/`.
 - If a brand's official mark changes (rebrand, redesign), prefer re-sourcing directly from the brand owner's current guidelines; fall back to Simple Icons only if it has already been updated to match. Replace the file here and re-run `scripts/New-IconSprite.ps1` — do not patch the generated copy.
 - Record the actual source, license, and trademark owner for any new brand added under this provider, following the table above.

@@ -49,7 +49,7 @@ public sealed class HabitCardMetricsTests
             .Add(component => component.Title, "Meditate")
             .Add(component => component.Direction, HabitDirection.Both));
 
-        Assert.DoesNotContain("pixel-icon--repeat", cut.Find(".habit-card__metrics").InnerHtml, StringComparison.Ordinal);
+        Assert.DoesNotContain("beeday-icon--repeat", cut.Find(".habit-card__metrics").InnerHtml, StringComparison.Ordinal);
     }
 
     [Fact]

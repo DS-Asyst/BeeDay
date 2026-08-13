@@ -102,7 +102,7 @@
    overrides recolor icons/brand mark rendered by child components only within Home's own DOM
    subtree, without touching the shared components' default (legacy purple) used by every other
    not-yet-migrated consumer. */
-.home-page ::deep .pixel-icon--color-primary {
+.home-page ::deep .beeday-icon--color-primary {
     color: var(--beeday-color-brand-primary);
 }
 

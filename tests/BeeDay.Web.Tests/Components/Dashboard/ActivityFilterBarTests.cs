@@ -33,7 +33,7 @@ public sealed class ActivityFilterBarTests
         var trigger = cut.Find("button[aria-haspopup='dialog']");
         Assert.Empty(trigger.QuerySelectorAll(".filter-bar__chevron"));
 
-        var filterIcon = trigger.QuerySelector(".pixel-icon--filter");
+        var filterIcon = trigger.QuerySelector(".beeday-icon--filter");
         Assert.NotNull(filterIcon);
         Assert.Equal("true", filterIcon!.GetAttribute("aria-hidden"));
     }

@@ -98,7 +98,7 @@
     background: #faf7fc;
 }
 
-.tutorial-preview__item ::deep .pixel-icon {
+.tutorial-preview__item ::deep .beeday-icon {
     flex: 0 0 auto;
     margin-top: .1rem;
 }

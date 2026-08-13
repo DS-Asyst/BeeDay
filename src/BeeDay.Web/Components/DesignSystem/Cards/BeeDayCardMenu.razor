@@ -11,7 +11,7 @@
             disabled="@Disabled"
             @onclick="ToggleMenu"
             @onclick:stopPropagation>
-        <PixelIcon Name="PixelIconName.More" Size="PixelIconSize.Medium" Decorative="true" />
+        <BeeDayIcon Name="BeeDayIconName.More" Size="BeeDayIconSize.Medium" Decorative="true" />
     </button>
 
     @if (isOpen)
@@ -24,7 +24,7 @@
                     class="card-action-menu__item"
                     role="menuitem"
                     @onclick="EditAsync">
-                <PixelIcon Name="PixelIconName.Edit" Size="PixelIconSize.Small" Decorative="true" />
+                <BeeDayIcon Name="BeeDayIconName.Edit" Size="BeeDayIconSize.Small" Decorative="true" />
                 <span>EDIT</span>
             </button>
 
@@ -32,7 +32,7 @@
                     class="card-action-menu__item card-action-menu__item--delete"
                     role="menuitem"
                     @onclick="DeleteAsync">
-                <PixelIcon Name="PixelIconName.Delete" Size="PixelIconSize.Small" Decorative="true" />
+                <BeeDayIcon Name="BeeDayIconName.Delete" Size="BeeDayIconSize.Small" Decorative="true" />
                 <span>DELETE</span>
             </button>
         </div>
