@@ -129,7 +129,7 @@ a infraestrutura descrita em `docs/testing/01-testing-strategy.md` §7 (`Playwri
 | `AccountLifecycleTests.cs` | Criar conta → confirmação pendente; login → onboarding → `/daily`; logout; editar perfil |
 | `HabitAndTaskTests.cs` | Criar/completar hábito (saldo + XP visíveis); criar/completar task |
 | `WalletTests.cs` | Criar tag + transação no Wallet, saldo atualizado |
-| `HomeTests.cs` (Sprint 20.14, EPIC 20) | Visitante anônimo vê a Home em `/`, acessa Login e retorna pelo X, chega ao cadastro pelo CTA, e valida desktop/tablet/mobile sem overflow |
+| `HomeTests.cs` (Sprint 20.15, EPIC 20) | Além dos fluxos públicos, valida continuidade geométrica Header/Hero, CTAs branco/amarelo e Footer `#17203B` em Chromium |
 | `ShellResponsiveLayoutTests.cs` (EPIC 21, Sprint 21.2/21.3) | Geometria real da sidebar/rail desktop; visibilidade condicional mobile vs. desktop sem sobreposição; ausência de overflow horizontal real |
 | `NavigationTests.cs` (EPIC 21, Sprint 21.3) | `aria-current` real ao navegar e em deep link; abrir/fechar o drawer mobile via hambúrguer/backdrop/Escape/botão dedicado; foco real move para o drawer ao abrir; navegar por um item do drawer fecha-o; Logout continua acessível |
 

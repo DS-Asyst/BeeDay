@@ -9,4 +9,5 @@
 
 .public-layout__main {
     flex: 1 0 auto;
+    padding-block: 0;
 }

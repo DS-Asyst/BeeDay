@@ -6,12 +6,8 @@
 <PageTitle>Login | BeeDay</PageTitle>
 
 <section class="auth-page beeday-fade-in" aria-labelledby="login-heading">
-    <nav class="auth-page__actions" aria-label="Login actions">
-        <a class="auth-page__close" href="/" aria-label="Close login and return to Home">
-            <BeeDayIcon Name="BeeDayIconName.Close" Size="BeeDayIconSize.Medium" Decorative="true" />
-        </a>
-        <a class="beeday-button beeday-button--secondary auth-page__create" href="/profile/create">Create account</a>
-    </nav>
+    <PublicAuthActions DestinationHref="/profile/create" DestinationLabel="Create account"
+                       CloseLabel="Close login and return to Home" Label="Login actions" />
 
     <div class="auth-login">
             <div class="auth-card__brand"><BeeDayBrand /></div>

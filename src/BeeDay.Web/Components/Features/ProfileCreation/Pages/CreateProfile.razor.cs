@@ -35,7 +35,6 @@ public partial class CreateProfile
 
     private void ContinueToProfile() => State.ContinueToProfile();
     private void Back() => State.Back();
-    private void BackToLogin() => Navigation.NavigateTo("/login");
 
     private async Task CompleteProfileAsync()
     {
