@@ -5,13 +5,19 @@
 
 <PageTitle>Login | BeeDay</PageTitle>
 
-<section class="auth-page beeday-fade-in">
-    <div class="auth-card">
-        <div class="auth-card__content">
+<section class="auth-page beeday-fade-in" aria-labelledby="login-heading">
+    <nav class="auth-page__actions" aria-label="Login actions">
+        <a class="auth-page__close" href="/" aria-label="Close login and return to Home">
+            <BeeDayIcon Name="BeeDayIconName.Close" Size="BeeDayIconSize.Medium" Decorative="true" />
+        </a>
+        <a class="beeday-button beeday-button--secondary auth-page__create" href="/profile/create">Create account</a>
+    </nav>
+
+    <div class="auth-login">
             <div class="auth-card__brand"><BeeDayBrand /></div>
 
             <header class="auth-card__header">
-                <h1>Welcome back</h1>
+                <h1 id="login-heading">Welcome back</h1>
                 <p>Sign in to continue your journey.</p>
             </header>
 
@@ -68,15 +74,11 @@
                     <a class="auth-action-link" href="/account/forgot-password">Forgot password?</a>
                 </div>
 
-                <BeeDayButton Type="submit" FullWidth="true" Class="beeday-button--comic beeday-button--comic-blue">
+                <BeeDayButton Type="submit" FullWidth="true" Class="auth-submit">
                     Sign In
                 </BeeDayButton>
             </form>
 
-            <p class="auth-card__footer">
-                New to BeeDay? <a class="auth-action-link" href="/profile/create">Create account</a>
-            </p>
-        </div>
     </div>
 </section>
 

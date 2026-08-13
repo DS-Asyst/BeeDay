@@ -5,17 +5,34 @@ namespace BeeDay.Web.Tests.Components.Authentication;
 public sealed class LoginTests
 {
     [Fact]
-    public void RendersAuthenticationActionsWithSharedVisualClassAndCorrectDestinations()
+    public void RendersFullscreenNavigationActionsWithCorrectDestinations()
     {
         using var context = new BunitContext();
         var cut = context.Render<Login>();
 
-        var actions = cut.FindAll("a.auth-action-link");
+        var close = cut.Find("a.auth-page__close");
+        Assert.Equal("/", close.GetAttribute("href"));
+        Assert.Equal("Close login and return to Home", close.GetAttribute("aria-label"));
 
-        Assert.Equal(2, actions.Count);
-        Assert.Equal("/account/forgot-password", actions[0].GetAttribute("href"));
-        Assert.Contains("Forgot password?", actions[0].TextContent);
-        Assert.Equal("/profile/create", actions[1].GetAttribute("href"));
-        Assert.Contains("Create account", actions[1].TextContent);
+        var create = cut.Find("a.auth-page__create");
+        Assert.Equal("/profile/create", create.GetAttribute("href"));
+        Assert.Contains("Create account", create.TextContent, StringComparison.Ordinal);
+        Assert.Contains("beeday-button--secondary", create.ClassList);
+
+        var forgotPassword = cut.Find("a.auth-action-link");
+        Assert.Equal("/account/forgot-password", forgotPassword.GetAttribute("href"));
+        Assert.Contains("Forgot password?", forgotPassword.TextContent, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PreservesAuthenticationContractAndRemovesCardContainer()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<Login>();
+
+        Assert.Empty(cut.FindAll(".auth-card"));
+        Assert.Equal("/auth/login", cut.Find("form[method='post']").GetAttribute("action"));
+        Assert.NotNull(cut.Find("input[name='rememberMe']"));
+        Assert.NotNull(cut.Find("input[name='returnUrl']"));
     }
 }

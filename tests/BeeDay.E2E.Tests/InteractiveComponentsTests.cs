@@ -21,7 +21,7 @@ public sealed class InteractiveComponentsTests(PlaywrightAppFixture fixture) : E
 
         Assert.Equal("2px", await email.EvaluateAsync<string>("element => getComputedStyle(element).borderTopWidth"));
         Assert.Equal("12px", await email.EvaluateAsync<string>("element => getComputedStyle(element).borderRadius"));
-        Assert.Equal("44px", await button.EvaluateAsync<string>("element => getComputedStyle(element).height"));
+        Assert.Equal("52px", await button.EvaluateAsync<string>("element => getComputedStyle(element).height"));
         Assert.Equal("4px", await button.EvaluateAsync<string>("element => getComputedStyle(element).borderBottomWidth"));
         Assert.Equal("none", await button.EvaluateAsync<string>("element => getComputedStyle(element).boxShadow"));
 
