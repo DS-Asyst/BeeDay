@@ -4,8 +4,8 @@ body {
     min-height: 100%;
     margin: 0;
     font-family: var(--beeday-font-family);
-    color: #302638;
-    background: #f4f3f5;
+    color: var(--beeday-color-text-primary);
+    background: var(--beeday-color-background);
 }
 
 *,
@@ -140,12 +140,7 @@ body {
    Friendly, high-contrast visual language with light pixel-console accents.
    ========================================================= */
 
-body {
-    background:
-        linear-gradient(rgb(255 255 255 / 72%), rgb(255 255 255 / 72%)),
-        repeating-linear-gradient(0deg, transparent 0 3px, rgb(103 58 183 / 3%) 3px 4px),
-        #f1eef6;
-}
+body { background: var(--beeday-color-background); }
 
 .beeday-field__control,
 .profile-field input,
@@ -172,7 +167,7 @@ textarea {
 /* Authentication */
 .auth-page { min-height: 100vh; display: grid; place-items: center; padding: 2rem 1rem; }
 .auth-card { width: min(100%, 28rem); padding: 2rem; border: 1px solid var(--border-color, #d9d2e8); border-radius: 1rem; background: var(--surface-primary, #fff); box-shadow: 0 1rem 3rem rgb(30 12 52 / 12%); }
-.auth-card__brand { display: block; margin-bottom: .75rem; font-family: var(--beeday-font-ui); font-size: 1.15rem; font-weight: 700; letter-spacing: .08em; color: #7a4fcb; }
+.auth-card__brand { display: block; margin-bottom: .75rem; font-family: var(--beeday-font-body); font-size: 1.15rem; font-weight: 800; letter-spacing: .08em; color: var(--beeday-color-brand-primary); }
 .auth-card h1 { margin: 0; }
 .auth-card > p { margin: .5rem 0 1.5rem; }
 .auth-form { display: grid; gap: 1rem; }
@@ -189,12 +184,9 @@ textarea {
 .beeday-brand,
 .profile-panel__brand,
 .welcome > span,
-.entry-loading > span,
-.top-navigation__brand-button {
-    font-family: var(--beeday-font-ui);
-}
+.entry-loading > span { font-family: var(--beeday-font-body); }
 
 h1, h2, h3,
 .beeday-display {
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
 }

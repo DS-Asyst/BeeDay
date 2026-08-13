@@ -52,14 +52,14 @@ h4,
 .page-title,
 .section-title,
 .modal-title {
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-weight: 400;
 }
 
 .beeday-brand,
 .brand,
 .logo {
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-weight: 400;
 }
 

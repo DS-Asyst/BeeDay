@@ -36,7 +36,7 @@
     background: transparent;
     border-radius: var(--beeday-radius-xs);
     text-decoration: none;
-    transition: background-color 180ms ease;
+    transition: background-color var(--beeday-transition-normal);
 }
 
 .desktop-sidebar__brand-link:hover,
@@ -45,8 +45,9 @@
 }
 
 .desktop-sidebar__brand-link:focus-visible {
-    outline: 2px solid rgb(255 255 255 / 90%);
+    outline: var(--beeday-border-width) solid var(--beeday-focus-color-inverse);
     outline-offset: -2px;
+    box-shadow: var(--beeday-focus-ring-inverse);
 }
 
 @media (prefers-reduced-motion: reduce) {

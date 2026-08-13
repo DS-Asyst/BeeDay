@@ -34,7 +34,7 @@
     color: #2f2638;
     font-size: clamp(1.65rem, 4vw, 2.1rem);
     line-height: 1.15;
-    text-shadow: 2px 2px 0 rgb(37 56 210 / 10%);
+    text-shadow: 2px 2px 0 var(--beeday-focus-color);
 }
 
 .profile-panel__intro {
@@ -73,7 +73,7 @@
 
 .profile-field input:focus {
     border-color: #7548b7;
-    box-shadow: 0 0 0 .2rem rgb(37 56 210 / 14%);
+    box-shadow: var(--beeday-focus-ring);
 }
 
 .profile-password-hint {
@@ -110,7 +110,7 @@
 
 .profile-nickname-field:focus-within {
     border-color: #7548b7;
-    box-shadow: 0 0 0 .2rem rgb(37 56 210 / 14%);
+    box-shadow: var(--beeday-focus-ring);
 }
 
 .profile-nickname-field__prefix {

@@ -39,9 +39,9 @@
     background: var(--beeday-button-background);
     box-shadow: var(--beeday-shadow-md);
     filter: none;
-    font: inherit;
+    font-family: var(--beeday-font-body);
     font-size: .88rem;
-    font-weight: 400;
+    font-weight: var(--beeday-font-weight-bold);
     letter-spacing: .035em;
     line-height: 1;
     text-align: center;
@@ -238,9 +238,9 @@
     background: var(--beeday-button-background);
     box-shadow: 3.5px 3.5px 0 #000;
     filter: none;
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: 20px;
-    font-weight: 400;
+    font-weight: var(--beeday-font-weight-bold);
     letter-spacing: 0;
     line-height: 1;
     text-transform: none;

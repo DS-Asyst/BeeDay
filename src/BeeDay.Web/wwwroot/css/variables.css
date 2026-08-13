@@ -1,36 +1,26 @@
 :root {
-    /* Brand — canonical since Sprint 20.7 (EPIC 20). --beeday-color-brand-primary was added in
-       Sprint 20.6, extracted directly from the reference page-model (#2538d2/#4458dc), alongside a
-       legacy --beeday-color-primary (#673ab7) kept as a compatibility value for not-yet-migrated
-       consumers. Sprint 20.7 audited every real consumer of the legacy token across the repository
-       (src/, excluding generated obj/ build output) and classified each by semantics — brand/generic
-       UI chrome (focus rings, links, badges, hovers, selection, drag handles) vs. status
-       (success/warning/danger/info, untouched) vs. activity (task/todo/project/attribute/habit,
-       untouched) — migrating every brand-semantic consumer to this family, never with a blind
-       search/replace. That audit found zero remaining consumers of --beeday-color-primary, so it —
-       and its -hover/-active/-light/-soft variants — were removed rather than kept as a permanent
-       second brand color. The reference's accent yellow is not duplicated as a token —
-       --beeday-game-yellow (#ffc928) is already close enough (#ffd326/#ffb72e) to reuse as-is. */
-    --beeday-color-brand-primary: #2538d2;
-    --beeday-color-brand-primary-hover: #1d2fb8;
-    --beeday-color-brand-primary-active: #16268c;
-    --beeday-color-brand-primary-light: #4458dc;
-    --beeday-color-brand-primary-soft: #e6e9fb;
+    /* Brand — one semantic family, migrated to the official Epic 21 BeeDay palette. */
+    --beeday-color-brand-primary: #1023c8;
+    --beeday-color-brand-primary-hover: #1e33ed;
+    --beeday-color-brand-primary-active: #0c1b99;
+    --beeday-color-brand-primary-light: #1e33ed;
+    --beeday-color-brand-primary-soft: #eef0ff;
 
     /* Surfaces */
-    --beeday-color-background: #f2f1f3;
+    --beeday-color-background: #ffffff;
     --beeday-color-surface: #ffffff;
-    --beeday-color-surface-muted: #f7f5f9;
-    --beeday-color-surface-subtle: #eceaec;
-    --beeday-color-overlay: rgb(47 27 72 / 72%);
+    --beeday-color-surface-muted: #f7f7f7;
+    --beeday-color-surface-subtle: #eeeeee;
+    --beeday-color-overlay: rgb(12 27 153 / 64%);
 
     /* Content */
     --beeday-color-text-primary: #2f2737;
     --beeday-color-text-secondary: #514858;
     --beeday-color-text-muted: #817789;
     --beeday-color-text-inverse: #ffffff;
-    --beeday-color-border: #d7d2da;
-    --beeday-color-border-strong: #c6c1ca;
+    --beeday-color-border: #e5e5e5;
+    --beeday-color-border-strong: #cecece;
+    --beeday-color-border-interactive: var(--beeday-color-brand-primary);
 
     /* Status */
     --beeday-color-success: #2f9e5b;
@@ -66,7 +56,7 @@
     --beeday-color-button-focus-default: rgb(122 79 203 / 36%);
 
     --beeday-color-button-primary-bg: var(--beeday-game-yellow);
-    --beeday-color-button-primary-bg-hover: #ffd454;
+    --beeday-color-button-primary-bg-hover: #fbdb6b;
     --beeday-color-button-primary-fg: #171321;
     --beeday-color-button-primary-outline: #8d6500;
     --beeday-color-button-primary-depth: #d28b00;
@@ -165,7 +155,7 @@
     --beeday-color-comic-blue-focus: rgb(20 173 255 / 35%);
 
     --beeday-color-comic-yellow: #ffc928;
-    --beeday-color-comic-yellow-hover: #ffd454;
+    --beeday-color-comic-yellow-hover: #fbdb6b;
     --beeday-color-comic-yellow-pressed: #d28b00;
     --beeday-color-comic-yellow-foreground: #000000;
     --beeday-color-comic-yellow-focus: rgb(255 201 40 / 40%);
@@ -226,27 +216,35 @@
     --beeday-radius-xs: .2rem;
     --beeday-radius-sm: .375rem;
     --beeday-radius-md: .625rem;
-    --beeday-radius-lg: .875rem;
-    --beeday-radius-xl: 1.25rem;
+    --beeday-radius-lg: .75rem;
+    --beeday-radius-xl: 1rem;
     /* Generous surface radius (large marketing/showcase cards, soft CTAs) — added Sprint 20.6
        (EPIC 20) to represent the reference page-model's target visual language; the scale had no
        step between xl (1.25rem) and pill (999px) for a rounded, non-pill surface. */
-    --beeday-radius-2xl: 1.75rem;
+    --beeday-radius-2xl: 1.5rem;
     --beeday-radius-pill: 999px;
 
+    /* Borders and physical depth — foundations for controls/surfaces and Sprint 21.5 buttons. */
+    --beeday-border-width: 2px;
+    --beeday-depth-sm: 2px;
+    --beeday-depth-md: 4px;
+    --beeday-depth-lg: 8px;
+
     /* Elevation */
-    --beeday-shadow-xs: 0 1px 2px rgb(40 27 52 / 8%);
-    --beeday-shadow-sm: 0 1px 2px rgb(47 36 56 / 8%), 0 2px 8px rgb(47 36 56 / 6%);
-    --beeday-shadow-md: 0 4px 12px rgb(47 36 56 / 10%), 0 10px 28px rgb(47 36 56 / 8%);
-    --beeday-shadow-lg: 0 1.5rem 4rem rgb(12 6 22 / 42%);
+    --beeday-shadow-xs: 0 1px 2px rgb(12 27 153 / 6%);
+    --beeday-shadow-sm: 0 2px 6px rgb(12 27 153 / 8%);
+    --beeday-shadow-md: 0 4px 12px rgb(12 27 153 / 10%);
+    --beeday-shadow-lg: 0 12px 28px rgb(12 27 153 / 16%);
 
     /* Focus — migrated to the canonical brand blue in Sprint 20.7 (EPIC 20): this token has a single,
        well-defined role (the default focus-visible ring color) rather than the broad, overloaded
        surface/text role of --beeday-color-primary, so migrating it directly — instead of keeping a
        legacy alias — does not risk the same product-wide background/text regression; it only
        recolors a transient interaction indicator, consistently, everywhere. */
-    --beeday-focus-color: rgb(37 56 210 / 20%);
+    --beeday-focus-color: rgb(30 51 237 / 24%);
     --beeday-focus-ring: 0 0 0 3px var(--beeday-focus-color);
+    --beeday-focus-color-inverse: #facf39;
+    --beeday-focus-ring-inverse: 0 0 0 3px rgb(250 207 57 / 36%);
 
     /* Motion */
     --beeday-duration-fast: 120ms;
@@ -257,6 +255,7 @@
     --beeday-transition-fast: var(--beeday-duration-fast) var(--beeday-easing-standard);
     --beeday-transition-normal: var(--beeday-duration-normal) var(--beeday-easing-standard);
     --beeday-transition-emphasized: var(--beeday-duration-slow) var(--beeday-easing-emphasized);
+    --beeday-transition-visibility: visibility 0s linear var(--beeday-duration-slow);
 
     /* Layout and layers */
     --beeday-content-width: 100%;
@@ -274,8 +273,8 @@
     --beeday-game-panel: #ffffff;
     --beeday-game-blue: #27a8e8;
     --beeday-game-blue-dark: #0879b5;
-    --beeday-game-yellow: #ffc928;
-    --beeday-game-yellow-dark: #d69100;
+    --beeday-game-yellow: #facf39;
+    --beeday-game-yellow-dark: #d3a900;
     --beeday-game-red: #ef4455;
     --beeday-game-green: #45c46b;
     --beeday-game-border: 2px solid var(--beeday-game-ink);

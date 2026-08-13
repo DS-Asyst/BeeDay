@@ -28,7 +28,7 @@
 
 .beeday-field__control:focus {
     border-color: var(--beeday-color-brand-primary-light);
-    box-shadow: 0 0 0 2px rgb(37 56 210 / 16%);
+    box-shadow: var(--beeday-focus-ring);
 }
 
 .beeday-field__control:disabled,

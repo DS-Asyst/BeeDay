@@ -7,14 +7,13 @@
 .beeday-brand {
     display: inline-flex;
     color: var(--beeday-brand-color, var(--beeday-color-brand-primary));
-    font-family: var(--beeday-font-ui);
-    font-size: 1.2rem;
-    font-weight: 700;
+    font-family: var(--beeday-font-body);
+    font-size: 1.5rem;
+    font-weight: var(--beeday-font-weight-extrabold);
     letter-spacing: .055em;
     line-height: 1;
 }
 
 .beeday-brand__accent {
     color: var(--beeday-game-yellow);
-    text-shadow: 1px 0 0 var(--beeday-game-ink), -1px 0 0 var(--beeday-game-ink), 0 1px 0 var(--beeday-game-ink), 0 -1px 0 var(--beeday-game-ink);
 }

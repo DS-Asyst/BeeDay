@@ -44,7 +44,7 @@
     border: 2px solid transparent;
     border-radius: var(--beeday-radius-xs);
     cursor: pointer;
-    transition: color 160ms ease, background-color 180ms ease;
+    transition: color var(--beeday-transition-normal), background-color var(--beeday-transition-normal);
 }
 
 .mobile-header__menu-button:hover,
@@ -55,8 +55,9 @@
 }
 
 .mobile-header__menu-button:focus-visible {
-    outline: 2px solid var(--beeday-game-yellow);
+    outline: var(--beeday-border-width) solid var(--beeday-focus-color-inverse);
     outline-offset: 2px;
+    box-shadow: var(--beeday-focus-ring-inverse);
 }
 
 @media (prefers-reduced-motion: reduce) {

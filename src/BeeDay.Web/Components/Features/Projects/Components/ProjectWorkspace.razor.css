@@ -270,7 +270,7 @@
 
 .project-workspace__todo-body strong {
     overflow: hidden;
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: .78rem;
     text-overflow: ellipsis;
     white-space: nowrap;

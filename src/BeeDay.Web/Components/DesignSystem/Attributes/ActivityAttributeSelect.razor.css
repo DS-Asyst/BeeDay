@@ -30,7 +30,7 @@
 .activity-attribute-select__trigger:focus-visible {
     outline: none;
     border-color: var(--beeday-color-brand-primary);
-    box-shadow: 0 0 0 3px rgb(37 56 210 / 15%);
+    box-shadow: var(--beeday-focus-ring);
 }
 
 .activity-attribute-select__trigger:disabled {
