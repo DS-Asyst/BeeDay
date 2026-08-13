@@ -1,0 +1,73 @@
+/* Sprint 21.3 (EPIC 21) — geometry/interaction language sourced from the Lingo SidebarItem
+   measurements in docs/epics/21-lingo-product-experience/README.md §3/§8 (52px item height, 32px
+   icon, active surface + border). Colors adapted to BeeDay's dark shell surface (the sidebar
+   inherits --beeday-color-brand-primary-active, not Lingo's light background) rather than copied
+   from the Lingo palette — global color/typography migration is Sprint 21.4, not this component. */
+.navigation-item {
+    display: flex;
+    align-items: center;
+    gap: var(--beeday-spacing-md);
+    min-height: 3.25rem;
+    padding-inline: var(--beeday-spacing-md);
+    border: 0;
+    border-radius: var(--beeday-radius-md);
+    color: rgb(255 255 255 / 82%);
+    background: transparent;
+    font-family: var(--beeday-font-body);
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 160ms ease, color 160ms ease, transform 120ms ease;
+}
+
+.navigation-item__icon {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+}
+
+.navigation-item__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.navigation-item:hover {
+    color: #fff;
+    background: rgb(255 255 255 / 10%);
+}
+
+.navigation-item:active {
+    transform: scale(.98);
+}
+
+.navigation-item:focus-visible {
+    outline: 2px solid var(--beeday-game-yellow);
+    outline-offset: 2px;
+}
+
+/* Current route (NavLink's own ActiveClass) or an open Profile/Account panel (button mode) — same
+   treatment either way. Font-weight change alongside the surface/border tint so the state is never
+   color-only (Sprint 21.3 §8). */
+.navigation-item.is-active {
+    color: #fff;
+    background: rgb(255 255 255 / 16%);
+    border: 1px solid rgb(255 255 255 / 30%);
+    font-weight: 700;
+}
+
+.navigation-item.is-active:hover {
+    background: rgb(255 255 255 / 20%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .navigation-item {
+        transition: none;
+    }
+
+    .navigation-item:active {
+        transform: none;
+    }
+}

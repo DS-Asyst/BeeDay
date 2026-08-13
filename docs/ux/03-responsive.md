@@ -2,20 +2,28 @@
 
 **Fonte da verdade:** levantamento completo de toda ocorrência de `@media` em
 `src/BeeDay.Web/wwwroot/css/*.css` (19 arquivos) e `src/BeeDay.Web/Components/**/*.razor.css`
-(33 arquivos) — 52 arquivos de CSS no total, cada um lido integralmente ou varrido por `@media`
+(36 arquivos) — 55 arquivos de CSS no total, cada um lido integralmente ou varrido por `@media`
 nesta Sprint (16.7 havia enumerado apenas as 19 folhas globais).
 
-**Última verificação:** 2026-08-12 (Sprint 21.2, EPIC 21 — BeeDay Shell Foundation) — dois arquivos
-de CSS isolado novos (`Layout/DesktopSidebar.razor.css`, `Layout/RightRail.razor.css`) introduzem o
-primeiro breakpoint `min-width` do novo shell (`1024px`, replicando o breakpoint estrutural único
-documentado para o Lingo em `docs/epics/21-lingo-product-experience/README.md` §13), também
-declarado em `Layout/MainLayout.razor.css` (×2 regras) e `Layout/TopNavigation.razor.css` (×1) —
-ver §2.2/§3/§5. Nesta verificação a contagem de arquivos de CSS isolado também foi reconferida por
-completo (`find`, não amostragem) e corrigida de 29 para 31 **antes** das duas adições desta
-Sprint — drift pré-existente, não introduzido por ela; não foi possível determinar nesta Sprint
-exatamente quais dois arquivos causaram a divergência com a verificação da Sprint 20.8, e essa
-investigação não faz parte do escopo do Shell Foundation. Verificação anterior: 2026-08-12
-(Sprint 20.8) — contagem de CSS isolado por componente corrigida de 30 para 29
+**Última verificação:** 2026-08-12 (Sprint 21.3, EPIC 21 — BeeDay Navigation) — `TopNavigation`
+removida do repositório (`Layout/TopNavigation.razor.css` deletado junto com o componente), suas
+responsabilidades absorvidas por `MobileHeader`/`MobileSidebar` — dois arquivos novos de CSS
+isolado, junto com `NavigationItem.razor.css`/`NavigationItems.razor.css` (sem `@media` próprio).
+Efeito líquido: 33 → 36 arquivos isolados (+4, -1). A remoção de `TopNavigation` também elimina o
+único arquivo que declarava `max-width: 680px` (§2.1: 26 → 25 valores distintos) — `920px` nunca
+tinha entrado na tabela do §2.1 apesar de também ter sido um corte próprio de
+`TopNavigation.razor.css`, lacuna pré-existente desta seção que se tornou irrelevante com a
+remoção do arquivo, não investigada retroativamente. `min-width: 1024px` (§2.2) agora é declarado
+em 5 arquivos (`MainLayout` ×2, `DesktopSidebar`, `RightRail`, `MobileHeader`, `MobileSidebar`) —
+era 4 com `TopNavigation`. Ver §2/§3/§5. Verificação anterior: 2026-08-12 (Sprint 21.2, EPIC 21 —
+BeeDay Shell Foundation) — dois arquivos de CSS isolado novos (`Layout/DesktopSidebar.razor.css`,
+`Layout/RightRail.razor.css`) introduziram o primeiro breakpoint `min-width` do novo shell
+(`1024px`, replicando o breakpoint estrutural único documentado para o Lingo em
+`docs/epics/21-lingo-product-experience/README.md` §13). Nessa verificação a contagem de arquivos
+de CSS isolado também foi reconferida por completo (`find`, não amostragem) e corrigida de 29 para
+31 **antes** das duas adições daquela Sprint — drift pré-existente, não investigado retroativamente.
+Verificação anterior: 2026-08-12 (Sprint 20.8) — contagem de CSS isolado por componente corrigida
+de 30 para 29
 (`LoginBackground.razor.css` removido junto com o componente — background de imagem descontinuado,
 ver `docs/epics/20-home-visual-experience/README.md` seção "Sprint 20.8"); o valor 640px/40rem que
 ele compartilhava com `OnboardingLayout.razor.css` permanece (este último manteve seu próprio bloco
@@ -29,12 +37,12 @@ Dar a tabela completa e definitiva de todo breakpoint real do repositório — e
 "dono" desse assunto; [`docs/design-system/01-foundations.md`](../design-system/01-foundations.md)
 §10 e [`01-guidelines.md`](01-guidelines.md) §4 apontam para cá em vez de repetir a lista.
 
-## 2. Não existe um sistema de breakpoints — existem 30 valores distintos
+## 2. Não existe um sistema de breakpoints — existem 29 valores distintos
 
-**30 declarações distintas** de largura/altura de viewport, sem nenhum token compartilhado: 26
+**29 declarações distintas** de largura/altura de viewport, sem nenhum token compartilhado: 25
 valores de `max-width`, 3 de `min-width` (Sprint 21.2 adicionou `1024px`), 1 de `max-height`.
 
-### 2.1 `max-width` (26 valores, ordenados)
+### 2.1 `max-width` (25 valores, ordenados)
 
 | px | rem original (se aplicável) | Arquivo(s) |
 |---:|---|---|
@@ -52,7 +60,6 @@ valores de `max-width`, 3 de `min-width` (Sprint 21.2 adicionou `1024px`), 1 de 
 | 640 | 40rem (2×) | `wallet.css` (×2), `OnboardingLayout.razor.css`, `IconCatalog.razor.css`, `HeroCatalog.razor.css` |
 | 650 | — | `cards.css` (×5 regras) |
 | 672 | 42rem | `design-system.css`, `polish.css` |
-| 680 | — | `TopNavigation.razor.css` |
 | 700 | — | `AppFooter.razor.css`, `Home.razor.css`, `ProjectWorkspace.razor.css` |
 | 720 | — | `settings.css`, `wallet.css` (×3), `Account.razor.css` |
 | 760 | — | `AccountSidePanel.razor.css`, `ProfileSidePanel.razor.css`, `MainLayout.razor.css` (×2), `ActivityFilterBar.razor.css` |
@@ -69,7 +76,7 @@ valores de `max-width`, 3 de `min-width` (Sprint 21.2 adicionou `1024px`), 1 de 
 | px | Arquivo | Contexto |
 |---|---|---|
 | 641 | `wallet.css:393` | Complementa o `max-width: 640px` da mesma folha — único par min/max explicitamente complementar encontrado |
-| 1024 | `MainLayout.razor.css` (×2 regras), `DesktopSidebar.razor.css`, `RightRail.razor.css`, `TopNavigation.razor.css` | **Novo (Sprint 21.2, EPIC 21).** Breakpoint estrutural do shell — replica o único breakpoint dominante documentado para o Lingo em `docs/epics/21-lingo-product-experience/README.md` §13. Diferente dos demais casos desta tabela, é usado com o **mesmo valor, coordenadamente, em 4 arquivos**: `DesktopSidebar`/`RightRail` aparecem, `TopNavigation` desaparece, `MainLayout` recalcula `--beeday-top-navigation-height` para `0px` (cascata para `.beeday-workspace`/`.beeday-side-slot`) e desloca `.beeday-workspace` com `padding-left`. |
+| 1024 | `MainLayout.razor.css` (×2 regras), `DesktopSidebar.razor.css`, `RightRail.razor.css`, `MobileHeader.razor.css`, `MobileSidebar.razor.css` | Breakpoint estrutural do shell — replica o único breakpoint dominante documentado para o Lingo em `docs/epics/21-lingo-product-experience/README.md` §13. Usado com o **mesmo valor, coordenadamente, em 5 arquivos**: `DesktopSidebar`/`RightRail` aparecem, `MobileHeader`/`MobileSidebar` desaparecem (Sprint 21.3 — substituíram `TopNavigation`, que usava este mesmo corte até ser removida), `MainLayout` recalcula `--beeday-top-navigation-height` para `0px` (cascata para `.beeday-workspace`/`.beeday-side-slot`) e desloca `.beeday-workspace` com `padding-left`. |
 | 1101 | `Home.razor.css:66` | Complementa o `max-width: 1100px` da mesma folha — segundo par complementar |
 
 ### 2.3 `max-height` (1 valor)
@@ -86,21 +93,21 @@ sem coordenação entre si:
 - **Cartão estreito**: `cards.css` usa `650px`, `wallet.css` usa `640px` para o mesmo tipo de ajuste
   (reduzir densidade de um cartão de item).
 - **"Layout mobile" da casca do produto**: `760px` aparece em 4 arquivos de `Components/Layout/`
-  (`AccountSidePanel`, `ProfileSidePanel`, `MainLayout` ×2) — consistente entre si — mas
-  `TopNavigation.razor.css` (também Layout, também "a casca do produto") corta em `920px` e depois
-  de novo em `680px`, dois valores próprios que não coincidem com o `760px` do resto da casca.
+  (`AccountSidePanel`, `ProfileSidePanel`, `MainLayout` ×2) — consistente entre si. Até a Sprint
+  21.3, `TopNavigation.razor.css` (também Layout, também "a casca do produto") divergia desse
+  corte com `920px`/`680px` próprios — exemplo histórico, não mais reproduzível: o arquivo foi
+  removido junto com o componente.
 - **Cabeçalho de página estreito**: `design-system.css`/`polish.css` cortam `BeeDayPageHeader`/
   `BeeDaySectionHeader`/`BeeDayHero` em `42rem` (672px), mas `Account.razor.css` (a única página que
   usa `BeeDayPageHeader` em produção) tem seu próprio corte em `720px` para o restante do layout da
   página — um usuário girando a tela por essa faixa de 48px vê o cabeçalho e o corpo da página
   mudarem de layout em momentos ligeiramente diferentes.
 
-**Contraexemplo (Sprint 21.2, EPIC 21):** o novo `min-width: 1024px` do shell (§2.2) é o primeiro
+**Contraexemplo (Sprint 21.2/21.3, EPIC 21):** o `min-width: 1024px` do shell (§2.2) é o primeiro
 caso do repositório onde o mesmo propósito visual usa o mesmo corte, coordenadamente, em múltiplos
-arquivos de `Components/Layout/` — inclusive substituindo os cortes próprios de `TopNavigation`
-citados no segundo bullet acima *nesse ponto específico* (`TopNavigation` ainda tem `920px`/`680px`
-como cortes próprios abaixo de `1024px`, mas passa a desaparecer inteiramente acima dele, em vez de
-continuar divergindo do resto da casca).
+arquivos de `Components/Layout/`. A Sprint 21.3 foi além de só coordenar esse corte: removeu de
+vez a divergência histórica citada no segundo bullet acima, deletando `TopNavigation.razor.css` em
+vez de deixá-lo divergir indefinidamente ao lado do novo shell.
 
 ## 4. Media features não relacionadas a largura
 
@@ -122,13 +129,13 @@ continuar divergindo do resto da casca).
   a altura reservada no topo e o offset `sticky` dos painéis sem precisar repetir a mudança em cada
   regra; `.beeday-workspace` também ganha `padding-left: var(--beeday-sidebar-width)` para
   compensar o `DesktopSidebar` (`position: fixed`, fora do fluxo).
-- **`TopNavigation`**: em `920px`, a grade de 4 colunas estreita a coluna da marca (17rem→13rem); em
-  `680px`, os links centrais (`Daily`/`Wallet`) desaparecem inteiramente (`display: none`) — não há
-  um menu alternativo visível para alcançá-los nessa largura além da navegação por URL direta ou os
-  painéis laterais. **Sprint 21.2:** em `1024px`, a barra inteira desaparece (`display: none`) — o
-  `DesktopSidebar` assume a navegação primária a partir daí; abaixo de `1024px` continua sendo o
-  único acesso a essa navegação, papel agora explicitamente transitório (ver
-  `docs/epics/21-lingo-product-experience/README.md` §8/§10).
+- **`MobileHeader`/`MobileSidebar`** (novos em `Components/Layout/`, Sprint 21.3 — substituem
+  `TopNavigation`, removida): `display: none` a partir de `1024px` — `DesktopSidebar` assume a
+  navegação primária a partir daí; abaixo de `1024px` continuam sendo o único acesso a ela, papel
+  explicitamente transitório (ver `docs/epics/21-lingo-product-experience/README.md` §8/§10). Sem
+  os cortes próprios (`920px`/`680px`) que `TopNavigation` tinha — `MobileHeader` não tem grade de
+  colunas nem links centrais a esconder, então não há mais nenhum breakpoint intermediário
+  específico de navegação abaixo de `1024px`.
 - **`DesktopSidebar`/`RightRail`** (novos em `Components/Layout/`, Sprint 21.2): `display: none` por
   padrão, mostrados apenas a partir de `1024px` — independente do breakpoint `760px` dos painéis
   Profile/Account. Entre `760px` e `1024px`, os painéis já saíram do modo overlay fixo e ocupam
@@ -150,11 +157,8 @@ continuar divergindo do resto da casca).
 ## 6. Fontes consultadas
 
 - Todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css` (19 arquivos) e
-  `src/BeeDay.Web/Components/**/*.razor.css` (33 arquivos) — 52 arquivos, levantamento completo
-  nesta Sprint (corrige uma inconsistência interna pré-existente neste mesmo documento: esta seção
-  ainda citava 30/49 arquivos enquanto a "Fonte da verdade" no topo já citava 29/48 — nenhum dos
-  dois batia com o `find` direto), contagem cruzada manual (26 `max-width` + 3 `min-width` + 1
-  `max-height` = 30).
+  `src/BeeDay.Web/Components/**/*.razor.css` (36 arquivos) — 55 arquivos, levantamento completo
+  nesta Sprint, contagem cruzada manual (25 `max-width` + 3 `min-width` + 1 `max-height` = 29).
 - [`docs/design-system/01-foundations.md`](../design-system/01-foundations.md) §9-10 (camadas de
   CSS, cross-referenciado, não duplicado).
 - [`02-accessibility.md`](02-accessibility.md) (media features de acessibilidade, cross-referenciado).

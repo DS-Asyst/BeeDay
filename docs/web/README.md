@@ -33,7 +33,8 @@ src/BeeDay.Web/
 │                                    BeeDayClaimTypes
 ├── Components/
 │   ├── App.razor, Routes.razor    shell HTML raiz e Router
-│   ├── Layout/                     MainLayout, OnboardingLayout, TopNavigation, side panels, footer
+│   ├── Layout/                     MainLayout, OnboardingLayout, DesktopSidebar, MobileHeader/
+│   │                                  MobileSidebar, NavigationItem(s), side panels, footer
 │   ├── DesignSystem/                 Buttons, Cards, Forms, Feedback, Icons, Layout, Modals, Text —
 │   │                                  ver docs/design-system/ (reservado) e §5 abaixo
 │   ├── Behaviors/DragDrop/            BeeDaySortable (JS interop de reordenação)
@@ -78,19 +79,16 @@ injetam `MediatR.ISender` diretamente e nunca passam por `BeeDayWebService` — 
   diretamente"** — essa afirmação está desatualizada/incorreta: `Wallet.razor` e as 5 páginas de
   `Features/Identity/Pages/` fazem exatamente isso (`@inject MediatR.ISender Sender`). Fora do
   escopo desta Sprint corrigir `docs/architecture/`; reportado aqui para correção em Sprint futura.
-- **Achado resolvido (verificado diretamente na Sprint 20.4, EPIC 20):** o texto literal
-  `<span>LEVEL</span><span>UP</span>` em `Components/Layout/TopNavigation.razor` e
-  `Components/Layout/AccountSidePanel.razor`, e o link para `https://github.com/tiagoarrigoni/LevelUp`
-  em `Components/Layout/AppFooter.razor`, **não existem mais** — ambos os componentes já renderizam
-  `BEE`/`DAY` (classes `top-navigation__brand-bee`/`-day`, `support-drawer__brand-bee`/`-day`;
-  corrigido em commits anteriores à EPIC 19, `09486d2`/`bb2502b`) e `AppFooter.razor`'s "About" já
-  aponta para `https://github.com/tiagoarrigoni/BeeDay`. O achado ficou desatualizado neste documento
-  por não ter sido revalidado desde então — corrigido aqui. Ponto que **permanece** válido:
-  `TopNavigation`/`AccountSidePanel` ainda usam markup próprio em vez de delegar a
-  `Components/DesignSystem/Text/BeeDayBrand.razor` — não é mais um erro de conteúdo, apenas ausência
-  de reuso do componente compartilhado (motivo: contexto de header escuro exige tratamento de cor
-  diferente do padrão claro de `BeeDayBrand`; ver `docs/epics/20-home-visual-experience/README.md`,
-  Sprint 20.4).
+- **Achado totalmente resolvido (histórico — verificado na Sprint 20.4, EPIC 20; reconfirmado na
+  Sprint 21.3, EPIC 21):** o texto literal `<span>LEVEL</span><span>UP</span>` em
+  `Components/Layout/AccountSidePanel.razor` (e no extinto `TopNavigation.razor`) **não existe
+  mais**. O ponto que este documento ainda registrava como "permanece válido" — `TopNavigation`/
+  `AccountSidePanel` usarem markup próprio em vez de `Components/DesignSystem/Text/BeeDayBrand.razor`
+  — também está resolvido: a Sprint 20.7 (EPIC 20) migrou ambos para `<BeeDayBrand />` via o hook
+  `--beeday-brand-color` (ver `docs/epics/20-home-visual-experience/README.md`, "TopNavigation
+  Migration"), e a Sprint 21.3 removeu `TopNavigation.razor` inteiramente — `DesktopSidebar`/
+  `MobileHeader`/`MobileSidebar` (seus sucessores) já nascem usando `<BeeDayBrand />`. Nenhum
+  componente de `Components/Layout/` renderiza marca própria hoje.
 - `Components/Features/ProfileCreation/Pages/Welcome.razor` (rota `/welcome`) define
   `<PageTitle>Login | BeeDay</PageTitle>` — título incorreto para uma página que só redireciona para
   `/login`. A rota `/` (`Entry.razor`) já resolve o destino real via estado de autenticação; `/welcome`

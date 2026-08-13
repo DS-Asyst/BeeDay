@@ -75,13 +75,18 @@ renderização do componente Razor em si via bUnit.
 |---|---|
 | `ProfileSidePanel.razor` | `Components/Layout/ProfileSidePanelTests.cs` |
 | `AccountSidePanel.razor` | `Components/Layout/AccountSidePanelTests.cs` |
-| `BeeDayPageHeader`/`BeeDaySectionHeader` (Design System, usado por `Account`/`Wallet`) | `Components/Layout/BeeDayHeaderTests.cs` — nome do arquivo sugere `TopNavigation`, mas testa os cabeçalhos do Design System, não a navegação |
+| `BeeDayPageHeader`/`BeeDaySectionHeader` (Design System, usado por `Account`/`Wallet`) | `Components/Layout/BeeDayHeaderTests.cs` — nome do arquivo sugere a navegação, mas testa os cabeçalhos do Design System |
 | `BeeDaySettingsForm`/`BeeDaySettingsSection` (Design System, usado por `Account`) | `Components/Layout/BeeDaySettingsTests.cs` |
 | `BeeDayHero` (Design System, catálogo — primeiro consumidor de produto real desde a Sprint 20.5, ver `Home.razor`) | `Components/Layout/BeeDayHeroTests.cs` |
 | `PublicHeader.razor`/`PublicLayout.razor` (EPIC 20, Sprint 20.4/20.5) | `Components/Layout/PublicHeaderTests.cs`, `PublicLayoutTests.cs` |
+| `DesktopSidebar.razor` (EPIC 21, Sprint 21.3) | `Components/Layout/DesktopSidebarTests.cs` |
+| `MobileHeader.razor` (EPIC 21, Sprint 21.3) | `Components/Layout/MobileHeaderTests.cs` |
+| `MobileSidebar.razor` (EPIC 21, Sprint 21.3) | `Components/Layout/MobileSidebarTests.cs` |
+| `NavigationItem.razor`/`NavigationItems.razor` (EPIC 21, Sprint 21.3) | `Components/Layout/NavigationItemTests.cs`, `NavigationItemsTests.cs` |
+| Contrato de shell (`MainLayout`/`DesktopSidebar`/`RightRail`/`MobileHeader`/`MobileSidebar`, EPIC 21) | `Components/Layout/ShellFoundationTests.cs` |
 
-`MainLayout.razor`, `OnboardingLayout.razor`, `TopNavigation.razor` e `AppFooter.razor` não têm
-arquivo de teste dedicado identificado nesta auditoria.
+`MainLayout.razor`, `OnboardingLayout.razor` e `AppFooter.razor` não têm arquivo de teste dedicado
+identificado nesta auditoria. `TopNavigation.razor` foi removida na Sprint 21.3 (EPIC 21).
 
 ## 6. Mapeamento — Feature components (`04-feature-components.md`)
 
@@ -117,9 +122,9 @@ não o código JS isoladamente.
 
 ## 8. `BeeDay.E2E.Tests`
 
-4 classes de teste, 9 fluxos, sobre a infraestrutura descrita em
-`docs/testing/01-testing-strategy.md` §7 (`PlaywrightAppFixture`, `E2ETestBase`,
-`E2EWebApplicationFactory`):
+6 classes de teste, 18 fluxos (`grep -c "\[Fact\]"`, verificado diretamente na Sprint 21.3), sobre
+a infraestrutura descrita em `docs/testing/01-testing-strategy.md` §7 (`PlaywrightAppFixture`,
+`E2ETestBase`, `E2EWebApplicationFactory`):
 
 | Classe | Fluxos |
 |---|---|
@@ -127,6 +132,8 @@ não o código JS isoladamente.
 | `HabitAndTaskTests.cs` | Criar/completar hábito (saldo + XP visíveis); criar/completar task |
 | `WalletTests.cs` | Criar tag + transação no Wallet, saldo atualizado |
 | `HomeTests.cs` (Sprint 20.5, EPIC 20) | Visitante anônimo vê a Home em `/` sem redirect; CTA "Get started" alcança `/login` |
+| `ShellResponsiveLayoutTests.cs` (EPIC 21, Sprint 21.2/21.3) | Geometria real da sidebar/rail desktop; visibilidade condicional mobile vs. desktop sem sobreposição; ausência de overflow horizontal real |
+| `NavigationTests.cs` (EPIC 21, Sprint 21.3) | `aria-current` real ao navegar e em deep link; abrir/fechar o drawer mobile via hambúrguer/backdrop/Escape/botão dedicado; foco real move para o drawer ao abrir; navegar por um item do drawer fecha-o; Logout continua acessível |
 
 ## 9. Contagem de referência
 
@@ -136,9 +143,11 @@ por execução real na Sprint 20.5 (não repetido aqui em detalhe para evitar du
 
 ## 10. Achado
 
-- `Components/Layout/BeeDayHeaderTests.cs` — o nome sugere que testa `TopNavigation.razor` (o
-  "header" da aplicação); na verdade testa `BeeDayPageHeader`/`BeeDaySectionHeader` do Design
-  System. `TopNavigation.razor` não tem teste de componente identificado nesta auditoria.
+- `Components/Layout/BeeDayHeaderTests.cs` — o nome sugere que testa a navegação da aplicação; na
+  verdade testa `BeeDayPageHeader`/`BeeDaySectionHeader` do Design System, sem relação com
+  `Components/Layout/`'s navegação real (`DesktopSidebar`/`MobileHeader`/`MobileSidebar`, com seus
+  próprios arquivos de teste — ver §5). `TopNavigation.razor`, que este achado apontava como sem
+  cobertura, foi removida na Sprint 21.3 (EPIC 21) — achado encerrado, não mais aplicável.
 
 ## 11. Fontes de verdade
 

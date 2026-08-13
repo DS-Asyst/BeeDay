@@ -1,0 +1,11 @@
+.navigation-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--beeday-spacing-xs);
+}
+
+.navigation-items--actions {
+    margin-top: auto;
+    padding-top: var(--beeday-spacing-md);
+    border-top: 1px solid rgb(255 255 255 / 12%);
+}

@@ -1,8 +1,8 @@
-/* Sprint 21.2 (EPIC 21) — structural foundation only. Reuses the exact triggers/behavior
-   TopNavigation already exposed (profile panel toggle, support/account menu toggle, Daily/Wallet
-   links) relocated into a persistent desktop region; final navigation design (icons, active
-   states, item set) belongs to Sprint 21.3 — see docs/epics/21-lingo-product-experience/README.md
-   §16 (Component Mapping: SidebarItem -> EVOLVE, target 21.3). */
+/* Sprint 21.2 (EPIC 21) established the structural region; Sprint 21.3 makes it the real primary
+   navigation — geometry/interaction language sourced from the Lingo Sidebar/SidebarItem
+   measurements documented in docs/epics/21-lingo-product-experience/README.md §3/§6/§8. Item-level
+   styling (icon/label/active/hover/focus) lives in NavigationItem.razor.css, shared with
+   MobileSidebar — this file only owns the sidebar's own chrome (width, fixed position, brand). */
 .desktop-sidebar {
     display: none;
 }
@@ -17,7 +17,7 @@
         display: flex;
         width: var(--beeday-sidebar-width);
         flex-direction: column;
-        gap: var(--beeday-spacing-sm);
+        gap: var(--beeday-spacing-lg);
         padding: var(--beeday-spacing-lg) var(--beeday-spacing-md);
         color: var(--beeday-color-text-inverse);
         background: var(--beeday-color-brand-primary-active);
@@ -27,86 +27,30 @@
     }
 }
 
-.desktop-sidebar__brand-button {
+.desktop-sidebar__brand-link {
     display: flex;
     align-items: center;
     justify-content: flex-start;
     padding: var(--beeday-spacing-sm);
     color: inherit;
     background: transparent;
-    border: 0;
     border-radius: var(--beeday-radius-xs);
-    font: inherit;
-    cursor: pointer;
+    text-decoration: none;
     transition: background-color 180ms ease;
 }
 
-.desktop-sidebar__brand-button:hover,
-.desktop-sidebar__brand-button:focus-visible {
+.desktop-sidebar__brand-link:hover,
+.desktop-sidebar__brand-link:focus-visible {
     background: rgb(255 255 255 / 10%);
 }
 
-.desktop-sidebar__brand-button:focus-visible {
+.desktop-sidebar__brand-link:focus-visible {
     outline: 2px solid rgb(255 255 255 / 90%);
     outline-offset: -2px;
 }
 
-.desktop-sidebar__links {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    gap: var(--beeday-spacing-xs);
-    margin-top: var(--beeday-spacing-md);
-}
-
-.desktop-sidebar__links ::deep a {
-    padding: var(--beeday-spacing-sm) var(--beeday-spacing-sm);
-    color: rgb(255 255 255 / 82%);
-    text-decoration: none;
-    border-radius: var(--beeday-radius-xs);
-    font-size: 1rem;
-    font-weight: 700;
-    transition: background-color 180ms ease, color 180ms ease;
-}
-
-.desktop-sidebar__links ::deep a:hover,
-.desktop-sidebar__links ::deep a:focus-visible,
-.desktop-sidebar__links ::deep a.active {
-    color: #fff;
-    background: rgb(255 255 255 / 10%);
-}
-
-.desktop-sidebar__menu-button {
-    display: flex;
-    align-items: center;
-    gap: var(--beeday-spacing-sm);
-    padding: var(--beeday-spacing-sm);
-    color: rgb(255 255 255 / 86%);
-    background: transparent;
-    border: 0;
-    border-radius: var(--beeday-radius-xs);
-    font: inherit;
-    cursor: pointer;
-    transition: background-color 180ms ease, color 180ms ease;
-}
-
-.desktop-sidebar__menu-button:hover,
-.desktop-sidebar__menu-button:focus-visible {
-    color: #fff;
-    background: rgb(255 255 255 / 10%);
-}
-
-.desktop-sidebar__menu-icon {
-    display: grid;
-    width: 1.5rem;
-    height: 1.5rem;
-    place-items: center;
-}
-
 @media (prefers-reduced-motion: reduce) {
-    .desktop-sidebar__brand-button,
-    .desktop-sidebar__links ::deep a,
-    .desktop-sidebar__menu-button {
+    .desktop-sidebar__brand-link {
         transition: none;
     }
 }

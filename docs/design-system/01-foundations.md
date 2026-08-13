@@ -3,11 +3,16 @@
 **Fonte da verdade:** verificado diretamente em `src/BeeDay.Web/wwwroot/css/variables.css`,
 `theme.css`, `typography.css`, `typography-policy.css`, `utilities.css`, `polish.css`, e um
 levantamento completo de todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css`
-(19 arquivos) e `src/BeeDay.Web/Components/**/*.razor.css` (33 arquivos de CSS isolado por
-componente — dois novos na Sprint 21.2, `Layout/DesktopSidebar.razor.css` e
-`Layout/RightRail.razor.css`, ver abaixo e `docs/ux/03-responsive.md`).
+(19 arquivos) e `src/BeeDay.Web/Components/**/*.razor.css` (36 arquivos de CSS isolado por
+componente — quatro novos na Sprint 21.3 (`Layout/{NavigationItem,NavigationItems,MobileHeader,
+MobileSidebar}.razor.css`), um removido (`Layout/TopNavigation.razor.css`, componente deletado —
+ver `docs/web/03-layouts.md`), ver abaixo e `docs/ux/03-responsive.md`).
 
-**Última verificação:** 2026-08-12 (Sprint 21.2, EPIC 21 — BeeDay Shell Foundation) — §10: novos
+**Última verificação:** 2026-08-12 (Sprint 21.3, EPIC 21 — BeeDay Navigation) — contagem de CSS
+isolado corrigida de 33 para 36 (+4 novos, -1 removido); §10 atualizado (5 arquivos agora
+coordenam o breakpoint `min-width: 1024px`, `TopNavigation` substituída por `MobileHeader`/
+`MobileSidebar`). Verificação anterior: 2026-08-12 (Sprint 21.2, EPIC 21 — BeeDay Shell
+Foundation) — §10: novos
 tokens de shell `--beeday-sidebar-width`/`--beeday-right-rail-width`/`--beeday-content-max-width`
 (escopados em `.beeday-app`, `MainLayout.razor.css`, seguindo o mesmo padrão já usado por
 `--beeday-top-navigation-height`/`--beeday-left-panel-width`/`--beeday-right-panel-width` — nenhuma
@@ -231,12 +236,14 @@ shell" compartilhada pelos quatro.
 
 **Não existe um token de breakpoint** para os valores em pixel/rem — toda `@media (max-width:
 ...)`/`(min-width: ...)` do repositório usa um valor literal, por arquivo, sem referência a uma
-variável compartilhada, verdade tanto para as 19 folhas globais quanto para os 33 arquivos de CSS
-isolado do §9. **Exceção parcial desde a Sprint 21.2 (EPIC 21):** o novo breakpoint estrutural do
-shell (`min-width: 1024px`) não usa uma variável de breakpoint (CSS não permite `var()` dentro de
-uma media feature), mas *é* aplicado como o mesmo valor literal coordenado em 4 arquivos de
-`Components/Layout/` (`MainLayout`, `DesktopSidebar`, `RightRail`, `TopNavigation`) — o primeiro
-caso do repositório de um corte reutilizado deliberadamente em vez de reinventado por arquivo; ver
+variável compartilhada, verdade tanto para as 19 folhas globais quanto para os 36 arquivos de CSS
+isolado do §9. **Exceção parcial desde a Sprint 21.2 (EPIC 21):** o breakpoint estrutural do shell
+(`min-width: 1024px`) não usa uma variável de breakpoint (CSS não permite `var()` dentro de uma
+media feature), mas *é* aplicado como o mesmo valor literal coordenado em 5 arquivos de
+`Components/Layout/` (`MainLayout`, `DesktopSidebar`, `RightRail`, `MobileHeader`, `MobileSidebar`
+— `TopNavigation` usava esse mesmo corte até ser removida na Sprint 21.3, absorvida por
+`MobileHeader`/`MobileSidebar`) — o primeiro caso do repositório de um corte reutilizado
+deliberadamente em vez de reinventado por arquivo; ver
 [`docs/ux/03-responsive.md`](../ux/03-responsive.md) §3. A lista completa (30 breakpoints
 distintos: 26 em `max-width`, 3 em `min-width`, 1 em `max-height`) está em
 [`docs/ux/03-responsive.md`](../ux/03-responsive.md) §2, junto com os casos em que o mesmo

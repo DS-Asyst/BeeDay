@@ -10,10 +10,12 @@ afirmação de "estado atual" abaixo vem de memória — quando este documento e
 futuras, cada atualização deve reverificar contra o código antes de alterar uma afirmação de
 estado atual.
 
-**Última verificação:** 2026-08-12 (Sprint 21.2 — BeeDay Shell Foundation, COMPLETE — primeira
-Sprint de implementação da EPIC; ver "Sprint 21.2 — Results" ao final deste documento). Sprint
-21.1 — Lingo Architecture & Design System Mapping, COMPLETE — especificação técnica, nenhuma
-implementação visual realizada (seções 1-21 abaixo, preservadas como registro dessa Sprint).
+**Última verificação:** 2026-08-12 (Sprint 21.3 — BeeDay Navigation, COMPLETE — segunda Sprint de
+implementação da EPIC; ver "Sprint 21.3 — Results" ao final deste documento). Sprint 21.2 — BeeDay
+Shell Foundation, COMPLETE (ver "Sprint 21.2 — Results", preservada como registro dessa Sprint).
+Sprint 21.1 — Lingo Architecture & Design System Mapping, COMPLETE — especificação técnica,
+nenhuma implementação visual realizada (seções 1-21 abaixo, preservadas como registro dessa
+Sprint).
 
 **Escopo da Sprint 21.1 (seções 1-21 abaixo):** transformar a referência visual genérica do
 Lingo/Duolingo Clone em uma especificação técnica concreta de migração para o BeeDay — medidas,
@@ -888,3 +890,174 @@ substitui validação em HMG, que segue pendente do fluxo normal de promoção d
   merece revisão de composição visual na Sprint 21.11.
 - `DesktopSidebar` tem estilo intencionalmente neutro/mínimo — qualquer comparação visual lado a
   lado com o Lingo antes da Sprint 21.3 vai parecer incompleta por design, não por erro.
+
+---
+
+## Sprint 21.3 — BeeDay Navigation — Results
+
+**Branch:** `sprint/21.3-beeday-navigation` (criada a partir de `hmg` já sincronizado com a Sprint
+21.2 mergeada, PR #84).
+
+**Status:** COMPLETE — segunda Sprint de implementação da EPIC 21. A `DesktopSidebar` estrutural da
+Sprint 21.2 passa a ser a navegação real do produto; `TopNavigation` (o fallback mobile transitório
+da Sprint 21.2) foi removida — não apenas desligada — porque suas responsabilidades foram
+totalmente absorvidas.
+
+### Inventário de rotas (base real da navegação)
+
+Levantamento direto de todo `@page` sob `MainLayout` antes de desenhar a hierarquia (§4 do prompt
+da Sprint): `/daily` (Dashboard — já concentra Habits/Tasks/Todos/Projects em colunas, não são
+experiências próprias hoje), `/wallet`, `/account` e `/settings` (mesma página, `Account.razor`
+com duas rotas). Não foram criadas `/habits`, `/tasks` ou `/projects` — essas continuam
+inexistentes como rotas independentes, exatamente como o escopo da Sprint exigiu. Profile não é
+uma rota — é acessado hoje via `ProfileSidePanel`, um drawer, não uma página.
+
+### Componentes criados
+
+- `Components/Layout/NavigationItem.razor(.css/.cs)` — primitivo de linha compartilhado entre
+  desktop e mobile (uma única definição visual via isolamento de CSS do Blazor). Dois modos: rota
+  (`NavLink`, computa `aria-current="page"` por conta própria — o `NavLink` do Blazor não expõe seu
+  próprio estado ativo) ou ação (`button`, `aria-expanded` sempre como string literal `"true"`/
+  `"false"`, não `bool` ligado direto ao atributo — Blazor trata esse caso como atributo HTML
+  booleano presente/ausente, não a string ARIA esperada).
+- `Components/Layout/NavigationItems.razor(.css)` — a lista real e atual de destinos (Daily/Wallet
+  como rotas; Profile/Account como triggers de drawer), usada verbatim por `DesktopSidebar` e
+  `MobileSidebar` — os dois nunca podem divergir porque compartilham a mesma definição.
+- `Components/Layout/MobileHeader.razor(.css)` — substitui `TopNavigation` abaixo de `1024px`:
+  marca (link para `/daily`) + um único botão hambúrguer que abre `MobileSidebar`.
+- `Components/Layout/MobileSidebar.razor(.css/.cs)` — drawer overlay com backdrop, `Escape` fecha,
+  botão de fechar dedicado, foco movido programaticamente para esse botão ao abrir
+  (`ElementReference.FocusAsync()`, sem JS customizado), `aria-hidden`/`aria-expanded`/
+  `aria-controls` corretos.
+
+### Componentes modificados
+
+- `Components/Layout/DesktopSidebar.razor(.css)` — brand vira `NavLink` para `/daily` (era um
+  botão que só abria o Profile panel); navegação delegada a `<NavigationItems>`.
+- `Components/Layout/MainLayout.razor` — troca `<TopNavigation>` por `<MobileHeader>` +
+  `<MobileSidebar>`; novo estado `_isMobileNavOpen`.
+- `Components/Layout/TopNavigation.razor(.css)` — **removidos** (`git rm`), não apenas
+  desconectados do shell — busca repo-wide confirmou zero consumidores restantes antes da remoção.
+
+### Decisões tomadas
+
+1. **Perfil e Conta viram itens dedicados na navegação**, não mais sobrecarregados no botão de
+   marca (Profile) e num botão de menu genérico (Account) — mais próximo da composição real do
+   Lingo (logo separado do `UserButton`), sem inventar nenhuma funcionalidade nova: os mesmos dois
+   drawers (`ProfileSidePanel`/`AccountSidePanel`) continuam sendo abertos pelos mesmos dois
+   `EventCallback`s de sempre.
+2. **`TopNavigation` foi deletada, não descontinuada silenciosamente** — Sprint 21.3 §17 exigia
+   avaliar explicitamente se suas responsabilidades tinham sido totalmente absorvidas antes de
+   remover; foram (marca/Profile → `MobileHeader`+drawer; Daily/Wallet → `NavigationItems`;
+   Account/menu → `NavigationItems`), então o arquivo foi removido de fato.
+3. **`ToggleMobileNav` não fecha mais Profile/Account ao abrir o drawer** — decisão corrigida
+   durante a própria Sprint, não planejada desde o início: a primeira implementação fechava os
+   dois painéis sempre que o hambúrguer era acionado (para evitar dois drawers ancorados à
+   esquerda sobrepostos); isso **prendia** um painel já aberto permanentemente aberto em mobile,
+   porque reabrir o hambúrguer era o único jeito de alcançar o botão "Close profile/support panel"
+   de novo — bug real, pego por `BeeDay.E2E.Tests.ShellResponsiveLayoutTests`, não por revisão
+   estática. A colisão visual (dois overlays de largura semelhante, mesmo lado) é resolvida pelo
+   `z-index` mais alto do `MobileSidebar` (150 vs. 20), que simplesmente desenha por cima — não
+   precisa de um bloqueio de estado.
+4. **`aria-expanded`/`aria-hidden` renderizados como strings literais**, não `bool` ligado direto
+   ao atributo — Blazor trata um valor `bool` como atributo HTML booleano (presente/ausente)
+   independente do nome do atributo, o que já divergia da string `"true"`/`"false"` que a ARIA
+   espera; padrão pré-existente em `DesktopSidebar`/`TopNavigation` (Sprint 21.2), corrigido nos
+   componentes novos desta Sprint, não retroativamente nos já removidos/substituídos.
+5. **Ícones**: nenhum novo — `PixelIconName.Daily`/`Wallet`/`Profile`/`Account`/`Menu`/`Close` já
+   existiam no registry (`PixelIconRegistry.cs`) e cobrem exatamente os destinos reais; nenhuma
+   biblioteca nova, nenhuma migração global (Sprint 21.3 §11).
+
+### Comportamento desktop (≥1024px, validado)
+
+`DesktopSidebar` (256px, fixa) mostra marca + Daily/Wallet (rotas reais, `aria-current="page"`
+correto inclusive após navegação real e em deep link) + Profile/Account (triggers de drawer,
+estado refletido em `aria-expanded`). `MobileHeader`/`MobileSidebar` ausentes.
+
+### Comportamento responsivo (mobile <1024px, validado)
+
+`MobileHeader` (marca + hambúrguer) sempre visível; hambúrguer abre `MobileSidebar` com a mesma
+lista de destinos do desktop. Fechamento por: botão dedicado, clique no backdrop, `Escape`,
+navegação por um item de rota. Foco move-se para o botão de fechar ao abrir (verificado com
+Chromium real, não presumido). Logout continua acessível via `AccountSidePanel` (aberto pelo item
+"Account"), inalterado.
+
+### Testes adicionados
+
+- `tests/BeeDay.Web.Tests/Components/Layout/NavigationItemTests.cs` (7 testes) — modo rota/ação,
+  `aria-current` real por rota atual (incluindo prefixo/sub-rota), `aria-expanded` como string
+  literal, `OnNavigate`.
+- `tests/BeeDay.Web.Tests/Components/Layout/NavigationItemsTests.cs` (3 testes) — só destinos
+  reais, sem links mortos; `OnNavigate` só dispara para itens de rota.
+- `tests/BeeDay.Web.Tests/Components/Layout/MobileHeaderTests.cs` (4 testes) — marca, contrato
+  ARIA aberto/fechado, callback do hambúrguer.
+- `tests/BeeDay.Web.Tests/Components/Layout/MobileSidebarTests.cs` (8 testes) — `aria-hidden`
+  real, fechar por botão/backdrop/Escape, navegação fecha o drawer, ativar Profile/Account dispara
+  seu próprio callback.
+- `tests/BeeDay.Web.Tests/Components/Layout/DesktopSidebarTests.cs` (reescrito, 6 testes) —
+  agora cobre a navegação real, não mais os antigos botões de marca/menu genéricos.
+- `tests/BeeDay.Web.Tests/Components/Layout/ShellFoundationTests.cs` (reescrito) — confirma que
+  `TopNavigation.razor(.css)` não existe mais no repositório, além dos contratos de shell já
+  cobertos na Sprint 21.2.
+- `tests/BeeDay.E2E.Tests/NavigationTests.cs` (novo, 7 testes, Chromium real) — `aria-current` real
+  ao clicar e em deep link; abrir/fechar o drawer por hambúrguer/backdrop/Escape/botão dedicado;
+  foco real move para o drawer ao abrir; navegar fecha o drawer; Logout acessível.
+- `tests/BeeDay.E2E.Tests/ShellResponsiveLayoutTests.cs` (atualizado) — troca `.top-navigation` por
+  `.mobile-header`; o teste de acesso ao Profile panel em mobile passa a refletir o novo caminho
+  (abrir hambúrguer → Profile) e verifica que reabrir o hambúrguer continua alcançando "Close
+  profile panel" (prova, não presume, que o bug da decisão 3 acima está corrigido).
+
+770 testes de `BeeDay.Web.Tests`/`BeeDay.E2E.Tests` existentes antes desta Sprint continuam
+passando sem modificação além dos arquivos listados acima.
+
+### Documentação atualizada
+
+- `docs/web/03-layouts.md` — reescrita das seções de navegação (§3-§7); `TopNavigation` removida
+  da narrativa.
+- `docs/ux/03-responsive.md` — remoção do arquivo/breakpoints exclusivos de `TopNavigation`
+  (`680px`; `920px` já não constava na tabela — lacuna pré-existente, não investigada
+  retroativamente), atualização do grupo de arquivos que compartilham `min-width: 1024px` (4→5).
+- `docs/design-system/01-foundations.md` §10 — mesma atualização de contagem/arquivos.
+- `docs/design-system/02-components.md` — corrige uma afirmação sobre `BeeDayBrand` que já estava
+  desatualizada antes desta Sprint (dizia que `TopNavigation`/`AccountSidePanel` não usavam o
+  componente — ambos já usavam desde a Sprint 20.7/20.4).
+- `docs/web/README.md` — árvore de `Components/Layout/` atualizada; achado histórico sobre marca
+  duplicada marcado como totalmente resolvido (estava parcialmente desatualizado antes desta
+  Sprint também).
+- `docs/web/06-testing.md` — tabelas de mapeamento componente→teste atualizadas; contagem de
+  classes/fluxos de E2E corrigida (`grep -c`, verificado diretamente — estava desatualizada desde
+  antes da Sprint 21.2, que não tinha registrado `ShellResponsiveLayoutTests.cs` aqui).
+- `docs/web/01-composition-root.md` — corrige a atribuição do form de logout (só `AccountSidePanel`
+  o renderiza, nunca foi `TopNavigation`).
+- `docs/ux/02-accessibility.md` — lista de arquivos com `prefers-reduced-motion` atualizada
+  (também desatualizada desde a Sprint 21.2, que não tinha registrado `DesktopSidebar.razor.css`).
+- Este documento (`docs/epics/21-lingo-product-experience/README.md`).
+
+### Validação executada
+
+- `dotnet format BeeDay.slnx --verify-no-changes` — sucesso.
+- `dotnet build BeeDay.slnx` — 0 erros, 0 avisos.
+- `dotnet test BeeDay.slnx` — todos os projetos, incluindo os testes novos/reescritos acima.
+- `git status` — apenas os arquivos intencionais desta Sprint (mais a remoção deliberada de
+  `TopNavigation.razor(.css)`).
+
+**Environment Validated, não apenas Code Complete:** `aria-current` real por navegação e deep
+link, geometria e visibilidade condicional reais, abertura/fechamento real do drawer por
+hambúrguer/backdrop/Escape/botão, movimento real de foco de teclado ao abrir, e a correção do bug
+de painel preso aberto — todos confirmados em Chromium real via `BeeDay.E2E.Tests`, não apenas
+inferidos de CSS/markup estático. Cobre o ambiente de teste E2E local — não substitui validação em
+HMG, que segue pendente do fluxo normal de promoção do repositório.
+
+### Riscos residuais
+
+- A faixa `760px`-`1024px` sem coordenação entre os breakpoints dos painéis existentes e do novo
+  shell (registrada na Sprint 21.2) permanece — não piorada nem corrigida nesta Sprint, ainda para
+  a Sprint 21.11.
+- `MobileHeader`/`MobileSidebar` não implementam um focus-trap completo (Tab pode sair do drawer
+  enquanto aberto) — mesmo patamar dos painéis Profile/Account pré-existentes, não uma regressão,
+  mas também não uma melhoria; se um focus-trap completo for desejado no futuro, é trabalho novo,
+  não coberto por esta Sprint.
+- Estilo da navegação ainda é o definido na Sprint 21.3 diretamente a partir dos valores do Lingo
+  (§6/§8 do prompt) — não passou pela consolidação tipográfica/cromática global da Sprint 21.4
+  (`Jersey 25`, `--beeday-color-brand-primary`), então cores/tipografia atuais são as mesmas de
+  antes da EPIC 21 aplicadas à nova geometria, não a paleta final `#1023C8` etc.

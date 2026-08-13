@@ -1,0 +1,19 @@
+<header class="mobile-header">
+    <NavLink href="/daily" Match="NavLinkMatch.Prefix" class="mobile-header__brand" aria-label="BeeDay — go to Daily">
+        <BeeDayBrand />
+    </NavLink>
+
+    <button type="button"
+            class="mobile-header__menu-button"
+            aria-label="@(IsNavOpen ? "Close navigation menu" : "Open navigation menu")"
+            aria-expanded="@(IsNavOpen ? "true" : "false")"
+            aria-controls="mobile-navigation"
+            @onclick="OnToggleNav">
+        <PixelIcon Name="@(IsNavOpen ? PixelIconName.Close : PixelIconName.Menu)" Size="PixelIconSize.Large" />
+    </button>
+</header>
+
+@code {
+    [Parameter] public bool IsNavOpen { get; set; }
+    [Parameter] public EventCallback OnToggleNav { get; set; }
+}
