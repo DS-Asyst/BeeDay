@@ -50,26 +50,26 @@ public sealed class AccountLifecycleTests(PlaywrightAppFixture fixture) : E2ETes
 
         // Each slide advance is a Blazor interactive click (not a form post); the very first one can
         // silently no-op if it lands before the SignalR circuit has connected. Looping on the
-        // "ENTER DAILY" button's own visibility (a real, render-confirmed state — the button's text
-        // only becomes "ENTER DAILY" on the last slide) — rather than assuming a fixed count of 4
+        // "ENTER BEEDAY" button's own visibility (a real, render-confirmed state — the button's text
+        // only becomes "ENTER BEEDAY" on the last slide) — rather than assuming a fixed count of 4
         // clicks — absorbs that without asserting on internal slide state or using a fixed sleep.
-        var enterDaily = Page.GetByRole(AriaRole.Button, new() { Name = "ENTER DAILY" });
-        for (var attempt = 0; attempt < 8 && !await enterDaily.IsVisibleAsync(); attempt++)
+        var enterBeeDay = Page.GetByRole(AriaRole.Button, new() { Name = "ENTER BEEDAY" });
+        for (var attempt = 0; attempt < 8 && !await enterBeeDay.IsVisibleAsync(); attempt++)
         {
             await Page.GetByRole(AriaRole.Button, new() { Name = "NEXT" }).ClickAsync();
             try
             {
-                await enterDaily.WaitForAsync(new LocatorWaitForOptions { Timeout = 800 });
+                await enterBeeDay.WaitForAsync(new LocatorWaitForOptions { Timeout = 800 });
             }
             catch (TimeoutException)
             {
             }
         }
 
-        await enterDaily.ClickAsync();
+        await enterBeeDay.ClickAsync();
 
-        await Expect(Page).ToHaveURLAsync(new Regex("/daily$"));
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Habits", Exact = true })).ToBeVisibleAsync();
+        await Expect(Page).ToHaveURLAsync(new Regex("/home$"));
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { NameRegex = new Regex("Welcome back") })).ToBeVisibleAsync();
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public sealed class AccountLifecycleTests(PlaywrightAppFixture fixture) : E2ETes
         var email = $"e2e-logout-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
         await LoginAsync(email);
-        await Expect(Page).ToHaveURLAsync(new Regex("/daily$"));
+        await Expect(Page).ToHaveURLAsync(new Regex("/home$"));
 
         // The drawer panel stays in the DOM at all times and is only moved off-screen via a CSS
         // transform when closed, so its own visibility is not a reliable "is it open" signal
@@ -101,7 +101,7 @@ public sealed class AccountLifecycleTests(PlaywrightAppFixture fixture) : E2ETes
         var email = $"e2e-profile-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
         await LoginAsync(email);
-        await Expect(Page).ToHaveURLAsync(new Regex("/daily$"));
+        await Expect(Page).ToHaveURLAsync(new Regex("/home$"));
 
         await GotoAsync("/account");
         var updatedName = $"E2E Updated {Guid.NewGuid():N}"[..20];

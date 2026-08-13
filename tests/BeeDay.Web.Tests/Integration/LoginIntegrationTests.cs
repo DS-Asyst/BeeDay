@@ -115,7 +115,7 @@ public sealed class LoginIntegrationTests(BeeDayWebApplicationFactory factory)
     }
 
     [Fact]
-    public async Task Login_RedirectsToDaily_WhenOnboardingAlreadyCompleted()
+    public async Task Login_RedirectsToHome_WhenOnboardingAlreadyCompleted()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         var user = await factory.SeedConfirmedUserAsync("onboarding-done@beeday.invalid", "Password123!");
@@ -127,7 +127,7 @@ public sealed class LoginIntegrationTests(BeeDayWebApplicationFactory factory)
 
         var response = await PostLoginAsync("onboarding-done@beeday.invalid", "Password123!", cancellationToken);
 
-        Assert.Equal("/daily", response.Headers.Location!.ToString());
+        Assert.Equal("/home", response.Headers.Location!.ToString());
     }
 
     [Fact]

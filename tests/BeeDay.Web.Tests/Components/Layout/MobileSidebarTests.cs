@@ -87,9 +87,10 @@ public sealed class MobileSidebarTests
             .Add(component => component.IsOpen, true));
 
         var routeLinks = cut.FindAll("nav.navigation-items a");
-        Assert.Equal(2, routeLinks.Count);
-        Assert.Equal("/daily", routeLinks[0].GetAttribute("href"));
-        Assert.Equal("/wallet", routeLinks[1].GetAttribute("href"));
+        Assert.Equal(3, routeLinks.Count);
+        Assert.Equal("/home", routeLinks[0].GetAttribute("href"));
+        Assert.Equal("/daily", routeLinks[1].GetAttribute("href"));
+        Assert.Equal("/wallet", routeLinks[2].GetAttribute("href"));
     }
 
     [Fact]

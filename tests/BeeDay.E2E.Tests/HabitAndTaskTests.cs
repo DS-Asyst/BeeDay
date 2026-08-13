@@ -76,7 +76,8 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
         await Page.GetByLabel("Email").FillAsync(email);
         await Page.GetByLabel("Password").FillAsync(Password);
         await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
-        await Expect(Page).ToHaveURLAsync(new Regex("/daily$"));
+        await Expect(Page).ToHaveURLAsync(new Regex("/home$"));
+        await GotoAsync("/daily");
 
         // The Sign In click triggers a real server-side redirect to a brand new page (/daily),
         // which establishes its own SignalR circuit; GotoAsync's network-idle wait only covers

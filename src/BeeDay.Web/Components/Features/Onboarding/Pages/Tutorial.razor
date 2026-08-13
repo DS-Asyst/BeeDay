@@ -46,7 +46,7 @@
                            IsLoading="@_busy"
                            Disabled="@_busy"
                            OnClick="NextAsync">
-                @(_step == Slides.Length - 1 ? "ENTER DAILY" : "NEXT")
+                @(_step == Slides.Length - 1 ? "ENTER BEEDAY" : "NEXT")
             </BeeDayButton>
         </footer>
     </article>
@@ -81,7 +81,7 @@
 
         if (user.HasCompletedOnboarding)
         {
-            Navigation.NavigateTo("/daily", forceLoad: true, replace: true);
+            Navigation.NavigateTo("/home", forceLoad: true, replace: true);
         }
     }
 
@@ -105,7 +105,7 @@
         try
         {
             await Store.CompleteOnboardingAsync();
-            Navigation.NavigateTo("/daily", forceLoad: true, replace: true);
+            Navigation.NavigateTo("/home", forceLoad: true, replace: true);
         }
         finally
         {

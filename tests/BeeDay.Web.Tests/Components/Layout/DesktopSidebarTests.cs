@@ -6,7 +6,7 @@ namespace BeeDay.Web.Tests.Components.Layout;
 public sealed class DesktopSidebarTests
 {
     [Fact]
-    public void RendersBrandLinkToDaily()
+    public void RendersBrandLinkToHome()
     {
         using var context = new BunitContext();
 
@@ -15,7 +15,7 @@ public sealed class DesktopSidebarTests
             .Add(component => component.IsMenuPanelOpen, false));
 
         var brand = cut.Find("a.desktop-sidebar__brand-link");
-        Assert.Equal("/daily", brand.GetAttribute("href"));
+        Assert.Equal("/home", brand.GetAttribute("href"));
     }
 
     [Fact]
@@ -28,9 +28,10 @@ public sealed class DesktopSidebarTests
             .Add(component => component.IsMenuPanelOpen, false));
 
         var routeLinks = cut.FindAll("nav.navigation-items a.navigation-item");
-        Assert.Equal(2, routeLinks.Count);
-        Assert.Equal("/daily", routeLinks[0].GetAttribute("href"));
-        Assert.Equal("/wallet", routeLinks[1].GetAttribute("href"));
+        Assert.Equal(3, routeLinks.Count);
+        Assert.Equal("/home", routeLinks[0].GetAttribute("href"));
+        Assert.Equal("/daily", routeLinks[1].GetAttribute("href"));
+        Assert.Equal("/wallet", routeLinks[2].GetAttribute("href"));
         Assert.All(routeLinks, link => Assert.NotEqual("#", link.GetAttribute("href")));
 
         var actionButtons = cut.FindAll(".navigation-items--actions button.navigation-item");

@@ -83,7 +83,7 @@ public sealed class PublicHeaderTests
     }
 
     [Fact]
-    public void AuthenticatedReady_ContinueCtaGoesToDaily()
+    public void AuthenticatedReady_ContinueCtaGoesToHome()
     {
         using var context = new BunitContext();
         context.AddAuthorization().SetAuthorized("test-user");
@@ -93,7 +93,7 @@ public sealed class PublicHeaderTests
         cut.Find("button").Click();
 
         var navigation = context.Services.GetRequiredService<NavigationManager>();
-        Assert.EndsWith("/daily", navigation.Uri, StringComparison.Ordinal);
+        Assert.EndsWith("/home", navigation.Uri, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -17,6 +17,7 @@ public sealed class AuthorizationIntegrationTests(BeeDayWebApplicationFactory fa
 {
     public static IEnumerable<object[]> ProtectedPages { get; } =
     [
+        ["/home"],
         ["/daily"],
         ["/wallet"],
         ["/account"],
