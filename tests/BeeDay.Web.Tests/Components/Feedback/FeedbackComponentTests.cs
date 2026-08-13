@@ -12,7 +12,7 @@ public sealed class FeedbackComponentTests
         var cut = context.Render<BeeDayEmptyState>(parameters => parameters
             .Add(component => component.Title, "No tasks yet")
             .Add(component => component.Description, "Create a task to get started.")
-            .Add(component => component.Icon, PixelIconName.RecurringTask)
+            .Add(component => component.Icon, BeeDayIconName.RecurringTask)
             .Add(component => component.Class, "empty-tasks"));
 
         var root = cut.Find("[role='status']");
@@ -21,8 +21,8 @@ public sealed class FeedbackComponentTests
         Assert.Equal("Create a task to get started.", cut.Find(".beeday-empty-state__description").TextContent);
         Assert.Single(cut.FindAll(".beeday-empty-state__icon"));
 
-        var icon = cut.Find(".beeday-empty-state__icon .pixel-icon");
-        Assert.Contains("pixel-icon--color-muted", icon.ClassList);
+        var icon = cut.Find(".beeday-empty-state__icon .beeday-icon");
+        Assert.Contains("beeday-icon--color-muted", icon.ClassList);
         Assert.Equal("true", icon.GetAttribute("aria-hidden"));
     }
 

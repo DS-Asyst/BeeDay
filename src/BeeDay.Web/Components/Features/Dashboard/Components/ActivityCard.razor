@@ -8,13 +8,13 @@
                     aria-label="@(Completed ? $"Mark {Title} as incomplete" : $"Complete {Title}")"
                     @onclick="OnToggle">
                 <span class="activity-card__checkbox-glyph">
-                    <PixelIcon Name="PixelIconName.Complete" Size="PixelIconSize.Small" Decorative="true" />
+                    <BeeDayIcon Name="BeeDayIconName.Complete" Size="BeeDayIconSize.Small" Decorative="true" />
                 </span>
             </button>
         }
         else
         {
-            <PixelIcon Name="PixelIconName.Project" Size="PixelIconSize.Small" Class="activity-card__project-status" Decorative="false" Label="Project progress is calculated automatically" />
+            <BeeDayIcon Name="BeeDayIconName.Project" Size="BeeDayIconSize.Small" Class="activity-card__project-status" Decorative="false" Label="Project progress is calculated automatically" />
         }
     </div>
 
@@ -28,7 +28,7 @@
             <div class="activity-card__title-row">
                 @if (Featured)
                 {
-                    <PixelIcon Name="PixelIconName.Featured" Size="PixelIconSize.ExtraSmall" Class="activity-card__star" Decorative="false" Label="Featured" />
+                    <BeeDayIcon Name="BeeDayIconName.Featured" Size="BeeDayIconSize.ExtraSmall" Class="activity-card__star" Decorative="false" Label="Featured" />
                 }
                 <h3><SearchHighlight Text="@Title" SearchTerm="@SearchTerm" /></h3>
             </div>

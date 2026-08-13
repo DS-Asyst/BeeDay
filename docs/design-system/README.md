@@ -26,7 +26,7 @@ próprio `BeeDay.Web`, consumida diretamente pelos componentes de Feature (ver
 Dentro: os 26 componentes reutilizáveis sob `Components/DesignSystem/` (Buttons, Cards, Forms,
 Feedback, Icons, Layout, Modals, Attributes, Text), as 19 folhas de CSS sob `wwwroot/css/`, os 3
 módulos de interop JS que servem componentes do Design System, e o Pixel Icon System
-(`PixelIconRegistry`, sprite único). Fora: componentes de Feature (`Components/Features/*` — ver
+(`BeeDayIconRegistry`, sprite único). Fora: componentes de Feature (`Components/Features/*` — ver
 [`docs/web/04-feature-components.md`](../web/04-feature-components.md)), layouts de página
 (`Components/Layout/*` — ver [`docs/web/03-layouts.md`](../web/03-layouts.md)), e
 `BeeDaySortable` (`Components/Behaviors/DragDrop/`, comportamento de reordenação usado pelo
@@ -71,7 +71,7 @@ catálogo e enums/modelos de suporte):
 | `Cards/` | `BeeDayCard`, `BeeDayCardMenu` |
 | `Feedback/` | `BeeDayConfirmDialog`, `BeeDayDashboardSkeleton`, `BeeDayEmptyState`, `BeeDayLoading`, `BeeDaySkeleton`, `BeeDayToastHost` |
 | `Forms/` | `BeeDayCheckbox`, `BeeDayDateInput`, `BeeDayInput`, `BeeDaySelect`, `BeeDayTextArea`, `BeeDayValidationMessage` |
-| `Icons/` | `PixelIcon` |
+| `Icons/` | `BeeDayIcon` |
 | `Layout/` | `BeeDayHero`, `BeeDayPageHeader`, `BeeDaySectionHeader`, `BeeDaySettingsForm`, `BeeDaySettingsSection` |
 | `Modals/` | `EditorModalShell` |
 | `Text/` | `BeeDayBrand`, `SearchHighlight` |
@@ -88,7 +88,7 @@ componentes reutilizáveis — documentadas em
 |---|---|
 | [`01-foundations.md`](01-foundations.md) | Cores, tokens, tipografia, espaçamento, border-radius, elevação/sombra, breakpoints, grid, z-index, movimento |
 | [`02-components.md`](02-components.md) | Os 26 componentes reutilizáveis — parâmetros, estados, eventos, dependências, JS interop, consumidores |
-| [`03-icons.md`](03-icons.md) | Pixel Icon System — sprite, `PixelIconRegistry`, bibliotecas de origem, estratégia, nomenclatura |
+| [`03-icons.md`](03-icons.md) | Pixel Icon System — sprite, `BeeDayIconRegistry`, bibliotecas de origem, estratégia, nomenclatura |
 | [`04-forms.md`](04-forms.md) | Os 6 componentes de formulário — contrato comum, validação, estados, botões |
 
 ## Ordem de leitura recomendada

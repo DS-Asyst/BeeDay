@@ -1,112 +1,78 @@
-# Iconography
+# Icon System
 
-**Fonte da verdade:** verificado diretamente em `src/BeeDay.Web/Components/DesignSystem/Icons/`
-(`PixelIcon.razor(.cs)`, `PixelIconRegistry.cs`, `PixelIconDefinition.cs`, `PixelIconName.cs`,
-`PixelIconCategory.cs`, `PixelIconSize.cs`, `PixelIconColor.cs`) e `src/BeeDay.Web/wwwroot/icons/`.
+**Fonte da verdade:** `Components/DesignSystem/Icons`, `design/icons/catalog/icon-mapping.csv` e
+`wwwroot/icons/sprite.svg`. **Última verificação:** 2026-08-12 (Sprint 21.8).
 
-**Última verificação:** 2026-08-07.
+## Contrato oficial
 
-## 1. Objetivo
+`BeeDayIcon` é a única primitive de ícones do produto. Consumidores escolhem um nome semântico
+tipado (`BeeDayIconName`), tamanho, cor e comportamento acessível; não importam SVGs nem conhecem
+a biblioteca de origem. `BeeDayIconRegistry` resolve cada nome para um `symbolId`, asset gerado,
+categoria e label padrão. Um nome inválido usa `Warning` como fallback.
 
-Documentar o Pixel Icon System: como um ícone vai do arquivo `.svg` fonte até a tela, o registry
-central que faz essa ligação, e a estratégia de nomenclatura.
-
-## 2. Estratégia: sprite único, não arquivos individuais importados
-
-Todo ícone é renderizado como `<svg><use href="/icons/sprite.svg#{symbolId}" /></svg>` —
-`PixelIcon.razor` nunca referencia um arquivo `.svg` individual diretamente em runtime; o
-mapeamento `PixelIconName → symbolId` é feito por `PixelIconRegistry.Resolve`. Isso significa uma
-única requisição de rede para `sprite.svg` cobre todo ícone da aplicação, em vez de uma por ícone —
-mas também significa que os arquivos individuais sob `wwwroot/icons/**/*.svg` (listados em `AssetPath`
-no registry) não são consumidos diretamente pelo componente; presume-se que `sprite.svg` é gerado a
-partir deles por um processo não auditado nesta Sprint (nenhum script de build de sprite foi
-encontrado em `src/BeeDay.Web/`).
-
-## 3. `PixelIconRegistry` — o único ponto de mapeamento
-
-```csharp
-public sealed record PixelIconDefinition(
-    string SymbolId, string AssetPath, PixelIconCategory Category,
-    string SemanticName, string? DefaultLabel = null, PixelIconName? Fallback = null);
+```razor
+<BeeDayIcon Name="BeeDayIconName.Search" Size="BeeDayIconSize.Medium" />
+<BeeDayIcon Name="BeeDayIconName.Warning"
+            Decorative="false"
+            Label="Warning status" />
 ```
 
-`PixelIconRegistry.Definitions` é um `Dictionary<PixelIconName, PixelIconDefinition>` com
-**61 entradas** — uma para cada um dos 61 valores do enum `PixelIconName`, confirmado por contagem
-direta (`grep` de declarações do enum vs. entradas `[PixelIconName.X] = Define(...)` do registry:
-61 = 61, nenhum órfão em nenhuma das duas direções).
+O nome anterior `PixelIcon` foi removido, sem alias: todos os consumidores internos foram migrados
+e manter duas APIs oficiais criaria dívida sem benefício de compatibilidade externa.
 
-`Resolve(name)` nunca lança — se o nome não existir no dicionário (impossível hoje, já que todo
-valor do enum tem entrada, mas o código está escrito para essa garantia poder ser quebrada no
-futuro sem crashar), cai para `DefaultFallback = PixelIconName.Warning`. `TryGet` existe como
-alternativa não-lançante explícita.
+## Renderização e estilo
 
-## 4. Categorias
+O componente renderiza `<svg><use href="/icons/sprite.svg#{symbolId}"></use></svg>`. O sprite é
+estático e local: não há pacote JavaScript, fonte de ícones ou requisição a CDN em runtime.
+Ícones funcionais usam Lucide com traço de 2px, extremidades e junções arredondadas, `fill="none"`
+e `stroke="currentColor"`. Marcas sociais mantêm seus vetores próprios e usam `fill: currentColor`.
+Assim, cor e estados continuam controlados pelos tokens/classes do BeeDay.
 
-`PixelIconCategory` tem 9 valores: `Actions`, `Activities`, `Attributes`, `Feedback`, `Forms`,
-`Navigation`, `Social`, `Statistics`, `System`. Cada uma das 61 definições declara exatamente uma
-categoria — usada apenas como metadado (`data-icon-category` no SVG renderizado); não há filtro por
-categoria na UI de produto, só no catálogo (`IconCatalog.razor`, ver §7).
+A escala permanece deliberadamente curta e baseada nos usos reais:
 
-## 5. Bibliotecas de origem dos assets
+| Token | Tamanho |
+|---|---:|
+| `ExtraSmall` | 12px |
+| `Small` | 16px |
+| `Medium` | 20px (default) |
+| `Large` | 24px |
+| `ExtraLarge` | 32px |
 
-| Pasta em `wwwroot/icons/` | Origem | Ícones |
-|---|---|---|
-| `material-symbols/` | Google Material Symbols (derivado) | 11 subpastas temáticas (`actions`, `books`, `feedback`, `forms`, `habits`, `navigation`, `profile`, `projects`, `statistics`, `system`, `tasks`) — a maioria das 61 definições |
-| `devicon/social/` | Devicon | `facebook.svg`, `github.svg`, `linkedin.svg` |
-| `official-brand/social/` | Marcas oficiais (Instagram, X, YouTube) | `instagram.svg`, `x.svg`, `youtube.svg` |
+As cores oficiais são `Current`, `Primary`, `Secondary`, `Muted`, `Success`, `Warning`, `Danger`
+e `Information`. Prefira `Current` quando o ícone deve acompanhar texto ou estado do controle.
 
-Nenhum arquivo de atribuição de licença foi encontrado para `material-symbols/`, `devicon/` ou
-`official-brand/` (diferente de `wwwroot/css/vendor/NES_ATTRIBUTION.md`, que documenta a proveniência
-do adapter NES.css usado por `pixel-nes.css` — ver [`02-components.md`](02-components.md) e
-`docs/ux/02-accessibility.md`). Não confirmado se isso representa uma lacuna de atribuição ou se as
-licenças de origem (Material Symbols é Apache 2.0, não exige atribuição por arquivo) simplesmente
-não exigem o mesmo tratamento que o excerto de NES.css (MIT, com atribuição explícita).
+## Acessibilidade
 
-## 6. Nomenclatura
+- Ícones decorativos são o default: `aria-hidden="true"` e `focusable="false"`.
+- Ícones informativos exigem `Decorative="false"` e um `Label` não vazio; o componente valida isso
+  durante a renderização e expõe `role="img"`/`aria-label`.
+- Botões icon-only continuam responsáveis por um nome acessível no próprio controle.
+- Não use somente um ícone ou somente cor para comunicar um estado crítico.
 
-- `PixelIconName` (C#, PascalCase) é o único identificador usado por componentes — nunca uma string
-  solta.
-- `SymbolId` (kebab-case, ex.: `"chevron-down"`, `"recurring-task"`) é o `id` do `<symbol>` dentro
-  do sprite — geralmente uma versão kebab-case do nome C#, mas não sempre 1:1: `PixelIconName.Account`
-  mapeia para `SymbolId "user"` (não `"account"`) e `AssetPath "material-symbols/profile/user.svg"`
-  — o nome semântico do enum (`Account`, papel de navegação) diverge do nome do arquivo fonte
-  (`user`, o que o ícone visualmente representa).
-- `SemanticName`/`DefaultLabel` (frase em inglês, ex. "Expand", "Previous", "Add") — usados como
-  `aria-label` quando `PixelIcon.Decorative="false"` e nenhum `Label` explícito é passado.
+## Fontes, geração e manutenção
 
-## 7. Uso do componente `PixelIcon`
+`design/icons/catalog/icon-mapping.csv` é o manifesto auditável. Os SVGs Lucide selecionados ficam
+em `design/icons/source/lucide/`, com licença e atribuição locais. Devicon e assets oficiais são
+reservados às seis marcas sociais. Execute `scripts/New-IconSprite.ps1` após alterar o catálogo:
+ele valida o mapeamento, limpa os outputs gerados e recria os SVGs publicados e o sprite.
 
-Ver contrato completo de parâmetros em
-[`02-components.md`](02-components.md#5-layout) — resumo aqui: `Name` (`EditorRequired`), `Size`
-(5 valores: `ExtraSmall` 12px, `Small` 16px, `Medium` 20px — padrão, `Large` 24px, `ExtraLarge`
-32px), `Color` (8 valores semânticos: `Current`, `Primary`, `Secondary`, `Muted`, `Success`,
-`Warning`, `Danger`, `Information` — resolvidos via classe CSS `pixel-icon--color-{nome}`, não
-`style` inline), `Decorative` (padrão `true` → `aria-hidden="true"`), `Label` (obrigatório quando
-`Decorative="false"`, senão `PixelIcon.OnParametersSet` lança `InvalidOperationException` —
-único componente do Design System que valida acessibilidade em tempo de renderização, não apenas
-por convenção documental).
+Para adicionar um ícone:
 
-## 8. Catálogo visual — `/design-system/icons`
+1. confirme uma necessidade semântica que não esteja coberta;
+2. adicione o valor ao enum e a definição ao registry;
+3. versione o SVG fonte e registre origem/licença no CSV;
+4. regenere o sprite e rode os testes de contrato;
+5. confira `/design-system/icons` em tema claro/escuro e nos tamanhos usados.
 
-`DesignSystem/Pages/IconCatalog.razor` (rota `/design-system/icons`, `[Authorize]`, sem restrição
-adicional por ambiente) renderiza `PixelIconRegistry.All` — todos os 61 ícones, por categoria,
-como referência visual para desenvolvimento. Ver
-[`docs/web/02-routing-and-pages.md`](../web/02-routing-and-pages.md) §6.
+Não crie nomes por página (`HomeBlueIcon`), variantes puramente visuais ou imports diretos. Use
+nomes de intenção como `Search`, `Wallet` e `ValidationError`.
 
-## 9. Achado
+## Decisões da Sprint 21.8
 
-- `docs/web/05-design-system-integration.md` (Sprint 16.7) registra "60 valores de `PixelIconName`"
-  — a contagem direta feita nesta Sprint confirma **61**. Discrepância pequena (um a menos),
-  provavelmente um erro de contagem manual na Sprint anterior, não uma mudança de código entre as
-  duas Sprints (nenhum commit de código-fonte ocorreu entre 16.7 e 16.8). Não corrigido no arquivo
-  da Sprint 16.7 — fora do escopo desta Sprint, que documenta exclusivamente Design System/UX.
+A arquitetura tipada e o sprite existentes eram sólidos e foram preservados. O problema era a
+linguagem visual pixel/filled e o nome público. Os 54 ícones funcionais foram migrados para um
+conjunto Lucide outline coerente; os seis ícones de marca foram preservados. `Streak` foi removido
+porque não existe capacidade de domínio correspondente; usos ilustrativos passaram a `Habit`.
+Material Symbols e o catálogo Streamline Pixel sem consumidores foram removidos após auditoria.
 
-## 10. Fontes consultadas
-
-- `src/BeeDay.Web/Components/DesignSystem/Icons/PixelIcon.razor`, `PixelIcon.razor.cs`,
-  `PixelIconRegistry.cs`, `PixelIconDefinition.cs`, `PixelIconName.cs`, `PixelIconCategory.cs`,
-  `PixelIconSize.cs`, `PixelIconColor.cs`.
-- `src/BeeDay.Web/wwwroot/icons/` (listagem completa de arquivos, 3 bibliotecas de origem).
-- `src/BeeDay.Web/Components/DesignSystem/Pages/IconCatalog.razor`.
-- Contagem cruzada: declarações do enum `PixelIconName` vs. entradas `[PixelIconName.X]` no
-  registry (61 = 61).
+Nenhuma mudança foi feita em Domain, Application, Infrastructure, regras de produto ou layout.

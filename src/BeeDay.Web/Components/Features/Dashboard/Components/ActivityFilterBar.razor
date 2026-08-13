@@ -11,7 +11,7 @@
                     aria-haspopup="dialog"
                     aria-expanded="@showTagsMenu"
                     aria-label="Filter by tags">
-                <PixelIcon Name="PixelIconName.Filter" Size="PixelIconSize.Small" Decorative="true" />
+                <BeeDayIcon Name="BeeDayIconName.Filter" Size="BeeDayIconSize.Small" Decorative="true" />
                 @if (SelectedAttributes.Count > 0)
                 {
                     <span class="filter-bar__filter-count" aria-hidden="true">@SelectedAttributes.Count</span>
@@ -65,7 +65,7 @@
         <div class="filter-bar__create">
             <BeeDayButton Variant="BeeDayButtonVariant.Primary"
                            Compact="true"
-                           Icon="PixelIconName.Add"
+                           Icon="BeeDayIconName.Add"
                            Class="filter-bar__create-button beeday-button--comic beeday-button--comic-blue"
                            OnClick="ToggleCreateMenu"
                            aria-haspopup="menu"
@@ -75,10 +75,10 @@
             @if (showCreateMenu)
             {
                 <div class="filter-bar__menu" role="menu" aria-label="Choose activity type">
-                    <button type="button" role="menuitem" @onclick="CreateHabitAsync"><PixelIcon Name="PixelIconName.Habit" Size="PixelIconSize.Small" Decorative="true" /><span>Habit</span></button>
-                    <button type="button" role="menuitem" @onclick="CreateTaskAsync"><PixelIcon Name="PixelIconName.RecurringTask" Size="PixelIconSize.Small" Decorative="true" /><span>Task</span></button>
-                    <button type="button" role="menuitem" @onclick="CreateTodoAsync"><PixelIcon Name="PixelIconName.Todo" Size="PixelIconSize.Small" Decorative="true" /><span>To-Do</span></button>
-                    <button type="button" role="menuitem" @onclick="CreateProjectAsync"><PixelIcon Name="PixelIconName.Project" Size="PixelIconSize.Small" Decorative="true" /><span>Project</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateHabitAsync"><BeeDayIcon Name="BeeDayIconName.Habit" Size="BeeDayIconSize.Small" Decorative="true" /><span>Habit</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateTaskAsync"><BeeDayIcon Name="BeeDayIconName.RecurringTask" Size="BeeDayIconSize.Small" Decorative="true" /><span>Task</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateTodoAsync"><BeeDayIcon Name="BeeDayIconName.Todo" Size="BeeDayIconSize.Small" Decorative="true" /><span>To-Do</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateProjectAsync"><BeeDayIcon Name="BeeDayIconName.Project" Size="BeeDayIconSize.Small" Decorative="true" /><span>Project</span></button>
                 </div>
             }
         </div>

@@ -13,7 +13,7 @@ public sealed class NavigationItemTests
         using var context = new BunitContext();
 
         var cut = context.Render<NavigationItem>(parameters => parameters
-            .Add(component => component.Icon, PixelIconName.Daily)
+            .Add(component => component.Icon, BeeDayIconName.Daily)
             .Add(component => component.Label, "Daily")
             .Add(component => component.Href, "/daily"));
 
@@ -30,7 +30,7 @@ public sealed class NavigationItemTests
         var clicked = false;
 
         var cut = context.Render<NavigationItem>(parameters => parameters
-            .Add(component => component.Icon, PixelIconName.Profile)
+            .Add(component => component.Icon, BeeDayIconName.Profile)
             .Add(component => component.Label, "Profile")
             .Add(component => component.AriaLabel, "Open profile panel")
             .Add(component => component.OnClick, () => clicked = true));
@@ -49,13 +49,13 @@ public sealed class NavigationItemTests
         using var context = new BunitContext();
 
         var closed = context.Render<NavigationItem>(parameters => parameters
-            .Add(component => component.Icon, PixelIconName.Profile)
+            .Add(component => component.Icon, BeeDayIconName.Profile)
             .Add(component => component.Label, "Profile")
             .Add(component => component.AriaExpanded, false));
         Assert.Equal("false", closed.Find("button").GetAttribute("aria-expanded"));
 
         var open = context.Render<NavigationItem>(parameters => parameters
-            .Add(component => component.Icon, PixelIconName.Profile)
+            .Add(component => component.Icon, BeeDayIconName.Profile)
             .Add(component => component.Label, "Profile")
             .Add(component => component.AriaExpanded, true));
         Assert.Equal("true", open.Find("button").GetAttribute("aria-expanded"));
@@ -68,7 +68,7 @@ public sealed class NavigationItemTests
         using var context = new BunitContext();
 
         var cut = context.Render<NavigationItem>(parameters => parameters
-            .Add(component => component.Icon, PixelIconName.Profile)
+            .Add(component => component.Icon, BeeDayIconName.Profile)
             .Add(component => component.Label, "Profile"));
 
         Assert.False(cut.Find("button").HasAttribute("aria-expanded"));
@@ -81,13 +81,13 @@ public sealed class NavigationItemTests
         context.Services.GetRequiredService<NavigationManager>().NavigateTo("/wallet");
 
         var onWallet = context.Render<NavigationItem>(parameters => parameters
-            .Add(component => component.Icon, PixelIconName.Wallet)
+            .Add(component => component.Icon, BeeDayIconName.Wallet)
             .Add(component => component.Label, "Wallet")
             .Add(component => component.Href, "/wallet"));
         Assert.Equal("page", onWallet.Find("a").GetAttribute("aria-current"));
 
         var onDaily = context.Render<NavigationItem>(parameters => parameters
-            .Add(component => component.Icon, PixelIconName.Daily)
+            .Add(component => component.Icon, BeeDayIconName.Daily)
             .Add(component => component.Label, "Daily")
             .Add(component => component.Href, "/daily"));
         Assert.Null(onDaily.Find("a").GetAttribute("aria-current"));
@@ -100,7 +100,7 @@ public sealed class NavigationItemTests
         context.Services.GetRequiredService<NavigationManager>().NavigateTo("/account/reset-password");
 
         var cut = context.Render<NavigationItem>(parameters => parameters
-            .Add(component => component.Icon, PixelIconName.Account)
+            .Add(component => component.Icon, BeeDayIconName.Account)
             .Add(component => component.Label, "Account")
             .Add(component => component.Href, "/account")
             .Add(component => component.Match, NavLinkMatch.Prefix));
@@ -115,7 +115,7 @@ public sealed class NavigationItemTests
         var navigated = false;
 
         var cut = context.Render<NavigationItem>(parameters => parameters
-            .Add(component => component.Icon, PixelIconName.Daily)
+            .Add(component => component.Icon, BeeDayIconName.Daily)
             .Add(component => component.Label, "Daily")
             .Add(component => component.Href, "/daily")
             .Add(component => component.OnNavigate, () => navigated = true));

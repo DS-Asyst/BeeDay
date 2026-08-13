@@ -16,7 +16,7 @@
                         aria-label="@ToggleViewLabel"
                         title="@ToggleViewLabel"
                         @onclick="ToggleCompleted">
-                    <PixelIcon Name="@CurrentViewIcon" Size="PixelIconSize.Small" Decorative="true" />
+                    <BeeDayIcon Name="@CurrentViewIcon" Size="BeeDayIconSize.Small" Decorative="true" />
                 </button>
             }
 
@@ -34,7 +34,7 @@
                         aria-label="@($"Add {ResolvedSingularLabel}")"
                         title="@($"Add {ResolvedSingularLabel}")"
                         @onclick="OnCreate">
-                    <PixelIcon Name="PixelIconName.Add" Size="PixelIconSize.Small" Decorative="true" />
+                    <BeeDayIcon Name="BeeDayIconName.Add" Size="BeeDayIconSize.Small" Decorative="true" />
                 </button>
             }
         </div>
@@ -47,7 +47,7 @@
                 @if (CompletedCount == 0)
                 {
                     <BeeDayEmptyState Class="dashboard-column__empty"
-                                       Icon="PixelIconName.Completed"
+                                       Icon="BeeDayIconName.Completed"
                                        Title="@CompletedEmptyTitle"
                                        Description="@CompletedEmptyDescription" />
                 }

@@ -9,7 +9,7 @@
         @if (State.IsLoading)
         {
             <div class="profile-drawer__loading">
-                <span><PixelIcon Name="PixelIconName.Loading" Size="PixelIconSize.Small" /> Loading profile...</span>
+                <span><BeeDayIcon Name="BeeDayIconName.Loading" Size="BeeDayIconSize.Small" /> Loading profile...</span>
                 <ExperienceBar IsLoading="true" />
             </div>
         }
@@ -43,7 +43,7 @@
                 <strong>No profile created</strong>
                 <span>Create your profile to track your progress.</span>
                 <NavLink href="/profile/create" class="profile-drawer__link" @onclick="OnClose">
-                    <PixelIcon Name="PixelIconName.Add" Size="PixelIconSize.Small" /> Create profile
+                    <BeeDayIcon Name="BeeDayIconName.Add" Size="BeeDayIconSize.Small" /> Create profile
                 </NavLink>
             </div>
         }

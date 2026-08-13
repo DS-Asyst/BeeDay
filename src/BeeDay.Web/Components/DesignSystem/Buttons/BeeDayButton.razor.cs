@@ -12,8 +12,8 @@ public partial class BeeDayButton
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public bool FullWidth { get; set; }
     [Parameter] public bool Compact { get; set; }
-    [Parameter] public PixelIconName? Icon { get; set; }
-    [Parameter] public PixelIconSize IconSize { get; set; } = PixelIconSize.Small;
+    [Parameter] public BeeDayIconName? Icon { get; set; }
+    [Parameter] public BeeDayIconSize IconSize { get; set; } = BeeDayIconSize.Small;
     [Parameter] public string? Class { get; set; }
     [Parameter] public EventCallback OnClick { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }

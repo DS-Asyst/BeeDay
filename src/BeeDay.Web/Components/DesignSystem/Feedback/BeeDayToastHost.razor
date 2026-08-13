@@ -8,7 +8,7 @@
     {
         <article class="beeday-toast beeday-toast--@VariantClass(toast.Variant)"
                  role="@RoleFor(toast.Variant)">
-            <span class="beeday-toast__icon" aria-hidden="true"><PixelIcon Name="@IconFor(toast.Variant)" Size="PixelIconSize.Small" /></span>
+            <span class="beeday-toast__icon" aria-hidden="true"><BeeDayIcon Name="@IconFor(toast.Variant)" Size="BeeDayIconSize.Small" /></span>
             <div class="beeday-toast__content">
                 <strong>@toast.Title</strong>
                 <p>@toast.Message</p>
@@ -17,7 +17,7 @@
                     type="button"
                     aria-label="Dismiss notification"
                     @onclick="() => ToastService.Remove(toast.Id)">
-                <PixelIcon Name="PixelIconName.Close" Size="PixelIconSize.ExtraSmall" />
+                <BeeDayIcon Name="BeeDayIconName.Close" Size="BeeDayIconSize.ExtraSmall" />
             </button>
         </article>
     }
@@ -43,11 +43,11 @@
         _ => "info"
     };
 
-    private static PixelIconName IconFor(ToastVariant variant) => variant switch
+    private static BeeDayIconName IconFor(ToastVariant variant) => variant switch
     {
-        ToastVariant.Success => PixelIconName.Success,
-        ToastVariant.Error => PixelIconName.ValidationError,
-        _ => PixelIconName.Information
+        ToastVariant.Success => BeeDayIconName.Success,
+        ToastVariant.Error => BeeDayIconName.ValidationError,
+        _ => BeeDayIconName.Information
     };
 
     private static string RoleFor(ToastVariant variant) =>

@@ -15,7 +15,7 @@ public partial class NavigationItem : IDisposable
 {
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
-    [Parameter, EditorRequired] public PixelIconName Icon { get; set; }
+    [Parameter, EditorRequired] public BeeDayIconName Icon { get; set; }
     [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
 
     /// <summary>Route mode when set; action mode when null.</summary>

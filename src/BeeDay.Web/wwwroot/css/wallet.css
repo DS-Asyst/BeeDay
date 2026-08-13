@@ -660,7 +660,7 @@
     }
 }
 
-.wallet-summary__label,.wallet-page__title,.wallet-alert>span,.wallet-transaction-card__type{display:flex;align-items:center;gap:.4rem}.wallet-summary__label .pixel-icon,.wallet-page__title .pixel-icon,.wallet-alert .pixel-icon,.wallet-transaction-card__type .pixel-icon{flex:0 0 auto}
+.wallet-summary__label,.wallet-page__title,.wallet-alert>span,.wallet-transaction-card__type{display:flex;align-items:center;gap:.4rem}.wallet-summary__label .beeday-icon,.wallet-page__title .beeday-icon,.wallet-alert .beeday-icon,.wallet-transaction-card__type .beeday-icon{flex:0 0 auto}
 
 
 /* Pagination and inline "Try again"/"Clear filters"/"New tag" actions now

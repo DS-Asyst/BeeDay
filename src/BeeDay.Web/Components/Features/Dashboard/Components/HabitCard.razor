@@ -20,7 +20,7 @@
             <div class="habit-card__title">
                 @if (Featured)
                 {
-                    <PixelIcon Name="PixelIconName.Featured" Size="PixelIconSize.ExtraSmall" Class="habit-card__featured" Decorative="false" Label="Featured" />
+                    <BeeDayIcon Name="BeeDayIconName.Featured" Size="BeeDayIconSize.ExtraSmall" Class="habit-card__featured" Decorative="false" Label="Featured" />
                 }
                 <h3><SearchHighlight Text="@Title" SearchTerm="@SearchTerm" /></h3>
             </div>
@@ -33,7 +33,7 @@
     </div>
 
     <div class="habit-card__metrics" aria-label="@DirectionText">
-        <PixelIcon Name="PixelIconName.Progress" Size="PixelIconSize.Small" Class="habit-card__metrics-icon" Decorative="true" />
+        <BeeDayIcon Name="BeeDayIconName.Progress" Size="BeeDayIconSize.Small" Class="habit-card__metrics-icon" Decorative="true" />
         <span class="habit-card__balance">@FormattedBalance</span>
     </div>
 

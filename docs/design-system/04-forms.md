@@ -74,7 +74,7 @@ toque recebem alvos maiores independente do valor base.
 `forms.css` implementa o checkbox como um `<input type="checkbox">` real, visualmente oculto
 (`position: absolute; width: 1px; height: 1px; opacity: 0`, não `display: none` — mantém o elemento
 focável e anunciável por leitor de tela), mais um `<span class="beeday-checkbox__visual">` com dois
-`PixelIcon` sobrepostos na mesma célula de grid (`CheckboxChecked`/`CheckboxUnchecked`), alternando
+`BeeDayIcon` sobrepostos na mesma célula de grid (`CheckboxChecked`/`CheckboxUnchecked`), alternando
 opacidade via `:checked +`. `:focus-visible` no input real aplica outline no `__visual` irmão — o
 indicador de foco do teclado nunca desaparece, mesmo com o controle nativo oculto.
 

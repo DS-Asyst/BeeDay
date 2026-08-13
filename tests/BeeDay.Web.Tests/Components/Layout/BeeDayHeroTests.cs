@@ -48,8 +48,8 @@ public sealed class BeeDayHeroTests
             .Add(component => component.Title, "Daily")
             .Add(component => component.Illustration, (RenderTreeBuilder builder) =>
             {
-                builder.OpenComponent<PixelIcon>(0);
-                builder.AddAttribute(1, "Name", PixelIconName.Daily);
+                builder.OpenComponent<BeeDayIcon>(0);
+                builder.AddAttribute(1, "Name", BeeDayIconName.Daily);
                 builder.CloseComponent();
             }));
 
@@ -75,8 +75,8 @@ public sealed class BeeDayHeroTests
             .Add(component => component.Title, "Daily")
             .Add(component => component.Illustration, (RenderTreeBuilder builder) =>
             {
-                builder.OpenComponent<PixelIcon>(0);
-                builder.AddAttribute(1, "Name", PixelIconName.Profile);
+                builder.OpenComponent<BeeDayIcon>(0);
+                builder.AddAttribute(1, "Name", BeeDayIconName.Profile);
                 builder.AddAttribute(2, "Decorative", true);
                 builder.CloseComponent();
             }));
@@ -93,8 +93,8 @@ public sealed class BeeDayHeroTests
             .Add(component => component.Title, "Daily")
             .Add(component => component.Illustration, (RenderTreeBuilder builder) =>
             {
-                builder.OpenComponent<PixelIcon>(0);
-                builder.AddAttribute(1, "Name", PixelIconName.Warning);
+                builder.OpenComponent<BeeDayIcon>(0);
+                builder.AddAttribute(1, "Name", BeeDayIconName.Warning);
                 builder.AddAttribute(2, "Decorative", false);
                 builder.AddAttribute(3, "Label", "Action required");
                 builder.CloseComponent();

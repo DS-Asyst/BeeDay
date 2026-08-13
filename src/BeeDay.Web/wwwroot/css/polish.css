@@ -32,7 +32,7 @@ body { min-width: 20rem; }
 .beeday-hero__primary-action { align-items: center; }
 
 /* Eight-pixel spacing and uniform control sizing */
-.beeday-button:has(.pixel-icon):not(.beeday-button--full-width) { padding-inline-start: calc(var(--beeday-grid) * 1.5); }
+.beeday-button:has(.beeday-icon):not(.beeday-button--full-width) { padding-inline-start: calc(var(--beeday-grid) * 1.5); }
 
 .beeday-field { gap: var(--beeday-grid); }
 .beeday-field__control--textarea { min-height: 7rem; line-height: 1.5; }

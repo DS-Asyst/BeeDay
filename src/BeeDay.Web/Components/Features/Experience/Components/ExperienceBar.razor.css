@@ -126,8 +126,8 @@
     gap: .3rem;
 }
 
-.experience-card__label ::deep .pixel-icon,
-.experience-card__values ::deep .pixel-icon,
-.experience-card__gain ::deep .pixel-icon {
+.experience-card__label ::deep .beeday-icon,
+.experience-card__values ::deep .beeday-icon,
+.experience-card__gain ::deep .beeday-icon {
     flex: 0 0 auto;
 }

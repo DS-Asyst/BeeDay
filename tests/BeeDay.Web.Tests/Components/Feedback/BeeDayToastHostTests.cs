@@ -20,7 +20,7 @@ public sealed class BeeDayToastHostTests
         Assert.Equal("status", toast.GetAttribute("role"));
         Assert.Contains("Saved", toast.TextContent);
         Assert.Contains("Habit saved", toast.TextContent);
-        Assert.NotNull(toast.QuerySelector("svg.pixel-icon--success"));
+        Assert.NotNull(toast.QuerySelector("svg.beeday-icon--success"));
     }
 
     [Fact]
@@ -35,7 +35,7 @@ public sealed class BeeDayToastHostTests
         cut.WaitForAssertion(() => Assert.Single(cut.FindAll(".beeday-toast--error")));
 
         Assert.Equal("alert", cut.Find(".beeday-toast--error").GetAttribute("role"));
-        Assert.NotNull(cut.Find("svg.pixel-icon--validation-error"));
+        Assert.NotNull(cut.Find("svg.beeday-icon--validation-error"));
     }
 
     [Fact]

@@ -1,7 +1,7 @@
 <div class="wallet-empty-state">
     <BeeDayEmptyState Title="No transactions found"
                        Description="@(HasFilters ? "Change or clear your filters to see more results." : "Create your first transaction to start tracking your wallet.")"
-                       Icon="PixelIconName.Wallet" />
+                       Icon="BeeDayIconName.Wallet" />
     @if (HasFilters)
     {
         <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel" Disabled="IsDisabled" OnClick="OnClearFilters">Clear filters</BeeDayButton>

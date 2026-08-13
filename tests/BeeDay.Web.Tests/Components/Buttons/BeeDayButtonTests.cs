@@ -48,7 +48,7 @@ public sealed class BeeDayButtonTests
         Assert.True(button.HasAttribute("disabled"));
         Assert.Equal("true", button.GetAttribute("aria-busy"));
         Assert.Contains("beeday-button--loading", button.ClassList);
-        Assert.NotNull(cut.Find("svg.pixel-icon--loading.beeday-button__loader"));
+        Assert.NotNull(cut.Find("svg.beeday-icon--loading.beeday-button__loader"));
         Assert.Equal("true", cut.Find(".beeday-button__label").GetAttribute("aria-hidden"));
     }
 
@@ -68,14 +68,14 @@ public sealed class BeeDayButtonTests
     }
 
     [Fact]
-    public void RendersPixelIconWhenConfigured()
+    public void RendersBeeDayIconWhenConfigured()
     {
         using var context = new BunitContext();
         var cut = context.Render<BeeDayButton>(parameters => parameters
-            .Add(component => component.Icon, PixelIconName.Save)
+            .Add(component => component.Icon, BeeDayIconName.Save)
             .AddChildContent("SAVE"));
 
-        var icon = cut.Find("svg.pixel-icon--save");
+        var icon = cut.Find("svg.beeday-icon--save");
         Assert.Equal("true", icon.GetAttribute("aria-hidden"));
         Assert.Contains("SAVE", cut.Find(".beeday-button__label").TextContent);
     }
