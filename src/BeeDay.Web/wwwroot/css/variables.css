@@ -1,17 +1,20 @@
 :root {
     /* Brand — one semantic family, migrated to the official Epic 21 BeeDay palette. */
-    --beeday-color-brand-primary: #1023c8;
-    --beeday-color-brand-primary-hover: #1e33ed;
-    --beeday-color-brand-primary-active: #0c1b99;
-    --beeday-color-brand-primary-light: #1e33ed;
+    --beeday-color-brand-primary: #185abd;
+    --beeday-color-brand-primary-hover: #1654b0;
+    --beeday-color-brand-primary-active: #124490;
+    --beeday-color-brand-primary-light: #1654b0;
     --beeday-color-brand-primary-soft: #eef0ff;
+    --beeday-color-brand-yellow: #ffe88d;
+    --beeday-color-brand-yellow-hover: #fbdb6b;
+    --beeday-color-brand-yellow-foreground: #2f2737;
 
     /* Surfaces */
     --beeday-color-background: #ffffff;
     --beeday-color-surface: #ffffff;
     --beeday-color-surface-muted: #f7f7f7;
     --beeday-color-surface-subtle: #eeeeee;
-    --beeday-color-overlay: rgb(12 27 153 / 64%);
+    --beeday-color-overlay: rgb(18 68 144 / 64%);
 
     /* Content */
     --beeday-color-text-primary: #2f2737;
@@ -222,20 +225,20 @@
     --beeday-depth-lg: 8px;
 
     /* Elevation */
-    --beeday-shadow-xs: 0 1px 2px rgb(12 27 153 / 6%);
-    --beeday-shadow-sm: 0 2px 6px rgb(12 27 153 / 8%);
-    --beeday-shadow-md: 0 4px 12px rgb(12 27 153 / 10%);
-    --beeday-shadow-lg: 0 12px 28px rgb(12 27 153 / 16%);
+    --beeday-shadow-xs: 0 1px 2px rgb(18 68 144 / 6%);
+    --beeday-shadow-sm: 0 2px 6px rgb(18 68 144 / 8%);
+    --beeday-shadow-md: 0 4px 12px rgb(18 68 144 / 10%);
+    --beeday-shadow-lg: 0 12px 28px rgb(18 68 144 / 16%);
 
     /* Focus — migrated to the canonical brand blue in Sprint 20.7 (EPIC 20): this token has a single,
        well-defined role (the default focus-visible ring color) rather than the broad, overloaded
        surface/text role of --beeday-color-primary, so migrating it directly — instead of keeping a
        legacy alias — does not risk the same product-wide background/text regression; it only
        recolors a transient interaction indicator, consistently, everywhere. */
-    --beeday-focus-color: rgb(30 51 237 / 24%);
+    --beeday-focus-color: rgb(24 90 189 / 28%);
     --beeday-focus-ring: 0 0 0 3px var(--beeday-focus-color);
-    --beeday-focus-color-inverse: #facf39;
-    --beeday-focus-ring-inverse: 0 0 0 3px rgb(250 207 57 / 36%);
+    --beeday-focus-color-inverse: var(--beeday-color-brand-yellow);
+    --beeday-focus-ring-inverse: 0 0 0 3px rgb(255 232 141 / 42%);
 
     /* Motion */
     --beeday-duration-fast: 120ms;
@@ -264,9 +267,6 @@
     --beeday-game-panel: #ffffff;
     --beeday-game-blue: #27a8e8;
     --beeday-game-blue-dark: #0879b5;
-    --beeday-game-yellow: #facf39;
-    --beeday-game-yellow-soft: #fbdb6b;
-    --beeday-game-yellow-dark: #d3a900;
     --beeday-game-red: #ef4455;
     --beeday-game-green: #45c46b;
     --beeday-game-border: 2px solid var(--beeday-game-ink);

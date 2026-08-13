@@ -1223,3 +1223,38 @@ visual outline moderna e consistente.
   acessibilidade foram preservados e protegidos por testes.
 
 Não houve mudanças em Domain, Application, Infrastructure, layout ou regras de negócio.
+
+---
+
+## Sprint 21.9 — Brand Identity, Color Direction & Application — Results
+
+**Status:** COMPLETE — identidade oficial incorporada e direção bicolor consolidada sem reabrir
+arquitetura, componentes ou regras de produto.
+
+- O único candidato em `C:\Users\tiago\Downloads` foi `beeday.png`: PNG ARGB 904×276, 104.062
+  bytes, fundo transparente e proporção 3,28:1. Não havia equivalente vetorial. A cópia byte a byte
+  foi versionada em `wwwroot/beeday-wordmark.png` (SHA-256
+  `8A99B76282A11202EE9DCF446E7364D7121C8FEE15E2372003493C401577A0BA`).
+- As cores dominantes reais são aproximadamente `#195ABE` no “bee” e `#FFDE59` no “day”. O azul
+  difere apenas 1/0/1 RGB do primary candidato `#185ABD`, imperceptível no uso. O amarelo do asset é
+  mais saturado que `#FFE88D`; a diferença é perceptível, mas intencionalmente preservada porque o
+  asset oficial não deve ser recolorido.
+- `BeeDayBrand` agora encapsula o PNG com dimensões intrínsecas, alt consciente e sizing por altura,
+  preservando proporção. DesktopSidebar, MobileHeader, MobileSidebar e support drawer fornecem uma
+  pequena surface neutra para contraste sobre o shell azul; contextos claros usam transparência.
+- A família canônica existente passou a primary `#185ABD`, hover `#1654B0`, active/depth `#124490`
+  e soft `#EEF0FF`. Brand yellow passou a `#FFE88D`, hover `#FBDB6B` e foreground `#2F2737`.
+  `--beeday-game-yellow*` foi removido, sem criar família paralela.
+- Azul permanece responsável por ações primárias, links, navegação/foco/seleção e progresso
+  estrutural. Amarelo é reward/highlight: XP usa `BeeDayProgressTone.Reward` e feedback de ganho.
+  Success, Danger, Warning, Info, atividades e Wallet continuam independentes da marca.
+- Primary buttons, cards, navegação, `BeeDayIcon`, RightRail e cálculos/ARIA do progress preservam
+  seus contratos. A Home recebeu somente a paleta e remoção do gradiente de marca; sua reconstrução
+  continua reservada à Sprint 21.10.
+- Contraste calculado: branco sobre primary/hover/active é 6,49:1/7,17:1/9,31:1; foreground escuro
+  sobre brand yellow é 11,72:1. Branco sobre amarelo seria apenas 1,22:1 e permanece proibido.
+
+Riscos e decisões adiadas: o PNG é raster, embora adequado aos tamanhos atuais; uma versão vetorial
+oficial deve substituir a mesma primitive se for fornecida. Favicon e símbolo compacto permanecem
+inalterados porque a wordmark horizontal não autoriza recorte. Dark mode e dívida 760–1024px seguem
+fora do escopo. Nenhuma mudança ocorreu em Domain, Application ou Infrastructure.

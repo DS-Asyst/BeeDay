@@ -254,12 +254,6 @@
     margin: 0 0 .5rem;
 }
 
-.support-drawer__brand-mark ::deep .beeday-brand {
-    --beeday-brand-color: var(--beeday-color-text-inverse);
-
-    font-size: 1.4rem;
-}
-
 .support-drawer__tagline {
     margin: 0;
     color: #fff;
