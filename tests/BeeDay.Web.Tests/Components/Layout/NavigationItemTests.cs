@@ -32,11 +32,11 @@ public sealed class NavigationItemTests
         var cut = context.Render<NavigationItem>(parameters => parameters
             .Add(component => component.Icon, BeeDayIconName.Profile)
             .Add(component => component.Label, "Profile")
-            .Add(component => component.AriaLabel, "Open profile panel")
+            .Add(component => component.AriaLabel, "Run account action")
             .Add(component => component.OnClick, () => clicked = true));
 
         var button = cut.Find("button.navigation-item");
-        Assert.Equal("Open profile panel", button.GetAttribute("aria-label"));
+        Assert.Equal("Run account action", button.GetAttribute("aria-label"));
         Assert.Empty(cut.FindAll("a"));
 
         button.Click();

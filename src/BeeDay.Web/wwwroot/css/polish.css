@@ -45,10 +45,10 @@ body { min-width: 20rem; }
 :where(button, a, [role="button"]) { touch-action: manipulation; }
 :where(button, a, input, select, textarea)[aria-disabled="true"] { pointer-events: none; }
 
-/* Layout refinement */
-.beeday-content-shell { min-width: 0; }
+/* Public pages retain the established gutter; authenticated pages own their width and gutters. */
 .beeday-main { padding-inline: var(--beeday-page-gutter); padding-block: calc(var(--beeday-grid) * 3); }
-.beeday-side-slot { overscroll-behavior: contain; }
+.beeday-main--authenticated { padding: 0; }
+.beeday-main--authenticated > :where(section, article, .beeday-page, .page-content) { width: 100%; max-width: none; }
 
 /* Avoid animation-driven layout shift */
 .beeday-button,
@@ -58,6 +58,7 @@ body { min-width: 20rem; }
 @media (max-width: 60rem) {
     :root { --beeday-reading-width: 100%; }
     .beeday-main { padding-block: calc(var(--beeday-grid) * 2); }
+    .beeday-main--authenticated { padding-block: 0; }
 }
 
 @media (max-width: 42rem) {

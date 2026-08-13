@@ -62,13 +62,13 @@ public sealed class VisualFoundationTests
     }
 
     [Fact]
-    public void NavigationConsumesSharedMotionAndInverseFocusFoundations()
+    public void NeutralNavigationConsumesSharedMotionAndBrandFocusFoundations()
     {
         var navigationItem = ReadWebFile("Components", "Layout", "NavigationItem.razor.css");
         var mobileSidebar = ReadWebFile("Components", "Layout", "MobileSidebar.razor.css");
 
         Assert.Contains("var(--beeday-transition-normal)", navigationItem, StringComparison.Ordinal);
-        Assert.Contains("var(--beeday-focus-color-inverse)", navigationItem, StringComparison.Ordinal);
+        Assert.Contains("var(--beeday-color-brand-primary)", navigationItem, StringComparison.Ordinal);
         Assert.Contains("var(--beeday-transition-emphasized)", mobileSidebar, StringComparison.Ordinal);
         Assert.Contains("@media (prefers-reduced-motion: reduce)", mobileSidebar, StringComparison.Ordinal);
     }

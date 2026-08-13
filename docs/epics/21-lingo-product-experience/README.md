@@ -1281,3 +1281,34 @@ pública (`/`) e do quadro operacional Daily (`/daily`).
 
 Validação: contratos, integração de rotas/login/navegação e cenários Chromium desktop, tablet e
 mobile, incluindo uma tarefa real criada no Daily e concluída pela Home.
+
+---
+
+## Sprint 21.11 — Authenticated Shell & Workspace Redesign — Results
+
+**Status:** COMPLETE — o shell autenticado foi reduzido a Navigation + Workspace e a Daily passou
+a utilizar a largura operacional disponível.
+
+- `RightRail`, `ProfileSidePanel` e `AccountSidePanel` foram removidos do `MainLayout` e do código
+  após confirmação de ausência de consumidores. `AppFooter` permanece somente no layout público.
+- Profile migrou para `/account`; Account para o alias real `/settings`; Logout migrou para a
+  navegação secundária compartilhada como POST antiforgery. Support e Donate eram botões sem ação
+  real e foram classificados como legado, sem criação de links fictícios.
+- `DesktopSidebar` usa surface neutra, border sutil, wordmark oficial e largura de 15.5rem. Brand
+  Blue identifica active/hover/focus. A geometria mantém item de 52px e ícone de 32px da referência.
+- A auditoria visual encontrou que CSS isolation não alcançava o `<a>` produzido por `NavLink`.
+  `NavigationItem` ganhou um boundary compartilhado com `::deep`; ícone e label agora formam uma
+  unidade real em links e botões, protegida por teste geométrico Chromium.
+- O breakpoint estrutural final é 1200px: DesktopSidebar acima; MobileHeader + MobileSidebar abaixo.
+  1024/900/768 usam um único paradigma tablet, encerrando a dívida de shells concorrentes.
+- Home mantém a hierarquia action-first e integra Level, XP total/progress/remaining e progresso
+  real de tarefas/project tasks com `DashboardState`, `ExperienceBar` e `ProgressMetricCard`.
+  Streak não foi exibido porque continua sem backing real.
+- Daily usa até 100rem: quatro colunas flexíveis com mínimo de 15rem no desktop; board com scroll
+  horizontal interno entre 901–1199px; duas colunas em 621–900px; uma coluna até 620px. O documento
+  não recebe overflow horizontal. Wallet preserva seu layout responsivo e max-width próprio.
+- A comparação visual em Chromium 1440px confirmou sidebar mais leve, wordmark legível, active
+  state imediato, icon/label alinhados, Home focada e Daily ocupando todo o workspace sem o vazio
+  provocado pela antiga terceira coluna.
+
+Não houve alteração em Domain, Application ou Infrastructure, nem novo request/state/component V2.

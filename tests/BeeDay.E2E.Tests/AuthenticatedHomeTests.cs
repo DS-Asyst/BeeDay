@@ -19,8 +19,8 @@ public sealed class AuthenticatedHomeTests(PlaywrightAppFixture fixture) : E2ETe
         await Expect(Page.GetByRole(AriaRole.Heading, new() { NameRegex = new Regex("Welcome back") })).ToBeVisibleAsync();
         await Expect(Page.GetByRole(AriaRole.Status).Filter(new() { HasText = "Your next step is yours to choose" })).ToBeVisibleAsync();
         await Expect(Page.Locator(".desktop-sidebar nav.navigation-items a[href='/home']")).ToHaveAttributeAsync("aria-current", "page");
-        await Expect(Page.Locator(".right-rail")).ToBeVisibleAsync();
-        await Expect(Page.Locator(".product-home__mobile-progress")).ToBeHiddenAsync();
+        await Expect(Page.Locator(".right-rail")).ToHaveCountAsync(0);
+        await Expect(Page.Locator(".product-home__progress")).ToBeVisibleAsync();
         await AssertNoOverflowAsync();
 
         await Page.Locator(".desktop-sidebar a[href='/daily']").ClickAsync();
@@ -30,13 +30,13 @@ public sealed class AuthenticatedHomeTests(PlaywrightAppFixture fixture) : E2ETe
     }
 
     [Fact]
-    public async Task MobileAndTabletPrioritizeEssentialProgressWithoutRightRailOrOverflow()
+    public async Task MobileAndTabletPrioritizeEssentialProgressWithoutLegacyRegionsOrOverflow()
     {
         await Page.SetViewportSizeAsync(390, 844);
         await LoginAsync();
 
-        await Expect(Page.Locator(".right-rail")).ToBeHiddenAsync();
-        await Expect(Page.Locator(".product-home__mobile-progress")).ToBeVisibleAsync();
+        await Expect(Page.Locator(".right-rail")).ToHaveCountAsync(0);
+        await Expect(Page.Locator(".product-home__progress")).ToBeVisibleAsync();
         await Expect(Page.GetByRole(AriaRole.Progressbar, new() { Name = "Experience progress" })).ToBeVisibleAsync();
         await AssertNoOverflowAsync();
 
@@ -44,7 +44,7 @@ public sealed class AuthenticatedHomeTests(PlaywrightAppFixture fixture) : E2ETe
         await Expect(Page.Locator("#mobile-navigation nav.navigation-items a[href='/home']")).ToHaveAttributeAsync("aria-current", "page");
 
         await Page.SetViewportSizeAsync(900, 800);
-        await Expect(Page.Locator(".right-rail")).ToBeHiddenAsync();
+        await Expect(Page.Locator(".right-rail")).ToHaveCountAsync(0);
         await AssertNoOverflowAsync();
     }
 

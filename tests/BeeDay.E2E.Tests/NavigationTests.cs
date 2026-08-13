@@ -112,13 +112,14 @@ public sealed class NavigationTests(PlaywrightAppFixture fixture) : E2ETestBase(
     }
 
     [Fact]
-    public async Task Desktop_LogoutRemainsAccessibleThroughTheAccountTrigger()
+    public async Task Desktop_LogoutRemainsDirectlyAccessibleInSecondaryNavigation()
     {
         await Page.SetViewportSizeAsync(1280, 800);
         await LoginToDailyAsync();
 
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Open support menu" }).ClickAsync();
-        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "LOGOUT" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Log out of BeeDay" })).ToBeVisibleAsync();
+        await Expect(Page.Locator(".desktop-sidebar a[href='/account']")).ToBeVisibleAsync();
+        await Expect(Page.Locator(".desktop-sidebar a[href='/settings']")).ToBeVisibleAsync();
     }
 
     private async Task LoginToDailyAsync()

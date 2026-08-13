@@ -1,74 +1,31 @@
-/* Sprint 21.3 (EPIC 21) — geometry/interaction language sourced from the Lingo SidebarItem
-   measurements in docs/epics/21-lingo-product-experience/README.md §3/§8 (52px item height, 32px
-   icon, active surface + border). Colors adapted to BeeDay's dark shell surface (the sidebar
-   inherits --beeday-color-brand-primary-active, not Lingo's light background) rather than copied
-   from the Lingo palette — global color/typography migration is Sprint 21.4, not this component. */
-.navigation-item {
+.navigation-item-shell { display: contents; }
+.navigation-item-shell ::deep .navigation-item {
     display: flex;
-    align-items: center;
-    gap: var(--beeday-spacing-md);
+    width: 100%;
     min-height: 3.25rem;
-    padding-inline: var(--beeday-spacing-md);
-    border: 0;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1.1rem;
+    padding: .55rem .85rem;
+    border: 2px solid transparent;
     border-radius: var(--beeday-radius-md);
-    color: rgb(255 255 255 / 82%);
+    color: var(--beeday-color-text-secondary);
     background: transparent;
     font-family: var(--beeday-font-body);
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
+    line-height: 1;
     text-align: left;
     text-decoration: none;
     cursor: pointer;
-    transition: background-color var(--beeday-transition-normal), color var(--beeday-transition-normal), transform var(--beeday-transition-fast);
+    transition: background-color var(--beeday-transition-normal), border-color var(--beeday-transition-normal), color var(--beeday-transition-normal), transform var(--beeday-transition-fast);
 }
 
-.navigation-item__icon {
-    display: grid;
-    flex-shrink: 0;
-    place-items: center;
-}
+.navigation-item-shell ::deep .navigation-item__icon { display: grid; flex: 0 0 2rem; place-items: center; color: inherit; }
+.navigation-item-shell ::deep .navigation-item__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.navigation-item-shell ::deep .navigation-item:hover { color: var(--beeday-color-brand-primary); background: var(--beeday-color-brand-primary-soft); }
+.navigation-item-shell ::deep .navigation-item:active { transform: translateY(1px); }
+.navigation-item-shell ::deep .navigation-item:focus-visible { outline: var(--beeday-border-width) solid var(--beeday-color-brand-primary); outline-offset: 2px; box-shadow: var(--beeday-focus-ring); }
+.navigation-item-shell ::deep .navigation-item.is-active { color: var(--beeday-color-brand-primary-active); background: var(--beeday-color-brand-primary-soft); border-color: var(--beeday-color-brand-primary); font-weight: 800; }
 
-.navigation-item__label {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.navigation-item:hover {
-    color: #fff;
-    background: rgb(255 255 255 / 10%);
-}
-
-.navigation-item:active {
-    transform: scale(.98);
-}
-
-.navigation-item:focus-visible {
-    outline: var(--beeday-border-width) solid var(--beeday-focus-color-inverse);
-    outline-offset: 2px;
-    box-shadow: var(--beeday-focus-ring-inverse);
-}
-
-/* Current route (NavLink's own ActiveClass) or an open Profile/Account panel (button mode) — same
-   treatment either way. Font-weight change alongside the surface/border tint so the state is never
-   color-only (Sprint 21.3 §8). */
-.navigation-item.is-active {
-    color: #fff;
-    background: rgb(255 255 255 / 16%);
-    border: 1px solid rgb(255 255 255 / 30%);
-    font-weight: 700;
-}
-
-.navigation-item.is-active:hover {
-    background: rgb(255 255 255 / 20%);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .navigation-item {
-        transition: none;
-    }
-
-    .navigation-item:active {
-        transform: none;
-    }
-}
+@media (prefers-reduced-motion: reduce) { .navigation-item-shell ::deep .navigation-item { transition: none; } .navigation-item-shell ::deep .navigation-item:active { transform: none; } }

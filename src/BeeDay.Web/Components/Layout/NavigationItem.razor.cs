@@ -7,8 +7,7 @@ namespace BeeDay.Web.Components.Layout;
 /// <summary>
 /// Shared row primitive for BeeDay's authenticated navigation (desktop sidebar and mobile drawer):
 /// either a route (<see cref="Href"/> set, renders a <see cref="NavLink"/>) or an action trigger
-/// (<see cref="Href"/> null, renders a button — e.g. opening the Profile/Account side panels,
-/// which are not routes). Carries no business logic; destinations and callbacks are supplied by
+/// (<see cref="Href"/> null, renders a button). Carries no business logic; destinations and callbacks are supplied by
 /// the caller.
 /// </summary>
 public partial class NavigationItem : IDisposable
@@ -27,6 +26,7 @@ public partial class NavigationItem : IDisposable
 
     /// <summary>Action mode only.</summary>
     [Parameter] public EventCallback OnClick { get; set; }
+    [Parameter] public string ButtonType { get; set; } = "button";
     [Parameter] public string? AriaLabel { get; set; }
     [Parameter] public bool? AriaExpanded { get; set; }
 
