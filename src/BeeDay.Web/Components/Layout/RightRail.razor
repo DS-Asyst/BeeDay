@@ -9,10 +9,10 @@
         }
         else if (State.IsUnavailable)
         {
-            <section class="right-rail__unavailable" role="status">
+            <BeeDayCard Padded="true" Class="right-rail__unavailable" role="status">
                 <strong>Progress unavailable</strong>
                 <span>Your main workspace is still available.</span>
-            </section>
+            </BeeDayCard>
         }
         else if (State.Data is { } dashboard)
         {

@@ -562,26 +562,25 @@
     .beeday-button__loader { animation: none; }
 }
 
-/* Sprint 20.8 (EPIC 20) — canonical default decision: the bare .beeday-card shape is now the "soft"
-   geometry validated on Home since Sprint 20.6 (generous radius, borderless, elevated shadow) —
-   folded in here instead of kept as a separate --soft modifier class, which is now removed (Home's
-   2 consumers had the class stripped, redundant with the default). Audited first: every other real
-   consumer (Wallet's summary/tag/transaction cards, the Account page's settings sections, Habit/
-   Task/Todo/Project activity cards) already fully self-declares its own border/border-radius/
-   background/box-shadow — several with a documented comment explaining exactly why (see wallet.css)
-   — so this default change has zero visual effect on any of them; only Home was ever actually
-   depending on the bare default's appearance. */
+/* Sprint 21.7: canonical content-card geometry. The default is a neutral, bordered, flat surface;
+   prominent hierarchy and interaction are explicit opt-ins. Panels, dialogs and structural
+   containers remain separate concepts. */
 .beeday-card {
-    border: 0;
-    border-radius: var(--beeday-radius-2xl);
+    min-width: 0;
+    border: var(--beeday-border-width) solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-lg);
     background: var(--beeday-color-surface);
-    box-shadow: var(--beeday-shadow-lg);
+    color: var(--beeday-color-text-primary);
+    box-shadow: none;
 }
 
-.beeday-card--padded { padding: var(--beeday-spacing-lg); }
+.beeday-card--padded { padding: var(--beeday-spacing-md); }
 .beeday-card--muted { background: var(--beeday-color-surface-muted); }
-.beeday-card--interactive { transition: transform var(--beeday-transition-normal), box-shadow var(--beeday-transition-normal); }
-.beeday-card--interactive:hover { transform: translateY(-2px); box-shadow: var(--beeday-shadow-md); }
+.beeday-card--prominent { border-color: var(--beeday-color-border-strong); border-radius: var(--beeday-radius-2xl); box-shadow: var(--beeday-shadow-sm); }
+.beeday-card--prominent.beeday-card--padded { padding: var(--beeday-spacing-lg); }
+.beeday-card--interactive { cursor: pointer; transition: border-color var(--beeday-transition-normal), background-color var(--beeday-transition-normal), box-shadow var(--beeday-transition-normal); }
+.beeday-card--interactive:hover { border-color: var(--beeday-color-border-strong); background: var(--beeday-color-surface-muted); }
+.beeday-card--interactive:focus-visible { outline: none; box-shadow: var(--beeday-focus-ring); }
 
 .beeday-page-header,
 .beeday-section-header,

@@ -1,4 +1,4 @@
-.activity-card{--activity-accent:var(--beeday-color-task);--activity-accent-dark:var(--beeday-color-task-dark);position:relative;display:grid;grid-template-columns:2.45rem minmax(0,1fr) 2.25rem;min-height:5.35rem;overflow:hidden;border:1px solid var(--beeday-color-border);border-radius:.25rem;background:var(--beeday-color-surface);box-shadow:0 1px 2px rgb(40 27 52 / 8%);transition:transform 140ms ease,box-shadow 140ms ease,border-color 140ms ease}.activity-card--task{--activity-accent:var(--beeday-color-task);--activity-accent-dark:var(--beeday-color-task-dark)}.activity-card--todo{--activity-accent:var(--beeday-color-todo);--activity-accent-dark:var(--beeday-color-todo-dark)}.activity-card--project{--activity-accent:var(--beeday-color-project);--activity-accent-dark:var(--beeday-color-project-dark)}.activity-card:hover{z-index:2;border-color:#b9b1c2;box-shadow:0 4px 12px rgb(45 28 66 / 13%);transform:translateY(-1px)}
+.activity-card{--activity-accent:var(--beeday-color-task);--activity-accent-dark:var(--beeday-color-task-dark);position:relative;display:grid;grid-template-columns:2.45rem minmax(0,1fr) 2.25rem;min-height:5.35rem;overflow:hidden}.activity-card--task{--activity-accent:var(--beeday-color-task);--activity-accent-dark:var(--beeday-color-task-dark)}.activity-card--todo{--activity-accent:var(--beeday-color-todo);--activity-accent-dark:var(--beeday-color-todo-dark)}.activity-card--project{--activity-accent:var(--beeday-color-project);--activity-accent-dark:var(--beeday-color-project-dark)}
 /* The checkbox's own outline/background is always visible (no opacity toggle
    on .activity-card__checkbox itself) — only the inner .activity-card__checkbox-glyph
    (the checkmark) fades in on hover/focus/completed, so the control reads as
@@ -46,7 +46,7 @@
         transform: none;
     }
 }
-.habit-card{--habit-side:var(--beeday-habit-color-white);--habit-button-bg:var(--beeday-color-surface);--habit-button-border:var(--beeday-color-border-strong);--habit-button-text:var(--beeday-habit-color-white-dark);display:grid;grid-template-columns:2.45rem minmax(0,1fr) 2.45rem;height:5.15rem;min-height:5.15rem;overflow:hidden;border:1px solid var(--beeday-color-border);border-radius:.2rem;background:var(--beeday-color-surface);box-shadow:0 1px 2px rgb(40 27 52 / 8%);transition:border-color .18s ease,box-shadow .18s ease}.habit-card:hover{border-color:var(--beeday-color-border-strong);box-shadow:0 2px 5px rgb(40 27 52 / 13%)}
+.habit-card{--habit-side:var(--beeday-habit-color-white);--habit-button-bg:var(--beeday-color-surface);--habit-button-border:var(--beeday-color-border-strong);--habit-button-text:var(--beeday-habit-color-white-dark);display:grid;grid-template-columns:2.45rem minmax(0,1fr) 2.45rem;height:5.15rem;min-height:5.15rem;overflow:hidden}
 .habit-card--white{--habit-side:var(--beeday-habit-color-white);--habit-button-bg:var(--beeday-color-surface);--habit-button-border:var(--beeday-color-border-strong);--habit-button-text:var(--beeday-habit-color-white-dark)}
 .habit-card--yellow{--habit-side:var(--beeday-habit-color-yellow);--habit-button-bg:var(--beeday-habit-color-yellow-dark);--habit-button-border:rgb(255 255 255 / 55%);--habit-button-text:var(--beeday-color-surface)}
 .habit-card--green{--habit-side:var(--beeday-habit-color-green);--habit-button-bg:var(--beeday-habit-color-green-dark);--habit-button-border:rgb(255 255 255 / 55%);--habit-button-text:var(--beeday-color-surface)}
@@ -103,12 +103,6 @@
         opacity var(--beeday-transition-normal);
 }
 
-.activity-card:hover,
-.habit-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--beeday-shadow-md);
-}
-
 .activity-card:focus-within,
 .habit-card:focus-within {
     border-color: var(--beeday-color-brand-primary-light);
@@ -154,14 +148,6 @@
 .habit-card__menu:focus-visible {
     position: relative;
     z-index: 3;
-}
-
-@media (hover: none) {
-    .activity-card:hover,
-    .habit-card:hover {
-        transform: none;
-        box-shadow: var(--beeday-shadow-xs);
-    }
 }
 
 /* Dashboard card proportions — compact layout based on the visual reference.

@@ -3,17 +3,17 @@
 
 @if (IsLoading)
 {
-    <section class="experience-card experience-card--loading"
-             aria-label="Loading experience"
-             aria-busy="true">
+    <BeeDayCard Padded="true" Class="experience-card experience-card--loading"
+                aria-label="Loading experience"
+                aria-busy="true">
         <div class="experience-card__skeleton experience-card__skeleton--label"></div>
         <div class="experience-card__skeleton experience-card__skeleton--bar"></div>
         <div class="experience-card__skeleton experience-card__skeleton--value"></div>
-    </section>
+    </BeeDayCard>
 }
 else if (Model is not null)
 {
-    <section class="experience-card" aria-label="Experience">
+    <BeeDayCard Padded="true" Class="experience-card" aria-label="Experience">
         <div class="experience-card__header">
             <span class="experience-card__label"><PixelIcon Name="PixelIconName.Level" Size="PixelIconSize.ExtraSmall" /> Level</span>
             <strong>@Model.Level</strong>
@@ -38,7 +38,7 @@ else if (Model is not null)
                 <PixelIcon Name="PixelIconName.Experience" Size="PixelIconSize.ExtraSmall" /> +@ExperienceGain XP
             </output>
         }
-    </section>
+    </BeeDayCard>
 }
 
 @code {
