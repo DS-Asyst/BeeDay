@@ -5,17 +5,19 @@ using static Microsoft.Playwright.Assertions;
 namespace BeeDay.E2E.Tests;
 
 /// <summary>
-/// Sprint 21.2 (EPIC 21) shell foundation, verified against a real Chromium render — bUnit has no
-/// layout engine, so the actual geometry/visibility contract (which region is on screen, at which
-/// width, with no horizontal overflow) can only be confirmed here. See
-/// docs/epics/21-lingo-product-experience/README.md §3/§13/§22.
+/// EPIC 21 shell foundation (Sprint 21.2) and its real navigation (Sprint 21.3), verified against a
+/// real Chromium render — bUnit has no layout engine, so the actual geometry/visibility contract
+/// (which region is on screen, at which width, with no horizontal overflow) can only be confirmed
+/// here. Mobile navigation open/close/keyboard behavior is covered separately in
+/// <see cref="NavigationTests"/>. See docs/epics/21-lingo-product-experience/README.md §3/§13/§22
+/// and "Sprint 21.3".
 /// </summary>
 public sealed class ShellResponsiveLayoutTests(PlaywrightAppFixture fixture) : E2ETestBase(fixture)
 {
     private const string Password = "E2ePassword123!";
 
     [Fact]
-    public async Task DesktopViewport_ShowsPersistentSidebarAndRightRail_HidesTopNavigation_NoHorizontalOverflow()
+    public async Task DesktopViewport_ShowsPersistentSidebarAndRightRail_HidesMobileHeader_NoHorizontalOverflow()
     {
         await Page.SetViewportSizeAsync(1280, 800);
         await LoginToDailyAsync();
@@ -32,26 +34,34 @@ public sealed class ShellResponsiveLayoutTests(PlaywrightAppFixture fixture) : E
         Assert.NotNull(rightRailBox);
         Assert.InRange(rightRailBox!.Width, 362, 374); // 23rem = 368px
 
-        await Expect(Page.Locator(".top-navigation")).ToBeHiddenAsync();
+        await Expect(Page.Locator(".mobile-header")).ToBeHiddenAsync();
 
         Assert.False(await HasHorizontalOverflowAsync());
     }
 
     [Fact]
-    public async Task NarrowViewport_HidesSidebarAndRightRail_PreservesTopNavigationAccessToProfilePanel()
+    public async Task NarrowViewport_HidesSidebarAndRightRail_ShowsMobileHeader_ProfilePanelReachableThroughDrawer()
     {
         await Page.SetViewportSizeAsync(390, 844);
         await LoginToDailyAsync();
 
         await Expect(Page.Locator(".desktop-sidebar")).ToBeHiddenAsync();
         await Expect(Page.Locator(".right-rail")).ToBeHiddenAsync();
-        await Expect(Page.Locator(".top-navigation")).ToBeVisibleAsync();
+        await Expect(Page.Locator(".mobile-header")).ToBeVisibleAsync();
 
         Assert.False(await HasHorizontalOverflowAsync());
 
-        // The transitory mobile fallback (§8 of the Sprint) must still give real access to the
-        // profile panel, exactly as before this Sprint's shell change.
+        // Sprint 21.3: Profile is no longer a direct button on the mobile header itself — it now
+        // lives inside the hamburger drawer, alongside Daily/Wallet/Account, same as desktop.
+        // Opening it closes the drawer (avoids the drawer and the profile panel, both left-anchored
+        // overlays of similar width, stacking on top of each other) — the panel itself becomes
+        // visible, and its own trigger (now reading "Close profile panel") is reachable again by
+        // reopening the hamburger menu, verified below.
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Open navigation menu" }).ClickAsync();
         await Page.GetByRole(AriaRole.Button, new() { Name = "Open profile panel" }).ClickAsync();
+        await Expect(Page.GetByRole(AriaRole.Complementary, new() { Name = "Profile panel" })).ToBeVisibleAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Open navigation menu" }).ClickAsync();
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Close profile panel" })).ToBeVisibleAsync();
     }
 

@@ -1,0 +1,27 @@
+@if (Href is not null)
+{
+    <NavLink href="@Href"
+             Match="Match"
+             class="navigation-item"
+             ActiveClass="is-active"
+             aria-current="@AriaCurrentValue"
+             @onclick="HandleNavigate">
+        <span class="navigation-item__icon" aria-hidden="true">
+            <PixelIcon Name="@Icon" Size="PixelIconSize.ExtraLarge" />
+        </span>
+        <span class="navigation-item__label">@Label</span>
+    </NavLink>
+}
+else
+{
+    <button type="button"
+            class="navigation-item @(AriaExpanded == true ? "is-active" : null)"
+            aria-label="@AriaLabel"
+            aria-expanded="@AriaExpandedValue"
+            @onclick="OnClick">
+        <span class="navigation-item__icon" aria-hidden="true">
+            <PixelIcon Name="@Icon" Size="PixelIconSize.ExtraLarge" />
+        </span>
+        <span class="navigation-item__label">@Label</span>
+    </button>
+}

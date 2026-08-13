@@ -1,5 +1,8 @@
 .beeday-app {
-    --beeday-top-navigation-height: 4.25rem;
+    /* Sprint 21.3 (EPIC 21): 3.25rem (52px) matches MobileHeader's own height and the 52px
+       NavigationItem row rhythm (docs/epics/21-lingo-product-experience/README.md §3/§6/§8) —
+       replaces the 4.25rem sized for the removed TopNavigation. */
+    --beeday-top-navigation-height: 3.25rem;
     --beeday-left-panel-width: 17rem;
     --beeday-right-panel-width: 24rem;
     --beeday-collapsed-panel-width: 1.35rem;
@@ -21,7 +24,7 @@
 
 /* Structural breakpoint of the new shell — matches the single dominant breakpoint the Lingo
    reference uses for its own shell (`lg:`, 1024px; see docs/epics/21-lingo-product-experience/
-   README.md §13). TopNavigation (fixed top bar) hides at this width in its own stylesheet, and
+   README.md §13). MobileHeader (fixed top bar) hides at this width in its own stylesheet, and
    DesktopSidebar/RightRail take over — redefining this one variable here is enough to also
    recompute .beeday-workspace's min-height and .beeday-side-slot's sticky offset below, since both
    already derive from it. */

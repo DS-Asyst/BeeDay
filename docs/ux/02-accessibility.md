@@ -72,13 +72,16 @@ carregada.
 
 ## 6. Movimento — `prefers-reduced-motion`
 
-11+ blocos `@media (prefers-reduced-motion: reduce)` distintos, um por arquivo de CSS que declara
+14+ blocos `@media (prefers-reduced-motion: reduce)` distintos, um por arquivo de CSS que declara
 `@keyframes`/`transition` decorativa: `animations.css`, `pixel-ui.css`, `activity-design-system.css`,
 `cards.css` (via `design-system.css`), `feedback.css`, `design-system.css`, `editor-modal.css`,
-`dragdrop.css`, `wallet.css`, `polish.css`, `PixelIcon.razor.css`, `TopNavigation.razor.css`,
-`MainLayout.razor.css`, `BeeDayCardMenu.razor.css`, `BeeDayFeedbackModal.razor.css`,
-`ExperienceBar.razor.css` — cobertura consistente através de todo o CSS de produto, tanto global
-quanto isolado por componente. **Sprint 20.8 (EPIC 20):** `LoginBackground.razor.css` (o único
+`dragdrop.css`, `wallet.css`, `polish.css`, `PixelIcon.razor.css`, `MainLayout.razor.css`,
+`BeeDayCardMenu.razor.css`, `BeeDayFeedbackModal.razor.css`, `ExperienceBar.razor.css` — mais, na
+navegação da EPIC 21 (Sprint 21.2/21.3, não capturados quando esta contagem foi feita
+originalmente): `DesktopSidebar.razor.css`, `NavigationItem.razor.css`, `MobileHeader.razor.css`,
+`MobileSidebar.razor.css` (`TopNavigation.razor.css`, que também tinha um bloco, foi removida na
+Sprint 21.3) — cobertura consistente através de todo o CSS de produto, tanto global quanto isolado
+por componente. **Sprint 20.8 (EPIC 20):** `LoginBackground.razor.css` (o único
 consumidor deste bloco fora dos listados acima) foi removido junto com o componente — era código
 morto, nunca montado por nenhuma página real (o fundo de imagem animado que ele implementava não
 tinha nenhum consumidor de markup em `src/`); o fundo realmente renderizado atrás de Login/Identity/

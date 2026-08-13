@@ -1,13 +1,13 @@
 namespace BeeDay.Web.Tests.Components.Layout;
 
 /// <summary>
-/// Guards the Sprint 21.2 (EPIC 21) shell foundation contract: MainLayout must compose the new
-/// Sidebar / Main Content / Right Rail regions without dropping any of the existing authenticated
-/// shell functionality (profile panel, account/support panel, logout form, footer, toasts), and
-/// the new regions must be structural only — hidden below the Lingo-derived 1024px breakpoint,
-/// shown above it, with TopNavigation taking the complementary role (visible below, hidden above)
-/// so no two desktop shell paradigms are ever active at once. See
-/// docs/epics/21-lingo-product-experience/README.md §3/§4/§10/§13/§22.
+/// Guards the EPIC 21 shell foundation contract established in Sprint 21.2 and evolved in Sprint
+/// 21.3: MainLayout must compose the Sidebar / Main Content / Right Rail regions without dropping
+/// any existing authenticated shell functionality (profile panel, account/support panel, logout
+/// form, footer, toasts), and desktop/mobile navigation must never both be visible at the same
+/// breakpoint — TopNavigation was fully removed in Sprint 21.3 once MobileHeader/MobileSidebar
+/// absorbed its responsibilities (no two navigation systems left concurrently). See
+/// docs/epics/21-lingo-product-experience/README.md §3/§4/§10/§13/§22 and "Sprint 21.3".
 ///
 /// This is a text-level contract check, not a computed-style assertion — bUnit has no
 /// layout/rendering engine, matching the approach already used by
@@ -36,15 +36,27 @@ public sealed class ShellFoundationTests
         File.ReadAllText(Path.Combine(ResolveRepoRoot(), "src", "BeeDay.Web", "Components", "Layout", fileName));
 
     [Fact]
-    public void MainLayoutComposesTheNewShellRegionsWithoutRemovingAnyExistingRegion()
+    public void TopNavigationNoLongerExistsInTheLayoutDirectory()
+    {
+        var razorPath = Path.Combine(ResolveRepoRoot(), "src", "BeeDay.Web", "Components", "Layout", "TopNavigation.razor");
+        var cssPath = Path.Combine(ResolveRepoRoot(), "src", "BeeDay.Web", "Components", "Layout", "TopNavigation.razor.css");
+
+        Assert.False(File.Exists(razorPath), "TopNavigation.razor should have been deleted once its responsibilities were fully absorbed by MobileHeader/MobileSidebar/DesktopSidebar (Sprint 21.3) — a leftover file would be dead code.");
+        Assert.False(File.Exists(cssPath));
+    }
+
+    [Fact]
+    public void MainLayoutComposesTheShellRegionsWithoutRemovingAnyExistingRegion()
     {
         var markup = ReadLayoutFile("MainLayout.razor");
 
         Assert.Contains("class=\"beeday-shell\"", markup, StringComparison.Ordinal);
         Assert.Contains("<DesktopSidebar", markup, StringComparison.Ordinal);
         Assert.Contains("<RightRail", markup, StringComparison.Ordinal);
+        Assert.Contains("<MobileHeader", markup, StringComparison.Ordinal);
+        Assert.Contains("<MobileSidebar", markup, StringComparison.Ordinal);
 
-        Assert.Contains("<TopNavigation", markup, StringComparison.Ordinal);
+        Assert.DoesNotContain("<TopNavigation", markup, StringComparison.Ordinal);
         Assert.Contains("<ProfileSidePanel", markup, StringComparison.Ordinal);
         Assert.Contains("<AccountSidePanel", markup, StringComparison.Ordinal);
         Assert.Contains("<AppFooter", markup, StringComparison.Ordinal);
@@ -73,15 +85,24 @@ public sealed class ShellFoundationTests
     }
 
     [Fact]
-    public void TopNavigationHidesAtTheSameStructuralBreakpointTheNewSidebarAppearsAtSoNoTwoDesktopShellsCompete()
+    public void MobileHeaderHidesAtTheSameStructuralBreakpointTheDesktopSidebarAppearsAtSoNoTwoDesktopShellsCompete()
     {
-        var css = ReadLayoutFile("TopNavigation.razor.css");
+        var css = ReadLayoutFile("MobileHeader.razor.css");
 
-        Assert.Matches(@"@media \(min-width: 1024px\)\s*\{\s*\.top-navigation\s*\{[^}]*display:\s*none", css);
+        Assert.Matches(@"@media \(min-width: 1024px\)\s*\{\s*\.mobile-header\s*\{[^}]*display:\s*none", css);
     }
 
     [Fact]
-    public void MainLayoutReclaimsTheTopNavigationReservedSpaceAtTheStructuralBreakpoint()
+    public void MobileSidebarHidesAtTheSameStructuralBreakpointTheDesktopSidebarAppearsAt()
+    {
+        var css = ReadLayoutFile("MobileSidebar.razor.css");
+
+        Assert.Contains("@media (min-width: 1024px)", css, StringComparison.Ordinal);
+        Assert.Matches(@"@media \(min-width: 1024px\)\s*\{[^}]*\.mobile-nav-backdrop,[^}]*\.mobile-nav-drawer[^}]*\{[^}]*display:\s*none", css);
+    }
+
+    [Fact]
+    public void MainLayoutReclaimsTheMobileHeaderReservedSpaceAtTheStructuralBreakpoint()
     {
         var css = ReadLayoutFile("MainLayout.razor.css");
 

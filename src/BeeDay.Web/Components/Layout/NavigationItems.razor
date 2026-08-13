@@ -1,0 +1,33 @@
+@* Sprint 21.3 (EPIC 21) — the real, current set of authenticated destinations, shared verbatim
+   between DesktopSidebar and MobileSidebar so both containers stay in sync automatically. Daily
+   and Wallet are routes; Profile and Account open the existing side-panel drawers (not routes) —
+   see docs/epics/21-lingo-product-experience/README.md "Sprint 21.3" for why Habits/Tasks/Projects
+   are not separate items yet. *@
+<nav class="navigation-items" aria-label="Main navigation">
+    <NavigationItem Icon="PixelIconName.Daily" Label="Daily" Href="/daily" OnNavigate="OnNavigate" />
+    <NavigationItem Icon="PixelIconName.Wallet" Label="Wallet" Href="/wallet" OnNavigate="OnNavigate" />
+</nav>
+
+<div class="navigation-items navigation-items--actions">
+    <NavigationItem Icon="PixelIconName.Profile"
+                     Label="Profile"
+                     AriaLabel="@(IsProfilePanelOpen ? "Close profile panel" : "Open profile panel")"
+                     AriaExpanded="IsProfilePanelOpen"
+                     OnClick="OnToggleProfilePanel" />
+
+    <NavigationItem Icon="PixelIconName.Account"
+                     Label="Account"
+                     AriaLabel="@(IsMenuPanelOpen ? "Close support menu" : "Open support menu")"
+                     AriaExpanded="IsMenuPanelOpen"
+                     OnClick="OnToggleMenuPanel" />
+</div>
+
+@code {
+    [Parameter] public bool IsProfilePanelOpen { get; set; }
+    [Parameter] public bool IsMenuPanelOpen { get; set; }
+    [Parameter] public EventCallback OnToggleProfilePanel { get; set; }
+    [Parameter] public EventCallback OnToggleMenuPanel { get; set; }
+
+    /// <summary>Invoked when a route item (Daily/Wallet) is activated — no-op on desktop, closes the drawer on mobile.</summary>
+    [Parameter] public EventCallback OnNavigate { get; set; }
+}

@@ -133,9 +133,11 @@ UseForwardedHeaders (se produção + habilitado)
   status desta tabela que não são hoje alcançáveis por uma requisição HTTP real (a superfície HTTP
   desta aplicação é só `/auth/login`, `/auth/logout`, `/health*` e páginas Blazor).
 - `UseHsts`/`UseHttpsRedirection` só fora de Development.
-- `UseAntiforgery` protege os formulários HTML puros (`/auth/login`, `/auth/logout`, e os
-  `<form method="post">` usados por `TopNavigation`/`AccountSidePanel` para logout) — os componentes
-  Blazor interativos usam `EditForm`/`AntiforgeryToken` própria do framework.
+- `UseAntiforgery` protege os formulários HTML puros (`/auth/login`, `/auth/logout`, e o
+  `<form method="post">` usado por `AccountSidePanel` para logout — o único componente de Layout
+  que renderiza esse form; `DesktopSidebar`/`MobileHeader`/`MobileSidebar` só disparam o botão que
+  abre esse painel) — os componentes Blazor interativos usam `EditForm`/`AntiforgeryToken` própria
+  do framework.
 - `MapStaticAssets()` (API nativa do .NET 10) serve `wwwroot/` com o mapeamento usado por
   `@Assets["..."]` em `App.razor`.
 

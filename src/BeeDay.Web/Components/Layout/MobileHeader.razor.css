@@ -1,0 +1,66 @@
+/* Sprint 21.3 (EPIC 21) — replaces TopNavigation below the shell's 1024px breakpoint (see
+   docs/epics/21-lingo-product-experience/README.md "Sprint 21.3" for why TopNavigation itself was
+   removed rather than kept as a second concurrent mobile nav system). Height matches
+   NavigationItem's own 52px rhythm and is read from the same shared --beeday-top-navigation-height
+   token MainLayout/DesktopSidebar/RightRail already derive from, so the reserved top space and the
+   header's real height can never drift apart. */
+.mobile-header {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--beeday-top-navigation-height);
+    padding-inline: var(--beeday-spacing-md);
+    color: var(--beeday-color-text-inverse);
+    background: var(--beeday-color-brand-primary-active);
+    border-bottom: 1px solid rgb(255 255 255 / 10%);
+    box-shadow: 0 2px 10px rgb(33 5 60 / 20%);
+}
+
+@media (min-width: 1024px) {
+    .mobile-header {
+        display: none;
+    }
+}
+
+.mobile-header__brand {
+    display: flex;
+    align-items: center;
+    color: inherit;
+    text-decoration: none;
+}
+
+.mobile-header__menu-button {
+    display: grid;
+    width: 2.65rem;
+    height: 2.65rem;
+    place-items: center;
+    color: rgb(255 255 255 / 86%);
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: var(--beeday-radius-xs);
+    cursor: pointer;
+    transition: color 160ms ease, background-color 180ms ease;
+}
+
+.mobile-header__menu-button:hover,
+.mobile-header__menu-button:focus-visible {
+    color: #fff;
+    background: rgb(255 255 255 / 10%);
+    border-color: #fff;
+}
+
+.mobile-header__menu-button:focus-visible {
+    outline: 2px solid var(--beeday-game-yellow);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mobile-header__menu-button {
+        transition: none;
+    }
+}
