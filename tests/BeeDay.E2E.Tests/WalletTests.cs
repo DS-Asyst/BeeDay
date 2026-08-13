@@ -22,7 +22,7 @@ public sealed class WalletTests(PlaywrightAppFixture fixture) : E2ETestBase(fixt
         await Page.GetByLabel("Email").FillAsync(email);
         await Page.GetByLabel("Password").FillAsync(Password);
         await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
-        await Expect(Page).ToHaveURLAsync(new Regex("/home$"));
+        await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
         await GotoAsync("/daily");
         // See AccountLifecycleTests.LoginAsync's remarks: a redirect-triggered navigation
         // establishes its own SignalR circuit that GotoAsync's own wait cannot cover.

@@ -148,15 +148,11 @@
 
 .editor-modal__type-icon {
     display: grid;
-    width: 2.8rem;
-    height: 2.8rem;
+    width: 2rem;
+    height: 2rem;
     flex: 0 0 auto;
     place-items: center;
-    border: 1px solid var(--beeday-color-border);
-    border-radius: var(--beeday-radius-md);
-    background: var(--beeday-color-brand-primary);
-    box-shadow: 3px 3px 0 var(--beeday-game-ink);
-    color: var(--beeday-color-surface);
+    color: var(--beeday-color-brand-primary);
 }
 
 .editor-modal__type-summary strong {

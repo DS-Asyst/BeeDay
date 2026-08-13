@@ -1,6 +1,6 @@
 # Layouts
 
-**Última verificação:** 2026-08-13 — Sprint 21.11, EPIC 21.
+**Última verificação:** 2026-08-13 — Sprint 21.12, EPIC 21.
 
 ## Layouts ativos
 
@@ -20,11 +20,10 @@ institucional continua legítimo no `PublicLayout`, mas não aparece em Home, Da
 
 | Grupo | Item | Destino/ação |
 |---|---|---|
-| Primário | Home | `/home` |
+| Primário | Profile | `/profile` |
 | Primário | Daily | `/daily` |
 | Primário | Wallet | `/wallet` |
-| Secundário | Profile | `/account` |
-| Secundário | Account | `/settings` (alias real da mesma página de conta) |
+| Secundário | Account | `/settings` (`/account` permanece alias da mesma página) |
 | Sessão | Logout | `POST /auth/logout` com `AntiforgeryToken` |
 
 Support e Donate dos painéis antigos eram botões sem destino nem efeito e foram classificados como
@@ -45,7 +44,7 @@ mínima de 52px, ícone de 32px e gap de 1.1rem, próximos às proporções medi
 Os tokens semânticos do shell são:
 
 - `--beeday-sidebar-width: 15.5rem`;
-- `--beeday-reading-width: 48rem` para experiências focadas como Home;
+- `--beeday-reading-width: 48rem` para experiências focadas como Profile;
 - `--beeday-workspace-width: 100rem` para experiências operacionais como Daily.
 
 Não existe token de RightRail ou de SidePanel. A Home controla sua largura de leitura; Daily usa o

@@ -108,14 +108,12 @@ identificado nesta auditoria. `TopNavigation.razor` foi removida na Sprint 21.3 
 |---|---|
 | `BeeDayButton` | `Components/Buttons/BeeDayButtonTests.cs` |
 | `BeeDayCard` / `BeeDayCardMenu` (+ cálculo de posicionamento) | `Components/Cards/BeeDayCardTests.cs`, `BeeDayCardMenuTests.cs`, `CardMenuPlacementCalculatorTests.cs` |
-| `ActivityAttributeSelect`/`Badge` (+ cálculo de posicionamento) | `Components/Attributes/ActivityAttributeComponentTests.cs`, `ActivityAttributeSelectTests.cs`, `AttributeSelectPlacementCalculatorTests.cs` |
 | `PixelIcon` | `Components/Icons/PixelIconTests.cs` |
 | `BeeDayBrand` / `SearchHighlight` | `Components/Text/BeeDayBrandTests.cs`, `SearchHighlightTests.cs` |
 | Isolamento do adapter de tema NES (`pixel-nes.css`) | `Components/DesignSystem/PixelNesAdapterIsolationTests.cs` |
 | Componentes de atividade (badges/atributos combinados) | `Components/DesignSystem/ActivityComponentsTests.cs` |
 
-Os 3 módulos `.js` em si (`beeday-sortable.js`, `beeday-card-menu.js`,
-`activity-attribute-select.js`) não são executados por `BeeDay.Web.Tests` (bUnit não roda um
+Os 2 módulos `.js` em si (`beeday-sortable.js`, `beeday-card-menu.js`) não são executados por `BeeDay.Web.Tests` (bUnit não roda um
 browser real) — sua cobertura prática vem apenas dos testes E2E (Playwright, browser real) listados
 em §4 e §8, que exercitam o comportamento visível resultante (reordenar cards, abrir/fechar menus),
 não o código JS isoladamente.

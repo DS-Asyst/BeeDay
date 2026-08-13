@@ -68,7 +68,7 @@ public sealed class AccountLifecycleTests(PlaywrightAppFixture fixture) : E2ETes
 
         await enterBeeDay.ClickAsync();
 
-        await Expect(Page).ToHaveURLAsync(new Regex("/home$"));
+        await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
         await Expect(Page.GetByRole(AriaRole.Heading, new() { NameRegex = new Regex("Welcome back") })).ToBeVisibleAsync();
     }
 
@@ -78,7 +78,7 @@ public sealed class AccountLifecycleTests(PlaywrightAppFixture fixture) : E2ETes
         var email = $"e2e-logout-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
         await LoginAsync(email);
-        await Expect(Page).ToHaveURLAsync(new Regex("/home$"));
+        await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Log out of BeeDay" }).ClickAsync();
 
@@ -94,7 +94,7 @@ public sealed class AccountLifecycleTests(PlaywrightAppFixture fixture) : E2ETes
         var email = $"e2e-profile-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
         await LoginAsync(email);
-        await Expect(Page).ToHaveURLAsync(new Regex("/home$"));
+        await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
 
         await GotoAsync("/account");
         var updatedName = $"E2E Updated {Guid.NewGuid():N}"[..20];

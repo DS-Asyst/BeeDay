@@ -7,9 +7,8 @@
 
 .filter-bar__main {
     display: grid;
-    grid-template-columns: auto minmax(18rem, 1fr) auto;
+    grid-template-columns: minmax(18rem, 1fr) auto;
     align-items: center;
-    justify-content: center;
     gap: .8rem;
     width: min(100%, 62rem);
     margin: 0 auto;
@@ -48,94 +47,11 @@
     box-shadow: 0 0 0 3px rgb(102 65 166 / 14%);
 }
 
-.filter-bar__filters,
 .filter-bar__create { position: relative; }
 
 .filter-bar__create ::deep .filter-bar__create-button {
     min-width: 8.2rem;
     min-height: 2.75rem;
-}
-
-/* Sizing, color, border, hover, and focus chrome all come from the shared
-   .beeday-icon-toggle class (design-system.css) — the same lightweight
-   treatment as the Daily column's Completed/Add icon toggles. No local
-   overrides here by design. */
-
-.filter-bar__filter-count {
-    position: absolute;
-    top: -.35rem;
-    right: -.35rem;
-    display: inline-grid;
-    place-items: center;
-    min-width: 1.35rem;
-    height: 1.35rem;
-    padding: 0 .3rem;
-    border-radius: var(--beeday-radius-pill);
-    color: #fff;
-    background: var(--beeday-color-project-dark);
-    font-size: .72rem;
-    font-weight: 700;
-}
-
-.filter-bar__tags-menu {
-    position: absolute;
-    z-index: 900;
-    top: calc(100% + .55rem);
-    right: 0;
-    width: min(30rem, calc(100vw - 2rem));
-    border: 1px solid var(--beeday-color-border);
-    border-radius: var(--beeday-radius-xs);
-    background: var(--beeday-color-surface);
-    box-shadow: var(--beeday-shadow-md);
-    transform-origin: top right;
-    animation: beeday-fade-in var(--beeday-duration-fast) var(--beeday-easing-emphasized) both;
-}
-
-.filter-bar__tags-heading {
-    padding: 1rem 1.15rem .35rem;
-    color: var(--beeday-color-text-primary);
-    font: var(--beeday-type-label);
-}
-
-.filter-bar__tags-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: .35rem 1.5rem;
-    padding: .55rem 1.15rem 1.1rem;
-}
-
-.filter-bar__tag-option {
-    display: grid;
-    grid-template-columns: 1.2rem minmax(0, 1fr);
-    align-items: center;
-    gap: .5rem;
-    min-height: 2.45rem;
-    padding: .45rem .6rem;
-    border-radius: var(--beeday-radius-xs);
-    color: var(--beeday-color-text-primary);
-    cursor: pointer;
-    font: var(--beeday-type-button);
-}
-
-.filter-bar__tag-option:hover,
-.filter-bar__tag-option:focus-within,
-.filter-bar__tag-option--selected { background: var(--beeday-color-surface-muted); }
-
-.filter-bar__tag-option input {
-    width: 1.05rem;
-    height: 1.05rem;
-    margin: 0;
-    accent-color: var(--beeday-color-project-dark);
-    cursor: pointer;
-}
-
-.filter-bar__tags-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: .8rem 1.15rem;
-    border-top: 1px solid var(--beeday-color-border);
 }
 
 .filter-bar__menu {
@@ -171,24 +87,17 @@
     cursor: pointer;
     transition: background-color var(--beeday-transition-fast);
 }
+
 .filter-bar__menu button:hover,
 .filter-bar__menu button:focus-visible {
     background: var(--beeday-color-surface-muted);
     outline: none;
 }
 
-@media (max-width: 760px) {
-    .filter-bar { padding: var(--beeday-spacing-sm); }
-    .filter-bar__main { grid-template-columns: minmax(0, 1fr) auto; width: 100%; }
-    .filter-bar__create { grid-column: 1 / -1; }
-    .filter-bar__create ::deep .filter-bar__create-button { width: 100%; }
-}
-
 @media (max-width: 520px) {
-    .filter-bar__main { grid-template-columns: 1fr; }
+    .filter-bar { padding: var(--beeday-spacing-sm); }
+    .filter-bar__main { grid-template-columns: 1fr; width: 100%; }
     .filter-bar__create,
     .filter-bar__create ::deep .filter-bar__create-button { width: 100%; }
-    .filter-bar__tags-menu,
     .filter-bar__menu { right: auto; left: 0; width: 100%; }
-    .filter-bar__tags-grid { grid-template-columns: 1fr; gap: .2rem; }
 }

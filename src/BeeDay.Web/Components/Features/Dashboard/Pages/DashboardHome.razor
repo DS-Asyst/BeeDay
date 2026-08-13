@@ -1,4 +1,4 @@
-@page "/home"
+@page "/profile"
 @attribute [Authorize]
 @rendermode InteractiveServer
 @implements IDisposable
@@ -6,11 +6,11 @@
 @inject BeeDay.Web.Components.Features.Dashboard.State.DashboardState State
 @inject NavigationManager Navigation
 
-<PageTitle>Home | BeeDay</PageTitle>
+<PageTitle>Profile | BeeDay</PageTitle>
 
 @if (State.IsLoading)
 {
-    <section class="product-home product-home--loading" aria-label="Loading Home" aria-busy="true">
+    <section class="product-home product-home--loading" aria-label="Loading Profile" aria-busy="true">
         <div class="product-home__skeleton product-home__skeleton--header"></div>
         <div class="product-home__skeleton product-home__skeleton--feature"></div>
         <div class="product-home__skeleton product-home__skeleton--row"></div>
@@ -21,18 +21,14 @@ else if (State.IsUnavailable)
     <section class="product-home" aria-labelledby="home-unavailable-heading">
         <BeeDayCard Padded="true" Class="product-home__status" role="status">
             <BeeDayIcon Name="BeeDayIconName.Warning" Size="BeeDayIconSize.Large" Color="BeeDayIconColor.Warning" />
-            <div><strong id="home-unavailable-heading">Home summary unavailable</strong><p>Refresh the page to try loading your workspace again.</p></div>
+            <div><strong id="home-unavailable-heading">Profile summary unavailable</strong><p>Refresh the page to try loading your workspace again.</p></div>
         </BeeDayCard>
     </section>
 }
 else if (State.Data?.Profile.HasProfile == true)
 {
     var dashboard = State.Data;
-    var pendingTasks = dashboard.Tasks.Where(item => !item.Completed).Take(2).ToList();
-    var pendingTodos = dashboard.Projects.SelectMany(project => project.Todos).Where(item => !item.Completed).Take(2).ToList();
-    var habits = dashboard.Habits.Take(2).ToList();
     var activeProject = dashboard.Projects.Where(project => !project.Completed).OrderByDescending(project => project.Featured).FirstOrDefault();
-    var hasActionableWork = pendingTasks.Count > 0 || pendingTodos.Count > 0 || habits.Count > 0;
 
     <section class="product-home beeday-fade-in" aria-labelledby="home-heading">
         <header class="product-home__header">
@@ -48,61 +44,18 @@ else if (State.Data?.Profile.HasProfile == true)
             <ExperienceBar Model="ExperienceViewModel.From(dashboard.Profile)"
                            ExperienceGain="State.LatestExperienceGain"
                            FeedbackKey="State.ExperienceFeedbackVersion" />
-            <ProgressMetricCard Title="Tasks"
-                                ProgressLabel="Task completion"
-                                Completed="@dashboard.Tasks.Count(task => task.Completed)"
-                                Total="@dashboard.Tasks.Count"
-                                EmptyText="No tasks yet." />
-            @if (dashboard.Projects.SelectMany(project => project.Todos).Any())
-            {
-                var projectTodos = dashboard.Projects.SelectMany(project => project.Todos).ToList();
-                <ProgressMetricCard Title="Project tasks"
-                                    ProgressLabel="Project task completion"
-                                    Completed="@projectTodos.Count(todo => todo.Completed)"
-                                    Total="@projectTodos.Count" />
-            }
         </section>
 
-        @if (!hasActionableWork && activeProject is null)
-        {
-            <BeeDayCard Padded="true" Prominent="true" Class="product-home__celebration" role="status">
-                <BeeDayIcon Name="BeeDayIconName.Success" Size="BeeDayIconSize.ExtraLarge" Color="BeeDayIconColor.Success" />
-                <div><span>YOU'RE CLEAR</span><h2>Your next step is yours to choose</h2><p>Create or review activities in Daily when you are ready.</p></div>
-                <BeeDayButton Icon="BeeDayIconName.Add" OnClick="GoToDaily">Plan in Daily</BeeDayButton>
+        <section class="product-home__section" aria-labelledby="week-heading">
+            <div class="product-home__section-heading">
+                <div><span>THIS WEEK</span><h2 id="week-heading">Weekly activity</h2></div>
+                <a href="/daily">Open Daily</a>
+            </div>
+            <BeeDayCard Padded="true" Class="product-home__weekly-unavailable" role="status">
+                <BeeDayIcon Name="BeeDayIconName.Calendar" Size="BeeDayIconSize.Large" Color="BeeDayIconColor.Muted" />
+                <div><strong>Weekly history is not available yet</strong><p>BeeDay does not currently record completion dates, so no weekly totals are shown.</p></div>
             </BeeDayCard>
-        }
-        else
-        {
-            <section class="product-home__section" aria-labelledby="next-heading">
-                <div class="product-home__section-heading">
-                    <div><span>NEXT UP</span><h2 id="next-heading">Make progress now</h2></div>
-                    <a href="/daily">View all in Daily</a>
-                </div>
-
-                <div class="product-home__action-list">
-                    @foreach (var task in pendingTasks)
-                    {
-                        <ActivityCard @key="task.Id" Title="@task.Title" Description="@task.Description"
-                                      Attribute="@task.Attribute" Meta="@State.FormatRepeat(task.Repeat)" Variant="task"
-                                      Completed="false" Featured="@task.Featured" OnToggle="@(() => State.ToggleTaskAsync(task.Id))" />
-                    }
-                    @foreach (var todo in pendingTodos)
-                    {
-                        <ActivityCard @key="todo.Id" Title="@todo.Title" Description="@todo.Description"
-                                      Attribute="@todo.Attribute" Meta="@State.FormatDueDate(todo.DueDate)" Variant="todo"
-                                      Completed="false" Featured="@todo.Featured" OnToggle="@(() => State.ToggleTodoAsync(todo.Id))" />
-                    }
-                    @foreach (var habit in habits)
-                    {
-                        <HabitCard @key="habit.Id" Title="@habit.Title" Description="@habit.Description"
-                                   Attribute="@habit.Attribute" Direction="@habit.Direction" PositiveCount="@habit.PositiveCount"
-                                   NegativeCount="@habit.NegativeCount" Featured="@habit.Featured"
-                                   OnPositive="@(() => State.RegisterPositiveAsync(habit.Id))"
-                                   OnNegative="@(() => State.RegisterNegativeAsync(habit.Id))" />
-                    }
-                </div>
-            </section>
-        }
+        </section>
 
         @if (activeProject is not null)
         {

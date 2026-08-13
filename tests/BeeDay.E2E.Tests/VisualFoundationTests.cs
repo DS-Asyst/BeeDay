@@ -35,7 +35,7 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
         await AssertWordmarkAsync(desktopBrand);
         Assert.Equal("rgba(0, 0, 0, 0)", await desktopBrand.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
 
-        await GotoAsync("/home");
+        await GotoAsync("/profile");
         var experienceProgress = Page.Locator(".product-home__progress .experience-card .beeday-progress");
         await Expect(experienceProgress).ToHaveAttributeAsync("data-tone", "reward");
         Assert.Equal("rgb(255, 232, 141)", await experienceProgress.Locator(".beeday-progress__fill")
@@ -54,7 +54,7 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
         await Expect(Page).ToHaveURLAsync(new Regex("/wallet$"));
         await AssertGlobalFoundationAsync();
 
-        await Expect(Page.Locator(".desktop-sidebar a[href='/account']")).ToBeVisibleAsync();
+        await Expect(Page.Locator(".desktop-sidebar a[href='/settings']")).ToBeVisibleAsync();
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Log out of BeeDay" })).ToBeVisibleAsync();
 
         await Page.SetViewportSizeAsync(390, 844);
@@ -103,7 +103,7 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
         await Page.GetByLabel("Email").FillAsync(email);
         await Page.GetByLabel("Password").FillAsync(Password);
         await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
-        await Expect(Page).ToHaveURLAsync(new Regex("/home$"));
+        await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
         await GotoAsync("/daily");
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
     }

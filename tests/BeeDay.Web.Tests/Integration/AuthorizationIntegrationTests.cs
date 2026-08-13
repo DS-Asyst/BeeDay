@@ -17,7 +17,7 @@ public sealed class AuthorizationIntegrationTests(BeeDayWebApplicationFactory fa
 {
     public static IEnumerable<object[]> ProtectedPages { get; } =
     [
-        ["/home"],
+        ["/profile"],
         ["/daily"],
         ["/wallet"],
         ["/account"],
@@ -64,6 +64,19 @@ public sealed class AuthorizationIntegrationTests(BeeDayWebApplicationFactory fa
         var response = await client.GetAsync(path, cancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Authenticated_HomeCompatibilityRouteRedirectsToProfile()
+    {
+        var cancellationToken = Xunit.TestContext.Current.CancellationToken;
+        using var client = await factory.CreateAuthenticatedClientAsync(
+            $"authz-home-{Guid.NewGuid():N}@beeday.invalid", "Password123!", cancellationToken);
+
+        var response = await client.GetAsync("/home", cancellationToken);
+
+        Assert.Equal(HttpStatusCode.Found, response.StatusCode);
+        Assert.Equal("/profile", response.Headers.Location?.AbsolutePath);
     }
 
     [Theory]

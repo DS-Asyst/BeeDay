@@ -100,4 +100,4 @@ injetam `MediatR.ISender` diretamente e nunca passam por `BeeDayWebService` — 
   invalidados por query string hardcoded no C# que os importa (`?v=20260721-f13-dragfix`,
   `?v=20260729-1`) em vez de um mecanismo de cache-busting automático (hash de conteúdo, `Assets[]`
   do mapa de estáticos usado pelo resto do projeto). Funciona, mas exige lembrar de trocar a string a
-  cada mudança no arquivo — `activity-attribute-select.js` não tem esse sufixo.
+  cada mudança no arquivo. O antigo módulo de Attribute foi removido com sua exposição Web na Sprint 21.12.

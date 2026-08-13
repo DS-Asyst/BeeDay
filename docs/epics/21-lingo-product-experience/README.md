@@ -1312,3 +1312,31 @@ a utilizar a largura operacional disponível.
   provocado pela antiga terceira coluna.
 
 Não houve alteração em Domain, Application ou Infrastructure, nem novo request/state/component V2.
+
+---
+
+## Sprint 21.12 — Profile Experience & UI Simplification — Results
+
+**Status:** COMPLETE — Profile passou a ser a experiência pessoal canônica em `/profile`; `/home`
+permanece protegido e redireciona para essa rota para preservar favoritos e links antigos.
+
+- Login, criação de perfil, onboarding e links autenticados da marca agora chegam a `/profile`.
+  A navegação primária é Profile, Daily e Wallet; Account (`/settings`) e Logout ficam no grupo
+  secundário, sem duplicidade entre Home e Profile.
+- Profile reutiliza a experiência autenticada existente: saudação, nível e XP ganharam mais largura,
+  enquanto os resumos de Task e o bloco Next Up foram removidos. Projetos ativos reais continuam
+  disponíveis como contexto e a execução de atividades permanece no Daily.
+- A auditoria de dados confirmou que tarefas e todos não possuem data de conclusão, e hábitos não
+  possuem histórico diário. Por isso Weekly Activity não inventa distribuição nem renderiza gráfico:
+  apresenta um estado acessível explicando a indisponibilidade até existir backing temporal real.
+- Ícones de navegação continuam simples; os ícones de tipo dos editores perderam fundo, borda e
+  sombra decorativa. Logout usa tokens Danger existentes e mantém POST com antiforgery.
+- Os filtros avançados da Wallet reutilizam `.beeday-field__control`, preservam `select` e `date`
+  nativos, expansão acessível e layout responsivo.
+- Attribute foi classificado como capacidade de domínio, persistida e presente em contratos. Sua
+  exposição Web (filtro, seletor, badge, parâmetros de cards, interop, asset e testes específicos)
+  foi removida, mas Domain, Application, Infrastructure, DTOs, editor models e mapeamento de serviço
+  foram preservados para não quebrar contratos nem apagar valores existentes. Tags da Wallet não
+  foram alteradas.
+
+Não houve alteração em Domain, Application ou Infrastructure.

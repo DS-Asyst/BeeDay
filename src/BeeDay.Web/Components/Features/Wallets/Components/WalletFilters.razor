@@ -4,12 +4,12 @@
     <div class="wallet-filters">
         <label class="wallet-search wallet-filter-field wallet-filter-field--search">
             <span>Search</span>
-            <input disabled="@IsDisabled" value="@Search" @oninput="HandleSearchInput" placeholder="Description or notes" />
+            <input class="beeday-field__control" disabled="@IsDisabled" value="@Search" @oninput="HandleSearchInput" placeholder="Description or notes" />
         </label>
 
         <label class="wallet-filter-field">
             <span>Tag</span>
-            <select disabled="@IsDisabled" value="@TagFilter" @onchange="HandleTagChanged">
+            <select class="beeday-field__control" disabled="@IsDisabled" value="@TagFilter" @onchange="HandleTagChanged">
                 <option value="">All tags</option>
                 @foreach (var tag in Tags)
                 {
@@ -20,8 +20,8 @@
 
         <div class="wallet-filter-field wallet-filter-toggle-field">
             <span aria-hidden="true">&nbsp;</span>
-            <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel"
-                           Class="wallet-filter-toggle beeday-button--comic beeday-button--comic-neutral"
+            <BeeDayButton Variant="BeeDayButtonVariant.Secondary"
+                           Class="wallet-filter-toggle"
                            Disabled="IsDisabled"
                            OnClick="ToggleSecondaryFilters"
                            aria-expanded="@isExpanded.ToString().ToLowerInvariant()"
@@ -36,7 +36,7 @@
         {
             <label class="wallet-filter-field">
                 <span>Type</span>
-                <select disabled="@IsDisabled" value="@TypeFilter" @onchange="HandleTypeChanged">
+                <select class="beeday-field__control" disabled="@IsDisabled" value="@TypeFilter" @onchange="HandleTypeChanged">
                     <option value="">All types</option>
                     <option value="Income">Income</option>
                     <option value="Expense">Expense</option>
@@ -45,17 +45,17 @@
 
             <label class="wallet-filter-field">
                 <span>From</span>
-                <input type="date" disabled="@IsDisabled" value="@FormatDate(StartDate)" @onchange="HandleStartDateChanged" />
+                <input class="beeday-field__control" type="date" disabled="@IsDisabled" value="@FormatDate(StartDate)" @onchange="HandleStartDateChanged" />
             </label>
 
             <label class="wallet-filter-field">
                 <span>To</span>
-                <input type="date" disabled="@IsDisabled" value="@FormatDate(EndDate)" @onchange="HandleEndDateChanged" />
+                <input class="beeday-field__control" type="date" disabled="@IsDisabled" value="@FormatDate(EndDate)" @onchange="HandleEndDateChanged" />
             </label>
 
             <label class="wallet-filter-field">
                 <span>Order</span>
-                <select disabled="@IsDisabled" value="@Sort" @onchange="HandleSortChanged">
+                <select class="beeday-field__control" disabled="@IsDisabled" value="@Sort" @onchange="HandleSortChanged">
                     <option value="date-desc">Newest first</option>
                     <option value="date-asc">Oldest first</option>
                 </select>

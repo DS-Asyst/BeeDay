@@ -196,35 +196,11 @@ Não tem interop JS próprio; a superfície visual vem de `editor-modal.css`. Co
 `HabitEditorModal`, `TaskEditorModal`, `TodoEditorModal`, `ProjectEditorModal` (todos em
 `Components/Features/*`, ver [`docs/web/04-feature-components.md`](../web/04-feature-components.md) §5).
 
-## 7. Attributes
+## 7. Attribute (retirado da UI)
 
-### `ActivityAttributeBadge`
-
-Puramente apresentacional: `Attribute` (`ActivityAttribute?`) → classe CSS
-(`activity-attribute-badge--{strength|dexterity|intelligence|vitality}`) + `title` com o tooltip
-nativo do navegador (`"{Attribute} activity attribute"`). Sem estado, sem JS.
-
-### `ActivityAttributeSelect`
-
-Select customizado (não um `<select>` nativo) com posicionamento dinâmico — mesmo padrão de
-`BeeDayCardMenu`.
-
-| Parâmetro | Tipo | Notas |
-|---|---|---|
-| `Id` (`EditorRequired`) | `string` | — |
-| `Label`, `FieldCssClass`, `LabelCssClass` | `string` | Segue o mesmo contrato visual dos componentes de `Forms/` (ver [`04-forms.md`](04-forms.md)) apesar de viver em `Attributes/`, não `Forms/` |
-| `Disabled` | `bool` | — |
-| `Value` | `ActivityAttribute?` | — |
-| `ValueChanged` | `EventCallback<ActivityAttribute?>` | — |
-
-**JS interop:** `js/activity-attribute-select.js` (sem sufixo de versão, diferente dos outros 2
-módulos — ver achado em [`docs/web/README.md`](../web/README.md#achados-relevantes-reportados-não-corrigidos)).
-`measureGeometry` alimenta `AttributeSelectPlacementCalculator.Calculate` (lógica pura, mesmo
-padrão de `CardMenuPlacementCalculator`) — decide `FlipUp`, `TopPx`, `MaxHeightPx`. Diferente de
-`BeeDayCardMenu`, não tem detecção de clique fora — o menu só fecha ao selecionar um valor.
-
-**Consumidores:** os 4 editores de atividade (via `EditorModalShell.BodyContent`), possivelmente
-`Wallets` (não confirmado nesta auditoria).
+`ActivityAttributeBadge` e `ActivityAttributeSelect` foram removidos na Sprint 21.12. Attribute
+continua existindo no Domain, na persistência e nos contratos; apenas sua exposição Web foi
+retirada para simplificar a experiência sem quebrar dados existentes.
 
 ## 8. Text
 
@@ -271,7 +247,7 @@ estabelecidos pelo contrato consumidor.
   `SortableOrder.cs`, `SortableReorderEvent.cs`.
 - `src/BeeDay.Web/wwwroot/css/design-system.css`, `cards.css`, `feedback.css`, `editor-modal.css`,
   `dragdrop.css`, `settings.css`.
-- `src/BeeDay.Web/wwwroot/js/beeday-card-menu.js`, `activity-attribute-select.js`,
+- `src/BeeDay.Web/wwwroot/js/beeday-card-menu.js`,
   `beeday-sortable.js` (nomes de import e assinaturas invocadas, não o conteúdo interno completo).
 - [`docs/web/04-feature-components.md`](../web/04-feature-components.md),
   [`docs/web/05-design-system-integration.md`](../web/05-design-system-integration.md) (Sprint

@@ -13,7 +13,7 @@ public sealed class MobileHeaderTests
             .Add(component => component.IsNavOpen, false));
 
         var brand = cut.Find("a.mobile-header__brand");
-        Assert.Equal("/home", brand.GetAttribute("href"));
+        Assert.Equal("/profile", brand.GetAttribute("href"));
     }
 
     [Fact]

@@ -87,7 +87,6 @@ public sealed class BeeDayIconTests
         Assert.Equal("/icons/sprite.svg#warning", cut.Find("use").GetAttribute("href"));
     }
     [Theory]
-    [InlineData(BeeDayIconName.Home, "home")]
     [InlineData(BeeDayIconName.Profile, "profile")]
     [InlineData(BeeDayIconName.Donate, "donate")]
     [InlineData(BeeDayIconName.Logout, "logout")]
@@ -130,7 +129,6 @@ public sealed class BeeDayIconTests
     [InlineData(BeeDayIconName.Calendar, "calendar")]
     [InlineData(BeeDayIconName.Repeat, "repeat")]
     [InlineData(BeeDayIconName.Tag, "tag")]
-    [InlineData(BeeDayIconName.Attribute, "attribute")]
     [InlineData(BeeDayIconName.Cancel, "cancel")]
     public void ResolvesActivityAndActionIcons(BeeDayIconName name, string symbolId)
     {

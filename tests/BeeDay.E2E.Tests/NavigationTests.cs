@@ -118,7 +118,7 @@ public sealed class NavigationTests(PlaywrightAppFixture fixture) : E2ETestBase(
         await LoginToDailyAsync();
 
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Log out of BeeDay" })).ToBeVisibleAsync();
-        await Expect(Page.Locator(".desktop-sidebar a[href='/account']")).ToBeVisibleAsync();
+        await Expect(Page.Locator(".desktop-sidebar nav.navigation-items a[href='/profile']")).ToBeVisibleAsync();
         await Expect(Page.Locator(".desktop-sidebar a[href='/settings']")).ToBeVisibleAsync();
     }
 
@@ -135,7 +135,7 @@ public sealed class NavigationTests(PlaywrightAppFixture fixture) : E2ETestBase(
         await Page.GetByLabel("Email").FillAsync(email);
         await Page.GetByLabel("Password").FillAsync(Password);
         await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
-        await Expect(Page).ToHaveURLAsync(new Regex("/home$"));
+        await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
         await GotoAsync("/daily");
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
     }

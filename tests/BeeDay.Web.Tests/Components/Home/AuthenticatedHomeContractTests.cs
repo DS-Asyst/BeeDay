@@ -8,7 +8,7 @@ public sealed class AuthenticatedHomeContractTests
     [Fact]
     public void UsesCanonicalRouteSharedStateAndOfficialPrimitives()
     {
-        Assert.Contains("@page \"/home\"", Source, StringComparison.Ordinal);
+        Assert.Contains("@page \"/profile\"", Source, StringComparison.Ordinal);
         Assert.Contains("Dashboard.State.DashboardState State", Source, StringComparison.Ordinal);
         Assert.Contains("<BeeDayCard", Source, StringComparison.Ordinal);
         Assert.Contains("<BeeDayButton", Source, StringComparison.Ordinal);
