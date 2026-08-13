@@ -7,55 +7,47 @@ namespace BeeDay.Web.Tests.Components.Home;
 public sealed class HomeTests
 {
     [Fact]
-    public void RendersSingleH1WithBrandMessage()
+    public void RendersSingleH1WithProductPromise()
     {
-        using var context = new BunitContext();
-        context.AddAuthorization().SetNotAuthorized();
-        PublicHeaderTests.RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
-
+        using var context = CreateContext();
         var cut = context.Render<HomePage>();
 
         var headings = cut.FindAll("h1");
         Assert.Single(headings);
-        Assert.Equal("Be better every day", headings[0].TextContent.Trim());
+        Assert.Contains("one day at a time", headings[0].TextContent, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
-    public void PresentsRealProductCapabilitiesOnly()
+    public void AnonymousCallsToActionTargetRegistrationAndLogin()
     {
-        using var context = new BunitContext();
-        context.AddAuthorization().SetNotAuthorized();
-        PublicHeaderTests.RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
-
+        using var context = CreateContext();
         var cut = context.Render<HomePage>();
 
-        var cardHeadings = cut.FindAll(".home-page__showcase-row h3").Select(h => h.TextContent.Trim()).ToArray();
-        Assert.Equal(["Daily", "Habits", "Tasks", "Projects", "Wallet"], cardHeadings);
+        Assert.NotEmpty(cut.FindAll("a[href='/profile/create']"));
+        Assert.NotNull(cut.Find(".home-hero a[href='/login']"));
     }
 
     [Fact]
-    public void DoesNotPresentFabricatedMetrics()
+    public void PresentsRealProductConceptsAndSimpleProcess()
     {
-        using var context = new BunitContext();
-        context.AddAuthorization().SetNotAuthorized();
-        PublicHeaderTests.RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
+        using var context = CreateContext();
+        var cut = context.Render<HomePage>();
 
+        Assert.Equal(["Define", "Practice", "Evolve"], cut.FindAll(".home-steps h3").Select(element => element.TextContent.Trim()));
+        Assert.Equal(["Habits", "Progress", "Consistency"], cut.FindAll(".home-values h3").Select(element => element.TextContent.Trim()));
+        Assert.Contains("Experience becomes level progress", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DoesNotPresentUnsupportedGamificationOrFabricatedMetrics()
+    {
+        using var context = CreateContext();
         var cut = context.Render<HomePage>();
 
         Assert.False(Regex.IsMatch(cut.Markup, @"\d+\s*(%|day|days)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
+        Assert.DoesNotContain("streak", cut.Markup, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("achievement", cut.Markup, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("XP today", cut.Markup, StringComparison.OrdinalIgnoreCase);
-    }
-
-    [Fact]
-    public void AnonymousVisitorSeesGetStartedCta()
-    {
-        using var context = new BunitContext();
-        context.AddAuthorization().SetNotAuthorized();
-        PublicHeaderTests.RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
-
-        var cut = context.Render<HomePage>();
-
-        Assert.Contains("Get started", cut.Markup, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -70,29 +62,11 @@ public sealed class HomeTests
         Assert.Contains("Continue to BeeDay", cut.Markup, StringComparison.Ordinal);
     }
 
-    [Fact]
-    public void CapabilitySectionHasStableAnchorId()
+    private static BunitContext CreateContext()
     {
-        using var context = new BunitContext();
+        var context = new BunitContext();
         context.AddAuthorization().SetNotAuthorized();
         PublicHeaderTests.RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
-
-        var cut = context.Render<HomePage>();
-
-        Assert.NotNull(cut.Find("#capabilities"));
-        Assert.NotNull(cut.Find("#progress"));
-    }
-
-    [Fact]
-    public void HeroSecondaryActionLinksToCapabilities()
-    {
-        using var context = new BunitContext();
-        context.AddAuthorization().SetNotAuthorized();
-        PublicHeaderTests.RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
-
-        var cut = context.Render<HomePage>();
-
-        var secondaryAction = cut.Find("a.home-hero__secondary-action");
-        Assert.Equal("#capabilities", secondaryAction.GetAttribute("href"));
+        return context;
     }
 }

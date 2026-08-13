@@ -57,7 +57,7 @@ Assert.Contains(expectedClass, cut.Find("button").ClassList);
 | `/wallet` fim a fim | `Components/Wallet/WalletComponentTests.cs`, `WalletUiCoverageTests.cs` |
 | `/daily` — arquitetura de scroll da página | `Components/Layout/DailyPageScrollArchitectureTests.cs` |
 | Consistência visual entre páginas de entrada sob `OnboardingLayout` (`/welcome`, `/login`, `/profile/create`, Identity, Tutorial) | `Components/Visual/EntryFlowVisualConsistencyTests.cs` — nome preservado da Sprint 16.7; `/` saiu deste grupo na Sprint 20.5 (agora `PublicLayout`, não `OnboardingLayout`), ver linha abaixo |
-| `/` — Home pública (EPIC 20, Sprint 20.5) | `Components/Home/HomeTests.cs` (h1 único, capacidades reais, ausência de métricas fabricadas, CTA anônimo/autenticado, IDs de âncora) |
+| `/` — Home pública (EPIC 20, Sprint 20.14) | `Components/Home/HomeTests.cs` (proposta única, rotas de cadastro/login, processo, capacidades reais e ausência de gamificação/métricas fabricadas) |
 | Fluxo real via browser: criar conta → confirmação pendente | `E2E: AccountLifecycleTests.CreateAccount_ReachesEmailConfirmationPending` |
 | Fluxo real via browser: login → onboarding → `/daily` | `E2E: AccountLifecycleTests.Login_CompletesOnboarding_ReachesDashboard` |
 | Fluxo real via browser: logout | `E2E: AccountLifecycleTests.Logout_EndsSessionAndBlocksDashboard` |
@@ -85,7 +85,7 @@ renderização do componente Razor em si via bUnit.
 | `NavigationItem.razor`/`NavigationItems.razor` (EPIC 21, Sprint 21.3) | `Components/Layout/NavigationItemTests.cs`, `NavigationItemsTests.cs` |
 | Contrato de shell (`MainLayout`/`DesktopSidebar`/`RightRail`/`MobileHeader`/`MobileSidebar`, EPIC 21) | `Components/Layout/ShellFoundationTests.cs` |
 
-`MainLayout.razor`, `OnboardingLayout.razor` e `AppFooter.razor` não têm arquivo de teste dedicado
+`MainLayout.razor` e `OnboardingLayout.razor` não têm arquivo de teste dedicado
 identificado nesta auditoria. `TopNavigation.razor` foi removida na Sprint 21.3 (EPIC 21).
 
 ## 6. Mapeamento — Feature components (`04-feature-components.md`)
@@ -129,7 +129,7 @@ a infraestrutura descrita em `docs/testing/01-testing-strategy.md` §7 (`Playwri
 | `AccountLifecycleTests.cs` | Criar conta → confirmação pendente; login → onboarding → `/daily`; logout; editar perfil |
 | `HabitAndTaskTests.cs` | Criar/completar hábito (saldo + XP visíveis); criar/completar task |
 | `WalletTests.cs` | Criar tag + transação no Wallet, saldo atualizado |
-| `HomeTests.cs` (Sprint 20.5, EPIC 20) | Visitante anônimo vê a Home em `/` sem redirect; CTA "Get started" alcança `/login` |
+| `HomeTests.cs` (Sprint 20.14, EPIC 20) | Visitante anônimo vê a Home em `/`, acessa Login e retorna pelo X, chega ao cadastro pelo CTA, e valida desktop/tablet/mobile sem overflow |
 | `ShellResponsiveLayoutTests.cs` (EPIC 21, Sprint 21.2/21.3) | Geometria real da sidebar/rail desktop; visibilidade condicional mobile vs. desktop sem sobreposição; ausência de overflow horizontal real |
 | `NavigationTests.cs` (EPIC 21, Sprint 21.3) | `aria-current` real ao navegar e em deep link; abrir/fechar o drawer mobile via hambúrguer/backdrop/Escape/botão dedicado; foco real move para o drawer ao abrir; navegar por um item do drawer fecha-o; Logout continua acessível |
 
