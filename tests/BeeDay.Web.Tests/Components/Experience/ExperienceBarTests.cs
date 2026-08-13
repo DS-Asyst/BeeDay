@@ -29,6 +29,7 @@ public sealed class ExperienceBarTests
 
         Assert.Contains("Level", cut.Markup);
         Assert.Contains(">4<", cut.Markup);
+        Assert.Contains("0 XP total", cut.Markup);
         Assert.Contains("120 / 200 XP", cut.Markup);
         Assert.Contains("80 XP to next level", cut.Markup);
     }
@@ -45,7 +46,7 @@ public sealed class ExperienceBarTests
         var progress = cut.Find("[role='progressbar']");
         Assert.Equal("50", progress.GetAttribute("aria-valuenow"));
         Assert.Equal("200", progress.GetAttribute("aria-valuemax"));
-        Assert.Contains("width: 25%", cut.Find(".experience-card__fill").GetAttribute("style"));
+        Assert.Contains("width: 25%", cut.Find(".beeday-progress__fill").GetAttribute("style"));
     }
 
     [Theory]
@@ -61,7 +62,7 @@ public sealed class ExperienceBarTests
 
         Assert.Contains(
             $"width: {expectedPercentage}%",
-            cut.Find(".experience-card__fill").GetAttribute("style"));
+            cut.Find(".beeday-progress__fill").GetAttribute("style"));
     }
 
     [Fact]

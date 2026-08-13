@@ -1,5 +1,64 @@
-@* Sprint 21.2 (EPIC 21) — structural region only, deliberately empty. Content (XP/Level, Habit/
-   Task/Project/Wallet summaries) is Sprint 21.6 — Progress & Right Rail; Quests/Streak/
-   Achievements have no Domain backing yet and must not be simulated here — see
-   docs/epics/21-lingo-product-experience/README.md §12/§15/§19. *@
-<aside class="right-rail" aria-label="Context and progress"></aside>
+@implements IDisposable
+@inject IServiceProvider Services
+
+<aside class="right-rail" aria-label="Progress and status">
+    <div class="right-rail__content">
+        @if (State is null || State.IsLoading)
+        {
+            <ExperienceBar IsLoading="true" />
+        }
+        else if (State.IsUnavailable)
+        {
+            <section class="right-rail__unavailable" role="status">
+                <strong>Progress unavailable</strong>
+                <span>Your main workspace is still available.</span>
+            </section>
+        }
+        else if (State.Data is { } dashboard)
+        {
+            <ExperienceBar Model="ExperienceViewModel.From(dashboard.Profile)"
+                           ExperienceGain="State.LatestExperienceGain"
+                           FeedbackKey="State.ExperienceFeedbackVersion" />
+
+            <ProgressMetricCard Title="Tasks"
+                                ProgressLabel="Task completion"
+                                Completed="@dashboard.Tasks.Count(task => task.Completed)"
+                                Total="@dashboard.Tasks.Count"
+                                EmptyText="No tasks yet." />
+
+            @if (dashboard.Projects.SelectMany(project => project.Todos).Any())
+            {
+                var todos = dashboard.Projects.SelectMany(project => project.Todos).ToList();
+                <ProgressMetricCard Title="Project tasks"
+                                    ProgressLabel="Project task completion"
+                                    Completed="@todos.Count(todo => todo.Completed)"
+                                    Total="@todos.Count" />
+            }
+        }
+    </div>
+</aside>
+
+@code {
+    private BeeDay.Web.Components.Features.Dashboard.State.DashboardState? State { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        State = Services.GetService<BeeDay.Web.Components.Features.Dashboard.State.DashboardState>();
+        if (State is null)
+        {
+            return;
+        }
+
+        State.Changed += HandleStateChanged;
+        await State.InitializeAsync();
+    }
+
+    private void HandleStateChanged() => _ = InvokeAsync(StateHasChanged);
+    public void Dispose()
+    {
+        if (State is not null)
+        {
+            State.Changed -= HandleStateChanged;
+        }
+    }
+}

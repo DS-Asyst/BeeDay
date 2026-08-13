@@ -33,6 +33,14 @@ public sealed class ShellResponsiveLayoutTests(PlaywrightAppFixture fixture) : E
         var rightRailBox = await rightRail.BoundingBoxAsync();
         Assert.NotNull(rightRailBox);
         Assert.InRange(rightRailBox!.Width, 362, 374); // 23rem = 368px
+        Assert.Equal("sticky", await rightRail.EvaluateAsync<string>("element => getComputedStyle(element).position"));
+
+        await Expect(rightRail.GetByText("Level", new() { Exact = true })).ToBeVisibleAsync();
+        await Expect(rightRail.GetByText(new Regex(@"\d+ XP total"))).ToBeVisibleAsync();
+        var experienceProgress = rightRail.GetByRole(AriaRole.Progressbar, new() { Name = "Experience progress" });
+        await Expect(experienceProgress).ToBeVisibleAsync();
+        Assert.NotNull(await experienceProgress.GetAttributeAsync("aria-valuenow"));
+        Assert.NotNull(await experienceProgress.GetAttributeAsync("aria-valuemax"));
 
         await Expect(Page.Locator(".mobile-header")).ToBeHiddenAsync();
 
