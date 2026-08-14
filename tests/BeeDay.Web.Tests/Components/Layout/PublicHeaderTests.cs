@@ -12,7 +12,7 @@ namespace BeeDay.Web.Tests.Components.Layout;
 public sealed class PublicHeaderTests
 {
     [Fact]
-    public void RendersHeaderLandmarkWithLoginAndRegistrationForAnonymousUser()
+    public void RendersHeaderLandmarkWithOnlyLoginForAnonymousUser()
     {
         using var context = new BunitContext();
         context.AddAuthorization().SetNotAuthorized();
@@ -24,7 +24,7 @@ public sealed class PublicHeaderTests
         Assert.NotNull(cut.Find(".public-header__brand .beeday-brand"));
 
         Assert.Equal("/login", cut.Find("a.public-header__login").GetAttribute("href"));
-        Assert.Equal("/profile/create", cut.Find("a.public-header__create").GetAttribute("href"));
+        Assert.Empty(cut.FindAll("a[href='/profile/create']"));
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public sealed class PublicHeaderTests
     }
 
     [Fact]
-    public void AnonymousActionsUseRealRoutes()
+    public void AnonymousLoginUsesRealRouteWithoutDuplicatingAcquisition()
     {
         using var context = new BunitContext();
         context.AddAuthorization().SetNotAuthorized();
@@ -49,7 +49,7 @@ public sealed class PublicHeaderTests
 
         var cut = context.Render<PublicHeader>();
         Assert.Equal("/login", cut.Find("a.public-header__login").GetAttribute("href"));
-        Assert.Equal("/profile/create", cut.Find("a.public-header__create").GetAttribute("href"));
+        Assert.Empty(cut.FindAll(".public-header__create"));
     }
 
     [Fact]

@@ -15,8 +15,11 @@ else if (Model is not null)
 {
     <BeeDayCard Padded="true" Class="experience-card" aria-label="Experience">
         <div class="experience-card__header">
-            <span class="experience-card__label"><BeeDayIcon Name="BeeDayIconName.Level" Size="BeeDayIconSize.ExtraSmall" /> Level</span>
-            <strong>@Model.Level</strong>
+            <BeeDayIcon Name="BeeDayIconName.Level" Size="BeeDayIconSize.Large" Color="BeeDayIconColor.Primary" />
+            <div class="experience-card__level">
+                <span class="experience-card__label">Level</span>
+                <strong>@Model.Level</strong>
+            </div>
         </div>
 
         <BeeDayProgressBar Label="Experience progress"
