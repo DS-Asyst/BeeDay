@@ -8,29 +8,20 @@ public sealed class BeeDayBrandTests
     public void RendersAccessibleSharedBrand()
     {
         using var context = new BunitContext();
-
-        var cut = context.Render<BeeDayBrand>();
-        var brand = cut.Find(".beeday-brand");
-
-        var image = cut.Find("img.beeday-brand__wordmark");
-
-        Assert.Equal("/beeday-wordmark.png", image.GetAttribute("src"));
-        Assert.Equal("BeeDay", image.GetAttribute("alt"));
-        Assert.Equal("904", image.GetAttribute("width"));
-        Assert.Equal("276", image.GetAttribute("height"));
-        Assert.Null(brand.GetAttribute("aria-label"));
+        var brand = context.Render<BeeDayBrand>().Find(".beeday-brand");
+        Assert.Equal("img", brand.GetAttribute("role"));
+        Assert.Equal("BeeDay", brand.GetAttribute("aria-label"));
+        Assert.Equal("bee", brand.QuerySelector(".beeday-brand__bee")?.TextContent);
+        Assert.Equal("day", brand.QuerySelector(".beeday-brand__day")?.TextContent);
     }
 
     [Fact]
-    public void AppliesContrastSurfaceOnlyWhenRequested()
+    public void AppliesInverseVariantOnlyWhenRequested()
     {
         using var context = new BunitContext();
-
         var defaultBrand = context.Render<BeeDayBrand>();
-        var contrastBrand = context.Render<BeeDayBrand>(parameters => parameters
-            .Add(component => component.OnDarkSurface, true));
-
-        Assert.DoesNotContain("beeday-brand--contrast", defaultBrand.Find(".beeday-brand").ClassList);
-        Assert.Contains("beeday-brand--contrast", contrastBrand.Find(".beeday-brand").ClassList);
+        var inverseBrand = context.Render<BeeDayBrand>(parameters => parameters.Add(x => x.OnDarkSurface, true));
+        Assert.DoesNotContain("beeday-brand--inverse", defaultBrand.Find(".beeday-brand").ClassList);
+        Assert.Contains("beeday-brand--inverse", inverseBrand.Find(".beeday-brand").ClassList);
     }
 }

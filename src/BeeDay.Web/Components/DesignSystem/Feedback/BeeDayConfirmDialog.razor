@@ -40,14 +40,14 @@
                 <div class="delete-confirmation__actions">
                     <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel"
                                    Disabled="IsBusy"
-                                   Class="delete-confirmation__cancel-action beeday-button--comic beeday-button--comic-neutral"
+                                   Class="delete-confirmation__cancel-action"
                                    OnClick="CancelAsync">
                         @CancelLabel
                     </BeeDayButton>
                     <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationDanger"
                                    Disabled="IsBusy"
                                    IsLoading="IsBusy"
-                                   Class="delete-confirmation__confirm-action beeday-button--comic beeday-button--comic-danger"
+                                   Class="delete-confirmation__confirm-action"
                                    OnClick="ConfirmAsync">
                         @ConfirmLabel
                     </BeeDayButton>

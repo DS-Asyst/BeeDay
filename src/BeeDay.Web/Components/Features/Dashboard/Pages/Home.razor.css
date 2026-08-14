@@ -17,8 +17,7 @@
     padding: .55rem .9rem 1rem;
     background: var(--beeday-color-surface);
     box-sizing: border-box;
-    max-width: var(--beeday-workspace-width);
-    margin-inline: auto;
+    max-width: none;
 }
 
 .loading-state {
@@ -50,13 +49,13 @@
     background: transparent;
     box-sizing: border-box;
     scrollbar-width: thin;
-    scrollbar-color: #aaa2b1 transparent;
+    scrollbar-color: var(--beeday-color-border-strong) transparent;
     scroll-snap-type: x proximity;
 }
 
 .dashboard-grid > * {
-    min-width: 15rem;
-    min-height: 30rem;
+    min-width: 17rem;
+    min-height: 36rem;
     height: auto;
     scroll-snap-align: start;
 }

@@ -97,7 +97,7 @@ public sealed class BeeDayFeedbackTests
     }
 
     [Fact]
-    public void AppliesThePixelAdapterToThePanelAndContinueAction()
+    public void UsesTheCanonicalPanelAndContinueAction()
     {
         using var context = CreateContext();
         BeeDayFeedback feedback = CreateFeedback(1, 2, 10, ExperienceSourceType.Habit);
@@ -106,7 +106,7 @@ public sealed class BeeDayFeedbackTests
             .Add(component => component.History, [feedback]));
 
         var dialog = cut.Find("[role='dialog']");
-        Assert.Contains("beeday-pixel-panel", dialog.ClassList);
+        Assert.DoesNotContain("beeday-pixel-panel", dialog.ClassList);
         Assert.Contains("beeday-button--primary", cut.Find("button").ClassList);
         Assert.DoesNotContain("beeday-pixel-cta", cut.Find("button").ClassList);
     }

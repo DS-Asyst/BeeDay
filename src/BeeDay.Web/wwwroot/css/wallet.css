@@ -118,7 +118,7 @@
 .wallet-panel-header--transactions {
     padding: 1.35rem 1.5rem;
     border-bottom: 1px solid var(--beeday-color-border);
-    background: linear-gradient(180deg, color-mix(in srgb, var(--beeday-color-brand-primary) 7%, transparent), transparent);
+    background: var(--beeday-color-brand-primary-soft);
 }
 
 .wallet-tags-panel > .wallet-panel-header {

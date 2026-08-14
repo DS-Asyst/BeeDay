@@ -93,6 +93,19 @@
 
 .activity-card__project-status{display:grid;place-items:center;width:1.55rem;height:1.55rem;margin:0;border:2px solid rgb(255 255 255 / 72%);border-radius:.14rem;color:var(--activity-accent-dark);background:rgb(255 255 255 / 72%);font-size:.88rem;font-weight:700;line-height:1;box-sizing:border-box}
 
+/* Sprint 21.14: activity actions retain a 44px target without a saturated rail or raised box. */
+.activity-card { grid-template-columns: 2.75rem minmax(0, 1fr); }
+.activity-card__rail { align-items: center; padding: 0; background: transparent; }
+.activity-card__checkbox,
+.activity-card__project-status { width: 2.75rem; height: 2.75rem; border: 0; border-radius: var(--beeday-radius-sm); background: transparent; color: var(--beeday-color-text-muted); box-shadow: none; }
+.activity-card__checkbox:hover { transform: none; background: var(--beeday-color-brand-primary-soft); color: var(--beeday-color-brand-primary); }
+.activity-card__checkbox:active { transform: none; }
+.activity-card__checkbox-glyph { opacity: .55; transform: none; }
+.activity-card--completed .activity-card__checkbox { color: var(--beeday-color-success); background: transparent; }
+.activity-card--task,
+.activity-card--todo,
+.activity-card--project { --activity-accent: var(--beeday-color-brand-primary); --activity-accent-dark: var(--beeday-color-brand-primary); }
+
 /* Sprint 1.7 — card feedback and touch behavior */
 .activity-card,
 .habit-card {

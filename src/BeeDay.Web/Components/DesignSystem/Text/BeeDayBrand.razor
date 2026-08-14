@@ -1,9 +1,7 @@
-<span class="beeday-brand @(OnDarkSurface ? "beeday-brand--contrast" : null)">
-    <img class="beeday-brand__wordmark"
-         src="/beeday-wordmark.png"
-         width="904"
-         height="276"
-         alt="BeeDay" />
+<span class="beeday-brand @(OnDarkSurface ? "beeday-brand--inverse" : null)"
+      role="img"
+      aria-label="BeeDay">
+    <span class="beeday-brand__bee" aria-hidden="true">bee</span><span class="beeday-brand__day" aria-hidden="true">day</span>
 </span>
 
 @code {

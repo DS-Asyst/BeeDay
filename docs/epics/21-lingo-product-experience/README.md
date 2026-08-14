@@ -1340,3 +1340,11 @@ permanece protegido e redireciona para essa rota para preservar favoritos e link
   foram alteradas.
 
 Não houve alteração em Domain, Application ou Infrastructure.
+
+## Sprint 21.13 — Color Inventory & Rationalization Audit
+
+The documentation-only audit is available in
+[`color-audit-sprint-21.13.md`](./color-audit-sprint-21.13.md), with the complete normalized
+191-row inventory in
+[`color-inventory-sprint-21.13.csv`](./color-inventory-sprint-21.13.csv). No runtime color was
+changed in this Sprint.
