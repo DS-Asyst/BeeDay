@@ -1,5 +1,8 @@
 const instances = new WeakMap();
 let runtimePromise;
+// This is the asset's only state machine, discovered through the loaded Rive runtime. It coordinates
+// the original breathing, blinking, gum, and hair timelines; generic autoplay only starts Hair-1 idle.
+const publicHomeStateMachine = "State Machine 1";
 
 function loadRuntime() {
     if (globalThis.rive) {
@@ -38,7 +41,7 @@ export async function mount(canvas, source) {
         let animation;
         const resize = () => animation?.resizeDrawingSurfaceToCanvas();
         const onMotionChange = event => {
-            event.matches ? animation?.pause() : animation?.play();
+            event.matches ? animation?.pause() : animation?.play(publicHomeStateMachine);
             host?.setAttribute("data-rive-motion", event.matches ? "paused" : "playing");
         };
 
@@ -46,6 +49,7 @@ export async function mount(canvas, source) {
             src: source,
             canvas,
             autoplay: !motion.matches,
+            stateMachines: publicHomeStateMachine,
             layout: new rive.Layout({ fit: rive.Fit.Contain, alignment: rive.Alignment.Center }),
             onLoad: () => {
                 resize();
@@ -75,4 +79,32 @@ export function dispose(canvas) {
     entry.motion.removeEventListener("change", entry.onMotionChange);
     entry.animation.cleanup();
     instances.delete(canvas);
+}
+
+export function inspect(canvas) {
+    const entry = instances.get(canvas);
+    if (!entry) {
+        return null;
+    }
+
+    const stateMachineInputs = Object.fromEntries(
+        entry.animation.stateMachineNames.map(name => [
+            name,
+            (entry.animation.stateMachineInputs(name) ?? []).map(input => ({
+                name: input.name,
+                type: input.type,
+                value: input.value
+            }))
+        ]));
+
+    return {
+        animationNames: entry.animation.animationNames,
+        stateMachineNames: entry.animation.stateMachineNames,
+        playingAnimationNames: entry.animation.playingAnimationNames,
+        playingStateMachineNames: entry.animation.playingStateMachineNames,
+        stateMachineInputs,
+        isPlaying: entry.animation.isPlaying,
+        isPaused: entry.animation.isPaused,
+        isStopped: entry.animation.isStopped
+    };
 }

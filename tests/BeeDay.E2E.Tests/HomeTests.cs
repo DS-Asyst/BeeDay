@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Text.Json;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
@@ -6,6 +7,60 @@ namespace BeeDay.E2E.Tests;
 
 public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixture)
 {
+    [Fact]
+    public async Task ReportsRiveAssetMetadataFromTheLoadedRuntime()
+    {
+        await GotoAsync("/");
+        await Expect(Page.Locator(".home-hero__visual")).ToHaveAttributeAsync("data-rive-state", "ready");
+
+        var json = await Page.EvaluateAsync<string>("""
+            async () => {
+                const module = await import('/js/public-home-rive.js');
+                return JSON.stringify(module.inspect(document.querySelector('.home-hero__rive')));
+            }
+            """);
+
+        using var diagnostics = JsonDocument.Parse(json);
+        var root = diagnostics.RootElement;
+
+        Assert.Contains("Blink", root.GetProperty("animationNames").EnumerateArray().Select(value => value.GetString()));
+        Assert.Contains("Breathe", root.GetProperty("animationNames").EnumerateArray().Select(value => value.GetString()));
+        Assert.Equal(["State Machine 1"], root.GetProperty("stateMachineNames").EnumerateArray().Select(value => value.GetString()));
+        Assert.Equal(["State Machine 1"], root.GetProperty("playingStateMachineNames").EnumerateArray().Select(value => value.GetString()));
+        Assert.Empty(root.GetProperty("playingAnimationNames").EnumerateArray());
+        Assert.Equal(
+            ["Bubble gum", "eye squint", "hair 4 overlay", "hair 2.5 overlay", "hair 3 overlay", "hair 2 overlay", "hair1 overlay"],
+            root.GetProperty("stateMachineInputs").GetProperty("State Machine 1").EnumerateArray()
+                .Select(value => value.GetProperty("name").GetString()));
+        Assert.True(root.GetProperty("isPlaying").GetBoolean());
+        Assert.False(root.GetProperty("isPaused").GetBoolean());
+    }
+
+    [Theory]
+    [InlineData(1280, 800)]
+    [InlineData(390, 844)]
+    public async Task RiveStateMachineContinuouslyUpdatesCanvasAfterHydration(int width, int height)
+    {
+        await Page.SetViewportSizeAsync(width, height);
+        await GotoAsync("/");
+
+        var host = Page.Locator(".home-hero__visual");
+        var canvas = host.Locator("canvas");
+        await Expect(host).ToHaveAttributeAsync("data-rive-state", "ready");
+        await Expect(host).ToHaveAttributeAsync("data-rive-motion", "playing");
+
+        var firstFrame = await canvas.EvaluateAsync<string>("element => element.toDataURL()");
+        await Task.Delay(350, TestContext.Current.CancellationToken);
+        var secondFrame = await canvas.EvaluateAsync<string>("element => element.toDataURL()");
+        await Task.Delay(650, TestContext.Current.CancellationToken);
+        var thirdFrame = await canvas.EvaluateAsync<string>("element => element.toDataURL()");
+
+        Assert.NotEqual(firstFrame, secondFrame);
+        Assert.NotEqual(secondFrame, thirdFrame);
+        Assert.False(await Page.EvaluateAsync<bool>(
+            "() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
+    }
+
     [Fact]
     public async Task AnonymousVisitorSeesOfficialHomeAndCanReachAuthenticationFlows()
     {
