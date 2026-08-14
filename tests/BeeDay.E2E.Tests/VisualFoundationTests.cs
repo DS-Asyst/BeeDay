@@ -45,7 +45,7 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
         Assert.Equal("rgb(255, 211, 38)", await experienceProgress.Locator(".beeday-progress__fill")
             .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
 
-        Assert.Equal("#3044d6", await Page.Locator("html").EvaluateAsync<string>(
+        Assert.Equal("#3a4ed9", await Page.Locator("html").EvaluateAsync<string>(
             "element => getComputedStyle(element).getPropertyValue('--beeday-color-brand-primary').trim()"));
 
         var wallet = Page.GetByRole(AriaRole.Link, new() { Name = "Wallet" });

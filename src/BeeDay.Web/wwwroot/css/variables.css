@@ -1,21 +1,21 @@
 :root {
     /* Brand — one semantic family, migrated to the official Epic 21 BeeDay palette. */
-    --beeday-color-brand-primary: #3044d6;
-    --beeday-color-brand-primary-hover: #2739c4;
-    --beeday-color-brand-primary-active: #1f2faa;
-    --beeday-color-brand-primary-light: #5364df;
-    --beeday-color-brand-primary-soft: #eef0ff;
+    --beeday-color-brand-primary: #3a4ed9;
+    --beeday-color-brand-primary-hover: #3043c7;
+    --beeday-color-brand-primary-active: #2637ad;
+    --beeday-color-brand-primary-light: #6675e3;
+    --beeday-color-brand-primary-soft: #eff1ff;
     --beeday-color-brand-yellow: #ffd326;
     --beeday-color-brand-yellow-hover: #e8bd00;
     --beeday-color-brand-yellow-active: #cda600;
     --beeday-color-brand-yellow-foreground: #2f2737;
 
     /* Public Home acquisition CTA. This contextual role does not replace Brand Blue. */
-    --beeday-color-public-home-cta: #14adff;
-    --beeday-color-public-home-cta-hover: #2cbaff;
-    --beeday-color-public-home-cta-active: #0798e2;
-    --beeday-color-public-home-cta-depth: #0798e2;
-    --beeday-color-public-home-cta-foreground: #2f2737;
+    --beeday-color-public-home-cta: #0079b9;
+    --beeday-color-public-home-cta-hover: #007cbd;
+    --beeday-color-public-home-cta-active: #006da8;
+    --beeday-color-public-home-cta-depth: #006da8;
+    --beeday-color-public-home-cta-foreground: #ffffff;
 
     /* Surfaces */
     --beeday-color-background: #ffffff;
@@ -233,17 +233,17 @@
     --beeday-depth-lg: 8px;
 
     /* Elevation */
-    --beeday-shadow-xs: 0 1px 2px rgb(48 68 214 / 6%);
-    --beeday-shadow-sm: 0 2px 6px rgb(48 68 214 / 8%);
-    --beeday-shadow-md: 0 4px 12px rgb(48 68 214 / 10%);
-    --beeday-shadow-lg: 0 12px 28px rgb(48 68 214 / 16%);
+    --beeday-shadow-xs: 0 1px 2px rgb(58 78 217 / 6%);
+    --beeday-shadow-sm: 0 2px 6px rgb(58 78 217 / 8%);
+    --beeday-shadow-md: 0 4px 12px rgb(58 78 217 / 10%);
+    --beeday-shadow-lg: 0 12px 28px rgb(58 78 217 / 16%);
 
     /* Focus — migrated to the canonical brand blue in Sprint 20.7 (EPIC 20): this token has a single,
        well-defined role (the default focus-visible ring color) rather than the broad, overloaded
        surface/text role of --beeday-color-primary, so migrating it directly — instead of keeping a
        legacy alias — does not risk the same product-wide background/text regression; it only
        recolors a transient interaction indicator, consistently, everywhere. */
-    --beeday-focus-color: rgb(48 68 214 / 30%);
+    --beeday-focus-color: rgb(58 78 217 / 32%);
     --beeday-focus-ring: 0 0 0 3px var(--beeday-focus-color);
     --beeday-focus-color-inverse: var(--beeday-color-brand-yellow);
     --beeday-focus-ring-inverse: 0 0 0 3px rgb(255 211 38 / 45%);

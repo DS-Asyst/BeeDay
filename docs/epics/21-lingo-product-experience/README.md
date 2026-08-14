@@ -1348,3 +1348,16 @@ The documentation-only audit is available in
 191-row inventory in
 [`color-inventory-sprint-21.13.csv`](./color-inventory-sprint-21.13.csv). No runtime color was
 changed in this Sprint.
+
+## Sprint 21.16 — Public Home Hero, Rive & Brand Blue Refinement
+
+- A Brand Blue canônica passa a `#3A4ED9`, com hover `#3043C7`, active/depth `#2637AD`, light
+  `#6675E3`, soft `#EFF1FF` e focus `rgb(58 78 217 / 32%)`. Brand Yellow permanece `#FFD326`.
+- A Home pública usa Hero responsivo de duas colunas em desktop e empilhado abaixo de 832px. A
+  wordmark permanece somente no header; headline, copy e CTAs formam a coluna de decisão.
+- O visual decorativo utiliza `public-home-hero.riv`, versionado em `wwwroot/assets/rive`, com o
+  runtime oficial `@rive-app/canvas-lite` 2.39.2 carregado sob demanda. Reduced motion pausa o
+  autoplay e falhas do runtime preservam todo o conteúdo funcional.
+- Como texto branco sobre `#14ADFF` e `#2CBAFF` mede apenas 2,48:1 e 2,19:1, o papel contextual do
+  CTA foi ajustado para `#0079B9`, hover `#007CBD` e active/depth `#006DA8`, mantendo intenção
+  cyan/blue e contraste AA de 4,73:1, 4,55:1 e 5,60:1.
