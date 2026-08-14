@@ -32,6 +32,7 @@ public sealed class ExperienceBarTests
         Assert.Contains("0 XP total", cut.Markup);
         Assert.Contains("120 / 200 XP", cut.Markup);
         Assert.Contains("80 XP to next level", cut.Markup);
+        Assert.Contains("beeday-icon--size-large", cut.Find(".experience-card__header .beeday-icon").ClassList);
     }
 
     [Fact]

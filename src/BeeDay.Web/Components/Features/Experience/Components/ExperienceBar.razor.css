@@ -2,18 +2,23 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: var(--beeday-spacing-md);
+    gap: var(--beeday-spacing-lg);
     color: var(--beeday-color-text-primary);
 }
 
 .experience-card__header {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: .75rem;
+    align-items: center;
+    gap: var(--beeday-spacing-smd);
 }
 
-.experience-card__header span {
+.experience-card__level {
+    display: flex;
+    align-items: baseline;
+    gap: var(--beeday-spacing-sm);
+}
+
+.experience-card__label {
     color: var(--beeday-color-text-muted);
     font-size: .72rem;
     font-weight: 800;
@@ -27,10 +32,14 @@
     line-height: 1;
 }
 
+.experience-card ::deep .beeday-progress__track {
+    height: 1rem;
+}
+
 .experience-card__values {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--beeday-spacing-sm);
+    gap: var(--beeday-spacing-md);
     color: var(--beeday-color-text-primary);
     font-weight: 700;
     line-height: 1.3;
@@ -47,6 +56,7 @@
 
 @media (max-width: 36rem) {
     .experience-card__values { grid-template-columns: 1fr; }
+    .experience-card { gap: var(--beeday-spacing-md); }
 }
 
 .experience-card__gain {

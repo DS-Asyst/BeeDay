@@ -29,6 +29,20 @@ public sealed class VisualFoundationTests
     }
 
     [Fact]
+    public void PublicHomeAcquisitionColorsAreContextualTokens()
+    {
+        var variables = ReadWebFile("wwwroot", "css", "variables.css");
+        var home = ReadWebFile("Components", "Features", "Home", "Pages", "Home.razor.css");
+
+        Assert.Contains("--beeday-color-public-home-cta: #14adff;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-color-public-home-cta-hover: #2cbaff;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-color-public-home-cta-active: #0798e2;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("var(--beeday-color-public-home-cta)", home, StringComparison.Ordinal);
+        Assert.DoesNotContain("#14adff", home, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("#2cbaff", home, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void NunitoIsTheOnlyProductFontAndJerseyArtifactsAreRemoved()
     {
         var typography = ReadWebFile("wwwroot", "css", "typography.css");

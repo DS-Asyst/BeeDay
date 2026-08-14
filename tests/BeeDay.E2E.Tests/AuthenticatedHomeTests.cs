@@ -29,10 +29,17 @@ public sealed class AuthenticatedHomeTests(PlaywrightAppFixture fixture) : E2ETe
         await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
     }
 
-    [Fact]
-    public async Task MobileAndTabletPrioritizeEssentialProgressWithoutLegacyRegionsOrOverflow()
+    [Theory]
+    [InlineData(390, 844)]
+    [InlineData(430, 860)]
+    [InlineData(768, 900)]
+    [InlineData(1024, 800)]
+    [InlineData(1280, 800)]
+    [InlineData(1440, 900)]
+    [InlineData(1920, 1080)]
+    public async Task MobileAndTabletPrioritizeEssentialProgressWithoutLegacyRegionsOrOverflow(int width, int height)
     {
-        await Page.SetViewportSizeAsync(390, 844);
+        await Page.SetViewportSizeAsync(width, height);
         await LoginAsync();
 
         await Expect(Page.Locator(".right-rail")).ToHaveCountAsync(0);
@@ -40,12 +47,11 @@ public sealed class AuthenticatedHomeTests(PlaywrightAppFixture fixture) : E2ETe
         await Expect(Page.GetByRole(AriaRole.Progressbar, new() { Name = "Experience progress" })).ToBeVisibleAsync();
         await AssertNoOverflowAsync();
 
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Open navigation menu" }).ClickAsync();
-        await Expect(Page.Locator("#mobile-navigation nav.navigation-items a[href='/profile']")).ToHaveAttributeAsync("aria-current", "page");
-
-        await Page.SetViewportSizeAsync(900, 800);
-        await Expect(Page.Locator(".right-rail")).ToHaveCountAsync(0);
-        await AssertNoOverflowAsync();
+        if (width < 768)
+        {
+            await Page.GetByRole(AriaRole.Button, new() { Name = "Open navigation menu" }).ClickAsync();
+            await Expect(Page.Locator("#mobile-navigation nav.navigation-items a[href='/profile']")).ToHaveAttributeAsync("aria-current", "page");
+        }
     }
 
     [Fact]
