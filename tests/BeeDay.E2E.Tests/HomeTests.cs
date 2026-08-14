@@ -40,11 +40,73 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         await Page.SetViewportSizeAsync(width, height);
         await GotoAsync("/");
 
-        await Expect(Page.Locator(".home-hero__brand .beeday-brand")).ToBeVisibleAsync();
+        var riveHost = Page.Locator(".home-hero__visual");
+        await Expect(riveHost).ToHaveAttributeAsync("data-rive-state", "ready");
+        await Expect(riveHost.Locator("canvas")).ToBeVisibleAsync();
+        await Expect(Page.Locator(".home-hero .beeday-brand")).ToHaveCountAsync(0);
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "How BeeDay works", Level = 2 })).ToBeVisibleAsync();
         await Expect(Page.GetByRole(AriaRole.Contentinfo)).ToBeVisibleAsync();
+        var visualBox = await riveHost.BoundingBoxAsync();
+        var contentBox = await Page.Locator(".home-hero__content").BoundingBoxAsync();
+        Assert.NotNull(visualBox);
+        Assert.NotNull(contentBox);
+        if (width >= 1024)
+        {
+            Assert.True(visualBox!.X < contentBox!.X, "Desktop Hero should place Rive to the left of its content.");
+            Assert.InRange(Math.Abs(visualBox.Y - contentBox.Y), 0, visualBox.Height * .35);
+        }
+        else
+        {
+            Assert.True(visualBox!.Y < contentBox!.Y, "Tablet/mobile Hero should stack Rive above its content.");
+        }
         Assert.False(await Page.EvaluateAsync<bool>(
             "() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
+    }
+
+    [Fact]
+    public async Task PublicHomeRiveHonorsReducedMotionWithoutConsoleErrors()
+    {
+        var consoleErrors = new List<string>();
+        EventHandler<IConsoleMessage> consoleHandler = (_, message) =>
+        {
+            if (message.Type == "error")
+            {
+                consoleErrors.Add(message.Text);
+            }
+        };
+
+        Page.Console += consoleHandler;
+        try
+        {
+            await Page.EmulateMediaAsync(new() { ReducedMotion = ReducedMotion.Reduce });
+            await GotoAsync("/");
+            await Expect(Page.Locator(".home-hero__visual")).ToHaveAttributeAsync("data-rive-state", "ready");
+            await Expect(Page.Locator(".home-hero__visual")).ToHaveAttributeAsync("data-rive-motion", "paused");
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            Page.Console -= consoleHandler;
+            await Page.EmulateMediaAsync(new() { ReducedMotion = ReducedMotion.NoPreference });
+        }
+    }
+
+    [Fact]
+    public async Task PublicHomeRemainsUsableWhenRiveAssetFails()
+    {
+        await Page.RouteAsync("**/public-home-hero.riv", route => route.AbortAsync());
+        try
+        {
+            await GotoAsync("/");
+            await Expect(Page.Locator(".home-hero__visual")).ToHaveAttributeAsync("data-rive-state", "error");
+            await Expect(Page.GetByRole(AriaRole.Heading, new() { NameRegex = new Regex("one step at a time", RegexOptions.IgnoreCase) })).ToBeVisibleAsync();
+            await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Get started" })).ToBeVisibleAsync();
+            await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "I already have an account" })).ToBeVisibleAsync();
+        }
+        finally
+        {
+            await Page.UnrouteAsync("**/public-home-hero.riv");
+        }
     }
 
     [Fact]
@@ -74,20 +136,28 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         Assert.NotNull(headerBox);
         Assert.NotNull(heroBox);
         Assert.InRange(Math.Abs((headerBox!.Y + headerBox.Height) - heroBox!.Y), 0, 1);
+        Assert.Equal("36px", await Page.Locator(".public-header .beeday-brand")
+            .EvaluateAsync<string>("element => getComputedStyle(element).fontSize"));
 
         var heroActions = Page.Locator(".home-hero__actions");
         var getStarted = heroActions.GetByRole(AriaRole.Link, new() { Name = "Get started" });
         var existingAccount = heroActions.GetByRole(AriaRole.Link, new() { Name = "I already have an account" });
-        Assert.Equal("rgb(20, 173, 255)", await getStarted
+        Assert.Equal("rgb(0, 121, 185)", await getStarted
             .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
-        Assert.Equal("rgb(7, 152, 226)", await getStarted
+        Assert.Equal("rgb(0, 109, 168)", await getStarted
             .EvaluateAsync<string>("element => getComputedStyle(element).borderBottomColor"));
-        await getStarted.HoverAsync();
-        await Expect(getStarted).ToHaveCSSAsync("background-color", "rgb(44, 186, 255)");
+        Assert.Equal("rgb(255, 255, 255)", await getStarted
+            .EvaluateAsync<string>("element => getComputedStyle(element).color"));
         Assert.Equal("rgb(255, 255, 255)", await existingAccount
             .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
         await existingAccount.FocusAsync();
         Assert.Equal("solid", await existingAccount.EvaluateAsync<string>("element => getComputedStyle(element).outlineStyle"));
+        await getStarted.HoverAsync();
+        await Expect(getStarted).ToHaveCSSAsync("background-color", "rgb(0, 124, 189)");
+        await Page.Mouse.DownAsync();
+        await Expect(getStarted).ToHaveCSSAsync("background-color", "rgb(0, 109, 168)");
+        await Page.Mouse.MoveAsync(0, 0);
+        await Page.Mouse.UpAsync();
         Assert.Equal("rgb(247, 247, 247)", await Page.GetByRole(AriaRole.Contentinfo)
             .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
     }

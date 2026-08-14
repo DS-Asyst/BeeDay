@@ -18,6 +18,8 @@
 }
 
 .public-header__brand {
+    --beeday-brand-height: 2.25rem;
+
     display: inline-flex;
     align-items: center;
     text-decoration: none;
@@ -43,4 +45,5 @@
     }
 
     .public-header__actions { gap: var(--beeday-spacing-xs); }
+    .public-header__brand { --beeday-brand-height: 2rem; }
 }

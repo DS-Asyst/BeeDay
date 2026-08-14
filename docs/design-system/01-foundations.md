@@ -8,9 +8,9 @@ componente — quatro novos na Sprint 21.3 (`Layout/{NavigationItem,NavigationIt
 MobileSidebar}.razor.css`), um removido (`Layout/TopNavigation.razor.css`, componente deletado —
 ver `docs/web/03-layouts.md`), ver abaixo e `docs/ux/03-responsive.md`).
 
-**Última verificação:** 2026-08-13 (Sprint 21.9, EPIC 21 — Brand Identity).
-A família azul existente foi evoluída para `#185ABD`/`#1654B0`/`#124490`; a família amarela de
-marca/recompensa usa `#FFE88D`/`#FBDB6B`. Nenhum namespace paralelo foi criado. Nunito continua
+**Última verificação:** 2026-08-14 (Sprint 21.16, EPIC 21 — Brand Blue Refinement).
+A família azul oficial é `#3A4ED9`/`#3043C7`/`#2637AD`; a família amarela de
+marca/recompensa usa `#FFD326`/`#E8BD00`. Nenhum namespace paralelo foi criado. Nunito continua
 sendo a única tipografia de produto; a tipografia própria da marca existe apenas dentro do asset
 oficial `beeday-wordmark.png`.
 
@@ -75,10 +75,10 @@ Nenhuma cor é definida duas vezes com valores diferentes sob o mesmo nome — c
 Status, Activity, Attribute, Habit, Button, Comic, Card, Chrome) tem seu próprio namespace de
 token, então uma alteração em uma família nunca risca colidir com outra.
 
-**Migração de marca atual (Sprint 21.9, EPIC 21):** `--beeday-color-brand-primary` é `#185ABD`,
-com hover `#1654B0`, active/depth `#124490` e soft `#EEF0FF`. Azul é estrutura e ação: primary
+**Migração de marca atual (Sprint 21.16, EPIC 21):** `--beeday-color-brand-primary` é `#3A4ED9`,
+com hover `#3043C7`, active/depth `#2637AD`, light `#6675E3` e soft `#EFF1FF`. Azul é estrutura e ação: primary
 buttons, links importantes, navegação/foco/seleção e progresso funcional. A segunda metade da
-identidade é canônica em `--beeday-color-brand-yellow` (`#FFE88D`) e `-hover` (`#FBDB6B`): reward,
+identidade é canônica em `--beeday-color-brand-yellow` (`#FFD326`) e `-hover` (`#E8BD00`): reward,
 XP, milestones e highlights de alta relevância, sempre com foreground escuro. O antigo namespace
 `--beeday-game-yellow*` foi removido. Cores de status (`success`, `warning`, `danger`, `info`),
 atividades e Wallet permanecem semanticamente independentes; brand yellow nunca significa warning

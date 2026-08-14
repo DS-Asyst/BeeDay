@@ -35,7 +35,8 @@ public sealed class HomeTests
         var cut = context.Render<HomePage>();
 
         Assert.Equal(["Define", "Practice", "Evolve"], cut.FindAll(".home-steps h3").Select(element => element.TextContent.Trim()));
-        Assert.NotNull(cut.Find(".home-hero__brand .beeday-brand"));
+        Assert.NotNull(cut.Find(".home-hero__visual canvas"));
+        Assert.Empty(cut.FindAll(".home-hero .beeday-brand"));
         Assert.Empty(cut.FindAll(".home-hero__symbol"));
         Assert.Empty(cut.FindAll(".home-preview, .home-values, .home-growth, .home-cta"));
     }
@@ -56,6 +57,7 @@ public sealed class HomeTests
     public void AuthenticatedVisitorSeesContinueCta()
     {
         using var context = new BunitContext();
+        context.JSInterop.Mode = JSRuntimeMode.Loose;
         context.AddAuthorization().SetAuthorized("test-user");
         PublicHeaderTests.RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
 
@@ -67,6 +69,7 @@ public sealed class HomeTests
     private static BunitContext CreateContext()
     {
         var context = new BunitContext();
+        context.JSInterop.Mode = JSRuntimeMode.Loose;
         context.AddAuthorization().SetNotAuthorized();
         PublicHeaderTests.RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
         return context;
