@@ -1365,3 +1365,61 @@ changed in this Sprint.
 - Como texto branco sobre `#14ADFF` e `#2CBAFF` mede apenas 2,48:1 e 2,19:1, o papel contextual do
   CTA foi ajustado para `#0079B9`, hover `#007CBD` e active/depth `#006DA8`, mantendo intenção
   cyan/blue e contraste AA de 4,73:1, 4,55:1 e 5,60:1.
+
+---
+
+## Sprint 21.17 — Final Consolidation & Visual Debt Cleanup
+
+**Status:** COMPLETE — a implementação consolidada está alinhada à direção final da Epic 21, sem
+redesign adicional e sem mudanças em Domain, Application ou Infrastructure.
+
+### Arquitetura visual permanente
+
+- Nunito é a única família tipográfica do produto. `BeeDayBrand` é a primitive única da wordmark.
+- Brand Blue `#3A4ED9` conduz identidade, navegação, foco, progresso e ações primárias; Brand Yellow
+  `#FFD326` permanece restrito a reward/highlight. Cores semânticas e de atividades não foram
+  absorvidas pela marca.
+- `BeeDayIcon` + sprite Lucide local, `BeeDayButton`, `BeeDayCard`, `BeeDayProgressBar` e os campos
+  compartilhados são os contratos canônicos. Não existem primitive V2 nem biblioteca paralela.
+- O shell autenticado é Navigation + Workspace; `/profile` é a entrada principal, `/daily` o espaço
+  operacional, `/wallet` o contexto financeiro e `/settings` a conta. Right Rail e side panels não
+  pertencem mais ao runtime.
+- A Home pública mantém o `.riv` original no runtime Rive, executando `State Machine 1`, com pausa
+  não intrusiva em reduced motion. Login e superfícies públicas compartilham a mesma linguagem.
+
+### Capability matrix final
+
+| Capacidade | Backing real | Exposição honesta na UI |
+|---|---:|---|
+| XP total, nível e progresso do nível | Sim | Profile e barra de experiência |
+| Ganho de XP por conclusão | Sim | Feedback e progresso reais |
+| Tasks, todos, habits e projects | Sim | Daily e contexto de Profile |
+| Progresso operacional diário | Sim | Estados e contagens derivados das atividades reais |
+| Histórico semanal | Não | Estado explícito de indisponibilidade, sem gráfico inventado |
+| Streaks, achievements, quests e ranking | Não | Não exibidos e sem affordance fictícia |
+| Attribute | Sim, preservado no domínio/contratos | Deliberadamente não exposto na Web atual |
+
+### Auditoria final e dívida
+
+**Resolvida:** os últimos seletores `comic-*`, `comic-press` e `skew-press`, suas paletas-alias e
+comentários de compatibilidade foram removidos após auditoria confirmar zero consumidores. A guarda
+automatizada agora rejeita seu retorno em qualquer stylesheet. PixelIcon, NES/pixel CSS, Jersey,
+TopNavigation, RightRail e painéis laterais continuam ausentes do runtime.
+
+**Aceita:** o PNG oficial da wordmark continua raster até existir fonte vetorial oficial; as cores
+de atividades/hábitos e as cores semânticas permanecem intencionalmente independentes da marca;
+Attribute continua preservado abaixo da Web para não destruir dados ou contratos existentes.
+
+**Adiada:** histórico temporal/Weekly Activity, streaks, achievements, quests e ranking dependem de
+capacidade real de produto e não devem ser simulados por trabalho visual. Dark mode e substituição
+da wordmark por vetor exigem decisões/assets próprios e não bloqueiam a Epic.
+
+### Matriz de validação
+
+Chromium percorre Public Home, Login, Profile, Daily, Wallet e Settings em 1920, 1440, 1280, 1024,
+900, 768, 430 e 390px, exigindo conteúdo principal visível e ausência de overflow horizontal do
+documento. As suítes específicas continuam cobrindo navegação por teclado, foco visível, labels,
+ARIA, contraste, comportamento do shell e frames reais do Rive após hydration.
+
+**Decisão de fechamento:** READY TO CLOSE EPIC 21. A validação final da branch está verde; não há
+débito visual crítico conhecido nem contrato visual paralelo ativo.

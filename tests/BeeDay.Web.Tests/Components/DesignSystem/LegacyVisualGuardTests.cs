@@ -24,6 +24,18 @@ public sealed class LegacyVisualGuardTests
         Assert.Empty(matches);
     }
 
+    [Fact]
+    public void StylesheetsDoNotRetainLegacyComicOrSkewContracts()
+    {
+        var css = Path.Combine(FindRepositoryRoot(), "src", "BeeDay.Web", "wwwroot", "css");
+        var styles = Directory.EnumerateFiles(css, "*.css", SearchOption.AllDirectories)
+            .SelectMany(File.ReadAllLines);
+
+        Assert.DoesNotContain(styles, line =>
+            line.Contains("comic-", StringComparison.OrdinalIgnoreCase)
+            || line.Contains("skew-press", StringComparison.OrdinalIgnoreCase));
+    }
+
     private static string FindRepositoryRoot()
     {
         var current = new DirectoryInfo(AppContext.BaseDirectory);
