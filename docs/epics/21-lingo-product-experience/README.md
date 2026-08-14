@@ -1358,6 +1358,10 @@ changed in this Sprint.
 - O visual decorativo utiliza `public-home-hero.riv`, versionado em `wwwroot/assets/rive`, com o
   runtime oficial `@rive-app/canvas-lite` 2.39.2 carregado sob demanda. Reduced motion pausa o
   autoplay e falhas do runtime preservam todo o conteúdo funcional.
+- A inspeção do asset pelo runtime encontrou 25 timelines (`Blink`, `Breathe`, `Gum` e movimentos de
+  cabelo, entre outras) e uma única state machine, `State Machine 1`. O autoplay genérico executava
+  apenas `Hair-1 idle`; a integração inicia explicitamente a state machine, que coordena o movimento
+  original e expõe o trigger `Bubble gum` e seis inputs booleanos de expressão/overlays.
 - Como texto branco sobre `#14ADFF` e `#2CBAFF` mede apenas 2,48:1 e 2,19:1, o papel contextual do
   CTA foi ajustado para `#0079B9`, hover `#007CBD` e active/depth `#006DA8`, mantendo intenção
   cyan/blue e contraste AA de 4,73:1, 4,55:1 e 5,60:1.
