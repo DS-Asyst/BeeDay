@@ -12,13 +12,6 @@
     --beeday-color-brand-yellow-active: #cda600;
     --beeday-color-brand-yellow-foreground: #2f2737;
 
-    /* Public Home acquisition CTA. This contextual role does not replace Brand Blue. */
-    --beeday-color-public-home-cta: #0079b9;
-    --beeday-color-public-home-cta-hover: #007cbd;
-    --beeday-color-public-home-cta-active: #006da8;
-    --beeday-color-public-home-cta-depth: #006da8;
-    --beeday-color-public-home-cta-foreground: #ffffff;
-
     /* Surfaces */
     --beeday-color-background: #ffffff;
     --beeday-color-surface: #ffffff;

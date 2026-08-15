@@ -31,18 +31,17 @@ public sealed class VisualFoundationTests
     }
 
     [Fact]
-    public void PublicHomeAcquisitionColorsAreContextualTokens()
+    public void PublicHomeAcquisitionCtaUsesTheSharedBrandPrimaryTokenWithoutAParallelColor()
     {
         var variables = ReadWebFile("wwwroot", "css", "variables.css");
         var home = ReadWebFile("Components", "Features", "Home", "Pages", "Home.razor.css");
 
-        Assert.Contains("--beeday-color-public-home-cta: #0079b9;", variables, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("--beeday-color-public-home-cta-hover: #007cbd;", variables, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("--beeday-color-public-home-cta-active: #006da8;", variables, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("--beeday-color-public-home-cta-foreground: #ffffff;", variables, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("var(--beeday-color-public-home-cta)", home, StringComparison.Ordinal);
+        Assert.DoesNotContain("public-home-cta", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("public-home-cta", home, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("--beeday-button-background", home, StringComparison.Ordinal);
         Assert.DoesNotContain("#14adff", home, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("#2cbaff", home, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("#0079b9", home, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

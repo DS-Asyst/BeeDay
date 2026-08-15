@@ -3,20 +3,18 @@
 @layout BeeDay.Web.Components.Layout.PublicLayout
 @using BeeDay.Web.Components.Features.Home
 @using BeeDay.Web.Services.Authentication
-@using Microsoft.JSInterop
 @inject NavigationManager Navigation
 @inject AuthenticatedEntryDestinationResolver DestinationResolver
 @inject PublicHomeLanguageState LanguageState
-@inject IJSRuntime JS
-@implements IAsyncDisposable
+@implements IDisposable
 
 <PageTitle>@Copy.PageTitle</PageTitle>
 
 <article class="home-page">
     <section class="home-hero" aria-labelledby="home-heading">
         <div class="home-hero__inner">
-            <div class="home-hero__visual" data-rive-host data-rive-state="loading" aria-hidden="true">
-                <canvas @ref="riveCanvas" class="home-hero__rive"></canvas>
+            <div class="home-hero__visual" aria-hidden="true">
+                <img class="home-hero__image" src="/assets/hero/home-team.png" alt="" width="500" height="500" />
             </div>
             <div class="home-hero__content">
                 <h1 id="home-heading">@Copy.HeroHeading</h1>
@@ -49,30 +47,9 @@
 </article>
 
 @code {
-    private ElementReference riveCanvas;
-    private IJSObjectReference? riveModule;
-
     private PublicHomeCopy Copy => PublicHomeCopy.For(LanguageState.Language);
 
     protected override void OnInitialized() => LanguageState.Changed += HandleLanguageChanged;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-        {
-            return;
-        }
-
-        try
-        {
-            riveModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/public-home-rive.js");
-            await riveModule.InvokeVoidAsync("mount", riveCanvas, "/assets/rive/public-home-hero.riv");
-        }
-        catch (JSException)
-        {
-            // The Hero content and actions remain usable when its decorative animation is unavailable.
-        }
-    }
 
     private async Task ContinueToBeeDay()
     {
@@ -82,23 +59,5 @@
 
     private void HandleLanguageChanged() => InvokeAsync(StateHasChanged);
 
-    public async ValueTask DisposeAsync()
-    {
-        LanguageState.Changed -= HandleLanguageChanged;
-
-        if (riveModule is null)
-        {
-            return;
-        }
-
-        try
-        {
-            await riveModule.InvokeVoidAsync("dispose", riveCanvas);
-            await riveModule.DisposeAsync();
-        }
-        catch (JSDisconnectedException)
-        {
-            // The circuit already owns cleanup after disconnect.
-        }
-    }
+    public void Dispose() => LanguageState.Changed -= HandleLanguageChanged;
 }
