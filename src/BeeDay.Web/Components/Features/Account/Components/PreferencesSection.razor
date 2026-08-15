@@ -1,22 +1,24 @@
 @using BeeDay.Web.Components.Features.Account.Models
+@using BeeDay.Web.Components.Features.Account
 @using BeeDay.Domain.Enums
+@inject IStringLocalizer<AccountResources> Localizer
 
-<BeeDaySettingsSection Eyebrow="EXPERIENCE"
-                        Title="Preferences"
-                        Description="Choose how BeeDay looks and communicates with you.">
+<BeeDaySettingsSection Eyebrow="@Localizer["PreferencesEyebrow"]"
+                        Title="@Localizer["PreferencesTitle"]"
+                        Description="@Localizer["PreferencesDescription"]">
     <BeeDaySettingsForm TModel="PreferencesFormModel" Model="Model" OnValidSubmit="OnSave"
-                         FormName="account-preferences" SubmitLabel="Save Preferences" IsBusy="IsBusy">
+                         FormName="account-preferences" SubmitLabel="@Localizer["PreferencesSubmitLabel"]" IsBusy="IsBusy">
         <div class="beeday-settings-form__grid">
-            <BeeDaySelect TValue="UserLanguage" Id="account-language" Label="Language"
+            <BeeDaySelect TValue="UserLanguage" Id="account-language" Label="@Localizer["LanguageLabel"]"
                            @bind-Value="Model.Language">
-                <option value="@UserLanguage.English">English</option>
-                <option value="@UserLanguage.Portuguese">Portuguese</option>
+                <option value="@UserLanguage.English">@Localizer["LanguageEnglishOption"]</option>
+                <option value="@UserLanguage.Portuguese">@Localizer["LanguagePortugueseOption"]</option>
             </BeeDaySelect>
-            <BeeDaySelect TValue="UserTheme" Id="account-theme" Label="Theme"
+            <BeeDaySelect TValue="UserTheme" Id="account-theme" Label="@Localizer["ThemeLabel"]"
                            @bind-Value="Model.Theme">
-                <option value="@UserTheme.System">System</option>
-                <option value="@UserTheme.Light">Light</option>
-                <option value="@UserTheme.Dark">Dark</option>
+                <option value="@UserTheme.System">@Localizer["ThemeSystemOption"]</option>
+                <option value="@UserTheme.Light">@Localizer["ThemeLightOption"]</option>
+                <option value="@UserTheme.Dark">@Localizer["ThemeDarkOption"]</option>
             </BeeDaySelect>
         </div>
     </BeeDaySettingsForm>

@@ -4,17 +4,21 @@
 @rendermode InteractiveServer
 @using BeeDay.Web.Components.Features.Account.Components
 @using BeeDay.Web.Components.Features.Account.Models
+@using BeeDay.Web.Localization
+@using Microsoft.JSInterop
 @inject BeeDayWebService Store
 @inject ToastService Toast
 @inject NavigationManager Navigation
 @inject AuthenticatedUserInitializer UserInitializer
+@inject IStringLocalizer<AccountResources> Localizer
+@inject IJSRuntime JS
 
-<PageTitle>My Account | BeeDay</PageTitle>
+<PageTitle>@Localizer["PageTitle"]</PageTitle>
 
 <main class="account-page" aria-busy="@IsAnyBusy.ToString().ToLowerInvariant()">
-    <BeeDayPageHeader Eyebrow="ACCOUNT SETTINGS"
-                       Title="My Account"
-                       Description="Keep your profile, security and experience preferences up to date." />
+    <BeeDayPageHeader Eyebrow="@Localizer["HeaderEyebrow"]"
+                       Title="@Localizer["HeaderTitle"]"
+                       Description="@Localizer["HeaderDescription"]" />
 
     @if (_isLoading)
     {
@@ -34,12 +38,19 @@
     }
 </main>
 
-<BeeDayLoading IsVisible="@IsAnyBusy" Label="Saving your account..." />
+<BeeDayLoading IsVisible="@IsAnyBusy" Label="@Localizer["SavingLabel"]" />
+
+<form id="culture-sync-form" method="post" action="/culture/set" hidden>
+    <AntiforgeryToken />
+    <input type="hidden" name="culture" value="" />
+    <input type="hidden" name="returnUrl" value="" />
+</form>
 
 @code {
     private readonly ProfileFormModel _profile = new();
     private readonly SecurityFormModel _security = new();
     private readonly PreferencesFormModel _preferences = new();
+    private UserLanguage _initialLanguage;
     private bool _isLoading = true;
     private bool _profileBusy;
     private bool _securityBusy;
@@ -63,10 +74,11 @@
             _profile.Nickname = user.Nickname;
             _preferences.Language = user.Language;
             _preferences.Theme = user.Theme;
+            _initialLanguage = user.Language;
         }
         catch (Exception ex)
         {
-            Toast.ShowError(ex.Message, "Account could not be loaded");
+            Toast.ShowError(ex.Message, Localizer["ToastAccountLoadErrorTitle"]);
         }
         finally
         {
@@ -81,11 +93,11 @@
         try
         {
             await Store.UpdateUserAsync(_profile.Name.Trim(), _profile.Email.Trim());
-            Toast.ShowSuccess("Your profile has been updated.", "Profile saved");
+            Toast.ShowSuccess(Localizer["ToastProfileSavedMessage"], Localizer["ToastProfileSavedTitle"]);
         }
         catch (Exception ex)
         {
-            Toast.ShowError(ex.Message, "Profile was not saved");
+            Toast.ShowError(ex.Message, Localizer["ToastProfileErrorTitle"]);
         }
         finally
         {
@@ -101,11 +113,11 @@
         {
             await Store.ChangePasswordAsync(_security.CurrentPassword, _security.NewPassword, _security.ConfirmNewPassword);
             _security.Clear();
-            Toast.ShowSuccess("Your password has been changed.", "Password updated");
+            Toast.ShowSuccess(Localizer["ToastPasswordChangedMessage"], Localizer["ToastPasswordChangedTitle"]);
         }
         catch (Exception ex)
         {
-            Toast.ShowError(ex.Message, "Password was not changed");
+            Toast.ShowError(ex.Message, Localizer["ToastPasswordErrorTitle"]);
         }
         finally
         {
@@ -120,15 +132,34 @@
         try
         {
             await Store.UpdatePreferencesAsync(_preferences.Language, _preferences.Theme);
-            Toast.ShowSuccess("Your preferences have been updated.", "Preferences saved");
+
+            if (_preferences.Language != _initialLanguage)
+            {
+                // The language just changed: reload through the same official /culture/set
+                // mechanism the Home switcher uses, so BeeDay.Culture and the rendered UI stay in
+                // sync with what was just persisted — a toast here would never be seen, since the
+                // page is about to navigate away.
+                await SyncCultureAndReloadAsync(_preferences.Language);
+                return;
+            }
+
+            Toast.ShowSuccess(Localizer["ToastPreferencesSavedMessage"], Localizer["ToastPreferencesSavedTitle"]);
         }
         catch (Exception ex)
         {
-            Toast.ShowError(ex.Message, "Preferences were not saved");
+            Toast.ShowError(ex.Message, Localizer["ToastPreferencesErrorTitle"]);
         }
         finally
         {
             _preferencesBusy = false;
         }
+    }
+
+    private async Task SyncCultureAndReloadAsync(UserLanguage language)
+    {
+        var culture = BeeDayCultures.FromUserLanguage(language);
+        var returnUrl = "/" + Navigation.ToBaseRelativePath(Navigation.Uri);
+        var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/beeday-culture-sync.js?v=20260815-1");
+        await module.InvokeVoidAsync("submitCultureSync", "culture-sync-form", culture, returnUrl);
     }
 }
