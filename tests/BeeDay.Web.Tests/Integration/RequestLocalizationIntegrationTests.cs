@@ -34,13 +34,17 @@ public sealed class RequestLocalizationIntegrationTests(BeeDayWebApplicationFact
     }
 
     [Fact]
-    public void RequestLocalizationOptions_ResolvesCultureOnlyThroughItsOwnCookie()
+    public void RequestLocalizationOptions_ResolvesCultureThroughItsOwnCookieBeforeTheAuthenticatedAccountFallback()
     {
         var options = factory.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
 
-        var provider = Assert.Single(options.RequestCultureProviders!);
-        var cookieProvider = Assert.IsType<CookieRequestCultureProvider>(provider);
+        // Order matters: the explicit cookie must be tried first so it always wins over the
+        // authenticated account's saved language (Sprint 23.3's precedence rule) — no
+        // query-string/Accept-Language sniffing provider yet, either.
+        Assert.Equal(2, options.RequestCultureProviders!.Count);
+        var cookieProvider = Assert.IsType<CookieRequestCultureProvider>(options.RequestCultureProviders![0]);
         Assert.Equal(BeeDayCultures.CookieName, cookieProvider.CookieName);
+        Assert.IsType<AuthenticatedAccountCultureProvider>(options.RequestCultureProviders![1]);
     }
 
     [Fact]
