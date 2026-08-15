@@ -1,5 +1,6 @@
 using BeeDay.Domain.Enums;
 using BeeDay.Web.Components.Features.Dashboard.Components;
+using BeeDay.Web.Tests.Localization;
 
 namespace BeeDay.Web.Tests.Components.Dashboard;
 
@@ -13,7 +14,7 @@ public sealed class HabitCardMetricsTests
     [InlineData(12345, 0, "+12345")]
     public void RendersTheBalanceCounterWithAnExplicitSignAndNoLayoutShiftRegardlessOfDigitCount(int positiveCount, int negativeCount, string expectedText)
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var cut = context.Render<HabitCard>(parameters => parameters
             .Add(component => component.Title, "Meditate")
             .Add(component => component.Direction, HabitDirection.Both)
@@ -28,7 +29,7 @@ public sealed class HabitCardMetricsTests
     [Fact]
     public void RendersTheMetricsColumnWithTheStatisticsIconBesideTheCounter()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var cut = context.Render<HabitCard>(parameters => parameters
             .Add(component => component.Title, "Meditate")
             .Add(component => component.Direction, HabitDirection.Both));
@@ -44,7 +45,7 @@ public sealed class HabitCardMetricsTests
     [Fact]
     public void DoesNotRenderARepeatIconInTheMetricsColumn()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var cut = context.Render<HabitCard>(parameters => parameters
             .Add(component => component.Title, "Meditate")
             .Add(component => component.Direction, HabitDirection.Both));
@@ -55,10 +56,10 @@ public sealed class HabitCardMetricsTests
     [Fact]
     public void ExposesTheHabitDirectionAsAnAccessibleLabelOnTheMetricsColumn()
     {
-        using var context = new BunitContext();
-        var cut = context.Render<HabitCard>(parameters => parameters
+        using var context = new BunitContext().WithLocalization();
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<HabitCard>(parameters => parameters
             .Add(component => component.Title, "Meditate")
-            .Add(component => component.Direction, HabitDirection.Negative));
+            .Add(component => component.Direction, HabitDirection.Negative)));
 
         Assert.Equal("Negative habit", cut.Find(".habit-card__metrics").GetAttribute("aria-label"));
     }

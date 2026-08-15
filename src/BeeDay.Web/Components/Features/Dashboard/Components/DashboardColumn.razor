@@ -31,8 +31,8 @@
             {
                 <button class="beeday-icon-toggle dashboard-column__add"
                         type="button"
-                        aria-label="@($"Add {ResolvedSingularLabel}")"
-                        title="@($"Add {ResolvedSingularLabel}")"
+                        aria-label="@AddItemAriaLabel"
+                        title="@AddItemAriaLabel"
                         @onclick="OnCreate">
                     <BeeDayIcon Name="BeeDayIconName.Add" Size="BeeDayIconSize.Small" Decorative="true" />
                 </button>
@@ -48,8 +48,8 @@
                 {
                     <BeeDayEmptyState Class="dashboard-column__empty"
                                        Icon="BeeDayIconName.Completed"
-                                       Title="@CompletedEmptyTitle"
-                                       Description="@CompletedEmptyDescription" />
+                                       Title="@(CompletedEmptyTitle ?? string.Empty)"
+                                       Description="@(CompletedEmptyDescription ?? string.Empty)" />
                 }
                 else
                 {

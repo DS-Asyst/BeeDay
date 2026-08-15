@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.Localization;
 
 namespace BeeDay.Web.Components.Features.Dashboard.Components;
 
 public partial class ActivityCard
 {
+    [Inject] private IStringLocalizer<DashboardResources> Localizer { get; set; } = default!;
+
     [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
     [Parameter, EditorRequired] public string Description { get; set; } = string.Empty;
     [Parameter] public string SearchTerm { get; set; } = string.Empty;
@@ -20,10 +23,16 @@ public partial class ActivityCard
 
     private string EntityLabel => Variant switch
     {
-        "todo" => "To-Do",
-        "project" => "Project",
-        _ => "Task"
+        "todo" => Localizer["TodoSingular"],
+        "project" => Localizer["ProjectSingular"],
+        _ => Localizer["TaskSingular"]
     };
+
+    private string ToggleAriaLabel => Completed
+        ? Localizer["ActivityCardMarkIncompleteAriaLabel", Title]
+        : Localizer["ActivityCardCompleteAriaLabel", Title];
+
+    private string EditAriaLabel => Localizer["ActivityCardEditAriaLabel", EntityLabel, Title];
 
     private Task HandleBodyKeyDown(KeyboardEventArgs args) =>
         args.Key is "Enter" or " " ? OnEdit.InvokeAsync() : Task.CompletedTask;

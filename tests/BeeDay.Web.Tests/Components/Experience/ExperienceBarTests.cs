@@ -11,8 +11,8 @@ public sealed class ExperienceBarTests
     {
         using var context = new BunitContext().WithLocalization();
 
-        var cut = context.Render<ExperienceBar>(parameters => parameters
-            .Add(component => component.IsLoading, true));
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<ExperienceBar>(parameters => parameters
+            .Add(component => component.IsLoading, true)));
 
         Assert.Equal("true", cut.Find("[aria-label='Loading experience']").GetAttribute("aria-busy"));
         Assert.Equal(3, cut.FindAll(".experience-card__skeleton").Count);
@@ -25,8 +25,8 @@ public sealed class ExperienceBarTests
         using var context = new BunitContext().WithLocalization();
         var model = new ExperienceViewModel(4, 120, 200, 80);
 
-        var cut = context.Render<ExperienceBar>(parameters => parameters
-            .Add(component => component.Model, model));
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<ExperienceBar>(parameters => parameters
+            .Add(component => component.Model, model)));
 
         Assert.Contains("Level", cut.Markup);
         Assert.Contains(">4<", cut.Markup);
@@ -34,6 +34,21 @@ public sealed class ExperienceBarTests
         Assert.Contains("120 / 200 XP", cut.Markup);
         Assert.Contains("80 XP to next level", cut.Markup);
         Assert.Contains("beeday-icon--size-large", cut.Find(".experience-card__header .beeday-icon").ClassList);
+    }
+
+    [Fact]
+    public void UnderPortugueseUiCulture_RendersPortugueseLevelAndExperienceValues()
+    {
+        using var context = new BunitContext().WithLocalization();
+        var model = new ExperienceViewModel(4, 120, 200, 80);
+
+        var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<ExperienceBar>(parameters => parameters
+            .Add(component => component.Model, model)));
+
+        Assert.Contains("Nível", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("0 XP no total", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("120 / 200 XP", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("80 XP para o próximo nível", cut.Markup, StringComparison.Ordinal);
     }
 
     [Fact]

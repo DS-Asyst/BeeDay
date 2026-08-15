@@ -8,10 +8,11 @@ using BeeDay.Web.Components.Features.Projects.Models;
 using BeeDay.Web.Components.Features.Tasks.Models;
 using BeeDay.Web.Components.Features.Todos.Models;
 using BeeDay.Web.Services;
+using Microsoft.Extensions.Localization;
 
 namespace BeeDay.Web.Components.Features.Dashboard.State;
 
-public sealed class DashboardState(BeeDayWebService store, ToastService toastService)
+public sealed class DashboardState(BeeDayWebService store, ToastService toastService, IStringLocalizer<DashboardResources> localizer)
 {
     private static readonly UserProfileSummary EmptyProfile = new(
         Guid.Empty, string.Empty, string.Empty, string.Empty, UserLanguage.English, UserTheme.System, 0, 1, 0, 0);
@@ -97,7 +98,7 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
         }
         catch
         {
-            toastService.ShowError("The dashboard data could not be loaded. Try refreshing the page.");
+            toastService.ShowError(localizer["DashboardLoadErrorMessage"]);
             data = new DashboardResponse(EmptyProfile, [], [], [], null);
             IsUnavailable = true;
             Changed?.Invoke();
@@ -132,17 +133,17 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
     public Task SaveHabitAsync(HabitEditorModel model) =>
         SaveEditorAsync(
             () => Modals.EditingId is Guid id ? store.UpdateHabitAsync(id, model) : store.AddHabitAsync(model),
-            Modals.IsEditing ? "Habit updated successfully." : "Habit created successfully.");
+            Modals.IsEditing ? localizer["HabitUpdatedMessage"] : localizer["HabitCreatedMessage"]);
 
     public Task SaveTaskAsync(TaskEditorModel model) =>
         SaveEditorAsync(
             () => Modals.EditingId is Guid id ? store.UpdateTaskAsync(id, model) : store.AddTaskAsync(model),
-            Modals.IsEditing ? "Task updated successfully." : "Task created successfully.");
+            Modals.IsEditing ? localizer["TaskUpdatedMessage"] : localizer["TaskCreatedMessage"]);
 
     public Task SaveTodoAsync(TodoEditorModel model) =>
         SaveEditorAsync(
             () => Modals.EditingId is Guid id ? store.UpdateTodoAsync(id, model) : store.AddTodoAsync(model),
-            Modals.IsEditing ? "To-Do updated successfully." : "To-Do created successfully.");
+            Modals.IsEditing ? localizer["TodoUpdatedMessage"] : localizer["TodoCreatedMessage"]);
 
 
     public Task SaveTodoFromProjectAsync(TodoEditorModel model) =>
@@ -152,18 +153,18 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
                 await store.AddTodoAsync(model);
                 await ReloadAsync();
             },
-            "To-Do created successfully.",
-            "The To-Do could not be created.");
+            localizer["TodoCreatedMessage"],
+            localizer["TodoCreateFromProjectErrorMessage"]);
 
     public Task SaveProjectAsync(ProjectEditorModel model) =>
         SaveEditorAsync(
             () => Modals.EditingId is Guid id ? store.UpdateProjectAsync(id, model) : store.AddProjectAsync(model),
-            Modals.IsEditing ? "Project updated successfully." : "Project created successfully.");
+            Modals.IsEditing ? localizer["ProjectUpdatedMessage"] : localizer["ProjectCreatedMessage"]);
 
-    public Task DeleteCurrentHabitAsync() => DeleteCurrentEditorItemAsync(ActivityType.Habit, "Habit deleted successfully.");
-    public Task DeleteCurrentTaskAsync() => DeleteCurrentEditorItemAsync(ActivityType.Task, "Task deleted successfully.");
-    public Task DeleteCurrentTodoAsync() => DeleteCurrentEditorItemAsync(ActivityType.Todo, "To-Do deleted successfully.");
-    public Task DeleteCurrentProjectAsync() => DeleteCurrentEditorItemAsync(ActivityType.Project, "Project deleted successfully.");
+    public Task DeleteCurrentHabitAsync() => DeleteCurrentEditorItemAsync(ActivityType.Habit, localizer["HabitDeletedMessage"]);
+    public Task DeleteCurrentTaskAsync() => DeleteCurrentEditorItemAsync(ActivityType.Task, localizer["TaskDeletedMessage"]);
+    public Task DeleteCurrentTodoAsync() => DeleteCurrentEditorItemAsync(ActivityType.Todo, localizer["TodoDeletedMessage"]);
+    public Task DeleteCurrentProjectAsync() => DeleteCurrentEditorItemAsync(ActivityType.Project, localizer["ProjectDeletedMessage"]);
 
     public Task RegisterPositiveAsync(Guid id) =>
         ExecuteExperienceOperationAsync(() => store.RegisterHabitPositiveAsync(id));
@@ -189,15 +190,23 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
     public Task ReorderProjectsAsync(SortableReorderEvent reorder) =>
         ReorderAsync(ActivityCollection.Projects, FilteredProjects.Select(item => item.Id).ToList(), reorder);
 
-    public string FormatRepeat(TaskRepeat repeat) =>
-        repeat == TaskRepeat.None ? "No repeat" : repeat.ToString();
+    public string FormatRepeat(TaskRepeat repeat) => repeat switch
+    {
+        TaskRepeat.None => localizer["NoRepeatLabel"],
+        TaskRepeat.Daily => localizer["TaskRepeatDaily"],
+        TaskRepeat.Weekly => localizer["TaskRepeatWeekly"],
+        TaskRepeat.Monthly => localizer["TaskRepeatMonthly"],
+        _ => repeat.ToString()
+    };
 
     public string FormatDueDate(DateOnly? date) =>
-        date?.ToString("MMM dd, yyyy") ?? "No due date";
+        date?.ToString("MMM dd, yyyy") ?? localizer["NoDueDateLabel"];
 
     public string FormatProjectStatus(ProjectStatus status) => status switch
     {
-        ProjectStatus.InProgress => "In progress",
+        ProjectStatus.Planned => localizer["ProjectStatusPlanned"],
+        ProjectStatus.InProgress => localizer["ProjectInProgressLabel"],
+        ProjectStatus.Completed => localizer["ProjectStatusCompleted"],
         _ => status.ToString()
     };
 
@@ -248,7 +257,7 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
                 await store.ReorderAsync(collection, reorderedIds);
                 await ReloadAsync();
             },
-            errorMessage: "The new card order could not be saved.");
+            errorMessage: localizer["ReorderErrorMessage"]);
     }
 
     private async Task ExecuteExperienceOperationAsync(Func<Task> operation)
@@ -302,7 +311,7 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
                 await ReloadAsync();
             },
             successMessage,
-            "Your changes could not be saved.");
+            localizer["SaveErrorMessage"]);
     }
 
     private async Task DeleteCurrentEditorItemAsync(ActivityType expectedType, string successMessage)
@@ -322,7 +331,7 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
                 await ReloadAsync();
             },
             successMessage,
-            "The item could not be deleted.");
+            localizer["DeleteErrorMessage"]);
     }
 
 
@@ -337,7 +346,7 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
     private async Task ExecuteAsync(
         Func<Task> operation,
         string? successMessage = null,
-        string errorMessage = "The operation could not be completed.")
+        string? errorMessage = null)
     {
         if (IsBusy)
         {
@@ -357,7 +366,7 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
         }
         catch
         {
-            toastService.ShowError(errorMessage);
+            toastService.ShowError(errorMessage ?? localizer["GenericOperationErrorMessage"]);
         }
         finally
         {

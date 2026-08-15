@@ -32,6 +32,40 @@ internal static class BunitLocalizationSupport
             CultureInfo.CurrentUICulture = restore;
         }
     }
+
+    public static void WithUiCulture(string culture, Action action)
+    {
+        var restore = CultureInfo.CurrentUICulture;
+        try
+        {
+            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(culture);
+            action();
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = restore;
+        }
+    }
+
+    /// <summary>
+    /// Async counterpart of <see cref="WithUiCulture{T}"/> — needed whenever the pinned culture
+    /// must still be in effect after an `await` (e.g. a bUnit click that triggers a re-render, or
+    /// a non-UI async operation like DashboardState.InitializeAsync producing a toast message),
+    /// since the synchronous overload restores the culture as soon as its delegate returns.
+    /// </summary>
+    public static async Task WithUiCultureAsync(string culture, Func<Task> action)
+    {
+        var restore = CultureInfo.CurrentUICulture;
+        try
+        {
+            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(culture);
+            await action();
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = restore;
+        }
+    }
 }
 
 /// <summary>
