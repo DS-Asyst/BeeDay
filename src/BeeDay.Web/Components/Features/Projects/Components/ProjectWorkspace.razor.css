@@ -31,7 +31,7 @@
 }
 
 .project-workspace__eyebrow {
-    color: var(--beeday-color-primary);
+    color: var(--beeday-color-brand-primary);
     font-size: .68rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -99,7 +99,7 @@
 .project-workspace__progress span {
     display: block;
     height: 100%;
-    background: var(--beeday-color-primary);
+    background: var(--beeday-color-brand-primary);
     transition: width .2s ease;
 }
 
@@ -131,9 +131,9 @@
     width: 2.2rem;
     height: 2.2rem;
     padding: 0;
-    border: 1px solid var(--beeday-color-primary);
+    border: 1px solid var(--beeday-color-brand-primary);
     border-radius: var(--beeday-radius-sm);
-    color: var(--beeday-color-primary);
+    color: var(--beeday-color-brand-primary);
     background: #fff;
     font-size: 1.3rem;
     font-weight: 700;
@@ -145,7 +145,7 @@
 .project-workspace__add:hover {
     transform: translateY(-1px);
     color: #fff;
-    background: var(--beeday-color-primary);
+    background: var(--beeday-color-brand-primary);
 }
 
 .project-workspace__body {
@@ -179,9 +179,9 @@
 }
 
 .project-workspace__list-toggle:hover {
-    border-color: var(--beeday-color-primary);
+    border-color: var(--beeday-color-brand-primary);
     color: #fff;
-    background: var(--beeday-color-primary);
+    background: var(--beeday-color-brand-primary);
 }
 
 .project-workspace__list-chevron {
@@ -254,7 +254,7 @@
 .project-workspace__check:hover,
 .project-workspace__todo--done .project-workspace__check {
     color: #fff;
-    background: var(--beeday-color-primary);
+    background: var(--beeday-color-brand-primary);
 }
 
 .project-workspace__todo-body {
@@ -270,7 +270,7 @@
 
 .project-workspace__todo-body strong {
     overflow: hidden;
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: .78rem;
     text-overflow: ellipsis;
     white-space: nowrap;

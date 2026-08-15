@@ -4,7 +4,7 @@
                         Title="Security"
                         Description="Protect your account with a strong, unique password.">
     <BeeDaySettingsForm TModel="SecurityFormModel" Model="Model" OnValidSubmit="OnSave"
-                         FormName="account-security" SubmitLabel="Change Password" SubmitButtonClass="beeday-button--comic beeday-button--comic-blue" IsBusy="IsBusy">
+                         FormName="account-security" SubmitLabel="Change Password" IsBusy="IsBusy">
         <BeeDayInput Id="current-password" Label="Current password" Required="true"
                       @bind-Value="Model.CurrentPassword" type="password" autocomplete="current-password" />
         <div class="beeday-settings-form__grid">

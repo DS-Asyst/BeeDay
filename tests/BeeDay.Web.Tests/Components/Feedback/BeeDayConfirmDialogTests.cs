@@ -91,7 +91,7 @@ public sealed class BeeDayConfirmDialogTests
     }
 
     [Fact]
-    public void UsesPixelIconsForDeleteAndWarningButNotForCancelOrConfirmButtons()
+    public void UsesBeeDayIconsForDeleteAndWarningButNotForCancelOrConfirmButtons()
     {
         using var context = new BunitContext();
         var cut = context.Render<BeeDayConfirmDialog>(parameters => parameters
@@ -100,8 +100,8 @@ public sealed class BeeDayConfirmDialogTests
             .Add(component => component.Message, "Confirm deletion")
             .Add(component => component.Warning, "Cannot be undone"));
 
-        Assert.NotNull(cut.Find("svg.pixel-icon--delete"));
-        Assert.NotNull(cut.Find("svg.pixel-icon--warning"));
+        Assert.NotNull(cut.Find("svg.beeday-icon--delete"));
+        Assert.NotNull(cut.Find("svg.beeday-icon--warning"));
         Assert.Empty(cut.Find(".delete-confirmation__cancel-action").QuerySelectorAll("svg"));
         Assert.Empty(cut.Find(".delete-confirmation__confirm-action").QuerySelectorAll("svg"));
     }

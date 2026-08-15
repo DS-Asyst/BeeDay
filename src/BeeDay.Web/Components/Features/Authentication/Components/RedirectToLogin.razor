@@ -9,7 +9,7 @@
         }
 
         var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
-        var returnUrl = string.IsNullOrWhiteSpace(relative) ? "/daily" : $"/{relative}";
+        var returnUrl = string.IsNullOrWhiteSpace(relative) ? "/profile" : $"/{relative}";
         Navigation.NavigateTo($"/login?returnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true, replace: true);
     }
 }

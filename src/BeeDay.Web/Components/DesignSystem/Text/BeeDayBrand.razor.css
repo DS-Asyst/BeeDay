@@ -1,14 +1,18 @@
 .beeday-brand {
     display: inline-flex;
-    color: var(--beeday-color-primary);
-    font-family: var(--beeday-font-ui);
-    font-size: 1.2rem;
-    font-weight: 700;
-    letter-spacing: .055em;
-    line-height: 1;
+    max-width: 100%;
+    align-items: center;
+    padding: var(--beeday-brand-padding, 0);
+    background: var(--beeday-brand-background, transparent);
+    border-radius: var(--beeday-brand-radius, 0);
+    font-family: var(--beeday-font-body);
+    font-size: var(--beeday-brand-height, 1.75rem);
+    font-weight: var(--beeday-font-weight-black);
+    letter-spacing: -.075em;
+    line-height: .8;
 }
 
-.beeday-brand__accent {
-    color: var(--beeday-game-yellow);
-    text-shadow: 1px 0 0 var(--beeday-game-ink), -1px 0 0 var(--beeday-game-ink), 0 1px 0 var(--beeday-game-ink), 0 -1px 0 var(--beeday-game-ink);
-}
+.beeday-brand__bee { color: var(--beeday-color-brand-primary); }
+.beeday-brand__day { color: var(--beeday-color-brand-yellow); }
+
+.beeday-brand--inverse .beeday-brand__bee { color: var(--beeday-color-text-inverse); }

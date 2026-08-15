@@ -48,6 +48,26 @@ public sealed class EntryFlowVisualConsistencyTests
         Assert.False(Regex.IsMatch(source, @"\bProgressPercent\b", RegexOptions.CultureInvariant));
     }
 
+    [Fact]
+    public void OnboardingLayoutHasNoBackgroundImage()
+    {
+        var root = FindRepositoryRoot();
+
+        var layoutCss = File.ReadAllText(Path.Combine(
+            root, "src", "BeeDay.Web", "Components", "Layout", "OnboardingLayout.razor.css"));
+        Assert.DoesNotContain("background-image", layoutCss, StringComparison.Ordinal);
+        Assert.DoesNotContain("url(", layoutCss, StringComparison.Ordinal);
+
+        var componentsDir = Path.Combine(
+            root, "src", "BeeDay.Web", "Components", "Features", "Authentication", "Components");
+        Assert.False(
+            File.Exists(Path.Combine(componentsDir, "LoginBackground.razor")),
+            "LoginBackground was removed in Sprint 20.8 (EPIC 20) — Login/Identity/Onboarding no longer render an image background.");
+
+        Assert.False(Directory.Exists(Path.Combine(root, "src", "BeeDay.Web", "wwwroot", "images", "authentication")));
+        Assert.False(Directory.Exists(Path.Combine(root, "src", "BeeDay.Web", "wwwroot", "images", "onboarding")));
+    }
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

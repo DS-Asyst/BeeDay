@@ -1,5 +1,4 @@
-/* Official BeeDay pixel pressable action system.
-   Shared by every semantic action button. Each variant preserves its palette. */
+/* Canonical BeeDay action-button system. Every action uses a semantic palette and the shared border-depth interaction model. */
 .beeday-button {
     --beeday-button-background: var(--beeday-color-button-primary-bg);
     --beeday-button-background-hover: color-mix(in srgb, var(--beeday-button-background) 90%, white);
@@ -12,23 +11,23 @@
 
     position: relative;
     display: inline-flex;
+    height: 2.75rem;
     min-height: 2.75rem;
     align-items: center;
     justify-content: center;
     gap: var(--beeday-spacing-sm);
-    padding: .68rem 1rem .78rem;
-    border: var(--beeday-pixel-unit) solid var(--beeday-button-outline);
-    border-radius: 3px;
+    padding: .5rem 1rem;
+    border: var(--beeday-border-width) solid var(--beeday-button-depth);
+    border-bottom-width: var(--beeday-depth-md);
+    border-radius: var(--beeday-radius-lg);
     clip-path: none;
     color: var(--beeday-button-foreground);
     background: var(--beeday-button-background);
-    box-shadow:
-        inset calc(var(--beeday-pixel-unit) * -1) -3px 0 var(--beeday-button-depth),
-        0 4px 0 var(--beeday-button-shadow);
+    box-shadow: none;
     filter: none;
-    font: inherit;
+    font-family: var(--beeday-font-body);
     font-size: .88rem;
-    font-weight: 400;
+    font-weight: var(--beeday-font-weight-bold);
     letter-spacing: .035em;
     line-height: 1;
     text-align: center;
@@ -36,7 +35,8 @@
     cursor: pointer;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
-    transition: none;
+    text-transform: uppercase;
+    transition: background-color var(--beeday-transition-fast), border-color var(--beeday-transition-fast), transform var(--beeday-transition-fast);
     overflow: visible;
 }
 
@@ -123,210 +123,6 @@
     text-transform: none;
 }
 
-/* Opt-in skewed press style used by the primary operational actions requested by the product.
-   The structural treatment is shared while each BeeDayButton variant keeps its semantic palette. */
-.beeday-button.beeday-button--skew-press {
-    width: 100%;
-    height: 2.4em;
-    min-height: 0;
-    padding: 0 1rem;
-    gap: 1rem;
-    border: 2px solid var(--beeday-button-outline);
-    border-radius: .75rem;
-    color: var(--beeday-button-foreground);
-    background: var(--beeday-button-background);
-    box-shadow: 0 8px 0 var(--beeday-button-depth);
-    filter: drop-shadow(0 15px 20px color-mix(in srgb, var(--beeday-button-shadow) 38%, transparent));
-    font-size: 1.125em;
-    font-weight: 400;
-    letter-spacing: 2px;
-    line-height: 1;
-    text-transform: none;
-    transform: skew(-10deg);
-    transition: all .1s ease;
-}
-
-.beeday-button.beeday-button--skew-press:not(:disabled):hover {
-    color: var(--beeday-button-foreground);
-    background: var(--beeday-button-background);
-    box-shadow: 0 8px 0 var(--beeday-button-depth);
-    transform: skew(-10deg);
-}
-
-.beeday-button.beeday-button--skew-press:not(:disabled):active {
-    letter-spacing: 0;
-    color: var(--beeday-button-foreground);
-    background: var(--beeday-button-background);
-    box-shadow: 0 0 0 var(--beeday-button-shadow);
-    transform: skew(-10deg) translateY(8px);
-}
-
-.beeday-button.beeday-button--skew-press:focus-visible {
-    outline: 0;
-    box-shadow:
-        0 8px 0 var(--beeday-button-depth),
-        0 0 0 4px var(--beeday-button-focus);
-}
-
-.beeday-button.beeday-button--skew-press:disabled {
-    filter: none;
-}
-
-/* Opt-in "comic panel" press style for destructive confirmation actions: a
-   bold ink outline and hard offset shadow that inverts on hover and settles
-   into the shadow on press. The ink reuses the existing pixel-UI outline
-   token; fill and text colors reuse the semantic palette of the button variant. */
-.beeday-button.beeday-button--comic-press {
-    border: var(--beeday-game-border);
-    border-radius: var(--beeday-radius-md);
-    color: var(--beeday-button-foreground);
-    background: var(--beeday-button-background);
-    box-shadow: 5px 5px 0 var(--beeday-game-ink);
-    transition:
-        background-color var(--beeday-transition-normal),
-        color var(--beeday-transition-normal),
-        border-color var(--beeday-transition-normal),
-        box-shadow var(--beeday-transition-normal),
-        transform var(--beeday-transition-normal);
-}
-
-.beeday-button.beeday-button--comic-press:not(:disabled):hover {
-    color: var(--beeday-button-background);
-    background: var(--beeday-button-foreground);
-    border-color: var(--beeday-button-background);
-    box-shadow: 5px 5px 0 var(--beeday-button-background);
-    transform: none;
-}
-
-.beeday-button.beeday-button--comic-press:not(:disabled):active {
-    color: var(--beeday-button-foreground);
-    background: var(--beeday-button-depth);
-    box-shadow: 1px 1px 0 var(--beeday-game-ink);
-    transform: translate(4px, 4px);
-}
-
-.beeday-button.beeday-button--comic-press:focus-visible {
-    outline: 0;
-    box-shadow: 5px 5px 0 var(--beeday-game-ink), 0 0 0 4px var(--beeday-button-focus);
-}
-
-
-/* Comic action style approved for the main BeeDay operational buttons.
-   Geometry is shared; palette modifiers map each product action to its requested colors. */
-.beeday-button.beeday-button--comic {
-    --beeday-comic-hover-foreground: var(--beeday-button-foreground);
-
-    min-height: 0;
-    max-height: 2.7em;
-    padding: 10px 20px;
-    border: 2px solid #000;
-    border-radius: 9px;
-    color: var(--beeday-button-foreground);
-    background: var(--beeday-button-background);
-    box-shadow: 3.5px 3.5px 0 #000;
-    filter: none;
-    font-family: var(--beeday-font-ui);
-    font-size: 20px;
-    font-weight: 400;
-    letter-spacing: 0;
-    line-height: 1;
-    text-transform: none;
-    transition:
-        background-color .3s ease,
-        color .3s ease,
-        box-shadow .3s ease,
-        transform .3s ease;
-}
-
-.beeday-button.beeday-button--comic:not(:disabled):hover {
-    color: var(--beeday-comic-hover-foreground);
-    background: var(--beeday-button-background-hover);
-    border-color: #000;
-    box-shadow: 5px 5px 0 #000;
-    transform: none;
-}
-
-.beeday-button.beeday-button--comic:not(:disabled):active {
-    color: var(--beeday-button-pressed-foreground, var(--beeday-button-foreground));
-    background: var(--beeday-button-pressed);
-    box-shadow: none;
-    transform: translateY(4px);
-}
-
-.beeday-button.beeday-button--comic:focus-visible {
-    outline: 0;
-    box-shadow: 3.5px 3.5px 0 #000, 0 0 0 4px var(--beeday-button-focus);
-}
-
-.beeday-button.beeday-button--comic-blue {
-    --beeday-button-background: var(--beeday-color-comic-blue);
-    --beeday-button-background-hover: var(--beeday-color-comic-blue-hover);
-    --beeday-button-pressed: var(--beeday-color-comic-blue-pressed);
-    --beeday-button-foreground: var(--beeday-color-comic-blue-foreground);
-    --beeday-button-focus: var(--beeday-color-comic-blue-focus);
-}
-
-.beeday-button.beeday-button--comic-yellow {
-    --beeday-button-background: var(--beeday-color-comic-yellow);
-    --beeday-button-background-hover: var(--beeday-color-comic-yellow-hover);
-    --beeday-button-pressed: var(--beeday-color-comic-yellow-pressed);
-    --beeday-button-foreground: var(--beeday-color-comic-yellow-foreground);
-    --beeday-button-focus: var(--beeday-color-comic-yellow-focus);
-}
-
-.beeday-button.beeday-button--comic-back {
-    --beeday-button-background: var(--beeday-color-comic-back);
-    --beeday-button-background-hover: var(--beeday-color-comic-back-hover);
-    --beeday-button-pressed: var(--beeday-color-comic-back-pressed);
-    --beeday-button-foreground: var(--beeday-color-comic-back-foreground);
-    --beeday-comic-hover-foreground: var(--beeday-color-comic-back-hover-foreground);
-    --beeday-button-pressed-foreground: var(--beeday-color-comic-back-pressed-foreground);
-    --beeday-button-focus: var(--beeday-color-comic-back-focus);
-}
-
-.beeday-button.beeday-button--comic-danger {
-    --beeday-button-background: var(--beeday-color-comic-danger);
-    --beeday-button-background-hover: var(--beeday-color-comic-danger-hover);
-    --beeday-button-pressed: var(--beeday-color-comic-danger-pressed);
-    --beeday-button-foreground: var(--beeday-color-comic-danger-foreground);
-    --beeday-comic-hover-foreground: var(--beeday-color-comic-danger-hover-foreground);
-    --beeday-button-pressed-foreground: var(--beeday-color-comic-danger-pressed-foreground);
-    --beeday-button-focus: var(--beeday-color-comic-danger-focus);
-}
-
-.beeday-button.beeday-button--comic-neutral {
-    --beeday-button-background: var(--beeday-color-comic-neutral);
-    --beeday-button-background-hover: var(--beeday-color-comic-neutral-hover);
-    --beeday-button-pressed: var(--beeday-color-comic-neutral-pressed);
-    --beeday-button-foreground: var(--beeday-color-comic-neutral-foreground);
-    --beeday-button-pressed-foreground: var(--beeday-color-comic-neutral-pressed-foreground);
-    --beeday-button-focus: var(--beeday-color-comic-neutral-focus);
-}
-
-.beeday-button.beeday-button--comic-success {
-    --beeday-button-background: var(--beeday-color-comic-success);
-    --beeday-button-background-hover: var(--beeday-color-comic-success-hover);
-    --beeday-button-pressed: var(--beeday-color-comic-success-pressed);
-    --beeday-button-foreground: var(--beeday-color-comic-success-foreground);
-    --beeday-button-focus: var(--beeday-color-comic-success-focus);
-}
-
-.beeday-button.beeday-button--comic-orange {
-    --beeday-button-background: var(--beeday-color-comic-orange);
-    --beeday-button-background-hover: var(--beeday-color-comic-orange-hover);
-    --beeday-button-pressed: var(--beeday-color-comic-orange-pressed);
-    --beeday-button-foreground: var(--beeday-color-comic-orange-foreground);
-    --beeday-button-focus: var(--beeday-color-comic-orange-focus);
-}
-
-.beeday-button.beeday-button--comic-magenta {
-    --beeday-button-background: var(--beeday-color-comic-magenta);
-    --beeday-button-background-hover: var(--beeday-color-comic-magenta-hover);
-    --beeday-button-pressed: var(--beeday-color-comic-magenta-pressed);
-    --beeday-button-foreground: var(--beeday-color-comic-magenta-foreground);
-    --beeday-button-focus: var(--beeday-color-comic-magenta-focus);
-}
-
 /* Shared lightweight icon-only toggle chrome — a square, subtly bordered
    button used for secondary/contextual actions (view toggles, filters,
    add-item triggers) that must sit next to real BeeDayButtons without
@@ -338,27 +134,27 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.15rem;
-    height: 2.15rem;
+    width: 2.5rem;
+    height: 2.5rem;
     padding: 0;
     border: 1px solid var(--beeday-color-border);
-    border-radius: var(--beeday-radius-xs);
+    border-radius: var(--beeday-radius-lg);
     color: var(--beeday-color-chrome-icon);
     background: var(--beeday-color-chrome-icon-surface);
     font-size: .86rem;
     font-weight: 700;
     line-height: 1;
     cursor: pointer;
-    transition: transform .12s ease, color .12s ease, border-color .12s ease, background-color .12s ease;
+    transition: transform var(--beeday-transition-fast), color var(--beeday-transition-fast), border-color var(--beeday-transition-fast), background-color var(--beeday-transition-fast);
 }
 
 .beeday-icon-toggle:hover,
 .beeday-icon-toggle[aria-pressed="true"],
 .beeday-icon-toggle[aria-expanded="true"] {
     transform: translateY(-1px);
-    border-color: var(--beeday-color-primary);
+    border-color: var(--beeday-color-brand-primary);
     color: #fff;
-    background: var(--beeday-color-primary);
+    background: var(--beeday-color-brand-primary);
 }
 
 .beeday-icon-toggle:active {
@@ -375,8 +171,7 @@
     }
 }
 
-/* Plain text action — an opt-in BeeDayButton modifier (same mechanism as
-   the --comic-* modifiers) for lightweight inline actions inside popovers
+/* Plain text action — an opt-in BeeDayButton modifier for lightweight inline actions inside popovers
    and filter panels (Clear filters, Cancel) that must not compete visually
    with real operational buttons: no border, no background, no press/shadow
    chrome, just colored text. Single shared implementation — do not
@@ -405,7 +200,7 @@
 }
 
 .beeday-button.beeday-button--plain:focus-visible {
-    outline: 2px solid var(--beeday-color-primary);
+    outline: 2px solid var(--beeday-color-brand-primary);
     outline-offset: 2px;
     box-shadow: none;
 }
@@ -420,67 +215,67 @@
 .beeday-button.beeday-button--plain-neutral { color: var(--beeday-color-text-secondary); }
 
 .beeday-button--full-width { width: 100%; }
-.beeday-button--compact { min-height: 2.25rem; padding: .5rem .8rem .58rem; font-size: .78rem; }
+.beeday-button--compact { height: 2.25rem; min-height: 2.25rem; padding: .375rem .75rem; font-size: var(--beeday-font-size-xs); }
 .beeday-button__label { position: relative; z-index: 1; display: inline-flex; min-width: 0; align-items: center; white-space: nowrap; }
-.beeday-button .pixel-icon { position: relative; z-index: 1; }
+.beeday-button .beeday-icon { position: relative; z-index: 1; }
 
 .beeday-button:not(:disabled):hover {
-    transform: translateY(-1px);
-    color: var(--beeday-button-foreground);
     background: var(--beeday-button-background-hover);
-    box-shadow:
-        inset calc(var(--beeday-pixel-unit) * -1) -4px 0 var(--beeday-button-depth),
-        0 5px 0 var(--beeday-button-shadow);
+    box-shadow: none;
 }
 
 .beeday-button:not(:disabled):active {
-    transform: translateY(4px);
-    color: var(--beeday-button-foreground);
-    background: var(--beeday-button-pressed, var(--beeday-button-depth));
-    box-shadow: inset var(--beeday-pixel-unit) var(--beeday-pixel-unit) 0 var(--beeday-button-outline);
+    border-bottom-width: 0;
+    background: var(--beeday-button-pressed);
+    box-shadow: none;
+    transform: translateY(var(--beeday-depth-md));
 }
 
-.beeday-button:focus-visible {
-    outline: 0;
-    box-shadow:
-        inset calc(var(--beeday-pixel-unit) * -1) -3px 0 var(--beeday-button-depth),
-        0 4px 0 var(--beeday-button-shadow),
-        0 0 0 4px var(--beeday-button-focus);
+.beeday-button.beeday-button:focus-visible {
+    outline: var(--beeday-border-width) solid var(--beeday-color-brand-primary);
+    outline-offset: 2px;
+    box-shadow: var(--beeday-focus-ring);
 }
 
 .beeday-button:disabled {
-    --beeday-button-background: #d3d3d3;
-    --beeday-button-background-hover: #d3d3d3;
-    --beeday-button-foreground: rgb(33 37 41 / 64%);
-    --beeday-button-outline: #85858d;
-    --beeday-button-depth: #a9a9af;
-    --beeday-button-shadow: #777780;
+    --beeday-button-background: var(--beeday-color-surface-subtle);
+    --beeday-button-background-hover: var(--beeday-color-surface-subtle);
+    --beeday-button-foreground: var(--beeday-color-text-muted);
+    --beeday-button-outline: var(--beeday-color-border-strong);
+    --beeday-button-depth: var(--beeday-color-border-strong);
     cursor: not-allowed;
     opacity: .62;
 }
 
-.beeday-button__loader { flex: 0 0 auto; animation: beeday-spin .7s steps(8, end) infinite; }
+.beeday-button--loading { position: relative; }
+.beeday-button--loading .beeday-button__label { visibility: hidden; }
+.beeday-button__loader { position: absolute; flex: 0 0 auto; animation: beeday-spin .7s linear infinite; }
 @keyframes beeday-spin { to { transform: rotate(360deg); } }
 
 @media (prefers-reduced-motion: reduce) {
     .beeday-button { transition: none; }
-    .beeday-button.beeday-button--skew-press { transition: none; }
-    .beeday-button.beeday-button--comic-press { transition: none; }
-    .beeday-button.beeday-button--comic { transition: none; }
     .beeday-button__loader { animation: none; }
 }
 
+/* Sprint 21.7: canonical content-card geometry. The default is a neutral, bordered, flat surface;
+   prominent hierarchy and interaction are explicit opt-ins. Panels, dialogs and structural
+   containers remain separate concepts. */
 .beeday-card {
-    border: 1px solid var(--beeday-color-border);
-    border-radius: var(--beeday-radius-xs);
+    min-width: 0;
+    border: var(--beeday-border-width) solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-lg);
     background: var(--beeday-color-surface);
-    box-shadow: var(--beeday-shadow-sm);
+    color: var(--beeday-color-text-primary);
+    box-shadow: none;
 }
 
-.beeday-card--padded { padding: var(--beeday-spacing-lg); }
+.beeday-card--padded { padding: var(--beeday-spacing-md); }
 .beeday-card--muted { background: var(--beeday-color-surface-muted); }
-.beeday-card--interactive { transition: transform var(--beeday-transition-normal), box-shadow var(--beeday-transition-normal); }
-.beeday-card--interactive:hover { transform: translateY(-2px); box-shadow: var(--beeday-shadow-md); }
+.beeday-card--prominent { border-color: var(--beeday-color-border-strong); border-radius: var(--beeday-radius-2xl); box-shadow: var(--beeday-shadow-sm); }
+.beeday-card--prominent.beeday-card--padded { padding: var(--beeday-spacing-lg); }
+.beeday-card--interactive { cursor: pointer; transition: border-color var(--beeday-transition-normal), background-color var(--beeday-transition-normal), box-shadow var(--beeday-transition-normal); }
+.beeday-card--interactive:hover { border-color: var(--beeday-color-border-strong); background: var(--beeday-color-surface-muted); }
+.beeday-card--interactive:focus-visible { outline: none; box-shadow: var(--beeday-focus-ring); }
 
 .beeday-page-header,
 .beeday-section-header,
@@ -501,7 +296,7 @@
 .beeday-hero__eyebrow {
     display: block;
     margin-bottom: var(--beeday-spacing-xs);
-    color: var(--beeday-color-primary);
+    color: var(--beeday-color-brand-primary);
     font-size: .75rem;
     font-weight: 700;
     letter-spacing: .1em;
@@ -571,10 +366,10 @@
     padding: var(--beeday-spacing-lg);
     border: 1px solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-lg);
-    background: var(--beeday-color-primary-soft);
+    background: var(--beeday-color-brand-primary-soft);
 }
 
-.beeday-hero--onboarding .beeday-hero__eyebrow { color: var(--beeday-color-primary-active); }
+.beeday-hero--onboarding .beeday-hero__eyebrow { color: var(--beeday-color-brand-primary-active); }
 
 @media (max-width: 30rem) {
     .beeday-hero__illustration { min-width: 3rem; min-height: 3rem; }

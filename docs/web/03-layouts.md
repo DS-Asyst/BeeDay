@@ -1,100 +1,73 @@
 # Layouts
 
-**Fonte da verdade:** verificado diretamente em `src/BeeDay.Web/Components/Layout/`.
+**Última verificação:** 2026-08-13 — Sprint 21.12, EPIC 21.
 
-**Última verificação:** 2026-08-07.
+## Layouts ativos
 
-## 1. Objetivo
-
-Descrever os dois `LayoutComponentBase` do repositório e os componentes de navegação/painéis que
-`MainLayout` compõe.
-
-## 2. Os dois layouts
-
-| Layout | Usado por | Composição |
+| Layout | Uso | Estrutura |
 |---|---|---|
-| `MainLayout.razor` | Todas as rotas autenticadas de produto (`/daily`, `/wallet`, `/account`, `/settings`, catálogos de Design System) e as duas páginas de erro/not-found | `TopNavigation`, `ProfileSidePanel`, `AccountSidePanel`, `AppFooter`, `BeeDayToastHost` |
-| `OnboardingLayout.razor` | Todas as páginas de Authentication/Identity/Onboarding/ProfileCreation (9 rotas) | Apenas `<main>@Body</main>` + `BeeDayToastHost` — sem navegação |
+| `MainLayout` | Rotas autenticadas | `MobileHeader` + (`DesktopSidebar` + Workspace) + `MobileSidebar` + `BeeDayToastHost` |
+| `PublicLayout` | Home pública `/` | `PublicHeader` + conteúdo + `AppFooter` |
+| `OnboardingLayout` | Login, identidade, perfil inicial e tutorial | Conteúdo focado sem navegação de produto |
 
-`OnboardingLayout.razor` inteiro:
+O shell autenticado possui somente duas regiões permanentes no desktop: Navigation e Workspace.
+`RightRail`, `ProfileSidePanel` e `AccountSidePanel` foram aposentados e removidos. O footer
+institucional continua legítimo no `PublicLayout`, mas não aparece em Home, Daily, Wallet ou Account.
 
-```razor
-@inherits LayoutComponentBase
-<div class="onboarding-layout"><main>@Body</main><BeeDayToastHost /></div>
-```
+## Navegação autenticada
 
-Deliberadamente mínimo — cada página sob esse layout monta seu próprio card centralizado
-(`auth-card`, `identity-card`, `tutorial-card`) e injeta `BeeDayBrand` individualmente.
+`NavigationItems` é a fonte compartilhada por `DesktopSidebar` e `MobileSidebar`:
 
-## 3. `MainLayout`
+| Grupo | Item | Destino/ação |
+|---|---|---|
+| Primário | Profile | `/profile` |
+| Primário | Daily | `/daily` |
+| Primário | Wallet | `/wallet` |
+| Secundário | Account | `/settings` (`/account` permanece alias da mesma página) |
+| Sessão | Logout | `POST /auth/logout` com `AntiforgeryToken` |
 
-```razor
-@inject AuthenticatedUserInitializer AuthenticatedUserInitializer
-@inherits LayoutComponentBase
-```
+Support e Donate dos painéis antigos eram botões sem destino nem efeito e foram classificados como
+legado não funcional. Não foram substituídos por links fictícios. `NavigationItem` continua sendo a
+única primitive de linha; um boundary com `::deep` garante que o `NavLink` renderizado receba a
+mesma composição flex de ícone + label dos botões, além de active, hover e focus-visible.
 
-- `OnInitializedAsync` chama `AuthenticatedUserInitializer.EnsureInitializedAsync()` **antes** de
-  renderizar `@Body` — garante que qualquer página sob este layout só renderiza depois que a
-  aplicação confirmou que o `UserId` do cookie ainda corresponde a um `User` real (mesma checagem
-  que `Home.razor`/`Wallet.razor` repetem individualmente por segurança; ver
-  [`04-feature-components.md`](04-feature-components.md)).
-- Controla dois painéis laterais mutuamente exclusivos via dois `bool` locais
-  (`_isProfilePanelOpen`, `_isMenuPanelOpen`) — abrir um sempre fecha o outro
-  (`ToggleProfilePanel`/`ToggleMenuPanel`). A classe CSS do `beeday-workspace` (`has-left-panel`/
-  `has-right-panel`) reflete qual está aberto, controlando o layout de grid via CSS.
-- Estrutura DOM: `TopNavigation` (fixo) → `beeday-workspace` (grid de 3 colunas: slot esquerdo =
-  `ProfileSidePanel`, centro = `beeday-content-shell` com `@Body` + `AppFooter`, slot direito =
-  `AccountSidePanel`) → `BeeDayToastHost` (fora do grid, `position: fixed` via CSS).
+## Sidebar e identidade
 
-## 4. `TopNavigation.razor`
+No desktop (a partir de 1200px), `DesktopSidebar` é fixa, mede `15.5rem` (248px) e usa superfície
+neutra com border sutil. A wordmark oficial é preservada sem distorção. Brand Blue fica concentrado
+em active/focus/hover e ações importantes, em vez de preencher toda a região. Itens têm altura
+mínima de 52px, ícone de 32px e gap de 1.1rem, próximos às proporções medidas no Lingo (sidebar
+256px, item 52px, ícone 32px), adaptados à identidade BeeDay.
 
-Header fixo com 3 regiões: botão de marca (abre/fecha `ProfileSidePanel`, ícone
-`ChevronLeft`/`ChevronRight` conforme estado), navegação central (`NavLink` para `/daily` e
-`/wallet`, `Match="NavLinkMatch.Prefix"`), botão de menu (abre/fecha `AccountSidePanel`, ícone
-`Close`/`Menu`). Renderiza o texto da marca como
-`<span class="top-navigation__brand-bee">BEE</span><span class="top-navigation__brand-day">DAY</span>`
-— literal, não `BeeDayBrand`. Nomes de classe atualizados na Sprint 18.7 (antes `brand-level`/
-`brand-up`, resíduo semântico do branding anterior "LevelUp").
+## Estratégia de largura
 
-## 5. Painéis laterais
+Os tokens semânticos do shell são:
 
-### `ProfileSidePanel.razor`
+- `--beeday-sidebar-width: 15.5rem`;
+- `--beeday-reading-width: 48rem` para experiências focadas como Profile;
+- `--beeday-workspace-width: 100rem` para experiências operacionais como Daily.
 
-Injeta `DashboardState` diretamente (único componente de Layout que depende de um state de
-Feature) para mostrar avatar/nome/nickname e `ExperienceBar` do usuário atual. Assina
-`DashboardState.Changed` no `OnInitializedAsync` e chama `State.InitializeAsync()` se
-`State.Data` ainda for nulo — ou seja, pode disparar o próprio carregamento do Dashboard mesmo que
-o usuário nunca tenha visitado `/daily` nesta sessão (abrir o painel em qualquer página sob
-`MainLayout` já popula `DashboardState`). Estado vazio (`HasProfile == false`) linka para
-`/profile/create`.
+Não existe token de RightRail ou de SidePanel. A Home controla sua largura de leitura; Daily usa o
+workspace amplo; Wallet preserva seu próprio `max-width: 1440px` e grid responsivo.
 
-### `AccountSidePanel.razor`
+## Responsividade
 
-Puramente estático/de navegação: liga para `/account` e para um `<form method="post"
-action="/auth/logout">` com `<AntiforgeryToken />` — não injeta nenhum serviço, apenas
-`[Parameter] IsOpen`/`OnClose`. Contém o mesmo texto de marca duplicado (`LEVEL`/`UP`) do
-`TopNavigation` — mesmo achado.
+Há um breakpoint estrutural único:
 
-## 6. `AppFooter.razor`
+- desktop `>= 1200px`: DesktopSidebar fixa + Workspace;
+- tablet/mobile `< 1200px`: MobileHeader + MobileSidebar overlay + Workspace integral;
+- Daily entre `901px` e `1199px`: board de quatro colunas com scroll horizontal interno controlado;
+- Daily entre `621px` e `900px`: duas colunas;
+- Daily `<= 620px`: uma coluna.
 
-Estático, sem `@code`. Três colunas de links (`BeeDay`/`Developers`/`Social`) — a maioria são
-placeholders (`href="#"`: News, Contact, Documentation, GitHub, Release Notes, Community, Privacy
-Policy, Terms of Service) exceto os dois links de "Social" (LinkedIn, GitHub pessoal do mantenedor,
-reais) e "About", que aponta para
-`https://github.com/tiagoarrigoni/LevelUp` — nome de repositório antigo, ver achado no
-[`README.md`](README.md#achados-relevantes-reportados-não-corrigidos).
+Assim, 1024/900/768 pertencem conscientemente ao mesmo shell tablet e não disputam com o paradigma
+desktop. O drawer preserva backdrop, close, Escape, foco inicial, `aria-hidden` e ausência da árvore
+de foco quando fechado. O documento inteiro não deve produzir overflow horizontal; somente o board
+operacional pode fazê-lo internamente na faixa tablet.
 
-## 7. `ReconnectModal.razor`
+## Progresso
 
-Não é filho de nenhum `LayoutComponentBase` — é renderizado direto em `App.razor`, fora de
-`<Routes>`, então cobre qualquer página independentemente do layout. Markup padrão do template
-Blazor Web App (`.NET 10`) para o modal de "Rejoining the server..." exibido pelo cliente SignalR
-(`blazor.web.js`) quando o circuito cai e tenta reconectar; carrega seu próprio módulo JS
-(`ReconnectModal.razor.js`, não auditado nesta Sprint — é gerado/mantido pelo template, não
-código de Feature). Não injeta nenhum serviço C#.
-
-## 8. Fontes de verdade
-
-- `src/BeeDay.Web/Components/Layout/MainLayout.razor`, `OnboardingLayout.razor`,
-  `TopNavigation.razor`, `ProfileSidePanel.razor`, `AccountSidePanel.razor`, `AppFooter.razor`,
-  `ReconnectModal.razor`.
+`DashboardState` continua scoped e idempotente. Level, XP total, XP progress/remaining e progresso
+real de tarefas/project tasks foram integrados à Home por `ExperienceBar`, `ProgressMetricCard` e
+`BeeDayProgressBar`; não há request ou store duplicado. Streak continua ausente porque não existe
+backing de domínio.

@@ -31,7 +31,7 @@
     </HeroContent>
     <BodyContent>
         <div class="editor-modal__body">
-            <div class="editor-modal__type-summary"><PixelIcon Name="PixelIconName.RecurringTask" Size="PixelIconSize.Large" Class="editor-modal__type-icon" Decorative="true" /><div><strong>Task</strong><p>A recurring or repeatable activity.</p></div></div>
+            <div class="editor-modal__type-summary"><BeeDayIcon Name="BeeDayIconName.RecurringTask" Size="BeeDayIconSize.Large" Class="editor-modal__type-icon" Decorative="true" /><div><strong>Task</strong><p>A recurring or repeatable activity.</p></div></div>
             <BeeDaySelect TValue="TaskRepeat"
                            Id="task-repeat"
                            Label="Repeat"
@@ -42,10 +42,6 @@
                     <option value="@option">@FormatEnum(option.ToString())</option>
                 }
             </BeeDaySelect>
-            <ActivityAttributeSelect Id="task-attribute"
-                                      Label="Attribute"
-                                      @bind-Value="Model.Attribute"
-                                      FieldCssClass="editor-modal__field" />
         </div>
     </BodyContent>
 </EditorModalShell>

@@ -1,0 +1,25 @@
+<nav class="navigation-items" aria-label="Main navigation">
+    <NavigationItem Icon="BeeDayIconName.Profile" Label="Profile" Href="/profile" OnNavigate="OnNavigate" />
+    <NavigationItem Icon="BeeDayIconName.Daily" Label="Daily" Href="/daily" OnNavigate="OnNavigate" />
+    <NavigationItem Icon="BeeDayIconName.Wallet" Label="Wallet" Href="/wallet" OnNavigate="OnNavigate" />
+</nav>
+
+<div class="navigation-items navigation-items--actions">
+    <NavigationItem Icon="BeeDayIconName.Account"
+                     Label="Account"
+                     Href="/settings"
+                     OnNavigate="OnNavigate" />
+
+    <form method="post" action="/auth/logout" class="navigation-items__logout-form">
+        <AntiforgeryToken />
+        <NavigationItem Icon="BeeDayIconName.Logout"
+                        Label="Logout"
+                        AriaLabel="Log out of BeeDay"
+                        ButtonType="submit" />
+    </form>
+</div>
+
+@code {
+    /// <summary>Invoked after route navigation; closes the mobile drawer and is a no-op on desktop.</summary>
+    [Parameter] public EventCallback OnNavigate { get; set; }
+}

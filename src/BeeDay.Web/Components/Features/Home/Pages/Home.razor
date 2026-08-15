@@ -1,0 +1,94 @@
+@page "/"
+@attribute [AllowAnonymous]
+@layout BeeDay.Web.Components.Layout.PublicLayout
+@using BeeDay.Web.Services.Authentication
+@using Microsoft.JSInterop
+@inject NavigationManager Navigation
+@inject AuthenticatedEntryDestinationResolver DestinationResolver
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<PageTitle>BeeDay — Be better every day</PageTitle>
+
+<article class="home-page">
+    <section class="home-hero" aria-labelledby="home-heading">
+        <div class="home-hero__inner">
+            <div class="home-hero__visual" data-rive-host data-rive-state="loading" aria-hidden="true">
+                <canvas @ref="riveCanvas" class="home-hero__rive"></canvas>
+            </div>
+            <div class="home-hero__content">
+                <h1 id="home-heading">Build a better day, one step at a time.</h1>
+                <p>Keep your habits, tasks, and personal progress together.</p>
+                <div class="home-hero__actions">
+                    <AuthorizeView>
+                        <Authorized><BeeDayButton OnClick="ContinueToBeeDay">Continue to BeeDay</BeeDayButton></Authorized>
+                        <NotAuthorized>
+                            <a class="beeday-button beeday-button--primary home-hero__start" href="/profile/create">Get started</a>
+                            <a class="beeday-button beeday-button--secondary home-hero__login" href="/login">I already have an account</a>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section" aria-labelledby="how-heading">
+        <div class="home-section__heading">
+            <span class="home-page__eyebrow">A SIMPLE DAILY LOOP</span>
+            <h2 id="how-heading">How BeeDay works</h2>
+            <p>Start with what matters, turn it into action, and let consistency build the result.</p>
+        </div>
+        <ol class="home-steps">
+            <li><span>1</span><div><h3>Define</h3><p>Choose what you want to improve.</p></div></li>
+            <li><span>2</span><div><h3>Practice</h3><p>Keep realistic daily actions in view.</p></div></li>
+            <li><span>3</span><div><h3>Evolve</h3><p>See completed work become progress.</p></div></li>
+        </ol>
+    </section>
+</article>
+
+@code {
+    private ElementReference riveCanvas;
+    private IJSObjectReference? riveModule;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        try
+        {
+            riveModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/public-home-rive.js");
+            await riveModule.InvokeVoidAsync("mount", riveCanvas, "/assets/rive/public-home-hero.riv");
+        }
+        catch (JSException)
+        {
+            // The Hero content and actions remain usable when its decorative animation is unavailable.
+        }
+    }
+
+    private async Task ContinueToBeeDay()
+    {
+        var destination = await DestinationResolver.ResolveAsync();
+        Navigation.NavigateTo(destination, forceLoad: true, replace: true);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (riveModule is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await riveModule.InvokeVoidAsync("dispose", riveCanvas);
+            await riveModule.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The circuit already owns cleanup after disconnect.
+        }
+    }
+}

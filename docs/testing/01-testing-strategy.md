@@ -5,8 +5,11 @@
 `tests/BeeDay.E2E.Tests/`, `BeeDay.slnx`, e confirmado por execução real de
 `dotnet test BeeDay.slnx --configuration Release --no-build` nesta Sprint (16.9).
 
-**Última verificação:** 2026-08-10 (Sprint 18.8) — contagens de teste e composição de arquivos
-atualizadas após as adições das Sprints 18.5/18.6; conteúdo estrutural desta Sprint 16.9 preservado.
+**Última verificação:** 2026-08-11 (Sprint 20.5, EPIC 20) — contagem total corrigida de 752 para
+768 testes (10 novos: `PublicHeaderTests`/`PublicLayoutTests` estendidos, `HomeTests.cs` novo em
+Web.Tests e E2E.Tests, ver `docs/epics/20-home-visual-experience/README.md`). Contagem de arquivos
+`.cs` por projeto (coluna "Arquivos") não reauditada nesta Sprint — pode estar desatualizada desde
+a Sprint 20.4. Verificação anterior: 2026-08-10 (Sprint 18.8).
 
 ## 1. Pirâmide — os 5 projetos de teste e o que cada um verifica
 
@@ -18,8 +21,8 @@ atualizadas após as adições das Sprints 18.5/18.6; conteúdo estrutural desta
 | `BeeDay.Web.Tests` | 61 | Componentes Blazor (bUnit) + integração HTTP real (`WebApplicationFactory`) | `BeeDayWebApplicationFactory` e variantes — documentado em [`docs/web/06-testing.md`](../web/06-testing.md) |
 | `BeeDay.E2E.Tests` | 7 (+ infraestrutura) | Fluxos de usuário reais via Chromium/Playwright | `PlaywrightAppFixture`/`E2EWebApplicationFactory` — documentado em [`docs/web/06-testing.md`](../web/06-testing.md) |
 
-Total confirmado por execução real na Sprint 18.7: **752 testes, 0 falhas** (93 Domain, 73
-Application, 129 Infrastructure, 450 Web, 7 E2E) — ver §7.
+Total confirmado por execução real na Sprint 20.5: **768 testes, 0 falhas** (93 Domain, 73
+Application, 129 Infrastructure, 464 Web, 9 E2E) — ver §7.
 
 ## 2. Domain.Tests — invariantes sem infraestrutura
 
@@ -146,9 +149,9 @@ Idêntico, mais `--logger "trx;LogFileName=beeday-tests.trx" --results-directory
 `ci.yml`, instalação do Chromium do Playwright antes de rodar os testes (necessário para
 `BeeDay.E2E.Tests`) — ver [`docs/deployment/01-deployment.md`](../deployment/01-deployment.md) §3.
 
-### Resultado mais recente (Sprint 18.7), executado localmente
+### Resultado mais recente (Sprint 20.5), executado localmente
 
-752 testes, 0 falhas: 93 Domain, 73 Application, 129 Infrastructure, 450 Web, 7 E2E. Uma execução
+768 testes, 0 falhas: 93 Domain, 73 Application, 129 Infrastructure, 464 Web, 9 E2E. Uma execução
 da solução completa em paralelo pode ocasionalmente reportar falha transiente em
 `BeeDay.Web.Tests`/`BeeDay.E2E.Tests` por contenção de LocalDB/porta Kestrel entre os dois projetos
 rodando ao mesmo tempo (observado e diagnosticado na Sprint 16.7); os mesmos testes passam 100%

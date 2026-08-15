@@ -1,0 +1,19 @@
+<div class="mobile-nav-backdrop @(IsOpen ? "is-open" : null)" aria-hidden="true" @onclick="OnClose"></div>
+
+<aside id="mobile-navigation"
+       class="mobile-nav-drawer @(IsOpen ? "is-open" : null)"
+       aria-label="Primary navigation"
+       aria-hidden="@AriaHiddenValue"
+       @onkeydown="HandleKeyDown">
+    <div class="mobile-nav-drawer__header">
+        <NavLink href="/profile" Match="NavLinkMatch.Prefix" class="mobile-nav-drawer__brand" @onclick="HandleNavigate">
+            <BeeDayBrand />
+        </NavLink>
+
+        <button type="button" class="mobile-nav-drawer__close" aria-label="Close" @onclick="OnClose" @ref="closeButtonElement">
+            <BeeDayIcon Name="BeeDayIconName.Close" Size="BeeDayIconSize.Large" />
+        </button>
+    </div>
+
+    <NavigationItems OnNavigate="HandleNavigate" />
+</aside>

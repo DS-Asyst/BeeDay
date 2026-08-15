@@ -4,7 +4,7 @@
                         Title="Profile"
                         Description="Manage the personal information shown across BeeDay.">
     <BeeDaySettingsForm TModel="ProfileFormModel" Model="Model" OnValidSubmit="OnSave"
-                         FormName="account-profile" SubmitLabel="Save Profile" SubmitButtonClass="beeday-button--comic beeday-button--comic-success" IsBusy="IsBusy">
+                         FormName="account-profile" SubmitLabel="Save Profile" IsBusy="IsBusy">
         <div class="beeday-settings-form__grid">
             <BeeDayInput Id="account-name" Label="Name" Required="true" MaxLength="100"
                           @bind-Value="Model.Name" />

@@ -35,8 +35,8 @@
 .dashboard-column__heading h2 {
     margin: 0;
     overflow: hidden;
-    color: #17121d;
-    font-family: var(--beeday-font-ui);
+    color: var(--beeday-color-text-primary);
+    font-family: var(--beeday-font-body);
     font-size: 1.42rem;
     font-weight: 700;
     letter-spacing: -.035em;
@@ -51,9 +51,9 @@
     min-width: 1.65rem;
     height: 1.65rem;
     padding: 0 .42rem;
-    border-radius: 999px;
-    color: var(--beeday-color-surface);
-    background: var(--beeday-color-project);
+    border-radius: var(--beeday-radius-sm);
+    color: var(--beeday-color-text-muted);
+    background: var(--beeday-color-brand-primary-soft);
     font-size: .75rem;
     font-weight: 700;
     box-sizing: border-box;
@@ -94,7 +94,7 @@
 }
 
 .dashboard-column:focus-within {
-    border-color: #c6bdd0;
+    border-color: var(--beeday-color-border-strong);
     box-shadow: var(--beeday-shadow-sm);
 }
 
@@ -109,7 +109,7 @@
 }
 
 .dashboard-column__heading h2 {
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: 1.65rem;
     font-weight: var(--beeday-font-weight-regular);
     letter-spacing: -.015em;
@@ -145,8 +145,8 @@
 }
 
 .dashboard-column:focus-within {
-    border-color: #b8b1c0 !important;
-    box-shadow: 0 1px 2px rgb(47 36 56 / 9%), 0 5px 14px rgb(47 36 56 / 9%) !important;
+    border-color: var(--beeday-color-brand-primary-light) !important;
+    box-shadow: var(--beeday-focus-ring), var(--beeday-shadow-sm) !important;
 }
 
 .dashboard-column__header {
@@ -169,7 +169,7 @@
 
 /* UX / Visual Refinement — Sprint 6.1: retro UI column headings */
 .dashboard-column__heading h2 {
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: 1.48rem;
     font-weight: var(--beeday-font-weight-semibold);
     letter-spacing: 0;

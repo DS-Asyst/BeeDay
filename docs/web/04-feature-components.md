@@ -1,16 +1,18 @@
 # Feature Components
 
-**Fonte da verdade:** verificado diretamente em `src/BeeDay.Web/Components/Features/` (12 pastas de
+**Fonte da verdade:** verificado diretamente em `src/BeeDay.Web/Components/Features/` (13 pastas de
 área) e `src/BeeDay.Web/Services/BeeDayWebService.cs`.
 
-**Última verificação:** 2026-08-07.
+**Última verificação:** 2026-08-11 (Sprint 20.5, EPIC 20) — nova área `Home` acrescentada (13ª),
+`ProfileCreation` deixou de servir `/` (`Entry.razor` removido); demais áreas preservadas da
+verificação de 2026-08-07.
 
 ## 1. Objetivo
 
-Descrever cada uma das 12 áreas sob `Components/Features/`: o que cada uma renderiza, que estado
+Descrever cada uma das 13 áreas sob `Components/Features/`: o que cada uma renderiza, que estado
 mantém, e como fala com `BeeDay.Application`.
 
-## 2. Visão geral das 12 áreas
+## 2. Visão geral das 13 áreas
 
 | Área | Rota(s) que serve | Componente raiz | State/Model próprio |
 |---|---|---|---|
@@ -24,8 +26,9 @@ mantém, e como fala com `BeeDay.Application`.
 | `Authentication` | `/login` | `Pages/Login.razor` | — (formulário HTML puro, sem model C#) |
 | `Identity` | `/account/{confirm-email,reset-password,forgot-password,resend-confirmation,email-confirmation-sent}` | 5 páginas independentes | classes `PasswordForm`/`EmailForm` privadas por página |
 | `Onboarding` | `/onboarding/tutorial` | `Pages/Tutorial.razor` | `TutorialSlide` record privado (5 slides hardcoded) |
-| `ProfileCreation` | `/`, `/welcome`, `/profile/create` | `Pages/Entry.razor`, `Welcome.razor`, `CreateProfile.razor` | `State/ProfileCreationState.cs`, `Models/ProfileCreationFormModel.cs` |
-| `Experience` | (embutido em `ProfileSidePanel`/`Dashboard`) | `Components/ExperienceBar.razor` | `Models/ExperienceViewModel.cs`, `Feedback/BeeDayFeedback*.cs` |
+| `ProfileCreation` | `/welcome`, `/profile/create` | `Pages/Welcome.razor`, `CreateProfile.razor` | `State/ProfileCreationState.cs`, `Models/ProfileCreationFormModel.cs` |
+| `Home` | `/` | `Pages/Home.razor` | — (conteúdo institucional estático; CTA usa `AuthenticatedEntryDestinationResolver` de `Services/Authentication/`) |
+| `Experience` | (embutido em Home/Dashboard) | `Components/ExperienceBar.razor` | `Models/ExperienceViewModel.cs`, `Feedback/BeeDayFeedback*.cs` |
 | `Common` | (compartilhado) | — | `ActivityType.cs` (enum `Habit`/`Task`/`Todo`/`Project`, usado por toda a UI de criação) |
 
 ## 3. `Dashboard` — a área mais densa
@@ -44,7 +47,7 @@ memória (client-side, sem nova query ao Application a cada digitação), e exp�
 - Feedback de XP: `ExecuteExperienceOperationAsync` compara `Profile.TotalExperience` antes/depois
   de uma operação (registrar hábito positivo, completar task/todo) e expõe `LatestExperienceGain` +
   `ExperienceFeedbackVersion` (incrementado a cada ganho, consumido pelo `ExperienceBar` dentro de
-  `ProfileSidePanel` para disparar a animação); um `Task.Delay(750)` guardado por número de versão
+  Home para disparar a animação); um `Task.Delay(750)` guardado por número de versão
   limpa o valor depois — se uma nova operação começar antes, o delay antigo não sobrescreve o novo ganho (checagem
   de versão).
 - Reordenação: `ReorderHabitsAsync`/`...TasksAsync`/`...TodosAsync`/`...ProjectsAsync` recebem um
@@ -131,10 +134,15 @@ mostra toast de sucesso/erro individualmente — uma seção falhando não bloqu
 - `ProfileCreationState` (`/profile/create`) é a única state class de Feature que atende **dois
   fluxos ao mesmo tempo**: cadastro anônimo completo (`CreateAccountAsync`, sem sessão) e
   completar perfil de um usuário já autenticado sem perfil (`CompleteUserProfileAsync`) —
-  `InitializeAsync(hasAuthenticatedSession)` decide qual dos dois ramos preparar. `Entry.razor`
-  (`/`) é o único ponto de decisão real de destino pós-autenticação fora do login/`Program.cs` —
-  replica a mesma árvore de decisão de `LoginDestinationResolver` (perfil → onboarding → `/daily`)
-  para o caso de um usuário já autenticado navegar direto para `/`.
+  `InitializeAsync(hasAuthenticatedSession)` decide qual dos dois ramos preparar.
+- **Sprint 20.5 (EPIC 20):** `Entry.razor` (`/`) foi removido — `/` deixou de ser um resolvedor de
+  destino e passou a ser a Home pública (`Features/Home/Pages/Home.razor`, ver
+  [`02-routing-and-pages.md`](02-routing-and-pages.md) §8). A árvore de decisão perfil → onboarding
+  → `/daily` que `Entry.razor` replicava para um usuário autenticado continua necessária (agora
+  para o CTA "Continue to BeeDay" de `PublicHeader`/`Home.razor`) — em vez de uma quarta cópia,
+  `Services/Authentication/AuthenticatedEntryDestinationResolver.cs` envolve
+  `BeeDayWebService.GetCurrentUserAsync()` + `LoginDestinationResolver.Resolve` (o mesmo método já
+  usado pelo endpoint `/auth/login` em `Program.cs`).
 
 ## 8. Acesso direto a `ISender` (desvio do padrão `BeeDayWebService`)
 

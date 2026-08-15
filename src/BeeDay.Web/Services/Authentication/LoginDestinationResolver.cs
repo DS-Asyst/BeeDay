@@ -17,7 +17,7 @@ public static class LoginDestinationResolver
             return "/onboarding/tutorial";
         }
 
-        return IsLocalPath(returnUrl) ? returnUrl! : "/daily";
+        return IsLocalPath(returnUrl) ? returnUrl! : "/profile";
     }
 
     public static string ResolveLogout(string? returnUrl) =>

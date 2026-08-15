@@ -19,4 +19,4 @@ Devicon's MIT license covers the SVG markup/artwork files themselves. The brand 
 ## Rules for this folder
 
 - These are reference source files only. Never modify, rename, or delete them. Recoloring is only acceptable where a brand's own guidelines explicitly allow monochrome/single-color use.
-- Never reference these files directly from application code — the application must only consume icons through `PixelIcon`/`PixelIconRegistry`, which point at `src/BeeDay.Web/wwwroot/icons/devicon/`.
+- Never reference these files directly from application code — the application must only consume icons through `BeeDayIcon`/`BeeDayIconRegistry`, which point at `src/BeeDay.Web/wwwroot/icons/devicon/`.

@@ -6,20 +6,22 @@
 
 <PageTitle>Get started | BeeDay</PageTitle>
 
-<section class="profile-page beeday-fade-in">
+<section class="profile-page beeday-fade-in" aria-label="Create account flow">
+    <PublicAuthActions DestinationHref="/login" DestinationLabel="Log in"
+                       CloseLabel="Close create account and return to Home" Label="Create account actions" />
+
     <div class="profile-panel profile-panel--@State.CurrentStepClass">
         <div class="profile-panel__global-brand"><BeeDayBrand /></div>
         @if (State.Step == BeeDay.Web.Components.Features.ProfileCreation.State.ProfileCreationStep.Account)
         {
-            <BeeDayButton Variant="BeeDayButtonVariant.Back" Compact="true" Class="beeday-button--comic beeday-button--comic-back" OnClick="BackToLogin">Back</BeeDayButton>
-            <h1>Create your account</h1>
-            <p class="profile-panel__intro">Start organizing your habits, tasks and finances.</p>
+            <h1 id="create-profile-heading">Create your account</h1>
+            <p class="profile-panel__intro">Start your journey in BeeDay.</p>
 
             <div class="profile-form">
                 <label class="profile-field">
                     <span>Full name</span>
                     <input type="text"
-                           class="profile-field__input"
+                           class="beeday-field__control profile-field__input"
                            autocomplete="name"
                            @bind="State.Model.Name"
                            @bind:event="oninput" />
@@ -28,7 +30,7 @@
                 <label class="profile-field">
                     <span>Email</span>
                     <input type="email"
-                           class="profile-field__input"
+                           class="beeday-field__control profile-field__input"
                            autocomplete="email"
                            @bind="State.Model.Email"
                            @bind:event="oninput" />
@@ -37,7 +39,7 @@
                 <label class="profile-field">
                     <span>Password</span>
                     <input type="password"
-                           class="profile-field__input"
+                           class="beeday-field__control profile-field__input"
                            autocomplete="new-password"
                            aria-describedby="password-requirements"
                            @bind="State.Model.Password"
@@ -56,7 +58,7 @@
                     <label class="profile-field beeday-fade-in">
                         <span>Confirm password</span>
                         <input type="password"
-                               class="profile-field__input"
+                               class="beeday-field__control profile-field__input"
                                autocomplete="new-password"
                                @bind="State.Model.ConfirmPassword"
                                @bind:event="oninput" />
@@ -69,7 +71,7 @@
                 }
 
                 <BeeDayButton Variant="BeeDayButtonVariant.Primary"
-                               Class="beeday-button--comic beeday-button--comic-yellow"
+                               FullWidth="true"
                                Disabled="@(!State.CanContinueAccount)"
                                OnClick="ContinueToProfile">
                     Continue
@@ -78,16 +80,17 @@
         }
         else
         {
-            <BeeDayButton Variant="BeeDayButtonVariant.Back" Compact="true" Class="beeday-button--comic beeday-button--comic-back" OnClick="Back">Back</BeeDayButton>
-            <h1>Choose your nickname</h1>
+            <h1 id="create-profile-heading">Choose your nickname</h1>
             <p class="profile-panel__intro">This is how you'll be identified in BeeDay.</p>
 
             <div class="profile-form">
+                <BeeDayButton Variant="BeeDayButtonVariant.Secondary" Compact="true" Class="profile-form__back" OnClick="Back">Back</BeeDayButton>
+
                 <label class="profile-field">
                     <span>Nickname</span>
                     <div class="profile-nickname-field">
                         <span class="profile-nickname-field__prefix">@@</span>
-                        <input class="profile-field__input profile-nickname-field__input"
+                        <input class="beeday-field__control profile-field__input profile-nickname-field__input"
                                autocomplete="nickname"
                                maxlength="24"
                                @bind="State.Model.Nickname"
@@ -101,7 +104,7 @@
                 }
 
                 <BeeDayButton Variant="BeeDayButtonVariant.Primary"
-                               Class="beeday-button--comic beeday-button--comic-yellow"
+                               FullWidth="true"
                                IsLoading="@State.IsBusy"
                                Disabled="@State.IsBusy"
                                OnClick="CompleteProfileAsync">

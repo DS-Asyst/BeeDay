@@ -76,7 +76,8 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
         await Page.GetByLabel("Email").FillAsync(email);
         await Page.GetByLabel("Password").FillAsync(Password);
         await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
-        await Expect(Page).ToHaveURLAsync(new Regex("/daily$"));
+        await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
+        await GotoAsync("/daily");
 
         // The Sign In click triggers a real server-side redirect to a brand new page (/daily),
         // which establishes its own SignalR circuit; GotoAsync's network-idle wait only covers
@@ -87,14 +88,11 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
 
     private async Task<string> ReadExperienceTextAsync()
     {
-        // Same reasoning as the Activity menu: confirm the panel is genuinely open via the trigger
-        // button's own accessible-name flip (a real, render-confirmed signal), not the panel's own
-        // visibility, before reading its content.
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Open profile panel" }).ClickAsync();
-        var closeButton = Page.GetByRole(AriaRole.Button, new() { Name = "Close profile panel" });
-        await Expect(closeButton).ToBeVisibleAsync();
-        var text = await Page.GetByText(new Regex(@"\d+\s*/\s*\d+ XP")).InnerTextAsync();
-        await closeButton.ClickAsync();
+        await GotoAsync("/profile");
+        var text = await Page.Locator(".product-home__progress .experience-card")
+            .GetByText(new Regex(@"\d+\s*/\s*\d+ XP"))
+            .InnerTextAsync();
+        await GotoAsync("/daily");
         return text;
     }
 

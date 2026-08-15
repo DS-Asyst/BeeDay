@@ -31,16 +31,12 @@
     </HeroContent>
     <BodyContent>
         <div class="editor-modal__body">
-            <div class="editor-modal__type-summary"><PixelIcon Name="PixelIconName.Project" Size="PixelIconSize.Large" Class="editor-modal__type-icon" Decorative="true" /><div><strong>Project</strong><p>A larger goal used to organize work.</p></div></div>
+            <div class="editor-modal__type-summary"><BeeDayIcon Name="BeeDayIconName.Project" Size="BeeDayIconSize.Large" Class="editor-modal__type-icon" Decorative="true" /><div><strong>Project</strong><p>A larger goal used to organize work.</p></div></div>
             <BeeDayDateInput TValue="DateTime?"
                               Id="project-expected-date"
                               Label="Expected date"
                               @bind-Value="Model.ExpectedDate"
                               FieldCssClass="editor-modal__field" />
-            <ActivityAttributeSelect Id="project-attribute"
-                                      Label="Attribute"
-                                      @bind-Value="Model.Attribute"
-                                      FieldCssClass="editor-modal__field" />
         </div>
     </BodyContent>
     <SecondaryAction>
@@ -48,7 +44,6 @@
         {
             <BeeDayButton Variant="BeeDayButtonVariant.Secondary"
                            Compact="true"
-                           Class="beeday-button--comic"
                            OnClick="OpenProject">Open Project</BeeDayButton>
         }
     </SecondaryAction>

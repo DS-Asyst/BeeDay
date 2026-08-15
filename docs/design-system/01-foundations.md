@@ -3,11 +3,44 @@
 **Fonte da verdade:** verificado diretamente em `src/BeeDay.Web/wwwroot/css/variables.css`,
 `theme.css`, `typography.css`, `typography-policy.css`, `utilities.css`, `polish.css`, e um
 levantamento completo de todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css`
-(20 arquivos) e `src/BeeDay.Web/Components/**/*.razor.css` (30 arquivos de CSS isolado por
-componente).
+(19 arquivos) e `src/BeeDay.Web/Components/**/*.razor.css` (36 arquivos de CSS isolado por
+componente — quatro novos na Sprint 21.3 (`Layout/{NavigationItem,NavigationItems,MobileHeader,
+MobileSidebar}.razor.css`), um removido (`Layout/TopNavigation.razor.css`, componente deletado —
+ver `docs/web/03-layouts.md`), ver abaixo e `docs/ux/03-responsive.md`).
 
-**Última verificação:** 2026-08-10 (Sprint 18.7) — contagem de folhas globais corrigida de 19 para
-20 (`Glob` direto de `wwwroot/css/*.css` confirma 20 arquivos hoje).
+**Última verificação:** 2026-08-14 (Sprint 21.16, EPIC 21 — Brand Blue Refinement).
+A família azul oficial é `#3A4ED9`/`#3043C7`/`#2637AD`; a família amarela de
+marca/recompensa usa `#FFD326`/`#E8BD00`. Nenhum namespace paralelo foi criado. Nunito continua
+sendo a única tipografia de produto; a tipografia própria da marca existe apenas dentro do asset
+oficial `beeday-wordmark.png`.
+
+Verificação anterior: 2026-08-12 (Sprint 21.3, EPIC 21 — BeeDay Navigation) — contagem de CSS
+isolado corrigida de 33 para 36 (+4 novos, -1 removido); §10 atualizado (5 arquivos agora
+coordenam o breakpoint `min-width: 1024px`, `TopNavigation` substituída por `MobileHeader`/
+`MobileSidebar`). Verificação anterior: 2026-08-12 (Sprint 21.2, EPIC 21 — BeeDay Shell
+Foundation) — §10: novos
+tokens de shell `--beeday-sidebar-width`/`--beeday-right-rail-width`/`--beeday-content-max-width`
+(escopados em `.beeday-app`, `MainLayout.razor.css`, seguindo o mesmo padrão já usado por
+`--beeday-top-navigation-height`/`--beeday-left-panel-width`/`--beeday-right-panel-width` — nenhuma
+infraestrutura de tokens nova); novo breakpoint estrutural `min-width: 1024px`; contagem de CSS
+isolado corrigida de 29 para 33 (31 já existentes antes desta Sprint — drift pré-existente não
+causado por ela, ver `docs/ux/03-responsive.md` — mais os 2 arquivos novos). Verificação anterior:
+2026-08-12 (Sprint 20.8, EPIC 20, Sprint final da EPIC) — `--beeday-color-accent`/
+`-hover` (`#f29b24`, sem consumidor real confirmado repo-wide) removida; `.beeday-button`/`.beeday-card`
+tiveram seu default canônico decidido — a geometria antes opt-in em `--soft` (Sprint 20.6) tornou-se o
+default de ambos, e o modificador `--soft` foi removido (ver `02-components.md` §2/§3); background de
+imagem do `OnboardingLayout` (Login/Identity/Onboarding/ProfileCreation/Tutorial) removido —
+`--beeday-color-background` agora usado. Verificação anterior: 2026-08-12 (Sprint 20.7) — §2:
+`--beeday-color-primary` (roxo legado) **removida** — a Sprint 20.7 auditou repo-wide todo consumidor
+real e confirmou zero restantes após migrá-los para `--beeday-color-brand-primary`, então o token de
+compatibilidade temporário introduzido na Sprint 20.6 foi removido em vez de mantido indefinidamente;
+nova foundation `--beeday-color-brand-primary-soft` adicionada; `--beeday-focus-color`/
+`--beeday-focus-ring` também migrados (papel único — cor do anel de foco — então migrados diretamente,
+sem alias). Verificação anterior: 2026-08-12 (Sprint 20.6) — §2/§3/§5: novo degrau
+`--beeday-radius-2xl`, novo token de escala `--beeday-font-size-hero`, novo peso
+`--beeday-font-weight-black`, nova família `--beeday-color-brand-primary` (introduzida como canônica
+ao lado da legada) e evolução de `--beeday-font-body` (Inter → Nunito) — ver
+`docs/epics/20-home-visual-experience/README.md`, seções "Sprint 20.6"/"20.7"/"20.8".
 
 ## 1. Objetivo
 
@@ -24,7 +57,8 @@ produto; linha 253: paleta "game"/pixel-console; linha 271: tokens de motion pix
 
 ```mermaid
 graph TD
-    Brand["Marca<br/>primary #673ab7, primary-hover, primary-active,<br/>primary-light, primary-soft, accent #f29b24"]
+    Brand["Marca (legada)<br/>primary #673ab7, primary-hover, primary-active,<br/>primary-light, primary-soft, accent #f29b24"]
+    BrandNew["Marca (canônica, Sprint 20.6)<br/>brand-primary #2538d2, -hover, -active, -light"]
     Surface["Superfícies<br/>background, surface, surface-muted,<br/>surface-subtle, overlay"]
     Content["Conteúdo<br/>text-primary, text-secondary, text-muted,<br/>text-inverse, border, border-strong"]
     Status["Status<br/>success, warning, danger, info<br/>(cada um com variante -soft)"]
@@ -41,10 +75,35 @@ Nenhuma cor é definida duas vezes com valores diferentes sob o mesmo nome — c
 Status, Activity, Attribute, Habit, Button, Comic, Card, Chrome) tem seu próprio namespace de
 token, então uma alteração em uma família nunca risca colidir com outra.
 
+**Migração de marca atual (Sprint 21.16, EPIC 21):** `--beeday-color-brand-primary` é `#3A4ED9`,
+com hover `#3043C7`, active/depth `#2637AD`, light `#6675E3` e soft `#EFF1FF`. Azul é estrutura e ação: primary
+buttons, links importantes, navegação/foco/seleção e progresso funcional. A segunda metade da
+identidade é canônica em `--beeday-color-brand-yellow` (`#FFD326`) e `-hover` (`#E8BD00`): reward,
+XP, milestones e highlights de alta relevância, sempre com foreground escuro. O antigo namespace
+`--beeday-game-yellow*` foi removido. Cores de status (`success`, `warning`, `danger`, `info`),
+atividades e Wallet permanecem semanticamente independentes; brand yellow nunca significa warning
+automaticamente e brand blue não substitui info.
+
+Surfaces permanecem neutras. Azul e amarelo devem ganhar importância por contraste e hierarquia,
+não por preencher indiscriminadamente cards ou páginas. É proibido criar famílias `new`/`v2`, usar
+texto branco sobre amarelo, ou codificar os HEX de marca diretamente em componentes/assets.
+
+**Histórico (Sprint 20.7, EPIC 20):** `--beeday-color-brand-primary` (`#2538d2`,
+extraído diretamente da página-modelo) é a cor primária **canônica** de todo o produto. Introduzida na
+Sprint 20.6 ao lado de `--beeday-color-primary` (`#673ab7`, roxo) mantida como compatibilidade
+temporária; a Sprint 20.7 auditou repo-wide todo consumidor real de `--beeday-color-primary`
+(classificando cada um por semântica — brand vs. status vs. activity, nunca um search/replace cego),
+migrou todos os que eram genuinamente de marca/chrome genérico, e confirmou **zero consumidores
+restantes** — por isso `--beeday-color-primary` foi **removida** de `variables.css`, em vez de mantida
+indefinidamente. Cores de status (`success`/`warning`/`danger`/`info`) e de atividade
+(`task`/`todo`/`project`/atributos/hábitos) nunca usaram este token para sua própria semântica — não
+foram tocadas. O amarelo de acento da referência (`#ffd326`/`#ffb72e`) não ganhou token novo —
+`--beeday-game-yellow` (`#ffc928`) já é próximo o suficiente e foi reutilizado como está.
+
 ### 2.2 Paleta "game" (pixel-console)
 
-Bloco `:root` separado (linha 253): `--beeday-game-ink`, `-ink-soft`, `-paper`, `-panel`, `-blue`,
-`-blue-dark`, `-yellow`, `-yellow-dark`, `-red`, `-green`, mais 3 tokens de borda/sombra
+Bloco `:root` separado: `--beeday-game-ink`, `-ink-soft`, `-paper`, `-panel`, `-blue`,
+`-blue-dark`, `-red`, `-green`, mais 3 tokens de borda/sombra
 pixel-style (`-border`, `-shadow-sm/md/lg`). Consumida pelos botões "comic"/"skew-press"/
 "comic-press" (`design-system.css`) e pelo adapter NES (`pixel-nes.css`).
 
@@ -65,12 +124,31 @@ usada — funciona como uma política de tipografia executável, não apenas uma
 
 | Papel | Fonte | Uso documentado em `typography-policy.css` |
 |---|---|---|
-| `--beeday-font-body` | `"Inter", "Segoe UI", sans-serif` | Todo texto de UI regular: parágrafos, descrições, formulários, inputs, tabelas, dialogs, navegação, menus, valores, contadores, estatísticas, saldos |
-| `--beeday-font-ui` (= `--beeday-font-family`) | `"Jersey 25", "Segoe UI", sans-serif` | Reservada a títulos de página/card, botões estilizados (`BeeDayButton`) e marca (`BeeDayBrand`) |
+| `--beeday-font-body` (= `--beeday-font-family`) | `"Nunito", "Segoe UI", sans-serif` | Toda a UI: corpo, títulos, marca, navegação, botões, dialogs, cards e métricas |
 
-Escala de tamanho (8 degraus, `xs` .75rem → `3xl` 2.2rem), peso (5: regular 400 → extrabold 700 —
-`extrabold` e `bold` compartilham o mesmo valor 700, não há um peso 800 real), altura de linha (3:
-tight 1.2, normal 1.5, relaxed 1.65), `letter-spacing-label` (.04em) e 7 tokens compostos
+**Consolidação canônica (Sprints 21.4/21.9, EPIC 21):** Jersey 25 foi retirada integralmente da UI
+e do carregamento de fontes. Títulos usam Nunito 700/800 e botões Nunito 700; o antigo
+`--beeday-font-ui` foi removido. `BeeDayBrand` não compõe mais a marca com uma fonte de produto:
+encapsula a wordmark oficial, cuja tipografia própria está desenhada no PNG. Brand typography e
+product typography são responsabilidades distintas.
+
+**Histórico (Sprint 20.6, EPIC 20):** `--beeday-font-body` evoluiu de Inter para Nunito —
+troca de valor imediata e project-wide (toda a UI regular do produto já renderiza Nunito), extraída
+diretamente da página-modelo (fonte dominante de toda a referência) e aplicada de uma vez porque é
+uma substituição puramente tipográfica, sem contrato de layout/comportamento em risco. `Google
+Fonts` em `App.razor` foi atualizado (`family=Nunito:wght@400;600;700;800;900`). `--beeday-font-ui`
+(Jersey 25) **não foi migrada** — permanece a identidade exclusiva do chrome pixel-console/retro-game
+(`BeeDayButton`, reforçado com `!important` em `typography-policy.css`; `BeeDayBrand`; títulos de
+página/card; `pixel-ui.css`), uma responsabilidade de marca real e formalmente documentada
+anteriormente a esta Sprint, não apenas compatibilidade visual histórica.
+
+Escala de tamanho (8 degraus, `xs` .75rem → `3xl` 2.2rem, mais o degrau fluido
+`--beeday-font-size-hero: clamp(2.75rem, 7vw, 5.5rem)` acrescentado na Sprint 20.6/EPIC 20 para
+headlines de hero/marketing em escala full-bleed — usado por `Home.razor.css`), peso (6: regular 400
+→ black 900 — `extrabold` e `bold` compartilham o mesmo valor 700, não há um peso 800 real;
+`--beeday-font-weight-black: 900` acrescentado na Sprint 20.6/EPIC 20 para o peso de display da
+headline/eyebrow do hero, igualando o peso 900 consistentemente usado pela página-modelo), altura de
+linha (3: tight 1.2, normal 1.5, relaxed 1.65), `letter-spacing-label` (.04em) e 7 tokens compostos
 `--beeday-type-*` (`display`, `title`, `subtitle`, `label`, `body`, `small`, `button`) que combinam
 peso/tamanho/altura de linha/família num único valor `font` shorthand.
 
@@ -99,9 +177,14 @@ coincidem numericamente com o início da escala principal, mas são tokens disti
 
 ## 5. Border radius
 
-6 degraus em `variables.css`: `xs` .2rem, `sm` .375rem, `md` .625rem, `lg` .875rem, `xl` 1.25rem,
-`pill` 999px. `activity-design-system.css` define mais dois, próprios (`--activity-radius-sm` .25rem,
-`--activity-radius-md` .4rem) — mesmo padrão de escala paralela do §4.
+7 degraus em `variables.css`: `xs` .2rem, `sm` .375rem, `md` .625rem, `lg` .75rem, `xl` 1rem,
+`2xl` 1.5rem (consolidados na Sprint 21.4 para controles, navegação, cards e dialogs;
+desde a Sprint 20.8 é o radius default do `BeeDayCard` em si, não mais um modificador opt-in), `pill`
+999px (desde a Sprint 20.8, também o radius default do `BeeDayButton`). `activity-design-system.css`
+define mais dois, próprios (`--activity-radius-sm` .25rem, `--activity-radius-md` .4rem) — mesmo
+padrão de escala paralela do §4; não afetados pela mudança de default de `BeeDayCard` porque
+`.activity-card`/`.habit-card` (`cards.css`) já redeclaram sua própria borda/radius/sombra por
+completo, mesmo renderizando `<BeeDayCard>` como raiz (ver `02-components.md` §3).
 
 ## 6. Elevação (sombra)
 
@@ -110,6 +193,11 @@ camadas para `sm`/`md`). `activity-design-system.css` acrescenta `--activity-sha
 `-hover`, valores próprios não derivados dos 4 degraus principais. A paleta "game" acrescenta 3
 sombras "pixel" (`--beeday-game-shadow-sm/md/lg`) — offset sólido sem blur (`0 3px 0 var(--beeday-game-ink)`),
 usadas pelos botões "comic"/"comic-press" em vez das sombras com blur do sistema principal.
+
+A Sprint 21.4 reduziu os quatro níveis globais para elevação sutil/controlada e acrescentou
+`--beeday-depth-sm/md/lg` (2/4/8px) como foundation física de borda para componentes futuros, sem
+aplicá-la antecipadamente ao `BeeDayButton`. `--beeday-border-width` (2px) e
+`--beeday-color-border-interactive` completam o contrato de bordas reutilizável.
 
 ## 7. Movimento
 
@@ -151,7 +239,7 @@ graph TD
 
 ## 9. Duas camadas de CSS: global e isolado por componente
 
-Além das 20 folhas globais em `wwwroot/css/` (carregadas por `<link>` em `App.razor`
+Além das 19 folhas globais em `wwwroot/css/` (carregadas por `<link>` em `App.razor`
 — ver [`docs/web/05-design-system-integration.md`](../web/05-design-system-integration.md) §3),
 o repositório tem **30 arquivos de CSS isolado por componente** (`*.razor.css`, 3.886 linhas —
 quase o mesmo volume que as folhas globais), compilados pelo SDK Blazor em
@@ -167,18 +255,26 @@ nunca vazam para outros componentes nem são sobrescritas por eles, ao contrári
 ver [`README.md`](README.md#achados-relevantes-reportados-não-corrigidos)).
 
 **Consequência para tokens:** nem todo componente com CSS isolado usa exclusivamente tokens
-`--beeday-*`. Exemplo confirmado: `Layout/TopNavigation.razor.css` declara `background: #5b1095`
-como cor literal — próxima de, mas diferente de, `--beeday-color-primary` (`#673ab7`) — então a
-barra de navegação superior tem uma cor de marca que não é a mesma variável usada pelo resto do
-produto. `Layout/MainLayout.razor.css` repete o mesmo literal `#5b1095` para os trilhos laterais
-colapsados, mantendo consistência *entre si*, mas não com o token central.
+`--beeday-*`. **Resolvido (Sprint 20.7):** `Layout/TopNavigation.razor.css`, `Layout/MainLayout.razor.css`,
+`Layout/AccountSidePanel.razor.css` e `Layout/ProfileSidePanel.razor.css` declaravam `background: #5b1095`
+como cor literal (repetida em 4 arquivos) em vez de um token — migrado para
+`var(--beeday-color-brand-primary-active)`, um único token canônico para a superfície "authenticated
+shell" compartilhada pelos quatro.
 
 ## 10. Breakpoints e grid
 
-**Não existe um token de breakpoint.** Toda `@media (max-width: ...)`/`(min-width: ...)` do
-repositório usa um valor literal, por arquivo, sem referência a uma variável compartilhada —
-verdade tanto para as 20 folhas globais quanto para os 30 arquivos de CSS isolado do §9. A lista
-completa (29 breakpoints distintos: 26 em `max-width`, 2 em `min-width`, 1 em `max-height`) está em
+**Não existe um token de breakpoint** para os valores em pixel/rem — toda `@media (max-width:
+...)`/`(min-width: ...)` do repositório usa um valor literal, por arquivo, sem referência a uma
+variável compartilhada, verdade tanto para as 19 folhas globais quanto para os 36 arquivos de CSS
+isolado do §9. **Exceção parcial desde a Sprint 21.2 (EPIC 21):** o breakpoint estrutural do shell
+(`min-width: 1024px`) não usa uma variável de breakpoint (CSS não permite `var()` dentro de uma
+media feature), mas *é* aplicado como o mesmo valor literal coordenado em 5 arquivos de
+`Components/Layout/` (`MainLayout`, `DesktopSidebar`, `RightRail`, `MobileHeader`, `MobileSidebar`
+— `TopNavigation` usava esse mesmo corte até ser removida na Sprint 21.3, absorvida por
+`MobileHeader`/`MobileSidebar`) — o primeiro caso do repositório de um corte reutilizado
+deliberadamente em vez de reinventado por arquivo; ver
+[`docs/ux/03-responsive.md`](../ux/03-responsive.md) §3. A lista completa (30 breakpoints
+distintos: 26 em `max-width`, 3 em `min-width`, 1 em `max-height`) está em
 [`docs/ux/03-responsive.md`](../ux/03-responsive.md) §2, junto com os casos em que o mesmo
 propósito visual usa cortes diferentes (ex.: `650px` em `cards.css` vs. `640px` em `wallet.css`;
 `760px` em 4 arquivos de Layout distintos vs. `720px`/`700px` em Features próximas ao mesmo
@@ -196,7 +292,7 @@ a 2 e depois 1 coluna via `@media`; `.wallet-summary`: `1.4fr 1fr 1fr`, etc.).
 
 - `src/BeeDay.Web/wwwroot/css/variables.css`, `theme.css`, `typography.css`,
   `typography-policy.css`, `utilities.css`, `polish.css`, `activity-design-system.css`.
-- Todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css` (20 arquivos) e em todo
+- Todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css` (19 arquivos) e em todo
   `src/BeeDay.Web/Components/**/*.razor.css` (30 arquivos) — levantamento completo de ambas as
   camadas de CSS.
 - `src/BeeDay.Web/Components/Layout/TopNavigation.razor.css`, `MainLayout.razor.css` (cores

@@ -18,12 +18,13 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
 
     private DashboardResponse? data;
     private string search = string.Empty;
-    private readonly HashSet<ActivityAttribute> selectedAttributes = [];
     private Guid? selectedProjectId;
+    private Task? initializationTask;
 
     public DashboardModalState Modals { get; } = new();
     public DashboardResponse? Data => data;
     public bool IsLoading => data is null;
+    public bool IsUnavailable { get; private set; }
     public bool IsBusy { get; private set; }
     public long LatestExperienceGain { get; private set; }
     public long ExperienceFeedbackVersion { get; private set; }
@@ -41,7 +42,6 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
         set => search = value ?? string.Empty;
     }
 
-    public IReadOnlyCollection<ActivityAttribute> SelectedAttributes => selectedAttributes;
     public Guid? SelectedProjectId => selectedProjectId;
     public IReadOnlyList<ProjectSummary> ProjectContextOptions => data?.Projects.ToList() ?? [];
 
@@ -52,16 +52,6 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
             : null;
         Changed?.Invoke();
     }
-
-    public void ToggleAttributeFilter(ActivityAttribute attribute)
-    {
-        if (!selectedAttributes.Add(attribute))
-        {
-            selectedAttributes.Remove(attribute);
-        }
-    }
-
-    public void ClearAttributeFilters() => selectedAttributes.Clear();
 
     private IEnumerable<TodoSummary> AllTodos => data?.Projects.SelectMany(project => project.Todos) ?? [];
 
@@ -79,17 +69,17 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
           + data.Projects.Count(item => !item.Completed);
 
     public IEnumerable<HabitSummary> FilteredHabits =>
-        Filter(data?.Habits ?? [], item => item.Title, item => item.Description, item => item.Attribute);
+        Filter(data?.Habits ?? [], item => item.Title, item => item.Description);
 
     public IEnumerable<TaskSummary> FilteredTasks =>
-        Filter(data?.Tasks ?? [], item => item.Title, item => item.Description, item => item.Attribute);
+        Filter(data?.Tasks ?? [], item => item.Title, item => item.Description);
 
     public IEnumerable<TodoSummary> FilteredTodos =>
-        Filter(AllTodos, item => item.Title, item => item.Description, item => item.Attribute)
+        Filter(AllTodos, item => item.Title, item => item.Description)
             .Where(item => selectedProjectId is null || item.ProjectId == selectedProjectId);
 
     public IEnumerable<ProjectSummary> FilteredProjects =>
-        Filter(data?.Projects ?? [], item => item.Name, item => item.Description, item => item.Attribute);
+        Filter(data?.Projects ?? [], item => item.Name, item => item.Description);
 
     public int TotalItems => data is null
         ? 0
@@ -97,7 +87,9 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
 
     public int FilteredItems => FilteredHabits.Count() + FilteredTasks.Count() + FilteredTodos.Count() + FilteredProjects.Count();
 
-    public async Task InitializeAsync()
+    public Task InitializeAsync() => initializationTask ??= InitializeCoreAsync();
+
+    private async Task InitializeCoreAsync()
     {
         try
         {
@@ -107,6 +99,8 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
         {
             toastService.ShowError("The dashboard data could not be loaded. Try refreshing the page.");
             data = new DashboardResponse(EmptyProfile, [], [], [], null);
+            IsUnavailable = true;
+            Changed?.Invoke();
         }
     }
 
@@ -207,33 +201,28 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
         _ => status.ToString()
     };
 
-    // Private helper, not a public Application-layer abstraction: the four summary DTOs
-    // (HabitSummary/TaskSummary/TodoSummary/ProjectSummary) deliberately share no interface — this
-    // just extracts the three fields each caller already has, via delegates supplied at each call
-    // site, so the search/attribute predicate isn't duplicated four times.
     private IEnumerable<T> Filter<T>(
         IEnumerable<T> items,
         Func<T, string> title,
-        Func<T, string> description,
-        Func<T, ActivityAttribute?> attribute) =>
-        items.Where(item => MatchesFilters(title(item), description(item), attribute(item)));
+        Func<T, string> description) =>
+        items.Where(item => MatchesSearch(title(item), description(item)));
 
-    private bool MatchesFilters(string title, string description, ActivityAttribute? attribute) =>
-        (selectedAttributes.Count == 0
-            || attribute is ActivityAttribute value && selectedAttributes.Contains(value))
-        && (string.IsNullOrWhiteSpace(search)
+    private bool MatchesSearch(string title, string description) =>
+        string.IsNullOrWhiteSpace(search)
             || title.Contains(search, StringComparison.OrdinalIgnoreCase)
-            || description.Contains(search, StringComparison.OrdinalIgnoreCase)
-            || (attribute?.ToString().Contains(search, StringComparison.OrdinalIgnoreCase) ?? false));
+            || description.Contains(search, StringComparison.OrdinalIgnoreCase);
 
     private async Task ReloadAsync()
     {
         data = await store.LoadDashboardAsync();
+        IsUnavailable = false;
 
         if (selectedProjectId is Guid projectId && !data.Projects.Any(project => project.Id == projectId))
         {
             selectedProjectId = null;
         }
+
+        Changed?.Invoke();
     }
 
     private Task ReorderAsync(

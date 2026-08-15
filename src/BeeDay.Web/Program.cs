@@ -184,6 +184,7 @@ builder.Services.AddBeeDayInfrastructure(builder.Configuration);
 builder.Services.AddScoped<BeeDayWebService>();
 builder.Services.AddScoped<ToastService>();
 builder.Services.AddScoped<AuthenticatedUserInitializer>();
+builder.Services.AddScoped<AuthenticatedEntryDestinationResolver>();
 builder.Services.AddScoped<DashboardState>();
 builder.Services.AddScoped<BeeDayFeedbackStore>();
 builder.Services.AddScoped<INotificationHandler<DomainEventNotification>, BeeDayFeedbackEventHandler>();

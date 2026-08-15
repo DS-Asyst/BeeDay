@@ -49,10 +49,10 @@
     box-shadow: inset 0 -2px 0 rgb(23 19 33 / 8%);
 }
 
-.identity-field input:hover:not(:disabled) { background: var(--beeday-game-paper); }
+.identity-field input:hover:not(:disabled) { background: var(--beeday-color-surface-muted); }
 .identity-field input:focus {
-    background: var(--beeday-game-paper);
-    border-color: var(--beeday-color-primary);
+    background: var(--beeday-color-surface-muted);
+    border-color: var(--beeday-color-brand-primary);
     box-shadow: var(--beeday-focus-ring);
     outline: none;
 }
@@ -76,9 +76,9 @@
     text-underline-offset: 3px;
 }
 
-.identity-navigation-link--primary { color: var(--beeday-color-primary); }
-.identity-navigation-link:hover { color: var(--beeday-color-primary); background: rgb(101 64 159 / 8%); }
-.identity-navigation-link:focus-visible { outline: 3px solid var(--beeday-color-primary); outline-offset: 2px; }
+.identity-navigation-link--primary { color: var(--beeday-color-brand-primary); }
+.identity-navigation-link:hover { color: var(--beeday-color-brand-primary); background: var(--beeday-color-brand-primary-soft); }
+.identity-navigation-link:focus-visible { outline: 3px solid var(--beeday-color-brand-primary); outline-offset: 2px; }
 
 .identity-feedback,
 .identity-note {

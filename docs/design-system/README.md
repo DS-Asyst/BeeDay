@@ -8,8 +8,9 @@ afirmação vem de `docs/history/` ou de sprints anteriores sem reverificação 
 **Fonte da verdade:** cada documento abaixo declara individualmente as fontes exatas usadas para
 validá-lo, na seção final "Fontes consultadas".
 
-**Última verificação:** 2026-08-10 (Sprint 18.7) — contagem de folhas de CSS globais corrigida de
-19 para 20.
+**Última verificação:** 2026-08-11 (Sprint 20.3) — contagem de folhas de CSS globais corrigida de
+20 para 19 (`css/cursors.css` removido — remoção estrutural do cursor gráfico personalizado, EPIC
+20). Verificação anterior: 2026-08-10 (Sprint 18.7) — contagem corrigida de 19 para 20.
 
 ## Objetivo
 
@@ -23,9 +24,9 @@ próprio `BeeDay.Web`, consumida diretamente pelos componentes de Feature (ver
 ## Escopo
 
 Dentro: os 26 componentes reutilizáveis sob `Components/DesignSystem/` (Buttons, Cards, Forms,
-Feedback, Icons, Layout, Modals, Attributes, Text), as 20 folhas de CSS sob `wwwroot/css/`, os 3
+Feedback, Icons, Layout, Modals, Attributes, Text), as 19 folhas de CSS sob `wwwroot/css/`, os 3
 módulos de interop JS que servem componentes do Design System, e o Pixel Icon System
-(`PixelIconRegistry`, sprite único). Fora: componentes de Feature (`Components/Features/*` — ver
+(`BeeDayIconRegistry`, sprite único). Fora: componentes de Feature (`Components/Features/*` — ver
 [`docs/web/04-feature-components.md`](../web/04-feature-components.md)), layouts de página
 (`Components/Layout/*` — ver [`docs/web/03-layouts.md`](../web/03-layouts.md)), e
 `BeeDaySortable` (`Components/Behaviors/DragDrop/`, comportamento de reordenação usado pelo
@@ -60,23 +61,22 @@ observado nesta auditoria viola isso na prática, mas a fronteira não é impost
 
 ## Contagem de componentes (corrige contagem anterior)
 
-26 componentes reutilizáveis (`.razor` com `@code`/`.razor.cs` próprio, excluindo páginas de
+24 componentes reutilizáveis (`.razor` com `@code`/`.razor.cs` próprio, excluindo páginas de
 catálogo e enums/modelos de suporte):
 
 | Pasta | Componentes |
 |---|---|
-| `Attributes/` | `ActivityAttributeBadge`, `ActivityAttributeSelect` |
 | `Buttons/` | `BeeDayButton` |
 | `Cards/` | `BeeDayCard`, `BeeDayCardMenu` |
 | `Feedback/` | `BeeDayConfirmDialog`, `BeeDayDashboardSkeleton`, `BeeDayEmptyState`, `BeeDayLoading`, `BeeDaySkeleton`, `BeeDayToastHost` |
 | `Forms/` | `BeeDayCheckbox`, `BeeDayDateInput`, `BeeDayInput`, `BeeDaySelect`, `BeeDayTextArea`, `BeeDayValidationMessage` |
-| `Icons/` | `PixelIcon` |
+| `Icons/` | `BeeDayIcon` |
 | `Layout/` | `BeeDayHero`, `BeeDayPageHeader`, `BeeDaySectionHeader`, `BeeDaySettingsForm`, `BeeDaySettingsSection` |
 | `Modals/` | `EditorModalShell` |
 | `Text/` | `BeeDayBrand`, `SearchHighlight` |
 
-O `README.md` anterior desta pasta (placeholder, nunca publicado) citava "24 componentes
-confirmados" — número não verificado nesta auditoria; a contagem atual é 26.
+Os dois componentes Web de Attribute foram removidos na Sprint 21.12 após auditoria cross-layer;
+a capacidade de domínio, persistência e contratos permaneceram intactos.
 `DesignSystem/Pages/{IconCatalog,HeroCatalog}.razor` são páginas roteáveis de catálogo visual, não
 componentes reutilizáveis — documentadas em
 [`docs/web/02-routing-and-pages.md`](../web/02-routing-and-pages.md) §6, não contadas aqui.
@@ -87,7 +87,7 @@ componentes reutilizáveis — documentadas em
 |---|---|
 | [`01-foundations.md`](01-foundations.md) | Cores, tokens, tipografia, espaçamento, border-radius, elevação/sombra, breakpoints, grid, z-index, movimento |
 | [`02-components.md`](02-components.md) | Os 26 componentes reutilizáveis — parâmetros, estados, eventos, dependências, JS interop, consumidores |
-| [`03-icons.md`](03-icons.md) | Pixel Icon System — sprite, `PixelIconRegistry`, bibliotecas de origem, estratégia, nomenclatura |
+| [`03-icons.md`](03-icons.md) | Pixel Icon System — sprite, `BeeDayIconRegistry`, bibliotecas de origem, estratégia, nomenclatura |
 | [`04-forms.md`](04-forms.md) | Os 6 componentes de formulário — contrato comum, validação, estados, botões |
 
 ## Ordem de leitura recomendada

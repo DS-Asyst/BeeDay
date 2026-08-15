@@ -31,7 +31,7 @@
     </HeroContent>
     <BodyContent>
         <div class="editor-modal__body">
-            <div class="editor-modal__type-summary"><PixelIcon Name="PixelIconName.Todo" Size="PixelIconSize.Large" Class="editor-modal__type-icon" Decorative="true" /><div><strong>To-Do</strong><p>An action that belongs to exactly one project.</p></div></div>
+            <div class="editor-modal__type-summary"><BeeDayIcon Name="BeeDayIconName.Todo" Size="BeeDayIconSize.Large" Class="editor-modal__type-icon" Decorative="true" /><div><strong>To-Do</strong><p>An action that belongs to exactly one project.</p></div></div>
             <BeeDaySelect TValue="Guid?" Id="todo-project" Label="Project" @bind-Value="Model.ProjectId" FieldCssClass="editor-modal__field">
                 <option value="">Select a project</option>
                 @foreach (var project in Projects.Where(project => !project.Archived))
@@ -44,10 +44,6 @@
                               Label="Due date"
                               @bind-Value="Model.DueDate"
                               FieldCssClass="editor-modal__field" />
-            <ActivityAttributeSelect Id="todo-attribute"
-                                      Label="Attribute"
-                                      @bind-Value="Model.Attribute"
-                                      FieldCssClass="editor-modal__field" />
         </div>
     </BodyContent>
 </EditorModalShell>

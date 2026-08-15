@@ -47,7 +47,9 @@ public sealed class BeeDayButtonTests
         var button = cut.Find("button");
         Assert.True(button.HasAttribute("disabled"));
         Assert.Equal("true", button.GetAttribute("aria-busy"));
-        Assert.NotNull(cut.Find("svg.pixel-icon--loading.beeday-button__loader"));
+        Assert.Contains("beeday-button--loading", button.ClassList);
+        Assert.NotNull(cut.Find("svg.beeday-icon--loading.beeday-button__loader"));
+        Assert.Equal("true", cut.Find(".beeday-button__label").GetAttribute("aria-hidden"));
     }
 
     [Fact]
@@ -66,14 +68,14 @@ public sealed class BeeDayButtonTests
     }
 
     [Fact]
-    public void RendersPixelIconWhenConfigured()
+    public void RendersBeeDayIconWhenConfigured()
     {
         using var context = new BunitContext();
         var cut = context.Render<BeeDayButton>(parameters => parameters
-            .Add(component => component.Icon, PixelIconName.Save)
+            .Add(component => component.Icon, BeeDayIconName.Save)
             .AddChildContent("SAVE"));
 
-        var icon = cut.Find("svg.pixel-icon--save");
+        var icon = cut.Find("svg.beeday-icon--save");
         Assert.Equal("true", icon.GetAttribute("aria-hidden"));
         Assert.Contains("SAVE", cut.Find(".beeday-button__label").TextContent);
     }
@@ -129,5 +131,17 @@ public sealed class BeeDayButtonTests
         var button = cut.Find("button");
         Assert.Contains("custom-action", button.ClassList);
         Assert.Equal("save-button", button.GetAttribute("data-testid"));
+    }
+
+    [Fact]
+    public void LoadingPreservesLabelContentToKeepTheIntrinsicWidthStable()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<BeeDayButton>(parameters => parameters
+            .Add(component => component.IsLoading, true)
+            .AddChildContent("Save changes"));
+
+        Assert.Equal("Save changes", cut.Find(".beeday-button__label").TextContent);
+        Assert.Equal("true", cut.Find("button").GetAttribute("aria-busy"));
     }
 }

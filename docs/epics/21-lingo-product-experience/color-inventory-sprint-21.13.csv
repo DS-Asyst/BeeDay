@@ -1,0 +1,192 @@
+Color,Normalized Value,Format(s) Found,Token,Semantic Role,Consumers,Occurrences,Status
+Transparent | transparent,transparent,NAMED,,Transparent state,src/BeeDay.Web/wwwroot/css/design-system.css:6 | src/BeeDay.Web/Components/Features/Projects/Components/ProjectWorkspace.razor.css:6 | src/BeeDay.Web/wwwroot/app.css:4 | src/BeeDay.Web/wwwroot/css/cards.css:3 | src/BeeDay.Web/wwwroot/css/wallet.css:3 | src/BeeDay.Web/Components/Features/Dashboard/Components/ProjectContextFilter.razor.css:3 | src/BeeDay.Web/Components/Layout/MobileHeader.razor.css:2 | src/BeeDay.Web/Components/Layout/NavigationItem.razor.css:2 | src/BeeDay.Web/Components/Features/Habits/Components/HabitEditorModal.razor.css:2 | src/BeeDay.Web/Components/Features/Dashboard/Pages/Home.razor.css:2 | src/BeeDay.Web/wwwroot/css/dragdrop.css:1 | src/BeeDay.Web/wwwroot/css/feedback.css:1 | src/BeeDay.Web/wwwroot/css/forms.css:1 | src/BeeDay.Web/Components/Layout/MobileSidebar.razor.css:1 | src/BeeDay.Web/Components/Features/ProfileCreation/Pages/CreateProfile.razor.css:1 | src/BeeDay.Web/Components/Features/ProfileCreation/Pages/Welcome.razor.css:1 | src/BeeDay.Web/Components/Features/Dashboard/Components/ActivityFilterBar.razor.css:1 | src/BeeDay.Web/Components/DesignSystem/Cards/BeeDayCardMenu.razor.css:1 | src/BeeDay.Web/Components/DesignSystem/Text/BeeDayBrand.razor.css:1,42,DERIVED STATE
+#fff | #ffffff,#ffffff,HEX,--beeday-color-background | --beeday-color-surface | --beeday-color-text-inverse | --beeday-color-button-success-fg | --beeday-color-button-danger-fg | --beeday-color-button-confirmation-cancel-bg | --beeday-color-button-reference-blue-fg | --beeday-game-panel,Success/Income/Positive; Danger/Expense/Negative; Neutral surface; Neutral text; Button state; Legacy game; Social provider asset,src/BeeDay.Web/Components/Features/Projects/Components/ProjectWorkspace.razor.css:9 | src/BeeDay.Web/wwwroot/css/variables.css:8 | src/BeeDay.Web/Components/Features/ProfileCreation/Pages/Welcome.razor.css:4 | src/BeeDay.Web/wwwroot/css/vendor/nes-core.beeday-excerpt.css:3 | src/BeeDay.Web/Components/Features/Wallets/Services/TagContrastCalculator.cs:3 | src/BeeDay.Web/Components/DesignSystem/Cards/BeeDayCardMenu.razor.css:3 | src/BeeDay.Web/wwwroot/app.css:2 | src/BeeDay.Web/wwwroot/css/cards.css:2 | src/BeeDay.Web/wwwroot/icons/sprite.svg:2 | src/BeeDay.Web/wwwroot/css/design-system.css:1 | src/BeeDay.Web/wwwroot/icons/devicon/social/facebook.svg:1 | src/BeeDay.Web/wwwroot/icons/devicon/social/linkedin.svg:1,39,DUPLICATE
+"#171321 | rgb(23,19,33)",#171321,HEX | RGB,--beeday-color-button-warning-fg | --beeday-color-button-confirmation-cancel-fg | --beeday-game-ink,Warning; Button state; Legacy game,src/BeeDay.Web/wwwroot/css/pixel-nes.css:3 | src/BeeDay.Web/wwwroot/css/variables.css:3,6,DUPLICATE
+#000,#000000,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/design-system.css:5,5,HARDCODED
+"#212529 | rgb(33,37,41)",#212529,HEX | RGB,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/vendor/nes-core.beeday-excerpt.css:4,4,LEGACY
+#7A4FCB | #7a4fcb,#7a4fcb,HEX,--beeday-color-tag-default,Wallet tag,src/BeeDay.Web/wwwroot/app.css:1 | src/BeeDay.Web/wwwroot/css/variables.css:1 | src/BeeDay.Web/Components/Features/Wallets/Components/TransactionCard.razor:1 | src/BeeDay.Web/Components/Features/Wallets/Models/WalletTagFormModel.cs:1,4,SPECIALIZED
+#006bb3,#006bb3,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/vendor/nes-core.beeday-excerpt.css:3,3,LEGACY
+#761919,#761919,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/identity.css:2 | src/BeeDay.Web/Components/Features/Authentication/Pages/Login.razor.css:1,3,HARDCODED
+#786f80,#786f80,HEX,--beeday-color-card-description,Card,src/BeeDay.Web/Components/Features/Projects/Components/ProjectWorkspace.razor.css:2 | src/BeeDay.Web/wwwroot/css/variables.css:1,3,SPECIALIZED
+#adafbc,#adafbc,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/vendor/nes-core.beeday-excerpt.css:3,3,LEGACY
+#f2eef7,#f2eef7,HEX,--beeday-color-filter-surface-tint,Neutral surface,src/BeeDay.Web/Components/Features/Dashboard/Components/ProjectContextFilter.razor.css:2 | src/BeeDay.Web/wwwroot/css/variables.css:1,3,OFFICIAL NEUTRAL
+rgb(255 255 255 / 92%),rgba(255 255 255 / 0.920),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Features/Home/Pages/Home.razor.css:2 | src/BeeDay.Web/wwwroot/css/feedback.css:1,3,DERIVED STATE
+#0076b2,#0076b2,HEX,,Social provider asset,src/BeeDay.Web/wwwroot/icons/sprite.svg:1 | src/BeeDay.Web/wwwroot/icons/devicon/social/linkedin.svg:1,2,SPECIALIZED
+#1654b0,#1654b0,HEX,--beeday-color-brand-primary-hover | --beeday-color-brand-primary-light,Brand,src/BeeDay.Web/wwwroot/css/variables.css:2,2,OFFICIAL BRAND
+#181616,#181616,HEX,,Social provider asset,src/BeeDay.Web/wwwroot/icons/sprite.svg:1 | src/BeeDay.Web/wwwroot/icons/devicon/social/github.svg:1,2,SPECIALIZED
+#1d5d2c,#1d5d2c,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/identity.css:1 | src/BeeDay.Web/Components/Features/Authentication/Pages/Login.razor.css:1,2,HARDCODED
+#2f2737,#2f2737,HEX,--beeday-color-brand-yellow-foreground | --beeday-color-text-primary,Brand; Neutral text,src/BeeDay.Web/wwwroot/css/variables.css:2,2,DUPLICATE
+#335f71,#335f71,HEX,--beeday-color-info | --beeday-color-task,Info; Task category,src/BeeDay.Web/wwwroot/css/variables.css:2,2,DUPLICATE
+#3d5a98,#3d5a98,HEX,,Social provider asset,src/BeeDay.Web/wwwroot/icons/sprite.svg:1 | src/BeeDay.Web/wwwroot/icons/devicon/social/facebook.svg:1,2,SPECIALIZED
+#4f3b5b,#4f3b5b,HEX,--beeday-color-chrome-icon,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/variables.css:1 | src/BeeDay.Web/Components/Features/Dashboard/Components/ProjectContextFilter.razor.css:1,2,DERIVED STATE
+#756c7d,#756c7d,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/cards.css:2,2,HARDCODED
+#8056C7 | #8056c7,#8056c7,HEX,--beeday-color-project,Project category,src/BeeDay.Web/wwwroot/css/variables.css:1 | src/BeeDay.Web/Components/Features/Projects/Models/ProjectEditorModel.cs:1,2,SPECIALIZED
+#aea5b5,#aea5b5,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/app.css:2,2,HARDCODED
+#b9b1bf,#b9b1bf,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Projects/Components/ProjectWorkspace.razor.css:2,2,HARDCODED
+#ddd7e0,#ddd7e0,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Projects/Components/ProjectWorkspace.razor.css:2,2,HARDCODED
+#dff5df,#dff5df,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/identity.css:1 | src/BeeDay.Web/Components/Features/Authentication/Pages/Login.razor.css:1,2,HARDCODED
+#e1dce4,#e1dce4,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Projects/Components/ProjectWorkspace.razor.css:2,2,HARDCODED
+#ebe7ef,#ebe7ef,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/feedback.css:2,2,HARDCODED
+#ffd9d9,#ffd9d9,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/identity.css:1 | src/BeeDay.Web/Components/Features/Authentication/Pages/Login.razor.css:1,2,HARDCODED
+rgb(23 19 33 / 8%),rgba(23 19 33 / 0.080),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/wwwroot/app.css:1 | src/BeeDay.Web/wwwroot/css/identity.css:1,2,DERIVED STATE
+rgb(255 255 255 / 55%),rgba(255 255 255 / 0.550),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/wwwroot/css/cards.css:2,2,DERIVED STATE
+rgb(255 255 255 / 62%),rgba(255 255 255 / 0.620),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/wwwroot/css/cards.css:2,2,DERIVED STATE
+rgb(255 255 255 / 72%),rgba(255 255 255 / 0.720),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/wwwroot/css/cards.css:2,2,DERIVED STATE
+rgb(255 255 255 / 88%),rgba(255 255 255 / 0.880),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/wwwroot/css/cards.css:2,2,DERIVED STATE
+rgb(47 36 56 / 9%),rgba(47 36 56 / 0.090),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Features/Dashboard/Components/DashboardColumn.razor.css:2,2,DERIVED STATE
+rgb(51 40 58 / 12%),rgba(51 40 58 / 0.120),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Features/Onboarding/Pages/Tutorial.razor.css:2,2,DERIVED STATE
+#0087ff,#0087ff,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Layout/ReconnectModal.razor.css:1,1,HARDCODED
+#064b78,#064b78,HEX,--beeday-color-button-reference-blue-shadow,Shadow/depth; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+#075b8f,#075b8f,HEX,--beeday-color-button-reference-blue-outline,Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+#0879b5,#0879b5,HEX,--beeday-game-blue-dark,Legacy game,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#087fbe,#087fbe,HEX,--beeday-color-button-reference-blue-depth,Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+#108de0,#108de0,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/vendor/nes-core.beeday-excerpt.css:1,1,LEGACY
+#124490,#124490,HEX,--beeday-color-brand-primary-active,Brand,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL BRAND
+#159d6c,#159d6c,HEX,--beeday-habit-color-green-dark,Habit category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#17111f,#17111f,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Wallets/Services/TagContrastCalculator.cs:1,1,HARDCODED
+#17121d,#17121d,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Dashboard/Components/DashboardColumn.razor.css:1,1,HARDCODED
+#17203B,#17203b,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Layout/AppFooter.razor.css:1,1,HARDCODED
+#174a2d,#174a2d,HEX,--beeday-color-button-success-shadow,Success/Income/Positive; Shadow/depth; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#185abd,#185abd,HEX,--beeday-color-brand-primary,Brand,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL BRAND
+#1a6139,#1a6139,HEX,--beeday-color-button-success-outline,Success/Income/Positive; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#1f8a99,#1f8a99,HEX,--beeday-color-attribute-dexterity,Attribute category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#209cee,#209cee,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/vendor/nes-core.beeday-excerpt.css:1,1,LEGACY
+#20b4f4,#20b4f4,HEX,--beeday-color-button-reference-blue-bg,Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+#2297a8,#2297a8,HEX,--beeday-habit-color-sky-dark,Habit category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#236b37,#236b37,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/app.css:1,1,HARDCODED
+#244554,#244554,HEX,--beeday-color-task-dark,Task category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#24cc8f,#24cc8f,HEX,--beeday-habit-color-green,Habit category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#26b050,#26b050,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/app.css:1,1,HARDCODED
+#27a8e8,#27a8e8,HEX,--beeday-game-blue,Legacy game,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#287d4d,#287d4d,HEX,--beeday-color-button-success-depth,Success/Income/Positive; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#2dbcf8,#2dbcf8,HEX,--beeday-color-button-reference-blue-bg-hover,Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+#2f9e5b,#2f9e5b,HEX,--beeday-color-success,Success/Income/Positive,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#302638,#302638,HEX,--beeday-color-card-title,Card,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#332b43,#332b43,HEX,--beeday-game-ink-soft,Legacy game,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#36a866,#36a866,HEX,--beeday-color-button-success-bg,Success/Income/Positive; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#39c5d7,#39c5d7,HEX,--beeday-habit-color-sky,Habit category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#44394b,#44394b,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Projects/Components/ProjectWorkspace.razor.css:1,1,HARDCODED
+#444047,#444047,HEX,--beeday-color-button-confirmation-cancel-outline,Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+#4456c9,#4456c9,HEX,--beeday-color-attribute-intelligence,Attribute category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#45c46b,#45c46b,HEX,--beeday-game-green,Legacy game,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#46b976,#46b976,HEX,--beeday-color-button-success-bg-hover,Success/Income/Positive; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#4b087d,#4b087d,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/ProfileCreation/Pages/Welcome.razor.css:1,1,HARDCODED
+#514858,#514858,HEX,--beeday-color-text-secondary,Neutral text,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL NEUTRAL
+#57151a,#57151a,HEX,--beeday-color-button-danger-shadow,Danger/Expense/Negative; Shadow/depth; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#5a4b62,#5a4b62,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Projects/Components/ProjectWorkspace.razor.css:1,1,HARDCODED
+#5a565d,#5a565d,HEX,--beeday-color-button-confirmation-cancel-shadow,Shadow/depth; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+#5f410d,#5f410d,HEX,--beeday-color-button-warning-shadow,Warning; Shadow/depth; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#613ca2,#613ca2,HEX,--beeday-color-project-dark,Project category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#665d70,#665d70,HEX,--beeday-color-card-meta-text,Card; Neutral text,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL NEUTRAL
+#691a20,#691a20,HEX,--beeday-color-button-danger-outline,Danger/Expense/Negative; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#6f6875,#6f6875,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Dashboard/Components/ActivityFilterBar.razor.css:1,1,HARDCODED
+#706777,#706777,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Projects/Components/ProjectWorkspace.razor.css:1,1,HARDCODED
+#746b7b,#746b7b,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Projects/Components/ProjectWorkspace.razor.css:1,1,HARDCODED
+#817789,#817789,HEX,--beeday-color-text-muted,Neutral text,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL NEUTRAL
+#8b8491,#8b8491,HEX,--beeday-habit-color-white-dark,Habit category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#92239a,#92239a,HEX,--beeday-color-todo-dark,Todo category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#9b6508,#9b6508,HEX,--beeday-color-button-warning-outline,Warning; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#9d1c1c,#9d1c1c,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/app.css:1,1,HARDCODED
+#9f2a32,#9f2a32,HEX,--beeday-color-button-danger-depth,Danger/Expense/Negative; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#a90f15,#a90f15,HEX,--beeday-habit-color-red-strong-dark,Habit category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#aaa2b1,#aaa2b1,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Dashboard/Pages/Home.razor.css:1,1,HARDCODED
+#aaa4b2,#aaa4b2,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Dashboard/Components/ActivityFilterBar.razor.css:1,1,HARDCODED
+#b23a86,#b23a86,HEX,--beeday-color-attribute-vitality,Attribute category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#b32121,#b32121,HEX,--beeday-color-danger-hover,Danger/Expense/Negative,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#b3261e,#b3261e,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/ProfileCreation/Pages/CreateProfile.razor.css:1,1,HARDCODED
+#b3432f,#b3432f,HEX,--beeday-color-attribute-strength,Attribute category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#b8b1c0,#b8b1c0,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Dashboard/Components/DashboardColumn.razor.css:1,1,HARDCODED
+#b9dfc3,#b9dfc3,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/app.css:1,1,HARDCODED
+#bf2ec7,#bf2ec7,HEX,--beeday-color-todo,Todo category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#c6bdd0,#c6bdd0,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Dashboard/Components/DashboardColumn.razor.css:1,1,HARDCODED
+#c7a91f,#c7a91f,HEX,--beeday-button-depth,Button state,src/BeeDay.Web/Components/Features/Home/Pages/Home.razor.css:1,1,DERIVED STATE
+#c8d7ed,#c8d7ed,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Home/Pages/Home.razor.css:1,1,HARDCODED
+#c9820d,#c9820d,HEX,--beeday-color-button-warning-depth,Warning; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#cecece,#cecece,HEX,--beeday-color-border-strong,Neutral border,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL NEUTRAL
+#d33b46,#d33b46,HEX,--beeday-color-danger,Danger/Expense/Negative,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#d71920,#d71920,HEX,--beeday-habit-color-red-strong,Habit category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#d7d5d8,#d7d5d8,HEX,--beeday-color-button-confirmation-cancel-depth,Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+#d89b22,#d89b22,HEX,--beeday-color-warning,Warning,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#d93640,#d93640,HEX,--beeday-habit-color-red-medium-dark,Habit category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#d94c57,#d94c57,HEX,--beeday-color-button-danger-bg-hover,Danger/Expense/Negative; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#d9d2e8,#d9d2e8,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/app.css:1,1,HARDCODED
+#d9d4df,#d9d4df,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Habits/Components/HabitEditorModal.razor.css:1,1,HARDCODED
+#ded8e7,#ded8e7,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Experience/Components/ExperienceBar.razor.css:1,1,HARDCODED
+#dfa234,#dfa234,HEX,--beeday-habit-color-yellow-dark,Habit category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#e2f5e9,#e2f5e9,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/feedback.css:1,1,HARDCODED
+#e4dfe6,#e4dfe6,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Projects/Components/ProjectWorkspace.razor.css:1,1,HARDCODED
+#e50000,#e50000,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/app.css:1,1,HARDCODED
+#e5e5e5,#e5e5e5,HEX,--beeday-color-border,Neutral border,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL NEUTRAL
+#e7e7e7,#e7e7e7,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/vendor/nes-core.beeday-excerpt.css:1,1,LEGACY
+#e7f0f4,#e7f0f4,HEX,--beeday-color-info-soft,Info,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#e8f7ee,#e8f7ee,HEX,--beeday-color-success-soft,Success/Income/Positive,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#e98189,#e98189,HEX,--beeday-habit-color-red-light-dark,Habit category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#ebe9ec,#ebe9ec,HEX,--beeday-color-board-surface,Neutral surface,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL NEUTRAL
+#eee9f0,#eee9f0,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Projects/Components/ProjectWorkspace.razor.css:1,1,HARDCODED
+#eeeeee,#eeeeee,HEX,--beeday-color-surface-subtle,Neutral surface,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL NEUTRAL
+#eef0ff,#eef0ff,HEX,--beeday-color-brand-primary-soft,Brand,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL BRAND
+#eefaf1,#eefaf1,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/app.css:1,1,HARDCODED
+#ef4455,#ef4455,HEX,--beeday-game-red,Legacy game,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#efb9b9,#efb9b9,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/app.css:1,1,HARDCODED
+#f0edf2,#f0edf2,HEX,--beeday-color-card-meta-bg,Card,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#f1f1f1,#f1f1f1,HEX,--beeday-color-button-confirmation-cancel-bg-hover,Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+#f3b82f,#f3b82f,HEX,--beeday-color-card-star,Card,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#f3ecff,#f3ecff,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/identity.css:1,1,HARDCODED
+#f4edff,#f4edff,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Onboarding/Pages/Tutorial.razor.css:1,1,HARDCODED
+#f5b942,#f5b942,HEX,--beeday-color-button-warning-bg,Warning; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#f5d75b,#f5d75b,HEX,--beeday-button-background-hover,Button state,src/BeeDay.Web/Components/Features/Home/Pages/Home.razor.css:1,1,DERIVED STATE
+#f7f6f8,#f7f6f8,HEX,--beeday-habit-color-white,Habit category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#f7f7f7,#f7f7f7,HEX,--beeday-color-surface-muted,Neutral surface,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL NEUTRAL
+#f8f7f9,#f8f7f9,HEX,--beeday-color-chrome-icon-surface,Neutral surface,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL NEUTRAL
+#faf7fc,#faf7fc,HEX,,Unmapped hardcode,src/BeeDay.Web/Components/Features/Onboarding/Pages/Tutorial.razor.css:1,1,HARDCODED
+#fbdb6b,#fbdb6b,HEX,--beeday-color-brand-yellow-hover,Brand,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL BRAND
+#fbfcff,#fbfcff,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/app.css:1,1,HARDCODED
+#fde8e8,#fde8e8,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/feedback.css:1,1,HARDCODED
+#ff5a62,#ff5a62,HEX,--beeday-habit-color-red-medium,Habit category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#ffb3b8,#ffb3b8,HEX,--beeday-habit-color-red-light,Habit category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#ffc15a,#ffc15a,HEX,--beeday-habit-color-yellow,Habit category,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+#ffc85d,#ffc85d,HEX,--beeday-color-button-warning-bg-hover,Warning; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#ffe49a,#ffe49a,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/css/animations.css:1,1,HARDCODED
+#ffe88d,#ffe88d,HEX,--beeday-color-brand-yellow,Brand,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL BRAND
+#fff0f0,#fff0f0,HEX,,Unmapped hardcode,src/BeeDay.Web/wwwroot/app.css:1,1,HARDCODED
+#fff0f1,#fff0f1,HEX,--beeday-color-danger-soft,Danger/Expense/Negative,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#fff5dc,#fff5dc,HEX,--beeday-color-warning-soft,Warning,src/BeeDay.Web/wwwroot/css/variables.css:1,1,OFFICIAL SEMANTIC
+#fffdf7,#fffdf7,HEX,--beeday-game-paper,Legacy game,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+"rgba(0, 0, 0, 0.4)",rgba(0 0 0 / 0.400),RGBA,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Layout/ReconnectModal.razor.css:1,1,DERIVED STATE
+"rgba(0, 107, 179, 0.3)",rgba(0 107 179 / 0.300),RGBA,,Derived alpha/shadow/overlay,src/BeeDay.Web/wwwroot/css/vendor/nes-core.beeday-excerpt.css:1,1,LEGACY
+rgb(102 65 166 / 14%),rgba(102 65 166 / 0.140),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Features/Dashboard/Components/ActivityFilterBar.razor.css:1,1,DERIVED STATE
+rgb(157 112 0 / 9%),rgba(157 112 0 / 0.090),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/wwwroot/css/animations.css:1,1,DERIVED STATE
+"rgba(173, 175, 188, 0.3)",rgba(173 175 188 / 0.300),RGBA,,Derived alpha/shadow/overlay,src/BeeDay.Web/wwwroot/css/vendor/nes-core.beeday-excerpt.css:1,1,LEGACY
+rgb(18 68 144 / 6%),rgba(18 68 144 / 0.060),RGB,--beeday-shadow-xs,Shadow/depth,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+rgb(18 68 144 / 8%),rgba(18 68 144 / 0.080),RGB,--beeday-shadow-sm,Shadow/depth,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+rgb(18 68 144 / 10%),rgba(18 68 144 / 0.100),RGB,--beeday-shadow-md,Shadow/depth,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+rgb(18 68 144 / 16%),rgba(18 68 144 / 0.160),RGB,--beeday-shadow-lg,Shadow/depth,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+rgb(18 68 144 / 64%),rgba(18 68 144 / 0.640),RGB,--beeday-color-overlay,Overlay,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+rgb(20 4 42 / 24%),rgba(20 4 42 / 0.240),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Features/ProfileCreation/Pages/Welcome.razor.css:1,1,DERIVED STATE
+rgb(20 4 42 / 32%),rgba(20 4 42 / 0.320),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Features/ProfileCreation/Pages/Welcome.razor.css:1,1,DERIVED STATE
+rgb(23 19 33 / 18%),rgba(23 19 33 / 0.180),RGB,--beeday-game-shadow-lg,Shadow/depth; Legacy game,src/BeeDay.Web/wwwroot/css/variables.css:1,1,SPECIALIZED
+rgb(23 19 33 / 25%),rgba(23 19 33 / 0.250),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Features/Experience/Components/ExperienceBar.razor.css:1,1,DERIVED STATE
+rgb(24 15 29 / 64%),rgba(24 15 29 / 0.640),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Features/Projects/Components/ProjectWorkspace.razor.css:1,1,DERIVED STATE
+rgb(24 90 189 / 28%),rgba(24 90 189 / 0.280),RGB,--beeday-focus-color,Focus,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+rgb(255 232 141 / 42%),rgba(255 232 141 / 0.420),RGB,--beeday-focus-ring-inverse,Focus,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+rgb(255 255 255 / 12%),rgba(255 255 255 / 0.120),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Layout/AppFooter.razor.css:1,1,DERIVED STATE
+rgb(255 255 255 / 16%),rgba(255 255 255 / 0.160),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Layout/AppFooter.razor.css:1,1,DERIVED STATE
+rgb(255 255 255 / 35%),rgba(255 255 255 / 0.350),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Features/Home/Pages/Home.razor.css:1,1,DERIVED STATE
+rgb(255 255 255 / 42%),rgba(255 255 255 / 0.420),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/DesignSystem/Progress/BeeDayProgressBar.razor.css:1,1,DERIVED STATE
+rgb(255 255 255 / 58%),rgba(255 255 255 / 0.580),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/wwwroot/css/cards.css:1,1,DERIVED STATE
+rgb(255 255 255 / 68%),rgba(255 255 255 / 0.680),RGB,--habit-button-border,Habit category; Neutral border; Button state,src/BeeDay.Web/wwwroot/css/cards.css:1,1,SPECIALIZED
+rgb(255 255 255 / 78%),rgba(255 255 255 / 0.780),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Layout/AppFooter.razor.css:1,1,DERIVED STATE
+rgb(30 12 52 / 12%),rgba(30 12 52 / 0.120),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/wwwroot/app.css:1,1,DERIVED STATE
+rgb(32 180 244 / 30%),rgba(32 180 244 / 0.300),RGB,--beeday-color-button-reference-blue-focus,Focus; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE
+rgb(35 18 56 / 82%),rgba(35 18 56 / 0.820),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Features/Experience/Feedback/BeeDayFeedbackModal.razor.css:1,1,DERIVED STATE
+rgb(35 25 45 / 55%),rgba(35 25 45 / 0.550),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Layout/MobileSidebar.razor.css:1,1,DERIVED STATE
+rgb(35 25 45 / 70%),rgba(35 25 45 / 0.700),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/wwwroot/css/editor-modal.css:1,1,DERIVED STATE
+rgb(38 24 54 / 5%),rgba(38 24 54 / 0.050),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Features/Dashboard/Components/ActivityFilterBar.razor.css:1,1,DERIVED STATE
+rgb(40 27 52 / 8%),rgba(40 27 52 / 0.080),RGB,--activity-shadow-rest,Shadow/depth,src/BeeDay.Web/wwwroot/css/activity-design-system.css:1,1,DERIVED STATE
+rgb(45 28 66 / 13%),rgba(45 28 66 / 0.130),RGB,--activity-shadow-hover,Shadow/depth,src/BeeDay.Web/wwwroot/css/activity-design-system.css:1,1,DERIVED STATE
+rgb(47 27 72 / 78%),rgba(47 27 72 / 0.780),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/wwwroot/css/feedback.css:1,1,DERIVED STATE
+rgb(47 36 56 / 7%),rgba(47 36 56 / 0.070),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Features/Dashboard/Components/DashboardColumn.razor.css:1,1,DERIVED STATE
+rgb(47 36 56 / 8%),rgba(47 36 56 / 0.080),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/Features/Dashboard/Components/DashboardColumn.razor.css:1,1,DERIVED STATE
+rgb(47 39 55 / 20%),rgba(47 39 55 / 0.200),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/Components/DesignSystem/Progress/BeeDayProgressBar.razor.css:1,1,DERIVED STATE
+rgb(50 30 20 / 12%),rgba(50 30 20 / 0.120),RGB,,Derived alpha/shadow/overlay,src/BeeDay.Web/wwwroot/css/cards.css:1,1,DERIVED STATE
+rgb(68 64 71 / 28%),rgba(68 64 71 / 0.280),RGB,--beeday-color-button-confirmation-cancel-focus,Focus; Button state,src/BeeDay.Web/wwwroot/css/variables.css:1,1,DERIVED STATE

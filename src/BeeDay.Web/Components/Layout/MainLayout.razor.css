@@ -1,157 +1,22 @@
 .beeday-app {
     --beeday-top-navigation-height: 3.75rem;
-    --beeday-left-panel-width: 17rem;
-    --beeday-right-panel-width: 24rem;
-    --beeday-collapsed-panel-width: 1.35rem;
-
+    --beeday-sidebar-width: 15.5rem;
+    --beeday-reading-width: 48rem;
+    --beeday-workspace-width: 100rem;
     display: flex;
     width: 100%;
     min-height: 100dvh;
     flex-direction: column;
     padding-top: var(--beeday-top-navigation-height);
     overflow-x: clip;
-    background: #f4f3f5;
+    background: var(--beeday-color-background);
 }
 
-.beeday-workspace {
-    display: grid;
-    grid-template-columns:
-        var(--beeday-collapsed-panel-width)
-        minmax(0, 1fr)
-        var(--beeday-collapsed-panel-width);
-    flex: 1 0 auto;
-    min-height: calc(100dvh - var(--beeday-top-navigation-height));
-    margin-top: 0;
-}
+.beeday-shell { display: flex; width: 100%; flex: 1 0 auto; min-width: 0; }
+.beeday-workspace { width: 100%; min-width: 0; min-height: calc(100dvh - var(--beeday-top-navigation-height)); }
+.beeday-main { display: flex; width: 100%; min-width: 0; min-height: inherit; flex-direction: column; }
 
-.beeday-workspace {
-    transition: grid-template-columns 300ms cubic-bezier(.2, .8, .2, 1);
-}
-
-.beeday-workspace.has-left-panel {
-    grid-template-columns:
-        var(--beeday-left-panel-width)
-        minmax(0, 1fr)
-        var(--beeday-collapsed-panel-width);
-}
-
-.beeday-workspace.has-right-panel {
-    grid-template-columns:
-        var(--beeday-collapsed-panel-width)
-        minmax(0, 1fr)
-        var(--beeday-right-panel-width);
-}
-
-.beeday-side-slot {
-    position: relative;
-    min-width: 0;
-    height: calc(100dvh - var(--beeday-top-navigation-height));
-    overflow: hidden;
-    align-self: start;
-    position: sticky;
-    top: var(--beeday-top-navigation-height);
-    z-index: 20;
-}
-
-.beeday-side-slot--left {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.beeday-side-slot--right {
-    display: flex;
-    justify-content: flex-start;
-}
-
-.beeday-content-shell {
-    display: flex;
-    min-width: 0;
-    min-height: calc(100dvh - var(--beeday-top-navigation-height));
-    flex-direction: column;
-    /* `clip`, not `hidden`: an axis set to anything other than `visible` while
-       the other stays `visible` gets that other axis silently promoted to
-       `auto` by the UA (a spec-mandated pairing) — that previously turned
-       this element into an unintended internal vertical scroll container.
-       `clip` does not participate in that pairing. */
-    overflow-x: clip;
-}
-
-.beeday-main {
-    display: flex;
-    flex: 1;
-    min-width: 0;
-    flex-direction: column;
-    margin: 0;
-    padding: 0;
-}
-
-@media (max-width: 760px) {
-    .beeday-workspace,
-    .beeday-workspace.has-left-panel,
-    .beeday-workspace.has-right-panel {
-        grid-template-columns: 0 minmax(0, 1fr) 0;
-    }
-
-    .beeday-side-slot {
-        position: fixed;
-        top: var(--beeday-top-navigation-height);
-        bottom: 0;
-        width: 0;
-        height: auto;
-        overflow: visible;
-    }
-
-    .beeday-side-slot--left {
-        left: 0;
-    }
-
-    .beeday-side-slot--right {
-        right: 0;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .beeday-workspace {
-        transition: none;
-    }
-}
-
-/* Collapsed side rails follow the Top Navigation identity. */
-.beeday-side-slot {
-    background: #5b1095;
-}
-
-.beeday-side-slot--left {
-    border-right: 1px solid rgb(255 255 255 / 10%);
-}
-
-.beeday-side-slot--right {
-    border-left: 1px solid rgb(255 255 255 / 10%);
-}
-
-.beeday-workspace.has-left-panel .beeday-side-slot--left,
-.beeday-workspace.has-right-panel .beeday-side-slot--right {
-    background: transparent;
-    border-color: transparent;
-}
-
-@media (max-width: 760px) {
-    .beeday-side-slot {
-        background: transparent;
-        border: 0;
-    }
-}
-
-/* The collapsed rails and open drawers visually continue the Top Navigation. */
-.beeday-side-slot,
-.beeday-side-slot--left,
-.beeday-side-slot--right {
-    background: #5b1095;
-    border: 0;
-}
-
-.beeday-workspace.has-left-panel .beeday-side-slot--left,
-.beeday-workspace.has-right-panel .beeday-side-slot--right {
-    background: #5b1095;
-    border: 0;
+@media (min-width: 1200px) {
+    .beeday-app { --beeday-top-navigation-height: 0px; padding-top: 0; }
+    .beeday-workspace { padding-left: var(--beeday-sidebar-width); }
 }

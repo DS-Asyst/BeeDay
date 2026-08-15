@@ -5,13 +5,15 @@
 
 <PageTitle>Login | BeeDay</PageTitle>
 
-<section class="auth-page beeday-fade-in">
-    <div class="auth-card">
-        <div class="auth-card__content">
+<section class="auth-page beeday-fade-in" aria-labelledby="login-heading">
+    <PublicAuthActions DestinationHref="/profile/create" DestinationLabel="Create account"
+                       CloseLabel="Close login and return to Home" Label="Login actions" />
+
+    <div class="auth-login">
             <div class="auth-card__brand"><BeeDayBrand /></div>
 
             <header class="auth-card__header">
-                <h1>Welcome back</h1>
+                <h1 id="login-heading">Welcome back</h1>
                 <p>Sign in to continue your journey.</p>
             </header>
 
@@ -46,6 +48,7 @@
                 <label class="auth-field">
                     <span>Email</span>
                     <input type="email"
+                           class="beeday-field__control"
                            name="email"
                            value="@Email"
                            autocomplete="email"
@@ -56,6 +59,7 @@
                 <label class="auth-field">
                     <span>Password</span>
                     <input type="password"
+                           class="beeday-field__control"
                            name="password"
                            autocomplete="current-password"
                            required />
@@ -66,15 +70,11 @@
                     <a class="auth-action-link" href="/account/forgot-password">Forgot password?</a>
                 </div>
 
-                <BeeDayButton Type="submit" FullWidth="true" Class="beeday-button--comic beeday-button--comic-blue">
+                <BeeDayButton Type="submit" FullWidth="true" Class="auth-submit">
                     Sign In
                 </BeeDayButton>
             </form>
 
-            <p class="auth-card__footer">
-                New to BeeDay? <a class="auth-action-link" href="/profile/create">Create account</a>
-            </p>
-        </div>
     </div>
 </section>
 

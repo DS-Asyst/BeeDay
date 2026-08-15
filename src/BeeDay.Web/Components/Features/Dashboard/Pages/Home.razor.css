@@ -17,6 +17,7 @@
     padding: .55rem .9rem 1rem;
     background: var(--beeday-color-surface);
     box-sizing: border-box;
+    max-width: none;
 }
 
 .loading-state {
@@ -29,7 +30,7 @@
 
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(17rem, 1fr));
+    grid-template-columns: repeat(4, minmax(15rem, 1fr));
     align-items: start;
     gap: .65rem;
     width: 100%;
@@ -48,13 +49,13 @@
     background: transparent;
     box-sizing: border-box;
     scrollbar-width: thin;
-    scrollbar-color: #aaa2b1 transparent;
+    scrollbar-color: var(--beeday-color-border-strong) transparent;
     scroll-snap-type: x proximity;
 }
 
 .dashboard-grid > * {
     min-width: 17rem;
-    min-height: 30rem;
+    min-height: 36rem;
     height: auto;
     scroll-snap-align: start;
 }
@@ -63,13 +64,13 @@
     height: .65rem;
 }
 
-@media (min-width: 1101px) {
+@media (min-width: 1200px) {
     .dashboard-grid {
         overflow-x: hidden;
     }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1199px) {
     .dashboard-grid {
         grid-template-columns: repeat(4, 17rem);
     }

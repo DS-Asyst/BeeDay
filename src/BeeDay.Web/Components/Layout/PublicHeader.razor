@@ -1,0 +1,30 @@
+@using BeeDay.Web.Services.Authentication
+<header class="public-header">
+    <div class="public-header__content beeday-container">
+        <a class="public-header__brand" href="/" aria-label="BeeDay home">
+            <BeeDayBrand />
+        </a>
+
+        <AuthorizeView>
+            <Authorized>
+                <BeeDayButton Compact="true" OnClick="ContinueToBeeDay">Continue to BeeDay</BeeDayButton>
+            </Authorized>
+            <NotAuthorized>
+                <nav class="public-header__actions" aria-label="Account actions">
+                    <a class="public-header__login" href="/login">Log in</a>
+                </nav>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</header>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private AuthenticatedEntryDestinationResolver DestinationResolver { get; set; } = default!;
+
+    private async Task ContinueToBeeDay()
+    {
+        var destination = await DestinationResolver.ResolveAsync();
+        Navigation.NavigateTo(destination, forceLoad: true, replace: true);
+    }
+}

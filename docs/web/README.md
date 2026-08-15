@@ -33,11 +33,12 @@ src/BeeDay.Web/
 │                                    BeeDayClaimTypes
 ├── Components/
 │   ├── App.razor, Routes.razor    shell HTML raiz e Router
-│   ├── Layout/                     MainLayout, OnboardingLayout, TopNavigation, side panels, footer
+│   ├── Layout/                     MainLayout, OnboardingLayout, DesktopSidebar, MobileHeader/
+│   │                                  MobileSidebar, NavigationItem(s), side panels, footer
 │   ├── DesignSystem/                 Buttons, Cards, Forms, Feedback, Icons, Layout, Modals, Text —
 │   │                                  ver docs/design-system/ (reservado) e §5 abaixo
 │   ├── Behaviors/DragDrop/            BeeDaySortable (JS interop de reordenação)
-│   ├── Features/                       12 áreas de funcionalidade — ver 04-feature-components.md
+│   ├── Features/                       13 áreas de funcionalidade — ver 04-feature-components.md
 │   └── Pages/                           NotFound, Error
 └── wwwroot/                               css/, js/ (3 módulos ES), icons/ (sprite SVG), images/
 ```
@@ -49,7 +50,7 @@ src/BeeDay.Web/
 | [`01-composition-root.md`](01-composition-root.md) | `Program.cs`: DI, pipeline HTTP, autenticação por cookie, endpoints `/auth/*`, rate limiting, health checks |
 | [`02-routing-and-pages.md`](02-routing-and-pages.md) | `Routes.razor`, `App.razor`, as 18 rotas `@page`, layout e atributo de autorização de cada uma |
 | [`03-layouts.md`](03-layouts.md) | `MainLayout`, `OnboardingLayout`, navegação, painéis laterais, rodapé, `ReconnectModal` |
-| [`04-feature-components.md`](04-feature-components.md) | As 12 áreas de `Components/Features/` — componentes, state, models, como cada uma chama Application |
+| [`04-feature-components.md`](04-feature-components.md) | As 13 áreas de `Components/Features/` — componentes, state, models, como cada uma chama Application |
 | [`05-design-system-integration.md`](05-design-system-integration.md) | Como a Web compõe o Design System, os 3 módulos de JS interop, ordem de carregamento de CSS |
 | [`06-testing.md`](06-testing.md) | Mapeamento componente → teste em `BeeDay.Web.Tests` (bUnit + integração) e `BeeDay.E2E.Tests` (Playwright) |
 
@@ -78,13 +79,16 @@ injetam `MediatR.ISender` diretamente e nunca passam por `BeeDayWebService` — 
   diretamente"** — essa afirmação está desatualizada/incorreta: `Wallet.razor` e as 5 páginas de
   `Features/Identity/Pages/` fazem exatamente isso (`@inject MediatR.ISender Sender`). Fora do
   escopo desta Sprint corrigir `docs/architecture/`; reportado aqui para correção em Sprint futura.
-- `Components/Layout/TopNavigation.razor` e `Components/Layout/AccountSidePanel.razor` ainda
-  renderizam a marca dividida em `<span>LEVEL</span><span>UP</span>` (texto literal, não CSS) em vez
-  de "BeeDay" — resíduo do rebrand `LevelUp` → `BeeDay` (commits `523728d`, `b1e9f53`, `6ae465b`).
-  `Components/DesignSystem/Text/BeeDayBrand.razor` (usado em todo `OnboardingLayout`) já usa o nome
-  correto; os dois arquivos acima não foram atualizados.
-- `Components/Layout/AppFooter.razor` linka `https://github.com/tiagoarrigoni/LevelUp` (nome de
-  repositório antigo) em "About".
+- **Achado totalmente resolvido (histórico — verificado na Sprint 20.4, EPIC 20; reconfirmado na
+  Sprint 21.3, EPIC 21):** o texto literal `<span>LEVEL</span><span>UP</span>` em
+  `Components/Layout/AccountSidePanel.razor` (e no extinto `TopNavigation.razor`) **não existe
+  mais**. O ponto que este documento ainda registrava como "permanece válido" — `TopNavigation`/
+  `AccountSidePanel` usarem markup próprio em vez de `Components/DesignSystem/Text/BeeDayBrand.razor`
+  — também está resolvido: a Sprint 20.7 (EPIC 20) migrou ambos para `<BeeDayBrand />` via o hook
+  `--beeday-brand-color` (ver `docs/epics/20-home-visual-experience/README.md`, "TopNavigation
+  Migration"), e a Sprint 21.3 removeu `TopNavigation.razor` inteiramente — `DesktopSidebar`/
+  `MobileHeader`/`MobileSidebar` (seus sucessores) já nascem usando `<BeeDayBrand />`. Nenhum
+  componente de `Components/Layout/` renderiza marca própria hoje.
 - `Components/Features/ProfileCreation/Pages/Welcome.razor` (rota `/welcome`) define
   `<PageTitle>Login | BeeDay</PageTitle>` — título incorreto para uma página que só redireciona para
   `/login`. A rota `/` (`Entry.razor`) já resolve o destino real via estado de autenticação; `/welcome`
@@ -96,4 +100,4 @@ injetam `MediatR.ISender` diretamente e nunca passam por `BeeDayWebService` — 
   invalidados por query string hardcoded no C# que os importa (`?v=20260721-f13-dragfix`,
   `?v=20260729-1`) em vez de um mecanismo de cache-busting automático (hash de conteúdo, `Assets[]`
   do mapa de estáticos usado pelo resto do projeto). Funciona, mas exige lembrar de trocar a string a
-  cada mudança no arquivo — `activity-attribute-select.js` não tem esse sufixo.
+  cada mudança no arquivo. O antigo módulo de Attribute foi removido com sua exposição Web na Sprint 21.12.

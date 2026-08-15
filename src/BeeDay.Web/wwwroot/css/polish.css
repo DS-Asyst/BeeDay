@@ -11,7 +11,7 @@
     --beeday-reading-width: 72rem;
 }
 
-html { scroll-padding-top: calc(var(--beeday-top-navigation-height, 3.75rem) + var(--beeday-grid)); }
+html { scroll-padding-top: calc(var(--beeday-top-navigation-height, 4.25rem) + var(--beeday-grid)); }
 body { min-width: 20rem; }
 
 /* Consistent page rhythm */
@@ -32,35 +32,10 @@ body { min-width: 20rem; }
 .beeday-hero__primary-action { align-items: center; }
 
 /* Eight-pixel spacing and uniform control sizing */
-.beeday-button {
-    min-height: var(--beeday-control-height-md);
-    padding: calc(var(--beeday-grid) + .125rem) calc(var(--beeday-grid) * 2);
-}
-.beeday-button--compact { min-height: var(--beeday-control-height-sm); }
-.beeday-button:has(.pixel-icon):not(.beeday-button--full-width) { padding-inline-start: calc(var(--beeday-grid) * 1.5); }
+.beeday-button:has(.beeday-icon):not(.beeday-button--full-width) { padding-inline-start: calc(var(--beeday-grid) * 1.5); }
 
 .beeday-field { gap: var(--beeday-grid); }
-.beeday-field__control,
-.beeday-input,
-.beeday-select {
-    min-height: var(--beeday-control-height-md);
-    padding: .625rem .75rem;
-    border: 1px solid var(--beeday-color-border);
-    border-radius: var(--beeday-radius-xs);
-    box-shadow: inset 0 -2px 0 rgb(23 19 33 / 7%);
-}
 .beeday-field__control--textarea { min-height: 7rem; line-height: 1.5; }
-.beeday-field__control:focus-visible,
-.beeday-input:focus-visible,
-.beeday-select:focus-visible {
-    border-color: var(--beeday-game-blue-dark);
-    outline: var(--beeday-focus-outline);
-    outline-offset: 2px;
-    box-shadow: inset 0 -2px 0 rgb(23 19 33 / 7%);
-}
-
-.beeday-checkbox { min-height: var(--beeday-control-height-sm); }
-.beeday-checkbox__control { width: 1.25rem; height: 1.25rem; }
 
 /* Unified surfaces */
 .beeday-card--padded { padding: clamp(1rem, 2.5vw, 1.5rem); }
@@ -70,10 +45,10 @@ body { min-width: 20rem; }
 :where(button, a, [role="button"]) { touch-action: manipulation; }
 :where(button, a, input, select, textarea)[aria-disabled="true"] { pointer-events: none; }
 
-/* Layout refinement */
-.beeday-content-shell { min-width: 0; }
+/* Public pages retain the established gutter; authenticated pages own their width and gutters. */
 .beeday-main { padding-inline: var(--beeday-page-gutter); padding-block: calc(var(--beeday-grid) * 3); }
-.beeday-side-slot { overscroll-behavior: contain; }
+.beeday-main--authenticated { padding: 0; }
+.beeday-main--authenticated > :where(section, article, .beeday-page, .page-content) { width: 100%; max-width: none; }
 
 /* Avoid animation-driven layout shift */
 .beeday-button,
@@ -83,6 +58,7 @@ body { min-width: 20rem; }
 @media (max-width: 60rem) {
     :root { --beeday-reading-width: 100%; }
     .beeday-main { padding-block: calc(var(--beeday-grid) * 2); }
+    .beeday-main--authenticated { padding-block: 0; }
 }
 
 @media (max-width: 42rem) {

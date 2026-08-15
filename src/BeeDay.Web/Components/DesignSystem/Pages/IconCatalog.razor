@@ -2,12 +2,12 @@
 @attribute [Authorize]
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment
 
-<PageTitle>Pixel Icon Catalog | BeeDay</PageTitle>
+<PageTitle>BeeDay Icon Catalog | BeeDay</PageTitle>
 
 @if (!HostEnvironment.IsDevelopment())
 {
     <main class="icon-catalog icon-catalog--unavailable">
-        <PixelIcon Name="PixelIconName.Lock" Size="PixelIconSize.Large" Color="PixelIconColor.Muted" />
+        <BeeDayIcon Name="BeeDayIconName.Lock" Size="BeeDayIconSize.Large" Color="BeeDayIconColor.Muted" />
         <h1>Design System catalog unavailable</h1>
         <p>The icon catalog is limited to the Development environment.</p>
     </main>
@@ -17,7 +17,7 @@ else
     <main class="icon-catalog">
         <header class="icon-catalog__header">
             <span class="icon-catalog__eyebrow">Design System</span>
-            <h1>Pixel Icon Catalog</h1>
+            <h1>BeeDay Icon Catalog</h1>
             <p>Official icon contracts, accessibility modes, semantic colors and size tokens.</p>
         </header>
 
@@ -27,7 +27,7 @@ else
                 @foreach (var size in Sizes)
                 {
                     <div class="icon-token">
-                        <PixelIcon Name="PixelIconName.Profile" Size="size" />
+                        <BeeDayIcon Name="BeeDayIconName.Profile" Size="size" />
                         <code>@size</code>
                     </div>
                 }
@@ -40,7 +40,7 @@ else
                 @foreach (var color in Colors)
                 {
                     <div class="icon-token">
-                        <PixelIcon Name="PixelIconName.Statistics" Size="PixelIconSize.Large" Color="color" />
+                        <BeeDayIcon Name="BeeDayIconName.Statistics" Size="BeeDayIconSize.Large" Color="color" />
                         <code>@color</code>
                     </div>
                 }
@@ -51,14 +51,14 @@ else
             <h2 id="icon-accessibility-heading">Accessibility examples</h2>
             <div class="icon-catalog__examples">
                 <div>
-                    <PixelIcon Name="PixelIconName.Featured" Size="PixelIconSize.Large" />
+                    <BeeDayIcon Name="BeeDayIconName.Featured" Size="BeeDayIconSize.Large" />
                     <strong>Decorative</strong>
                     <span>Hidden from assistive technology.</span>
                 </div>
                 <div>
-                    <PixelIcon Name="PixelIconName.Warning"
-                               Size="PixelIconSize.Large"
-                               Color="PixelIconColor.Warning"
+                    <BeeDayIcon Name="BeeDayIconName.Warning"
+                               Size="BeeDayIconSize.Large"
+                               Color="BeeDayIconColor.Warning"
                                Decorative="false"
                                Label="Warning status" />
                     <strong>Informative</strong>
@@ -69,7 +69,7 @@ else
 
         @foreach (var category in Categories)
         {
-            var icons = PixelIconRegistry.All
+            var icons = BeeDayIconRegistry.All
                 .Where(entry => entry.Value.Category == category)
                 .OrderBy(entry => entry.Key.ToString())
                 .ToArray();
@@ -81,7 +81,7 @@ else
                     {
                         <article class="icon-catalog__card">
                             <div class="icon-catalog__preview">
-                                <PixelIcon Name="entry.Key" Size="PixelIconSize.ExtraLarge" />
+                                <BeeDayIcon Name="entry.Key" Size="BeeDayIconSize.ExtraLarge" />
                             </div>
                             <h3>@entry.Key</h3>
                             <dl>
@@ -90,7 +90,7 @@ else
                                 <div><dt>Asset</dt><dd><code>@entry.Value.AssetPath</code></dd></div>
                             </dl>
                             <div class="icon-catalog__usage">
-                                <code>&lt;PixelIcon Name=&quot;PixelIconName.@entry.Key&quot; /&gt;</code>
+                                <code>&lt;BeeDayIcon Name=&quot;BeeDayIconName.@entry.Key&quot; /&gt;</code>
                             </div>
                         </article>
                     }
@@ -101,7 +101,7 @@ else
 }
 
 @code {
-    private static readonly PixelIconSize[] Sizes = Enum.GetValues<PixelIconSize>();
-    private static readonly PixelIconColor[] Colors = Enum.GetValues<PixelIconColor>();
-    private static readonly PixelIconCategory[] Categories = Enum.GetValues<PixelIconCategory>();
+    private static readonly BeeDayIconSize[] Sizes = Enum.GetValues<BeeDayIconSize>();
+    private static readonly BeeDayIconColor[] Colors = Enum.GetValues<BeeDayIconColor>();
+    private static readonly BeeDayIconCategory[] Categories = Enum.GetValues<BeeDayIconCategory>();
 }

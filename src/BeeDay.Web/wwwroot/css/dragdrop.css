@@ -12,10 +12,11 @@
     transition: opacity var(--beeday-transition-fast), transform var(--beeday-transition-fast), box-shadow var(--beeday-transition-fast);
 }
 
-/* The actual drag cursor (custom asset, grab/grabbing fallback) is declared
-   in cursors.css, which loads after this file and after its own generic
-   [role="button"] cursor rule — see cursors.css for why it must live there
-   instead of here. */
+.beeday-sortable__item,
+.beeday-sortable__item .activity-card__body--openable,
+.beeday-sortable__item .habit-card__body--openable {
+    cursor: grab;
+}
 
     /*
  * Keeps the card with an open menu above the other cards.
@@ -61,8 +62,8 @@
     z-index: 40;
     height: 3px;
     border-radius: var(--beeday-radius-pill);
-    background: var(--beeday-color-primary);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--beeday-color-primary) 18%, transparent);
+    background: var(--beeday-color-brand-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--beeday-color-brand-primary) 18%, transparent);
     content: "";
 }
 
@@ -103,8 +104,21 @@
     will-change: transform;
 }
 
-/* Cursor for this state is declared in cursors.css alongside the rest of the
-   custom cursor pack; this rule only owns the non-cursor sorting behavior. */
+.beeday-sortable__item:active,
+.beeday-sortable__item.is-drag-armed,
+.beeday-sortable__item.is-dragging,
+.beeday-sortable__item:active .activity-card__body--openable,
+.beeday-sortable__item:active .habit-card__body--openable,
+.beeday-sortable__item.is-drag-armed .activity-card__body--openable,
+.beeday-sortable__item.is-drag-armed .habit-card__body--openable,
+.beeday-sortable__item.is-dragging .activity-card__body--openable,
+.beeday-sortable__item.is-dragging .habit-card__body--openable,
+body.beeday-is-sorting,
+body.beeday-is-sorting *,
+body.beeday-is-sorting [role="button"] {
+    cursor: grabbing;
+}
+
 body.beeday-is-sorting,
 body.beeday-is-sorting * {
     user-select: none !important;

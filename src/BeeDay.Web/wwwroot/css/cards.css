@@ -1,11 +1,11 @@
-.activity-card{--activity-accent:var(--beeday-color-task);--activity-accent-dark:var(--beeday-color-task-dark);position:relative;display:grid;grid-template-columns:2.45rem minmax(0,1fr) 2.25rem;min-height:5.35rem;overflow:hidden;border:1px solid var(--beeday-color-border);border-radius:.25rem;background:var(--beeday-color-surface);box-shadow:0 1px 2px rgb(40 27 52 / 8%);transition:transform 140ms ease,box-shadow 140ms ease,border-color 140ms ease}.activity-card--task{--activity-accent:var(--beeday-color-task);--activity-accent-dark:var(--beeday-color-task-dark)}.activity-card--todo{--activity-accent:var(--beeday-color-todo);--activity-accent-dark:var(--beeday-color-todo-dark)}.activity-card--project{--activity-accent:var(--beeday-color-project);--activity-accent-dark:var(--beeday-color-project-dark)}.activity-card:hover{z-index:2;border-color:#b9b1c2;box-shadow:0 4px 12px rgb(45 28 66 / 13%);transform:translateY(-1px)}
+.activity-card{--activity-accent:var(--beeday-color-task);--activity-accent-dark:var(--beeday-color-task-dark);position:relative;display:grid;grid-template-columns:2.45rem minmax(0,1fr) 2.25rem;min-height:5.35rem;overflow:hidden}.activity-card--task{--activity-accent:var(--beeday-color-task);--activity-accent-dark:var(--beeday-color-task-dark)}.activity-card--todo{--activity-accent:var(--beeday-color-todo);--activity-accent-dark:var(--beeday-color-todo-dark)}.activity-card--project{--activity-accent:var(--beeday-color-project);--activity-accent-dark:var(--beeday-color-project-dark)}
 /* The checkbox's own outline/background is always visible (no opacity toggle
    on .activity-card__checkbox itself) — only the inner .activity-card__checkbox-glyph
    (the checkmark) fades in on hover/focus/completed, so the control reads as
    a real toggle at rest instead of appearing only on interaction. */
 .activity-card__rail{display:flex;align-items:flex-start;justify-content:center;padding-top:.5rem;background:var(--activity-accent)}.activity-card__checkbox{display:grid;place-items:center;width:1.55rem;height:1.55rem;padding:0;border:2px solid rgb(255 255 255 / 88%);border-radius:.14rem;background:rgb(255 255 255 / 88%);color:var(--activity-accent-dark);font-size:.95rem;font-weight:700;cursor:pointer;box-shadow:0 1px 2px rgb(50 30 20 / 12%);transition:transform .12s ease,background-color .12s ease,color .12s ease}.activity-card__checkbox-glyph{display:inline-flex;align-items:center;justify-content:center;opacity:0;transform:scale(.7);transition:opacity .12s ease,transform .12s ease}.activity-card__checkbox:hover{transform:scale(1.06);background:var(--beeday-color-surface)}.activity-card__checkbox:hover .activity-card__checkbox-glyph{opacity:.62;transform:scale(1)}.activity-card__checkbox:focus-visible .activity-card__checkbox-glyph{opacity:.62;transform:scale(1)}.activity-card__checkbox:active{transform:scale(.96)}
 .activity-card__body{min-width:0;padding:.66rem .72rem .55rem}.activity-card__title-row{display:flex;align-items:center;gap:.3rem}.activity-card h3{margin:0;overflow:hidden;color:var(--beeday-color-card-title);font-size:.82rem;font-weight:650;line-height:1.25;text-overflow:ellipsis;white-space:nowrap}.activity-card p{display:-webkit-box;margin:.22rem 0 0;overflow:hidden;color:var(--beeday-color-card-description);font-size:.64rem;line-height:1.4;-webkit-box-orient:vertical;-webkit-line-clamp:2}.activity-card__star{color:var(--beeday-color-card-star);font-size:.74rem}.activity-card__meta{display:inline-block;margin-top:.42rem;padding:.12rem .35rem;border-radius:.15rem;color:var(--beeday-color-card-meta-text);background:var(--beeday-color-card-meta-bg);font-size:.55rem;font-weight:700}
-.activity-card__menu{align-self:start;justify-self:center;width:1.35rem;height:1.55rem;margin-top:.48rem;padding:0;border:0;color:#756c7d;background:transparent;font-size:1.15rem;font-weight:700;line-height:1;cursor:pointer}.activity-card__menu:hover{color:var(--beeday-color-primary-hover)}.activity-card--completed{opacity:.66}.activity-card--completed h3{text-decoration:line-through}.activity-card--completed .activity-card__checkbox{background:var(--beeday-color-surface)}.activity-card--completed .activity-card__checkbox-glyph{opacity:1;transform:scale(1)}
+.activity-card__menu{align-self:start;justify-self:center;width:1.35rem;height:1.55rem;margin-top:.48rem;padding:0;border:0;color:#756c7d;background:transparent;font-size:1.15rem;font-weight:700;line-height:1;cursor:pointer}.activity-card__menu:hover{color:var(--beeday-color-brand-primary-hover)}.activity-card--completed{opacity:.66}.activity-card--completed h3{text-decoration:line-through}.activity-card--completed .activity-card__checkbox{background:var(--beeday-color-surface)}.activity-card--completed .activity-card__checkbox-glyph{opacity:1;transform:scale(1)}
 @media(max-width:650px){.activity-card{grid-template-columns:2.65rem minmax(0,1fr) 2.4rem}}
 
 .activity-card__actions {
@@ -46,7 +46,7 @@
         transform: none;
     }
 }
-.habit-card{--habit-side:var(--beeday-habit-color-white);--habit-button-bg:var(--beeday-color-surface);--habit-button-border:var(--beeday-color-border-strong);--habit-button-text:var(--beeday-habit-color-white-dark);display:grid;grid-template-columns:2.45rem minmax(0,1fr) 2.45rem;height:5.15rem;min-height:5.15rem;overflow:hidden;border:1px solid var(--beeday-color-border);border-radius:.2rem;background:var(--beeday-color-surface);box-shadow:0 1px 2px rgb(40 27 52 / 8%);transition:border-color .18s ease,box-shadow .18s ease}.habit-card:hover{border-color:var(--beeday-color-border-strong);box-shadow:0 2px 5px rgb(40 27 52 / 13%)}
+.habit-card{--habit-side:var(--beeday-habit-color-white);--habit-button-bg:var(--beeday-color-surface);--habit-button-border:var(--beeday-color-border-strong);--habit-button-text:var(--beeday-habit-color-white-dark);display:grid;grid-template-columns:2.45rem minmax(0,1fr) 2.45rem;height:5.15rem;min-height:5.15rem;overflow:hidden}
 .habit-card--white{--habit-side:var(--beeday-habit-color-white);--habit-button-bg:var(--beeday-color-surface);--habit-button-border:var(--beeday-color-border-strong);--habit-button-text:var(--beeday-habit-color-white-dark)}
 .habit-card--yellow{--habit-side:var(--beeday-habit-color-yellow);--habit-button-bg:var(--beeday-habit-color-yellow-dark);--habit-button-border:rgb(255 255 255 / 55%);--habit-button-text:var(--beeday-color-surface)}
 .habit-card--green{--habit-side:var(--beeday-habit-color-green);--habit-button-bg:var(--beeday-habit-color-green-dark);--habit-button-border:rgb(255 255 255 / 55%);--habit-button-text:var(--beeday-color-surface)}
@@ -55,7 +55,7 @@
 .habit-card--red-medium{--habit-side:var(--beeday-habit-color-red-medium);--habit-button-bg:var(--beeday-habit-color-red-medium-dark);--habit-button-border:rgb(255 255 255 / 62%);--habit-button-text:var(--beeday-color-surface)}
 .habit-card--red-strong{--habit-side:var(--beeday-habit-color-red-strong);--habit-button-bg:var(--beeday-habit-color-red-strong-dark);--habit-button-border:rgb(255 255 255 / 68%);--habit-button-text:var(--beeday-color-surface)}
 .habit-card__side{display:flex;align-items:flex-start;justify-content:center;padding-top:.5rem;background:var(--habit-side);transition:background-color .18s ease}.habit-card__score-button{display:grid;place-items:center;width:1.65rem;height:1.65rem;padding:0;border:1px solid var(--habit-button-border);border-radius:50%;background:var(--habit-button-bg);color:var(--habit-button-text);font-size:1.12rem;font-weight:700;line-height:1;cursor:pointer;transition:transform .12s ease,filter .12s ease}.habit-card__score-button:hover{transform:scale(1.08);filter:brightness(.96)}.habit-card__score-button:active{transform:scale(.95)}
-.habit-card__body{display:grid;grid-template-rows:auto auto minmax(0,1fr);min-width:0;padding:.58rem .72rem .62rem}.habit-card__header{display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem}.habit-card__title{display:flex;min-width:0;align-items:center;gap:.25rem}.habit-card__title h3{margin:0;overflow:hidden;color:var(--beeday-color-card-title);font-size:.82rem;font-weight:500;line-height:1.2;text-overflow:ellipsis;white-space:nowrap}.habit-card__featured{color:var(--beeday-color-card-star);font-size:.78rem}.habit-card__body p{margin:.08rem 0 0;color:var(--beeday-color-card-description);font-size:.64rem;line-height:1.3}.habit-card__menu{width:1.35rem;height:1.55rem;flex:0 0 auto;padding:0;border:0;background:transparent;color:#756c7d;font-size:1.15rem;font-weight:700;line-height:1;cursor:pointer}.habit-card__menu:hover{color:var(--beeday-color-primary-hover)}@media(max-width:650px){.habit-card{grid-template-columns:2.65rem minmax(0,1fr) auto 2.65rem}}
+.habit-card__body{display:grid;grid-template-rows:auto auto minmax(0,1fr);min-width:0;padding:.58rem .72rem .62rem}.habit-card__header{display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem}.habit-card__title{display:flex;min-width:0;align-items:center;gap:.25rem}.habit-card__title h3{margin:0;overflow:hidden;color:var(--beeday-color-card-title);font-size:.82rem;font-weight:500;line-height:1.2;text-overflow:ellipsis;white-space:nowrap}.habit-card__featured{color:var(--beeday-color-card-star);font-size:.78rem}.habit-card__body p{margin:.08rem 0 0;color:var(--beeday-color-card-description);font-size:.64rem;line-height:1.3}.habit-card__menu{width:1.35rem;height:1.55rem;flex:0 0 auto;padding:0;border:0;background:transparent;color:#756c7d;font-size:1.15rem;font-weight:700;line-height:1;cursor:pointer}.habit-card__menu:hover{color:var(--beeday-color-brand-primary-hover)}@media(max-width:650px){.habit-card{grid-template-columns:2.65rem minmax(0,1fr) auto 2.65rem}}
 
 
 /* Menu visibility and clipping */
@@ -93,6 +93,19 @@
 
 .activity-card__project-status{display:grid;place-items:center;width:1.55rem;height:1.55rem;margin:0;border:2px solid rgb(255 255 255 / 72%);border-radius:.14rem;color:var(--activity-accent-dark);background:rgb(255 255 255 / 72%);font-size:.88rem;font-weight:700;line-height:1;box-sizing:border-box}
 
+/* Sprint 21.14: activity actions retain a 44px target without a saturated rail or raised box. */
+.activity-card { grid-template-columns: 2.75rem minmax(0, 1fr); }
+.activity-card__rail { align-items: center; padding: 0; background: transparent; }
+.activity-card__checkbox,
+.activity-card__project-status { width: 2.75rem; height: 2.75rem; border: 0; border-radius: var(--beeday-radius-sm); background: transparent; color: var(--beeday-color-text-muted); box-shadow: none; }
+.activity-card__checkbox:hover { transform: none; background: var(--beeday-color-brand-primary-soft); color: var(--beeday-color-brand-primary); }
+.activity-card__checkbox:active { transform: none; }
+.activity-card__checkbox-glyph { opacity: .55; transform: none; }
+.activity-card--completed .activity-card__checkbox { color: var(--beeday-color-success); background: transparent; }
+.activity-card--task,
+.activity-card--todo,
+.activity-card--project { --activity-accent: var(--beeday-color-brand-primary); --activity-accent-dark: var(--beeday-color-brand-primary); }
+
 /* Sprint 1.7 — card feedback and touch behavior */
 .activity-card,
 .habit-card {
@@ -103,21 +116,20 @@
         opacity var(--beeday-transition-normal);
 }
 
-.activity-card:hover,
-.habit-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--beeday-shadow-md);
-}
-
 .activity-card:focus-within,
 .habit-card:focus-within {
-    border-color: var(--beeday-color-primary-light);
+    border-color: var(--beeday-color-brand-primary-light);
     box-shadow: var(--beeday-focus-ring), var(--beeday-shadow-sm);
+}
+
+.activity-card__body--openable,
+.habit-card__body--openable {
+    cursor: pointer;
 }
 
 .activity-card__body--openable:hover h3,
 .habit-card__body--openable:hover h3 {
-    color: color-mix(in srgb, var(--beeday-color-primary) 55%, currentColor);
+    color: color-mix(in srgb, var(--beeday-color-brand-primary) 55%, currentColor);
 }
 
 .activity-card__body--openable:active,
@@ -151,14 +163,6 @@
     z-index: 3;
 }
 
-@media (hover: none) {
-    .activity-card:hover,
-    .habit-card:hover {
-        transform: none;
-        box-shadow: var(--beeday-shadow-xs);
-    }
-}
-
 /* Dashboard card proportions — compact layout based on the visual reference.
    Keeps text readable without increasing the physical card footprint. */
 .activity-card,
@@ -182,7 +186,7 @@
 
 .activity-card h3,
 .habit-card__title h3 {
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: .95rem;
     font-weight: var(--beeday-font-weight-semibold);
     line-height: 1.15;
@@ -192,7 +196,7 @@
 .activity-card p,
 .habit-card__body p {
     margin-top: .18rem;
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: .78rem;
     line-height: 1.25;
 }
@@ -200,7 +204,7 @@
 .activity-card__meta {
     margin-top: .28rem;
     padding: .1rem .3rem;
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: .68rem;
     font-weight: var(--beeday-font-weight-semibold);
     line-height: 1.1;
@@ -260,7 +264,7 @@
 
 .activity-card:focus-within,
 .habit-card:focus-within {
-    border-color: var(--beeday-color-primary-light) !important;
+    border-color: var(--beeday-color-brand-primary-light) !important;
     box-shadow: var(--beeday-focus-ring), var(--beeday-shadow-sm) !important;
 }
 
@@ -423,7 +427,7 @@
 .activity-card__title-row h3,
 .habit-card__title h3 {
     min-width: 0;
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
     font-size: .95rem;
     font-weight: var(--beeday-font-weight-semibold);
     line-height: 1.15;
@@ -455,7 +459,7 @@
 }
 
 .activity-card--project .activity-card__project-status svg,
-.activity-card--project .activity-card__project-status .pixel-icon {
+.activity-card--project .activity-card__project-status .beeday-icon {
     color: #fff;
     fill: currentColor;
 }

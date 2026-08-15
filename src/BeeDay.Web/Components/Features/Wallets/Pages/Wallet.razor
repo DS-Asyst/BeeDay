@@ -29,16 +29,15 @@ else
                 <p>Track your wallet, organize transactions and understand where your money goes.</p>
             </div>
             <BeeDayButton Variant="BeeDayButtonVariant.Primary"
-                           Icon="PixelIconName.Add"
+                           Icon="BeeDayIconName.Add"
                            Disabled="_interaction.IsBusy"
-                           Class="beeday-button--comic beeday-button--comic-orange"
                            OnClick="OpenCreateTransaction">New transaction</BeeDayButton>
         </header>
 
         @if (!string.IsNullOrWhiteSpace(_errorMessage))
         {
             <div class="wallet-alert" role="alert">
-                <span><PixelIcon Name="PixelIconName.Warning" Size="PixelIconSize.Small" Color="PixelIconColor.Danger" /> @_errorMessage</span>
+                <span><BeeDayIcon Name="BeeDayIconName.Warning" Size="BeeDayIconSize.Small" Color="BeeDayIconColor.Danger" /> @_errorMessage</span>
                 <BeeDayButton Variant="BeeDayButtonVariant.Secondary" Compact="true" Disabled="_interaction.IsBusy" OnClick="RetryAsync">Try again</BeeDayButton>
             </div>
         }

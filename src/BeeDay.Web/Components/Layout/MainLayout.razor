@@ -2,28 +2,20 @@
 @inherits LayoutComponentBase
 
 <div class="beeday-app">
-    <TopNavigation IsProfilePanelOpen="@_isProfilePanelOpen"
-                   IsMenuPanelOpen="@_isMenuPanelOpen"
-                   OnToggleProfilePanel="ToggleProfilePanel"
-                   OnToggleMenuPanel="ToggleMenuPanel" />
+    <MobileHeader IsNavOpen="@_isMobileNavOpen" OnToggleNav="ToggleMobileNav" />
 
-    <div class="beeday-workspace @GetWorkspaceClass()">
-        <div class="beeday-side-slot beeday-side-slot--left">
-            <ProfileSidePanel IsOpen="@_isProfilePanelOpen" OnClose="ClosePanels" />
-        </div>
+    <div class="beeday-shell">
+        <DesktopSidebar />
 
-        <div class="beeday-content-shell">
-            <main class="beeday-main">
+        <div class="beeday-workspace">
+            <main class="beeday-main beeday-main--authenticated">
                 @Body
             </main>
-
-            <AppFooter />
-        </div>
-
-        <div class="beeday-side-slot beeday-side-slot--right">
-            <AccountSidePanel IsOpen="@_isMenuPanelOpen" OnClose="ClosePanels" />
         </div>
     </div>
+
+    <MobileSidebar IsOpen="@_isMobileNavOpen"
+                   OnClose="CloseMobileNav" />
 
     <BeeDayToastHost />
 </div>
@@ -34,31 +26,8 @@
         await AuthenticatedUserInitializer.EnsureInitializedAsync();
     }
 
-    private bool _isProfilePanelOpen;
-    private bool _isMenuPanelOpen;
+    private bool _isMobileNavOpen;
+    private void ToggleMobileNav() => _isMobileNavOpen = !_isMobileNavOpen;
 
-    private void ToggleProfilePanel()
-    {
-        _isProfilePanelOpen = !_isProfilePanelOpen;
-        _isMenuPanelOpen = false;
-    }
-
-    private void ToggleMenuPanel()
-    {
-        _isMenuPanelOpen = !_isMenuPanelOpen;
-        _isProfilePanelOpen = false;
-    }
-
-    private void ClosePanels()
-    {
-        _isProfilePanelOpen = false;
-        _isMenuPanelOpen = false;
-    }
-
-    private string GetWorkspaceClass() =>
-        _isProfilePanelOpen
-            ? "has-left-panel"
-            : _isMenuPanelOpen
-                ? "has-right-panel"
-                : string.Empty;
+    private void CloseMobileNav() => _isMobileNavOpen = false;
 }

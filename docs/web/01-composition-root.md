@@ -86,7 +86,7 @@ Blazor):
 | `BeeDayWebService` | Fachada MediatR — ver [`docs/web/README.md`](README.md) "Integração com Application" |
 | `ToastService` | Fila de notificações in-memory, consumida por `BeeDayToastHost.razor` |
 | `AuthenticatedUserInitializer` | Garante que o `User` do cookie ainda existe antes de qualquer página autenticada renderizar dados |
-| `DashboardState` | Estado agregado da página `/daily` — ver `04-feature-components.md` |
+| `DashboardState` | Estado agregado compartilhado por `/profile` e `/daily` — ver `04-feature-components.md` |
 | `BeeDayFeedbackStore` + `INotificationHandler<DomainEventNotification>` → `BeeDayFeedbackEventHandler` | Escuta `UserLeveledUpDomainEvent` via pipeline MediatR e alimenta o feedback visual de level-up |
 | `ProfileCreationState` | Estado do fluxo de criação de conta/perfil (`/profile/create`) |
 | `CardActionMenuCoordinator` | Coordena `BeeDayCardMenu` para que abrir um menu feche qualquer outro já aberto no mesmo circuito |
@@ -133,9 +133,11 @@ UseForwardedHeaders (se produção + habilitado)
   status desta tabela que não são hoje alcançáveis por uma requisição HTTP real (a superfície HTTP
   desta aplicação é só `/auth/login`, `/auth/logout`, `/health*` e páginas Blazor).
 - `UseHsts`/`UseHttpsRedirection` só fora de Development.
-- `UseAntiforgery` protege os formulários HTML puros (`/auth/login`, `/auth/logout`, e os
-  `<form method="post">` usados por `TopNavigation`/`AccountSidePanel` para logout) — os componentes
-  Blazor interativos usam `EditForm`/`AntiforgeryToken` própria do framework.
+- `UseAntiforgery` protege os formulários HTML puros (`/auth/login`, `/auth/logout`, e o
+  `<form method="post">` usado por `NavigationItems` para logout — a única navegação autenticada
+  que renderiza esse form; `DesktopSidebar`/`MobileHeader`/`MobileSidebar` só disparam o botão que
+  abre esse painel) — os componentes Blazor interativos usam `EditForm`/`AntiforgeryToken` própria
+  do framework.
 - `MapStaticAssets()` (API nativa do .NET 10) serve `wwwroot/` com o mapeamento usado por
   `@Assets["..."]` em `App.razor`.
 
@@ -165,7 +167,7 @@ Só dois endpoints HTTP fora de Blazor e health checks, ambos em `Program.cs`:
 ```csharp
 if (!hasProfile) return "/profile/create";
 if (!hasCompletedOnboarding) return "/onboarding/tutorial";
-return IsLocalPath(returnUrl) ? returnUrl! : "/daily";
+return IsLocalPath(returnUrl) ? returnUrl! : "/profile";
 ```
 
 `IsLocalPath` exige que o valor comece com `/` e não com `//` nem `/\` — mitiga open redirect via

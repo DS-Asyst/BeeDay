@@ -1,13 +1,15 @@
 # Web Testing Map
 
-**Fonte da verdade:** enumerado diretamente em `tests/BeeDay.Web.Tests/` (61 arquivos `.cs`) e
-`tests/BeeDay.E2E.Tests/` (7 arquivos `.cs` + o `.csproj`). A estratégia de teste em si (pirâmide, infraestrutura de
+**Fonte da verdade:** enumerado diretamente em `tests/BeeDay.Web.Tests/` (64 arquivos `.cs`) e
+`tests/BeeDay.E2E.Tests/` (8 arquivos `.cs` + o `.csproj`). A estratégia de teste em si (pirâmide, infraestrutura de
 integração, infraestrutura E2E) já é descrita em detalhe em
 [`docs/testing/01-testing-strategy.md`](../testing/01-testing-strategy.md) — este documento não a
 duplica; mapeia especificamente qual arquivo de teste cobre qual parte da árvore de
 `src/BeeDay.Web/` descrita nos 5 documentos anteriores.
 
-**Última verificação:** 2026-08-07.
+**Última verificação:** 2026-08-11 (Sprint 20.5, EPIC 20) — `PublicHeader`/`PublicLayout`/`Home`
+(rota `/`) mapeados; contagem de arquivos corrigida (Web.Tests 61→64, E2E.Tests 7→8). Demais seções
+preservadas da verificação de 2026-08-07.
 
 ## 1. Objetivo
 
@@ -54,10 +56,12 @@ Assert.Contains(expectedClass, cut.Find("button").ClassList);
 | `Login.razor` (componente, sem HTTP) | `Components/Authentication/LoginTests.cs` |
 | `/wallet` fim a fim | `Components/Wallet/WalletComponentTests.cs`, `WalletUiCoverageTests.cs` |
 | `/daily` — arquitetura de scroll da página | `Components/Layout/DailyPageScrollArchitectureTests.cs` |
-| Consistência visual entre páginas de entrada (`/`, `/welcome`, `/login`, `/profile/create`) | `Components/Visual/EntryFlowVisualConsistencyTests.cs` |
+| Consistência visual entre páginas de entrada sob `OnboardingLayout` (`/welcome`, `/login`, `/profile/create`, Identity, Tutorial) | `Components/Visual/EntryFlowVisualConsistencyTests.cs` — nome preservado da Sprint 16.7; `/` saiu deste grupo na Sprint 20.5 (agora `PublicLayout`, não `OnboardingLayout`), ver linha abaixo |
+| `/` — Home pública (EPIC 20, Sprint 20.14) | `Components/Home/HomeTests.cs` (proposta única, rotas de cadastro/login, processo, capacidades reais e ausência de gamificação/métricas fabricadas) |
 | Fluxo real via browser: criar conta → confirmação pendente | `E2E: AccountLifecycleTests.CreateAccount_ReachesEmailConfirmationPending` |
 | Fluxo real via browser: login → onboarding → `/daily` | `E2E: AccountLifecycleTests.Login_CompletesOnboarding_ReachesDashboard` |
 | Fluxo real via browser: logout | `E2E: AccountLifecycleTests.Logout_EndsSessionAndBlocksDashboard` |
+| Fluxo real via browser: visitante anônimo em `/`, sem redirect, CTA para `/login` | `E2E: HomeTests.AnonymousVisitor_SeesHomeWithoutRedirect`, `HomeTests.AnonymousVisitor_GetStartedCtaReachesLogin` (Sprint 20.5) |
 
 Nenhum teste de componente/integração dedicado foi encontrado para as 5 páginas de `Identity`
 individualmente (`ConfirmEmail`, `ResetPassword`, `ForgotPassword`, `ResendConfirmation`,
@@ -71,12 +75,18 @@ renderização do componente Razor em si via bUnit.
 |---|---|
 | `ProfileSidePanel.razor` | `Components/Layout/ProfileSidePanelTests.cs` |
 | `AccountSidePanel.razor` | `Components/Layout/AccountSidePanelTests.cs` |
-| `BeeDayPageHeader`/`BeeDaySectionHeader` (Design System, usado por `Account`/`Wallet`) | `Components/Layout/BeeDayHeaderTests.cs` — nome do arquivo sugere `TopNavigation`, mas testa os cabeçalhos do Design System, não a navegação |
+| `BeeDayPageHeader`/`BeeDaySectionHeader` (Design System, usado por `Account`/`Wallet`) | `Components/Layout/BeeDayHeaderTests.cs` — nome do arquivo sugere a navegação, mas testa os cabeçalhos do Design System |
 | `BeeDaySettingsForm`/`BeeDaySettingsSection` (Design System, usado por `Account`) | `Components/Layout/BeeDaySettingsTests.cs` |
-| `BeeDayHero` (Design System, catálogo) | `Components/Layout/BeeDayHeroTests.cs` |
+| `BeeDayHero` (Design System, catálogo — primeiro consumidor de produto real desde a Sprint 20.5, ver `Home.razor`) | `Components/Layout/BeeDayHeroTests.cs` |
+| `PublicHeader.razor`/`PublicLayout.razor` (EPIC 20, Sprint 20.4/20.5) | `Components/Layout/PublicHeaderTests.cs`, `PublicLayoutTests.cs` |
+| `DesktopSidebar.razor` (EPIC 21, Sprint 21.3) | `Components/Layout/DesktopSidebarTests.cs` |
+| `MobileHeader.razor` (EPIC 21, Sprint 21.3) | `Components/Layout/MobileHeaderTests.cs` |
+| `MobileSidebar.razor` (EPIC 21, Sprint 21.3) | `Components/Layout/MobileSidebarTests.cs` |
+| `NavigationItem.razor`/`NavigationItems.razor` (EPIC 21, Sprint 21.3) | `Components/Layout/NavigationItemTests.cs`, `NavigationItemsTests.cs` |
+| Contrato de shell (`MainLayout`/`DesktopSidebar`/`RightRail`/`MobileHeader`/`MobileSidebar`, EPIC 21) | `Components/Layout/ShellFoundationTests.cs` |
 
-`MainLayout.razor`, `OnboardingLayout.razor`, `TopNavigation.razor` e `AppFooter.razor` não têm
-arquivo de teste dedicado identificado nesta auditoria.
+`MainLayout.razor` e `OnboardingLayout.razor` não têm arquivo de teste dedicado
+identificado nesta auditoria. `TopNavigation.razor` foi removida na Sprint 21.3 (EPIC 21).
 
 ## 6. Mapeamento — Feature components (`04-feature-components.md`)
 
@@ -98,47 +108,53 @@ arquivo de teste dedicado identificado nesta auditoria.
 |---|---|
 | `BeeDayButton` | `Components/Buttons/BeeDayButtonTests.cs` |
 | `BeeDayCard` / `BeeDayCardMenu` (+ cálculo de posicionamento) | `Components/Cards/BeeDayCardTests.cs`, `BeeDayCardMenuTests.cs`, `CardMenuPlacementCalculatorTests.cs` |
-| `ActivityAttributeSelect`/`Badge` (+ cálculo de posicionamento) | `Components/Attributes/ActivityAttributeComponentTests.cs`, `ActivityAttributeSelectTests.cs`, `AttributeSelectPlacementCalculatorTests.cs` |
 | `PixelIcon` | `Components/Icons/PixelIconTests.cs` |
 | `BeeDayBrand` / `SearchHighlight` | `Components/Text/BeeDayBrandTests.cs`, `SearchHighlightTests.cs` |
 | Isolamento do adapter de tema NES (`pixel-nes.css`) | `Components/DesignSystem/PixelNesAdapterIsolationTests.cs` |
 | Componentes de atividade (badges/atributos combinados) | `Components/DesignSystem/ActivityComponentsTests.cs` |
 
-Os 3 módulos `.js` em si (`beeday-sortable.js`, `beeday-card-menu.js`,
-`activity-attribute-select.js`) não são executados por `BeeDay.Web.Tests` (bUnit não roda um
+Os 2 módulos `.js` em si (`beeday-sortable.js`, `beeday-card-menu.js`) não são executados por `BeeDay.Web.Tests` (bUnit não roda um
 browser real) — sua cobertura prática vem apenas dos testes E2E (Playwright, browser real) listados
 em §4 e §8, que exercitam o comportamento visível resultante (reordenar cards, abrir/fechar menus),
 não o código JS isoladamente.
 
 ## 8. `BeeDay.E2E.Tests`
 
-3 classes de teste, 7 fluxos, sobre a infraestrutura descrita em
-`docs/testing/01-testing-strategy.md` §7 (`PlaywrightAppFixture`, `E2ETestBase`,
-`E2EWebApplicationFactory`):
+6 classes de teste, 18 fluxos (`grep -c "\[Fact\]"`, verificado diretamente na Sprint 21.3), sobre
+a infraestrutura descrita em `docs/testing/01-testing-strategy.md` §7 (`PlaywrightAppFixture`,
+`E2ETestBase`, `E2EWebApplicationFactory`):
 
 | Classe | Fluxos |
 |---|---|
 | `AccountLifecycleTests.cs` | Criar conta → confirmação pendente; login → onboarding → `/daily`; logout; editar perfil |
 | `HabitAndTaskTests.cs` | Criar/completar hábito (saldo + XP visíveis); criar/completar task |
 | `WalletTests.cs` | Criar tag + transação no Wallet, saldo atualizado |
+| `HomeTests.cs` (Sprint 20.15, EPIC 20) | Além dos fluxos públicos, valida continuidade geométrica Header/Hero, CTAs branco/amarelo e Footer `#17203B` em Chromium |
+| `ShellResponsiveLayoutTests.cs` (EPIC 21, Sprint 21.2/21.3) | Geometria real da sidebar/rail desktop; visibilidade condicional mobile vs. desktop sem sobreposição; ausência de overflow horizontal real |
+| `NavigationTests.cs` (EPIC 21, Sprint 21.3) | `aria-current` real ao navegar e em deep link; abrir/fechar o drawer mobile via hambúrguer/backdrop/Escape/botão dedicado; foco real move para o drawer ao abrir; navegar por um item do drawer fecha-o; Logout continua acessível |
 
 ## 9. Contagem de referência
 
 `docs/testing/01-testing-strategy.md` §1 é a fonte canônica da contagem de testes por projeto —
-752 testes aprovados (93 Domain, 73 Application, 129 Infrastructure, 450 Web, 7 E2E), confirmado
-pelo quality gate na Sprint 18.7 (não repetido aqui em detalhe para evitar duplicação).
+768 testes aprovados (93 Domain, 73 Application, 129 Infrastructure, 464 Web, 9 E2E), confirmado
+por execução real na Sprint 20.5 (não repetido aqui em detalhe para evitar duplicação).
 
 ## 10. Achado
 
-- `Components/Layout/BeeDayHeaderTests.cs` — o nome sugere que testa `TopNavigation.razor` (o
-  "header" da aplicação); na verdade testa `BeeDayPageHeader`/`BeeDaySectionHeader` do Design
-  System. `TopNavigation.razor` não tem teste de componente identificado nesta auditoria.
+- `Components/Layout/BeeDayHeaderTests.cs` — o nome sugere que testa a navegação da aplicação; na
+  verdade testa `BeeDayPageHeader`/`BeeDaySectionHeader` do Design System, sem relação com
+  `Components/Layout/`'s navegação real (`DesktopSidebar`/`MobileHeader`/`MobileSidebar`, com seus
+  próprios arquivos de teste — ver §5). `TopNavigation.razor`, que este achado apontava como sem
+  cobertura, foi removida na Sprint 21.3 (EPIC 21) — achado encerrado, não mais aplicável.
 
 ## 11. Fontes de verdade
 
-- Lista de arquivos de `tests/BeeDay.Web.Tests/**/*.cs` (61 arquivos) e `tests/BeeDay.E2E.Tests/*.cs`
-  (7 arquivos, mais `E2EWebApplicationFactory.cs`/`PlaywrightAppFixture.cs`/`E2ETestBase.cs` como
-  infraestrutura).
+- Lista de arquivos de `tests/BeeDay.Web.Tests/**/*.cs` (64 arquivos, `Glob` direto nesta Sprint —
+  61 na Sprint 18.8, `+1` de `Components/Home/HomeTests.cs`; a diferença residual de +2 não é
+  atribuída a esta Sprint especificamente, não reauditada arquivo a arquivo) e
+  `tests/BeeDay.E2E.Tests/*.cs` (8 arquivos — `+1` de `HomeTests.cs`, Sprint 20.5), incluindo
+  `E2EWebApplicationFactory.cs`/`PlaywrightAppFixture.cs`/`E2ETestBase.cs`/`Usings.cs` como
+  infraestrutura.
 - `tests/BeeDay.Web.Tests/BeeDay.Web.Tests.csproj`, `tests/BeeDay.E2E.Tests/BeeDay.E2E.Tests.csproj`.
 - [`docs/testing/01-testing-strategy.md`](../testing/01-testing-strategy.md) para a infraestrutura
   compartilhada (não reverificada em detalhe nesta Sprint — a leitura desta sessão confirma que a

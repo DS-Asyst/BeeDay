@@ -1,35 +1,14 @@
-/*
- * BeeDay typography policy
- *
- * Inter: the default for all regular UI text (paragraphs, descriptions, forms,
- * inputs, tables, dialogs, navigation, menus, tabs, values, counters,
- * statistics, balances, HUD information, and every other regular UI element).
- * Jersey 25: reserved for page titles, card titles, stylized buttons
- * (the shared BeeDayButton component), and BeeDay branding only.
- */
-
-/* The complete interface reads from Inter by default. */
+/* Epic 21 typography policy: Nunito is the single product family. Hierarchy is expressed through
+   the shared weight, size, line-height and tracking tokens in typography.css. */
 html,
-body {
-    font-family: var(--beeday-font-body);
-}
-
-/* Only the shared stylized button component uses the retro UI font. */
-.beeday-button {
-    font-family: var(--beeday-font-ui) !important;
-}
-
-/* Form fields and labels use Inter for readability. */
+body,
+button,
 input,
 select,
 textarea,
 option,
 optgroup,
-label {
-    font-family: var(--beeday-font-body) !important;
-}
-
-/* Tables, dialogs, and messages read as body content. */
+label,
 table,
 th,
 td,
@@ -44,18 +23,17 @@ td,
     font-family: var(--beeday-font-body);
 }
 
-/* Button font-weight is enforced here (rather than only in design-system.css) so no
-   variant, state, or legacy modifier class can ever render bold; size/line-height/letter-
-   spacing are owned solely by design-system.css's .beeday-button rule to avoid duplicated,
-   drift-prone declarations across files. */
-.beeday-button {
-    font-weight: var(--beeday-font-weight-regular) !important;
+body {
+    font-size: var(--beeday-font-size-base);
+    line-height: var(--beeday-line-height-normal);
 }
 
-/* Brand and heading roles use the retro UI font. */
-.beeday-brand,
+.beeday-button {
+    font-family: var(--beeday-font-body);
+    font-weight: var(--beeday-font-weight-bold);
+}
+
 .beeday-logo,
-.top-navigation__brand-button,
 .tutorial-brand,
 .tutorial-icon,
 .display-title,
@@ -63,38 +41,27 @@ td,
 h1,
 .page-title,
 .hero-title {
-    font-family: var(--beeday-font-ui);
+    font-family: var(--beeday-font-body);
+    font-weight: var(--beeday-font-weight-extrabold);
 }
 
-/* Card and section titles use the retro UI font. */
 h2.title,
 h3.title,
 .card-title,
 .card-title--special,
 .section-title--display,
-.wallet-panel-header h2 {
-    font-family: var(--beeday-font-ui);
+.wallet-panel-header h2,
+.dashboard-column__heading h2 {
+    font-family: var(--beeday-font-body);
+    font-weight: var(--beeday-font-weight-bold);
 }
 
-/* Large numeric indicators (XP, level, counters, balances) use Inter, tabular. */
 .stat-value,
 .metric-value,
 .wallet-balance,
 [data-display="number"] {
     font-family: var(--beeday-font-body);
     font-variant-numeric: tabular-nums;
-}
-
-/* Canonical project-wide readable type scale. */
-body {
-    font-size: var(--beeday-font-size-base);
-    line-height: var(--beeday-line-height-normal);
-}
-
-.card-title,
-.special-card-title,
-.dashboard-column__heading h2 {
-    font-family: var(--beeday-font-ui);
 }
 
 small,
@@ -104,7 +71,6 @@ small,
     font-size: var(--beeday-font-size-sm);
 }
 
-/* Dashboard card copy uses Inter; the retro UI font remains reserved for page/section identity. */
 .activity-card h3,
 .habit-card__title h3,
 .activity-card p,
@@ -117,8 +83,8 @@ small,
 .activity-card h3,
 .habit-card__title h3 {
     font-size: .88rem;
-    font-weight: 500;
-    line-height: 1.2;
+    font-weight: var(--beeday-font-weight-medium);
+    line-height: var(--beeday-line-height-tight);
     letter-spacing: 0;
 }
 
@@ -126,7 +92,6 @@ small,
 .habit-card__body p {
     margin-top: .12rem;
     font-size: .78rem;
-    font-weight: 400;
+    font-weight: var(--beeday-font-weight-regular);
     line-height: 1.3;
 }
-

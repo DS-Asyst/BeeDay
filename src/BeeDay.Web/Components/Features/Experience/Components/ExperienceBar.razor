@@ -3,36 +3,35 @@
 
 @if (IsLoading)
 {
-    <section class="experience-card experience-card--loading"
-             aria-label="Loading experience"
-             aria-busy="true">
+    <BeeDayCard Padded="true" Class="experience-card experience-card--loading"
+                aria-label="Loading experience"
+                aria-busy="true">
         <div class="experience-card__skeleton experience-card__skeleton--label"></div>
         <div class="experience-card__skeleton experience-card__skeleton--bar"></div>
         <div class="experience-card__skeleton experience-card__skeleton--value"></div>
-    </section>
+    </BeeDayCard>
 }
 else if (Model is not null)
 {
-    <section class="experience-card" aria-label="Experience">
+    <BeeDayCard Padded="true" Class="experience-card" aria-label="Experience">
         <div class="experience-card__header">
-            <span class="experience-card__label"><PixelIcon Name="PixelIconName.Level" Size="PixelIconSize.ExtraSmall" /> Level</span>
-            <strong>@Model.Level</strong>
+            <BeeDayIcon Name="BeeDayIconName.Level" Size="BeeDayIconSize.Large" Color="BeeDayIconColor.Primary" />
+            <div class="experience-card__level">
+                <span class="experience-card__label">Level</span>
+                <strong>@Model.Level</strong>
+            </div>
         </div>
 
-        <div class="experience-card__track"
-             role="progressbar"
-             aria-label="Experience progress"
-             aria-valuemin="0"
-             aria-valuemax="@Model.RequiredExperience"
-             aria-valuenow="@Model.CurrentExperience"
-             aria-valuetext="@ExperienceText">
-            <div class="experience-card__fill"
-                 style="@ProgressStyle"></div>
-        </div>
+        <BeeDayProgressBar Label="Experience progress"
+                           Tone="BeeDayProgressTone.Reward"
+                           Value="@Model.CurrentExperience"
+                           Maximum="@Model.RequiredExperience"
+                           ValueText="@ExperienceText" />
 
         <div class="experience-card__values">
-            <span><PixelIcon Name="PixelIconName.Experience" Size="PixelIconSize.ExtraSmall" /> @Model.CurrentExperience / @Model.RequiredExperience XP</span>
-            <span><PixelIcon Name="PixelIconName.TrendUp" Size="PixelIconSize.ExtraSmall" /> @Model.RemainingExperience XP to next level</span>
+            <span><BeeDayIcon Name="BeeDayIconName.Experience" Size="BeeDayIconSize.ExtraSmall" /> @Model.TotalExperience XP total</span>
+            <span>@Model.CurrentExperience / @Model.RequiredExperience XP</span>
+            <span><BeeDayIcon Name="BeeDayIconName.TrendUp" Size="BeeDayIconSize.ExtraSmall" /> @Model.RemainingExperience XP to next level</span>
         </div>
 
         @if (ExperienceGain > 0)
@@ -40,10 +39,10 @@ else if (Model is not null)
             <output @key="FeedbackKey"
                     class="experience-card__gain"
                     aria-live="polite">
-                <PixelIcon Name="PixelIconName.Experience" Size="PixelIconSize.ExtraSmall" /> +@ExperienceGain XP
+                <BeeDayIcon Name="BeeDayIconName.Experience" Size="BeeDayIconSize.ExtraSmall" /> +@ExperienceGain XP
             </output>
         }
-    </section>
+    </BeeDayCard>
 }
 
 @code {
@@ -51,10 +50,6 @@ else if (Model is not null)
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public long ExperienceGain { get; set; }
     [Parameter] public long FeedbackKey { get; set; }
-
-    private double ProgressPercentage => Model?.ProgressPercentage ?? 0d;
-
-    private string ProgressStyle => $"width: {ProgressPercentage.ToString("0.##", CultureInfo.InvariantCulture)}%";
 
     private string ExperienceText => Model is null
         ? string.Empty

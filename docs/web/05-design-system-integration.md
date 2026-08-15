@@ -4,7 +4,7 @@
 `src/BeeDay.Web/Components/Behaviors/DragDrop/`, `src/BeeDay.Web/Components/App.razor` e
 `src/BeeDay.Web/wwwroot/`.
 
-**Última verificação:** 2026-08-07.
+**Última verificação:** 2026-08-13 (Sprint 21.12).
 
 ## 1. Objetivo
 
@@ -26,7 +26,6 @@ CSS), não uma referência exaustiva de cada Parameter de cada componente.
 | `Icons/` | `PixelIcon`, `PixelIconRegistry` | Sprite SVG único (`/icons/sprite.svg`) — ver §4 |
 | `Layout/` | `BeeDayHero`, `BeeDayPageHeader`, `BeeDaySectionHeader`, `BeeDaySettingsForm<TModel>`, `BeeDaySettingsSection` | Blocos de página compartilhados entre Account/Wallet/Dashboard |
 | `Modals/` | `EditorModalShell` | Esqueleto comum aos 4 editores de atividade (ver `04-feature-components.md` §5) |
-| `Attributes/` | `ActivityAttributeBadge`, `ActivityAttributeSelect` | Select customizado com posicionamento via interop (ver §5) |
 | `Text/` | `BeeDayBrand`, `SearchHighlight` | Marca oficial; realce de termo buscado |
 | `Pages/` | `IconCatalog`, `HeroCatalog` | Catálogos visuais roteáveis — ver `02-routing-and-pages.md` §6 |
 
@@ -53,7 +52,6 @@ app.css
 → css/identity.css
 → BeeDay.Web.styles.css          (bundle isolado, gerado pelo SDK a partir de todo *.razor.css)
 → css/typography-policy.css
-→ css/cursors.css
 → css/pixel-nes.css              (excerto do tema NES.css — ver css/vendor/NES_ATTRIBUTION.md)
 ```
 
@@ -72,7 +70,7 @@ semanticName)`; `Resolve` cai para `PixelIconName.Warning` se o nome não existi
 (`InvalidOperationException` em `OnParametersSet`) — força que todo ícone não-decorativo declare
 texto acessível.
 
-## 5. Interop JavaScript — os 3 módulos
+## 5. Interop JavaScript — os 2 módulos
 
 Todo componente com JS interop segue o mesmo padrão: import dinâmico de módulo ES
 (`JS.InvokeAsync<IJSObjectReference>("import", "./js/...")`) no primeiro `OnAfterRenderAsync`,
@@ -84,12 +82,9 @@ Todo componente com JS interop segue o mesmo padrão: import dinâmico de módul
 |---|---|---|---|
 | `Behaviors/DragDrop/BeeDaySortable.razor` | `js/beeday-sortable.js?v=20260721-f13-dragfix` | JS → C# (`[JSInvokable] NotifyReorderAsync`) | Drag-and-drop de cards; C# nunca lê posição do mouse, só recebe o resultado final (`itemId`, `targetItemId`, `placeAfter`) |
 | `DesignSystem/Cards/BeeDayCardMenu.razor` | `js/beeday-card-menu.js?v=20260729-1` | C# → JS (`measureGeometry`) e JS → C# (`[JSInvokable] NotifyOutsideClickAsync`) | Mede `getBoundingClientRect` do trigger/painel para decidir abrir para cima/baixo e deslocamento horizontal (`CardMenuPlacementCalculator`, lógica pura, testável sem DOM); detecta clique fora do menu |
-| `DesignSystem/Attributes/ActivityAttributeSelect.razor` | `js/activity-attribute-select.js` | C# → JS (`measureGeometry`) | Mesmo padrão de posicionamento do `BeeDayCardMenu`, via `AttributeSelectPlacementCalculator` — sem detecção de clique fora (o menu fecha só ao selecionar um valor) |
-
-Os dois primeiros módulos usam sufixo de versão hardcoded na própria string de import
-(`?v=20260721-f13-dragfix`, `?v=20260729-1`) como cache-busting manual; `activity-attribute-select.js`
-não tem sufixo — inconsistência já listada em [`README.md`](README.md#achados-relevantes-reportados-não-corrigidos).
-Nenhum dos 3 módulos é auditado linha a linha nesta Sprint (escopo: código C#/Razor, não os
+Os dois módulos usam sufixo de versão hardcoded na própria string de import
+(`?v=20260721-f13-dragfix`, `?v=20260729-1`) como cache-busting manual.
+Nenhum dos 2 módulos é auditado linha a linha nesta Sprint (escopo: código C#/Razor, não os
 arquivos `.js` em si).
 
 `CardActionMenuCoordinator` (ver `01-composition-root.md` §6) é o que faz múltiplos

@@ -6,7 +6,9 @@
 `polish.css`, e cálculo manual de contraste (fórmula WCAG 2.x de luminância relativa) sobre os
 valores hexadecimais de `variables.css`.
 
-**Última verificação:** 2026-08-07.
+**Última verificação:** 2026-08-11 (Sprint 20.3) — §8 atualizado para refletir a remoção
+estrutural do cursor personalizado (EPIC 20); demais seções preservadas da verificação de
+2026-08-07.
 
 ## 1. Objetivo
 
@@ -70,13 +72,22 @@ carregada.
 
 ## 6. Movimento — `prefers-reduced-motion`
 
-12+ blocos `@media (prefers-reduced-motion: reduce)` distintos, um por arquivo de CSS que declara
+14+ blocos `@media (prefers-reduced-motion: reduce)` distintos, um por arquivo de CSS que declara
 `@keyframes`/`transition` decorativa: `animations.css`, `pixel-ui.css`, `activity-design-system.css`,
 `cards.css` (via `design-system.css`), `feedback.css`, `design-system.css`, `editor-modal.css`,
-`dragdrop.css`, `wallet.css`, `polish.css`, `PixelIcon.razor.css`, `TopNavigation.razor.css`,
-`MainLayout.razor.css`, `BeeDayCardMenu.razor.css`, `BeeDayFeedbackModal.razor.css`,
-`ExperienceBar.razor.css`, `LoginBackground.razor.css` — cobertura consistente através de todo o
-CSS de produto, tanto global quanto isolado por componente. `animations.css` tem o bloco mais amplo:
+`dragdrop.css`, `wallet.css`, `polish.css`, `PixelIcon.razor.css`, `MainLayout.razor.css`,
+`BeeDayCardMenu.razor.css`, `BeeDayFeedbackModal.razor.css`, `ExperienceBar.razor.css` — mais, na
+navegação da EPIC 21 (Sprint 21.2/21.3, não capturados quando esta contagem foi feita
+originalmente): `DesktopSidebar.razor.css`, `NavigationItem.razor.css`, `MobileHeader.razor.css`,
+`MobileSidebar.razor.css` (`TopNavigation.razor.css`, que também tinha um bloco, foi removida na
+Sprint 21.3) — cobertura consistente através de todo o CSS de produto, tanto global quanto isolado
+por componente. **Sprint 20.8 (EPIC 20):** `LoginBackground.razor.css` (o único
+consumidor deste bloco fora dos listados acima) foi removido junto com o componente — era código
+morto, nunca montado por nenhuma página real (o fundo de imagem animado que ele implementava não
+tinha nenhum consumidor de markup em `src/`); o fundo realmente renderizado atrás de Login/Identity/
+Onboarding vinha de `OnboardingLayout.razor.css` (`auth-galaxy.png`, sem animação/`reduced-motion`
+próprios — não se aplicava aqui), também removido nesta Sprint em favor do background canônico do
+Design System. `animations.css` tem o bloco mais amplo:
 um seletor universal (`*, *::before, *::after`) que zera `animation-duration`/
 `transition-duration` para `.01ms` — uma rede de segurança que cobre qualquer animação futura que
 esqueça seu próprio bloco `reduced-motion` individual.
@@ -89,17 +100,25 @@ que é ignorado por navegadores neste modo de qualquer forma — torna explícit
 (força `border-color: CanvasText` em campos de formulário/card). Nenhum outro arquivo dos 49
 (19 globais + 30 isolados) trata este modo — a cobertura existe, mas é pontual, não sistemática.
 
-## 8. Cursor customizado — tensão com acessibilidade
+## 8. Cursor customizado — removido na Sprint 20.3 (histórico)
 
-`cursors.css` substitui o cursor do sistema inteiro por imagens customizadas
-(`cursor: url(...) !important` em `html, body, body *`), incluindo variantes para clique, arrastar
-(`grab`/`grabbing`) e desabilitado. Não há nenhum mecanismo no código (configuração de usuário,
-media query, preferência salva) para desativar isso e voltar ao cursor nativo do sistema
-operacional — um cursor customizado de baixo contraste ou pequeno pode ser mais difícil de
-localizar na tela para uma pessoa com baixa visão do que o cursor do sistema, que já respeita o
-tamanho/cor configurados no SO. O fallback nativo (`, auto`/`, pointer`/`, grab` após a URL) só
-entra em ação se a imagem falhar ao carregar — não é uma opção de acessibilidade, é uma
-degradação técnica.
+Até a Sprint 20.3 (EPIC 20), `cursors.css` substituía o cursor do sistema inteiro por imagens
+customizadas (`cursor: url(...) !important` em `html, body, body *`), incluindo variantes para
+clique, arrastar (`grab`/`grabbing`) e desabilitado. Não havia nenhum mecanismo no código
+(configuração de usuário, media query, preferência salva) para desativar isso e voltar ao cursor
+nativo do sistema operacional — um cursor customizado de baixo contraste ou pequeno podia ser mais
+difícil de localizar na tela para uma pessoa com baixa visão do que o cursor do sistema, que já
+respeita o tamanho/cor configurados no SO. O fallback nativo (`, auto`/`, pointer`/`, grab` após a
+URL) só entrava em ação se a imagem falhasse ao carregar — não era uma opção de acessibilidade, era
+uma degradação técnica.
+
+**Estado atual (Sprint 20.3):** `cursors.css` e os assets `wwwroot/cursors/{cursor-normal,
+cursor-click}.png` foram removidos estruturalmente — o BeeDay usa cursores nativos do
+navegador/sistema operacional em toda a aplicação. A tensão de acessibilidade descrita acima não se
+aplica mais. A semântica de `grab`/`grabbing` para itens arrastáveis (`.beeday-sortable__item`) e de
+`pointer` para o corpo clicável de cards (`role="button"`, `.activity-card__body--openable`/
+`.habit-card__body--openable`) foi preservada como declarações CSS nativas (sem imagem), movidas
+para `dragdrop.css`/`cards.css`, os stylesheets que já possuem esses seletores.
 
 ## 9. Contraste de cor — cálculo manual (fórmula WCAG 2.x)
 
@@ -126,9 +145,8 @@ grande" (limiar 3:1) do WCAG.
   onclick>` fazendo o papel de botão foi encontrado dentro de `Components/DesignSystem/`.
 - Cards de atividade (`ActivityCard`/`HabitCard`, em `Components/Features/Dashboard/`) usam
   `role="button"` em uma área clicável não-semântica (`.activity-card__body--openable`) — confirmado
-  indiretamente pelo comentário em `cursors.css` ("The card's clickable body has role='button', see
-  cards.css"); não foi lido o markup completo do card nesta Sprint (já coberto em profundidade na
-  Sprint 16.7).
+  diretamente em `ActivityCard.razor` na Sprint 20.3 (a semântica `cursor: pointer` para essa área
+  vive hoje em `cards.css`, ver §8).
 - Formulários usam `<label>` associado (via `Id`) em todo componente de `Forms/` — nenhum campo foi
   encontrado sem label programaticamente associado.
 

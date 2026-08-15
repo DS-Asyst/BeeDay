@@ -34,7 +34,7 @@
                 <span class="wallet-muted">No tag</span>
             }
             <time datetime="@Transaction.TransactionDate.ToString("yyyy-MM-dd")">@Transaction.TransactionDate.ToString("MMM dd, yyyy")</time>
-            <span class="wallet-transaction-card__type"><PixelIcon Name="@TransactionTypeIcon" Size="PixelIconSize.ExtraSmall" Color="@TransactionTypeColor" /> @(Transaction.Type == TransactionType.Income ? "Income" : "Expense")</span>
+            <span class="wallet-transaction-card__type"><BeeDayIcon Name="@TransactionTypeIcon" Size="BeeDayIconSize.ExtraSmall" Color="@TransactionTypeColor" /> @(Transaction.Type == TransactionType.Income ? "Income" : "Expense")</span>
         </div>
     </div>
 </BeeDayCard>
@@ -43,8 +43,8 @@
     [Parameter, EditorRequired] public TransactionResponse Transaction { get; set; } = default!;
     [Parameter] public EventCallback<TransactionResponse> OnEdit { get; set; }
 
-    private PixelIconName TransactionTypeIcon => Transaction.Type == TransactionType.Income ? PixelIconName.Income : PixelIconName.Expense;
-    private PixelIconColor TransactionTypeColor => Transaction.Type == TransactionType.Income ? PixelIconColor.Success : PixelIconColor.Danger;
+    private BeeDayIconName TransactionTypeIcon => Transaction.Type == TransactionType.Income ? BeeDayIconName.Income : BeeDayIconName.Expense;
+    private BeeDayIconColor TransactionTypeColor => Transaction.Type == TransactionType.Income ? BeeDayIconColor.Success : BeeDayIconColor.Danger;
     private string TypeClass => Transaction.Type == TransactionType.Income ? "income" : "expense";
     private string SignedAmount => WalletCurrencyFormatter.FormatSigned(Transaction.Amount, Transaction.Type == TransactionType.Income);
     private string TagColor => string.IsNullOrWhiteSpace(Transaction.WalletTagColor) ? "#7A4FCB" : Transaction.WalletTagColor;
