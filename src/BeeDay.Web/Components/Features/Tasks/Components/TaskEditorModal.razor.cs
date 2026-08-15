@@ -1,11 +1,15 @@
+using BeeDay.Domain.Enums;
 using BeeDay.Web.Components.Features.Tasks.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.Localization;
 
 namespace BeeDay.Web.Components.Features.Tasks.Components;
 
 public partial class TaskEditorModal
 {
+    [Inject] private IStringLocalizer<TaskResources> Localizer { get; set; } = default!;
+
     [Parameter, EditorRequired] public TaskEditorModel Model { get; set; } = new();
     [Parameter] public bool IsEditing { get; set; }
     [Parameter] public EventCallback<TaskEditorModel> OnSave { get; set; }
@@ -32,5 +36,12 @@ public partial class TaskEditorModal
 
         return Cancel();
     }
-    private static string FormatEnum(string value) => System.Text.RegularExpressions.Regex.Replace(value, "([a-z])([A-Z])", "$1 $2");
+    private string FormatRepeat(TaskRepeat repeat) => repeat switch
+    {
+        TaskRepeat.None => Localizer["RepeatNone"],
+        TaskRepeat.Daily => Localizer["RepeatDaily"],
+        TaskRepeat.Weekly => Localizer["RepeatWeekly"],
+        TaskRepeat.Monthly => Localizer["RepeatMonthly"],
+        _ => repeat.ToString()
+    };
 }
