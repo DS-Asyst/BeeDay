@@ -1,22 +1,23 @@
 @using BeeDay.Domain.Enums
+@inject IStringLocalizer<DashboardResources> Localizer
 
-<div class="filter-bar" aria-label="Dashboard controls">
+<div class="filter-bar" aria-label="@Localizer["DashboardControlsAriaLabel"]">
     <div class="filter-bar__main">
         <div class="filter-bar__search" role="search">
             <input id="dashboard-search" class="filter-bar__input" type="search"
-                   aria-label="Search activities" placeholder="Search" value="@inputValue" @oninput="OnInput" />
+                   aria-label="@Localizer["SearchActivitiesAriaLabel"]" placeholder="@Localizer["SearchPlaceholder"]" value="@inputValue" @oninput="OnInput" />
         </div>
         <div class="filter-bar__create">
             <BeeDayButton Variant="BeeDayButtonVariant.Primary" Compact="true" Icon="BeeDayIconName.Add"
                           Class="filter-bar__create-button" OnClick="ToggleCreateMenu"
-                          aria-haspopup="menu" aria-expanded="@showCreateMenu">Activity</BeeDayButton>
+                          aria-haspopup="menu" aria-expanded="@showCreateMenu">@Localizer["CreateActivityButtonLabel"]</BeeDayButton>
             @if (showCreateMenu)
             {
-                <div class="filter-bar__menu" role="menu" aria-label="Choose activity type">
-                    <button type="button" role="menuitem" @onclick="CreateHabitAsync"><BeeDayIcon Name="BeeDayIconName.Habit" Size="BeeDayIconSize.Small" Decorative="true" /><span>Habit</span></button>
-                    <button type="button" role="menuitem" @onclick="CreateTaskAsync"><BeeDayIcon Name="BeeDayIconName.RecurringTask" Size="BeeDayIconSize.Small" Decorative="true" /><span>Task</span></button>
-                    <button type="button" role="menuitem" @onclick="CreateTodoAsync"><BeeDayIcon Name="BeeDayIconName.Todo" Size="BeeDayIconSize.Small" Decorative="true" /><span>To-Do</span></button>
-                    <button type="button" role="menuitem" @onclick="CreateProjectAsync"><BeeDayIcon Name="BeeDayIconName.Project" Size="BeeDayIconSize.Small" Decorative="true" /><span>Project</span></button>
+                <div class="filter-bar__menu" role="menu" aria-label="@Localizer["ChooseActivityTypeAriaLabel"]">
+                    <button type="button" role="menuitem" @onclick="CreateHabitAsync"><BeeDayIcon Name="BeeDayIconName.Habit" Size="BeeDayIconSize.Small" Decorative="true" /><span>@Localizer["CreateMenuHabitLabel"]</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateTaskAsync"><BeeDayIcon Name="BeeDayIconName.RecurringTask" Size="BeeDayIconSize.Small" Decorative="true" /><span>@Localizer["CreateMenuTaskLabel"]</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateTodoAsync"><BeeDayIcon Name="BeeDayIconName.Todo" Size="BeeDayIconSize.Small" Decorative="true" /><span>@Localizer["CreateMenuTodoLabel"]</span></button>
+                    <button type="button" role="menuitem" @onclick="CreateProjectAsync"><BeeDayIcon Name="BeeDayIconName.Project" Size="BeeDayIconSize.Small" Decorative="true" /><span>@Localizer["CreateMenuProjectLabel"]</span></button>
                 </div>
             }
         </div>

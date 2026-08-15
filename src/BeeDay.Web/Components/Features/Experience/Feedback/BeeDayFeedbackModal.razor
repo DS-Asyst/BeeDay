@@ -1,3 +1,5 @@
+@inject IStringLocalizer<ExperienceResources> Localizer
+
 @if (Feedback is not null)
 {
     <div class="beeday-feedback-backdrop"
@@ -17,44 +19,44 @@
                  @onclick:stopPropagation>
             <div class="beeday-feedback__accent" aria-hidden="true"></div>
             <div class="beeday-feedback__content">
-                <p class="beeday-feedback__eyebrow" aria-hidden="true">Progress</p>
-                <h2 id="beeday-feedback-title">BE BETTER EVERY DAY</h2>
+                <p class="beeday-feedback__eyebrow" aria-hidden="true">@Localizer["FeedbackEyebrow"]</p>
+                <h2 id="beeday-feedback-title">@Localizer["FeedbackTitle"]</h2>
                 <p id="beeday-feedback-description" class="beeday-feedback__summary">
-                    You advanced @Feedback.LevelsGained @(Feedback.LevelsGained == 1 ? "level" : "levels").
+                    @(Feedback.LevelsGained == 1 ? Localizer["LevelUpSingular"] : Localizer["LevelUpPlural", Feedback.LevelsGained])
                 </p>
 
                 <dl class="beeday-feedback__levels">
                     <div>
-                        <dt>Previous Level</dt>
+                        <dt>@Localizer["PreviousLevelLabel"]</dt>
                         <dd data-testid="previous-level">@Feedback.PreviousLevel</dd>
                     </div>
                     <div class="beeday-feedback__new-level">
-                        <dt>New Level</dt>
+                        <dt>@Localizer["NewLevelLabel"]</dt>
                         <dd data-testid="new-level">@Feedback.NewLevel</dd>
                     </div>
                     <div>
-                        <dt>Levels Gained</dt>
+                        <dt>@Localizer["LevelsGainedLabel"]</dt>
                         <dd data-testid="levels-gained">@Feedback.LevelsGained</dd>
                     </div>
                 </dl>
 
-                <p class="beeday-feedback__xp" data-testid="experience-source">@Feedback.ExperienceSummary</p>
+                <p class="beeday-feedback__xp" data-testid="experience-source">@ExperienceSummary(Feedback)</p>
 
                 <section class="beeday-feedback__history" aria-labelledby="beeday-history-title">
-                    <h3 id="beeday-history-title">Recent Progress</h3>
+                    <h3 id="beeday-history-title">@Localizer["RecentProgressHeading"]</h3>
                     <ul>
                         @foreach (var item in History.Take(3))
                         {
                             <li>
-                                <strong>@item.HistorySummary</strong>
-                                <span>@item.ExperienceSummary</span>
+                                <strong>@HistorySummary(item)</strong>
+                                <span>@ExperienceSummary(item)</span>
                             </li>
                         }
                     </ul>
                 </section>
 
                 <BeeDayButton Variant="BeeDayButtonVariant.Primary" OnClick="CloseAsync">
-                    Continue
+                    @Localizer["ContinueButtonLabel"]
                 </BeeDayButton>
             </div>
         </section>
@@ -89,4 +91,19 @@
 
     private Task HandleKeyDownAsync(KeyboardEventArgs args) =>
         args.Key == "Escape" ? CloseAsync() : Task.CompletedTask;
+
+    private string ExperienceSummary(BeeDayFeedback feedback) =>
+        Localizer["ExperienceGainSummary", feedback.ExperienceAmount, FormatSource(feedback.ExperienceSource)];
+
+    private string HistorySummary(BeeDayFeedback feedback) =>
+        Localizer["ReachedLevelSummary", feedback.NewLevel];
+
+    private string FormatSource(ExperienceSourceType source) => source switch
+    {
+        ExperienceSourceType.Habit => Localizer["SourceHabitCompleted"],
+        ExperienceSourceType.Task => Localizer["SourceTaskCompleted"],
+        ExperienceSourceType.Todo => Localizer["SourceTodoCompleted"],
+        ExperienceSourceType.Project => Localizer["SourceProjectCompleted"],
+        _ => source.ToString(),
+    };
 }

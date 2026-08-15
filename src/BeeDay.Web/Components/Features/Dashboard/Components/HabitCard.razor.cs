@@ -2,11 +2,14 @@ using BeeDay.Domain.Enums;
 using BeeDay.Web.Components.Features.Habits;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.Localization;
 
 namespace BeeDay.Web.Components.Features.Dashboard.Components;
 
 public partial class HabitCard
 {
+    [Inject] private IStringLocalizer<DashboardResources> Localizer { get; set; } = default!;
+
     [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
     [Parameter] public string Description { get; set; } = string.Empty;
     [Parameter] public string SearchTerm { get; set; } = string.Empty;
@@ -25,10 +28,14 @@ public partial class HabitCard
 
     private string DirectionText => Direction switch
     {
-        HabitDirection.Positive => "Positive habit",
-        HabitDirection.Negative => "Negative habit",
-        _ => "Positive and negative habit"
+        HabitDirection.Positive => Localizer["DirectionPositive"],
+        HabitDirection.Negative => Localizer["DirectionNegative"],
+        _ => Localizer["DirectionBoth"]
     };
+
+    private string EditAriaLabel => Localizer["HabitEditAriaLabel", Title];
+    private string RegisterPositiveAriaLabel => Localizer["RegisterPositiveAriaLabel", Title];
+    private string RegisterNegativeAriaLabel => Localizer["RegisterNegativeAriaLabel", Title];
 
     private string CardCssClass => $"habit-card {HabitVisualState.GetCardClass(Balance)}";
 

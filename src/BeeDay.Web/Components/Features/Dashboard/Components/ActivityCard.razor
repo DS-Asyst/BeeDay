@@ -4,8 +4,8 @@
         {
             <button class="activity-card__checkbox"
                     type="button"
-                    title="@(Completed ? $"Mark {Title} as incomplete" : $"Complete {Title}")"
-                    aria-label="@(Completed ? $"Mark {Title} as incomplete" : $"Complete {Title}")"
+                    title="@ToggleAriaLabel"
+                    aria-label="@ToggleAriaLabel"
                     @onclick="OnToggle">
                 <span class="activity-card__checkbox-glyph">
                     <BeeDayIcon Name="BeeDayIconName.Complete" Size="BeeDayIconSize.Small" Decorative="true" />
@@ -14,21 +14,21 @@
         }
         else
         {
-            <BeeDayIcon Name="BeeDayIconName.Project" Size="BeeDayIconSize.Small" Class="activity-card__project-status" Decorative="false" Label="Project progress is calculated automatically" />
+            <BeeDayIcon Name="BeeDayIconName.Project" Size="BeeDayIconSize.Small" Class="activity-card__project-status" Decorative="false" Label="@Localizer["ProjectProgressAutoLabel"]" />
         }
     </div>
 
     <div class="activity-card__body activity-card__body--openable"
          role="button"
          tabindex="0"
-         aria-label="@($"Edit {EntityLabel}: {Title}")"
+         aria-label="@EditAriaLabel"
          @onclick="OnEdit"
          @onkeydown="HandleBodyKeyDown">
         <div class="activity-card__content">
             <div class="activity-card__title-row">
                 @if (Featured)
                 {
-                    <BeeDayIcon Name="BeeDayIconName.Featured" Size="BeeDayIconSize.ExtraSmall" Class="activity-card__star" Decorative="false" Label="Featured" />
+                    <BeeDayIcon Name="BeeDayIconName.Featured" Size="BeeDayIconSize.ExtraSmall" Class="activity-card__star" Decorative="false" Label="@Localizer["FeaturedLabel"]" />
                 }
                 <h3><SearchHighlight Text="@Title" SearchTerm="@SearchTerm" /></h3>
             </div>

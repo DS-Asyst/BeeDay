@@ -1,4 +1,5 @@
 using BeeDay.Web.Components.Features.Dashboard.Components;
+using BeeDay.Web.Tests.Localization;
 
 namespace BeeDay.Web.Tests.Components.Dashboard;
 
@@ -7,7 +8,7 @@ public sealed class DashboardColumnTests
     [Fact]
     public void RendersActiveViewByDefaultWithoutLegacyCompletedSection()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var cut = RenderColumn(context);
 
         var toggle = cut.Find("button.dashboard-column__view-toggle");
@@ -23,7 +24,7 @@ public sealed class DashboardColumnTests
     [Fact]
     public async Task TogglesBetweenActiveAndCompletedContentFromHeader()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var cut = RenderColumn(context);
 
         await cut.Find("button.dashboard-column__view-toggle").ClickAsync();
@@ -37,16 +38,39 @@ public sealed class DashboardColumnTests
         Assert.DoesNotContain("Active item", cut.Markup);
     }
 
+    [Theory]
+    [InlineData("en-US", "Add Habit")]
+    [InlineData("pt-BR", "Adicionar Habit")]
+    public void AddButtonAriaLabel_FormatsTheSingularLabelThroughDashboardResources(string culture, string expected)
+    {
+        using var context = new BunitContext().WithLocalization();
+
+        var cut = BunitLocalizationSupport.WithUiCulture(culture, () => context.Render<DashboardColumn>(parameters => parameters
+            .Add(component => component.Title, "Habits")
+            .Add(component => component.EmptyTitle, "No habits yet")
+            .Add(component => component.EmptyDescription, "Create a habit.")
+            .Add(component => component.SingularLabel, "Habit")
+            .Add(component => component.ShowCreateButton, true)
+            .Add(component => component.ActiveCount, 0)));
+
+        var addButton = cut.Find(".dashboard-column__add");
+        Assert.Equal(expected, addButton.GetAttribute("aria-label"));
+        Assert.Equal(expected, addButton.GetAttribute("title"));
+    }
+
     private static IRenderedComponent<DashboardColumn> RenderColumn(BunitContext context)
     {
-        return context.Render<DashboardColumn>(parameters => parameters
+        return BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<DashboardColumn>(parameters => parameters
             .Add(component => component.Title, "Tasks")
-            .Add(component => component.EmptyLabel, "tasks")
             .Add(component => component.EmptyTitle, "No tasks yet")
             .Add(component => component.EmptyDescription, "Create a task.")
+            .Add(component => component.ActiveStateLabel, "active tasks")
+            .Add(component => component.CompletedStateLabel, "completed tasks")
+            .Add(component => component.ShowActiveAriaLabel, "Show active tasks")
+            .Add(component => component.ShowCompletedAriaLabel, "Show completed tasks")
             .Add(component => component.ActiveCount, 1)
             .Add(component => component.CompletedCount, 1)
             .Add(component => component.ActiveContent, builder => builder.AddContent(0, "Active item"))
-            .Add(component => component.CompletedContent, builder => builder.AddContent(0, "Completed item")));
+            .Add(component => component.CompletedContent, builder => builder.AddContent(0, "Completed item"))));
     }
 }

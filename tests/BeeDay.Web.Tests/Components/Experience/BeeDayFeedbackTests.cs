@@ -2,11 +2,26 @@ using BeeDay.Application.Common.Events;
 using BeeDay.Domain.Enums;
 using BeeDay.Domain.Events;
 using BeeDay.Web.Components.Features.Experience.Feedback;
+using BeeDay.Web.Tests.Localization;
 
 namespace BeeDay.Web.Tests.Components.Experience;
 
 public sealed class BeeDayFeedbackTests
 {
+    [Fact]
+    public void ExperienceSummaryAndHistorySummary_RemainPublicAndUnlocalized()
+    {
+        // BeeDayFeedback is a plain data record with no access to IStringLocalizer, so these two
+        // public members are — and must remain — English-only; they predate Sprint 23.5 and are
+        // preserved here for backward compatibility. BeeDayFeedbackModal (the only renderer) uses
+        // its own culture-aware equivalents instead of these, proven by the other tests in this
+        // file asserting localized markup.
+        var feedback = CreateFeedback(4, 5, 20, ExperienceSourceType.Project);
+
+        Assert.Equal("+20 XP from Project Completed", feedback.ExperienceSummary);
+        Assert.Equal("Reached Level 5", feedback.HistorySummary);
+    }
+
     [Fact]
     public void DoesNotRenderWithoutBeeDayFeedback()
     {
@@ -23,9 +38,9 @@ public sealed class BeeDayFeedbackTests
         using var context = CreateContext();
         BeeDayFeedback feedback = CreateFeedback(4, 5, 20, ExperienceSourceType.Project);
 
-        var cut = context.Render<BeeDayFeedbackModal>(parameters => parameters
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<BeeDayFeedbackModal>(parameters => parameters
             .Add(component => component.Feedback, feedback)
-            .Add(component => component.History, [feedback]));
+            .Add(component => component.History, [feedback])));
 
         Assert.Equal("4", cut.Find("[data-testid='previous-level']").TextContent);
         Assert.Equal("5", cut.Find("[data-testid='new-level']").TextContent);
@@ -39,13 +54,29 @@ public sealed class BeeDayFeedbackTests
         using var context = CreateContext();
         BeeDayFeedback feedback = CreateFeedback(3, 7, 80, ExperienceSourceType.Task);
 
-        var cut = context.Render<BeeDayFeedbackModal>(parameters => parameters
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<BeeDayFeedbackModal>(parameters => parameters
             .Add(component => component.Feedback, feedback)
-            .Add(component => component.History, [feedback]));
+            .Add(component => component.History, [feedback])));
 
         Assert.Single(cut.FindAll("[role='dialog']"));
         Assert.Equal("4", cut.Find("[data-testid='levels-gained']").TextContent);
         Assert.Contains("advanced 4 levels", cut.Markup);
+    }
+
+    [Fact]
+    public void UnderPortugueseUiCulture_RendersPortugueseLevelUpCopy()
+    {
+        using var context = CreateContext();
+        BeeDayFeedback feedback = CreateFeedback(4, 5, 20, ExperienceSourceType.Project);
+
+        var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<BeeDayFeedbackModal>(parameters => parameters
+            .Add(component => component.Feedback, feedback)
+            .Add(component => component.History, [feedback])));
+
+        Assert.Contains("SEJA MELHOR A CADA DIA", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Você avançou 1 nível.", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("+20 XP de Projeto Concluído", cut.Find("[data-testid='experience-source']").TextContent, StringComparison.Ordinal);
+        Assert.Equal("Continuar", cut.Find("button").TextContent.Trim());
     }
 
     [Fact]
@@ -165,7 +196,7 @@ public sealed class BeeDayFeedbackTests
 
     private static BunitContext CreateContext()
     {
-        var context = new BunitContext();
+        var context = new BunitContext().WithLocalization();
         context.JSInterop.Mode = JSRuntimeMode.Loose;
         return context;
     }

@@ -4,8 +4,8 @@
         {
             <button type="button"
                     class="habit-card__score-button"
-                    title="Register positive behavior"
-                    aria-label="Register positive for @Title"
+                    title="@Localizer["RegisterPositiveTitle"]"
+                    aria-label="@RegisterPositiveAriaLabel"
                     @onclick="OnPositive">+</button>
         }
     </div>
@@ -13,14 +13,14 @@
     <div class="habit-card__body habit-card__body--openable"
          role="button"
          tabindex="0"
-         aria-label="@($"Edit Habit: {Title}")"
+         aria-label="@EditAriaLabel"
          @onclick="OnEdit"
          @onkeydown="HandleBodyKeyDown">
         <div class="habit-card__header">
             <div class="habit-card__title">
                 @if (Featured)
                 {
-                    <BeeDayIcon Name="BeeDayIconName.Featured" Size="BeeDayIconSize.ExtraSmall" Class="habit-card__featured" Decorative="false" Label="Featured" />
+                    <BeeDayIcon Name="BeeDayIconName.Featured" Size="BeeDayIconSize.ExtraSmall" Class="habit-card__featured" Decorative="false" Label="@Localizer["FeaturedLabel"]" />
                 }
                 <h3><SearchHighlight Text="@Title" SearchTerm="@SearchTerm" /></h3>
             </div>
@@ -42,8 +42,8 @@
         {
             <button type="button"
                     class="habit-card__score-button"
-                    title="Register negative behavior"
-                    aria-label="Register negative for @Title"
+                    title="@Localizer["RegisterNegativeTitle"]"
+                    aria-label="@RegisterNegativeAriaLabel"
                     @onclick="OnNegative">−</button>
         }
     </div>
