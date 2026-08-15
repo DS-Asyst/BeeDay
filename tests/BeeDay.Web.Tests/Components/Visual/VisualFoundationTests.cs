@@ -13,11 +13,11 @@ public sealed class VisualFoundationTests
     {
         var css = ReadWebFile("wwwroot", "css", "variables.css");
 
-        Assert.Contains("--beeday-color-brand-primary: #3a4ed9;", css, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("--beeday-color-brand-primary-hover: #3043c7;", css, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("--beeday-color-brand-primary-active: #2637ad;", css, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("--beeday-color-brand-primary-light: #6675e3;", css, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("--beeday-color-brand-primary-soft: #eff1ff;", css, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-color-brand-primary: #5247f9;", css, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-color-brand-primary-hover: #3f33f1;", css, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-color-brand-primary-active: #1c0ef2;", css, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-color-brand-primary-light: #827afc;", css, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-color-brand-primary-soft: #f8f7ff;", css, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("--beeday-color-brand-yellow: #ffd326;", css, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("--beeday-color-brand-yellow-hover: #e8bd00;", css, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("--beeday-color-brand-yellow-foreground: #2f2737;", css, StringComparison.OrdinalIgnoreCase);

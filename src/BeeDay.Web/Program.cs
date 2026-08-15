@@ -10,6 +10,7 @@ using BeeDay.Web.Components;
 using BeeDay.Web.Components.Features.Dashboard.State;
 using BeeDay.Web.Components.Features.Experience.Feedback;
 using BeeDay.Web.Components.Features.ProfileCreation.State;
+using BeeDay.Web.Components.Layout;
 using BeeDay.Web.Configuration;
 using BeeDay.Web.Diagnostics;
 using BeeDay.Web.HealthChecks;
@@ -190,6 +191,7 @@ builder.Services.AddScoped<BeeDayFeedbackStore>();
 builder.Services.AddScoped<INotificationHandler<DomainEventNotification>, BeeDayFeedbackEventHandler>();
 builder.Services.AddScoped<ProfileCreationState>();
 builder.Services.AddScoped<CardActionMenuCoordinator>();
+builder.Services.AddScoped<PublicHomeLanguageState>();
 
 var app = builder.Build();
 
