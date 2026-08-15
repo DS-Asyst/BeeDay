@@ -1,4 +1,5 @@
 @using System.Globalization
+@inject IStringLocalizer<DesignSystemResources> Localizer
 
 <div class="beeday-progress" data-state="@State" data-tone="@Tone.ToString().ToLowerInvariant()">
     <div class="beeday-progress__heading">
@@ -34,6 +35,8 @@
     private double AccessibleValue => HasValidMaximum ? Math.Clamp(SafeValue, 0d, Maximum) : 0d;
     private double Percentage => AccessibleValue * 100d / AccessibleMaximum;
     private string State => !HasValidMaximum ? "unavailable" : Percentage >= 100d ? "complete" : Percentage <= 0d ? "empty" : "partial";
-    private string AccessibleValueText => HasValidMaximum ? ValueText ?? $"{AccessibleValue:0.##} of {Maximum:0.##}" : "Progress unavailable";
+    private string AccessibleValueText => HasValidMaximum
+        ? ValueText ?? Localizer["ProgressValueText", AccessibleValue.ToString("0.##"), Maximum.ToString("0.##")]
+        : Localizer["ProgressUnavailable"];
     private string FillStyle => $"width: {Percentage.ToString("0.##", CultureInfo.InvariantCulture)}%";
 }

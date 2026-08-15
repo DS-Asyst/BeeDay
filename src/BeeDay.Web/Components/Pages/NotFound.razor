@@ -1,6 +1,7 @@
 @page "/not-found"
 @attribute [AllowAnonymous]
 @layout MainLayout
+@inject IStringLocalizer<SharedResources> Localizer
 
-<h3>Not Found</h3>
-<p>Sorry, the content you are looking for does not exist.</p>
+<h3>@Localizer["NotFoundTitle"]</h3>
+<p>@Localizer["NotFoundMessage"]</p>

@@ -73,6 +73,43 @@ public sealed class AuthenticatedCultureIntegrationTests(BeeDayWebApplicationFac
     }
 
     [Fact]
+    public async Task ExistingAuthenticatedSession_WithPortugueseCultureCookie_RendersTheSharedNavigationShellInPortuguese()
+    {
+        // Same shape as "Settings -> pt-BR -> reload": the shared MainLayout chrome (NavigationItems,
+        // DesktopSidebar, MobileHeader) surrounding /account must reflect the effective culture too,
+        // not just the Account page's own content — Sprint 23.4's shared-UI localization target.
+        var cancellationToken = Xunit.TestContext.Current.CancellationToken;
+        var email = "shared-shell-pt@beeday.invalid";
+        var user = await factory.SeedConfirmedUserAsync(email, "Password123!");
+
+        using var response = await GetAccountWithForgedAuthCookieAsync(user.Id, "c=pt-BR|uic=pt-BR", cancellationToken);
+        var html = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Perfil", html, StringComparison.Ordinal);
+        Assert.Contains("Carteira", html, StringComparison.Ordinal);
+        Assert.Contains("Sair do BeeDay", html, StringComparison.Ordinal);
+        Assert.Contains("Conta", html, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ExistingAuthenticatedSession_WithEnglishCultureCookie_RendersTheSharedNavigationShellInEnglish()
+    {
+        var cancellationToken = Xunit.TestContext.Current.CancellationToken;
+        var email = "shared-shell-en@beeday.invalid";
+        var user = await factory.SeedConfirmedUserAsync(email, "Password123!");
+
+        using var response = await GetAccountWithForgedAuthCookieAsync(user.Id, "c=en-US|uic=en-US", cancellationToken);
+        var html = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Profile", html, StringComparison.Ordinal);
+        Assert.Contains("Wallet", html, StringComparison.Ordinal);
+        Assert.Contains("Log out of BeeDay", html, StringComparison.Ordinal);
+        Assert.Contains("Primary navigation", html, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task Login_WithoutCultureCookie_AppliesThePortugueseAccountLanguage()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;

@@ -31,7 +31,7 @@ public partial class BeeDayCardMenu : IAsyncDisposable
     private bool flipUp;
     private double horizontalShiftPx;
 
-    private string AriaLabel => $"Options for {Title}";
+    private string AriaLabel => Localizer["CardMenuOptionsForAriaLabel", Title];
     private string MenuCssClass => string.IsNullOrWhiteSpace(Class)
         ? "card-action-menu"
         : $"card-action-menu {Class}";

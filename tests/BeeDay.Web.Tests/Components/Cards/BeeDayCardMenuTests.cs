@@ -1,5 +1,6 @@
 using BeeDay.Web.Components.DesignSystem.Cards;
 using BeeDay.Web.Services;
+using BeeDay.Web.Tests.Localization;
 
 namespace BeeDay.Web.Tests.Components.Cards;
 
@@ -7,7 +8,7 @@ public sealed class BeeDayCardMenuTests
 {
     private static BunitContext CreateContext()
     {
-        var context = new BunitContext();
+        var context = new BunitContext().WithLocalization();
         context.Services.AddScoped<CardActionMenuCoordinator>();
         context.JSInterop.Mode = JSRuntimeMode.Loose;
         return context;
@@ -17,13 +18,27 @@ public sealed class BeeDayCardMenuTests
     public void StartsClosedWithAccessibleLabel()
     {
         using var context = CreateContext();
-        var cut = context.Render<BeeDayCardMenu>(parameters => parameters
-            .Add(component => component.Title, "Read a book"));
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<BeeDayCardMenu>(parameters => parameters
+            .Add(component => component.Title, "Read a book")));
 
         var trigger = cut.Find("button");
         Assert.Equal("Options for Read a book", trigger.GetAttribute("aria-label"));
         Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
         Assert.Empty(cut.FindAll("[role='menu']"));
+    }
+
+    [Fact]
+    public void UnderPortugueseUiCulture_RendersPortugueseLabelsAndFormattedAriaLabel()
+    {
+        using var context = CreateContext();
+        var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<BeeDayCardMenu>(parameters => parameters
+            .Add(component => component.Title, "Ler um livro")));
+
+        Assert.Equal("Opções para Ler um livro", cut.Find("button").GetAttribute("aria-label"));
+
+        cut.Find("button").Click();
+        var items = cut.FindAll("[role='menuitem'] span");
+        Assert.Equal(["EDITAR", "EXCLUIR"], items.Select(item => item.TextContent));
     }
 
     [Fact]

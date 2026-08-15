@@ -1,12 +1,16 @@
 @if (IsVisible)
 {
-    <div class="beeday-loading-overlay" role="status" aria-live="polite" aria-label="@Label">
+    <div class="beeday-loading-overlay" role="status" aria-live="polite" aria-label="@EffectiveLabel">
         <BeeDayIcon Name="BeeDayIconName.Loading" Size="BeeDayIconSize.Small" Color="BeeDayIconColor.Primary" Class="beeday-loading-spinner" />
-        <span class="beeday-loading-label">@Label</span>
+        <span class="beeday-loading-label">@EffectiveLabel</span>
     </div>
 }
 
 @code {
+    [Inject] private IStringLocalizer<DesignSystemResources> Localizer { get; set; } = default!;
+
     [Parameter] public bool IsVisible { get; set; }
-    [Parameter] public string Label { get; set; } = "Saving changes...";
+    [Parameter] public string? Label { get; set; }
+
+    private string EffectiveLabel => Label ?? Localizer["LoadingDefaultLabel"];
 }

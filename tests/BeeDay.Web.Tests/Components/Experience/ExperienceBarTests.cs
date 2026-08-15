@@ -1,5 +1,6 @@
 using BeeDay.Web.Components.Features.Experience.Components;
 using BeeDay.Web.Components.Features.Experience.Models;
+using BeeDay.Web.Tests.Localization;
 
 namespace BeeDay.Web.Tests.Components.Experience;
 
@@ -8,7 +9,7 @@ public sealed class ExperienceBarTests
     [Fact]
     public void RendersLoadingStateWithoutProgressBar()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
 
         var cut = context.Render<ExperienceBar>(parameters => parameters
             .Add(component => component.IsLoading, true));
@@ -21,7 +22,7 @@ public sealed class ExperienceBarTests
     [Fact]
     public void RendersLevelAndExperienceValues()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var model = new ExperienceViewModel(4, 120, 200, 80);
 
         var cut = context.Render<ExperienceBar>(parameters => parameters
@@ -38,7 +39,7 @@ public sealed class ExperienceBarTests
     [Fact]
     public void RendersAccessibleProgressWithCorrectPercentage()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var model = new ExperienceViewModel(2, 50, 200, 150);
 
         var cut = context.Render<ExperienceBar>(parameters => parameters
@@ -55,7 +56,7 @@ public sealed class ExperienceBarTests
     [InlineData(250, 100)]
     public void ClampsProgressPercentage(long currentExperience, int expectedPercentage)
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var model = new ExperienceViewModel(3, currentExperience, 100, 0);
 
         var cut = context.Render<ExperienceBar>(parameters => parameters
@@ -69,7 +70,7 @@ public sealed class ExperienceBarTests
     [Fact]
     public void RendersExperienceGainFeedbackWhenRewardWasGranted()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var model = new ExperienceViewModel(1, 10, 100, 90);
 
         var cut = context.Render<ExperienceBar>(parameters => parameters
@@ -85,7 +86,7 @@ public sealed class ExperienceBarTests
     [Fact]
     public void DoesNotRenderFeedbackWithoutNewReward()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var model = new ExperienceViewModel(1, 10, 100, 90);
 
         var cut = context.Render<ExperienceBar>(parameters => parameters
@@ -97,7 +98,7 @@ public sealed class ExperienceBarTests
     [Fact]
     public void RendersNothingWhenModelIsUnavailableAndNotLoading()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
 
         var cut = context.Render<ExperienceBar>();
 

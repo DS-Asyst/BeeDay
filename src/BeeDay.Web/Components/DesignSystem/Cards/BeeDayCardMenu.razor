@@ -1,5 +1,6 @@
 @inject IJSRuntime JS
 @inject BeeDay.Web.Services.CardActionMenuCoordinator Coordinator
+@inject IStringLocalizer<DesignSystemResources> Localizer
 
 <div class="@MenuCssClass" @ref="rootElement" @onkeydown="HandleKeyDown">
     <button type="button"
@@ -25,7 +26,7 @@
                     role="menuitem"
                     @onclick="EditAsync">
                 <BeeDayIcon Name="BeeDayIconName.Edit" Size="BeeDayIconSize.Small" Decorative="true" />
-                <span>EDIT</span>
+                <span>@Localizer["CardMenuEditLabel"]</span>
             </button>
 
             <button type="button"
@@ -33,7 +34,7 @@
                     role="menuitem"
                     @onclick="DeleteAsync">
                 <BeeDayIcon Name="BeeDayIconName.Delete" Size="BeeDayIconSize.Small" Decorative="true" />
-                <span>DELETE</span>
+                <span>@Localizer["CardMenuDeleteLabel"]</span>
             </button>
         </div>
     }

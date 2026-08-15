@@ -117,52 +117,67 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="FooterTagline" xml:space="preserve">
-    <value>Be Better Every Day</value>
+  <data name="NavMainLabel" xml:space="preserve">
+    <value>Main navigation</value>
   </data>
-  <data name="ContinueToBeeDay" xml:space="preserve">
-    <value>Continue to BeeDay</value>
+  <data name="NavProfileLabel" xml:space="preserve">
+    <value>Profile</value>
   </data>
-  <data name="FooterLinksAriaLabel" xml:space="preserve">
-    <value>BeeDay links</value>
+  <data name="NavDailyLabel" xml:space="preserve">
+    <value>Daily</value>
   </data>
-  <data name="FooterGitHubLink" xml:space="preserve">
-    <value>Project on GitHub</value>
+  <data name="NavWalletLabel" xml:space="preserve">
+    <value>Wallet</value>
   </data>
-  <data name="FooterCopyright" xml:space="preserve">
-    <value>© 2026 BeeDay. All rights reserved.</value>
+  <data name="NavAccountLabel" xml:space="preserve">
+    <value>Account</value>
   </data>
-  <data name="PublicHeaderHomeAriaLabel" xml:space="preserve">
-    <value>BeeDay home</value>
+  <data name="NavLogoutLabel" xml:space="preserve">
+    <value>Logout</value>
   </data>
-  <data name="LanguageSwitcherGroupAriaLabel" xml:space="preserve">
-    <value>Language</value>
+  <data name="NavLogoutAriaLabel" xml:space="preserve">
+    <value>Log out of BeeDay</value>
   </data>
-  <data name="NotFoundTitle" xml:space="preserve">
-    <value>Not Found</value>
+  <data name="PrimaryNavigationAriaLabel" xml:space="preserve">
+    <value>Primary navigation</value>
   </data>
-  <data name="NotFoundMessage" xml:space="preserve">
-    <value>Sorry, the content you are looking for does not exist.</value>
+  <data name="BrandHomeAriaLabel" xml:space="preserve">
+    <value>BeeDay — go to Profile</value>
   </data>
-  <data name="ErrorTitle" xml:space="preserve">
-    <value>Error.</value>
+  <data name="OpenNavMenuAriaLabel" xml:space="preserve">
+    <value>Open navigation menu</value>
   </data>
-  <data name="ErrorMessage" xml:space="preserve">
-    <value>An error occurred while processing your request.</value>
+  <data name="CloseNavMenuAriaLabel" xml:space="preserve">
+    <value>Close navigation menu</value>
   </data>
-  <data name="ToastDefaultSuccessTitle" xml:space="preserve">
-    <value>Success</value>
+  <data name="MobileSidebarCloseAriaLabel" xml:space="preserve">
+    <value>Close</value>
   </data>
-  <data name="ToastDefaultErrorTitle" xml:space="preserve">
-    <value>Something went wrong</value>
+  <data name="ReconnectModalRejoining" xml:space="preserve">
+    <value>Rejoining the server...</value>
   </data>
-  <data name="ToastDefaultInfoTitle" xml:space="preserve">
-    <value>Information</value>
+  <data name="ReconnectModalRejoinFailedPrefix" xml:space="preserve">
+    <value>Rejoin failed... trying again in </value>
   </data>
-  <data name="ToastRegionAriaLabel" xml:space="preserve">
-    <value>Notifications</value>
+  <data name="ReconnectModalRejoinFailedSuffix" xml:space="preserve">
+    <value> seconds.</value>
   </data>
-  <data name="ToastDismissAriaLabel" xml:space="preserve">
-    <value>Dismiss notification</value>
+  <data name="ReconnectModalFailedToRejoin" xml:space="preserve">
+    <value>Failed to rejoin.</value>
+  </data>
+  <data name="ReconnectModalRetryOrReload" xml:space="preserve">
+    <value>Please retry or reload the page.</value>
+  </data>
+  <data name="ReconnectModalRetryButton" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="ReconnectModalPaused" xml:space="preserve">
+    <value>The session has been paused by the server.</value>
+  </data>
+  <data name="ReconnectModalFailedToResume" xml:space="preserve">
+    <value>Failed to resume the session.</value>
+  </data>
+  <data name="ReconnectModalResumeButton" xml:space="preserve">
+    <value>Resume</value>
   </data>
 </root>

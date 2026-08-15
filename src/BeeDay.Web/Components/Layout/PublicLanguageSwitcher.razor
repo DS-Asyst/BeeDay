@@ -1,8 +1,10 @@
 @using System.Globalization
 @using BeeDay.Web.Localization
+@using BeeDay.Web.Resources
 @inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResources> Localizer
 
-<form method="post" action="/culture/set" class="public-language-switcher" role="group" aria-label="Language">
+<form method="post" action="/culture/set" class="public-language-switcher" role="group" aria-label="@Localizer["LanguageSwitcherGroupAriaLabel"]">
     <AntiforgeryToken />
     <input type="hidden" name="returnUrl" value="@ReturnUrl" />
     <button type="submit"

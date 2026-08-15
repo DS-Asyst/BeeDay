@@ -1,8 +1,10 @@
+@inject IStringLocalizer<LayoutResources> Localizer
+
 <div class="mobile-nav-backdrop @(IsOpen ? "is-open" : null)" aria-hidden="true" @onclick="OnClose"></div>
 
 <aside id="mobile-navigation"
        class="mobile-nav-drawer @(IsOpen ? "is-open" : null)"
-       aria-label="Primary navigation"
+       aria-label="@Localizer["PrimaryNavigationAriaLabel"]"
        aria-hidden="@AriaHiddenValue"
        @onkeydown="HandleKeyDown">
     <div class="mobile-nav-drawer__header">
@@ -10,7 +12,7 @@
             <BeeDayBrand />
         </NavLink>
 
-        <button type="button" class="mobile-nav-drawer__close" aria-label="Close" @onclick="OnClose" @ref="closeButtonElement">
+        <button type="button" class="mobile-nav-drawer__close" aria-label="@Localizer["MobileSidebarCloseAriaLabel"]" @onclick="OnClose" @ref="closeButtonElement">
             <BeeDayIcon Name="BeeDayIconName.Close" Size="BeeDayIconSize.Large" />
         </button>
     </div>

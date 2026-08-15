@@ -3,9 +3,11 @@ using BeeDay.Application.Features.Users.Queries;
 using BeeDay.Application.Features.Users.Responses;
 using BeeDay.Domain.Entities;
 using BeeDay.Domain.Enums;
+using BeeDay.Web.Resources;
 using BeeDay.Web.Services;
 using BeeDay.Web.Tests.Localization;
 using MediatR;
+using Microsoft.Extensions.Localization;
 using AccountPage = BeeDay.Web.Components.Features.Account.Pages.Account;
 
 namespace BeeDay.Web.Tests.Components.Account;
@@ -71,7 +73,7 @@ public sealed class AccountTests
             accountLanguage, UserTheme.System, true, true, true, true);
         var store = new BeeDayWebService(new StubAccountSender(response));
         context.Services.AddSingleton(store);
-        context.Services.AddSingleton(new ToastService());
+        context.Services.AddSingleton(sp => new ToastService(sp.GetRequiredService<IStringLocalizer<SharedResources>>()));
         context.Services.AddSingleton(sp => new AuthenticatedUserInitializer(
             sp.GetRequiredService<Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider>(),
             new UnusedUserRepository()));

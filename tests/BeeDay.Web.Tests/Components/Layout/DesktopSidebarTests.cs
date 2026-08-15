@@ -1,4 +1,5 @@
 using BeeDay.Web.Components.Layout;
+using BeeDay.Web.Tests.Localization;
 using Microsoft.AspNetCore.Components;
 
 namespace BeeDay.Web.Tests.Components.Layout;
@@ -8,7 +9,7 @@ public sealed class DesktopSidebarTests
     [Fact]
     public void ComposesOfficialBrandPrimaryRoutesAndSecondaryAccountActions()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var cut = context.Render<DesktopSidebar>();
 
         Assert.Equal("/profile", cut.Find("a.desktop-sidebar__brand-link").GetAttribute("href"));
@@ -19,9 +20,19 @@ public sealed class DesktopSidebarTests
     }
 
     [Fact]
+    public void UnderPortugueseUiCulture_RendersPortugueseAriaLabels()
+    {
+        using var context = new BunitContext().WithLocalization();
+        var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<DesktopSidebar>());
+
+        Assert.Equal("Navegação principal", cut.Find("aside.desktop-sidebar").GetAttribute("aria-label"));
+        Assert.Equal("BeeDay — ir para o Perfil", cut.Find("a.desktop-sidebar__brand-link").GetAttribute("aria-label"));
+    }
+
+    [Fact]
     public void MarksCurrentRouteWithAriaCurrent()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.Services.GetRequiredService<NavigationManager>().NavigateTo("/wallet");
         var cut = context.Render<DesktopSidebar>();
         Assert.Equal("page", cut.Find("a[href='/wallet']").GetAttribute("aria-current"));
