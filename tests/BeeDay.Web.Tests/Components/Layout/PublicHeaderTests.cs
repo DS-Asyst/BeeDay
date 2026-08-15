@@ -4,6 +4,7 @@ using BeeDay.Domain.Enums;
 using BeeDay.Web.Components.Layout;
 using BeeDay.Web.Services;
 using BeeDay.Web.Services.Authentication;
+using BeeDay.Web.Tests.Localization;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 
@@ -14,11 +15,11 @@ public sealed class PublicHeaderTests
     [Fact]
     public void RendersHeaderLandmarkWithBrandMarkAndLanguageSwitcherForAnonymousUser()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.AddAuthorization().SetNotAuthorized();
         RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
 
-        var cut = context.Render<PublicHeader>();
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<PublicHeader>());
 
         Assert.NotNull(cut.Find("header.public-header"));
         Assert.NotNull(cut.Find(".public-header__brand img.public-header__brand-mark"));
@@ -35,38 +36,42 @@ public sealed class PublicHeaderTests
     [Fact]
     public void RendersContinueCtaForAuthenticatedUser()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.AddAuthorization().SetAuthorized("test-user");
         RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
 
-        var cut = context.Render<PublicHeader>();
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<PublicHeader>());
 
         var cta = cut.Find("button.beeday-button");
         Assert.Equal("Continue to BeeDay", cta.TextContent.Trim());
     }
 
     [Fact]
-    public void SelectingLanguageUpdatesActiveStateWithoutNavigating()
+    public void LanguageSwitcher_PostsToTheOfficialCultureEndpointWithCorrectCultureValues()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.AddAuthorization().SetNotAuthorized();
         RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
 
         var cut = context.Render<PublicHeader>();
-        var navigation = context.Services.GetRequiredService<NavigationManager>();
-        var uriBeforeClick = navigation.Uri;
 
-        cut.Find("button[aria-label='Português (Brasil)']").Click();
+        var form = cut.Find("form.public-language-switcher");
+        Assert.Equal("post", form.GetAttribute("method"));
+        Assert.Equal("/culture/set", form.GetAttribute("action"));
+        Assert.NotNull(cut.Find("input[name='returnUrl']"));
 
-        Assert.Equal(uriBeforeClick, navigation.Uri);
-        Assert.Equal("true", cut.Find("button[aria-label='Português (Brasil)']").GetAttribute("aria-pressed"));
-        Assert.Equal("false", cut.Find("button[aria-label='English (United States)']").GetAttribute("aria-pressed"));
+        var portuguese = cut.Find("button[aria-label='Português (Brasil)']");
+        var english = cut.Find("button[aria-label='English (United States)']");
+        Assert.Equal("culture", portuguese.GetAttribute("name"));
+        Assert.Equal("pt-BR", portuguese.GetAttribute("value"));
+        Assert.Equal("culture", english.GetAttribute("name"));
+        Assert.Equal("en-US", english.GetAttribute("value"));
     }
 
     [Fact]
     public void AuthenticatedWithoutProfile_ContinueCtaGoesToProfileCreate()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.AddAuthorization().SetAuthorized("test-user");
         RegisterDestinationResolver(context, hasProfile: false, hasCompletedOnboarding: false);
 
@@ -80,7 +85,7 @@ public sealed class PublicHeaderTests
     [Fact]
     public void AuthenticatedWithIncompleteOnboarding_ContinueCtaGoesToTutorial()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.AddAuthorization().SetAuthorized("test-user");
         RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: false);
 
@@ -94,7 +99,7 @@ public sealed class PublicHeaderTests
     [Fact]
     public void AuthenticatedReady_ContinueCtaGoesToHome()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.AddAuthorization().SetAuthorized("test-user");
         RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
 
@@ -108,7 +113,7 @@ public sealed class PublicHeaderTests
     [Fact]
     public void BrandLinksHome()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.AddAuthorization().SetNotAuthorized();
         RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
 
@@ -125,7 +130,6 @@ public sealed class PublicHeaderTests
             UserLanguage.English, UserTheme.System, true, hasCompletedOnboarding, true, hasProfile);
         var store = new BeeDayWebService(new StubCurrentUserSender(response));
         context.Services.AddSingleton(new AuthenticatedEntryDestinationResolver(store));
-        context.Services.AddSingleton(new PublicHomeLanguageState());
     }
 
     private sealed class StubCurrentUserSender(CurrentUserResponse response) : ISender

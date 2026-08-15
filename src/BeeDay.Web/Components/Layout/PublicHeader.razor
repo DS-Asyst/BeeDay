@@ -1,4 +1,5 @@
 @using BeeDay.Web.Services.Authentication
+@using BeeDay.Web.Resources
 <header class="public-header">
     <div class="public-header__content beeday-container">
         <a class="public-header__brand" href="/" aria-label="BeeDay home">
@@ -9,7 +10,7 @@
             <PublicLanguageSwitcher />
             <AuthorizeView>
                 <Authorized>
-                    <BeeDayButton Compact="true" OnClick="ContinueToBeeDay">Continue to BeeDay</BeeDayButton>
+                    <BeeDayButton Compact="true" OnClick="ContinueToBeeDay">@SharedLocalizer["ContinueToBeeDay"]</BeeDayButton>
                 </Authorized>
             </AuthorizeView>
         </div>
@@ -19,6 +20,7 @@
 @code {
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private AuthenticatedEntryDestinationResolver DestinationResolver { get; set; } = default!;
+    [Inject] private IStringLocalizer<SharedResources> SharedLocalizer { get; set; } = default!;
 
     private async Task ContinueToBeeDay()
     {
