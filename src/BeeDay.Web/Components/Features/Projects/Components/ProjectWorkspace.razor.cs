@@ -1,11 +1,14 @@
 using BeeDay.Application.Features.Dashboard.Responses;
 using BeeDay.Domain.Enums;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Localization;
 
 namespace BeeDay.Web.Components.Features.Projects.Components;
 
 public partial class ProjectWorkspace
 {
+    [Inject] private IStringLocalizer<ProjectResources> Localizer { get; set; } = default!;
+
     [Parameter, EditorRequired] public ProjectSummary? Project { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public EventCallback OnAddTodo { get; set; }
@@ -16,9 +19,9 @@ public partial class ProjectWorkspace
 
     private string StatusLabel => Project?.Status switch
     {
-        ProjectStatus.InProgress => "In Progress",
-        ProjectStatus.Completed => "Completed",
-        _ => "Planned"
+        ProjectStatus.InProgress => Localizer["StatusInProgress"],
+        ProjectStatus.Completed => Localizer["StatusCompleted"],
+        _ => Localizer["StatusPlanned"]
     };
 
     private void ToggleTodos()
