@@ -35,7 +35,8 @@ public sealed class HomeTests
         var cut = context.Render<HomePage>();
 
         Assert.Equal(["Define", "Practice", "Evolve"], cut.FindAll(".home-steps h3").Select(element => element.TextContent.Trim()));
-        Assert.NotNull(cut.Find(".home-hero__visual canvas"));
+        var heroImage = cut.Find(".home-hero__visual img.home-hero__image");
+        Assert.Equal("/assets/hero/home-team.png", heroImage.GetAttribute("src"));
         Assert.Empty(cut.FindAll(".home-hero .beeday-brand"));
         Assert.Empty(cut.FindAll(".home-hero__symbol"));
         Assert.Empty(cut.FindAll(".home-preview, .home-values, .home-growth, .home-cta"));
