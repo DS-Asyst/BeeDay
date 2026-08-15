@@ -1,12 +1,13 @@
 @using BeeDay.Application.Features.Wallets.Responses
 @using BeeDay.Domain.Enums
 @using BeeDay.Web.Components.Features.Wallets.Services
+@inject IStringLocalizer<WalletResources> Localizer
 
 <BeeDayCard Class="wallet-transaction-card"
              Interactive="true"
              role="button"
              tabindex="0"
-             aria-label="@($"Edit Transaction: {Transaction.Description}, {SignedAmount}")"
+             aria-label="@Localizer["EditTransactionAriaLabel", Transaction.Description, SignedAmount]"
              @onclick="EditAsync"
              @onkeydown="HandleBodyKeyDown">
     <div class="wallet-transaction-card__marker wallet-transaction-card__marker--@TypeClass" aria-hidden="true"></div>
@@ -31,10 +32,10 @@
             }
             else
             {
-                <span class="wallet-muted">No tag</span>
+                <span class="wallet-muted">@Localizer["NoTagLabel"]</span>
             }
-            <time datetime="@Transaction.TransactionDate.ToString("yyyy-MM-dd")">@Transaction.TransactionDate.ToString("MMM dd, yyyy")</time>
-            <span class="wallet-transaction-card__type"><BeeDayIcon Name="@TransactionTypeIcon" Size="BeeDayIconSize.ExtraSmall" Color="@TransactionTypeColor" /> @(Transaction.Type == TransactionType.Income ? "Income" : "Expense")</span>
+            <time datetime="@Transaction.TransactionDate.ToString("yyyy-MM-dd")">@Transaction.TransactionDate.ToString("d")</time>
+            <span class="wallet-transaction-card__type"><BeeDayIcon Name="@TransactionTypeIcon" Size="BeeDayIconSize.ExtraSmall" Color="@TransactionTypeColor" /> @(Transaction.Type == TransactionType.Income ? Localizer["TransactionTypeIncomeLabel"] : Localizer["TransactionTypeExpenseLabel"])</span>
         </div>
     </div>
 </BeeDayCard>

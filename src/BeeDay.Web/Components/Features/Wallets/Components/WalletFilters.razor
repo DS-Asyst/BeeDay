@@ -1,16 +1,17 @@
 @using BeeDay.Application.Features.Wallets.Responses
+@inject IStringLocalizer<WalletResources> Localizer
 
 <div class="wallet-filter-shell">
     <div class="wallet-filters">
         <label class="wallet-search wallet-filter-field wallet-filter-field--search">
-            <span>Search</span>
-            <input class="beeday-field__control" disabled="@IsDisabled" value="@Search" @oninput="HandleSearchInput" placeholder="Description or notes" />
+            <span>@Localizer["SearchLabel"]</span>
+            <input class="beeday-field__control" disabled="@IsDisabled" value="@Search" @oninput="HandleSearchInput" placeholder="@Localizer["SearchPlaceholder"]" />
         </label>
 
         <label class="wallet-filter-field">
-            <span>Tag</span>
+            <span>@Localizer["TagLabel"]</span>
             <select class="beeday-field__control" disabled="@IsDisabled" value="@TagFilter" @onchange="HandleTagChanged">
-                <option value="">All tags</option>
+                <option value="">@Localizer["AllTagsOption"]</option>
                 @foreach (var tag in Tags)
                 {
                     <option value="@tag.Id">@tag.Name</option>
@@ -26,7 +27,7 @@
                            OnClick="ToggleSecondaryFilters"
                            aria-expanded="@isExpanded.ToString().ToLowerInvariant()"
                            aria-controls="@SecondaryFiltersId">
-                More Filters
+                @Localizer["MoreFiltersButton"]
             </BeeDayButton>
         </div>
     </div>
@@ -35,41 +36,41 @@
         @if (isExpanded)
         {
             <label class="wallet-filter-field">
-                <span>Type</span>
+                <span>@Localizer["TypeLabel"]</span>
                 <select class="beeday-field__control" disabled="@IsDisabled" value="@TypeFilter" @onchange="HandleTypeChanged">
-                    <option value="">All types</option>
-                    <option value="Income">Income</option>
-                    <option value="Expense">Expense</option>
+                    <option value="">@Localizer["AllTypesOption"]</option>
+                    <option value="Income">@Localizer["TransactionTypeIncomeLabel"]</option>
+                    <option value="Expense">@Localizer["TransactionTypeExpenseLabel"]</option>
                 </select>
             </label>
 
             <label class="wallet-filter-field">
-                <span>From</span>
+                <span>@Localizer["FromLabel"]</span>
                 <input class="beeday-field__control" type="date" disabled="@IsDisabled" value="@FormatDate(StartDate)" @onchange="HandleStartDateChanged" />
             </label>
 
             <label class="wallet-filter-field">
-                <span>To</span>
+                <span>@Localizer["ToLabel"]</span>
                 <input class="beeday-field__control" type="date" disabled="@IsDisabled" value="@FormatDate(EndDate)" @onchange="HandleEndDateChanged" />
             </label>
 
             <label class="wallet-filter-field">
-                <span>Order</span>
+                <span>@Localizer["OrderLabel"]</span>
                 <select class="beeday-field__control" disabled="@IsDisabled" value="@Sort" @onchange="HandleSortChanged">
-                    <option value="date-desc">Newest first</option>
-                    <option value="date-asc">Oldest first</option>
+                    <option value="date-desc">@Localizer["NewestFirstOption"]</option>
+                    <option value="date-asc">@Localizer["OldestFirstOption"]</option>
                 </select>
             </label>
 
             @if (ActiveFilterCount > 0)
             {
                 <div class="wallet-active-filters" role="status">
-                    <span>@ActiveFilterCount active filter@(ActiveFilterCount == 1 ? string.Empty : "s")</span>
+                    <span>@(ActiveFilterCount == 1 ? Localizer["ActiveFilterCountSingular", ActiveFilterCount] : Localizer["ActiveFilterCountPlural", ActiveFilterCount])</span>
                     <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel"
                                    Class="beeday-button--plain beeday-button--plain-danger"
                                    Disabled="IsDisabled"
                                    OnClick="OnClearFilters">
-                        Clear filters
+                        @Localizer["ClearFiltersButton"]
                     </BeeDayButton>
                 </div>
             }

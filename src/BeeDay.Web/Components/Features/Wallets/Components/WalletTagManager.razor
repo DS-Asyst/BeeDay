@@ -1,15 +1,16 @@
 @using BeeDay.Application.Features.Wallets.Responses
+@inject IStringLocalizer<WalletResources> Localizer
 
 <section class="wallet-tags-panel beeday-card" aria-labelledby="wallet-tags-title" aria-busy="@IsBusy.ToString().ToLowerInvariant()">
     <header class="wallet-panel-header">
-        <div><span class="wallet-eyebrow">Organization</span><h2 id="wallet-tags-title">Tags</h2></div>
-        <BeeDayButton Variant="BeeDayButtonVariant.Primary" Compact="true" Disabled="IsBusy" OnClick="RaiseCreate">New tag</BeeDayButton>
+        <div><span class="wallet-eyebrow">@Localizer["OrganizationEyebrow"]</span><h2 id="wallet-tags-title">@Localizer["TagsHeading"]</h2></div>
+        <BeeDayButton Variant="BeeDayButtonVariant.Primary" Compact="true" Disabled="IsBusy" OnClick="RaiseCreate">@Localizer["NewTagButton"]</BeeDayButton>
     </header>
 
     @if (Tags.Count == 0)
     {
-        <BeeDayEmptyState Title="No tags yet"
-                           Description="Create one to organize your income and expenses."
+        <BeeDayEmptyState Title="@Localizer["NoTagsYetTitle"]"
+                           Description="@Localizer["NoTagsYetDescription"]"
                            Icon="BeeDayIconName.Tag" />
     }
     else
@@ -21,11 +22,11 @@
                              Interactive="true"
                              role="button"
                              tabindex="0"
-                             aria-label="@($"Edit Tag: {tag.Name}")"
+                             aria-label="@Localizer["EditTagAriaLabel", tag.Name]"
                              @onclick="() => RaiseEdit(tag)"
                              @onkeydown="args => HandleRowKeyDown(args, tag)">
                     <span class="wallet-tag-dot" style="background:@tag.Color"></span>
-                    <div><strong>@tag.Name</strong><small>@tag.TransactionCount transaction@(tag.TransactionCount == 1 ? string.Empty : "s")</small></div>
+                    <div><strong>@tag.Name</strong><small>@(tag.TransactionCount == 1 ? Localizer["TagTransactionCountSingular", tag.TransactionCount] : Localizer["TagTransactionCountPlural", tag.TransactionCount])</small></div>
                 </BeeDayCard>
             }
         </div>

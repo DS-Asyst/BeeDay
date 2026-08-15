@@ -2,16 +2,23 @@ using System.ComponentModel.DataAnnotations;
 using BeeDay.Application.Features.Wallets.Responses;
 using BeeDay.Web.Components.Features.Wallets.Components;
 using BeeDay.Web.Components.Features.Wallets.Models;
+using BeeDay.Web.Tests.Localization;
 
 namespace BeeDay.Web.Tests.Components.Wallet;
 
 public sealed class WalletComponentTests : BunitContext
 {
+    public WalletComponentTests()
+    {
+        Services.AddLogging();
+        Services.AddLocalization();
+    }
+
     [Fact]
     public void Summary_RendersWalletTotals()
     {
         var summary = new WalletSummaryResponse(Guid.NewGuid(), 125.50m, 200m, 74.50m, 3, DateTimeOffset.UtcNow);
-        var cut = Render<WalletSummary>(parameters => parameters.Add(component => component.Summary, summary));
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => Render<WalletSummary>(parameters => parameters.Add(component => component.Summary, summary)));
 
         Assert.Contains("$125.50", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("$200.00", cut.Markup, StringComparison.Ordinal);
@@ -54,10 +61,46 @@ public sealed class WalletComponentTests : BunitContext
     }
 
     [Fact]
-    public void CurrencyFormatter_UsesEnUs()
+    public void CurrencyFormatter_UnderEnglishUiCulture_UsesEnUsGroupingWithUsdSymbol()
     {
-        Assert.Equal("$125.50", BeeDay.Web.Components.Features.Wallets.Services.WalletCurrencyFormatter.Format(125.50m));
-        Assert.Equal("-$89.90", BeeDay.Web.Components.Features.Wallets.Services.WalletCurrencyFormatter.Format(-89.90m));
+        BunitLocalizationSupport.WithUiCulture("en-US", () =>
+        {
+            Assert.Equal("$125.50", BeeDay.Web.Components.Features.Wallets.Services.WalletCurrencyFormatter.Format(125.50m));
+            Assert.Equal("-$89.90", BeeDay.Web.Components.Features.Wallets.Services.WalletCurrencyFormatter.Format(-89.90m));
+            Assert.Equal("$1,234.56", BeeDay.Web.Components.Features.Wallets.Services.WalletCurrencyFormatter.Format(1234.56m));
+        });
+    }
+
+    [Fact]
+    public void CurrencyFormatter_UnderPortugueseUiCulture_UsesPortugueseGroupingButStillUsdSymbol()
+    {
+        BunitLocalizationSupport.WithUiCulture("pt-BR", () =>
+        {
+            var formatted = BeeDay.Web.Components.Features.Wallets.Services.WalletCurrencyFormatter.Format(1234.56m);
+
+            // Presentation (grouping/decimal separators) follows pt-BR; the currency itself stays
+            // USD ("$") regardless of UI culture — pt-BR's own "C" format would otherwise render
+            // "R$", which would incorrectly imply the underlying financial data changed currency.
+            Assert.Contains('$', formatted);
+            Assert.DoesNotContain("R$", formatted, StringComparison.Ordinal);
+            Assert.Contains("1.234,56", formatted, StringComparison.Ordinal);
+        });
+    }
+
+    [Fact]
+    public void CurrencyFormatter_PreservesTheFinancialValueAcrossCultures()
+    {
+        // Same underlying decimal, different presentation — proves culture only changes how the
+        // number is *displayed*, never the value itself or the currency it represents.
+        const decimal value = 1234.56m;
+
+        var enUs = BunitLocalizationSupport.WithUiCulture("en-US", () => BeeDay.Web.Components.Features.Wallets.Services.WalletCurrencyFormatter.Format(value));
+        var ptBr = BunitLocalizationSupport.WithUiCulture("pt-BR", () => BeeDay.Web.Components.Features.Wallets.Services.WalletCurrencyFormatter.Format(value));
+
+        Assert.NotEqual(enUs, ptBr);
+        Assert.Equal(
+            decimal.Parse(enUs.Replace("$", string.Empty).Trim(), System.Globalization.NumberStyles.Currency, System.Globalization.CultureInfo.GetCultureInfo("en-US")),
+            decimal.Parse(ptBr.Replace("$", string.Empty).Trim(), System.Globalization.NumberStyles.Currency, System.Globalization.CultureInfo.GetCultureInfo("pt-BR")));
     }
 
     [Theory]

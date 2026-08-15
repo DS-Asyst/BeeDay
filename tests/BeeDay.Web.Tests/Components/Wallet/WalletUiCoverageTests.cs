@@ -1,23 +1,30 @@
 using BeeDay.Application.Features.Wallets.Responses;
 using BeeDay.Domain.Enums;
 using BeeDay.Web.Components.Features.Wallets.Components;
+using BeeDay.Web.Tests.Localization;
 
 namespace BeeDay.Web.Tests.Components.Wallet;
 
 public sealed class WalletFiltersTests : BunitContext
 {
+    public WalletFiltersTests()
+    {
+        Services.AddLogging();
+        Services.AddLocalization();
+    }
+
     [Fact]
     public void RendersAllFilterControlsAndActiveIndicatorWhenSecondaryFiltersAreActive()
     {
         var tag = CreateTag("Food");
-        var cut = Render<WalletFilters>(parameters => parameters
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => Render<WalletFilters>(parameters => parameters
             .Add(component => component.Search, "rent")
             .Add(component => component.TypeFilter, "Expense")
             .Add(component => component.TagFilter, tag.Id.ToString())
             .Add(component => component.StartDate, new DateOnly(2026, 1, 1))
             .Add(component => component.EndDate, new DateOnly(2026, 1, 31))
             .Add(component => component.ActiveFilterCount, 5)
-            .Add(component => component.Tags, [tag]));
+            .Add(component => component.Tags, [tag])));
 
         Assert.Equal(6, cut.FindAll("input, select").Count);
         Assert.Contains("5 active filters", cut.Markup, StringComparison.Ordinal);
@@ -31,10 +38,10 @@ public sealed class WalletFiltersTests : BunitContext
         string? search = null;
         string? type = null;
         DateOnly? startDate = null;
-        var cut = Render<WalletFilters>(parameters => parameters
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => Render<WalletFilters>(parameters => parameters
             .Add(component => component.SearchChanged, value => search = value)
             .Add(component => component.TypeFilterChanged, value => type = value)
-            .Add(component => component.StartDateChanged, value => startDate = value));
+            .Add(component => component.StartDateChanged, value => startDate = value)));
 
         cut.Find("input[placeholder='Description or notes']").Input("salary");
 
@@ -133,11 +140,11 @@ public sealed class WalletFiltersTests : BunitContext
     [Fact]
     public void DoesNotRenderANumericBadgeEvenWhenSecondaryFiltersAreActive()
     {
-        var cut = Render<WalletFilters>(parameters => parameters
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => Render<WalletFilters>(parameters => parameters
             .Add(component => component.TypeFilter, "Expense")
             .Add(component => component.StartDate, new DateOnly(2026, 1, 1))
             .Add(component => component.EndDate, new DateOnly(2026, 1, 31))
-            .Add(component => component.Sort, "amount-desc"));
+            .Add(component => component.Sort, "amount-desc")));
 
         Assert.Empty(cut.FindAll(".wallet-filter-toggle__count"));
         Assert.Contains("More Filters", cut.Find(".wallet-filter-toggle").TextContent, StringComparison.Ordinal);
@@ -163,12 +170,18 @@ public sealed class WalletFiltersTests : BunitContext
 
 public sealed class WalletEmptyStateTests : BunitContext
 {
+    public WalletEmptyStateTests()
+    {
+        Services.AddLogging();
+        Services.AddLocalization();
+    }
+
     [Fact]
     public void RendersCreateActionWhenWalletIsEmpty()
     {
         var invoked = false;
-        var cut = Render<WalletEmptyState>(parameters => parameters
-            .Add(component => component.OnCreateTransaction, () => invoked = true));
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => Render<WalletEmptyState>(parameters => parameters
+            .Add(component => component.OnCreateTransaction, () => invoked = true)));
 
         Assert.Equal("No transactions found", cut.Find(".beeday-empty-state__title").TextContent);
         Assert.Contains("Create your first transaction", cut.Find(".beeday-empty-state__description").TextContent, StringComparison.Ordinal);
@@ -183,9 +196,9 @@ public sealed class WalletEmptyStateTests : BunitContext
     public void RendersClearActionWhenFiltersHaveNoResults()
     {
         var invoked = false;
-        var cut = Render<WalletEmptyState>(parameters => parameters
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => Render<WalletEmptyState>(parameters => parameters
             .Add(component => component.HasFilters, true)
-            .Add(component => component.OnClearFilters, () => invoked = true));
+            .Add(component => component.OnClearFilters, () => invoked = true)));
 
         Assert.Contains("Change or clear your filters", cut.Find(".beeday-empty-state__description").TextContent, StringComparison.Ordinal);
         cut.Find("button").Click();
@@ -195,8 +208,12 @@ public sealed class WalletEmptyStateTests : BunitContext
 
 public sealed class TransactionListTests : BunitContext
 {
-    public TransactionListTests() =>
+    public TransactionListTests()
+    {
         Services.AddScoped<BeeDay.Web.Services.CardActionMenuCoordinator>();
+        Services.AddLogging();
+        Services.AddLocalization();
+    }
 
     [Fact]
     public void RendersRefreshStateAndTransactions()
@@ -245,10 +262,16 @@ public sealed class TransactionListTests : BunitContext
 
 public sealed class WalletTagManagerTests : BunitContext
 {
+    public WalletTagManagerTests()
+    {
+        Services.AddLogging();
+        Services.AddLocalization();
+    }
+
     [Fact]
     public void RendersTheSharedEmptyStateWhenNoTagsExist()
     {
-        var cut = Render<WalletTagManager>();
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => Render<WalletTagManager>());
 
         Assert.Equal("No tags yet", cut.Find(".beeday-empty-state__title").TextContent);
         Assert.Contains(
@@ -340,8 +363,8 @@ public sealed class WalletTagManagerTests : BunitContext
     public void ExposesAccessibleEditNameOnTheTagRow()
     {
         var tag = CreateTag("Groceries");
-        var cut = Render<WalletTagManager>(parameters => parameters
-            .Add(component => component.Tags, [tag]));
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => Render<WalletTagManager>(parameters => parameters
+            .Add(component => component.Tags, [tag])));
 
         Assert.Equal("Edit Tag: Groceries", cut.Find("[role='button']").GetAttribute("aria-label"));
     }

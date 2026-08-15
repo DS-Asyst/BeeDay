@@ -1,12 +1,13 @@
 @using BeeDay.Application.Features.Wallets.Responses
+@inject IStringLocalizer<WalletResources> Localizer
 
 <section class="wallet-main-panel beeday-card @(Transactions.Items.Count == 0 ? "wallet-main-panel--empty" : null)" aria-labelledby="wallet-transactions-title">
     <header class="wallet-panel-header wallet-panel-header--transactions">
         <div>
-            <span class="wallet-eyebrow">History</span>
-            <h2 id="wallet-transactions-title">Transactions</h2>
+            <span class="wallet-eyebrow">@Localizer["HistoryEyebrow"]</span>
+            <h2 id="wallet-transactions-title">@Localizer["TransactionsHeading"]</h2>
         </div>
-        <span class="wallet-result-count">@Transactions.TotalCount result@(Transactions.TotalCount == 1 ? string.Empty : "s")</span>
+        <span class="wallet-result-count">@(Transactions.TotalCount == 1 ? Localizer["ResultCountSingular", Transactions.TotalCount] : Localizer["ResultCountPlural", Transactions.TotalCount])</span>
     </header>
 
     <WalletFilters IsDisabled="IsBusy"
@@ -44,10 +45,10 @@
 
         @if (Transactions.TotalPages > 1)
         {
-            <nav class="wallet-pagination" aria-label="Transaction pages">
-                <BeeDayButton Variant="BeeDayButtonVariant.Secondary" Compact="true" Disabled="@(IsBusy || Transactions.Page <= 1)" OnClick="OnPreviousPage">Previous</BeeDayButton>
-                <span>@PaginationSummary · Page @Transactions.Page of @Transactions.TotalPages</span>
-                <BeeDayButton Variant="BeeDayButtonVariant.Secondary" Compact="true" Disabled="@(IsBusy || Transactions.Page >= Transactions.TotalPages)" OnClick="OnNextPage">Next</BeeDayButton>
+            <nav class="wallet-pagination" aria-label="@Localizer["TransactionPagesAriaLabel"]">
+                <BeeDayButton Variant="BeeDayButtonVariant.Secondary" Compact="true" Disabled="@(IsBusy || Transactions.Page <= 1)" OnClick="OnPreviousPage">@Localizer["PreviousButton"]</BeeDayButton>
+                <span>@PaginationSummary · @Localizer["PageOfTotalPages", Transactions.Page, Transactions.TotalPages]</span>
+                <BeeDayButton Variant="BeeDayButtonVariant.Secondary" Compact="true" Disabled="@(IsBusy || Transactions.Page >= Transactions.TotalPages)" OnClick="OnNextPage">@Localizer["NextButton"]</BeeDayButton>
             </nav>
         }
     }
@@ -79,6 +80,9 @@
     [Parameter] public EventCallback<TransactionResponse> OnEdit { get; set; }
 
     private string PaginationSummary => Transactions.TotalCount == 0
-        ? "No results"
-        : $"Showing {((Transactions.Page - 1) * Transactions.PageSize) + 1}–{Math.Min(Transactions.Page * Transactions.PageSize, Transactions.TotalCount)} of {Transactions.TotalCount}";
+        ? Localizer["NoResultsLabel"]
+        : Localizer["PaginationSummary",
+            ((Transactions.Page - 1) * Transactions.PageSize) + 1,
+            Math.Min(Transactions.Page * Transactions.PageSize, Transactions.TotalCount),
+            Transactions.TotalCount];
 }

@@ -12,33 +12,34 @@
 @inject MediatR.ISender Sender
 @inject AuthenticatedUserInitializer UserInitializer
 @inject ToastService Toast
+@inject IStringLocalizer<WalletResources> Localizer
 
-<PageTitle>Wallet | BeeDay</PageTitle>
+<PageTitle>@Localizer["PageTitle"]</PageTitle>
 
 @if (_isLoading)
 {
-    <BeeDayDashboardSkeleton />
+    <BeeDayDashboardSkeleton AriaLabel="@Localizer["LoadingWalletAriaLabel"]" />
 }
 else
 {
     <main class="wallet-page beeday-fade-in" aria-busy="@_interaction.IsBusy.ToString().ToLowerInvariant()">
         <header class="wallet-page__header">
             <div>
-                <span class="wallet-eyebrow">Personal finance</span>
-                <h1 class="wallet-page__title">Wallet</h1>
-                <p>Track your wallet, organize transactions and understand where your money goes.</p>
+                <span class="wallet-eyebrow">@Localizer["PersonalFinanceEyebrow"]</span>
+                <h1 class="wallet-page__title">@Localizer["WalletHeading"]</h1>
+                <p>@Localizer["WalletDescription"]</p>
             </div>
             <BeeDayButton Variant="BeeDayButtonVariant.Primary"
                            Icon="BeeDayIconName.Add"
                            Disabled="_interaction.IsBusy"
-                           OnClick="OpenCreateTransaction">New transaction</BeeDayButton>
+                           OnClick="OpenCreateTransaction">@Localizer["NewTransactionButton"]</BeeDayButton>
         </header>
 
         @if (!string.IsNullOrWhiteSpace(_errorMessage))
         {
             <div class="wallet-alert" role="alert">
                 <span><BeeDayIcon Name="BeeDayIconName.Warning" Size="BeeDayIconSize.Small" Color="BeeDayIconColor.Danger" /> @_errorMessage</span>
-                <BeeDayButton Variant="BeeDayButtonVariant.Secondary" Compact="true" Disabled="_interaction.IsBusy" OnClick="RetryAsync">Try again</BeeDayButton>
+                <BeeDayButton Variant="BeeDayButtonVariant.Secondary" Compact="true" Disabled="_interaction.IsBusy" OnClick="RetryAsync">@Localizer["TryAgainButton"]</BeeDayButton>
             </div>
         }
 
@@ -81,27 +82,25 @@ else
 
 <BeeDayConfirmDialog IsOpen="@(_pendingDeleteTransaction is not null)"
                       IsBusy="_interaction.IsBusy"
-                      Title="Delete transaction"
-                      Message="Are you sure you want to delete this transaction?"
+                      Title="@Localizer["DeleteTransactionTitle"]"
+                      Message="@Localizer["DeleteTransactionMessage"]"
                       ItemTitle="@_pendingDeleteTransaction?.Description"
-                      Warning="This action cannot be undone."
-                      ConfirmLabel="Delete transaction"
+                      Warning="@Localizer["DeleteTransactionWarning"]"
+                      ConfirmLabel="@Localizer["DeleteTransactionTitle"]"
                       OnConfirm="DeleteTransactionAsync"
                       OnCancel="CancelDeleteTransaction" />
 
 <BeeDayConfirmDialog IsOpen="@(_pendingDeleteTag is not null)"
                       IsBusy="_interaction.IsBusy"
-                      Title="Delete tag"
-                      Message="Transactions using this tag will remain and become untagged."
+                      Title="@Localizer["DeleteTagTitle"]"
+                      Message="@Localizer["DeleteTagMessage"]"
                       ItemTitle="@_pendingDeleteTag?.Name"
-                      Warning="The tag will be permanently removed."
-                      ConfirmLabel="Delete tag"
+                      Warning="@Localizer["DeleteTagWarning"]"
+                      ConfirmLabel="@Localizer["DeleteTagTitle"]"
                       OnConfirm="DeleteTagAsync"
                       OnCancel="CancelDeleteTag" />
 
 @code {
-    private const string LoadError = "We could not load your wallet. Please try again.";
-    private const string RefreshError = "We could not refresh your wallet. Your current view was preserved.";
     private WalletSummaryResponse? _summary;
     private IReadOnlyList<WalletTagResponse> _tags = [];
     private PagedTransactionsResponse _transactions = new([], 1, 20, 0, 0);
@@ -138,7 +137,7 @@ else
         }
         catch
         {
-            _errorMessage = LoadError;
+            _errorMessage = Localizer["LoadErrorMessage"];
         }
         finally
         {
@@ -198,7 +197,7 @@ else
         }
         catch
         {
-            _errorMessage = RefreshError;
+            _errorMessage = Localizer["RefreshErrorMessage"];
             return false;
         }
         finally
@@ -262,12 +261,12 @@ else
             _isTransactionEditorOpen = false;
             _editingTransactionId = null;
             await RefreshAfterMutationAsync();
-            Toast.ShowSuccess(wasEditing ? "Transaction updated successfully." : "Transaction created successfully.");
+            Toast.ShowSuccess(wasEditing ? Localizer["TransactionUpdatedMessage"] : Localizer["TransactionCreatedMessage"]);
         }
         catch
         {
-            _errorMessage = "We could not save the transaction. Review the information and try again.";
-            Toast.ShowError("Could not save the transaction.");
+            _errorMessage = Localizer["TransactionSaveErrorInline"];
+            Toast.ShowError(Localizer["TransactionSaveErrorToast"]);
         }
         finally { _interaction.End(); }
     }
@@ -294,12 +293,12 @@ else
             _pendingDeleteTransaction = null;
             await RefreshAfterMutationAsync();
             if (_transactions.Items.Count == 0 && _state.Page > 1) { _state.Page--; await RefreshAsync(); }
-            Toast.ShowSuccess("Transaction deleted successfully.");
+            Toast.ShowSuccess(Localizer["TransactionDeletedMessage"]);
         }
         catch
         {
-            _errorMessage = "We could not delete the transaction. Please try again.";
-            Toast.ShowError("Could not delete the transaction.");
+            _errorMessage = Localizer["TransactionDeleteErrorInline"];
+            Toast.ShowError(Localizer["TransactionDeleteErrorToast"]);
         }
         finally { _interaction.End(); }
     }
@@ -341,12 +340,12 @@ else
             _isTagEditorOpen = false;
             _editingTagId = null;
             await RefreshAfterMutationAsync();
-            Toast.ShowSuccess(wasEditing ? "Tag updated successfully." : "Tag created successfully.");
+            Toast.ShowSuccess(wasEditing ? Localizer["TagUpdatedMessage"] : Localizer["TagCreatedMessage"]);
         }
         catch
         {
-            _errorMessage = "We could not save the tag. Review the information and try again.";
-            Toast.ShowError("Could not save the tag.");
+            _errorMessage = Localizer["TagSaveErrorInline"];
+            Toast.ShowError(Localizer["TagSaveErrorToast"]);
         }
         finally { _interaction.End(); }
     }
@@ -372,12 +371,12 @@ else
             await Sender.Send(new DeleteWalletTagCommand(_pendingDeleteTag.Id));
             _pendingDeleteTag = null;
             await RefreshAfterMutationAsync();
-            Toast.ShowSuccess("Tag deleted successfully.");
+            Toast.ShowSuccess(Localizer["TagDeletedMessage"]);
         }
         catch
         {
-            _errorMessage = "We could not delete the tag. Please try again.";
-            Toast.ShowError("Could not delete the tag.");
+            _errorMessage = Localizer["TagDeleteErrorInline"];
+            Toast.ShowError(Localizer["TagDeleteErrorToast"]);
         }
         finally { _interaction.End(); }
     }
@@ -386,11 +385,11 @@ else
     {
         if (!await RefreshAsync())
         {
-            Toast.ShowError("The operation succeeded, but the wallet could not be refreshed.");
+            Toast.ShowError(Localizer["RefreshFailedAfterSuccessMessage"]);
             return;
         }
 
-        _statusAnnouncement = $"Balance updated to {WalletCurrencyFormatter.Format(_summary?.Balance ?? 0)}.";
+        _statusAnnouncement = Localizer["BalanceUpdatedAnnouncement", WalletCurrencyFormatter.Format(_summary?.Balance ?? 0)];
         _highlightBalance = true;
         StateHasChanged();
         await Task.Delay(700);

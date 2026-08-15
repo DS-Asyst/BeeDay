@@ -7,8 +7,13 @@ namespace BeeDay.Web.Tests.Localization;
 /// Shared setup for bUnit tests rendering components that inject IStringLocalizer&lt;...&gt;
 /// (AppFooter, PublicLayout, PublicHeader, Home, Login, ...). Every BunitContext needs
 /// AddLogging()/AddLocalization() registered, same as production's builder.Services in
-/// Program.cs; UI-culture-sensitive tests additionally need CultureInfo.CurrentUICulture pinned
-/// so results don't depend on the machine's default locale.
+/// Program.cs; culture-sensitive tests additionally need both CultureInfo.CurrentCulture (number/
+/// date formatting — e.g. WalletCurrencyFormatter) and CurrentUICulture (resx lookups) pinned, so
+/// results don't depend on the machine's default locale. Both are pinned together because
+/// RequestLocalizationMiddleware always sets them to the same resolved culture in production
+/// (BeeDayCultures never separates "c=" from "uic=" in the culture cookie) — pinning only one, as
+/// an earlier version of this helper did, let CurrentCulture silently fall through to the
+/// machine's ambient default and produced flaky currency/date-formatting assertions.
 /// </summary>
 internal static class BunitLocalizationSupport
 {
@@ -21,29 +26,29 @@ internal static class BunitLocalizationSupport
 
     public static T WithUiCulture<T>(string culture, Func<T> render)
     {
-        var restore = CultureInfo.CurrentUICulture;
+        var (restoreCulture, restoreUiCulture) = (CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture);
         try
         {
-            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(culture);
+            (CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture) = (CultureInfo.GetCultureInfo(culture), CultureInfo.GetCultureInfo(culture));
             return render();
         }
         finally
         {
-            CultureInfo.CurrentUICulture = restore;
+            (CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture) = (restoreCulture, restoreUiCulture);
         }
     }
 
     public static void WithUiCulture(string culture, Action action)
     {
-        var restore = CultureInfo.CurrentUICulture;
+        var (restoreCulture, restoreUiCulture) = (CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture);
         try
         {
-            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(culture);
+            (CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture) = (CultureInfo.GetCultureInfo(culture), CultureInfo.GetCultureInfo(culture));
             action();
         }
         finally
         {
-            CultureInfo.CurrentUICulture = restore;
+            (CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture) = (restoreCulture, restoreUiCulture);
         }
     }
 
@@ -55,15 +60,15 @@ internal static class BunitLocalizationSupport
     /// </summary>
     public static async Task WithUiCultureAsync(string culture, Func<Task> action)
     {
-        var restore = CultureInfo.CurrentUICulture;
+        var (restoreCulture, restoreUiCulture) = (CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture);
         try
         {
-            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(culture);
+            (CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture) = (CultureInfo.GetCultureInfo(culture), CultureInfo.GetCultureInfo(culture));
             await action();
         }
         finally
         {
-            CultureInfo.CurrentUICulture = restore;
+            (CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture) = (restoreCulture, restoreUiCulture);
         }
     }
 }

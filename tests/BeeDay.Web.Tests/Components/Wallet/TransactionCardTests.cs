@@ -2,11 +2,18 @@ using BeeDay.Application.Features.Wallets.Responses;
 using BeeDay.Domain.Enums;
 using BeeDay.Web.Components.Features.Wallets.Components;
 using BeeDay.Web.Components.Features.Wallets.Services;
+using BeeDay.Web.Tests.Localization;
 
 namespace BeeDay.Web.Tests.Components.Wallet;
 
 public sealed class TransactionCardTests : BunitContext
 {
+    public TransactionCardTests()
+    {
+        Services.AddLogging();
+        Services.AddLocalization();
+    }
+
     [Fact]
     public void ClickOnCardBody_InvokesOnEdit()
     {
@@ -63,13 +70,41 @@ public sealed class TransactionCardTests : BunitContext
     public void ExposesAccessibleEditName()
     {
         var transaction = CreateTransaction();
-        var cut = Render<TransactionCard>(parameters => parameters
-            .Add(component => component.Transaction, transaction));
 
-        var expectedAmount = WalletCurrencyFormatter.FormatSigned(transaction.Amount, isIncome: true);
-        Assert.Equal(
-            $"Edit Transaction: {transaction.Description}, {expectedAmount}",
-            cut.Find("[role='button']").GetAttribute("aria-label"));
+        BunitLocalizationSupport.WithUiCulture("en-US", () =>
+        {
+            var cut = Render<TransactionCard>(parameters => parameters
+                .Add(component => component.Transaction, transaction));
+
+            var expectedAmount = WalletCurrencyFormatter.FormatSigned(transaction.Amount, isIncome: true);
+            Assert.Equal(
+                $"Edit Transaction: {transaction.Description}, {expectedAmount}",
+                cut.Find("[role='button']").GetAttribute("aria-label"));
+        });
+    }
+
+    [Theory]
+    [InlineData("en-US", "7/1/2026")]
+    [InlineData("pt-BR", "01/07/2026")]
+    public void TransactionDate_UsesTheStandardShortDatePatternForTheCurrentCulture(string culture, string expectedDisplayDate)
+    {
+        // TransactionDate.ToString("d") — the standard short-date pattern — rather than a custom
+        // "MMM dd, yyyy" pattern: a custom format string fixes day/month/year order and separators
+        // regardless of culture (only token values like month names localize), so pt-BR would keep
+        // rendering the en-US day-month order even with the right month name. "d" adapts the whole
+        // structure, which is why en-US (month/day/year) and pt-BR (day/month/year) genuinely differ
+        // here, not just in language.
+        var transaction = CreateTransaction();
+
+        BunitLocalizationSupport.WithUiCulture(culture, () =>
+        {
+            var cut = Render<TransactionCard>(parameters => parameters
+                .Add(component => component.Transaction, transaction));
+
+            var time = cut.Find("time");
+            Assert.Equal(expectedDisplayDate, time.TextContent);
+            Assert.Equal("2026-07-01", time.GetAttribute("datetime"));
+        });
     }
 
     private static TransactionResponse CreateTransaction() =>
