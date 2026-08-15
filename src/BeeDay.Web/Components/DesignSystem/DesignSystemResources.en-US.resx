@@ -117,52 +117,37 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="FooterTagline" xml:space="preserve">
-    <value>Be Better Every Day</value>
+  <data name="ConfirmDialogConfirmLabel" xml:space="preserve">
+    <value>Confirm</value>
   </data>
-  <data name="ContinueToBeeDay" xml:space="preserve">
-    <value>Continue to BeeDay</value>
+  <data name="ConfirmDialogCancelLabel" xml:space="preserve">
+    <value>Cancel</value>
   </data>
-  <data name="FooterLinksAriaLabel" xml:space="preserve">
-    <value>BeeDay links</value>
+  <data name="LoadingDefaultLabel" xml:space="preserve">
+    <value>Saving changes...</value>
   </data>
-  <data name="FooterGitHubLink" xml:space="preserve">
-    <value>Project on GitHub</value>
+  <data name="CardMenuEditLabel" xml:space="preserve">
+    <value>EDIT</value>
   </data>
-  <data name="FooterCopyright" xml:space="preserve">
-    <value>© 2026 BeeDay. All rights reserved.</value>
+  <data name="CardMenuDeleteLabel" xml:space="preserve">
+    <value>DELETE</value>
   </data>
-  <data name="PublicHeaderHomeAriaLabel" xml:space="preserve">
-    <value>BeeDay home</value>
+  <data name="CardMenuOptionsForAriaLabel" xml:space="preserve">
+    <value>Options for {0}</value>
   </data>
-  <data name="LanguageSwitcherGroupAriaLabel" xml:space="preserve">
-    <value>Language</value>
+  <data name="EditorModalDeleteButton" xml:space="preserve">
+    <value>Delete</value>
   </data>
-  <data name="NotFoundTitle" xml:space="preserve">
-    <value>Not Found</value>
+  <data name="EditorModalCancelButton" xml:space="preserve">
+    <value>Cancel</value>
   </data>
-  <data name="NotFoundMessage" xml:space="preserve">
-    <value>Sorry, the content you are looking for does not exist.</value>
+  <data name="EditorModalSubmitDefault" xml:space="preserve">
+    <value>SAVE</value>
   </data>
-  <data name="ErrorTitle" xml:space="preserve">
-    <value>Error.</value>
+  <data name="ProgressValueText" xml:space="preserve">
+    <value>{0} of {1}</value>
   </data>
-  <data name="ErrorMessage" xml:space="preserve">
-    <value>An error occurred while processing your request.</value>
-  </data>
-  <data name="ToastDefaultSuccessTitle" xml:space="preserve">
-    <value>Success</value>
-  </data>
-  <data name="ToastDefaultErrorTitle" xml:space="preserve">
-    <value>Something went wrong</value>
-  </data>
-  <data name="ToastDefaultInfoTitle" xml:space="preserve">
-    <value>Information</value>
-  </data>
-  <data name="ToastRegionAriaLabel" xml:space="preserve">
-    <value>Notifications</value>
-  </data>
-  <data name="ToastDismissAriaLabel" xml:space="preserve">
-    <value>Dismiss notification</value>
+  <data name="ProgressUnavailable" xml:space="preserve">
+    <value>Progress unavailable</value>
   </data>
 </root>

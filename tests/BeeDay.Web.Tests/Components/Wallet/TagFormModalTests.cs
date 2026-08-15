@@ -5,6 +5,12 @@ namespace BeeDay.Web.Tests.Components.Wallet;
 
 public sealed class TagFormModalTests : BunitContext
 {
+    public TagFormModalTests()
+    {
+        Services.AddLogging();
+        Services.AddLocalization();
+    }
+
     [Fact]
     public void ShowsDeleteOnlyWhenEditing()
     {

@@ -5,6 +5,12 @@ namespace BeeDay.Web.Tests.Components.Projects;
 
 public sealed class ProjectEditorModalTests : BunitContext
 {
+    public ProjectEditorModalTests()
+    {
+        Services.AddLogging();
+        Services.AddLocalization();
+    }
+
     [Fact]
     public void OpenProjectAction_RendersOnlyWhenEditing()
     {

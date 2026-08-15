@@ -1,11 +1,12 @@
 @page "/Error"
 @attribute [AllowAnonymous]
 @using System.Diagnostics
+@inject IStringLocalizer<SharedResources> Localizer
 
 <PageTitle>Error</PageTitle>
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<h1 class="text-danger">@Localizer["ErrorTitle"]</h1>
+<h2 class="text-danger">@Localizer["ErrorMessage"]</h2>
 
 @if (ShowRequestId)
 {

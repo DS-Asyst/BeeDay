@@ -47,6 +47,19 @@ public sealed class PublicHeaderTests
     }
 
     [Fact]
+    public void UnderPortugueseUiCulture_RendersPortugueseAriaLabels()
+    {
+        using var context = new BunitContext().WithLocalization();
+        context.AddAuthorization().SetNotAuthorized();
+        RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
+
+        var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<PublicHeader>());
+
+        Assert.Equal("Página inicial do BeeDay", cut.Find("a.public-header__brand").GetAttribute("aria-label"));
+        Assert.Equal("Idioma", cut.Find("form.public-language-switcher").GetAttribute("aria-label"));
+    }
+
+    [Fact]
     public void LanguageSwitcher_PostsToTheOfficialCultureEndpointWithCorrectCultureValues()
     {
         using var context = new BunitContext().WithLocalization();

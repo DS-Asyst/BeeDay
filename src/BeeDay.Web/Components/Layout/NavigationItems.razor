@@ -1,20 +1,22 @@
-<nav class="navigation-items" aria-label="Main navigation">
-    <NavigationItem Icon="BeeDayIconName.Profile" Label="Profile" Href="/profile" OnNavigate="OnNavigate" />
-    <NavigationItem Icon="BeeDayIconName.Daily" Label="Daily" Href="/daily" OnNavigate="OnNavigate" />
-    <NavigationItem Icon="BeeDayIconName.Wallet" Label="Wallet" Href="/wallet" OnNavigate="OnNavigate" />
+@inject IStringLocalizer<LayoutResources> Localizer
+
+<nav class="navigation-items" aria-label="@Localizer["NavMainLabel"]">
+    <NavigationItem Icon="BeeDayIconName.Profile" Label="@Localizer["NavProfileLabel"]" Href="/profile" OnNavigate="OnNavigate" />
+    <NavigationItem Icon="BeeDayIconName.Daily" Label="@Localizer["NavDailyLabel"]" Href="/daily" OnNavigate="OnNavigate" />
+    <NavigationItem Icon="BeeDayIconName.Wallet" Label="@Localizer["NavWalletLabel"]" Href="/wallet" OnNavigate="OnNavigate" />
 </nav>
 
 <div class="navigation-items navigation-items--actions">
     <NavigationItem Icon="BeeDayIconName.Account"
-                     Label="Account"
+                     Label="@Localizer["NavAccountLabel"]"
                      Href="/settings"
                      OnNavigate="OnNavigate" />
 
     <form method="post" action="/auth/logout" class="navigation-items__logout-form">
         <AntiforgeryToken />
         <NavigationItem Icon="BeeDayIconName.Logout"
-                        Label="Logout"
-                        AriaLabel="Log out of BeeDay"
+                        Label="@Localizer["NavLogoutLabel"]"
+                        AriaLabel="@Localizer["NavLogoutAriaLabel"]"
                         ButtonType="submit" />
     </form>
 </div>

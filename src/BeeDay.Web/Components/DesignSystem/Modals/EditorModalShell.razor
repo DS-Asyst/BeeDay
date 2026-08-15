@@ -1,3 +1,5 @@
+@inject IStringLocalizer<DesignSystemResources> Localizer
+
 <div class="editor-modal-backdrop" @onclick="Cancel" @onkeydown="HandleKeyDown" tabindex="-1">
     <section class="editor-modal"
              role="dialog"
@@ -15,7 +17,7 @@
                                Icon="BeeDayIconName.Save"
                                Disabled="IsBusy"
                                IsLoading="IsBusy"
-                               Class="editor-modal__submit-action editor-modal__header-save">@SubmitLabel</BeeDayButton>
+                               Class="editor-modal__submit-action editor-modal__header-save">@(SubmitLabel ?? Localizer["EditorModalSubmitDefault"])</BeeDayButton>
             </header>
 
             <div class="editor-modal__content">
@@ -31,7 +33,7 @@
                                        Disabled="IsBusy"
                                        Compact="true"
                                        Class="editor-modal__delete-action"
-                                       OnClick="OnDelete">Delete</BeeDayButton>
+                                       OnClick="OnDelete">@Localizer["EditorModalDeleteButton"]</BeeDayButton>
                     }
                 </div>
 
@@ -40,7 +42,7 @@
                     <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel"
                                    Disabled="IsBusy"
                                    Class="editor-modal__cancel-action"
-                                   OnClick="Cancel">Cancel</BeeDayButton>
+                                   OnClick="Cancel">@Localizer["EditorModalCancelButton"]</BeeDayButton>
                 </div>
             </footer>
         </EditForm>

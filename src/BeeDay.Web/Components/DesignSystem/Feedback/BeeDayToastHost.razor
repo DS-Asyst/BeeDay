@@ -1,9 +1,10 @@
 @implements IDisposable
 @inject ToastService ToastService
+@inject IStringLocalizer<SharedResources> Localizer
 
 <div class="beeday-toast-region"
      aria-live="polite"
-     aria-label="Notifications">
+     aria-label="@Localizer["ToastRegionAriaLabel"]">
     @foreach (var toast in ToastService.Messages)
     {
         <article class="beeday-toast beeday-toast--@VariantClass(toast.Variant)"
@@ -15,7 +16,7 @@
             </div>
             <button class="beeday-toast__close"
                     type="button"
-                    aria-label="Dismiss notification"
+                    aria-label="@Localizer["ToastDismissAriaLabel"]"
                     @onclick="() => ToastService.Remove(toast.Id)">
                 <BeeDayIcon Name="BeeDayIconName.Close" Size="BeeDayIconSize.ExtraSmall" />
             </button>

@@ -1,3 +1,5 @@
+@inject IStringLocalizer<LayoutResources> Localizer
+
 <script type="module" src="@Assets["Components/Layout/ReconnectModal.razor.js"]"></script>
 
 <dialog id="components-reconnect-modal" data-nosnippet>
@@ -7,25 +9,25 @@
             <div></div>
         </div>
         <p class="components-reconnect-first-attempt-visible">
-            Rejoining the server...
+            @Localizer["ReconnectModalRejoining"]
         </p>
         <p class="components-reconnect-repeated-attempt-visible">
-            Rejoin failed... trying again in <span id="components-seconds-to-next-attempt"></span> seconds.
+            @Localizer["ReconnectModalRejoinFailedPrefix"]<span id="components-seconds-to-next-attempt"></span>@Localizer["ReconnectModalRejoinFailedSuffix"]
         </p>
         <p class="components-reconnect-failed-visible">
-            Failed to rejoin.<br />Please retry or reload the page.
+            @Localizer["ReconnectModalFailedToRejoin"]<br />@Localizer["ReconnectModalRetryOrReload"]
         </p>
         <button id="components-reconnect-button" class="components-reconnect-failed-visible">
-            Retry
+            @Localizer["ReconnectModalRetryButton"]
         </button>
         <p class="components-pause-visible">
-            The session has been paused by the server.
+            @Localizer["ReconnectModalPaused"]
         </p>
         <p class="components-resume-failed-visible">
-            Failed to resume the session.<br />Please retry or reload the page.
+            @Localizer["ReconnectModalFailedToResume"]<br />@Localizer["ReconnectModalRetryOrReload"]
         </p>
         <button id="components-resume-button" class="components-pause-visible components-resume-failed-visible">
-            Resume
+            @Localizer["ReconnectModalResumeButton"]
         </button>
     </div>
 </dialog>
