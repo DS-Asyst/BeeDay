@@ -14,6 +14,7 @@ using BeeDay.Web.Components.Layout;
 using BeeDay.Web.Configuration;
 using BeeDay.Web.Diagnostics;
 using BeeDay.Web.HealthChecks;
+using BeeDay.Web.Localization;
 using BeeDay.Web.Services;
 using BeeDay.Web.Services.Authentication;
 using MediatR;
@@ -21,6 +22,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -172,6 +174,23 @@ builder.Services
     });
 builder.Services.AddAuthorization();
 
+builder.Services.AddLocalization();
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.SetDefaultCulture(BeeDayCultures.Default)
+        .AddSupportedCultures(BeeDayCultures.Supported)
+        .AddSupportedUICultures(BeeDayCultures.Supported);
+
+    // Cookie-only on purpose: the effective culture is the single source of truth described in
+    // Epic 23 — no query-string or Accept-Language sniffing yet, so an anonymous visitor's
+    // browser language never silently overrides the explicit/default culture before a later
+    // Sprint deliberately decides to add that provider.
+    options.RequestCultureProviders =
+    [
+        new CookieRequestCultureProvider { CookieName = BeeDayCultures.CookieName }
+    ];
+});
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<BeeDay.Application.Common.Security.ICurrentUserContext, HttpCurrentUserContext>();
 builder.Services.AddCascadingAuthenticationState();
@@ -216,6 +235,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
     app.UseHttpsRedirection();
 }
+
+app.UseRequestLocalization();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -329,6 +350,28 @@ app.MapPost("/auth/logout", async (HttpContext httpContext, [FromForm] string? r
 
     return Results.LocalRedirect(LoginDestinationResolver.ResolveLogout(returnUrl));
 }).RequireAuthorization();
+
+app.MapPost("/culture/set", (HttpContext httpContext, [FromForm] string culture, [FromForm] string? returnUrl) =>
+{
+    if (!BeeDayCultures.Supported.Contains(culture, StringComparer.OrdinalIgnoreCase))
+    {
+        return Results.BadRequest();
+    }
+
+    httpContext.Response.Cookies.Append(
+        BeeDayCultures.CookieName,
+        CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+        new CookieOptions
+        {
+            HttpOnly = true,
+            SameSite = SameSiteMode.Lax,
+            Secure = !app.Environment.IsDevelopment(),
+            Expires = DateTimeOffset.UtcNow.AddYears(1)
+        });
+
+    var destination = LoginDestinationResolver.IsLocalPath(returnUrl) ? returnUrl! : "/";
+    return Results.LocalRedirect(destination);
+});
 
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
