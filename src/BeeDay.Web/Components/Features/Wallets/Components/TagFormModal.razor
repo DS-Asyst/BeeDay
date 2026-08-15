@@ -1,11 +1,12 @@
 @using BeeDay.Web.Components.Features.Wallets.Models
+@inject IStringLocalizer<WalletResources> Localizer
 
 @if (IsOpen)
 {
     <EditorModalShell Model="Model"
-                      Title="@(IsEditing ? "Edit Tag" : "Create Tag")"
+                      Title="@(IsEditing ? Localizer["EditTagTitle"] : Localizer["CreateTagTitle"])"
                       TitleId="tag-editor-title"
-                      SubmitLabel="@(IsEditing ? "Save" : "Create")"
+                      SubmitLabel="@(IsEditing ? Localizer["SaveButtonLabel"] : Localizer["CreateButtonLabel"])"
                       ShowDelete="IsEditing"
                       IsBusy="IsBusy"
                       OnSubmit="SaveAsync"
@@ -14,10 +15,10 @@
         <HeroContent>
             <div class="editor-modal__hero">
                 <BeeDayInput Id="tag-name"
-                              Label="Name"
+                              Label="@Localizer["NameLabel"]"
                               Required="true"
                               @bind-Value="Model.Name"
-                              Placeholder="Add a name"
+                              Placeholder="@Localizer["NamePlaceholder"]"
                               MaxLength="40"
                               FieldCssClass="editor-modal__hero-field"
                               LabelCssClass="editor-modal__label-line"
@@ -29,14 +30,14 @@
                 <div class="editor-modal__type-summary">
                     <BeeDayIcon Name="BeeDayIconName.Tag" Size="BeeDayIconSize.Large" Class="editor-modal__type-icon" Decorative="true" />
                     <div>
-                        <strong>Tag</strong>
-                        <p>Organize your income and expenses.</p>
+                        <strong>@Localizer["TagSummaryHeading"]</strong>
+                        <p>@Localizer["TagSummaryDescription"]</p>
                     </div>
                 </div>
                 <label class="editor-modal__field wallet-color-field">
-                    <span>Color</span>
+                    <span>@Localizer["ColorLabel"]</span>
                     <InputText @bind-Value="Model.Color" maxlength="7" disabled="@IsBusy" />
-                    <input type="color" @bind="Model.Color" disabled="@IsBusy" aria-label="Select tag color" />
+                    <input type="color" @bind="Model.Color" disabled="@IsBusy" aria-label="@Localizer["SelectTagColorAriaLabel"]" />
                     <ValidationMessage For="@(() => Model.Color)" />
                 </label>
             </div>
