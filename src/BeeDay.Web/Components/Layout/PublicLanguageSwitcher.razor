@@ -1,33 +1,33 @@
-@inject PublicHomeLanguageState LanguageState
-@implements IDisposable
+@using System.Globalization
+@using BeeDay.Web.Localization
+@inject NavigationManager Navigation
 
-<div class="public-language-switcher" role="group" aria-label="Language">
-    <button type="button"
-            class="public-language-switcher__option @(IsActive(UserLanguage.Portuguese) ? "public-language-switcher__option--active" : null)"
-            aria-pressed="@AriaPressed(UserLanguage.Portuguese)"
-            aria-label="Português (Brasil)"
-            @onclick="() => Select(UserLanguage.Portuguese)">
+<form method="post" action="/culture/set" class="public-language-switcher" role="group" aria-label="Language">
+    <AntiforgeryToken />
+    <input type="hidden" name="returnUrl" value="@ReturnUrl" />
+    <button type="submit"
+            name="culture"
+            value="@BeeDayCultures.Portuguese"
+            class="public-language-switcher__option @(IsActive(BeeDayCultures.Portuguese) ? "public-language-switcher__option--active" : null)"
+            aria-pressed="@AriaPressed(BeeDayCultures.Portuguese)"
+            aria-label="Português (Brasil)">
         <img class="public-language-switcher__flag" src="/assets/flags/brazil.png" alt="" width="612" height="408" />
     </button>
-    <button type="button"
-            class="public-language-switcher__option @(IsActive(UserLanguage.English) ? "public-language-switcher__option--active" : null)"
-            aria-pressed="@AriaPressed(UserLanguage.English)"
-            aria-label="English (United States)"
-            @onclick="() => Select(UserLanguage.English)">
+    <button type="submit"
+            name="culture"
+            value="@BeeDayCultures.English"
+            class="public-language-switcher__option @(IsActive(BeeDayCultures.English) ? "public-language-switcher__option--active" : null)"
+            aria-pressed="@AriaPressed(BeeDayCultures.English)"
+            aria-label="English (United States)">
         <img class="public-language-switcher__flag" src="/assets/flags/united-states.png" alt="" width="612" height="408" />
     </button>
-</div>
+</form>
 
 @code {
-    protected override void OnInitialized() => LanguageState.Changed += HandleChanged;
+    private string ReturnUrl => "/" + Navigation.ToBaseRelativePath(Navigation.Uri);
 
-    private bool IsActive(UserLanguage language) => LanguageState.Language == language;
+    private static bool IsActive(string culture) =>
+        string.Equals(CultureInfo.CurrentUICulture.Name, culture, StringComparison.OrdinalIgnoreCase);
 
-    private string AriaPressed(UserLanguage language) => IsActive(language) ? "true" : "false";
-
-    private void Select(UserLanguage language) => LanguageState.SetLanguage(language);
-
-    private void HandleChanged() => InvokeAsync(StateHasChanged);
-
-    public void Dispose() => LanguageState.Changed -= HandleChanged;
+    private static string AriaPressed(string culture) => IsActive(culture) ? "true" : "false";
 }

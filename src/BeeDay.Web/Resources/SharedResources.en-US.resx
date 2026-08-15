@@ -120,4 +120,7 @@
   <data name="FooterTagline" xml:space="preserve">
     <value>Be Better Every Day</value>
   </data>
+  <data name="ContinueToBeeDay" xml:space="preserve">
+    <value>Continue to BeeDay</value>
+  </data>
 </root>
