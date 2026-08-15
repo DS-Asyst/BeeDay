@@ -25,7 +25,7 @@
 
 .public-header__brand-mark {
     display: block;
-    height: 2.25rem;
+    height: 2.93rem;
     width: auto;
 }
 
@@ -40,5 +40,5 @@
     }
 
     .public-header__actions { gap: var(--beeday-spacing-xs); }
-    .public-header__brand-mark { height: 2rem; }
+    .public-header__brand-mark { height: 2.6rem; }
 }

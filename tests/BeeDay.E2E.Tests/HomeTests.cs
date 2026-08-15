@@ -123,7 +123,7 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         Assert.NotNull(headerBox);
         Assert.NotNull(heroBox);
         Assert.InRange(Math.Abs((headerBox!.Y + headerBox.Height) - heroBox!.Y), 0, 1);
-        Assert.Equal("36px", await Page.Locator(".public-header__brand-mark")
+        Assert.Equal("46.875px", await Page.Locator(".public-header__brand-mark")
             .EvaluateAsync<string>("element => getComputedStyle(element).height"));
 
         var heroActions = Page.Locator(".home-hero__actions");
