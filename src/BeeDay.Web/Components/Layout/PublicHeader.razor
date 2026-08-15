@@ -2,19 +2,17 @@
 <header class="public-header">
     <div class="public-header__content beeday-container">
         <a class="public-header__brand" href="/" aria-label="BeeDay home">
-            <BeeDayBrand />
+            <img class="public-header__brand-mark" src="/assets/brand/beeday-top-navigation.png" alt="" width="866" height="288" />
         </a>
 
-        <AuthorizeView>
-            <Authorized>
-                <BeeDayButton Compact="true" OnClick="ContinueToBeeDay">Continue to BeeDay</BeeDayButton>
-            </Authorized>
-            <NotAuthorized>
-                <nav class="public-header__actions" aria-label="Account actions">
-                    <a class="public-header__login" href="/login">Log in</a>
-                </nav>
-            </NotAuthorized>
-        </AuthorizeView>
+        <div class="public-header__actions">
+            <PublicLanguageSwitcher />
+            <AuthorizeView>
+                <Authorized>
+                    <BeeDayButton Compact="true" OnClick="ContinueToBeeDay">Continue to BeeDay</BeeDayButton>
+                </Authorized>
+            </AuthorizeView>
+        </div>
     </div>
 </header>
 

@@ -1,14 +1,16 @@
 @page "/"
 @attribute [AllowAnonymous]
 @layout BeeDay.Web.Components.Layout.PublicLayout
+@using BeeDay.Web.Components.Features.Home
 @using BeeDay.Web.Services.Authentication
 @using Microsoft.JSInterop
 @inject NavigationManager Navigation
 @inject AuthenticatedEntryDestinationResolver DestinationResolver
+@inject PublicHomeLanguageState LanguageState
 @inject IJSRuntime JS
 @implements IAsyncDisposable
 
-<PageTitle>BeeDay — Be better every day</PageTitle>
+<PageTitle>@Copy.PageTitle</PageTitle>
 
 <article class="home-page">
     <section class="home-hero" aria-labelledby="home-heading">
@@ -17,14 +19,14 @@
                 <canvas @ref="riveCanvas" class="home-hero__rive"></canvas>
             </div>
             <div class="home-hero__content">
-                <h1 id="home-heading">Build a better day, one step at a time.</h1>
-                <p>Keep your habits, tasks, and personal progress together.</p>
+                <h1 id="home-heading">@Copy.HeroHeading</h1>
+                <p>@Copy.HeroDescription</p>
                 <div class="home-hero__actions">
                     <AuthorizeView>
-                        <Authorized><BeeDayButton OnClick="ContinueToBeeDay">Continue to BeeDay</BeeDayButton></Authorized>
+                        <Authorized><BeeDayButton OnClick="ContinueToBeeDay">@Copy.ContinueToBeeDay</BeeDayButton></Authorized>
                         <NotAuthorized>
-                            <a class="beeday-button beeday-button--primary home-hero__start" href="/profile/create">Get started</a>
-                            <a class="beeday-button beeday-button--secondary home-hero__login" href="/login">I already have an account</a>
+                            <a class="beeday-button beeday-button--primary home-hero__start" href="/profile/create">@Copy.GetStarted</a>
+                            <a class="beeday-button beeday-button--secondary home-hero__login" href="/login">@Copy.AlreadyHaveAccount</a>
                         </NotAuthorized>
                     </AuthorizeView>
                 </div>
@@ -34,14 +36,14 @@
 
     <section class="home-section" aria-labelledby="how-heading">
         <div class="home-section__heading">
-            <span class="home-page__eyebrow">A SIMPLE DAILY LOOP</span>
-            <h2 id="how-heading">How BeeDay works</h2>
-            <p>Start with what matters, turn it into action, and let consistency build the result.</p>
+            <span class="home-page__eyebrow">@Copy.StepsEyebrow</span>
+            <h2 id="how-heading">@Copy.StepsHeading</h2>
+            <p>@Copy.StepsDescription</p>
         </div>
         <ol class="home-steps">
-            <li><span>1</span><div><h3>Define</h3><p>Choose what you want to improve.</p></div></li>
-            <li><span>2</span><div><h3>Practice</h3><p>Keep realistic daily actions in view.</p></div></li>
-            <li><span>3</span><div><h3>Evolve</h3><p>See completed work become progress.</p></div></li>
+            <li><span>1</span><div><h3>@Copy.Step1Title</h3><p>@Copy.Step1Description</p></div></li>
+            <li><span>2</span><div><h3>@Copy.Step2Title</h3><p>@Copy.Step2Description</p></div></li>
+            <li><span>3</span><div><h3>@Copy.Step3Title</h3><p>@Copy.Step3Description</p></div></li>
         </ol>
     </section>
 </article>
@@ -49,6 +51,10 @@
 @code {
     private ElementReference riveCanvas;
     private IJSObjectReference? riveModule;
+
+    private PublicHomeCopy Copy => PublicHomeCopy.For(LanguageState.Language);
+
+    protected override void OnInitialized() => LanguageState.Changed += HandleLanguageChanged;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -74,8 +80,12 @@
         Navigation.NavigateTo(destination, forceLoad: true, replace: true);
     }
 
+    private void HandleLanguageChanged() => InvokeAsync(StateHasChanged);
+
     public async ValueTask DisposeAsync()
     {
+        LanguageState.Changed -= HandleLanguageChanged;
+
         if (riveModule is null)
         {
             return;

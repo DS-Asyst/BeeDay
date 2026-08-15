@@ -12,7 +12,7 @@ namespace BeeDay.Web.Tests.Components.Layout;
 public sealed class PublicHeaderTests
 {
     [Fact]
-    public void RendersHeaderLandmarkWithOnlyLoginForAnonymousUser()
+    public void RendersHeaderLandmarkWithBrandMarkAndLanguageSwitcherForAnonymousUser()
     {
         using var context = new BunitContext();
         context.AddAuthorization().SetNotAuthorized();
@@ -21,10 +21,15 @@ public sealed class PublicHeaderTests
         var cut = context.Render<PublicHeader>();
 
         Assert.NotNull(cut.Find("header.public-header"));
-        Assert.NotNull(cut.Find(".public-header__brand .beeday-brand"));
+        Assert.NotNull(cut.Find(".public-header__brand img.public-header__brand-mark"));
 
-        Assert.Equal("/login", cut.Find("a.public-header__login").GetAttribute("href"));
+        Assert.Empty(cut.FindAll("a.public-header__login"));
         Assert.Empty(cut.FindAll("a[href='/profile/create']"));
+
+        var portuguese = cut.Find("button[aria-label='Português (Brasil)']");
+        var english = cut.Find("button[aria-label='English (United States)']");
+        Assert.Equal("false", portuguese.GetAttribute("aria-pressed"));
+        Assert.Equal("true", english.GetAttribute("aria-pressed"));
     }
 
     [Fact]
@@ -36,20 +41,26 @@ public sealed class PublicHeaderTests
 
         var cut = context.Render<PublicHeader>();
 
-        var cta = cut.Find("button");
+        var cta = cut.Find("button.beeday-button");
         Assert.Equal("Continue to BeeDay", cta.TextContent.Trim());
     }
 
     [Fact]
-    public void AnonymousLoginUsesRealRouteWithoutDuplicatingAcquisition()
+    public void SelectingLanguageUpdatesActiveStateWithoutNavigating()
     {
         using var context = new BunitContext();
         context.AddAuthorization().SetNotAuthorized();
         RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
 
         var cut = context.Render<PublicHeader>();
-        Assert.Equal("/login", cut.Find("a.public-header__login").GetAttribute("href"));
-        Assert.Empty(cut.FindAll(".public-header__create"));
+        var navigation = context.Services.GetRequiredService<NavigationManager>();
+        var uriBeforeClick = navigation.Uri;
+
+        cut.Find("button[aria-label='Português (Brasil)']").Click();
+
+        Assert.Equal(uriBeforeClick, navigation.Uri);
+        Assert.Equal("true", cut.Find("button[aria-label='Português (Brasil)']").GetAttribute("aria-pressed"));
+        Assert.Equal("false", cut.Find("button[aria-label='English (United States)']").GetAttribute("aria-pressed"));
     }
 
     [Fact]
@@ -60,7 +71,7 @@ public sealed class PublicHeaderTests
         RegisterDestinationResolver(context, hasProfile: false, hasCompletedOnboarding: false);
 
         var cut = context.Render<PublicHeader>();
-        cut.Find("button").Click();
+        cut.Find("button.beeday-button").Click();
 
         var navigation = context.Services.GetRequiredService<NavigationManager>();
         Assert.EndsWith("/profile/create", navigation.Uri, StringComparison.Ordinal);
@@ -74,7 +85,7 @@ public sealed class PublicHeaderTests
         RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: false);
 
         var cut = context.Render<PublicHeader>();
-        cut.Find("button").Click();
+        cut.Find("button.beeday-button").Click();
 
         var navigation = context.Services.GetRequiredService<NavigationManager>();
         Assert.EndsWith("/onboarding/tutorial", navigation.Uri, StringComparison.Ordinal);
@@ -88,7 +99,7 @@ public sealed class PublicHeaderTests
         RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
 
         var cut = context.Render<PublicHeader>();
-        cut.Find("button").Click();
+        cut.Find("button.beeday-button").Click();
 
         var navigation = context.Services.GetRequiredService<NavigationManager>();
         Assert.EndsWith("/profile", navigation.Uri, StringComparison.Ordinal);
@@ -114,6 +125,7 @@ public sealed class PublicHeaderTests
             UserLanguage.English, UserTheme.System, true, hasCompletedOnboarding, true, hasProfile);
         var store = new BeeDayWebService(new StubCurrentUserSender(response));
         context.Services.AddSingleton(new AuthenticatedEntryDestinationResolver(store));
+        context.Services.AddSingleton(new PublicHomeLanguageState());
     }
 
     private sealed class StubCurrentUserSender(CurrentUserResponse response) : ISender

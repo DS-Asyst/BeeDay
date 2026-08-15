@@ -1,10 +1,12 @@
 :root {
-    /* Brand — one semantic family, migrated to the official Epic 21 BeeDay palette. */
-    --beeday-color-brand-primary: #3a4ed9;
-    --beeday-color-brand-primary-hover: #3043c7;
-    --beeday-color-brand-primary-active: #2637ad;
-    --beeday-color-brand-primary-light: #6675e3;
-    --beeday-color-brand-primary-soft: #eff1ff;
+    /* Brand — one semantic family, migrated to the official Epic 22 BeeDay palette (#5247F9). Hover/
+       active/light/soft preserve the same hue and the same saturation/lightness offsets from base
+       that the previous Epic 21 family (#3A4ED9) used, so the ladder stays coherent under the new hue. */
+    --beeday-color-brand-primary: #5247f9;
+    --beeday-color-brand-primary-hover: #3f33f1;
+    --beeday-color-brand-primary-active: #1c0ef2;
+    --beeday-color-brand-primary-light: #827afc;
+    --beeday-color-brand-primary-soft: #f8f7ff;
     --beeday-color-brand-yellow: #ffd326;
     --beeday-color-brand-yellow-hover: #e8bd00;
     --beeday-color-brand-yellow-active: #cda600;
@@ -184,18 +186,20 @@
     --beeday-depth-md: 4px;
     --beeday-depth-lg: 8px;
 
-    /* Elevation */
-    --beeday-shadow-xs: 0 1px 2px rgb(58 78 217 / 6%);
-    --beeday-shadow-sm: 0 2px 6px rgb(58 78 217 / 8%);
-    --beeday-shadow-md: 0 4px 12px rgb(58 78 217 / 10%);
-    --beeday-shadow-lg: 0 12px 28px rgb(58 78 217 / 16%);
+    /* Elevation — brand-tinted shadow, rgb() literal because CSS cannot extract channels from a hex
+       custom property; kept in sync with --beeday-color-brand-primary (#5247F9 as of Epic 22). */
+    --beeday-shadow-xs: 0 1px 2px rgb(82 71 249 / 6%);
+    --beeday-shadow-sm: 0 2px 6px rgb(82 71 249 / 8%);
+    --beeday-shadow-md: 0 4px 12px rgb(82 71 249 / 10%);
+    --beeday-shadow-lg: 0 12px 28px rgb(82 71 249 / 16%);
 
-    /* Focus — migrated to the canonical brand blue in Sprint 20.7 (EPIC 20): this token has a single,
-       well-defined role (the default focus-visible ring color) rather than the broad, overloaded
-       surface/text role of --beeday-color-primary, so migrating it directly — instead of keeping a
-       legacy alias — does not risk the same product-wide background/text regression; it only
-       recolors a transient interaction indicator, consistently, everywhere. */
-    --beeday-focus-color: rgb(58 78 217 / 32%);
+    /* Focus — migrated to the canonical brand blue in Sprint 20.7 (EPIC 20); channel values kept in
+       sync with --beeday-color-brand-primary through the Epic 22 remigration to #5247F9. This token
+       has a single, well-defined role (the default focus-visible ring color) rather than the broad,
+       overloaded surface/text role of --beeday-color-primary, so migrating it directly — instead of
+       keeping a legacy alias — does not risk the same product-wide background/text regression; it
+       only recolors a transient interaction indicator, consistently, everywhere. */
+    --beeday-focus-color: rgb(82 71 249 / 32%);
     --beeday-focus-ring: 0 0 0 3px var(--beeday-focus-color);
     --beeday-focus-color-inverse: var(--beeday-color-brand-yellow);
     --beeday-focus-ring-inverse: 0 0 0 3px rgb(255 211 38 / 45%);

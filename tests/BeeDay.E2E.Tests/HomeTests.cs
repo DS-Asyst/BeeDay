@@ -69,11 +69,13 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
 
         await Expect(Page).ToHaveURLAsync(new Regex(@"/$"));
         await Expect(Page.GetByRole(AriaRole.Heading, new() { NameRegex = new Regex("one step at a time", RegexOptions.IgnoreCase), Level = 1 })).ToBeVisibleAsync();
-        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Log in" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Log in" })).ToHaveCountAsync(0);
+        await Expect(Page.Locator(".public-header").GetByRole(AriaRole.Button, new() { Name = "Português (Brasil)" })).ToBeVisibleAsync();
+        await Expect(Page.Locator(".public-header").GetByRole(AriaRole.Button, new() { Name = "English (United States)" })).ToBeVisibleAsync();
         await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Get started" })).ToBeVisibleAsync();
         await Expect(Page.Locator(".public-header").GetByRole(AriaRole.Link, new() { Name = "Get started" })).ToHaveCountAsync(0);
 
-        await Page.GetByRole(AriaRole.Link, new() { Name = "Log in" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Link, new() { Name = "I already have an account" }).ClickAsync();
         await Expect(Page).ToHaveURLAsync(new Regex("/login$"));
         await Page.GetByRole(AriaRole.Link, new() { Name = "Close login and return to Home" }).ClickAsync();
         await Expect(Page).ToHaveURLAsync(new Regex(@"/$"));
@@ -170,14 +172,44 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         await Page.SetViewportSizeAsync(1280, 800);
         await GotoAsync("/");
 
-        var login = Page.GetByRole(AriaRole.Link, new() { Name = "Log in" });
-        await login.FocusAsync();
-        await Expect(login).ToBeFocusedAsync();
-        Assert.Equal("solid", await login.EvaluateAsync<string>("element => getComputedStyle(element).outlineStyle"));
+        var portuguese = Page.GetByRole(AriaRole.Button, new() { Name = "Português (Brasil)" });
+        await portuguese.FocusAsync();
+        await Expect(portuguese).ToBeFocusedAsync();
+        Assert.Equal("solid", await portuguese.EvaluateAsync<string>("element => getComputedStyle(element).outlineStyle"));
 
         await Page.Locator(".public-header__brand").FocusAsync();
         await Expect(Page.Locator(".public-header__brand")).ToBeFocusedAsync();
         Assert.Equal("solid", await Page.Locator(".public-header__brand").EvaluateAsync<string>("element => getComputedStyle(element).outlineStyle"));
+    }
+
+    [Fact]
+    public async Task SelectingLanguageTranslatesPublicHomeContentAndTracksActiveState()
+    {
+        await Page.SetViewportSizeAsync(1280, 800);
+        await GotoAsync("/");
+
+        var portuguese = Page.GetByRole(AriaRole.Button, new() { Name = "Português (Brasil)" });
+        var english = Page.GetByRole(AriaRole.Button, new() { Name = "English (United States)" });
+
+        await Expect(english).ToHaveAttributeAsync("aria-pressed", "true");
+        await Expect(portuguese).ToHaveAttributeAsync("aria-pressed", "false");
+
+        await portuguese.ClickAsync();
+
+        await Expect(portuguese).ToHaveAttributeAsync("aria-pressed", "true");
+        await Expect(english).ToHaveAttributeAsync("aria-pressed", "false");
+        await Expect(Page).ToHaveURLAsync(new Regex(@"/$"));
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Level = 1 })).ToContainTextAsync("Construa um dia melhor");
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Level = 2 })).ToContainTextAsync("Como o BeeDay funciona");
+        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Comece agora" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Já tenho uma conta" })).ToBeVisibleAsync();
+
+        await english.ClickAsync();
+
+        await Expect(english).ToHaveAttributeAsync("aria-pressed", "true");
+        await Expect(portuguese).ToHaveAttributeAsync("aria-pressed", "false");
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Level = 1 })).ToContainTextAsync("Build a better day");
+        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Get started" })).ToBeVisibleAsync();
     }
 
     [Fact]
@@ -191,8 +223,8 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         Assert.NotNull(headerBox);
         Assert.NotNull(heroBox);
         Assert.InRange(Math.Abs((headerBox!.Y + headerBox.Height) - heroBox!.Y), 0, 1);
-        Assert.Equal("36px", await Page.Locator(".public-header .beeday-brand")
-            .EvaluateAsync<string>("element => getComputedStyle(element).fontSize"));
+        Assert.Equal("36px", await Page.Locator(".public-header__brand-mark")
+            .EvaluateAsync<string>("element => getComputedStyle(element).height"));
 
         var heroActions = Page.Locator(".home-hero__actions");
         var getStarted = heroActions.GetByRole(AriaRole.Link, new() { Name = "Get started" });
