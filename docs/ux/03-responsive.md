@@ -6,7 +6,7 @@ implementação permanece nos READMEs das EPICs correspondentes.
 
 ## 1. Mapa atual
 
-Existem 105 declarações `@media` em 44 arquivos. Destas, 70 são queries de largura de viewport em
+Existem 102 declarações `@media` em 44 arquivos. Destas, 67 são queries de largura de viewport em
 33 arquivos; não existe `@container`. Depois de normalizar whitespace e converter `rem` para o
 equivalente em 16px, há 26 cortes `max-width` e dois cortes `min-width` (27 valores físicos, pois
 1200px aparece nos dois sentidos).
@@ -67,7 +67,7 @@ proibido.
 | Onboarding | `OnboardingLayout.razor.css` | main até 72rem; páginas internas escolhem sua largura focada |
 | Brand Guidelines | `TypographyGuidelines.razor.css` | 72rem, cards em uma coluna a 40rem |
 | Daily | feature Dashboard | workspace integral; 4 colunas/scroll interno, 2 colunas e 1 coluna por cortes próprios |
-| Wallet | `wallet.css` | 1440px/76rem e grid próprios; convergência completa pertence à 25.11 |
+| Wallet | `wallet.css` | container canônico de 76rem e grids feature-local por densidade de conteúdo |
 | ProjectWorkspace | CSS da feature | 58rem e breakpoints 700/520px; convergência pertence à 25.12 |
 
 `.beeday-main--authenticated` remove o gutter/reading-width global: páginas autenticadas são
@@ -81,9 +81,9 @@ estado atual; permanecem candidatos para o sweep final, não contratos para cód
 - **SHARED STRUCTURAL:** shell 1200px; public primitives 42rem; família pública compacta 40rem.
 - **LEGITIMATE FEATURE LOCAL:** Home marketing 60/52/46/30rem; Daily 1199/900/700/620px; Wallet;
   ProjectWorkspace; Account 720px; activity cards 650px.
-- **REDUNDANT / CONSOLIDATE:** grafias duplicadas e blocos repetidos dentro de Wallet/Cards são
-  candidatos quando o owner for migrado; não justificam rewrite transversal.
-- **DEFER TO FEATURE SPRINT:** Wallet → 25.11; Daily/Project → 25.12; Character/illustration → 25.13.
+- **REDUNDANT / CONSOLIDATE:** os blocos Wallet duplicados de 1000/720/640px foram removidos na
+  Sprint 25.11; Cards continuam candidatos somente quando seu owner for migrado.
+- **DEFER TO FEATURE SPRINT:** Daily/Project → 25.12; Character/illustration → 25.13.
 
 Igualdade numérica não torna dois breakpoints compartilhados. A mudança de estrutura, o owner e os
 consumers precisam coincidir.

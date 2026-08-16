@@ -3,7 +3,7 @@
 **Fonte da verdade:** verificado diretamente em `src/BeeDay.Web/Components/DesignSystem/Forms/`
 (6 componentes) e `src/BeeDay.Web/wwwroot/css/forms.css`, `editor-modal.css`, `identity.css`.
 
-**Última verificação:** 2026-08-16 (Sprint 25.9, EPIC 25 — Forms, Authentication & Identity).
+**Última verificação:** 2026-08-16 (Sprint 25.11, EPIC 25 — Wallet convergence).
 
 ## 1. Objetivo
 
@@ -32,7 +32,10 @@ vez disso), `Disabled`, `ShowValidationMessage` (padrão `true`), `Value`/`Value
 campo do `EditContext` está ligado, mesmo sem herdar a classe base do ASP.NET Core). Todos aceitam
 `AdditionalAttributes` (`CaptureUnmatchedValues`).
 
-Parâmetros específicos: `BeeDayInput` tem `Placeholder`, `MaxLength`, `Required`, `ReadOnly`;
+Parâmetros específicos: `BeeDayInput` tem `Placeholder`, `MaxLength`, `Required`, `ReadOnly` e
+`UpdateOnInput`. Este último é um modo explícito para busca/filtro sem `EditContext`: mantém o
+mesmo label, chrome, disabled e atributos, mas dispara `ValueChanged` em cada `input`; o modo
+padrão continua usando `InputText` e integração normal de formulário.
 `BeeDayTextArea` tem os mesmos mais `ShowCounter`/`CounterCssClass`; `BeeDayCheckbox` não tem
 `Placeholder`/`MaxLength`/`ReadOnly` (não fazem sentido para um booleano); `BeeDaySelect<TValue>`
 tem `ChildContent` (as `<option>`, fornecidas pelo consumidor — o componente não gera opções
@@ -89,13 +92,14 @@ removeu a implementação paralela de inputs em `identity.css`: `ForgotPassword`
 | `forms.css` | Componentes `Forms/` do Design System | É a origem de `.beeday-field*` |
 | `editor-modal.css` | Os 4 editores de atividade (Habit/Task/Todo/Project) | Não — declara `.editor-modal__hero input`, `.editor-modal__field input` com seu próprio border/box-shadow/focus, valores próximos mas não idênticos aos de `.beeday-field__control` |
 | `identity.css` | Layout e feedback das 5 páginas Identity | Sim — os três formulários usam `BeeDayInput`; o arquivo não redefine inputs |
-| `wallet.css` | `WalletFilters`, `TransactionFormModal`, `TagFormModal` | Parcial — `WalletFilters` reutiliza `.beeday-field__control`; os modais mantêm composição especializada |
+| `wallet.css` | `WalletFilters`, `TransactionFormModal`, `TagFormModal` | Sim nos filtros — busca, selects e datas usam as primitives; valor financeiro e picker de cor continuam especializados nos modais |
 
 `Login` mantém `<form method="post">` e controles HTML para preservar nomes, antiforgery,
 `returnUrl` e semântica do endpoint `/auth/login`; `CreateProfile` mantém inputs HTML porque seu
 fluxo em etapas não possui `EditContext`. Ambos consomem `.beeday-field*`; o remember-me do Login
 consome `.beeday-checkbox*`. Esses são adapters legítimos, não implementações visuais paralelas.
-Os editores e modais Wallet continuam especializados e pertencem às Sprints donas dessas áreas.
+Os editores Wallet continuam especializados na composição, mas reutilizam `EditorModalShell`,
+`BeeDayInput`, `BeeDayTextArea`, `BeeDaySelect` e `BeeDayDateInput` onde os contratos permitem.
 
 ## 6. Botões dentro de formulários
 

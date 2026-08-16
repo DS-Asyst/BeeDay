@@ -97,17 +97,17 @@ Regras transversais:
 
 ## 4. Inventário de controles nativos
 
-O baseline tem **49 tags nativas em 20 arquivos**: 29 `<button>`, 17 `<input>`, três `<select>` e
-zero `<textarea>` direto.
+Após a convergência Wallet da Sprint 25.11, o baseline tem **44 tags nativas em 20 arquivos**:
+29 `<button>`, 15 `<input>`, zero `<select>` e zero `<textarea>` direto.
 
 | Classificação | Quantidade | Exemplos e decisão |
 |---|---:|---|
-| `FRAMEWORK / INTERNAL` | 13 | internals de Button/CardMenu/Toast; Reconnect; culture form; triggers do shell. Permanecem nativos |
+| `FRAMEWORK / INTERNAL` | 14 | internals de Button/CardMenu/Toast/Input live-search; Reconnect; culture form; triggers do shell. Permanecem nativos |
 | `LEGITIMATE SPECIALIZED WIDGET / ADAPTER` | 26 | activity checkbox/score, menus, drag/project toolbar, color controls e os 8 adapters HTML de Login/ProfileCreation convergidos visualmente na 25.9 |
-| `DESIGN-SYSTEM DUPLICATION` / migration candidate | 10 | Wallet filters/tag/modal controls. Owner: 25.11 |
+| `DESIGN-SYSTEM DUPLICATION` / migration candidate | 4 | Controles feature-local remanescentes para auditoria Daily/Project na 25.12 |
 
-Dashboard search e menu triggers continuam especializados e são revistos com Daily na 25.12.
-Nenhum native control foi migrado nesta Sprint: igualdade de tag não prova equivalência de contrato.
+Wallet eliminou seus selects/dates/busca paralelos; o picker de cor e o valor monetário continuam
+especializados. Dashboard search e menu triggers são revistos com Daily na 25.12.
 
 ## 5. Foundations, responsive e localização
 

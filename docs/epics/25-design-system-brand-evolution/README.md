@@ -1364,3 +1364,65 @@ passou 3/3 na repetição. O gate integral final acima foi então reexecutado no
 axe/quality automation → 25.15; Wallet → 25.11; Daily/Project → 25.12; Character → 25.13;
 Writing → 25.14; final sweep → 25.16. Drawer/menu mantiveram lifecycle próprio; nenhuma
 convergência visual dessas Features foi antecipada.
+
+## Sprint 25.11 — Wallet Design System Convergence (Results)
+
+**Fonte da verdade:** página Wallet, summary, filtros, transaction/tag lists e editors, CSS,
+foundations 25.3–25.7, componentes 25.8–25.10, localização, bUnit/E2E e documentação viva.
+Executado sobre o commit da Sprint 25.10 `d7fa6970488430fe2915da03c82f341bc57c5b65`.
+
+### Convergência sem perda da semântica financeira
+
+O cabeçalho local migrou para `BeeDayPageHeader`. Busca, tag/type/sort selects e datas de filtro
+agora consomem `BeeDayInput`, `BeeDaySelect` e `BeeDayDateInput`; `BeeDayInput.UpdateOnInput`
+formaliza o contrato de live-search sem `EditContext`, preservando atualização a cada tecla. O
+inventário caiu de 49 para 44 tags nativas: 29 buttons, 15 inputs, zero selects/textarea em 20
+arquivos. O `◇` funcional do editor virou `BeeDayIconName.Wallet` pelo sprite central.
+
+`InputNumber` monetário e `input[type=color]` permanecem especializados. Currency/culture,
+Income/Expense success/danger, cores persistidas pelo usuário, fallback `#7A4FCB` e contraste
+calculado não viraram tokens globais nem sofreram mudança de domínio/Application.
+
+### Responsive, a11y e Product Pattern
+
+Foram removidos três blocos responsivos Wallet legados (1000/720/640px) que duplicavam ou
+conflitavam com a composição posterior. Permanecem somente transições ligadas à densidade real de
+workspace, summary, filtros, cards e touch. O inventário de produção passou a 102 `@media`, sendo
+67 width queries; shell 1200px continua independente. Labels, disabled/busy, live region, empty
+states e lifecycle de modal/foco da 25.10 foram preservados.
+
+### Testes e impacto
+
+bUnit cobre live-search sem form, wrappers de filtro, callbacks/disabled, icon registry, picker de
+cor, cores dinâmicas + contraste, moeda/cultura, empty/loading e keyboard. O fluxo Chromium cobre
+header compartilhado, criação de tag/transação, saldo, edição por teclado e filtros expandidos em
+390px sem overflow. Nenhuma mudança de schema, segurança financeira, Domain ou Application.
+
+### Validação
+
+```text
+git diff --check
+# aprovado
+
+dotnet format BeeDay.slnx --verify-no-changes
+# aprovado
+
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+# aprovado, 0 avisos, 0 erros
+
+dotnet test BeeDay.slnx --no-build --configuration Release
+# 1.090/1.090 — Domain 93, Application 73, Infrastructure 129, Web 720, E2E 75
+
+BeeDay.Web.Tests — completo: 720/720; Forms + Wallet focado: 83/83
+BeeDay.E2E.Tests — Wallet: 1/1; completo: 75/75
+EF Core pending model changes: nenhum
+```
+
+O primeiro gate integral detectou apenas o baseline source-level de controles nativos ainda em 49;
+ele foi atualizado para refletir a migração intencional (44) e Web passou 720/720. E2E já havia
+passado 75/75 nessa execução. O gate integral final acima foi reexecutado no estado documentado.
+
+### Itens `DEFER` e confirmação de escopo
+
+Daily/Project → 25.12; Character/Illustration → 25.13; Writing → 25.14; axe/quality → 25.15;
+final sweep → 25.16. Nenhuma dessas áreas foi antecipada.

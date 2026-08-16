@@ -30,6 +30,9 @@ public sealed class WalletFiltersTests : BunitContext
         Assert.Contains("5 active filters", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Food", cut.Markup, StringComparison.Ordinal);
         Assert.Equal("true", cut.Find(".wallet-filter-toggle").GetAttribute("aria-expanded"));
+        Assert.Equal(3, cut.FindAll(".beeday-field__control--select").Count);
+        Assert.Equal(5, cut.FindAll(".beeday-field__control-icon").Count);
+        Assert.Equal("wallet-search", cut.Find("label.wallet-search").GetAttribute("for"));
     }
 
     [Fact]
@@ -367,6 +370,16 @@ public sealed class WalletTagManagerTests : BunitContext
             .Add(component => component.Tags, [tag])));
 
         Assert.Equal("Edit Tag: Groceries", cut.Find("[role='button']").GetAttribute("aria-label"));
+    }
+
+    [Fact]
+    public void PreservesTheUserDefinedTagColorAsFeatureData()
+    {
+        var tag = new WalletTagResponse(Guid.NewGuid(), "Groceries", "#12AB34", 2, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
+        var cut = Render<WalletTagManager>(parameters => parameters
+            .Add(component => component.Tags, [tag]));
+
+        Assert.Contains("background:#12AB34", cut.Find(".wallet-tag-dot").GetAttribute("style"), StringComparison.Ordinal);
     }
 
     private static WalletTagResponse CreateTag(string name) =>

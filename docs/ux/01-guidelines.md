@@ -29,9 +29,8 @@ O padrão estrutural de cabeçalho (`BeeDayPageHeader`/`BeeDaySectionHeader`/`Be
 pequeno, maiúsculo, cor de marca) → título (H1/H2, Jersey 25) → descrição (Inter, cor muted) →
 ações (à direita em telas largas, empilhadas abaixo em `max-width: 42rem`). Esse padrão se repete
 em `Account.razor` (via `BeeDayPageHeader`) e nas páginas de catálogo — não foi adotado por
-`Wallet.razor`/`Home.razor`, que usam markup de cabeçalho próprio (`<header class="wallet-page__header">`),
-uma inconsistência estrutural entre as duas telas de produto mais usadas e o componente que existe
-especificamente para esse papel.
+`Wallet.razor` passou a consumir `BeeDayPageHeader` na Sprint 25.11, preservando seu container e
+conteúdo financeiro; `Home.razor` permanece uma composição de marketing deliberadamente própria.
 
 ## 3. Feedback de ação
 
@@ -65,7 +64,7 @@ do repositório passa por uma confirmação.
 - 4 implementações CSS independentes do mesmo padrão visual de campo de formulário
   (`.beeday-field__control`, `.editor-modal__field input`, `.identity-field input`,
   `.wallet-filters input`) — ver [`docs/design-system/04-forms.md`](../design-system/04-forms.md) §5.
-- `Wallet.razor`/`Home.razor` não usam `BeeDayPageHeader` (ver §2 acima).
+- `Home.razor` não usa `BeeDayPageHeader` porque sua hierarquia é de marketing (ver §2 acima).
 - 70 queries de largura em 33 stylesheets (26 cortes `max-width`, dois `min-width`), sem token
   artificial; shell 1200px e famílias públicas compartilhadas estão formalizados — ver
   [`03-responsive.md`](03-responsive.md).
@@ -127,8 +126,17 @@ Toda animação acima é desativada sob `prefers-reduced-motion: reduce` — ver
 do Dashboard (`DashboardColumn.razor`) gera seu próprio texto de estado vazio a partir de
 `EmptyLabel` (ex. "No completed tasks", "Completed tasks will appear here") em vez de compor
 `BeeDayEmptyState` diretamente — o padrão visual é o mesmo, a composição não. `WalletEmptyState`
-(`Features/Wallets/Components/`) é uma implementação própria, não confirmada nesta auditoria como
-reutilizando `BeeDayEmptyState`.
+(`Features/Wallets/Components/`) é um adapter de Product Pattern: escolhe copy/ação para zero
+transações ou zero resultados e delega a superfície genérica a `BeeDayEmptyState`.
+
+### 7.1 Wallet — Product Pattern financeiro
+
+Wallet compõe `BeeDayPageHeader`, cards, botões, empty state, filtros e Editor/Confirm compartilhados,
+mas preserva especializações de produto: valores monetários usam `WalletCurrencyFormatter`, receita
+e despesa mantêm semântica success/danger, e cores persistidas de tags continuam dados do usuário
+com contraste calculado localmente. O picker nativo `type=color` e o `InputNumber` monetário não se
+transformam em primitives globais. Seus breakpoints locais respondem à densidade real de summary,
+workspace, filtros, transações e tags; não redefinem contratos do shell autenticado.
 
 ## 8. Estados de carregamento
 

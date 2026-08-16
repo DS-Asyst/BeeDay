@@ -107,6 +107,24 @@ public sealed class TransactionCardTests : BunitContext
         });
     }
 
+    [Fact]
+    public void PreservesDynamicTagColorAndDerivesReadableContrast()
+    {
+        var transaction = CreateTransaction() with
+        {
+            WalletTagId = Guid.NewGuid(),
+            WalletTagName = "Custom",
+            WalletTagColor = "#101010"
+        };
+        var cut = Render<TransactionCard>(parameters => parameters
+            .Add(component => component.Transaction, transaction));
+
+        var badgeStyle = cut.Find(".wallet-tag-badge").GetAttribute("style");
+        Assert.Contains("background:#101010", badgeStyle, StringComparison.Ordinal);
+        Assert.Contains("color:#ffffff", badgeStyle, StringComparison.Ordinal);
+        Assert.Contains("border-color:#101010", badgeStyle, StringComparison.Ordinal);
+    }
+
     private static TransactionResponse CreateTransaction() =>
         new(Guid.NewGuid(), Guid.NewGuid(), "Monthly salary", 1000m, 1000m, TransactionType.Income,
             new DateOnly(2026, 7, 1), null, null, null, "", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
