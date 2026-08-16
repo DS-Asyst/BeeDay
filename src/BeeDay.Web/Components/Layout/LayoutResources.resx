@@ -136,13 +136,13 @@
     <value>Logout</value>
   </data>
   <data name="NavLogoutAriaLabel" xml:space="preserve">
-    <value>Log out of BeeDay</value>
+    <value>Log out of beeday</value>
   </data>
   <data name="PrimaryNavigationAriaLabel" xml:space="preserve">
     <value>Primary navigation</value>
   </data>
   <data name="BrandHomeAriaLabel" xml:space="preserve">
-    <value>BeeDay — go to Profile</value>
+    <value>beeday — go to Profile</value>
   </data>
   <data name="OpenNavMenuAriaLabel" xml:space="preserve">
     <value>Open navigation menu</value>

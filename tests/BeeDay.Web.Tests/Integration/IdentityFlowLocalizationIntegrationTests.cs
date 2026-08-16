@@ -35,7 +35,7 @@ public sealed class IdentityFlowLocalizationIntegrationTests(BeeDayWebApplicatio
         var createProfileHtml = await client.GetStringAsync("/profile/create", cancellationToken);
         var createProfileText = await DecodeBodyTextAsync(createProfileHtml, cancellationToken);
         Assert.Contains("Crie sua conta", createProfileText, StringComparison.Ordinal);
-        Assert.Contains("Comece sua jornada no BeeDay.", createProfileText, StringComparison.Ordinal);
+        Assert.Contains("Comece sua jornada no beeday.", createProfileText, StringComparison.Ordinal);
         Assert.DoesNotContain("Create your account", createProfileText, StringComparison.Ordinal);
     }
 
@@ -50,7 +50,7 @@ public sealed class IdentityFlowLocalizationIntegrationTests(BeeDayWebApplicatio
 
         var createProfileHtml = await client.GetStringAsync("/profile/create", cancellationToken);
         Assert.Contains("Create your account", createProfileHtml, StringComparison.Ordinal);
-        Assert.Contains("Start your journey in BeeDay.", createProfileHtml, StringComparison.Ordinal);
+        Assert.Contains("Start your journey in beeday.", createProfileHtml, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -11,9 +11,10 @@ de `dotnet format`/`dotnet build`/`dotnet test`. Nenhuma afirmação de "estado 
 memória — quando este documento evoluir em Sprints futuras, cada atualização deve reverificar
 contra o código antes de alterar uma afirmação de estado atual.
 
-**Última verificação:** 2026-08-16 (Sprint 25.1 — Design System Governance & Brand Contract,
-COMPLETE — primeira Sprint de implementação da EPIC; ver "Sprint 25.1 — Results" ao final deste
-documento).
+**Última verificação:** 2026-08-16 (Sprint 25.2 — Brand Identity & Wordmark Convergence, COMPLETE —
+segunda Sprint de implementação da EPIC; ver "Sprint 25.2 — Results" ao final deste documento).
+Sprint 25.1 — Design System Governance & Brand Contract, COMPLETE (ver "Sprint 25.1 — Results",
+preservada como registro dessa Sprint).
 
 **Escopo:** formalizar a governança normativa que sustenta toda a EPIC 25 (beeday Design System &
 Brand System Evolution) e o contrato oficial de marca do beeday, evoluindo o Design System já
@@ -430,3 +431,309 @@ Nenhuma mudança visual ou funcional foi implementada. Nenhuma Sprint 25.2+ foi 
 inventário acima é apenas input registrado, nenhuma convergência de wordmark, cor, tipografia,
 shape, motion, breakpoint, componente, Auth/Identity, Wallet, ProjectWorkspace, Character,
 Illustration, Writing, visual regression, axe, ou limpeza ampla de documentação/CSS foi executada.
+
+---
+
+## Sprint 25.2 — Brand Identity & Wordmark Convergence (Results)
+
+**Branch:** `sprint/25.2-brand-identity-wordmark`, criada a partir de `hmg` em `a090182` (merge da
+Sprint 25.1, confirmado via `gh pr view 126` — `state: MERGED`, `mergedAt: 2026-08-16T12:24:20Z` —
+antes de criar a branch, conforme pré-condição da Sprint).
+
+### Estado inicial
+
+`hmg` continha exatamente as mudanças da Sprint 25.1 (fast-forward `d5bc5d9 → a090182`, diff de
+fast-forward = os mesmos 4 arquivos do commit da 25.1). Nenhuma outra Sprint foi integrada a `hmg`
+entre a 25.1 e o início desta Sprint. Working tree limpo confirmado antes da criação da branch.
+
+### Inventário revalidado da 25.1
+
+Revalidado contra o HEAD atual por leitura direta (não presumido do relatório da 25.1). Como
+nenhuma mudança de código ocorreu entre a 25.1 e o início desta Sprint, os fatos de código do
+inventário anterior permaneciam válidos, mas a revalidação encontrou **três correções relevantes**
+ao inventário original:
+
+1. **`beeday-wordmark.png` é um terceiro asset real**, não apenas uma menção hipotética — existe em
+   `src/BeeDay.Web/wwwroot/beeday-wordmark.png` (raiz do `wwwroot`, não em `assets/brand/`), 904×276,
+   confirmado por `docs/epics/21-lingo-product-experience/color-audit-sprint-21.13.md` (auditoria de
+   pixel da Sprint 21.13). Sem nenhum consumidor real em `.razor`/`.razor.cs`/`.css` (busca
+   repo-wide). O inventário da Sprint 25.1 mencionava "nenhum arquivo `beeday-wordmark.png`" citando
+   apenas o prompt da própria Sprint 25.2 — a busca direta desta Sprint corrigiu isso: o arquivo
+   existe, está órfão. Ver "Classificação dos assets de wordmark" abaixo.
+2. **`docs/design-system/02-components.md` §8 e `01-foundations.md`** descreviam `BeeDayBrand` como
+   um wordmark em imagem (`/beeday-wordmark.png`) — desatualizados desde antes desta Sprint (última
+   verificação de `01-foundations.md` foi 2026-08-15, Sprint 22.2, um dia antes do início da EPIC
+   25). A implementação real já era texto CSS (dois `<span>`) nessa data. `02-components.md` foi
+   corrigido nesta Sprint (ver "Documentação atualizada"); `01-foundations.md` foi apenas registrado,
+   não corrigido (a afirmação stale é sobre tipografia da marca, fora do escopo desta Sprint — ver
+   "Itens DEFER").
+3. **`PublicHeader.razor`'s `alt=""` não é uma inconsistência acidental** — a imagem está dentro de
+   um `<a>` com `aria-label` próprio (`PublicHeaderHomeAriaLabel`); `alt=""` é o tratamento
+   correto (decorativo, evita anúncio duplicado). A Sprint 25.1 registrou isso como possível
+   inconsistência com o `alt="BeeDay"` do `AppFooter` (mesma imagem, sem link ao redor) — mantido
+   como achado, mas reclassificado: são dois contextos de acessibilidade genuinamente diferentes, não
+   um bug a "corrigir para bater."
+
+Categorias reafirmadas sem mudança: TECHNICAL IDENTITY e HISTORICAL permanecem intocados; nenhuma
+ocorrência nova nessas categorias foi encontrada nem alterada.
+
+### Representação canônica escolhida
+
+**`BeeDayBrand` permanece a primitive canônica do wordmark vivo** (nome técnico preservado por
+backward compatibility, conforme o Brand Contract). Seu output visual convergiu para `beeday`
+inteiro em `--beeday-color-brand-primary` (`#5247f9`), eliminando o tratamento bicolor anterior.
+
+**O raster `assets/brand/beeday-top-navigation.png` (Header/Footer público) foi preservado como
+está — não convergido para `<BeeDayBrand />`.** Decisão registrada como `PRESERVE` com impedimento
+técnico documentado (a Sprint pede exatamente isso quando a convergência não é seguramente possível
+— §2 do prompt): a imagem é um lockup composto (ilustração da abelha + wordmark, 866×288, tratamento
+monocromático já em `#5247F9`/lowercase `beeday` — confirmado por inspeção visual direta do PNG na
+Sprint 25.1) desenhado para a escala de identidade pública de página inteira; `BeeDayBrand` é uma
+primitive de texto inline, dimensionada para chrome compacto (sidebar/auth card, nunca usada sozinha
+como identidade hero). Substituir a imagem pelo componente:
+
+- removeria a ilustração da abelha das duas superfícies públicas mais visíveis do produto (Header e
+  Footer de toda página pública) — uma mudança de conteúdo pertencente ao Character & Illustration
+  System (Sprint 25.13), não a esta Sprint de wordmark;
+- exigiria um contrato novo de dimensionamento hero-scale para `BeeDayBrand` (nenhum hook de altura
+  grande o suficiente existe hoje) — criação de capability nova, não convergência;
+- violaria a instrução explícita desta Sprint de não redesenhar Header/Footer (§4 do prompt).
+
+Como o PNG já satisfaz o Brand Contract (lowercase, cor oficial) sem nenhuma mudança, a convergência
+segura e mínima foi: manter o asset, corrigir apenas a semântica acessível ao redor dele (ver
+"Accessible names revisados"). Este par de decisões (`BeeDayBrand` = primitive canônica de texto;
+raster público = lockup preservado, não uma segunda "primitive" concorrente, e sim uma composição de
+marca para um contexto que `BeeDayBrand` não cobre hoje) fica registrado para a Sprint 25.13
+(Character & Illustration System) decidir formalmente se/quando a ilustração da abelha ganha um
+contrato de componente próprio.
+
+### Alterações em `BeeDayBrand`
+
+- `BeeDayBrand.razor` — `aria-label="BeeDay"` → `aria-label="beeday"`.
+- `BeeDayBrand.razor.css` — `.beeday-brand__day` deixou de usar `--beeday-color-brand-yellow`; ambos
+  os segmentos (`__bee`, `__day`) agora usam `--beeday-color-brand-primary`. O modificador
+  `--inverse` (`OnDarkSurface`) também foi unificado: ambos os segmentos migram para
+  `--beeday-color-text-inverse` em vez de só `__bee` (o `__day` amarelo, que tinha contraste próprio
+  em superfícies escuras, deixaria de fazer sentido isolado depois da convergência para cor única no
+  estado padrão). `OnDarkSurface` não tem nenhum consumidor real de produto hoje (confirmado por
+  busca repo-wide) — mudança de baixo risco, mantém o contrato (`[Parameter] public bool
+  OnDarkSurface`) intacto.
+- Nenhuma mudança de markup (os dois `<span>` permanecem, `role="img"` preservado), nenhuma mudança
+  de tipografia (nenhum `font-family` tocado), nenhum novo token criado — reusou
+  `--beeday-color-brand-primary`/`--beeday-color-text-inverse`, ambos já existentes.
+
+### Alterações em Header/Footer
+
+- `AppFooter.razor` — `alt="BeeDay"` (hardcoded, não localizado) → `alt="beeday"` (hardcoded,
+  casing apenas — não promovido a resource key nesta Sprint; ver "Itens DEFER").
+- `PublicHeader.razor` — nenhuma mudança de markup (o `alt=""` da imagem está correto — ver
+  "Representação canônica escolhida"); o `aria-label` do link `<a>` é resolvido via
+  `SharedResources["PublicHeaderHomeAriaLabel"]`, corrigido na resource (ver abaixo).
+- Nenhuma estrutura, espaçamento, link ou responsive behavior alterado em nenhum dos dois.
+
+### Casing migrado por superfície
+
+Confirmado por leitura direta de cada arquivo antes de editar, todas as strings abaixo convergidas
+de `BeeDay`/`BEEDAY` (Title Case ou all-caps) para `beeday` (lowercase), preservando o texto ao
+redor:
+
+| Superfície | Chave(s) | en-US | pt-BR |
+|---|---|---|---|
+| `BeeDayBrand` | `aria-label` (hardcoded no `.razor`) | `BeeDay` → `beeday` | — |
+| Header/Footer (`SharedResources`) | `ContinueToBeeDay`, `FooterLinksAriaLabel`, `FooterCopyright`, `PublicHeaderHomeAriaLabel` | 4 valores | 4 valores |
+| `AppFooter.razor` | `alt` (hardcoded) | `BeeDay` → `beeday` | — |
+| Navegação autenticada (`LayoutResources`) | `NavLogoutAriaLabel`, `BrandHomeAriaLabel` | 2 valores | 2 valores |
+| Wallet (`WalletResources`) | `PageTitle` | 1 valor | 1 valor |
+| Account (`AccountResources`) | `PageTitle`, `ProfileDescription`, `PreferencesDescription` | 3 valores | 3 valores |
+| Profile Creation (`ProfileCreationResources`) | `PageTitle`, `StartYourJourney`, `IdentifiedInBeeDay`, `WelcomeToast`, `RedirectingToLoginTitle` | 5 valores | 5 valores |
+| Home (`HomeResources`) | `PageTitle` (`StepsHeading` já era lowercase, não alterado) | 1 valor | 1 valor |
+| Dashboard (`DashboardResources`) | `DailyPageTitle`, `ProfilePageTitle`, `WeeklyHistoryUnavailableDescription` | 3 valores | 3 valores |
+| Onboarding (`OnboardingResources`) | `PageTitle`, `EnterBeeDayButton` | 2 valores | 2 valores |
+| Authentication (`AuthenticationResources`) | `PageTitle` | 1 valor | 1 valor |
+| Identity (`IdentityResources`) | `ForgotPasswordPageTitle`, `ResetPasswordPageTitle`, `ConfirmEmailPageTitle`, `ResendConfirmationPageTitle`, `EmailConfirmationSentPageTitle` | 5 valores | 5 valores |
+| `Welcome.razor` | `<span>` hardcoded (tela transitória de redirect) | `BEEDAY` → `beeday` | — |
+| E-mails transacionais (`IdentityEmailComposer.cs`) | assunto/corpo de confirmação e reset | 4 strings | — (inglês apenas, sem localization — ver "Itens DEFER") |
+| `FromName` do remetente (`appsettings.json`, `.Production.json`) | `Resend:FromName` | `BeeDay` → `beeday` | — |
+
+`EnterBeeDayButton` (`OnboardingResources`) — caso especial: valor era `ENTER BEEDAY`/`ENTRAR NO
+BEEDAY`, all-caps, mesmo padrão de outras strings da mesma tela (`STEP {0} OF {1}`, `BACK`, também
+all-caps, não tocadas — não representam a marca). Convergido para `ENTER beeday`/`ENTRAR NO beeday`
+— a marca mantém lowercase mesmo dentro de um botão estilizado em maiúsculas (nenhum
+`text-transform` CSS encontrado nesse botão — confirmado por leitura de `Tutorial.razor.css`; a
+renderização muda de fato, não é só semântica).
+
+**Preservado sem alteração (`TECHNICAL IDENTITY`):** todos os `namespace BeeDay.*`, `BeeDay.slnx`,
+os 9 `.csproj`, nomes de componentes (`BeeDayButton`, `BeeDayCard`, `BeeDayIcon`, `BeeDayBrand`
+propriamente dito, etc.), `BeeDayDbContext`/migrations, cookies (`BeeDay.Auth`, `BeeDay.Culture`),
+configuration keys (`BeeDay:*`), `SetApplicationName("BeeDay")`, URLs reais do GitHub
+(`github.com/tiagoarrigoni/BeeDay`), nomes de banco de dados de teste, `BEEDAY_DESIGNTIME_CONNECTION`
+(variável de ambiente). **Preservado (`HISTORICAL`):** `docs/history/*`, `docs/adr/*`, seções de
+Sprint já escritas em `docs/epics/20-*`/`docs/epics/21-*`. **Chaves de resource (nomes, não
+valores)** preservadas em todos os casos — `ContinueToBeeDay`, `EnterBeeDayButton`,
+`IdentifiedInBeeDay` etc. continuam com esses nomes (identificadores técnicos, convenção CONVENTIONS.md
+§11: identificadores sempre em inglês, independente do idioma do texto).
+
+### Resources/localization alterados
+
+34 arquivos `.resx` (11 famílias × 3 culturas: `SharedResources`, `LayoutResources`,
+`WalletResources`, `AccountResources`, `ProfileCreationResources`, `HomeResources`,
+`DashboardResources`, `OnboardingResources`, `AuthenticationResources`, `IdentityResources` — 30
+arquivos — mais o já contado acima). Paridade de chaves preservada em todos os arquivos (nenhuma
+chave adicionada, removida ou renomeada — apenas valores). As outras 6 famílias de resources do
+projeto (`ExperienceResources`, `ProjectResources`, `HabitResources`, `TaskResources`,
+`TodoResources`, `DesignSystemResources`) foram verificadas e confirmadas **sem nenhuma ocorrência**
+de `BeeDay` em valores — não precisaram de alteração (confirmado por busca `<value>...BeeDay...</value>`
+em todos os `.resx` de `src/BeeDay.Web`, zero resultados após esta Sprint).
+
+### Accessible names revisados
+
+- `BeeDayBrand`: `aria-label` → `beeday` (lowercase, mesmo texto que os nós de texto visíveis
+  "bee"+"day" concatenados).
+- Header (`PublicHeader`): `aria-label` do link → "beeday home"/"página inicial do beeday"; `alt`
+  da imagem permanece `""` (correto — decorativo dentro de link já nomeado).
+- Footer (`AppFooter`): `alt` da imagem → `beeday` (único texto acessível para a marca nesse bloco,
+  sem link ao redor).
+- Navegação autenticada: `aria-label` de logout e do link de marca → `beeday` em ambas as culturas.
+- Nenhum nome acessível foi duplicado ou removido; nenhuma mudança de landmark, foco ou ordem de
+  tabulação.
+
+### Classificação dos assets de wordmark
+
+| Asset | Caminho | Status | Evidência |
+|---|---|---|---|
+| `beeday-top-navigation.png` | `wwwroot/assets/brand/` | **ACTIVE** | Consumido por `PublicHeader.razor` e `AppFooter.razor`; já lowercase/brand color, preservado sem alteração |
+| `beeday-wordmark.png` | `wwwroot/` (raiz) | **LEGACY / UNCONSUMED** | 904×276, zero consumidores em `.razor`/`.razor.cs`/`.css` (busca repo-wide); documentado como "oficial" em `docs/design-system/{01-foundations,02-components}.md` até esta Sprint corrigir `02-components.md`. Registrado como candidato a remoção física — não removido aqui (Sprint 25.16 ou Sprint dedicada, conforme o padrão do repositório para exclusão de arquivo) |
+| `favicon.png` | `wwwroot/` | **DEFER** | Ver "Decisão sobre favicon" abaixo |
+
+### Decisão sobre favicon
+
+`favicon.png` é um glifo genérico "@" (branco sobre gradiente azul/roxo) — não é a abelha, não é o
+wordmark `beeday`, não usa nenhuma das duas cores de marca em tratamento reconhecível como tal.
+Nenhum asset de favicon aprovado com a identidade `beeday`/abelha existe no repositório hoje.
+Classificação: **`DEFER`** — não inventado um favicon novo (proibido pelo prompt desta Sprint), gap
+registrado para decisão futura (candidato natural: Sprint 25.2 já está fechada; Sprint 25.13,
+Character & Illustration System, ou uma Sprint de Brand Identity dedicada, quando houver asset
+aprovado). Não bloqueou a convergência do wordmark.
+
+### Documentação atualizada
+
+- `docs/design-system/02-components.md` — §8 (`BeeDayBrand`) reescrito para descrever a
+  implementação real (texto CSS, não imagem); cabeçalho "Última verificação" recebeu nova entrada
+  registrando a correção e sua causa (drift pré-existente, não introduzido por esta Sprint).
+- `docs/epics/25-design-system-brand-evolution/README.md` — este documento, seção "Sprint 25.2 —
+  Results" (você está lendo).
+- `docs/design-system/01-foundations.md` — **não alterado**, apenas registrado como stale (ver
+  "Itens DEFER") — a afirmação incorreta é sobre origem da tipografia da marca, território da
+  Sprint 25.4.
+- `docs/epics/21-lingo-product-experience/README.md` e `color-audit-sprint-21.13.md` — **não
+  alterados** (registro histórico congelado, CONVENTIONS.md — "não reescreva Epic antiga").
+
+### Impacto arquitetural
+
+Nenhum. Nenhuma camada, projeto, contrato público, dependência ou API de componente foi alterada —
+`BeeDayBrand` manteve seu único parâmetro (`OnDarkSurface`) e sua estrutura de markup.
+
+### Backward compatibility
+
+Preservada. Nenhum nome de componente, namespace, resource key, cookie, configuration key ou
+contrato de API mudou — apenas valores de string visíveis/acessíveis e dois arquivos de
+configuração (`FromName`). Consumers de `BeeDayBrand` (11 localizações) continuam funcionando sem
+nenhuma mudança de código — o componente é usado exatamente da mesma forma (`<BeeDayBrand />`,
+mesmo parâmetro opcional).
+
+### Ocorrências residuais de `BeeDay` classificadas
+
+Busca final repo-wide (`src/`, `tests/`, quatro formas: `BeeDay`, `BEEDAY`, `Beeday`, `beeday`)
+confirmou:
+
+- **Zero** ocorrências de `<value>...BeeDay...</value>` remanescentes em qualquer `.resx` de
+  `src/BeeDay.Web` (46 arquivos verificados).
+- **Zero** ocorrências de `Beeday` (mixed-case) em `src/`.
+- `BEEDAY` remanescente: apenas `BEEDAY_DESIGNTIME_CONNECTION` (variável de ambiente,
+  `BeeDayDbContextFactory.cs`) — `TECHNICAL IDENTITY`, correto preservar.
+- `BeeDay` remanescente em `src/`/`tests/`: exclusivamente `TECHNICAL IDENTITY` (namespaces,
+  `.csproj`, `BeeDay.slnx`, nomes de componente, `BeeDayDbContext`, cookies, configuration keys,
+  connection strings de teste, `ApplicationName` de teste) ou `HISTORICAL`/`DEVELOPMENT` já
+  registrados na Sprint 25.1 e não tocados aqui (`IconCatalog.razor`/`HeroCatalog.razor` — DS
+  catalog pages, DEFER mantido) — nenhuma ocorrência de marca visual ativa restante encontrada por
+  acidente.
+
+### Itens `DEFER`
+
+- `docs/design-system/01-foundations.md` — afirmação stale sobre `beeday-wordmark.png` conter "a
+  tipografia própria da marca" — não corrigida (território de tipografia, Sprint 25.4).
+- `wwwroot/beeday-wordmark.png` — candidato a remoção física, não removido (Sprint 25.16 ou Sprint
+  dedicada de limpeza de assets).
+- `favicon.png` — sem decisão de substituição (nenhum asset aprovado existe).
+- `IdentityEmailComposer.cs` — e-mails transacionais continuam apenas em inglês, sem passar pelo
+  mecanismo de localization (`IStringLocalizer` não usado ali) — corrigido apenas o casing das
+  strings existentes; completude de localization de e-mail é gap separado, não assumido como escopo
+  desta Sprint.
+- `AppFooter.razor`'s `alt="beeday"` continua hardcoded (não usa `@Localizer`, ao contrário do resto
+  do mesmo arquivo) — oportunidade de promover a uma resource key própria, não feito aqui (mudança
+  estritamente de casing, não de infraestrutura, conforme o escopo desta Sprint).
+- `IconCatalog.razor`/`HeroCatalog.razor` — páginas de catálogo de desenvolvimento com `"...| BeeDay"`
+  no título; categoria `DEVELOPMENT/DOCUMENTATION`, prioridade menor que superfícies de produto
+  público — não convergidas nesta Sprint.
+- Composição bee+wordmark do raster público (`beeday-top-navigation.png`) — decisão formal sobre se
+  a ilustração da abelha ganha um contrato de componente próprio pertence à Sprint 25.13 (Character
+  & Illustration System).
+- Contagem desatualizada de componentes em `docs/design-system/README.md` (24 vs. 26 real) —
+  registrado na Sprint 25.1, ainda não corrigido (Sprint 25.16 ou próxima Sprint que tocar o
+  documento).
+
+### Testes atualizados
+
+17 arquivos de teste atualizados para refletir a nova regra de marca — nenhum teste removido,
+nenhuma cobertura reduzida:
+
+`BeeDayBrandTests.cs` (aria-label), `VisualFoundationTests.cs` (Web.Tests — conteúdo CSS de
+`BeeDayBrand.razor.css`; E2E — aria-label e "Log out of beeday" via Playwright real),
+`PublicHeaderTests.cs`, `AppFooterTests.cs`, `MobileHeaderTests.cs`, `DesktopSidebarTests.cs`,
+`NavigationItemsTests.cs`, `TutorialTests.cs`, `HomeTests.cs` (Web.Tests),
+`AuthenticatedCultureIntegrationTests.cs`, `DashboardLocalizationIntegrationTests.cs`,
+`WalletLocalizationIntegrationTests.cs`, `IdentityFlowLocalizationIntegrationTests.cs`,
+`IdentityInfrastructureTests.cs`, `ShellResponsiveLayoutTests.cs` (E2E), `AccountLifecycleTests.cs`
+(E2E), `NavigationTests.cs` (E2E).
+
+**Duas falhas reais encontradas e corrigidas dentro desta Sprint, antes do relatório final** (não
+escondidas — ver "Resultado de `dotnet test`" abaixo para a execução que as expôs):
+
+1. `AppFooterTests.UnderPortugueseUiCulture_RendersPortugueseLinksAriaLabelAndCopyright` — erro de
+   cópia desta própria Sprint: o bloco pt-BR foi editado com o valor em inglês (`"beeday links"`) em
+   vez do valor pt-BR (`"Links do beeday"`). Corrigido.
+2. `VisualFoundationTests.SharedBrandPreservesLightAndInverseColorContracts` (Web.Tests) — teste não
+   capturado pela busca inicial por `"BeeDay"` porque suas asserções já usavam `beeday` lowercase nos
+   seletores CSS (`.beeday-brand__bee`/`.beeday-brand__day`) — o teste checava o CSS antigo
+   (`--beeday-color-brand-yellow` em `__day`, regras separadas). Reescrito para verificar a nova
+   estrutura (seletor combinado, cor única) e adicionada uma asserção `DoesNotContain` explícita para
+   o token de cor removido.
+
+### Resultado de `dotnet test` (execução final)
+
+1.063 testes, **1.063 aprovados, 0 falhas** (Domain 93, Application 73, Infrastructure 129, E2E 65,
+Web 703) — nenhuma flakiness de contenção reapareceu nesta execução (contraste com a Sprint 25.1,
+onde `RateLimitingIntegrationTests` falhou uma vez sob contenção da suíte completa e passou isolado;
+aqui a suíte completa passou 100% de primeira, na segunda tentativa desta Sprint).
+
+### Validação final da Sprint 25.2
+
+```bash
+git diff --check                                    # sem saída — sem problemas de whitespace/EOL
+dotnet format BeeDay.slnx --verify-no-changes        # aprovado
+dotnet build BeeDay.slnx                             # aprovado, 0 aviso(s), 0 erro(s)
+dotnet test BeeDay.slnx                              # 1.063 testes, 1.063 aprovados, 0 falhas
+git status                                           # 57 arquivos modificados, ver relatório da Sprint
+```
+
+Todos os 48 arquivos `.resx` do projeto verificados como XML bem-formado após as edições
+(`xml.etree.ElementTree`, zero erros de parsing).
+
+### Confirmação de escopo — Sprint 25.2
+
+Nenhuma Sprint 25.3+ foi antecipada. Color System, Coiny, Typography System, Shape Language,
+spacing/radius, Motion, breakpoints, redesign de componentes, Auth/Identity forms convergence,
+Wallet, Daily, ProjectWorkspace, Character System, Illustration System, Writing System,
+`/brand/typography`, visual regression, axe, e limpeza ampla de CSS/documentação — nenhum desses foi
+tocado. As únicas correções de documentação feitas (`02-components.md` §8) foram estritamente sobre
+o componente que esta própria Sprint alterou, não uma varredura documental.

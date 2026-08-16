@@ -63,7 +63,7 @@ public sealed class ShellResponsiveLayoutTests(PlaywrightAppFixture fixture) : E
         var drawer = Page.Locator("#mobile-navigation");
         await Expect(drawer).ToBeVisibleAsync();
         await Expect(drawer.Locator("a[href='/settings']")).ToBeVisibleAsync();
-        await Expect(drawer.GetByRole(AriaRole.Button, new() { Name = "Log out of BeeDay" })).ToBeVisibleAsync();
+        await Expect(drawer.GetByRole(AriaRole.Button, new() { Name = "Log out of beeday" })).ToBeVisibleAsync();
         await Page.Keyboard.PressAsync("Escape");
         await Expect(drawer).ToBeHiddenAsync();
     }

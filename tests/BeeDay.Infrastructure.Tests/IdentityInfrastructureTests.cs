@@ -48,7 +48,7 @@ public sealed class IdentityInfrastructureTests
         var message = composer.ComposeEmailConfirmation("player@example.com", "Tiago <Admin>", "a+b/c=");
 
         Assert.Equal("player@example.com", message.Recipient);
-        Assert.Equal("Confirm your BeeDay email", message.Subject);
+        Assert.Equal("Confirm your beeday email", message.Subject);
         Assert.Contains("https://beeday.example/account/confirm-email?token=a%2Bb%2Fc%3D", message.HtmlBody, StringComparison.Ordinal);
         Assert.Contains("Tiago &lt;Admin&gt;", message.HtmlBody, StringComparison.Ordinal);
         Assert.DoesNotContain("Tiago <Admin>", message.HtmlBody, StringComparison.Ordinal);
@@ -61,7 +61,7 @@ public sealed class IdentityInfrastructureTests
 
         var message = composer.ComposePasswordReset("player@example.com", "Tiago", "reset-token");
 
-        Assert.Equal("Reset your BeeDay password", message.Subject);
+        Assert.Equal("Reset your beeday password", message.Subject);
         Assert.Contains("https://beeday.example/account/reset-password?token=reset-token", message.HtmlBody, StringComparison.Ordinal);
         Assert.Contains("expires in 1 hour", message.HtmlBody, StringComparison.Ordinal);
     }
@@ -110,7 +110,7 @@ public sealed class IdentityInfrastructureTests
         using var document = JsonDocument.Parse(payload);
         var root = document.RootElement;
 
-        Assert.Equal("BeeDay <noreply@beeday.example>", root.GetProperty("from").GetString());
+        Assert.Equal("beeday <noreply@beeday.example>", root.GetProperty("from").GetString());
         Assert.Equal("player@example.com", root.GetProperty("to")[0].GetString());
         Assert.Equal("Confirm", root.GetProperty("subject").GetString());
         Assert.Equal("<p>Hello</p>", root.GetProperty("html").GetString());
@@ -151,7 +151,7 @@ public sealed class IdentityInfrastructureTests
     {
         Enabled = true,
         ApiKey = "re_test",
-        FromName = "BeeDay",
+        FromName = "beeday",
         FromAddress = "noreply@beeday.example"
     };
 

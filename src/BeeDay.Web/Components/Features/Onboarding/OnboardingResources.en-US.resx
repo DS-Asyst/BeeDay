@@ -58,11 +58,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="PageTitle" xml:space="preserve"><value>Getting started | BeeDay</value></data>
+  <data name="PageTitle" xml:space="preserve"><value>Getting started | beeday</value></data>
   <data name="StepProgress" xml:space="preserve"><value>STEP {0} OF {1}</value></data>
   <data name="BackButton" xml:space="preserve"><value>BACK</value></data>
   <data name="NextButton" xml:space="preserve"><value>NEXT</value></data>
-  <data name="EnterBeeDayButton" xml:space="preserve"><value>ENTER BEEDAY</value></data>
+  <data name="EnterBeeDayButton" xml:space="preserve"><value>ENTER beeday</value></data>
   <data name="Slide1Eyebrow" xml:space="preserve"><value>01 — DAILY</value></data>
   <data name="Slide1Title" xml:space="preserve"><value>Your command center</value></data>
   <data name="Slide1IconLabel" xml:space="preserve"><value>Daily</value></data>

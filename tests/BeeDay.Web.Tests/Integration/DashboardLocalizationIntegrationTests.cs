@@ -32,7 +32,7 @@ public sealed class DashboardLocalizationIntegrationTests(BeeDayWebApplicationFa
         var document = await new HtmlParser().ParseDocumentAsync(html, cancellationToken);
         var bodyText = document.Body?.TextContent ?? string.Empty;
 
-        Assert.Equal("Diário | BeeDay", document.Title);
+        Assert.Equal("Diário | beeday", document.Title);
         Assert.Contains("Buscar atividades", html, StringComparison.Ordinal);
         Assert.Contains("Hábitos", bodyText, StringComparison.Ordinal);
         Assert.Contains("Nenhum hábito ainda", bodyText, StringComparison.Ordinal);
@@ -41,7 +41,7 @@ public sealed class DashboardLocalizationIntegrationTests(BeeDayWebApplicationFa
         Assert.Contains("Projetos", bodyText, StringComparison.Ordinal);
         // Shared MainLayout shell, not just the page's own content.
         Assert.Contains("Perfil", bodyText, StringComparison.Ordinal);
-        Assert.Contains("Sair do BeeDay", html, StringComparison.Ordinal);
+        Assert.Contains("Sair do beeday", html, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public sealed class DashboardLocalizationIntegrationTests(BeeDayWebApplicationFa
 
         var html = await GetWithForgedAuthCookieAsync(user.Id, "/daily", "c=en-US|uic=en-US", cancellationToken);
 
-        Assert.Contains("Daily | BeeDay", html, StringComparison.Ordinal);
+        Assert.Contains("Daily | beeday", html, StringComparison.Ordinal);
         Assert.Contains("Search activities", html, StringComparison.Ordinal);
         Assert.Contains("Habits", html, StringComparison.Ordinal);
         Assert.Contains("No habits yet", html, StringComparison.Ordinal);
@@ -60,7 +60,7 @@ public sealed class DashboardLocalizationIntegrationTests(BeeDayWebApplicationFa
         Assert.Contains("To-Dos", html, StringComparison.Ordinal);
         Assert.Contains("Projects", html, StringComparison.Ordinal);
         Assert.Contains("Profile", html, StringComparison.Ordinal);
-        Assert.Contains("Log out of BeeDay", html, StringComparison.Ordinal);
+        Assert.Contains("Log out of beeday", html, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public sealed class DashboardLocalizationIntegrationTests(BeeDayWebApplicationFa
         var document = await new HtmlParser().ParseDocumentAsync(html, cancellationToken);
         var bodyText = document.Body?.TextContent ?? string.Empty;
 
-        Assert.Equal("Perfil | BeeDay", document.Title);
+        Assert.Equal("Perfil | beeday", document.Title);
         Assert.Contains("Escolha um próximo passo e continue seu dia em movimento.", bodyText, StringComparison.Ordinal);
         Assert.Contains("Abrir Diário", bodyText, StringComparison.Ordinal);
         Assert.Contains("Atividade semanal", bodyText, StringComparison.Ordinal);
@@ -87,7 +87,7 @@ public sealed class DashboardLocalizationIntegrationTests(BeeDayWebApplicationFa
 
         var html = await GetWithForgedAuthCookieAsync(user.Id, "/profile", "c=en-US|uic=en-US", cancellationToken);
 
-        Assert.Contains("Profile | BeeDay", html, StringComparison.Ordinal);
+        Assert.Contains("Profile | beeday", html, StringComparison.Ordinal);
         Assert.Contains("Choose one next step and keep your day moving.", html, StringComparison.Ordinal);
         Assert.Contains("Open Daily", html, StringComparison.Ordinal);
         Assert.Contains("Weekly activity", html, StringComparison.Ordinal);

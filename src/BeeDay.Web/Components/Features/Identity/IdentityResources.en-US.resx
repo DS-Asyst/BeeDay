@@ -71,7 +71,7 @@
     <value>Email</value>
   </data>
   <data name="ForgotPasswordPageTitle" xml:space="preserve">
-    <value>Forgot password | BeeDay</value>
+    <value>Forgot password | beeday</value>
   </data>
   <data name="ForgotPasswordHeading" xml:space="preserve">
     <value>Forgot password</value>
@@ -92,7 +92,7 @@
     <value>Send Recovery Link</value>
   </data>
   <data name="ResetPasswordPageTitle" xml:space="preserve">
-    <value>Reset password | BeeDay</value>
+    <value>Reset password | beeday</value>
   </data>
   <data name="PasswordUpdatedHeading" xml:space="preserve">
     <value>Password updated</value>
@@ -122,7 +122,7 @@
     <value>The password reset token is missing.</value>
   </data>
   <data name="ConfirmEmailPageTitle" xml:space="preserve">
-    <value>Email confirmation | BeeDay</value>
+    <value>Email confirmation | beeday</value>
   </data>
   <data name="ConfirmingEmailHeading" xml:space="preserve">
     <value>Confirming email</value>
@@ -182,7 +182,7 @@
     <value>The confirmation token is missing.</value>
   </data>
   <data name="ResendConfirmationPageTitle" xml:space="preserve">
-    <value>Resend confirmation | BeeDay</value>
+    <value>Resend confirmation | beeday</value>
   </data>
   <data name="ResendConfirmationHeading" xml:space="preserve">
     <value>Resend confirmation</value>
@@ -203,7 +203,7 @@
     <value>Resend Email</value>
   </data>
   <data name="EmailConfirmationSentPageTitle" xml:space="preserve">
-    <value>Confirm your email | BeeDay</value>
+    <value>Confirm your email | beeday</value>
   </data>
   <data name="CheckYourEmailHeading" xml:space="preserve">
     <value>Check your email</value>

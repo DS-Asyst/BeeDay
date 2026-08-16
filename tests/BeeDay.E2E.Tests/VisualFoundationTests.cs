@@ -59,7 +59,7 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
         await AssertGlobalFoundationAsync();
 
         await Expect(Page.Locator(".desktop-sidebar a[href='/settings']")).ToBeVisibleAsync();
-        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Log out of BeeDay" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Log out of beeday" })).ToBeVisibleAsync();
 
         await Page.SetViewportSizeAsync(390, 844);
         await Expect(Page.Locator(".mobile-header")).ToBeVisibleAsync();
@@ -87,7 +87,7 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
     {
         await Expect(brand).ToBeVisibleAsync();
         await Expect(brand).ToHaveAttributeAsync("role", "img");
-        await Expect(brand).ToHaveAttributeAsync("aria-label", "BeeDay");
+        await Expect(brand).ToHaveAttributeAsync("aria-label", "beeday");
         await Expect(brand.Locator(".beeday-brand__bee")).ToHaveTextAsync("bee");
         await Expect(brand.Locator(".beeday-brand__day")).ToHaveTextAsync("day");
     }

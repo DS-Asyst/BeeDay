@@ -88,7 +88,7 @@ public sealed class AuthenticatedCultureIntegrationTests(BeeDayWebApplicationFac
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Perfil", html, StringComparison.Ordinal);
         Assert.Contains("Carteira", html, StringComparison.Ordinal);
-        Assert.Contains("Sair do BeeDay", html, StringComparison.Ordinal);
+        Assert.Contains("Sair do beeday", html, StringComparison.Ordinal);
         Assert.Contains("Conta", html, StringComparison.Ordinal);
     }
 
@@ -105,7 +105,7 @@ public sealed class AuthenticatedCultureIntegrationTests(BeeDayWebApplicationFac
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Profile", html, StringComparison.Ordinal);
         Assert.Contains("Wallet", html, StringComparison.Ordinal);
-        Assert.Contains("Log out of BeeDay", html, StringComparison.Ordinal);
+        Assert.Contains("Log out of beeday", html, StringComparison.Ordinal);
         Assert.Contains("Primary navigation", html, StringComparison.Ordinal);
     }
 

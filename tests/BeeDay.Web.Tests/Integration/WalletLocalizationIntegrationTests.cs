@@ -27,7 +27,7 @@ public sealed class WalletLocalizationIntegrationTests(BeeDayWebApplicationFacto
         var document = await new HtmlParser().ParseDocumentAsync(html, cancellationToken);
         var bodyText = document.Body?.TextContent ?? string.Empty;
 
-        Assert.Equal("Carteira | BeeDay", document.Title);
+        Assert.Equal("Carteira | beeday", document.Title);
         Assert.Contains("Finanças pessoais", bodyText, StringComparison.Ordinal);
         Assert.Contains("Nova transação", bodyText, StringComparison.Ordinal);
         Assert.Contains("Nenhuma transação encontrada", bodyText, StringComparison.Ordinal);
@@ -35,7 +35,7 @@ public sealed class WalletLocalizationIntegrationTests(BeeDayWebApplicationFacto
         Assert.Contains("Saldo atual", bodyText, StringComparison.Ordinal);
         // Shared MainLayout shell, not just the page's own content.
         Assert.Contains("Perfil", bodyText, StringComparison.Ordinal);
-        Assert.Contains("Sair do BeeDay", html, StringComparison.Ordinal);
+        Assert.Contains("Sair do beeday", html, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -46,14 +46,14 @@ public sealed class WalletLocalizationIntegrationTests(BeeDayWebApplicationFacto
 
         var html = await GetWithForgedAuthCookieAsync(user.Id, "c=en-US|uic=en-US", cancellationToken);
 
-        Assert.Contains("Wallet | BeeDay", html, StringComparison.Ordinal);
+        Assert.Contains("Wallet | beeday", html, StringComparison.Ordinal);
         Assert.Contains("Personal finance", html, StringComparison.Ordinal);
         Assert.Contains("New transaction", html, StringComparison.Ordinal);
         Assert.Contains("No transactions found", html, StringComparison.Ordinal);
         Assert.Contains("No tags yet", html, StringComparison.Ordinal);
         Assert.Contains("Current balance", html, StringComparison.Ordinal);
         Assert.Contains("Profile", html, StringComparison.Ordinal);
-        Assert.Contains("Log out of BeeDay", html, StringComparison.Ordinal);
+        Assert.Contains("Log out of beeday", html, StringComparison.Ordinal);
     }
 
     private async Task<string> GetWithForgedAuthCookieAsync(Guid userId, string cultureCookie, CancellationToken cancellationToken)

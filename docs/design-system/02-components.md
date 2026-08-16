@@ -7,7 +7,17 @@ interop-equivalente aos demais). Componentes de Forms e o `BeeDayIcon` têm par�
 [`04-forms.md`](04-forms.md) e [`03-icons.md`](03-icons.md) respectivamente — este documento os
 resume e linka em vez de duplicar (`docs/CONVENTIONS.md` §12).
 
-**Última verificação:** 2026-08-13 (Sprint 21.7, EPIC 21) — §3 (`BeeDayCard`) consolidado como
+**Última verificação:** 2026-08-16 (Sprint 25.2, EPIC 25 — Brand Identity & Wordmark Convergence) —
+§8 (`BeeDayBrand`) corrigido: a entrada anterior descrevia um wordmark em imagem
+(`/beeday-wordmark.png`, 904×276, `alt="BeeDay"`) que não corresponde à implementação atual —
+confirmado por leitura direta que o componente renderiza texto CSS (dois `<span>`, não `<img>`)
+desde antes desta Sprint; a divergência já existia na verificação anterior (2026-08-15, Sprint 22.2,
+ver `01-foundations.md`) e não foi causada por esta Sprint, apenas corrigida agora porque esta
+Sprint alterou o mesmo componente (convergência de cor da marca). `wwwroot/beeday-wordmark.png`
+continua existindo no repositório mas está confirmado sem nenhum consumidor real — candidato a
+remoção física no migration sweep da Sprint 25.16, não removido aqui. Ver
+`docs/epics/25-design-system-brand-evolution/README.md` para o registro completo desta Sprint.
+Verificação anterior: 2026-08-13 (Sprint 21.7, EPIC 21) — §3 (`BeeDayCard`) consolidado como
 linguagem oficial de content surfaces. Verificação anterior: 2026-08-12 (Sprint 21.5, EPIC 21) — §2 (`BeeDayButton`) migrado para a
 linguagem física Lingo/BeeDay. Verificação anterior: 2026-08-12 (Sprint 20.6, EPIC 20) — §2 e §3
 atualizados: novo modificador opt-in `--soft` em ambos, target visual da página-modelo (ver
@@ -206,7 +216,7 @@ retirada para simplificar a experiência sem quebrar dados existentes.
 
 | Componente | Objetivo |
 |---|---|
-| `BeeDayBrand` | Única primitive da marca. Renderiza `/beeday-wordmark.png` com dimensões intrínsecas 904×276 e `alt="BeeDay"`; CSS preserva aspect ratio e aceita apenas hooks de apresentação (`--beeday-brand-height`, `-padding`, `-background`, `-radius`). Contextos escuros fornecem uma surface branca para não recolorir nem perder o “bee” azul. Não use `<img>` direto, Nunito, recortes ou símbolos inventados para representar a marca. |
+| `BeeDayBrand` | Única primitive da marca. Renderiza o wordmark `beeday` como texto CSS (dois `<span>`, `.beeday-brand__bee`/`.beeday-brand__day`, não `<img>`), `role="img"`, `aria-label="beeday"` (lowercase — Sprint 25.2, Brand Contract). Ambos os segmentos usam `--beeday-color-brand-primary` (convergência de cor única — Sprint 25.2; antes da Sprint 25.2 o segundo segmento usava `--beeday-color-brand-yellow`, tratamento bicolor). Parâmetro `OnDarkSurface` aplica `.beeday-brand--inverse`, recolorindo ambos os segmentos para `--beeday-color-text-inverse` (sem consumidor real de produto até esta Sprint). CSS aceita apenas hooks de apresentação (`--beeday-brand-height`, `-padding`, `-background`, `-radius`). Não use `<img>`, o asset legado `wwwroot/beeday-wordmark.png` (sem consumidor, candidato a remoção — Sprint 25.16) ou símbolos inventados para representar a marca. |
 | `SearchHighlight` | Divide `Text` em segmentos por ocorrência de `SearchTerm` (case-insensitive, `IndexOf` iterativo, sem regex) e envolve cada match em `<mark>`/span destacado (`beeday-search-highlight`, fundo `#ffe49a`). Lógica de segmentação (`BuildSegments`) é `internal static`, testável isoladamente. |
 
 ## 9. Interop — `BeeDaySortable` (fora de `DesignSystem/`, documentado aqui por simetria)

@@ -50,10 +50,10 @@ public sealed class AccountLifecycleTests(PlaywrightAppFixture fixture) : E2ETes
 
         // Each slide advance is a Blazor interactive click (not a form post); the very first one can
         // silently no-op if it lands before the SignalR circuit has connected. Looping on the
-        // "ENTER BEEDAY" button's own visibility (a real, render-confirmed state — the button's text
-        // only becomes "ENTER BEEDAY" on the last slide) — rather than assuming a fixed count of 4
+        // "ENTER beeday" button's own visibility (a real, render-confirmed state — the button's text
+        // only becomes "ENTER beeday" on the last slide) — rather than assuming a fixed count of 4
         // clicks — absorbs that without asserting on internal slide state or using a fixed sleep.
-        var enterBeeDay = Page.GetByRole(AriaRole.Button, new() { Name = "ENTER BEEDAY" });
+        var enterBeeDay = Page.GetByRole(AriaRole.Button, new() { Name = "ENTER beeday" });
         for (var attempt = 0; attempt < 8 && !await enterBeeDay.IsVisibleAsync(); attempt++)
         {
             await Page.GetByRole(AriaRole.Button, new() { Name = "NEXT" }).ClickAsync();
@@ -80,7 +80,7 @@ public sealed class AccountLifecycleTests(PlaywrightAppFixture fixture) : E2ETes
         await LoginAsync(email);
         await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
 
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Log out of BeeDay" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Log out of beeday" }).ClickAsync();
 
         await Expect(Page).ToHaveURLAsync(new Regex("/login"));
 
