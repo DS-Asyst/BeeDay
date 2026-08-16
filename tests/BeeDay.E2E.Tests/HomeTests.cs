@@ -50,8 +50,10 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         var howSection = Page.Locator(".home-how");
         var howVisual = howSection.Locator(".home-how__visual img");
         await Expect(howVisual).ToBeVisibleAsync();
-        await Expect(howSection).ToHaveCSSAsync("background-color", "rgb(213, 238, 253)");
-        Assert.Equal(3, await howSection.Locator(".home-steps > li").CountAsync());
+        Assert.Equal(5, await howSection.Locator(".home-steps > li").CountAsync());
+        Assert.Equal(
+            ["Define what matters", "Organize your day", "Improve every day", "Track your progress", "Celebrate your wins"],
+            await howSection.Locator(".home-steps h3").AllTextContentsAsync());
         var brandClosure = Page.Locator(".home-brand-closure");
         var brandClosureImage = brandClosure.Locator("img");
         var footer = Page.GetByRole(AriaRole.Contentinfo);
@@ -76,7 +78,27 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
             "() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
         var howVisualBox = await Page.Locator(".home-how__visual").BoundingBoxAsync();
         Assert.NotNull(howVisualBox);
-        Assert.True(howVisualBox!.Width >= 280 || width < 390, "The How BeeDay works illustration should remain meaningful on narrow viewports.");
+        double expectedHowVisualWidth = width > 960
+            ? Math.Min(width * .204, 230.4)
+            : width > 736
+                ? Math.Min(width * .348, 201.6)
+                : Math.Min(width * .432, 182.4);
+        Assert.InRange(Math.Abs(howVisualBox!.Width - expectedHowVisualWidth), 0, 2);
+        var stepBoxes = await howSection.Locator(".home-steps > li").EvaluateAllAsync<double[][]>(
+            "elements => elements.map(element => { const box = element.getBoundingClientRect(); return [box.x, box.y, box.width, box.height]; })");
+        Assert.All(stepBoxes, stepBox => Assert.False(
+            howVisualBox.X < stepBox[0] + stepBox[2]
+                && howVisualBox.X + howVisualBox.Width > stepBox[0]
+                && howVisualBox.Y < stepBox[1] + stepBox[3]
+                && howVisualBox.Y + howVisualBox.Height > stepBox[1],
+            "The Bee must not overlap concept copy."));
+        if (width > 960)
+        {
+            Assert.True(stepBoxes[0][0] < howVisualBox.X && stepBoxes[1][0] > howVisualBox.X);
+            Assert.True(stepBoxes[2][1] >= howVisualBox.Y + howVisualBox.Height);
+            Assert.InRange(Math.Abs((stepBoxes[2][0] + stepBoxes[2][2] / 2) - (howVisualBox.X + howVisualBox.Width / 2)), 0, 2);
+            Assert.True(stepBoxes[3][0] < howVisualBox.X && stepBoxes[4][0] > howVisualBox.X);
+        }
         var closureBox = await brandClosure.BoundingBoxAsync();
         var closureImageBox = await brandClosureImage.BoundingBoxAsync();
         var footerBox = await footer.BoundingBoxAsync();
@@ -123,6 +145,8 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         await Expect(Page).ToHaveURLAsync(new Regex(@"/$"));
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Level = 1 })).ToContainTextAsync("Construa um dia melhor");
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Level = 2 })).ToContainTextAsync("Como o BeeDay funciona");
+        await Expect(Page.Locator(".home-steps h3")).ToHaveTextAsync(
+            ["Defina o que importa", "Organize o seu dia", "Evolua todos os dias", "Acompanhe seu progresso", "Celebre suas conquistas"]);
         await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Comece agora" })).ToBeVisibleAsync();
         await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Já tenho uma conta" })).ToBeVisibleAsync();
 
@@ -170,4 +194,63 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         Assert.Equal("rgb(247, 247, 247)", await Page.GetByRole(AriaRole.Contentinfo)
             .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
     }
+
+    [Fact]
+    public async Task HowBeeDayWorksBackgroundTracksSectionProgressAndReducedMotion()
+    {
+        await Page.SetViewportSizeAsync(1280, 800);
+        await GotoAsync("/");
+
+        Assert.True(await Page.EvaluateAsync<bool>("() => CSS.supports('animation-timeline: view()')"));
+
+        await ScrollHowSectionToProgressAsync(.1);
+        Assert.Equal("rgb(255, 255, 255)", await HowBackgroundAsync());
+
+        await ScrollHowSectionToProgressAsync(.4);
+        var enteringColor = await HowBackgroundAsync();
+        Assert.NotEqual("rgb(255, 255, 255)", enteringColor);
+        Assert.NotEqual("rgb(213, 238, 253)", enteringColor);
+
+        await ScrollHowSectionToProgressAsync(.6);
+        Assert.Equal("rgb(213, 238, 253)", await HowBackgroundAsync());
+
+        await ScrollHowSectionToProgressAsync(.85);
+        var exitingColor = await HowBackgroundAsync();
+        Assert.NotEqual("rgb(255, 255, 255)", exitingColor);
+        Assert.NotEqual("rgb(213, 238, 253)", exitingColor);
+
+        await ScrollHowSectionToProgressAsync(.99);
+        Assert.Equal("rgb(255, 255, 255)", await HowBackgroundAsync());
+
+        await ScrollHowSectionToProgressAsync(.6);
+        Assert.Equal("rgb(213, 238, 253)", await HowBackgroundAsync());
+        await ScrollHowSectionToProgressAsync(.4);
+        Assert.Equal(enteringColor, await HowBackgroundAsync());
+
+        await ScrollHowSectionToProgressAsync(.6);
+        var restoredScrollPosition = await Page.EvaluateAsync<double>("() => window.scrollY");
+        await Page.ReloadAsync();
+        await Page.EvaluateAsync("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
+        Assert.InRange(Math.Abs(await Page.EvaluateAsync<double>("() => window.scrollY") - restoredScrollPosition), 0, 2);
+        Assert.Equal("rgb(213, 238, 253)", await HowBackgroundAsync());
+
+        await Page.EmulateMediaAsync(new() { ReducedMotion = ReducedMotion.Reduce });
+        await ScrollHowSectionToProgressAsync(.1);
+        Assert.Equal("rgb(213, 238, 253)", await HowBackgroundAsync());
+        await Page.EmulateMediaAsync(new() { ReducedMotion = ReducedMotion.NoPreference });
+    }
+
+    private async Task ScrollHowSectionToProgressAsync(double progress)
+    {
+        await Page.EvaluateAsync(
+            "progress => { document.documentElement.style.scrollBehavior = 'auto'; const section = document.querySelector('.home-how'); const rangeStart = section.offsetTop - window.innerHeight; const rangeEnd = section.offsetTop + section.offsetHeight; window.scrollTo(0, rangeStart + (rangeEnd - rangeStart) * progress); }",
+            progress);
+        await Page.EvaluateAsync("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
+    }
+
+    private async Task<string> HowBackgroundAsync()
+    {
+        return await Page.Locator(".home-how").EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor");
+    }
+
 }

@@ -35,7 +35,10 @@ public sealed class HomeTests
         using var context = CreateContext();
         var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<HomePage>());
 
-        Assert.Equal(["Define", "Practice", "Evolve"], cut.FindAll(".home-steps h3").Select(element => element.TextContent.Trim()));
+        Assert.Equal(
+            ["Define what matters", "Organize your day", "Improve every day", "Track your progress", "Celebrate your wins"],
+            cut.FindAll(".home-steps h3").Select(element => element.TextContent.Trim()));
+        Assert.Equal(["1", "2", "3", "4", "5"], cut.FindAll(".home-steps > li > span").Select(element => element.TextContent.Trim()));
         var heroImage = cut.Find(".home-hero__visual img.home-hero__image");
         Assert.Equal("/assets/hero/home-team.png", heroImage.GetAttribute("src"));
         var howImage = cut.Find(".home-how__visual img");
@@ -74,6 +77,14 @@ public sealed class HomeTests
 
         Assert.Contains("Construa um dia melhor", cut.Find("h1").TextContent, StringComparison.Ordinal);
         Assert.Contains("Como o BeeDay funciona", cut.Find("h2").TextContent, StringComparison.Ordinal);
+        Assert.Equal(
+            ["Defina o que importa", "Organize o seu dia", "Evolua todos os dias", "Acompanhe seu progresso", "Celebre suas conquistas"],
+            cut.FindAll(".home-steps h3").Select(element => element.TextContent.Trim()));
+        Assert.Contains("Transforme seus objetivos em prioridades claras e saiba onde concentrar sua energia.", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Reúna sua rotina, tarefas e compromissos em um só lugar para viver com mais clareza.", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Pequenas ações consistentes criam grandes mudanças. Avance um pouco a cada dia.", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Veja sua evolução, mantenha a motivação e entenda o quanto você já avançou.", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Cada passo conta. Reconheça suas vitórias e continue evoluindo.", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Comece agora", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Já tenho uma conta", cut.Markup, StringComparison.Ordinal);
         Assert.DoesNotContain("Build a better day", cut.Markup, StringComparison.Ordinal);
