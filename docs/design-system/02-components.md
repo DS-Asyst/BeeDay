@@ -7,7 +7,11 @@ interop-equivalente aos demais). Componentes de Forms e o `BeeDayIcon` têm par�
 [`04-forms.md`](04-forms.md) e [`03-icons.md`](03-icons.md) respectivamente — este documento os
 resume e linka em vez de duplicar (`docs/CONVENTIONS.md` §12).
 
-**Última verificação:** 2026-08-16 (Sprint 25.2, EPIC 25 — Brand Identity & Wordmark Convergence) —
+**Última verificação:** 2026-08-16 (Sprint 25.3, EPIC 25 — Color System Consolidation) — §8
+revalidado: `BeeDayBrand.OnDarkSurface` mantém parâmetro e classe por backward compatibility, não
+possui consumer real de produto e agora preserva Brand Primary em vez de recolorir o wordmark. A
+cor oficial `#5247F9` passa a valer em todos os modos suportados. Verificação anterior: 2026-08-16
+(Sprint 25.2, EPIC 25 — Brand Identity & Wordmark Convergence) —
 §8 (`BeeDayBrand`) corrigido: a entrada anterior descrevia um wordmark em imagem
 (`/beeday-wordmark.png`, 904×276, `alt="BeeDay"`) que não corresponde à implementação atual —
 confirmado por leitura direta que o componente renderiza texto CSS (dois `<span>`, não `<img>`)
@@ -216,7 +220,7 @@ retirada para simplificar a experiência sem quebrar dados existentes.
 
 | Componente | Objetivo |
 |---|---|
-| `BeeDayBrand` | Única primitive da marca. Renderiza o wordmark `beeday` como texto CSS (dois `<span>`, `.beeday-brand__bee`/`.beeday-brand__day`, não `<img>`), `role="img"`, `aria-label="beeday"` (lowercase — Sprint 25.2, Brand Contract). Ambos os segmentos usam `--beeday-color-brand-primary` (convergência de cor única — Sprint 25.2; antes da Sprint 25.2 o segundo segmento usava `--beeday-color-brand-yellow`, tratamento bicolor). Parâmetro `OnDarkSurface` aplica `.beeday-brand--inverse`, recolorindo ambos os segmentos para `--beeday-color-text-inverse` (sem consumidor real de produto até esta Sprint). CSS aceita apenas hooks de apresentação (`--beeday-brand-height`, `-padding`, `-background`, `-radius`). Não use `<img>`, o asset legado `wwwroot/beeday-wordmark.png` (sem consumidor, candidato a remoção — Sprint 25.16) ou símbolos inventados para representar a marca. |
+| `BeeDayBrand` | Única primitive da marca. Renderiza o wordmark `beeday` como texto CSS (dois `<span>`, `.beeday-brand__bee`/`.beeday-brand__day`, não `<img>`), `role="img"`, `aria-label="beeday"` (lowercase — Sprint 25.2, Brand Contract). Ambos os segmentos e todos os modos usam `--beeday-color-brand-primary`; `OnDarkSurface` continua aplicando `.beeday-brand--inverse` por backward compatibility, mas não altera a cor e não possui consumer real de produto na Sprint 25.3. CSS aceita apenas hooks de apresentação (`--beeday-brand-height`, `-padding`, `-background`, `-radius`). Não use `<img>`, o asset legado `wwwroot/beeday-wordmark.png` (sem consumidor, candidato a remoção — Sprint 25.16) ou símbolos inventados para representar a marca. |
 | `SearchHighlight` | Divide `Text` em segmentos por ocorrência de `SearchTerm` (case-insensitive, `IndexOf` iterativo, sem regex) e envolve cada match em `<mark>`/span destacado (`beeday-search-highlight`, fundo `#ffe49a`). Lógica de segmentação (`BuildSegments`) é `internal static`, testável isoladamente. |
 
 ## 9. Interop — `BeeDaySortable` (fora de `DesignSystem/`, documentado aqui por simetria)

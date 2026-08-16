@@ -5,7 +5,7 @@
 .beeday-progress__fill { position: relative; min-width: 0; height: 100%; background: var(--beeday-color-brand-primary); border-radius: inherit; transition: width 240ms ease; }
 .beeday-progress__marker { position: absolute; inset: 2px 4px auto; height: 3px; background: rgb(255 255 255 / 42%); border-radius: var(--beeday-radius-pill); }
 .beeday-progress[data-state="complete"] .beeday-progress__fill { background: var(--beeday-color-success); }
-.beeday-progress[data-tone="reward"] .beeday-progress__fill { background: var(--beeday-color-brand-yellow); }
+.beeday-progress[data-tone="reward"] .beeday-progress__fill { background: var(--beeday-color-reward); }
 .beeday-progress[data-tone="reward"] .beeday-progress__marker { background: rgb(47 39 55 / 20%); }
 .beeday-progress[data-state="unavailable"] .beeday-progress__track { border-style: dashed; }
 @media (prefers-reduced-motion: reduce) { .beeday-progress__fill { transition: none; } }

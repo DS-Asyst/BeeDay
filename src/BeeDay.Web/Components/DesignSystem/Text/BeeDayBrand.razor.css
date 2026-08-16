@@ -16,4 +16,4 @@
 .beeday-brand__day { color: var(--beeday-color-brand-primary); }
 
 .beeday-brand--inverse .beeday-brand__bee,
-.beeday-brand--inverse .beeday-brand__day { color: var(--beeday-color-text-inverse); }
+.beeday-brand--inverse .beeday-brand__day { color: var(--beeday-color-brand-primary); }

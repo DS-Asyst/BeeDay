@@ -153,7 +153,7 @@
 .beeday-icon-toggle[aria-expanded="true"] {
     transform: translateY(-1px);
     border-color: var(--beeday-color-brand-primary);
-    color: #fff;
+    color: var(--beeday-color-text-inverse);
     background: var(--beeday-color-brand-primary);
 }
 
