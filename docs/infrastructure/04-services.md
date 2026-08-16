@@ -5,9 +5,10 @@
 `HealthChecks/SqlServerHealthCheck.cs`, `Background/*.cs`, `Configuration/*.cs`, e
 `InfrastructureServiceCollectionExtensions.cs` (para lifetime/registro).
 
-**Última verificação:** 2026-08-16 (Epic 26, Sprint 26.2) — seção Email atualizada com
-`EmailProviderSelector`; verificação anterior em 2026-08-09 (Sprint 18.6) —
-`Caching/MemoryApplicationCache.cs` removido (ver achado abaixo).
+**Última verificação:** 2026-08-16 (Epic 26, Sprint 26.4) — seção Email atualizada com
+`HmgRecipientGuardedEmailSender`; Sprint 26.2 atualizou a mesma seção com `EmailProviderSelector`;
+verificação anterior em 2026-08-09 (Sprint 18.6) — `Caching/MemoryApplicationCache.cs` removido (ver
+achado abaixo).
 
 ## Event Journal — `JsonEventJournal`
 
@@ -68,6 +69,18 @@ descartada por engano. Sem lock global, sem `BackgroundService`/`Timer` novo, se
 
 A escolha entre os dois acontece inteiramente em tempo de DI (`InfrastructureServiceCollectionExtensions`),
 nunca em runtime por requisição.
+
+**EPIC 26, Sprint 26.4 — `HmgRecipientGuardedEmailSender`:** whenever `EmailProviderSelector`
+resolves `EmailProvider.Resend`, `IEmailSender` is registered as `HmgRecipientGuardedEmailSender`
+wrapping `ResendEmailSender` — never the raw `ResendEmailSender` directly. The guard
+(`Configuration/HmgRecipientGuardOptions.cs`) defaults to `Enabled=true` with an empty
+`AllowedRecipients`, which fails `ValidateOnStart()` — an environment that switches to Resend
+without configuring the guard refuses to start rather than sending unprotected. When `Enabled`, only
+listed recipients reach `ResendEmailSender` (others are silently suppressed, subject gets the
+`SubjectPrefix` — default `"[HMG] "` — prepended once); when explicitly `Enabled=false`
+(`appsettings.Production.json`'s deliberate opt-out), every recipient passes through unmodified. The
+`Development` branch of the same `if`/`else` never binds `HmgRecipientGuardOptions` at all. See
+[`06-transactional-email.md`](06-transactional-email.md) §10 for the full contract.
 
 **EPIC 26, Sprint 26.2 — `EmailProviderSelector`:** `ResendOptions.Enabled` e
 `DevelopmentEmailOptions.Enabled` continuam sendo dois booleanos independentes (mesmas chaves de

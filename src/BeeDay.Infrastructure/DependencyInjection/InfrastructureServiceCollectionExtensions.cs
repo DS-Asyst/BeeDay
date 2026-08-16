@@ -79,11 +79,29 @@ public static class InfrastructureServiceCollectionExtensions
         var emailProvider = EmailProviderSelector.Resolve(resendEnabled, developmentEmailEnabled);
         if (emailProvider == EmailProvider.Resend)
         {
-            services.AddHttpClient<BeeDay.Application.Common.Identity.IEmailSender, ResendEmailSender>(client =>
+            // HmgRecipientGuardOptions is only registered/validated here — never unconditionally for
+            // every environment — because it exists solely to guard Resend delivery. Registering its
+            // ValidateOnStart outside this branch would fail startup for the Development provider too,
+            // which never consults it. See HmgRecipientGuardedEmailSender and
+            // docs/infrastructure/06-transactional-email.md §10 for the fail-closed contract this
+            // enforces: Enabled defaults to true, so an environment that switches to Resend without ever
+            // configuring this section refuses to start rather than sending unprotected.
+            services
+                .AddOptions<HmgRecipientGuardOptions>()
+                .Bind(configuration.GetSection(HmgRecipientGuardOptions.SectionName))
+                .Validate(options => !options.Enabled || options.AllowedRecipients.Count > 0, "At least one allowed recipient is required while the HMG recipient guard is enabled.")
+                .ValidateOnStart();
+
+            services.AddHttpClient<ResendEmailSender>(client =>
             {
                 client.BaseAddress = new Uri("https://api.resend.com/");
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
+            services.AddSingleton<BeeDay.Application.Common.Identity.IEmailSender, HmgRecipientGuardedEmailSender>(sp =>
+                new HmgRecipientGuardedEmailSender(
+                    sp.GetRequiredService<ResendEmailSender>(),
+                    sp.GetRequiredService<IOptions<HmgRecipientGuardOptions>>(),
+                    sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<HmgRecipientGuardedEmailSender>>()));
         }
         else
         {

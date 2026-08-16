@@ -27,7 +27,11 @@ public sealed class EmailSecretsConfigurationTests
             [$"{SqlServerOptions.SectionName}:ConnectionString"] = TestConnectionString,
             [$"{ResendOptions.SectionName}:Enabled"] = "true",
             [$"{ResendOptions.SectionName}:FromAddress"] = "noreply@beeday.example",
-            [$"{DevelopmentEmailOptions.SectionName}:Enabled"] = "false"
+            [$"{DevelopmentEmailOptions.SectionName}:Enabled"] = "false",
+            // Isolates this test to the secret-configuration failure this test is about — the HMG
+            // recipient guard (Sprint 26.4) is a separate, independently validated concern; see
+            // EmailSecretsConfigurationTests vs. HmgRecipientGuardDependencyInjectionTests.
+            [$"{HmgRecipientGuardOptions.SectionName}:Enabled"] = "false"
         });
 
         var exception = await Assert.ThrowsAsync<OptionsValidationException>(
@@ -44,7 +48,8 @@ public sealed class EmailSecretsConfigurationTests
             [$"{SqlServerOptions.SectionName}:ConnectionString"] = TestConnectionString,
             [$"{ResendOptions.SectionName}:Enabled"] = "true",
             [$"{ResendOptions.SectionName}:ApiKey"] = "re_test_only_used_in_memory_never_a_real_key",
-            [$"{DevelopmentEmailOptions.SectionName}:Enabled"] = "false"
+            [$"{DevelopmentEmailOptions.SectionName}:Enabled"] = "false",
+            [$"{HmgRecipientGuardOptions.SectionName}:Enabled"] = "false"
         });
 
         await Assert.ThrowsAsync<OptionsValidationException>(

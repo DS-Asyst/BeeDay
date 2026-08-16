@@ -43,16 +43,21 @@ public sealed class EmailProviderDependencyInjectionTests
     }
 
     [Fact]
-    public void AddBeeDayInfrastructure_ProductionEnvironmentSettings_ResolveResendEmailSenderExactlyOnce()
+    public void AddBeeDayInfrastructure_ProductionEnvironmentSettings_ResolveHmgRecipientGuardedEmailSenderWrappingResendExactlyOnce()
     {
+        // appsettings.Production.json explicitly disables the HMG recipient guard (Sprint 26.4) — it
+        // is still the registered IEmailSender (always wraps Resend when Resend is selected), just a
+        // no-op pass-through in that state. See HmgRecipientGuardDependencyInjectionTests for the
+        // guard's own DI-level contract.
         AssertResolvesExactlyOneSender(
             resendEnabled: true,
             developmentEnabled: false,
-            expectedSenderType: typeof(ResendEmailSender),
+            expectedSenderType: typeof(HmgRecipientGuardedEmailSender),
             additionalSettings: new Dictionary<string, string?>
             {
                 [$"{ResendOptions.SectionName}:ApiKey"] = "re_test",
-                [$"{ResendOptions.SectionName}:FromAddress"] = "noreply@beeday.example"
+                [$"{ResendOptions.SectionName}:FromAddress"] = "noreply@beeday.example",
+                [$"{HmgRecipientGuardOptions.SectionName}:Enabled"] = "false"
             });
     }
 

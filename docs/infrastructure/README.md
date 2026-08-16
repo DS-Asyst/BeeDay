@@ -99,14 +99,16 @@ mesma Sprint.
 
 ## Achados relevantes (reportados, não corrigidos)
 
-- **EPIC 26, Sprint 26.1:** `DevelopmentEmailSender` recusa gravar em qualquer diretório fora da
-  content root do host; `appsettings.Homologation.json` configura
-  `Email:Development:Directory` como um caminho absoluto externo
+- **EPIC 26, Sprint 26.1 (ainda não corrigido nas Sprints 26.2–26.4):** `DevelopmentEmailSender`
+  recusa gravar em qualquer diretório fora da content root do host; `appsettings.Homologation.json`
+  configura `Email:Development:Directory` como um caminho absoluto externo
   (`C:\Apps\BeeDay-Data\Emails`, fora de `C:\Apps\BeeDay.Web`) — toda chamada de `SendAsync` em HMG
-  lança `InvalidOperationException` antes de gravar qualquer arquivo. Zero cobertura de teste
-  automatizado existe para `DevelopmentEmailSender`. Ver
-  [`06-transactional-email.md`](06-transactional-email.md) §6 para a análise completa de causa
-  raiz e classificação de evidência; correção planejada para as Sprints 26.2/26.3 do EPIC 26.
+  lança `InvalidOperationException` antes de gravar qualquer arquivo. A Sprint 26.2 endereçou a
+  seleção de provider (`EmailProviderSelector`) e a Sprint 26.3 documentou o contrato de secrets —
+  nenhuma das duas tocou este guard específico. A Sprint 26.4 adicionou a guarda de destinatário de
+  HMG (`HmgRecipientGuardedEmailSender`), um problema relacionado mas distinto. Ver
+  [`06-transactional-email.md`](06-transactional-email.md) §6/§8 para a análise completa de causa
+  raiz e o status atualizado da correção planejada.
 - Comentários de código em `EfConcurrencySaveChanges.cs` e `EventJournalOptions.cs` ainda
   mencionam "o provider JSON" como referência histórica — comentários, não comportamento; fora do
   escopo alterar (código).
