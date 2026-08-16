@@ -13,9 +13,11 @@ and `git log`/`git show` on the files above. Cross-checked against
 [`docs/deployment/02-runtime-configuration.md`](../deployment/02-runtime-configuration.md)
 (already current as of Sprint 18.4).
 
-**Last verified:** 2026-08-16 (Epic 26, Sprint 26.2 — §4.1/§8's provider-selection recommendation
-implemented via `EmailProviderSelector`; §4.1 and §8 updated accordingly. Originally written in
-Sprint 26.1, audit-only, no behavior changed by that sprint).
+**Last verified:** 2026-08-16 (Epic 26, Sprint 26.3 — the secrets/configuration contract for
+`ResendOptions:ApiKey`/`FromAddress` is now formally documented in
+[`docs/deployment/02-runtime-configuration.md`](../deployment/02-runtime-configuration.md) §6;
+Sprint 26.2 implemented §4.1/§8's provider-selection recommendation via `EmailProviderSelector`.
+Originally written in Sprint 26.1, audit-only, no behavior changed by that sprint).
 
 ## 1. Scope
 
