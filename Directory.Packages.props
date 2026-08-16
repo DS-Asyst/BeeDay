@@ -5,6 +5,8 @@
   <ItemGroup>
     <PackageVersion Include="AngleSharp" Version="1.5.2" />
     <PackageVersion Include="bunit" Version="2.7.2" />
+    <PackageVersion Include="Deque.AxeCore.Commons" Version="4.12.0" />
+    <PackageVersion Include="Deque.AxeCore.Playwright" Version="4.12.0" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageVersion Include="MediatR" Version="14.2.0" />

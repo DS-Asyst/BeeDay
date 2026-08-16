@@ -11,12 +11,11 @@
 
     position: relative;
     display: inline-flex;
-    height: 2.75rem;
     min-height: 2.75rem;
     align-items: center;
     justify-content: center;
     gap: var(--beeday-spacing-sm);
-    padding: .5rem 1rem;
+    padding: var(--beeday-spacing-sm) var(--beeday-spacing-md);
     border: var(--beeday-border-width) solid var(--beeday-button-depth);
     border-bottom-width: var(--beeday-depth-md);
     border-radius: var(--beeday-radius-lg);
@@ -36,6 +35,8 @@
     user-select: none;
     -webkit-tap-highlight-color: transparent;
     text-transform: uppercase;
+    text-align: center;
+    overflow-wrap: anywhere;
     transition: background-color var(--beeday-transition-fast), border-color var(--beeday-transition-fast), transform var(--beeday-transition-fast);
     overflow: visible;
 }
@@ -137,7 +138,7 @@
     width: 2.5rem;
     height: 2.5rem;
     padding: 0;
-    border: 1px solid var(--beeday-color-border);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-lg);
     color: var(--beeday-color-chrome-icon);
     background: var(--beeday-color-chrome-icon-surface);
@@ -153,7 +154,7 @@
 .beeday-icon-toggle[aria-expanded="true"] {
     transform: translateY(-1px);
     border-color: var(--beeday-color-brand-primary);
-    color: #fff;
+    color: var(--beeday-color-text-inverse);
     background: var(--beeday-color-brand-primary);
 }
 
@@ -216,7 +217,7 @@
 
 .beeday-button--full-width { width: 100%; }
 .beeday-button--compact { height: 2.25rem; min-height: 2.25rem; padding: .375rem .75rem; font-size: var(--beeday-font-size-xs); }
-.beeday-button__label { position: relative; z-index: 1; display: inline-flex; min-width: 0; align-items: center; white-space: nowrap; }
+.beeday-button__label { position: relative; z-index: 1; display: inline-flex; min-width: 0; align-items: center; }
 .beeday-button .beeday-icon { position: relative; z-index: 1; }
 
 .beeday-button:not(:disabled):hover {
@@ -248,7 +249,7 @@
 }
 
 .beeday-button--loading { position: relative; }
-.beeday-button--loading .beeday-button__label { visibility: hidden; }
+.beeday-button--loading .beeday-button__label { opacity: 0; }
 .beeday-button__loader { position: absolute; flex: 0 0 auto; animation: beeday-spin .7s linear infinite; }
 @keyframes beeday-spin { to { transform: rotate(360deg); } }
 
@@ -357,14 +358,14 @@
 .beeday-hero__supporting {
     margin-top: var(--beeday-spacing-md);
     padding-top: var(--beeday-spacing-md);
-    border-top: 1px solid var(--beeday-color-border);
+    border-top: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     color: var(--beeday-color-text-secondary);
     font-size: var(--beeday-font-size-sm);
 }
 
 .beeday-hero--onboarding {
     padding: var(--beeday-spacing-lg);
-    border: 1px solid var(--beeday-color-border);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-lg);
     background: var(--beeday-color-brand-primary-soft);
 }

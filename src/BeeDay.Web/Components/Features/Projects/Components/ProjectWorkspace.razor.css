@@ -1,11 +1,11 @@
 .project-workspace {
     position: fixed;
     inset: 0;
-    z-index: 950;
+    z-index: var(--beeday-z-modal);
     display: grid;
     place-items: center;
     padding: 1rem;
-    background: rgb(24 15 29 / 64%);
+    background: var(--beeday-color-overlay);
     backdrop-filter: blur(3px);
 }
 
@@ -26,8 +26,8 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 1.2rem 1.3rem 1rem;
-    border-bottom: 1px solid #ddd7e0;
-    background: #fff;
+    border-bottom: 1px solid var(--beeday-color-border);
+    background: var(--beeday-color-surface);
 }
 
 .project-workspace__eyebrow {
@@ -44,23 +44,13 @@
 
 .project-workspace__header p {
     margin: .42rem 0 0;
-    color: #706777;
+    color: var(--beeday-color-text-muted);
     font-size: .78rem;
     line-height: 1.45;
 }
 
 .project-workspace__close {
-    width: 2rem;
-    height: 2rem;
-    border: 0;
-    border-radius: var(--beeday-radius-sm);
-    background: transparent;
-    font-size: 1.5rem;
-    cursor: pointer;
-}
-
-.project-workspace__close:hover {
-    background: #eee9f0;
+    flex: 0 0 auto;
 }
 
 .project-workspace__summary {
@@ -76,11 +66,11 @@
     padding: .65rem .75rem;
     border: 1px solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-sm);
-    background: #fff;
+    background: var(--beeday-color-surface);
 }
 
 .project-workspace__summary span {
-    color: #786f80;
+    color: var(--beeday-color-text-muted);
     font-size: .7rem;
 }
 
@@ -89,18 +79,7 @@
 }
 
 .project-workspace__progress {
-    height: .48rem;
     margin: 0 1.3rem .9rem;
-    overflow: hidden;
-    border-radius: var(--beeday-radius-pill);
-    background: #ddd7e0;
-}
-
-.project-workspace__progress span {
-    display: block;
-    height: 100%;
-    background: var(--beeday-color-brand-primary);
-    transition: width .2s ease;
 }
 
 .project-workspace__toolbar {
@@ -109,9 +88,9 @@
     justify-content: space-between;
     gap: 1rem;
     padding: .9rem 1.3rem;
-    border-top: 1px solid #e1dce4;
-    border-bottom: 1px solid #e1dce4;
-    background: #fff;
+    border-top: 1px solid var(--beeday-color-border);
+    border-bottom: 1px solid var(--beeday-color-border);
+    background: var(--beeday-color-surface);
 }
 
 .project-workspace__toolbar h3 {
@@ -121,31 +100,12 @@
 
 .project-workspace__toolbar p {
     margin: .2rem 0 0;
-    color: #786f80;
+    color: var(--beeday-color-text-muted);
     font-size: .68rem;
 }
 
 .project-workspace__add {
-    display: grid;
-    place-items: center;
-    width: 2.2rem;
-    height: 2.2rem;
-    padding: 0;
-    border: 1px solid var(--beeday-color-brand-primary);
-    border-radius: var(--beeday-radius-sm);
-    color: var(--beeday-color-brand-primary);
-    background: #fff;
-    font-size: 1.3rem;
-    font-weight: 700;
-    line-height: 1;
-    cursor: pointer;
-    transition: color .12s ease, background-color .12s ease, transform .12s ease;
-}
-
-.project-workspace__add:hover {
-    transform: translateY(-1px);
-    color: #fff;
-    background: var(--beeday-color-brand-primary);
+    flex: 0 0 auto;
 }
 
 .project-workspace__body {
@@ -165,12 +125,12 @@
     display: inline-flex;
     align-items: center;
     gap: .4rem;
-    min-height: 2rem;
+    min-height: var(--beeday-control-height-sm);
     padding: .4rem .65rem;
     border: 1px solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-sm);
-    color: #5a4b62;
-    background: #fff;
+    color: var(--beeday-color-text-secondary);
+    background: var(--beeday-color-surface);
     font-family: var(--beeday-font-body);
     font-size: .68rem;
     font-weight: 700;
@@ -180,7 +140,7 @@
 
 .project-workspace__list-toggle:hover {
     border-color: var(--beeday-color-brand-primary);
-    color: #fff;
+    color: var(--beeday-color-text-inverse);
     background: var(--beeday-color-brand-primary);
 }
 
@@ -198,7 +158,7 @@
     overflow-y: auto;
     padding-right: .2rem;
     scrollbar-width: thin;
-    scrollbar-color: #b9b1bf transparent;
+    scrollbar-color: var(--beeday-color-border-strong) transparent;
 }
 
 .project-workspace__todos::-webkit-scrollbar {
@@ -208,7 +168,7 @@
 .project-workspace__todos::-webkit-scrollbar-thumb {
     border: .1rem solid transparent;
     border-radius: var(--beeday-radius-pill);
-    background: #b9b1bf;
+    background: var(--beeday-color-border-strong);
     background-clip: padding-box;
 }
 
@@ -217,12 +177,12 @@
     place-items: center;
     gap: .35rem;
     min-height: 8rem;
-    color: #746b7b;
+    color: var(--beeday-color-text-muted);
     text-align: center;
 }
 
 .project-workspace__empty strong {
-    color: #44394b;
+    color: var(--beeday-color-text-primary);
 }
 
 .project-workspace__empty span {
@@ -238,23 +198,7 @@
     border: 1px solid var(--beeday-color-border);
     border-left: 4px solid var(--beeday-color-todo);
     border-radius: var(--beeday-radius-sm);
-    background: #fff;
-}
-
-.project-workspace__check {
-    width: 2.5rem;
-    border: 0;
-    border-right: 1px solid #e4dfe6;
-    color: transparent;
-    background: transparent;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.project-workspace__check:hover,
-.project-workspace__todo--done .project-workspace__check {
-    color: #fff;
-    background: var(--beeday-color-brand-primary);
+    background: var(--beeday-color-surface);
 }
 
 .project-workspace__todo-body {
@@ -307,9 +251,6 @@
         max-height: 14rem;
     }
 }
-
-/* Sprint 1.4 refinement: standard modal creation and contextual To-Do actions. */
-.project-workspace { z-index: 950; }
 
 .project-workspace__todo {
     position: relative;
@@ -395,4 +336,10 @@
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+@media (pointer: coarse) {
+    .project-workspace__list-toggle {
+        min-height: var(--beeday-control-height-md);
+    }
 }

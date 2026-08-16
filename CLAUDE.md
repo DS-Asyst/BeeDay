@@ -1216,3 +1216,15 @@ Validate before claiming success.
 Ask before irreversible actions.
 
 Keep Git history deliberate and auditable.
+
+13. Brand contract
+
+BeeDay's official public brand is beeday, always lowercase, with official brand color #5247F9.
+
+This identity governs visible and marketing surfaces only.
+
+It does not authorize renaming technical identifiers: solution name, projects, namespaces, assemblies, classes, components, configuration keys, tests, and infrastructure keep the BeeDay technical identity unless a specific task explicitly approves a technical rename with consumer and backward-compatibility analysis.
+
+Brand identity and technical identity are never the same decision.
+
+Full contract, governance rules, and rationale: docs/epics/25-design-system-brand-evolution/README.md.

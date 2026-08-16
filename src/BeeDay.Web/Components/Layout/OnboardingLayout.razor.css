@@ -7,7 +7,7 @@
     min-height: 100dvh;
     display: grid;
     place-items: center;
-    padding: 2rem;
+    padding: var(--beeday-spacing-xl);
     overflow-x: hidden;
     overflow-y: auto;
     background: var(--beeday-color-background);
@@ -20,6 +20,6 @@
 
 @media (max-width: 40rem) {
     .onboarding-layout {
-        padding: 1rem;
+        padding: var(--beeday-spacing-md);
     }
 }

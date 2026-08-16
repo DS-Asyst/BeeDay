@@ -4,13 +4,22 @@
 <div class="filter-bar" aria-label="@Localizer["DashboardControlsAriaLabel"]">
     <div class="filter-bar__main">
         <div class="filter-bar__search" role="search">
-            <input id="dashboard-search" class="filter-bar__input" type="search"
-                   aria-label="@Localizer["SearchActivitiesAriaLabel"]" placeholder="@Localizer["SearchPlaceholder"]" value="@inputValue" @oninput="OnInput" />
+            <BeeDayInput Id="dashboard-search"
+                         Value="@inputValue"
+                         ValueChanged="OnInput"
+                         ValueExpression="@(() => inputValue)"
+                         Placeholder="@Localizer["SearchPlaceholder"]"
+                         UpdateOnInput="true"
+                         ShowValidationMessage="false"
+                         FieldCssClass="beeday-field filter-bar__search-field"
+                         InputCssClass="beeday-field__control filter-bar__input"
+                         type="search"
+                         aria-label="@Localizer["SearchActivitiesAriaLabel"]" />
         </div>
         <div class="filter-bar__create">
             <BeeDayButton Variant="BeeDayButtonVariant.Primary" Compact="true" Icon="BeeDayIconName.Add"
                           Class="filter-bar__create-button" OnClick="ToggleCreateMenu"
-                          aria-haspopup="menu" aria-expanded="@showCreateMenu">@Localizer["CreateActivityButtonLabel"]</BeeDayButton>
+                          aria-haspopup="menu" aria-expanded="@showCreateMenu.ToString().ToLowerInvariant()">@Localizer["CreateActivityButtonLabel"]</BeeDayButton>
             @if (showCreateMenu)
             {
                 <div class="filter-bar__menu" role="menu" aria-label="@Localizer["ChooseActivityTypeAriaLabel"]">

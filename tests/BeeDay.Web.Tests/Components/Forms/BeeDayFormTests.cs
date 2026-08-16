@@ -46,6 +46,25 @@ public sealed class BeeDayFormTests
     }
 
     [Fact]
+    public void InputCanUpdateLiveSearchWithoutAFormEditContext()
+    {
+        using var context = new BunitContext();
+        context.Services.AddLocalization();
+        var model = new FormTestModel();
+        var cut = context.Render<BeeDayInput>(parameters => parameters
+            .Add(component => component.Id, "search")
+            .Add(component => component.UpdateOnInput, true)
+            .Add(component => component.ShowValidationMessage, false)
+            .Add(component => component.Value, model.TextValue)
+            .Add(component => component.ValueChanged, value => model.TextValue = value)
+            .Add(component => component.ValueExpression, () => model.TextValue));
+
+        cut.Find("input").Input("live value");
+
+        Assert.Equal("live value", model.TextValue);
+    }
+
+    [Fact]
     public void InputSupportsDisabledReadonlyAndAdditionalAttributes()
     {
         using var context = new BunitContext();

@@ -15,9 +15,13 @@ public partial class BeeDayInput
     [Parameter] public bool Required { get; set; }
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public bool UpdateOnInput { get; set; }
     [Parameter] public bool ShowValidationMessage { get; set; } = true;
     [Parameter] public string? Value { get; set; }
     [Parameter] public EventCallback<string?> ValueChanged { get; set; }
     [Parameter, EditorRequired] public Expression<Func<string?>> ValueExpression { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private Task HandleInputAsync(ChangeEventArgs args) =>
+        ValueChanged.InvokeAsync(args.Value?.ToString());
 }

@@ -39,7 +39,7 @@
 
 .beeday-empty-state__description {
     margin: 0;
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     font-size: .78rem;
     line-height: 1.65;
 }

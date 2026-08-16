@@ -3,7 +3,7 @@
     top: 0;
     right: 0;
     left: 0;
-    z-index: 100;
+    z-index: var(--beeday-z-navigation);
     width: 100%;
     min-height: 4.25rem;
     background: var(--beeday-color-surface);
@@ -14,7 +14,7 @@
     align-items: center;
     justify-content: space-between;
     min-height: 4.25rem;
-    gap: 1rem;
+    gap: var(--beeday-spacing-md);
 }
 
 .public-header__brand {

@@ -67,6 +67,36 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Mark {title} as incomplete" })).ToBeVisibleAsync();
     }
 
+    [Fact]
+    public async Task ProjectWorkspace_UsesSharedProgressFocusAndResponsiveContracts()
+    {
+        await LoginToDailyAsync();
+        var title = $"E2E Project {Guid.NewGuid():N}"[..26];
+
+        await OpenActivityMenuAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Project" }).ClickAsync();
+
+        var editor = Page.GetByRole(AriaRole.Dialog);
+        await editor.GetByLabel("Title").FillAsync(title);
+        await editor.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
+        await Expect(editor).ToBeHiddenAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Project: {title}" }).ClickAsync();
+        await Expect(editor).ToBeVisibleAsync();
+        await editor.GetByRole(AriaRole.Button, new() { Name = "Open Project" }).ClickAsync();
+
+        var workspace = Page.GetByRole(AriaRole.Dialog, new() { Name = title });
+        await Expect(workspace).ToBeVisibleAsync();
+        await Expect(workspace.GetByRole(AriaRole.Button, new() { Name = "Close project" })).ToBeFocusedAsync();
+        await Expect(workspace.GetByRole(AriaRole.Progressbar, new() { Name = "Project progress 0%" })).ToBeVisibleAsync();
+
+        await Page.SetViewportSizeAsync(390, 844);
+        Assert.False(await Page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
+
+        await Page.Keyboard.PressAsync("Escape");
+        await Expect(workspace).ToBeHiddenAsync();
+    }
+
     private async Task LoginToDailyAsync()
     {
         var email = $"e2e-activity-{Guid.NewGuid():N}@beeday.invalid";
@@ -99,12 +129,9 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
     /// <summary>
     /// Opens the "Activity" create menu and confirms it is genuinely open. The menu items are
     /// conditionally rendered (an @if block, not CSS-hidden), so waiting for the menu container's
-    /// own role/label is a reliable, render-confirmed signal that the click was actually received
-    /// and processed — as opposed to the trigger button's own aria-expanded attribute, which
-    /// ActivityFilterBar.razor renders as the C#-default "True"/"False" (capitalized) instead of the
-    /// ARIA-spec-required lowercase "true"/"false", so Playwright's Expanded filter never matches it
-    /// (a real, separate, pre-existing accessibility defect — reported, not fixed, since production
-    /// code is out of scope for this correction).
+    /// own role/label is a reliable, render-confirmed signal that the click was received and the
+    /// interactive render completed. The trigger also exposes lowercase aria-expanded, covered by
+    /// the component accessibility contract.
     /// </summary>
     private async Task OpenActivityMenuAsync()
     {

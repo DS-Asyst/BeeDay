@@ -10,6 +10,7 @@ public sealed class EditorModalShellTests : BunitContext
     {
         Services.AddLogging();
         Services.AddLocalization();
+        JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
     [Fact]
@@ -25,6 +26,12 @@ public sealed class EditorModalShellTests : BunitContext
         Assert.Contains("Save", cut.Find(".editor-modal__header-save").TextContent);
         Assert.Contains("Delete", cut.Find(".editor-modal__footer-danger .beeday-button--danger").TextContent);
         Assert.Contains("Cancel", cut.Find(".editor-modal__cancel-action").TextContent);
+
+        var dialog = cut.Find("[role='dialog']");
+        Assert.Equal("true", dialog.GetAttribute("aria-modal"));
+        Assert.Equal("false", dialog.GetAttribute("aria-busy"));
+        Assert.Equal("-1", dialog.GetAttribute("tabindex"));
+        Assert.DoesNotContain("beeday-button--compact", cut.Find(".editor-modal__delete-action").ClassList);
     }
 
     [Fact]

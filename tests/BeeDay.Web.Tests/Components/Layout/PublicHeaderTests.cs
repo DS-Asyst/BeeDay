@@ -43,7 +43,7 @@ public sealed class PublicHeaderTests
         var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<PublicHeader>());
 
         var cta = cut.Find("button.beeday-button");
-        Assert.Equal("Continue to BeeDay", cta.TextContent.Trim());
+        Assert.Equal("Continue to beeday", cta.TextContent.Trim());
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public sealed class PublicHeaderTests
 
         var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<PublicHeader>());
 
-        Assert.Equal("Página inicial do BeeDay", cut.Find("a.public-header__brand").GetAttribute("aria-label"));
+        Assert.Equal("Página inicial do beeday", cut.Find("a.public-header__brand").GetAttribute("aria-label"));
         Assert.Equal("Idioma", cut.Find("form.public-language-switcher").GetAttribute("aria-label"));
     }
 
@@ -71,6 +71,7 @@ public sealed class PublicHeaderTests
         var form = cut.Find("form.public-language-switcher");
         Assert.Equal("post", form.GetAttribute("method"));
         Assert.Equal("/culture/set", form.GetAttribute("action"));
+        Assert.Null(form.GetAttribute("role"));
         Assert.NotNull(cut.Find("input[name='returnUrl']"));
 
         var portuguese = cut.Find("button[aria-label='Português (Brasil)']");

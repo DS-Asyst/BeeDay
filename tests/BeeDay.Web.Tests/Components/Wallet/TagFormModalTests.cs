@@ -10,6 +10,7 @@ public sealed class TagFormModalTests : BunitContext
     {
         Services.AddLogging();
         Services.AddLocalization();
+        JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
     [Fact]
@@ -79,5 +80,17 @@ public sealed class TagFormModalTests : BunitContext
         Assert.NotEmpty(cut.FindAll(".editor-modal"));
         Assert.Empty(cut.FindAll(".wallet-modal"));
         Assert.Empty(cut.FindAll(".wallet-modal-backdrop"));
+    }
+
+    [Fact]
+    public void KeepsTheNativeColorPickerAsASpecializedDataControl()
+    {
+        var cut = Render<TagFormModal>(parameters => parameters
+            .Add(component => component.IsOpen, true)
+            .Add(component => component.Model, new WalletTagFormModel { Color = "#12AB34" }));
+
+        var colorPicker = cut.Find("input[type='color']");
+        Assert.Equal("#12AB34", colorPicker.GetAttribute("value"));
+        Assert.False(string.IsNullOrWhiteSpace(colorPicker.GetAttribute("aria-label")));
     }
 }

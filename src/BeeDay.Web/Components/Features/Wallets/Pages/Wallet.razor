@@ -22,18 +22,18 @@
 }
 else
 {
-    <main class="wallet-page beeday-fade-in" aria-busy="@_interaction.IsBusy.ToString().ToLowerInvariant()">
-        <header class="wallet-page__header">
-            <div>
-                <span class="wallet-eyebrow">@Localizer["PersonalFinanceEyebrow"]</span>
-                <h1 class="wallet-page__title">@Localizer["WalletHeading"]</h1>
-                <p>@Localizer["WalletDescription"]</p>
-            </div>
-            <BeeDayButton Variant="BeeDayButtonVariant.Primary"
-                           Icon="BeeDayIconName.Add"
-                           Disabled="_interaction.IsBusy"
-                           OnClick="OpenCreateTransaction">@Localizer["NewTransactionButton"]</BeeDayButton>
-        </header>
+    <div class="wallet-page beeday-fade-in" aria-busy="@_interaction.IsBusy.ToString().ToLowerInvariant()">
+        <BeeDayPageHeader Class="wallet-page__header"
+                          Eyebrow="@Localizer["PersonalFinanceEyebrow"]"
+                          Title="@Localizer["WalletHeading"]"
+                          Description="@Localizer["WalletDescription"]">
+            <Actions>
+                <BeeDayButton Variant="BeeDayButtonVariant.Primary"
+                               Icon="BeeDayIconName.Add"
+                               Disabled="_interaction.IsBusy"
+                               OnClick="OpenCreateTransaction">@Localizer["NewTransactionButton"]</BeeDayButton>
+            </Actions>
+        </BeeDayPageHeader>
 
         @if (!string.IsNullOrWhiteSpace(_errorMessage))
         {
@@ -43,7 +43,7 @@ else
             </div>
         }
 
-        <div aria-live="polite" class="sr-only">@_statusAnnouncement</div>
+        <div aria-live="polite" class="beeday-visually-hidden">@_statusAnnouncement</div>
         <WalletSummary Summary="_summary" HighlightBalance="_highlightBalance" />
 
         <section class="wallet-workspace">
@@ -73,7 +73,7 @@ else
 
             <WalletTagManager Tags="_tags" IsBusy="_interaction.IsBusy" OnCreate="OpenCreateTag" OnEdit="OpenEditTag" />
         </section>
-    </main>
+    </div>
 }
 
 <TransactionFormModal IsOpen="_isTransactionEditorOpen" IsEditing="@(_editingTransactionId is not null)" IsBusy="_interaction.IsBusy" Model="_transactionForm" Tags="_tags" OnSave="SaveTransactionAsync" OnCancel="CloseTransactionEditor" OnDeleteRequested="RequestDeleteCurrentTransaction" />

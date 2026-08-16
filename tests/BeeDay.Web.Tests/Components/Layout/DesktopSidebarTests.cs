@@ -26,7 +26,7 @@ public sealed class DesktopSidebarTests
         var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<DesktopSidebar>());
 
         Assert.Equal("Navegação principal", cut.Find("aside.desktop-sidebar").GetAttribute("aria-label"));
-        Assert.Equal("BeeDay — ir para o Perfil", cut.Find("a.desktop-sidebar__brand-link").GetAttribute("aria-label"));
+        Assert.Equal("beeday — ir para o Perfil", cut.Find("a.desktop-sidebar__brand-link").GetAttribute("aria-label"));
     }
 
     [Fact]

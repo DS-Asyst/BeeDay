@@ -11,6 +11,7 @@ public sealed class HabitEditorModalTests : BunitContext
     {
         Services.AddLogging();
         Services.AddLocalization();
+        JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
     [Theory]

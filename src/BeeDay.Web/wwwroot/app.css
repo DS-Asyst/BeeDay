@@ -164,24 +164,8 @@ textarea {
     }
 }
 
-/* Authentication */
-.auth-page { min-height: 100vh; display: grid; place-items: center; padding: 2rem 1rem; }
-.auth-card { width: min(100%, 28rem); padding: 2rem; border: 1px solid var(--border-color, #d9d2e8); border-radius: 1rem; background: var(--surface-primary, #fff); box-shadow: 0 1rem 3rem rgb(30 12 52 / 12%); }
-.auth-card__brand { display: block; margin-bottom: .75rem; font-family: var(--beeday-font-body); font-size: 1.15rem; font-weight: 800; letter-spacing: .08em; color: var(--beeday-color-brand-primary); }
-.auth-card h1 { margin: 0; }
-.auth-card > p { margin: .5rem 0 1.5rem; }
-.auth-form { display: grid; gap: 1rem; }
-.auth-field { display: grid; gap: .4rem; font-weight: 700; }
-.auth-submit { min-height: 3rem; border: 0; border-radius: .55rem; background: #7a4fcb; color: #fff; font-family: var(--beeday-font-family); font-size: 1rem; font-weight: 700; cursor: pointer; }
-.auth-submit:hover { filter: brightness(1.06); }
-.auth-feedback { margin-bottom: 1rem; padding: .75rem .9rem; border-radius: .5rem; }
-.auth-feedback--error { background: #fff0f0; color: #9d1c1c; border: 1px solid #efb9b9; }
-.auth-feedback--success { background: #eefaf1; color: #236b37; border: 1px solid #b9dfc3; }
-.auth-card__footer { margin: 1.5rem 0 0 !important; text-align: center; }
-
-/* Official BeeDay product typography. The brand wordmark has its own typography in the asset. */
+/* Official beeday product typography. Brand/display moments use their qualified typography. */
 .profile-panel__brand,
-.welcome > span,
 .entry-loading > span { font-family: var(--beeday-font-body); }
 
 h1, h2, h3,

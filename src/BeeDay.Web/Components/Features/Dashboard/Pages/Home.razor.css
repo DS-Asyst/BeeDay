@@ -64,6 +64,7 @@
     height: .65rem;
 }
 
+/* Align the Daily board transition with the authenticated shell's 1200px structural boundary. */
 @media (min-width: 1200px) {
     .dashboard-grid {
         overflow-x: hidden;

@@ -8,6 +8,19 @@ que uma decisão foi tomada.
 **Fonte da verdade:** esta taxonomia foi definida na Sprint 16.2 verificando diretamente
 `BeeDay.slnx`, `src/*`, `tests/*` e o inventário de documentos existentes auditado na Sprint 16.1.
 
+**`docs/` vs. o `beeday Experience System`:** este diretório é a documentação técnica para quem
+desenvolve o repositório — não é publicado, exige acesso ao código-fonte para ser lido. Desde a
+Sprint 25.17, `/experience-system` (`beeday Experience System`) é o equivalente público e navegável
+dentro do próprio produto: uma representação real, localizada em `en-US`/`pt-BR` e sempre
+sincronizada com o código, do que a EPIC 25 formalizou sobre Brand System, UI Design System e UX
+System — acessível a qualquer visitante, sem autenticação, a partir do link no footer institucional.
+As duas áreas não duplicam conteúdo por cópia manual: `/experience-system` resume e apresenta as
+mesmas decisões documentadas em [`design-system/`](design-system/README.md),
+[`brand/`](brand/README.md), [`ux/`](ux/README.md) e
+[`epics/25-design-system-brand-evolution/`](epics/25-design-system-brand-evolution/README.md) para
+um público diferente. Ver [`docs/web/02-routing-and-pages.md`](web/02-routing-and-pages.md) §9 para
+a estrutura de rotas e composição.
+
 ## Regra permanente desta documentação
 
 Todo documento deve declarar explicitamente sua fonte de verdade — por exemplo:
@@ -29,14 +42,16 @@ testes em `tests/BeeDay.Web.Tests`". Ver [`CONVENTIONS.md`](CONVENTIONS.md).
 | [`security/`](security/README.md) | Baseline de segurança, segurança operacional | Correto — `02-operational-security.md` reconstruído na Sprint 16.9; nomenclatura residual de `01-security-baseline.md` corrigida na Sprint 16.10 |
 | [`deployment/`](deployment/README.md) | Deploy, GitHub Actions, runtime configuration, observabilidade, operações | Correto — reconstruído por completo na Sprint 16.9 a partir do código atual |
 | [`testing/`](testing/README.md) | Estratégia e infraestrutura de testes | Correto — reconstruído por completo na Sprint 16.9 a partir do código atual |
-| [`design-system/`](design-system/README.md) | Design System Blazor, Pixel Icon System, Foundations, Componentes, Forms | Correto — reconstruído por completo na Sprint 16.8 a partir do código atual |
+| [`design-system/`](design-system/README.md) | Design System Blazor, BeeDay Icon System, Foundations, Componentes, Forms | Atual — governança e contratos revalidados na EPIC 25 |
+| [`brand/`](brand/README.md) | Brand System: identidade, personagens, ilustração, escrita e localização | Atual — Character/Illustration e Writing/Voice/Tone formalizados na EPIC 25 |
 | [`ux/`](ux/README.md) | Diretrizes de UX, acessibilidade, responsividade | Correto — reconstruído por completo na Sprint 16.8 a partir do código atual |
 | [`api/`](api/README.md) | Especificação OpenAPI | Não reauditado quanto ao conteúdo |
 | [`adr/`](adr/README.md) | Registros de decisão arquitetural | Correto (histórico, imutável) |
 | [`developer/`](developer/README.md) | Guia de contribuição, setup de ambiente | Reservado — ver `README.md` da raiz enquanto isso |
 | [`history/`](history/README.md) | Diários de sprint e transições já concluídas | Correto (histórico, congelado) |
-| [`epics/20-home-visual-experience/`](epics/20-home-visual-experience/README.md) | EPIC 20 — Home & Visual Experience: decisões aprovadas, discovery transversal, Visual Adoption Map, roadmap de Sprints | Em andamento — iniciado na Sprint 20.1 |
-| [`epics/21-lingo-product-experience/`](epics/21-lingo-product-experience/README.md) | EPIC 21 — Lingo-Based Product Experience & Design System: especificação de migração Lingo → BeeDay, component mapping, gamification capability matrix | Em andamento — iniciado na Sprint 21.1 |
+| [`epics/20-home-visual-experience/`](epics/20-home-visual-experience/README.md) | EPIC 20 — Home & Visual Experience: decisões aprovadas, discovery transversal, Visual Adoption Map, roadmap de Sprints | Histórico concluído |
+| [`epics/21-lingo-product-experience/`](epics/21-lingo-product-experience/README.md) | EPIC 21 — Lingo-Based Product Experience & Design System: especificação de migração Lingo → BeeDay, component mapping, gamification capability matrix | Histórico concluído |
+| [`epics/25-design-system-brand-evolution/`](epics/25-design-system-brand-evolution/README.md) | EPIC 25 — beeday Design System & Brand System Evolution: contrato de marca, governança, implementação e gate final | Concluída na Sprint 25.16 |
 
 ## Templates
 

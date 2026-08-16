@@ -31,6 +31,7 @@ public sealed class WalletTests(PlaywrightAppFixture fixture) : E2ETestBase(fixt
         await Page.GetByRole(AriaRole.Link, new() { Name = "Wallet" }).ClickAsync();
         await Expect(Page).ToHaveURLAsync(new Regex("/wallet$"));
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Expect(Page.Locator(".wallet-page > .beeday-page-header")).ToBeVisibleAsync();
 
         var balance = Page.Locator(".wallet-summary__card--balance strong");
         await Expect(balance).ToHaveTextAsync("$0.00");
@@ -70,6 +71,8 @@ public sealed class WalletTests(PlaywrightAppFixture fixture) : E2ETestBase(fixt
 
         await Page.SetViewportSizeAsync(390, 844);
         await Expect(summaryCard).ToBeVisibleAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "More Filters" }).ClickAsync();
+        await Expect(Page.GetByLabel("From")).ToBeVisibleAsync();
         Assert.False(await Page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
     }
 }

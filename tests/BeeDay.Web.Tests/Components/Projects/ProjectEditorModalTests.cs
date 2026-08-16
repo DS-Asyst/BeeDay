@@ -10,6 +10,7 @@ public sealed class ProjectEditorModalTests : BunitContext
     {
         Services.AddLogging();
         Services.AddLocalization();
+        JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
     [Fact]

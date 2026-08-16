@@ -1,8 +1,9 @@
 :root {
-    /* Epic 21 uses one typographic family for the complete product hierarchy. Nunito's weight,
-       size, line-height and tracking provide distinction without a parallel display font. */
+    /* Nunito owns Product/UI typography. Coiny is deliberately limited to approved Brand/Display
+       compositions; the fallback keeps those compositions legible while the web font loads. */
     --beeday-font-body: "Nunito", "Segoe UI", sans-serif;
     --beeday-font-family: var(--beeday-font-body);
+    --beeday-font-display: "Coiny", "Nunito", "Segoe UI", sans-serif;
 
     --beeday-font-size-xs: .75rem;
     --beeday-font-size-sm: .85rem;
@@ -33,11 +34,18 @@
 
     --beeday-letter-spacing-label: .04em;
 
+    --beeday-type-brand-display: var(--beeday-font-weight-regular) var(--beeday-font-size-hero) / 1.05 var(--beeday-font-display);
+    --beeday-type-hero: var(--beeday-font-weight-black) var(--beeday-font-size-hero) / 1.05 var(--beeday-font-body);
     --beeday-type-display: var(--beeday-font-weight-extrabold) var(--beeday-font-size-3xl) / var(--beeday-line-height-tight) var(--beeday-font-body);
+    --beeday-type-page-title: var(--beeday-font-weight-extrabold) var(--beeday-font-size-2xl) / var(--beeday-line-height-tight) var(--beeday-font-body);
+    --beeday-type-section-title: var(--beeday-font-weight-bold) var(--beeday-font-size-xl) / var(--beeday-line-height-tight) var(--beeday-font-body);
     --beeday-type-title: var(--beeday-font-weight-bold) var(--beeday-font-size-xl) / var(--beeday-line-height-tight) var(--beeday-font-body);
+    --beeday-type-card-title: var(--beeday-type-title);
     --beeday-type-subtitle: var(--beeday-font-weight-bold) var(--beeday-font-size-base) / 1.3 var(--beeday-font-body);
     --beeday-type-label: var(--beeday-font-weight-bold) var(--beeday-font-size-sm) / 1.3 var(--beeday-font-body);
+    --beeday-type-eyebrow: var(--beeday-font-weight-bold) var(--beeday-font-size-xs) / 1.3 var(--beeday-font-body);
     --beeday-type-body: var(--beeday-font-weight-regular) var(--beeday-font-size-md) / var(--beeday-line-height-normal) var(--beeday-font-body);
     --beeday-type-small: var(--beeday-font-weight-medium) var(--beeday-font-size-xs) / 1.35 var(--beeday-font-body);
+    --beeday-type-caption: var(--beeday-type-small);
     --beeday-type-button: var(--beeday-font-weight-bold) var(--beeday-font-size-sm) / 1 var(--beeday-font-body);
 }

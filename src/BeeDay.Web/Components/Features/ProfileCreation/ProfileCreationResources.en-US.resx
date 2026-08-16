@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PageTitle" xml:space="preserve">
-    <value>Get started | BeeDay</value>
+    <value>Get started | beeday</value>
   </data>
   <data name="LogIn" xml:space="preserve">
     <value>Log in</value>
@@ -74,7 +74,7 @@
     <value>Create your account</value>
   </data>
   <data name="StartYourJourney" xml:space="preserve">
-    <value>Start your journey in BeeDay.</value>
+    <value>Start your journey in beeday.</value>
   </data>
   <data name="FullNameLabel" xml:space="preserve">
     <value>Full name</value>
@@ -101,7 +101,7 @@
     <value>Choose your nickname</value>
   </data>
   <data name="IdentifiedInBeeDay" xml:space="preserve">
-    <value>This is how you'll be identified in BeeDay.</value>
+    <value>This is how you'll be identified in beeday.</value>
   </data>
   <data name="BackButton" xml:space="preserve">
     <value>Back</value>
@@ -128,10 +128,10 @@
     <value>Nickname must have 3 to 24 characters and may contain letters, numbers, dots, underscores or hyphens.</value>
   </data>
   <data name="WelcomeToast" xml:space="preserve">
-    <value>Welcome to BeeDay.</value>
+    <value>Welcome to beeday.</value>
   </data>
   <data name="RedirectingToLoginTitle" xml:space="preserve">
-    <value>Login | BeeDay</value>
+    <value>Login | beeday</value>
   </data>
   <data name="RedirectingToLoginMessage" xml:space="preserve">
     <value>Redirecting to login...</value>

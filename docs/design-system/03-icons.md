@@ -1,7 +1,7 @@
 # Icon System
 
 **Fonte da verdade:** `Components/DesignSystem/Icons`, `design/icons/catalog/icon-mapping.csv` e
-`wwwroot/icons/sprite.svg`. **Última verificação:** 2026-08-12 (Sprint 21.8).
+`wwwroot/icons/sprite.svg`. **Última verificação:** 2026-08-16 (Sprint 25.16, EPIC 25).
 
 ## Contrato oficial
 
@@ -70,8 +70,9 @@ nomes de intenção como `Search`, `Wallet` e `ValidationError`.
 ## Decisões da Sprint 21.8
 
 A arquitetura tipada e o sprite existentes eram sólidos e foram preservados. O problema era a
-linguagem visual pixel/filled e o nome público. Os 54 ícones funcionais foram migrados para um
-conjunto Lucide outline coerente; os seis ícones de marca foram preservados. `Streak` foi removido
+linguagem visual pixel/filled e o nome público. Os ícones funcionais foram migrados para um
+conjunto Lucide outline coerente; os seis ícones de marca foram preservados. Enum, registry,
+mapping, assets gerados e símbolos do sprite permanecem em relação um-para-um. `Streak` foi removido
 porque não existe capacidade de domínio correspondente; usos ilustrativos passaram a `Habit`.
 Material Symbols e o catálogo Streamline Pixel sem consumidores foram removidos após auditoria.
 

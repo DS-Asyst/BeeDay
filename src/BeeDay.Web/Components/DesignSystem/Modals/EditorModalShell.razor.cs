@@ -6,6 +6,8 @@ namespace BeeDay.Web.Components.DesignSystem.Modals;
 
 public partial class EditorModalShell
 {
+    private readonly string _dialogId = $"beeday-editor-dialog-{Guid.NewGuid():N}";
+
     [Parameter, EditorRequired] public object Model { get; set; } = default!;
     [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
     [Parameter, EditorRequired] public string TitleId { get; set; } = string.Empty;
@@ -18,6 +20,8 @@ public partial class EditorModalShell
     [Parameter] public EventCallback OnSubmit { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public EventCallback OnDelete { get; set; }
+
+    private string DialogId => _dialogId;
 
     private Task Submit(EditContext _) => IsBusy ? Task.CompletedTask : OnSubmit.InvokeAsync();
 

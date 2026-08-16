@@ -4,17 +4,21 @@
 `src/BeeDay.Web/Components/**/*.razor` e leitura das 3 primeiras linhas de cada arquivo resultante
 (`@page`, `@attribute`, `@layout`/`@rendermode`), mais `Components/Routes.razor` e `Components/App.razor`.
 
-**Última verificação:** 2026-08-13 (Sprint 21.12, EPIC 21) — `/profile` é a experiência pessoal
-autenticada e o destino normal após login/onboarding; `/home` redireciona para `/profile` por
-compatibilidade; `/daily` permanece o quadro operacional. Em 2026-08-11,
-Sprint 20.5 da EPIC 20, `/` deixou de redirecionar
-(`Entry.razor` removido) e passou a servir a Home pública oficial
-(`Features/Home/Pages/Home.razor`, layout `PublicLayout`); demais rotas preservadas da verificação
-de 2026-08-07.
+**Última verificação:** 2026-08-16 (Sprint 25.17 — beeday Experience System) — adicionadas as 21
+rotas públicas do `beeday Experience System` (`/experience-system/*`), todas `PublicLayout` e
+`AllowAnonymous`; corrigida uma lacuna encontrada nesta Sprint: `/brand/typography`
+(`Features/Brand/Pages/TypographyGuidelines.razor`, introduzida na Sprint 25.4) nunca tinha sido
+adicionada a este documento — a tabela abaixo já reflete a contagem correta incluindo essa correção,
+não apenas as rotas novas desta Sprint. Verificação anterior: 2026-08-13 (Sprint 21.12, EPIC 21) —
+`/profile` é a experiência pessoal autenticada e o destino normal após login/onboarding; `/home`
+redireciona para `/profile` por compatibilidade; `/daily` permanece o quadro operacional. Em
+2026-08-11, Sprint 20.5 da EPIC 20, `/` deixou de redirecionar (`Entry.razor` removido) e passou a
+servir a Home pública oficial (`Features/Home/Pages/Home.razor`, layout `PublicLayout`); demais
+rotas preservadas da verificação de 2026-08-07.
 
 ## 1. Objetivo
 
-Mapear as 20 rotas `@page` do repositório, seu layout e atributo de autorização, e descrever o
+Mapear as 42 rotas `@page` do repositório, seu layout e atributo de autorização, e descrever o
 shell HTML (`App.razor`) e o `Router` (`Routes.razor`) que as hospedam.
 
 ## 2. Shell e Router
@@ -49,8 +53,9 @@ e `<HeadOutlet />`. O `<body>` contém apenas `<Routes @rendermode="InteractiveS
 - `DefaultLayout` é sempre `MainLayout` — uma página só foge dele com um `@layout` explícito. Duas
   famílias de layout explícito existem: `OnboardingLayout` (todas as páginas de
   Authentication/Identity/Onboarding/ProfileCreation, sem navegação) e, desde a Sprint 20.4/20.5
-  (EPIC 20), `PublicLayout` (`PublicHeader` + `@Body` + `AppFooter`, usado apenas por `/`) — ver
-  tabela abaixo.
+  (EPIC 20), `PublicLayout` (`PublicHeader` + `@Body` + `AppFooter`) — usado por `/`, pela guideline
+  pública de marca (`/brand/typography`) e, desde a Sprint 25.17, por todo o `beeday Experience
+  System` (`/experience-system/*`, ver §9) — ver tabela abaixo.
 - `NotAuthorized`: `RedirectToLogin.razor` — não usa `NavigationManager.NavigateTo` comum; espera o
   primeiro `OnAfterRender` e força `forceLoad: true, replace: true` para `/login?returnUrl=...`,
   preservando o path relativo atual como retorno.
@@ -79,10 +84,35 @@ e `<HeadOutlet />`. O `<body>` contém apenas `<Routes @rendermode="InteractiveS
 | `/account`, `/settings` (mesmo componente, 2 rotas) | `Features/Account/Pages/Account.razor` | `MainLayout` (padrão) | `Authorize` | `InteractiveServer` |
 | `/design-system/icons` | `DesignSystem/Pages/IconCatalog.razor` | `MainLayout` (padrão) | `Authorize` | — |
 | `/design-system/hero` | `DesignSystem/Pages/HeroCatalog.razor` | `MainLayout` (padrão) | `Authorize` | — |
+| `/brand/typography`, `/experience-system/brand/typography` (mesmo componente, 2 rotas) | `Features/Brand/Pages/TypographyGuidelines.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system` | `Features/ExperienceSystem/Pages/ExperienceSystemHome.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/brand` | `Features/ExperienceSystem/Pages/Brand/BrandOverview.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/brand/identity` | `Features/ExperienceSystem/Pages/Brand/BrandIdentity.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/brand/wordmark` | `Features/ExperienceSystem/Pages/Brand/BrandWordmark.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/brand/color` | `Features/ExperienceSystem/Pages/Brand/BrandColor.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/brand/illustration` | `Features/ExperienceSystem/Pages/Brand/BrandIllustration.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/brand/characters` | `Features/ExperienceSystem/Pages/Brand/BrandCharacters.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/brand/writing` | `Features/ExperienceSystem/Pages/Brand/BrandWriting.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/ui` | `Features/ExperienceSystem/Pages/Ui/UiOverview.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/ui/foundations` | `Features/ExperienceSystem/Pages/Ui/UiFoundations.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/ui/components` | `Features/ExperienceSystem/Pages/Ui/UiComponents.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/ui/product-patterns` | `Features/ExperienceSystem/Pages/Ui/UiProductPatterns.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/ui/interaction` | `Features/ExperienceSystem/Pages/Ui/UiInteraction.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/ui/layout` | `Features/ExperienceSystem/Pages/Ui/UiLayout.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/ux` | `Features/ExperienceSystem/Pages/Ux/UxOverview.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/ux/accessibility` | `Features/ExperienceSystem/Pages/Ux/UxAccessibility.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/ux/responsive` | `Features/ExperienceSystem/Pages/Ux/UxResponsive.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/ux/localization` | `Features/ExperienceSystem/Pages/Ux/UxLocalization.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/ux/motion` | `Features/ExperienceSystem/Pages/Ux/UxMotion.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/experience-system/ux/performance` | `Features/ExperienceSystem/Pages/Ux/UxPerformance.razor` | `PublicLayout` | `AllowAnonymous` | — |
 | `/not-found` | `Pages/NotFound.razor` | `MainLayout` (explícito) | `AllowAnonymous` | — |
 | `/Error` | `Pages/Error.razor` | `MainLayout` (padrão) | `AllowAnonymous` | — |
 
-20 rotas em 19 arquivos `.razor` (`Account.razor` declara duas rotas para o mesmo componente).
+42 rotas em 40 arquivos `.razor`. Duas famílias de rota compartilham componente: `Account.razor`
+(`/account`, `/settings`) e `TypographyGuidelines.razor` (`/brand/typography`,
+`/experience-system/brand/typography` — a segunda rota foi adicionada na Sprint 25.17 como alias
+canônico dentro do `beeday Experience System`, preservando a primeira por compatibilidade e sem
+duplicar conteúdo).
 
 ## 4. Páginas com `@rendermode` explícito vs. implícito
 
@@ -105,18 +135,18 @@ para o detalhamento e o achado de documentação relacionado.
 ## 6. Páginas de catálogo do Design System
 
 `/design-system/icons` e `/design-system/hero` (`DesignSystem/Pages/`) não pertencem a nenhuma área
-de Feature — são páginas de desenvolvimento/QA visual que renderizam todo `PixelIconRegistry` e
+de Feature — são páginas de desenvolvimento/QA visual que renderizam todo `BeeDayIconRegistry` e
 todas as variantes de `BeeDayHero`, respectivamente, injetando `IWebHostEnvironment` (não usado para
 restringir acesso — ambas exigem apenas `[Authorize]`, acessíveis a qualquer usuário autenticado em
 qualquer ambiente). Ver [`05-design-system-integration.md`](05-design-system-integration.md).
 
-## 7. Páginas sem estado de erro dedicado
+## 7. Páginas de erro
 
-`/not-found` (`NotFound.razor`) é estático (`<h3>Not Found</h3>`); `/Error` (`Error.razor`) é o
-template padrão gerado pelo scaffolding ASP.NET Core, sem nenhuma customização: exibe
+`/not-found` (`NotFound.razor`) e `/Error` (`Error.razor`) usam `SharedResources` para título e
+mensagens em `en-US`/`pt-BR`. `/Error` exibe
 `Activity.Current?.Id ?? HttpContext.TraceIdentifier` (via `[CascadingParameter] HttpContext`)
-sempre que não vazio, e um bloco estático de texto explicando como habilitar o ambiente Development
-— não há checagem de ambiente no componente em si. Nenhuma das duas páginas é acionada
+quando não vazio e instruções localizadas sobre Development; não há checagem de ambiente no
+componente em si. Nenhuma das duas páginas é acionada
 automaticamente pelo `GlobalExceptionHandler` (que responde `ProblemDetails`, não uma página Blazor)
 — `/Error` só é alcançável por navegação direta; nada no repositório redireciona para ela.
 
@@ -141,12 +171,39 @@ continua ativa em `LoginDestinationResolver.Resolve` (pós-login, `Program.cs`) 
 "Continue to BeeDay" tanto de `PublicHeader` quanto da própria `Home.razor` — reutilizando a regra
 existente em vez de duplicá-la uma quarta vez.
 
-## 9. Fontes de verdade
+## 9. O `beeday Experience System` (Sprint 25.17)
 
-- Busca `@page` em `src/BeeDay.Web/Components/**/*.razor` (20 ocorrências, 19 arquivos após a rota
-  de compatibilidade `LegacyHomeRedirect.razor` adicionada na Sprint 21.12).
-- Primeiras linhas de cada um dos 19 arquivos resultantes.
+`/experience-system` é o ponto de entrada público e navegável para tudo que a EPIC 25 formalizou —
+Brand System, UI Design System e UX System — distinto de `docs/` (que continua sendo a
+documentação técnica para quem desenvolve o repositório, não uma superfície do produto). A área
+vive inteira em `Components/Features/ExperienceSystem/`, com um único catálogo de recursos
+(`ExperienceSystemResources`, `en-US`/`pt-BR`) cobrindo a raiz, as três páginas de overview de
+pilar e 15 dos 17 tópicos — `/brand/typography` continua sendo o dono do seu próprio conteúdo
+(`BrandTypographyResources`), apenas ganhando uma segunda rota dentro desta área.
+
+Composição, não 21 implementações independentes: toda página usa o componente compartilhado
+`ExperienceSystemPage` (`Components/ExperienceSystemPage.razor`), que já resolve `BeeDayPageHeader`
+(eyebrow/título/descrição), a navegação entre os três pilares (`ExperienceSystemPillarNav`) e,
+quando aplicável, a navegação entre os tópicos do pilar atual (`ExperienceSystemTopicNav`) —
+suprimida nas três páginas de overview de pilar porque elas já listam os mesmos tópicos, com mais
+contexto, através de `ExperienceSystemTopicGrid` (reaproveitado também pela raiz, para os três
+pilares). Cada página individual contribui apenas seu próprio conteúdo de corpo, componentes e CSS
+já existentes do Design System (`BeeDayPageHeader`, `BeeDayBrand`, tabelas e `BeeDayCard`-adjacent
+patterns) — nenhuma folha de CSS global paralela foi criada; o vocabulário visual compartilhado
+(`.experience-system-section`, tabelas, callouts) vive no CSS isolado de `ExperienceSystemPage`, via
+seletores `::deep`.
+
+## 10. Fontes de verdade
+
+- Busca `@page` em `src/BeeDay.Web/Components/**/*.razor` (42 ocorrências, 40 arquivos — inclui a
+  rota de compatibilidade `LegacyHomeRedirect.razor` da Sprint 21.12 e as 21 rotas do `beeday
+  Experience System`/Brand Guidelines reconciliadas na Sprint 25.17).
+- Primeiras linhas de cada um dos 40 arquivos resultantes.
 - `src/BeeDay.Web/Components/Routes.razor`, `App.razor`.
 - `src/BeeDay.Web/Components/Features/Home/Pages/Home.razor`,
   `src/BeeDay.Web/Components/Layout/PublicLayout.razor`, `PublicHeader.razor`,
   `src/BeeDay.Web/Services/Authentication/AuthenticatedEntryDestinationResolver.cs` (Sprint 20.5).
+- `src/BeeDay.Web/Components/Features/ExperienceSystem/` completo, incluindo
+  `Components/ExperienceSystemPage.razor(.css)`, `ExperienceSystemPillarNav.razor`,
+  `ExperienceSystemTopicNav.razor`, `ExperienceSystemTopicGrid.razor` e os 20 arquivos de página sob
+  `Pages/` (Sprint 25.17).

@@ -1,0 +1,21 @@
+@page "/experience-system/ui"
+@attribute [AllowAnonymous]
+@layout BeeDay.Web.Components.Layout.PublicLayout
+@inject IStringLocalizer<ExperienceSystemResources> Localizer
+
+<PageTitle>@Localizer["UiOverviewPageTitle"]</PageTitle>
+
+<ExperienceSystemPage Eyebrow="@Localizer["UiOverviewEyebrow"]" Title="@Localizer["UiOverviewTitle"]" Description="@Localizer["UiOverviewIntro"]" Pillar="ExperienceSystemPillar.Ui" ShowTopicNav="false">
+    <ExperienceSystemTopicGrid AriaLabel="@Localizer["UiOverviewGridAriaLabel"]" Items="TopicLinks" />
+</ExperienceSystemPage>
+
+@code {
+    private IReadOnlyList<ExperienceSystemLink> TopicLinks =>
+    [
+        new(Localizer["UiNavFoundations"], Localizer["UiFoundationsCardDescription"], "/experience-system/ui/foundations"),
+        new(Localizer["UiNavComponents"], Localizer["UiComponentsCardDescription"], "/experience-system/ui/components"),
+        new(Localizer["UiNavProductPatterns"], Localizer["UiProductPatternsCardDescription"], "/experience-system/ui/product-patterns"),
+        new(Localizer["UiNavInteraction"], Localizer["UiInteractionCardDescription"], "/experience-system/ui/interaction"),
+        new(Localizer["UiNavLayout"], Localizer["UiLayoutCardDescription"], "/experience-system/ui/layout")
+    ];
+}

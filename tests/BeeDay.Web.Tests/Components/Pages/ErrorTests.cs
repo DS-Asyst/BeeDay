@@ -5,23 +5,21 @@ namespace BeeDay.Web.Tests.Components.Pages;
 
 public sealed class ErrorTests
 {
-    [Fact]
-    public void UnderEnglishUiCulture_RendersEnglishCopy()
+    [Theory]
+    [InlineData("en-US", "Error", "Development mode", "For local debugging")]
+    [InlineData("pt-BR", "Erro", "Modo de desenvolvimento", "Para depuração local")]
+    public void RendersOperationalAndDevelopmentCopyForTheActiveCulture(
+        string culture,
+        string expectedTitle,
+        string expectedDevelopmentHeading,
+        string expectedInstructions)
     {
         using var context = new BunitContext().WithLocalization();
-        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Error>());
+        var cut = BunitLocalizationSupport.WithUiCulture(culture, () => context.Render<Error>());
 
-        Assert.Equal("Error.", cut.Find("h1").TextContent);
-        Assert.Equal("An error occurred while processing your request.", cut.Find("h2").TextContent);
-    }
-
-    [Fact]
-    public void UnderPortugueseUiCulture_RendersPortugueseCopy()
-    {
-        using var context = new BunitContext().WithLocalization();
-        var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<Error>());
-
-        Assert.Equal("Erro.", cut.Find("h1").TextContent);
-        Assert.Equal("Ocorreu um erro ao processar sua solicitação.", cut.Find("h2").TextContent);
+        Assert.Equal(expectedTitle, cut.Find("h1").TextContent.Trim());
+        Assert.Equal(expectedDevelopmentHeading, cut.Find("h3").TextContent.Trim());
+        Assert.Contains(expectedInstructions, cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("ASPNETCORE_ENVIRONMENT", cut.Markup, StringComparison.Ordinal);
     }
 }

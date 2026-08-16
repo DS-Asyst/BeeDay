@@ -1,4 +1,4 @@
-.mobile-header { position: fixed; inset: 0 0 auto; z-index: 100; display: flex; min-height: var(--beeday-top-navigation-height); align-items: center; justify-content: space-between; padding-inline: var(--beeday-spacing-md); background: var(--beeday-color-surface); border-bottom: 2px solid var(--beeday-color-border); }
+.mobile-header { position: fixed; inset: 0 0 auto; z-index: var(--beeday-z-navigation); display: flex; min-height: var(--beeday-top-navigation-height); align-items: center; justify-content: space-between; padding-inline: var(--beeday-spacing-md); background: var(--beeday-color-surface); border-bottom: 2px solid var(--beeday-color-border); }
 .mobile-header__brand { display: flex; align-items: center; text-decoration: none; }
 .mobile-header__menu-button { display: grid; width: 2.75rem; height: 2.75rem; place-items: center; color: var(--beeday-color-brand-primary); background: transparent; border: 2px solid transparent; border-radius: var(--beeday-radius-md); cursor: pointer; }
 .mobile-header__menu-button:hover { background: var(--beeday-color-brand-primary-soft); }

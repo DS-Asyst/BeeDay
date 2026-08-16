@@ -1,10 +1,9 @@
 # Forms
 
 **Fonte da verdade:** verificado diretamente em `src/BeeDay.Web/Components/DesignSystem/Forms/`
-(6 componentes) e `src/BeeDay.Web/wwwroot/css/forms.css`, `polish.css`, `editor-modal.css`,
-`identity.css` (cada área de produto tem seu próprio CSS de formulário — ver §5).
+(6 componentes) e `src/BeeDay.Web/wwwroot/css/forms.css`, `editor-modal.css`, `identity.css`.
 
-**Última verificação:** 2026-08-12 (Sprint 21.5, EPIC 21 — Interactive Components).
+**Última verificação:** 2026-08-16 (Sprint 25.12, EPIC 25 — Daily/Project convergence).
 
 ## 1. Objetivo
 
@@ -33,7 +32,10 @@ vez disso), `Disabled`, `ShowValidationMessage` (padrão `true`), `Value`/`Value
 campo do `EditContext` está ligado, mesmo sem herdar a classe base do ASP.NET Core). Todos aceitam
 `AdditionalAttributes` (`CaptureUnmatchedValues`).
 
-Parâmetros específicos: `BeeDayInput` tem `Placeholder`, `MaxLength`, `Required`, `ReadOnly`;
+Parâmetros específicos: `BeeDayInput` tem `Placeholder`, `MaxLength`, `Required`, `ReadOnly` e
+`UpdateOnInput`. Este último é um modo explícito para busca/filtro sem `EditContext`: mantém o
+mesmo label, chrome, disabled e atributos, mas dispara `ValueChanged` em cada `input`; o modo
+padrão continua usando `InputText` e integração normal de formulário.
 `BeeDayTextArea` tem os mesmos mais `ShowCounter`/`CounterCssClass`; `BeeDayCheckbox` não tem
 `Placeholder`/`MaxLength`/`ReadOnly` (não fazem sentido para um booleano); `BeeDaySelect<TValue>`
 tem `ChildContent` (as `<option>`, fornecidas pelo consumidor — o componente não gera opções
@@ -78,26 +80,27 @@ focável e anunciável por leitor de tela), mais um `<span class="beeday-checkbo
 opacidade via `:checked +`. `:focus-visible` no input real aplica outline no `__visual` irmão — o
 indicador de foco do teclado nunca desaparece, mesmo com o controle nativo oculto.
 
-## 5. CSS de formulário é fragmentado por área de produto
+## 5. Convergência por área de produto
 
-As primitives oficiais e o Login agora consomem `forms.css`; os editores foram alinhados aos mesmos
-valores de height/border/radius/focus sem reestruturar sua composição. Ainda existem casos
-especializados em Identity e Wallet. Historicamente, cada área reimplementava
-sua própria versão do mesmo padrão visual (campo com borda, foco, erro):
+As primitives oficiais são a origem de geometria, foco, disabled e validação. A Sprint 25.9
+removeu a implementação paralela de inputs em `identity.css`: `ForgotPassword`, `ResetPassword` e
+`ResendConfirmation` agora usam `BeeDayInput` dentro de seus `EditForm`. Account já consumia
+`BeeDayInput`/`BeeDaySelect` por meio de `BeeDaySettingsForm`.
 
 | Arquivo | Escopo | Reaproveita `.beeday-field`? |
 |---|---|---|
 | `forms.css` | Componentes `Forms/` do Design System | É a origem de `.beeday-field*` |
 | `editor-modal.css` | Os 4 editores de atividade (Habit/Task/Todo/Project) | Não — declara `.editor-modal__hero input`, `.editor-modal__field input` com seu próprio border/box-shadow/focus, valores próximos mas não idênticos aos de `.beeday-field__control` |
-| `identity.css` | As 7 páginas de Login/Identity | Não — declara `.identity-field input` com seu próprio conjunto de regras, incluindo um `background: var(--beeday-color-surface-subtle)` que os outros dois não têm |
-| `wallet.css` | `WalletFilters`, `TransactionFormModal`, `TagFormModal` | Parcial — `WalletFilters` reutiliza `.beeday-field__control`; os modais mantêm composição especializada |
+| `identity.css` | Layout e feedback das 5 páginas Identity | Sim — os três formulários usam `BeeDayInput`; o arquivo não redefine inputs |
+| `wallet.css` | `WalletFilters`, `TransactionFormModal`, `TagFormModal` | Sim nos filtros — busca, selects e datas usam as primitives; valor financeiro e picker de cor continuam especializados nos modais |
+| `ActivityFilterBar.razor.css` | Busca debounced do Daily | Sim — `BeeDayInput.UpdateOnInput` preserva debounce de 300ms; menu de criação continua especializado |
 
-As 4 implementações convergem visualmente (mesma paleta de token, mesma ideia de borda + foco) mas
-divergem em detalhe (raio, box-shadow exato, cor de fundo em repouso) porque nenhuma delas
-referencia as outras — um ajuste em `.beeday-field__control` não se propaga para
-`.editor-modal__field input` ou `.identity-field input`. `WalletFilters` foi convergido para a
-foundation na Sprint 21.12. Não é um bug funcional, mas ainda há pontos de manutenção para uma única
-intenção visual.
+`Login` mantém `<form method="post">` e controles HTML para preservar nomes, antiforgery,
+`returnUrl` e semântica do endpoint `/auth/login`; `CreateProfile` mantém inputs HTML porque seu
+fluxo em etapas não possui `EditContext`. Ambos consomem `.beeday-field*`; o remember-me do Login
+consome `.beeday-checkbox*`. Esses são adapters legítimos, não implementações visuais paralelas.
+Os editores Wallet continuam especializados na composição, mas reutilizam `EditorModalShell`,
+`BeeDayInput`, `BeeDayTextArea`, `BeeDaySelect` e `BeeDayDateInput` onde os contratos permitem.
 
 ## 6. Botões dentro de formulários
 
@@ -117,23 +120,22 @@ intenção visual.
 
 ## 7. Validação — `DataAnnotations` vs. `FluentValidation`
 
-Todo formulário de produto usa `<EditForm Model="..." OnValidSubmit="...">` +
-`<DataAnnotationsValidator />` — a validação client-side (Web) é sempre `DataAnnotations`
+Todo formulário de produto baseado em `EditForm` usa `<EditForm Model="..." OnValidSubmit="...">` +
+`<DataAnnotationsValidator />` — a validação client-side (Web) é `DataAnnotations`
 (`[Required]`, `[EmailAddress]`, `[MinLength]`, `[Compare]`), nunca `FluentValidation` diretamente
 no componente Razor. `FluentValidation` existe na camada Application (ver
 [`docs/application/03-pipeline.md`](../application/03-pipeline.md)) e roda de novo, no servidor,
-quando o comando chega via `BeeDayWebService`/`ISender` — ou seja, toda submissão passa por 2
+quando o comando chega via `BeeDayWebService`/`ISender` — ou seja, essas submissões passam por 2
 validações independentes (`DataAnnotations` no Blazor, `FluentValidation` no handler), não uma
-delegando para a outra. Um erro só de `FluentValidation` (regra que `DataAnnotations` não expressa)
-aparece como exceção capturada no `catch` do método de submit do componente, mostrada via
-`ToastService.ShowError` — não como uma `ValidationMessage` inline por campo.
+delegando para a outra. Um erro só de Application aparece como feedback geral da feature
+(toast ou banner inline), não como `BeeDayValidationMessage` de campo.
 
 ## 8. Fontes consultadas
 
 - `src/BeeDay.Web/Components/DesignSystem/Forms/BeeDayInput.razor(.cs)`, `BeeDayCheckbox.razor(.cs)`,
   `BeeDayDateInput.razor(.cs)`, `BeeDaySelect.razor(.cs)`, `BeeDayTextArea.razor(.cs)`,
   `BeeDayValidationMessage.razor(.cs)`.
-- `src/BeeDay.Web/wwwroot/css/forms.css`, `polish.css`, `editor-modal.css`, `identity.css`,
+- `src/BeeDay.Web/wwwroot/css/forms.css`, `editor-modal.css`, `identity.css`,
   `wallet.css` (layout responsivo dos filtros; chrome dos controles vem de `forms.css`).
 - [`docs/web/04-feature-components.md`](../web/04-feature-components.md) (padrões de submit por
   página, reaproveitado da Sprint 16.7).

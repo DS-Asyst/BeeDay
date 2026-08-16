@@ -58,8 +58,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DailyPageTitle" xml:space="preserve"><value>Diário | BeeDay</value></data>
-  <data name="ProfilePageTitle" xml:space="preserve"><value>Perfil | BeeDay</value></data>
+  <data name="DailyPageTitle" xml:space="preserve"><value>Diário | beeday</value></data>
+  <data name="DailyHeading" xml:space="preserve"><value>Diário</value></data>
+  <data name="ProfilePageTitle" xml:space="preserve"><value>Perfil | beeday</value></data>
   <data name="LoadingDashboardAriaLabel" xml:space="preserve"><value>Carregando painel</value></data>
   <data name="DashboardControlsAriaLabel" xml:space="preserve"><value>Controles do painel</value></data>
   <data name="SearchActivitiesAriaLabel" xml:space="preserve"><value>Buscar atividades</value></data>
@@ -136,7 +137,7 @@
   <data name="ThisWeekEyebrow" xml:space="preserve"><value>ESTA SEMANA</value></data>
   <data name="WeeklyActivityHeading" xml:space="preserve"><value>Atividade semanal</value></data>
   <data name="WeeklyHistoryUnavailableHeading" xml:space="preserve"><value>Histórico semanal ainda não disponível</value></data>
-  <data name="WeeklyHistoryUnavailableDescription" xml:space="preserve"><value>O BeeDay não registra datas de conclusão no momento, portanto nenhum total semanal é exibido.</value></data>
+  <data name="WeeklyHistoryUnavailableDescription" xml:space="preserve"><value>O beeday não registra datas de conclusão no momento, portanto nenhum total semanal é exibido.</value></data>
   <data name="InProgressEyebrow" xml:space="preserve"><value>EM ANDAMENTO</value></data>
   <data name="ContinueProjectHeading" xml:space="preserve"><value>Continue seu projeto</value></data>
   <data name="ProjectProgressLabel" xml:space="preserve"><value>Progresso de {0}</value></data>

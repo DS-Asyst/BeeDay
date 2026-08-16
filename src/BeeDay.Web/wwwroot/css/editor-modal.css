@@ -2,10 +2,10 @@
 .editor-modal-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 1200;
+    z-index: var(--beeday-z-modal-raised);
     display: grid;
     place-items: center;
-    padding: 1rem;
+    padding: var(--beeday-spacing-md);
     background: rgb(35 25 45 / 70%);
     backdrop-filter: blur(2px);
 }
@@ -14,7 +14,7 @@
     width: min(30rem, calc(100vw - 1.25rem));
     max-height: calc(100vh - 1.25rem);
     overflow: hidden auto;
-    border: 1px solid var(--beeday-color-border);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-lg);
     background: var(--beeday-color-surface);
     box-shadow: var(--beeday-shadow-lg);
@@ -36,9 +36,9 @@
     min-height: 4.25rem;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: var(--beeday-spacing-md);
     padding: 1.1rem 1.4rem;
-    border-bottom: 1px solid var(--beeday-color-border);
+    border-bottom: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     background: var(--beeday-color-surface);
 }
 
@@ -65,7 +65,7 @@
     display: grid;
     gap: .9rem;
     padding: 1.2rem 1.4rem;
-    border-bottom: 1px solid var(--beeday-color-border);
+    border-bottom: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     background: var(--beeday-color-surface);
 }
 
@@ -81,7 +81,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: .75rem;
+    gap: var(--beeday-spacing-smd);
 }
 
 .editor-modal__hero input,
@@ -130,7 +130,7 @@
 
 .editor-modal__body {
     display: grid;
-    gap: 1rem;
+    gap: var(--beeday-spacing-md);
     padding: 1.2rem 1.4rem 1.35rem;
     background: var(--beeday-color-surface);
 }
@@ -140,7 +140,7 @@
     align-items: center;
     gap: .9rem;
     padding: .8rem;
-    border: 1px solid var(--beeday-color-border);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-md);
     background: var(--beeday-color-surface-subtle);
     text-align: left;
@@ -162,14 +162,14 @@
 
 .editor-modal__type-summary p {
     margin: .2rem 0 0;
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     font: var(--beeday-type-small);
     line-height: 1.45;
 }
 
 .editor-modal__field small,
 .editor-modal__counter {
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     font: var(--beeday-type-small);
 }
 
@@ -183,9 +183,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: var(--beeday-spacing-md);
     padding: 1rem 1.4rem 1.25rem;
-    border-top: 1px solid var(--beeday-color-border);
+    border-top: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     background: var(--beeday-color-surface-subtle);
 }
 
@@ -197,7 +197,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: .75rem;
+    gap: var(--beeday-spacing-smd);
     margin-left: auto;
 }
 

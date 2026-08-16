@@ -54,8 +54,8 @@ public sealed class TutorialTests
     }
 
     [Theory]
-    [InlineData("en-US", "NEXT", "ENTER BEEDAY")]
-    [InlineData("pt-BR", "PRÓXIMO", "ENTRAR NO BEEDAY")]
+    [InlineData("en-US", "NEXT", "ENTER beeday")]
+    [InlineData("pt-BR", "PRÓXIMO", "ENTRAR NO beeday")]
     public async Task OnTheLastSlide_TheNextButtonBecomesEnterBeeDay(string culture, string nextButtonText, string enterButtonText)
     {
         await BunitLocalizationSupport.WithUiCultureAsync(culture, async () =>

@@ -13,7 +13,7 @@
     padding: 0;
     border: 0;
     border-radius: .25rem;
-    color: #4f3b5b;
+    color: var(--beeday-color-chrome-icon);
     background: transparent;
     cursor: pointer;
     transition: background-color var(--beeday-transition-fast), color var(--beeday-transition-fast);
@@ -21,12 +21,12 @@
 
 .project-context-filter__trigger:hover {
     color: var(--beeday-color-brand-primary);
-    background: #f2eef7;
+    background: var(--beeday-color-filter-surface-tint);
 }
 
 .project-context-filter__trigger[aria-expanded="true"] {
     color: var(--beeday-color-brand-primary);
-    background: #f2eef7;
+    background: var(--beeday-color-filter-surface-tint);
 }
 
 .project-context-filter__trigger:focus-visible {
@@ -79,4 +79,15 @@
     color: var(--beeday-color-project-dark);
     background: var(--beeday-color-surface-muted);
     font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .project-context-filter__trigger,
+    .project-context-filter__option {
+        transition: none;
+    }
+
+    .project-context-filter__menu {
+        animation: none;
+    }
 }

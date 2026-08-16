@@ -3,6 +3,7 @@
 @inject IStringLocalizer<SharedResources> Localizer
 
 <div class="beeday-toast-region"
+     role="region"
      aria-live="polite"
      aria-label="@Localizer["ToastRegionAriaLabel"]">
     @foreach (var toast in ToastService.Messages)

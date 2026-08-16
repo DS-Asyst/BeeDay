@@ -8,9 +8,8 @@ afirmação vem de `docs/history/` ou de sprints anteriores sem reverificação 
 **Fonte da verdade:** cada documento abaixo declara individualmente as fontes exatas usadas para
 validá-lo, na seção final "Fontes consultadas".
 
-**Última verificação:** 2026-08-11 (Sprint 20.3) — contagem de folhas de CSS globais corrigida de
-20 para 19 (`css/cursors.css` removido — remoção estrutural do cursor gráfico personalizado, EPIC
-20). Verificação anterior: 2026-08-10 (Sprint 18.7) — contagem corrigida de 19 para 20.
+**Última verificação:** 2026-08-16 (Sprint 25.16, EPIC 25) — components, foundations, ícones,
+forms, CSS carregado e documentação viva revalidados contra a implementação final.
 
 ## Objetivo
 
@@ -23,9 +22,9 @@ próprio `BeeDay.Web`, consumida diretamente pelos componentes de Feature (ver
 
 ## Escopo
 
-Dentro: os 26 componentes reutilizáveis sob `Components/DesignSystem/` (Buttons, Cards, Forms,
-Feedback, Icons, Layout, Modals, Attributes, Text), as 19 folhas de CSS sob `wwwroot/css/`, os 3
-módulos de interop JS que servem componentes do Design System, e o Pixel Icon System
+Dentro: os componentes reutilizáveis sob `Components/DesignSystem/` (Buttons, Cards, Forms,
+Feedback, Icons, Layout, Modals, Progress e Text), as folhas de CSS sob `wwwroot/css/`, os
+módulos de interop JS que servem componentes do Design System, e o BeeDay Icon System
 (`BeeDayIconRegistry`, sprite único). Fora: componentes de Feature (`Components/Features/*` — ver
 [`docs/web/04-feature-components.md`](../web/04-feature-components.md)), layouts de página
 (`Components/Layout/*` — ver [`docs/web/03-layouts.md`](../web/03-layouts.md)), e
@@ -39,8 +38,8 @@ fora desta pasta).
 docs/design-system/
 ├── README.md                    este documento
 ├── 01-foundations.md            cores, tokens, tipografia, espaçamento, raio, elevação, breakpoints, grid, z-index
-├── 02-components.md             os 26 componentes: objetivo, parâmetros, estados, eventos, JS interop, consumidores
-├── 03-icons.md                  Pixel Icon System: sprite, registry, bibliotecas de origem, nomenclatura
+├── 02-components.md             25 primitives + BeeDaySortable: contratos, estados, a11y e consumers
+├── 03-icons.md                  BeeDay Icon System: sprite, registry, bibliotecas de origem, nomenclatura
 └── 04-forms.md                  os 6 componentes de formulário: inputs, validação, estados, botões de ação
 ```
 
@@ -59,10 +58,10 @@ inverso do que `PersistenceContractBoundaryTests` faz para `Application`/`Infras
 [`docs/testing/01-testing-strategy.md`](../testing/01-testing-strategy.md) §8) — nenhum componente
 observado nesta auditoria viola isso na prática, mas a fronteira não é imposta por código.
 
-## Contagem de componentes (corrige contagem anterior)
+## Inventário de componentes
 
-24 componentes reutilizáveis (`.razor` com `@code`/`.razor.cs` próprio, excluindo páginas de
-catálogo e enums/modelos de suporte):
+O inventário canônico abaixo exclui páginas de catálogo e enums/modelos de suporte. A lista de
+primitives, não uma contagem copiada para outros documentos, é o contrato mantido:
 
 | Pasta | Componentes |
 |---|---|
@@ -73,6 +72,7 @@ catálogo e enums/modelos de suporte):
 | `Icons/` | `BeeDayIcon` |
 | `Layout/` | `BeeDayHero`, `BeeDayPageHeader`, `BeeDaySectionHeader`, `BeeDaySettingsForm`, `BeeDaySettingsSection` |
 | `Modals/` | `EditorModalShell` |
+| `Progress/` | `BeeDayProgressBar` |
 | `Text/` | `BeeDayBrand`, `SearchHighlight` |
 
 Os dois componentes Web de Attribute foram removidos na Sprint 21.12 após auditoria cross-layer;
@@ -86,8 +86,8 @@ componentes reutilizáveis — documentadas em
 | Documento | Conteúdo |
 |---|---|
 | [`01-foundations.md`](01-foundations.md) | Cores, tokens, tipografia, espaçamento, border-radius, elevação/sombra, breakpoints, grid, z-index, movimento |
-| [`02-components.md`](02-components.md) | Os 26 componentes reutilizáveis — parâmetros, estados, eventos, dependências, JS interop, consumidores |
-| [`03-icons.md`](03-icons.md) | Pixel Icon System — sprite, `BeeDayIconRegistry`, bibliotecas de origem, estratégia, nomenclatura |
+| [`02-components.md`](02-components.md) | Primitives canônicas + `BeeDaySortable` — contratos, state matrix, a11y, native controls e consumers |
+| [`03-icons.md`](03-icons.md) | BeeDay Icon System — sprite, `BeeDayIconRegistry`, bibliotecas de origem, estratégia, nomenclatura |
 | [`04-forms.md`](04-forms.md) | Os 6 componentes de formulário — contrato comum, validação, estados, botões |
 
 ## Ordem de leitura recomendada
@@ -96,33 +96,24 @@ componentes reutilizáveis — documentadas em
 2. `02-components.md` — o catálogo completo.
 3. `03-icons.md` e `04-forms.md` — os dois subsistemas mais usados, em detalhe.
 4. [`docs/ux/README.md`](../ux/README.md) — como esses componentes devem ser usados, não apenas o que fazem.
+5. [`docs/epics/25-design-system-brand-evolution/README.md`](../epics/25-design-system-brand-evolution/README.md) — a partir da Sprint 25.1 (EPIC 25), a governança de evolução deste Design System (hierarquia reuse/extend/consolidate/refactor/create, política de hardcode vs. token, taxonomia de decisão) e o contrato oficial de marca (`beeday`, lowercase, `#5247F9`, e o limite entre brand identity e technical identity) vivem lá, não neste documento.
 
 ## Achados relevantes (reportados, não corrigidos)
 
-- Nenhum token de breakpoint compartilhado existe (`variables.css` não define nenhuma
-  `--beeday-breakpoint-*`) — 16 valores de corte distintos, hardcoded por arquivo, alguns
-  inconsistentes para o mesmo propósito visual. Ver [`01-foundations.md`](01-foundations.md) §9 e
+- Breakpoints continuam literais porque CSS custom properties não são válidas em media features.
+  O shell compartilha estruturalmente 1200px; as 70 queries de largura e seus owners estão em
+  [`01-foundations.md`](01-foundations.md) §10 e
   [`docs/ux/03-responsive.md`](../ux/03-responsive.md).
-- `wwwroot/css/feedback.css:20` — `animation: delete-confirmation-enter var(--beeday-transition-normal)-out;`
-  concatena `-out` diretamente após um `var()`, o que é sintaxe CSS inválida (não é possível
-  interpolar texto após uma função `var()` em um valor de propriedade). O navegador descarta a
-  declaração `animation` inteira nessa regra — `.delete-confirmation` provavelmente não recebe a
-  animação de entrada `delete-confirmation-enter` declarada via `@keyframes` mais abaixo no mesmo
-  arquivo. Não corrigido (CSS fora do escopo desta Sprint).
-- `wwwroot/css/cards.css` (576 linhas) e `wwwroot/css/wallet.css` (699 linhas) acumulam os mesmos
+- Os dois shorthands inválidos de animation registrados na auditoria antiga foram corrigidos na
+  Sprint 25.6 e agora usam os tokens duration/easing separadamente.
+- `wwwroot/css/cards.css` e `wwwroot/css/wallet.css` ainda acumulam alguns dos mesmos
   seletores (`.activity-card`, `.habit-card__body`, `.wallet-transaction-card`, etc.) redeclarados
   3 a 5 vezes em blocos sucessivos marcados por comentário `/* Sprint N ... */`, em vez de
   consolidados em uma única declaração — inclui uso de `!important` para uma declaração posterior
   vencer uma anterior (`cards.css` linha ~251). Funciona (o CSS em cascata resolve corretamente),
   mas dificulta encontrar o valor "vigente" de qualquer propriedade sem ler o arquivo inteiro.
-- Comentários-fonte em `wwwroot/css/pixel-nes.css` e `wwwroot/css/design-system.css` referenciam
-  `docs/design-system/foundations.md` e `docs/design-system/components.md` (sem prefixo numérico) —
-  os arquivos desta Sprint usam `01-`/`02-` por convenção (`docs/CONVENTIONS.md` §2). Os comentários
-  no CSS não foram alterados (fora do escopo desta Sprint); os nomes de arquivo reais são
-  `01-foundations.md`/`02-components.md`.
-- A Sprint 16.7 (`docs/web/05-design-system-integration.md`) registrou a existência do bundle
-  `BeeDay.Web.styles.css` (CSS isolation do Blazor) mas não enumerou seus arquivos-fonte. Esta
-  Sprint encontrou **30 arquivos `*.razor.css`** (3.886 linhas — quase o mesmo volume que as 19
-  folhas globais de `wwwroot/css/`, 3.939 linhas) e os incorporou à auditoria — ver
-  [`01-foundations.md`](01-foundations.md) §9. Um deles (`Layout/TopNavigation.razor.css`) declara
-  uma cor de marca (`#5b1095`) fora do sistema de tokens `--beeday-color-*`.
+- `TopNavigation` e as folhas pixel/NES já não existem; a propriedade e os limites das fontes CSS
+  atuais estão documentados em
+  [`01-foundations.md`](01-foundations.md) §9.
+- `BeeDayProgressBar` integra o inventário de primitives físicas; `BeeDaySortable` permanece um
+  contrato compartilhado fora da pasta do Design System.

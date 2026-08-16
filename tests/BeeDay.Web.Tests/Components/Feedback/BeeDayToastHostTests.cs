@@ -59,6 +59,7 @@ public sealed class BeeDayToastHostTests
             cut.WaitForAssertion(() => Assert.Single(cut.FindAll(".beeday-toast")));
 
             Assert.Equal("Notificações", cut.Find(".beeday-toast-region").GetAttribute("aria-label"));
+            Assert.Equal("region", cut.Find(".beeday-toast-region").GetAttribute("role"));
             Assert.Equal("Dispensar notificação", cut.Find(".beeday-toast__close").GetAttribute("aria-label"));
         });
     }

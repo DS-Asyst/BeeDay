@@ -71,7 +71,7 @@
     <value>E-mail</value>
   </data>
   <data name="ForgotPasswordPageTitle" xml:space="preserve">
-    <value>Esqueci minha senha | BeeDay</value>
+    <value>Esqueci minha senha | beeday</value>
   </data>
   <data name="ForgotPasswordHeading" xml:space="preserve">
     <value>Esqueci minha senha</value>
@@ -92,7 +92,7 @@
     <value>Enviar Link de Recuperação</value>
   </data>
   <data name="ResetPasswordPageTitle" xml:space="preserve">
-    <value>Redefinir senha | BeeDay</value>
+    <value>Redefinir senha | beeday</value>
   </data>
   <data name="PasswordUpdatedHeading" xml:space="preserve">
     <value>Senha atualizada</value>
@@ -116,13 +116,13 @@
     <value>Confirmar senha</value>
   </data>
   <data name="ResetPasswordButton" xml:space="preserve">
-    <value>Redefinir Senha</value>
+    <value>Redefinir senha</value>
   </data>
   <data name="ResetTokenMissingError" xml:space="preserve">
     <value>O token de redefinição de senha está ausente.</value>
   </data>
   <data name="ConfirmEmailPageTitle" xml:space="preserve">
-    <value>Confirmação de e-mail | BeeDay</value>
+    <value>Confirmação de e-mail | beeday</value>
   </data>
   <data name="ConfirmingEmailHeading" xml:space="preserve">
     <value>Confirmando e-mail</value>
@@ -182,7 +182,7 @@
     <value>O token de confirmação está ausente.</value>
   </data>
   <data name="ResendConfirmationPageTitle" xml:space="preserve">
-    <value>Reenviar confirmação | BeeDay</value>
+    <value>Reenviar confirmação | beeday</value>
   </data>
   <data name="ResendConfirmationHeading" xml:space="preserve">
     <value>Reenviar confirmação</value>
@@ -203,7 +203,7 @@
     <value>Reenviar E-mail</value>
   </data>
   <data name="EmailConfirmationSentPageTitle" xml:space="preserve">
-    <value>Confirme seu e-mail | BeeDay</value>
+    <value>Confirme seu e-mail | beeday</value>
   </data>
   <data name="CheckYourEmailHeading" xml:space="preserve">
     <value>Verifique seu e-mail</value>

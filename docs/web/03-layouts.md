@@ -12,7 +12,12 @@
 
 O shell autenticado possui somente duas regiões permanentes no desktop: Navigation e Workspace.
 `RightRail`, `ProfileSidePanel` e `AccountSidePanel` foram aposentados e removidos. O footer
-institucional continua legítimo no `PublicLayout`, mas não aparece em Home, Daily, Wallet ou Account.
+institucional continua legítimo no `PublicLayout`, aparecendo em Home, `/brand/typography` e, desde
+a Sprint 25.17, em toda rota `/experience-system/*` (`beeday Experience System`, ver
+[`docs/web/02-routing-and-pages.md`](02-routing-and-pages.md) §9), mas não nas rotas autenticadas
+Daily, Wallet ou Account. O link do footer para Typography foi substituído por um link para
+`/experience-system` nesta Sprint — `/brand/typography` continua acessível diretamente e a partir da
+navegação interna do Experience System, apenas deixou de ter um link próprio no footer.
 
 ## Navegação autenticada
 
@@ -43,12 +48,13 @@ mínima de 52px, ícone de 32px e gap de 1.1rem, próximos às proporções medi
 
 Os tokens semânticos do shell são:
 
-- `--beeday-sidebar-width: 15.5rem`;
-- `--beeday-reading-width: 48rem` para experiências focadas como Profile;
-- `--beeday-workspace-width: 100rem` para experiências operacionais como Daily.
+- `--beeday-sidebar-width: 15.5rem`, consumido pela Sidebar e pelo offset do Workspace;
+- `--beeday-top-navigation-height`, 3.75rem abaixo de 1200px e 0 no desktop.
 
-Não existe token de RightRail ou de SidePanel. A Home controla sua largura de leitura; Daily usa o
-workspace amplo; Wallet preserva seu próprio `max-width: 1440px` e grid responsivo.
+O conteúdo autenticado não herda o reading-width/gutter público: Profile, Daily e Wallet são owners
+de sua largura. Os overrides scoped sem leitura efetiva `--beeday-reading-width: 48rem` e
+`--beeday-workspace-width: 100rem` foram removidos no sweep final; não eram API. Wallet preserva
+container e grid responsivo próprios.
 
 ## Responsividade
 

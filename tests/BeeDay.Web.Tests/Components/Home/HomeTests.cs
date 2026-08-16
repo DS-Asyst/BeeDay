@@ -42,10 +42,12 @@ public sealed class HomeTests
         Assert.Equal(["1", "2", "3", "4", "5"], cut.FindAll(".home-steps > li > span").Select(element => element.TextContent.Trim()));
         var heroImage = cut.Find(".home-hero__visual img.home-hero__image");
         Assert.Equal("/assets/hero/home-team.png", heroImage.GetAttribute("src"));
+        Assert.Equal("high", heroImage.GetAttribute("fetchpriority"));
         var howImage = cut.Find(".home-how__visual img");
         Assert.Equal("/assets/home/how-beeday-works-bee.png", howImage.GetAttribute("src"));
         Assert.Equal(string.Empty, howImage.GetAttribute("alt"));
         Assert.Equal("lazy", howImage.GetAttribute("loading"));
+        Assert.Equal("async", howImage.GetAttribute("decoding"));
         var brandClosure = cut.Find(".home-brand-closure");
         var brandClosureImages = brandClosure.QuerySelectorAll("img");
         Assert.Equal(2, brandClosureImages.Length);
@@ -61,11 +63,12 @@ public sealed class HomeTests
         Assert.NotNull(brandClosure.QuerySelector(".home-brand-closure__base"));
         var topicGroups = brandClosure.QuerySelectorAll(".home-brand-topics > section");
         Assert.Equal(5, topicGroups.Length);
-        Assert.All(topicGroups, group => Assert.Equal(2, group.QuerySelectorAll("li").Length));
+        Assert.Equal([2, 2, 2, 2, 2], topicGroups.Select(group => group.QuerySelectorAll("li").Length));
         Assert.Equal(
             ["About us", "Social", "Apps", "Help and support", "Privacy and terms"],
             topicGroups.Select(group => group.QuerySelector("h2")!.TextContent.Trim()));
         Assert.Equal(2, brandClosure.QuerySelectorAll(".home-brand-topics a").Length);
+        Assert.Empty(brandClosure.QuerySelectorAll("a[href='/brand/typography']"));
         Assert.NotNull(brandClosure.QuerySelector("a[href='https://github.com/tiagoarrigoni/BeeDay']"));
         Assert.NotNull(brandClosure.QuerySelector("a[href='https://www.linkedin.com/in/tiago-a-arrigoni-335b9413b/']"));
         Assert.Contains("home-brand-closure", cut.Find(".home-page").LastElementChild!.ClassList);
@@ -106,6 +109,7 @@ public sealed class HomeTests
             ["Sobre nós", "Social", "Apps", "Ajuda e suporte", "Privacidade e termos"],
             cut.FindAll(".home-brand-topics h2").Select(element => element.TextContent.Trim()));
         Assert.Contains("Nossa missão", cut.Markup, StringComparison.Ordinal);
+        Assert.Empty(cut.FindAll(".home-brand-topics a[href='/brand/typography']"));
         Assert.Contains("Política de privacidade", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Comece agora", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Já tenho uma conta", cut.Markup, StringComparison.Ordinal);
@@ -123,7 +127,7 @@ public sealed class HomeTests
 
         var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<HomePage>());
 
-        Assert.Contains("Continue to BeeDay", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Continue to beeday", cut.Markup, StringComparison.Ordinal);
     }
 
     private static BunitContext CreateContext()

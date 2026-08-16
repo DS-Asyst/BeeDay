@@ -11,6 +11,7 @@ public sealed class ProjectWorkspaceTests : BunitContext
     {
         Services.AddLogging();
         Services.AddLocalization();
+        JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
     [Fact]
@@ -97,13 +98,55 @@ public sealed class ProjectWorkspaceTests : BunitContext
             .Add(component => component.Project, project)));
 
         Assert.Contains("Escolher piso", cut.Markup, StringComparison.Ordinal);
+        Assert.Equal("true", cut.Find(".project-workspace__list-toggle").GetAttribute("aria-expanded"));
     }
 
-    private static ProjectSummary CreateProject(string name, string description, ProjectStatus status, IReadOnlyList<TodoSummary> todos) => new(
-        Guid.NewGuid(), name, description, "#8056C7", Featured: false, Attribute: null,
-        ExpectedDate: null, Archived: false, Status: status, ProgressPercentage: 0m, Todos: todos);
+    [Fact]
+    public void UsesSharedProgressAndIconControlsWithLocalizedSemantics()
+    {
+        var project = CreateProject("Kitchen remodel", string.Empty, ProjectStatus.InProgress, [], progress: 42m);
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => Render<ProjectWorkspace>(parameters => parameters
+            .Add(component => component.Project, project)));
 
-    private static TodoSummary CreateTodo(string title) => new(
-        Guid.NewGuid(), title, string.Empty, Guid.NewGuid(), Featured: false, DueDate: null,
-        Attribute: null, Completed: false, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
+        var progress = cut.Find("[role='progressbar']");
+        Assert.Equal("Project progress 42%", progress.GetAttribute("aria-label"));
+        Assert.Equal("42%", progress.GetAttribute("aria-valuetext"));
+        Assert.Contains("beeday-icon-toggle", cut.Find(".project-workspace__close").ClassList);
+        Assert.Contains("beeday-icon-toggle", cut.Find(".project-workspace__add").ClassList);
+    }
+
+    [Fact]
+    public void PreservesTheAuthoritativeTodoSequenceInsteadOfApplyingAVisualSort()
+    {
+        var first = CreateTodo("Completed but manually first", completed: true, dueDate: new DateOnly(2026, 12, 31));
+        var second = CreateTodo("Active but manually second", completed: false, dueDate: new DateOnly(2026, 1, 1));
+        var project = CreateProject("Kitchen remodel", string.Empty, ProjectStatus.InProgress, [first, second]);
+        var cut = Render<ProjectWorkspace>(parameters => parameters.Add(component => component.Project, project));
+
+        Assert.Equal(
+            [first.Title, second.Title],
+            cut.FindAll(".project-workspace__todo strong").Select(element => element.TextContent));
+    }
+
+    [Fact]
+    public void EscapeClosesTheWorkspaceThroughTheSharedDialogLifecycle()
+    {
+        var closed = false;
+        var project = CreateProject("Kitchen remodel", string.Empty, ProjectStatus.InProgress, []);
+        var cut = Render<ProjectWorkspace>(parameters => parameters
+            .Add(component => component.Project, project)
+            .Add(component => component.OnClose, () => closed = true));
+
+        cut.Find(".project-workspace").KeyDown("Escape");
+
+        Assert.True(closed);
+    }
+
+    private static ProjectSummary CreateProject(string name, string description, ProjectStatus status, IReadOnlyList<TodoSummary> todos, decimal progress = 0m) => new(
+        Guid.NewGuid(), name, description, "#8056C7", Featured: false, Attribute: null,
+        ExpectedDate: null, Archived: false, Status: status, ProgressPercentage: progress, Todos: todos);
+
+    private static TodoSummary CreateTodo(string title, bool completed = false, DateOnly? dueDate = null) => new(
+        Guid.NewGuid(), title, string.Empty, Guid.NewGuid(), Featured: false, DueDate: dueDate,
+        Attribute: null, Completed: completed, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
 }

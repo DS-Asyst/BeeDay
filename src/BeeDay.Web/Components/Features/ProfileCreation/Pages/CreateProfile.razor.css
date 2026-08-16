@@ -27,9 +27,6 @@
 }
 
 .profile-form { display: grid; gap: var(--beeday-spacing-md); }
-.profile-field { display: grid; gap: var(--beeday-spacing-xs); color: var(--beeday-color-text-primary); font-weight: var(--beeday-font-weight-bold); }
-.profile-field__input { width: 100%; }
-
 .profile-password-hint {
     margin: calc(-1 * var(--beeday-spacing-sm)) 0 0;
     color: var(--beeday-color-text-muted);

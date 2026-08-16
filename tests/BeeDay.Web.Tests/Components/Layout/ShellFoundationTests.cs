@@ -47,14 +47,18 @@ public sealed class ShellFoundationTests
     {
         var layoutCss = Layout("MainLayout.razor.css");
         Assert.Contains("--beeday-sidebar-width", layoutCss, StringComparison.Ordinal);
-        Assert.Contains("--beeday-reading-width", layoutCss, StringComparison.Ordinal);
-        Assert.Contains("--beeday-workspace-width", layoutCss, StringComparison.Ordinal);
+        Assert.DoesNotContain("--beeday-reading-width", layoutCss, StringComparison.Ordinal);
+        Assert.DoesNotContain("--beeday-workspace-width", layoutCss, StringComparison.Ordinal);
         Assert.DoesNotContain("right-rail", layoutCss, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("panel-width", layoutCss, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("@media (min-width: 1200px)", layoutCss, StringComparison.Ordinal);
         Assert.Contains("@media (min-width: 1200px)", Layout("DesktopSidebar.razor.css"), StringComparison.Ordinal);
         Assert.Contains("@media (min-width: 1200px)", Layout("MobileHeader.razor.css"), StringComparison.Ordinal);
         Assert.Contains("@media (min-width: 1200px)", Layout("MobileSidebar.razor.css"), StringComparison.Ordinal);
+        Assert.DoesNotContain("1024px", layoutCss, StringComparison.Ordinal);
+        Assert.DoesNotContain("1024px", Layout("DesktopSidebar.razor.css"), StringComparison.Ordinal);
+        Assert.DoesNotContain("1024px", Layout("MobileHeader.razor.css"), StringComparison.Ordinal);
+        Assert.DoesNotContain("1024px", Layout("MobileSidebar.razor.css"), StringComparison.Ordinal);
     }
 
     [Fact]

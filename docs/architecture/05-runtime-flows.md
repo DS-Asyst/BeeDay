@@ -75,9 +75,10 @@ sequenceDiagram
     State-->>User: UI re-renderizada com o hábito criado
 ```
 
-**Ponto de acoplamento único confirmado:** `BeeDayWebService`
-(`src/BeeDay.Web/Services/BeeDayWebService.cs`) é a única classe em `BeeDay.Web` que chama
-`ISender.Send(...)` para estes fluxos — nenhum componente Razor injeta `ISender` diretamente.
+**Ponto de acoplamento destes fluxos de Dashboard:** `BeeDayWebService`
+(`src/BeeDay.Web/Services/BeeDayWebService.cs`) concentra as chamadas `ISender.Send(...)` descritas
+nesta seção. Isso não é uma regra universal da Web: `Wallet.razor` e as páginas de Identity injetam
+`ISender` diretamente, conforme o mapa atual em `docs/web/04-feature-components.md`.
 
 ## 3. Login
 

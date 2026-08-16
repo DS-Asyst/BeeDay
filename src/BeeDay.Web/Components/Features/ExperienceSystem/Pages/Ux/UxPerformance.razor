@@ -1,0 +1,30 @@
+@page "/experience-system/ux/performance"
+@attribute [AllowAnonymous]
+@layout BeeDay.Web.Components.Layout.PublicLayout
+@inject IStringLocalizer<ExperienceSystemResources> Localizer
+
+<PageTitle>@Localizer["UxPerformancePageTitle"]</PageTitle>
+
+<ExperienceSystemPage Eyebrow="@Localizer["PillarNavUx"]" Title="@Localizer["UxPerformanceTitle"]" Description="@Localizer["UxPerformanceIntro"]" Pillar="ExperienceSystemPillar.Ux" CurrentHref="/experience-system/ux/performance">
+    <section class="experience-system-section" aria-labelledby="performance-images-heading">
+        <h2 id="performance-images-heading">@Localizer["UxPerformanceImagesTitle"]</h2>
+        <p>@Localizer["UxPerformanceImagesText"]</p>
+    </section>
+
+    <section class="experience-system-section" aria-labelledby="performance-fonts-heading">
+        <h2 id="performance-fonts-heading">@Localizer["UxPerformanceFontsTitle"]</h2>
+        <p>@Localizer["UxPerformanceFontsText"]</p>
+    </section>
+
+    <section class="experience-system-section" aria-labelledby="performance-gaps-heading">
+        <h2 id="performance-gaps-heading">@Localizer["UxPerformanceGapsTitle"]</h2>
+        <p>@Localizer["UxPerformanceGapsText"]</p>
+    </section>
+
+    <section class="experience-system-callouts" aria-label="@Localizer["UxPerformanceDisclaimerTitle"]">
+        <div class="experience-system-callout experience-system-callout--info">
+            <h3>@Localizer["UxPerformanceDisclaimerTitle"]</h3>
+            <p>@Localizer["UxPerformanceDisclaimerText"]</p>
+        </div>
+    </section>
+</ExperienceSystemPage>

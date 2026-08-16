@@ -22,9 +22,9 @@ public partial class ActivityFilterBar : IDisposable
         }
     }
 
-    private async Task OnInput(ChangeEventArgs args)
+    private async Task OnInput(string? value)
     {
-        inputValue = args.Value?.ToString() ?? string.Empty;
+        inputValue = value ?? string.Empty;
         debounceCancellation?.Cancel();
         debounceCancellation?.Dispose();
         debounceCancellation = new CancellationTokenSource();

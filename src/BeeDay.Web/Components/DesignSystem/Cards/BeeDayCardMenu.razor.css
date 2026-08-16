@@ -23,7 +23,7 @@
     display: grid;
     min-width: 9rem;
     padding: .3rem;
-    border: 1px solid var(--beeday-color-border);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-xs);
     background: var(--beeday-color-surface);
     box-shadow: var(--beeday-shadow-sm);
@@ -69,7 +69,7 @@
     margin-top: .2rem;
     border: 1px solid transparent;
     border-radius: var(--beeday-radius-sm);
-    color: #fff;
+    color: var(--beeday-color-text-inverse);
     background: var(--beeday-color-danger);
     box-shadow: none;
     transition:
@@ -82,7 +82,7 @@
 
 .card-action-menu__item--delete:hover,
 .card-action-menu__item--delete:focus-visible {
-    background: #fff;
+    background: var(--beeday-color-surface);
     color: var(--beeday-color-danger);
     border-color: var(--beeday-color-danger);
     box-shadow: none;
@@ -91,7 +91,7 @@
 
 .card-action-menu__item--delete:active {
     background: var(--beeday-color-danger-hover);
-    color: #fff;
+    color: var(--beeday-color-text-inverse);
     box-shadow: none;
 }
 

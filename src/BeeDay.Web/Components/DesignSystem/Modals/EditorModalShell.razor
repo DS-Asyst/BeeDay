@@ -2,10 +2,12 @@
 
 <div class="editor-modal-backdrop" @onclick="Cancel" @onkeydown="HandleKeyDown" tabindex="-1">
     <section class="editor-modal"
+             id="@DialogId"
              role="dialog"
              aria-modal="true"
              aria-labelledby="@TitleId"
              aria-busy="@IsBusy.ToString().ToLowerInvariant()"
+             tabindex="-1"
              @onclick:stopPropagation>
         <EditForm Model="Model" OnValidSubmit="Submit">
             <DataAnnotationsValidator />
@@ -31,7 +33,6 @@
                     {
                         <BeeDayButton Variant="BeeDayButtonVariant.Danger"
                                        Disabled="IsBusy"
-                                       Compact="true"
                                        Class="editor-modal__delete-action"
                                        OnClick="OnDelete">@Localizer["EditorModalDeleteButton"]</BeeDayButton>
                     }
@@ -48,3 +49,7 @@
         </EditForm>
     </section>
 </div>
+
+<DialogFocusScope Active="true"
+                  TargetId="@DialogId"
+                  InitialFocusSelector=".editor-modal__content input:not(:disabled), .editor-modal__content textarea:not(:disabled), .editor-modal__content select:not(:disabled), .editor-modal__cancel-action" />

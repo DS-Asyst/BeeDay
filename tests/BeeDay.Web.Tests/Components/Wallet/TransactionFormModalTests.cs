@@ -9,6 +9,7 @@ public sealed class TransactionFormModalTests : BunitContext
     {
         Services.AddLogging();
         Services.AddLocalization();
+        JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
     [Fact]
@@ -43,5 +44,17 @@ public sealed class TransactionFormModalTests : BunitContext
 
         Assert.True(deleteRequested);
         Assert.Empty(cut.FindAll(".delete-confirmation"));
+    }
+
+    [Fact]
+    public void UsesTheCentralWalletIconInsteadOfALocalFunctionalSymbol()
+    {
+        var cut = Render<TransactionFormModal>(parameters => parameters
+            .Add(component => component.IsOpen, true)
+            .Add(component => component.Model, new TransactionFormModel()));
+
+        var icon = cut.Find(".editor-modal__type-summary .beeday-icon");
+        Assert.Equal("Wallet", icon.GetAttribute("data-icon"));
+        Assert.DoesNotContain("◇", cut.Markup, StringComparison.Ordinal);
     }
 }

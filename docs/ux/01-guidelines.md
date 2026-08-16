@@ -5,9 +5,7 @@
 arquivo onde foi observado. Não é uma lista de recomendações novas: é uma descrição do que o código
 atual faz de forma consistente (ou não).
 
-**Última verificação:** 2026-08-11 (Sprint 20.5, EPIC 20) — §5 atualizado: `/` deixou de ser um
-resolvedor de redirect e passou a ser a Home pública; demais seções preservadas da verificação de
-2026-08-07.
+**Última verificação:** 2026-08-16 (Sprint 25.16, EPIC 25).
 
 ## 1. Objetivo
 
@@ -17,21 +15,16 @@ estado (vazio, carregando, erro), e onde o produto pede confirmação antes de a
 
 ## 2. Hierarquia visual
 
-A hierarquia é comunicada principalmente por **fonte**, não só por tamanho: `typography-policy.css`
-reserva Jersey 25 (fonte "retro"/pixel) exclusivamente para título de página/card, marca
-(`BeeDayBrand`) e botões (`BeeDayButton`) — todo o resto (parágrafos, labels, inputs, tabelas,
-valores numéricos) usa Inter. Isso significa que, em qualquer tela, os elementos em Jersey 25 são,
-por definição, os pontos de maior peso visual — não é preciso variar tamanho de fonte para
-comunicar "isto é o título desta seção".
+A hierarquia usa a escala tipográfica e o papel do texto. Nunito é a foundation de Product/UI para
+títulos, body, labels, inputs, navegação e controles. Coiny fica restrita a Brand/Display em
+`BeeDayBrand` e momentos expressivos qualificados; não é fonte de forms, buttons ou leitura longa.
 
 O padrão estrutural de cabeçalho (`BeeDayPageHeader`/`BeeDaySectionHeader`/`BeeDayHero`, ver
 [`docs/design-system/02-components.md`](../design-system/02-components.md) §5) é: eyebrow (rótulo
-pequeno, maiúsculo, cor de marca) → título (H1/H2, Jersey 25) → descrição (Inter, cor muted) →
-ações (à direita em telas largas, empilhadas abaixo em `max-width: 42rem`). Esse padrão se repete
-em `Account.razor` (via `BeeDayPageHeader`) e nas páginas de catálogo — não foi adotado por
-`Wallet.razor`/`Home.razor`, que usam markup de cabeçalho próprio (`<header class="wallet-page__header">`),
-uma inconsistência estrutural entre as duas telas de produto mais usadas e o componente que existe
-especificamente para esse papel.
+pequeno, maiúsculo, cor de marca) → título (H1/H2, Nunito) → descrição (Nunito,
+text-secondary) → ações (à direita em telas largas, empilhadas abaixo em `max-width: 42rem`). Esse
+padrão se repete em Account e Wallet via `BeeDayPageHeader`, preservando containers e conteúdos
+próprios; `Home.razor` permanece uma composição de marketing deliberadamente própria.
 
 ## 3. Feedback de ação
 
@@ -65,9 +58,9 @@ do repositório passa por uma confirmação.
 - 4 implementações CSS independentes do mesmo padrão visual de campo de formulário
   (`.beeday-field__control`, `.editor-modal__field input`, `.identity-field input`,
   `.wallet-filters input`) — ver [`docs/design-system/04-forms.md`](../design-system/04-forms.md) §5.
-- `Wallet.razor`/`Home.razor` não usam `BeeDayPageHeader` (ver §2 acima).
-- 29 breakpoints distintos (26 `max-width`, 2 `min-width`, 1 `max-height`) sem token compartilhado,
-  espalhados entre CSS global e CSS isolado por componente — ver
+- `Home.razor` não usa `BeeDayPageHeader` porque sua hierarquia é de marketing (ver §2 acima).
+- queries de largura continuam junto de seus owners, sem token artificial; shell 1200px e famílias
+  públicas compartilhadas estão formalizados — ver
   [`03-responsive.md`](03-responsive.md).
 
 ## 5. Fluxo — do primeiro acesso ao Dashboard
@@ -127,8 +120,30 @@ Toda animação acima é desativada sob `prefers-reduced-motion: reduce` — ver
 do Dashboard (`DashboardColumn.razor`) gera seu próprio texto de estado vazio a partir de
 `EmptyLabel` (ex. "No completed tasks", "Completed tasks will appear here") em vez de compor
 `BeeDayEmptyState` diretamente — o padrão visual é o mesmo, a composição não. `WalletEmptyState`
-(`Features/Wallets/Components/`) é uma implementação própria, não confirmada nesta auditoria como
-reutilizando `BeeDayEmptyState`.
+(`Features/Wallets/Components/`) é um adapter de Product Pattern: escolhe copy/ação para zero
+transações ou zero resultados e delega a superfície genérica a `BeeDayEmptyState`.
+
+### 7.1 Wallet — Product Pattern financeiro
+
+Wallet compõe `BeeDayPageHeader`, cards, botões, empty state, filtros e Editor/Confirm compartilhados,
+mas preserva especializações de produto: valores monetários usam `WalletCurrencyFormatter`, receita
+e despesa mantêm semântica success/danger, e cores persistidas de tags continuam dados do usuário
+com contraste calculado localmente. O picker nativo `type=color` e o `InputNumber` monetário não se
+transformam em primitives globais. Seus breakpoints locais respondem à densidade real de summary,
+workspace, filtros, transações e tags; não redefinem contratos do shell autenticado.
+
+### 7.2 Daily e ProjectWorkspace — Product Patterns operacionais
+
+Daily preserva quatro conceitos distintos — Habit, Task, To-Do e Project — com cores, métricas e
+ações próprias; igualdade física não autoriza colapsar esses significados. O board mantém ordem
+manual por `BeeDaySortable`, quatro colunas no shell amplo, scroll horizontal intermediário, duas
+colunas abaixo de 900px e uma abaixo de 620px. A busca debounced consome `BeeDayInput`; create menu,
+completion/score controls e `ProjectContextFilter` permanecem widgets especializados.
+
+ProjectWorkspace recebe a ordem de To-Dos pronta e nunca aplica sort visual implícito. Ele compõe
+`BeeDayProgressBar`, icon-toggle e `DialogFocusScope`, enquanto status, To-Do accent e layout compacto
+são semântica/estrutura local. Cores neutras, overlay, border, text, surface, shadow e layer usam as
+foundations compartilhadas; nenhum token Project foi substituído por Brand apenas por semelhança.
 
 ## 8. Estados de carregamento
 
