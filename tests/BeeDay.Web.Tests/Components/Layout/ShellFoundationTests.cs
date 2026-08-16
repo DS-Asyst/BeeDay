@@ -55,6 +55,10 @@ public sealed class ShellFoundationTests
         Assert.Contains("@media (min-width: 1200px)", Layout("DesktopSidebar.razor.css"), StringComparison.Ordinal);
         Assert.Contains("@media (min-width: 1200px)", Layout("MobileHeader.razor.css"), StringComparison.Ordinal);
         Assert.Contains("@media (min-width: 1200px)", Layout("MobileSidebar.razor.css"), StringComparison.Ordinal);
+        Assert.DoesNotContain("1024px", layoutCss, StringComparison.Ordinal);
+        Assert.DoesNotContain("1024px", Layout("DesktopSidebar.razor.css"), StringComparison.Ordinal);
+        Assert.DoesNotContain("1024px", Layout("MobileHeader.razor.css"), StringComparison.Ordinal);
+        Assert.DoesNotContain("1024px", Layout("MobileSidebar.razor.css"), StringComparison.Ordinal);
     }
 
     [Fact]

@@ -471,30 +471,29 @@ shell" compartilhada pelos quatro.
 
 ## 10. Breakpoints e grid
 
-**Não existe um token de breakpoint** para os valores em pixel/rem — toda `@media (max-width:
-...)`/`(min-width: ...)` do repositório usa um valor literal, por arquivo, sem referência a uma
-variável compartilhada, verdade tanto para as 17 folhas globais quanto para os 36 arquivos de CSS
-isolado do §9. **Exceção parcial desde a Sprint 21.2 (EPIC 21):** o breakpoint estrutural do shell
-(`min-width: 1024px`) não usa uma variável de breakpoint (CSS não permite `var()` dentro de uma
-media feature), mas *é* aplicado como o mesmo valor literal coordenado em 5 arquivos de
-`Components/Layout/` (`MainLayout`, `DesktopSidebar`, `RightRail`, `MobileHeader`, `MobileSidebar`
-— `TopNavigation` usava esse mesmo corte até ser removida na Sprint 21.3, absorvida por
-`MobileHeader`/`MobileSidebar`) — o primeiro caso do repositório de um corte reutilizado
-deliberadamente em vez de reinventado por arquivo; ver
-[`docs/ux/03-responsive.md`](../ux/03-responsive.md) §3. A lista completa (30 breakpoints
-distintos: 26 em `max-width`, 3 em `min-width`, 1 em `max-height`) está em
-[`docs/ux/03-responsive.md`](../ux/03-responsive.md) §2, junto com os casos em que o mesmo
-propósito visual usa cortes diferentes (ex.: `650px` em `cards.css` vs. `640px` em `wallet.css`;
-`760px` em 4 arquivos de Layout distintos vs. `720px`/`700px` em Features próximas ao mesmo
-propósito).
+O inventário da Sprint 25.7 encontrou 105 declarações `@media` em 44 dos 55 stylesheets: 70 queries
+de largura em 33 arquivos e zero `@container`. Há 26 cortes `max-width` e dois `min-width` (27
+valores físicos porque 1200px aparece nos dois sentidos). A lista normalizada vive em
+[`docs/ux/03-responsive.md`](../ux/03-responsive.md).
 
-Grid/largura de conteúdo: `--beeday-content-width: 100%` (`variables.css`, sem uso aparente além da
-própria declaração), `.beeday-container` (`utilities.css`, `width: min(100% - 2rem, 1440px)`),
-`--beeday-reading-width: 72rem` (`polish.css`, aplicado a `.beeday-main > :where(section, article,
-.beeday-page, .page-content)`, reduzido a `100%` abaixo de 60rem). Não há um sistema de colunas
-(12-col grid, `grid-template-columns` compartilhado) — cada componente declara seu próprio
-`grid-template-columns` ad hoc (`.dashboard-skeleton__grid`: `repeat(4, minmax(0,1fr))`, reduzido
-a 2 e depois 1 coluna via `@media`; `.wallet-summary`: `1.4fr 1fr 1fr`, etc.).
+**Não existe token de breakpoint:** CSS custom properties não são válidas como valor de media
+feature. Contratos compartilhados repetem deliberadamente o mesmo literal e são protegidos por
+testes. O shell usa **1200px** em `MainLayout`, `DesktopSidebar`, `MobileHeader` e `MobileSidebar`;
+Daily alinha o board com o par 1199/1200. 1024px pertence ao shell tablet/intermediário atual.
+
+Containers não formam uma única largura universal:
+
+- público: gutter fluido + reading width 72rem em `polish.css`;
+- Header/Footer: `.beeday-container`, até 1440px;
+- autenticado: `.beeday-main--authenticated` remove width/gutter global; cada feature é owner;
+- Home: inner 72rem e full-bleed controlado pelo gutter público;
+- Onboarding/Brand Guidelines: envelope 72rem, com conteúdo interno focado;
+- Daily, Wallet e ProjectWorkspace: larguras/grids feature-local, preservados para 25.11/25.12.
+
+`--beeday-content-width` e os overrides scoped `reading-width: 48rem`/`workspace-width: 100rem` não
+têm consumer efetivo atual e não devem orientar código novo; são candidatos ao sweep final. Não há
+12-column grid compartilhado: igualdade de `grid-template-columns` só autoriza consolidação quando
+owner e transição estrutural também coincidem.
 
 ## 11. Fontes consultadas
 

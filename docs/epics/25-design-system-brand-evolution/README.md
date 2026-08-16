@@ -1120,3 +1120,66 @@ BeeDay.E2E.Tests — Home reduced motion/Navigation/InteractiveComponents: 7/7
 Breakpoints/layout → 25.7; component APIs/state matrix → 25.8; Auth/Identity motion → 25.9;
 focus-trap/a11y lifecycle → 25.10; Wallet → 25.11; Daily/Project → 25.12; Character motion → 25.13;
 Writing → 25.14; quality engineering → 25.15; final sweep → 25.16. Nenhuma foi antecipada.
+
+## Sprint 25.7 — Responsive, Layout & Breakpoints (Results)
+
+**Fonte da verdade:** inventário direto dos 55 stylesheets de produção, shell/layouts atuais,
+containers, testes source-level/E2E e documentação viva. Executado sobre o commit da Sprint 25.6
+`0cb97ff66c3337cb1dce9be5766741e53d090716`.
+
+### Baseline revalidado
+
+Foram encontradas 105 declarações `@media` em 44 arquivos: 70 queries de largura em 33 arquivos e
+zero `@container`. Após normalizar rem/px e whitespace, há 26 cortes `max-width` e dois
+`min-width` (27 valores físicos, pois 1200px aparece nos dois sentidos). Não foi criado token de
+breakpoint: custom properties não são válidas em media features.
+
+### Contratos estruturais e ownership
+
+- shell autenticado formalizado em 1200px: DesktopSidebar + offset do Workspace a partir do corte;
+  MobileHeader/Drawer abaixo dele; Daily alinha seu par complementar 1199/1200;
+- 1024px confirmado como tablet/intermediário, corrigindo living docs que ainda o tratavam como
+  início do desktop;
+- 42rem formalizado para public header/language e primitives compartilhados; 40rem como família
+  compacta pública/Auth/Onboarding/Brand, sem obrigar consumers que não mudam estrutura;
+- gutter/reading width públicos pertencem a `polish.css`; Header/Footer usam `.beeday-container`;
+  authenticated pages removem esse limite e cada feature é owner de largura/padding;
+- Home full-bleed, Wallet, Daily e ProjectWorkspace permanecem legítimos owners locais.
+
+### Drift removido e testes
+
+`docs/ux/03-responsive.md` foi refeito a partir do código atual; foundations, guidelines,
+Design System README e layouts deixaram de repetir contagens/1024px/containers obsoletos. Comentários
+no shell e Daily tornam o literal coordenado explícito. Source test rejeita regressão para 1024px;
+E2E passa a cobrir exatamente 1199/1200 e `/brand/typography` também em 768px.
+
+### Impacto, compatibilidade e escopo
+
+Nenhum valor computado, layout, API de componente ou artwork mudou. Produção recebeu somente
+comentários de ownership; mudanças funcionais são testes e documentação. Wallet/Daily/Project não
+foram convergidos, não foi criado visual snapshot nem abstração CSS sem suporte.
+
+### Validação
+
+```text
+git diff --check
+# aprovado
+
+dotnet format BeeDay.slnx --verify-no-changes
+# aprovado
+
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+# aprovado, 0 avisos, 0 erros
+
+dotnet test BeeDay.slnx --no-build --configuration Release
+# 1.075/1.075 de primeira — Domain 93, Application 73, Infrastructure 129, Web 709, E2E 71
+
+BeeDay.Web.Tests — ShellFoundation: 4/4
+BeeDay.E2E.Tests — ShellResponsive/Home/BrandTypography: 18/18
+```
+
+### Itens `DEFER` e confirmação de escopo
+
+Component APIs/state matrix → 25.8; Auth/Identity → 25.9; feedback/a11y lifecycle → 25.10;
+Wallet → 25.11; Daily/Project → 25.12; Character → 25.13; Writing → 25.14; quality → 25.15;
+unused container-token sweep/final gate → 25.16. Nenhuma foi antecipada.
