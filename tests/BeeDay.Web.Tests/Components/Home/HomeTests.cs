@@ -38,6 +38,10 @@ public sealed class HomeTests
         Assert.Equal(["Define", "Practice", "Evolve"], cut.FindAll(".home-steps h3").Select(element => element.TextContent.Trim()));
         var heroImage = cut.Find(".home-hero__visual img.home-hero__image");
         Assert.Equal("/assets/hero/home-team.png", heroImage.GetAttribute("src"));
+        var howImage = cut.Find(".home-how__visual img");
+        Assert.Equal("/assets/home/how-beeday-works-bee.png", howImage.GetAttribute("src"));
+        Assert.Equal(string.Empty, howImage.GetAttribute("alt"));
+        Assert.Equal("lazy", howImage.GetAttribute("loading"));
         Assert.Empty(cut.FindAll(".home-hero .beeday-brand"));
         Assert.Empty(cut.FindAll(".home-hero__symbol"));
         Assert.Empty(cut.FindAll(".home-preview, .home-values, .home-growth, .home-cta"));
