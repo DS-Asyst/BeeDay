@@ -83,21 +83,33 @@
     <value>Comece pelo que importa, transforme em ação e deixe a consistência construir o resultado.</value>
   </data>
   <data name="Step1Title" xml:space="preserve">
-    <value>Definir</value>
+    <value>Defina o que importa</value>
   </data>
   <data name="Step1Description" xml:space="preserve">
-    <value>Escolha o que você quer melhorar.</value>
+    <value>Transforme seus objetivos em prioridades claras e saiba onde concentrar sua energia.</value>
   </data>
   <data name="Step2Title" xml:space="preserve">
-    <value>Praticar</value>
+    <value>Organize o seu dia</value>
   </data>
   <data name="Step2Description" xml:space="preserve">
-    <value>Mantenha ações diárias realistas à vista.</value>
+    <value>Reúna sua rotina, tarefas e compromissos em um só lugar para viver com mais clareza.</value>
   </data>
   <data name="Step3Title" xml:space="preserve">
-    <value>Evoluir</value>
+    <value>Evolua todos os dias</value>
   </data>
   <data name="Step3Description" xml:space="preserve">
-    <value>Veja o trabalho concluído virar progresso.</value>
+    <value>Pequenas ações consistentes criam grandes mudanças. Avance um pouco a cada dia.</value>
+  </data>
+  <data name="Step4Title" xml:space="preserve">
+    <value>Acompanhe seu progresso</value>
+  </data>
+  <data name="Step4Description" xml:space="preserve">
+    <value>Veja sua evolução, mantenha a motivação e entenda o quanto você já avançou.</value>
+  </data>
+  <data name="Step5Title" xml:space="preserve">
+    <value>Celebre suas conquistas</value>
+  </data>
+  <data name="Step5Description" xml:space="preserve">
+    <value>Cada passo conta. Reconheça suas vitórias e continue evoluindo.</value>
   </data>
 </root>
