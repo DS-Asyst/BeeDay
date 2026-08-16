@@ -97,6 +97,7 @@ public sealed class ProjectWorkspaceTests : BunitContext
             .Add(component => component.Project, project)));
 
         Assert.Contains("Escolher piso", cut.Markup, StringComparison.Ordinal);
+        Assert.Equal("true", cut.Find(".project-workspace__list-toggle").GetAttribute("aria-expanded"));
     }
 
     private static ProjectSummary CreateProject(string name, string description, ProjectStatus status, IReadOnlyList<TodoSummary> todos) => new(

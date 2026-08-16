@@ -9,13 +9,12 @@
          @onkeydown="HandleKeyDownAsync"
          @onkeydown:stopPropagation="true">
         <section class="beeday-feedback"
+                 id="@DialogId"
                  role="dialog"
                  aria-modal="true"
                  aria-labelledby="beeday-feedback-title"
                  aria-describedby="beeday-feedback-description"
                  tabindex="-1"
-                 autofocus
-                 @ref="dialog"
                  @onclick:stopPropagation>
             <div class="beeday-feedback__accent" aria-hidden="true"></div>
             <div class="beeday-feedback__content">
@@ -63,29 +62,18 @@
     </div>
 }
 
+<DialogFocusScope Active="@(Feedback is not null)"
+                  TargetId="@DialogId"
+                  InitialFocusSelector="self" />
+
 @code {
-    private ElementReference dialog;
+    private readonly string _dialogId = $"beeday-feedback-dialog-{Guid.NewGuid():N}";
 
     [Parameter] public BeeDayFeedback? Feedback { get; set; }
     [Parameter] public IReadOnlyList<BeeDayFeedback> History { get; set; } = [];
     [Parameter] public EventCallback OnClose { get; set; }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (Feedback is null)
-        {
-            return;
-        }
-
-        try
-        {
-            await dialog.FocusAsync();
-        }
-        catch (InvalidOperationException)
-        {
-            // The component can be prerendered before JavaScript interop is available.
-        }
-    }
+    private string DialogId => _dialogId;
 
     private Task CloseAsync() => OnClose.InvokeAsync();
 

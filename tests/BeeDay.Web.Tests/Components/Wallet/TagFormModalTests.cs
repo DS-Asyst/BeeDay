@@ -10,6 +10,7 @@ public sealed class TagFormModalTests : BunitContext
     {
         Services.AddLogging();
         Services.AddLocalization();
+        JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
     [Fact]

@@ -39,6 +39,8 @@ public sealed class ProjectContextFilterTests
             Assert.Equal(2, options.Count);
             Assert.Equal("All Projects", options[0].TextContent.Trim());
             Assert.Equal("Project A", options[1].TextContent.Trim());
+            Assert.Equal("true", options[0].GetAttribute("aria-selected"));
+            Assert.Equal("false", options[1].GetAttribute("aria-selected"));
         }
         finally
         {

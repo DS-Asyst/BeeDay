@@ -2,7 +2,7 @@
 
 **Fonte da verdade:** todos os `.razor`/`.razor.cs` sob
 `src/BeeDay.Web/Components/DesignSystem`, mais `Components/Behaviors/DragDrop/BeeDaySortable`.
-Revalidado em 2026-08-16 pela Sprint 25.8.
+Revalidado em 2026-08-16 pelas Sprints 25.8–25.10.
 
 ## 1. Inventário atual
 
@@ -21,11 +21,11 @@ um zero significa primitive preservada/testada sem consumer runtime atual.
 | `BeeDayButton` | Ação canônica. `Variant`, `Type`, `Disabled`, `IsLoading`, `FullWidth`, `Compact`, `Icon`, `IconSize`, `Class`, `OnClick`, `ChildContent`, attributes | 22 | 8 variants; default/hover/pressed/focus/disabled/loading. `<button>`, `disabled`, `aria-busy`; loading preserva o label acessível. `BeeDayButtonTests`; `design-system.css` |
 | `BeeDayCard` | Surface sem estado interno. `Class`, `Padded`, `Muted`, `Prominent`, `Interactive`, `ChildContent`, attributes | 9 | `<article>`; interactive oferece chrome/focus, mas semântica/teclado pertencem ao consumer. `BeeDayCardTests`; `design-system.css` |
 | `BeeDayCardMenu` | Menu Edit/Delete posicionado. `Title`, `Class`, `TriggerClass`, `Disabled`, `OnEdit`, `OnDelete`, `OpenChanged` | 0 | trigger nativo, `aria-expanded`, `role=menu/menuitem`, Escape/outside click, medição JS. Mantido por contrato/testes. `BeeDayCardMenuTests`/placement tests; CSS isolado |
-| `BeeDayConfirmDialog` | Confirmação destrutiva. `IsOpen`, `IsBusy`, `Title`, `Message`, textos opcionais, labels opcionais, callbacks | 5 | open/busy; `alertdialog`, modal, labelled/described, Escape/backdrop. Focus lifecycle profundo → 25.10. `BeeDayConfirmDialogTests`; `feedback.css` |
-| `BeeDayToastHost` | Host da fila de `ToastService`; sem parâmetros | 3 layouts | `status`/`alert`, live region e dismiss nativo. `BeeDayToastHostTests`; `feedback.css` |
+| `BeeDayConfirmDialog` | Confirmação destrutiva. `IsOpen`, `IsBusy`, `Title`, `Message`, textos opcionais, labels opcionais, callbacks | 5 | open/busy; `alertdialog`, modal, labelled/described/busy; foco inicial em Cancel, trap, Escape/backdrop e restore. `BeeDayConfirmDialogTests` + E2E; `feedback.css`/focus scope |
+| `BeeDayToastHost` | Host da fila de `ToastService`; sem parâmetros | 3 layouts | `status`/`alert`, live region e dismiss nativo com target 44px. `BeeDayToastHostTests`; `feedback.css` |
 | `BeeDayLoading` | Feedback global controlado por `IsVisible`, `Label?` | 4 | `role=status`, polite live, label localizada; reduced motion mantém conteúdo. `FeedbackComponentTests`; `feedback.css` |
 | `BeeDaySkeleton` | Placeholder com `Lines`, `Class?` | 2 | busy visual, não interativo; shimmer reduzido. `FeedbackComponentTests`; `feedback.css` |
-| `BeeDayDashboardSkeleton` | Composição de skeleton; `AriaLabel?` | 2 | `role=status`, label localizada/caller. `BeeDayDashboardSkeletonTests`; `feedback.css` |
+| `BeeDayDashboardSkeleton` | Composição de skeleton; `AriaLabel?` | 2 | section labelled + busy; label vem do caller ou fallback. `BeeDayDashboardSkeletonTests`; `feedback.css` |
 | `BeeDayEmptyState` | Empty state com `Title`, `Description`, `Icon?`, `Class?` | 3 | conteúdo semântico, ação composta externamente. `FeedbackComponentTests`; CSS isolado |
 
 ### Forms, icon e layout
@@ -49,7 +49,7 @@ um zero significa primitive preservada/testada sem consumer runtime atual.
 
 | Primitive | Responsabilidade e contrato público | Consumers | Estados, a11y, responsive, teste e CSS |
 |---|---|---:|---|
-| `EditorModalShell` | `Model`, `Title`, `TitleId`, `SubmitLabel?`, `ShowDelete`, `IsBusy`, 3 slots e 3 callbacks | 6 | modal labelled, busy, submit/cancel/delete, Escape. Focus lifecycle → 25.10. `EditorModalShellTests`; `editor-modal.css` |
+| `EditorModalShell` | `Model`, `Title`, `TitleId`, `SubmitLabel?`, `ShowDelete`, `IsBusy`, 3 slots e 3 callbacks | 6 | modal labelled/busy; foco inicial no primeiro field, trap, Escape, nested-confirm e restore; delete mantém 44px. `EditorModalShellTests` + E2E; `editor-modal.css`/focus scope |
 | `BeeDayBrand` | `OnDarkSurface` compatível | 11 | wordmark textual `beeday`, `role=img`, label fixa lowercase; sem variants de cor. `BeeDayBrandTests`; CSS isolado |
 | `SearchHighlight` | `Text`, `SearchTerm` | 2 | `<mark>` para matches case-insensitive; sem estado interativo. `SearchHighlightTests`; `animations.css` |
 | `BeeDayProgressBar` | `Label`, `Value`, `Maximum`, `ValueText?`, `Tone` | 3 | `Primary`/`Reward`; empty/partial/complete/unavailable; `progressbar` + aria values. `BeeDayProgressBarTests`; CSS isolado |
@@ -79,7 +79,9 @@ Regras transversais:
 - disabled não dispara ação;
 - invalid pertence a controles integrados ao `EditContext`, não a Card/Button;
 - selected/expanded deve existir em atributo/semântica, não somente em cor;
-- dialogs têm contrato básico aqui; trap/restore/inert aprofundados pertencem à 25.10.
+- dialogs canônicos usam `DialogFocusScope` + `beeday-dialog-focus.js`: OPEN → initial focus →
+  contenção de Tab/Shift+Tab → Escape/close com busy guard → restore quando o trigger ainda existe;
+  trigger removido e escopo sem controles degradam sem erro.
 
 ## 3. Contratos de composição
 
@@ -101,8 +103,8 @@ zero `<textarea>` direto.
 | Classificação | Quantidade | Exemplos e decisão |
 |---|---:|---|
 | `FRAMEWORK / INTERNAL` | 13 | internals de Button/CardMenu/Toast; Reconnect; culture form; triggers do shell. Permanecem nativos |
-| `LEGITIMATE SPECIALIZED WIDGET` | 18 | activity checkbox/score, menus de filtro, drag/project toolbar e color controls. Sem migração genérica |
-| `DESIGN-SYSTEM DUPLICATION` / migration candidate | 18 | Auth/ProfileCreation/Account inputs e Wallet filters/tag input. Owners: 25.9 e 25.11 |
+| `LEGITIMATE SPECIALIZED WIDGET / ADAPTER` | 26 | activity checkbox/score, menus, drag/project toolbar, color controls e os 8 adapters HTML de Login/ProfileCreation convergidos visualmente na 25.9 |
+| `DESIGN-SYSTEM DUPLICATION` / migration candidate | 10 | Wallet filters/tag/modal controls. Owner: 25.11 |
 
 Dashboard search e menu triggers continuam especializados e são revistos com Daily na 25.12.
 Nenhum native control foi migrado nesta Sprint: igualdade de tag não prova equivalência de contrato.
@@ -126,5 +128,7 @@ cobertos por bUnit/E2E.
 
 Cobertura relevante: Button, Card/Menu/placement, Forms, Icon, Feedback/Toast/Confirm/Skeleton,
 Headers/Settings/Hero, EditorModal, Progress, Brand, SearchHighlight, SortableOrder e fluxos E2E de
-drawer/menu/modal/Daily. Testes priorizam markup, callbacks, ARIA e estados públicos; detalhes de
-classe só são fixados quando representam variants/tokens do contrato.
+drawer/menu/modal/Daily. A Sprint 25.10 testa initial focus, trap nos dois sentidos, Escape,
+nested-dialog restore, trigger removido, dialog sem controles, busy e ARIA lowercase. Testes
+priorizam markup, callbacks, ARIA e estados públicos; detalhes de classe só são fixados quando
+representam variants/tokens do contrato.

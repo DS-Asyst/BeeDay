@@ -69,6 +69,86 @@ public sealed class InteractiveComponentsTests(PlaywrightAppFixture fixture) : E
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Close navigation menu" })).ToBeVisibleAsync();
     }
 
+    [Fact]
+    public async Task NestedDialogsTrapKeyboardAndRestoreFocusAcrossEscapeClosures()
+    {
+        await Page.SetViewportSizeAsync(1280, 800);
+        await LoginToDailyAsync();
+        var title = $"Focus lifecycle {Guid.NewGuid():N}"[..30];
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Activity" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Task" }).ClickAsync();
+
+        var editor = Page.GetByRole(AriaRole.Dialog);
+        var titleInput = editor.GetByLabel("Title");
+        await Expect(titleInput).ToBeFocusedAsync();
+        await titleInput.FillAsync(title);
+        await editor.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
+        await Expect(editor).ToBeHiddenAsync();
+
+        var editTrigger = Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Task: {title}" });
+        await editTrigger.ClickAsync();
+        editor = Page.GetByRole(AriaRole.Dialog);
+        await Expect(editor.GetByLabel("Title")).ToBeFocusedAsync();
+
+        var delete = editor.GetByRole(AriaRole.Button, new() { Name = "Delete" });
+        await delete.ClickAsync();
+
+        var confirmation = Page.Locator("[role='alertdialog']");
+        var cancel = confirmation.GetByRole(AriaRole.Button, new() { Name = "Cancel" });
+        var confirm = confirmation.GetByRole(AriaRole.Button, new() { Name = "Delete Task" });
+        await Expect(cancel).ToBeFocusedAsync();
+
+        await Page.Keyboard.PressAsync("Shift+Tab");
+        await Expect(confirm).ToBeFocusedAsync();
+        await Page.Keyboard.PressAsync("Tab");
+        await Expect(cancel).ToBeFocusedAsync();
+
+        await Page.Keyboard.PressAsync("Escape");
+        await Expect(confirmation).ToBeHiddenAsync();
+        await Expect(delete).ToBeFocusedAsync();
+
+        await Page.Keyboard.PressAsync("Escape");
+        await Expect(editor).ToBeHiddenAsync();
+        await Expect(editTrigger).ToBeFocusedAsync();
+    }
+
+    [Fact]
+    public async Task FocusScopeHandlesDialogWithoutControlsAndRemovedTrigger()
+    {
+        await GotoAsync("/login");
+
+        var handled = await Page.EvaluateAsync<bool>("""
+            async () => {
+                const trigger = document.querySelector('#login-email');
+                const dialog = document.createElement('section');
+                dialog.id = 'e2e-empty-focus-scope';
+                dialog.tabIndex = -1;
+                document.body.append(dialog);
+
+                const focusScope = await import('/js/beeday-dialog-focus.js?v=20260816-1');
+                trigger.focus();
+                focusScope.activate(dialog.id, 'self');
+                await Promise.resolve();
+
+                const focusedEmptyDialog = document.activeElement === dialog;
+                trigger.remove();
+
+                try {
+                    focusScope.deactivate(dialog.id);
+                } catch {
+                    dialog.remove();
+                    return false;
+                }
+
+                dialog.remove();
+                return focusedEmptyDialog;
+            }
+            """);
+
+        Assert.True(handled);
+    }
+
     private async Task LoginToDailyAsync()
     {
         var email = $"e2e-controls-{Guid.NewGuid():N}@beeday.invalid";

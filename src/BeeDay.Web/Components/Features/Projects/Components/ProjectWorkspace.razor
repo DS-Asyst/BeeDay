@@ -35,7 +35,7 @@
                 @if (Project.Todos.Count > 0)
                 {
                     <div class="project-workspace__list-toggle-row">
-                        <button type="button" class="project-workspace__list-toggle" aria-expanded="@showTodos" @onclick="ToggleTodos">
+                        <button type="button" class="project-workspace__list-toggle" aria-expanded="@showTodos.ToString().ToLowerInvariant()" @onclick="ToggleTodos">
                             <span>@(showTodos ? Localizer["HideTodosButton"] : Localizer["ShowTodosButton"])</span>
                             <BeeDayIcon Name="@(showTodos ? BeeDayIconName.ChevronRight : BeeDayIconName.ChevronDown)" Size="BeeDayIconSize.ExtraSmall" Class="project-workspace__list-chevron" Decorative="true" />
                         </button>
