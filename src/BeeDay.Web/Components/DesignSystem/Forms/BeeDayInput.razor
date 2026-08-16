@@ -11,16 +11,31 @@
             }
         </span>
     }
-    <InputText id="@Id"
+    @if (UpdateOnInput)
+    {
+        <input id="@Id"
                class="@InputCssClass"
-               Value="@Value"
-               ValueChanged="ValueChanged"
-               ValueExpression="ValueExpression"
+               value="@Value"
+               @oninput="HandleInputAsync"
                placeholder="@Placeholder"
                maxlength="@MaxLength"
                disabled="@Disabled"
                readonly="@ReadOnly"
                @attributes="AdditionalAttributes" />
+    }
+    else
+    {
+        <InputText id="@Id"
+                   class="@InputCssClass"
+                   Value="@Value"
+                   ValueChanged="ValueChanged"
+                   ValueExpression="ValueExpression"
+                   placeholder="@Placeholder"
+                   maxlength="@MaxLength"
+                   disabled="@Disabled"
+                   readonly="@ReadOnly"
+                   @attributes="AdditionalAttributes" />
+    }
 </label>
 @if (ShowValidationMessage)
 {

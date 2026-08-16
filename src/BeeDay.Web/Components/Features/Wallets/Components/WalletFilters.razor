@@ -3,21 +3,32 @@
 
 <div class="wallet-filter-shell">
     <div class="wallet-filters">
-        <label class="wallet-search wallet-filter-field wallet-filter-field--search">
-            <span>@Localizer["SearchLabel"]</span>
-            <input class="beeday-field__control" disabled="@IsDisabled" value="@Search" @oninput="HandleSearchInput" placeholder="@Localizer["SearchPlaceholder"]" />
-        </label>
+        <BeeDayInput Id="wallet-search"
+                     Label="@Localizer["SearchLabel"]"
+                     Value="@Search"
+                     ValueChanged="HandleSearchChanged"
+                     ValueExpression="@(() => Search)"
+                     Placeholder="@Localizer["SearchPlaceholder"]"
+                     Disabled="IsDisabled"
+                     UpdateOnInput="true"
+                     ShowValidationMessage="false"
+                     FieldCssClass="wallet-search wallet-filter-field wallet-filter-field--search" />
 
-        <label class="wallet-filter-field">
-            <span>@Localizer["TagLabel"]</span>
-            <select class="beeday-field__control" disabled="@IsDisabled" value="@TagFilter" @onchange="HandleTagChanged">
+        <BeeDaySelect TValue="string"
+                      Id="wallet-tag-filter"
+                      Label="@Localizer["TagLabel"]"
+                      Value="@TagFilter"
+                      ValueChanged="HandleTagChanged"
+                      ValueExpression="@(() => TagFilter)"
+                      Disabled="IsDisabled"
+                      ShowValidationMessage="false"
+                      FieldCssClass="wallet-filter-field">
                 <option value="">@Localizer["AllTagsOption"]</option>
                 @foreach (var tag in Tags)
                 {
                     <option value="@tag.Id">@tag.Name</option>
                 }
-            </select>
-        </label>
+        </BeeDaySelect>
 
         <div class="wallet-filter-field wallet-filter-toggle-field">
             <span aria-hidden="true">&nbsp;</span>
@@ -35,32 +46,52 @@
     <div id="@SecondaryFiltersId" class="wallet-secondary-filters" hidden="@(!isExpanded)">
         @if (isExpanded)
         {
-            <label class="wallet-filter-field">
-                <span>@Localizer["TypeLabel"]</span>
-                <select class="beeday-field__control" disabled="@IsDisabled" value="@TypeFilter" @onchange="HandleTypeChanged">
+            <BeeDaySelect TValue="string"
+                          Id="wallet-type-filter"
+                          Label="@Localizer["TypeLabel"]"
+                          Value="@TypeFilter"
+                          ValueChanged="HandleTypeChanged"
+                          ValueExpression="@(() => TypeFilter)"
+                          Disabled="IsDisabled"
+                          ShowValidationMessage="false"
+                          FieldCssClass="wallet-filter-field">
                     <option value="">@Localizer["AllTypesOption"]</option>
                     <option value="Income">@Localizer["TransactionTypeIncomeLabel"]</option>
                     <option value="Expense">@Localizer["TransactionTypeExpenseLabel"]</option>
-                </select>
-            </label>
+            </BeeDaySelect>
 
-            <label class="wallet-filter-field">
-                <span>@Localizer["FromLabel"]</span>
-                <input class="beeday-field__control" type="date" disabled="@IsDisabled" value="@FormatDate(StartDate)" @onchange="HandleStartDateChanged" />
-            </label>
+            <BeeDayDateInput TValue="DateOnly?"
+                             Id="wallet-start-date"
+                             Label="@Localizer["FromLabel"]"
+                             Value="@StartDate"
+                             ValueChanged="HandleStartDateChanged"
+                             ValueExpression="@(() => StartDate)"
+                             Disabled="IsDisabled"
+                             ShowValidationMessage="false"
+                             FieldCssClass="wallet-filter-field" />
 
-            <label class="wallet-filter-field">
-                <span>@Localizer["ToLabel"]</span>
-                <input class="beeday-field__control" type="date" disabled="@IsDisabled" value="@FormatDate(EndDate)" @onchange="HandleEndDateChanged" />
-            </label>
+            <BeeDayDateInput TValue="DateOnly?"
+                             Id="wallet-end-date"
+                             Label="@Localizer["ToLabel"]"
+                             Value="@EndDate"
+                             ValueChanged="HandleEndDateChanged"
+                             ValueExpression="@(() => EndDate)"
+                             Disabled="IsDisabled"
+                             ShowValidationMessage="false"
+                             FieldCssClass="wallet-filter-field" />
 
-            <label class="wallet-filter-field">
-                <span>@Localizer["OrderLabel"]</span>
-                <select class="beeday-field__control" disabled="@IsDisabled" value="@Sort" @onchange="HandleSortChanged">
+            <BeeDaySelect TValue="string"
+                          Id="wallet-sort-filter"
+                          Label="@Localizer["OrderLabel"]"
+                          Value="@Sort"
+                          ValueChanged="HandleSortChanged"
+                          ValueExpression="@(() => Sort)"
+                          Disabled="IsDisabled"
+                          ShowValidationMessage="false"
+                          FieldCssClass="wallet-filter-field">
                     <option value="date-desc">@Localizer["NewestFirstOption"]</option>
                     <option value="date-asc">@Localizer["OldestFirstOption"]</option>
-                </select>
-            </label>
+            </BeeDaySelect>
 
             @if (ActiveFilterCount > 0)
             {
@@ -117,17 +148,10 @@
         isExpanded = !isExpanded;
     }
 
-    private Task HandleSearchInput(ChangeEventArgs args) => SearchChanged.InvokeAsync(args.Value?.ToString() ?? string.Empty);
-    private Task HandleTypeChanged(ChangeEventArgs args) => TypeFilterChanged.InvokeAsync(args.Value?.ToString() ?? string.Empty);
-    private Task HandleTagChanged(ChangeEventArgs args) => TagFilterChanged.InvokeAsync(args.Value?.ToString() ?? string.Empty);
-    private Task HandleStartDateChanged(ChangeEventArgs args) => StartDateChanged.InvokeAsync(ParseDate(args.Value));
-    private Task HandleEndDateChanged(ChangeEventArgs args) => EndDateChanged.InvokeAsync(ParseDate(args.Value));
-    private Task HandleSortChanged(ChangeEventArgs args) => SortChanged.InvokeAsync(args.Value?.ToString() ?? "date-desc");
-
-    private static string FormatDate(DateOnly? value) => value?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty;
-
-    private static DateOnly? ParseDate(object? value) =>
-        DateOnly.TryParseExact(value?.ToString(), "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var date)
-            ? date
-            : null;
+    private Task HandleSearchChanged(string? value) => SearchChanged.InvokeAsync(value ?? string.Empty);
+    private Task HandleTypeChanged(string value) => TypeFilterChanged.InvokeAsync(value ?? string.Empty);
+    private Task HandleTagChanged(string value) => TagFilterChanged.InvokeAsync(value ?? string.Empty);
+    private Task HandleStartDateChanged(DateOnly? value) => StartDateChanged.InvokeAsync(value);
+    private Task HandleEndDateChanged(DateOnly? value) => EndDateChanged.InvokeAsync(value);
+    private Task HandleSortChanged(string value) => SortChanged.InvokeAsync(string.IsNullOrWhiteSpace(value) ? "date-desc" : value);
 }
