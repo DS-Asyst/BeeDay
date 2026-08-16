@@ -200,7 +200,7 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
     };
 
     public string FormatDueDate(DateOnly? date) =>
-        date?.ToString("MMM dd, yyyy") ?? localizer["NoDueDateLabel"];
+        date?.ToString("d") ?? localizer["NoDueDateLabel"];
 
     public string FormatProjectStatus(ProjectStatus status) => status switch
     {

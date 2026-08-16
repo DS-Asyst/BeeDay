@@ -102,8 +102,13 @@
         }
         catch (Exception exception)
         {
-            _error = exception.Message;
             _state = Classify(exception.Message);
+            _error = _state switch
+            {
+                ConfirmationPageState.Expired => Localizer["LinkExpiredMessage"],
+                ConfirmationPageState.Invalid => Localizer["InvalidLinkMessage"],
+                _ => _error
+            };
         }
     }
 

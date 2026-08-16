@@ -165,4 +165,40 @@
   <data name="ToastDismissAriaLabel" xml:space="preserve">
     <value>Dispensar notificação</value>
   </data>
+  <data name="DomainErrorEmailAlreadyRegistered" xml:space="preserve">
+    <value>Este e-mail já está cadastrado.</value>
+  </data>
+  <data name="DomainErrorNicknameAlreadyInUse" xml:space="preserve">
+    <value>Este apelido já está em uso.</value>
+  </data>
+  <data name="DomainErrorCurrentPasswordIncorrect" xml:space="preserve">
+    <value>A senha atual está incorreta.</value>
+  </data>
+  <data name="DomainErrorNewPasswordSameAsCurrent" xml:space="preserve">
+    <value>A nova senha deve ser diferente da senha atual.</value>
+  </data>
+  <data name="DomainErrorPasswordResetTokenInvalid" xml:space="preserve">
+    <value>Este link de redefinição de senha é inválido ou expirou.</value>
+  </data>
+  <data name="DomainErrorProfileAlreadyCompleted" xml:space="preserve">
+    <value>Seu perfil já foi concluído.</value>
+  </data>
+  <data name="DomainErrorWaitBeforeResend" xml:space="preserve">
+    <value>Aguarde {0} segundos antes de solicitar outro e-mail.</value>
+  </data>
+  <data name="DomainErrorInvalidEmail" xml:space="preserve">
+    <value>Informe um endereço de e-mail válido.</value>
+  </data>
+  <data name="DomainErrorInvalidNickname" xml:space="preserve">
+    <value>Escolha um apelido diferente.</value>
+  </data>
+  <data name="DomainErrorInvalidName" xml:space="preserve">
+    <value>Informe um nome válido.</value>
+  </data>
+  <data name="DomainErrorGenericValidation" xml:space="preserve">
+    <value>Verifique as informações destacadas e tente novamente.</value>
+  </data>
+  <data name="DomainErrorGeneric" xml:space="preserve">
+    <value>Algo deu errado. Tente novamente em instantes.</value>
+  </data>
 </root>

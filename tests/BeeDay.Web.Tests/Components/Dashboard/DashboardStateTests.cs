@@ -69,6 +69,24 @@ public sealed class DashboardStateTests
         });
     }
 
+    [Theory]
+    [InlineData("en-US", "3/5/2026")]
+    [InlineData("pt-BR", "05/03/2026")]
+    public void FormatDueDate_UsesTheStandardShortDatePatternForTheCurrentCulture(string culture, string expectedDisplayDate)
+    {
+        // DateOnly.ToString("d") — the standard short-date pattern — rather than a custom
+        // "MMM dd, yyyy" pattern: a custom format string fixes day/month/year order regardless of
+        // culture. "d" adapts the whole structure, so en-US (month/day/year) and pt-BR (day/month/
+        // year) genuinely differ here, matching the same fix already applied to Wallet transaction
+        // dates in Sprint 23.6.
+        var (state, _) = CreateState(new ThrowingSender());
+
+        BunitLocalizationSupport.WithUiCulture(culture, () =>
+        {
+            Assert.Equal(expectedDisplayDate, state.FormatDueDate(new DateOnly(2026, 3, 5)));
+        });
+    }
+
     private static (DashboardState State, ToastService Toasts) CreateState(ISender sender)
     {
         var services = new ServiceCollection();

@@ -3,6 +3,7 @@ using BeeDay.Application.Features.Users.Queries;
 using BeeDay.Application.Features.Users.Responses;
 using BeeDay.Domain.Entities;
 using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
 using BeeDay.Web.Resources;
 using BeeDay.Web.Services;
 using BeeDay.Web.Tests.Localization;
@@ -62,16 +63,44 @@ public sealed class AccountTests
         Assert.NotNull(form.QuerySelector("input[name='returnUrl']"));
     }
 
-    private static BunitContext CreateContext(UserLanguage accountLanguage)
+    [Theory]
+    [InlineData("en-US", "This email is already registered.")]
+    [InlineData("pt-BR", "Este e-mail já está cadastrado.")]
+    public async Task SaveProfileFailure_ShowsALocalizedToast_NotTheRawDomainMessage(string culture, string expectedMessage)
+    {
+        var response = new CurrentUserResponse(
+            Guid.NewGuid(), "Test User", "test@beeday.invalid", "tester",
+            UserLanguage.English, UserTheme.System, true, true, true, true);
+        var sender = new ThrowingAccountSender(response, new InvalidDomainStateException("Email 'test@beeday.invalid' is already registered."));
+        using var context = CreateContext(sender);
+
+        await BunitLocalizationSupport.WithUiCultureAsync(culture, async () =>
+        {
+            var cut = context.Render<AccountPage>();
+            var toastService = context.Services.GetRequiredService<ToastService>();
+
+            var submit = cut.FindAll("button[type='submit']").First(button => button.TextContent.Contains(
+                culture == "en-US" ? "Save Profile" : "Salvar Perfil", StringComparison.Ordinal));
+            await submit.ClickAsync();
+
+            var toast = Assert.Single(toastService.Messages);
+            Assert.Equal(expectedMessage, toast.Message);
+            Assert.DoesNotContain("test@beeday.invalid", toast.Message, StringComparison.Ordinal);
+        });
+    }
+
+    private static BunitContext CreateContext(UserLanguage accountLanguage) =>
+        CreateContext(new StubAccountSender(new CurrentUserResponse(
+            Guid.NewGuid(), "Test User", "test@beeday.invalid", "tester",
+            accountLanguage, UserTheme.System, true, true, true, true)));
+
+    private static BunitContext CreateContext(ISender sender)
     {
         var context = new BunitContext().WithLocalization();
         context.JSInterop.Mode = JSRuntimeMode.Loose;
         context.AddAuthorization().SetAuthorized("test-user");
 
-        var response = new CurrentUserResponse(
-            Guid.NewGuid(), "Test User", "test@beeday.invalid", "tester",
-            accountLanguage, UserTheme.System, true, true, true, true);
-        var store = new BeeDayWebService(new StubAccountSender(response));
+        var store = new BeeDayWebService(sender);
         context.Services.AddSingleton(store);
         context.Services.AddSingleton(sp => new ToastService(sp.GetRequiredService<IStringLocalizer<SharedResources>>()));
         context.Services.AddSingleton(sp => new AuthenticatedUserInitializer(
@@ -104,6 +133,31 @@ public sealed class AccountTests
 
         public Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default) where TRequest : IRequest =>
             Task.CompletedTask;
+    }
+
+    private sealed class ThrowingAccountSender(CurrentUserResponse response, Exception failure) : ISender
+    {
+        public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
+        {
+            if (request is GetCurrentUserQuery)
+            {
+                return Task.FromResult((TResponse)(object)response);
+            }
+
+            throw new NotSupportedException($"Unexpected request: {request.GetType().Name}");
+        }
+
+        public Task<object?> Send(object request, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
+        public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IStreamRequest<TResponse> request, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
+        public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
+        public Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default) where TRequest : IRequest =>
+            throw failure;
     }
 
     /// <summary>

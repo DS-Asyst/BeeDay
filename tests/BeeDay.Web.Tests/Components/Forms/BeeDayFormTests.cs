@@ -9,6 +9,7 @@ public sealed class BeeDayFormTests
     public void InputRendersLabelRequiredMarkerAndAttributes()
     {
         using var context = new BunitContext();
+        context.Services.AddLocalization();
         var model = new FormTestModel();
         var cut = RenderInsideEditContext<BeeDayInput>(context, model, parameters => parameters
             .Add(component => component.Id, "title")
@@ -31,6 +32,7 @@ public sealed class BeeDayFormTests
     public void InputInvokesValueChanged()
     {
         using var context = new BunitContext();
+        context.Services.AddLocalization();
         var model = new FormTestModel();
         var cut = RenderInsideEditContext<BeeDayInput>(context, model, parameters => parameters
             .Add(component => component.Id, "title")
@@ -47,6 +49,7 @@ public sealed class BeeDayFormTests
     public void InputSupportsDisabledReadonlyAndAdditionalAttributes()
     {
         using var context = new BunitContext();
+        context.Services.AddLocalization();
         var model = new FormTestModel();
         var cut = RenderInsideEditContext<BeeDayInput>(context, model, parameters => parameters
             .Add(component => component.Id, "title")
@@ -66,6 +69,7 @@ public sealed class BeeDayFormTests
     public void TextAreaRendersCounter()
     {
         using var context = new BunitContext();
+        context.Services.AddLocalization();
         var model = new FormTestModel { TextValue = "Study" };
         var cut = RenderInsideEditContext<BeeDayTextArea>(context, model, parameters => parameters
             .Add(component => component.Id, "notes")
@@ -83,6 +87,7 @@ public sealed class BeeDayFormTests
     public void TextAreaInvokesValueChanged()
     {
         using var context = new BunitContext();
+        context.Services.AddLocalization();
         var model = new FormTestModel();
         var cut = RenderInsideEditContext<BeeDayTextArea>(context, model, parameters => parameters
             .Add(component => component.Id, "notes")
@@ -99,6 +104,7 @@ public sealed class BeeDayFormTests
     public void CheckboxRendersLabelAndInvokesValueChanged()
     {
         using var context = new BunitContext();
+        context.Services.AddLocalization();
         var model = new FormTestModel();
         var cut = RenderInsideEditContext<BeeDayCheckbox>(context, model, parameters => parameters
             .Add(component => component.Id, "favorite")
@@ -116,6 +122,7 @@ public sealed class BeeDayFormTests
     public void CheckboxSupportsDisabledState()
     {
         using var context = new BunitContext();
+        context.Services.AddLocalization();
         var model = new FormTestModel();
         var cut = RenderInsideEditContext<BeeDayCheckbox>(context, model, parameters => parameters
             .Add(component => component.Id, "favorite")
@@ -131,6 +138,7 @@ public sealed class BeeDayFormTests
     public void DateInputRendersAndInvokesValueChanged()
     {
         using var context = new BunitContext();
+        context.Services.AddLocalization();
         var model = new FormTestModel();
         var cut = RenderInsideEditContext<BeeDayDateInput<DateTime?>>(context, model, parameters => parameters
             .Add(component => component.Id, "due-date")
@@ -148,6 +156,7 @@ public sealed class BeeDayFormTests
     public void SelectRendersOptionsAndInvokesValueChanged()
     {
         using var context = new BunitContext();
+        context.Services.AddLocalization();
         var model = new FormTestModel { SelectValue = "medium" };
         var cut = RenderInsideEditContext<BeeDaySelect<string>>(context, model, parameters => parameters
             .Add(component => component.Id, "difficulty")

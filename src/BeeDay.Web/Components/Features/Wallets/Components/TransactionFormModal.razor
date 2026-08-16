@@ -57,7 +57,7 @@
                 <label class="editor-modal__field">
                     <span>@Localizer["AmountLabel"]</span>
                     <InputNumber @bind-Value="Model.Amount" step="0.01" min="0.01" />
-                    <ValidationMessage For="@(() => Model.Amount)" />
+                    <BeeDayValidationMessage For="@(() => Model.Amount)" />
                 </label>
 
                 <BeeDayDateInput TValue="DateTime"

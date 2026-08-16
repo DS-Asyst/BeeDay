@@ -1,4 +1,6 @@
 using BeeDay.Web.Components.Features.ProfileCreation.Models;
+using BeeDay.Web.Localization;
+using BeeDay.Web.Resources;
 using BeeDay.Web.Services;
 using Microsoft.Extensions.Localization;
 
@@ -7,7 +9,8 @@ namespace BeeDay.Web.Components.Features.ProfileCreation.State;
 public sealed class ProfileCreationState(
     BeeDayWebService store,
     ToastService toastService,
-    IStringLocalizer<ProfileCreationResources> localizer)
+    IStringLocalizer<ProfileCreationResources> localizer,
+    IStringLocalizer<SharedResources> sharedLocalizer)
 {
     public ProfileCreationFormModel Model { get; } = new();
     public ProfileCreationStep Step { get; private set; } = ProfileCreationStep.Account;
@@ -154,8 +157,8 @@ public sealed class ProfileCreationState(
         }
         catch (Exception exception)
         {
-            ValidationError = exception.Message;
-            toastService.ShowError(exception.Message);
+            ValidationError = DomainErrorLocalizer.Translate(exception, sharedLocalizer);
+            toastService.ShowError(ValidationError);
             return false;
         }
         finally
