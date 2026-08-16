@@ -1183,3 +1183,64 @@ BeeDay.E2E.Tests — ShellResponsive/Home/BrandTypography: 18/18
 Component APIs/state matrix → 25.8; Auth/Identity → 25.9; feedback/a11y lifecycle → 25.10;
 Wallet → 25.11; Daily/Project → 25.12; Character → 25.13; Writing → 25.14; quality → 25.15;
 unused container-token sweep/final gate → 25.16. Nenhuma foi antecipada.
+
+## Sprint 25.8 — Core Component Contracts & State Matrix (Results)
+
+**Fonte da verdade:** inventário direto de todos os `.razor`/code-behind em DesignSystem,
+`BeeDaySortable`, consumers, controles nativos, CSS, bUnit/E2E e documentação viva. Executado sobre
+o commit da Sprint 25.7 `350de02bbd42486fc5e8e0392f931e7ea084f7d9`.
+
+### Inventário e contratos
+
+O catálogo atual possui 25 primitives físicas sob `Components/DesignSystem`, excluindo
+`HeroCatalog`/`IconCatalog`, mais `BeeDaySortable`: 26 contratos compartilhados. A contagem antiga
+de 24 foi corrigida e `BeeDayProgressBar` integrado. Cada primitive agora registra parâmetros,
+consumer count, variants/sizes, estados aplicáveis, a11y, responsive/localization, testes e owner de
+CSS. Componentes sem consumer atual (`BeeDayCardMenu`, `BeeDayCheckbox`) permanecem canônicos e
+testados; nenhum `V2` foi criado.
+
+### State matrix e refinamento compatível
+
+Foi formalizada a matriz DEFAULT/HOVER/PRESSED/FOCUS-VISIBLE/DISABLED/LOADING/INVALID/SELECTED/
+EXPANDED, com N/A explícito por família. Um defeito acessível foi corrigido sem mudança de API:
+`BeeDayButton` loading mantinha o label no layout, mas aplicava `visibility:hidden` + `aria-hidden`,
+removendo seu nome acessível. O label agora usa `opacity:0`, permanece na árvore acessível e continua
+preservando largura enquanto spinner/`aria-busy` comunicam busy.
+
+### Native controls
+
+O baseline contém 49 tags nativas em 20 arquivos: 29 buttons, 17 inputs, três selects e zero
+textarea direto. Foram classificadas como 13 Framework/Internal, 18 Specialized Widget e 18
+Design-System Duplication/Migration Candidate. Auth/Profile/Account → 25.9; Wallet → 25.11;
+Dashboard/Daily → 25.12. Nenhuma migração feature-local foi antecipada.
+
+### Impacto, compatibilidade e escopo
+
+API pública preservada; nenhuma parallel library, component V2 ou mudança de domínio/application/
+persistence. O único runtime change é a manutenção do nome acessível no loading do Button, sem
+alteração visual. Catálogos técnicos não viraram Brand Guidelines; focus lifecycle profundo ficou
+para 25.10.
+
+### Validação
+
+```text
+git diff --check
+# aprovado
+
+dotnet format BeeDay.slnx --verify-no-changes
+# aprovado
+
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+# aprovado, 0 avisos, 0 erros
+
+dotnet test BeeDay.slnx --no-build --configuration Release
+# 1.077/1.077 de primeira — Domain 93, Application 73, Infrastructure 129, Web 711, E2E 71
+
+BeeDay.Web.Tests — core shared contracts: 125/125
+BeeDay.E2E.Tests — InteractiveComponents/HabitAndTask: 4/4
+```
+
+### Itens `DEFER` e confirmação de escopo
+
+Auth/Identity/forms → 25.9; dialogs/focus lifecycle → 25.10; Wallet → 25.11; Daily/Project → 25.12;
+Character → 25.13; Writing → 25.14; quality → 25.15; final sweep → 25.16. Nenhuma foi antecipada.

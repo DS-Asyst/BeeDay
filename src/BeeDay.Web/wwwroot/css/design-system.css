@@ -248,7 +248,7 @@
 }
 
 .beeday-button--loading { position: relative; }
-.beeday-button--loading .beeday-button__label { visibility: hidden; }
+.beeday-button--loading .beeday-button__label { opacity: 0; }
 .beeday-button__loader { position: absolute; flex: 0 0 auto; animation: beeday-spin .7s linear infinite; }
 @keyframes beeday-spin { to { transform: rotate(360deg); } }
 

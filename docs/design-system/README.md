@@ -23,8 +23,8 @@ próprio `BeeDay.Web`, consumida diretamente pelos componentes de Feature (ver
 
 ## Escopo
 
-Dentro: os 26 componentes reutilizáveis sob `Components/DesignSystem/` (Buttons, Cards, Forms,
-Feedback, Icons, Layout, Modals, Attributes, Text), as 19 folhas de CSS sob `wwwroot/css/`, os 3
+Dentro: os 25 componentes reutilizáveis sob `Components/DesignSystem/` (Buttons, Cards, Forms,
+Feedback, Icons, Layout, Modals, Progress e Text), as folhas de CSS sob `wwwroot/css/`, os
 módulos de interop JS que servem componentes do Design System, e o Pixel Icon System
 (`BeeDayIconRegistry`, sprite único). Fora: componentes de Feature (`Components/Features/*` — ver
 [`docs/web/04-feature-components.md`](../web/04-feature-components.md)), layouts de página
@@ -39,7 +39,7 @@ fora desta pasta).
 docs/design-system/
 ├── README.md                    este documento
 ├── 01-foundations.md            cores, tokens, tipografia, espaçamento, raio, elevação, breakpoints, grid, z-index
-├── 02-components.md             os 26 componentes: objetivo, parâmetros, estados, eventos, JS interop, consumidores
+├── 02-components.md             25 primitives + BeeDaySortable: contratos, estados, a11y e consumers
 ├── 03-icons.md                  Pixel Icon System: sprite, registry, bibliotecas de origem, nomenclatura
 └── 04-forms.md                  os 6 componentes de formulário: inputs, validação, estados, botões de ação
 ```
@@ -61,7 +61,7 @@ observado nesta auditoria viola isso na prática, mas a fronteira não é impost
 
 ## Contagem de componentes (corrige contagem anterior)
 
-24 componentes reutilizáveis (`.razor` com `@code`/`.razor.cs` próprio, excluindo páginas de
+25 componentes reutilizáveis (`.razor` com `@code`/`.razor.cs` próprio, excluindo páginas de
 catálogo e enums/modelos de suporte):
 
 | Pasta | Componentes |
@@ -73,6 +73,7 @@ catálogo e enums/modelos de suporte):
 | `Icons/` | `BeeDayIcon` |
 | `Layout/` | `BeeDayHero`, `BeeDayPageHeader`, `BeeDaySectionHeader`, `BeeDaySettingsForm`, `BeeDaySettingsSection` |
 | `Modals/` | `EditorModalShell` |
+| `Progress/` | `BeeDayProgressBar` |
 | `Text/` | `BeeDayBrand`, `SearchHighlight` |
 
 Os dois componentes Web de Attribute foram removidos na Sprint 21.12 após auditoria cross-layer;
@@ -86,7 +87,7 @@ componentes reutilizáveis — documentadas em
 | Documento | Conteúdo |
 |---|---|
 | [`01-foundations.md`](01-foundations.md) | Cores, tokens, tipografia, espaçamento, border-radius, elevação/sombra, breakpoints, grid, z-index, movimento |
-| [`02-components.md`](02-components.md) | Os 26 componentes reutilizáveis — parâmetros, estados, eventos, dependências, JS interop, consumidores |
+| [`02-components.md`](02-components.md) | 25 primitives + `BeeDaySortable` — contratos, state matrix, a11y, native controls e consumers |
 | [`03-icons.md`](03-icons.md) | Pixel Icon System — sprite, `BeeDayIconRegistry`, bibliotecas de origem, estratégia, nomenclatura |
 | [`04-forms.md`](04-forms.md) | Os 6 componentes de formulário — contrato comum, validação, estados, botões |
 
@@ -117,19 +118,9 @@ componentes reutilizáveis — documentadas em
   os arquivos desta Sprint usam `01-`/`02-` por convenção (`docs/CONVENTIONS.md` §2). Os comentários
   no CSS não foram alterados (fora do escopo desta Sprint); os nomes de arquivo reais são
   `01-foundations.md`/`02-components.md`.
-- A Sprint 16.7 (`docs/web/05-design-system-integration.md`) registrou a existência do bundle
-  `BeeDay.Web.styles.css` (CSS isolation do Blazor) mas não enumerou seus arquivos-fonte. Esta
-  Sprint encontrou **30 arquivos `*.razor.css`** (3.886 linhas — quase o mesmo volume que as 19
-  folhas globais de `wwwroot/css/`, 3.939 linhas) e os incorporou à auditoria — ver
-  [`01-foundations.md`](01-foundations.md) §9. Um deles (`Layout/TopNavigation.razor.css`) declara
-  uma cor de marca (`#5b1095`) fora do sistema de tokens `--beeday-color-*`.
-- **Contagem de componentes desatualizada (encontrado na Sprint 25.1, não corrigido aqui).** A
-  tabela em "Contagem de componentes" acima (24, "corrige contagem anterior", verificada na Sprint
-  20.3, antes da EPIC 21 começar) não inclui `Components/DesignSystem/Progress/BeeDayProgressBar.razor`
-  (+ `BeeDayProgressTone.cs`) — adicionado depois, na Sprint 21.6 (Progress Right Rail), conforme
-  `docs/epics/21-lingo-product-experience/README.md` §16 (Component Mapping). Confirmado por leitura
-  direta nesta Sprint: 25 componentes reutilizáveis fisicamente em `Components/DesignSystem/`
-  (excluindo as 2 páginas de catálogo `HeroCatalog`/`IconCatalog`) + `BeeDaySortable`
-  (fisicamente fora da pasta) = 26 no total. Correção da tabela pertence à próxima Sprint que tocar
-  este documento (candidato natural: Sprint 25.16, Documentation, Migration Sweep & Final Quality
-  Gate), não a esta auditoria.
+- **Inventário revalidado na Sprint 25.8:** há 37 folhas isoladas `*.razor.css`, 17 folhas em
+  `wwwroot/css/` e `app.css`, totalizando 55 fontes CSS. `TopNavigation` já não existe; a
+  propriedade e os limites dessas fontes estão documentados em
+  [`01-foundations.md`](01-foundations.md) §9.
+- **Contagem corrigida na Sprint 25.8:** `BeeDayProgressBar` integra a tabela atual de 25 primitives
+  físicas; com `BeeDaySortable` fora da pasta são 26 contratos compartilhados.
