@@ -42,7 +42,7 @@
 }
 
 .wallet-page__header p {
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
 }
 
 .wallet-eyebrow {
@@ -81,7 +81,7 @@
 .wallet-transaction-card__title-wrap small,
 .wallet-transaction-card__meta,
 .wallet-tag-item small {
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
 }
 
 .wallet-summary__card strong {

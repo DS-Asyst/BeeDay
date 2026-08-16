@@ -1622,3 +1622,78 @@ E-mail transacional bilíngue depende de cultura autoritativa no contrato; strin
 expressivas herdadas exigem migração visual consumer-by-consumer. Quality engineering/axe/visual
 regression → 25.15; documentation/migration sweep final → 25.16. Nenhuma dessas áreas foi
 antecipada.
+
+## Sprint 25.15 — Design System Quality Engineering (Results)
+
+**Fonte da verdade:** infraestrutura xUnit/bUnit/Playwright existente, Central Package Management,
+workflows `ci.yml`/`release-quality-gate.yml`, assets públicos e execução local integral. Executado
+sobre o commit da Sprint 25.14 `d80f68748f17329710a39378acfe9c23bbeb1f70`.
+
+### Acessibilidade e contraste automatizados
+
+`Deque.AxeCore.Playwright` 4.12.0 foi adicionado apenas ao projeto E2E e versionado centralmente;
+Playwright já fornecia Chromium/isolamento/artefatos, mas não um ruleset de acessibilidade.
+`AccessibilityQualityTests` executa axe sem exclusões em Home, Typography, Login, Daily, Wallet e
+no diálogo de transação. Resultado limpo é tratado como ausência de violações automaticamente
+detectáveis nessa amostra, nunca como conformidade WCAG ou certificação.
+
+A primeira execução expôs problemas reais e guiou correções restritas: landmark `main` duplicado no
+Wallet, ausência de H1 no Daily, role inválido no language switcher, região de toast sem role
+compatível e contraste insuficiente em textos pequenos de Footer, Login, EmptyState, Wallet e modal.
+O token global muted foi preservado; somente consumers que falharam no contexto renderizado migraram
+para secondary.
+
+`DesignSystemContrastTests` resolve aliases de `variables.css` e protege nove pares determinísticos:
+brand, texto primary/secondary, botões primary/success/warning/danger, info e foco inverso. O verde
+semantic/button success foi escurecido para suportar texto branco normal; raster illustration não é
+tratada como contrato matemático de texto.
+
+### Responsividade, localização, visual regression e performance
+
+A matriz Playwright existente já cobria 390–1920 px, overflow/clipping, controles e layouts públicos
+e autenticados; os cenários em português de Home/Typography cobrem expansão. Os resource contracts
+agora também bloqueiam valores ausentes/vazios e casing visível `BeeDay`/`BEEDAY`, além da paridade,
+fallback e placeholders criados na 25.14.
+
+Pixel baselines não foram introduzidos: há Chromium único, mas fontes web e nenhum ambiente de
+rasterização/baseline previamente qualificado. A estratégia estável usa computed layout, bounding
+boxes, overflow, estrutura, tokens e axe; screenshots/traces continuam capturados somente em falha.
+
+No audit de performance, dimensões intrínsecas e lazy/async abaixo da dobra já estavam corretos. A
+imagem Hero acima da dobra recebeu `fetchpriority="high"`. Não há variantes fonte qualificadas para
+`srcset`; nenhuma resize artificial ou pipeline de imagens foi criado. Coiny/Nunito já usam
+preconnect e `display=swap`. LCP/CLS de campo continuam desconhecidos e não foram inventados.
+
+### CI e documentação
+
+Nenhum workflow duplicado foi criado. Mudanças Web/E2E selecionam Chromium no Fast PR e o Release
+Quality Gate já executa todos os projetos. `docs/testing/02-design-system-quality-gates.md` registra
+cobertura, limitações, artefatos e comandos; `docs/ux/02-accessibility.md` deixou de declarar axe
+inexistente e passou a apontar o contrato atual.
+
+### Validação
+
+```text
+git diff --check
+# aprovado
+
+dotnet format BeeDay.slnx --verify-no-changes --no-restore
+# aprovado
+
+dotnet build BeeDay.slnx --configuration Release --no-restore --warnaserror
+# aprovado, 0 avisos, 0 erros
+
+dotnet test BeeDay.slnx --configuration Release --no-build --no-restore
+# 1.116/1.116 — Domain 93, Application 73, Infrastructure 129, Web 741, E2E 80
+
+BeeDay.Web.Tests — contrast/resources/Home: 20/20
+BeeDay.E2E.Tests — axe representative matrix: 4/4
+EF Core pending model changes: nenhum
+```
+
+### Itens `DEFER` e confirmação de escopo
+
+Validação manual por teclado/leitor de tela, certificação WCAG/legal, métricas reais de LCP/CLS,
+pipeline responsivo de imagem e screenshot baselines qualificados permanecem fora do que a automação
+prova. Documentation/migration sweep final → 25.16. Nenhuma funcionalidade de produto, redesign
+dirigido por snapshot, Application/Domain ou workflow paralelo foi introduzido.

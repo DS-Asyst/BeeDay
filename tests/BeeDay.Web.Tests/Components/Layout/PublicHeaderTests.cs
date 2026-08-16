@@ -71,6 +71,7 @@ public sealed class PublicHeaderTests
         var form = cut.Find("form.public-language-switcher");
         Assert.Equal("post", form.GetAttribute("method"));
         Assert.Equal("/culture/set", form.GetAttribute("action"));
+        Assert.Null(form.GetAttribute("role"));
         Assert.NotNull(cut.Find("input[name='returnUrl']"));
 
         var portuguese = cut.Find("button[aria-label='Português (Brasil)']");

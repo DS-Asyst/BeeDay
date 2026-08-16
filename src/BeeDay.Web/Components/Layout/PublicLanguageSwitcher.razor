@@ -4,7 +4,7 @@
 @inject NavigationManager Navigation
 @inject IStringLocalizer<SharedResources> Localizer
 
-<form method="post" action="/culture/set" class="public-language-switcher" role="group" aria-label="@Localizer["LanguageSwitcherGroupAriaLabel"]">
+<form method="post" action="/culture/set" class="public-language-switcher" aria-label="@Localizer["LanguageSwitcherGroupAriaLabel"]">
     <AntiforgeryToken />
     <input type="hidden" name="returnUrl" value="@ReturnUrl" />
     <button type="submit"
