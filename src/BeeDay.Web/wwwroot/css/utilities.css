@@ -5,7 +5,7 @@
 
 .beeday-surface {
     background: var(--beeday-color-surface);
-    border: 1px solid var(--beeday-color-border);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-md);
     box-shadow: var(--beeday-shadow-sm);
 }

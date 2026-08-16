@@ -16,7 +16,7 @@
     align-items: center;
     justify-content: center;
     gap: var(--beeday-spacing-sm);
-    padding: .5rem 1rem;
+    padding: var(--beeday-spacing-sm) var(--beeday-spacing-md);
     border: var(--beeday-border-width) solid var(--beeday-button-depth);
     border-bottom-width: var(--beeday-depth-md);
     border-radius: var(--beeday-radius-lg);
@@ -137,7 +137,7 @@
     width: 2.5rem;
     height: 2.5rem;
     padding: 0;
-    border: 1px solid var(--beeday-color-border);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-lg);
     color: var(--beeday-color-chrome-icon);
     background: var(--beeday-color-chrome-icon-surface);
@@ -357,14 +357,14 @@
 .beeday-hero__supporting {
     margin-top: var(--beeday-spacing-md);
     padding-top: var(--beeday-spacing-md);
-    border-top: 1px solid var(--beeday-color-border);
+    border-top: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     color: var(--beeday-color-text-secondary);
     font-size: var(--beeday-font-size-sm);
 }
 
 .beeday-hero--onboarding {
     padding: var(--beeday-spacing-lg);
-    border: 1px solid var(--beeday-color-border);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-lg);
     background: var(--beeday-color-brand-primary-soft);
 }

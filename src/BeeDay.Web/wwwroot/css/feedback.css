@@ -4,7 +4,7 @@
     z-index: 1400;
     display: grid;
     place-items: center;
-    padding: 1rem;
+    padding: var(--beeday-spacing-md);
     background: rgb(47 27 72 / 78%);
     backdrop-filter: blur(2px);
 }
@@ -13,7 +13,7 @@
     position: relative;
     width: min(31rem, calc(100vw - 2rem));
     overflow: hidden;
-    border: 1px solid var(--beeday-color-border);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-lg);
     background: var(--beeday-color-surface);
     box-shadow: var(--beeday-shadow-lg);
@@ -167,7 +167,7 @@
     align-items: start;
     gap: var(--beeday-spacing-smd);
     padding: var(--beeday-spacing-md);
-    border: 1px solid var(--beeday-color-border);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     border-left-width: .2rem;
     border-radius: var(--beeday-radius-md);
     background: var(--beeday-color-surface);
@@ -235,9 +235,9 @@
     z-index: var(--beeday-z-loading);
     display: inline-flex;
     align-items: center;
-    gap: .5rem;
-    padding: .5rem .75rem;
-    border: 1px solid var(--beeday-color-border);
+    gap: var(--beeday-spacing-sm);
+    padding: var(--beeday-spacing-sm) var(--beeday-spacing-smd);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-pill);
     background: rgb(255 255 255 / 92%);
     color: var(--beeday-color-text-primary);
@@ -282,31 +282,31 @@
 
 .dashboard-skeleton {
     width: 100%;
-    padding: 1rem 2rem 2rem;
+    padding: var(--beeday-spacing-md) var(--beeday-spacing-xl) var(--beeday-spacing-xl);
 }
 
 .dashboard-skeleton__summary,
 .dashboard-skeleton__card {
-    border: 1px solid var(--beeday-color-border);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-md);
     background: var(--beeday-color-surface);
     box-shadow: var(--beeday-shadow-sm);
 }
 
 .dashboard-skeleton__summary {
-    padding: 1.5rem;
+    padding: var(--beeday-spacing-lg);
 }
 
 .dashboard-skeleton__toolbar {
     width: 16rem;
     height: 2.5rem;
-    margin: 1.5rem 0;
+    margin: var(--beeday-spacing-lg) 0;
 }
 
 .dashboard-skeleton__grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1rem;
+    gap: var(--beeday-spacing-md);
 }
 
 .dashboard-skeleton__column {
@@ -321,7 +321,7 @@
 }
 
 .dashboard-skeleton__card {
-    padding: 1rem;
+    padding: var(--beeday-spacing-md);
 }
 
 @keyframes beeday-toast-enter {
@@ -342,7 +342,7 @@
 
 @media (max-width: 560px) {
     .beeday-toast-region { top: .75rem; right: .75rem; width: calc(100vw - 1.5rem); }
-    .dashboard-skeleton { padding: 1rem; }
+    .dashboard-skeleton { padding: var(--beeday-spacing-md); }
     .dashboard-skeleton__grid { grid-template-columns: 1fr; }
 }
 

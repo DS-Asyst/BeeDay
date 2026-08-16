@@ -10,7 +10,7 @@
 .brand-typography__accented-sample { margin: 0; color: var(--beeday-color-text-primary); font-size: clamp(1.7rem, 5vw, 3rem); line-height: 1.15; overflow-wrap: anywhere; }
 .brand-typography__role-intro h3 { margin: 0; color: var(--beeday-color-text-primary); font: var(--beeday-type-section-title); }
 .brand-typography__roles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--beeday-spacing-md); }
-.brand-typography__role { min-width: 0; padding: var(--beeday-spacing-lg); border: 1px solid var(--beeday-color-border); border-radius: var(--beeday-radius-lg); background: var(--beeday-color-surface); }
+.brand-typography__role { min-width: 0; padding: var(--beeday-spacing-lg); border: var(--beeday-border-width-subtle) solid var(--beeday-color-border); border-radius: var(--beeday-radius-lg); background: var(--beeday-color-surface); }
 .brand-typography__role p { margin: var(--beeday-spacing-md) 0 0; overflow-wrap: anywhere; }
 .brand-typography__role--display { grid-column: 1 / -1; }
 .brand-typography__role--display p { color: var(--beeday-color-brand-primary); font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.1; }

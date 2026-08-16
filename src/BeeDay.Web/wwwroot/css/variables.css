@@ -174,13 +174,14 @@
     --beeday-radius-md: .625rem;
     --beeday-radius-lg: .75rem;
     --beeday-radius-xl: 1rem;
-    /* Generous surface radius (large marketing/showcase cards, soft CTAs) — added Sprint 20.6
-       (EPIC 20) to represent the reference page-model's target visual language; the scale had no
-       step between xl (1.25rem) and pill (999px) for a rounded, non-pill surface. */
+    /* Generous surface radius for large marketing/showcase cards; the scale needs a rounded,
+       non-pill step above xl (1rem). */
     --beeday-radius-2xl: 1.5rem;
     --beeday-radius-pill: 999px;
 
-    /* Borders and physical depth — foundations for controls/surfaces and Sprint 21.5 buttons. */
+    /* Borders and physical depth. Subtle separates structural dividers/surfaces from the existing
+       2px interactive-control contract; --beeday-border-width remains stable for compatibility. */
+    --beeday-border-width-subtle: 1px;
     --beeday-border-width: 2px;
     --beeday-depth-sm: 2px;
     --beeday-depth-md: 4px;

@@ -2,7 +2,7 @@
    Final layout, rhythm, responsiveness and accessibility pass. */
 
 :root {
-    --beeday-grid: .5rem;
+    --beeday-grid: var(--beeday-spacing-sm);
     --beeday-control-height-sm: 2.5rem;
     --beeday-control-height-md: 3rem;
     --beeday-control-height-lg: 3.5rem;

@@ -23,7 +23,7 @@
     display: grid;
     min-width: 9rem;
     padding: .3rem;
-    border: 1px solid var(--beeday-color-border);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-xs);
     background: var(--beeday-color-surface);
     box-shadow: var(--beeday-shadow-sm);

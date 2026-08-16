@@ -1,8 +1,9 @@
 :root {
-    --activity-space-xs: .25rem;
-    --activity-space-sm: .5rem;
-    --activity-space-md: .75rem;
-    --activity-space-lg: 1rem;
+    /* Feature aliases preserve the Activity API while sharing the canonical physical scale. */
+    --activity-space-xs: var(--beeday-spacing-xs);
+    --activity-space-sm: var(--beeday-spacing-sm);
+    --activity-space-md: var(--beeday-spacing-smd);
+    --activity-space-lg: var(--beeday-spacing-md);
     --activity-radius-sm: .25rem;
     --activity-radius-md: .4rem;
     --activity-transition-fast: 120ms ease;

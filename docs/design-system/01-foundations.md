@@ -270,34 +270,79 @@ sem `!important`.
 
 ## 4. Espaçamento
 
-Escala linear de 9 degraus em `variables.css`, todos em `rem`:
+Escala canônica linear de 9 degraus em `variables.css`, todos em `rem`:
 
 ```text
 2xs .125rem  xs .25rem  sm .5rem  smd .75rem  md 1rem  lg 1.5rem  xl 2rem  2xl 3rem  3xl 4rem
 ```
 
-`polish.css` acrescenta uma segunda escala paralela e mais grossa, com nome próprio, usada para
-ritmo de página em vez de espaçamento interno de componente: `--beeday-grid` (.5rem — mesmo valor
-de `--beeday-spacing-sm`, mas token separado), `--beeday-control-height-{sm,md,lg}` (2.5/3/3.5rem),
+`polish.css` mantém o nome de contrato `--beeday-grid`, usado para ritmo de página, mas desde a
+Sprint 25.5 ele aliasa `--beeday-spacing-sm` em vez de declarar uma segunda origem física.
+`--beeday-control-height-{sm,md,lg}` (2.5/3/3.5rem),
 `--beeday-page-gutter` (`clamp(1rem, 2.5vw, 2rem)`), `--beeday-section-gap` (`clamp(1.5rem, 3vw,
 2.5rem)`), `--beeday-reading-width` (72rem, mas sobrescrita para `100%` abaixo de 60rem — ver §9).
 
-`activity-design-system.css` define uma **terceira** escala de espaçamento, com seu próprio prefixo
-(`--activity-space-{xs,sm,md,lg}` = .25/.5/.75/1rem), escopada aos cards de atividade — os valores
-coincidem numericamente com o início da escala principal, mas são tokens distintos, não aliases.
+`activity-design-system.css` preserva os nomes feature-scoped
+`--activity-space-{xs,sm,md,lg}` por compatibilidade, mas eles agora aliasam respectivamente
+`spacing-{xs,sm,smd,md}`. A feature mantém a API; a escala física tem uma única origem.
 
-## 5. Border radius
+### Ownership de spacing
 
-7 degraus em `variables.css`: `xs` .2rem, `sm` .375rem, `md` .625rem, `lg` .75rem, `xl` 1rem,
-`2xl` 1.5rem (consolidados na Sprint 21.4 para controles, navegação, cards e dialogs;
-desde a Sprint 20.8 é o radius default do `BeeDayCard` em si, não mais um modificador opt-in), `pill`
-999px (desde a Sprint 20.8, também o radius default do `BeeDayButton`). `activity-design-system.css`
-define mais dois, próprios (`--activity-radius-sm` .25rem, `--activity-radius-md` .4rem) — mesmo
-padrão de escala paralela do §4; não afetados pela mudança de default de `BeeDayCard` porque
-`.activity-card`/`.habit-card` (`cards.css`) já redeclaram sua própria borda/radius/sombra por
-completo, mesmo renderizando `<BeeDayCard>` como raiz (ver `02-components.md` §3).
+- **SHARED SCALE:** layout e componentes compartilhados usam os nove tokens quando o valor e a
+  intenção coincidem; valores exatos em Button, EditorModal, Feedback, layouts e skeletons foram
+  consolidados sem mudança computada.
+- **LEGITIMATE MICRO-SPACING:** ajustes como `.1rem`, `.18rem`, `.35rem` e assimetrias ópticas de
+  controles permanecem locais; arredondá-los para a escala alteraria densidade/alinhamento.
+- **FEATURE-SPECIFIC:** métricas compactas de Daily, Wallet e Project permanecem sob ownership da
+  feature, inclusive quando não coincidem com a escala.
+- **ILLUSTRATION / COMPOSITION:** offsets, sobreposições e ritmo artístico da Home/marketing não
+  viram tokens de Product UI.
+- **LEGACY / CANDIDATE:** literais exatamente equivalentes em shared UI podem migrar quando o
+  arquivo for tocado; a Sprint 25.5 não fez rewrite global por busca/substituição.
 
-## 6. Elevação (sombra)
+Inventário pré-alteração: **628** declarations de margin/padding/gap em 55 CSS, 167 com token e 461
+literais, 223 valores distintos. Depois da consolidação, o total visual permaneceu 628, com 188
+tokenizadas, 440 literais e 222 valores distintos. Redução bruta não foi critério de sucesso.
+
+## 5. Shape / border radius
+
+Sete degraus em `variables.css`: `xs` .2rem, `sm` .375rem, `md` .625rem, `lg` .75rem, `xl` 1rem,
+`2xl` 1.5rem e `pill` 999px. A linguagem beeday é arredondada, mas a forma comunica papel:
+
+- **controles e inputs:** `lg` (12px), alinhado a Button, icon toggle e fields;
+- **cards:** `lg` no default; `2xl` somente em prominent/showcase;
+- **panels:** `md` ou `lg` conforme densidade e hierarquia, sem se disfarçar de Card;
+- **dialogs/modals:** `lg`, combinada com overlay e elevação própria;
+- **pills/chips/progress tracks:** `pill` somente quando a silhueta deve permanecer cápsula;
+- **círculos:** `50%` em avatars, markers e ícones realmente quadrados — não substituir por pill;
+- **marketing:** `2xl` é a referência compartilhada; recortes/curvas artísticas permanecem locais.
+
+`activity-radius-sm` (.25rem) e `activity-radius-md` (.4rem) não coincidem com a escala global e
+continuam `FEATURE-SPECIFIC`; forçar alias mudaria a compactação real de Daily. Micro-radii de 2px
+em links/focus targets também permanecem locais. O inventário ficou em **99** declarations: 71
+tokenizadas e 28 locais (25 valores), sem alteração visual ou criação de aliases sem consumer.
+
+## 6. Borders, depth e elevation
+
+### Borders
+
+- `--beeday-border-width-subtle` (1px): divisores e boundaries estruturais de panels, dialogs,
+  menus, Footer, progress track e surfaces auxiliares;
+- `--beeday-border-width` (2px): contrato existente de controles interativos, fields e content
+  cards; nome preservado por backward compatibility;
+- Border Strong é responsabilidade de **cor** (`--beeday-color-border-strong`), não um convite a
+  engrossar arbitrariamente a borda;
+- validation/status muda a cor do mesmo boundary quando o estado exige; focus-visible usa outline
+  + focus ring e não depende apenas da border color;
+- bordas decorativas/feature-local podem permanecer literais quando representam composição, rail,
+  dado do usuário ou affordance específica.
+
+O baseline tinha 159 declarations de border e 51 ocorrências idênticas de
+`1px solid var(--beeday-color-border)`. A Sprint 25.5 criou o token subtle por contrato comprovado e
+migrou 20 consumers compartilhados; nenhum border computado mudou. Wallet, Project, Tutorial e
+outros consumers feature-local não sofreram migração ampla.
+
+### Physical depth e elevation
 
 4 degraus em `variables.css` (`--beeday-shadow-xs/sm/md/lg`), todos `box-shadow` compostos (2
 camadas para `sm`/`md`). `activity-design-system.css` acrescenta `--activity-shadow-rest`/
@@ -306,9 +351,23 @@ sombras `--beeday-game-*` já não existe na implementação atual; referências
 constituem tokens reservados.
 
 A Sprint 21.4 reduziu os quatro níveis globais para elevação sutil/controlada e acrescentou
-`--beeday-depth-sm/md/lg` (2/4/8px) como foundation física de borda para componentes futuros, sem
-aplicá-la antecipadamente ao `BeeDayButton`. `--beeday-border-width` (2px) e
-`--beeday-color-border-interactive` completam o contrato de bordas reutilizável.
+`--beeday-depth-sm/md/lg` (2/4/8px). O Button usa depth físico inferior `md`: repouso com bottom
+border de 4px; pressed colapsa a borda e desloca o controle pelos mesmos 4px. `sm`/`lg` permanecem
+reservados, não devem receber consumers apenas por simetria.
+
+Regras de uso:
+
+- **physical bottom depth:** ações pressionáveis que realmente colapsam/deslocam; não aplicar a
+  cards ou panels estáticos;
+- **shadow-xs/sm:** separação discreta de surface/menu/prominent card;
+- **shadow-md/lg:** feedback elevado, dialog/modal e overlay que precisa se separar do conteúdo;
+- **no shadow:** default para Button, Card e estruturas planas; border/surface já comunicam limite;
+- **local:** sombras inset de controles, drag preview, ilustração e feature feedback permanecem
+  locais quando não representam elevação global.
+
+O inventário permaneceu em **92** declarations de shadow/filter: 56 tokenizadas e 36 locais. Os
+literais restantes são `none`, blur/backdrop, shadows inset, animações ou composições específicas;
+nenhum foi promovido por igualdade aproximada.
 
 ## 7. Movimento
 
