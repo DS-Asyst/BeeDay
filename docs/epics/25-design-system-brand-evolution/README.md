@@ -11,10 +11,10 @@ de `dotnet format`/`dotnet build`/`dotnet test`. Nenhuma afirmação de "estado 
 memória — quando este documento evoluir em Sprints futuras, cada atualização deve reverificar
 contra o código antes de alterar uma afirmação de estado atual.
 
-**Última verificação:** 2026-08-16 (Sprint 25.2 — Brand Identity & Wordmark Convergence, COMPLETE —
-segunda Sprint de implementação da EPIC; ver "Sprint 25.2 — Results" ao final deste documento).
-Sprint 25.1 — Design System Governance & Brand Contract, COMPLETE (ver "Sprint 25.1 — Results",
-preservada como registro dessa Sprint).
+**Última verificação:** 2026-08-16 (Sprint 25.3 — Color System Consolidation, COMPLETE — ver
+"Sprint 25.3 — Results" ao final deste documento). Sprint 25.2 — Brand Identity & Wordmark
+Convergence e Sprint 25.1 — Design System Governance & Brand Contract permanecem preservadas como
+registros das Sprints anteriores.
 
 **Escopo:** formalizar a governança normativa que sustenta toda a EPIC 25 (beeday Design System &
 Brand System Evolution) e o contrato oficial de marca do beeday, evoluindo o Design System já
@@ -737,3 +737,165 @@ Wallet, Daily, ProjectWorkspace, Character System, Illustration System, Writing 
 `/brand/typography`, visual regression, axe, e limpeza ampla de CSS/documentação — nenhum desses foi
 tocado. As únicas correções de documentação feitas (`02-components.md` §8) foram estritamente sobre
 o componente que esta própria Sprint alterou, não uma varredura documental.
+
+---
+
+## Sprint 25.3 — Color System Consolidation (Results)
+
+**Branch:** `sprint/25.3-color-system-consolidation`, iniciada em `eab4369`, mesmo commit de `hmg` e
+`origin/hmg` após `git fetch origin --prune` (`0/0` de divergência). Nenhuma troca de branch, reset,
+stash, commit, push ou PR ocorreu.
+
+### Estado encontrado no handoff
+
+O working tree continha cinco arquivos unstaged, nenhum staged e nenhum untracked. As 18 alterações
+herdadas eram substituições sem mudança física de cor e foram classificadas `COHERENT PARTIAL
+IMPLEMENTATION`:
+
+- `BeeDayCardMenu.razor.css`: 3 aliases de Surface/Text Inverse em estados Danger;
+- `ProjectContextFilter.razor.css`: 3 usos dos aliases Chrome/Filter já existentes;
+- `ProjectWorkspace.razor.css`: 9 equivalências de branco para Surface/Text Inverse, sem
+  convergência estrutural da Feature;
+- `cards.css`: 2 usos de Text Inverse no status de Project;
+- `design-system.css`: 1 uso de Text Inverse no icon toggle ativo.
+
+Todas foram preservadas. Nenhum trabalho válido anterior foi revertido ou refeito.
+
+### Baseline cromático revalidado
+
+Metodologia reproduzível: custom properties com `color` no nome em `variables.css`; literals HEX/
+RGB/HSL em todos os CSS runtime fora de `variables.css` e do excerpt vendor, normalizando casing e
+HEX de três dígitos.
+
+| Métrica | HEAD antes da 25.3 | Final | Interpretação |
+|---|---:|---:|---|
+| Color tokens nomeados | 117 | 121 | +4 Product/Reward aliases; nenhuma cor física nova |
+| Literals fora da foundation | 123 | 105 | -18 equivalências herdadas, sem alteração visual |
+| Valores únicos fora da foundation | 75 | 73 | duas duplicações físicas deixaram de ser hardcode |
+| Literals em declarations da foundation | 100 | 96 | component aliases passaram a apontar para Surface/Content |
+| Valores físicos únicos na foundation | 91 | 91 | paleta física inalterada |
+
+### Taxonomia e ownership final
+
+- **Brand:** `#5247F9` é a única Brand Color aprovada; hover/active/light/soft são states da mesma
+  família.
+- **Surface:** Background, Surface, Muted, Subtle e Overlay; aliases iguais continuam separados por
+  responsabilidade.
+- **Content:** Text Primary/Secondary/Muted/Inverse e Border/Strong/Interactive.
+- **Semantic:** Success, Warning, Danger e Information; nenhum state foi criado só por simetria.
+- **Product:** Reward/XP, Task, To-Do, Project, Attributes, Habits e Wallet tag default.
+- **Illustration:** valores artísticos permanecem locais e não viram UI tokens automaticamente.
+- **Component:** Button, Card e Dashboard chrome podem aliasar foundations quando isso explicita o
+  contrato real.
+
+`#335F71` continua com tokens separados para Information e Task: igualdade física não elimina
+diferença semântica.
+
+### Brand Yellow — decisão
+
+`#FFD326` **não** foi promovido a segunda Brand Color. Os consumers reais são Reward/XP
+(`ExperienceBar` e `BeeDayProgressBar` tone Reward), portanto a classificação pedida é `SEMANTIC /
+COMPONENT`, com ownership de Product/Reward. Foram criados `--beeday-color-reward`, `-hover`,
+`-active` e `-foreground` e os consumers migraram sem mudança visual. `--beeday-color-brand-yellow*` permanece como
+`LEGACY / COMPATIBILITY`, aliasando Reward para não quebrar consumers externos ou indiretos.
+
+### Component aliases e Buttons
+
+Foregrounds Success, Danger e Reference Blue agora aliasam Text Inverse; Confirmation Cancel
+background aliasa Surface. As oito variants públicas, enum, classes, values, hover/press/focus,
+sizing e typography permanecem iguais. Danger e ConfirmationDanger continuam compartilhando a
+mesma família. Reference Blue permanece modifier legado fora do enum, candidato a revisão futura.
+
+### `BeeDayBrand.OnDarkSurface`
+
+A busca repo-wide confirmou zero consumers reais; apenas componente e teste exercem o parâmetro.
+O handoff exigia `beeday → #5247F9` em todos os modos, enquanto o CSS herdado da 25.2 ainda usava
+Text Inverse no modo inverse. O parâmetro, a classe e o markup foram preservados por backward
+compatibility, mas o modo agora mantém Brand Primary. Eventual contraste sobre uma surface escura
+real deve ser avaliado quando existir consumer; sem background runtime associado hoje, a medição de
+contraste é `N/A`. Não foi inventada `brand-white`/`brand-inverse`.
+
+### Focus
+
+O ring default continua derivado de Brand Primary (`rgb(82 71 249 / 32%)`). Focus inverse mantém o
+valor físico `#FFD326` e seu ring de 45%, mas com ownership independente de Reward. Ambos permanecem
+`RESERVED`, sem consumer runtime confirmado. Auditoria WCAG completa fica em `DEFER 25.15`.
+
+### Classificação de Features e hardcodes preservados
+
+- **Home:** `#464AFA`/`#4048F9`, `#D5EEFD` e brancos da composição são `ILLUSTRATION / DEFER
+  25.13`; não representam o wordmark e nenhum redesign ocorreu.
+- **Identity/Login:** feedbacks locais são Success/Danger por significado, mas usam valores físicos
+  diferentes da foundation: `LEGACY / DEFER 25.9`, sem Forms/Auth convergence.
+- **Wallet:** tag default, cores persistidas pelo usuário e constantes do contrast calculator são
+  `PRODUCT-SPECIFIC`; nenhuma migração estrutural ocorreu (`DEFER 25.11`).
+- **ProjectWorkspace:** 15 literals locais restantes são Feature/Product values ou `REQUIRES
+  REVIEW`; somente os nove brancos exatamente equivalentes foram normalizados (`DEFER 25.12`).
+- **Daily:** neutrals/shadows locais permanecem Feature/Component values até a convergência da
+  25.12.
+- **Overlays, shadows, alpha markers e provider/algorithmic values:** `LEGITIMATE LOCAL VALUE` ou
+  `REQUIRES REVIEW`, preservados.
+
+Os 105 literals restantes não foram tratados como falha da Sprint. Redução de hardcodes não foi
+usada como métrica isolada.
+
+### Tokens sem consumer estático
+
+Overlay e semantic soft states foram preservados como `RESERVED`; Attributes como
+`PRODUCT-SPECIFIC / RESERVED`; focus inverse como `RESERVED`; Brand Yellow como
+`COMPATIBILITY`; tokens com possível uso dinâmico/indireto como `UNKNOWN / DEFER`. Nenhum token foi
+removido por grep negativo; o sweep amplo pertence à 25.16.
+
+### Arquivos e testes
+
+13 arquivos modificados: `variables.css`; 8 CSS consumers (`BeeDayBrand`, `BeeDayProgressBar`,
+`BeeDayCardMenu`, `ExperienceBar`, `ProjectContextFilter`, `ProjectWorkspace`, `cards.css`,
+`design-system.css`); `VisualFoundationTests.cs`; `docs/design-system/01-foundations.md`;
+`docs/design-system/02-components.md`; e este documento.
+
+`VisualFoundationTests` foi atualizado para o Brand Primary em todos os modos e ganhou um novo test
+guardando Reward ownership, compatibility aliases e aliases de Button. O total da solução passou de
+1.063 para 1.064 testes.
+
+### Impacto arquitetural e backward compatibility
+
+Impacto restrito a Web foundations, CSS consumers, testes source-level e documentação. Domain,
+Application, Infrastructure, persistence e contratos públicos não mudaram. `BeeDayBrand` preservou
+parâmetro/markup; variants de Button foram preservadas; tokens Brand Yellow antigos continuam
+resolvendo para os mesmos valores; nenhuma cor computada foi alterada fora da correção explícita de
+`OnDarkSurface`, que não possui consumer runtime.
+
+### Validação final
+
+```bash
+git diff --check
+# aprovado, sem saída após normalização CRLF
+
+dotnet format BeeDay.slnx --verify-no-changes
+# aprovado
+
+dotnet build BeeDay.slnx
+# aprovado, 0 aviso(s), 0 erro(s)
+
+dotnet test tests/BeeDay.Web.Tests/BeeDay.Web.Tests.csproj \
+  --filter "FullyQualifiedName~VisualFoundationTests|FullyQualifiedName~BeeDayBrandTests"
+# 9/9 aprovados
+
+dotnet test BeeDay.slnx --no-build
+# 1.064/1.064 aprovados: Domain 93, Application 73, Infrastructure 129, Web 704, E2E 65
+
+git status
+# 13 arquivos modificados, nenhum staged e nenhum untracked
+```
+
+Não houve falha, retry ou resultado flaky nesta Sprint; classificação de falhas: **nenhuma**. A
+suíte completa incluiu todos os 65 E2E Chromium, cobrindo as superfícies críticas afetadas pelo CSS
+compartilhado.
+
+### Itens `DEFER` e confirmação de escopo
+
+Identity/Login → 25.9; Wallet → 25.11; Daily/ProjectWorkspace → 25.12; Home/Illustration → 25.13;
+WCAG/visual regression/axe → 25.15; remoção de tokens/assets/aliases legados → 25.16. Coiny,
+typography, spacing, radius, borders estruturais, shadows/depth, motion, z-index, breakpoints,
+responsive architecture, component API redesign, Writing System e qualquer rota `/brand/color`
+não foram antecipados. A Sprint para aqui; 25.4 não foi iniciada.

@@ -1,16 +1,11 @@
 :root {
-    /* Brand — one semantic family, migrated to the official Epic 22 BeeDay palette (#5247F9). Hover/
-       active/light/soft preserve the same hue and the same saturation/lightness offsets from base
-       that the previous Epic 21 family (#3A4ED9) used, so the ladder stays coherent under the new hue. */
+    /* Brand — #5247F9 is the only officially approved brand color. Hover/active/light/soft are
+       interaction and surface states derived from the same primary family, not additional brand colors. */
     --beeday-color-brand-primary: #5247f9;
     --beeday-color-brand-primary-hover: #3f33f1;
     --beeday-color-brand-primary-active: #1c0ef2;
     --beeday-color-brand-primary-light: #827afc;
     --beeday-color-brand-primary-soft: #f8f7ff;
-    --beeday-color-brand-yellow: #ffd326;
-    --beeday-color-brand-yellow-hover: #e8bd00;
-    --beeday-color-brand-yellow-active: #cda600;
-    --beeday-color-brand-yellow-foreground: #2f2737;
 
     /* Surfaces */
     --beeday-color-background: #ffffff;
@@ -28,7 +23,7 @@
     --beeday-color-border-strong: #cecece;
     --beeday-color-border-interactive: var(--beeday-color-brand-primary);
 
-    /* Status */
+    /* Semantic feedback */
     --beeday-color-success: #2f9e5b;
     --beeday-color-success-soft: #e8f7ee;
     --beeday-color-warning: #d89b22;
@@ -39,7 +34,19 @@
     --beeday-color-info: #335f71;
     --beeday-color-info-soft: #e7f0f4;
 
-    /* Activity accents */
+    /* Product semantics — reward/XP. Yellow is not an approved secondary brand color. */
+    --beeday-color-reward: #ffd326;
+    --beeday-color-reward-hover: #e8bd00;
+    --beeday-color-reward-active: #cda600;
+    --beeday-color-reward-foreground: var(--beeday-color-text-primary);
+
+    /* Legacy public names kept for backward compatibility. New consumers use the reward family. */
+    --beeday-color-brand-yellow: var(--beeday-color-reward);
+    --beeday-color-brand-yellow-hover: var(--beeday-color-reward-hover);
+    --beeday-color-brand-yellow-active: var(--beeday-color-reward-active);
+    --beeday-color-brand-yellow-foreground: var(--beeday-color-reward-foreground);
+
+    /* Product semantics — activity accents */
     --beeday-color-task: #335f71;
     --beeday-color-task-dark: #244554;
     --beeday-color-todo: #bf2ec7;
@@ -47,13 +54,13 @@
     --beeday-color-project: #8056c7;
     --beeday-color-project-dark: #613ca2;
 
-    /* Activity attributes — dedicated identity colors, distinct from status/brand tokens */
+    /* Product semantics — activity attributes, distinct from feedback and brand tokens */
     --beeday-color-attribute-strength: #b3432f;
     --beeday-color-attribute-dexterity: #1f8a99;
     --beeday-color-attribute-intelligence: #4456c9;
     --beeday-color-attribute-vitality: #b23a86;
 
-    /* Wallet */
+    /* Product semantics — Wallet */
     --beeday-color-tag-default: #7a4fcb;
 
     /* BeeDayButton semantic palettes. Depth is a physical bottom border, not a shadow. */
@@ -75,7 +82,7 @@
 
     --beeday-color-button-success-bg: #36a866;
     --beeday-color-button-success-bg-hover: #46b976;
-    --beeday-color-button-success-fg: #ffffff;
+    --beeday-color-button-success-fg: var(--beeday-color-text-inverse);
     --beeday-color-button-success-outline: #1a6139;
     --beeday-color-button-success-depth: #287d4d;
     --beeday-color-button-success-shadow: #174a2d;
@@ -96,12 +103,12 @@
 
     --beeday-color-button-danger-bg: var(--beeday-color-danger);
     --beeday-color-button-danger-bg-hover: #d94c57;
-    --beeday-color-button-danger-fg: #ffffff;
+    --beeday-color-button-danger-fg: var(--beeday-color-text-inverse);
     --beeday-color-button-danger-outline: #691a20;
     --beeday-color-button-danger-depth: #9f2a32;
     --beeday-color-button-danger-shadow: #57151a;
 
-    --beeday-color-button-confirmation-cancel-bg: #ffffff;
+    --beeday-color-button-confirmation-cancel-bg: var(--beeday-color-surface);
     --beeday-color-button-confirmation-cancel-bg-hover: #f1f1f1;
     --beeday-color-button-confirmation-cancel-fg: #171321;
     --beeday-color-button-confirmation-cancel-outline: #444047;
@@ -111,7 +118,7 @@
 
     --beeday-color-button-reference-blue-bg: #20b4f4;
     --beeday-color-button-reference-blue-bg-hover: #2dbcf8;
-    --beeday-color-button-reference-blue-fg: #ffffff;
+    --beeday-color-button-reference-blue-fg: var(--beeday-color-text-inverse);
     --beeday-color-button-reference-blue-outline: #075b8f;
     --beeday-color-button-reference-blue-depth: #087fbe;
     --beeday-color-button-reference-blue-shadow: #064b78;
@@ -132,7 +139,7 @@
     --beeday-color-filter-surface-tint: #f2eef7;
     --beeday-color-board-surface: #ebe9ec;
 
-    /* Habit colors — single source for the Habit card side rail/score button and
+    /* Product semantics — Habit colors. Single source for the Habit card side rail/score button and
        the matching Habit editor accent, so both surfaces of the same chosen
        color never drift apart. */
     --beeday-habit-color-white: #f7f6f8;
@@ -194,7 +201,9 @@
        only recolors a transient interaction indicator, consistently, everywhere. */
     --beeday-focus-color: rgb(82 71 249 / 32%);
     --beeday-focus-ring: 0 0 0 3px var(--beeday-focus-color);
-    --beeday-focus-color-inverse: var(--beeday-color-brand-yellow);
+    /* The inverse focus color intentionally shares reward yellow's physical value but owns a
+       separate interaction responsibility. */
+    --beeday-focus-color-inverse: #ffd326;
     --beeday-focus-ring-inverse: 0 0 0 3px rgb(255 211 38 / 45%);
 
     /* Motion */

@@ -64,9 +64,9 @@
     top: -.7rem;
     right: .65rem;
     padding: .2rem .38rem;
-    color: var(--beeday-color-brand-yellow-foreground);
-    background: var(--beeday-color-brand-yellow);
-    border: 1px solid var(--beeday-color-brand-yellow-active);
+    color: var(--beeday-color-reward-foreground);
+    background: var(--beeday-color-reward);
+    border: 1px solid var(--beeday-color-reward-active);
     box-shadow: var(--beeday-shadow-xs);
     font-size: .8rem;
     font-weight: 800;

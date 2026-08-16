@@ -9,7 +9,7 @@ public sealed class VisualFoundationTests
     private static readonly string RepoRoot = ResolveRepoRoot();
 
     [Fact]
-    public void BrandFamilyUsesTheOfficialBeeDayPaletteWithoutAParallelNamespace()
+    public void BrandFamilyUsesTheOfficialPrimaryPaletteWithoutASecondBrandColor()
     {
         var css = ReadWebFile("wwwroot", "css", "variables.css");
 
@@ -18,9 +18,9 @@ public sealed class VisualFoundationTests
         Assert.Contains("--beeday-color-brand-primary-active: #1c0ef2;", css, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("--beeday-color-brand-primary-light: #827afc;", css, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("--beeday-color-brand-primary-soft: #f8f7ff;", css, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("--beeday-color-brand-yellow: #ffd326;", css, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("--beeday-color-brand-yellow-hover: #e8bd00;", css, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("--beeday-color-brand-yellow-foreground: #2f2737;", css, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-color-brand-yellow: var(--beeday-color-reward);", css, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-color-brand-yellow-hover: var(--beeday-color-reward-hover);", css, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-color-brand-yellow-foreground: var(--beeday-color-reward-foreground);", css, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("#1023c8", css, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("#1e33ed", css, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("#0c1b99", css, StringComparison.OrdinalIgnoreCase);
@@ -45,15 +45,35 @@ public sealed class VisualFoundationTests
     }
 
     [Fact]
-    public void SharedBrandPreservesLightAndInverseColorContracts()
+    public void SharedBrandUsesTheOfficialPrimaryInEverySupportedMode()
     {
         var brand = ReadWebFile("Components", "DesignSystem", "Text", "BeeDayBrand.razor.css");
 
         Assert.Contains(".beeday-brand__bee,", brand, StringComparison.Ordinal);
         Assert.Contains(".beeday-brand__day { color: var(--beeday-color-brand-primary); }", brand, StringComparison.Ordinal);
         Assert.Contains(".beeday-brand--inverse .beeday-brand__bee,", brand, StringComparison.Ordinal);
-        Assert.Contains(".beeday-brand--inverse .beeday-brand__day { color: var(--beeday-color-text-inverse); }", brand, StringComparison.Ordinal);
+        Assert.Contains(".beeday-brand--inverse .beeday-brand__day { color: var(--beeday-color-brand-primary); }", brand, StringComparison.Ordinal);
         Assert.DoesNotContain("--beeday-color-brand-yellow", brand, StringComparison.Ordinal);
+        Assert.DoesNotContain("--beeday-color-text-inverse", brand, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RewardAndButtonAliasesPreserveSemanticOwnership()
+    {
+        var variables = ReadWebFile("wwwroot", "css", "variables.css");
+        var progress = ReadWebFile("Components", "DesignSystem", "Progress", "BeeDayProgressBar.razor.css");
+        var experience = ReadWebFile("Components", "Features", "Experience", "Components", "ExperienceBar.razor.css");
+
+        Assert.Contains("--beeday-color-reward: #ffd326;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-color-reward-active: #cda600;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-color-reward-foreground: var(--beeday-color-text-primary);", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-color-button-success-fg: var(--beeday-color-text-inverse);", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-color-button-danger-fg: var(--beeday-color-text-inverse);", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-color-button-confirmation-cancel-bg: var(--beeday-color-surface);", variables, StringComparison.Ordinal);
+        Assert.Contains("var(--beeday-color-reward)", progress, StringComparison.Ordinal);
+        Assert.Contains("var(--beeday-color-reward)", experience, StringComparison.Ordinal);
+        Assert.DoesNotContain("var(--beeday-color-brand-yellow", progress, StringComparison.Ordinal);
+        Assert.DoesNotContain("var(--beeday-color-brand-yellow", experience, StringComparison.Ordinal);
     }
 
     [Fact]

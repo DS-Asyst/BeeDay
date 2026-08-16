@@ -453,14 +453,14 @@
     margin: 0;
     border: 0;
     border-radius: 0;
-    color: #fff;
+    color: var(--beeday-color-text-inverse);
     background: transparent;
     box-shadow: none;
 }
 
 .activity-card--project .activity-card__project-status svg,
 .activity-card--project .activity-card__project-status .beeday-icon {
-    color: #fff;
+    color: var(--beeday-color-text-inverse);
     fill: currentColor;
 }
 

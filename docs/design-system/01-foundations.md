@@ -1,20 +1,24 @@
 # Foundations
 
 **Fonte da verdade:** verificado diretamente em `src/BeeDay.Web/wwwroot/css/variables.css`,
-`theme.css`, `typography.css`, `typography-policy.css`, `utilities.css`, `polish.css`, e um
+`theme.css`, `typography.css`, `typography-policy.css`, `utilities.css`, `polish.css`,
+`src/BeeDay.Web/wwwroot/app.css`, e um
 levantamento completo de todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css`
-(19 arquivos) e `src/BeeDay.Web/Components/**/*.razor.css` (36 arquivos de CSS isolado por
+(17 arquivos no snapshot atual) e `src/BeeDay.Web/Components/**/*.razor.css` (36 arquivos de CSS isolado por
 componente — quatro novos na Sprint 21.3 (`Layout/{NavigationItem,NavigationItems,MobileHeader,
 MobileSidebar}.razor.css`), um removido (`Layout/TopNavigation.razor.css`, componente deletado —
 ver `docs/web/03-layouts.md`), ver abaixo e `docs/ux/03-responsive.md`).
 
-**Última verificação:** 2026-08-15 (Sprint 22.2, EPIC 22 — Hero Image, CTA & Brand Alignment). A
-família azul oficial é `#5247F9`/`#3F33F1`/`#1C0EF2`; a família amarela de marca/recompensa usa
-`#FFD326`/`#E8BD00`. Nenhum namespace paralelo foi criado — o token contextual
-`--beeday-color-public-home-cta`, introduzido na Sprint 21.16 especificamente para o CTA do Hero, foi
-removido nesta Sprint em favor do token de marca compartilhado. Nunito continua sendo a única
-tipografia de produto; a tipografia própria da marca existe apenas dentro do asset oficial
-`beeday-wordmark.png`.
+**Última verificação:** 2026-08-16 (Sprint 25.3, EPIC 25 — Color System Consolidation) — §2
+reconstruído diretamente de `variables.css`, dos 54 arquivos CSS runtime e dos consumers Razor/C#
+de cores especializadas. `#5247F9` permanece a única Brand Color aprovada; `#FFD326` foi
+formalizado como Product/Reward sem mudança física, mantendo `brand-yellow*` apenas como aliases de
+compatibilidade. Surface, Content, Semantic, Product, Illustration e Component agora possuem
+ownership explícito, assim como a hardcode policy e os itens `DEFER`.
+
+Verificação anterior: 2026-08-15 (Sprint 22.2, EPIC 22 — Hero Image, CTA & Brand Alignment) —
+família primary remigrada para `#5247F9`/`#3F33F1`/`#1C0EF2` e CTA público consolidado no token
+compartilhado. Afirmações tipográficas dessa revisão não foram reavaliadas pela Sprint 25.3.
 
 Verificação anterior: 2026-08-15 (Sprint 22.1, EPIC 22 — Public Home Header, Brand & Language
 Switcher, correção de Brand Color).
@@ -56,84 +60,133 @@ já que não existem como token.
 
 ## 2. Cores
 
-Todos os tokens de cor vivem em `:root` de `variables.css`, em 3 blocos (linha 1: paleta de
-produto; linha 253: paleta "game"/pixel-console; linha 271: tokens de motion pixel-UI).
+O owner de declarations compartilhadas continua sendo o único `:root` de `variables.css`. A Sprint
+25.3 revalidou **121 custom properties com `color` no nome**: 117 já existiam no baseline e quatro
+tokens de Product/Reward foram adicionados sem introduzir nenhuma cor física nova. Focus e shadows
+possuem nomes próprios e continuam na mesma foundation.
 
-### 2.1 Paleta de produto
+### 2.1 Taxonomia e ownership
 
-```mermaid
-graph TD
-    Brand["Marca (legada)<br/>primary #673ab7, primary-hover, primary-active,<br/>primary-light, primary-soft, accent #f29b24"]
-    BrandNew["Marca (canônica, Sprint 20.6)<br/>brand-primary #2538d2, -hover, -active, -light"]
-    Surface["Superfícies<br/>background, surface, surface-muted,<br/>surface-subtle, overlay"]
-    Content["Conteúdo<br/>text-primary, text-secondary, text-muted,<br/>text-inverse, border, border-strong"]
-    Status["Status<br/>success, warning, danger, info<br/>(cada um com variante -soft)"]
-    Activity["Acentos de atividade<br/>task, todo, project (+ -dark)"]
-    Attribute["Atributos de atividade<br/>strength, dexterity, intelligence, vitality"]
-    Habit["Cores de Hábito (7)<br/>white, yellow, green, sky,<br/>red-light, red-medium, red-strong (+ -dark)"]
-    Button["Paletas de botão (8 variantes)<br/>bg, bg-hover, fg, outline, depth, shadow[, focus]"]
-    Comic["Paletas 'comic' (7)<br/>blue, yellow, back, danger, neutral, success, orange, magenta"]
-    Card["Cores de card<br/>title, description, star, meta-text, meta-bg"]
-    Chrome["Chrome do dashboard<br/>icon, icon-surface, filter-surface-tint, board-surface"]
-```
+| Categoria | Responsabilidade | Exemplos atuais |
+|---|---|---|
+| Brand | identidade oficial e seus estados diretamente derivados | `brand-primary`, `-hover`, `-active`, `-light`, `-soft` |
+| Surface | fundos e camadas neutras compartilhadas | `background`, `surface`, `surface-muted`, `surface-subtle`, `overlay` |
+| Content | texto, borda e conteúdo interativo | `text-primary`, `text-secondary`, `text-muted`, `text-inverse`, `border*` |
+| Semantic | feedback independente de Feature | `success`, `warning`, `danger`, `info` e somente os states existentes |
+| Product | significados do produto | `reward`, Task, To-Do, Project, Attributes, Habits e Wallet tag default |
+| Illustration | valores de composição artística | permanecem locais; não são promovidos automaticamente a UI tokens |
+| Component | aliases que estabilizam a implementação de uma primitive | famílias `button-*`, `card-*` e chrome do Dashboard |
 
-Nenhuma cor é definida duas vezes com valores diferentes sob o mesmo nome — cada família (Brand,
-Status, Activity, Attribute, Habit, Button, Comic, Card, Chrome) tem seu próprio namespace de
-token, então uma alteração em uma família nunca risca colidir com outra.
+Mesmo valor físico não implica mesmo ownership. `#335F71`, por exemplo, continua representando
+separadamente Information e Task; `#FFFFFF` continua sendo Background, Surface e Text Inverse por
+responsabilidades legítimas distintas.
 
-**Migração de marca atual (Sprint 22.1, EPIC 22):** `--beeday-color-brand-primary` é `#5247F9`,
-com hover `#3F33F1`, active/depth `#1C0EF2`, light `#827AFC` e soft `#F8F7FF` — remigração completa
-da família Sprint 21.16 (`#3A4ED9`), aprovada como cor oficial da marca para a EPIC 22. Hover/active/
-light/soft preservam a mesma matiz e os mesmos deslocamentos de saturação/luminosidade relativos à
-base que a família anterior usava, então a escada permanece coerente sob a nova matiz. `--beeday-focus-color`
-e as sombras `--beeday-shadow-xs/-sm/-md/-lg` (literais `rgb()`, pois CSS não extrai canais de uma
-custom property em hex) foram atualizados para os mesmos canais RGB da nova base (`82 71 249`). Azul
-é estrutura e ação: primary buttons, links importantes, navegação/foco/seleção e progresso funcional.
-A segunda metade da identidade é canônica em `--beeday-color-brand-yellow` (`#FFD326`) e `-hover`
-(`#E8BD00`): reward, XP, milestones e highlights de alta relevância, sempre com foreground escuro. O
-antigo namespace `--beeday-game-yellow*` foi removido. Cores de status (`success`, `warning`,
-`danger`, `info`), atividades e Wallet permanecem semanticamente independentes; brand yellow nunca
-significa warning automaticamente e brand blue não substitui info. O token contextual
-`--beeday-color-public-home-cta` (`#0079B9` e variantes, Sprint 21.16, ajustado por contraste AA
-sobre um fundo cyan que não existe mais no Hero) foi removido na Sprint 22.2 — o CTA `Get started`
-da Public Home agora usa `--beeday-color-brand-primary` diretamente, como qualquer outro botão
-primário do produto, sem paleta paralela.
+### 2.2 Brand
 
-Surfaces permanecem neutras. Azul e amarelo devem ganhar importância por contraste e hierarquia,
-não por preencher indiscriminadamente cards ou páginas. É proibido criar famílias `new`/`v2`, usar
-texto branco sobre amarelo, ou codificar os HEX de marca diretamente em componentes/assets.
+`#5247F9` é a única cor oficialmente aprovada da marca. `--beeday-color-brand-primary` é o token
+canônico; hover `#3F33F1`, active `#1C0EF2`, light `#827AFC` e soft `#F8F7FF` são states derivados,
+não novas cores de marca. O nome visual `beeday`, inclusive quando `BeeDayBrand.OnDarkSurface` está
+ativo, usa Brand Primary. O parâmetro e a classe inverse permanecem por backward compatibility, mas
+não mudam a cor; não existe consumer real de produto desse modo no snapshot da Sprint 25.3.
 
-**Histórico (Sprint 21.16, EPIC 21):** `--beeday-color-brand-primary` era `#3A4ED9`, com hover
-`#3043C7`, active/depth `#2637AD`, light `#6675E3` e soft `#EFF1FF` — família remigrada integralmente
-na Sprint 22.1 (ver acima); nenhum consumidor manteve o valor antigo.
+### 2.3 Reward e aliases legados de Brand Yellow
 
-**Histórico (Sprint 20.7, EPIC 20):** `--beeday-color-brand-primary` (`#2538d2`,
-extraído diretamente da página-modelo) é a cor primária **canônica** de todo o produto. Introduzida na
-Sprint 20.6 ao lado de `--beeday-color-primary` (`#673ab7`, roxo) mantida como compatibilidade
-temporária; a Sprint 20.7 auditou repo-wide todo consumidor real de `--beeday-color-primary`
-(classificando cada um por semântica — brand vs. status vs. activity, nunca um search/replace cego),
-migrou todos os que eram genuinamente de marca/chrome genérico, e confirmou **zero consumidores
-restantes** — por isso `--beeday-color-primary` foi **removida** de `variables.css`, em vez de mantida
-indefinidamente. Cores de status (`success`/`warning`/`danger`/`info`) e de atividade
-(`task`/`todo`/`project`/atributos/hábitos) nunca usaram este token para sua própria semântica — não
-foram tocadas. O amarelo de acento da referência (`#ffd326`/`#ffb72e`) não ganhou token novo —
-`--beeday-game-yellow` (`#ffc928`) já é próximo o suficiente e foi reutilizado como está.
+`#FFD326` não é uma segunda brand color aprovada. Seus consumers reais são recompensa/XP:
+`ExperienceBar` e o tone `Reward` de `BeeDayProgressBar`. A classificação pedida é `SEMANTIC /
+COMPONENT`, com ownership de Product/Reward nos tokens `--beeday-color-reward`, `-hover`, `-active`
+e `-foreground`.
 
-### 2.2 Paleta "game" (pixel-console)
+Os nomes públicos `--beeday-color-brand-yellow*` foram preservados como aliases dos tokens Reward
+para backward compatibility; não devem receber novos consumers. `--beeday-focus-color-inverse`
+mantém o mesmo valor físico amarelo com responsabilidade independente de foco. O token não possui
+consumer runtime confirmado e foi preservado como `RESERVED`, sem remoção baseada apenas em grep.
 
-Bloco `:root` separado: `--beeday-game-ink`, `-ink-soft`, `-paper`, `-panel`, `-blue`,
-`-blue-dark`, `-red`, `-green`, mais 3 tokens de borda/sombra
-pixel-style (`-border`, `-shadow-sm/md/lg`). Consumida pelos botões "comic"/"skew-press"/
-"comic-press" (`design-system.css`) e pelo adapter NES (`pixel-nes.css`).
+### 2.4 Surface e Content
 
-### 2.3 Cores hardcoded fora do sistema de tokens
+Background e Surface compartilham branco intencionalmente: o primeiro representa canvas de página;
+o segundo, superfícies de componentes. Muted/Subtle permanecem degraus neutros distintos. Overlay é
+uma reserva compartilhada ainda sem consumer direto; overlays locais de modals/drawers não foram
+remapeados porque possuem alphas e contextos diferentes.
 
-Vários arquivos declaram cores literais em vez de referenciar um token — não é um erro (muitas são
-estados pontuais como `#dff5df`/`#761919` em `identity.css` para feedback de sucesso/erro), mas
-significa que uma paleta única e auditável não cobre 100% das cores do repositório. Exemplos:
-`identity.css` (feedback success/error, cores literais distintas de `--beeday-color-success`/
-`-danger`), `feedback.css` (`#e2f5e9`/`#fde8e8` para ícones de toast), `cards.css`
-(`#b9b1c2`, `#756c7d`).
+Content mantém Primary, Secondary, Muted e Inverse, além de Border, Border Strong e Border
+Interactive. Aliases de componente numericamente equivalentes agora apontam para esses conceitos:
+foregrounds Success/Danger/Reference Blue de `BeeDayButton` usam Text Inverse, e Confirmation
+Cancel usa Surface. Não houve alteração de cor computada.
+
+### 2.5 Semantic feedback
+
+Success, Warning, Danger e Information são as quatro famílias compartilhadas. Apenas states já
+existentes permanecem: soft para as quatro e hover somente para Danger. Não foi criada uma matriz
+artificial de hover/active/border/focus. Os feedbacks paralelos de Login/Identity são semanticamente
+Success/Danger, mas seus valores físicos diferem da foundation; foram classificados `LEGACY /
+DEFER 25.9` para evitar mudança visual e convergência prematura de Forms/Auth.
+
+### 2.6 Product colors
+
+- Task, To-Do e Project são identidades compartilhadas das Activities; Information e Task mantêm
+  tokens separados mesmo compartilhando `#335F71`.
+- Habit preserva sua escala escolhida pelo usuário, inclusive amarelos/vermelhos que não significam
+  Warning/Danger.
+- Attributes permanecem tokens especializados `RESERVED`: a UI foi retirada, mas Domain e contratos
+  continuam existindo.
+- Wallet preserva `tag-default` e cores arbitrárias persistidas; constantes de contraste e defaults
+  em C#/Razor não podem depender de CSS custom properties.
+- Reward/XP usa a família `reward*` descrita acima.
+
+### 2.7 Illustration boundary e Features adiadas
+
+Valores de ilustração podem ter linguagem própria e não precisam virar semantic UI tokens. Na Home,
+`#464AFA`/`#4048F9` pertencem à composição de fechamento com personagens/wave, não ao wordmark nem a
+uma action foundation: `ILLUSTRATION / DEFER 25.13`. O fundo `#D5EEFD` e seus keyframes seguem a
+mesma fronteira. Nenhum redesign da Home foi feito.
+
+ProjectWorkspace mantém seus neutrals locais e é `DEFER 25.12`; somente brancos exatamente
+equivalentes a Surface/Text Inverse foram normalizados. Wallet é `DEFER 25.11` e não sofreu
+migração estrutural. Daily/chrome preserva Product/Component ownership e também aguarda 25.12 para
+convergência mais ampla.
+
+### 2.8 Component aliases e Buttons
+
+O fluxo preferido é `foundation/semantic → component alias → implementation` quando o alias torna
+states reais compreensíveis. As oito variants públicas de `BeeDayButton` permanecem inalteradas:
+Primary, Secondary, Success, Warning, Back, Danger, ConfirmationDanger e ConfirmationCancel.
+Danger e ConfirmationDanger compartilham deliberadamente a mesma família; Reference Blue é um
+modifier legado fora do enum e foi preservado. Nenhum valor, API, behavior, sizing ou typography de
+botão mudou.
+
+### 2.9 Focus
+
+O focus ring default deriva dos canais de Brand Primary (`rgb(82 71 249 / 32%)`). O focus inverse
+mantém `#FFD326`/45% como responsabilidade de interação independente de Reward e não tem consumer
+runtime confirmado. A auditoria de acessibilidade completa e eventual revisão de contraste ficam em
+`DEFER 25.15`; nenhum conflito óbvio foi introduzido nesta Sprint.
+
+### 2.10 Hardcode policy e inventário atual
+
+Todo literal deve ser classificado antes de migrar:
+
+| Classificação | Ação |
+|---|---|
+| `TOKEN EQUIVALENT EXISTS` | substituir somente com mesma semântica e cor computada |
+| `NEW SHARED CONCEPT` | criar token apenas com ownership e reutilização comprovados |
+| `LEGITIMATE LOCAL VALUE` | manter local |
+| `ILLUSTRATION VALUE` | manter na composição; não promover a UI semantic |
+| `PRODUCT-SPECIFIC VALUE` | manter no namespace/Feature de produto apropriado |
+| `LEGACY / CANDIDATE` | documentar e migrar na Sprint owner |
+| `REQUIRES REVIEW` | preservar até existir evidência suficiente |
+
+No HEAD anterior à implementação parcial da Sprint 25.3 havia **123 ocorrências** de literals em CSS
+runtime fora de `variables.css` e do excerpt vendor, com **75 valores normalizados únicos**. As 18
+substituições de alta confiança encontradas no handoff reduziram o estado atual para **105
+ocorrências / 73 valores únicos**, sem mudança visual. Permaneceram, entre outros: ProjectWorkspace
+(15), Home (12), Identity/Login (11), `app.css` (17), cards (13), feedback (6), overlays, shadows e
+valores algorítmicos. Redução de hardcodes não é métrica isolada de sucesso; esses valores foram
+preservados porque são locais, artísticos, product-specific, diferentes da foundation ou pertencem
+a uma Sprint futura.
+
+Tokens sem consumer estático não são removidos automaticamente. Overlay, semantic soft states,
+Attributes, focus inverse e aliases legados foram classificados como `RESERVED`, `INDIRECT`,
+`COMPATIBILITY` ou `DEFER`; a remoção ampla pertence à Sprint 25.16.
 
 ## 3. Tipografia
 
@@ -209,9 +262,9 @@ completo, mesmo renderizando `<BeeDayCard>` como raiz (ver `02-components.md` §
 
 4 degraus em `variables.css` (`--beeday-shadow-xs/sm/md/lg`), todos `box-shadow` compostos (2
 camadas para `sm`/`md`). `activity-design-system.css` acrescenta `--activity-shadow-rest`/
-`-hover`, valores próprios não derivados dos 4 degraus principais. A paleta "game" acrescenta 3
-sombras "pixel" (`--beeday-game-shadow-sm/md/lg`) — offset sólido sem blur (`0 3px 0 var(--beeday-game-ink)`),
-usadas pelos botões "comic"/"comic-press" em vez das sombras com blur do sistema principal.
+`-hover`, valores próprios não derivados dos 4 degraus principais. A antiga família cromática e de
+sombras `--beeday-game-*` já não existe na implementação atual; referências históricas a ela não
+constituem tokens reservados.
 
 A Sprint 21.4 reduziu os quatro níveis globais para elevação sutil/controlada e acrescentou
 `--beeday-depth-sm/md/lg` (2/4/8px) como foundation física de borda para componentes futuros, sem
@@ -258,15 +311,16 @@ graph TD
 
 ## 9. Duas camadas de CSS: global e isolado por componente
 
-Além das 19 folhas globais em `wwwroot/css/` (carregadas por `<link>` em `App.razor`
+Além das 17 folhas em `wwwroot/css/` e de `wwwroot/app.css` (18 folhas globais carregadas por
+`<link>` em `App.razor`
 — ver [`docs/web/05-design-system-integration.md`](../web/05-design-system-integration.md) §3),
-o repositório tem **30 arquivos de CSS isolado por componente** (`*.razor.css`, 3.886 linhas —
-quase o mesmo volume que as folhas globais), compilados pelo SDK Blazor em
+o repositório tem **36 arquivos de CSS isolado por componente** (`*.razor.css`, 2.794 linhas),
+compilados pelo SDK Blazor em
 `BeeDay.Web.styles.css` — o bundle que `App.razor` carrega por último (ver
 [`docs/web/05-design-system-integration.md`](../web/05-design-system-integration.md) §3). A Sprint
-16.7 registrou a existência desse bundle mas não enumerou os 30 arquivos-fonte que o compõem — essa
-lacuna é preenchida aqui. Distribuição por área: 8 em `Components/DesignSystem/` (inclui as 2
-páginas de catálogo), 5 em `Components/Layout/`, 17 em `Components/Features/*`. Cada arquivo
+16.7 registrou a existência desse bundle mas não enumerou os arquivos-fonte que o compõem — essa
+lacuna é preenchida aqui. Distribuição por área: 7 em `Components/DesignSystem/` (inclui as 2
+páginas de catálogo), 12 em `Components/Layout/`, 17 em `Components/Features/*`. Cada arquivo
 estiliza exclusivamente o componente do mesmo nome —
 CSS isolation do Blazor gera seletores com escopo automático (`b-xxxxxxxxxx`), então essas regras
 nunca vazam para outros componentes nem são sobrescritas por eles, ao contrário do padrão de
@@ -284,7 +338,7 @@ shell" compartilhada pelos quatro.
 
 **Não existe um token de breakpoint** para os valores em pixel/rem — toda `@media (max-width:
 ...)`/`(min-width: ...)` do repositório usa um valor literal, por arquivo, sem referência a uma
-variável compartilhada, verdade tanto para as 19 folhas globais quanto para os 36 arquivos de CSS
+variável compartilhada, verdade tanto para as 17 folhas globais quanto para os 36 arquivos de CSS
 isolado do §9. **Exceção parcial desde a Sprint 21.2 (EPIC 21):** o breakpoint estrutural do shell
 (`min-width: 1024px`) não usa uma variável de breakpoint (CSS não permite `var()` dentro de uma
 media feature), mas *é* aplicado como o mesmo valor literal coordenado em 5 arquivos de
@@ -311,8 +365,8 @@ a 2 e depois 1 coluna via `@media`; `.wallet-summary`: `1.4fr 1fr 1fr`, etc.).
 
 - `src/BeeDay.Web/wwwroot/css/variables.css`, `theme.css`, `typography.css`,
   `typography-policy.css`, `utilities.css`, `polish.css`, `activity-design-system.css`.
-- Todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css` (19 arquivos) e em todo
-  `src/BeeDay.Web/Components/**/*.razor.css` (30 arquivos) — levantamento completo de ambas as
+- Todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css` (17 arquivos) e em todo
+  `src/BeeDay.Web/Components/**/*.razor.css` (36 arquivos) — levantamento completo de ambas as
   camadas de CSS.
 - `src/BeeDay.Web/Components/Layout/TopNavigation.razor.css`, `MainLayout.razor.css` (cores
   literais fora do sistema de tokens, §9).
