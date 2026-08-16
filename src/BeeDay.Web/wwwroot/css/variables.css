@@ -218,10 +218,16 @@
     --beeday-transition-emphasized: var(--beeday-duration-slow) var(--beeday-easing-emphasized);
     --beeday-transition-visibility: visibility 0s linear var(--beeday-duration-slow);
 
-    /* Layout and layers */
+    /* Layout and layers. Page-local stacking contexts may use small local values; these tokens
+       own only overlays that must participate in the shared application hierarchy. */
     --beeday-content-width: 100%;
+    --beeday-z-navigation: 100;
+    --beeday-z-drawer-backdrop: 140;
+    --beeday-z-drawer: 150;
     --beeday-z-dropdown: 300;
     --beeday-z-modal: 900;
+    --beeday-z-modal-raised: 1200;
+    --beeday-z-confirmation: 1400;
     --beeday-z-loading: 1500;
     --beeday-z-toast: 1700;
 }

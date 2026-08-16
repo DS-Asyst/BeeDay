@@ -80,3 +80,14 @@
     background: var(--beeday-color-surface-muted);
     font-weight: 700;
 }
+
+@media (prefers-reduced-motion: reduce) {
+    .project-context-filter__trigger,
+    .project-context-filter__option {
+        transition: none;
+    }
+
+    .project-context-filter__menu {
+        animation: none;
+    }
+}

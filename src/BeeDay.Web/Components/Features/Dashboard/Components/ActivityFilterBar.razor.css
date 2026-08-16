@@ -101,3 +101,14 @@
     .filter-bar__create ::deep .filter-bar__create-button { width: 100%; }
     .filter-bar__menu { right: auto; left: 0; width: 100%; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+    .filter-bar__input,
+    .filter-bar__menu button {
+        transition: none;
+    }
+
+    .filter-bar__menu {
+        animation: none;
+    }
+}

@@ -40,3 +40,14 @@
     .public-language-switcher__option { min-width: 2.5rem; min-height: 2.5rem; }
     .public-language-switcher__flag { width: 1.5rem; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+    .public-language-switcher__option,
+    .public-language-switcher__flag {
+        transition: none;
+    }
+
+    .public-language-switcher__option:hover {
+        transform: none;
+    }
+}

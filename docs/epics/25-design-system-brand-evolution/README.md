@@ -1051,3 +1051,72 @@ BeeDay.E2E.Tests — InteractiveComponentsTests/BrandTypographyTests: 5/5
 Motion/z-index → 25.6; responsive/breakpoints → 25.7; component APIs → 25.8; Auth/Identity → 25.9;
 feedback/a11y → 25.10; Wallet → 25.11; Daily/Project → 25.12; illustration → 25.13; Writing →
 25.14; quality engineering → 25.15; final sweep → 25.16. Nenhuma foi antecipada.
+
+## Sprint 25.6 — Motion, Interaction & Layers (Results)
+
+**Fonte da verdade:** inventário direto dos stylesheets de produção, tokens, overlays, Home scroll
+motion, testes visuais/E2E e documentação viva. Executado sobre o commit da Sprint 25.5
+`28dd2d649280e6a13263b510325d825869929aa9`.
+
+### Baseline e decisões
+
+O baseline tinha 31 stylesheets com animation/transition/keyframes: 18 com fallback local de
+reduced motion e 13 dependentes do safety net global. A foundation compartilhada de 120/180/260ms
+e os dois easings já era coerente e foi `PRESERVE`; nenhuma duração foi criada por simetria. Motion
+foi classificado como Micro-Interaction, State Transition, Entrance/Exit, Loading/Progress,
+Feedback/Celebration ou Brand/Decorative.
+
+### Correções e consolidação
+
+- corrigidos dois shorthands inválidos de animação nos modais de confirmação/feedback, usando
+  duration + easing existentes e fallback reduzido já previsto;
+- loading reduzido mantém a cápsula e label visíveis sem spinner/shimmer; reconnect reduzido mantém
+  dialog e indicador estático, sem opacity/translação que esconda o estado;
+- AppFooter, PublicLanguageSwitcher e dois menus de Dashboard receberam fallback local; cobertura
+  explícita passou de 18/31 para 23/31 stylesheets;
+- Home scroll motion foi revisado e preservado: o fallback já remove animation-timeline e mantém a
+  cor intermediária estática, sem alterar artwork/layout;
+- valores já usados por navigation, drawer, raised modal e destructive confirmation receberam
+  tokens de layer sem mudança numérica; z-index locais de feature/filhos foram preservados.
+
+### Interaction e layer contract
+
+Hover não substitui focus-visible; pressed confirma sem reflow externo; disabled interrompe
+interação/motion; loading preserva semântica; selected/expanded continua representado por estado
+estático/atributo. A hierarquia compartilhada é navigation 100 → drawer 140/150 → dropdown 300 →
+modal 900 → raised modal 1200 → confirmation 1400 → loading 1500 → toast 1700.
+
+### Impacto, compatibilidade e escopo
+
+Impacto restrito a CSS/Web, teste estrutural e documentação. Valores de layer e contratos públicos
+foram preservados; nenhuma API de componente, focus trap, breakpoint, feature convergence ou nova
+animação de Brand/Character foi introduzida. Os oito stylesheets feature-local sem fallback próprio
+continuam cobertos pelo safety net global e ficam com seus owners futuros.
+
+### Validação
+
+```text
+git diff --check
+# aprovado
+
+dotnet format BeeDay.slnx --verify-no-changes
+# aprovado
+
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+# aprovado, 0 avisos, 0 erros
+
+dotnet test BeeDay.slnx --no-build --configuration Release
+# 1ª execução: 1.071/1.072; falha histórica de contenção em RateLimitingIntegrationTests
+# (esperado 429, recebido redirect 302); todos os 68 E2E passaram
+# teste falho isolado: 1/1 aprovado
+# 2ª execução completa: 1.072/1.072 — Domain 93, Application 73, Infrastructure 129, Web 709, E2E 68
+
+BeeDay.Web.Tests — VisualFoundation/Reconnect/Drawer/Filter/Toast: 26/26
+BeeDay.E2E.Tests — Home reduced motion/Navigation/InteractiveComponents: 7/7
+```
+
+### Itens `DEFER` e confirmação de escopo
+
+Breakpoints/layout → 25.7; component APIs/state matrix → 25.8; Auth/Identity motion → 25.9;
+focus-trap/a11y lifecycle → 25.10; Wallet → 25.11; Daily/Project → 25.12; Character motion → 25.13;
+Writing → 25.14; quality engineering → 25.15; final sweep → 25.16. Nenhuma foi antecipada.

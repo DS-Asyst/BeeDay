@@ -10,3 +10,4 @@
 .app-footer__links a:focus-visible { border-radius: 2px; outline: var(--beeday-border-width) solid var(--beeday-color-brand-primary); outline-offset: 3px; box-shadow: var(--beeday-focus-ring); }
 .app-footer__copyright { grid-column: 1 / -1; padding-top: var(--beeday-spacing-md); border-top: var(--beeday-border-width-subtle) solid var(--beeday-color-border); font-size: var(--beeday-font-size-sm); }
 @media (max-width: 40rem) { .app-footer__content { grid-template-columns: 1fr; align-items: start; } .app-footer__links { justify-content: flex-start; } }
+@media (prefers-reduced-motion: reduce) { .app-footer__brand-mark, .app-footer__links a { transition: none; } }

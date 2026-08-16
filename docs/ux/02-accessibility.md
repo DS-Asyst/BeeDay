@@ -72,25 +72,18 @@ carregada.
 
 ## 6. Movimento — `prefers-reduced-motion`
 
-14+ blocos `@media (prefers-reduced-motion: reduce)` distintos, um por arquivo de CSS que declara
-`@keyframes`/`transition` decorativa: `animations.css`, `pixel-ui.css`, `activity-design-system.css`,
-`cards.css` (via `design-system.css`), `feedback.css`, `design-system.css`, `editor-modal.css`,
-`dragdrop.css`, `wallet.css`, `polish.css`, `PixelIcon.razor.css`, `MainLayout.razor.css`,
-`BeeDayCardMenu.razor.css`, `BeeDayFeedbackModal.razor.css`, `ExperienceBar.razor.css` — mais, na
-navegação da EPIC 21 (Sprint 21.2/21.3, não capturados quando esta contagem foi feita
-originalmente): `DesktopSidebar.razor.css`, `NavigationItem.razor.css`, `MobileHeader.razor.css`,
-`MobileSidebar.razor.css` (`TopNavigation.razor.css`, que também tinha um bloco, foi removida na
-Sprint 21.3) — cobertura consistente através de todo o CSS de produto, tanto global quanto isolado
-por componente. **Sprint 20.8 (EPIC 20):** `LoginBackground.razor.css` (o único
-consumidor deste bloco fora dos listados acima) foi removido junto com o componente — era código
-morto, nunca montado por nenhuma página real (o fundo de imagem animado que ele implementava não
-tinha nenhum consumidor de markup em `src/`); o fundo realmente renderizado atrás de Login/Identity/
-Onboarding vinha de `OnboardingLayout.razor.css` (`auth-galaxy.png`, sem animação/`reduced-motion`
-próprios — não se aplicava aqui), também removido nesta Sprint em favor do background canônico do
-Design System. `animations.css` tem o bloco mais amplo:
-um seletor universal (`*, *::before, *::after`) que zera `animation-duration`/
-`transition-duration` para `.01ms` — uma rede de segurança que cobre qualquer animação futura que
-esqueça seu próprio bloco `reduced-motion` individual.
+O inventário direto da Sprint 25.6 encontrou 31 stylesheets com `animation`, `transition` ou
+`@keyframes`: 18 tinham fallback local e 13 dependiam apenas da rede global. A Sprint adicionou
+fallback a `AppFooter`, `PublicLanguageSwitcher`, `ReconnectModal`, `ActivityFilterBar` e
+`ProjectContextFilter`, chegando a **23/31**. Os oito restantes pertencem a Auth/ProfileCreation,
+Habit, ProjectWorkspace, DashboardColumn ou motion interno dos activity cards e ficam com seus
+owners de convergência; a contagem anterior de "cobertura consistente em todo CSS" era imprecisa.
+
+`animations.css` mantém o safety net universal (`*, *::before, *::after`) que reduz duration para
+`.01ms`, mas ele não substitui fallback local: delay, opacity e transform ainda podem ocultar
+feedback. Por isso loading passa a manter a cápsula visível sem spinner/shimmer, reconnect mantém o
+dialog e um indicador estático, menus/modais aparecem sem entrada, e a Home preserva sua cor de
+seção intermediária sem scroll motion. Feedback textual, ARIA e controles continuam presentes.
 
 ## 7. `forced-colors` (modo de alto contraste)
 
