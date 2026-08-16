@@ -46,11 +46,18 @@ public sealed class HomeTests
         Assert.Equal(string.Empty, howImage.GetAttribute("alt"));
         Assert.Equal("lazy", howImage.GetAttribute("loading"));
         var brandClosure = cut.Find(".home-brand-closure");
-        var brandClosureImage = brandClosure.QuerySelector("img");
-        Assert.NotNull(brandClosureImage);
-        Assert.Equal("/assets/home/home-team-fall-color.png", brandClosureImage.GetAttribute("src"));
-        Assert.Equal(string.Empty, brandClosureImage.GetAttribute("alt"));
-        Assert.Equal("lazy", brandClosureImage.GetAttribute("loading"));
+        var brandClosureImages = brandClosure.QuerySelectorAll("img");
+        Assert.Equal(2, brandClosureImages.Length);
+        Assert.Equal("/assets/home/home-team-fall.png", brandClosureImages[0].GetAttribute("src"));
+        Assert.Equal("/assets/home/wave-site.png", brandClosureImages[1].GetAttribute("src"));
+        Assert.All(brandClosureImages, image =>
+        {
+            Assert.Equal(string.Empty, image.GetAttribute("alt"));
+            Assert.Equal("lazy", image.GetAttribute("loading"));
+            Assert.Equal("async", image.GetAttribute("decoding"));
+        });
+        Assert.DoesNotContain("home-team-fall-color.png", brandClosure.InnerHtml, StringComparison.Ordinal);
+        Assert.NotNull(brandClosure.QuerySelector(".home-brand-closure__base"));
         Assert.Contains("home-brand-closure", cut.Find(".home-page").LastElementChild!.ClassList);
         Assert.Empty(cut.FindAll(".home-hero .beeday-brand"));
         Assert.Empty(cut.FindAll(".home-hero__symbol"));
