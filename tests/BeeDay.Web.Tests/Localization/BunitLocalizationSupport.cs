@@ -24,6 +24,24 @@ internal static class BunitLocalizationSupport
         return context;
     }
 
+    /// <summary>
+    /// Pins the culture only for the duration of <paramref name="render"/> — the culture is already
+    /// restored to the ambient default by the time this method returns the rendered component.
+    /// </summary>
+    /// <remarks>
+    /// Common mistake (caused six real CI failures — the dev machine's ambient pt-BR masked it
+    /// locally, since a re-render outside the scope still happened to land in the right culture by
+    /// coincidence): wrapping only the initial <c>Render&lt;T&gt;(...)</c> call here and then
+    /// interacting with the returned component (<c>.Click()</c>, <c>InvokeAsync(...)</c>,
+    /// <c>.Change(...)</c>) afterward. Any interaction that causes Blazor to re-execute
+    /// <c>BuildRenderTree</c> — opening a conditionally-rendered dialog/menu, a toast arriving via a
+    /// service event — re-evaluates every <c>@Localizer[...]</c> expression in that component,
+    /// including ones that already rendered correctly the first time, against whatever culture is
+    /// ambient at that later moment. If the test needs to click, wait, or otherwise trigger a
+    /// re-render before asserting culture-sensitive text, do that (and the assertion) inside the
+    /// synchronous <see cref="WithUiCulture(string, Action)"/> overload instead, or
+    /// <see cref="WithUiCultureAsync"/> for anything that must stay pinned across an <c>await</c>.
+    /// </remarks>
     public static T WithUiCulture<T>(string culture, Func<T> render)
     {
         var (restoreCulture, restoreUiCulture) = (CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture);

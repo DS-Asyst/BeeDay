@@ -44,14 +44,23 @@ public sealed class BeeDayToastHostTests
     {
         using var context = new BunitContext().WithLocalization();
         context.Services.AddSingleton<ToastService>();
-        var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<BeeDayToastHost>());
         var service = context.Services.GetRequiredService<ToastService>();
 
-        cut.InvokeAsync(() => service.ShowInfo("Sincronização concluída"));
-        cut.WaitForAssertion(() => Assert.Single(cut.FindAll(".beeday-toast")));
+        // The toast host re-renders on ToastService.Changed (a new toast arriving re-executes the
+        // whole component, re-evaluating every @Localizer[...] expression, not just the new toast's
+        // own markup — so the region's aria-label is just as culture-sensitive on this second render
+        // as the close button's), so the culture pin has to stay active through that re-render, not
+        // just the initial one.
+        BunitLocalizationSupport.WithUiCulture("pt-BR", () =>
+        {
+            var cut = context.Render<BeeDayToastHost>();
 
-        Assert.Equal("Notificações", cut.Find(".beeday-toast-region").GetAttribute("aria-label"));
-        Assert.Equal("Dispensar notificação", cut.Find(".beeday-toast__close").GetAttribute("aria-label"));
+            cut.InvokeAsync(() => service.ShowInfo("Sincronização concluída"));
+            cut.WaitForAssertion(() => Assert.Single(cut.FindAll(".beeday-toast")));
+
+            Assert.Equal("Notificações", cut.Find(".beeday-toast-region").GetAttribute("aria-label"));
+            Assert.Equal("Dispensar notificação", cut.Find(".beeday-toast__close").GetAttribute("aria-label"));
+        });
     }
 
     [Fact]
