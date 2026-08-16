@@ -1,7 +1,7 @@
 .delete-confirmation-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 1400;
+    z-index: var(--beeday-z-confirmation);
     display: grid;
     place-items: center;
     padding: var(--beeday-spacing-md);
@@ -17,7 +17,7 @@
     border-radius: var(--beeday-radius-lg);
     background: var(--beeday-color-surface);
     box-shadow: var(--beeday-shadow-lg);
-    animation: delete-confirmation-enter var(--beeday-transition-normal)-out;
+    animation: delete-confirmation-enter var(--beeday-duration-normal) var(--beeday-easing-emphasized) both;
     font-family: var(--beeday-font-family);
 }
 
@@ -146,7 +146,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .delete-confirmation { animation: none; }
+    .delete-confirmation {
+        animation: none;
+    }
 }
 
 /* Toast notifications */
@@ -357,6 +359,12 @@
 
     .beeday-toast__close {
         transition: none;
+    }
+
+    .beeday-loading-overlay {
+        opacity: 1;
+        transform: translate(-50%, 0);
+        animation: none;
     }
 }
 

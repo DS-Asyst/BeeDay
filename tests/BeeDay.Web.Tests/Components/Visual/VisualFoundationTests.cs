@@ -164,6 +164,42 @@ public sealed class VisualFoundationTests
         Assert.Contains("@media (prefers-reduced-motion: reduce)", mobileSidebar, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void SharedMotionReducedMotionAndLayerContractsRemainCoherent()
+    {
+        var variables = ReadWebFile("wwwroot", "css", "variables.css");
+        var feedback = ReadWebFile("wwwroot", "css", "feedback.css");
+        var editorModal = ReadWebFile("wwwroot", "css", "editor-modal.css");
+        var experienceFeedback = ReadWebFile("Components", "Features", "Experience", "Feedback", "BeeDayFeedbackModal.razor.css");
+        var reconnect = ReadWebFile("Components", "Layout", "ReconnectModal.razor.css");
+        var mobileSidebar = ReadWebFile("Components", "Layout", "MobileSidebar.razor.css");
+        var home = ReadWebFile("Components", "Features", "Home", "Pages", "Home.razor.css");
+
+        Assert.Contains("--beeday-duration-fast: 120ms;", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-duration-normal: 180ms;", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-duration-slow: 260ms;", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-easing-standard:", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-easing-emphasized:", variables, StringComparison.Ordinal);
+
+        Assert.Contains("z-index: var(--beeday-z-confirmation);", feedback, StringComparison.Ordinal);
+        Assert.Contains("z-index: var(--beeday-z-modal-raised);", editorModal, StringComparison.Ordinal);
+        Assert.Contains("z-index: var(--beeday-z-drawer-backdrop);", mobileSidebar, StringComparison.Ordinal);
+        Assert.Contains("z-index: var(--beeday-z-drawer);", mobileSidebar, StringComparison.Ordinal);
+        Assert.Contains("--beeday-z-toast: 1700;", variables, StringComparison.Ordinal);
+
+        Assert.DoesNotContain("var(--beeday-transition-normal)-out", feedback, StringComparison.Ordinal);
+        Assert.DoesNotContain("var(--beeday-transition-normal) ease-out", experienceFeedback, StringComparison.Ordinal);
+        Assert.Contains("animation: delete-confirmation-enter var(--beeday-duration-normal) var(--beeday-easing-emphasized) both;", feedback, StringComparison.Ordinal);
+        Assert.Contains("animation: beeday-feedback-enter var(--beeday-duration-normal) var(--beeday-easing-emphasized) both;", experienceFeedback, StringComparison.Ordinal);
+
+        Assert.Contains(".beeday-loading-overlay {", feedback, StringComparison.Ordinal);
+        Assert.Contains("opacity: 1;", feedback, StringComparison.Ordinal);
+        Assert.Contains("#components-reconnect-modal[open]", reconnect, StringComparison.Ordinal);
+        Assert.Contains("animation: none;", reconnect, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", home, StringComparison.Ordinal);
+        Assert.Contains("background: #d5eefd;", home, StringComparison.Ordinal);
+    }
+
     private static string ReadWebFile(params string[] segments) =>
         File.ReadAllText(Path.Combine([RepoRoot, "src", "BeeDay.Web", .. segments]));
 

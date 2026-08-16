@@ -371,41 +371,78 @@ nenhum foi promovido por igualdade aproximada.
 
 ## 7. Movimento
 
-| Token | Valor | Uso |
-|---|---|---|
-| `--beeday-duration-fast/normal/slow` | 120/180/260ms | Transições padrão |
-| `--beeday-easing-standard` | `cubic-bezier(.2,0,0,1)` | Padrão |
-| `--beeday-easing-emphasized` | `cubic-bezier(.2,.8,.2,1)` | Entradas/hovers com mais destaque |
-| `--beeday-transition-fast/normal/emphasized` | duração + easing compostos | Atalho de `transition` |
-| `--beeday-duration-instant/interaction/panel` | 70/140/220ms | Segunda escala, "Sprint 3.5 Pixel UI" — usada por `pixel-ui.css` |
-| `--beeday-easing-pixel` | `steps(2, end)` | Easing "passo a passo", estética pixel, usado só por `pixel-ui.css` |
+### Foundation compartilhada
 
-Todo `@keyframes`/transição do repositório respeita `prefers-reduced-motion: reduce` — confirmado
-por 12+ blocos `@media (prefers-reduced-motion: reduce)` distintos, um por arquivo de CSS que
-declara animação (ver [`docs/ux/02-accessibility.md`](../ux/02-accessibility.md) §5).
+| Token | Valor | Ownership |
+|---|---|---|
+| `--beeday-duration-fast` | 120ms | hover/pressed e resposta visual imediata |
+| `--beeday-duration-normal` | 180ms | mudança de estado e entrada curta |
+| `--beeday-duration-slow` | 260ms | panel/drawer com deslocamento perceptível |
+| `--beeday-easing-standard` | `cubic-bezier(.2,0,0,1)` | transições de estado sem overshoot |
+| `--beeday-easing-emphasized` | `cubic-bezier(.2,.8,.2,1)` | entrada/saída espacial deliberada |
+| `--beeday-transition-fast/normal/emphasized` | duração + easing | shorthand somente para `transition` |
+| `--beeday-transition-visibility` | visibility + delay slow | fechamento acessível do drawer |
+
+Tokens `transition-*` não devem ser concatenados nem combinados com outro easing em `animation`.
+Keyframes usam `duration-*` + `easing-*` explicitamente. A escala histórica Pixel
+`duration-{instant,interaction,panel}`/`easing-pixel` permanece confinada ao adapter Pixel; não é
+uma segunda foundation para novos componentes.
+
+### Taxonomia e propósito
+
+- **MICRO-INTERACTION:** hover/pressed/selected curto; nunca é a única pista de estado.
+- **STATE TRANSITION:** mudança de cor, border, opacity ou dimensão que explica atualização real.
+- **ENTRANCE / EXIT:** drawer, menu, modal e toast; deve respeitar ordem de foco/visibilidade.
+- **LOADING / PROGRESS:** spinner, shimmer e progress; a alternativa reduzida mantém texto/surface
+  visíveis e elimina deslocamento/repetição.
+- **FEEDBACK / CELEBRATION:** confirmação e ganho de experiência, com conteúdo semântico preservado
+  quando a animação é removida.
+- **BRAND / DECORATIVE:** composição expressiva opcional; nunca bloqueia leitura ou navegação.
+
+Hover não substitui `focus-visible`; pressed/active confirma ação sem mover layout ao redor;
+disabled interrompe interação e motion; loading/busy preserva label/semântica; selected/expanded
+permanece exposto por atributo/estado visual estático. A matriz completa de APIs pertence à 25.8.
+
+### Reduced motion
+
+Todo motion compartilhado alterado precisa de fallback local em
+`@media (prefers-reduced-motion: reduce)`. O fallback remove translação, pulso e repetição, mas não
+esconde feedback: loading mantém a cápsula visível, reconnect mantém o dialog e indicador estático,
+menus/modais aparecem sem entrada e a Home mantém a cor intermediária estática. O bloco universal
+de `animations.css` continua como safety net, não como substituto do fallback do componente.
+
+O inventário da Sprint 25.6 encontrou **31** arquivos CSS com animation/transition/keyframes; 18 já
+tinham bloco local de reduced motion e 13 não. Cobertura foi adicionada a cinco shared/public/menu
+stylesheets, elevando a proteção local para 23/31. Os oito restantes são motion feature-local e
+devem ser tratados quando seus owners convergirem, sem rewrite transversal.
 
 ## 8. Z-index
 
-4 tokens em `variables.css`: `--beeday-z-dropdown` 300, `--beeday-z-modal` 900, `--beeday-z-loading`
-1500, `--beeday-z-toast` 1700. **Nem todo elemento sobreposto usa esses tokens** — `feedback.css`
-declara `z-index: 1400` (backdrop de `delete-confirmation`) e `editor-modal.css` declara
-`z-index: 1200` (backdrop do editor) como números literais, não `var(--beeday-z-modal)`, apesar de
-estarem na mesma faixa conceitual de "modal". A ordem relativa resultante (dropdown 300 < editor
-1200 < confirmação de exclusão 1400 < modal genérico 900 [sic — abaixo dos dois anteriores] <
-loading 1500 < toast 1700) tem uma inversão: `--beeday-z-modal` (900) é *menor* que os dois
-z-index literais de modal real (1200, 1400) usados na prática — o token nomeado "modal" não é o
-maior valor da pilha de modais.
+Layers compartilhadas usam valores nomeados somente quando precisam competir fora de um stacking
+context local:
 
 ```mermaid
 graph TD
-    Z0["300 — dropdown (--beeday-z-dropdown)"]
-    Z1["900 — --beeday-z-modal (token nomeado 'modal', mas nenhum modal real declarado nesta auditoria usa este valor diretamente)"]
-    Z2["1200 — editor-modal.css (literal)"]
-    Z3["1400 — feedback.css delete-confirmation (literal)"]
-    Z4["1500 — loading (--beeday-z-loading)"]
-    Z5["1700 — toast (--beeday-z-toast, o mais alto)"]
-    Z0 --> Z1 --> Z2 --> Z3 --> Z4 --> Z5
+    N["100 navigation"] --> DB["140 drawer backdrop"] --> D["150 drawer"]
+    D --> DD["300 dropdown"] --> M["900 modal"] --> MR["1200 raised modal"]
+    MR --> C["1400 destructive confirmation"] --> L["1500 loading"] --> T["1700 toast"]
 ```
+
+| Token | Papel |
+|---|---|
+| `--beeday-z-navigation` | headers fixos/sticky compartilhados |
+| `--beeday-z-drawer-backdrop` / `--beeday-z-drawer` | shell mobile e seu backdrop |
+| `--beeday-z-dropdown` | menu/popover que escapa do fluxo local |
+| `--beeday-z-modal` | overlay modal padrão e drag overlay de tela inteira |
+| `--beeday-z-modal-raised` | editor que pode coexistir com overlays padrão |
+| `--beeday-z-confirmation` | confirmação destrutiva acima do editor |
+| `--beeday-z-loading` | progresso global não interativo |
+| `--beeday-z-toast` | mensagem transitória sempre legível |
+
+Valores pequenos (`1`, `2`, `3`, `30`, `40`) continuam locais para ordenar filhos dentro de Card,
+Home, Dashboard ou drag preview. Os literais 850/900 dos menus de Dashboard e 950 do
+ProjectWorkspace vivem em stacking contexts/arquiteturas de feature e não foram migrados por
+semelhança numérica. Token global não deve ser usado para corrigir um stacking context local.
 
 ## 9. Duas camadas de CSS: global e isolado por componente
 
