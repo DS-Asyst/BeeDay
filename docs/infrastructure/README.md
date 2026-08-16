@@ -8,8 +8,11 @@ sprints anteriores sem reverificação direta no código.
 **Fonte da verdade:** cada documento abaixo declara individualmente as fontes exatas usadas para
 validá-lo, na seção final "Fontes de verdade".
 
-**Última verificação:** 2026-08-09 (Sprint 18.6) — `Caching/MemoryApplicationCache.cs` removido
-(código morto comprovado: seu único cache nunca era populado em produção; ver `04-services.md`).
+**Última verificação:** 2026-08-16 (Epic 26, Sprint 26.1) — `06-transactional-email.md` adicionado
+(auditoria completa da arquitetura de e-mail transacional e causa raiz comprovada do diretório
+`C:\Apps\BeeDay-Data\Emails` vazio em HMG); verificação anterior em 2026-08-09 (Sprint 18.6) —
+`Caching/MemoryApplicationCache.cs` removido (código morto comprovado: seu único cache nunca era
+populado em produção; ver `04-services.md`).
 
 ## Responsabilidade
 
@@ -80,6 +83,7 @@ documentado em `docs/architecture/07-security-architecture.md`, fora do escopo d
 | [`03-concurrency.md`](03-concurrency.md) | RowVersion, `DbUpdateConcurrencyException`, tradução de exceções, fluxo completo |
 | [`04-services.md`](04-services.md) | Event Journal, Identity, hashing de senha, e-mail, health check, background |
 | [`05-dependency-injection.md`](05-dependency-injection.md) | Os 29 registros de `InfrastructureServiceCollectionExtensions`, lifetimes, `IDbContextFactory` |
+| [`06-transactional-email.md`](06-transactional-email.md) | EPIC 26, Sprint 26.1 — mapa completo da arquitetura de e-mail transacional (fluxos, seleção de provider, precedência de configuração), causa raiz comprovada do diretório de e-mail de desenvolvimento vazio em HMG, gaps/riscos e arquitetura-alvo recomendada para as Sprints 26.2+ |
 
 Para o mapeamento objeto-relacional em si (DbSets, Configurations, TPC, Owned/Complex Type,
 migration strategy), ver [`docs/persistence/`](../persistence/README.md) — reconstruído nesta
@@ -95,6 +99,14 @@ mesma Sprint.
 
 ## Achados relevantes (reportados, não corrigidos)
 
+- **EPIC 26, Sprint 26.1:** `DevelopmentEmailSender` recusa gravar em qualquer diretório fora da
+  content root do host; `appsettings.Homologation.json` configura
+  `Email:Development:Directory` como um caminho absoluto externo
+  (`C:\Apps\BeeDay-Data\Emails`, fora de `C:\Apps\BeeDay.Web`) — toda chamada de `SendAsync` em HMG
+  lança `InvalidOperationException` antes de gravar qualquer arquivo. Zero cobertura de teste
+  automatizado existe para `DevelopmentEmailSender`. Ver
+  [`06-transactional-email.md`](06-transactional-email.md) §6 para a análise completa de causa
+  raiz e classificação de evidência; correção planejada para as Sprints 26.2/26.3 do EPIC 26.
 - Comentários de código em `EfConcurrencySaveChanges.cs` e `EventJournalOptions.cs` ainda
   mencionam "o provider JSON" como referência histórica — comentários, não comportamento; fora do
   escopo alterar (código).

@@ -82,3 +82,10 @@ nenhum Runtime State existente.
   checklists prescritivos escritos antes da infraestrutura real (`Deploy-BeeDay.ps1`, os workflows
   de deploy) existir — movidos para [`docs/history/`](../history/README.md), substituídos pelos
   documentos acima.
+- **EPIC 26, Sprint 26.1:** o valor de `Email:Development:Directory` em
+  `appsettings.Homologation.json` (`C:\Apps\BeeDay-Data\Emails`, ver §5.2 de
+  `02-runtime-configuration.md`) é externo à content root de HMG (`C:\Apps\BeeDay.Web`) — o guard de
+  `DevelopmentEmailSender` contra esse tipo de caminho impede toda gravação de e-mail capturado em
+  HMG hoje. Causa raiz completa em
+  [`docs/infrastructure/06-transactional-email.md`](../infrastructure/06-transactional-email.md) §6;
+  correção planejada para as Sprints 26.2/26.3 do EPIC 26.
