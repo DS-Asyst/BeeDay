@@ -11,6 +11,7 @@
 @inject NavigationManager Navigation
 @inject AuthenticatedUserInitializer UserInitializer
 @inject IStringLocalizer<AccountResources> Localizer
+@inject IStringLocalizer<SharedResources> SharedLocalizer
 @inject IJSRuntime JS
 
 <PageTitle>@Localizer["PageTitle"]</PageTitle>
@@ -78,7 +79,7 @@
         }
         catch (Exception ex)
         {
-            Toast.ShowError(ex.Message, Localizer["ToastAccountLoadErrorTitle"]);
+            Toast.ShowError(DomainErrorLocalizer.Translate(ex, SharedLocalizer), Localizer["ToastAccountLoadErrorTitle"]);
         }
         finally
         {
@@ -97,7 +98,7 @@
         }
         catch (Exception ex)
         {
-            Toast.ShowError(ex.Message, Localizer["ToastProfileErrorTitle"]);
+            Toast.ShowError(DomainErrorLocalizer.Translate(ex, SharedLocalizer), Localizer["ToastProfileErrorTitle"]);
         }
         finally
         {
@@ -117,7 +118,7 @@
         }
         catch (Exception ex)
         {
-            Toast.ShowError(ex.Message, Localizer["ToastPasswordErrorTitle"]);
+            Toast.ShowError(DomainErrorLocalizer.Translate(ex, SharedLocalizer), Localizer["ToastPasswordErrorTitle"]);
         }
         finally
         {
@@ -147,7 +148,7 @@
         }
         catch (Exception ex)
         {
-            Toast.ShowError(ex.Message, Localizer["ToastPreferencesErrorTitle"]);
+            Toast.ShowError(DomainErrorLocalizer.Translate(ex, SharedLocalizer), Localizer["ToastPreferencesErrorTitle"]);
         }
         finally
         {

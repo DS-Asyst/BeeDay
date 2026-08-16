@@ -1,11 +1,15 @@
 using System.Linq.Expressions;
+using BeeDay.Web.Localization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.Extensions.Localization;
 
 namespace BeeDay.Web.Components.DesignSystem.Forms;
 
 public partial class BeeDayValidationMessage<TValue> : IDisposable
 {
+    [Inject] private IStringLocalizer<DesignSystemResources> Localizer { get; set; } = default!;
+
     [CascadingParameter] private EditContext? EditContext { get; set; }
     [Parameter, EditorRequired] public Expression<Func<TValue>> For { get; set; } = default!;
 
@@ -38,7 +42,9 @@ public partial class BeeDayValidationMessage<TValue> : IDisposable
         _ = InvokeAsync(StateHasChanged);
     }
 
-    private void RefreshMessages() => _messages = EditContext?.GetValidationMessages(_fieldIdentifier).ToArray() ?? Array.Empty<string>();
+    private void RefreshMessages() => _messages = EditContext?.GetValidationMessages(_fieldIdentifier)
+        .Select(message => ValidationMessageLocalizer.Translate(message, Localizer))
+        .ToArray() ?? Array.Empty<string>();
 
     public void Dispose()
     {

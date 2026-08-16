@@ -1,5 +1,6 @@
 using BeeDay.Web.Components.Features.Wallets.Components;
 using BeeDay.Web.Components.Features.Wallets.Models;
+using BeeDay.Web.Tests.Localization;
 
 namespace BeeDay.Web.Tests.Components.Wallet;
 
@@ -43,6 +44,24 @@ public sealed class TagFormModalTests : BunitContext
 
         Assert.True(deleteRequested);
         Assert.Empty(cut.FindAll(".delete-confirmation"));
+    }
+
+    [Theory]
+    [InlineData("en-US", "Use a valid hexadecimal color.")]
+    [InlineData("pt-BR", "Use uma cor hexadecimal válida.")]
+    public async Task InvalidColor_ShowsALocalizedValidationMessage(string culture, string expected)
+    {
+        await BunitLocalizationSupport.WithUiCultureAsync(culture, async () =>
+        {
+            var cut = Render<TagFormModal>(parameters => parameters
+                .Add(component => component.IsOpen, true)
+                .Add(component => component.IsEditing, false)
+                .Add(component => component.Model, new WalletTagFormModel { Name = "Groceries", Color = "not-a-color" }));
+
+            await cut.Find(".editor-modal__header-save").ClickAsync();
+
+            cut.WaitForAssertion(() => Assert.Contains(expected, cut.Markup, StringComparison.Ordinal));
+        });
     }
 
     [Fact]

@@ -169,6 +169,12 @@
   <data name="InvalidLinkIntro" xml:space="preserve">
     <value>This link is incomplete or does not belong to a valid confirmation request.</value>
   </data>
+  <data name="LinkExpiredMessage" xml:space="preserve">
+    <value>Confirmation links expire after a period of time for security reasons.</value>
+  </data>
+  <data name="InvalidLinkMessage" xml:space="preserve">
+    <value>Check the link in your email or request a new one.</value>
+  </data>
   <data name="DefaultConfirmationError" xml:space="preserve">
     <value>Unable to confirm this email.</value>
   </data>

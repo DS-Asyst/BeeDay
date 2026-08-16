@@ -150,4 +150,55 @@
   <data name="ProgressUnavailable" xml:space="preserve">
     <value>Progress unavailable</value>
   </data>
+  <data name="ValidationCurrentPasswordRequired" xml:space="preserve">
+    <value>Current password is required.</value>
+  </data>
+  <data name="ValidationNewPasswordRequired" xml:space="preserve">
+    <value>New password is required.</value>
+  </data>
+  <data name="ValidationPasswordLength" xml:space="preserve">
+    <value>Password must contain between 8 and 128 characters.</value>
+  </data>
+  <data name="ValidationPasswordComplexity" xml:space="preserve">
+    <value>Password must contain at least one letter and one number.</value>
+  </data>
+  <data name="ValidationConfirmNewPasswordRequired" xml:space="preserve">
+    <value>Confirm the new password.</value>
+  </data>
+  <data name="ValidationPasswordsMismatch" xml:space="preserve">
+    <value>Passwords do not match.</value>
+  </data>
+  <data name="ValidationNameRequired" xml:space="preserve">
+    <value>Name is required.</value>
+  </data>
+  <data name="ValidationNameLength" xml:space="preserve">
+    <value>Name must contain between 2 and 100 characters.</value>
+  </data>
+  <data name="ValidationEmailRequired" xml:space="preserve">
+    <value>Email is required.</value>
+  </data>
+  <data name="ValidationEmailFormat" xml:space="preserve">
+    <value>Enter a valid email address.</value>
+  </data>
+  <data name="ValidationNameMaxLength" xml:space="preserve">
+    <value>Name cannot exceed 100 characters.</value>
+  </data>
+  <data name="ValidationNotesMaxLength" xml:space="preserve">
+    <value>Notes cannot exceed 500 characters.</value>
+  </data>
+  <data name="ValidationHexColorFormat" xml:space="preserve">
+    <value>Use a valid hexadecimal color.</value>
+  </data>
+  <data name="ValidationTitleRequired" xml:space="preserve">
+    <value>Title is required.</value>
+  </data>
+  <data name="ValidationTitleMaxLength" xml:space="preserve">
+    <value>Title cannot exceed 100 characters.</value>
+  </data>
+  <data name="ValidationProjectRequired" xml:space="preserve">
+    <value>Project is required.</value>
+  </data>
+  <data name="SessionCheckingLabel" xml:space="preserve">
+    <value>Checking your session...</value>
+  </data>
 </root>

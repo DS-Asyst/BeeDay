@@ -122,6 +122,30 @@ public sealed class IdentityFlowLocalizationIntegrationTests(BeeDayWebApplicatio
     }
 
     [Fact]
+    public async Task ConfirmEmail_WithExpiredToken_RendersLocalizedMessage_NotTheRawDomainText()
+    {
+        var cancellationToken = Xunit.TestContext.Current.CancellationToken;
+        var user = await factory.SeedUnconfirmedUserAsync($"expired-token-{Guid.NewGuid():N}@beeday.invalid", "Password123!");
+        var expiredToken = await factory.IssueEmailConfirmationTokenAsync(user.Id, expired: true);
+
+        using var englishClient = factory.CreateClient();
+        using var portugueseClient = factory.CreateClient();
+        portugueseClient.DefaultRequestHeaders.Add("Cookie", "BeeDay.Culture=c=pt-BR|uic=pt-BR");
+
+        var englishHtml = await englishClient.GetStringAsync($"/account/confirm-email?token={expiredToken}", cancellationToken);
+        var portugueseText = await DecodeBodyTextAsync(
+            await portugueseClient.GetStringAsync($"/account/confirm-email?token={expiredToken}", cancellationToken), cancellationToken);
+
+        Assert.Contains("Confirmation link expired", englishHtml, StringComparison.Ordinal);
+        Assert.Contains("Confirmation links expire after a period of time for security reasons.", englishHtml, StringComparison.Ordinal);
+        Assert.DoesNotContain("Token has expired.", englishHtml, StringComparison.Ordinal);
+
+        Assert.Contains("Link de confirmação expirado", portugueseText, StringComparison.Ordinal);
+        Assert.Contains("Links de confirmação expiram após um período por motivos de segurança.", portugueseText, StringComparison.Ordinal);
+        Assert.DoesNotContain("Token has expired.", portugueseText, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task ResendConfirmation_RendersPerCulture()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;

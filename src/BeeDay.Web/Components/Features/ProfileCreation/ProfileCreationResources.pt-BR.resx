@@ -130,4 +130,13 @@
   <data name="WelcomeToast" xml:space="preserve">
     <value>Bem-vindo ao BeeDay.</value>
   </data>
+  <data name="RedirectingToLoginTitle" xml:space="preserve">
+    <value>Entrar | BeeDay</value>
+  </data>
+  <data name="RedirectingToLoginMessage" xml:space="preserve">
+    <value>Redirecionando para o login...</value>
+  </data>
+  <data name="CreateAccountFlowAriaLabel" xml:space="preserve">
+    <value>Fluxo de criação de conta</value>
+  </data>
 </root>

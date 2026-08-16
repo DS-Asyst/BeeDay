@@ -38,7 +38,7 @@
                     <span>@Localizer["ColorLabel"]</span>
                     <InputText @bind-Value="Model.Color" maxlength="7" disabled="@IsBusy" />
                     <input type="color" @bind="Model.Color" disabled="@IsBusy" aria-label="@Localizer["SelectTagColorAriaLabel"]" />
-                    <ValidationMessage For="@(() => Model.Color)" />
+                    <BeeDayValidationMessage For="@(() => Model.Color)" />
                 </label>
             </div>
         </BodyContent>
