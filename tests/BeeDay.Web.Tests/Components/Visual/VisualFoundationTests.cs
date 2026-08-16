@@ -139,6 +139,9 @@ public sealed class VisualFoundationTests
         Assert.Contains("border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);", editorModal, StringComparison.Ordinal);
 
         Assert.Contains("backdrop-filter: blur(3px);", projectWorkspace, StringComparison.Ordinal);
+        Assert.Contains("background: var(--beeday-color-overlay);", projectWorkspace, StringComparison.Ordinal);
+        Assert.Contains("z-index: var(--beeday-z-modal);", projectWorkspace, StringComparison.Ordinal);
+        Assert.DoesNotMatch("#[0-9a-fA-F]{3,8}", projectWorkspace);
         Assert.DoesNotContain("--beeday-radius-control", variables, StringComparison.Ordinal);
         Assert.DoesNotContain("--beeday-shadow-activity", variables, StringComparison.Ordinal);
     }

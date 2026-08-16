@@ -1426,3 +1426,63 @@ passado 75/75 nessa execução. O gate integral final acima foi reexecutado no e
 
 Daily/Project → 25.12; Character/Illustration → 25.13; Writing → 25.14; axe/quality → 25.15;
 final sweep → 25.16. Nenhuma dessas áreas foi antecipada.
+
+## Sprint 25.12 — Daily & ProjectWorkspace Design System Convergence (Results)
+
+**Fonte da verdade:** Daily page/board, Activity/Habit cards, columns, filter/context menus,
+`BeeDaySortable`, editors, ProjectWorkspace, shared Forms/Progress/Dialog lifecycle, CSS,
+localização, bUnit/E2E e documentação viva. Executado sobre o commit da Sprint 25.11
+`b0df5c7d714d41478656b96b09aa7bc42468b450`.
+
+### Product Pattern preservado, microsystem removido
+
+Habit balance/score, Task/To-Do completion, Project status, cores semânticas de cada tipo,
+`ProjectContextFilter`, create menu e o board multi-coluna permanecem especializados. Daily mantém
+quatro colunas/scroll intermediário, duas abaixo de 900px e uma abaixo de 620px, alinhado ao shell
+1199/1200. A busca debounced de 300ms migrou para `BeeDayInput.UpdateOnInput` sem alterar o timing
+nem o callback; o inventário caiu para 43 tags nativas (29 buttons, 14 inputs, zero select/textarea).
+
+ProjectWorkspace substituiu a progress bar local por `BeeDayProgressBar`, com `AriaLabel` contextual
+separado do label visível, e close/add passaram a consumir o icon-toggle compartilhado. Overlay,
+layer, surface, border, text, scrollbar e shadow agora usam foundations; seu CSS não contém hex/rgb
+local. Status, To-Do accent e layout compacto continuam feature semantics legítimas.
+
+### Ordem manual, foco e responsive
+
+O workspace deixou de aplicar `OrderBy(Completed).ThenBy(DueDate)` na apresentação: a sequência
+recebida é renderizada sem sort implícito, preservando a ordem manual autoritativa sem mudar
+persistência, commands ou drag/drop. `DialogFocusScope` agora fornece foco inicial no Close, trap,
+Escape e restore seguro. O dialog mantém recomposição interna em 700/520px e touch target ampliado
+para o toggle de lista em pointer coarse.
+
+### Testes e impacto
+
+bUnit cobre debounce, progress contextual, foundations sem literals, icon-toggle, culturas,
+sequência manual, Escape e inventário. E2E cria/abre Project, confirma foco inicial e progressbar,
+valida 390px sem overflow e fecha por Escape. Testes existentes continuam cobrindo card keyboard,
+filter/listbox state, sortable/reorder e editors. Nenhuma regra Domain/Application ou schema mudou.
+
+### Validação
+
+```text
+git diff --check
+# aprovado
+
+dotnet format BeeDay.slnx --verify-no-changes
+# aprovado
+
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+# aprovado, 0 avisos, 0 erros
+
+dotnet test BeeDay.slnx --no-build --configuration Release
+# 1.096/1.096 de primeira — Domain 93, Application 73, Infrastructure 129, Web 725, E2E 76
+
+BeeDay.Web.Tests — Daily/Project/Progress/Sortable: 92/92
+BeeDay.E2E.Tests — ProjectWorkspace focus/progress/responsive: 1/1
+EF Core pending model changes: nenhum
+```
+
+### Itens `DEFER` e confirmação de escopo
+
+Character/Illustration → 25.13; Writing → 25.14; axe/quality → 25.15; final sweep → 25.16.
+Nenhuma dessas áreas foi antecipada.

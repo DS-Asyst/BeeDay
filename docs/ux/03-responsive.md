@@ -68,7 +68,7 @@ proibido.
 | Brand Guidelines | `TypographyGuidelines.razor.css` | 72rem, cards em uma coluna a 40rem |
 | Daily | feature Dashboard | workspace integral; 4 colunas/scroll interno, 2 colunas e 1 coluna por cortes próprios |
 | Wallet | `wallet.css` | container canônico de 76rem e grids feature-local por densidade de conteúdo |
-| ProjectWorkspace | CSS da feature | 58rem e breakpoints 700/520px; convergência pertence à 25.12 |
+| ProjectWorkspace | CSS da feature | dialog compacto de 30rem; recomposição interna em 700/520px |
 
 `.beeday-main--authenticated` remove o gutter/reading-width global: páginas autenticadas são
 responsáveis por padding e largura, evitando que Daily, Wallet e experiências focadas sejam
@@ -83,7 +83,7 @@ estado atual; permanecem candidatos para o sweep final, não contratos para cód
   ProjectWorkspace; Account 720px; activity cards 650px.
 - **REDUNDANT / CONSOLIDATE:** os blocos Wallet duplicados de 1000/720/640px foram removidos na
   Sprint 25.11; Cards continuam candidatos somente quando seu owner for migrado.
-- **DEFER TO FEATURE SPRINT:** Daily/Project → 25.12; Character/illustration → 25.13.
+- **DEFER TO FEATURE SPRINT:** Character/illustration → 25.13.
 
 Igualdade numérica não torna dois breakpoints compartilhados. A mudança de estrutura, o owner e os
 consumers precisam coincidir.

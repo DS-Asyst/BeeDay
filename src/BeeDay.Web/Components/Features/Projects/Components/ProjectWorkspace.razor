@@ -1,17 +1,23 @@
 @if (Project is not null)
 {
-    <div class="project-workspace" role="dialog" aria-modal="true" aria-labelledby="project-workspace-title" @onclick="OnClose">
-        <section class="project-workspace__panel" @onclick:stopPropagation="true">
+    <div class="project-workspace" role="presentation" tabindex="-1" @onclick="OnClose" @onkeydown="HandleKeyDown">
+        <section class="project-workspace__panel"
+                 id="@DialogId"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="@TitleId"
+                 tabindex="-1"
+                 @onclick:stopPropagation="true">
             <header class="project-workspace__header">
                 <div>
                     <span class="project-workspace__eyebrow">@Localizer["ProjectLabel"]</span>
-                    <h2 id="project-workspace-title">@Project.Name</h2>
+                    <h2 id="@TitleId">@Project.Name</h2>
                     @if (!string.IsNullOrWhiteSpace(Project.Description))
                     {
                         <p>@Project.Description</p>
                     }
                 </div>
-                <button type="button" class="project-workspace__close" aria-label="@Localizer["CloseProjectAriaLabel"]" @onclick="OnClose"><BeeDayIcon Name="BeeDayIconName.Close" Size="BeeDayIconSize.Small" Decorative="true" /></button>
+                <button type="button" class="beeday-icon-toggle project-workspace__close" aria-label="@Localizer["CloseProjectAriaLabel"]" @onclick="OnClose"><BeeDayIcon Name="BeeDayIconName.Close" Size="BeeDayIconSize.Small" Decorative="true" /></button>
             </header>
 
             <div class="project-workspace__summary">
@@ -19,8 +25,11 @@
                 <div><span>@Localizer["ProgressLabel"]</span><strong>@Project.Todos.Count(todo => todo.Completed) / @Project.Todos.Count</strong></div>
             </div>
 
-            <div class="project-workspace__progress" aria-label="@Localizer["ProjectProgressAriaLabel", Project.ProgressPercentage.ToString("0")]">
-                <span style="width:@($"{Project.ProgressPercentage:0.##}%")"></span>
+            <div class="project-workspace__progress">
+                <BeeDayProgressBar Label="@Localizer["ProgressLabel"]"
+                                   AriaLabel="@Localizer["ProjectProgressAriaLabel", Project.ProgressPercentage.ToString("0")]"
+                                   Value="@((double)Project.ProgressPercentage)"
+                                   ValueText="@($"{Project.ProgressPercentage:0.##}%")" />
             </div>
 
             <div class="project-workspace__toolbar">
@@ -28,7 +37,7 @@
                     <h3>@Localizer["TodosHeading"]</h3>
                     <p>@Localizer["TodosSubtitle"]</p>
                 </div>
-                <button type="button" class="project-workspace__add" aria-label="@Localizer["AddTodoAriaLabel"]" title="@Localizer["AddTodoAriaLabel"]" @onclick="OnAddTodo"><BeeDayIcon Name="BeeDayIconName.Add" Size="BeeDayIconSize.Small" Decorative="true" /></button>
+                <button type="button" class="beeday-icon-toggle project-workspace__add" aria-label="@Localizer["AddTodoAriaLabel"]" title="@Localizer["AddTodoAriaLabel"]" @onclick="OnAddTodo"><BeeDayIcon Name="BeeDayIconName.Add" Size="BeeDayIconSize.Small" Decorative="true" /></button>
             </div>
 
             <div class="project-workspace__body">
@@ -54,7 +63,7 @@
                         }
                         else
                         {
-                            @foreach (var todo in Project.Todos.OrderBy(todo => todo.Completed).ThenBy(todo => todo.DueDate))
+                            @foreach (var todo in Project.Todos)
                             {
                                 <article class="project-workspace__todo @(todo.Completed ? "project-workspace__todo--done" : string.Empty)">
                                     <div class="project-workspace__todo-body">
@@ -68,4 +77,8 @@
             </div>
         </section>
     </div>
+
+    <DialogFocusScope Active="true"
+                      TargetId="@DialogId"
+                      InitialFocusSelector=".project-workspace__close" />
 }

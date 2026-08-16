@@ -18,6 +18,7 @@ public sealed class ActivityFilterBarTests
         Assert.Empty(cut.FindAll("button[aria-haspopup='dialog']"));
         Assert.DoesNotContain("Attribute", cut.Markup, StringComparison.OrdinalIgnoreCase);
         Assert.Equal("false", cut.Find("button[aria-haspopup='menu']").GetAttribute("aria-expanded"));
+        Assert.Contains("beeday-field__control", cut.Find("input[type='search']").ClassList);
     }
 
     [Fact]
@@ -34,5 +35,18 @@ public sealed class ActivityFilterBarTests
         await cut.FindAll("button[role='menuitem']")[0].ClickAsync();
 
         Assert.Equal(ActivityType.Habit, selectedType);
+    }
+
+    [Fact]
+    public void SharedSearchInputPreservesTheDebouncedFilterContract()
+    {
+        using var context = new BunitContext().WithLocalization();
+        string? search = null;
+        var cut = context.Render<ActivityFilterBar>(parameters => parameters
+            .Add(component => component.ValueChanged, value => search = value));
+
+        cut.Find("input[type='search']").Input("project");
+
+        cut.WaitForAssertion(() => Assert.Equal("project", search), TimeSpan.FromSeconds(1));
     }
 }
