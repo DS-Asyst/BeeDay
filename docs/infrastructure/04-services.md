@@ -5,8 +5,9 @@
 `HealthChecks/SqlServerHealthCheck.cs`, `Background/*.cs`, `Configuration/*.cs`, e
 `InfrastructureServiceCollectionExtensions.cs` (para lifetime/registro).
 
-**Última verificação:** 2026-08-09 (Sprint 18.6) — `Caching/MemoryApplicationCache.cs` removido
-(ver achado abaixo).
+**Última verificação:** 2026-08-16 (Epic 26, Sprint 26.2) — seção Email atualizada com
+`EmailProviderSelector`; verificação anterior em 2026-08-09 (Sprint 18.6) —
+`Caching/MemoryApplicationCache.cs` removido (ver achado abaixo).
 
 ## Event Journal — `JsonEventJournal`
 
@@ -67,6 +68,21 @@ descartada por engano. Sem lock global, sem `BackgroundService`/`Timer` novo, se
 
 A escolha entre os dois acontece inteiramente em tempo de DI (`InfrastructureServiceCollectionExtensions`),
 nunca em runtime por requisição.
+
+**EPIC 26, Sprint 26.2 — `EmailProviderSelector`:** `ResendOptions.Enabled` e
+`DevelopmentEmailOptions.Enabled` continuam sendo dois booleanos independentes (mesmas chaves de
+configuração já implantadas, nenhuma renomeada), mas a escolha do `IEmailSender` efetivo agora passa
+por `EmailProviderSelector.Resolve(resendEnabled, developmentEnabled)`
+(`Configuration/EmailProviderSelector.cs`), uma função pura que devolve `EmailProvider.Resend` ou
+`EmailProvider.Development` para as duas combinações não ambíguas, e lança
+`InvalidOperationException` no próprio registro de DI (antes de `builder.Build()`, mesmo momento em
+que `resendEnabled` já era lido hoje) para as duas combinações ambíguas: ambos `true` (a antiga
+lógica silenciosamente ignorava `Development:Enabled` e escolhia Resend) e ambos `false` (a antiga
+lógica registrava `DevelopmentEmailSender`, que então suprimia todo e-mail silenciosamente, só com
+log `Information`). Nenhum arquivo `appsettings*.json` precisou mudar — nenhuma das 4 configurações
+já commitadas (base, Homologation, Production; Development herda do base) está em um dos dois
+estados ambíguos. Ver [`docs/infrastructure/06-transactional-email.md`](06-transactional-email.md)
+§4.1/§8 para a análise completa que motivou esta mudança.
 
 ## `Pbkdf2PasswordService` — hashing de senha
 
@@ -140,6 +156,7 @@ típico do pipeline JSON removido (ADR-005). Confirmado código morto e removido
 `ResendEmailSender.cs`, `DevelopmentEmailSender.cs`, `Security/Pbkdf2PasswordService.cs`,
 `HealthChecks/SqlServerHealthCheck.cs`,
 `Background/BackgroundTaskQueue.cs`, `BackgroundTaskWorker.cs`,
+`Configuration/EmailProvider.cs`, `Configuration/EmailProviderSelector.cs` (EPIC 26, Sprint 26.2),
 os 5 arquivos de `Configuration/`,
 `DependencyInjection/InfrastructureServiceCollectionExtensions.cs` (para lifetime de cada
 registro).

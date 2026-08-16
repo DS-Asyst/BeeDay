@@ -13,8 +13,9 @@ and `git log`/`git show` on the files above. Cross-checked against
 [`docs/deployment/02-runtime-configuration.md`](../deployment/02-runtime-configuration.md)
 (already current as of Sprint 18.4).
 
-**Last verified:** 2026-08-16 (Epic 26, Sprint 26.1 — audit only, no behavior changed by this
-sprint).
+**Last verified:** 2026-08-16 (Epic 26, Sprint 26.2 — §4.1/§8's provider-selection recommendation
+implemented via `EmailProviderSelector`; §4.1 and §8 updated accordingly. Originally written in
+Sprint 26.1, audit-only, no behavior changed by that sprint).
 
 ## 1. Scope
 
@@ -110,7 +111,13 @@ exists. `ResendOptions.Enabled` is the only value that decides which `IEmailSend
 is registered; `DevelopmentEmailOptions.Enabled` is a second, independent flag consumed only inside
 `DevelopmentEmailSender.SendAsync` itself (it does not affect DI).
 
-### 4.1 The two-boolean model can reach a silently-degraded state
+### 4.1 The two-boolean model can reach a silently-degraded state (resolved in Sprint 26.2)
+
+**Sprint 26.2 update:** the ambiguous states described below are now rejected at DI-registration
+time by `EmailProviderSelector.Resolve` (`src/BeeDay.Infrastructure/Configuration/EmailProviderSelector.cs`),
+called from `InfrastructureServiceCollectionExtensions` in place of the old bare `if (resendEnabled)`.
+The two configuration keys themselves are unchanged (§5). The description below is preserved as the
+proven finding that motivated the change.
 
 `Resend:Enabled` and `Email:Development:Enabled` are validated independently
 (`InfrastructureServiceCollectionExtensions.cs:34-46`) and never validated against each other. Two
@@ -280,14 +287,18 @@ content-root guard against this one configured value.
 
 ## 8. Recommended target architecture for Sprint 26.2+
 
-**This section is a recommendation for future sprints. Nothing described here is implemented as of
-this sprint.**
+**This section was written in Sprint 26.1 as a recommendation for future sprints. Sprint 26.2 below
+is now implemented (see §4.1); §26.3 onward remain forward-looking recommendations, not yet
+implemented.**
 
-- Sprint 26.2: replace the two independent booleans with a single explicit provider-selection
-  contract (e.g. one `EmailProvider` enum value: `Development` / `Resend`), validated at startup so
-  every environment resolves to exactly one unambiguous provider — no dead configuration, no silent
-  full suppression by accident. Keep both `ResendEmailSender` and `DevelopmentEmailSender` as the
-  two concrete implementations; this is a selection-contract change, not a rewrite of either sender.
+- ~~Sprint 26.2: replace the two independent booleans with a single explicit provider-selection
+  contract~~ — **done.** `EmailProviderSelector.Resolve(resendEnabled, developmentEnabled)` returns
+  one `EmailProvider` (`Development`/`Resend`) for the two valid combinations and throws
+  `InvalidOperationException` for the two ambiguous ones, at DI-registration time (effectively
+  startup, before `builder.Build()`). Both `ResendEmailSender` and `DevelopmentEmailSender` kept
+  unchanged as the two concrete implementations — this was a selection-contract change only, not a
+  rewrite of either sender. No `appsettings*.json` key was renamed; none of the 4 committed
+  configurations needed a value change, since none was already in an ambiguous state (§5.1).
 - Sprint 26.3: make `DevelopmentEmailSender`'s directory guard aware of an explicitly-configured
   external absolute path (distinct from an accidental relative-path traversal escape), without
   weakening the traversal protection for the relative-path case it was originally built for.
