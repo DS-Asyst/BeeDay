@@ -18,13 +18,14 @@ coincidem com as dimensões intrínsecas.
 | `assets/brand/beeday-top-navigation.png` | 866×288 / 117.690 B | `PublicHeader` e `AppFooter`; largura responsiva por CSS, sem lazy-loading | Identidade: link do header recebe nome acessível externo; footer usa `alt="beeday"` | Wordmark canônico atual; fora do sistema de personagens |
 | `assets/flags/brazil.png` | 612×408 / 170.991 B | `PublicLanguageSwitcher`; reduzida por CSS dentro de botão rotulado | Decorativa; o botão informa idioma e estado | Utilitário atual, não ilustração de marca |
 | `assets/flags/united-states.png` | 612×408 / 140.253 B | `PublicLanguageSwitcher`; reduzida por CSS dentro de botão rotulado | Decorativa; o botão informa idioma e estado | Utilitário atual, não ilustração de marca |
-| `assets/hero/home-team.png` | 1536×1024 / 1.770.361 B | Hero da Home; `contain`, caixa quadrada, 32rem desktop, 24rem até 52rem e 19rem até 30rem; carregamento inicial | Decorativa, em container `aria-hidden`; texto adjacente entrega a mensagem | Composição canônica aprovada da Home, não character sheet |
+| `assets/hero/home-team.png` | 1536×1024 / 1.770.361 B | Hero da Home; `contain`, caixa quadrada, 32rem desktop, 24rem até 52rem e 19rem até 30rem; `fetchpriority="high"` | Decorativa, em container `aria-hidden`; texto adjacente entrega a mensagem | Composição canônica aprovada da Home, não character sheet |
 | `assets/home/how-beeday-works-bee.png` | 1254×1254 / 533.600 B | Seção de passos; `contain`, absoluta no desktop e em fluxo até 60rem; `loading="lazy"`, `decoding="async"` | Decorativa, em container `aria-hidden`; passos carregam o conteúdo | Composição individual canônica atual da abelha |
 | `assets/home/home-team-fall.png` | 1536×1024 / 1.793.100 B | Fechamento da Home; largura `clamp` por viewport, sobrepõe a wave sem crop; lazy/async | Decorativa, `alt=""` e `aria-hidden="true"` | Variante de grupo canônica para esta composição |
 | `assets/home/wave-site.png` | 1672×941 / 476.914 B | Fechamento da Home; centralizada, largura mínima 48rem, recorte vertical controlado pelo container; lazy/async | Decorativa, em container `aria-hidden` | Fundo composition-specific; não é foundation de UI |
 
 Não existem ativos individuais dos seis personagens coadjuvantes, SVGs de personagem, variantes
-alternativas, poses nomeadas ou arquivos marcados como legacy. Também não há evidência de que
+alternativas ou poses nomeadas. O PNG raiz `beeday-wordmark.png`, sem consumer e separado do lockup
+canônico de Header/Footer, foi removido no sweep final. Também não há evidência de que
 recortes extraídos das imagens de grupo sejam permitidos; portanto, não devem ser produzidos.
 
 ## Abelha central
@@ -110,8 +111,8 @@ todo o conteúdo sem elas. Devem manter `alt=""`; `aria-hidden="true"` pode esta
 container. Se uma arte futura comunicar informação ausente do texto, ela deixa de ser decorativa e
 precisa de alternativa localizada que comunique a função, não uma lista de detalhes visuais.
 
-O hero é acima da dobra e permanece no carregamento inicial. As três imagens posteriores usam
-lazy-loading; seus bitmaps são decodificados de forma assíncrona. `width`/`height` intrínsecos
+O hero é acima da dobra, permanece no carregamento inicial e usa prioridade alta. As três imagens
+posteriores usam lazy-loading; seus bitmaps são decodificados de forma assíncrona. `width`/`height` intrínsecos
 devem continuar declarados para reservar proporção e reduzir layout shift.
 
 Os quatro PNGs artísticos somam 4.573.975 bytes no repositório e não possuem variantes responsivas.

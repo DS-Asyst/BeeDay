@@ -164,9 +164,8 @@ textarea {
     }
 }
 
-/* Official BeeDay product typography. The brand wordmark has its own typography in the asset. */
+/* Official beeday product typography. Brand/display moments use their qualified typography. */
 .profile-panel__brand,
-.welcome > span,
 .entry-loading > span { font-family: var(--beeday-font-body); }
 
 h1, h2, h3,

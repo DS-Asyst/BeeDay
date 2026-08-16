@@ -3,7 +3,7 @@ namespace BeeDay.Web.Tests.Components.DesignSystem;
 public sealed class LegacyVisualGuardTests
 {
     [Fact]
-    public void RuntimeDoesNotLoadRetiredPixelOrNesStylesheets()
+    public void RuntimeDoesNotRetainRetiredVisualAssetsOrStylesheets()
     {
         var root = FindRepositoryRoot();
         var app = File.ReadAllText(Path.Combine(root, "src", "BeeDay.Web", "Components", "App.razor"));
@@ -11,16 +11,19 @@ public sealed class LegacyVisualGuardTests
         Assert.DoesNotContain("pixel-ui.css", app, StringComparison.OrdinalIgnoreCase);
         Assert.False(File.Exists(Path.Combine(root, "src", "BeeDay.Web", "wwwroot", "css", "pixel-nes.css")));
         Assert.False(File.Exists(Path.Combine(root, "src", "BeeDay.Web", "wwwroot", "css", "vendor", "nes-core.beeday-excerpt.css")));
+        Assert.False(File.Exists(Path.Combine(root, "src", "BeeDay.Web", "wwwroot", "beeday-wordmark.png")));
+        Assert.False(File.Exists(Path.Combine(root, "src", "BeeDay.Web", "Components", "Features", "ProfileCreation", "Pages", "Welcome.razor.css")));
     }
 
     [Fact]
-    public void RazorConsumersDoNotReintroduceComicOrPixelClasses()
+    public void RazorConsumersDoNotReintroduceRetiredVisualClasses()
     {
         var web = Path.Combine(FindRepositoryRoot(), "src", "BeeDay.Web");
         var matches = Directory.EnumerateFiles(web, "*.razor", SearchOption.AllDirectories)
             .SelectMany(File.ReadAllLines)
             .Where(line => line.Contains("beeday-button--comic", StringComparison.OrdinalIgnoreCase)
-                || line.Contains("beeday-pixel-panel", StringComparison.OrdinalIgnoreCase));
+                || line.Contains("beeday-pixel-panel", StringComparison.OrdinalIgnoreCase)
+                || line.Contains("class=\"sr-only\"", StringComparison.OrdinalIgnoreCase));
         Assert.Empty(matches);
     }
 
@@ -33,7 +36,8 @@ public sealed class LegacyVisualGuardTests
 
         Assert.DoesNotContain(styles, line =>
             line.Contains("comic-", StringComparison.OrdinalIgnoreCase)
-            || line.Contains("skew-press", StringComparison.OrdinalIgnoreCase));
+            || line.Contains("skew-press", StringComparison.OrdinalIgnoreCase)
+            || line.Contains(".sr-only", StringComparison.OrdinalIgnoreCase));
     }
 
     private static string FindRepositoryRoot()

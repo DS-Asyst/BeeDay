@@ -47,8 +47,8 @@ public sealed class ShellFoundationTests
     {
         var layoutCss = Layout("MainLayout.razor.css");
         Assert.Contains("--beeday-sidebar-width", layoutCss, StringComparison.Ordinal);
-        Assert.Contains("--beeday-reading-width", layoutCss, StringComparison.Ordinal);
-        Assert.Contains("--beeday-workspace-width", layoutCss, StringComparison.Ordinal);
+        Assert.DoesNotContain("--beeday-reading-width", layoutCss, StringComparison.Ordinal);
+        Assert.DoesNotContain("--beeday-workspace-width", layoutCss, StringComparison.Ordinal);
         Assert.DoesNotContain("right-rail", layoutCss, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("panel-width", layoutCss, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("@media (min-width: 1200px)", layoutCss, StringComparison.Ordinal);

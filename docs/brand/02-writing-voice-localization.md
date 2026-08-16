@@ -104,7 +104,7 @@ que o produto não entrega ou usa gamificação fictícia para forçar engajamen
 ### Emojis e símbolos
 
 Emoji não faz parte da copy operacional atual e não deve substituir ícone, label ou estado. `+`/`−`,
-`%`, `$` e `XP` só aparecem com significado real calculado. Ícones são fornecidos pelo Pixel Icon
+`%`, `$` e `XP` só aparecem com significado real calculado. Ícones são fornecidos pelo BeeDay Icon
 System e nunca carregam sozinhos informação necessária.
 
 ## Glossário canônico

@@ -6,10 +6,10 @@ implementação permanece nos READMEs das EPICs correspondentes.
 
 ## 1. Mapa atual
 
-Existem 102 declarações `@media` em 44 arquivos. Destas, 67 são queries de largura de viewport em
-33 arquivos; não existe `@container`. Depois de normalizar whitespace e converter `rem` para o
-equivalente em 16px, há 26 cortes `max-width` e dois cortes `min-width` (27 valores físicos, pois
-1200px aparece nos dois sentidos).
+O inventário atual cobre todas as folhas de produção; não existe `@container`. Depois de normalizar
+whitespace e converter `rem` para o equivalente em 16px, as queries de largura usam os cortes
+físicos listados abaixo. Quantidades de arquivos/declarations não são contrato e não são duplicadas
+neste documento.
 
 CSS custom properties não funcionam como valor de media feature, portanto o projeto não cria
 `--beeday-breakpoint-*`. Um breakpoint compartilhado é um contrato literal documentado e protegido
@@ -72,9 +72,9 @@ proibido.
 
 `.beeday-main--authenticated` remove o gutter/reading-width global: páginas autenticadas são
 responsáveis por padding e largura, evitando que Daily, Wallet e experiências focadas sejam
-forçadas ao mesmo container. `--beeday-content-width` e os overrides scoped
-`--beeday-reading-width: 48rem`/`--beeday-workspace-width: 100rem` não têm consumers efetivos no
-estado atual; permanecem candidatos para o sweep final, não contratos para código novo.
+forçadas ao mesmo container. Os antigos `--beeday-content-width` e overrides scoped
+`--beeday-reading-width: 48rem`/`--beeday-workspace-width: 100rem`, sem leitura efetiva, foram
+removidos no sweep final da EPIC 25.
 
 ## 4. Classificação por owner
 

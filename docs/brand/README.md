@@ -6,7 +6,7 @@ interface continuam pertencendo ao [`design-system/`](../design-system/README.md
 
 **Fonte da verdade:** ativos e consumers atuais em `src/BeeDay.Web`, contratos documentados pela
 EPIC 25 e testes que protegem o markup correspondente. Última verificação: 2026-08-16, Sprint
-25.13.
+25.16.
 
 ## Documentos
 

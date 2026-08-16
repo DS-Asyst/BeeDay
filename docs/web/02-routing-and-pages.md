@@ -105,18 +105,18 @@ para o detalhamento e o achado de documentação relacionado.
 ## 6. Páginas de catálogo do Design System
 
 `/design-system/icons` e `/design-system/hero` (`DesignSystem/Pages/`) não pertencem a nenhuma área
-de Feature — são páginas de desenvolvimento/QA visual que renderizam todo `PixelIconRegistry` e
+de Feature — são páginas de desenvolvimento/QA visual que renderizam todo `BeeDayIconRegistry` e
 todas as variantes de `BeeDayHero`, respectivamente, injetando `IWebHostEnvironment` (não usado para
 restringir acesso — ambas exigem apenas `[Authorize]`, acessíveis a qualquer usuário autenticado em
 qualquer ambiente). Ver [`05-design-system-integration.md`](05-design-system-integration.md).
 
-## 7. Páginas sem estado de erro dedicado
+## 7. Páginas de erro
 
-`/not-found` (`NotFound.razor`) é estático (`<h3>Not Found</h3>`); `/Error` (`Error.razor`) é o
-template padrão gerado pelo scaffolding ASP.NET Core, sem nenhuma customização: exibe
+`/not-found` (`NotFound.razor`) e `/Error` (`Error.razor`) usam `SharedResources` para título e
+mensagens em `en-US`/`pt-BR`. `/Error` exibe
 `Activity.Current?.Id ?? HttpContext.TraceIdentifier` (via `[CascadingParameter] HttpContext`)
-sempre que não vazio, e um bloco estático de texto explicando como habilitar o ambiente Development
-— não há checagem de ambiente no componente em si. Nenhuma das duas páginas é acionada
+quando não vazio e instruções localizadas sobre Development; não há checagem de ambiente no
+componente em si. Nenhuma das duas páginas é acionada
 automaticamente pelo `GlobalExceptionHandler` (que responde `ProblemDetails`, não uma página Blazor)
 — `/Error` só é alcançável por navegação direta; nada no repositório redireciona para ela.
 

@@ -1,15 +1,14 @@
 # Web Testing Map
 
-**Fonte da verdade:** enumerado diretamente em `tests/BeeDay.Web.Tests/` (64 arquivos `.cs`) e
-`tests/BeeDay.E2E.Tests/` (8 arquivos `.cs` + o `.csproj`). A estratégia de teste em si (pirâmide, infraestrutura de
+**Fonte da verdade:** enumerado diretamente em `tests/BeeDay.Web.Tests/` e
+`tests/BeeDay.E2E.Tests/`. A estratégia de teste em si (pirâmide, infraestrutura de
 integração, infraestrutura E2E) já é descrita em detalhe em
 [`docs/testing/01-testing-strategy.md`](../testing/01-testing-strategy.md) — este documento não a
 duplica; mapeia especificamente qual arquivo de teste cobre qual parte da árvore de
 `src/BeeDay.Web/` descrita nos 5 documentos anteriores.
 
-**Última verificação:** 2026-08-11 (Sprint 20.5, EPIC 20) — `PublicHeader`/`PublicLayout`/`Home`
-(rota `/`) mapeados; contagem de arquivos corrigida (Web.Tests 61→64, E2E.Tests 7→8). Demais seções
-preservadas da verificação de 2026-08-07.
+**Última verificação:** 2026-08-16 (Sprint 25.16, EPIC 25) — mapa de layouts, Design System,
+localização, responsividade e quality gates reconciliado com os projetos atuais.
 
 ## 1. Objetivo
 
@@ -73,8 +72,6 @@ renderização do componente Razor em si via bUnit.
 
 | Componente | Teste(s) |
 |---|---|
-| `ProfileSidePanel.razor` | `Components/Layout/ProfileSidePanelTests.cs` |
-| `AccountSidePanel.razor` | `Components/Layout/AccountSidePanelTests.cs` |
 | `BeeDayPageHeader`/`BeeDaySectionHeader` (Design System, usado por `Account`/`Wallet`) | `Components/Layout/BeeDayHeaderTests.cs` — nome do arquivo sugere a navegação, mas testa os cabeçalhos do Design System |
 | `BeeDaySettingsForm`/`BeeDaySettingsSection` (Design System, usado por `Account`) | `Components/Layout/BeeDaySettingsTests.cs` |
 | `BeeDayHero` (Design System, catálogo — primeiro consumidor de produto real desde a Sprint 20.5, ver `Home.razor`) | `Components/Layout/BeeDayHeroTests.cs` |
@@ -83,7 +80,7 @@ renderização do componente Razor em si via bUnit.
 | `MobileHeader.razor` (EPIC 21, Sprint 21.3) | `Components/Layout/MobileHeaderTests.cs` |
 | `MobileSidebar.razor` (EPIC 21, Sprint 21.3) | `Components/Layout/MobileSidebarTests.cs` |
 | `NavigationItem.razor`/`NavigationItems.razor` (EPIC 21, Sprint 21.3) | `Components/Layout/NavigationItemTests.cs`, `NavigationItemsTests.cs` |
-| Contrato de shell (`MainLayout`/`DesktopSidebar`/`RightRail`/`MobileHeader`/`MobileSidebar`, EPIC 21) | `Components/Layout/ShellFoundationTests.cs` |
+| Contrato de shell (`MainLayout`/`DesktopSidebar`/`MobileHeader`/`MobileSidebar`, EPIC 21) | `Components/Layout/ShellFoundationTests.cs` |
 
 `MainLayout.razor` e `OnboardingLayout.razor` não têm arquivo de teste dedicado
 identificado nesta auditoria. `TopNavigation.razor` foi removida na Sprint 21.3 (EPIC 21).
@@ -120,8 +117,7 @@ não o código JS isoladamente.
 
 ## 8. `BeeDay.E2E.Tests`
 
-6 classes de teste, 18 fluxos (`grep -c "\[Fact\]"`, verificado diretamente na Sprint 21.3), sobre
-a infraestrutura descrita em `docs/testing/01-testing-strategy.md` §7 (`PlaywrightAppFixture`,
+As classes de fluxo usam a infraestrutura descrita em `docs/testing/01-testing-strategy.md` §7 (`PlaywrightAppFixture`,
 `E2ETestBase`, `E2EWebApplicationFactory`):
 
 | Classe | Fluxos |
@@ -129,15 +125,19 @@ a infraestrutura descrita em `docs/testing/01-testing-strategy.md` §7 (`Playwri
 | `AccountLifecycleTests.cs` | Criar conta → confirmação pendente; login → onboarding → `/daily`; logout; editar perfil |
 | `HabitAndTaskTests.cs` | Criar/completar hábito (saldo + XP visíveis); criar/completar task |
 | `WalletTests.cs` | Criar tag + transação no Wallet, saldo atualizado |
-| `HomeTests.cs` (Sprint 20.15, EPIC 20) | Além dos fluxos públicos, valida continuidade geométrica Header/Hero, CTAs branco/amarelo e Footer `#17203B` em Chromium |
-| `ShellResponsiveLayoutTests.cs` (EPIC 21, Sprint 21.2/21.3) | Geometria real da sidebar/rail desktop; visibilidade condicional mobile vs. desktop sem sobreposição; ausência de overflow horizontal real |
+| `HomeTests.cs` | Conteúdo/capacidades reais, geometria Header/Hero/Home/Footer, imagens e responsividade pública |
+| `AuthenticatedHomeTests.cs`, `VisualFoundationTests.cs` | Entrada autenticada e foundations visuais computadas |
+| `BrandTypographyTests.cs` | Guideline pública, Coiny/Nunito, localização, casing, clipping e overflow |
+| `ShellResponsiveLayoutTests.cs`, `Epic21ConsolidationTests.cs` | Geometria do shell e matriz mobile→wide sem overflow de documento |
 | `NavigationTests.cs` (EPIC 21, Sprint 21.3) | `aria-current` real ao navegar e em deep link; abrir/fechar o drawer mobile via hambúrguer/backdrop/Escape/botão dedicado; foco real move para o drawer ao abrir; navegar por um item do drawer fecha-o; Logout continua acessível |
+| `InteractiveComponentsTests.cs`, `IconSystemTests.cs` | Lifecycle de dialogs/menus e sprite de ícones no browser real |
+| `LoginExperienceTests.cs`, `SettingsLocalizationTests.cs` | Auth/Identity responsivo e persistência de cultura |
+| `AccessibilityQualityTests.cs` | axe em Home, Typography, Login, Daily, Wallet e diálogo canônico |
 
 ## 9. Contagem de referência
 
-`docs/testing/01-testing-strategy.md` §1 é a fonte canônica da contagem de testes por projeto —
-768 testes aprovados (93 Domain, 73 Application, 129 Infrastructure, 464 Web, 9 E2E), confirmado
-por execução real na Sprint 20.5 (não repetido aqui em detalhe para evitar duplicação).
+`docs/testing/README.md` é a fonte canônica da última contagem executada por projeto; este mapa
+permanece qualitativo para não duplicar um número que muda a cada novo cenário.
 
 ## 10. Achado
 
@@ -149,14 +149,11 @@ por execução real na Sprint 20.5 (não repetido aqui em detalhe para evitar du
 
 ## 11. Fontes de verdade
 
-- Lista de arquivos de `tests/BeeDay.Web.Tests/**/*.cs` (64 arquivos, `Glob` direto nesta Sprint —
-  61 na Sprint 18.8, `+1` de `Components/Home/HomeTests.cs`; a diferença residual de +2 não é
-  atribuída a esta Sprint especificamente, não reauditada arquivo a arquivo) e
-  `tests/BeeDay.E2E.Tests/*.cs` (8 arquivos — `+1` de `HomeTests.cs`, Sprint 20.5), incluindo
+- Lista atual de arquivos de `tests/BeeDay.Web.Tests/**/*.cs` e
+  `tests/BeeDay.E2E.Tests/*.cs`, incluindo
   `E2EWebApplicationFactory.cs`/`PlaywrightAppFixture.cs`/`E2ETestBase.cs`/`Usings.cs` como
   infraestrutura.
 - `tests/BeeDay.Web.Tests/BeeDay.Web.Tests.csproj`, `tests/BeeDay.E2E.Tests/BeeDay.E2E.Tests.csproj`.
-- [`docs/testing/01-testing-strategy.md`](../testing/01-testing-strategy.md) para a infraestrutura
-  compartilhada (não reverificada em detalhe nesta Sprint — a leitura desta sessão confirma que a
-  descrição de `BeeDayWebApplicationFactory`, `PlaywrightAppFixture` e `E2ETestBase` continua
-  batendo com o código atual).
+- [`docs/testing/01-testing-strategy.md`](../testing/01-testing-strategy.md) e
+  [`docs/testing/02-design-system-quality-gates.md`](../testing/02-design-system-quality-gates.md)
+  para infraestrutura e quality gates compartilhados.

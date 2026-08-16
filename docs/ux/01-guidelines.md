@@ -5,9 +5,7 @@
 arquivo onde foi observado. Não é uma lista de recomendações novas: é uma descrição do que o código
 atual faz de forma consistente (ou não).
 
-**Última verificação:** 2026-08-11 (Sprint 20.5, EPIC 20) — §5 atualizado: `/` deixou de ser um
-resolvedor de redirect e passou a ser a Home pública; demais seções preservadas da verificação de
-2026-08-07.
+**Última verificação:** 2026-08-16 (Sprint 25.16, EPIC 25).
 
 ## 1. Objetivo
 
@@ -17,20 +15,16 @@ estado (vazio, carregando, erro), e onde o produto pede confirmação antes de a
 
 ## 2. Hierarquia visual
 
-A hierarquia é comunicada principalmente por **fonte**, não só por tamanho: `typography-policy.css`
-reserva Jersey 25 (fonte "retro"/pixel) exclusivamente para título de página/card, marca
-(`BeeDayBrand`) e botões (`BeeDayButton`) — todo o resto (parágrafos, labels, inputs, tabelas,
-valores numéricos) usa Inter. Isso significa que, em qualquer tela, os elementos em Jersey 25 são,
-por definição, os pontos de maior peso visual — não é preciso variar tamanho de fonte para
-comunicar "isto é o título desta seção".
+A hierarquia usa a escala tipográfica e o papel do texto. Nunito é a foundation de Product/UI para
+títulos, body, labels, inputs, navegação e controles. Coiny fica restrita a Brand/Display em
+`BeeDayBrand` e momentos expressivos qualificados; não é fonte de forms, buttons ou leitura longa.
 
 O padrão estrutural de cabeçalho (`BeeDayPageHeader`/`BeeDaySectionHeader`/`BeeDayHero`, ver
 [`docs/design-system/02-components.md`](../design-system/02-components.md) §5) é: eyebrow (rótulo
-pequeno, maiúsculo, cor de marca) → título (H1/H2, Jersey 25) → descrição (Inter, cor muted) →
-ações (à direita em telas largas, empilhadas abaixo em `max-width: 42rem`). Esse padrão se repete
-em `Account.razor` (via `BeeDayPageHeader`) e nas páginas de catálogo — não foi adotado por
-`Wallet.razor` passou a consumir `BeeDayPageHeader` na Sprint 25.11, preservando seu container e
-conteúdo financeiro; `Home.razor` permanece uma composição de marketing deliberadamente própria.
+pequeno, maiúsculo, cor de marca) → título (H1/H2, Nunito) → descrição (Nunito,
+text-secondary) → ações (à direita em telas largas, empilhadas abaixo em `max-width: 42rem`). Esse
+padrão se repete em Account e Wallet via `BeeDayPageHeader`, preservando containers e conteúdos
+próprios; `Home.razor` permanece uma composição de marketing deliberadamente própria.
 
 ## 3. Feedback de ação
 
@@ -65,8 +59,8 @@ do repositório passa por uma confirmação.
   (`.beeday-field__control`, `.editor-modal__field input`, `.identity-field input`,
   `.wallet-filters input`) — ver [`docs/design-system/04-forms.md`](../design-system/04-forms.md) §5.
 - `Home.razor` não usa `BeeDayPageHeader` porque sua hierarquia é de marketing (ver §2 acima).
-- 70 queries de largura em 33 stylesheets (26 cortes `max-width`, dois `min-width`), sem token
-  artificial; shell 1200px e famílias públicas compartilhadas estão formalizados — ver
+- queries de largura continuam junto de seus owners, sem token artificial; shell 1200px e famílias
+  públicas compartilhadas estão formalizados — ver
   [`03-responsive.md`](03-responsive.md).
 
 ## 5. Fluxo — do primeiro acesso ao Dashboard

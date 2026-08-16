@@ -220,7 +220,6 @@
 
     /* Layout and layers. Page-local stacking contexts may use small local values; these tokens
        own only overlays that must participate in the shared application hierarchy. */
-    --beeday-content-width: 100%;
     --beeday-z-navigation: 100;
     --beeday-z-drawer-backdrop: 140;
     --beeday-z-drawer: 150;
