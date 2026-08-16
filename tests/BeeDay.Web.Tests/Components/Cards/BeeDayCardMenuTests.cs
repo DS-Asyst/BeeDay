@@ -31,14 +31,18 @@ public sealed class BeeDayCardMenuTests
     public void UnderPortugueseUiCulture_RendersPortugueseLabelsAndFormattedAriaLabel()
     {
         using var context = CreateContext();
-        var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<BeeDayCardMenu>(parameters => parameters
-            .Add(component => component.Title, "Ler um livro")));
 
-        Assert.Equal("Opções para Ler um livro", cut.Find("button").GetAttribute("aria-label"));
+        BunitLocalizationSupport.WithUiCulture("pt-BR", () =>
+        {
+            var cut = context.Render<BeeDayCardMenu>(parameters => parameters
+                .Add(component => component.Title, "Ler um livro"));
 
-        cut.Find("button").Click();
-        var items = cut.FindAll("[role='menuitem'] span");
-        Assert.Equal(["EDITAR", "EXCLUIR"], items.Select(item => item.TextContent));
+            Assert.Equal("Opções para Ler um livro", cut.Find("button").GetAttribute("aria-label"));
+
+            cut.Find("button").Click();
+            var items = cut.FindAll("[role='menuitem'] span");
+            Assert.Equal(["EDITAR", "EXCLUIR"], items.Select(item => item.TextContent));
+        });
     }
 
     [Fact]
