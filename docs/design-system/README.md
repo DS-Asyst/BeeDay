@@ -96,6 +96,7 @@ componentes reutilizáveis — documentadas em
 2. `02-components.md` — o catálogo completo.
 3. `03-icons.md` e `04-forms.md` — os dois subsistemas mais usados, em detalhe.
 4. [`docs/ux/README.md`](../ux/README.md) — como esses componentes devem ser usados, não apenas o que fazem.
+5. [`docs/epics/25-design-system-brand-evolution/README.md`](../epics/25-design-system-brand-evolution/README.md) — a partir da Sprint 25.1 (EPIC 25), a governança de evolução deste Design System (hierarquia reuse/extend/consolidate/refactor/create, política de hardcode vs. token, taxonomia de decisão) e o contrato oficial de marca (`beeday`, lowercase, `#5247F9`, e o limite entre brand identity e technical identity) vivem lá, não neste documento.
 
 ## Achados relevantes (reportados, não corrigidos)
 
@@ -126,3 +127,13 @@ componentes reutilizáveis — documentadas em
   folhas globais de `wwwroot/css/`, 3.939 linhas) e os incorporou à auditoria — ver
   [`01-foundations.md`](01-foundations.md) §9. Um deles (`Layout/TopNavigation.razor.css`) declara
   uma cor de marca (`#5b1095`) fora do sistema de tokens `--beeday-color-*`.
+- **Contagem de componentes desatualizada (encontrado na Sprint 25.1, não corrigido aqui).** A
+  tabela em "Contagem de componentes" acima (24, "corrige contagem anterior", verificada na Sprint
+  20.3, antes da EPIC 21 começar) não inclui `Components/DesignSystem/Progress/BeeDayProgressBar.razor`
+  (+ `BeeDayProgressTone.cs`) — adicionado depois, na Sprint 21.6 (Progress Right Rail), conforme
+  `docs/epics/21-lingo-product-experience/README.md` §16 (Component Mapping). Confirmado por leitura
+  direta nesta Sprint: 25 componentes reutilizáveis fisicamente em `Components/DesignSystem/`
+  (excluindo as 2 páginas de catálogo `HeroCatalog`/`IconCatalog`) + `BeeDaySortable`
+  (fisicamente fora da pasta) = 26 no total. Correção da tabela pertence à próxima Sprint que tocar
+  este documento (candidato natural: Sprint 25.16, Documentation, Migration Sweep & Final Quality
+  Gate), não a esta auditoria.
