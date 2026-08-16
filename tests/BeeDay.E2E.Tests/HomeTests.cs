@@ -52,7 +52,12 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         await Expect(howVisual).ToBeVisibleAsync();
         await Expect(howSection).ToHaveCSSAsync("background-color", "rgb(213, 238, 253)");
         Assert.Equal(3, await howSection.Locator(".home-steps > li").CountAsync());
-        await Expect(Page.GetByRole(AriaRole.Contentinfo)).ToBeVisibleAsync();
+        var brandClosure = Page.Locator(".home-brand-closure");
+        var brandClosureImage = brandClosure.Locator("img");
+        var footer = Page.GetByRole(AriaRole.Contentinfo);
+        await Expect(brandClosureImage).ToBeVisibleAsync();
+        await Expect(brandClosure).ToHaveCSSAsync("background-color", "rgb(70, 74, 250)");
+        await Expect(footer).ToBeVisibleAsync();
         var visualBox = await heroVisual.BoundingBoxAsync();
         var contentBox = await Page.Locator(".home-hero__content").BoundingBoxAsync();
         Assert.NotNull(visualBox);
@@ -72,6 +77,15 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         var howVisualBox = await Page.Locator(".home-how__visual").BoundingBoxAsync();
         Assert.NotNull(howVisualBox);
         Assert.True(howVisualBox!.Width >= 280 || width < 390, "The How BeeDay works illustration should remain meaningful on narrow viewports.");
+        var closureBox = await brandClosure.BoundingBoxAsync();
+        var closureImageBox = await brandClosureImage.BoundingBoxAsync();
+        var footerBox = await footer.BoundingBoxAsync();
+        Assert.NotNull(closureBox);
+        Assert.NotNull(closureImageBox);
+        Assert.NotNull(footerBox);
+        Assert.InRange(Math.Abs(closureImageBox!.Width / closureImageBox.Height - 1744d / 902d), 0, .01);
+        Assert.InRange(Math.Abs(closureBox!.Y + closureBox.Height - footerBox!.Y), 0, 1);
+        Assert.True(closureImageBox.Height >= 200, "The brand closure artwork should remain recognizable on narrow viewports.");
     }
 
     [Fact]
