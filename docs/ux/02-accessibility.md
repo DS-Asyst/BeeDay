@@ -40,7 +40,7 @@ ProjectWorkspace To-Do toggle e TransactionList busy.
 `BeeDayIcon.razor.cs.OnParametersSet` lança `InvalidOperationException` se `Decorative="false"` e
 nenhum `Label` foi fornecido — nenhum outro componente do Design System tem uma checagem
 equivalente (ex.: nada impede um `BeeDayButton` sem `ChildContent` nem `AdditionalAttributes["aria-label"]`
-de ser renderizado sem nome acessível). Isso torna `PixelIcon` uma garantia real de build-time —
+de ser renderizado sem nome acessível). Isso torna `BeeDayIcon` uma garantia real de runtime —
 mas só cobre ícones, não os outros componentes.
 
 ## 4. Achado — nenhum link "pular para o conteúdo"
@@ -67,9 +67,9 @@ carregada.
   seus lifecycles próprios porque são menu/navigation, não dialogs.
 - `:focus-visible` é estilizado globalmente (`theme.css`:
   `:where(button, a, input, select, textarea, [tabindex]):focus-visible { box-shadow:
-  var(--beeday-focus-ring); }`) e reforçado por `polish.css` com `outline: var(--beeday-focus-outline)`
-  (3px sólido, cor `--beeday-game-blue-dark`) mais `scroll-margin: 5rem` — um elemento focado por
-  teclado nunca fica escondido atrás do cabeçalho fixo ao rolar até ele.
+  var(--beeday-focus-ring); }`) e complementado por `polish.css` com `scroll-margin: 5rem`. O ring
+  usa o token de foco derivado de Brand Primary e o scroll margin reduz o risco de o alvo ficar sob
+  o cabeçalho fixo.
 - `BeeDayCheckbox` mantém o `<input>` real focável (posicionado fora da tela, não `display:none`) e
   aplica o indicador de foco ao elemento visual irmão — o controle nativo continua sendo o alvo real
   de Tab/Espaço.
@@ -78,8 +78,8 @@ carregada.
   mas não clicável; não confirmado se algum componente usa `aria-disabled` em vez de `disabled`
   nativo na prática (a maioria dos componentes auditados usa `disabled` nativo, que já remove o
   elemento da ordem de tabulação).
-- `.beeday-side-slot` (painéis laterais) usa `overscroll-behavior: contain` (`polish.css`) —
-  rolagem dentro do painel não "vaza" para a página por trás.
+- `MobileSidebar` é removida da árvore de foco quando fechada e seu backdrop/drawer controlam o
+  lifecycle de navegação sem depender dos painéis laterais aposentados.
 
 ## 6. Movimento — `prefers-reduced-motion`
 

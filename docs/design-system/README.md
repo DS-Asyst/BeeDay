@@ -8,9 +8,8 @@ afirmação vem de `docs/history/` ou de sprints anteriores sem reverificação 
 **Fonte da verdade:** cada documento abaixo declara individualmente as fontes exatas usadas para
 validá-lo, na seção final "Fontes consultadas".
 
-**Última verificação:** 2026-08-11 (Sprint 20.3) — contagem de folhas de CSS globais corrigida de
-20 para 19 (`css/cursors.css` removido — remoção estrutural do cursor gráfico personalizado, EPIC
-20). Verificação anterior: 2026-08-10 (Sprint 18.7) — contagem corrigida de 19 para 20.
+**Última verificação:** 2026-08-16 (Sprint 25.16, EPIC 25) — components, foundations, ícones,
+forms, CSS carregado e documentação viva revalidados contra a implementação final.
 
 ## Objetivo
 
@@ -23,9 +22,9 @@ próprio `BeeDay.Web`, consumida diretamente pelos componentes de Feature (ver
 
 ## Escopo
 
-Dentro: os 25 componentes reutilizáveis sob `Components/DesignSystem/` (Buttons, Cards, Forms,
+Dentro: os componentes reutilizáveis sob `Components/DesignSystem/` (Buttons, Cards, Forms,
 Feedback, Icons, Layout, Modals, Progress e Text), as folhas de CSS sob `wwwroot/css/`, os
-módulos de interop JS que servem componentes do Design System, e o Pixel Icon System
+módulos de interop JS que servem componentes do Design System, e o BeeDay Icon System
 (`BeeDayIconRegistry`, sprite único). Fora: componentes de Feature (`Components/Features/*` — ver
 [`docs/web/04-feature-components.md`](../web/04-feature-components.md)), layouts de página
 (`Components/Layout/*` — ver [`docs/web/03-layouts.md`](../web/03-layouts.md)), e
@@ -40,7 +39,7 @@ docs/design-system/
 ├── README.md                    este documento
 ├── 01-foundations.md            cores, tokens, tipografia, espaçamento, raio, elevação, breakpoints, grid, z-index
 ├── 02-components.md             25 primitives + BeeDaySortable: contratos, estados, a11y e consumers
-├── 03-icons.md                  Pixel Icon System: sprite, registry, bibliotecas de origem, nomenclatura
+├── 03-icons.md                  BeeDay Icon System: sprite, registry, bibliotecas de origem, nomenclatura
 └── 04-forms.md                  os 6 componentes de formulário: inputs, validação, estados, botões de ação
 ```
 
@@ -59,10 +58,10 @@ inverso do que `PersistenceContractBoundaryTests` faz para `Application`/`Infras
 [`docs/testing/01-testing-strategy.md`](../testing/01-testing-strategy.md) §8) — nenhum componente
 observado nesta auditoria viola isso na prática, mas a fronteira não é imposta por código.
 
-## Contagem de componentes (corrige contagem anterior)
+## Inventário de componentes
 
-25 componentes reutilizáveis (`.razor` com `@code`/`.razor.cs` próprio, excluindo páginas de
-catálogo e enums/modelos de suporte):
+O inventário canônico abaixo exclui páginas de catálogo e enums/modelos de suporte. A lista de
+primitives, não uma contagem copiada para outros documentos, é o contrato mantido:
 
 | Pasta | Componentes |
 |---|---|
@@ -87,8 +86,8 @@ componentes reutilizáveis — documentadas em
 | Documento | Conteúdo |
 |---|---|
 | [`01-foundations.md`](01-foundations.md) | Cores, tokens, tipografia, espaçamento, border-radius, elevação/sombra, breakpoints, grid, z-index, movimento |
-| [`02-components.md`](02-components.md) | 25 primitives + `BeeDaySortable` — contratos, state matrix, a11y, native controls e consumers |
-| [`03-icons.md`](03-icons.md) | Pixel Icon System — sprite, `BeeDayIconRegistry`, bibliotecas de origem, estratégia, nomenclatura |
+| [`02-components.md`](02-components.md) | Primitives canônicas + `BeeDaySortable` — contratos, state matrix, a11y, native controls e consumers |
+| [`03-icons.md`](03-icons.md) | BeeDay Icon System — sprite, `BeeDayIconRegistry`, bibliotecas de origem, estratégia, nomenclatura |
 | [`04-forms.md`](04-forms.md) | Os 6 componentes de formulário — contrato comum, validação, estados, botões |
 
 ## Ordem de leitura recomendada
@@ -107,20 +106,14 @@ componentes reutilizáveis — documentadas em
   [`docs/ux/03-responsive.md`](../ux/03-responsive.md).
 - Os dois shorthands inválidos de animation registrados na auditoria antiga foram corrigidos na
   Sprint 25.6 e agora usam os tokens duration/easing separadamente.
-- `wwwroot/css/cards.css` (576 linhas) e `wwwroot/css/wallet.css` (699 linhas) acumulam os mesmos
+- `wwwroot/css/cards.css` e `wwwroot/css/wallet.css` ainda acumulam alguns dos mesmos
   seletores (`.activity-card`, `.habit-card__body`, `.wallet-transaction-card`, etc.) redeclarados
   3 a 5 vezes em blocos sucessivos marcados por comentário `/* Sprint N ... */`, em vez de
   consolidados em uma única declaração — inclui uso de `!important` para uma declaração posterior
   vencer uma anterior (`cards.css` linha ~251). Funciona (o CSS em cascata resolve corretamente),
   mas dificulta encontrar o valor "vigente" de qualquer propriedade sem ler o arquivo inteiro.
-- Comentários-fonte em `wwwroot/css/pixel-nes.css` e `wwwroot/css/design-system.css` referenciam
-  `docs/design-system/foundations.md` e `docs/design-system/components.md` (sem prefixo numérico) —
-  os arquivos desta Sprint usam `01-`/`02-` por convenção (`docs/CONVENTIONS.md` §2). Os comentários
-  no CSS não foram alterados (fora do escopo desta Sprint); os nomes de arquivo reais são
-  `01-foundations.md`/`02-components.md`.
-- **Inventário revalidado na Sprint 25.8:** há 37 folhas isoladas `*.razor.css`, 17 folhas em
-  `wwwroot/css/` e `app.css`, totalizando 55 fontes CSS. `TopNavigation` já não existe; a
-  propriedade e os limites dessas fontes estão documentados em
+- `TopNavigation` e as folhas pixel/NES já não existem; a propriedade e os limites das fontes CSS
+  atuais estão documentados em
   [`01-foundations.md`](01-foundations.md) §9.
-- **Contagem corrigida na Sprint 25.8:** `BeeDayProgressBar` integra a tabela atual de 25 primitives
-  físicas; com `BeeDaySortable` fora da pasta são 26 contratos compartilhados.
+- `BeeDayProgressBar` integra o inventário de primitives físicas; `BeeDaySortable` permanece um
+  contrato compartilhado fora da pasta do Design System.

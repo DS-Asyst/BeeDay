@@ -25,7 +25,7 @@ progress.
   feedback;
 - SQL Server persistence via EF Core, with a single `BeeDayDbContext` and repositories scoped per
   Aggregate Root;
-- reusable Blazor Design System and centralized Pixel Icon System;
+- reusable Blazor Design System and centralized BeeDay Icon System;
 - automated tests across Domain, Application, Infrastructure, Web, and end-to-end (Playwright);
 - GitHub Actions validation and controlled IIS deployment with health checks and rollback.
 
@@ -122,16 +122,9 @@ dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructu
 
 ## Tests
 
-768 tests currently pass across five projects:
-
-| Project | Tests |
-|---|---|
-| `BeeDay.Domain.Tests` | 93 |
-| `BeeDay.Application.Tests` | 73 |
-| `BeeDay.Infrastructure.Tests` | 129 |
-| `BeeDay.Web.Tests` | 464 |
-| `BeeDay.E2E.Tests` | 9 |
-| **Total** | **768** |
+The automated suite spans five projects: Domain, Application, Infrastructure, Web, and E2E. The
+latest executed baseline is recorded in [`docs/testing/README.md`](docs/testing/README.md) instead
+of being duplicated here.
 
 All Infrastructure and Web integration tests run against a real, disposable SQL Server LocalDB
 instance created per test run — never InMemory or SQLite. See

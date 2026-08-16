@@ -3,18 +3,13 @@
 **Fonte da verdade:** verificado diretamente em `src/BeeDay.Web/wwwroot/css/variables.css`,
 `theme.css`, `typography.css`, `typography-policy.css`, `utilities.css`, `polish.css`,
 `src/BeeDay.Web/wwwroot/app.css`, e um
-levantamento completo de todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css`
-(17 arquivos no snapshot atual) e `src/BeeDay.Web/Components/**/*.razor.css` (36 arquivos de CSS isolado por
-componente — quatro novos na Sprint 21.3 (`Layout/{NavigationItem,NavigationItems,MobileHeader,
-MobileSidebar}.razor.css`), um removido (`Layout/TopNavigation.razor.css`, componente deletado —
-ver `docs/web/03-layouts.md`), ver abaixo e `docs/ux/03-responsive.md`).
+e levantamento completo de `@media` em `src/BeeDay.Web/wwwroot/css/*.css` e
+`src/BeeDay.Web/Components/**/*.razor.css`; ver também `docs/ux/03-responsive.md`.
 
-**Última verificação:** 2026-08-16 (Sprint 25.3, EPIC 25 — Color System Consolidation) — §2
-reconstruído diretamente de `variables.css`, dos 54 arquivos CSS runtime e dos consumers Razor/C#
-de cores especializadas. `#5247F9` permanece a única Brand Color aprovada; `#FFD326` foi
-formalizado como Product/Reward sem mudança física, mantendo `brand-yellow*` apenas como aliases de
-compatibilidade. Surface, Content, Semantic, Product, Illustration e Component agora possuem
-ownership explícito, assim como a hardcode policy e os itens `DEFER`.
+**Última verificação:** 2026-08-16 (Sprint 25.16, EPIC 25). `#5247F9` permanece a única Brand Color
+aprovada; `#FFD326` é Product/Reward, mantendo `brand-yellow*` apenas como aliases de
+compatibilidade. Surface, Content, Semantic, Product, Illustration e Component possuem ownership
+explícito, assim como a hardcode policy e os itens `DEFER`.
 
 Verificação anterior: 2026-08-15 (Sprint 22.2, EPIC 22 — Hero Image, CTA & Brand Alignment) —
 família primary remigrada para `#5247F9`/`#3F33F1`/`#1C0EF2` e CTA público consolidado no token
@@ -451,14 +446,10 @@ semelhança numérica. Token global não deve ser usado para corrigir um stackin
 Além das 17 folhas em `wwwroot/css/` e de `wwwroot/app.css` (18 folhas globais carregadas por
 `<link>` em `App.razor`
 — ver [`docs/web/05-design-system-integration.md`](../web/05-design-system-integration.md) §3),
-o repositório tem **36 arquivos de CSS isolado por componente** (`*.razor.css`, 2.794 linhas),
-compilados pelo SDK Blazor em
+o repositório também usa CSS isolado por componente (`*.razor.css`), compilado pelo SDK Blazor em
 `BeeDay.Web.styles.css` — o bundle que `App.razor` carrega por último (ver
 [`docs/web/05-design-system-integration.md`](../web/05-design-system-integration.md) §3). A Sprint
-16.7 registrou a existência desse bundle mas não enumerou os arquivos-fonte que o compõem — essa
-lacuna é preenchida aqui. Distribuição por área: 7 em `Components/DesignSystem/` (inclui as 2
-páginas de catálogo), 12 em `Components/Layout/`, 17 em `Components/Features/*`. Cada arquivo
-estiliza exclusivamente o componente do mesmo nome —
+16.7 registrou a existência desse bundle. Cada arquivo estiliza o componente do mesmo nome —
 CSS isolation do Blazor gera seletores com escopo automático (`b-xxxxxxxxxx`), então essas regras
 nunca vazam para outros componentes nem são sobrescritas por eles, ao contrário do padrão de
 "múltiplas declarações do mesmo seletor" observado nas folhas globais (`cards.css`/`wallet.css`,
@@ -473,9 +464,8 @@ shell" compartilhada pelos quatro.
 
 ## 10. Breakpoints e grid
 
-O inventário da Sprint 25.7 encontrou 105 declarações `@media` em 44 dos 55 stylesheets: 70 queries
-de largura em 33 arquivos e zero `@container`. Há 26 cortes `max-width` e dois `min-width` (27
-valores físicos porque 1200px aparece nos dois sentidos). A lista normalizada vive em
+O inventário final cobre todas as folhas de produção e não encontrou `@container`. A lista
+normalizada de cortes físicos vive em
 [`docs/ux/03-responsive.md`](../ux/03-responsive.md).
 
 **Não existe token de breakpoint:** CSS custom properties não são válidas como valor de media
@@ -492,8 +482,8 @@ Containers não formam uma única largura universal:
 - Onboarding/Brand Guidelines: envelope 72rem, com conteúdo interno focado;
 - Daily, Wallet e ProjectWorkspace: larguras/grids feature-local, preservados para 25.11/25.12.
 
-`--beeday-content-width` e os overrides scoped `reading-width: 48rem`/`workspace-width: 100rem` não
-têm consumer efetivo atual e não devem orientar código novo; são candidatos ao sweep final. Não há
+Os antigos `--beeday-content-width` e overrides scoped `reading-width: 48rem`/
+`workspace-width: 100rem` não tinham consumer efetivo e foram removidos na Sprint 25.16. Não há
 12-column grid compartilhado: igualdade de `grid-template-columns` só autoriza consolidação quando
 owner e transição estrutural também coincidem.
 
@@ -501,11 +491,10 @@ owner e transição estrutural também coincidem.
 
 - `src/BeeDay.Web/wwwroot/css/variables.css`, `theme.css`, `typography.css`,
   `typography-policy.css`, `utilities.css`, `polish.css`, `activity-design-system.css`.
-- Todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css` (17 arquivos) e em todo
-  `src/BeeDay.Web/Components/**/*.razor.css` (36 arquivos) — levantamento completo de ambas as
+- Todas as ocorrências de `@media` em `src/BeeDay.Web/wwwroot/css/*.css` e em todo
+  `src/BeeDay.Web/Components/**/*.razor.css` — levantamento completo de ambas as
   camadas de CSS.
-- `src/BeeDay.Web/Components/Layout/TopNavigation.razor.css`, `MainLayout.razor.css` (cores
-  literais fora do sistema de tokens, §9).
+- `src/BeeDay.Web/Components/Layout/MainLayout.razor.css` e os demais owners do shell (§9).
 - Documentação relacionada: [`docs/ux/03-responsive.md`](../ux/03-responsive.md),
   [`docs/ux/02-accessibility.md`](../ux/02-accessibility.md),
   [`docs/web/05-design-system-integration.md`](../web/05-design-system-integration.md).

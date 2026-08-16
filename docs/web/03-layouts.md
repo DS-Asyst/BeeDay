@@ -12,7 +12,8 @@
 
 O shell autenticado possui somente duas regiões permanentes no desktop: Navigation e Workspace.
 `RightRail`, `ProfileSidePanel` e `AccountSidePanel` foram aposentados e removidos. O footer
-institucional continua legítimo no `PublicLayout`, mas não aparece em Home, Daily, Wallet ou Account.
+institucional continua legítimo no `PublicLayout`, aparecendo em Home e `/brand/typography`, mas não
+nas rotas autenticadas Daily, Wallet ou Account.
 
 ## Navegação autenticada
 
@@ -47,9 +48,9 @@ Os tokens semânticos do shell são:
 - `--beeday-top-navigation-height`, 3.75rem abaixo de 1200px e 0 no desktop.
 
 O conteúdo autenticado não herda o reading-width/gutter público: Profile, Daily e Wallet são owners
-de sua largura. Os overrides scoped `--beeday-reading-width: 48rem` e
-`--beeday-workspace-width: 100rem` não têm consumer efetivo atual e são candidatos ao sweep final;
-não devem ser tratados como API. Wallet preserva `max-width: 1440px` e grid responsivo próprios.
+de sua largura. Os overrides scoped sem leitura efetiva `--beeday-reading-width: 48rem` e
+`--beeday-workspace-width: 100rem` foram removidos no sweep final; não eram API. Wallet preserva
+container e grid responsivo próprios.
 
 ## Responsividade
 

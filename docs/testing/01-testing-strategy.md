@@ -3,26 +3,24 @@
 **Fonte da verdade:** verificado diretamente em `tests/BeeDay.Domain.Tests/`,
 `tests/BeeDay.Application.Tests/`, `tests/BeeDay.Infrastructure.Tests/`, `tests/BeeDay.Web.Tests/`,
 `tests/BeeDay.E2E.Tests/`, `BeeDay.slnx`, e confirmado por execução real de
-`dotnet test BeeDay.slnx --configuration Release --no-build` nesta Sprint (16.9).
+`dotnet test BeeDay.slnx --configuration Release --no-build --no-restore` na Sprint 25.16.
 
-**Última verificação:** 2026-08-11 (Sprint 20.5, EPIC 20) — contagem total corrigida de 752 para
-768 testes (10 novos: `PublicHeaderTests`/`PublicLayoutTests` estendidos, `HomeTests.cs` novo em
-Web.Tests e E2E.Tests, ver `docs/epics/20-home-visual-experience/README.md`). Contagem de arquivos
-`.cs` por projeto (coluna "Arquivos") não reauditada nesta Sprint — pode estar desatualizada desde
-a Sprint 20.4. Verificação anterior: 2026-08-10 (Sprint 18.8).
+**Última verificação:** 2026-08-16 (Sprint 25.16, EPIC 25) — infraestrutura, inventário dos cinco
+projetos e baseline integral revalidados. Contagens ficam somente neste owner e no índice de
+Testing; outros documentos apontam para cá em vez de copiar números.
 
 ## 1. Pirâmide — os 5 projetos de teste e o que cada um verifica
 
-| Projeto | Arquivos `.cs` (sem `bin`/`obj`) | O que valida | Infraestrutura real usada |
-|---|---|---|---|
-| `BeeDay.Domain.Tests` | 12 | Invariantes de Aggregate/Entity/Value Object, sem nenhuma infraestrutura | Nenhuma — só o assembly `BeeDay.Domain` |
-| `BeeDay.Application.Tests` | 18 | Handlers de Command/Query com portas fakes | `FakeUnitOfWork` + 8 fakes de repositório, `FakeCurrentUserContext` |
-| `BeeDay.Infrastructure.Tests` | 19 | Repositórios EF Core, Identity, hashing de senha, Event Journal, health check contra um SQL Server LocalDB real | `EfLocalDbTestBase`/`EfLocalDbCollection` — ver §4 |
-| `BeeDay.Web.Tests` | 61 | Componentes Blazor (bUnit) + integração HTTP real (`WebApplicationFactory`) | `BeeDayWebApplicationFactory` e variantes — documentado em [`docs/web/06-testing.md`](../web/06-testing.md) |
-| `BeeDay.E2E.Tests` | 7 (+ infraestrutura) | Fluxos de usuário reais via Chromium/Playwright | `PlaywrightAppFixture`/`E2EWebApplicationFactory` — documentado em [`docs/web/06-testing.md`](../web/06-testing.md) |
+| Projeto | O que valida | Infraestrutura real usada |
+|---|---|---|
+| `BeeDay.Domain.Tests` | Invariantes de Aggregate/Entity/Value Object, sem nenhuma infraestrutura | Nenhuma — só o assembly `BeeDay.Domain` |
+| `BeeDay.Application.Tests` | Handlers de Command/Query com portas fakes | `FakeUnitOfWork` + fakes de repositório, `FakeCurrentUserContext` |
+| `BeeDay.Infrastructure.Tests` | Repositórios EF Core, Identity, hashing de senha, Event Journal, health check contra um SQL Server LocalDB real | `EfLocalDbTestBase`/`EfLocalDbCollection` — ver §4 |
+| `BeeDay.Web.Tests` | Componentes Blazor (bUnit), source contracts e integração HTTP real (`WebApplicationFactory`) | `BeeDayWebApplicationFactory` e variantes — documentado em [`docs/web/06-testing.md`](../web/06-testing.md) |
+| `BeeDay.E2E.Tests` | Fluxos, responsividade e axe via Chromium/Playwright | `PlaywrightAppFixture`/`E2EWebApplicationFactory` — documentado em [`docs/web/06-testing.md`](../web/06-testing.md) |
 
-Total confirmado por execução real na Sprint 20.5: **768 testes, 0 falhas** (93 Domain, 73
-Application, 129 Infrastructure, 464 Web, 9 E2E) — ver §7.
+Total confirmado por execução real na Sprint 25.16: **1.116 testes, 0 falhas** (93 Domain, 73
+Application, 129 Infrastructure, 741 Web, 80 E2E) — ver §7.
 
 ## 2. Domain.Tests — invariantes sem infraestrutura
 
@@ -79,7 +77,7 @@ Esse é o mesmo tipo de contenção de recurso observado entre projetos de teste
 
 Mapeamento componente→teste, infraestrutura de `WebApplicationFactory` (`BeeDayWebApplicationFactory`
 e as 4 variantes especializadas), infraestrutura Playwright
-(`PlaywrightAppFixture`/`E2ETestBase`/`E2EWebApplicationFactory`) e os 7 fluxos E2E cobertos estão
+(`PlaywrightAppFixture`/`E2ETestBase`/`E2EWebApplicationFactory`) e os fluxos E2E cobertos estão
 documentados por completo em [`docs/web/06-testing.md`](../web/06-testing.md) (Sprint 16.7) — este
 documento não duplica esse conteúdo.
 
@@ -149,14 +147,11 @@ Idêntico, mais `--logger "trx;LogFileName=beeday-tests.trx" --results-directory
 `ci.yml`, instalação do Chromium do Playwright antes de rodar os testes (necessário para
 `BeeDay.E2E.Tests`) — ver [`docs/deployment/01-deployment.md`](../deployment/01-deployment.md) §3.
 
-### Resultado mais recente (Sprint 20.5), executado localmente
+### Resultado mais recente (Sprint 25.16), executado localmente
 
-768 testes, 0 falhas: 93 Domain, 73 Application, 129 Infrastructure, 464 Web, 9 E2E. Uma execução
-da solução completa em paralelo pode ocasionalmente reportar falha transiente em
-`BeeDay.Web.Tests`/`BeeDay.E2E.Tests` por contenção de LocalDB/porta Kestrel entre os dois projetos
-rodando ao mesmo tempo (observado e diagnosticado na Sprint 16.7); os mesmos testes passam 100%
-quando o projeto afetado roda isolado, e uma nova execução da solução completa tipicamente passa
-752/752.
+1.116 testes, 0 falhas: 93 Domain, 73 Application, 129 Infrastructure, 741 Web, 80 E2E. A suíte
+completa usa LocalDB e Chromium e, por isso, deve receber timeout compatível; o resultado final da
+EPIC passou em uma execução única da solução.
 
 ### Cobertura formal (`dotnet test --collect:"XPlat Code Coverage"` ou equivalente)
 
@@ -167,8 +162,7 @@ hoje é a lista de cenários por classe de teste documentada neste arquivo e em
 
 ## 8. Fontes consultadas
 
-- Contagem de arquivos `.cs` (excluindo `bin`/`obj`) em `tests/BeeDay.Domain.Tests/`,
-  `tests/BeeDay.Application.Tests/`, `tests/BeeDay.Infrastructure.Tests/`.
+- Inventário atual dos cinco projetos sob `tests/` (excluindo `bin`/`obj`).
 - `tests/BeeDay.Application.Tests/FakeUnitOfWork.cs`, `FakeCurrentUserContext.cs`,
   `PersistenceContractBoundaryTests.cs`.
 - `tests/BeeDay.Domain.Tests/DomainAssemblyBoundaryTests.cs`.
@@ -177,7 +171,8 @@ hoje é a lista de cenários por classe de teste documentada neste arquivo e em
   `MemoryIdentityRequestThrottleTests.cs` (Sprints 18.5/18.6).
 - `tests/BeeDay.Web.Tests/Integration/ProblemDetailsIntegrationTests.cs` (comentário de classe —
   limitações de `WebApplicationFactory`/TestServer, §5).
-- `dotnet test BeeDay.slnx --configuration Release --no-build`, executado na Sprint 18.7 (752/752).
+- `dotnet test BeeDay.slnx --configuration Release --no-build --no-restore`, executado na Sprint
+  25.16 (1.116/1.116).
 - `.github/workflows/ci.yml`, `deploy-prd.yml` (fluxo de execução em CI).
-- [`docs/web/06-testing.md`](../web/06-testing.md) (Web.Tests/E2E.Tests, Sprint 16.7, reaproveitado
-  sem duplicar).
+- [`docs/web/06-testing.md`](../web/06-testing.md) e
+  [`02-design-system-quality-gates.md`](02-design-system-quality-gates.md).

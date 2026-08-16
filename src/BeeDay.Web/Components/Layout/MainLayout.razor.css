@@ -1,8 +1,6 @@
 .beeday-app {
     --beeday-top-navigation-height: 3.75rem;
     --beeday-sidebar-width: 15.5rem;
-    --beeday-reading-width: 48rem;
-    --beeday-workspace-width: 100rem;
     display: flex;
     width: 100%;
     min-height: 100dvh;

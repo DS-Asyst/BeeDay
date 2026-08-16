@@ -38,13 +38,13 @@ src/BeeDay.Web/
 ├── Components/
 │   ├── App.razor, Routes.razor    shell HTML raiz e Router
 │   ├── Layout/                     MainLayout, OnboardingLayout, DesktopSidebar, MobileHeader/
-│   │                                  MobileSidebar, NavigationItem(s), side panels, footer
+│   │                                  MobileSidebar, NavigationItem(s), PublicHeader e footer
 │   ├── DesignSystem/                 Buttons, Cards, Forms, Feedback, Icons, Layout, Modals, Text —
 │   │                                  ver docs/design-system/ (reservado) e §5 abaixo
 │   ├── Behaviors/DragDrop/            BeeDaySortable (JS interop de reordenação)
-│   ├── Features/                       13 áreas de funcionalidade — ver 04-feature-components.md
+│   ├── Features/                       áreas de funcionalidade — ver 04-feature-components.md
 │   └── Pages/                           NotFound, Error
-└── wwwroot/                               css/, js/ (3 módulos ES), icons/ (sprite SVG), images/
+└── wwwroot/                               css/, js/, icons/ (sprite SVG), assets/
 ```
 
 ## Documentos
@@ -52,10 +52,10 @@ src/BeeDay.Web/
 | Documento | Conteúdo |
 |---|---|
 | [`01-composition-root.md`](01-composition-root.md) | `Program.cs`: DI, pipeline HTTP, autenticação por cookie, endpoints `/auth/*`, rate limiting, health checks |
-| [`02-routing-and-pages.md`](02-routing-and-pages.md) | `Routes.razor`, `App.razor`, as 18 rotas `@page`, layout e atributo de autorização de cada uma |
+| [`02-routing-and-pages.md`](02-routing-and-pages.md) | `Routes.razor`, `App.razor`, rotas `@page`, layout e atributo de autorização |
 | [`03-layouts.md`](03-layouts.md) | `MainLayout`, `OnboardingLayout`, navegação, painéis laterais, rodapé, `ReconnectModal` |
-| [`04-feature-components.md`](04-feature-components.md) | As 13 áreas de `Components/Features/` — componentes, state, models, como cada uma chama Application |
-| [`05-design-system-integration.md`](05-design-system-integration.md) | Como a Web compõe o Design System, os 3 módulos de JS interop, ordem de carregamento de CSS |
+| [`04-feature-components.md`](04-feature-components.md) | Áreas de `Components/Features/` — components, state, models, como cada uma chama Application |
+| [`05-design-system-integration.md`](05-design-system-integration.md) | Como a Web compõe o Design System, interop JS e ordem de carregamento de CSS |
 | [`06-testing.md`](06-testing.md) | Mapeamento componente → teste em `BeeDay.Web.Tests` (bUnit + integração) e `BeeDay.E2E.Tests` (Playwright) |
 | [`07-localization.md`](07-localization.md) | Suporte en-US/pt-BR: `BeeDayCultures`, precedência cookie → `User.Language` → fallback, endpoint `/culture/set`, convenção de catálogos `.resx`, responsabilidade da Web pelas mensagens localizadas (EPIC 23) |
 
@@ -72,7 +72,7 @@ injetam `MediatR.ISender` diretamente e nunca passam por `BeeDayWebService` — 
 ## Ordem de leitura recomendada
 
 1. `01-composition-root.md` — o que roda antes de qualquer componente Razor existir.
-2. `02-routing-and-pages.md` — o mapa de todas as 18 rotas.
+2. `02-routing-and-pages.md` — o mapa das rotas.
 3. `03-layouts.md` — a casca visual comum a toda rota autenticada.
 4. `04-feature-components.md` — cada área de funcionalidade em detalhe.
 5. `05-design-system-integration.md` — os blocos reutilizáveis que as Features compõem.
@@ -81,10 +81,9 @@ injetam `MediatR.ISender` diretamente e nunca passam por `BeeDayWebService` — 
 
 ## Achados relevantes (reportados, não corrigidos)
 
-- **`docs/architecture/05-runtime-flows.md` §2 afirma "nenhum componente Razor injeta `ISender`
-  diretamente"** — essa afirmação está desatualizada/incorreta: `Wallet.razor` e as 5 páginas de
-  `Features/Identity/Pages/` fazem exatamente isso (`@inject MediatR.ISender Sender`). Fora do
-  escopo desta Sprint corrigir `docs/architecture/`; reportado aqui para correção em Sprint futura.
+- `docs/architecture/05-runtime-flows.md` §2 foi qualificado no sweep final: `BeeDayWebService` é o
+  ponto único dos fluxos Dashboard descritos ali; Wallet e Identity são exceções explícitas que
+  injetam `ISender` diretamente.
 - **Achado totalmente resolvido (histórico — verificado na Sprint 20.4, EPIC 20; reconfirmado na
   Sprint 21.3, EPIC 21):** o texto literal `<span>LEVEL</span><span>UP</span>` em
   `Components/Layout/AccountSidePanel.razor` (e no extinto `TopNavigation.razor`) **não existe
@@ -95,11 +94,9 @@ injetam `MediatR.ISender` diretamente e nunca passam por `BeeDayWebService` — 
   Migration"), e a Sprint 21.3 removeu `TopNavigation.razor` inteiramente — `DesktopSidebar`/
   `MobileHeader`/`MobileSidebar` (seus sucessores) já nascem usando `<BeeDayBrand />`. Nenhum
   componente de `Components/Layout/` renderiza marca própria hoje.
-- `Components/Features/ProfileCreation/Pages/Welcome.razor` (rota `/welcome`) define
-  `<PageTitle>Login | BeeDay</PageTitle>` — título incorreto para uma página que só redireciona para
-  `/login`. A rota `/` (`Entry.razor`) já resolve o destino real via estado de autenticação; `/welcome`
-  não é linkada por nenhum outro componente do repositório (busca por `href="/welcome"` e
-  `NavigateTo("/welcome"` sem resultado) — possível rota morta.
+- `Components/Features/ProfileCreation/Pages/Welcome.razor` permanece como rota de compatibilidade
+  não linkada: expõe título/mensagem localizados e substitui a navegação por `/login`. O stylesheet
+  antigo de uma Welcome interativa não correspondia mais ao markup e foi removido na Sprint 25.16.
 - `Services/Authentication/BeeDayClaimTypes.SessionVersion` tem valor literal `"levelup:session_version"`
   — já reportado em `docs/architecture/README.md`, não duplicado aqui além desta referência.
 - Os dois módulos JS com estado de posicionamento (`beeday-sortable.js`, `beeday-card-menu.js`) são

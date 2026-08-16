@@ -4,12 +4,12 @@
 `src/BeeDay.Web/Components/Behaviors/DragDrop/`, `src/BeeDay.Web/Components/App.razor` e
 `src/BeeDay.Web/wwwroot/`.
 
-**Última verificação:** 2026-08-13 (Sprint 21.12).
+**Última verificação:** 2026-08-16 (Sprint 25.16, EPIC 25).
 
 ## 1. Objetivo
 
-Descrever como `BeeDay.Web` compõe o Design System (`Components/DesignSystem/`, ~2000 linhas em
-~50 arquivos) e a mecânica de interop JavaScript usada pelos 3 componentes que precisam medir o DOM
+Descrever como `BeeDay.Web` compõe o Design System (`Components/DesignSystem/`) e a mecânica de
+interop JavaScript usada pelos componentes que precisam medir o DOM
 real. `docs/design-system/` (ver [`docs/README.md`](../README.md)) permanece reservado para uma
 Sprint futura dedicada exclusivamente ao catálogo de componentes reutilizáveis em si — este
 documento cobre apenas o que é específico da integração com a Web (composição, interop, ordem de
@@ -23,7 +23,7 @@ CSS), não uma referência exaustiva de cada Parameter de cada componente.
 | `Cards/` | `BeeDayCard`, `BeeDayCardMenu` | Container genérico; menu de ações posicionado dinamicamente (interop) |
 | `Forms/` | `BeeDayInput`, `BeeDayCheckbox`, `BeeDayDateInput`, `BeeDaySelect`, `BeeDayTextArea`, `BeeDayValidationMessage<TValue>` | Wrappers de `InputBase`/`EditForm`, todos com `Expression<Func<...>>` para bind a `EditContext` |
 | `Feedback/` | `BeeDayToastHost`, `BeeDayLoading`, `BeeDaySkeleton`, `BeeDayDashboardSkeleton`, `BeeDayEmptyState`, `BeeDayConfirmDialog` | Estados assíncronos e vazios |
-| `Icons/` | `PixelIcon`, `PixelIconRegistry` | Sprite SVG único (`/icons/sprite.svg`) — ver §4 |
+| `Icons/` | `BeeDayIcon`, `BeeDayIconRegistry` | Sprite SVG único (`/icons/sprite.svg`) — ver §4 |
 | `Layout/` | `BeeDayHero`, `BeeDayPageHeader`, `BeeDaySectionHeader`, `BeeDaySettingsForm<TModel>`, `BeeDaySettingsSection` | Blocos de página compartilhados entre Account/Wallet/Dashboard |
 | `Modals/` | `EditorModalShell` | Esqueleto comum aos 4 editores de atividade (ver `04-feature-components.md` §5) |
 | `Text/` | `BeeDayBrand`, `SearchHighlight` | Marca oficial; realce de termo buscado |
@@ -36,7 +36,6 @@ app.css
 → css/variables.css              (custom properties: cores, espaçamento, tipografia)
 → css/design-system.css          (base do Design System)
 → css/activity-design-system.css (tokens específicos de Habit/Task/Todo/Project)
-→ css/pixel-ui.css
 → css/typography.css
 → css/editor-modal.css
 → css/forms.css
@@ -52,21 +51,20 @@ app.css
 → css/identity.css
 → BeeDay.Web.styles.css          (bundle isolado, gerado pelo SDK a partir de todo *.razor.css)
 → css/typography-policy.css
-→ css/pixel-nes.css              (excerto do tema NES.css — ver css/vendor/NES_ATTRIBUTION.md)
 ```
 
 `variables.css` precisa carregar antes de qualquer folha que consuma `var(--beeday-*)` — é a
 primeira folha específica do projeto (depois só de `app.css`, que é o CSS isolado padrão do
 projeto Blazor). `BeeDay.Web.styles.css` (isolamento de CSS por componente, `*.razor.css`) carrega
-deliberadamente **depois** das 15 folhas globais, para que overrides por componente vençam em caso
+deliberadamente **depois** das folhas globais, para que overrides por componente vençam em caso
 de conflito de especificidade igual.
 
-## 4. `PixelIcon` / `PixelIconRegistry`
+## 4. `BeeDayIcon` / `BeeDayIconRegistry`
 
-Um único `<svg><use href="/icons/sprite.svg#{symbolId}" /></svg>` por ícone — `PixelIconRegistry`
-mapeia 60 valores de `PixelIconName` para `(symbolId, assetPath, PixelIconCategory,
-semanticName)`; `Resolve` cai para `PixelIconName.Warning` se o nome não existir no dicionário
-(nunca lança). `PixelIcon.razor.cs` recusa renderizar sem `Label` quando `Decorative="false"`
+Um único `<svg><use href="/icons/sprite.svg#{symbolId}" /></svg>` por ícone — `BeeDayIconRegistry`
+mapeia cada valor de `BeeDayIconName` para `(symbolId, assetPath, BeeDayIconCategory,
+semanticName)`; `Resolve` cai para `BeeDayIconName.Warning` se o nome não existir no dicionário
+(nunca lança). `BeeDayIcon.razor.cs` recusa renderizar sem `Label` quando `Decorative="false"`
 (`InvalidOperationException` em `OnParametersSet`) — força que todo ícone não-decorativo declare
 texto acessível.
 
