@@ -1554,3 +1554,71 @@ sequencialmente e aprovados; o gate integral acima foi executado depois, sem fal
 
 Writing/Voice/Tone/Localization → 25.14; axe/quality automation e visual-regression infrastructure
 → 25.15; documentation/migration sweep final → 25.16. Nenhuma dessas áreas foi antecipada.
+
+## Sprint 25.14 — Writing, Voice, Tone & Localization System (Results)
+
+**Fonte da verdade:** amostra por padrão dos 17 catálogos e consumers de Home, onboarding/auth,
+Daily, Wallet, Account, erros/validação, empty/loading/success, Experience e templates de e-mail;
+pipeline de cultura, testes Web/E2E e documentação viva. Executado sobre o commit da Sprint 25.13
+`b33574584e552c3de80597e5bf8b4bf25a6d2cf9`.
+
+### Narrative, Voice, Tone e Style
+
+`docs/brand/02-writing-voice-localization.md` formaliza a narrativa aprovada de construir um dia
+melhor com ações claras e progresso consistente, sem promessa absoluta ou gamificação fictícia. A
+Voice é clara, encorajadora, orientada à ação, honesta e próxima sem ser invasiva. A tone matrix
+separa operação, onboarding, celebração, warning, erro, destruição, empty state, Wallet/finance e
+Identity/security; humor e euforia ficam fora dos contextos sensíveis.
+
+Style cobre `beeday` lowercase, sentence case, headings/eyebrows/CTA, pontuação, comprimento,
+números, `XP`/Level, datas, USD/cultura, emojis/símbolos, validação e estrutura de empty state. O
+glossário distingue Activity/Habit/Task/To-Do/Project/Daily/Wallet/Transaction/Tag/Experience/XP/
+Level dos identifiers técnicos e fixa os equivalentes reais de `pt-BR`, inclusive `To-Do` →
+`Pendência`, `Daily` → `Diário`, `Wallet` → `Carteira` e `Tag` preservado.
+
+### Localização e correções de alta confiança
+
+O baseline final possui 17 catálogos, 650 chaves por cultura e 1.950 valores: zero chave ausente,
+zero divergência entre fallback neutro e `en-US` default e zero incompatibilidade de placeholders.
+`ResourceCatalogContractTests` transforma esses três invariants em contrato automatizado.
+
+A auditoria corrigiu somente intenções inequívocas: o sample neutro de Typography agora coincide
+com `en-US`; o CTA de reset usa sentence case em ambos os idiomas; e PageTitle, heading, request ID
+e instruções de Development da página Error agora usam `SharedResources`, removendo o bloco
+hardcoded em inglês. Nenhuma reescrita massiva, mudança de posicionamento ou rota `/brand/writing`
+foi criada.
+
+### Gap de e-mail transacional
+
+`IdentityEmailComposer` continua seguro e consistente em inglês, mas seu contrato recebe somente
+recipient/display name/token; os handlers não transportam idioma e Infrastructure não participa do
+`IStringLocalizer` Web. Localizar sem decidir cultura autoritativa e sem evoluir o contrato criaria
+um segundo pipeline ou dependeria de cultura global incorreta. A mudança fica `DEFER` arquitetural,
+sem alteração em Application/Infrastructure nesta Sprint.
+
+### Validação
+
+```text
+git diff --check
+# aprovado
+
+dotnet format BeeDay.slnx --verify-no-changes
+# aprovado após normalizar CRLF somente nos arquivos alterados
+
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+# aprovado, 0 avisos, 0 erros
+
+dotnet test BeeDay.slnx --no-build --configuration Release
+# 1.101/1.101 — Domain 93, Application 73, Infrastructure 129, Web 730, E2E 76
+
+BeeDay.Web.Tests — resources/Error/Identity/localization/Typography: 23/23
+BeeDay.E2E.Tests — Brand Typography + Login/Identity visual flows: 14/14
+EF Core pending model changes: nenhum
+```
+
+### Itens `DEFER` e confirmação de escopo
+
+E-mail transacional bilíngue depende de cultura autoritativa no contrato; strings uppercase
+expressivas herdadas exigem migração visual consumer-by-consumer. Quality engineering/axe/visual
+regression → 25.15; documentation/migration sweep final → 25.16. Nenhuma dessas áreas foi
+antecipada.

@@ -6,7 +6,8 @@ os catálogos `.resx` sob `src/BeeDay.Web/` e `tests/BeeDay.Web.Tests/Localizati
 EPIC 23 (Sprints 23.1–23.9); nenhuma afirmação vem de sprints anteriores sem reverificação direta no
 código.
 
-**Última verificação:** 2026-08-15 (Sprint 23.9, EPIC 23 — sprint de consolidação final).
+**Última verificação:** 2026-08-16 (Sprint 25.14 — 17 catálogos, paridade/fallback/
+placeholders automatizados). Verificação anterior: Sprint 23.9, EPIC 23.
 
 ## 1. Objetivo
 
@@ -22,8 +23,9 @@ Dentro: `src/BeeDay.Web/Localization/` (`BeeDayCultures`, `AuthenticatedAccountC
 `AuthenticatedCultureSynchronizer`, o endpoint `POST /culture/set`, a convenção de catálogos
 `.resx`/`IStringLocalizer<T>`, e os dois tradutores Web-only que impedem mensagens cruas de
 Domain/Application e de DataAnnotations de vazar para a UI (`DomainErrorLocalizer`,
-`ValidationMessageLocalizer`). Fora: o conteúdo textual de cada catálogo individual (ver o próprio
-`.resx` da feature); detalhe de `Program.cs` fora do bloco de localização (ver
+`ValidationMessageLocalizer`). Fora: Voice, Tone, Style, glossário e conteúdo textual (ver o
+[`Writing, Voice, Tone & Localization System`](../brand/02-writing-voice-localization.md)); detalhe
+de `Program.cs` fora do bloco de localização (ver
 [`01-composition-root.md`](01-composition-root.md)); `User.Language`/`UserTheme` como Value Object
 de Domain (ver [`docs/domain/user.md`](../domain/user.md)).
 
@@ -141,14 +143,14 @@ por conveniência:
 └── <Área>Resources.pt-BR.resx    tradução
 ```
 
-16 catálogos existem hoje (`find src/BeeDay.Web -name "*.resx" ! -name "*.en-US.resx" ! -name "*.pt-BR.resx"`):
+17 catálogos existem hoje (650 chaves por cultura):
 
-`SharedResources` (`Resources/`, cross-cutting — toasts genéricos, rodapé, 404, e as mensagens de
+`SharedResources` (`Resources/`, cross-cutting — toasts genéricos, rodapé, 404, Error e mensagens de
 `DomainErrorLocalizer`, ver §9), `LayoutResources`, `DesignSystemResources` (inclui as mensagens de
 `ValidationMessageLocalizer`, ver §9), `AccountResources`, `AuthenticationResources`,
-`DashboardResources`, `ExperienceResources`, `HabitResources`, `HomeResources`, `IdentityResources`,
-`OnboardingResources`, `ProfileCreationResources`, `ProjectResources`, `TaskResources`,
-`TodoResources`, `WalletResources`.
+`BrandTypographyResources`, `DashboardResources`, `ExperienceResources`, `HabitResources`,
+`HomeResources`, `IdentityResources`, `OnboardingResources`, `ProfileCreationResources`,
+`ProjectResources`, `TaskResources`, `TodoResources`, `WalletResources`.
 
 Regras observadas de forma consistente em todos os catálogos (auditadas nesta Sprint — zero exceção
 encontrada):
@@ -213,6 +215,10 @@ silenciosamente na CI (ambiente en-US) e falha localmente, ou o inverso. Toda `B
 renderiza um componente injetando `IStringLocalizer<T>` precisa registrar `Services.AddLogging()` e
 `Services.AddLocalization()`.
 
+`ResourceCatalogContractTests` percorre os catálogos-fonte e falha se neutro, `en-US` e `pt-BR`
+divergirem em chaves, se o fallback neutro deixar de coincidir com o inglês default ou se uma
+tradução perder/alterar placeholders de composite formatting.
+
 ## 12. Fontes de verdade
 
 - `src/BeeDay.Web/Localization/BeeDayCultures.cs`, `AuthenticatedAccountCultureProvider.cs`,
@@ -221,8 +227,9 @@ renderiza um componente injetando `IStringLocalizer<T>` precisa registrar `Servi
 - `src/BeeDay.Web/Program.cs` (bloco `AddLocalization`/`RequestLocalizationOptions`, ordem do
   pipeline, endpoint `/culture/set`)
 - `src/BeeDay.Web/Components/DesignSystem/Forms/BeeDayValidationMessage.razor(.cs)`
-- Os 16 catálogos `.resx`/`.en-US.resx`/`.pt-BR.resx` sob `src/BeeDay.Web/`
+- Os 17 catálogos `.resx`/`.en-US.resx`/`.pt-BR.resx` sob `src/BeeDay.Web/`
 - `tests/BeeDay.Web.Tests/Localization/BunitLocalizationSupport.cs`,
-  `DomainErrorLocalizerTests.cs`, `ValidationMessageLocalizerTests.cs`
+  `DomainErrorLocalizerTests.cs`, `ValidationMessageLocalizerTests.cs`,
+  `ResourceCatalogContractTests.cs`
 - `tests/BeeDay.Web.Tests/Integration/IdentityFlowLocalizationIntegrationTests.cs`,
   `CultureCookieIntegrationTests.cs`, `AuthenticatedCultureIntegrationTests.cs`
