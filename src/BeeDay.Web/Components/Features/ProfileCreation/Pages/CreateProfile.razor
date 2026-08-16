@@ -20,8 +20,8 @@
             <p class="profile-panel__intro">@Localizer["StartYourJourney"]</p>
 
             <div class="profile-form">
-                <label class="profile-field">
-                    <span>@Localizer["FullNameLabel"]</span>
+                <label class="profile-field beeday-field">
+                    <span class="beeday-field__label">@Localizer["FullNameLabel"]</span>
                     <input type="text"
                            class="beeday-field__control profile-field__input"
                            autocomplete="name"
@@ -29,8 +29,8 @@
                            @bind:event="oninput" />
                 </label>
 
-                <label class="profile-field">
-                    <span>@Localizer["EmailLabel"]</span>
+                <label class="profile-field beeday-field">
+                    <span class="beeday-field__label">@Localizer["EmailLabel"]</span>
                     <input type="email"
                            class="beeday-field__control profile-field__input"
                            autocomplete="email"
@@ -38,8 +38,8 @@
                            @bind:event="oninput" />
                 </label>
 
-                <label class="profile-field">
-                    <span>@Localizer["PasswordLabel"]</span>
+                <label class="profile-field beeday-field">
+                    <span class="beeday-field__label">@Localizer["PasswordLabel"]</span>
                     <input type="password"
                            class="beeday-field__control profile-field__input"
                            autocomplete="new-password"
@@ -57,8 +57,8 @@
 
                 @if (State.ShouldShowConfirmPassword)
                 {
-                    <label class="profile-field beeday-fade-in">
-                        <span>@Localizer["ConfirmPasswordLabel"]</span>
+                    <label class="profile-field beeday-field beeday-fade-in">
+                        <span class="beeday-field__label">@Localizer["ConfirmPasswordLabel"]</span>
                         <input type="password"
                                class="beeday-field__control profile-field__input"
                                autocomplete="new-password"
@@ -88,8 +88,8 @@
             <div class="profile-form">
                 <BeeDayButton Variant="BeeDayButtonVariant.Secondary" Compact="true" Class="profile-form__back" OnClick="Back">@Localizer["BackButton"]</BeeDayButton>
 
-                <label class="profile-field">
-                    <span>@Localizer["NicknameLabel"]</span>
+                <label class="profile-field beeday-field">
+                    <span class="beeday-field__label">@Localizer["NicknameLabel"]</span>
                     <div class="profile-nickname-field">
                         <span class="profile-nickname-field__prefix">@@</span>
                         <input class="beeday-field__control profile-field__input profile-nickname-field__input"

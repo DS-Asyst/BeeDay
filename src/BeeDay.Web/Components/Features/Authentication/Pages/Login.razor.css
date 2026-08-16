@@ -43,13 +43,6 @@
     gap: var(--beeday-spacing-md);
 }
 
-.auth-field {
-    display: grid;
-    gap: var(--beeday-spacing-xs);
-    color: var(--beeday-color-text-primary);
-    font-weight: var(--beeday-font-weight-bold);
-}
-
 .auth-login ::deep .auth-submit {
     min-height: 3.25rem;
     margin-top: var(--beeday-spacing-xs);
@@ -65,8 +58,8 @@
     font-weight: var(--beeday-font-weight-bold);
 }
 
-.auth-feedback--error { background: #ffd9d9; color: #761919; }
-.auth-feedback--success { background: #dff5df; color: #1d5d2c; }
+.auth-feedback--error { background: var(--beeday-color-danger-soft); color: var(--beeday-color-danger); }
+.auth-feedback--success { background: var(--beeday-color-success-soft); color: var(--beeday-color-success); }
 
 .auth-action-link {
     color: var(--beeday-color-text-primary);
@@ -93,23 +86,8 @@
 }
 
 .auth-remember {
-    display: flex;
     min-height: 2.75rem;
-    align-items: center;
-    gap: var(--beeday-spacing-xs);
     color: var(--beeday-color-text-muted);
-    cursor: pointer;
-}
-
-.auth-remember input {
-    width: 1.1rem;
-    height: 1.1rem;
-    accent-color: var(--beeday-color-brand-primary);
-}
-
-.auth-remember input:focus-visible {
-    outline: 2px solid var(--beeday-color-brand-primary);
-    outline-offset: 3px;
 }
 
 @media (max-width: 40rem) {

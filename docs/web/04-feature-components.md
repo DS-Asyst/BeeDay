@@ -118,16 +118,19 @@ mostra toast de sucesso/erro individualmente — uma seção falhando não bloqu
   `EditForm` — reflete que o POST vai para o endpoint minimal API de `Program.cs`
   (ver [`01-composition-root.md`](01-composition-root.md) §8), não para um handler Blazor. O
   `onsubmit` inline desabilita o botão via JS vanilla (sem componente/JS interop dedicado) para
-  evitar duplo submit.
+  evitar duplo submit. Os nomes/inputs nativos permanecem por esse contrato, mas o chrome consome
+  `.beeday-field*`/`.beeday-checkbox*` e o submit continua sendo `BeeDayButton`.
 - `RedirectToLogin.razor` (usado só por `Routes.razor`'s `NotAuthorized`): preserva o path atual
   como `returnUrl`.
 - As 5 páginas de `Identity` (`ConfirmEmail`, `ResetPassword`, `ForgotPassword`,
   `ResendConfirmation`, `EmailConfirmationSent`) são todas single-file (markup + `@code` na mesma
   linha em vários casos), cada uma com uma classe de formulário privada minúscula
-  (`PasswordForm`/`EmailForm`) validada por `DataAnnotations`. `ResendConfirmation` e
+  (`PasswordForm`/`EmailForm`) validada por `DataAnnotations`. Os campos de
+  `ResetPassword`/`ForgotPassword`/`ResendConfirmation` usam `BeeDayInput`, preservando
+  `autocomplete`, disabled e mensagens localizadas. `ResendConfirmation` e
   `EmailConfirmationSent` implementam o mesmo cooldown de 60s via `PeriodicTimer` de forma
   independente (não extraído para um componente/serviço compartilhado) — candidato a duplicação,
-  não corrigido nesta Sprint por ser documentação, não refatoração de produção.
+  fora do escopo de apresentação desta Sprint.
 - `Tutorial.razor` (`/onboarding/tutorial`): 5 slides estáticos (`TutorialSlide[]` hardcoded no
   `@code`), sem nenhuma leitura de Application até o último slide, quando `NextAsync` chama
   `Store.CompleteOnboardingAsync()` e navega para `/daily`.

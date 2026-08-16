@@ -35,7 +35,15 @@ public sealed class LoginTests
 
         Assert.Empty(cut.FindAll(".auth-card"));
         Assert.Equal("/auth/login", cut.Find("form[method='post']").GetAttribute("action"));
-        Assert.NotNull(cut.Find("input[name='rememberMe']"));
+        var email = cut.Find("#login-email.beeday-field__control");
+        var password = cut.Find("#login-password.beeday-field__control");
+        var rememberMe = cut.Find("#login-remember.beeday-checkbox__control[name='rememberMe']");
+
+        Assert.Equal("login-email", cut.Find("label[for='login-email']").GetAttribute("for"));
+        Assert.Equal("email", email.GetAttribute("autocomplete"));
+        Assert.Equal("current-password", password.GetAttribute("autocomplete"));
+        Assert.NotNull(rememberMe);
+        Assert.NotNull(cut.Find(".auth-remember .beeday-checkbox__visual"));
         Assert.NotNull(cut.Find("input[name='returnUrl']"));
     }
 
