@@ -46,7 +46,7 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         var heroImage = heroVisual.Locator("img.home-hero__image");
         await Expect(heroImage).ToBeVisibleAsync();
         await Expect(Page.Locator(".home-hero .beeday-brand")).ToHaveCountAsync(0);
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "How BeeDay works", Level = 2 })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "How beeday works", Level = 2 })).ToBeVisibleAsync();
         var howSection = Page.Locator(".home-how");
         var howVisual = howSection.Locator(".home-how__visual img");
         await Expect(howVisual).ToBeVisibleAsync();
@@ -58,11 +58,19 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         var brandClosureCharacters = brandClosure.Locator(".home-brand-closure__characters");
         var brandClosureWave = brandClosure.Locator(".home-brand-closure__wave");
         var brandClosureBase = brandClosure.Locator(".home-brand-closure__base");
+        var topicGroups = brandClosure.Locator(".home-brand-topics > section");
         var footer = Page.GetByRole(AriaRole.Contentinfo);
         await Expect(brandClosureCharacters).ToBeVisibleAsync();
         await Expect(brandClosureWave.Locator("img")).ToBeVisibleAsync();
         await Expect(brandClosure).ToHaveCSSAsync("background-color", "rgb(255, 255, 255)");
         await Expect(brandClosureBase).ToHaveCSSAsync("background-color", "rgb(70, 74, 250)");
+        await Expect(topicGroups).ToHaveCountAsync(5);
+        var topicItemCounts = await topicGroups.EvaluateAllAsync<int[]>("groups => groups.map(group => group.querySelectorAll('li').length)");
+        Assert.Equal(new[] { 2, 2, 2, 2, 2 }, topicItemCounts);
+        var topicLinks = brandClosure.Locator(".home-brand-topics a");
+        await Expect(topicLinks).ToHaveCountAsync(2);
+        await brandClosure.Locator("img").EvaluateAllAsync<object?>(
+            "images => Promise.all(images.map(image => image.complete ? Promise.resolve() : new Promise(resolve => image.addEventListener('load', resolve, { once: true }))))");
         await Expect(footer).ToBeVisibleAsync();
         var visualBox = await heroVisual.BoundingBoxAsync();
         var contentBox = await Page.Locator(".home-hero__content").BoundingBoxAsync();
@@ -118,6 +126,16 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         Assert.True(closureCharactersBox.Height >= 149, "The characters should remain recognizable on narrow viewports.");
         Assert.InRange(Math.Abs(closureWaveBox!.Y + closureWaveBox.Height - closureBaseBox!.Y), 0, 1);
         Assert.True(closureCharactersBox.X >= 0 && closureCharactersBox.X + closureCharactersBox.Width <= width, "The characters must not be cropped.");
+        double expectedCharactersWidth = width > 960
+            ? Math.Clamp(width * .216, 268.8, 364.8)
+            : width > 736
+                ? Math.Clamp(width * .408, 288, 345.6)
+                : Math.Min(width * .744, 307.2);
+        Assert.InRange(Math.Abs(closureCharactersBox.Width - expectedCharactersWidth), 0, 2);
+        Assert.True(closureCharactersBox.Y + closureCharactersBox.Height > closureWaveBox!.Y, "The characters should overlap the wave region instead of floating above it.");
+        await topicLinks.First.FocusAsync();
+        await Expect(topicLinks.First).ToBeFocusedAsync();
+        Assert.Equal("solid", await topicLinks.First.EvaluateAsync<string>("element => getComputedStyle(element).outlineStyle"));
     }
 
     [Fact]
@@ -154,7 +172,9 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         await Expect(english).ToHaveAttributeAsync("aria-pressed", "false");
         await Expect(Page).ToHaveURLAsync(new Regex(@"/$"));
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Level = 1 })).ToContainTextAsync("Construa um dia melhor");
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { Level = 2 })).ToContainTextAsync("Como o BeeDay funciona");
+        await Expect(Page.Locator("#how-heading")).ToContainTextAsync("Como o beeday funciona");
+        await Expect(Page.Locator(".home-brand-topics h2")).ToHaveTextAsync(
+            ["Sobre nós", "Social", "Apps", "Ajuda e suporte", "Privacidade e termos"]);
         await Expect(Page.Locator(".home-steps h3")).ToHaveTextAsync(
             ["Defina o que importa", "Organize o seu dia", "Evolua todos os dias", "Acompanhe seu progresso", "Celebre suas conquistas"]);
         await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Comece agora" })).ToBeVisibleAsync();
