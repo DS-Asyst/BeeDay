@@ -103,6 +103,47 @@ public sealed class VisualFoundationTests
     }
 
     [Fact]
+    public void SharedShapeLanguageUsesCanonicalSpacingBordersAndDepthWithoutFlatteningFeatures()
+    {
+        var variables = ReadWebFile("wwwroot", "css", "variables.css");
+        var activity = ReadWebFile("wwwroot", "css", "activity-design-system.css");
+        var polish = ReadWebFile("wwwroot", "css", "polish.css");
+        var designSystem = ReadWebFile("wwwroot", "css", "design-system.css");
+        var forms = ReadWebFile("wwwroot", "css", "forms.css");
+        var feedback = ReadWebFile("wwwroot", "css", "feedback.css");
+        var editorModal = ReadWebFile("wwwroot", "css", "editor-modal.css");
+        var projectWorkspace = ReadWebFile("Components", "Features", "Projects", "Components", "ProjectWorkspace.razor.css");
+
+        Assert.Contains("--beeday-border-width-subtle: 1px;", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-border-width: 2px;", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-depth-sm: 2px;", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-depth-md: 4px;", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-depth-lg: 8px;", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-shadow-sm:", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-shadow-lg:", variables, StringComparison.Ordinal);
+
+        Assert.Contains("--beeday-grid: var(--beeday-spacing-sm);", polish, StringComparison.Ordinal);
+        Assert.Contains("--activity-space-xs: var(--beeday-spacing-xs);", activity, StringComparison.Ordinal);
+        Assert.Contains("--activity-space-sm: var(--beeday-spacing-sm);", activity, StringComparison.Ordinal);
+        Assert.Contains("--activity-space-md: var(--beeday-spacing-smd);", activity, StringComparison.Ordinal);
+        Assert.Contains("--activity-space-lg: var(--beeday-spacing-md);", activity, StringComparison.Ordinal);
+        Assert.Contains("--activity-radius-md: .4rem;", activity, StringComparison.Ordinal);
+
+        Assert.Contains("padding: var(--beeday-spacing-sm) var(--beeday-spacing-md);", designSystem, StringComparison.Ordinal);
+        Assert.Contains("border-bottom-width: var(--beeday-depth-md);", designSystem, StringComparison.Ordinal);
+        Assert.Contains("transform: translateY(var(--beeday-depth-md));", designSystem, StringComparison.Ordinal);
+        Assert.Contains("border-radius: var(--beeday-radius-lg);", designSystem, StringComparison.Ordinal);
+        Assert.Contains("box-shadow: none;", designSystem, StringComparison.Ordinal);
+        Assert.Contains("border: var(--beeday-border-width) solid var(--beeday-color-border);", forms, StringComparison.Ordinal);
+        Assert.Contains("border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);", feedback, StringComparison.Ordinal);
+        Assert.Contains("border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);", editorModal, StringComparison.Ordinal);
+
+        Assert.Contains("backdrop-filter: blur(3px);", projectWorkspace, StringComparison.Ordinal);
+        Assert.DoesNotContain("--beeday-radius-control", variables, StringComparison.Ordinal);
+        Assert.DoesNotContain("--beeday-shadow-activity", variables, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void GlobalBackgroundIsASolidFoundationSurface()
     {
         var css = ReadWebFile("wwwroot", "app.css");

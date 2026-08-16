@@ -14,7 +14,7 @@
     align-items: center;
     justify-content: space-between;
     min-height: 4.25rem;
-    gap: 1rem;
+    gap: var(--beeday-spacing-md);
 }
 
 .public-header__brand {

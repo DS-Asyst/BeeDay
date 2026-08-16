@@ -979,3 +979,75 @@ Shape/spacing/borders/depth → 25.5; motion → 25.6; breakpoints → 25.7; com
 Auth/Identity → 25.9; feedback/accessibility transversal → 25.10/25.15; Wallet → 25.11;
 Daily/ProjectWorkspace → 25.12; Characters → 25.13; Writing → 25.14; sweep amplo → 25.16.
 Nenhuma dessas Sprints foi antecipada.
+
+## Sprint 25.5 — Shape, Spacing, Borders & Depth (Results)
+
+**Fonte da verdade:** inventário direto dos 55 arquivos CSS de produção, `variables.css`,
+`activity-design-system.css`, `polish.css`, shared components/layouts, Feature CSS, testes visuais e
+documentação viva. Executado sobre o commit da Sprint 25.4
+`79646f9a01a3387e8a8df63af2767dc639349285`.
+
+### Baseline e classificação
+
+O baseline pré-alteração tinha 628 declarations de spacing (167 tokenizadas), 99 radii (71
+tokenizados), 159 borders (103 com algum token) e 92 declarations de shadow/filter (56
+tokenizadas). Os valores foram classificados como Shared Scale, Legitimate Micro-Spacing,
+Feature-Specific, Illustration/Composition ou Legacy/Candidate antes de qualquer migração.
+
+### Consolidação sem mudança visual
+
+- `--beeday-grid` passou a aliasar `--beeday-spacing-sm`;
+- `--activity-space-{xs,sm,md,lg}` preservou a API feature-scoped e passou a aliasar a escala
+  canônica equivalente;
+- 21 expressões exatas de spacing em Button, Feedback, EditorModal, skeletons e layouts passaram a
+  consumir tokens existentes; o total continuou 628, com 188 tokenizadas e 440 literais;
+- `--beeday-border-width-subtle: 1px` formalizou boundaries estruturais comprovados por múltiplos
+  consumers e migrou 20 usos compartilhados sem alteração computada;
+- radii, physical depth e shadows já possuíam foundation suficiente; nenhum alias sem consumer ou
+  nível por simetria foi criado.
+
+### Product Shape Language
+
+Controls/inputs e cards default usam radius `lg`; panels escolhem `md`/`lg` pela densidade; dialogs
+usam `lg`; pills e círculos são reservados às silhuetas correspondentes; marketing/showcase pode
+usar `2xl`, mantendo curvas artísticas locais. Borders de 1px delimitam estrutura; o contrato de
+2px permanece para interação/content cards; Strong é diferença de cor; focus combina outline e
+ring visível.
+
+Button é o único shared component com bottom depth físico: 4px em repouso, colapso + deslocamento
+de 4px no pressed. Shadows sutis separam menu/prominent surface; `md`/`lg` pertencem a feedback e
+modal/overlay; Button/Card default permanecem sem shadow.
+
+### Impacto, compatibilidade e escopo
+
+Impacto restrito a CSS/Web, teste estrutural e documentação. Todos os valores computados foram
+preservados; aliases feature-scoped, `--beeday-border-width`, radii e shadows existentes continuam
+compatíveis. Micro-spacing, activity radii/shadows, Wallet, ProjectWorkspace, Home/illustration e
+shadows locais foram preservados sob seus owners. Nenhum componente/API, motion, z-index,
+breakpoint, typography ou Color System foi redesenhado.
+
+### Validação
+
+```text
+git diff --check
+# aprovado
+
+dotnet format BeeDay.slnx --verify-no-changes
+# aprovado após normalização CRLF restrita aos 18 arquivos alterados; a primeira execução detectou
+# ENDOFLINE em VisualFoundationTests.cs introduzido pela edição local
+
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+# aprovado, 0 avisos, 0 erros
+
+dotnet test BeeDay.slnx --no-build --configuration Release
+# 1.071/1.071 aprovados: Domain 93, Application 73, Infrastructure 129, Web 708, E2E 68
+
+BeeDay.Web.Tests — VisualFoundation/DesignSystem/Progress/Card/Layout: 50/50
+BeeDay.E2E.Tests — InteractiveComponentsTests/BrandTypographyTests: 5/5
+```
+
+### Itens `DEFER` e confirmação de escopo
+
+Motion/z-index → 25.6; responsive/breakpoints → 25.7; component APIs → 25.8; Auth/Identity → 25.9;
+feedback/a11y → 25.10; Wallet → 25.11; Daily/Project → 25.12; illustration → 25.13; Writing →
+25.14; quality engineering → 25.15; final sweep → 25.16. Nenhuma foi antecipada.
