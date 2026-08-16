@@ -45,6 +45,19 @@ public sealed class BeeDayProgressBarTests
     }
 
     [Fact]
+    public void SupportsAContextualAccessibleLabelWithoutChangingVisibleCopy()
+    {
+        using var context = new BunitContext().WithLocalization();
+        var cut = context.Render<BeeDayProgressBar>(parameters => parameters
+            .Add(component => component.Label, "Progress")
+            .Add(component => component.AriaLabel, "Kitchen project progress 40%")
+            .Add(component => component.Value, 40));
+
+        Assert.Equal("Progress", cut.Find(".beeday-progress__heading span").TextContent);
+        Assert.Equal("Kitchen project progress 40%", cut.Find("[role='progressbar']").GetAttribute("aria-label"));
+    }
+
+    [Fact]
     public void UnderEnglishUiCulture_DefaultsUnsetValueTextToEnglish()
     {
         using var context = new BunitContext().WithLocalization();

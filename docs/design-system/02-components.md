@@ -2,7 +2,7 @@
 
 **Fonte da verdade:** todos os `.razor`/`.razor.cs` sob
 `src/BeeDay.Web/Components/DesignSystem`, mais `Components/Behaviors/DragDrop/BeeDaySortable`.
-Revalidado em 2026-08-16 pelas Sprints 25.8–25.10.
+Revalidado em 2026-08-16 pelas Sprints 25.8–25.12.
 
 ## 1. Inventário atual
 
@@ -32,7 +32,7 @@ um zero significa primitive preservada/testada sem consumer runtime atual.
 
 | Primitive | Responsabilidade e contrato público | Consumers | Estados, a11y, responsive, teste e CSS |
 |---|---|---:|---|
-| `BeeDayInput` | `Id`, `Label`, `Placeholder`, classes, `MaxLength`, `Required`, `Disabled`, `ReadOnly`, validation flag, bind + attributes | 8 | default/hover/focus/disabled/readonly/invalid. Label + validation ligada ao EditContext. `BeeDayFormTests`; `forms.css` |
+| `BeeDayInput` | `Id`, `Label`, `Placeholder`, classes, `MaxLength`, `Required`, `Disabled`, `ReadOnly`, `UpdateOnInput`, validation flag, bind + attributes | 9 | default/hover/focus/disabled/readonly/invalid; live-search opt-in fora de EditContext. `BeeDayFormTests`; `forms.css` |
 | `BeeDayTextArea` | Input contract + `CounterCssClass`, `ShowCounter` | 5 | mesmos estados; counter/maxlength. `BeeDayFormTests`; `forms.css` |
 | `BeeDaySelect<T>` | `Id`, `Label`, classes, `Required`, `Disabled`, validation flag, bind, options, attributes | 5 | focus/disabled/invalid/selected nativo. `BeeDayFormTests`; `forms.css` |
 | `BeeDayDateInput<T>` | `Id`, `Label`, classes, `Required`, `Disabled`, validation flag, bind + attributes | 3 | date nativo com label/invalid. `BeeDayFormTests`; `forms.css` |
@@ -52,7 +52,7 @@ um zero significa primitive preservada/testada sem consumer runtime atual.
 | `EditorModalShell` | `Model`, `Title`, `TitleId`, `SubmitLabel?`, `ShowDelete`, `IsBusy`, 3 slots e 3 callbacks | 6 | modal labelled/busy; foco inicial no primeiro field, trap, Escape, nested-confirm e restore; delete mantém 44px. `EditorModalShellTests` + E2E; `editor-modal.css`/focus scope |
 | `BeeDayBrand` | `OnDarkSurface` compatível | 11 | wordmark textual `beeday`, `role=img`, label fixa lowercase; sem variants de cor. `BeeDayBrandTests`; CSS isolado |
 | `SearchHighlight` | `Text`, `SearchTerm` | 2 | `<mark>` para matches case-insensitive; sem estado interativo. `SearchHighlightTests`; `animations.css` |
-| `BeeDayProgressBar` | `Label`, `Value`, `Maximum`, `ValueText?`, `Tone` | 3 | `Primary`/`Reward`; empty/partial/complete/unavailable; `progressbar` + aria values. `BeeDayProgressBarTests`; CSS isolado |
+| `BeeDayProgressBar` | `Label`, `AriaLabel?`, `Value`, `Maximum`, `ValueText?`, `Tone` | 4 | `Primary`/`Reward`; empty/partial/complete/unavailable; label visível pode ter contexto acessível mais específico. `BeeDayProgressBarTests`; CSS isolado |
 | `BeeDaySortable` | `ItemIds`, template, reorder callback, `CollectionKey`, `AriaLabel`, `Class?`, virtualization params, `RemovingItemId` | 1 | drag/touch/keyboard ownership, removing state, JS result → C#. `SortableOrderTests` + E2E Daily; `dragdrop.css` |
 
 ## 2. Matriz formal de estados
@@ -97,17 +97,18 @@ Regras transversais:
 
 ## 4. Inventário de controles nativos
 
-Após a convergência Wallet da Sprint 25.11, o baseline tem **44 tags nativas em 20 arquivos**:
-29 `<button>`, 15 `<input>`, zero `<select>` e zero `<textarea>` direto.
+Após a convergência Daily/Project da Sprint 25.12, o baseline tem **43 tags nativas em 20 arquivos**:
+29 `<button>`, 14 `<input>`, zero `<select>` e zero `<textarea>` direto.
 
 | Classificação | Quantidade | Exemplos e decisão |
 |---|---:|---|
 | `FRAMEWORK / INTERNAL` | 14 | internals de Button/CardMenu/Toast/Input live-search; Reconnect; culture form; triggers do shell. Permanecem nativos |
 | `LEGITIMATE SPECIALIZED WIDGET / ADAPTER` | 26 | activity checkbox/score, menus, drag/project toolbar, color controls e os 8 adapters HTML de Login/ProfileCreation convergidos visualmente na 25.9 |
-| `DESIGN-SYSTEM DUPLICATION` / migration candidate | 4 | Controles feature-local remanescentes para auditoria Daily/Project na 25.12 |
+| `DESIGN-SYSTEM DUPLICATION` / migration candidate | 3 | Casos remanescentes sem contrato equivalente confirmado; revisão final na 25.16 |
 
 Wallet eliminou seus selects/dates/busca paralelos; o picker de cor e o valor monetário continuam
-especializados. Dashboard search e menu triggers são revistos com Daily na 25.12.
+especializados. Daily eliminou o chrome paralelo da busca; menu, score, completion e listbox
+continuam especializados porque codificam interação real de produto.
 
 ## 5. Foundations, responsive e localização
 

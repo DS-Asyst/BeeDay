@@ -61,10 +61,10 @@ public sealed class CoreComponentContractTests
         }
 
         Assert.Equal(29, counts["button"]);
-        Assert.Equal(15, counts["input"]);
+        Assert.Equal(14, counts["input"]);
         Assert.Equal(0, counts["select"]);
         Assert.Equal(0, counts["textarea"]);
-        Assert.Equal(44, counts.Values.Sum());
+        Assert.Equal(43, counts.Values.Sum());
         Assert.Equal(20, filesWithNativeControls);
     }
 

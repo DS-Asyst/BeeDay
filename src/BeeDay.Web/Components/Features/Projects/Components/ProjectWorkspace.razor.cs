@@ -1,6 +1,7 @@
 using BeeDay.Application.Features.Dashboard.Responses;
 using BeeDay.Domain.Enums;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Localization;
 
 namespace BeeDay.Web.Components.Features.Projects.Components;
@@ -16,6 +17,9 @@ public partial class ProjectWorkspace
     [Parameter] public EventCallback<TodoSummary> OnDeleteTodo { get; set; }
 
     private bool showTodos = true;
+    private readonly string id = Guid.NewGuid().ToString("N");
+    private string DialogId => $"project-workspace-{id}";
+    private string TitleId => $"project-workspace-title-{id}";
 
     private string StatusLabel => Project?.Status switch
     {
@@ -28,4 +32,7 @@ public partial class ProjectWorkspace
     {
         showTodos = !showTodos;
     }
+
+    private Task HandleKeyDown(KeyboardEventArgs args) =>
+        args.Key == "Escape" ? OnClose.InvokeAsync() : Task.CompletedTask;
 }

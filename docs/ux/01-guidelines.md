@@ -138,6 +138,19 @@ com contraste calculado localmente. O picker nativo `type=color` e o `InputNumbe
 transformam em primitives globais. Seus breakpoints locais respondem à densidade real de summary,
 workspace, filtros, transações e tags; não redefinem contratos do shell autenticado.
 
+### 7.2 Daily e ProjectWorkspace — Product Patterns operacionais
+
+Daily preserva quatro conceitos distintos — Habit, Task, To-Do e Project — com cores, métricas e
+ações próprias; igualdade física não autoriza colapsar esses significados. O board mantém ordem
+manual por `BeeDaySortable`, quatro colunas no shell amplo, scroll horizontal intermediário, duas
+colunas abaixo de 900px e uma abaixo de 620px. A busca debounced consome `BeeDayInput`; create menu,
+completion/score controls e `ProjectContextFilter` permanecem widgets especializados.
+
+ProjectWorkspace recebe a ordem de To-Dos pronta e nunca aplica sort visual implícito. Ele compõe
+`BeeDayProgressBar`, icon-toggle e `DialogFocusScope`, enquanto status, To-Do accent e layout compacto
+são semântica/estrutura local. Cores neutras, overlay, border, text, surface, shadow e layer usam as
+foundations compartilhadas; nenhum token Project foi substituído por Brand apenas por semelhança.
+
 ## 8. Estados de carregamento
 
 Dois padrões distintos, para dois momentos diferentes do ciclo de vida de uma página:

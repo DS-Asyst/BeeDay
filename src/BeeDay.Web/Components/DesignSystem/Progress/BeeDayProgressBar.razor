@@ -11,7 +11,7 @@
     </div>
     <div class="beeday-progress__track"
          role="progressbar"
-         aria-label="@Label"
+         aria-label="@AccessibleLabel"
          aria-valuemin="0"
          aria-valuemax="@AccessibleMaximum"
          aria-valuenow="@AccessibleValue"
@@ -27,6 +27,7 @@
     [Parameter] public double Value { get; set; }
     [Parameter] public double Maximum { get; set; } = 100d;
     [Parameter] public string? ValueText { get; set; }
+    [Parameter] public string? AriaLabel { get; set; }
     [Parameter] public BeeDayProgressTone Tone { get; set; } = BeeDayProgressTone.Primary;
 
     private bool HasValidMaximum => double.IsFinite(Maximum) && Maximum > 0d;
@@ -38,5 +39,6 @@
     private string AccessibleValueText => HasValidMaximum
         ? ValueText ?? Localizer["ProgressValueText", AccessibleValue.ToString("0.##"), Maximum.ToString("0.##")]
         : Localizer["ProgressUnavailable"];
+    private string AccessibleLabel => string.IsNullOrWhiteSpace(AriaLabel) ? Label : AriaLabel;
     private string FillStyle => $"width: {Percentage.ToString("0.##", CultureInfo.InvariantCulture)}%";
 }
