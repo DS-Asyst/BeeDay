@@ -81,18 +81,21 @@ public sealed class TodoEditorModalTests : BunitContext
     [Fact]
     public void UnderPortugueseUiCulture_DeleteConfirmationIsLocalized()
     {
-        var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => Render<TodoEditorModal>(parameters => parameters
-            .Add(component => component.Model, new TodoEditorModel { Title = "Comprar presente da Ana" })
-            .Add(component => component.Projects, Projects)
-            .Add(component => component.IsEditing, true)));
+        BunitLocalizationSupport.WithUiCulture("pt-BR", () =>
+        {
+            var cut = Render<TodoEditorModal>(parameters => parameters
+                .Add(component => component.Model, new TodoEditorModel { Title = "Comprar presente da Ana" })
+                .Add(component => component.Projects, Projects)
+                .Add(component => component.IsEditing, true));
 
-        cut.Find(".editor-modal__footer-danger .beeday-button--danger").Click();
+            cut.Find(".editor-modal__footer-danger .beeday-button--danger").Click();
 
-        var dialog = cut.Find("[role='alertdialog']");
-        Assert.Contains("Excluir pendência", dialog.TextContent, StringComparison.Ordinal);
-        Assert.Contains("Tem certeza de que deseja excluir esta pendência?", dialog.TextContent, StringComparison.Ordinal);
-        Assert.Contains("Esta ação não pode ser desfeita.", dialog.TextContent, StringComparison.Ordinal);
-        Assert.Contains("Todas as informações serão removidas permanentemente.", dialog.TextContent, StringComparison.Ordinal);
-        Assert.Contains("Cancelar", dialog.TextContent, StringComparison.Ordinal);
+            var dialog = cut.Find("[role='alertdialog']");
+            Assert.Contains("Excluir pendência", dialog.TextContent, StringComparison.Ordinal);
+            Assert.Contains("Tem certeza de que deseja excluir esta pendência?", dialog.TextContent, StringComparison.Ordinal);
+            Assert.Contains("Esta ação não pode ser desfeita.", dialog.TextContent, StringComparison.Ordinal);
+            Assert.Contains("Todas as informações serão removidas permanentemente.", dialog.TextContent, StringComparison.Ordinal);
+            Assert.Contains("Cancelar", dialog.TextContent, StringComparison.Ordinal);
+        });
     }
 }
