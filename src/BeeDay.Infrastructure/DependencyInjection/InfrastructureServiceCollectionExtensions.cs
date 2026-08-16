@@ -71,8 +71,13 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<BeeDay.Application.Common.Identity.IUserTokenService, SecureUserTokenService>();
         services.AddSingleton<BeeDay.Application.Common.Identity.IIdentityRequestThrottle, MemoryIdentityRequestThrottle>();
         services.AddSingleton<BeeDay.Application.Common.Identity.IIdentityEmailComposer, IdentityEmailComposer>();
-        var resendEnabled = configuration.GetValue<bool>($"{ResendOptions.SectionName}:Enabled");
-        if (resendEnabled)
+        // Falls back to each Options class's own declared default (not bool's default false) when the
+        // key is absent, matching exactly what .Bind() would have produced — an omitted key must
+        // resolve the same way here as it does for every other consumer of these Options classes.
+        var resendEnabled = configuration.GetValue($"{ResendOptions.SectionName}:Enabled", new ResendOptions().Enabled);
+        var developmentEmailEnabled = configuration.GetValue($"{DevelopmentEmailOptions.SectionName}:Enabled", new DevelopmentEmailOptions().Enabled);
+        var emailProvider = EmailProviderSelector.Resolve(resendEnabled, developmentEmailEnabled);
+        if (emailProvider == EmailProvider.Resend)
         {
             services.AddHttpClient<BeeDay.Application.Common.Identity.IEmailSender, ResendEmailSender>(client =>
             {
