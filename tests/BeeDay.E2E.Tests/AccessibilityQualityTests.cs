@@ -17,6 +17,7 @@ public sealed class AccessibilityQualityTests(PlaywrightAppFixture fixture) : E2
     [Theory]
     [InlineData("/")]
     [InlineData("/brand/typography")]
+    [InlineData("/experience-system")]
     [InlineData("/login")]
     public async Task PublicHighValuePages_HaveNoAutomaticallyDetectableViolations(string route)
     {

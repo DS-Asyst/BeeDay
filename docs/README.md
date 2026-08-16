@@ -8,6 +8,19 @@ que uma decisão foi tomada.
 **Fonte da verdade:** esta taxonomia foi definida na Sprint 16.2 verificando diretamente
 `BeeDay.slnx`, `src/*`, `tests/*` e o inventário de documentos existentes auditado na Sprint 16.1.
 
+**`docs/` vs. o `beeday Experience System`:** este diretório é a documentação técnica para quem
+desenvolve o repositório — não é publicado, exige acesso ao código-fonte para ser lido. Desde a
+Sprint 25.17, `/experience-system` (`beeday Experience System`) é o equivalente público e navegável
+dentro do próprio produto: uma representação real, localizada em `en-US`/`pt-BR` e sempre
+sincronizada com o código, do que a EPIC 25 formalizou sobre Brand System, UI Design System e UX
+System — acessível a qualquer visitante, sem autenticação, a partir do link no footer institucional.
+As duas áreas não duplicam conteúdo por cópia manual: `/experience-system` resume e apresenta as
+mesmas decisões documentadas em [`design-system/`](design-system/README.md),
+[`brand/`](brand/README.md), [`ux/`](ux/README.md) e
+[`epics/25-design-system-brand-evolution/`](epics/25-design-system-brand-evolution/README.md) para
+um público diferente. Ver [`docs/web/02-routing-and-pages.md`](web/02-routing-and-pages.md) §9 para
+a estrutura de rotas e composição.
+
 ## Regra permanente desta documentação
 
 Todo documento deve declarar explicitamente sua fonte de verdade — por exemplo:

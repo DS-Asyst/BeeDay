@@ -1,0 +1,15 @@
+@inject IStringLocalizer<ExperienceSystemResources> Localizer
+
+<nav class="experience-system-pillar-nav" aria-label="@Localizer["PillarNavAriaLabel"]">
+    <a class="experience-system-pillar-nav__home" href="/experience-system">@Localizer["PillarNavHome"]</a>
+    <ul class="experience-system-pillar-nav__list">
+        <li><a href="/experience-system/brand" aria-current="@(Current == ExperienceSystemPillar.Brand ? "page" : null)">@Localizer["PillarNavBrand"]</a></li>
+        <li><a href="/experience-system/ui" aria-current="@(Current == ExperienceSystemPillar.Ui ? "page" : null)">@Localizer["PillarNavUi"]</a></li>
+        <li><a href="/experience-system/ux" aria-current="@(Current == ExperienceSystemPillar.Ux ? "page" : null)">@Localizer["PillarNavUx"]</a></li>
+    </ul>
+</nav>
+
+@code {
+    [Parameter, EditorRequired]
+    public ExperienceSystemPillar Current { get; set; }
+}

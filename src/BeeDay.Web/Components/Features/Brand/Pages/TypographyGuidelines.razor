@@ -1,10 +1,14 @@
 @page "/brand/typography"
+@page "/experience-system/brand/typography"
 @attribute [AllowAnonymous]
 @layout BeeDay.Web.Components.Layout.PublicLayout
 @using BeeDay.Web.Components.Features.Brand
 @inject IStringLocalizer<BrandTypographyResources> Localizer
 
 <PageTitle>@Localizer["PageTitle"]</PageTitle>
+
+<ExperienceSystemPillarNav Current="ExperienceSystemPillar.Brand" />
+<ExperienceSystemTopicNav Pillar="ExperienceSystemPillar.Brand" CurrentHref="/experience-system/brand/typography" />
 
 <article class="brand-typography">
     <header class="brand-typography__hero">

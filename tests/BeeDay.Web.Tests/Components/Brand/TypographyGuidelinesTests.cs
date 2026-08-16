@@ -49,8 +49,21 @@ public sealed class TypographyGuidelinesTests
             "TypographyGuidelines.razor"));
 
         Assert.Contains("@page \"/brand/typography\"", source, StringComparison.Ordinal);
+        Assert.Contains("@page \"/experience-system/brand/typography\"", source, StringComparison.Ordinal);
         Assert.Contains("@attribute [AllowAnonymous]", source, StringComparison.Ordinal);
         Assert.Contains("@layout BeeDay.Web.Components.Layout.PublicLayout", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PageRendersExperienceSystemPillarAndTopicNavigationForBothRoutes()
+    {
+        using var context = new BunitContext().WithLocalization();
+
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<TypographyGuidelines>());
+
+        Assert.Equal("page", cut.Find(".experience-system-pillar-nav a[href='/experience-system/brand']").GetAttribute("aria-current"));
+        Assert.Equal("page", cut.Find(".experience-system-topic-nav a[href='/experience-system/brand/typography']").GetAttribute("aria-current"));
+        Assert.Equal("Typography with purpose", cut.Find("h1").TextContent.Trim());
     }
 
     private static string ResolveRepoRoot()

@@ -1,0 +1,43 @@
+<article class="experience-system-page">
+    <BeeDayPageHeader Eyebrow="@Eyebrow" Title="@Title" />
+    @if (!string.IsNullOrWhiteSpace(Description))
+    {
+        <p class="experience-system-page__intro">@Description</p>
+    }
+
+    @if (Pillar is not null)
+    {
+        <ExperienceSystemPillarNav Current="@Pillar.Value" />
+        @if (ShowTopicNav)
+        {
+            <ExperienceSystemTopicNav Pillar="@Pillar.Value" CurrentHref="@CurrentHref" />
+        }
+    }
+
+    <div class="experience-system-page__body">
+        @ChildContent
+    </div>
+</article>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Eyebrow { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public string? Description { get; set; }
+
+    [Parameter]
+    public ExperienceSystemPillar? Pillar { get; set; }
+
+    [Parameter]
+    public bool ShowTopicNav { get; set; } = true;
+
+    [Parameter]
+    public string? CurrentHref { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}
