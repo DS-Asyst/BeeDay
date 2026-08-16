@@ -148,10 +148,25 @@
     <value>Sorry, the content you are looking for does not exist.</value>
   </data>
   <data name="ErrorTitle" xml:space="preserve">
-    <value>Error.</value>
+    <value>Error</value>
   </data>
   <data name="ErrorMessage" xml:space="preserve">
     <value>An error occurred while processing your request.</value>
+  </data>
+  <data name="ErrorRequestIdLabel" xml:space="preserve">
+    <value>Request ID:</value>
+  </data>
+  <data name="ErrorDevelopmentModeTitle" xml:space="preserve">
+    <value>Development mode</value>
+  </data>
+  <data name="ErrorDevelopmentModeDescription" xml:space="preserve">
+    <value>The Development environment displays more detailed information about the error.</value>
+  </data>
+  <data name="ErrorDevelopmentModeWarning" xml:space="preserve">
+    <value>Do not enable the Development environment in deployed applications. It can expose sensitive exception information to users.</value>
+  </data>
+  <data name="ErrorDevelopmentModeInstructions" xml:space="preserve">
+    <value>For local debugging, set {0} to {1} and restart the app.</value>
   </data>
   <data name="ToastDefaultSuccessTitle" xml:space="preserve">
     <value>Success</value>

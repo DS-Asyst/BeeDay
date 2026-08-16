@@ -116,7 +116,7 @@
     <value>Confirmar senha</value>
   </data>
   <data name="ResetPasswordButton" xml:space="preserve">
-    <value>Redefinir Senha</value>
+    <value>Redefinir senha</value>
   </data>
   <data name="ResetTokenMissingError" xml:space="preserve">
     <value>O token de redefinição de senha está ausente.</value>

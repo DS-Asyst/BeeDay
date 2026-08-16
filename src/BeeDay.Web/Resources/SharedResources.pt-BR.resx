@@ -148,10 +148,25 @@
     <value>O conteúdo que você está procurando não existe.</value>
   </data>
   <data name="ErrorTitle" xml:space="preserve">
-    <value>Erro.</value>
+    <value>Erro</value>
   </data>
   <data name="ErrorMessage" xml:space="preserve">
     <value>Ocorreu um erro ao processar sua solicitação.</value>
+  </data>
+  <data name="ErrorRequestIdLabel" xml:space="preserve">
+    <value>ID da solicitação:</value>
+  </data>
+  <data name="ErrorDevelopmentModeTitle" xml:space="preserve">
+    <value>Modo de desenvolvimento</value>
+  </data>
+  <data name="ErrorDevelopmentModeDescription" xml:space="preserve">
+    <value>O ambiente Development exibe informações mais detalhadas sobre o erro.</value>
+  </data>
+  <data name="ErrorDevelopmentModeWarning" xml:space="preserve">
+    <value>Não habilite o ambiente Development em aplicações publicadas. Ele pode expor informações sensíveis de exceções aos usuários.</value>
+  </data>
+  <data name="ErrorDevelopmentModeInstructions" xml:space="preserve">
+    <value>Para depuração local, defina {0} como {1} e reinicie o aplicativo.</value>
   </data>
   <data name="ToastDefaultSuccessTitle" xml:space="preserve">
     <value>Sucesso</value>

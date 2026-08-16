@@ -48,6 +48,17 @@ public sealed class IdentityFormConvergenceTests
         Assert.Equal("reset-password-confirmation", inputs[1].Id);
     }
 
+    [Theory]
+    [InlineData("en-US", "Reset password")]
+    [InlineData("pt-BR", "Redefinir senha")]
+    public void ResetPassword_UsesSentenceCaseActionLabel(string culture, string expectedLabel)
+    {
+        using var context = CreateContext();
+        var cut = BunitLocalizationSupport.WithUiCulture(culture, () => context.Render<ResetPassword>());
+
+        Assert.Equal(expectedLabel, cut.Find("button[type='submit']").TextContent.Trim());
+    }
+
     [Fact]
     public void ResendConfirmation_UsesSharedEmailFieldInPortuguese()
     {

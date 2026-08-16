@@ -116,7 +116,7 @@
     <value>Confirm password</value>
   </data>
   <data name="ResetPasswordButton" xml:space="preserve">
-    <value>Reset Password</value>
+    <value>Reset password</value>
   </data>
   <data name="ResetTokenMissingError" xml:space="preserve">
     <value>The password reset token is missing.</value>

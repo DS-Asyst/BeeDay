@@ -11,7 +11,7 @@
   <data name="BrandTitle" xml:space="preserve"><value>Brand and display</value></data>
   <data name="BrandDescription" xml:space="preserve"><value>Coiny is our display voice. Use it sparingly for large, expressive brand moments—not for interface controls or long-form reading.</value></data>
   <data name="BrandSample" xml:space="preserve"><value>beeday</value></data>
-  <data name="BrandAccentedSample" xml:space="preserve"><value>Pequenas ações, grandes conquistas.</value></data>
+  <data name="BrandAccentedSample" xml:space="preserve"><value>Small actions, meaningful progress.</value></data>
   <data name="ProductTitle" xml:space="preserve"><value>Product and UI</value></data>
   <data name="ProductDescription" xml:space="preserve"><value>Nunito is the product foundation for navigation, buttons, labels, forms, body copy, captions, and product headings.</value></data>
   <data name="RoleMatrixTitle" xml:space="preserve"><value>Roles, not arbitrary sizes</value></data>

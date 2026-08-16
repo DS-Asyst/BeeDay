@@ -13,6 +13,7 @@ EPIC 25 e testes que protegem o markup correspondente. Última verificação: 20
 | Documento | Conteúdo |
 |---|---|
 | [`01-character-illustration.md`](01-character-illustration.md) | Inventário, personagens confirmados, shape language, composição, acessibilidade e performance |
+| [`02-writing-voice-localization.md`](02-writing-voice-localization.md) | Narrativa, Voice, Tone, Style, glossário e política bilíngue |
 
 ## Limites
 
