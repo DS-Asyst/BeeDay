@@ -133,12 +133,14 @@ DEFER 25.9` para evitar mudança visual e convergência prematura de Forms/Auth.
   em C#/Razor não podem depender de CSS custom properties.
 - Reward/XP usa a família `reward*` descrita acima.
 
-### 2.7 Illustration boundary e Features adiadas
+### 2.7 Illustration boundary
 
 Valores de ilustração podem ter linguagem própria e não precisam virar semantic UI tokens. Na Home,
 `#464AFA`/`#4048F9` pertencem à composição de fechamento com personagens/wave, não ao wordmark nem a
-uma action foundation: `ILLUSTRATION / DEFER 25.13`. O fundo `#D5EEFD` e seus keyframes seguem a
-mesma fronteira. Nenhum redesign da Home foi feito.
+uma action foundation. O fundo `#D5EEFD` e seus keyframes seguem a mesma fronteira. O owner e as
+regras de uso estão no
+[`Character & Illustration System`](../brand/01-character-illustration.md); nenhum valor artístico
+foi promovido a foundation e nenhum redesign da Home foi feito.
 
 ProjectWorkspace mantém seus neutrals locais e é `DEFER 25.12`; somente brancos exatamente
 equivalentes a Surface/Text Inverse foram normalizados. Wallet é `DEFER 25.11` e não sofreu

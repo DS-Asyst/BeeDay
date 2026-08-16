@@ -1486,3 +1486,71 @@ EF Core pending model changes: nenhum
 
 Character/Illustration → 25.13; Writing → 25.14; axe/quality → 25.15; final sweep → 25.16.
 Nenhuma dessas áreas foi antecipada.
+
+## Sprint 25.13 — Character & Illustration System (Results)
+
+**Fonte da verdade:** sete PNGs de `wwwroot/assets`, consumers de Home/header/footer/language
+switcher, responsive da Home, markup de acessibilidade, testes bUnit/E2E e documentação viva.
+Executado sobre o commit da Sprint 25.12 `e9d6f35d8375ca9e9575e2985bdc91762f1be0cd`.
+
+### Inventário e ownership
+
+`docs/brand/` passa a ser o owner vivo do Brand System, separado conceitualmente do UI Design
+System e sem criar nova camada de runtime. O inventário registra caminho, dimensão, formato, peso,
+consumer, loading, responsive, semântica e status dos quatro ativos artísticos, do wordmark e das
+duas bandeiras utilitárias. Os quatro PNGs artísticos somam 4.573.975 bytes e não possuem variantes
+responsivas; a otimização fica registrada como dívida, sem recompressão ou repaint sem validação.
+
+### Personagens e Illustration Shape Language
+
+A abelha foi formalizada como personagem central somente pela evidência atual: único arquivo
+individual nomeado, maior primeiro plano no hero e recorrência no fechamento. Silhueta, volumes,
+expressões observadas, escala, crop e comportamento decorativo foram documentados sem inventar
+nome, gênero, idade, personalidade, lore ou anatomia ausente.
+
+Os mesmos seis coadjuvantes visuais aparecem nas duas composições de grupo. A documentação usa
+descrições observáveis, não nomes oficiais, e marca explicitamente espécie exata, papel, idade e
+proporções fora do grupo como desconhecidos. A shape language formaliza massas arredondadas,
+render 3D estilizado, ausência de outline uniforme, luz/glow suaves, alta legibilidade facial e
+cores artísticas que permanecem `Illustration`, sem promoção automática a tokens de UI.
+
+### Composição, acessibilidade e impacto
+
+Os grupos continuam completos, preservam aspect ratio e não autorizam recortes individuais. Texto
+e controles permanecem fora da arte; breakpoints, empilhamento, ausência de crop e overlap da wave
+foram preservados e documentados. As quatro imagens da Home continuam decorativas com `alt=""` e
+`aria-hidden` próprio ou herdado. A ilustração lazy da seção de passos passou a declarar
+`decoding="async"`, alinhada às duas artes posteriores; o hero acima da dobra continua sem lazy.
+
+Nenhum ativo foi gerado, renomeado, recortado ou alterado; nenhuma rota `/brand/characters` ou
+`/brand/illustration`, componente de personagem, mudança de composição, Domain/Application ou
+schema foi criada.
+
+### Validação
+
+```text
+git diff --check
+# aprovado
+
+dotnet format BeeDay.slnx --verify-no-changes
+# aprovado
+
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+# aprovado, 0 avisos, 0 erros
+
+dotnet test BeeDay.slnx --no-build --configuration Release
+# 1.096/1.096 — Domain 93, Application 73, Infrastructure 129, Web 725, E2E 76
+
+BeeDay.Web.Tests — Home focado: 6/6
+BeeDay.E2E.Tests — Home completo: 12/12
+EF Core pending model changes: nenhum
+```
+
+A primeira tentativa de iniciar os dois testes focados em paralelo encontrou apenas contenção de
+escrita no mesmo assembly intermediário (`BeeDay.Domain.dll`). Ambos foram repetidos
+sequencialmente e aprovados; o gate integral acima foi executado depois, sem falhas.
+
+### Itens `DEFER` e confirmação de escopo
+
+Writing/Voice/Tone/Localization → 25.14; axe/quality automation e visual-regression infrastructure
+→ 25.15; documentation/migration sweep final → 25.16. Nenhuma dessas áreas foi antecipada.
