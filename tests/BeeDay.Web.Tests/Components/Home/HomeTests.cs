@@ -42,6 +42,13 @@ public sealed class HomeTests
         Assert.Equal("/assets/home/how-beeday-works-bee.png", howImage.GetAttribute("src"));
         Assert.Equal(string.Empty, howImage.GetAttribute("alt"));
         Assert.Equal("lazy", howImage.GetAttribute("loading"));
+        var brandClosure = cut.Find(".home-brand-closure");
+        var brandClosureImage = brandClosure.QuerySelector("img");
+        Assert.NotNull(brandClosureImage);
+        Assert.Equal("/assets/home/home-team-fall-color.png", brandClosureImage.GetAttribute("src"));
+        Assert.Equal(string.Empty, brandClosureImage.GetAttribute("alt"));
+        Assert.Equal("lazy", brandClosureImage.GetAttribute("loading"));
+        Assert.Contains("home-brand-closure", cut.Find(".home-page").LastElementChild!.ClassList);
         Assert.Empty(cut.FindAll(".home-hero .beeday-brand"));
         Assert.Empty(cut.FindAll(".home-hero__symbol"));
         Assert.Empty(cut.FindAll(".home-preview, .home-values, .home-growth, .home-cta"));
