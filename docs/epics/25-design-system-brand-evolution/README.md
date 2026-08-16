@@ -899,3 +899,83 @@ WCAG/visual regression/axe → 25.15; remoção de tokens/assets/aliases legados
 typography, spacing, radius, borders estruturais, shadows/depth, motion, z-index, breakpoints,
 responsive architecture, component API redesign, Writing System e qualquer rota `/brand/color`
 não foram antecipados. A Sprint para aqui; 25.4 não foi iniciada.
+
+## Sprint 25.4 — Typography System & Public Typography Guidelines (Results)
+
+**Fonte da verdade:** inventário direto de `App.razor`, 54 arquivos CSS de produção,
+`typography.css`, `typography-policy.css`, `BeeDayBrand`, Home/Footer, resources, testes Web/E2E e
+documentação oficial do Google Fonts para Coiny. Executado em 2026-08-16 sobre o commit da Sprint
+25.3 `b1a35b4665db1110c34545427b85e3ae56f595df`.
+
+### Baseline e classificação
+
+O baseline pré-alteração continha 400 declarations de `font-family`, `font-size`, `font-weight`,
+`line-height`, `letter-spacing` e `text-transform` em 54 arquivos CSS, mais 31 `font` shorthands.
+Os sete papéis compostos existentes já tinham consumers reais e foram `PRESERVE`; duplicações
+locais em Cards, Wallet, Home, ProjectWorkspace e Dashboard foram `DEFER` para as Sprints de
+convergência correspondentes. Nenhuma migração massiva foi feita.
+
+### Decisão Coiny
+
+Coiny foi `FORMALIZE` como Brand/Display oficial após os gates objetivos passarem:
+
+- Google Fonts registra categoria Display, peso 400, licença SIL OFL 1.1 e subsets latin/latin-ext;
+- a licença permite uso/embedding e nenhum binário foi adicionado ao repositório;
+- a entrega reutiliza o mesmo Google Fonts já usado por Nunito, com `font-display: swap`;
+- o subset latino WOFF2 observado em Chrome tinha 15.576 bytes;
+- Chromium confirmou carregamento, glyphs acentuados pt-BR/en-US, fallback declarado, ausência de
+  clipping, wrapping mobile, legibilidade nas escalas aprovadas e ausência de overflow.
+
+Coiny ficou restrita a `--beeday-font-display`, `--beeday-type-brand-display`, `BeeDayBrand` e
+composições com opt-in `.brand-display`. Nunito continua sendo a única família Product/UI.
+
+### Papéis e página pública
+
+Além dos sete contratos legados preservados, foram formalizados Brand Display, Hero, Page Title,
+Section Title, Card Title, Caption e Eyebrow com aliases quando a expressão existente já era a
+mesma. A nova `/brand/typography` é pública, anônima, responsiva, localizada para `en-US`/`pt-BR`,
+usa `PublicLayout`, demonstra Coiny/Nunito ao vivo e documenta papéis, casing, uso correto e mau
+uso sem expor detalhes internos desnecessários.
+
+`Typography`/`Tipografia` aponta para a rota no Footer institucional e na coluna About/Sobre nós
+da Home. A estrutura e a responsividade existentes foram preservadas.
+
+### Impacto e compatibilidade
+
+Impacto restrito à camada Web/presentation: fontes/tokens CSS, `BeeDayBrand`, nova página e
+resources, Footer/Home, testes e documentação. Domain, Application, Infrastructure, persistência,
+rotas existentes, parâmetros públicos de componentes e tokens compostos legados não mudaram.
+Nenhuma página `/brand/color`, `/brand/characters` ou `/brand/writing` foi criada.
+
+### Testes focados executados durante a implementação
+
+```text
+BeeDay.Web.Tests — TypographyGuidelines/AppFooter/Home/VisualFoundation: 21/21
+BeeDay.E2E.Tests — BrandTypographyTests, 390 px e 1.280 px: 3/3
+```
+
+### Validação final
+
+```text
+git diff --check
+# aprovado
+
+dotnet format BeeDay.slnx --verify-no-changes
+# aprovado
+
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+# aprovado — 0 avisos, 0 erros
+
+dotnet test BeeDay.slnx --configuration Release --no-build
+# 1.070/1.070: Domain 93, Application 73, Infrastructure 129, Web 707, E2E 68
+```
+
+Não houve falha ou retry de teste. Os 68 E2E incluem os 65 cenários anteriores e 3 novos cenários
+de tipografia pública em Chromium.
+
+### Itens `DEFER` e confirmação de escopo
+
+Shape/spacing/borders/depth → 25.5; motion → 25.6; breakpoints → 25.7; component APIs → 25.8;
+Auth/Identity → 25.9; feedback/accessibility transversal → 25.10/25.15; Wallet → 25.11;
+Daily/ProjectWorkspace → 25.12; Characters → 25.13; Writing → 25.14; sweep amplo → 25.16.
+Nenhuma dessas Sprints foi antecipada.

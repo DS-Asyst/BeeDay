@@ -77,7 +77,7 @@ public sealed class VisualFoundationTests
     }
 
     [Fact]
-    public void NunitoIsTheOnlyProductFontAndJerseyArtifactsAreRemoved()
+    public void NunitoOwnsProductTypographyAndCoinyOwnsBrandDisplay()
     {
         var typography = ReadWebFile("wwwroot", "css", "typography.css");
         var app = ReadWebFile("Components", "App.razor");
@@ -91,7 +91,9 @@ public sealed class VisualFoundationTests
             .Select(File.ReadAllText);
 
         Assert.Contains("--beeday-font-family: var(--beeday-font-body);", typography, StringComparison.Ordinal);
-        Assert.Contains("family=Nunito:wght@400;500;600;700;800;900", app, StringComparison.Ordinal);
+        Assert.Contains("--beeday-font-display: \"Coiny\", \"Nunito\", \"Segoe UI\", sans-serif;", typography, StringComparison.Ordinal);
+        Assert.Contains("--beeday-type-brand-display:", typography, StringComparison.Ordinal);
+        Assert.Contains("family=Coiny&family=Nunito:wght@400;500;600;700;800;900", app, StringComparison.Ordinal);
         Assert.DoesNotContain("Jersey", app, StringComparison.OrdinalIgnoreCase);
         Assert.All(sourceFiles, content =>
         {

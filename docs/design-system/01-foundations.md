@@ -190,44 +190,83 @@ Attributes, focus inverse e aliases legados foram classificados como `RESERVED`,
 
 ## 3. Tipografia
 
-`typography.css` define os tokens; `typography-policy.css` (132 linhas) é o único arquivo do
-repositório inteiro que documenta, por comentário e por seletor, **quando** cada fonte deve ser
-usada — funciona como uma política de tipografia executável, não apenas uma referência de tokens.
+`typography.css` define famílias, escala e papéis semânticos; `typography-policy.css` documenta por
+comentário e seletor **quando** cada família deve ser usada. Os dois arquivos formam a política de
+tipografia executável, não apenas uma referência de tokens.
 
 | Papel | Fonte | Uso documentado em `typography-policy.css` |
 |---|---|---|
-| `--beeday-font-body` (= `--beeday-font-family`) | `"Nunito", "Segoe UI", sans-serif` | Toda a UI: corpo, títulos, marca, navegação, botões, dialogs, cards e métricas |
+| Product/UI: `--beeday-font-body` (= `--beeday-font-family`) | `"Nunito", "Segoe UI", sans-serif` | Corpo, navegação, botões, labels, forms, captions, conteúdo longo, títulos de produto, dialogs, cards e métricas |
+| Brand/Display: `--beeday-font-display` | `"Coiny", "Nunito", "Segoe UI", sans-serif` | Momentos grandes e expressivos de marca, `BeeDayBrand` e exemplos públicos explicitamente classificados como Brand/Display |
+
+**Decisão Brand/Display (Sprint 25.4, EPIC 25):** Coiny foi qualificada e promovida para
+Brand/Display. O catálogo oficial do Google Fonts registra categoria `DISPLAY`, peso 400, licença
+SIL Open Font License 1.1 e subsets `latin`/`latin-ext`. A licença permite uso e embedding; o
+repositório continua sem redistribuir binários da fonte porque reutiliza a entrega Google Fonts já
+adotada para Nunito. Em resposta Chrome auditada em 2026-08-16, o CSS usa `font-display: swap` e o
+subset latino WOFF2 tinha 15.576 bytes. Testes Chromium verificam carregamento real, acentos pt-BR,
+métricas sem clipping, wrapping e ausência de overflow em 390 px e 1.280 px. Fontes primárias:
+[`METADATA.pb`](https://github.com/google/fonts/blob/main/ofl/coiny/METADATA.pb) e
+[`OFL.txt`](https://github.com/google/fonts/blob/main/ofl/coiny/OFL.txt).
+
+Coiny não é fonte de produto. Navegação, botões, labels, formulários, captions, conteúdo longo e
+títulos de produto continuam em Nunito. A ordem de fallback de Brand/Display é Coiny → Nunito →
+Segoe UI → sans-serif, preservando legibilidade durante carregamento ou indisponibilidade remota.
 
 **Consolidação canônica (Sprints 21.4/21.9, EPIC 21):** Jersey 25 foi retirada integralmente da UI
-e do carregamento de fontes. Títulos usam Nunito 700/800 e botões Nunito 700; o antigo
-`--beeday-font-ui` foi removido. `BeeDayBrand` não compõe mais a marca com uma fonte de produto:
-encapsula a wordmark oficial, cuja tipografia própria está desenhada no PNG. Brand typography e
-product typography são responsabilidades distintas.
+e do carregamento de fontes. Títulos de produto usam Nunito 700/800 e botões Nunito 700; o antigo
+`--beeday-font-ui` foi removido. Brand typography e Product/UI typography são responsabilidades
+distintas.
 
 **Histórico (Sprint 20.6, EPIC 20):** `--beeday-font-body` evoluiu de Inter para Nunito —
-troca de valor imediata e project-wide (toda a UI regular do produto já renderiza Nunito), extraída
-diretamente da página-modelo (fonte dominante de toda a referência) e aplicada de uma vez porque é
-uma substituição puramente tipográfica, sem contrato de layout/comportamento em risco. `Google
-Fonts` em `App.razor` foi atualizado (`family=Nunito:wght@400;600;700;800;900`). `--beeday-font-ui`
-(Jersey 25) **não foi migrada** — permanece a identidade exclusiva do chrome pixel-console/retro-game
-(`BeeDayButton`, reforçado com `!important` em `typography-policy.css`; `BeeDayBrand`; títulos de
-página/card; `pixel-ui.css`), uma responsabilidade de marca real e formalmente documentada
-anteriormente a esta Sprint, não apenas compatibilidade visual histórica.
+troca de valor imediata e project-wide: toda a UI regular do produto renderiza Nunito. O
+carregamento em `App.razor` inclui os pesos 400/500/600/700/800/900 usados pelo produto.
 
 Escala de tamanho (8 degraus, `xs` .75rem → `3xl` 2.2rem, mais o degrau fluido
 `--beeday-font-size-hero: clamp(2.75rem, 7vw, 5.5rem)` acrescentado na Sprint 20.6/EPIC 20 para
 headlines de hero/marketing em escala full-bleed — usado por `Home.razor.css`), peso (6: regular 400
-→ black 900 — `extrabold` e `bold` compartilham o mesmo valor 700, não há um peso 800 real;
+→ black 900, incluindo bold 700 e extrabold 800;
 `--beeday-font-weight-black: 900` acrescentado na Sprint 20.6/EPIC 20 para o peso de display da
 headline/eyebrow do hero, igualando o peso 900 consistentemente usado pela página-modelo), altura de
-linha (3: tight 1.2, normal 1.5, relaxed 1.65), `letter-spacing-label` (.04em) e 7 tokens compostos
-`--beeday-type-*` (`display`, `title`, `subtitle`, `label`, `body`, `small`, `button`) que combinam
-peso/tamanho/altura de linha/família num único valor `font` shorthand.
+linha (3: tight 1.2, normal 1.5, relaxed 1.65) e `letter-spacing-label` (.04em). Os sete tokens
+compostos existentes (`display`, `title`, `subtitle`, `label`, `body`, `small`, `button`) foram
+preservados para backward compatibility. A Sprint 25.4 formalizou os papéis reais `brand-display`,
+`hero`, `page-title`, `section-title`, `card-title`, `eyebrow` e `caption`; aliases apontam para o
+papel legado equivalente quando a semântica e a expressão são iguais.
 
-`typography-policy.css` reforça a política com `!important` em dois pontos deliberados: a família
-de `.beeday-button` (linha 19) e seu `font-weight` (linha 52) — comentário no próprio arquivo
-explica que isso existe para que nenhuma variante/modificador/classe legada consiga renderizar o
-botão em negrito por acidente.
+O inventário pré-alteração da Sprint 25.4 contou **400 declarations** das seis propriedades
+auditadas em 54 arquivos CSS: `font-family` 52, `font-size` 139, `font-weight` 95, `line-height` 74,
+`letter-spacing` 27 e `text-transform` 13; 122 pares propriedade/valor distintos. Havia ainda 31
+declarações `font` shorthand, das quais 28 consumiam papéis semânticos e 3 eram `inherit`. Os
+maiores clusters locais pertenciam a `cards.css` (85), `wallet.css` (32), Home (28),
+ProjectWorkspace (22) e DashboardColumn (21). Eles foram preservados porque as convergências de
+componentes/Wallet/Daily/Project pertencem às Sprints 25.8/25.11/25.12; esta Sprint não usou
+redução bruta de declarations como métrica de sucesso.
+
+### Matriz de uso e responsividade
+
+- **Brand Display:** Coiny 400, somente para marca/display grande; nunca para controles ou texto
+  longo. O nome de marca visível permanece `beeday`, lowercase e `#5247F9`.
+- **Hero e Display de produto:** Nunito 800/900 em escalas fluidas quando a composição exige forte
+  hierarquia; o `display` legado continua sendo um papel de produto.
+- **Page/Section/Card Title e Subtitle:** Nunito 700/800, escolhidos pela função do heading e não
+  por um tamanho específico de página.
+- **Body:** Nunito 400, line-height normal/relaxed conforme extensão do conteúdo.
+- **Label/Button:** Nunito 700; casing e tracking são decisões do componente, não da família.
+- **Caption/Small/Eyebrow:** Nunito 500/700; eyebrow pode usar tracking e uppercase para contexto,
+  mas nunca transforma o nome `beeday`.
+
+Tamanhos de display usam `clamp()` e devem poder quebrar naturalmente; containers precisam de
+`min-width: 0`/`overflow-wrap` quando necessário. Em zoom, mobile ou fallback, preservar leitura,
+hierarquia e ausência de clipping tem prioridade sobre manter uma headline em uma linha.
+
+A responsabilidade pública desta política vive em `/brand/typography`: página anônima, localizada
+em `en-US`/`pt-BR`, composta pelo `PublicLayout`, com exemplos tipográficos vivos e orientação de
+uso/mau uso. Ela é Brand Guidelines pública, separada dos catálogos técnicos `/design-system/*`.
+
+`typography-policy.css` mantém Nunito nos controles e aplica Coiny apenas a `.beeday-brand` e ao
+opt-in `.brand-display`. CSS isolado do `BeeDayBrand` repete a decisão para vencer por especificidade
+sem `!important`.
 
 ## 4. Espaçamento
 

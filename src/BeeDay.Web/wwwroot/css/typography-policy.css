@@ -1,5 +1,5 @@
-/* Epic 21 typography policy: Nunito is the single product family. Hierarchy is expressed through
-   the shared weight, size, line-height and tracking tokens in typography.css. */
+/* Nunito is the single Product/UI family. Coiny is the qualified Brand/Display family and is only
+   applied by an explicit semantic role; hierarchy within product UI remains Nunito-based. */
 html,
 body,
 button,
@@ -31,6 +31,12 @@ body {
 .beeday-button {
     font-family: var(--beeday-font-body);
     font-weight: var(--beeday-font-weight-bold);
+}
+
+.beeday-brand,
+.brand-display {
+    font-family: var(--beeday-font-display);
+    font-weight: var(--beeday-font-weight-regular);
 }
 
 .beeday-logo,

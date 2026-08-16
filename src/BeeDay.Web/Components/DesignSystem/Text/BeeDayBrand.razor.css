@@ -5,11 +5,11 @@
     padding: var(--beeday-brand-padding, 0);
     background: var(--beeday-brand-background, transparent);
     border-radius: var(--beeday-brand-radius, 0);
-    font-family: var(--beeday-font-body);
+    font-family: var(--beeday-font-display);
     font-size: var(--beeday-brand-height, 1.75rem);
-    font-weight: var(--beeday-font-weight-black);
-    letter-spacing: -.075em;
-    line-height: .8;
+    font-weight: var(--beeday-font-weight-regular);
+    letter-spacing: -.04em;
+    line-height: 1;
 }
 
 .beeday-brand__bee,
