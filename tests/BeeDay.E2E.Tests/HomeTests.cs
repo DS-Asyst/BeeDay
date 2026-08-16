@@ -47,6 +47,11 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         await Expect(heroImage).ToBeVisibleAsync();
         await Expect(Page.Locator(".home-hero .beeday-brand")).ToHaveCountAsync(0);
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "How BeeDay works", Level = 2 })).ToBeVisibleAsync();
+        var howSection = Page.Locator(".home-how");
+        var howVisual = howSection.Locator(".home-how__visual img");
+        await Expect(howVisual).ToBeVisibleAsync();
+        await Expect(howSection).ToHaveCSSAsync("background-color", "rgb(213, 238, 253)");
+        Assert.Equal(3, await howSection.Locator(".home-steps > li").CountAsync());
         await Expect(Page.GetByRole(AriaRole.Contentinfo)).ToBeVisibleAsync();
         var visualBox = await heroVisual.BoundingBoxAsync();
         var contentBox = await Page.Locator(".home-hero__content").BoundingBoxAsync();
@@ -64,6 +69,9 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         }
         Assert.False(await Page.EvaluateAsync<bool>(
             "() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
+        var howVisualBox = await Page.Locator(".home-how__visual").BoundingBoxAsync();
+        Assert.NotNull(howVisualBox);
+        Assert.True(howVisualBox!.Width >= 280 || width < 390, "The How BeeDay works illustration should remain meaningful on narrow viewports.");
     }
 
     [Fact]
