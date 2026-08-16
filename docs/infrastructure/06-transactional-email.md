@@ -13,8 +13,9 @@ and `git log`/`git show` on the files above. Cross-checked against
 [`docs/deployment/02-runtime-configuration.md`](../deployment/02-runtime-configuration.md)
 (already current as of Sprint 18.4).
 
-**Last verified:** 2026-08-16 (Epic 26, Sprint 26.3 — the secrets/configuration contract for
-`ResendOptions:ApiKey`/`FromAddress` is now formally documented in
+**Last verified:** 2026-08-16 (Epic 26, Sprint 26.4 — §10 added: the centralized, fail-closed HMG
+recipient guard, `HmgRecipientGuardedEmailSender`. Sprint 26.3 formally documented the
+secrets/configuration contract for `ResendOptions:ApiKey`/`FromAddress` in
 [`docs/deployment/02-runtime-configuration.md`](../deployment/02-runtime-configuration.md) §6;
 Sprint 26.2 implemented §4.1/§8's provider-selection recommendation via `EmailProviderSelector`.
 Originally written in Sprint 26.1, audit-only, no behavior changed by that sprint).
@@ -273,11 +274,12 @@ content-root guard against this one configured value.
   directly.
 - **Confirmed test-coverage gap:** zero automated coverage of `DevelopmentEmailSender`, including
   its content-root guard — the exact condition that (per §6) explains the reported HMG symptom.
-- **Confirmed security-relevant gap (real, but low severity given current state):** HMG has no
-  centralized recipient safety guard today — `Resend:Enabled=false` on HMG happens to make this
-  moot right now, but nothing in the architecture would stop a future `Resend:Enabled=true` on HMG
-  from delivering to arbitrary real recipient addresses. This is exactly the boundary Sprint 26.4
-  must add.
+- **Resolved in Sprint 26.4:** HMG previously had no centralized recipient safety guard —
+  `Resend:Enabled=false` on HMG made this moot in practice, but nothing in the architecture stopped
+  a future `Resend:Enabled=true` on HMG from delivering to arbitrary real recipient addresses.
+  `HmgRecipientGuardedEmailSender` now wraps `ResendEmailSender` unconditionally whenever Resend is
+  selected as the provider, fails closed by default (see §10), and requires Production to opt out
+  explicitly rather than by omission.
 - **Not a gap, confirmed correct:** `ResendEmailSender` already fails closed on non-2xx responses
   (throws `HttpRequestException`, never swallows) and never logs the API key
   (`ResendSender_WhenApiRejectsRequest_ThrowsWithoutExposingApiKey`,
@@ -289,8 +291,8 @@ content-root guard against this one configured value.
 
 ## 8. Recommended target architecture for Sprint 26.2+
 
-**This section was written in Sprint 26.1 as a recommendation for future sprints. Sprint 26.2 below
-is now implemented (see §4.1); §26.3 onward remain forward-looking recommendations, not yet
+**This section was written in Sprint 26.1 as a recommendation for future sprints. Sprints 26.2 and
+26.4 below are now implemented; the rest remain forward-looking recommendations, not yet
 implemented.**
 
 - ~~Sprint 26.2: replace the two independent booleans with a single explicit provider-selection
@@ -304,10 +306,8 @@ implemented.**
 - Sprint 26.3: make `DevelopmentEmailSender`'s directory guard aware of an explicitly-configured
   external absolute path (distinct from an accidental relative-path traversal escape), without
   weakening the traversal protection for the relative-path case it was originally built for.
-- Sprint 26.4: add the centralized, fail-closed HMG recipient guard at the final external-delivery
-  boundary (naturally placed beside/inside `ResendEmailSender`, or immediately in front of it in
-  Infrastructure — not scattered into the Identity handlers in Application, which must stay
-  environment-agnostic per Application's architectural invariant).
+- ~~Sprint 26.4: add the centralized, fail-closed HMG recipient guard at the final
+  external-delivery boundary~~ — **done.** See §10.
 - Do not introduce a queue/Outbox/durable retry for email sends merely to fix §3.1 — the existing
   `BackgroundTaskQueue` is a fire-and-forget mechanism with no retry/durability semantics of its own
   (§2), so using it here would trade a visible failure for a silent one. Sprint 26.5 should evaluate
@@ -331,7 +331,82 @@ implemented.**
   dependency) without requiring every environment's `appsettings.json` to be rewritten just to keep
   current behavior.
 
-## 10. Evidence inspected this sprint
+## 10. HMG recipient safety guard (Epic 26, Sprint 26.4)
+
+**Source of truth for this section:** `src/BeeDay.Infrastructure/Identity/HmgRecipientGuardedEmailSender.cs`,
+`Configuration/HmgRecipientGuardOptions.cs`, `DependencyInjection/InfrastructureServiceCollectionExtensions.cs`,
+`src/BeeDay.Web/appsettings.Production.json`,
+`tests/BeeDay.Infrastructure.Tests/HmgRecipientGuardedEmailSenderTests.cs`,
+`HmgRecipientGuardDependencyInjectionTests.cs`.
+
+### 10.1 Placement
+
+`HmgRecipientGuardedEmailSender` sits at the single external-delivery boundary, wrapping whichever
+concrete sender is resolved as `ResendEmailSender` — it is registered as `IEmailSender` **only**
+when `EmailProviderSelector.Resolve(...)` returns `EmailProvider.Resend`
+(`InfrastructureServiceCollectionExtensions.cs`). Every current and future caller of `IEmailSender`
+(all 4 sending flows in §3) is protected automatically; no Identity handler, no Application code, and
+no environment-name check were added anywhere outside Infrastructure's own DI composition. The
+`Development` branch of the same `if`/`else` is completely untouched — `DevelopmentEmailSender` is
+registered directly, never wrapped, and `HmgRecipientGuardOptions` is not even bound in that branch.
+
+### 10.2 Fail-closed contract
+
+`HmgRecipientGuardOptions.Enabled` defaults to `true`. Its `.ValidateOnStart()` (registered only
+inside the `EmailProvider.Resend` branch, so it is never evaluated for the `Development` provider)
+requires `AllowedRecipients` to be non-empty whenever `Enabled` is `true`. The practical consequence:
+
+```text
+Resend selected + HmgRecipientGuard section absent or its AllowedRecipients empty
+→ the process refuses to start (OptionsValidationException)
+```
+
+There is no code path where Resend is selected and the guard is silently inert by omission — an
+environment must **explicitly** set `Enabled: false` to send unprotected (Production's own choice,
+§10.4), or explicitly provide `AllowedRecipients` to send protected. Proven end to end (not just
+read from the `.Validate()` predicate) by
+`HmgRecipientGuardDependencyInjectionTests.Host_WhenResendSelectedAndGuardLeftAtDefault_FailsToStartPredictably`.
+
+### 10.3 Guard behavior
+
+| Recipient state | `Enabled` | Result |
+|---|---|---|
+| In `AllowedRecipients` (case-insensitive, trimmed) | `true` | Delegates to `ResendEmailSender`, with `SubjectPrefix` (default `"[HMG] "`) prepended once (never doubled if already present) |
+| Not in `AllowedRecipients` | `true` | Silently suppressed — `ResendEmailSender` is never called. Matches the existing "disabled = silent no-op" idiom already used by `DevelopmentEmailSender`/`ResendEmailSender` themselves, rather than throwing and breaking the calling flow (§3.1's existing send-failure propagation problem is not made worse by this guard) |
+| Any | `false` | Delegates to `ResendEmailSender` unmodified — no allowlist check, no subject prefix. This is the explicit Production opt-out, not a default |
+
+Logging never interpolates the raw recipient address in either the allowed or blocked branch
+(`HmgRecipientGuardedEmailSender.cs`) — proven by
+`HmgRecipientGuardedEmailSenderTests.SendAsync_NeverLogsTheRawRecipientAddress_ForAllowedOrBlockedRecipients`,
+which asserts the test's own recipient strings never appear in any captured log message.
+
+### 10.4 Production does not inherit HMG blocking
+
+`appsettings.Production.json` now explicitly sets `BeeDay:Email:HmgRecipientGuard:Enabled: false` —
+a deliberate, auditable line in source control, not an inferred default (Production's `Resend`
+section was already `Enabled: true` before this sprint; this is the one new key). Guarded by
+`HmgRecipientGuardDependencyInjectionTests.CommittedProductionAppsettings_ExplicitlyDisablesHmgRecipientGuard`,
+which reads the real committed file. `appsettings.Homologation.json` is untouched by this sprint —
+it still resolves to the `Development` provider (§5.1), so the guard's default (`Enabled: true`,
+fail-closed) is not yet exercised there; it only becomes relevant the moment a future sprint flips
+Homologation's `Resend:Enabled` to `true`, at which point the guard's own default protects it
+automatically.
+
+### 10.5 Allowlist storage — not committed to source control
+
+`AllowedRecipients` is real-world PII (personal email addresses) and must never be hardcoded in
+`appsettings*.json` or anywhere else in the repository — no value was added anywhere by this sprint.
+The approved channel is the same one already proven for the Resend API key itself
+(`docs/deployment/02-runtime-configuration.md` §6.2): a GitHub Environment secret →
+`Deploy-BeeDay.ps1` → the privileged IIS CONFIGURE operation → an App Pool environment variable
+(`BeeDay__Email__HmgRecipientGuard__AllowedRecipients__0`, `__1`, ... — the standard
+`Microsoft.Extensions.Configuration` array-binding convention for that key). Wiring a new
+`-HmgAllowedRecipients` parameter through `deploy-hmg.yml`/`Deploy-BeeDay.ps1` (mirroring
+`-ResendApiKey`) is deployment-automation work, not addressed by this sprint's own scope
+(configuration/policy code) — tracked as a prerequisite for actually enabling Resend on HMG in a
+later sprint, alongside the Sprint 26.1 §6 directory-guard fix.
+
+## 11. Evidence inspected this sprint
 
 **Source files read in full:** `Common/Identity/IEmailSender.cs`, `IIdentityEmailComposer.cs`,
 `IEmailConfirmationIssuer.cs`, `IIdentityRequestThrottle.cs`, `Features/Users/Handlers/UserHandlers.cs`,
@@ -356,13 +431,14 @@ implemented.**
 reading HMG's live stdout log; reproducing a registration attempt against HMG or an equivalent local
 configuration; any change to code, configuration, or tests.
 
-## 11. Related documentation
+## 12. Related documentation
 
 - [`04-services.md`](04-services.md) — existing Infrastructure services inventory, including the
   `ResendEmailSender`/`DevelopmentEmailSender` summary this document expands on with the HMG root
   cause.
 - [`docs/deployment/02-runtime-configuration.md`](../deployment/02-runtime-configuration.md) —
   existing per-environment configuration reference; §5.2 of that document is the source for HMG's
-  confirmed Runtime State used in §6 above.
+  confirmed Runtime State used in §6 above, and §6 there covers the Resend secret contract the
+  guard's own allowlist channel (§10.5) extends.
 - [`docs/architecture/07-security-architecture.md`](../architecture/07-security-architecture.md) —
-  broader security-boundary context for where a future HMG recipient guard (§8) fits.
+  broader security-boundary context for the HMG recipient guard (§10).
