@@ -12,8 +12,12 @@
 
 O shell autenticado possui somente duas regiões permanentes no desktop: Navigation e Workspace.
 `RightRail`, `ProfileSidePanel` e `AccountSidePanel` foram aposentados e removidos. O footer
-institucional continua legítimo no `PublicLayout`, aparecendo em Home e `/brand/typography`, mas não
-nas rotas autenticadas Daily, Wallet ou Account.
+institucional continua legítimo no `PublicLayout`, aparecendo em Home, `/brand/typography` e, desde
+a Sprint 25.17, em toda rota `/experience-system/*` (`beeday Experience System`, ver
+[`docs/web/02-routing-and-pages.md`](02-routing-and-pages.md) §9), mas não nas rotas autenticadas
+Daily, Wallet ou Account. O link do footer para Typography foi substituído por um link para
+`/experience-system` nesta Sprint — `/brand/typography` continua acessível diretamente e a partir da
+navegação interna do Experience System, apenas deixou de ter um link próprio no footer.
 
 ## Navegação autenticada
 

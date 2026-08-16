@@ -1,0 +1,30 @@
+@page "/experience-system/ui/product-patterns"
+@attribute [AllowAnonymous]
+@layout BeeDay.Web.Components.Layout.PublicLayout
+@inject IStringLocalizer<ExperienceSystemResources> Localizer
+
+<PageTitle>@Localizer["UiProductPatternsPageTitle"]</PageTitle>
+
+<ExperienceSystemPage Eyebrow="@Localizer["PillarNavUi"]" Title="@Localizer["UiProductPatternsTitle"]" Description="@Localizer["UiProductPatternsIntro"]" Pillar="ExperienceSystemPillar.Ui" CurrentHref="/experience-system/ui/product-patterns">
+    <section class="experience-system-section" aria-labelledby="patterns-wallet-heading">
+        <h2 id="patterns-wallet-heading">@Localizer["UiProductPatternsWalletTitle"]</h2>
+        <p>@Localizer["UiProductPatternsWalletText"]</p>
+    </section>
+
+    <section class="experience-system-section" aria-labelledby="patterns-daily-heading">
+        <h2 id="patterns-daily-heading">@Localizer["UiProductPatternsDailyTitle"]</h2>
+        <p>@Localizer["UiProductPatternsDailyText"]</p>
+    </section>
+
+    <section class="experience-system-section" aria-labelledby="patterns-empty-heading">
+        <h2 id="patterns-empty-heading">@Localizer["UiProductPatternsEmptyTitle"]</h2>
+        <p>@Localizer["UiProductPatternsEmptyText"]</p>
+    </section>
+
+    <section class="experience-system-callouts" aria-label="@Localizer["UiProductPatternsCalloutTitle"]">
+        <div class="experience-system-callout experience-system-callout--info">
+            <h3>@Localizer["UiProductPatternsCalloutTitle"]</h3>
+            <p>@Localizer["UiProductPatternsCalloutText"]</p>
+        </div>
+    </section>
+</ExperienceSystemPage>

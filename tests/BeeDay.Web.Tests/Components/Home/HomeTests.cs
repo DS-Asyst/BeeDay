@@ -63,12 +63,12 @@ public sealed class HomeTests
         Assert.NotNull(brandClosure.QuerySelector(".home-brand-closure__base"));
         var topicGroups = brandClosure.QuerySelectorAll(".home-brand-topics > section");
         Assert.Equal(5, topicGroups.Length);
-        Assert.Equal([3, 2, 2, 2, 2], topicGroups.Select(group => group.QuerySelectorAll("li").Length));
+        Assert.Equal([2, 2, 2, 2, 2], topicGroups.Select(group => group.QuerySelectorAll("li").Length));
         Assert.Equal(
             ["About us", "Social", "Apps", "Help and support", "Privacy and terms"],
             topicGroups.Select(group => group.QuerySelector("h2")!.TextContent.Trim()));
-        Assert.Equal(3, brandClosure.QuerySelectorAll(".home-brand-topics a").Length);
-        Assert.Equal("Typography", brandClosure.QuerySelector("a[href='/brand/typography']")!.TextContent.Trim());
+        Assert.Equal(2, brandClosure.QuerySelectorAll(".home-brand-topics a").Length);
+        Assert.Empty(brandClosure.QuerySelectorAll("a[href='/brand/typography']"));
         Assert.NotNull(brandClosure.QuerySelector("a[href='https://github.com/tiagoarrigoni/BeeDay']"));
         Assert.NotNull(brandClosure.QuerySelector("a[href='https://www.linkedin.com/in/tiago-a-arrigoni-335b9413b/']"));
         Assert.Contains("home-brand-closure", cut.Find(".home-page").LastElementChild!.ClassList);
@@ -109,7 +109,7 @@ public sealed class HomeTests
             ["Sobre nós", "Social", "Apps", "Ajuda e suporte", "Privacidade e termos"],
             cut.FindAll(".home-brand-topics h2").Select(element => element.TextContent.Trim()));
         Assert.Contains("Nossa missão", cut.Markup, StringComparison.Ordinal);
-        Assert.Equal("Tipografia", cut.Find(".home-brand-topics a[href='/brand/typography']").TextContent.Trim());
+        Assert.Empty(cut.FindAll(".home-brand-topics a[href='/brand/typography']"));
         Assert.Contains("Política de privacidade", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Comece agora", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Já tenho uma conta", cut.Markup, StringComparison.Ordinal);
