@@ -3,10 +3,10 @@
 **Fonte da verdade:** verificado por busca direta de atributos ARIA (`aria-live`, `aria-expanded`,
 `aria-pressed`, `role="alert"`, `role="status"`, `aria-modal`, etc.) em
 `src/BeeDay.Web/Components/**/*.razor`, leitura de `polish.css`, do behavior
-`beeday-dialog-focus.js` e cálculo manual de contraste (fórmula WCAG 2.x de luminância relativa)
-sobre os valores hexadecimais de `variables.css`.
+`beeday-dialog-focus.js`, cálculo automatizado de contraste sobre `variables.css` e varreduras axe
+em Chromium sobre páginas públicas/autenticadas representativas.
 
-**Última verificação:** 2026-08-16 (Sprint 25.10 — Feedback, Dialogs & Accessibility Lifecycle).
+**Última verificação:** 2026-08-16 (Sprint 25.15 — Design System Quality Engineering).
 
 ## 1. Objetivo
 
@@ -122,24 +122,21 @@ aplica mais. A semântica de `grab`/`grabbing` para itens arrastáveis (`.beeday
 `.habit-card__body--openable`) foi preservada como declarações CSS nativas (sem imagem), movidas
 para `dragdrop.css`/`cards.css`, os stylesheets que já possuem esses seletores.
 
-## 9. Contraste de cor — cálculo manual (fórmula WCAG 2.x)
+## 9. Contraste de cor — contrato automatizado
 
-Verificado a partir dos valores hexadecimais de `variables.css`, aplicando a fórmula oficial de
-luminância relativa e razão de contraste do WCAG 2.x. Cálculo manual, não validado por ferramenta
-automatizada — tratar como indicativo, sujeito a nova verificação com um contrast checker real
-antes de qualquer decisão de correção.
+`DesignSystemContrastTests` resolve tokens e aliases de `variables.css` e aplica a fórmula WCAG 2.x
+de luminância relativa/razão. O gate cobre brand primary, texto primary/secondary, botões primary,
+success, warning e danger, info sobre info-soft e foco inverso sobre brand.
 
 | Par | Uso | Contraste calculado | Limiar WCAG AA |
 |---|---|---|---|
 | `--beeday-color-text-secondary` (#514858) sobre `--beeday-color-surface` (#fff) | Descrições, corpo de texto secundário | **≈8.69:1** | Passa AA (4.5:1) e AAA (7:1) para texto normal |
 | `--beeday-color-text-muted` (#817789) sobre `--beeday-color-surface` (#fff) | Texto auxiliar, meta-informação, estado vazio | **≈4.26:1** | **Abaixo de 4.5:1** (texto normal AA) — passa o limiar de 3:1 (texto grande/UI, AA) mas não o de texto normal |
 
-O par `text-muted` sobre branco é usado extensivamente (`BeeDayEmptyState`, meta de card, texto de
-ajuda de formulário) — em qualquer lugar onde esse texto seja renderizado abaixo do tamanho "grande"
-do WCAG (24px regular ou 19px bold), o contraste calculado fica abaixo do limiar AA para texto
-normal. Não foi possível confirmar, sem inspeção visual real da aplicação renderizada, se algum
-desses usos específicos usa um tamanho de fonte grande o suficiente para cair na exceção "texto
-grande" (limiar 3:1) do WCAG.
+O par `text-muted` sobre branco continua abaixo de 4.5:1 e não é promovido artificialmente a contrato
+de texto normal. A varredura axe levou os consumers pequenos realmente renderizados de EmptyState,
+Footer, Login, Wallet e editor modal para `text-secondary`. Outros usos precisam ser avaliados no
+contexto renderizado; o token muted não foi alterado globalmente.
 
 ## 10. Semântica e leitores de tela
 
@@ -154,10 +151,14 @@ grande" (limiar 3:1) do WCAG.
 
 ## 11. Testes automatizados de acessibilidade
 
-Ainda não existe axe-core/Pa11y; essa infraestrutura pertence à Sprint 25.15. A cobertura atual não
-é apenas presença pontual: bUnit valida roles, labels, descriptions, busy e booleanos lowercase;
-E2E Chromium valida initial focus, Tab/Shift+Tab containment, Escape, nested restore, trigger
-removido e scope sem controles. Isso é cobertura contratual dirigida, não uma varredura WCAG.
+`AccessibilityQualityTests` usa axe no Chromium, sem exclusões, em Home, Typography, Login, Daily,
+Wallet e no diálogo de transação. bUnit continua validando roles, labels, descriptions, busy e
+booleanos lowercase; E2E valida também initial focus, Tab/Shift+Tab containment, Escape, nested
+restore, trigger removido e scope sem controles.
+
+Automação detecta somente uma parte dos problemas possíveis. Resultado verde não declara
+conformidade WCAG, certificação legal nem substitui teclado, leitor de tela e revisão humana. O mapa
+de cobertura e limitações vive em [`docs/testing/02-design-system-quality-gates.md`](../testing/02-design-system-quality-gates.md).
 
 ## 12. Fontes consultadas
 
@@ -170,5 +171,5 @@ removido e scope sem controles. Isso é cobertura contratual dirigida, não uma 
 - `src/BeeDay.Web/Components/DesignSystem/Modals/DialogFocusScope.cs` e
   `src/BeeDay.Web/wwwroot/js/beeday-dialog-focus.js`.
 - `src/BeeDay.Web/Components/Routes.razor` (`FocusOnNavigate`).
-- Cálculo próprio de contraste WCAG a partir de `src/BeeDay.Web/wwwroot/css/variables.css`.
+- `DesignSystemContrastTests` e `AccessibilityQualityTests`.
 - [`docs/web/06-testing.md`](../web/06-testing.md) (cobertura de teste, Sprint 16.7, reaproveitado).

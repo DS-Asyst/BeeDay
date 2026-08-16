@@ -354,7 +354,7 @@ public sealed class WalletTagManagerTests : BunitContext
     {
         // The editor modal is owned and rendered by the page (Wallet.razor), not by this
         // list component — nesting it here previously trapped its fixed-position backdrop
-        // inside the page's animated <main>, clipping it to a rectangle instead of the viewport.
+        // inside the page's animated root, clipping it to a rectangle instead of the viewport.
         var tag = CreateTag("Groceries");
         var cut = Render<WalletTagManager>(parameters => parameters
             .Add(component => component.Tags, [tag]));

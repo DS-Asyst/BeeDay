@@ -42,6 +42,7 @@ public sealed class HomeTests
         Assert.Equal(["1", "2", "3", "4", "5"], cut.FindAll(".home-steps > li > span").Select(element => element.TextContent.Trim()));
         var heroImage = cut.Find(".home-hero__visual img.home-hero__image");
         Assert.Equal("/assets/hero/home-team.png", heroImage.GetAttribute("src"));
+        Assert.Equal("high", heroImage.GetAttribute("fetchpriority"));
         var howImage = cut.Find(".home-how__visual img");
         Assert.Equal("/assets/home/how-beeday-works-bee.png", howImage.GetAttribute("src"));
         Assert.Equal(string.Empty, howImage.GetAttribute("alt"));

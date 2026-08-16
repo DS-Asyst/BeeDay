@@ -15,6 +15,7 @@
 else if (State.Data?.Profile.HasProfile == true)
 {
     <section class="dashboard-page beeday-fade-in">
+        <h1 class="beeday-visually-hidden">@Localizer["DailyHeading"]</h1>
         <div class="dashboard-page__content">
             <ActivityFilterBar Value="@State.Search"
                        ValueChanged="@(value => State.Search = value)"

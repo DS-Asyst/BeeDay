@@ -24,7 +24,7 @@
     --beeday-color-border-interactive: var(--beeday-color-brand-primary);
 
     /* Semantic feedback */
-    --beeday-color-success: #2f9e5b;
+    --beeday-color-success: #287d4d;
     --beeday-color-success-soft: #e8f7ee;
     --beeday-color-warning: #d89b22;
     --beeday-color-warning-soft: #fff5dc;
@@ -80,11 +80,11 @@
     --beeday-color-button-secondary-depth: var(--beeday-color-border-strong);
     --beeday-color-button-secondary-shadow: var(--beeday-color-border-strong);
 
-    --beeday-color-button-success-bg: #36a866;
-    --beeday-color-button-success-bg-hover: #46b976;
+    --beeday-color-button-success-bg: var(--beeday-color-success);
+    --beeday-color-button-success-bg-hover: #237a45;
     --beeday-color-button-success-fg: var(--beeday-color-text-inverse);
     --beeday-color-button-success-outline: #1a6139;
-    --beeday-color-button-success-depth: #287d4d;
+    --beeday-color-button-success-depth: #1a6139;
     --beeday-color-button-success-shadow: #174a2d;
 
     --beeday-color-button-warning-bg: #f5b942;

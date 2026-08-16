@@ -1,7 +1,7 @@
 .app-footer { width: 100%; border-top: var(--beeday-border-width-subtle) solid var(--beeday-color-border); background: var(--beeday-color-surface-muted); }
 .app-footer__content { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--beeday-spacing-xl); padding-block: var(--beeday-spacing-xl); }
 .app-footer__identity { display: grid; gap: var(--beeday-spacing-sm); }
-.app-footer__identity p, .app-footer__copyright { margin: 0; color: var(--beeday-color-text-muted); }
+.app-footer__identity p, .app-footer__copyright { margin: 0; color: var(--beeday-color-text-secondary); }
 .app-footer__brand-mark { display: block; height: 2rem; width: auto; filter: grayscale(1); transition: filter var(--beeday-transition-normal); }
 .app-footer__brand-mark:hover { filter: grayscale(0); }
 .app-footer__links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--beeday-spacing-lg); }

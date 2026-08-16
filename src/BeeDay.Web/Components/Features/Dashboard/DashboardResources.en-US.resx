@@ -59,6 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="DailyPageTitle" xml:space="preserve"><value>Daily | beeday</value></data>
+  <data name="DailyHeading" xml:space="preserve"><value>Daily</value></data>
   <data name="ProfilePageTitle" xml:space="preserve"><value>Profile | beeday</value></data>
   <data name="LoadingDashboardAriaLabel" xml:space="preserve"><value>Loading dashboard</value></data>
   <data name="DashboardControlsAriaLabel" xml:space="preserve"><value>Dashboard controls</value></data>

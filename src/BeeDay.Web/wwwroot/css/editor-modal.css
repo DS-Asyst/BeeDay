@@ -162,14 +162,14 @@
 
 .editor-modal__type-summary p {
     margin: .2rem 0 0;
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     font: var(--beeday-type-small);
     line-height: 1.45;
 }
 
 .editor-modal__field small,
 .editor-modal__counter {
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     font: var(--beeday-type-small);
 }
 

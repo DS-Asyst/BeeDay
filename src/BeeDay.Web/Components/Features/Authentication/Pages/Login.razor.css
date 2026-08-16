@@ -34,7 +34,7 @@
 
 .auth-card__header p {
     margin: var(--beeday-spacing-sm) 0 0;
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     line-height: 1.5;
 }
 
@@ -87,7 +87,7 @@
 
 .auth-remember {
     min-height: 2.75rem;
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
 }
 
 @media (max-width: 40rem) {

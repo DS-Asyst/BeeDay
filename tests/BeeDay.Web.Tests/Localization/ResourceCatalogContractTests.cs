@@ -5,6 +5,10 @@ namespace BeeDay.Web.Tests.Localization;
 
 public sealed class ResourceCatalogContractTests
 {
+    private static readonly Regex NonCanonicalBrandCasingPattern = new(
+        @"\b(?:BeeDay|BEEDAY)\b",
+        RegexOptions.CultureInvariant);
+
     private static readonly Regex PlaceholderPattern = new(
         @"\{\d+(?:,[^}:]+)?(?::[^}]+)?\}",
         RegexOptions.CultureInvariant);
@@ -56,6 +60,43 @@ public sealed class ResourceCatalogContractTests
                 Assert.True(
                     englishPlaceholders.SequenceEqual(portuguesePlaceholders, StringComparer.Ordinal),
                     $"{catalog.Name}:{key} has different placeholders in en-US and pt-BR.");
+            }
+        }
+    }
+
+    [Fact]
+    public void Catalogs_HaveNoMissingOrEmptyValues()
+    {
+        foreach (var catalog in FindCatalogs())
+        {
+            foreach (var (culture, path) in catalog.AllPaths())
+            {
+                foreach (var (key, value) in ReadCatalog(path))
+                {
+                    Assert.False(
+                        string.IsNullOrWhiteSpace(value),
+                        $"{catalog.Name}:{key} has an empty value in {culture}.");
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void UserFacingResources_KeepTheVisibleBrandLowercase()
+    {
+        foreach (var catalog in FindCatalogs())
+        {
+            foreach (var (culture, path) in catalog.AllPaths())
+            {
+                foreach (var (key, value) in ReadCatalog(path))
+                {
+                    var isTypographyCounterexample = catalog.Name == "BrandTypographyResources"
+                        && key == "AvoidCasing";
+
+                    Assert.True(
+                        isTypographyCounterexample || !NonCanonicalBrandCasingPattern.IsMatch(value),
+                        $"{catalog.Name}:{key} uses non-canonical visible brand casing in {culture}.");
+                }
             }
         }
     }
@@ -128,5 +169,13 @@ public sealed class ResourceCatalogContractTests
         string Name,
         string NeutralPath,
         string EnglishPath,
-        string PortuguesePath);
+        string PortuguesePath)
+    {
+        public IEnumerable<(string Culture, string Path)> AllPaths()
+        {
+            yield return ("neutral", NeutralPath);
+            yield return ("en-US", EnglishPath);
+            yield return ("pt-BR", PortuguesePath);
+        }
+    }
 }

@@ -22,7 +22,7 @@
 }
 else
 {
-    <main class="wallet-page beeday-fade-in" aria-busy="@_interaction.IsBusy.ToString().ToLowerInvariant()">
+    <div class="wallet-page beeday-fade-in" aria-busy="@_interaction.IsBusy.ToString().ToLowerInvariant()">
         <BeeDayPageHeader Class="wallet-page__header"
                           Eyebrow="@Localizer["PersonalFinanceEyebrow"]"
                           Title="@Localizer["WalletHeading"]"
@@ -73,7 +73,7 @@ else
 
             <WalletTagManager Tags="_tags" IsBusy="_interaction.IsBusy" OnCreate="OpenCreateTag" OnEdit="OpenEditTag" />
         </section>
-    </main>
+    </div>
 }
 
 <TransactionFormModal IsOpen="_isTransactionEditorOpen" IsEditing="@(_editingTransactionId is not null)" IsBusy="_interaction.IsBusy" Model="_transactionForm" Tags="_tags" OnSave="SaveTransactionAsync" OnCancel="CloseTransactionEditor" OnDeleteRequested="RequestDeleteCurrentTransaction" />
