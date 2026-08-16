@@ -9,6 +9,7 @@ public sealed class TransactionFormModalTests : BunitContext
     {
         Services.AddLogging();
         Services.AddLocalization();
+        JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
     [Fact]

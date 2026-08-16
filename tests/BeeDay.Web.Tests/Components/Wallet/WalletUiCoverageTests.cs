@@ -224,7 +224,7 @@ public sealed class TransactionListTests : BunitContext
             .Add(component => component.Transactions, response)
             .Add(component => component.IsRefreshing, true));
 
-        Assert.True(cut.Find(".wallet-transaction-list").HasAttribute("aria-busy"));
+        Assert.Equal("true", cut.Find(".wallet-transaction-list").GetAttribute("aria-busy"));
         Assert.Contains(transaction.Description, cut.Markup, StringComparison.Ordinal);
     }
 

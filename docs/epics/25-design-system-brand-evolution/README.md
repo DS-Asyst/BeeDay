@@ -1301,3 +1301,66 @@ EF Core pending model changes: nenhum
 
 Dialogs/focus lifecycle → 25.10; Wallet → 25.11; Daily/Project → 25.12; Character → 25.13;
 Writing → 25.14; quality → 25.15; final sweep → 25.16. Nenhuma foi antecipada.
+
+## Sprint 25.10 — Feedback, Dialogs & Accessibility Lifecycle (Results)
+
+**Fonte da verdade:** Confirm, Editor, Experience feedback, Toast/Loading/Skeleton/Empty/Progress,
+drawer/menu boundaries, JS interop, ARIA consumers, bUnit/E2E e documentação viva. Executado sobre
+o commit da Sprint 25.9 `1f8db5071edd6975925936676d7fb864a24a9728`.
+
+### Lifecycle compartilhado, componentes distintos
+
+`DialogFocusScope` + `beeday-dialog-focus.js` implementam o menor behavior comum para
+`BeeDayConfirmDialog`, `EditorModalShell` e `BeeDayFeedbackModal`: OPEN → initial focus →
+Tab/Shift+Tab containment → Escape/close → restore. Confirm inicia em Cancel, Editor no primeiro
+field habilitado e feedback no painel semântico. O behavior recalcula controles habilitados,
+suporta dialogs sem focusables, nested dialogs e trigger removido, sem depender de motion.
+
+Confirm continua `alertdialog` destrutivo, Editor continua shell de formulário e Feedback continua
+experiência de level-up; nenhum modal universal ou visual novo foi criado. Busy guards existentes
+continuam bloqueando Confirm/Editor e agora Confirm também expõe `aria-busy`.
+
+### ARIA, live feedback e touch targets
+
+Foram corrigidos os quatro booleanos ainda serializados como `True`/`False`: Activity create menu,
+Project context selection, ProjectWorkspace To-Do toggle e TransactionList busy. Toast mantém
+região polite, severidade `status`/`alert` e dismiss localizado; seu dismiss passou a 44px. Delete
+do Editor deixou o modo compact e também mantém o target canônico. Loading, Skeleton, EmptyState e
+Progress preservaram responsabilidades/semântica já corretas.
+
+### Testes e impacto
+
+bUnit cobre roles, labels/descriptions, busy, callbacks e ARIA lowercase. E2E Chromium cobre foco
+inicial no Editor/Confirm, trap nos dois sentidos, Escape nested, restore para Delete e trigger do
+card, dialog sem controles e trigger removido. Fixtures bUnit dos consumers de Editor foram
+atualizados para a dependência JS; nenhuma regra de domínio/application/persistence mudou.
+
+### Validação
+
+```text
+git diff --check
+# aprovado
+
+dotnet format BeeDay.slnx --verify-no-changes
+# aprovado
+
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+# aprovado, 0 avisos, 0 erros
+
+dotnet test BeeDay.slnx --no-build --configuration Release
+# 1.085/1.085 — Domain 93, Application 73, Infrastructure 129, Web 715, E2E 75
+
+BeeDay.Web.Tests — dialog/ARIA owners: 46/46; Web completo: 715/715
+BeeDay.E2E.Tests — InteractiveComponents lifecycle: 4/4
+EF Core pending model changes: nenhum
+```
+
+O primeiro gate revelou fixtures bUnit sem setup para o novo interop e uma oscilação externa no
+carregamento do Google Fonts; após corrigir os fixtures, Web passou 715/715 e o teste de fonte
+passou 3/3 na repetição. O gate integral final acima foi então reexecutado no estado final.
+
+### Itens `DEFER` e confirmação de escopo
+
+axe/quality automation → 25.15; Wallet → 25.11; Daily/Project → 25.12; Character → 25.13;
+Writing → 25.14; final sweep → 25.16. Drawer/menu mantiveram lifecycle próprio; nenhuma
+convergência visual dessas Features foi antecipada.

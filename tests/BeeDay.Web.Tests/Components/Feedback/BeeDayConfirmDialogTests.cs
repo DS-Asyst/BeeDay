@@ -8,7 +8,7 @@ public sealed class BeeDayConfirmDialogTests
     [Fact]
     public void DoesNotRenderWhenClosed()
     {
-        using var context = new BunitContext().WithLocalization();
+        using var context = CreateContext();
         var cut = context.Render<BeeDayConfirmDialog>(parameters => parameters
             .Add(component => component.Title, "Delete")
             .Add(component => component.Message, "Are you sure?"));
@@ -19,7 +19,7 @@ public sealed class BeeDayConfirmDialogTests
     [Fact]
     public void RendersContentAndOptionalWarningWhenOpen()
     {
-        using var context = new BunitContext().WithLocalization();
+        using var context = CreateContext();
         var cut = context.Render<BeeDayConfirmDialog>(parameters => parameters
             .Add(component => component.IsOpen, true)
             .Add(component => component.Title, "Delete task")
@@ -32,12 +32,17 @@ public sealed class BeeDayConfirmDialogTests
         Assert.Contains("Delete task", dialog.TextContent);
         Assert.Contains("Study bUnit", dialog.TextContent);
         Assert.Contains("This cannot be undone", dialog.TextContent);
+        Assert.Equal("true", dialog.GetAttribute("aria-modal"));
+        Assert.Equal("false", dialog.GetAttribute("aria-busy"));
+        Assert.Equal("-1", dialog.GetAttribute("tabindex"));
+        Assert.NotNull(cut.Find($"#{dialog.GetAttribute("aria-labelledby")}"));
+        Assert.NotNull(cut.Find($"#{dialog.GetAttribute("aria-describedby")}"));
     }
 
     [Fact]
     public void ConfirmAndCancelInvokeCallbacks()
     {
-        using var context = new BunitContext().WithLocalization();
+        using var context = CreateContext();
         var confirmed = false;
         var cancelled = false;
         var cut = context.Render<BeeDayConfirmDialog>(parameters => parameters
@@ -57,7 +62,7 @@ public sealed class BeeDayConfirmDialogTests
     [Fact]
     public void BusyStateDisablesActionsAndSuppressesCallbacks()
     {
-        using var context = new BunitContext().WithLocalization();
+        using var context = CreateContext();
         var callbackCount = 0;
         var cut = context.Render<BeeDayConfirmDialog>(parameters => parameters
             .Add(component => component.IsOpen, true)
@@ -72,13 +77,14 @@ public sealed class BeeDayConfirmDialogTests
             Assert.True(button.HasAttribute("disabled"));
         }
 
+        Assert.Equal("true", cut.Find("[role='alertdialog']").GetAttribute("aria-busy"));
         Assert.Equal(0, callbackCount);
     }
 
     [Fact]
     public void EscapeKeyInvokesCancel()
     {
-        using var context = new BunitContext().WithLocalization();
+        using var context = CreateContext();
         var cancelled = false;
         var cut = context.Render<BeeDayConfirmDialog>(parameters => parameters
             .Add(component => component.IsOpen, true)
@@ -94,7 +100,7 @@ public sealed class BeeDayConfirmDialogTests
     [Fact]
     public void UsesBeeDayIconsForDeleteAndWarningButNotForCancelOrConfirmButtons()
     {
-        using var context = new BunitContext().WithLocalization();
+        using var context = CreateContext();
         var cut = context.Render<BeeDayConfirmDialog>(parameters => parameters
             .Add(component => component.IsOpen, true)
             .Add(component => component.Title, "Delete item")
@@ -110,7 +116,7 @@ public sealed class BeeDayConfirmDialogTests
     [Fact]
     public void UnderEnglishUiCulture_DefaultsUnsetLabelsToEnglish()
     {
-        using var context = new BunitContext().WithLocalization();
+        using var context = CreateContext();
         var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<BeeDayConfirmDialog>(parameters => parameters
             .Add(component => component.IsOpen, true)
             .Add(component => component.Title, "Delete")
@@ -123,7 +129,7 @@ public sealed class BeeDayConfirmDialogTests
     [Fact]
     public void UnderPortugueseUiCulture_DefaultsUnsetLabelsToPortuguese()
     {
-        using var context = new BunitContext().WithLocalization();
+        using var context = CreateContext();
         var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<BeeDayConfirmDialog>(parameters => parameters
             .Add(component => component.IsOpen, true)
             .Add(component => component.Title, "Delete")
@@ -136,7 +142,7 @@ public sealed class BeeDayConfirmDialogTests
     [Fact]
     public void ExplicitLabelsStillOverrideTheCultureAwareDefault()
     {
-        using var context = new BunitContext().WithLocalization();
+        using var context = CreateContext();
         var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<BeeDayConfirmDialog>(parameters => parameters
             .Add(component => component.IsOpen, true)
             .Add(component => component.Title, "Delete transaction")
@@ -151,7 +157,7 @@ public sealed class BeeDayConfirmDialogTests
     [Fact]
     public void RendersStandardizedSideBySideActions()
     {
-        using var context = new BunitContext().WithLocalization();
+        using var context = CreateContext();
         var cut = context.Render<BeeDayConfirmDialog>(parameters => parameters
             .Add(component => component.IsOpen, true)
             .Add(component => component.Title, "Delete project")
@@ -160,5 +166,12 @@ public sealed class BeeDayConfirmDialogTests
         var actions = cut.Find(".delete-confirmation__actions");
         Assert.NotNull(actions.QuerySelector(".delete-confirmation__cancel-action"));
         Assert.NotNull(actions.QuerySelector(".delete-confirmation__confirm-action"));
+    }
+
+    private static BunitContext CreateContext()
+    {
+        var context = new BunitContext().WithLocalization();
+        context.JSInterop.Mode = JSRuntimeMode.Loose;
+        return context;
     }
 }

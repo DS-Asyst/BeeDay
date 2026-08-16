@@ -10,7 +10,7 @@
         <div class="filter-bar__create">
             <BeeDayButton Variant="BeeDayButtonVariant.Primary" Compact="true" Icon="BeeDayIconName.Add"
                           Class="filter-bar__create-button" OnClick="ToggleCreateMenu"
-                          aria-haspopup="menu" aria-expanded="@showCreateMenu">@Localizer["CreateActivityButtonLabel"]</BeeDayButton>
+                          aria-haspopup="menu" aria-expanded="@showCreateMenu.ToString().ToLowerInvariant()">@Localizer["CreateActivityButtonLabel"]</BeeDayButton>
             @if (showCreateMenu)
             {
                 <div class="filter-bar__menu" role="menu" aria-label="@Localizer["ChooseActivityTypeAriaLabel"]">

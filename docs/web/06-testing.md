@@ -108,10 +108,10 @@ identificado nesta auditoria. `TopNavigation.razor` foi removida na Sprint 21.3 
 |---|---|
 | `BeeDayButton` | `Components/Buttons/BeeDayButtonTests.cs` |
 | `BeeDayCard` / `BeeDayCardMenu` (+ cálculo de posicionamento) | `Components/Cards/BeeDayCardTests.cs`, `BeeDayCardMenuTests.cs`, `CardMenuPlacementCalculatorTests.cs` |
-| `PixelIcon` | `Components/Icons/PixelIconTests.cs` |
+| `BeeDayIcon` | `Components/Icons/BeeDayIconTests.cs` |
 | `BeeDayBrand` / `SearchHighlight` | `Components/Text/BeeDayBrandTests.cs`, `SearchHighlightTests.cs` |
-| Isolamento do adapter de tema NES (`pixel-nes.css`) | `Components/DesignSystem/PixelNesAdapterIsolationTests.cs` |
 | Componentes de atividade (badges/atributos combinados) | `Components/DesignSystem/ActivityComponentsTests.cs` |
+| Lifecycle de dialogs (initial focus, trap, Escape, restore e edge cases) | `BeeDay.E2E.Tests/InteractiveComponentsTests.cs` |
 
 Os 2 módulos `.js` em si (`beeday-sortable.js`, `beeday-card-menu.js`) não são executados por `BeeDay.Web.Tests` (bUnit não roda um
 browser real) — sua cobertura prática vem apenas dos testes E2E (Playwright, browser real) listados

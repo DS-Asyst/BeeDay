@@ -36,7 +36,7 @@
     }
     else
     {
-        <div class="wallet-transaction-list" aria-busy="@IsRefreshing">
+        <div class="wallet-transaction-list" aria-busy="@IsRefreshing.ToString().ToLowerInvariant()">
             @foreach (var transaction in Transactions.Items)
             {
                 <TransactionCard Transaction="transaction" OnEdit="OnEdit" />

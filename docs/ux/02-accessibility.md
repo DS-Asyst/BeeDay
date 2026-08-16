@@ -2,13 +2,11 @@
 
 **Fonte da verdade:** verificado por busca direta de atributos ARIA (`aria-live`, `aria-expanded`,
 `aria-pressed`, `role="alert"`, `role="status"`, `aria-modal`, etc.) em
-`src/BeeDay.Web/Components/**/*.razor`, leitura de `src/BeeDay.Web/wwwroot/css/cursors.css`,
-`polish.css`, e cálculo manual de contraste (fórmula WCAG 2.x de luminância relativa) sobre os
-valores hexadecimais de `variables.css`.
+`src/BeeDay.Web/Components/**/*.razor`, leitura de `polish.css`, do behavior
+`beeday-dialog-focus.js` e cálculo manual de contraste (fórmula WCAG 2.x de luminância relativa)
+sobre os valores hexadecimais de `variables.css`.
 
-**Última verificação:** 2026-08-11 (Sprint 20.3) — §8 atualizado para refletir a remoção
-estrutural do cursor personalizado (EPIC 20); demais seções preservadas da verificação de
-2026-08-07.
+**Última verificação:** 2026-08-16 (Sprint 25.10 — Feedback, Dialogs & Accessibility Lifecycle).
 
 ## 1. Objetivo
 
@@ -18,26 +16,32 @@ X".
 
 ## 2. ARIA — uso confirmado
 
-28 arquivos `.razor`/`.razor.css` usam pelo menos um destes atributos:
+O inventário atual usa estes contratos recorrentes:
 `aria-live`, `aria-expanded`, `aria-pressed`, `role="alert"`, `role="status"`, `aria-modal`,
 `aria-current`. Padrões recorrentes:
 
 | Padrão | Onde |
 |---|---|
 | `role="alertdialog"` + `aria-modal="true"` + `aria-labelledby`/`aria-describedby` | `BeeDayConfirmDialog` |
+| `role="dialog"` + `aria-modal="true"` + label | `EditorModalShell`, `BeeDayFeedbackModal`, `ProjectWorkspace` |
 | `role="status"`/`role="alert"` (dependendo da severidade) | `BeeDayToastHost` (`RoleFor`: erro → `alert`, senão `status`) |
 | `aria-live="polite"` | `BeeDayLoading`, região de status silenciosa do Wallet (`_statusAnnouncement`) |
 | `aria-busy` | `main` de várias páginas (`Wallet.razor`, `Account.razor`), refletindo `IsBusy` agregado |
 | `aria-expanded`/`aria-pressed` | Botões de toggle (painéis, menus, filtros, `.beeday-icon-toggle`) |
-| `aria-hidden="true"` em ícones decorativos | Todo `PixelIcon` com `Decorative="true"` (padrão) |
+| `aria-hidden="true"` em ícones decorativos | Todo `BeeDayIcon` com `Decorative="true"` (padrão) |
+| `role="progressbar"` + `aria-valuemin/max/now/text` | `BeeDayProgressBar` |
 
-## 3. `PixelIcon` — o único componente que valida acessibilidade em runtime
+Booleanos ARIA dinâmicos são serializados em lowercase. A Sprint 25.10 corrigiu os quatro casos
+confirmados que ainda emitiam `True`/`False`: Activity create menu, Project context options,
+ProjectWorkspace To-Do toggle e TransactionList busy.
 
-`PixelIcon.razor.cs.OnParametersSet` lança `InvalidOperationException` se `Decorative="false"` e
+## 3. `BeeDayIcon` — validação de acessibilidade em runtime
+
+`BeeDayIcon.razor.cs.OnParametersSet` lança `InvalidOperationException` se `Decorative="false"` e
 nenhum `Label` foi fornecido — nenhum outro componente do Design System tem uma checagem
 equivalente (ex.: nada impede um `BeeDayButton` sem `ChildContent` nem `AdditionalAttributes["aria-label"]`
 de ser renderizado sem nome acessível). Isso torna `PixelIcon` uma garantia real de build-time —
-mas só cobre ícones, não os outros ~25 componentes.
+mas só cobre ícones, não os outros componentes.
 
 ## 4. Achado — nenhum link "pular para o conteúdo"
 
@@ -51,9 +55,16 @@ carregada.
 
 ## 5. Teclado e foco
 
-- `Escape` fecha: `BeeDayConfirmDialog`, `EditorModalShell`, `HabitEditorModal`/`TaskEditorModal`
-  (confirmação de exclusão interna primeiro, depois o modal), `BeeDayCardMenu` — padrão consistente
-  em todo elemento tipo popover/modal auditado.
+- O lifecycle canônico de `BeeDayConfirmDialog`, `EditorModalShell` e `BeeDayFeedbackModal` é:
+  OPEN → initial focus → contenção de Tab/Shift+Tab → Escape/close → restore. Confirm inicia em
+  Cancel; Editor no primeiro field habilitado; feedback no painel para anunciar title/description.
+  Confirmação nested restaura o foco no Delete do editor e o editor restaura seu trigger.
+- `DialogFocusScope` compartilha somente esse comportamento via `beeday-dialog-focus.js`; não
+  unifica markup ou significado dos dialogs. A lista de focusables é recalculada a cada Tab para
+  respeitar busy/disabled. Sem controles, o painel recebe foco; se o trigger saiu do DOM, close não
+  lança erro e restaura o próximo scope ativo quando houver.
+- `Escape` continua passando pelos busy guards de Confirm/Editor. `BeeDayCardMenu` e drawer mantêm
+  seus lifecycles próprios porque são menu/navigation, não dialogs.
 - `:focus-visible` é estilizado globalmente (`theme.css`:
   `:where(button, a, input, select, textarea, [tabindex]):focus-visible { box-shadow:
   var(--beeday-focus-ring); }`) e reforçado por `polish.css` com `outline: var(--beeday-focus-outline)`
@@ -87,11 +98,9 @@ seção intermediária sem scroll motion. Feedback textual, ARIA e controles con
 
 ## 7. `forced-colors` (modo de alto contraste)
 
-4 arquivos tratam explicitamente `@media (forced-colors: active)`: `pixel-ui.css` (permite
-`forced-color-adjust: auto` em botão/card/scrollbar), `pixel-nes.css` (remove `border-image`,
-que é ignorado por navegadores neste modo de qualquer forma — torna explícito), `polish.css`
-(força `border-color: CanvasText` em campos de formulário/card). Nenhum outro arquivo dos 49
-(19 globais + 30 isolados) trata este modo — a cobertura existe, mas é pontual, não sistemática.
+`polish.css` trata explicitamente `@media (forced-colors: active)` e força
+`border-color: CanvasText` em campos/card. É o único dos 55 sources CSS atuais (37 isolados,
+17 em `wwwroot/css` e `app.css`) com tratamento local — a cobertura existe, mas é pontual.
 
 ## 8. Cursor customizado — removido na Sprint 20.3 (histórico)
 
@@ -145,21 +154,21 @@ grande" (limiar 3:1) do WCAG.
 
 ## 11. Testes automatizados de acessibilidade
 
-Nenhum teste de acessibilidade automatizado (axe-core, Pa11y, ou equivalente) foi encontrado em
-`tests/BeeDay.Web.Tests/` ou `tests/BeeDay.E2E.Tests/`. A cobertura existente valida presença de
-atributos ARIA pontuais via asserção bUnit direta (`cut.Find(...).GetAttribute("aria-...")`), não
-uma varredura de regras de acessibilidade. `Components/DesignSystem/PixelNesAdapterIsolationTests.cs`
-(ver [`docs/web/06-testing.md`](../web/06-testing.md) §7) testa isolamento de um adapter visual, não
-acessibilidade em si.
+Ainda não existe axe-core/Pa11y; essa infraestrutura pertence à Sprint 25.15. A cobertura atual não
+é apenas presença pontual: bUnit valida roles, labels, descriptions, busy e booleanos lowercase;
+E2E Chromium valida initial focus, Tab/Shift+Tab containment, Escape, nested restore, trigger
+removido e scope sem controles. Isso é cobertura contratual dirigida, não uma varredura WCAG.
 
 ## 12. Fontes consultadas
 
 - Busca de atributos ARIA em `src/BeeDay.Web/Components/**/*.razor` (28 arquivos com pelo menos uma
   ocorrência).
-- `src/BeeDay.Web/wwwroot/css/cursors.css`, `polish.css`, `theme.css`, `animations.css`.
+- `src/BeeDay.Web/wwwroot/css/polish.css`, `theme.css`, `animations.css`, `feedback.css`.
 - Levantamento de `@media (forced-colors: active)` e `@media (prefers-reduced-motion: reduce)` em
   todo `src/BeeDay.Web/wwwroot/css/*.css` e `src/BeeDay.Web/Components/**/*.razor.css`.
-- `src/BeeDay.Web/Components/DesignSystem/Icons/PixelIcon.razor.cs`.
+- `src/BeeDay.Web/Components/DesignSystem/Icons/BeeDayIcon.razor.cs`.
+- `src/BeeDay.Web/Components/DesignSystem/Modals/DialogFocusScope.cs` e
+  `src/BeeDay.Web/wwwroot/js/beeday-dialog-focus.js`.
 - `src/BeeDay.Web/Components/Routes.razor` (`FocusOnNavigate`).
 - Cálculo próprio de contraste WCAG a partir de `src/BeeDay.Web/wwwroot/css/variables.css`.
 - [`docs/web/06-testing.md`](../web/06-testing.md) (cobertura de teste, Sprint 16.7, reaproveitado).

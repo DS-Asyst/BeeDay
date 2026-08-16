@@ -7,16 +7,19 @@
          @onkeydown="HandleKeyDownAsync"
          @onkeydown:stopPropagation="true">
         <section class="delete-confirmation"
+                 id="@DialogId"
                  role="alertdialog"
                  aria-modal="true"
-                 aria-labelledby="beeday-confirm-title"
-                 aria-describedby="beeday-confirm-description"
+                 aria-labelledby="@TitleId"
+                 aria-describedby="@DescriptionId"
+                 aria-busy="@IsBusy.ToString().ToLowerInvariant()"
+                 tabindex="-1"
                  @onclick:stopPropagation>
             <div class="delete-confirmation__top-border" aria-hidden="true"></div>
             <div class="delete-confirmation__content">
                 <div class="delete-confirmation__icon" aria-hidden="true"><BeeDayIcon Name="BeeDayIconName.Delete" Size="BeeDayIconSize.ExtraLarge" Color="BeeDayIconColor.Danger" /></div>
-                <h2 id="beeday-confirm-title">@Title</h2>
-                <p id="beeday-confirm-description" class="delete-confirmation__question">@Message</p>
+                <h2 id="@TitleId">@Title</h2>
+                <p id="@DescriptionId" class="delete-confirmation__question">@Message</p>
 
                 @if (!string.IsNullOrWhiteSpace(ItemTitle))
                 {
@@ -57,6 +60,10 @@
     </div>
 }
 
+<DialogFocusScope Active="@IsOpen"
+                  TargetId="@DialogId"
+                  InitialFocusSelector=".delete-confirmation__cancel-action" />
+
 @code {
     [Inject] private IStringLocalizer<DesignSystemResources> Localizer { get; set; } = default!;
 
@@ -71,6 +78,11 @@
     [Parameter] public string? CancelLabel { get; set; }
     [Parameter] public EventCallback OnConfirm { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
+
+    private readonly string _id = Guid.NewGuid().ToString("N");
+    private string DialogId => $"beeday-confirm-dialog-{_id}";
+    private string TitleId => $"beeday-confirm-title-{_id}";
+    private string DescriptionId => $"beeday-confirm-description-{_id}";
 
     private Task ConfirmAsync() => IsBusy ? Task.CompletedTask : OnConfirm.InvokeAsync();
     private Task CancelAsync() => IsBusy ? Task.CompletedTask : OnCancel.InvokeAsync();

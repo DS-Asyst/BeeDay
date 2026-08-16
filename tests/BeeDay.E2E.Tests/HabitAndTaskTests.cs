@@ -99,12 +99,9 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
     /// <summary>
     /// Opens the "Activity" create menu and confirms it is genuinely open. The menu items are
     /// conditionally rendered (an @if block, not CSS-hidden), so waiting for the menu container's
-    /// own role/label is a reliable, render-confirmed signal that the click was actually received
-    /// and processed — as opposed to the trigger button's own aria-expanded attribute, which
-    /// ActivityFilterBar.razor renders as the C#-default "True"/"False" (capitalized) instead of the
-    /// ARIA-spec-required lowercase "true"/"false", so Playwright's Expanded filter never matches it
-    /// (a real, separate, pre-existing accessibility defect — reported, not fixed, since production
-    /// code is out of scope for this correction).
+    /// own role/label is a reliable, render-confirmed signal that the click was received and the
+    /// interactive render completed. The trigger also exposes lowercase aria-expanded, covered by
+    /// the component accessibility contract.
     /// </summary>
     private async Task OpenActivityMenuAsync()
     {
