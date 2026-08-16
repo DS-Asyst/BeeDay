@@ -1244,3 +1244,60 @@ BeeDay.E2E.Tests — InteractiveComponents/HabitAndTask: 4/4
 
 Auth/Identity/forms → 25.9; dialogs/focus lifecycle → 25.10; Wallet → 25.11; Daily/Project → 25.12;
 Character → 25.13; Writing → 25.14; quality → 25.15; final sweep → 25.16. Nenhuma foi antecipada.
+
+## Sprint 25.9 — Forms, Authentication & Identity Convergence (Results)
+
+**Fonte da verdade:** Login, CreateProfile, cinco páginas Identity, Account, primitives Forms,
+consumers, CSS, bUnit/integration/E2E e documentação viva. Executado sobre o commit da Sprint 25.8
+`39af4a5381bbdc0d650ff299df901ff7a421f596`.
+
+### Convergência preservando contratos
+
+`ForgotPassword`, `ResetPassword` e `ResendConfirmation` migraram de `InputText` + chrome local
+para `BeeDayInput`, preservando `EditForm`, `DataAnnotations`, autocomplete de email/senha nova,
+disabled/busy, comandos Identity e mensagens localizadas. Account já estava convergido e não
+precisou de mudança.
+
+Login continua como POST HTML para `/auth/login`: antiforgery, `name=email/password/rememberMe`,
+`returnUrl`, autocomplete e handler de double-submit foram preservados. Seus controles nativos
+agora consomem `.beeday-field*` e `.beeday-checkbox*`. CreateProfile também mantém inputs nativos
+por seu fluxo de duas etapas sem `EditContext`, mas passa a consumir o chrome compartilhado.
+
+### CSS, feedback e conteúdo longo
+
+Foram removidas as regras paralelas de input de `identity.css` e o bloco Auth global órfão de
+`app.css`, após confirmação de consumidores. Feedback Auth/Identity passou a usar tokens
+semânticos success/danger/info da Sprint 25.3. Botões compartilhados deixam o label quebrar linha e
+crescem a partir de `min-height`, evitando overflow com traduções longas sem reduzir touch target.
+
+### Testes e impacto
+
+Quatro testes bUnit novos cobrem wrappers, labels, autocomplete, validação e culturas; Login ganhou
+assertions do adapter HTML compartilhado. E2E cobre recovery em 320/390px, validação e ausência de
+overflow. Nenhuma regra de autenticação, endpoint, Application, Domain, persistence ou arquitetura
+de email mudou.
+
+### Validação
+
+```text
+git diff --check
+# aprovado
+
+dotnet format BeeDay.slnx --verify-no-changes
+# aprovado
+
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+# aprovado, 0 avisos, 0 erros
+
+dotnet test BeeDay.slnx --no-build --configuration Release
+# 1.083/1.083 de primeira — Domain 93, Application 73, Infrastructure 129, Web 715, E2E 73
+
+BeeDay.Web.Tests — Auth/Identity/localization: 18/18
+BeeDay.E2E.Tests — Login/CreateProfile/PasswordRecovery responsive: 10/10
+EF Core pending model changes: nenhum
+```
+
+### Itens `DEFER` e confirmação de escopo
+
+Dialogs/focus lifecycle → 25.10; Wallet → 25.11; Daily/Project → 25.12; Character → 25.13;
+Writing → 25.14; quality → 25.15; final sweep → 25.16. Nenhuma foi antecipada.

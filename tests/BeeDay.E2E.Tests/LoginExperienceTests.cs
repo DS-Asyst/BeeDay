@@ -58,6 +58,23 @@ public sealed class LoginExperienceTests(PlaywrightAppFixture fixture) : E2ETest
     }
 
     [Theory]
+    [InlineData(320, 568)]
+    [InlineData(390, 844)]
+    public async Task PasswordRecoveryUsesSharedFieldWithoutHorizontalOverflow(int width, int height)
+    {
+        await Page.SetViewportSizeAsync(width, height);
+        await GotoAsync("/account/forgot-password");
+
+        var email = Page.GetByLabel("Email");
+        await Expect(email).ToBeVisibleAsync();
+        await Expect(email).ToHaveClassAsync(new Regex("beeday-field__control"));
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Send recovery link" }).ClickAsync();
+        await Expect(Page.Locator(".beeday-validation-message[role='alert']")).ToBeVisibleAsync();
+        Assert.False(await Page.EvaluateAsync<bool>(
+            "() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
+    }
+
+    [Theory]
     [InlineData(390, 844)]
     [InlineData(768, 900)]
     [InlineData(1280, 800)]

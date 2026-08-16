@@ -47,9 +47,10 @@
                 <AntiforgeryToken />
                 <input type="hidden" name="returnUrl" value="@ReturnUrl" />
 
-                <label class="auth-field">
-                    <span>@Localizer["EmailLabel"]</span>
-                    <input type="email"
+                <label class="auth-field beeday-field" for="login-email">
+                    <span class="beeday-field__label">@Localizer["EmailLabel"]</span>
+                    <input id="login-email"
+                           type="email"
                            class="beeday-field__control"
                            name="email"
                            value="@Email"
@@ -58,9 +59,10 @@
                            autofocus />
                 </label>
 
-                <label class="auth-field">
-                    <span>@Localizer["PasswordLabel"]</span>
-                    <input type="password"
+                <label class="auth-field beeday-field" for="login-password">
+                    <span class="beeday-field__label">@Localizer["PasswordLabel"]</span>
+                    <input id="login-password"
+                           type="password"
                            class="beeday-field__control"
                            name="password"
                            autocomplete="current-password"
@@ -68,7 +70,14 @@
                 </label>
 
                 <div class="auth-form__options">
-                    <label class="auth-remember"><input type="checkbox" name="rememberMe" value="true" /> <span>@Localizer["RememberMe"]</span></label>
+                    <label class="auth-remember beeday-checkbox" for="login-remember">
+                        <input id="login-remember" class="beeday-checkbox__control" type="checkbox" name="rememberMe" value="true" />
+                        <span class="beeday-checkbox__visual" aria-hidden="true">
+                            <BeeDayIcon Name="BeeDayIconName.CheckboxUnchecked" Size="BeeDayIconSize.Small" Class="beeday-checkbox__unchecked" />
+                            <BeeDayIcon Name="BeeDayIconName.CheckboxChecked" Size="BeeDayIconSize.Small" Color="BeeDayIconColor.Primary" Class="beeday-checkbox__checked" />
+                        </span>
+                        <span class="beeday-checkbox__label">@Localizer["RememberMe"]</span>
+                    </label>
                     <a class="auth-action-link" href="/account/forgot-password">@Localizer["ForgotPassword"]</a>
                 </div>
 
