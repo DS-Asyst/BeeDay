@@ -55,10 +55,14 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
             ["Define what matters", "Organize your day", "Improve every day", "Track your progress", "Celebrate your wins"],
             await howSection.Locator(".home-steps h3").AllTextContentsAsync());
         var brandClosure = Page.Locator(".home-brand-closure");
-        var brandClosureImage = brandClosure.Locator("img");
+        var brandClosureCharacters = brandClosure.Locator(".home-brand-closure__characters");
+        var brandClosureWave = brandClosure.Locator(".home-brand-closure__wave");
+        var brandClosureBase = brandClosure.Locator(".home-brand-closure__base");
         var footer = Page.GetByRole(AriaRole.Contentinfo);
-        await Expect(brandClosureImage).ToBeVisibleAsync();
-        await Expect(brandClosure).ToHaveCSSAsync("background-color", "rgb(70, 74, 250)");
+        await Expect(brandClosureCharacters).ToBeVisibleAsync();
+        await Expect(brandClosureWave.Locator("img")).ToBeVisibleAsync();
+        await Expect(brandClosure).ToHaveCSSAsync("background-color", "rgb(255, 255, 255)");
+        await Expect(brandClosureBase).ToHaveCSSAsync("background-color", "rgb(70, 74, 250)");
         await Expect(footer).ToBeVisibleAsync();
         var visualBox = await heroVisual.BoundingBoxAsync();
         var contentBox = await Page.Locator(".home-hero__content").BoundingBoxAsync();
@@ -100,14 +104,20 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
             Assert.True(stepBoxes[3][0] < howVisualBox.X && stepBoxes[4][0] > howVisualBox.X);
         }
         var closureBox = await brandClosure.BoundingBoxAsync();
-        var closureImageBox = await brandClosureImage.BoundingBoxAsync();
+        var closureCharactersBox = await brandClosureCharacters.BoundingBoxAsync();
+        var closureWaveBox = await brandClosureWave.BoundingBoxAsync();
+        var closureBaseBox = await brandClosureBase.BoundingBoxAsync();
         var footerBox = await footer.BoundingBoxAsync();
         Assert.NotNull(closureBox);
-        Assert.NotNull(closureImageBox);
+        Assert.NotNull(closureCharactersBox);
+        Assert.NotNull(closureWaveBox);
+        Assert.NotNull(closureBaseBox);
         Assert.NotNull(footerBox);
-        Assert.InRange(Math.Abs(closureImageBox!.Width / closureImageBox.Height - 1744d / 902d), 0, .01);
         Assert.InRange(Math.Abs(closureBox!.Y + closureBox.Height - footerBox!.Y), 0, 1);
-        Assert.True(closureImageBox.Height >= 200, "The brand closure artwork should remain recognizable on narrow viewports.");
+        Assert.InRange(Math.Abs(closureCharactersBox!.Width / closureCharactersBox.Height - 1536d / 1024d), 0, .01);
+        Assert.True(closureCharactersBox.Height >= 149, "The characters should remain recognizable on narrow viewports.");
+        Assert.InRange(Math.Abs(closureWaveBox!.Y + closureWaveBox.Height - closureBaseBox!.Y), 0, 1);
+        Assert.True(closureCharactersBox.X >= 0 && closureCharactersBox.X + closureCharactersBox.Width <= width, "The characters must not be cropped.");
     }
 
     [Fact]
