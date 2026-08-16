@@ -12,7 +12,8 @@
     line-height: .8;
 }
 
-.beeday-brand__bee { color: var(--beeday-color-brand-primary); }
-.beeday-brand__day { color: var(--beeday-color-brand-yellow); }
+.beeday-brand__bee,
+.beeday-brand__day { color: var(--beeday-color-brand-primary); }
 
-.beeday-brand--inverse .beeday-brand__bee { color: var(--beeday-color-text-inverse); }
+.beeday-brand--inverse .beeday-brand__bee,
+.beeday-brand--inverse .beeday-brand__day { color: var(--beeday-color-text-inverse); }

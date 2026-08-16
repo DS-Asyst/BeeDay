@@ -58,8 +58,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DailyPageTitle" xml:space="preserve"><value>Daily | BeeDay</value></data>
-  <data name="ProfilePageTitle" xml:space="preserve"><value>Profile | BeeDay</value></data>
+  <data name="DailyPageTitle" xml:space="preserve"><value>Daily | beeday</value></data>
+  <data name="ProfilePageTitle" xml:space="preserve"><value>Profile | beeday</value></data>
   <data name="LoadingDashboardAriaLabel" xml:space="preserve"><value>Loading dashboard</value></data>
   <data name="DashboardControlsAriaLabel" xml:space="preserve"><value>Dashboard controls</value></data>
   <data name="SearchActivitiesAriaLabel" xml:space="preserve"><value>Search activities</value></data>
@@ -136,7 +136,7 @@
   <data name="ThisWeekEyebrow" xml:space="preserve"><value>THIS WEEK</value></data>
   <data name="WeeklyActivityHeading" xml:space="preserve"><value>Weekly activity</value></data>
   <data name="WeeklyHistoryUnavailableHeading" xml:space="preserve"><value>Weekly history is not available yet</value></data>
-  <data name="WeeklyHistoryUnavailableDescription" xml:space="preserve"><value>BeeDay does not currently record completion dates, so no weekly totals are shown.</value></data>
+  <data name="WeeklyHistoryUnavailableDescription" xml:space="preserve"><value>beeday does not currently record completion dates, so no weekly totals are shown.</value></data>
   <data name="InProgressEyebrow" xml:space="preserve"><value>IN PROGRESS</value></data>
   <data name="ContinueProjectHeading" xml:space="preserve"><value>Continue your project</value></data>
   <data name="ProjectProgressLabel" xml:space="preserve"><value>{0} progress</value></data>

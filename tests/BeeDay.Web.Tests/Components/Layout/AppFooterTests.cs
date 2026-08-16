@@ -34,9 +34,9 @@ public sealed class AppFooterTests
         using var context = new BunitContext().WithLocalization();
         var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<AppFooter>());
 
-        Assert.Equal("BeeDay links", cut.Find("nav.app-footer__links").GetAttribute("aria-label"));
+        Assert.Equal("beeday links", cut.Find("nav.app-footer__links").GetAttribute("aria-label"));
         Assert.Equal("Project on GitHub", cut.Find("a[href='https://github.com/tiagoarrigoni/BeeDay']").TextContent);
-        Assert.Equal("© 2026 BeeDay. All rights reserved.", cut.Find(".app-footer__copyright").TextContent);
+        Assert.Equal("© 2026 beeday. All rights reserved.", cut.Find(".app-footer__copyright").TextContent);
     }
 
     [Fact]
@@ -45,9 +45,9 @@ public sealed class AppFooterTests
         using var context = new BunitContext().WithLocalization();
         var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<AppFooter>());
 
-        Assert.Equal("Links do BeeDay", cut.Find("nav.app-footer__links").GetAttribute("aria-label"));
+        Assert.Equal("Links do beeday", cut.Find("nav.app-footer__links").GetAttribute("aria-label"));
         Assert.Equal("Projeto no GitHub", cut.Find("a[href='https://github.com/tiagoarrigoni/BeeDay']").TextContent);
-        Assert.Equal("© 2026 BeeDay. Todos os direitos reservados.", cut.Find(".app-footer__copyright").TextContent);
+        Assert.Equal("© 2026 beeday. Todos os direitos reservados.", cut.Find(".app-footer__copyright").TextContent);
     }
 
     [Fact]

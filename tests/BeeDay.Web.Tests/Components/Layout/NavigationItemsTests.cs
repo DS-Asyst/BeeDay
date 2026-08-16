@@ -13,7 +13,7 @@ public sealed class NavigationItemsTests
         var links = cut.FindAll("a.navigation-item");
         Assert.Equal(["/profile", "/daily", "/wallet", "/settings"], links.Select(link => link.GetAttribute("href")));
         var logout = cut.Find("form[method='post'][action='/auth/logout'] button[type='submit']");
-        Assert.Equal("Log out of BeeDay", logout.GetAttribute("aria-label"));
+        Assert.Equal("Log out of beeday", logout.GetAttribute("aria-label"));
     }
 
     [Fact]
@@ -25,7 +25,7 @@ public sealed class NavigationItemsTests
         var labels = cut.FindAll("a.navigation-item .navigation-item__label");
         Assert.Equal(["Perfil", "Diário", "Carteira", "Conta"], labels.Select(label => label.TextContent));
         var logout = cut.Find("form[method='post'][action='/auth/logout'] button[type='submit']");
-        Assert.Equal("Sair do BeeDay", logout.GetAttribute("aria-label"));
+        Assert.Equal("Sair do beeday", logout.GetAttribute("aria-label"));
     }
 
     [Fact]

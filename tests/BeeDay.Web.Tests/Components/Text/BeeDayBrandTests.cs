@@ -10,7 +10,7 @@ public sealed class BeeDayBrandTests
         using var context = new BunitContext();
         var brand = context.Render<BeeDayBrand>().Find(".beeday-brand");
         Assert.Equal("img", brand.GetAttribute("role"));
-        Assert.Equal("BeeDay", brand.GetAttribute("aria-label"));
+        Assert.Equal("beeday", brand.GetAttribute("aria-label"));
         Assert.Equal("bee", brand.QuerySelector(".beeday-brand__bee")?.TextContent);
         Assert.Equal("day", brand.QuerySelector(".beeday-brand__day")?.TextContent);
     }

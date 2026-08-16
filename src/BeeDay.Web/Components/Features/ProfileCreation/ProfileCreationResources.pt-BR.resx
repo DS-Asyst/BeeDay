@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PageTitle" xml:space="preserve">
-    <value>Comece agora | BeeDay</value>
+    <value>Comece agora | beeday</value>
   </data>
   <data name="LogIn" xml:space="preserve">
     <value>Entrar</value>
@@ -74,7 +74,7 @@
     <value>Crie sua conta</value>
   </data>
   <data name="StartYourJourney" xml:space="preserve">
-    <value>Comece sua jornada no BeeDay.</value>
+    <value>Comece sua jornada no beeday.</value>
   </data>
   <data name="FullNameLabel" xml:space="preserve">
     <value>Nome completo</value>
@@ -101,7 +101,7 @@
     <value>Escolha seu apelido</value>
   </data>
   <data name="IdentifiedInBeeDay" xml:space="preserve">
-    <value>É assim que você será identificado no BeeDay.</value>
+    <value>É assim que você será identificado no beeday.</value>
   </data>
   <data name="BackButton" xml:space="preserve">
     <value>Voltar</value>
@@ -128,10 +128,10 @@
     <value>O apelido deve ter de 3 a 24 caracteres e pode conter letras, números, pontos, sublinhados ou hífens.</value>
   </data>
   <data name="WelcomeToast" xml:space="preserve">
-    <value>Bem-vindo ao BeeDay.</value>
+    <value>Bem-vindo ao beeday.</value>
   </data>
   <data name="RedirectingToLoginTitle" xml:space="preserve">
-    <value>Entrar | BeeDay</value>
+    <value>Entrar | beeday</value>
   </data>
   <data name="RedirectingToLoginMessage" xml:space="preserve">
     <value>Redirecionando para o login...</value>

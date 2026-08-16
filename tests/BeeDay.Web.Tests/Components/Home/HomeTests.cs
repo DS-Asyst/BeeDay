@@ -123,7 +123,7 @@ public sealed class HomeTests
 
         var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<HomePage>());
 
-        Assert.Contains("Continue to BeeDay", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Continue to beeday", cut.Markup, StringComparison.Ordinal);
     }
 
     private static BunitContext CreateContext()

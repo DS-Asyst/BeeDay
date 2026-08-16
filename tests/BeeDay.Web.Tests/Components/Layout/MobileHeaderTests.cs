@@ -54,7 +54,7 @@ public sealed class MobileHeaderTests
 
         var brand = cut.Find("a.mobile-header__brand");
         var button = cut.Find(".mobile-header__menu-button");
-        Assert.Equal("BeeDay — ir para o Perfil", brand.GetAttribute("aria-label"));
+        Assert.Equal("beeday — ir para o Perfil", brand.GetAttribute("aria-label"));
         Assert.Equal("Abrir menu de navegação", button.GetAttribute("aria-label"));
     }
 

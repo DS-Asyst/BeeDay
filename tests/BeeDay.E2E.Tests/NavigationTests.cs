@@ -117,7 +117,7 @@ public sealed class NavigationTests(PlaywrightAppFixture fixture) : E2ETestBase(
         await Page.SetViewportSizeAsync(1280, 800);
         await LoginToDailyAsync();
 
-        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Log out of BeeDay" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Log out of beeday" })).ToBeVisibleAsync();
         await Expect(Page.Locator(".desktop-sidebar nav.navigation-items a[href='/profile']")).ToBeVisibleAsync();
         await Expect(Page.Locator(".desktop-sidebar a[href='/settings']")).ToBeVisibleAsync();
     }

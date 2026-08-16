@@ -49,9 +49,11 @@ public sealed class VisualFoundationTests
     {
         var brand = ReadWebFile("Components", "DesignSystem", "Text", "BeeDayBrand.razor.css");
 
-        Assert.Contains(".beeday-brand__bee { color: var(--beeday-color-brand-primary); }", brand, StringComparison.Ordinal);
-        Assert.Contains(".beeday-brand__day { color: var(--beeday-color-brand-yellow); }", brand, StringComparison.Ordinal);
-        Assert.Contains(".beeday-brand--inverse .beeday-brand__bee { color: var(--beeday-color-text-inverse); }", brand, StringComparison.Ordinal);
+        Assert.Contains(".beeday-brand__bee,", brand, StringComparison.Ordinal);
+        Assert.Contains(".beeday-brand__day { color: var(--beeday-color-brand-primary); }", brand, StringComparison.Ordinal);
+        Assert.Contains(".beeday-brand--inverse .beeday-brand__bee,", brand, StringComparison.Ordinal);
+        Assert.Contains(".beeday-brand--inverse .beeday-brand__day { color: var(--beeday-color-text-inverse); }", brand, StringComparison.Ordinal);
+        Assert.DoesNotContain("--beeday-color-brand-yellow", brand, StringComparison.Ordinal);
     }
 
     [Fact]

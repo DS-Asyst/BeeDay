@@ -15,13 +15,13 @@ public sealed class IdentityEmailComposer(IOptions<IdentityEmailOptions> options
         var safeName = WebUtility.HtmlEncode(displayName);
         var safeUrl = WebUtility.HtmlEncode(url);
         var body = BuildTemplate(
-            "Confirm your BeeDay email",
+            "Confirm your beeday email",
             $"Hello, {safeName}!",
-            "Confirm your email address to activate your BeeDay account.",
+            "Confirm your email address to activate your beeday account.",
             "Confirm email",
             safeUrl,
             "This link expires in 24 hours and can only be used once.");
-        return new EmailMessage(recipient, "Confirm your BeeDay email", body);
+        return new EmailMessage(recipient, "Confirm your beeday email", body);
     }
 
     public EmailMessage ComposePasswordReset(string recipient, string displayName, string rawToken)
@@ -30,13 +30,13 @@ public sealed class IdentityEmailComposer(IOptions<IdentityEmailOptions> options
         var safeName = WebUtility.HtmlEncode(displayName);
         var safeUrl = WebUtility.HtmlEncode(url);
         var body = BuildTemplate(
-            "Reset your BeeDay password",
+            "Reset your beeday password",
             $"Hello, {safeName}!",
-            "A password reset was requested for your BeeDay account.",
+            "A password reset was requested for your beeday account.",
             "Reset password",
             safeUrl,
             "This link expires in 1 hour and can only be used once. Ignore this email if you did not request it.");
-        return new EmailMessage(recipient, "Reset your BeeDay password", body);
+        return new EmailMessage(recipient, "Reset your beeday password", body);
     }
 
     private string BuildUrl(string path, string rawToken)
