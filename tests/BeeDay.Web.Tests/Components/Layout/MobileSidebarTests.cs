@@ -1,4 +1,5 @@
 using BeeDay.Web.Components.Layout;
+using BeeDay.Web.Tests.Localization;
 
 namespace BeeDay.Web.Tests.Components.Layout;
 
@@ -7,7 +8,7 @@ public sealed class MobileSidebarTests
     [Fact]
     public void ClosedState_IsAriaHiddenAndCarriesTheIdMobileHeaderPointsAt()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.JSInterop.Mode = JSRuntimeMode.Loose;
 
         var cut = context.Render<MobileSidebar>(parameters => parameters
@@ -21,7 +22,7 @@ public sealed class MobileSidebarTests
     [Fact]
     public void OpenState_IsNotAriaHiddenAndCarriesTheOpenClass()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.JSInterop.Mode = JSRuntimeMode.Loose;
 
         var cut = context.Render<MobileSidebar>(parameters => parameters
@@ -35,7 +36,7 @@ public sealed class MobileSidebarTests
     [Fact]
     public void CloseButtonClick_InvokesOnClose()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.JSInterop.Mode = JSRuntimeMode.Loose;
         var closed = false;
 
@@ -50,7 +51,7 @@ public sealed class MobileSidebarTests
     [Fact]
     public void BackdropClick_InvokesOnClose()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.JSInterop.Mode = JSRuntimeMode.Loose;
         var closed = false;
 
@@ -65,7 +66,7 @@ public sealed class MobileSidebarTests
     [Fact]
     public void EscapeKey_InvokesOnClose()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.JSInterop.Mode = JSRuntimeMode.Loose;
         var closed = false;
 
@@ -80,7 +81,7 @@ public sealed class MobileSidebarTests
     [Fact]
     public void ContainsTheSameRealDestinationsAsDesktop()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.JSInterop.Mode = JSRuntimeMode.Loose;
 
         var cut = context.Render<MobileSidebar>(parameters => parameters
@@ -96,7 +97,7 @@ public sealed class MobileSidebarTests
     [Fact]
     public void NavigatingViaARouteItem_AlsoClosesTheDrawer()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.JSInterop.Mode = JSRuntimeMode.Loose;
         var closed = false;
 
@@ -109,9 +110,22 @@ public sealed class MobileSidebarTests
     }
 
     [Fact]
+    public void UnderPortugueseUiCulture_RendersPortugueseAriaLabels()
+    {
+        using var context = new BunitContext().WithLocalization();
+        context.JSInterop.Mode = JSRuntimeMode.Loose;
+
+        var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<MobileSidebar>(parameters => parameters
+            .Add(component => component.IsOpen, true)));
+
+        Assert.Equal("Navegação principal", cut.Find("aside#mobile-navigation").GetAttribute("aria-label"));
+        Assert.Equal("Fechar", cut.Find(".mobile-nav-drawer__close").GetAttribute("aria-label"));
+    }
+
+    [Fact]
     public void ContainsProfileSettingsAndLogoutWithoutLegacyPanelTriggers()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.JSInterop.Mode = JSRuntimeMode.Loose;
         var cut = context.Render<MobileSidebar>(parameters => parameters.Add(component => component.IsOpen, true));
         Assert.NotNull(cut.Find("a[href='/profile']"));

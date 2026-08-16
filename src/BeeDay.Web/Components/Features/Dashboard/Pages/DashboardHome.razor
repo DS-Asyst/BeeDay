@@ -5,12 +5,13 @@
 @inject AuthenticatedUserInitializer UserInitializer
 @inject BeeDay.Web.Components.Features.Dashboard.State.DashboardState State
 @inject NavigationManager Navigation
+@inject IStringLocalizer<DashboardResources> Localizer
 
-<PageTitle>Profile | BeeDay</PageTitle>
+<PageTitle>@Localizer["ProfilePageTitle"]</PageTitle>
 
 @if (State.IsLoading)
 {
-    <section class="product-home product-home--loading" aria-label="Loading Profile" aria-busy="true">
+    <section class="product-home product-home--loading" aria-label="@Localizer["LoadingProfileAriaLabel"]" aria-busy="true">
         <div class="product-home__skeleton product-home__skeleton--header"></div>
         <div class="product-home__skeleton product-home__skeleton--feature"></div>
         <div class="product-home__skeleton product-home__skeleton--row"></div>
@@ -21,7 +22,7 @@ else if (State.IsUnavailable)
     <section class="product-home" aria-labelledby="home-unavailable-heading">
         <BeeDayCard Padded="true" Class="product-home__status" role="status">
             <BeeDayIcon Name="BeeDayIconName.Warning" Size="BeeDayIconSize.Large" Color="BeeDayIconColor.Warning" />
-            <div><strong id="home-unavailable-heading">Profile summary unavailable</strong><p>Refresh the page to try loading your workspace again.</p></div>
+            <div><strong id="home-unavailable-heading">@Localizer["ProfileUnavailableHeading"]</strong><p>@Localizer["ProfileUnavailableDescription"]</p></div>
         </BeeDayCard>
     </section>
 }
@@ -34,13 +35,13 @@ else if (State.Data?.Profile.HasProfile == true)
         <header class="product-home__header">
             <div>
                 <span class="product-home__date">@DateTime.Today.ToString("dddd, MMMM d")</span>
-                <h1 id="home-heading">Welcome back, @dashboard.Profile.Nickname</h1>
-                <p>Choose one next step and keep your day moving.</p>
+                <h1 id="home-heading">@Localizer["WelcomeBackHeading", dashboard.Profile.Nickname]</h1>
+                <p>@Localizer["ChooseNextStepDescription"]</p>
             </div>
-            <BeeDayButton Icon="BeeDayIconName.Daily" OnClick="GoToDaily">Open Daily</BeeDayButton>
+            <BeeDayButton Icon="BeeDayIconName.Daily" OnClick="GoToDaily">@Localizer["OpenDailyButtonLabel"]</BeeDayButton>
         </header>
 
-        <section class="product-home__progress" aria-label="Your progress">
+        <section class="product-home__progress" aria-label="@Localizer["YourProgressAriaLabel"]">
             <ExperienceBar Model="ExperienceViewModel.From(dashboard.Profile)"
                            ExperienceGain="State.LatestExperienceGain"
                            FeedbackKey="State.ExperienceFeedbackVersion" />
@@ -48,12 +49,12 @@ else if (State.Data?.Profile.HasProfile == true)
 
         <section class="product-home__section" aria-labelledby="week-heading">
             <div class="product-home__section-heading">
-                <div><span>THIS WEEK</span><h2 id="week-heading">Weekly activity</h2></div>
-                <a href="/daily">Open Daily</a>
+                <div><span>@Localizer["ThisWeekEyebrow"]</span><h2 id="week-heading">@Localizer["WeeklyActivityHeading"]</h2></div>
+                <a href="/daily">@Localizer["OpenDailyButtonLabel"]</a>
             </div>
             <BeeDayCard Padded="true" Class="product-home__weekly-unavailable" role="status">
                 <BeeDayIcon Name="BeeDayIconName.Calendar" Size="BeeDayIconSize.Large" Color="BeeDayIconColor.Muted" />
-                <div><strong>Weekly history is not available yet</strong><p>BeeDay does not currently record completion dates, so no weekly totals are shown.</p></div>
+                <div><strong>@Localizer["WeeklyHistoryUnavailableHeading"]</strong><p>@Localizer["WeeklyHistoryUnavailableDescription"]</p></div>
             </BeeDayCard>
         </section>
 
@@ -61,24 +62,24 @@ else if (State.Data?.Profile.HasProfile == true)
         {
             <section class="product-home__section" aria-labelledby="project-heading">
                 <div class="product-home__section-heading">
-                    <div><span>IN PROGRESS</span><h2 id="project-heading">Continue your project</h2></div>
+                    <div><span>@Localizer["InProgressEyebrow"]</span><h2 id="project-heading">@Localizer["ContinueProjectHeading"]</h2></div>
                 </div>
                 <BeeDayCard Padded="true" Class="product-home__project">
                     <div class="product-home__project-header">
                         <BeeDayIcon Name="BeeDayIconName.Project" Size="BeeDayIconSize.Large" Color="BeeDayIconColor.Primary" />
                         <div><h3>@activeProject.Name</h3><p>@activeProject.Description</p></div>
                     </div>
-                    <BeeDayProgressBar Label="@($"{activeProject.Name} progress")"
+                    <BeeDayProgressBar Label="@Localizer["ProjectProgressLabel", activeProject.Name]"
                                        Value="@((double)activeProject.ProgressPercentage)"
                                        Maximum="100"
-                                       ValueText="@($"{activeProject.ProgressPercentage:0}% complete")" />
-                    <BeeDayButton Variant="BeeDayButtonVariant.Secondary" Compact="true" OnClick="GoToDaily">Continue in Daily</BeeDayButton>
+                                       ValueText="@Localizer["ProjectProgressValueText", activeProject.ProgressPercentage.ToString("0")]" />
+                    <BeeDayButton Variant="BeeDayButtonVariant.Secondary" Compact="true" OnClick="GoToDaily">@Localizer["ContinueInDailyButtonLabel"]</BeeDayButton>
                 </BeeDayCard>
             </section>
         }
     </section>
 
-    <BeeDayLoading IsVisible="State.IsBusy" Label="Saving..." />
+    <BeeDayLoading IsVisible="State.IsBusy" />
     <BeeDayFeedbackHost />
 }
 

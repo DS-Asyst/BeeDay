@@ -1,5 +1,6 @@
 using BeeDay.Web.Components.Features.Experience.Components;
 using BeeDay.Web.Components.Features.Experience.Models;
+using BeeDay.Web.Tests.Localization;
 
 namespace BeeDay.Web.Tests.Components.Experience;
 
@@ -8,10 +9,10 @@ public sealed class ExperienceBarTests
     [Fact]
     public void RendersLoadingStateWithoutProgressBar()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
 
-        var cut = context.Render<ExperienceBar>(parameters => parameters
-            .Add(component => component.IsLoading, true));
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<ExperienceBar>(parameters => parameters
+            .Add(component => component.IsLoading, true)));
 
         Assert.Equal("true", cut.Find("[aria-label='Loading experience']").GetAttribute("aria-busy"));
         Assert.Equal(3, cut.FindAll(".experience-card__skeleton").Count);
@@ -21,11 +22,11 @@ public sealed class ExperienceBarTests
     [Fact]
     public void RendersLevelAndExperienceValues()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var model = new ExperienceViewModel(4, 120, 200, 80);
 
-        var cut = context.Render<ExperienceBar>(parameters => parameters
-            .Add(component => component.Model, model));
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<ExperienceBar>(parameters => parameters
+            .Add(component => component.Model, model)));
 
         Assert.Contains("Level", cut.Markup);
         Assert.Contains(">4<", cut.Markup);
@@ -36,9 +37,24 @@ public sealed class ExperienceBarTests
     }
 
     [Fact]
+    public void UnderPortugueseUiCulture_RendersPortugueseLevelAndExperienceValues()
+    {
+        using var context = new BunitContext().WithLocalization();
+        var model = new ExperienceViewModel(4, 120, 200, 80);
+
+        var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<ExperienceBar>(parameters => parameters
+            .Add(component => component.Model, model)));
+
+        Assert.Contains("Nível", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("0 XP no total", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("120 / 200 XP", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("80 XP para o próximo nível", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void RendersAccessibleProgressWithCorrectPercentage()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var model = new ExperienceViewModel(2, 50, 200, 150);
 
         var cut = context.Render<ExperienceBar>(parameters => parameters
@@ -55,7 +71,7 @@ public sealed class ExperienceBarTests
     [InlineData(250, 100)]
     public void ClampsProgressPercentage(long currentExperience, int expectedPercentage)
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var model = new ExperienceViewModel(3, currentExperience, 100, 0);
 
         var cut = context.Render<ExperienceBar>(parameters => parameters
@@ -69,7 +85,7 @@ public sealed class ExperienceBarTests
     [Fact]
     public void RendersExperienceGainFeedbackWhenRewardWasGranted()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var model = new ExperienceViewModel(1, 10, 100, 90);
 
         var cut = context.Render<ExperienceBar>(parameters => parameters
@@ -85,7 +101,7 @@ public sealed class ExperienceBarTests
     [Fact]
     public void DoesNotRenderFeedbackWithoutNewReward()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var model = new ExperienceViewModel(1, 10, 100, 90);
 
         var cut = context.Render<ExperienceBar>(parameters => parameters
@@ -97,7 +113,7 @@ public sealed class ExperienceBarTests
     [Fact]
     public void RendersNothingWhenModelIsUnavailableAndNotLoading()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
 
         var cut = context.Render<ExperienceBar>();
 

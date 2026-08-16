@@ -1,25 +1,27 @@
 @page "/profile/create"
 @attribute [AllowAnonymous]
 @layout BeeDay.Web.Components.Layout.OnboardingLayout
+@using BeeDay.Web.Components.Features.ProfileCreation
 @inject BeeDay.Web.Components.Features.ProfileCreation.State.ProfileCreationState State
 @inject NavigationManager Navigation
+@inject IStringLocalizer<ProfileCreationResources> Localizer
 
-<PageTitle>Get started | BeeDay</PageTitle>
+<PageTitle>@Localizer["PageTitle"]</PageTitle>
 
-<section class="profile-page beeday-fade-in" aria-label="Create account flow">
-    <PublicAuthActions DestinationHref="/login" DestinationLabel="Log in"
-                       CloseLabel="Close create account and return to Home" Label="Create account actions" />
+<section class="profile-page beeday-fade-in" aria-label="@Localizer["CreateAccountFlowAriaLabel"]">
+    <PublicAuthActions DestinationHref="/login" DestinationLabel="@Localizer["LogIn"]"
+                       CloseLabel="@Localizer["CloseAndReturnToHome"]" Label="@Localizer["CreateAccountActionsLabel"]" />
 
     <div class="profile-panel profile-panel--@State.CurrentStepClass">
         <div class="profile-panel__global-brand"><BeeDayBrand /></div>
         @if (State.Step == BeeDay.Web.Components.Features.ProfileCreation.State.ProfileCreationStep.Account)
         {
-            <h1 id="create-profile-heading">Create your account</h1>
-            <p class="profile-panel__intro">Start your journey in BeeDay.</p>
+            <h1 id="create-profile-heading">@Localizer["CreateYourAccount"]</h1>
+            <p class="profile-panel__intro">@Localizer["StartYourJourney"]</p>
 
             <div class="profile-form">
                 <label class="profile-field">
-                    <span>Full name</span>
+                    <span>@Localizer["FullNameLabel"]</span>
                     <input type="text"
                            class="beeday-field__control profile-field__input"
                            autocomplete="name"
@@ -28,7 +30,7 @@
                 </label>
 
                 <label class="profile-field">
-                    <span>Email</span>
+                    <span>@Localizer["EmailLabel"]</span>
                     <input type="email"
                            class="beeday-field__control profile-field__input"
                            autocomplete="email"
@@ -37,7 +39,7 @@
                 </label>
 
                 <label class="profile-field">
-                    <span>Password</span>
+                    <span>@Localizer["PasswordLabel"]</span>
                     <input type="password"
                            class="beeday-field__control profile-field__input"
                            autocomplete="new-password"
@@ -49,14 +51,14 @@
                 <p id="password-requirements"
                    class="profile-password-hint @(State.IsPasswordValid ? "profile-password-hint--valid" : string.Empty)">
                     @(State.IsPasswordValid
-                        ? "Password valid"
-                        : "Use at least 8 characters, one letter and one number.")
+                        ? Localizer["PasswordValid"]
+                        : Localizer["PasswordRequirements"])
                 </p>
 
                 @if (State.ShouldShowConfirmPassword)
                 {
                     <label class="profile-field beeday-fade-in">
-                        <span>Confirm password</span>
+                        <span>@Localizer["ConfirmPasswordLabel"]</span>
                         <input type="password"
                                class="beeday-field__control profile-field__input"
                                autocomplete="new-password"
@@ -74,20 +76,20 @@
                                FullWidth="true"
                                Disabled="@(!State.CanContinueAccount)"
                                OnClick="ContinueToProfile">
-                    Continue
+                    @Localizer["ContinueButton"]
                 </BeeDayButton>
             </div>
         }
         else
         {
-            <h1 id="create-profile-heading">Choose your nickname</h1>
-            <p class="profile-panel__intro">This is how you'll be identified in BeeDay.</p>
+            <h1 id="create-profile-heading">@Localizer["ChooseYourNickname"]</h1>
+            <p class="profile-panel__intro">@Localizer["IdentifiedInBeeDay"]</p>
 
             <div class="profile-form">
-                <BeeDayButton Variant="BeeDayButtonVariant.Secondary" Compact="true" Class="profile-form__back" OnClick="Back">Back</BeeDayButton>
+                <BeeDayButton Variant="BeeDayButtonVariant.Secondary" Compact="true" Class="profile-form__back" OnClick="Back">@Localizer["BackButton"]</BeeDayButton>
 
                 <label class="profile-field">
-                    <span>Nickname</span>
+                    <span>@Localizer["NicknameLabel"]</span>
                     <div class="profile-nickname-field">
                         <span class="profile-nickname-field__prefix">@@</span>
                         <input class="beeday-field__control profile-field__input profile-nickname-field__input"
@@ -108,7 +110,7 @@
                                IsLoading="@State.IsBusy"
                                Disabled="@State.IsBusy"
                                OnClick="CompleteProfileAsync">
-                    Create account
+                    @Localizer["CreateAccountButton"]
                 </BeeDayButton>
             </div>
         }

@@ -13,6 +13,7 @@ using BeeDay.Web.Components.Features.ProfileCreation.State;
 using BeeDay.Web.Configuration;
 using BeeDay.Web.Diagnostics;
 using BeeDay.Web.HealthChecks;
+using BeeDay.Web.Localization;
 using BeeDay.Web.Services;
 using BeeDay.Web.Services.Authentication;
 using MediatR;
@@ -20,6 +21,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -166,10 +168,38 @@ builder.Services
             {
                 context.RejectPrincipal();
                 await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return;
             }
+
+            // Hands the User this handler already loaded off to AuthenticatedAccountCultureProvider
+            // (no extra read) via HttpContext.Items, so a session authenticated purely by this
+            // persistent "BeeDay.Auth" cookie — one that never repasses through POST /auth/login,
+            // the only other place this precedence rule is applied — still gets its saved language
+            // applied. That provider only ever consults this when no explicit BeeDay.Culture cookie
+            // already exists; see its own remarks for why request-culture resolution, not this
+            // event, is where that has to happen.
+            context.HttpContext.Items[AuthenticatedAccountCultureProvider.HttpContextItemsKey] = user;
         };
     });
 builder.Services.AddAuthorization();
+
+builder.Services.AddLocalization();
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.SetDefaultCulture(BeeDayCultures.Default)
+        .AddSupportedCultures(BeeDayCultures.Supported)
+        .AddSupportedUICultures(BeeDayCultures.Supported);
+
+    // Explicit cookie first (always wins), then the authenticated account's saved language for a
+    // request that has neither — no query-string or Accept-Language sniffing yet, so an anonymous
+    // visitor's browser language never silently overrides the explicit/default culture before a
+    // later Sprint deliberately decides to add that provider.
+    options.RequestCultureProviders =
+    [
+        new CookieRequestCultureProvider { CookieName = BeeDayCultures.CookieName },
+        new AuthenticatedAccountCultureProvider(builder.Environment.IsDevelopment())
+    ];
+});
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<BeeDay.Application.Common.Security.ICurrentUserContext, HttpCurrentUserContext>();
@@ -185,6 +215,7 @@ builder.Services.AddScoped<BeeDayWebService>();
 builder.Services.AddScoped<ToastService>();
 builder.Services.AddScoped<AuthenticatedUserInitializer>();
 builder.Services.AddScoped<AuthenticatedEntryDestinationResolver>();
+builder.Services.AddScoped<AuthenticatedCultureSynchronizer>();
 builder.Services.AddScoped<DashboardState>();
 builder.Services.AddScoped<BeeDayFeedbackStore>();
 builder.Services.AddScoped<INotificationHandler<DomainEventNotification>, BeeDayFeedbackEventHandler>();
@@ -215,8 +246,17 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
+// Authentication must run before request-localization here: AuthenticatedAccountCultureProvider
+// (registered into RequestLocalizationOptions above) reads the User that OnValidatePrincipal
+// stashes on HttpContext.Items, so that hand-off has to have already happened by the time
+// UseRequestLocalization() asks its providers to resolve this request's culture. Anonymous
+// requests are unaffected either way — UseAuthentication() runs unconditionally but only
+// populates HttpContext.Items when a valid "BeeDay.Auth" cookie is actually present.
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseRequestLocalization();
+
 app.UseAntiforgery();
 app.MapStaticAssets();
 
@@ -248,6 +288,7 @@ app.MapHealthChecks("/health", new HealthCheckOptions
 app.MapPost("/auth/login", async (
     HttpContext httpContext,
     ISender sender,
+    AuthenticatedCultureSynchronizer cultureSynchronizer,
     [FromForm] string email,
     [FromForm] string password,
     [FromForm] string? returnUrl,
@@ -281,6 +322,18 @@ app.MapPost("/auth/login", async (
             CookieAuthenticationDefaults.AuthenticationScheme,
             principal,
             authenticationProperties);
+
+        // SignInAsync only affects the outgoing response cookie — HttpContext.User for the rest of
+        // THIS request is still whatever it was when the pipeline started (anonymous, since no auth
+        // cookie was present yet). Assigning it here is what lets ICurrentUserContext, and therefore
+        // the same GetCurrentUserQuery/UpdateCurrentUserPreferencesCommand Settings itself uses,
+        // resolve the just-authenticated user for the culture synchronization immediately below.
+        httpContext.User = principal;
+
+        // Precedence rule: an explicit BeeDay.Culture cookie already on this request wins (and the
+        // account converges to it); otherwise the account's saved language becomes the effective
+        // culture. See AuthenticatedCultureSynchronizer for the full rule.
+        await cultureSynchronizer.SynchronizeAtLoginAsync(httpContext, httpContext.RequestAborted);
 
         loggerFactory.CreateLogger("BeeDay.Authentication").LogInformation(
             "Authentication.LoginSucceeded UserId={UserId} RememberMe={RememberMe}", user.Id, rememberMe == true);
@@ -327,6 +380,22 @@ app.MapPost("/auth/logout", async (HttpContext httpContext, [FromForm] string? r
 
     return Results.LocalRedirect(LoginDestinationResolver.ResolveLogout(returnUrl));
 }).RequireAuthorization();
+
+app.MapPost("/culture/set", (HttpContext httpContext, [FromForm] string culture, [FromForm] string? returnUrl) =>
+{
+    if (!BeeDayCultures.Supported.Contains(culture, StringComparer.OrdinalIgnoreCase))
+    {
+        return Results.BadRequest();
+    }
+
+    httpContext.Response.Cookies.Append(
+        BeeDayCultures.CookieName,
+        CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+        BeeDayCultures.CreateCookieOptions(app.Environment.IsDevelopment()));
+
+    var destination = LoginDestinationResolver.IsLocalPath(returnUrl) ? returnUrl! : "/";
+    return Results.LocalRedirect(destination);
+});
 
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 

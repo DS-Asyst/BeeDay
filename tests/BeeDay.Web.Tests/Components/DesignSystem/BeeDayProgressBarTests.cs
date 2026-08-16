@@ -1,4 +1,5 @@
 using BeeDay.Web.Components.DesignSystem.Progress;
+using BeeDay.Web.Tests.Localization;
 
 namespace BeeDay.Web.Tests.Components.DesignSystem;
 
@@ -12,7 +13,7 @@ public sealed class BeeDayProgressBarTests
     [InlineData(20, 0, "unavailable", "width: 0%")]
     public void RepresentsProgressStatesSafely(double value, double maximum, string state, string width)
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var cut = context.Render<BeeDayProgressBar>(parameters => parameters
             .Add(component => component.Label, "Task completion")
             .Add(component => component.Value, value)
@@ -29,7 +30,7 @@ public sealed class BeeDayProgressBarTests
     [Fact]
     public void ExposesClampedAccessibleValuesAndVisibleLabel()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var cut = context.Render<BeeDayProgressBar>(parameters => parameters
             .Add(component => component.Label, "Project task completion")
             .Add(component => component.Value, 12)
@@ -44,9 +45,45 @@ public sealed class BeeDayProgressBarTests
     }
 
     [Fact]
+    public void UnderEnglishUiCulture_DefaultsUnsetValueTextToEnglish()
+    {
+        using var context = new BunitContext().WithLocalization();
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<BeeDayProgressBar>(parameters => parameters
+            .Add(component => component.Label, "Task completion")
+            .Add(component => component.Value, 5)
+            .Add(component => component.Maximum, 10)));
+
+        Assert.Equal("5 of 10", cut.Find("[role='progressbar']").GetAttribute("aria-valuetext"));
+    }
+
+    [Fact]
+    public void UnderPortugueseUiCulture_DefaultsUnsetValueTextToPortuguese()
+    {
+        using var context = new BunitContext().WithLocalization();
+        var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<BeeDayProgressBar>(parameters => parameters
+            .Add(component => component.Label, "Task completion")
+            .Add(component => component.Value, 5)
+            .Add(component => component.Maximum, 10)));
+
+        Assert.Equal("5 de 10", cut.Find("[role='progressbar']").GetAttribute("aria-valuetext"));
+    }
+
+    [Fact]
+    public void UnderPortugueseUiCulture_UnavailableMaximumRendersPortugueseFallbackText()
+    {
+        using var context = new BunitContext().WithLocalization();
+        var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<BeeDayProgressBar>(parameters => parameters
+            .Add(component => component.Label, "Task completion")
+            .Add(component => component.Value, 5)
+            .Add(component => component.Maximum, 0)));
+
+        Assert.Equal("Progresso indisponível", cut.Find("[role='progressbar']").GetAttribute("aria-valuetext"));
+    }
+
+    [Fact]
     public void ExposesRewardToneWithoutChangingProgressSemantics()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var cut = context.Render<BeeDayProgressBar>(parameters => parameters
             .Add(component => component.Label, "Experience progress")
             .Add(component => component.Value, 25)

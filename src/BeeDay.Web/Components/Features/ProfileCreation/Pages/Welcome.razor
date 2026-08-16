@@ -1,13 +1,15 @@
 @page "/welcome"
 @attribute [AllowAnonymous]
 @layout BeeDay.Web.Components.Layout.OnboardingLayout
+@using BeeDay.Web.Components.Features.ProfileCreation
 @inject NavigationManager Navigation
+@inject IStringLocalizer<ProfileCreationResources> Localizer
 
-<PageTitle>Login | BeeDay</PageTitle>
+<PageTitle>@Localizer["RedirectingToLoginTitle"]</PageTitle>
 
 <div class="entry-loading" role="status" aria-live="polite">
     <span>BEEDAY</span>
-    <p>Redirecting to login...</p>
+    <p>@Localizer["RedirectingToLoginMessage"]</p>
 </div>
 
 @code {

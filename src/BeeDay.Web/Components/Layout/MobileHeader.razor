@@ -1,11 +1,13 @@
+@inject IStringLocalizer<LayoutResources> Localizer
+
 <header class="mobile-header">
-    <NavLink href="/profile" Match="NavLinkMatch.Prefix" class="mobile-header__brand" aria-label="BeeDay — go to Profile">
+    <NavLink href="/profile" Match="NavLinkMatch.Prefix" class="mobile-header__brand" aria-label="@Localizer["BrandHomeAriaLabel"]">
         <BeeDayBrand />
     </NavLink>
 
     <button type="button"
             class="mobile-header__menu-button"
-            aria-label="@(IsNavOpen ? "Close navigation menu" : "Open navigation menu")"
+            aria-label="@(IsNavOpen ? Localizer["CloseNavMenuAriaLabel"] : Localizer["OpenNavMenuAriaLabel"])"
             aria-expanded="@(IsNavOpen ? "true" : "false")"
             aria-controls="mobile-navigation"
             @onclick="OnToggleNav">

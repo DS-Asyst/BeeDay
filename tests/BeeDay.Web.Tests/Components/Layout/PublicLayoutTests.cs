@@ -1,6 +1,9 @@
 using BeeDay.Web.Components.Layout;
+using BeeDay.Web.Resources;
 using BeeDay.Web.Services;
+using BeeDay.Web.Tests.Localization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Localization;
 
 namespace BeeDay.Web.Tests.Components.Layout;
 
@@ -9,9 +12,9 @@ public sealed class PublicLayoutTests
     [Fact]
     public void RendersHeaderMainBodyAndFooter()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         context.AddAuthorization().SetNotAuthorized();
-        context.Services.AddSingleton(new ToastService());
+        context.Services.AddSingleton(sp => new ToastService(sp.GetRequiredService<IStringLocalizer<SharedResources>>()));
         PublicHeaderTests.RegisterDestinationResolver(context, hasProfile: true, hasCompletedOnboarding: true);
 
         RenderFragment body = builder =>

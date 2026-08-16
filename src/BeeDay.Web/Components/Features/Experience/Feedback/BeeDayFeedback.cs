@@ -2,6 +2,13 @@ using BeeDay.Domain.Enums;
 
 namespace BeeDay.Web.Components.Features.Experience.Feedback;
 
+/// <summary>
+/// ExperienceSummary/HistorySummary are public members of this record and stay for backward
+/// compatibility, unchanged (still English-only — a record has no access to IStringLocalizer at
+/// construction time). BeeDayFeedbackModal, the only actual renderer of this data, does not use
+/// them: it computes its own culture-aware equivalents via IStringLocalizer&lt;ExperienceResources&gt;,
+/// keeping localization responsibility in the presentation layer without removing this API.
+/// </summary>
 public sealed record BeeDayFeedback(
     Guid EventId,
     Guid ExperienceEntryId,

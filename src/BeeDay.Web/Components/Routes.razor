@@ -1,3 +1,5 @@
+@inject IStringLocalizer<DesignSystem.DesignSystemResources> Localizer
+
 <CascadingAuthenticationState>
     <Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
         <Found Context="routeData">
@@ -6,7 +8,7 @@
                     <BeeDay.Web.Components.Features.Authentication.Components.RedirectToLogin />
                 </NotAuthorized>
                 <Authorizing>
-                    <BeeDayLoading IsVisible="true" Label="Checking your session..." />
+                    <BeeDayLoading IsVisible="true" Label="@Localizer["SessionCheckingLabel"]" />
                 </Authorizing>
             </AuthorizeRouteView>
             <FocusOnNavigate RouteData="routeData" Selector="h1" />

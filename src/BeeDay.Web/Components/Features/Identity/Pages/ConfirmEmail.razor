@@ -1,9 +1,11 @@
 @page "/account/confirm-email"
 @attribute [AllowAnonymous]
 @layout OnboardingLayout
+@using BeeDay.Web.Components.Features.Identity
 @inject MediatR.ISender Sender
+@inject IStringLocalizer<IdentityResources> Localizer
 
-<PageTitle>Email confirmation | BeeDay</PageTitle>
+<PageTitle>@Localizer["ConfirmEmailPageTitle"]</PageTitle>
 
 <section class="identity-page beeday-fade-in">
     <div class="identity-card">
@@ -14,60 +16,60 @@
             {
                 case ConfirmationPageState.Processing:
                     <header class="identity-header">
-                        <h1>Confirming email</h1>
-                        <p>Validating your confirmation link...</p>
+                        <h1>@Localizer["ConfirmingEmailHeading"]</h1>
+                        <p>@Localizer["ValidatingLinkIntro"]</p>
                     </header>
                     break;
 
                 case ConfirmationPageState.Confirmed:
                     <header class="identity-header">
-                        <h1>Email confirmed</h1>
-                        <p>Your account is ready. Sign in to begin your journey.</p>
+                        <h1>@Localizer["EmailConfirmedHeading"]</h1>
+                        <p>@Localizer["AccountReadyIntro"]</p>
                     </header>
                     <div class="identity-feedback identity-feedback--success" role="status">
-                        Confirmation completed successfully.
+                        @Localizer["ConfirmationCompletedMessage"]
                     </div>
-                    <a class="identity-navigation-link identity-navigation-link--primary" href="/login?confirmed=true">SIGN IN</a>
+                    <a class="identity-navigation-link identity-navigation-link--primary" href="/login?confirmed=true">@Localizer["SignIn"]</a>
                     break;
 
                 case ConfirmationPageState.AlreadyConfirmed:
                     <header class="identity-header">
-                        <h1>Email already confirmed</h1>
-                        <p>This confirmation link has already been used. Your account remains active.</p>
+                        <h1>@Localizer["AlreadyConfirmedHeading"]</h1>
+                        <p>@Localizer["AlreadyConfirmedIntro"]</p>
                     </header>
                     <div class="identity-feedback identity-feedback--success" role="status">
-                        You can sign in normally.
+                        @Localizer["CanSignInNormallyMessage"]
                     </div>
-                    <a class="identity-navigation-link identity-navigation-link--primary" href="/login">SIGN IN</a>
+                    <a class="identity-navigation-link identity-navigation-link--primary" href="/login">@Localizer["SignIn"]</a>
                     break;
 
                 case ConfirmationPageState.Expired:
                     <header class="identity-header">
-                        <h1>Confirmation link expired</h1>
-                        <p>This link is no longer valid. Request a new confirmation email.</p>
+                        <h1>@Localizer["LinkExpiredHeading"]</h1>
+                        <p>@Localizer["LinkExpiredIntro"]</p>
                     </header>
                     <div class="identity-feedback identity-feedback--error" role="alert">@_error</div>
-                    <a class="identity-navigation-link" href="/account/resend-confirmation">REQUEST A NEW LINK</a>
+                    <a class="identity-navigation-link" href="/account/resend-confirmation">@Localizer["RequestNewLink"]</a>
                     break;
 
                 case ConfirmationPageState.Replaced:
                     <header class="identity-header">
-                        <h1>Confirmation link replaced</h1>
-                        <p>A newer confirmation link was generated for this account.</p>
+                        <h1>@Localizer["LinkReplacedHeading"]</h1>
+                        <p>@Localizer["LinkReplacedIntro"]</p>
                     </header>
                     <div class="identity-feedback identity-feedback--error" role="alert">
-                        Use the most recent email or request another confirmation link.
+                        @Localizer["UseMostRecentLinkMessage"]
                     </div>
-                    <a class="identity-navigation-link" href="/account/resend-confirmation">REQUEST A NEW LINK</a>
+                    <a class="identity-navigation-link" href="/account/resend-confirmation">@Localizer["RequestNewLink"]</a>
                     break;
 
                 default:
                     <header class="identity-header">
-                        <h1>Invalid confirmation link</h1>
-                        <p>This link is incomplete or does not belong to a valid confirmation request.</p>
+                        <h1>@Localizer["InvalidLinkHeading"]</h1>
+                        <p>@Localizer["InvalidLinkIntro"]</p>
                     </header>
                     <div class="identity-feedback identity-feedback--error" role="alert">@_error</div>
-                    <a class="identity-navigation-link" href="/account/resend-confirmation">REQUEST A NEW LINK</a>
+                    <a class="identity-navigation-link" href="/account/resend-confirmation">@Localizer["RequestNewLink"]</a>
                     break;
             }
         </div>
@@ -79,14 +81,16 @@
     public string? Token { get; set; }
 
     private ConfirmationPageState _state = ConfirmationPageState.Processing;
-    private string _error = "Unable to confirm this email.";
+    private string _error = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
+        _error = Localizer["DefaultConfirmationError"];
+
         if (string.IsNullOrWhiteSpace(Token))
         {
             _state = ConfirmationPageState.Invalid;
-            _error = "The confirmation token is missing.";
+            _error = Localizer["ConfirmationTokenMissingError"];
             return;
         }
 
@@ -98,8 +102,13 @@
         }
         catch (Exception exception)
         {
-            _error = exception.Message;
             _state = Classify(exception.Message);
+            _error = _state switch
+            {
+                ConfirmationPageState.Expired => Localizer["LinkExpiredMessage"],
+                ConfirmationPageState.Invalid => Localizer["InvalidLinkMessage"],
+                _ => _error
+            };
         }
     }
 

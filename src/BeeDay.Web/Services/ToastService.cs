@@ -1,6 +1,9 @@
+using BeeDay.Web.Resources;
+using Microsoft.Extensions.Localization;
+
 namespace BeeDay.Web.Services;
 
-public sealed class ToastService
+public sealed class ToastService(IStringLocalizer<SharedResources> localizer)
 {
     private readonly List<ToastMessage> messages = [];
 
@@ -9,13 +12,13 @@ public sealed class ToastService
     public IReadOnlyList<ToastMessage> Messages => messages;
 
     public void ShowSuccess(string message, string? title = null) =>
-        Show(message, title ?? "Success", ToastVariant.Success);
+        Show(message, title ?? localizer["ToastDefaultSuccessTitle"], ToastVariant.Success);
 
     public void ShowError(string message, string? title = null) =>
-        Show(message, title ?? "Something went wrong", ToastVariant.Error, TimeSpan.FromSeconds(7));
+        Show(message, title ?? localizer["ToastDefaultErrorTitle"], ToastVariant.Error, TimeSpan.FromSeconds(7));
 
     public void ShowInfo(string message, string? title = null) =>
-        Show(message, title ?? "Information", ToastVariant.Info);
+        Show(message, title ?? localizer["ToastDefaultInfoTitle"], ToastVariant.Info);
 
     public void Remove(Guid id)
     {

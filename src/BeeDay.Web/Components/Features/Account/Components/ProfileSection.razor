@@ -1,19 +1,21 @@
 @using BeeDay.Web.Components.Features.Account.Models
+@using BeeDay.Web.Components.Features.Account
+@inject IStringLocalizer<AccountResources> Localizer
 
-<BeeDaySettingsSection Eyebrow="IDENTITY"
-                        Title="Profile"
-                        Description="Manage the personal information shown across BeeDay.">
+<BeeDaySettingsSection Eyebrow="@Localizer["ProfileEyebrow"]"
+                        Title="@Localizer["ProfileTitle"]"
+                        Description="@Localizer["ProfileDescription"]">
     <BeeDaySettingsForm TModel="ProfileFormModel" Model="Model" OnValidSubmit="OnSave"
-                         FormName="account-profile" SubmitLabel="Save Profile" IsBusy="IsBusy">
+                         FormName="account-profile" SubmitLabel="@Localizer["ProfileSubmitLabel"]" IsBusy="IsBusy">
         <div class="beeday-settings-form__grid">
-            <BeeDayInput Id="account-name" Label="Name" Required="true" MaxLength="100"
+            <BeeDayInput Id="account-name" Label="@Localizer["NameLabel"]" Required="true" MaxLength="100"
                           @bind-Value="Model.Name" />
-            <BeeDayInput Id="account-email" Label="Email" Required="true" MaxLength="254"
+            <BeeDayInput Id="account-email" Label="@Localizer["EmailLabel"]" Required="true" MaxLength="254"
                           @bind-Value="Model.Email" />
-            <BeeDayInput Id="account-nickname" Label="Nickname" ReadOnly="true" @bind-Value="Model.Nickname" />
+            <BeeDayInput Id="account-nickname" Label="@Localizer["NicknameLabel"]" ReadOnly="true" @bind-Value="Model.Nickname" />
         </div>
 
-        <p class="beeday-settings-form__hint">Your nickname is permanent after your profile is created.</p>
+        <p class="beeday-settings-form__hint">@Localizer["ProfileHint"]</p>
     </BeeDaySettingsForm>
 </BeeDaySettingsSection>
 

@@ -42,14 +42,14 @@
                                    Disabled="IsBusy"
                                    Class="delete-confirmation__cancel-action"
                                    OnClick="CancelAsync">
-                        @CancelLabel
+                        @(CancelLabel ?? Localizer["ConfirmDialogCancelLabel"])
                     </BeeDayButton>
                     <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationDanger"
                                    Disabled="IsBusy"
                                    IsLoading="IsBusy"
                                    Class="delete-confirmation__confirm-action"
                                    OnClick="ConfirmAsync">
-                        @ConfirmLabel
+                        @(ConfirmLabel ?? Localizer["ConfirmDialogConfirmLabel"])
                     </BeeDayButton>
                 </div>
             </div>
@@ -58,6 +58,8 @@
 }
 
 @code {
+    [Inject] private IStringLocalizer<DesignSystemResources> Localizer { get; set; } = default!;
+
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public bool IsBusy { get; set; }
     [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
@@ -65,8 +67,8 @@
     [Parameter] public string? ItemTitle { get; set; }
     [Parameter] public string? Warning { get; set; }
     [Parameter] public string? WarningDetails { get; set; }
-    [Parameter] public string ConfirmLabel { get; set; } = "Confirm";
-    [Parameter] public string CancelLabel { get; set; } = "Cancel";
+    [Parameter] public string? ConfirmLabel { get; set; }
+    [Parameter] public string? CancelLabel { get; set; }
     [Parameter] public EventCallback OnConfirm { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
 

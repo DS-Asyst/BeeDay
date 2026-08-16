@@ -9,7 +9,7 @@ public partial class EditorModalShell
     [Parameter, EditorRequired] public object Model { get; set; } = default!;
     [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
     [Parameter, EditorRequired] public string TitleId { get; set; } = string.Empty;
-    [Parameter, EditorRequired] public string SubmitLabel { get; set; } = "SAVE";
+    [Parameter] public string? SubmitLabel { get; set; }
     [Parameter] public bool ShowDelete { get; set; }
     [Parameter] public bool IsBusy { get; set; }
     [Parameter] public RenderFragment? HeroContent { get; set; }

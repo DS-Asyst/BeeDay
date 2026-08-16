@@ -25,6 +25,10 @@ src/BeeDay.Web/
 ├── Configuration/             ProductionHostingOptions (DataProtection, forwarded headers)
 ├── Diagnostics/                CorrelationIdMiddleware, GlobalExceptionHandler, WebEventIds
 ├── HealthChecks/                HealthCheckResponseWriter (formato JSON de /health*)
+├── Localization/                BeeDayCultures, AuthenticatedAccountCultureProvider,
+│                                    DomainErrorLocalizer, ValidationMessageLocalizer — ver
+│                                    07-localization.md
+├── Resources/                     SharedResources (catálogo cross-cutting) — ver 07-localization.md
 ├── Services/
 │   ├── BeeDayWebService.cs       fachada MediatR usada pela maioria dos componentes Feature
 │   ├── AuthenticatedUserInitializer, HttpCurrentUserContext, ToastService,
@@ -53,6 +57,7 @@ src/BeeDay.Web/
 | [`04-feature-components.md`](04-feature-components.md) | As 13 áreas de `Components/Features/` — componentes, state, models, como cada uma chama Application |
 | [`05-design-system-integration.md`](05-design-system-integration.md) | Como a Web compõe o Design System, os 3 módulos de JS interop, ordem de carregamento de CSS |
 | [`06-testing.md`](06-testing.md) | Mapeamento componente → teste em `BeeDay.Web.Tests` (bUnit + integração) e `BeeDay.E2E.Tests` (Playwright) |
+| [`07-localization.md`](07-localization.md) | Suporte en-US/pt-BR: `BeeDayCultures`, precedência cookie → `User.Language` → fallback, endpoint `/culture/set`, convenção de catálogos `.resx`, responsabilidade da Web pelas mensagens localizadas (EPIC 23) |
 
 ## Integração com Application
 
@@ -72,6 +77,7 @@ injetam `MediatR.ISender` diretamente e nunca passam por `BeeDayWebService` — 
 4. `04-feature-components.md` — cada área de funcionalidade em detalhe.
 5. `05-design-system-integration.md` — os blocos reutilizáveis que as Features compõem.
 6. `06-testing.md` — como cada camada acima é coberta por teste.
+7. `07-localization.md` — como a Web resolve, persiste e aplica o idioma (en-US/pt-BR).
 
 ## Achados relevantes (reportados, não corrigidos)
 

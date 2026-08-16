@@ -8,12 +8,18 @@ componente — quatro novos na Sprint 21.3 (`Layout/{NavigationItem,NavigationIt
 MobileSidebar}.razor.css`), um removido (`Layout/TopNavigation.razor.css`, componente deletado —
 ver `docs/web/03-layouts.md`), ver abaixo e `docs/ux/03-responsive.md`).
 
-**Última verificação:** 2026-08-14 (Sprint 21.16, EPIC 21 — Brand Blue Refinement).
-A família azul oficial é `#3A4ED9`/`#3043C7`/`#2637AD`; a família amarela de
-marca/recompensa usa `#FFD326`/`#E8BD00`. Nenhum namespace paralelo foi criado. Nunito continua
-sendo a única tipografia de produto; a tipografia própria da marca existe apenas dentro do asset
-oficial `beeday-wordmark.png`.
+**Última verificação:** 2026-08-15 (Sprint 22.2, EPIC 22 — Hero Image, CTA & Brand Alignment). A
+família azul oficial é `#5247F9`/`#3F33F1`/`#1C0EF2`; a família amarela de marca/recompensa usa
+`#FFD326`/`#E8BD00`. Nenhum namespace paralelo foi criado — o token contextual
+`--beeday-color-public-home-cta`, introduzido na Sprint 21.16 especificamente para o CTA do Hero, foi
+removido nesta Sprint em favor do token de marca compartilhado. Nunito continua sendo a única
+tipografia de produto; a tipografia própria da marca existe apenas dentro do asset oficial
+`beeday-wordmark.png`.
 
+Verificação anterior: 2026-08-15 (Sprint 22.1, EPIC 22 — Public Home Header, Brand & Language
+Switcher, correção de Brand Color).
+Verificação anterior: 2026-08-14 (Sprint 21.16, EPIC 21 — Brand Blue Refinement) — família azul
+`#3A4ED9`/`#3043C7`/`#2637AD`, remigrada integralmente na Sprint 22.1 para a paleta oficial da EPIC 22.
 Verificação anterior: 2026-08-12 (Sprint 21.3, EPIC 21 — BeeDay Navigation) — contagem de CSS
 isolado corrigida de 33 para 36 (+4 novos, -1 removido); §10 atualizado (5 arquivos agora
 coordenam o breakpoint `min-width: 1024px`, `TopNavigation` substituída por `MobileHeader`/
@@ -75,18 +81,31 @@ Nenhuma cor é definida duas vezes com valores diferentes sob o mesmo nome — c
 Status, Activity, Attribute, Habit, Button, Comic, Card, Chrome) tem seu próprio namespace de
 token, então uma alteração em uma família nunca risca colidir com outra.
 
-**Migração de marca atual (Sprint 21.16, EPIC 21):** `--beeday-color-brand-primary` é `#3A4ED9`,
-com hover `#3043C7`, active/depth `#2637AD`, light `#6675E3` e soft `#EFF1FF`. Azul é estrutura e ação: primary
-buttons, links importantes, navegação/foco/seleção e progresso funcional. A segunda metade da
-identidade é canônica em `--beeday-color-brand-yellow` (`#FFD326`) e `-hover` (`#E8BD00`): reward,
-XP, milestones e highlights de alta relevância, sempre com foreground escuro. O antigo namespace
-`--beeday-game-yellow*` foi removido. Cores de status (`success`, `warning`, `danger`, `info`),
-atividades e Wallet permanecem semanticamente independentes; brand yellow nunca significa warning
-automaticamente e brand blue não substitui info.
+**Migração de marca atual (Sprint 22.1, EPIC 22):** `--beeday-color-brand-primary` é `#5247F9`,
+com hover `#3F33F1`, active/depth `#1C0EF2`, light `#827AFC` e soft `#F8F7FF` — remigração completa
+da família Sprint 21.16 (`#3A4ED9`), aprovada como cor oficial da marca para a EPIC 22. Hover/active/
+light/soft preservam a mesma matiz e os mesmos deslocamentos de saturação/luminosidade relativos à
+base que a família anterior usava, então a escada permanece coerente sob a nova matiz. `--beeday-focus-color`
+e as sombras `--beeday-shadow-xs/-sm/-md/-lg` (literais `rgb()`, pois CSS não extrai canais de uma
+custom property em hex) foram atualizados para os mesmos canais RGB da nova base (`82 71 249`). Azul
+é estrutura e ação: primary buttons, links importantes, navegação/foco/seleção e progresso funcional.
+A segunda metade da identidade é canônica em `--beeday-color-brand-yellow` (`#FFD326`) e `-hover`
+(`#E8BD00`): reward, XP, milestones e highlights de alta relevância, sempre com foreground escuro. O
+antigo namespace `--beeday-game-yellow*` foi removido. Cores de status (`success`, `warning`,
+`danger`, `info`), atividades e Wallet permanecem semanticamente independentes; brand yellow nunca
+significa warning automaticamente e brand blue não substitui info. O token contextual
+`--beeday-color-public-home-cta` (`#0079B9` e variantes, Sprint 21.16, ajustado por contraste AA
+sobre um fundo cyan que não existe mais no Hero) foi removido na Sprint 22.2 — o CTA `Get started`
+da Public Home agora usa `--beeday-color-brand-primary` diretamente, como qualquer outro botão
+primário do produto, sem paleta paralela.
 
 Surfaces permanecem neutras. Azul e amarelo devem ganhar importância por contraste e hierarquia,
 não por preencher indiscriminadamente cards ou páginas. É proibido criar famílias `new`/`v2`, usar
 texto branco sobre amarelo, ou codificar os HEX de marca diretamente em componentes/assets.
+
+**Histórico (Sprint 21.16, EPIC 21):** `--beeday-color-brand-primary` era `#3A4ED9`, com hover
+`#3043C7`, active/depth `#2637AD`, light `#6675E3` e soft `#EFF1FF` — família remigrada integralmente
+na Sprint 22.1 (ver acima); nenhum consumidor manteve o valor antigo.
 
 **Histórico (Sprint 20.7, EPIC 20):** `--beeday-color-brand-primary` (`#2538d2`,
 extraído diretamente da página-modelo) é a cor primária **canônica** de todo o produto. Introduzida na

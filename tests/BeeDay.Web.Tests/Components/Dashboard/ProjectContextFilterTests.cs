@@ -1,6 +1,8 @@
+using System.Globalization;
 using BeeDay.Application.Features.Dashboard.Responses;
 using BeeDay.Domain.Enums;
 using BeeDay.Web.Components.Features.Dashboard.Components;
+using BeeDay.Web.Tests.Localization;
 
 namespace BeeDay.Web.Tests.Components.Dashboard;
 
@@ -9,7 +11,7 @@ public sealed class ProjectContextFilterTests
     [Fact]
     public void MenuIsClosedByDefault()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
 
         var cut = context.Render<ProjectContextFilter>();
 
@@ -20,25 +22,34 @@ public sealed class ProjectContextFilterTests
     [Fact]
     public async Task RendersAllProjectsAndAvailableProjectsWhenOpened()
     {
-        using var context = new BunitContext();
-        var project = CreateProject("Project A");
+        var restore = CultureInfo.CurrentUICulture;
+        CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en-US");
+        try
+        {
+            using var context = new BunitContext().WithLocalization();
+            var project = CreateProject("Project A");
 
-        var cut = context.Render<ProjectContextFilter>(parameters => parameters
-            .Add(component => component.Projects, [project]));
+            var cut = context.Render<ProjectContextFilter>(parameters => parameters
+                .Add(component => component.Projects, [project]));
 
-        await cut.Find(".project-context-filter__trigger").ClickAsync();
+            await cut.Find(".project-context-filter__trigger").ClickAsync();
 
-        var options = cut.FindAll(".project-context-filter__option");
+            var options = cut.FindAll(".project-context-filter__option");
 
-        Assert.Equal(2, options.Count);
-        Assert.Equal("All Projects", options[0].TextContent.Trim());
-        Assert.Equal("Project A", options[1].TextContent.Trim());
+            Assert.Equal(2, options.Count);
+            Assert.Equal("All Projects", options[0].TextContent.Trim());
+            Assert.Equal("Project A", options[1].TextContent.Trim());
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = restore;
+        }
     }
 
     [Fact]
     public async Task EmitsSelectedProjectAndClearsBackToAllProjects()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var project = CreateProject("Project A");
         Guid? selectedProjectId = null;
 
@@ -58,7 +69,7 @@ public sealed class ProjectContextFilterTests
     [Fact]
     public async Task ClosesTheMenuAfterSelectingAnOption()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var project = CreateProject("Project A");
 
         var cut = context.Render<ProjectContextFilter>(parameters => parameters

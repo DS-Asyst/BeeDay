@@ -1,5 +1,6 @@
 using BeeDay.Web.Components.Features.Common;
 using BeeDay.Web.Components.Features.Dashboard.Components;
+using BeeDay.Web.Tests.Localization;
 
 namespace BeeDay.Web.Tests.Components.Dashboard;
 
@@ -8,8 +9,8 @@ public sealed class ActivityFilterBarTests
     [Fact]
     public void RendersSearchAndCreateActionWithoutAttributeFilters()
     {
-        using var context = new BunitContext();
-        var cut = context.Render<ActivityFilterBar>();
+        using var context = new BunitContext().WithLocalization();
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<ActivityFilterBar>());
 
         Assert.Contains("placeholder=\"Search\"", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Activity", cut.Markup, StringComparison.Ordinal);
@@ -21,7 +22,7 @@ public sealed class ActivityFilterBarTests
     [Fact]
     public async Task OpensCreateMenuAndEmitsSelectedActivityType()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         ActivityType? selectedType = null;
 
         var cut = context.Render<ActivityFilterBar>(parameters => parameters

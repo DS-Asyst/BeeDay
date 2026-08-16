@@ -4,13 +4,13 @@
 `src/BeeDay.Web/Diagnostics/`, `src/BeeDay.Web/HealthChecks/`, `src/BeeDay.Web/Configuration/` e
 `src/BeeDay.Web/Services/Authentication/`. Trechos de código citados abaixo são reais.
 
-**Última verificação:** 2026-08-07.
+**Última verificação:** 2026-08-15 (adição do endpoint `/culture/set`, EPIC 23).
 
 ## 1. Objetivo
 
 Descrever tudo que `Program.cs` monta antes de qualquer componente Razor ser renderizado: registro
-de DI, guardas de produção, pipeline HTTP, autenticação por cookie, os dois endpoints minimal API
-(`/auth/login`, `/auth/logout`) e health checks.
+de DI, guardas de produção, pipeline HTTP, autenticação por cookie, os três endpoints minimal API
+(`/auth/login`, `/auth/logout`, `/culture/set`) e health checks.
 
 ## 2. Escopo
 
@@ -131,9 +131,9 @@ UseForwardedHeaders (se produção + habilitado)
   são logados como `LogError` (com `WebEventIds.RequestFailed`, `EventId` 6100), os demais como
   `LogWarning`. Ver `docs/testing/01-testing-strategy.md` §6 "Limitações conhecidas" para os
   status desta tabela que não são hoje alcançáveis por uma requisição HTTP real (a superfície HTTP
-  desta aplicação é só `/auth/login`, `/auth/logout`, `/health*` e páginas Blazor).
+  desta aplicação é só `/auth/login`, `/auth/logout`, `/culture/set`, `/health*` e páginas Blazor).
 - `UseHsts`/`UseHttpsRedirection` só fora de Development.
-- `UseAntiforgery` protege os formulários HTML puros (`/auth/login`, `/auth/logout`, e o
+- `UseAntiforgery` protege os formulários HTML puros (`/auth/login`, `/auth/logout`, `/culture/set`, e o
   `<form method="post">` usado por `NavigationItems` para logout — a única navegação autenticada
   que renderiza esse form; `DesktopSidebar`/`MobileHeader`/`MobileSidebar` só disparam o botão que
   abre esse painel) — os componentes Blazor interativos usam `EditForm`/`AntiforgeryToken` própria
@@ -143,7 +143,7 @@ UseForwardedHeaders (se produção + habilitado)
 
 ## 8. Endpoints minimal API
 
-Só dois endpoints HTTP fora de Blazor e health checks, ambos em `Program.cs`:
+Três endpoints HTTP fora de Blazor e health checks, todos em `Program.cs`:
 
 ### `POST /auth/login`
 
@@ -161,6 +161,17 @@ Só dois endpoints HTTP fora de Blazor e health checks, ambos em `Program.cs`:
 
 - `[RequireAuthorization()]`; `SignOutAsync` + loga `Authentication.LogoutSucceeded`; redireciona via
   `LoginDestinationResolver.ResolveLogout(returnUrl)`.
+
+### `POST /culture/set`
+
+- Parâmetros de formulário: `culture`, `returnUrl?`. Anônimo (sem `[RequireAuthorization()]`) — é o
+  único mecanismo oficial de troca de idioma, usado tanto pelo `PublicLanguageSwitcher` (área
+  pública) quanto pelo formulário oculto `#culture-sync-form` em `Account.razor` (Settings).
+- Rejeita (`Results.BadRequest()`) qualquer `culture` fora de `BeeDayCultures.Supported`
+  (`en-US`/`pt-BR`); grava o cookie `BeeDay.Culture` com `BeeDayCultures.CreateCookieOptions(...)` e
+  redireciona (`returnUrl` local válido, senão `/`).
+- Detalhe completo da precedência de cultura (cookie explícito → `User.Language` → fallback) e da
+  convenção de resources está em [`07-localization.md`](07-localization.md), não duplicado aqui.
 
 ### `LoginDestinationResolver` (`Services/Authentication/LoginDestinationResolver.cs`)
 
@@ -212,3 +223,5 @@ Três endpoints mapeados (`HealthCheckResponseWriter.WriteAsync` formata todos c
 - `src/BeeDay.Web/Configuration/ProductionHostingOptions.cs`
 - `src/BeeDay.Web/Services/Authentication/LoginDestinationResolver.cs`, `LoginRateLimiterFactory.cs`,
   `LoginRateLimiterOptions.cs`, `BeeDayClaimTypes.cs`
+- `src/BeeDay.Web/Localization/BeeDayCultures.cs` (para o endpoint `/culture/set`; detalhe completo em
+  [`07-localization.md`](07-localization.md))

@@ -1,19 +1,21 @@
 @using BeeDay.Web.Components.Features.Account.Models
+@using BeeDay.Web.Components.Features.Account
+@inject IStringLocalizer<AccountResources> Localizer
 
-<BeeDaySettingsSection Eyebrow="PASSWORD"
-                        Title="Security"
-                        Description="Protect your account with a strong, unique password.">
+<BeeDaySettingsSection Eyebrow="@Localizer["SecurityEyebrow"]"
+                        Title="@Localizer["SecurityTitle"]"
+                        Description="@Localizer["SecurityDescription"]">
     <BeeDaySettingsForm TModel="SecurityFormModel" Model="Model" OnValidSubmit="OnSave"
-                         FormName="account-security" SubmitLabel="Change Password" IsBusy="IsBusy">
-        <BeeDayInput Id="current-password" Label="Current password" Required="true"
+                         FormName="account-security" SubmitLabel="@Localizer["SecuritySubmitLabel"]" IsBusy="IsBusy">
+        <BeeDayInput Id="current-password" Label="@Localizer["CurrentPasswordLabel"]" Required="true"
                       @bind-Value="Model.CurrentPassword" type="password" autocomplete="current-password" />
         <div class="beeday-settings-form__grid">
-            <BeeDayInput Id="new-password" Label="New password" Required="true"
+            <BeeDayInput Id="new-password" Label="@Localizer["NewPasswordLabel"]" Required="true"
                           @bind-Value="Model.NewPassword" type="password" autocomplete="new-password" />
-            <BeeDayInput Id="confirm-password" Label="Confirm new password" Required="true"
+            <BeeDayInput Id="confirm-password" Label="@Localizer["ConfirmNewPasswordLabel"]" Required="true"
                           @bind-Value="Model.ConfirmNewPassword" type="password" autocomplete="new-password" />
         </div>
-        <p class="beeday-settings-form__hint">Use at least 8 characters, including one letter and one number.</p>
+        <p class="beeday-settings-form__hint">@Localizer["SecurityHint"]</p>
     </BeeDaySettingsForm>
 </BeeDaySettingsSection>
 

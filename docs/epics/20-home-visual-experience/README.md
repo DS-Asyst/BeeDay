@@ -1495,3 +1495,9 @@ coerente em azul, branco, amarelo e superfícies neutras.
   mantém integralmente seu state machine, validações, disabled/loading e fluxo de confirmação.
 - Não existe infraestrutura de localização. A área pública permanece em inglês nesta Sprint; uma
   estratégia de i18n continua fora do escopo e deve ser decidida separadamente.
+
+  > **Nota de atualização (Sprint 23.9, EPIC 23):** esta limitação foi resolvida. A EPIC 23 construiu
+  > a infraestrutura de localização (en-US/pt-BR) e migrou a área pública, incluindo Home, Login e
+  > Create Account, para ela. Ver [`docs/web/07-localization.md`](../../web/07-localization.md). O
+  > registro acima é preservado como estava em Sprint 20.15; esta nota apenas evita que um leitor
+  > atual o tome como estado corrente.

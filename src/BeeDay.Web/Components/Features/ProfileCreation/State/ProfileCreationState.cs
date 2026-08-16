@@ -1,9 +1,16 @@
 using BeeDay.Web.Components.Features.ProfileCreation.Models;
+using BeeDay.Web.Localization;
+using BeeDay.Web.Resources;
 using BeeDay.Web.Services;
+using Microsoft.Extensions.Localization;
 
 namespace BeeDay.Web.Components.Features.ProfileCreation.State;
 
-public sealed class ProfileCreationState(BeeDayWebService store, ToastService toastService)
+public sealed class ProfileCreationState(
+    BeeDayWebService store,
+    ToastService toastService,
+    IStringLocalizer<ProfileCreationResources> localizer,
+    IStringLocalizer<SharedResources> sharedLocalizer)
 {
     public ProfileCreationFormModel Model { get; } = new();
     public ProfileCreationStep Step { get; private set; } = ProfileCreationStep.Account;
@@ -76,25 +83,25 @@ public sealed class ProfileCreationState(BeeDayWebService store, ToastService to
 
         if (string.IsNullOrWhiteSpace(NormalizedName))
         {
-            ValidationError = "Enter your full name.";
+            ValidationError = localizer["FullNameRequired"];
             return false;
         }
 
         if (string.IsNullOrWhiteSpace(Model.Email) || !Model.Email.Contains('@', StringComparison.Ordinal))
         {
-            ValidationError = "Enter a valid email address.";
+            ValidationError = localizer["ValidEmailRequired"];
             return false;
         }
 
         if (!IsPasswordValid)
         {
-            ValidationError = "Password must contain at least 8 characters, one letter and one number.";
+            ValidationError = localizer["PasswordRequirementsError"];
             return false;
         }
 
         if (!string.Equals(Model.Password, Model.ConfirmPassword, StringComparison.Ordinal))
         {
-            ValidationError = "Passwords do not match.";
+            ValidationError = localizer["PasswordsDoNotMatch"];
             return false;
         }
 
@@ -119,7 +126,7 @@ public sealed class ProfileCreationState(BeeDayWebService store, ToastService to
 
         if (!CanCompleteProfile)
         {
-            ValidationError = "Nickname must have 3 to 24 characters and may contain letters, numbers, dots, underscores or hyphens.";
+            ValidationError = localizer["NicknameRequirementsError"];
             return false;
         }
 
@@ -145,13 +152,13 @@ public sealed class ProfileCreationState(BeeDayWebService store, ToastService to
                     string.Empty);
             }
 
-            toastService.ShowSuccess("Welcome to BeeDay.");
+            toastService.ShowSuccess(localizer["WelcomeToast"]);
             return true;
         }
         catch (Exception exception)
         {
-            ValidationError = exception.Message;
-            toastService.ShowError(exception.Message);
+            ValidationError = DomainErrorLocalizer.Translate(exception, sharedLocalizer);
+            toastService.ShowError(ValidationError);
             return false;
         }
         finally

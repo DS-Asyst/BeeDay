@@ -1,52 +1,54 @@
 @page "/login"
 @attribute [AllowAnonymous]
 @layout BeeDay.Web.Components.Layout.OnboardingLayout
+@using BeeDay.Web.Components.Features.Authentication
 @inject NavigationManager Navigation
+@inject IStringLocalizer<AuthenticationResources> Localizer
 
-<PageTitle>Login | BeeDay</PageTitle>
+<PageTitle>@Localizer["PageTitle"]</PageTitle>
 
 <section class="auth-page beeday-fade-in" aria-labelledby="login-heading">
-    <PublicAuthActions DestinationHref="/profile/create" DestinationLabel="Create account"
-                       CloseLabel="Close login and return to Home" Label="Login actions" />
+    <PublicAuthActions DestinationHref="/profile/create" DestinationLabel="@Localizer["CreateAccount"]"
+                       CloseLabel="@Localizer["CloseAndReturnToHome"]" Label="@Localizer["LoginActionsLabel"]" />
 
     <div class="auth-login">
             <div class="auth-card__brand"><BeeDayBrand /></div>
 
             <header class="auth-card__header">
-                <h1 id="login-heading">Welcome back</h1>
-                <p>Sign in to continue your journey.</p>
+                <h1 id="login-heading">@Localizer["WelcomeBack"]</h1>
+                <p>@Localizer["SignInToContinue"]</p>
             </header>
 
             @if (HasInvalidCredentials)
             {
                 <div class="auth-feedback auth-feedback--error" role="alert">
-                    Invalid email or password.
+                    @Localizer["InvalidCredentials"]
                 </div>
             }
 
             @if (WasConfirmed)
             {
-                <div class="auth-feedback auth-feedback--success" role="status">Email confirmed. Sign in to continue.</div>
+                <div class="auth-feedback auth-feedback--success" role="status">@Localizer["EmailConfirmedSignIn"]</div>
             }
 
             @if (WasReset)
             {
-                <div class="auth-feedback auth-feedback--success" role="status">Password updated. Sign in with your new password.</div>
+                <div class="auth-feedback auth-feedback--success" role="status">@Localizer["PasswordUpdatedSignIn"]</div>
             }
 
             @if (SessionExpired)
             {
                 <div class="auth-feedback auth-feedback--error" role="alert">
-                    Your session expired. Sign in again to continue.
+                    @Localizer["SessionExpired"]
                 </div>
             }
 
-            <form method="post" action="/auth/login" class="auth-form" onsubmit="const button=this.querySelector('button[type=submit]');if(button){button.disabled=true;button.textContent='Signing in...';}">
+            <form method="post" action="/auth/login" class="auth-form" onsubmit="const button=this.querySelector('button[type=submit]');if(button){button.disabled=true;button.textContent='@JsSingleQuoteEscape(Localizer["SigningIn"])';}">
                 <AntiforgeryToken />
                 <input type="hidden" name="returnUrl" value="@ReturnUrl" />
 
                 <label class="auth-field">
-                    <span>Email</span>
+                    <span>@Localizer["EmailLabel"]</span>
                     <input type="email"
                            class="beeday-field__control"
                            name="email"
@@ -57,7 +59,7 @@
                 </label>
 
                 <label class="auth-field">
-                    <span>Password</span>
+                    <span>@Localizer["PasswordLabel"]</span>
                     <input type="password"
                            class="beeday-field__control"
                            name="password"
@@ -66,12 +68,12 @@
                 </label>
 
                 <div class="auth-form__options">
-                    <label class="auth-remember"><input type="checkbox" name="rememberMe" value="true" /> <span>Remember me</span></label>
-                    <a class="auth-action-link" href="/account/forgot-password">Forgot password?</a>
+                    <label class="auth-remember"><input type="checkbox" name="rememberMe" value="true" /> <span>@Localizer["RememberMe"]</span></label>
+                    <a class="auth-action-link" href="/account/forgot-password">@Localizer["ForgotPassword"]</a>
                 </div>
 
                 <BeeDayButton Type="submit" FullWidth="true" Class="auth-submit">
-                    Sign In
+                    @Localizer["SignIn"]
                 </BeeDayButton>
             </form>
 
@@ -105,4 +107,14 @@
 
     private static bool IsLocalPath(string? value) =>
         !string.IsNullOrWhiteSpace(value) && value.StartsWith('/') && !value.StartsWith("//");
+
+    /// <summary>
+    /// The only resource value interpolated directly into inline JavaScript on this page — HTML
+    /// attribute-encoding alone (which Blazor already applies automatically) does not protect the
+    /// single-quoted JS string literal it sits inside, so a translation containing an apostrophe
+    /// would otherwise silently break this handler. Escapes backslashes and single quotes so the
+    /// resource text can never terminate the JS string early or inject additional statements.
+    /// </summary>
+    private static string JsSingleQuoteEscape(string value) =>
+        value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("'", "\\'", StringComparison.Ordinal);
 }
