@@ -7,6 +7,7 @@ public sealed class BrandTypographyTests(PlaywrightAppFixture fixture) : E2ETest
 {
     [Theory]
     [InlineData(390, 844)]
+    [InlineData(768, 900)]
     [InlineData(1280, 800)]
     public async Task PublicTypographyGuidelinesLoadQualifiedFontsWithoutClippingOrOverflow(int width, int height)
     {

@@ -12,6 +12,7 @@ public sealed class ShellResponsiveLayoutTests(PlaywrightAppFixture fixture) : E
     [InlineData(1920, 900)]
     [InlineData(1440, 900)]
     [InlineData(1280, 800)]
+    [InlineData(1200, 800)]
     public async Task DesktopUsesNeutralNavigationAndWideWorkspaceWithoutLegacyRegions(int width, int height)
     {
         await Page.SetViewportSizeAsync(width, height);
@@ -46,6 +47,7 @@ public sealed class ShellResponsiveLayoutTests(PlaywrightAppFixture fixture) : E
 
     [Theory]
     [InlineData(1024, 800)]
+    [InlineData(1199, 800)]
     [InlineData(900, 800)]
     [InlineData(768, 900)]
     [InlineData(430, 900)]

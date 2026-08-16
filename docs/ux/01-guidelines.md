@@ -66,8 +66,8 @@ do repositório passa por uma confirmação.
   (`.beeday-field__control`, `.editor-modal__field input`, `.identity-field input`,
   `.wallet-filters input`) — ver [`docs/design-system/04-forms.md`](../design-system/04-forms.md) §5.
 - `Wallet.razor`/`Home.razor` não usam `BeeDayPageHeader` (ver §2 acima).
-- 29 breakpoints distintos (26 `max-width`, 2 `min-width`, 1 `max-height`) sem token compartilhado,
-  espalhados entre CSS global e CSS isolado por componente — ver
+- 70 queries de largura em 33 stylesheets (26 cortes `max-width`, dois `min-width`), sem token
+  artificial; shell 1200px e famílias públicas compartilhadas estão formalizados — ver
   [`03-responsive.md`](03-responsive.md).
 
 ## 5. Fluxo — do primeiro acesso ao Dashboard

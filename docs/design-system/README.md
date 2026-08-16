@@ -100,16 +100,12 @@ componentes reutilizáveis — documentadas em
 
 ## Achados relevantes (reportados, não corrigidos)
 
-- Nenhum token de breakpoint compartilhado existe (`variables.css` não define nenhuma
-  `--beeday-breakpoint-*`) — 16 valores de corte distintos, hardcoded por arquivo, alguns
-  inconsistentes para o mesmo propósito visual. Ver [`01-foundations.md`](01-foundations.md) §9 e
+- Breakpoints continuam literais porque CSS custom properties não são válidas em media features.
+  O shell compartilha estruturalmente 1200px; as 70 queries de largura e seus owners estão em
+  [`01-foundations.md`](01-foundations.md) §10 e
   [`docs/ux/03-responsive.md`](../ux/03-responsive.md).
-- `wwwroot/css/feedback.css:20` — `animation: delete-confirmation-enter var(--beeday-transition-normal)-out;`
-  concatena `-out` diretamente após um `var()`, o que é sintaxe CSS inválida (não é possível
-  interpolar texto após uma função `var()` em um valor de propriedade). O navegador descarta a
-  declaração `animation` inteira nessa regra — `.delete-confirmation` provavelmente não recebe a
-  animação de entrada `delete-confirmation-enter` declarada via `@keyframes` mais abaixo no mesmo
-  arquivo. Não corrigido (CSS fora do escopo desta Sprint).
+- Os dois shorthands inválidos de animation registrados na auditoria antiga foram corrigidos na
+  Sprint 25.6 e agora usam os tokens duration/easing separadamente.
 - `wwwroot/css/cards.css` (576 linhas) e `wwwroot/css/wallet.css` (699 linhas) acumulam os mesmos
   seletores (`.activity-card`, `.habit-card__body`, `.wallet-transaction-card`, etc.) redeclarados
   3 a 5 vezes em blocos sucessivos marcados por comentário `/* Sprint N ... */`, em vez de
