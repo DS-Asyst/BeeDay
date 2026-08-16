@@ -1,268 +1,130 @@
 # Component Library
 
-**Fonte da verdade:** verificado diretamente em cada arquivo `.razor`/`.razor.cs` sob
-`src/BeeDay.Web/Components/DesignSystem/`, mais `src/BeeDay.Web/Components/Behaviors/DragDrop/`
-para `BeeDaySortable` (fisicamente fora desta pasta, mas documentado aqui por ser
-interop-equivalente aos demais). Componentes de Forms e o `BeeDayIcon` têm parâmetros completos em
-[`04-forms.md`](04-forms.md) e [`03-icons.md`](03-icons.md) respectivamente — este documento os
-resume e linka em vez de duplicar (`docs/CONVENTIONS.md` §12).
+**Fonte da verdade:** todos os `.razor`/`.razor.cs` sob
+`src/BeeDay.Web/Components/DesignSystem`, mais `Components/Behaviors/DragDrop/BeeDaySortable`.
+Revalidado em 2026-08-16 pela Sprint 25.8.
 
-**Última verificação:** 2026-08-16 (Sprint 25.3, EPIC 25 — Color System Consolidation) — §8
-revalidado: `BeeDayBrand.OnDarkSurface` mantém parâmetro e classe por backward compatibility, não
-possui consumer real de produto e agora preserva Brand Primary em vez de recolorir o wordmark. A
-cor oficial `#5247F9` passa a valer em todos os modos suportados. Verificação anterior: 2026-08-16
-(Sprint 25.2, EPIC 25 — Brand Identity & Wordmark Convergence) —
-§8 (`BeeDayBrand`) corrigido: a entrada anterior descrevia um wordmark em imagem
-(`/beeday-wordmark.png`, 904×276, `alt="BeeDay"`) que não corresponde à implementação atual —
-confirmado por leitura direta que o componente renderiza texto CSS (dois `<span>`, não `<img>`)
-desde antes desta Sprint; a divergência já existia na verificação anterior (2026-08-15, Sprint 22.2,
-ver `01-foundations.md`) e não foi causada por esta Sprint, apenas corrigida agora porque esta
-Sprint alterou o mesmo componente (convergência de cor da marca). `wwwroot/beeday-wordmark.png`
-continua existindo no repositório mas está confirmado sem nenhum consumidor real — candidato a
-remoção física no migration sweep da Sprint 25.16, não removido aqui. Ver
-`docs/epics/25-design-system-brand-evolution/README.md` para o registro completo desta Sprint.
-Verificação anterior: 2026-08-13 (Sprint 21.7, EPIC 21) — §3 (`BeeDayCard`) consolidado como
-linguagem oficial de content surfaces. Verificação anterior: 2026-08-12 (Sprint 21.5, EPIC 21) — §2 (`BeeDayButton`) migrado para a
-linguagem física Lingo/BeeDay. Verificação anterior: 2026-08-12 (Sprint 20.6, EPIC 20) — §2 e §3
-atualizados: novo modificador opt-in `--soft` em ambos, target visual da página-modelo (ver
-`docs/epics/20-home-visual-experience/README.md`). Correção na mesma Sprint: a cor sob `--soft`
-migrou de `--beeday-color-primary` (legado) para a família canônica `--beeday-color-brand-primary`
-(ver `01-foundations.md` §2.1/§3) nos dois primeiros consumidores (`PublicHeader`, `Home.razor`); o
-modificador `--soft` em si (forma/radius/shadow) não mudou. Verificação anterior: 2026-08-11 (Sprint 20.5) —
-§5 (`BeeDayHero`) atualizado: primeiro consumidor de produto real (`Home.razor`, rota `/`). Demais
-seções preservadas da verificação de 2026-08-07.
+## 1. Inventário atual
 
-## 1. Objetivo
+Existem **25 primitives físicas** em `Components/DesignSystem` (excluídas as páginas de catálogo
+`HeroCatalog` e `IconCatalog`) e um comportamento compartilhado fora da pasta, `BeeDaySortable`:
+**26 contratos** no total. Não existe componente `V2` nem biblioteca paralela.
 
-Catálogo dos 26 componentes reutilizáveis do Design System: para cada um, objetivo, parâmetros,
-estados internos, eventos, dependências, interop JS (quando existe) e quem consome.
+Forms e Icon têm detalhes adicionais em [`04-forms.md`](04-forms.md) e
+[`03-icons.md`](03-icons.md). “Consumers” abaixo conta arquivos Razor de produção com uso direto;
+um zero significa primitive preservada/testada sem consumer runtime atual.
 
-## 2. Buttons
+### Actions, cards e feedback
 
-### `BeeDayButton`
+| Primitive | Responsabilidade e contrato público | Consumers | Estados, a11y, responsive, teste e CSS |
+|---|---|---:|---|
+| `BeeDayButton` | Ação canônica. `Variant`, `Type`, `Disabled`, `IsLoading`, `FullWidth`, `Compact`, `Icon`, `IconSize`, `Class`, `OnClick`, `ChildContent`, attributes | 22 | 8 variants; default/hover/pressed/focus/disabled/loading. `<button>`, `disabled`, `aria-busy`; loading preserva o label acessível. `BeeDayButtonTests`; `design-system.css` |
+| `BeeDayCard` | Surface sem estado interno. `Class`, `Padded`, `Muted`, `Prominent`, `Interactive`, `ChildContent`, attributes | 9 | `<article>`; interactive oferece chrome/focus, mas semântica/teclado pertencem ao consumer. `BeeDayCardTests`; `design-system.css` |
+| `BeeDayCardMenu` | Menu Edit/Delete posicionado. `Title`, `Class`, `TriggerClass`, `Disabled`, `OnEdit`, `OnDelete`, `OpenChanged` | 0 | trigger nativo, `aria-expanded`, `role=menu/menuitem`, Escape/outside click, medição JS. Mantido por contrato/testes. `BeeDayCardMenuTests`/placement tests; CSS isolado |
+| `BeeDayConfirmDialog` | Confirmação destrutiva. `IsOpen`, `IsBusy`, `Title`, `Message`, textos opcionais, labels opcionais, callbacks | 5 | open/busy; `alertdialog`, modal, labelled/described, Escape/backdrop. Focus lifecycle profundo → 25.10. `BeeDayConfirmDialogTests`; `feedback.css` |
+| `BeeDayToastHost` | Host da fila de `ToastService`; sem parâmetros | 3 layouts | `status`/`alert`, live region e dismiss nativo. `BeeDayToastHostTests`; `feedback.css` |
+| `BeeDayLoading` | Feedback global controlado por `IsVisible`, `Label?` | 4 | `role=status`, polite live, label localizada; reduced motion mantém conteúdo. `FeedbackComponentTests`; `feedback.css` |
+| `BeeDaySkeleton` | Placeholder com `Lines`, `Class?` | 2 | busy visual, não interativo; shimmer reduzido. `FeedbackComponentTests`; `feedback.css` |
+| `BeeDayDashboardSkeleton` | Composição de skeleton; `AriaLabel?` | 2 | `role=status`, label localizada/caller. `BeeDayDashboardSkeletonTests`; `feedback.css` |
+| `BeeDayEmptyState` | Empty state com `Title`, `Description`, `Icon?`, `Class?` | 3 | conteúdo semântico, ação composta externamente. `FeedbackComponentTests`; CSS isolado |
 
-Único botão estilizado do sistema — todo botão de ação do produto passa por ele.
+### Forms, icon e layout
 
-| Parâmetro | Tipo | Padrão | Notas |
-|---|---|---|---|
-| `Variant` | `BeeDayButtonVariant` | `Primary` | 8 valores: `Primary`, `Secondary`, `Success`, `Warning`, `Back`, `Danger`, `ConfirmationDanger`, `ConfirmationCancel` |
-| `Type` | `string` | `"button"` | Atributo HTML `type` |
-| `Disabled`, `IsLoading` | `bool` | `false` | `IsDisabled` combina os dois; `IsLoading` também desabilita |
-| `FullWidth`, `Compact` | `bool` | `false` | Modificadores de layout |
-| `Icon` | `BeeDayIconName?` | `null` | Ícone opcional antes do texto |
-| `IconSize` | `BeeDayIconSize` | `Small` | — |
-| `Class` | `string?` | `null` | Classes extras; nomes `comic`/`skew-press` existentes são aliases legados, não novas variantes visuais |
-| `OnClick` | `EventCallback<MouseEventArgs>` | — | Não dispara se `IsDisabled` |
-| `ChildContent` | `RenderFragment?` | — | Texto/conteúdo do botão |
-| `AdditionalAttributes` | `IReadOnlyDictionary<string,object>?` | — | `CaptureUnmatchedValues` |
+| Primitive | Responsabilidade e contrato público | Consumers | Estados, a11y, responsive, teste e CSS |
+|---|---|---:|---|
+| `BeeDayInput` | `Id`, `Label`, `Placeholder`, classes, `MaxLength`, `Required`, `Disabled`, `ReadOnly`, validation flag, bind + attributes | 8 | default/hover/focus/disabled/readonly/invalid. Label + validation ligada ao EditContext. `BeeDayFormTests`; `forms.css` |
+| `BeeDayTextArea` | Input contract + `CounterCssClass`, `ShowCounter` | 5 | mesmos estados; counter/maxlength. `BeeDayFormTests`; `forms.css` |
+| `BeeDaySelect<T>` | `Id`, `Label`, classes, `Required`, `Disabled`, validation flag, bind, options, attributes | 5 | focus/disabled/invalid/selected nativo. `BeeDayFormTests`; `forms.css` |
+| `BeeDayDateInput<T>` | `Id`, `Label`, classes, `Required`, `Disabled`, validation flag, bind + attributes | 3 | date nativo com label/invalid. `BeeDayFormTests`; `forms.css` |
+| `BeeDayCheckbox` | `Id`, `Label`, classes, `Disabled`, validation flag, bind + attributes | 0 | input checkbox real, checked/focus/disabled/invalid; preservado/testado. `BeeDayFormTests`; `forms.css` |
+| `BeeDayValidationMessage<T>` | `For` obrigatório | 10, incluindo wrappers | mensagem associada ao EditContext. `BeeDayFormTests`; `forms.css` |
+| `BeeDayIcon` | `Name`, `Size`, `Color`, `Decorative`, `Label?`, `Class?`, attributes | 32 | 5 sizes, 8 color roles; decorative usa `aria-hidden`, semântico usa `role=img` + label. `BeeDayIconTests`; sprite registry + CSS isolado |
+| `BeeDayPageHeader` | `Title`, `Eyebrow?`, `Description?`, `Actions?`, `Class?`, attributes | 1 | h1, actions refluem em 42rem. `BeeDayHeaderTests`; `design-system.css`/`polish.css` |
+| `BeeDaySectionHeader` | Mesmo shape do PageHeader em escala h2 | 1 direto | heading de seção; responsive compartilhado. `BeeDayHeaderTests`; `design-system.css`/`polish.css` |
+| `BeeDayHero` | `Title`, `Eyebrow?`, `Subtitle?`, illustration/action/support slots, `Variant`, `Class?`, attributes | catálogo apenas | `Default`/`Onboarding`; illustration some no compacto. `ActivityComponentsTests`; `design-system.css`/`polish.css` |
+| `BeeDaySettingsSection` | `Title`, `Eyebrow?`, `Description?`, `Class?`, `ChildContent` | 3 | compõe Card + SectionHeader. `BeeDaySettingsTests`; `settings.css` |
+| `BeeDaySettingsForm<T>` | `Model`, `FormName`, `SubmitLabel`, `IsBusy`, button class, valid-submit callback, content | 3 | fieldset disabled/busy e submit canônico. `BeeDaySettingsTests`; `settings.css` |
 
-**Estados visuais canônicos desde a Sprint 21.5** (`design-system.css`): altura 44px (36px compact),
-padding horizontal 16px, radius 12px, borda 2px com depth inferior 4px, Nunito 700 uppercase.
-Hover altera somente a surface; pressed colapsa o depth para zero e desloca 4px; focus-visible usa
-outline + ring; disabled usa surfaces/tokens neutros sem hover/press. Loading mantém label no layout
-com `visibility:hidden`, centraliza o spinner e bloqueia interação via `disabled`/`aria-busy`, sem
-mudança de largura.
+### Modal, text, progress e behavior
 
-**Histórico anterior:** sem borda,
-`border-radius: pill`, sombra `--beeday-shadow-md`; `:hover` (`translateY(-2px)` + `shadow-lg`),
-`:active` (`translateY(0)` + `shadow-sm`), `:focus-visible` (`shadow-md` + `--beeday-focus-ring`,
-anel canônico azul), `:disabled` (paleta cinza fixa, `cursor: not-allowed`, opacidade .62), loading
-(ícone `BeeDayIconName.Loading` com `beeday-spin` — `steps(8, end)`, respeitando
-`prefers-reduced-motion`). **Decisão final de default (Sprint 20.8, EPIC 20):** este era o
-modificador opt-in `--soft` introduzido na Sprint 20.6 — auditados repo-wide todos os 40+
-consumidores de `<BeeDayButton` antes de decidir; a grande maioria já usa um dos modificadores de
-forma abaixo (que se auto-declaram por completo e são, portanto, totalmente não afetados), então o
-modificador foi incorporado ao default (removido como classe separada) sem risco real para eles —
-apenas ~9 consumidores sem modificador de forma (paginação/estado vazio do Wallet, submits de
-recuperação de senha, navegação do Tutorial) passam a herdar a nova aparência, exatamente a
-convergência pretendida para ações secundárias/utilitárias.
+| Primitive | Responsabilidade e contrato público | Consumers | Estados, a11y, responsive, teste e CSS |
+|---|---|---:|---|
+| `EditorModalShell` | `Model`, `Title`, `TitleId`, `SubmitLabel?`, `ShowDelete`, `IsBusy`, 3 slots e 3 callbacks | 6 | modal labelled, busy, submit/cancel/delete, Escape. Focus lifecycle → 25.10. `EditorModalShellTests`; `editor-modal.css` |
+| `BeeDayBrand` | `OnDarkSurface` compatível | 11 | wordmark textual `beeday`, `role=img`, label fixa lowercase; sem variants de cor. `BeeDayBrandTests`; CSS isolado |
+| `SearchHighlight` | `Text`, `SearchTerm` | 2 | `<mark>` para matches case-insensitive; sem estado interativo. `SearchHighlightTests`; `animations.css` |
+| `BeeDayProgressBar` | `Label`, `Value`, `Maximum`, `ValueText?`, `Tone` | 3 | `Primary`/`Reward`; empty/partial/complete/unavailable; `progressbar` + aria values. `BeeDayProgressBarTests`; CSS isolado |
+| `BeeDaySortable` | `ItemIds`, template, reorder callback, `CollectionKey`, `AriaLabel`, `Class?`, virtualization params, `RemovingItemId` | 1 | drag/touch/keyboard ownership, removing state, JS result → C#. `SortableOrderTests` + E2E Daily; `dragdrop.css` |
 
-**Compatibilidade:** `--comic*`, `--comic-press` e `--skew-press` continuam aceitos pelos consumidores
-existentes, porém são remapeados para a geometria canônica e paletas semânticas; não possuem mais
-sombra offset, skew, contorno preto ou cores comic e não devem receber novos usos. `--pixel-cta`
-foi removido inclusive do Level Up. `--plain` permanece como responsabilidade legítima de ação de
-texto leve.
+## 2. Matriz formal de estados
 
-**Histórico de modificadores opt-in via `Class`** (não são `Variant` — eram combináveis por cima de qualquer
-variante; cada um redeclara sua própria forma por completo — borda/radius/shadow — e por isso não é
-afetado pelo default acima): `--skew-press` (botão inclinado, ação operacional principal),
-`--comic-press` (contorno grosso, sombra offset, usado em confirmações destrutivas), `--comic` + 7
-paletas (`-blue`, `-yellow`, `-back`, `-danger`, `-neutral`, `-success`, `-orange`, `-magenta` —
-estilo "quadrinho", a linguagem de **ênfase operacional primária** já estabelecida e preservada
-intacta: Save/Delete/Sign in/Create em Wallet, editores de atividade, Login, Identity, Account),
-`--plain` + `--plain-danger`/`--plain-neutral` (ação de texto puro, sem chrome, para popovers/
-filtros), `--pixel-cta` (`pixel-nes.css` — experiência pixel única e deliberadamente restrita ao
-modal de celebração de Level Up; ganhou `border-width`/`border-style` explícitos na Sprint 20.8
-porque deixou de poder depender da borda da base, agora `0`).
+`N/A` é intencional: components apresentacionais não ganham estados apenas para preencher matriz.
 
-**Consumidores:** todo componente do repositório com uma ação — 40+ pontos de uso confirmados por
-busca de `<BeeDayButton`.
+| Família | Default | Hover | Pressed | Focus-visible | Disabled | Loading/busy | Invalid | Selected | Expanded/open |
+|---|---|---|---|---|---|---|---|---|---|
+| Button | sim | sim | sim | sim | sim | sim | N/A | N/A | N/A |
+| Interactive Card | sim | sim | consumer | sim | consumer | consumer | N/A | consumer | N/A |
+| CardMenu | sim | sim | trigger | sim | sim | measuring | N/A | N/A | sim |
+| Input/TextArea/Date | sim | sim | N/A | sim | sim | form owner | sim | N/A | N/A |
+| Select/Checkbox | sim | sim | checkbox | sim | sim | form owner | sim | sim | select nativo |
+| Confirm/Editor modal | fechado | N/A | actions | sim | busy | sim | form owner | N/A | sim |
+| Loading/Skeleton/Toast | conforme presença | dismiss toast | N/A | dismiss | N/A | próprio estado | N/A | N/A | host-controlled |
+| Progress | sim | N/A | N/A | N/A | N/A | value update | unavailable | complete/tone | N/A |
+| Headers/Brand/Icon/Text | sim | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A |
+| Sortable | sim | drag affordance | drag | keyboard target | owner | removing | N/A | drag item | N/A |
 
-## 3. Cards
+Regras transversais:
 
-### `BeeDayCard`
+- hover nunca substitui focus-visible;
+- loading/busy mantém nome/feedback acessível e bloqueia callbacks incompatíveis;
+- disabled não dispara ação;
+- invalid pertence a controles integrados ao `EditContext`, não a Card/Button;
+- selected/expanded deve existir em atributo/semântica, não somente em cor;
+- dialogs têm contrato básico aqui; trap/restore/inert aprofundados pertencem à 25.10.
 
-Primitive oficial de unidade de conteúdo, sem estado interno, busca de dados ou JS. Parâmetros:
-`Class`, `Padded`, `Muted`, `Prominent`, `Interactive`, `ChildContent` e `AdditionalAttributes`.
+## 3. Contratos de composição
 
-- Default: surface sólida neutra, border de 2px, radius 12px e nenhuma shadow.
-- `Padded`: padding padrão de 16px; com `Prominent`, 24px.
-- `Muted`: apenas muda a surface para o token muted.
-- `Prominent`: radius 24px, border strong e depth discreta `shadow-sm`; usado apenas quando a
-  hierarquia justifica, como os dois showcase cards da Home pública.
-- `Interactive`: cursor, border/background em hover e focus ring; não aplica press/depth de botão.
-  O consumidor continua responsável por fornecer elemento/atributos semânticos (`role`,
-  `tabindex`, teclado) quando torna o card acionável.
+- Use Button para ações; links continuam links quando navegam.
+- Card é content surface, não substitui panel/dialog. `Interactive` não inventa `role` ou teclado:
+  o consumer deve fornecer semântica coerente ou usar um controle interno.
+- Menu é uma ação contextual e não um select. Seu estado aberto é coordenado por
+  `CardActionMenuCoordinator` e posicionado por medição real.
+- Headers possuem hierarquia h1/h2; Hero é composição rica, não cabeçalho default.
+- Feedback vazio/loading/skeleton não calcula regra de domínio.
+- Progress recebe valores prontos; não calcula XP/task completion.
+- Forms permanecem uma família única; Auth/Identity converge na 25.9, sem wrappers `V2`.
 
-Cards informativos não devem definir `Interactive`, receber `tabindex` ou hover decorativo.
-Containers estruturais, panels, dialogs, chips e itens de navegação não são cards. Feature CSS
-pode controlar layout, conteúdo, accent rails e métricas, mas não deve redeclarar todo o chrome
-base. Consumidores reais incluem RightRail (`ExperienceBar`, `ProgressMetricCard`, unavailable),
-Daily (`ActivityCard`, `HabitCard`), Wallet (summary, transaction e tag cards), Account settings e
-Home. `BeeDayProgressBar` permanece uma primitive independente composta dentro dos cards.
+## 4. Inventário de controles nativos
 
-Anti-patterns: `<div @onclick>` sem teclado/semântica, hover em informação estática, shadow grande
-como default, radius/hex literal por feature e usar Card para representar panel/modal.
+O baseline tem **49 tags nativas em 20 arquivos**: 29 `<button>`, 17 `<input>`, três `<select>` e
+zero `<textarea>` direto.
 
-### `BeeDayCardMenu`
+| Classificação | Quantidade | Exemplos e decisão |
+|---|---:|---|
+| `FRAMEWORK / INTERNAL` | 13 | internals de Button/CardMenu/Toast; Reconnect; culture form; triggers do shell. Permanecem nativos |
+| `LEGITIMATE SPECIALIZED WIDGET` | 18 | activity checkbox/score, menus de filtro, drag/project toolbar e color controls. Sem migração genérica |
+| `DESIGN-SYSTEM DUPLICATION` / migration candidate | 18 | Auth/ProfileCreation/Account inputs e Wallet filters/tag input. Owners: 25.9 e 25.11 |
 
-Menu de ações posicionado dinamicamente (Edit/Delete) sobre um card.
+Dashboard search e menu triggers continuam especializados e são revistos com Daily na 25.12.
+Nenhum native control foi migrado nesta Sprint: igualdade de tag não prova equivalência de contrato.
 
-| Parâmetro | Tipo | Notas |
-|---|---|---|
-| `Title` (`EditorRequired`) | `string` | Usado no `aria-label` ("Options for {Title}") |
-| `Class`, `TriggerClass` | `string` | — |
-| `Disabled` | `bool` | — |
-| `OnEdit`, `OnDelete` | `EventCallback` | — |
-| `OpenChanged` | `EventCallback<bool>` | Notifica o pai quando abre/fecha |
+## 5. Foundations, responsive e localização
 
-**Estado interno:** `isOpen`, `isMeasuring` (abre invisível para medir o painel real antes de
-posicionar — evita "chutar" altura/largura), `flipUp`, `horizontalShiftPx`.
+Shared primitives consomem tokens de Color/Typography/Shape/Motion/Layer estabelecidos nas 25.3–
+25.7. CSS global é owner de Button/Card/Headers/Forms/Feedback/Editor/Settings/Sortable; CSS isolado
+é owner de Menu/Empty/Icon/Progress/Brand. Feature CSS pode compor layout, não redefinir o chrome.
 
-**JS interop:** `js/beeday-card-menu.js?v=20260729-1` — `measureGeometry` (C#→JS,
-`getBoundingClientRect` do trigger/painel) alimenta `CardMenuPlacementCalculator.Calculate` (lógica
-pura em C#, testável sem DOM — decide `FlipUp` e `HorizontalShiftPx` clampando a posição desejada
-dentro da viewport com uma margem de 8px); `registerOutsideClick`/`unregisterOutsideClick` +
-`[JSInvokable] NotifyOutsideClickAsync` (JS→C#) fecham o menu ao clicar fora, com fallback
-silencioso (`catch (JSException)`) se o interop falhar — o menu continua utilizável via clique no
-trigger, Escape, Edit, Delete.
+Button/Card/Headers refluem pelos contratos 42rem/40rem documentados em
+[`docs/ux/03-responsive.md`](../ux/03-responsive.md). Strings internas de Menu, Confirm, Loading,
+Skeleton e Toast vêm de `DesignSystemResources` en-US/pt-BR. Demais textos são parâmetros e devem
+chegar localizados pelo consumer. Brand casing é contrato fixo, não tradução.
 
-**Coordenação entre instâncias:** `CardActionMenuCoordinator` (`BeeDay.Web/Services/`, `Scoped`) —
-abrir um `BeeDayCardMenu` fecha qualquer outro já aberto no mesmo circuito, via evento C#-para-C#
-(`MenuOpened`), não JS.
+## 6. Catálogos e testes
 
-**Consumidores:** todo card de atividade no Dashboard (Habit/Task/Todo/Project), `TransactionCard`
-(Wallet).
+`HeroCatalog` e `IconCatalog` são páginas técnicas de desenvolvimento, não Brand Guidelines nem
+primitives contadas. Não foram expandidas nesta Sprint porque os contratos reais já são melhor
+cobertos por bUnit/E2E.
 
-## 4. Feedback
-
-| Componente | Objetivo | Parâmetros-chave | Estado/eventos |
-|---|---|---|---|
-| `BeeDayToastHost` | Renderiza a fila de `ToastService` (`Scoped`) | Nenhum — lê `ToastService` injetado | Assina `ToastService.Changed`; cada toast some sozinho (4s info/sucesso, 7s erro) ou por clique em fechar |
-| `BeeDayLoading` | Overlay de "salvando..." fixo, inferior | `IsVisible`, `Label` | Puramente controlado pelo pai — sem estado próprio |
-| `BeeDaySkeleton` | N linhas de skeleton shimmer | `Lines` (padrão 3), `Class` | Primeira linha = "title" (larga), demais alternam "wide"/"medium" |
-| `BeeDayDashboardSkeleton` | Skeleton completo da tela `/daily` (resumo + 4 colunas × 3 cards) | Nenhum | Composição fixa de `BeeDaySkeleton` |
-| `BeeDayEmptyState` | Estado vazio com ícone/título/descrição | `Title`, `Description` (`EditorRequired`), `Icon?`, `Class?` | Puramente apresentacional |
-| `BeeDayConfirmDialog` | Diálogo de confirmação genérico (não só exclusão, apesar do CSS se chamar `delete-confirmation`) | `IsOpen`, `IsBusy`, `Title`/`Message` (`EditorRequired`), `ItemTitle?`, `Warning?`/`WarningDetails?`, `ConfirmLabel`/`CancelLabel`, `OnConfirm`/`OnCancel` | `role="alertdialog"`, `Escape` fecha (via `CancelAsync`), clique no backdrop fecha, clique dentro do painel não propaga (`@onclick:stopPropagation`) |
-
-**Consumidores:** `BeeDayToastHost`/`BeeDayLoading` são globais (montados em `MainLayout`/
-`OnboardingLayout`); `BeeDayConfirmDialog` é usado por toda exclusão de atividade/transação/tag;
-`BeeDayDashboardSkeleton` só por `Home.razor`.
-
-## 5. Layout
-
-| Componente | Objetivo | Parâmetros-chave |
-|---|---|---|
-| `BeeDayPageHeader` | Cabeçalho de página: eyebrow + título + descrição + ações | `Title` (`EditorRequired`), `Eyebrow?`, `Description?`, `Actions?` (RenderFragment) |
-| `BeeDaySectionHeader` | Mesmo papel que `BeeDayPageHeader`, em escala menor (`h2` vs `h1`), para seções dentro de uma página | Mesmo shape de parâmetros |
-| `BeeDayHero` | Painel introdutório mais rico: ilustração opcional, uma ação primária emphasized, conteúdo de suporte, variante contextual | `Title` (`EditorRequired`), `Eyebrow?`, `Subtitle?`, `Illustration?`, `PrimaryAction?`, `SupportingContent?`, `Variant` (`Default`\|`Onboarding`) |
-| `BeeDaySettingsSection` | Card de seção de configurações (cabeçalho + conteúdo) | `Title` (`EditorRequired`), `Eyebrow?`, `Description?`, `ChildContent` |
-| `BeeDaySettingsForm<TModel>` | `EditForm` genérico com fieldset, grid de 2 colunas opcional, hint, ação de submit alinhada à direita | `Model`/`FormName`/`SubmitLabel` (`EditorRequired`), `IsBusy`, `SubmitButtonClass?`, `OnValidSubmit`, `ChildContent` |
-
-`BeeDayPageHeader`/`BeeDaySectionHeader`/`BeeDayHero` compartilham o mesmo bloco CSS
-(`.beeday-page-header, .beeday-section-header, .beeday-hero__row { display:flex; ... }` em
-`design-system.css`) — mudar o layout de um dos três nesse bloco afeta os três. O comentário em
-`design-system.css:547` documenta a distinção de uso pretendida: `BeeDayHero` para quando se precisa
-de ilustração + uma única ação emphasized; `BeeDayPageHeader` para o caso comum sem ilustração.
-
-**Consumidores:** `BeeDayPageHeader` em `Account.razor`; `BeeDaySettingsSection`/`Form` nas 3 seções
-de `Account.razor` (Profile/Security/Preferences); `BeeDaySectionHeader` usado principalmente nas
-páginas de catálogo (`HeroCatalog.razor`). **`BeeDayHero` teve seu primeiro consumidor de produto
-real na Sprint 20.5 (EPIC 20):** `Features/Home/Pages/Home.razor` (rota `/`, variante `Default`,
-sem ilustração) — até então só era usado em `HeroCatalog.razor`.
-
-## 6. Modals
-
-### `EditorModalShell`
-
-Esqueleto compartilhado pelos 4 editores de atividade (Habit/Task/Todo/Project).
-
-| Parâmetro | Tipo | Notas |
-|---|---|---|
-| `Model` (`EditorRequired`) | `object` | Não genérico — aceita qualquer `*EditorModel` |
-| `Title`, `TitleId`, `SubmitLabel` (`EditorRequired`) | `string` | `TitleId` liga o `<h2>` ao `aria-labelledby` do modal |
-| `ShowDelete` | `bool` | — |
-| `IsBusy` | `bool` | Desabilita submit enquanto `true` |
-| `HeroContent`, `BodyContent`, `SecondaryAction` | `RenderFragment?` | Slots de composição — cada editor injeta seus próprios campos aqui |
-| `OnSubmit`, `OnCancel`, `OnDelete` | `EventCallback` | `Escape` chama `Cancel()` |
-
-Não tem interop JS próprio; a superfície visual vem de `editor-modal.css`. Consumido por
-`HabitEditorModal`, `TaskEditorModal`, `TodoEditorModal`, `ProjectEditorModal` (todos em
-`Components/Features/*`, ver [`docs/web/04-feature-components.md`](../web/04-feature-components.md) §5).
-
-## 7. Attribute (retirado da UI)
-
-`ActivityAttributeBadge` e `ActivityAttributeSelect` foram removidos na Sprint 21.12. Attribute
-continua existindo no Domain, na persistência e nos contratos; apenas sua exposição Web foi
-retirada para simplificar a experiência sem quebrar dados existentes.
-
-## 8. Text
-
-| Componente | Objetivo |
-|---|---|
-| `BeeDayBrand` | Única primitive da marca. Renderiza o wordmark `beeday` como texto CSS (dois `<span>`, `.beeday-brand__bee`/`.beeday-brand__day`, não `<img>`), `role="img"`, `aria-label="beeday"` (lowercase — Sprint 25.2, Brand Contract). Ambos os segmentos e todos os modos usam `--beeday-color-brand-primary`; `OnDarkSurface` continua aplicando `.beeday-brand--inverse` por backward compatibility, mas não altera a cor e não possui consumer real de produto na Sprint 25.3. CSS aceita apenas hooks de apresentação (`--beeday-brand-height`, `-padding`, `-background`, `-radius`). Não use `<img>`, o asset legado `wwwroot/beeday-wordmark.png` (sem consumidor, candidato a remoção — Sprint 25.16) ou símbolos inventados para representar a marca. |
-| `SearchHighlight` | Divide `Text` em segmentos por ocorrência de `SearchTerm` (case-insensitive, `IndexOf` iterativo, sem regex) e envolve cada match em `<mark>`/span destacado (`beeday-search-highlight`, fundo `#ffe49a`). Lógica de segmentação (`BuildSegments`) é `internal static`, testável isoladamente. |
-
-## 9. Interop — `BeeDaySortable` (fora de `DesignSystem/`, documentado aqui por simetria)
-
-`Components/Behaviors/DragDrop/BeeDaySortable.razor` — motor de reordenação drag-and-drop genérico
-usado pelas 4 colunas do Dashboard.
-
-| Parâmetro | Tipo | Notas |
-|---|---|---|
-| `ItemIds`, `ItemTemplate`, `OnReorder`, `CollectionKey` (todos `EditorRequired`) | — | `ItemTemplate` é um `RenderFragment<Guid>` — o consumidor decide o que cada item renderiza |
-| `AriaLabel` | `string` | Padrão "Reorderable activity list" |
-| `VirtualizationThreshold` | `int` | Padrão 30 — acima disso, usa `<Virtualize>` |
-| `ItemSize`, `OverscanCount` | `float`/`int` | Parâmetros de `Virtualize` |
-| `RemovingItemId` | `Guid?` | Anima a saída de um item específico (170ms, ver `DashboardState.AnimateRemovalAsync`) |
-
-**JS interop:** `js/beeday-sortable.js?v=20260721-f13-dragfix` (291 linhas — o maior dos 3 módulos).
-`[JSInvokable] NotifyReorderAsync(itemId, targetItemId, placeAfter)` é a única direção JS→C# — o C#
-nunca lê posição de mouse/touch, só recebe o resultado final. `SortableOrder.Move` (C# puro,
-testável) calcula a nova ordem a partir desse resultado.
-
-## 10. Progress
-
-`BeeDayProgressBar` é a primitive linear oficial. Recebe `Label`, `Value`, `Maximum` e
-`ValueText`; limita valores fora da faixa, diferencia `empty`, `partial`, `complete` e
-`unavailable`, e expõe `role="progressbar"` com nome e valores ARIA. O marcador claro dentro do
-preenchimento mantém a leitura visual sem depender somente da cor. `Maximum <= 0` não é tratado
-como conclusão: a barra fica vazia e anuncia progresso indisponível.
-
-Consumidores atuais: `ExperienceBar` (XP no nível), `ProgressMetricCard` para tarefas e para todos
-de projetos no RightRail. A primitive não calcula regras de produto; recebe somente valores já
-estabelecidos pelo contrato consumidor.
-
-## 11. Fontes consultadas
-
-- Todos os arquivos `.razor`/`.razor.cs`/`.cs` sob `src/BeeDay.Web/Components/DesignSystem/`
-  (exceto `Forms/` e `Icons/`, documentados em `04-forms.md`/`03-icons.md`).
-- `src/BeeDay.Web/Components/Behaviors/DragDrop/BeeDaySortable.razor(.cs)`,
-  `SortableOrder.cs`, `SortableReorderEvent.cs`.
-- `src/BeeDay.Web/wwwroot/css/design-system.css`, `cards.css`, `feedback.css`, `editor-modal.css`,
-  `dragdrop.css`, `settings.css`.
-- `src/BeeDay.Web/wwwroot/js/beeday-card-menu.js`,
-  `beeday-sortable.js` (nomes de import e assinaturas invocadas, não o conteúdo interno completo).
-- [`docs/web/04-feature-components.md`](../web/04-feature-components.md),
-  [`docs/web/05-design-system-integration.md`](../web/05-design-system-integration.md) (Sprint
-  16.7, reaproveitado sem duplicar).
+Cobertura relevante: Button, Card/Menu/placement, Forms, Icon, Feedback/Toast/Confirm/Skeleton,
+Headers/Settings/Hero, EditorModal, Progress, Brand, SearchHighlight, SortableOrder e fluxos E2E de
+drawer/menu/modal/Daily. Testes priorizam markup, callbacks, ARIA e estados públicos; detalhes de
+classe só são fixados quando representam variants/tokens do contrato.

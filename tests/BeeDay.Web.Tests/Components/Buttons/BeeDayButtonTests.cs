@@ -49,7 +49,7 @@ public sealed class BeeDayButtonTests
         Assert.Equal("true", button.GetAttribute("aria-busy"));
         Assert.Contains("beeday-button--loading", button.ClassList);
         Assert.NotNull(cut.Find("svg.beeday-icon--loading.beeday-button__loader"));
-        Assert.Equal("true", cut.Find(".beeday-button__label").GetAttribute("aria-hidden"));
+        Assert.False(cut.Find(".beeday-button__label").HasAttribute("aria-hidden"));
     }
 
     [Fact]
@@ -143,5 +143,6 @@ public sealed class BeeDayButtonTests
 
         Assert.Equal("Save changes", cut.Find(".beeday-button__label").TextContent);
         Assert.Equal("true", cut.Find("button").GetAttribute("aria-busy"));
+        Assert.False(cut.Find(".beeday-button__label").HasAttribute("aria-hidden"));
     }
 }
