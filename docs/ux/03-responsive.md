@@ -83,7 +83,9 @@ estado atual; permanecem candidatos para o sweep final, não contratos para cód
   ProjectWorkspace; Account 720px; activity cards 650px.
 - **REDUNDANT / CONSOLIDATE:** os blocos Wallet duplicados de 1000/720/640px foram removidos na
   Sprint 25.11; Cards continuam candidatos somente quando seu owner for migrado.
-- **DEFER TO FEATURE SPRINT:** Character/illustration → 25.13.
+- **BRAND / ILLUSTRATION:** Home mantém breakpoints locais 60/52/46/30rem; regras de crop, escala e
+  obstrução vivem no
+  [`Character & Illustration System`](../brand/01-character-illustration.md).
 
 Igualdade numérica não torna dois breakpoints compartilhados. A mudança de estrutura, o owner e os
 consumers precisam coincidir.

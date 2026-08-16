@@ -46,6 +46,7 @@ public sealed class HomeTests
         Assert.Equal("/assets/home/how-beeday-works-bee.png", howImage.GetAttribute("src"));
         Assert.Equal(string.Empty, howImage.GetAttribute("alt"));
         Assert.Equal("lazy", howImage.GetAttribute("loading"));
+        Assert.Equal("async", howImage.GetAttribute("decoding"));
         var brandClosure = cut.Find(".home-brand-closure");
         var brandClosureImages = brandClosure.QuerySelectorAll("img");
         Assert.Equal(2, brandClosureImages.Length);

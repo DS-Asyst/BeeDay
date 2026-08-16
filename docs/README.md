@@ -30,6 +30,7 @@ testes em `tests/BeeDay.Web.Tests`". Ver [`CONVENTIONS.md`](CONVENTIONS.md).
 | [`deployment/`](deployment/README.md) | Deploy, GitHub Actions, runtime configuration, observabilidade, operações | Correto — reconstruído por completo na Sprint 16.9 a partir do código atual |
 | [`testing/`](testing/README.md) | Estratégia e infraestrutura de testes | Correto — reconstruído por completo na Sprint 16.9 a partir do código atual |
 | [`design-system/`](design-system/README.md) | Design System Blazor, Pixel Icon System, Foundations, Componentes, Forms | Correto — reconstruído por completo na Sprint 16.8 a partir do código atual |
+| [`brand/`](brand/README.md) | Brand System: identidade, personagens, ilustração e regras de expressão | Em evolução — Character & Illustration System formalizado na Sprint 25.13 |
 | [`ux/`](ux/README.md) | Diretrizes de UX, acessibilidade, responsividade | Correto — reconstruído por completo na Sprint 16.8 a partir do código atual |
 | [`api/`](api/README.md) | Especificação OpenAPI | Não reauditado quanto ao conteúdo |
 | [`adr/`](adr/README.md) | Registros de decisão arquitetural | Correto (histórico, imutável) |
