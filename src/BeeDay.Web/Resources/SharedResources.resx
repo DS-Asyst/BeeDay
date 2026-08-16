@@ -129,6 +129,9 @@
   <data name="FooterGitHubLink" xml:space="preserve">
     <value>Project on GitHub</value>
   </data>
+  <data name="FooterTypographyLink" xml:space="preserve">
+    <value>Typography</value>
+  </data>
   <data name="FooterCopyright" xml:space="preserve">
     <value>© 2026 beeday. All rights reserved.</value>
   </data>

@@ -66,9 +66,10 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         await Expect(brandClosureBase).ToHaveCSSAsync("background-color", "rgb(70, 74, 250)");
         await Expect(topicGroups).ToHaveCountAsync(5);
         var topicItemCounts = await topicGroups.EvaluateAllAsync<int[]>("groups => groups.map(group => group.querySelectorAll('li').length)");
-        Assert.Equal(new[] { 2, 2, 2, 2, 2 }, topicItemCounts);
+        Assert.Equal(new[] { 3, 2, 2, 2, 2 }, topicItemCounts);
         var topicLinks = brandClosure.Locator(".home-brand-topics a");
-        await Expect(topicLinks).ToHaveCountAsync(2);
+        await Expect(topicLinks).ToHaveCountAsync(3);
+        await Expect(brandClosure.GetByRole(AriaRole.Link, new() { Name = "Typography" })).ToHaveAttributeAsync("href", "/brand/typography");
         await brandClosure.Locator("img").EvaluateAllAsync<object?>(
             "images => Promise.all(images.map(image => image.complete ? Promise.resolve() : new Promise(resolve => image.addEventListener('load', resolve, { once: true }))))");
         await Expect(footer).ToBeVisibleAsync();
@@ -179,6 +180,7 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
             ["Defina o que importa", "Organize o seu dia", "Evolua todos os dias", "Acompanhe seu progresso", "Celebre suas conquistas"]);
         await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Comece agora" })).ToBeVisibleAsync();
         await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Já tenho uma conta" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Tipografia" })).ToHaveCountAsync(2);
 
         await english.ClickAsync();
 
