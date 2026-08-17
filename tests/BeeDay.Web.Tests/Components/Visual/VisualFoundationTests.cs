@@ -110,6 +110,23 @@ public sealed class VisualFoundationTests
     }
 
     [Fact]
+    public void MobileHeaderAndDrawerBrandLinksAreReachableThroughDeepSelectors()
+    {
+        // EPIC 27 Sprint 27.12 (epic hardening): DesktopSidebar's brand link had the exact same
+        // bug when it was fixed in Sprint 27.9 — NavLink wraps a child component (BeeDayBrand),
+        // so its rendered <a> never receives the file's own CSS-isolation scope attribute, and an
+        // un-::deep'd rule targeting it is a silent no-op. That sprint's own commit flagged
+        // MobileSidebar as a known, deferred instance of the same bug; MobileHeader had the
+        // identical bug too, undiagnosed until this hardening pass. Both rendered their wordmark
+        // with the browser's default underline instead of beeday-brand's own styling.
+        var mobileHeader = ReadWebFile("Components", "Layout", "MobileHeader.razor.css");
+        var mobileSidebar = ReadWebFile("Components", "Layout", "MobileSidebar.razor.css");
+
+        Assert.Contains(".mobile-header ::deep .mobile-header__brand", mobileHeader, StringComparison.Ordinal);
+        Assert.Contains(".mobile-nav-drawer__header ::deep .mobile-nav-drawer__brand", mobileSidebar, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Epic27PaletteFoundationsAreCentralizedAndPairedWithAForeground()
     {
         var variables = ReadWebFile("wwwroot", "css", "variables.css");
