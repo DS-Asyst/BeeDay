@@ -24,16 +24,7 @@ public sealed class DevelopmentEmailSender(
             return;
         }
 
-        var contentRoot = Path.GetFullPath(environment.ContentRootPath);
-        var directory = Path.GetFullPath(Path.Combine(contentRoot, _options.Directory));
-        var contentRootPrefix = contentRoot.EndsWith(Path.DirectorySeparatorChar)
-            ? contentRoot
-            : contentRoot + Path.DirectorySeparatorChar;
-
-        if (!directory.StartsWith(contentRootPrefix, StringComparison.OrdinalIgnoreCase))
-        {
-            throw new InvalidOperationException("The development email directory must remain inside the application content root.");
-        }
+        var directory = ResolveDirectory(environment.ContentRootPath, _options.Directory);
 
         Directory.CreateDirectory(directory);
 
@@ -67,5 +58,34 @@ public sealed class DevelopmentEmailSender(
             "Development email captured for {Recipient}. Preview: {PreviewPath}",
             EmailAddressLogMasking.Mask(message.Recipient),
             htmlPath);
+    }
+
+    // Epic 26, Sprint 26.9 fix for the Sprint 26.1-proven HMG root cause
+    // (docs/infrastructure/06-transactional-email.md §6): a relative Directory must still resolve
+    // inside the content root — the original point of this guard, protecting against a misconfigured
+    // relative value escaping via ".." segments. An absolute Directory is a deliberate operator
+    // choice (e.g. HMG's externally-provisioned C:\Apps\BeeDay-Data\Emails, chosen so captured emails
+    // survive a redeploy, exactly like Data Protection Keys and the Event Journal already do) and is
+    // trusted as-is — the content-root containment check does not apply to it at all, rather than
+    // being weakened for the relative case it still fully protects.
+    private static string ResolveDirectory(string contentRootPath, string configuredDirectory)
+    {
+        if (Path.IsPathRooted(configuredDirectory))
+        {
+            return Path.GetFullPath(configuredDirectory);
+        }
+
+        var contentRoot = Path.GetFullPath(contentRootPath);
+        var directory = Path.GetFullPath(Path.Combine(contentRoot, configuredDirectory));
+        var contentRootPrefix = contentRoot.EndsWith(Path.DirectorySeparatorChar)
+            ? contentRoot
+            : contentRoot + Path.DirectorySeparatorChar;
+
+        if (!directory.StartsWith(contentRootPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("A relative development email directory must resolve inside the application content root.");
+        }
+
+        return directory;
     }
 }

@@ -11,8 +11,11 @@ namespace BeeDay.Web.Tests.Integration;
 /// so parallel tests never see each other's captured emails.
 /// </summary>
 /// <remarks>
-/// <c>DevelopmentEmailSender</c> refuses to write outside the app's content root, so the capture
-/// directory must be a relative subpath under it rather than a %TEMP% path — cleaned up on Dispose.
+/// Uses a relative subpath under the app's content root (cleaned up on Dispose) rather than a %TEMP%
+/// path, simply to keep every test artifact inside the repository's own test-output tree. An
+/// absolute path would also work as of Epic 26, Sprint 26.9 — <c>DevelopmentEmailSender</c> now
+/// trusts a deliberately-configured absolute <c>Directory</c> as-is (the guard against a relative
+/// path escaping the content root via ".." is unchanged).
 /// </remarks>
 public class EmailCaptureWebApplicationFactory : BeeDayWebApplicationFactory
 {
