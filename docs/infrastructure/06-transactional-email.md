@@ -13,7 +13,11 @@ and `git log`/`git show` on the files above. Cross-checked against
 [`docs/deployment/02-runtime-configuration.md`](../deployment/02-runtime-configuration.md)
 (already current as of Sprint 18.4).
 
-**Last verified:** 2026-08-16 (Epic 26, Sprint 26.9 — §16 added: Gate D verdict — blocked on the
+**Last verified:** 2026-08-16 (Epic 26, Sprint 26.10 — §17 added: final production-readiness audit,
+re-verified against current `src/` (not re-asserted from memory), verdict **Production Ready, not
+Production Activated**. Companion operational runbook published:
+[`docs/deployment/14-transactional-email-runbook.md`](../deployment/14-transactional-email-runbook.md).
+This closes Epic 26. Sprint 26.9 added §16: Gate D verdict — blocked on the
 documented external prerequisite (no SERV3-WEB/Resend-secret access this session), not fabricated.
 Repository-side readiness completed instead: the actual Sprint 26.1 HMG root cause is fixed
 (`DevelopmentEmailSender`'s content-root guard now trusts a deliberately-configured absolute
@@ -881,7 +885,52 @@ owner is ready to activate real Resend delivery on HMG — to create the
 `BEEDAY_HMG_ALLOWED_RECIPIENTS` secret and flip `appsettings.Homologation.json`'s provider flags in
 a future, explicitly-scoped change.
 
-## 17. Related documentation
+## 17. Production readiness — final audit (Epic 26, Sprint 26.10)
+
+Closes the Epic. Re-verified against the current repository state (not re-asserted from memory of
+earlier sprints) on 2026-08-16.
+
+### 17.1 Epic invariants
+
+| Invariant | Status | Evidence |
+|---|---|---|
+| Development uses local/file delivery, no Resend credential required | ✅ | `appsettings.json` base: `Resend:Enabled=false`, `Development:Enabled=true` |
+| Homologation uses the external provider only behind centralized fail-closed safety | ✅ (architecturally guaranteed, not yet exercised) | Whenever Resend is selected, `IEmailSender` is always `HmgRecipientGuardedEmailSender` — §10 |
+| Production configured conceptually for Resend, not automatically activated | ✅ | `appsettings.Production.json`: `Resend:Enabled=true`; PRD has no runtime (Not Provisioned by Design) |
+| HMG and PRD secret identities separate by contract | ✅ contract / ⚠️ not yet a live guarantee | Same secret name, different GitHub Environment scope — but `production` Environment doesn't exist yet; runbook §4.1 |
+| No HMG API key committed, logged, documented, or embedded | ✅ | Confirmed across every sprint's diff review; never requested |
+| Identity/Application code does not depend on Resend/IIS/Homologation | ✅ | `PersistenceContractBoundaryTests`; `Common/Identity/*` contracts only |
+| Provider selection is deterministic | ✅ | `EmailProviderSelector.Resolve` — §4 |
+| Critical configuration is validated | ✅ | `ValidateOnStart()` on all 6 Options classes |
+| `PublicBaseUrl` behavior is environment-safe | ✅ | §12.2; `ProductionOriginGuardTests` |
+| Automated tests do not call real Resend | ✅ | Every HTTP call stubbed; confirmed by re-reading every test touching `ResendEmailSender` |
+| Provider acceptance is not mislabeled as delivery | ✅ | Explicit terminology throughout §14.1, this doc, and the runbook |
+| PII/token logging is controlled | ✅ | §14.3 |
+| Existing throttling/resilience infrastructure reused, not duplicated | ✅ | §14.4; no new rate limiter, no Outbox/retry subsystem introduced anywhere in the Epic |
+| Rollback path is documented | ✅ | Runbook §12, linking the existing (not Epic-26-specific) `Deploy-BeeDay.ps1` mechanism |
+| Documentation matches implementation | ✅ | This document + the runbook, both re-verified against current `src/` in this sprint |
+
+### 17.2 Final code sweep
+
+Searched for stale two-boolean provider logic, old sender names, and obsolete configuration
+references left behind by the Epic's own changes: none found (`EmailProviderSelector.Resolve` fully
+replaced the old bare `if (resendEnabled)` branch everywhere; no leftover reference to it exists).
+One unrelated, pre-existing historical comment was found
+(`IEmailConfirmationIssuer.cs`'s doc comment mentions `LevelUpData`, predating the BeeDay rename by
+many sprints) — not touched, since it is not a reference this Epic introduced or replaced, and
+`CLAUDE.md`'s change-discipline rule is to avoid unrelated cleanup, not to open old scars an Epic
+never owned.
+
+### 17.3 Production readiness verdict
+
+**Production Ready, not Production Activated** — exactly the distinction the roadmap requires.
+Every invariant above holds today, in the repository, under test. Nothing in this Epic deployed to
+Production, enabled Production email delivery, created or requested a PRD API key, reused HMG's
+credential anywhere, or sent a Production smoke email. The residual gaps are listed in the runbook
+§19 and were carried forward explicitly across every sprint that found them — none were silently
+dropped.
+
+## 18. Related documentation
 
 - [`04-services.md`](04-services.md) — existing Infrastructure services inventory, including the
   `ResendEmailSender`/`DevelopmentEmailSender` summary this document expands on with the HMG root
