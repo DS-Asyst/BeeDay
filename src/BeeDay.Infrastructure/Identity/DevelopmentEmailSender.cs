@@ -1,6 +1,7 @@
 using System.Text.Json;
 using BeeDay.Application.Common.Identity;
 using BeeDay.Infrastructure.Configuration;
+using BeeDay.Infrastructure.Diagnostics;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -20,7 +21,7 @@ public sealed class DevelopmentEmailSender(
 
         if (!_options.Enabled)
         {
-            logger.LogInformation("Development email capture is disabled. Suppressed email to {Recipient}.", EmailAddressLogMasking.Mask(message.Recipient));
+            logger.LogInformation(EmailEventIds.DevelopmentCaptureDisabled, "Development email capture is disabled. Suppressed email to {Recipient}.", EmailAddressLogMasking.Mask(message.Recipient));
             return;
         }
 
@@ -55,6 +56,7 @@ public sealed class DevelopmentEmailSender(
         await File.WriteAllTextAsync(metadataPath, metadata, cancellationToken);
 
         logger.LogInformation(
+            EmailEventIds.DevelopmentCaptured,
             "Development email captured for {Recipient}. Preview: {PreviewPath}",
             EmailAddressLogMasking.Mask(message.Recipient),
             htmlPath);

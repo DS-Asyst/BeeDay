@@ -1,9 +1,11 @@
 using System.Text.Json;
 using BeeDay.Application.Common.Identity;
 using BeeDay.Infrastructure.Configuration;
+using BeeDay.Infrastructure.Diagnostics;
 using BeeDay.Infrastructure.Identity;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Xunit;
@@ -130,11 +132,60 @@ public sealed class DevelopmentEmailSenderTests : IDisposable
                 TestContext.Current.CancellationToken));
     }
 
+    // EPIC 28, Sprint 28.7: same EventId discipline as the Resend/Guard senders — captured vs.
+    // suppressed must be filterable without parsing message text.
+    [Fact]
+    public async Task SendAsync_LogsTheCapturedEventId()
+    {
+        var logger = new RecordingLogger<DevelopmentEmailSender>();
+        var sender = new DevelopmentEmailSender(
+            new TestHostEnvironment { ContentRootPath = contentRoot },
+            Options.Create(new DevelopmentEmailOptions { Enabled = true, Directory = "Data/Emails" }),
+            logger);
+
+        await sender.SendAsync(new EmailMessage("player@example.com", "Subject", "<p>Body</p>"), TestContext.Current.CancellationToken);
+
+        Assert.Contains(logger.Entries, e => e.EventId.Id == EmailEventIds.DevelopmentCaptured.Id);
+    }
+
+    [Fact]
+    public async Task SendAsync_WhenDisabled_LogsTheCaptureDisabledEventId()
+    {
+        var logger = new RecordingLogger<DevelopmentEmailSender>();
+        var sender = new DevelopmentEmailSender(
+            new TestHostEnvironment { ContentRootPath = contentRoot },
+            Options.Create(new DevelopmentEmailOptions { Enabled = false, Directory = "Data/Emails" }),
+            logger);
+
+        await sender.SendAsync(new EmailMessage("player@example.com", "Subject", "<p>Body</p>"), TestContext.Current.CancellationToken);
+
+        Assert.Contains(logger.Entries, e => e.EventId.Id == EmailEventIds.DevelopmentCaptureDisabled.Id);
+    }
+
     private DevelopmentEmailSender CreateSender(bool enabled = true) =>
         new(
             new TestHostEnvironment { ContentRootPath = contentRoot },
             Options.Create(new DevelopmentEmailOptions { Enabled = enabled, Directory = "Data/Emails" }),
             NullLogger<DevelopmentEmailSender>.Instance);
+
+    private sealed class RecordingLogger<T> : ILogger<T>
+    {
+        public List<(LogLevel Level, EventId EventId, string Message)> Entries { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            Entries.Add((logLevel, eventId, formatter(state, exception)));
+        }
+    }
 
     private sealed class TestHostEnvironment : IHostEnvironment
     {

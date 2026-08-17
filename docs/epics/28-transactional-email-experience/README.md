@@ -921,3 +921,108 @@ environment. `POST-MERGE PENDING`: none newly introduced by this Sprint.
   proven" level (as opposed to "configuration/code evidence" level, which this Sprint does satisfy) —
   both require the repository owner's input/decision before any further code or DNS action.
 - No experiment/retest has been run — this Sprint intentionally did not claim one.
+
+---
+
+## Sprint 28.7 — Transactional Email Observability Operationalization
+
+**Base local:** `sprint/28.6-deliverability-remediation`.
+**Branch:** `sprint/28.7-email-observability`.
+**Gate:** preparation for Gate D complete at the code/script level. Real-HMG evidence (directory
+actually provisioned with the new commits, log EventIds observed in a real stdout file, retention
+script actually scheduled) is `POST-MERGE PENDING`.
+
+### Baseline (from Sprint 28.1)
+
+`web.config:8-17` (`stdoutLogEnabled=true`, `stdoutLogFile=C:\Apps\BeeDay-Data\Logs\stdout`),
+`Deploy-BeeDay.ps1` creates the `Logs` directory idempotently (`New-Item -Force`, already correct —
+no defect found) but deliberately never sets ACLs (administratively provisioned, validated read-only
+by `Assert-BeeDayRequiredAccess` — boundary preserved, not touched this Sprint), no typed `EventId`
+existed for the email path (`WebEventIds.RequestFailed`, 6100, was the only one in the repository),
+`docs/deployment/03-observability.md` predated Epic 26 entirely (zero mention of email logging).
+
+### What changed
+
+1. **Typed `EventId`s** — new `src/BeeDay.Infrastructure/Diagnostics/EmailEventIds.cs` (10 values,
+   `71xx` block), retrofitted onto every existing log call in `HmgRecipientGuardedEmailSender`,
+   `ResendEmailSender`, `DevelopmentEmailSender` — no new log statement, no message text changed, no
+   new information logged. Lets an operator filter stdout's JSON output by `EventId.Id` instead of
+   parsing message text.
+2. **Stdout log retention** — new, standalone `scripts/Clear-BeeDayStdoutLogs.ps1`: idempotent,
+   deletes only `stdout_*.log` files (ANCM's own naming convention) older than `-RetentionDays`
+   (default 30) in the given directory, supports `-WhatIf`, never throws if the directory doesn't
+   exist yet. **Deliberately not wired into `Deploy-BeeDay.ps1`'s critical deploy/rollback path** — a
+   failure in it can never affect a deployment. Its own regression suite
+   (`scripts/tests/Test-ClearBeeDayStdoutLogs.ps1`, 8 assertions, framework-free per this repo's
+   existing convention) is wired into `deploy-hmg.yml`'s existing "Validate deployment script
+   regression suite" preflight, alongside the two suites Hotfixes 26.9.2/26.9.3 already added.
+3. **Found while investigating this area, fixed for consistency with Sprint 28.6's precedent:**
+   `Deploy-BeeDay.ps1`'s own `-ResendFromName` parameter default was also `"BeeDay"` (same brand-
+   casing issue Sprint 28.6 fixed in `ResendOptions.cs`) — corrected to `"beeday"`. Both
+   `deploy-hmg.yml` and `deploy-prd.yml` always pass this parameter explicitly (from
+   `$env:BEEDAY_RESEND_FROM_NAME`, empty or not), so this default is unreachable through either
+   known workflow today — same "unreachable but latent" risk profile as the C# fix, same
+   justification, applied for consistency rather than left half-fixed in one of the two places it
+   existed.
+4. **Documentation** — `docs/deployment/03-observability.md` §2.1 (new: the full EventId table, an
+   operator filtering recipe, cross-referenced rather than duplicated from
+   `06-transactional-email.md` §14) and §7 (updated: the stdout retention gap it already documented
+   is now closed by the new script, explicitly marked Code Complete / not Environment Validated);
+   `docs/infrastructure/06-transactional-email.md` §14.1 (dated Update note pointing to the new
+   EventIds); `docs/deployment/14-transactional-email-runbook.md` §13 (two new troubleshooting rows).
+
+### ACL/provisioning — audited, not changed
+
+`Assert-BeeDayRequiredAccess` already validates (read-only) that the AppPool has `Modify` rights on
+`Logs` before deploy proceeds; `Deploy-BeeDay.ps1` never grants ACLs itself (administratively
+provisioned, per its own existing comment). This boundary was re-confirmed correct this Sprint, not
+altered — no "grant broad permissions as a workaround" was introduced, consistent with the Sprint's
+own explicit prohibition.
+
+### Tests added
+
+- `IdentityInfrastructureTests.cs`: 5 new EventId tests (Resend attempted/accepted, rejected, network
+  failure, disabled).
+- `HmgRecipientGuardedEmailSenderTests.cs`: 1 new EventId test (allowed + blocked).
+- `DevelopmentEmailSenderTests.cs`: 2 new EventId tests (captured, capture-disabled).
+- `scripts/tests/Test-ClearBeeDayStdoutLogs.ps1` (new, 8 assertions): parse validation, missing-
+  directory no-throw, stale-file removal, recent-file preservation, non-matching-filename
+  preservation (regardless of age), idempotent re-run, `-WhatIf` non-destructiveness. Run directly
+  this session (`powershell -File ...`) — all 8 pass.
+- Existing `Test-DeployBeeDayRecovery.ps1` (18/18) and `Test-InvokeBeeDayIisControlContract.ps1`
+  (19/19) re-run directly this session to confirm the `-ResendFromName` default change didn't
+  regress either suite — both still pass.
+
+### Validation Results
+
+```
+dotnet format BeeDay.slnx --verify-no-changes   → clean
+dotnet build BeeDay.slnx                         → 0 errors, 0 warnings
+dotnet test BeeDay.slnx                          → 1394/1394 passed (93+85+210+841+165 across 5 projects)
+scripts/tests/Test-ClearBeeDayStdoutLogs.ps1     → 8/8 assertions passed (run directly)
+scripts/tests/Test-DeployBeeDayRecovery.ps1      → 18/18 assertions passed (unaffected by this Sprint)
+scripts/tests/Test-InvokeBeeDayIisControlContract.ps1 → 19/19 assertions passed (unaffected)
+deploy-hmg.yml YAML syntax                       → valid (python yaml.safe_load)
+git status                                       → confirmed clean after commit
+```
+
+### Security / Production
+
+No secrets touched or exposed. No ACL changed (validated read-only, as before). No server touched
+outside the official deploy flow. Production untouched — the retention script and EventIds apply
+equally to any environment but were not deployed or scheduled anywhere by this Sprint.
+
+### Runtime validation
+
+Not applicable — code/script complete, not yet exercised against real SERV3WEB state.
+`POST-MERGE PENDING`: the new `Logs` directory content (typed EventIds actually appearing in a real
+stdout file), and the retention script actually being scheduled and exercised against real
+accumulated files, both require the merged commits to be deployed first.
+
+### Risks / Known Limitations
+
+- The retention script has not been scheduled anywhere — it exists and is tested, but "operationally
+  usable" in the full sense (an operator actually running or scheduling it on SERV3WEB) requires a
+  post-merge, out-of-repository action.
+- Event Journal's own retention gap (distinct from the stdout gap this Sprint closed) remains open —
+  explicitly out of this Sprint's scope (email/stdout only), not silently dropped.

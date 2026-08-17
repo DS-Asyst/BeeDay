@@ -11,6 +11,12 @@
 History e auditoria exaustiva de `EventId`; seções anteriores a esta data cobriam só logging de
 `Program.cs`).
 
+**Update (2026-08-17, EPIC 28 Sprint 28.7 — Observability Operationalization):** este documento
+predatava por completo a EPIC 26 (e-mail transacional) e por isso não cobria nenhum dos sinais de
+log que já existiam para esse fluxo — lacuna encerrada por §2.1 abaixo. O achado de §7 sobre ausência
+de rotação/retenção para o log de stdout do IIS agora tem uma ferramenta dedicada (§7), mantendo o
+restante da auditoria da Sprint 18.5 intacto.
+
 ## 1. Objetivo
 
 Documentar o que é observável no BeeDay em execução hoje: logging, o log de auditoria de domain
@@ -48,6 +54,45 @@ e `Domain` não definem nenhum outro), usado por `GlobalExceptionHandler`.
 para **todo** Command/Query que passa por `ISender.Send` — mecanismo separado do logging de
 `Program.cs`, documentado em detalhe em
 [`docs/application/03-pipeline.md`](../application/03-pipeline.md) §1-2 (não duplicado aqui).
+
+### 2.1 Transactional email logging (EPIC 28, Sprint 28.7)
+
+`EmailEventIds` (`src/BeeDay.Infrastructure/Diagnostics/EmailEventIds.cs`, new this Sprint) is the
+second typed-`EventId` class in the repository — `WebEventIds.RequestFailed` (6100, §2 above) was
+the only one before it. Infrastructure-owned (it cannot reference `BeeDay.Web.Diagnostics`), numbered
+in the `71xx` block to stay clearly distinct:
+
+| EventId | Value | Emitted by | Level |
+|---|---|---|---|
+| `GuardAllowed` | 7100 | `HmgRecipientGuardedEmailSender` | Information |
+| `GuardBlocked` | 7101 | `HmgRecipientGuardedEmailSender` | Warning |
+| `ProviderDisabled` | 7102 | `ResendEmailSender` | Information |
+| `ProviderAttempted` | 7103 | `ResendEmailSender` | Information |
+| `ProviderAccepted` | 7104 | `ResendEmailSender` | Information |
+| `ProviderRejected` | 7105 | `ResendEmailSender` | Error |
+| `ProviderTimedOut` | 7106 | `ResendEmailSender` | Error |
+| `ProviderNetworkFailure` | 7107 | `ResendEmailSender` | Error |
+| `DevelopmentCaptureDisabled` | 7108 | `DevelopmentEmailSender` | Information |
+| `DevelopmentCaptured` | 7109 | `DevelopmentEmailSender` | Information |
+
+Retrofitted onto the exact log call sites that already existed — no new log statement was added, no
+message text changed, no new information is logged. `accepted != delivered != inbox placement` still
+applies (§14.1 of the owning document below); "send requested" remains without a dedicated log line
+by design (the guard-allowed/blocked or provider-attempted line is the first real evidence — see that
+document's own note on this). Full observable-state model, recipient-sanitization policy, and
+troubleshooting table: [`docs/infrastructure/06-transactional-email.md`](../infrastructure/06-transactional-email.md)
+§14 — not duplicated here, this section only adds the typed `EventId` layer on top of it.
+
+**Operator recipe** (never exposes PII — stdout already never carries recipient addresses in the
+Resend/Guard path, and `DevelopmentEmailSender`'s two lines mask the address before it reaches the
+log):
+
+```text
+Select-String -Path "C:\Apps\BeeDay-Data\Logs\stdout_*.log" -Pattern '"EventId":\{"Id":710[0-9]'
+```
+
+(`AddJsonConsole`'s structured output carries `EventId.Id` as a JSON field — filtering on it is
+exact, unlike matching message text, which can drift if a message is ever reworded.)
 
 ## 3. Health Checks
 
@@ -140,12 +185,22 @@ toda resposta de erro carrega `correlationId`/`requestId` como extension do `Pro
   uso de `Activity` é o padrão do ASP.NET Core em `Error.razor` (`Activity.Current?.Id`, ver
   [`docs/web/02-routing-and-pages.md`](../web/02-routing-and-pages.md) §7), não instrumentação
   própria.
-- Sem rotação/retenção configurada para o Event Journal (§4) nem para o log de stdout do IIS — a
-  responsabilidade de gerenciar o crescimento de ambos os arquivos não está automatizada em nenhum
-  script deste repositório. Risco operacional conhecido, registrado na Sprint 18.5 (auditoria de
-  observabilidade) — implementar rotação seria introduzir comportamento novo, fora do escopo dessa
-  Sprint (correção de código, não auditoria); recomendação para uma Sprint futura, não implementada
-  silenciosamente.
+- **Event Journal (§4):** ainda sem rotação/retenção — permanece exatamente como a Sprint 18.5
+  encontrou, fora do escopo da Sprint 28.7 (que tratou apenas de e-mail transacional/stdout).
+- **Log de stdout do IIS:** a Sprint 18.5 registrou esse gap como risco operacional conhecido, sem
+  implementá-lo (fora do escopo daquela auditoria). A **Sprint 28.7 (EPIC 28) fecha esse gap**:
+  `scripts/Clear-BeeDayStdoutLogs.ps1` (novo) remove, de forma idempotente, apenas arquivos
+  `stdout_*.log` (a convenção de nomes do próprio ANCM) mais antigos que `-RetentionDays` (padrão 30
+  dias) no diretório informado — nunca toca em nenhum outro arquivo, nunca lança erro se o diretório
+  ainda não existir, suporta `-WhatIf`. Deliberadamente **não** foi acoplado ao caminho crítico de
+  deploy/rollback de `Deploy-BeeDay.ps1` — uma falha nele nunca pode afetar um deploy. Coberto por
+  `scripts/tests/Test-ClearBeeDayStdoutLogs.ps1` (8 asserções), executado no mesmo preflight
+  `deploy-hmg.yml` já usa para os outros dois suites de regressão do deploy.
+  **Estado: Code Complete, não Environment Validated** — este script não foi ainda agendado (ex.:
+  Windows Scheduled Task) em nenhum ambiente real; agendá-lo é uma decisão/execução operacional fora
+  do escopo desta auditoria de repositório. Comando de referência:
+  `powershell -File scripts\Clear-BeeDayStdoutLogs.ps1 -Directory "C:\Apps\BeeDay-Data\Logs"
+  -RetentionDays 30`.
 - Nenhum alerta automatizado (e-mail, Slack, PagerDuty) configurado a partir de qualquer sinal
   descrito acima — o único consumidor automatizado de `/health/ready` é `Deploy-BeeDay.ps1`, e
   apenas durante a janela do próprio deploy (6 tentativas, então para de verificar).
@@ -165,3 +220,7 @@ toda resposta de erro carrega `correlationId`/`requestId` como extension do `Pro
 - [`docs/web/01-composition-root.md`](../web/01-composition-root.md),
   [`docs/architecture/05-runtime-flows.md`](../architecture/05-runtime-flows.md) (reaproveitados,
   não duplicados).
+- EPIC 28, Sprint 28.7: `src/BeeDay.Infrastructure/Diagnostics/EmailEventIds.cs`,
+  `Identity/{HmgRecipientGuardedEmailSender,ResendEmailSender,DevelopmentEmailSender}.cs`,
+  `scripts/Clear-BeeDayStdoutLogs.ps1`, `scripts/tests/Test-ClearBeeDayStdoutLogs.ps1`,
+  `.github/workflows/deploy-hmg.yml`.

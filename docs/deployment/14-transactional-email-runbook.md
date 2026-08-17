@@ -265,6 +265,8 @@ explicit limits: [`04-operations.md`](04-operations.md) §3.
 | "Provider request attempted" logged, no "accepted"/"rejected" follows | Transient network error or `HttpClient` timeout — check the `Error`-level log line's classification | [`06-transactional-email.md`](../infrastructure/06-transactional-email.md) §14.2 |
 | User reports registration failed but the account exists | The known persistence-succeeds/delivery-fails boundary — direct them to resend-confirmation | [`06-transactional-email.md`](../infrastructure/06-transactional-email.md) §3.1/§12.3/§15.4 |
 | Email sent to the wrong environment's recipient | Should be structurally impossible (§8) — if observed, treat as a P0 regression in `IdentityEmailComposer`/`PublicBaseUrl` resolution, not a configuration issue |  |
+| Need to filter stdout logs for one specific email state (e.g. only "guard blocked") | Every log line in the email path now carries a typed `EventId` (7100-7109) — filter on `EventId.Id` in the JSON stdout, not message text | [`06-transactional-email.md`](../infrastructure/06-transactional-email.md) §14.1, [`03-observability.md`](03-observability.md) §2.1 (EPIC 28, Sprint 28.7) |
+| stdout log directory accumulating old files | No automatic rotation is provisioned — run `scripts/Clear-BeeDayStdoutLogs.ps1` manually, or schedule it | [`03-observability.md`](03-observability.md) §7 (EPIC 28, Sprint 28.7) — Code Complete, not yet Environment Validated |
 
 ## 14. Key rotation procedure
 

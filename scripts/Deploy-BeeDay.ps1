@@ -15,7 +15,7 @@ param(
     # deploy-prd.yml already does) enables Resend the same way it always has.
     [string]$ResendApiKey,
     [string]$ResendFromAddress,
-    [string]$ResendFromName = "BeeDay",
+    [string]$ResendFromName = "beeday",
 
     # Epic 26, Sprint 26.9: the HMG recipient safety guard's allowlist (HmgRecipientGuardOptions,
     # Sprint 26.4) — semicolon-separated, matching this script's own AllowedHosts convention below
