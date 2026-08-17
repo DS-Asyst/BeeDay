@@ -10,8 +10,13 @@
 @* No App Store URL exists yet — an honest "coming soon" state, not a placeholder link
    (06_ASSETS_AND_OPEN_ITEMS.md). *@
 <ProductPageTemplate PageContext="@Localizer["IosPageContext"]" Title="@Localizer["IosTitle"]" Description="@Localizer["IosIntro"]" Surface="BeeDayPaletteToken.Cor3">
-    <section aria-label="@Localizer["IosTitle"]">
-        <span class="institutional-product__status">@Localizer["IosStatus"]</span>
-        <p>@Localizer["IosBody"]</p>
-    </section>
+    <PrimaryAction>
+        <a class="beeday-button beeday-button--important-white" href="/profile/create">@Localizer["TryBeedayToday"]</a>
+    </PrimaryAction>
+    <ChildContent>
+        <section aria-label="@Localizer["IosTitle"]">
+            <span class="institutional-product__status">@Localizer["IosStatus"]</span>
+            <p>@Localizer["IosBody"]</p>
+        </section>
+    </ChildContent>
 </ProductPageTemplate>

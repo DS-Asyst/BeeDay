@@ -34,6 +34,13 @@
     cursor: pointer;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    /* .beeday-button is applied to both real <button> elements (never underlined) and <a> elements
+       used as buttons (PublicAuthActions, Home's hero CTAs, and the institutional hero's
+       PrimaryAction slot) — anchors default to underlined text, so the base rule must reset it once
+       instead of relying on every consumer to add its own local override, as the previous
+       consumers did (discovered in Sprint 27.6: the institutional hero's CTA rendered underlined
+       because no such override existed for it). */
+    text-decoration: none;
     text-transform: uppercase;
     text-align: center;
     overflow-wrap: anywhere;

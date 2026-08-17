@@ -57,6 +57,8 @@
   <data name="ProductFeatureWalletBody" xml:space="preserve"><value>Acompanhe transações, tags e filtros das suas finanças pessoais junto com o seu dia.</value></data>
   <data name="ProductFeatureProgressTitle" xml:space="preserve"><value>Progresso</value></data>
   <data name="ProductFeatureProgressBody" xml:space="preserve"><value>Uma curva de experiência leve e feedback de level-up mantêm a consistência visível — sem mecânicas de RPG.</value></data>
+  <data name="ProductGetStarted" xml:space="preserve"><value>Comece agora</value></data>
+  <data name="TryBeedayToday" xml:space="preserve"><value>Experimente o beeday hoje</value></data>
 
   <data name="ProductPlusPageContext" xml:space="preserve"><value>beeday Plus</value></data>
   <data name="ProductPlusPageTitle" xml:space="preserve"><value>beeday Plus</value></data>

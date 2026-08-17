@@ -59,6 +59,9 @@ public sealed class InstitutionalPagesTests
 
         Assert.Equal("beeday", cut.Find("h1").TextContent.Trim());
         Assert.Equal(3, cut.FindAll(".institutional-product__feature").Count);
+        var cta = cut.Find(".beeday-hero__primary-action a.beeday-button--important-white");
+        Assert.Equal("/profile/create", cta.GetAttribute("href"));
+        Assert.Equal("Get started", cta.TextContent.Trim());
     }
 
     [Fact]
@@ -70,6 +73,7 @@ public sealed class InstitutionalPagesTests
         Assert.Equal("beeday Plus", cut.Find("h1").TextContent.Trim());
         Assert.Contains("Coming soon", cut.Find(".institutional-product__status").TextContent, StringComparison.Ordinal);
         Assert.DoesNotContain("$", cut.Markup, StringComparison.Ordinal);
+        Assert.Equal("/profile/create", cut.Find(".beeday-hero__primary-action a").GetAttribute("href"));
     }
 
     [Fact]
@@ -81,6 +85,7 @@ public sealed class InstitutionalPagesTests
         Assert.Equal("beeday for Android", cut.Find("h1").TextContent.Trim());
         Assert.Contains("Coming soon", cut.Find(".institutional-product__status").TextContent, StringComparison.Ordinal);
         Assert.Empty(cut.FindAll("a[href*='play.google.com']"));
+        Assert.Equal("/profile/create", cut.Find(".beeday-hero__primary-action a").GetAttribute("href"));
     }
 
     [Fact]
@@ -92,6 +97,7 @@ public sealed class InstitutionalPagesTests
         Assert.Equal("beeday for iOS", cut.Find("h1").TextContent.Trim());
         Assert.Contains("Coming soon", cut.Find(".institutional-product__status").TextContent, StringComparison.Ordinal);
         Assert.Empty(cut.FindAll("a[href*='apps.apple.com']"));
+        Assert.Equal("/profile/create", cut.Find(".beeday-hero__primary-action a").GetAttribute("href"));
     }
 
     [Fact]

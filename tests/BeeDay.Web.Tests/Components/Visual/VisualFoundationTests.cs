@@ -91,6 +91,14 @@ public sealed class VisualFoundationTests
         }
 
         Assert.Contains(".beeday-button--important-white {", designSystem, StringComparison.Ordinal);
+        // .beeday-button is applied to real <button>s (never underlined) and <a>s used as buttons
+        // (PublicAuthActions, Home's hero CTAs, the institutional hero's PrimaryAction). Anchors
+        // default to underlined text; the base rule must reset it once instead of relying on every
+        // consumer to add its own local override (the institutional hero's CTA rendered underlined
+        // in Sprint 27.6 because no such override existed for that new consumer).
+        var baseButtonRuleHasNoUnderline = System.Text.RegularExpressions.Regex.IsMatch(
+            designSystem, @"\.beeday-button\s*\{[^}]*text-decoration:\s*none", System.Text.RegularExpressions.RegexOptions.Singleline);
+        Assert.True(baseButtonRuleHasNoUnderline, "The base .beeday-button rule must reset text-decoration for anchor consumers.");
     }
 
     [Fact]

@@ -10,8 +10,13 @@
 @* No price, entitlement, or benefit is invented here (06_ASSETS_AND_OPEN_ITEMS.md) — beeday Plus
    does not exist in the product yet. *@
 <ProductPageTemplate PageContext="@Localizer["ProductPlusPageContext"]" Title="@Localizer["ProductPlusTitle"]" Description="@Localizer["ProductPlusIntro"]" Surface="BeeDayPaletteToken.Cor1">
-    <section aria-label="@Localizer["ProductPlusTitle"]">
-        <span class="institutional-product__status">@Localizer["ProductPlusStatus"]</span>
-        <p>@Localizer["ProductPlusBody"]</p>
-    </section>
+    <PrimaryAction>
+        <a class="beeday-button beeday-button--important-white" href="/profile/create">@Localizer["TryBeedayToday"]</a>
+    </PrimaryAction>
+    <ChildContent>
+        <section aria-label="@Localizer["ProductPlusTitle"]">
+            <span class="institutional-product__status">@Localizer["ProductPlusStatus"]</span>
+            <p>@Localizer["ProductPlusBody"]</p>
+        </section>
+    </ChildContent>
 </ProductPageTemplate>

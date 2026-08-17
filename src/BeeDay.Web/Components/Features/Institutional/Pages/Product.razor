@@ -8,21 +8,30 @@
 <PageTitle>@Localizer["ProductPageTitle"]</PageTitle>
 
 <ProductPageTemplate PageContext="@Localizer["ProductPageContext"]" Title="@Localizer["ProductTitle"]" Description="@Localizer["ProductIntro"]" Surface="BeeDayPaletteToken.Cor0">
-    <section aria-labelledby="product-features-heading">
-        <h2 id="product-features-heading">@Localizer["ProductFeaturesTitle"]</h2>
-        <div class="institutional-product__features">
-            <article class="institutional-product__feature">
-                <h3>@Localizer["ProductFeatureDailyTitle"]</h3>
-                <p>@Localizer["ProductFeatureDailyBody"]</p>
-            </article>
-            <article class="institutional-product__feature">
-                <h3>@Localizer["ProductFeatureWalletTitle"]</h3>
-                <p>@Localizer["ProductFeatureWalletBody"]</p>
-            </article>
-            <article class="institutional-product__feature">
-                <h3>@Localizer["ProductFeatureProgressTitle"]</h3>
-                <p>@Localizer["ProductFeatureProgressBody"]</p>
-            </article>
-        </div>
-    </section>
+    <PrimaryAction>
+        @* important-white (not the default primary/brand-colored variant) because this hero's own
+           surface is already brand-primary (COR0) — a solid-purple button would have poor contrast
+           against a purple background. Matches the same on-brand-surface treatment already used for
+           Home's hero CTA (Sprint 27.2). *@
+        <a class="beeday-button beeday-button--important-white" href="/profile/create">@Localizer["ProductGetStarted"]</a>
+    </PrimaryAction>
+    <ChildContent>
+        <section aria-labelledby="product-features-heading">
+            <h2 id="product-features-heading">@Localizer["ProductFeaturesTitle"]</h2>
+            <div class="institutional-product__features">
+                <article class="institutional-product__feature">
+                    <h3>@Localizer["ProductFeatureDailyTitle"]</h3>
+                    <p>@Localizer["ProductFeatureDailyBody"]</p>
+                </article>
+                <article class="institutional-product__feature">
+                    <h3>@Localizer["ProductFeatureWalletTitle"]</h3>
+                    <p>@Localizer["ProductFeatureWalletBody"]</p>
+                </article>
+                <article class="institutional-product__feature">
+                    <h3>@Localizer["ProductFeatureProgressTitle"]</h3>
+                    <p>@Localizer["ProductFeatureProgressBody"]</p>
+                </article>
+            </div>
+        </section>
+    </ChildContent>
 </ProductPageTemplate>
