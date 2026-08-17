@@ -68,6 +68,70 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
     }
 
     [Fact]
+    public async Task TaskCheckbox_HoverPreviewsTheCheckWithoutCompletingUntilClicked()
+    {
+        // EPIC 27 Sprint 27.10 acceptance: "Hover mostra check sem marcar antes do clique."
+        await LoginToDailyAsync();
+        var title = $"E2E Hover {Guid.NewGuid():N}"[..24];
+
+        await OpenActivityMenuAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Task" }).ClickAsync();
+        var dialog = Page.GetByRole(AriaRole.Dialog);
+        await dialog.GetByLabel("Title").FillAsync(title);
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
+        await Expect(dialog).ToBeHiddenAsync();
+
+        var checkbox = Page.GetByRole(AriaRole.Button, new() { Name = $"Complete {title}" });
+        var glyph = checkbox.Locator(".activity-card__checkbox-glyph");
+
+        Assert.Equal("0", await glyph.EvaluateAsync<string>("element => getComputedStyle(element).opacity"));
+
+        await checkbox.HoverAsync();
+        await Page.WaitForTimeoutAsync(200);
+        var hoveredOpacity = await glyph.EvaluateAsync<string>("element => getComputedStyle(element).opacity");
+        Assert.NotEqual("0", hoveredOpacity);
+        Assert.NotEqual("1", hoveredOpacity);
+
+        // Hovering alone must never have completed it.
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Complete {title}" })).ToBeVisibleAsync();
+
+        await checkbox.ClickAsync();
+
+        // Completing moves the task out of the Active view (see CreateAndCompleteTask_TogglesCompletion).
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Show completed tasks" }).ClickAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Mark {title} as incomplete" })).ToBeVisibleAsync();
+
+        // Completed must stay visibly checked after the mouse moves away.
+        await Page.Mouse.MoveAsync(5, 5);
+        var completedCheckbox = Page.GetByRole(AriaRole.Button, new() { Name = $"Mark {title} as incomplete" });
+        Assert.Equal("1", await completedCheckbox.Locator(".activity-card__checkbox-glyph").EvaluateAsync<string>("element => getComputedStyle(element).opacity"));
+    }
+
+    [Fact]
+    public async Task TaskCheckbox_CompletesViaKeyboardAloneWithoutAnyHover()
+    {
+        // EPIC 27 Sprint 27.10 acceptance: "Teclado/touch conseguem concluir sem depender de hover."
+        await LoginToDailyAsync();
+        var title = $"E2E Keyboard {Guid.NewGuid():N}"[..24];
+
+        await OpenActivityMenuAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Task" }).ClickAsync();
+        var dialog = Page.GetByRole(AriaRole.Dialog);
+        await dialog.GetByLabel("Title").FillAsync(title);
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
+        await Expect(dialog).ToBeHiddenAsync();
+
+        var checkbox = Page.GetByRole(AriaRole.Button, new() { Name = $"Complete {title}" });
+        await checkbox.FocusAsync();
+        await Expect(checkbox).ToBeFocusedAsync();
+        await Page.Keyboard.PressAsync("Enter");
+
+        // Completing moves the task out of the Active view (see CreateAndCompleteTask_TogglesCompletion).
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Show completed tasks" }).ClickAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Mark {title} as incomplete" })).ToBeVisibleAsync();
+    }
+
+    [Fact]
     public async Task ProjectWorkspace_UsesSharedProgressFocusAndResponsiveContracts()
     {
         await LoginToDailyAsync();
@@ -95,6 +159,26 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
 
         await Page.Keyboard.PressAsync("Escape");
         await Expect(workspace).ToBeHiddenAsync();
+    }
+
+    [Fact]
+    public async Task ProjectCard_ShowsTheMiniBeeIndicatorInsteadOfTheOldCoinLikeIcon()
+    {
+        // EPIC 27 Sprint 27.10 acceptance: "Projects não exibem mais a moeda antiga no indicador alvo."
+        await LoginToDailyAsync();
+        var title = $"E2E Project Badge {Guid.NewGuid():N}"[..26];
+
+        await OpenActivityMenuAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Project" }).ClickAsync();
+        var editor = Page.GetByRole(AriaRole.Dialog);
+        await editor.GetByLabel("Title").FillAsync(title);
+        await editor.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
+        await Expect(editor).ToBeHiddenAsync();
+
+        var card = Page.Locator(".activity-card--project").Filter(new() { HasText = title });
+        var badge = card.Locator(".activity-card__project-status");
+        await Expect(badge).ToHaveAttributeAsync("src", new Regex("project-bee\\.png$"));
+        await Expect(card.Locator("svg.beeday-icon")).ToHaveCountAsync(0);
     }
 
     private async Task LoginToDailyAsync()

@@ -447,22 +447,11 @@
     text-transform: uppercase;
 }
 
-.activity-card--project .activity-card__project-status {
-    width: auto;
-    height: auto;
-    margin: 0;
-    border: 0;
-    border-radius: 0;
-    color: var(--beeday-color-text-inverse);
-    background: transparent;
-    box-shadow: none;
-}
-
-.activity-card--project .activity-card__project-status svg,
-.activity-card--project .activity-card__project-status .beeday-icon {
-    color: var(--beeday-color-text-inverse);
-    fill: currentColor;
-}
+/* Sprint 27.10: the Project indicator is now a cropped presentation of the existing
+   "how beeday works" bee illustration (no new character generated — see project-bee.png)
+   instead of a folder icon, so the two rules below (sizing/shape and the old icon-specific
+   svg/.beeday-icon color hooks) are superseded by the Sprint 27.10 block at the end of this
+   file, which gives the badge a real background so the pale illustration stays visible. */
 
 /* UX / Visual Refinement — Sprint 6.1: Daily card layout standardization */
 .activity-card,
@@ -577,4 +566,52 @@
     line-height: 1;
     text-align: center;
     white-space: nowrap;
+}
+
+/* Sprint 27.10 — Daily card system: coherent Task/To-Do/Project family.
+   This is the final word on the checkbox and the Project badge; it deliberately supersedes
+   earlier rules in this file's sprint-by-sprint history that left the checkbox borderless (no
+   visible "empty box" at rest) and its check glyph faintly visible (opacity .55) even when
+   pending. border-color: currentColor keeps the box in sync with .activity-card__checkbox's
+   own color per state (muted at rest, brand primary on hover/focus/press, success once
+   completed) without duplicating that logic here. */
+.activity-card__checkbox {
+    border: 2px solid currentColor;
+    border-radius: var(--beeday-radius-sm);
+}
+
+.activity-card__checkbox-glyph { opacity: 0; }
+
+.activity-card__checkbox:hover .activity-card__checkbox-glyph,
+.activity-card__checkbox:focus-visible .activity-card__checkbox-glyph,
+.activity-card__checkbox:active .activity-card__checkbox-glyph {
+    opacity: .62;
+}
+
+.activity-card--completed .activity-card__checkbox-glyph { opacity: 1; }
+
+.activity-card__checkbox:active {
+    background: var(--beeday-color-brand-primary-soft);
+    border-color: var(--beeday-color-brand-primary-hover);
+    transform: scale(.92);
+}
+
+.activity-card__checkbox:focus-visible {
+    outline: var(--beeday-border-width) solid var(--beeday-color-brand-primary);
+    outline-offset: 2px;
+    box-shadow: var(--beeday-focus-ring);
+}
+
+/* Same footprint as the checkbox, so Task/To-Do and Project read as one family; the badge's
+   own accent background keeps the pale bee illustration visible against it. */
+.activity-card--project .activity-card__project-status {
+    display: block;
+    width: 1.55rem;
+    height: 1.55rem;
+    padding: .2rem;
+    border: 0;
+    border-radius: 50%;
+    background: var(--beeday-color-project);
+    box-sizing: border-box;
+    object-fit: contain;
 }

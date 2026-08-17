@@ -77,6 +77,39 @@ public sealed class VisualFoundationTests
     }
 
     [Fact]
+    public void ActivityCardCheckboxIsATrueEmptyBoxAtRestWithAPreviewOnlyOnHoverFocusOrPress()
+    {
+        // EPIC 27 Sprint 27.10: pending/default must be a real empty box (no visible check, but a
+        // visible border), previewing the check only on hover/focus-visible/press, and only
+        // becoming persistent once the item is actually completed. This supersedes an earlier,
+        // conflicting rule that left the glyph faintly visible (opacity .55) even when pending.
+        var cards = ReadWebFile("wwwroot", "css", "cards.css");
+
+        Assert.Contains("border: 2px solid currentColor;", cards, StringComparison.Ordinal);
+        Assert.Contains(".activity-card__checkbox-glyph { opacity: 0; }", cards, StringComparison.Ordinal);
+        Assert.Contains(".activity-card__checkbox:active .activity-card__checkbox-glyph", cards, StringComparison.Ordinal);
+        Assert.Contains("opacity: .62;", cards, StringComparison.Ordinal);
+        Assert.Contains(".activity-card--completed .activity-card__checkbox-glyph { opacity: 1; }", cards, StringComparison.Ordinal);
+        Assert.Contains(".activity-card__checkbox:focus-visible {", cards, StringComparison.Ordinal);
+        Assert.Contains("transform: scale(.92);", cards, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ActivityCardProjectBadgeReusesTheExistingBeeIllustrationOnTheProjectAccent()
+    {
+        // EPIC 27 Sprint 27.10: no new bee character was generated — project-bee.png is a cropped
+        // presentation of the existing how-beeday-works-bee.png (see 06_ASSETS_AND_OPEN_ITEMS.md).
+        var cards = ReadWebFile("wwwroot", "css", "cards.css");
+        var component = ReadWebFile("Components", "Features", "Dashboard", "Components", "ActivityCard.razor");
+
+        Assert.Contains("src=\"/assets/dashboard/project-bee.png\"", component, StringComparison.Ordinal);
+        Assert.DoesNotContain("BeeDayIconName.Project", component, StringComparison.Ordinal);
+        Assert.Contains(".activity-card--project .activity-card__project-status {", cards, StringComparison.Ordinal);
+        Assert.Contains("background: var(--beeday-color-project);", cards, StringComparison.Ordinal);
+        Assert.True(File.Exists(Path.Combine(RepoRoot, "src", "BeeDay.Web", "wwwroot", "assets", "dashboard", "project-bee.png")));
+    }
+
+    [Fact]
     public void Epic27PaletteFoundationsAreCentralizedAndPairedWithAForeground()
     {
         var variables = ReadWebFile("wwwroot", "css", "variables.css");
