@@ -191,7 +191,7 @@ chamado.
 | `BEEDAY_ALLOWED_HOSTS` | `AllowedHosts` | Sim |
 | `BEEDAY_APP_CONNECTION` (só `deploy-hmg.yml`) | connection string da aplicação | Não — sem step de validação de secrets em `deploy-hmg.yml` |
 | `BEEDAY_MIGRATOR_CONNECTION` (só `deploy-hmg.yml`) | connection string do migration bundle | Não — idem |
-| `BEEDAY_HMG_ALLOWED_RECIPIENTS` (só `deploy-hmg.yml`) | `BeeDay__Email__HmgRecipientGuard__AllowedRecipients__0`, `__1`, ... (uma variável por destinatário, `Deploy-BeeDay.ps1` faz o split por `;`) | Não — idem; ainda não existe como secret no GitHub nesta Sprint (§6), lido como vazio, o que faz `Deploy-BeeDay.ps1` pular essas variáveis inteiramente (mesmo padrão de ausência graciosa do Resend acima) |
+| `BEEDAY_HMG_ALLOWED_RECIPIENTS` (só `deploy-hmg.yml`) | `BeeDay__Email__HmgRecipientGuard__AllowedRecipients__0`, `__1`, ... (uma variável por destinatário, `Deploy-BeeDay.ps1` faz o split por `;`) | Não — idem; ainda não existe como secret no GitHub nesta Sprint (§6). **Correção (Hotfix 26.9.1):** lido como vazio, isto na verdade **derrubava** `Deploy-BeeDay.ps1` (não pulava as variáveis graciosamente como descrito originalmente aqui) — causa raiz e correção real em §6 |
 
 `Deploy-BeeDay.ps1` declara `[string]$ResendFromName = "BeeDay"` como valor padrão do parâmetro —
 então, mesmo sem o secret `BEEDAY_RESEND_FROM_NAME` configurado no GitHub (que faria a variável de
@@ -234,12 +234,26 @@ passar silenciosamente até o e-mail de fato ser enviado com remetente em branco
   `Deploy-BeeDay.ps1` nesta Sprint, preparando a automação para quando Resend for de fato ativado em
   HMG — mas o secret em si **não foi criado no GitHub por esta Sprint** (Claude Code não tem acesso
   para configurar secrets do repositório, e o valor é PII de destinatário, não deve entrar no
-  código-fonte). Enquanto o secret não existir, a variável de ambiente do workflow resolve para
-  vazio e `Deploy-BeeDay.ps1` pula essas variáveis do App Pool inteiramente — comportamento idêntico
-  ao já estabelecido para Resend quando `BEEDAY_RESEND_API_KEY`/`BEEDAY_RESEND_FROM_ADDRESS` estão
-  ausentes. Homologation continua no provider Development hoje (`Resend:Enabled=false`,
-  `appsettings.Homologation.json`), então esta lacuna não tem efeito prático até uma ativação real
-  de Resend em HMG ser explicitamente decidida e executada pelo responsável pelo repositório.
+  código-fonte). Esta seção originalmente afirmava que, com o secret ausente, `Deploy-BeeDay.ps1`
+  "pula essas variáveis do App Pool inteiramente — comportamento idêntico ao já estabelecido para
+  Resend" e que "esta lacuna não tem efeito prático". **Essa afirmação estava errada e foi
+  desmentida por um incidente real**: a primeira execução real de `deploy-hmg.yml` após o merge
+  desta Sprint (GitHub Actions run `31986772973`, ambas as tentativas) falhou em "Deploy to IIS with
+  rollback" com `The property 'Count' cannot be found on this object` — uma pipeline PowerShell que
+  filtra todos os elementos retorna `$null`, não um array vazio, e `$null.Count` sob
+  `Set-StrictMode -Version Latest` lança exceção. O rollback documentado abaixo também não executou
+  nesse incidente, por um segundo defeito independente: o próprio `Write-Error` que registrava a
+  falha herdava `$ErrorActionPreference = "Stop"` e se tornava terminante, abortando o bloco `catch`
+  antes de "Starting rollback...". Ambos os defeitos foram corrigidos no **Hotfix 26.9.1**
+  (`fix/epic-26-hmg-deploy-recovery`, branch dedicada a partir de `hmg`) — `ConvertTo-BeeDayRecipientList`
+  agora sempre retorna uma coleção real (mesmo vazia) e ambos os `Write-Error` do bloco de
+  rollback usam `-ErrorAction Continue`. Com o hotfix aplicado, a ausência do secret volta a ter o
+  comportamento graciosamente-vazio originalmente pretendido (nenhuma variável
+  `AllowedRecipients__N` é emitida, sem exceção) — mas isso só passou a ser verdade a partir do
+  hotfix, não desde a Sprint 26.9 original. Homologation continua no provider Development hoje
+  (`Resend:Enabled=false`, `appsettings.Homologation.json`); nenhum e-mail de fato foi enviado
+  durante o incidente, pois o processo da aplicação nunca chegou a reiniciar em nenhuma das duas
+  tentativas.
 
 ## 7. Fontes consultadas
 

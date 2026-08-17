@@ -105,13 +105,26 @@ if (-not [string]::IsNullOrWhiteSpace($AppConnectionString) `
     throw "AppConnectionString and MigrationConnectionString must not be the same value - the application must never use the migrator credential."
 }
 
+# Hotfix 26.9.1 (GitHub Actions run 31986772973): a PowerShell pipeline that filters out every
+# emitted object returns $null, not an empty array - "" -split ';' still yields one empty-string
+# element, which Where-Object then filters away entirely. Under Set-StrictMode -Version Latest,
+# $null.Count later throws "The property 'Count' cannot be found on this object", which is exactly
+# what crashed both attempts of that run. @() around the pipeline guards the function's OWN use of
+# the result, but a zero-object function return still collapses to $null again at the call site -
+# confirmed empirically - so the call below must independently wrap the call itself in @() too.
+function ConvertTo-BeeDayRecipientList {
+    param([AllowEmptyString()][Parameter(Mandatory = $true)][string]$RecipientsRaw)
+
+    return @($RecipientsRaw -split ';' |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+}
+
 # Parsed once here (not inline in Set-BeeDayEnvironmentVariables) so the same list backs both the
 # redaction list immediately below and the App Pool variables later — real recipient addresses are
 # PII, not merely operational data, so they are redacted from $deployLogsPath exactly like the
 # connection strings and the Resend API key are.
-$script:hmgAllowedRecipients = @($HmgAllowedRecipients -split ';') |
-    ForEach-Object { $_.Trim() } |
-    Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+$script:hmgAllowedRecipients = @(ConvertTo-BeeDayRecipientList -RecipientsRaw $HmgAllowedRecipients)
 
 # Exception messages can echo back raw parameter values verbatim (e.g. a malformed connection
 # string thrown by SqlConnectionStringBuilder, or a driver error that embeds its input). GitHub
@@ -951,7 +964,18 @@ try {
 }
 catch {
     $deploymentError = Protect-DeploySecret $_.Exception.Message
-    Write-Error "Deployment failed: $deploymentError"
+
+    # Hotfix 26.9.1 (GitHub Actions run 31986772973): under the script-wide
+    # $ErrorActionPreference = "Stop" (line 87), a bare Write-Error escalates to a terminating
+    # error and unwinds out of this catch block immediately - it never even reaches
+    # "Starting rollback...", let alone the rollback attempt itself. That is exactly what both
+    # attempts of that run did: the failure was logged, and the entire rollback silently never
+    # ran. -ErrorAction Continue keeps this call non-terminating (it still writes to the error
+    # stream and is still visible in the log - nothing here is swallowed), so execution reliably
+    # reaches the rollback attempt and, afterward, the explicit throw below. The same escalation
+    # risk applies to the inner "Rollback also failed" Write-Error, so it gets the same treatment
+    # - a failed rollback must not skip the final throw either.
+    Write-Error "Deployment failed: $deploymentError" -ErrorAction Continue
 
     Write-DeployMessage "Starting rollback to the previous application version..."
 
@@ -965,7 +989,7 @@ catch {
         Write-DeployMessage "Rollback completed and previous version is healthy."
     }
     catch {
-        Write-Error "Rollback also failed: $(Protect-DeploySecret $_.Exception.Message)"
+        Write-Error "Rollback also failed: $(Protect-DeploySecret $_.Exception.Message)" -ErrorAction Continue
     }
 
     throw "Deployment failed and rollback was attempted. Original error: $deploymentError"
