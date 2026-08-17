@@ -13,9 +13,11 @@ and `git log`/`git show` on the files above. Cross-checked against
 [`docs/deployment/02-runtime-configuration.md`](../deployment/02-runtime-configuration.md)
 (already current as of Sprint 18.4).
 
-**Last verified:** 2026-08-16 (Epic 26, Sprint 26.4 — §10 added: the centralized, fail-closed HMG
-recipient guard, `HmgRecipientGuardedEmailSender`. Sprint 26.3 formally documented the
-secrets/configuration contract for `ResendOptions:ApiKey`/`FromAddress` in
+**Last verified:** 2026-08-16 (Epic 26, Sprint 26.5 — §12 added: full Identity email flow and
+`PublicBaseUrl` link-integrity audit, closing test gaps for the production origin guard and the
+persistence-succeeds-delivery-fails boundary; no production code changed. Sprint 26.4 added §10: the
+centralized, fail-closed HMG recipient guard, `HmgRecipientGuardedEmailSender`. Sprint 26.3 formally
+documented the secrets/configuration contract for `ResendOptions:ApiKey`/`FromAddress` in
 [`docs/deployment/02-runtime-configuration.md`](../deployment/02-runtime-configuration.md) §6;
 Sprint 26.2 implemented §4.1/§8's provider-selection recommendation via `EmailProviderSelector`.
 Originally written in Sprint 26.1, audit-only, no behavior changed by that sprint).
@@ -431,7 +433,121 @@ later sprint, alongside the Sprint 26.1 §6 directory-guard fix.
 reading HMG's live stdout log; reproducing a registration attempt against HMG or an equivalent local
 configuration; any change to code, configuration, or tests.
 
-## 12. Related documentation
+**Epic 26, Sprint 26.5 additionally read in full:** `Components/Features/Identity/Pages/ForgotPassword.razor`,
+`ResendConfirmation.razor`, `ResetPassword.razor` (already read: `ConfirmEmail.razor`, §11 above);
+`Common/Identity/IEmailConfirmationIssuer.cs`/`EmailConfirmationIssuer.cs`; `Domain/Entities/UserToken.cs`;
+`Web/Localization/DomainErrorLocalizer.cs` (full file); `Web/Services/BeeDayWebService.cs`;
+`Program.cs` production startup guards (§4.1 below).
+**Tests read:** `tests/BeeDay.Application.Tests/IdentityHandlersTests.cs`, `AccountRegistrationTests.cs`;
+`tests/BeeDay.Web.Tests/Integration/EmailConfirmationIntegrationTests.cs`, `PasswordResetIntegrationTests.cs`,
+`BeeDayWebApplicationFactory.cs`, `ProductionLikeWebApplicationFactory.cs`.
+
+## 12. Identity email flows & link integrity (Epic 26, Sprint 26.5)
+
+Audit of every Identity flow that sends or consumes a transactional email, plus the `PublicBaseUrl`
+origin contract those emails' callback links depend on. No production code changed by this sprint —
+findings below are either confirmed-safe (with the test that proves it) or a documented boundary.
+
+### 12.1 Flow inventory (extends §3)
+
+All 6 flows in §3 were re-inspected end to end. Two already had thorough integration coverage
+predating this sprint (`EmailConfirmationIntegrationTests.cs`, `PasswordResetIntegrationTests.cs` —
+token validity/expiry/reuse/revocation, throttle behavior, enumeration-safety, and real `/auth/login`
+gating, all verified against the real MediatR handlers and a real SQL Server LocalDB instance). This
+sprint closed the remaining gaps found by direct inspection, listed in §12.2–§12.5.
+
+### 12.2 `PublicBaseUrl` as the callback origin — confirmed single-sourced, now guard-tested
+
+Re-confirms §5's finding that `IdentityEmailComposer` builds every callback URL from exactly one
+value — the bound `IdentityEmailOptions.PublicBaseUrl` — never from `HttpContext`, a forwarded
+header, or any other request-derived input. Combined with each environment loading its own
+`appsettings.{Environment}.json` independently (standard ASP.NET Core precedence, §5), there is no
+runtime code path that could let one environment's link cross into another
+(HMG→Production/localhost, Production→HMG/localhost, or the reverse) — confirmed by reading
+`IdentityEmailComposer.cs` and `Program.cs` again in full, not merely re-asserted from §5.
+
+The one real enforcement gap found: **zero test exercised the Program.cs guard** that requires
+`PublicBaseUrl` to be an absolute HTTPS URL outside Development (`Program.cs`, ~line 37) — nor its
+two sibling guards (`AllowedHosts`, `DataProtectionKeysDirectory`). Closed for `PublicBaseUrl`
+specifically (the security-sensitive origin contract this sprint is scoped to) by
+`ProductionOriginGuardTests.cs`: non-HTTPS, relative, and missing values each proven to fail startup
+with the exact guard message. `AllowedHosts`/`DataProtectionKeysDirectory` remain untested — noted
+as a gap for a future sprint, not fixed here (out of this sprint's stated flow/link-integrity scope).
+Because this test (like `ProductionLikeWebApplicationFactory`) mutates process-wide environment
+variables to defeat Program.cs's pre-`Build()` guards, and xUnit parallelizes across test classes by
+default, both factories now serialize their mutate-boot-restore lifecycle through a shared
+`ProductionEnvironmentVariableTestLock` (new this sprint) — without it, this test's deliberately
+invalid `PublicBaseUrl` values could leak into an unrelated, concurrently-booting host and fail it
+with the same `OptionsValidationException`, which is exactly what happened once during this sprint's
+own validation before the lock was added.
+
+### 12.3 Token and failure behavior
+
+- **Expiration/reuse/revocation:** entirely `UserToken`'s own domain logic (`EnsureCanBeUsed`,
+  `MarkAsUsed`, `Revoke`) — a token cannot be used twice, used after revocation, or used after
+  `ExpiresAtUtc`; confirmed by domain-level state (`Domain/Entities/UserToken.cs`) and already
+  covered by both integration suites (§12.1) and `IdentityHandlersTests.cs`.
+- **User-enumeration resistance:** confirmed for both throttled and non-throttled paths.
+  `RequestPasswordResetCommandHandler` returns silently (no exception, no email) for both an unknown
+  email and a throttled one. `ResendEmailConfirmationCommandHandler` differs by design — it *does*
+  throw a "please wait N seconds" `InvalidDomainStateException` when throttled — but the throttle
+  fires identically whether or not the submitted email belongs to a real account (the throttle key is
+  the normalized email string itself, never account existence), so the exception carries no
+  existence signal. Proven by
+  `IdentityHandlersTests.ResendConfirmation_WhenThrottled_BehavesIdenticallyForAnUnknownEmail`
+  (new this sprint) alongside the pre-existing
+  `EmailConfirmationIntegrationTests.ResendEmailConfirmation_ForNonexistentEmail_CompletesSilentlyWithoutSendingEmail`.
+  `DomainErrorLocalizer` already translates this message into a proper localized string
+  (`DomainErrorWaitBeforeResend`), not a raw leak of the Domain-layer English text.
+- **Persistence succeeds, delivery fails — the known transactional boundary:** both
+  `CreateAccountCommandHandler` and `CreateUserCommandHandler` commit the user/token transaction
+  *before* calling `emailSender.SendAsync`, outside the owning `try`/`finally` (§3.1). This sprint
+  proves — rather than only asserts — that the account is not lost when delivery fails:
+  `AccountRegistrationTests.CreateAccount_WhenEmailSendFails_UserAndTokenArePersistedDespiteTheFailure`
+  and its `CreateUser` counterpart (new this sprint) seed a throwing `IEmailSender`, assert the
+  exception propagates, and assert the user/token rows exist anyway. **This is accepted as the
+  correct boundary, not fixed with an Outbox/queue/distributed transaction** — per the master
+  instructions' explicit prohibition and because the existing resend-confirmation flow (§12.1) is
+  already the correct recovery path for exactly this case: an operator or the user themselves can
+  request a fresh confirmation email for an account that exists but never received one.
+- **Provider accepts, a later step fails:** does not apply to any current flow — `SendAsync` is
+  always the last statement in every handler that calls it (`UserHandlers.cs`, `IdentityHandlers.cs`);
+  there is no step after delivery that could still fail.
+- **Token-bearing URLs never logged:** confirmed by re-reading every logging call site in the email
+  path (`ResendEmailSender`, `DevelopmentEmailSender`, `HmgRecipientGuardedEmailSender`,
+  `IdentityEmailComposer`) — none logs the message body or the raw token; `DevelopmentEmailSender`
+  writes the body to its capture file (the intended local-dev preview mechanism, not a log) and logs
+  only the file path.
+
+### 12.4 A pre-existing DI/configuration-timing subtlety, not a defect
+
+`BeeDayWebApplicationFactory` (the base fixture used by nearly every Web integration test) overrides
+`BeeDay:Email:Development:Enabled=false` via `ConfigureAppConfiguration`. That override never
+reaches `EmailProviderSelector.Resolve` (called eagerly, before `Build()`, per the same
+before-vs-after-`Build()` distinction documented on `ProductionLikeWebApplicationFactory`), so
+provider *selection* still sees the base `appsettings.json` default (`Development:Enabled=true`) and
+correctly registers `DevelopmentEmailSender` — never ambiguous. The override *does* reach the
+lazily-bound `IOptions<DevelopmentEmailOptions>` that `DevelopmentEmailSender.SendAsync` reads at
+send time (resolved after `Build()`), so sends are silently suppressed instead of writing files
+during ordinary (non-email-capture) integration tests. Confirmed by running the full Web.Tests suite
+after Sprint 26.2/26.4 landed — no test broke — and by direct inspection of the timing distinction.
+Documented here because a future engineer attempting the same override-via-`ConfigureAppConfiguration`
+trick for `Resend:Enabled` (expecting it to switch providers) would be surprised to find it silently
+does not.
+
+### 12.5 `CreateUserCommand` has no UI caller
+
+`CreateUserCommandHandler`/`CreateUserCommand` (`Features/Users/Handlers/UserHandlers.cs`,
+`Commands.cs`) is fully wired (MediatR, DI, `BeeDayWebService.CreateUserAsync`) but nothing in
+`src/BeeDay.Web/Components/` calls `BeeDayWebService.CreateUserAsync` — only
+`CreateAccountAsync`/`CreateAccountCommand` (the nickname/avatar onboarding flow) is reachable from
+the UI today. Not proven dead (a MediatR command can be invoked by other means, e.g. a future admin
+tool), so not removed by this sprint — removing a live, exported handler is a scope decision for
+whoever owns that call site, not an email-architecture change. Given `CreateUserCommand` sends a real
+confirmation email through the exact same path as `CreateAccountCommand`, it now has the same test
+coverage (§12.3) so it is not a silent gap if it is ever wired up.
+
+## 13. Related documentation
 
 - [`04-services.md`](04-services.md) — existing Infrastructure services inventory, including the
   `ResendEmailSender`/`DevelopmentEmailSender` summary this document expands on with the HMG root

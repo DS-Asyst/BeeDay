@@ -62,6 +62,59 @@ public sealed class IdentityHandlersTests
     }
 
     [Fact]
+    public async Task ResendConfirmation_WhenThrottled_ThrowsAndDoesNotSendEmail()
+    {
+        var fixture = new Fixture();
+        fixture.Throttle.AllowNextAcquire = false;
+        var user = fixture.AddUser(confirmed: false);
+        var handler = new ResendEmailConfirmationCommandHandler(
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+
+        var exception = await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
+            new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest(user.Email)),
+            TestContext.Current.CancellationToken));
+
+        Assert.Contains("wait", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(fixture.Email.Messages);
+    }
+
+    [Fact]
+    public async Task ResendConfirmation_WhenThrottled_BehavesIdenticallyForAnUnknownEmail()
+    {
+        // Throttle is keyed by the submitted email string alone (Sprint 26.5 audit finding), never by
+        // whether an account exists — so this scenario is indistinguishable from the confirmed-user
+        // case above from the caller's perspective, closing the user-enumeration question for this path.
+        var fixture = new Fixture();
+        fixture.Throttle.AllowNextAcquire = false;
+        var handler = new ResendEmailConfirmationCommandHandler(
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+
+        var exception = await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
+            new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest("unknown@beeday.invalid")),
+            TestContext.Current.CancellationToken));
+
+        Assert.Contains("wait", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(fixture.Email.Messages);
+    }
+
+    [Fact]
+    public async Task RequestPasswordReset_WhenThrottled_ReturnsSilentlyWithoutSendingEmail()
+    {
+        var fixture = new Fixture();
+        fixture.Throttle.AllowNextAcquire = false;
+        var user = fixture.AddUser(confirmed: true);
+        var handler = new RequestPasswordResetCommandHandler(
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+
+        await handler.Handle(
+            new RequestPasswordResetCommand(new RequestPasswordResetRequest(user.Email)),
+            TestContext.Current.CancellationToken);
+
+        Assert.Empty(fixture.Repository.UserTokensData);
+        Assert.Empty(fixture.Email.Messages);
+    }
+
+    [Fact]
     public async Task RequestPasswordReset_DoesNotRevealMissingEmail()
     {
         var fixture = new Fixture();
@@ -171,10 +224,12 @@ public sealed class IdentityHandlersTests
 
     private sealed class FakeIdentityRequestThrottle : IIdentityRequestThrottle
     {
+        public bool AllowNextAcquire { get; set; } = true;
+
         public bool TryAcquire(string operation, string subject, TimeSpan cooldown, out TimeSpan retryAfter)
         {
-            retryAfter = TimeSpan.Zero;
-            return true;
+            retryAfter = AllowNextAcquire ? TimeSpan.Zero : TimeSpan.FromSeconds(42);
+            return AllowNextAcquire;
         }
     }
 
