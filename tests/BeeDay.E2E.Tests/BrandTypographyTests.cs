@@ -16,7 +16,9 @@ public sealed class BrandTypographyTests(PlaywrightAppFixture fixture) : E2ETest
 
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Typography with purpose", Level = 1 })).ToBeVisibleAsync();
         await Expect(Page.Locator(".brand-typography__display-sample")).ToHaveTextAsync("beeday");
-        await Expect(Page.GetByRole(AriaRole.Contentinfo).GetByRole(AriaRole.Link, new() { Name = "beeday Experience System" })).ToHaveAttributeAsync("href", "/experience-system");
+        // EPIC 27 Sprint 27.4: the footer's standalone "beeday Experience System" entry was removed
+        // in favor of "Brand guidelines" (03_DESIGN_DECISIONS.md §9/§11).
+        await Expect(Page.GetByRole(AriaRole.Contentinfo).GetByRole(AriaRole.Link, new() { Name = "Brand guidelines" })).ToHaveAttributeAsync("href", "/brand-guidelines");
 
         await Page.EvaluateAsync("() => document.fonts.ready");
         Assert.True(await Page.EvaluateAsync<bool>("() => document.fonts.check('48px Coiny', 'beeday ações')"));
@@ -40,7 +42,7 @@ public sealed class BrandTypographyTests(PlaywrightAppFixture fixture) : E2ETest
 
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Tipografia com propósito", Level = 1 })).ToBeVisibleAsync();
         await Expect(Page.Locator(".brand-typography__accented-sample")).ToHaveTextAsync("Pequenas ações, grandes conquistas.");
-        await Expect(Page.GetByRole(AriaRole.Contentinfo).GetByRole(AriaRole.Link, new() { Name = "beeday Experience System" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Contentinfo).GetByRole(AriaRole.Link, new() { Name = "Brand guidelines" })).ToBeVisibleAsync();
         await Expect(Page.Locator(".brand-typography__display-sample")).ToHaveTextAsync("beeday");
         Assert.False(await Page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
     }
