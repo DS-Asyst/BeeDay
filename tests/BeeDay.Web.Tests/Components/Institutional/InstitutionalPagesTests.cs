@@ -114,6 +114,19 @@ public sealed class InstitutionalPagesTests
     }
 
     [Fact]
+    public void FaqsHelpAnswerLinksToTheRealContactPageInsteadOfNamingItAsPlainText()
+    {
+        // Sprint 27.3's original copy told the reader to "visit our Contact us page" without an
+        // actual link — found during the 27.7 audit. It must be a real, working <a>, not text.
+        using var context = new BunitContext().WithLocalization();
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Faqs>());
+
+        var contactLink = cut.Find("a[href='/contact']");
+        Assert.Equal("Contact us", contactLink.TextContent.Trim());
+        Assert.Contains("beeday-link", contactLink.ClassList);
+    }
+
+    [Fact]
     public void CommunityGuidelinesDisclosesAPendingReviewStateInsteadOfFabricatedClauses()
     {
         using var context = new BunitContext().WithLocalization();
