@@ -29,15 +29,9 @@ public sealed class InstitutionalPagesTests
         Assert.DoesNotMatch(@"\d+\s*%", cut.Markup);
     }
 
-    [Fact]
-    public void BrandGuidelinesRendersItsHeadingAndLinksToTheExperienceSystem()
-    {
-        using var context = new BunitContext().WithLocalization();
-        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<BrandGuidelines>());
-
-        Assert.Equal("Brand guidelines", cut.Find("h1").TextContent.Trim());
-        Assert.Equal("/experience-system", cut.Find("a[href='/experience-system']").GetAttribute("href"));
-    }
+    // Brand guidelines moved to ExperienceSystemHome (a second @page route on the same component
+    // that already powers /experience-system) in Sprint 27.8 — see ExperienceSystemHomeTests for
+    // its coverage. The Institutional feature no longer owns this route.
 
     [Fact]
     public void ContactRendersRealExistingGitHubAndLinkedInChannelsWithoutFabricatedEmail()
@@ -197,7 +191,6 @@ public sealed class InstitutionalPagesTests
         {
             BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Mission>()).Markup,
             BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Efficacy>()).Markup,
-            BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<BrandGuidelines>()).Markup,
             BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Contact>()).Markup,
             BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Product>()).Markup,
             BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<ProductPlus>()).Markup,

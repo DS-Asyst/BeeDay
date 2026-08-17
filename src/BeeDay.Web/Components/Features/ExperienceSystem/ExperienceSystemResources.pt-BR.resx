@@ -7,6 +7,7 @@
 
   <!-- Navegação compartilhada -->
   <data name="PillarNavAriaLabel" xml:space="preserve"><value>Pilares do beeday Experience System</value></data>
+  <data name="SidebarToggleLabel" xml:space="preserve"><value>Explorar tópicos</value></data>
   <data name="PillarNavHome" xml:space="preserve"><value>beeday Experience System</value></data>
   <data name="PillarNavBrand" xml:space="preserve"><value>Brand System</value></data>
   <data name="PillarNavUi" xml:space="preserve"><value>UI Design System</value></data>
@@ -33,10 +34,10 @@
   <data name="UxNavPerformance" xml:space="preserve"><value>Performance</value></data>
 
   <!-- Raiz: /experience-system -->
-  <data name="RootPageTitle" xml:space="preserve"><value>beeday Experience System</value></data>
-  <data name="RootEyebrow" xml:space="preserve"><value>EXPERIENCE SYSTEM</value></data>
-  <data name="RootTitle" xml:space="preserve"><value>beeday Experience System</value></data>
-  <data name="RootIntro" xml:space="preserve"><value>O registro público e navegável de como o beeday se parece, se comporta e se comunica — o Brand System, o UI Design System e o UX System formalizados durante a EPIC 25, mantidos em sincronia com o próprio produto.</value></data>
+  <data name="RootPageTitle" xml:space="preserve"><value>Brand guidelines — beeday</value></data>
+  <data name="RootEyebrow" xml:space="preserve"><value>SOBRE NÓS</value></data>
+  <data name="RootTitle" xml:space="preserve"><value>Brand guidelines</value></data>
+  <data name="RootIntro" xml:space="preserve"><value>O beeday Experience System — o registro público e navegável de como o beeday se parece, se comporta e se comunica. O Brand System, o UI Design System e o UX System formalizados durante a EPIC 25, mantidos em sincronia com o próprio produto.</value></data>
   <data name="RootGridAriaLabel" xml:space="preserve"><value>Pilares do beeday Experience System</value></data>
   <data name="RootBrandCardDescription" xml:space="preserve"><value>Identidade, wordmark, cor, tipografia, ilustração, personagens e escrita.</value></data>
   <data name="RootUiCardDescription" xml:space="preserve"><value>Fundamentos, componentes, padrões de produto, interação e layout.</value></data>

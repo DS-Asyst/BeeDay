@@ -1,7 +1,55 @@
 .experience-system-page { display: grid; width: min(100%, 72rem); margin-inline: auto; gap: var(--beeday-spacing-xl); padding-block: clamp(2rem, 5vw, 4rem); }
 .experience-system-page ::deep .beeday-page-header { margin-bottom: 0; }
 .experience-system-page__intro { max-width: 52rem; margin: 0; color: var(--beeday-color-text-secondary); line-height: 1.55; }
+
+/* Sprint 27.8 — documentation layout: a hierarchical sidebar (existing ExperienceSystemPillarNav +
+   ExperienceSystemTopicNav, unchanged internally — only their container/position changed here) next
+   to the page body, instead of the two horizontal nav bars this used to stack above the content. */
+.experience-system-page__layout { display: grid; gap: var(--beeday-spacing-2xl); align-items: start; }
 .experience-system-page__body { display: grid; gap: clamp(2.5rem, 5vw, 4rem); min-width: 0; }
+
+.experience-system-sidebar {
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-lg);
+    background: var(--beeday-color-surface);
+}
+
+.experience-system-sidebar__toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--beeday-spacing-sm);
+    padding: var(--beeday-spacing-md);
+    color: var(--beeday-color-text-primary);
+    font-weight: var(--beeday-font-weight-bold);
+    cursor: pointer;
+    list-style: none;
+}
+
+.experience-system-sidebar__toggle::-webkit-details-marker { display: none; }
+.experience-system-sidebar__toggle:focus-visible { outline: var(--beeday-border-width) solid var(--beeday-color-brand-primary); outline-offset: -2px; border-radius: var(--beeday-radius-lg); }
+
+.experience-system-sidebar__content { padding: 0 var(--beeday-spacing-md) var(--beeday-spacing-md); }
+.experience-system-sidebar__content ::deep .experience-system-pillar-nav { flex-direction: column; align-items: stretch; gap: var(--beeday-spacing-sm); padding-block: 0 var(--beeday-spacing-md); border-block: none; border-bottom: var(--beeday-border-width-subtle) solid var(--beeday-color-border); }
+.experience-system-sidebar__content ::deep .experience-system-pillar-nav__list { flex-direction: column; align-items: stretch; }
+.experience-system-sidebar__content ::deep .experience-system-topic-nav ul { flex-direction: column; align-items: stretch; }
+.experience-system-sidebar__content ::deep .experience-system-topic-nav a,
+.experience-system-sidebar__content ::deep .experience-system-pillar-nav__list a { width: 100%; text-align: left; }
+
+/* Desktop: a real sticky sidebar column. The toggle is hidden (nothing to collapse at this width)
+   and the content is forced visible regardless of the <details> open attribute, so a sidebar closed
+   on a narrow viewport still shows correctly if the window is then widened past this breakpoint. */
+@media (min-width: 64rem) {
+    .experience-system-page__layout { grid-template-columns: 16rem minmax(0, 1fr); }
+    .experience-system-sidebar { position: sticky; top: calc(var(--beeday-top-navigation-height, 4.25rem) + var(--beeday-spacing-lg)); align-self: start; max-height: calc(100dvh - var(--beeday-top-navigation-height, 4.25rem) - 2 * var(--beeday-spacing-lg)); overflow-y: auto; }
+    .experience-system-sidebar__toggle { display: none; }
+    .experience-system-sidebar > .experience-system-sidebar__content { display: block !important; }
+}
+
+/* Below the desktop breakpoint the sidebar is a normal in-flow, collapsible block — never fixed or
+   sticky, so it cannot occupy the viewport permanently on mobile/tablet. */
+@media (max-width: 63.9375rem) {
+    .experience-system-sidebar[open] { padding-bottom: var(--beeday-spacing-sm); }
+}
 
 ::deep .experience-system-section { display: grid; gap: var(--beeday-spacing-md); min-width: 0; }
 ::deep .experience-system-section h2 { margin: 0; color: var(--beeday-color-text-primary); font: var(--beeday-type-section-title); }

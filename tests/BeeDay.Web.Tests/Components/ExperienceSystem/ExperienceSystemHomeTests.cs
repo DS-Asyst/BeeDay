@@ -12,7 +12,10 @@ public sealed class ExperienceSystemHomeTests
 
         var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<ExperienceSystemHome>());
 
-        Assert.Equal("beeday Experience System", cut.Find("h1").TextContent.Trim());
+        // EPIC 27 Sprint 27.8: "Brand guidelines" is the public title (03_DESIGN_DECISIONS.md §9/§11);
+        // "beeday Experience System" is now introductory prose describing what it is, not the H1.
+        Assert.Equal("Brand guidelines", cut.Find("h1").TextContent.Trim());
+        Assert.Contains("beeday Experience System", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("formalized during EPIC 25", cut.Markup, StringComparison.Ordinal);
 
         var cards = cut.FindAll(".experience-system-topic-grid__card");
@@ -26,24 +29,49 @@ public sealed class ExperienceSystemHomeTests
     }
 
     [Fact]
+    public void RootUsesTheFullInstitutionalHeroWithABrandContextLockup()
+    {
+        // The overview/root page is the public "door" into the documentation (03_DESIGN_DECISIONS.md
+        // §11) — it gets the full COR8 institutional hero from Sprint 27.3, unlike every individual
+        // topic page underneath it (which keep the plain BeeDayPageHeader — see
+        // ExperienceSystemBrandPagesTests etc., unaffected by this sprint). The lockup does not use
+        // BeeDayBrand's own inverse variant, matching every other institutional hero since Sprint
+        // 27.3: BeeDayHero.razor.css forces it to inherit the surface's own paired foreground instead
+        // (COR8's white, here), because BeeDayBrand's two fixed colors don't reliably contrast
+        // against every COR0-COR9 surface.
+        using var context = new BunitContext().WithLocalization();
+
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<ExperienceSystemHome>());
+
+        var hero = cut.Find("header.beeday-hero");
+        Assert.Contains("beeday-surface-cor8", hero.ClassList);
+        Assert.Equal("Brand guidelines", cut.Find("header.beeday-hero h1").TextContent.Trim());
+        Assert.NotNull(cut.Find(".beeday-hero__brand-context .beeday-brand"));
+        Assert.Empty(cut.FindAll(".beeday-page-header"));
+    }
+
+    [Fact]
     public void PortugueseRootLocalizesHeadingAndClosingSection()
     {
         using var context = new BunitContext().WithLocalization();
 
         var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<ExperienceSystemHome>());
 
-        Assert.Equal("beeday Experience System", cut.Find("h1").TextContent.Trim());
+        Assert.Equal("Brand guidelines", cut.Find("h1").TextContent.Trim());
         Assert.Contains("Construído a partir do que já está no ar", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("formalizados durante a EPIC 25", cut.Markup, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void SourceDeclaresPublicRouteAnonymousAccessAndPublicLayout()
+    public void SourceDeclaresBothPublicRoutesAnonymousAccessAndPublicLayout()
     {
         var source = File.ReadAllText(Path.Combine(
             ResolveRepoRoot(), "src", "BeeDay.Web", "Components", "Features", "ExperienceSystem", "Pages", "ExperienceSystemHome.razor"));
 
+        // /brand-guidelines is the public name/URL (Sprint 27.8); /experience-system keeps working
+        // since it predates this Epic and nothing requires breaking it.
         Assert.Contains("@page \"/experience-system\"", source, StringComparison.Ordinal);
+        Assert.Contains("@page \"/brand-guidelines\"", source, StringComparison.Ordinal);
         Assert.Contains("@attribute [AllowAnonymous]", source, StringComparison.Ordinal);
         Assert.Contains("@layout BeeDay.Web.Components.Layout.PublicLayout", source, StringComparison.Ordinal);
     }

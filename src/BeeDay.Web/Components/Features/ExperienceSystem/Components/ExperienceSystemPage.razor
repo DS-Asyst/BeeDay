@@ -1,21 +1,56 @@
-<article class="experience-system-page">
-    <BeeDayPageHeader Eyebrow="@Eyebrow" Title="@Title" />
-    @if (!string.IsNullOrWhiteSpace(Description))
-    {
-        <p class="experience-system-page__intro">@Description</p>
-    }
+@using BeeDay.Web.Components.DesignSystem
+@using BeeDay.Web.Components.DesignSystem.Icons
+@using BeeDay.Web.Components.DesignSystem.Layout
+@using BeeDay.Web.Components.DesignSystem.Text
+@inject IStringLocalizer<ExperienceSystemResources> Localizer
 
-    @if (Pillar is not null)
+@if (ShowBrandGuidelinesHero)
+{
+    @* EPIC 27 Sprint 27.8: the institutional hero (03_DESIGN_DECISIONS.md §11) is the public "door"
+       into the beeday Experience System — shown only on the overview/root page, not on every single
+       topic page, matching how documentation sites typically reserve the big splash for the entry. *@
+    <BeeDayHero Surface="BeeDayPaletteToken.Cor8" Title="@Title" Subtitle="@Description">
+        <BrandContext>
+            <BeeDayBrand />
+            <span class="institutional-hero__context-label">@Localizer["RootEyebrow"]</span>
+        </BrandContext>
+    </BeeDayHero>
+}
+
+<article class="experience-system-page">
+    @if (!ShowBrandGuidelinesHero)
     {
-        <ExperienceSystemPillarNav Current="@Pillar.Value" />
-        @if (ShowTopicNav)
+        <BeeDayPageHeader Eyebrow="@Eyebrow" Title="@Title" />
+        @if (!string.IsNullOrWhiteSpace(Description))
         {
-            <ExperienceSystemTopicNav Pillar="@Pillar.Value" CurrentHref="@CurrentHref" />
+            <p class="experience-system-page__intro">@Description</p>
         }
     }
 
-    <div class="experience-system-page__body">
-        @ChildContent
+    <div class="experience-system-page__layout">
+        @if (Pillar is not null)
+        {
+            @* A native <details> collapses on narrow viewports without any script; CSS hides the
+               toggle and forces the content visible at the desktop breakpoint instead of scripting
+               a responsive default open state. See ExperienceSystemPage.razor.css. *@
+            <details class="experience-system-sidebar" open>
+                <summary class="experience-system-sidebar__toggle">
+                    <BeeDayIcon Name="BeeDayIconName.Menu" Decorative="true" />
+                    @Localizer["SidebarToggleLabel"]
+                </summary>
+                <div class="experience-system-sidebar__content">
+                    <ExperienceSystemPillarNav Current="@Pillar.Value" />
+                    @if (ShowTopicNav)
+                    {
+                        <ExperienceSystemTopicNav Pillar="@Pillar.Value" CurrentHref="@CurrentHref" />
+                    }
+                </div>
+            </details>
+        }
+
+        <div class="experience-system-page__body">
+            @ChildContent
+        </div>
     </div>
 </article>
 
@@ -37,6 +72,10 @@
 
     [Parameter]
     public string? CurrentHref { get; set; }
+
+    /// <summary>Set only by the root/overview page (Sprint 27.8) — see the hero-vs-header comment above.</summary>
+    [Parameter]
+    public bool ShowBrandGuidelinesHero { get; set; }
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }

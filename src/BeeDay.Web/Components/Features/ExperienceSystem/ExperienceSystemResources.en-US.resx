@@ -7,6 +7,7 @@
 
   <!-- Shared navigation -->
   <data name="PillarNavAriaLabel" xml:space="preserve"><value>beeday Experience System pillars</value></data>
+  <data name="SidebarToggleLabel" xml:space="preserve"><value>Browse topics</value></data>
   <data name="PillarNavHome" xml:space="preserve"><value>beeday Experience System</value></data>
   <data name="PillarNavBrand" xml:space="preserve"><value>Brand System</value></data>
   <data name="PillarNavUi" xml:space="preserve"><value>UI Design System</value></data>
@@ -33,10 +34,10 @@
   <data name="UxNavPerformance" xml:space="preserve"><value>Performance</value></data>
 
   <!-- Root: /experience-system -->
-  <data name="RootPageTitle" xml:space="preserve"><value>beeday Experience System</value></data>
-  <data name="RootEyebrow" xml:space="preserve"><value>EXPERIENCE SYSTEM</value></data>
-  <data name="RootTitle" xml:space="preserve"><value>beeday Experience System</value></data>
-  <data name="RootIntro" xml:space="preserve"><value>The public, browsable record of how beeday looks, behaves, and communicates — the Brand System, the UI Design System, and the UX System formalized during EPIC 25, kept in sync with the product itself.</value></data>
+  <data name="RootPageTitle" xml:space="preserve"><value>Brand guidelines — beeday</value></data>
+  <data name="RootEyebrow" xml:space="preserve"><value>ABOUT US</value></data>
+  <data name="RootTitle" xml:space="preserve"><value>Brand guidelines</value></data>
+  <data name="RootIntro" xml:space="preserve"><value>The beeday Experience System — the public, browsable record of how beeday looks, behaves, and communicates. The Brand System, the UI Design System, and the UX System formalized during EPIC 25, kept in sync with the product itself.</value></data>
   <data name="RootGridAriaLabel" xml:space="preserve"><value>beeday Experience System pillars</value></data>
   <data name="RootBrandCardDescription" xml:space="preserve"><value>Identity, wordmark, color, typography, illustration, characters, and writing.</value></data>
   <data name="RootUiCardDescription" xml:space="preserve"><value>Foundations, components, product patterns, interaction, and layout.</value></data>
