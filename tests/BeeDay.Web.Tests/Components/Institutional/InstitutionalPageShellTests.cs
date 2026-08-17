@@ -29,13 +29,15 @@ public sealed class InstitutionalPageShellTests
     [InlineData(BeeDayPaletteToken.Cor3)]
     [InlineData(BeeDayPaletteToken.Cor4)]
     [InlineData(BeeDayPaletteToken.Cor8)]
-    public void NeverAppliesBeeDayBrandsOwnInverseVariantRegardlessOfSurface(BeeDayPaletteToken surface)
+    public void UsesTheNonWhiteBackgroundIconRegardlessOfSurfaceWhileTextStillInheritsTheHeroForeground(BeeDayPaletteToken surface)
     {
-        // BeeDayBrand only models two fixed colors (brand-primary purple / white), neither of which
-        // reliably contrasts against every COR0-COR9 surface (brand-primary purple text failed WCAG
-        // color-contrast against COR3/COR4 in a real axe-core E2E run). The shell instead lets
-        // BeeDayHero.razor.css force the lockup text to inherit the hero's own paired foreground —
-        // see the CSS-source assertion in VisualFoundationTests for that half of the contract.
+        // Every institutional hero surface (Cor0-Cor9, the unused white Cor6 excepted) is non-white,
+        // so the shell always passes OnDarkSurface="true" to BeeDayBrand to select the approved
+        // non-white-background bee icon (Sprint 29.1). That also applies BeeDayBrand's own
+        // beeday-brand--inverse class, but its fixed white TEXT color never actually renders:
+        // BeeDayHero.razor.css forces the lockup text to inherit the hero's own paired foreground for
+        // every COR0-COR9 surface instead — see the CSS-source assertion in VisualFoundationTests for
+        // that half of the contract, since bUnit cannot resolve computed CSS cascade/specificity.
         using var context = new BunitContext();
         var cut = context.Render<InstitutionalPageShell>(parameters => parameters
             .Add(component => component.PageContext, "Mission")
@@ -43,7 +45,10 @@ public sealed class InstitutionalPageShellTests
             .Add(component => component.Surface, surface));
 
         var brand = cut.Find(".beeday-hero__brand-context .beeday-brand");
-        Assert.DoesNotContain("beeday-brand--inverse", brand.ClassList);
+        Assert.Contains("beeday-brand--inverse", brand.ClassList);
+        var icon = brand.QuerySelector(".beeday-brand__icon");
+        Assert.NotNull(icon);
+        Assert.Equal("/assets/brand/bee-color-neutral.png", icon.GetAttribute("src"));
     }
 
     [Fact]

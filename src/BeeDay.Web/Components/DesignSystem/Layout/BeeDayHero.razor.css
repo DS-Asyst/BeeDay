@@ -65,9 +65,20 @@
    fixed colors (brand-primary purple or white); neither reliably contrasts against every COR0-COR9
    surface (e.g. brand-primary purple text failed WCAG color-contrast against COR3/COR4 — caught by
    the repo's axe-core E2E scan). Inheriting the surface's own computed foreground is correct for
-   all ten surfaces by construction, so OnDarkSurface is deliberately not used for this slot. */
+   all ten surfaces by construction.
+   Sprint 29.1: InstitutionalPageShell now passes OnDarkSurface="true" here so BeeDayBrand selects
+   its non-white-background bee icon (every institutional hero surface is non-white) — that also
+   applies BeeDayBrand's own .beeday-brand--inverse (fixed white text), which is NOT correct for
+   every surface (e.g. white text on COR3/COR4/COR7/COR9 fails contrast, caught by the same
+   axe-core scan). The plain 2-class-selector rule below only outranks BeeDayBrand's own *default*
+   text-color rule (0,2,0); it does not outrank --inverse's own scoped rule (0,4,0), because ::deep
+   forfeits this file's own scope-attribute boost on everything past it. The second, more specific
+   selector pair exists solely to also outrank --inverse (0,5,0 > 0,4,0), regardless of the two
+   scoped files' relative bundling order. */
 .beeday-hero__brand-context ::deep .beeday-brand__bee,
-.beeday-hero__brand-context ::deep .beeday-brand__day { color: inherit; }
+.beeday-hero__brand-context ::deep .beeday-brand__day,
+.beeday-hero__brand-context ::deep .beeday-brand.beeday-brand--inverse .beeday-brand__bee,
+.beeday-hero__brand-context ::deep .beeday-brand.beeday-brand--inverse .beeday-brand__day { color: inherit; }
 
 .beeday-hero__eyebrow {
     display: inline-block;

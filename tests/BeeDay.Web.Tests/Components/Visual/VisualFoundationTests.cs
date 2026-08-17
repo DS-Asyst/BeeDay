@@ -98,7 +98,8 @@ public sealed class VisualFoundationTests
     public void ActivityCardProjectBadgeReusesTheExistingBeeIllustrationOnTheProjectAccent()
     {
         // EPIC 27 Sprint 27.10: no new bee character was generated — project-bee.png is a cropped
-        // presentation of the existing how-beeday-works-bee.png (see 06_ASSETS_AND_OPEN_ITEMS.md).
+        // presentation of the same source art as assets/brand/bee-color-neutral.png (renamed from
+        // assets/home/how-beeday-works-bee.png in Sprint 29.1; see 06_ASSETS_AND_OPEN_ITEMS.md).
         var cards = ReadWebFile("wwwroot", "css", "cards.css");
         var component = ReadWebFile("Components", "Features", "Dashboard", "Components", "ActivityCard.razor");
 
@@ -188,7 +189,14 @@ public sealed class VisualFoundationTests
         // in a real axe-core E2E run); the hero's brand-context slot must force the lockup text to
         // inherit the surface's own paired foreground instead.
         Assert.Contains(".beeday-hero__brand-context ::deep .beeday-brand__bee,", hero, StringComparison.Ordinal);
-        Assert.Contains(".beeday-hero__brand-context ::deep .beeday-brand__day { color: inherit; }", hero, StringComparison.Ordinal);
+        Assert.Contains(".beeday-hero__brand-context ::deep .beeday-brand__day,", hero, StringComparison.Ordinal);
+        // Sprint 29.1: InstitutionalPageShell passes OnDarkSurface="true" so BeeDayBrand selects its
+        // non-white-background icon, which also applies .beeday-brand--inverse (fixed white text) —
+        // a plain 2-class-selector rule only outranks BeeDayBrand's *default* text rule (0,2,0), not
+        // --inverse's own scoped rule (0,4,0); this more specific pair (0,5,0) is required to also
+        // outrank --inverse regardless of the two scoped files' bundling order.
+        Assert.Contains(".beeday-hero__brand-context ::deep .beeday-brand.beeday-brand--inverse .beeday-brand__bee,", hero, StringComparison.Ordinal);
+        Assert.Contains(".beeday-hero__brand-context ::deep .beeday-brand.beeday-brand--inverse .beeday-brand__day { color: inherit; }", hero, StringComparison.Ordinal);
     }
 
     [Fact]

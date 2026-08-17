@@ -44,15 +44,14 @@ public sealed class HomeTests
         Assert.Equal("/assets/hero/home-team.png", heroImage.GetAttribute("src"));
         Assert.Equal("high", heroImage.GetAttribute("fetchpriority"));
         var howImage = cut.Find(".home-how__visual img");
-        Assert.Equal("/assets/home/how-beeday-works-bee.png", howImage.GetAttribute("src"));
+        Assert.Equal("/assets/brand/bee-color-neutral.png", howImage.GetAttribute("src"));
         Assert.Equal(string.Empty, howImage.GetAttribute("alt"));
         Assert.Equal("lazy", howImage.GetAttribute("loading"));
         Assert.Equal("async", howImage.GetAttribute("decoding"));
         var brandClosure = cut.Find(".home-brand-closure");
         var brandClosureImages = brandClosure.QuerySelectorAll("img");
-        Assert.Equal(2, brandClosureImages.Length);
+        Assert.Single(brandClosureImages);
         Assert.Equal("/assets/home/home-team-fall.png", brandClosureImages[0].GetAttribute("src"));
-        Assert.Equal("/assets/home/wave-site.png", brandClosureImages[1].GetAttribute("src"));
         Assert.All(brandClosureImages, image =>
         {
             Assert.Equal(string.Empty, image.GetAttribute("alt"));
@@ -60,17 +59,10 @@ public sealed class HomeTests
             Assert.Equal("async", image.GetAttribute("decoding"));
         });
         Assert.DoesNotContain("home-team-fall-color.png", brandClosure.InnerHtml, StringComparison.Ordinal);
-        Assert.NotNull(brandClosure.QuerySelector(".home-brand-closure__base"));
-        var topicGroups = brandClosure.QuerySelectorAll(".home-brand-topics > section");
-        Assert.Equal(5, topicGroups.Length);
-        Assert.Equal([2, 2, 2, 2, 2], topicGroups.Select(group => group.QuerySelectorAll("li").Length));
-        Assert.Equal(
-            ["About us", "Social", "Apps", "Help and support", "Privacy and terms"],
-            topicGroups.Select(group => group.QuerySelector("h2")!.TextContent.Trim()));
-        Assert.Equal(2, brandClosure.QuerySelectorAll(".home-brand-topics a").Length);
-        Assert.Empty(brandClosure.QuerySelectorAll("a[href='/brand/typography']"));
-        Assert.NotNull(brandClosure.QuerySelector("a[href='https://github.com/tiagoarrigoni/BeeDay']"));
-        Assert.NotNull(brandClosure.QuerySelector("a[href='https://www.linkedin.com/in/tiago-a-arrigoni-335b9413b/']"));
+        // Sprint 29.1: the duplicate footer-like block (wave PNG + About/Social/Apps/Help/Privacy
+        // topics) that used to sit between the Home content and the real AppFooter was removed —
+        // AppFooter is the single official footer now.
+        Assert.Empty(brandClosure.QuerySelectorAll(".home-brand-closure__wave, .home-brand-closure__base, .home-brand-topics"));
         Assert.Contains("home-brand-closure", cut.Find(".home-page").LastElementChild!.ClassList);
         Assert.Empty(cut.FindAll(".home-hero .beeday-brand"));
         Assert.Empty(cut.FindAll(".home-hero__symbol"));
@@ -105,12 +97,6 @@ public sealed class HomeTests
         Assert.Contains("Pequenas ações consistentes criam grandes mudanças. Avance um pouco a cada dia.", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Veja sua evolução, mantenha a motivação e entenda o quanto você já avançou.", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Cada passo conta. Reconheça suas vitórias e continue evoluindo.", cut.Markup, StringComparison.Ordinal);
-        Assert.Equal(
-            ["Sobre nós", "Social", "Apps", "Ajuda e suporte", "Privacidade e termos"],
-            cut.FindAll(".home-brand-topics h2").Select(element => element.TextContent.Trim()));
-        Assert.Contains("Nossa missão", cut.Markup, StringComparison.Ordinal);
-        Assert.Empty(cut.FindAll(".home-brand-topics a[href='/brand/typography']"));
-        Assert.Contains("Política de privacidade", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Comece agora", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Já tenho uma conta", cut.Markup, StringComparison.Ordinal);
         Assert.DoesNotContain("Build a better day", cut.Markup, StringComparison.Ordinal);

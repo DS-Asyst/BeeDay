@@ -106,9 +106,10 @@
     --beeday-button-shadow: var(--beeday-color-button-danger-shadow);
 }
 
-/* Important White — white surface, Accent Secondary (COR3) text/outline. Reserved for the explicit
-   "important white button" cases called out in 03_DESIGN_DECISIONS.md §5 (e.g. I ALREADY HAVE AN
-   ACCOUNT, CREATE ACCOUNT), not a general secondary replacement. */
+/* Important White — white surface, neutral border, Accent Secondary (COR3, text-safe) text.
+   Reserved for the explicit "important white button" cases (e.g. I ALREADY HAVE AN ACCOUNT, CREATE
+   ACCOUNT), not a general secondary replacement. See --beeday-color-button-important-white-* in
+   variables.css for why the border/depth/shadow are neutral rather than colored. */
 .beeday-button--important-white {
     --beeday-button-background: var(--beeday-color-button-important-white-bg);
     --beeday-button-background-hover: var(--beeday-color-button-important-white-bg-hover);

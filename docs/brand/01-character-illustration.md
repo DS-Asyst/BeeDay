@@ -3,10 +3,12 @@
 Regras reproduzíveis extraídas exclusivamente dos ativos aprovados e de seus consumers atuais. O
 documento formaliza o que já é observável; não cria personagens, nomes, lore, anatomia ou variantes.
 
-**Fonte da verdade:** os sete PNGs sob `src/BeeDay.Web/wwwroot/assets/`, seus consumers em
-`Components/Features/Home/Pages/Home.razor`, `Components/Layout/` e o responsive de
-`Home.razor.css`, inspecionados em 2026-08-16. Sem arquivos-fonte vetoriais, character sheets ou
-metadados autorais no repositório, qualquer característica além dessa evidência é desconhecida.
+**Fonte da verdade:** os PNGs sob `src/BeeDay.Web/wwwroot/assets/`, seus consumers em
+`Components/Features/Home/Pages/Home.razor`, `Components/DesignSystem/Text/BeeDayBrand.razor`,
+`Components/Layout/`, `Components/Features/Institutional/Components/InstitutionalPageShell.razor` e o
+responsive de `Home.razor.css`, reinspecionados na Sprint 29.1 (2026-08-17). Sem arquivos-fonte
+vetoriais, character sheets ou metadados autorais no repositório, qualquer característica além dessa
+evidência é desconhecida.
 
 ## Inventário atual
 
@@ -16,17 +18,20 @@ coincidem com as dimensões intrínsecas.
 | Ativo | Dimensão / peso | Consumer e tratamento | Semântica | Status |
 |---|---:|---|---|---|
 | `assets/brand/beeday-top-navigation.png` | 866×288 / 117.690 B | `PublicHeader` e `AppFooter`; largura responsiva por CSS, sem lazy-loading | Identidade: link do header recebe nome acessível externo; footer usa `alt="beeday"` | Wordmark canônico atual; fora do sistema de personagens |
+| `assets/brand/bee.png` | 279×287 / 38.332 B | `BeeDayBrand` (ícone do lockup "bee"+"day"), variante padrão | Decorativa, `alt=""` `aria-hidden="true"`; o texto `bee`/`day` adjacente é o nome acessível real (`role="img"` no wrapper) | Bee icon aprovado para fundos brancos; adicionado na EPIC 27 Sprint 27.1 |
+| `assets/brand/bee-color-neutral.png` | 1254×1254 / 533.600 B | `BeeDayBrand` quando `OnDarkSurface="true"` (footer institucional, contexto do hero institucional); seção de passos da Home; `contain`, `loading="lazy"`, `decoding="async"` | Decorativa; variante clara/quase monocromática da abelha aprovada para qualquer fundo não branco (regra formalizada na Sprint 29.1, ver "Abelha central") | Mesmo arquivo reaproveitado nos três consumers — nunca duplicar os bytes; renomeado de `assets/home/how-beeday-works-bee.png` na Sprint 29.1 para refletir seu uso agora central, não exclusivo da Home |
 | `assets/flags/brazil.png` | 612×408 / 170.991 B | `PublicLanguageSwitcher`; reduzida por CSS dentro de botão rotulado | Decorativa; o botão informa idioma e estado | Utilitário atual, não ilustração de marca |
 | `assets/flags/united-states.png` | 612×408 / 140.253 B | `PublicLanguageSwitcher`; reduzida por CSS dentro de botão rotulado | Decorativa; o botão informa idioma e estado | Utilitário atual, não ilustração de marca |
 | `assets/hero/home-team.png` | 1536×1024 / 1.770.361 B | Hero da Home; `contain`, caixa quadrada, 32rem desktop, 24rem até 52rem e 19rem até 30rem; `fetchpriority="high"` | Decorativa, em container `aria-hidden`; texto adjacente entrega a mensagem | Composição canônica aprovada da Home, não character sheet |
-| `assets/home/how-beeday-works-bee.png` | 1254×1254 / 533.600 B | Seção de passos; `contain`, absoluta no desktop e em fluxo até 60rem; `loading="lazy"`, `decoding="async"` | Decorativa, em container `aria-hidden`; passos carregam o conteúdo | Composição individual canônica atual da abelha |
-| `assets/home/home-team-fall.png` | 1536×1024 / 1.793.100 B | Fechamento da Home; largura `clamp` por viewport, sobrepõe a wave sem crop; lazy/async | Decorativa, `alt=""` e `aria-hidden="true"` | Variante de grupo canônica para esta composição |
-| `assets/home/wave-site.png` | 1672×941 / 476.914 B | Fechamento da Home; centralizada, largura mínima 48rem, recorte vertical controlado pelo container; lazy/async | Decorativa, em container `aria-hidden` | Fundo composition-specific; não é foundation de UI |
+| `assets/home/home-team-fall.png` | 1536×1024 / 1.793.100 B | Fechamento da Home; largura `clamp` por viewport, sobrepõe o separador ondulado do `AppFooter` sem crop; lazy/async | Decorativa, `alt=""` e `aria-hidden="true"` | Variante de grupo canônica para esta composição |
 
 Não existem ativos individuais dos seis personagens coadjuvantes, SVGs de personagem, variantes
 alternativas ou poses nomeadas. O PNG raiz `beeday-wordmark.png`, sem consumer e separado do lockup
-canônico de Header/Footer, foi removido no sweep final. Também não há evidência de que
-recortes extraídos das imagens de grupo sejam permitidos; portanto, não devem ser produzidos.
+canônico de Header/Footer, foi removido no sweep final. `assets/home/wave-site.png` (a wave
+raster que a Home renderizava antes da separação ondulada do footer) foi removido na Sprint 29.1: o
+separador agora é um `<path>` SVG inline pertencente ao `AppFooter`, documentado em
+[`web/03-layouts.md`](../web/03-layouts.md). Também não há evidência de que recortes extraídos das
+imagens de grupo sejam permitidos; portanto, não devem ser produzidos.
 
 ## Abelha central
 
@@ -43,8 +48,12 @@ Regras observáveis:
   outras emoções não estão aprovadas;
 - no hero, pode ser o maior elemento e ficar em primeiro plano; no grupo de fechamento, aparece
   menor e afastada, sem perder antenas, asas ou faixas identificadoras;
-- a versão individual é clara/quase monocromática e pertence ao fundo azul-claro da seção de
-  passos; ela não autoriza recolorir as versões de grupo;
+- a abelha tem duas variantes de cor aprovadas, cada uma reservada para uma cor de fundo: `bee.png`
+  (roxo de marca) é exclusiva para fundos brancos; `bee-color-neutral.png` (clara/quase
+  monocromática) é a única variante aprovada sempre que a abelha aparece sobre um fundo que não seja
+  branco — regra permanente formalizada na Sprint 29.1 após a EPIC 27 introduzir `bee.png` sem essa
+  distinção. Nenhuma das duas autoriza recolorir as versões de grupo (`home-team.png`,
+  `home-team-fall.png`), que têm paleta própria;
 - nenhuma composição aprovada corta a silhueta da abelha. Antenas e asas devem permanecer dentro
   do quadro, com respiro suficiente para não parecerem acidentalmente truncadas.
 
@@ -81,9 +90,11 @@ violência, poses estáticas de referência nem relações narrativas permanente
 - **Cor:** amarelo da abelha e violeta/azul de marca convivem com laranja, marrom, rosa, verde e
   cyan específicos da arte. Essas cores artísticas permanecem `Illustration`; não representam
   automaticamente Brand, Semantic ou Product tokens.
-- **Fundo:** os grupos usam transparência e halos difusos; a wave usa violeta próprio da
-  composição. Um fundo novo deve preservar contraste e silhueta sem transformar a cor da arte em
-  regra de interface.
+- **Fundo:** os grupos e a abelha usam transparência e halos difusos, sem cor de fundo própria da
+  arte. O separador ondulado do footer (Sprint 29.1) não é mais uma exceção pintada por ilustração:
+  é UI chrome do `AppFooter` e usa `--beeday-palette-cor0` diretamente, o mesmo token do fundo do
+  footer. Um fundo novo deve preservar contraste e silhueta sem transformar a cor da arte em regra
+  de interface.
 
 Essas regras descrevem coerência interna; não permitem copiar anatomia, proporção ou styling de
 outra marca para preencher especificações ausentes.
@@ -94,31 +105,34 @@ outra marca para preencher especificações ausentes.
   composição de passos; não substituir uma pela outra sem nova aprovação.
 - Preservar a proporção intrínseca com `height: auto` ou `object-fit: contain`; nunca esticar para
   preencher uma caixa.
-- Não cortar personagens, antenas, asas, orelhas ou a flor. O único recorte aprovado é o recorte
-  vertical da wave, calculado pelo container do fechamento.
+- Não cortar personagens, antenas, asas, orelhas ou a flor.
 - Manter texto e ações fora da arte. No hero desktop, imagem e conteúdo ocupam colunas distintas;
   até 52rem, a imagem empilha acima do conteúdo. A arte nunca deve interceptar ponteiro nem
   encobrir foco, labels ou controles.
-- O grupo de fechamento pode sobrepor a wave porque ambos são decorativos e o texto começa na base
-  opaca abaixo. A sobreposição não autoriza posicionar personagens sobre links.
+- O grupo de fechamento pode sobrepor o separador ondulado do `AppFooter` (Sprint 29.1: um `<path>`
+  SVG pertencente ao próprio footer, não mais uma wave PNG específica da Home) porque ambos são
+  decorativos e o texto do footer começa na superfície opaca abaixo. A sobreposição não autoriza
+  posicionar personagens sobre links.
 - Em viewports estreitos, reduzir o conjunto, não extrair personagens para compensar espaço. O
-  teste E2E atual protege proporção, ausência de crop e overlap com a wave.
+  teste E2E atual protege proporção, ausência de crop e overlap com o separador do footer.
 
 ## Acessibilidade e performance
 
-As quatro artes da Home são decorativas: o heading, os cinco passos e os grupos de links comunicam
+As três artes da Home são decorativas: o heading, os cinco passos e os grupos de links comunicam
 todo o conteúdo sem elas. Devem manter `alt=""`; `aria-hidden="true"` pode estar na imagem ou em seu
 container. Se uma arte futura comunicar informação ausente do texto, ela deixa de ser decorativa e
-precisa de alternativa localizada que comunique a função, não uma lista de detalhes visuais.
+precisa de alternativa localizada que comunique a função, não uma lista de detalhes visuais. O
+separador ondulado do footer é SVG puramente decorativo (`aria-hidden="true"`), não uma dessas artes.
 
-O hero é acima da dobra, permanece no carregamento inicial e usa prioridade alta. As três imagens
+O hero é acima da dobra, permanece no carregamento inicial e usa prioridade alta. As duas imagens
 posteriores usam lazy-loading; seus bitmaps são decodificados de forma assíncrona. `width`/`height` intrínsecos
 devem continuar declarados para reservar proporção e reduzir layout shift.
 
-Os quatro PNGs artísticos somam 4.573.975 bytes no repositório e não possuem variantes responsivas.
-O peso é dívida conhecida, não permissão para recompressão destrutiva: otimização futura deve
-comparar fidelidade, transparência, tamanho transferido e suporte do browser, manter fallback quando
-necessário e ser validada visualmente nos breakpoints existentes.
+Os três PNGs artísticos (`home-team.png`, `bee-color-neutral.png`, `home-team-fall.png`) somam
+4.097.061 bytes no repositório e não possuem variantes responsivas. O peso é dívida conhecida, não
+permissão para recompressão destrutiva: otimização futura deve comparar fidelidade, transparência,
+tamanho transferido e suporte do browser, manter fallback quando necessário e ser validada
+visualmente nos breakpoints existentes.
 
 ## Checklist para novo uso
 

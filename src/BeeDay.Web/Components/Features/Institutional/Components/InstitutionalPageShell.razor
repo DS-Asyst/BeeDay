@@ -5,10 +5,13 @@
 <article class="institutional-page">
     <BeeDayHero Surface="Surface" Title="@Title" Subtitle="@Description" Illustration="@Illustration" PrimaryAction="@PrimaryAction">
         <BrandContext>
-            @* The lockup text color is forced to inherit the hero's own paired foreground in
+            @* The lockup TEXT color is forced to inherit the hero's own paired foreground in
                BeeDayHero.razor.css — correct for every COR0-COR9 surface by construction, unlike
-               BeeDayBrand's own fixed default/inverse colors — so OnDarkSurface is not set here. *@
-            <BeeDayBrand />
+               BeeDayBrand's own fixed default/inverse colors. OnDarkSurface is still set here because
+               every institutional hero surface (Cor0-Cor9 except the unused white Cor6) is non-white,
+               and OnDarkSurface is what selects the official non-white-background bee icon
+               (bee-color-neutral.png) instead of the white-surface-only brand-purple one. *@
+            <BeeDayBrand OnDarkSurface="true" />
             <span class="institutional-hero__context-label">@PageContext</span>
         </BrandContext>
     </BeeDayHero>
