@@ -1,5 +1,8 @@
+using System.Globalization;
 using System.Net;
+using System.Resources;
 using BeeDay.Application.Common.Identity;
+using BeeDay.Domain.Enums;
 using BeeDay.Infrastructure.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -9,27 +12,58 @@ public sealed class IdentityEmailComposer(IOptions<IdentityEmailOptions> options
 {
     private readonly IdentityEmailOptions _options = options.Value;
 
-    public EmailMessage ComposeEmailConfirmation(string recipient, string displayName, string rawToken)
+    // A narrow, Infrastructure-owned resource catalog for transactional-email strings only (ADR-006) —
+    // deliberately not the Web project's IStringLocalizer/resx convention (19 catalogs under
+    // src/BeeDay.Web/), which Infrastructure cannot depend on without inverting the dependency
+    // direction. ResourceManager.GetString(name, culture) takes an explicit CultureInfo per call, so
+    // no thread's CurrentUICulture is ever read or mutated — safe for concurrent requests composing
+    // email for different recipients' languages at the same time.
+    private static readonly ResourceManager Resources = new(
+        "BeeDay.Infrastructure.Identity.EmailResources",
+        typeof(IdentityEmailComposer).Assembly);
+
+    private static readonly CultureInfo EnglishCulture = CultureInfo.GetCultureInfo("en-US");
+    private static readonly CultureInfo PortugueseCulture = CultureInfo.GetCultureInfo("pt-BR");
+
+    public EmailMessage ComposeEmailConfirmation(string recipient, string displayName, string rawToken, UserLanguage language)
     {
+        var culture = ResolveCulture(language);
         var url = BuildUrl(_options.ConfirmationPath, rawToken);
-        const string title = "Confirm your beeday email";
-        const string introduction = "Confirm your email address to activate your beeday account.";
-        const string footer = "This link expires in 24 hours and can only be used once.";
-        var body = BuildHtmlTemplate(title, displayName, introduction, "Confirm email", url, footer);
-        var plainText = BuildPlainTextTemplate(title, displayName, introduction, url, footer);
+        var title = GetString("ConfirmationTitle", culture);
+        var introduction = GetString("ConfirmationIntroduction", culture);
+        var footer = GetString("ConfirmationFooter", culture);
+        var actionLabel = GetString("ConfirmationActionLabel", culture);
+        var body = BuildHtmlTemplate(culture, title, displayName, introduction, actionLabel, url, footer);
+        var plainText = BuildPlainTextTemplate(culture, title, displayName, introduction, url, footer);
         return new EmailMessage(recipient, title, body, plainText);
     }
 
-    public EmailMessage ComposePasswordReset(string recipient, string displayName, string rawToken)
+    public EmailMessage ComposePasswordReset(string recipient, string displayName, string rawToken, UserLanguage language)
     {
+        var culture = ResolveCulture(language);
         var url = BuildUrl(_options.PasswordResetPath, rawToken);
-        const string title = "Reset your beeday password";
-        const string introduction = "A password reset was requested for your beeday account.";
-        const string footer = "This link expires in 1 hour and can only be used once. Ignore this email if you did not request it.";
-        var body = BuildHtmlTemplate(title, displayName, introduction, "Reset password", url, footer);
-        var plainText = BuildPlainTextTemplate(title, displayName, introduction, url, footer);
+        var title = GetString("ResetTitle", culture);
+        var introduction = GetString("ResetIntroduction", culture);
+        var footer = GetString("ResetFooter", culture);
+        var actionLabel = GetString("ResetActionLabel", culture);
+        var body = BuildHtmlTemplate(culture, title, displayName, introduction, actionLabel, url, footer);
+        var plainText = BuildPlainTextTemplate(culture, title, displayName, introduction, url, footer);
         return new EmailMessage(recipient, title, body, plainText);
     }
+
+    // The only UserLanguage -> culture mapping Infrastructure is allowed to own (ADR-006). Deliberately
+    // not a reuse of BeeDay.Web.Localization.BeeDayCultures.FromUserLanguage — Infrastructure cannot
+    // reference Web, so this two-line switch is the minimal, unavoidable duplication at the boundary,
+    // not a second localization system.
+    private static CultureInfo ResolveCulture(UserLanguage language) => language switch
+    {
+        UserLanguage.Portuguese => PortugueseCulture,
+        _ => EnglishCulture
+    };
+
+    private static string GetString(string name, CultureInfo culture) =>
+        Resources.GetString(name, culture)
+            ?? throw new InvalidOperationException($"Missing transactional email resource '{name}'.");
 
     private string BuildUrl(string path, string rawToken)
     {
@@ -52,6 +86,7 @@ public sealed class IdentityEmailComposer(IOptions<IdentityEmailOptions> options
     private const string BrandColor = "#5247F9";
 
     private static string BuildHtmlTemplate(
+        CultureInfo culture,
         string title,
         string displayName,
         string introduction,
@@ -59,8 +94,9 @@ public sealed class IdentityEmailComposer(IOptions<IdentityEmailOptions> options
         string actionUrl,
         string footer)
     {
+        var greeting = string.Format(culture, GetString("Greeting", culture), displayName);
         var safeTitle = WebUtility.HtmlEncode(title);
-        var safeGreeting = WebUtility.HtmlEncode($"Hello, {displayName}!");
+        var safeGreeting = WebUtility.HtmlEncode(greeting);
         var safeIntroduction = WebUtility.HtmlEncode(introduction);
         var safeActionLabel = WebUtility.HtmlEncode(actionLabel);
         var safeActionUrl = WebUtility.HtmlEncode(actionUrl);
@@ -68,7 +104,7 @@ public sealed class IdentityEmailComposer(IOptions<IdentityEmailOptions> options
 
         return $$"""
         <!doctype html>
-        <html lang="en">
+        <html lang="{{culture.Name}}">
         <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
         <body style="margin:0;background:#17131f;color:#f4efff;font-family:Arial,sans-serif">
           <div style="max-width:560px;margin:0 auto;padding:40px 24px">
@@ -90,15 +126,18 @@ public sealed class IdentityEmailComposer(IOptions<IdentityEmailOptions> options
     // that do. No encoding needed: this is not markup, so there is no injection surface to escape
     // against; the raw display name and URL are safe to interpolate directly.
     private static string BuildPlainTextTemplate(
+        CultureInfo culture,
         string title,
         string displayName,
         string introduction,
         string actionUrl,
-        string footer) =>
-        $"""
+        string footer)
+    {
+        var greeting = string.Format(culture, GetString("Greeting", culture), displayName);
+        return $"""
         {title}
 
-        Hello, {displayName}!
+        {greeting}
 
         {introduction}
 
@@ -106,4 +145,5 @@ public sealed class IdentityEmailComposer(IOptions<IdentityEmailOptions> options
 
         {footer}
         """;
+    }
 }

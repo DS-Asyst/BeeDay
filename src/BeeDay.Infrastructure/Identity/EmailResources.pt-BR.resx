@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="Greeting" xml:space="preserve"><value>Olá, {0}!</value></data>
+
+  <data name="ConfirmationTitle" xml:space="preserve"><value>Confirme seu e-mail beeday</value></data>
+  <data name="ConfirmationIntroduction" xml:space="preserve"><value>Confirme seu endereço de e-mail para ativar sua conta beeday.</value></data>
+  <data name="ConfirmationFooter" xml:space="preserve"><value>Este link expira em 24 horas e só pode ser usado uma vez.</value></data>
+  <data name="ConfirmationActionLabel" xml:space="preserve"><value>Confirmar e-mail</value></data>
+
+  <data name="ResetTitle" xml:space="preserve"><value>Redefina sua senha beeday</value></data>
+  <data name="ResetIntroduction" xml:space="preserve"><value>Uma redefinição de senha foi solicitada para sua conta beeday.</value></data>
+  <data name="ResetFooter" xml:space="preserve"><value>Este link expira em 1 hora e só pode ser usado uma vez. Ignore este e-mail se você não fez esta solicitação.</value></data>
+  <data name="ResetActionLabel" xml:space="preserve"><value>Redefinir senha</value></data>
+</root>

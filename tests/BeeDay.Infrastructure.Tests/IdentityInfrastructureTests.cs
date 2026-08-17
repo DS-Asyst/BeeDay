@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using BeeDay.Application.Common.Identity;
+using BeeDay.Domain.Enums;
 using BeeDay.Infrastructure.Configuration;
 using BeeDay.Infrastructure.Identity;
 using Microsoft.Extensions.Logging;
@@ -46,7 +47,7 @@ public sealed class IdentityInfrastructureTests
     {
         var composer = CreateComposer();
 
-        var message = composer.ComposeEmailConfirmation("player@example.com", "Tiago <Admin>", "a+b/c=");
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Tiago <Admin>", "a+b/c=", UserLanguage.English);
 
         Assert.Equal("player@example.com", message.Recipient);
         Assert.Equal("Confirm your beeday email", message.Subject);
@@ -60,7 +61,7 @@ public sealed class IdentityInfrastructureTests
     {
         var composer = CreateComposer();
 
-        var message = composer.ComposePasswordReset("player@example.com", "Tiago", "reset-token");
+        var message = composer.ComposePasswordReset("player@example.com", "Tiago", "reset-token", UserLanguage.English);
 
         Assert.Equal("Reset your beeday password", message.Subject);
         Assert.Contains("https://beeday.example/account/reset-password?token=reset-token", message.HtmlBody, StringComparison.Ordinal);
@@ -78,8 +79,8 @@ public sealed class IdentityInfrastructureTests
         var composer = CreateComposer();
 
         var message = method == "ComposeEmailConfirmation"
-            ? composer.ComposeEmailConfirmation("player@example.com", "Tiago", "token")
-            : composer.ComposePasswordReset("player@example.com", "Tiago", "token");
+            ? composer.ComposeEmailConfirmation("player@example.com", "Tiago", "token", UserLanguage.English)
+            : composer.ComposePasswordReset("player@example.com", "Tiago", "token", UserLanguage.English);
 
         Assert.Contains("#5247F9", message.HtmlBody, StringComparison.Ordinal);
         Assert.DoesNotContain("#7A4FCB", message.HtmlBody, StringComparison.OrdinalIgnoreCase);
@@ -90,7 +91,7 @@ public sealed class IdentityInfrastructureTests
     {
         var composer = CreateComposer();
 
-        var message = composer.ComposeEmailConfirmation("player@example.com", "Tiago", "a+b/c=");
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Tiago", "a+b/c=", UserLanguage.English);
 
         Assert.NotNull(message.PlainTextBody);
         Assert.DoesNotContain('<', message.PlainTextBody);
@@ -103,12 +104,63 @@ public sealed class IdentityInfrastructureTests
     {
         var composer = CreateComposer();
 
-        var message = composer.ComposePasswordReset("player@example.com", "Tiago", "reset-token");
+        var message = composer.ComposePasswordReset("player@example.com", "Tiago", "reset-token", UserLanguage.English);
 
         Assert.NotNull(message.PlainTextBody);
         Assert.DoesNotContain('<', message.PlainTextBody);
         Assert.Contains("https://beeday.example/account/reset-password?token=reset-token", message.PlainTextBody, StringComparison.Ordinal);
         Assert.Contains("expires in 1 hour", message.PlainTextBody, StringComparison.Ordinal);
+    }
+
+    // EPIC 28, Sprint 28.2 (ADR-006): the composer must render each recipient's own persisted
+    // UserLanguage, never a shared/ambient culture — these tests exercise both approved languages and
+    // both flows to prove that.
+    [Theory]
+    [InlineData(UserLanguage.English, "Confirm your beeday email", "Hello, Ana!", "en-US")]
+    [InlineData(UserLanguage.Portuguese, "Confirme seu e-mail beeday", "Olá, Ana!", "pt-BR")]
+    public void EmailComposer_ComposesConfirmationInTheRequestedLanguage(UserLanguage language, string expectedSubject, string expectedGreeting, string expectedHtmlLang)
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", language);
+
+        Assert.Equal(expectedSubject, message.Subject);
+        // WebUtility.HtmlEncode converts non-ASCII characters (e.g. the pt-BR "á") to numeric HTML
+        // entities, which is correct/safe markup but not a literal substring match — decode first.
+        Assert.Contains(expectedGreeting, WebUtility.HtmlDecode(message.HtmlBody), StringComparison.Ordinal);
+        Assert.Contains(expectedGreeting, message.PlainTextBody, StringComparison.Ordinal);
+        Assert.Contains($"<html lang=\"{expectedHtmlLang}\">", message.HtmlBody, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(UserLanguage.English, "Reset your beeday password", "Hello, Ana!")]
+    [InlineData(UserLanguage.Portuguese, "Redefina sua senha beeday", "Olá, Ana!")]
+    public void EmailComposer_ComposesPasswordResetInTheRequestedLanguage(UserLanguage language, string expectedSubject, string expectedGreeting)
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposePasswordReset("player@example.com", "Ana", "token", language);
+
+        Assert.Equal(expectedSubject, message.Subject);
+        Assert.Contains(expectedGreeting, WebUtility.HtmlDecode(message.HtmlBody), StringComparison.Ordinal);
+        Assert.Contains(expectedGreeting, message.PlainTextBody, StringComparison.Ordinal);
+    }
+
+    // Every language passed through the boundary must resolve every key the composer needs — a
+    // missing pt-BR translation must fail loudly (InvalidOperationException from IdentityEmailComposer),
+    // never silently fall back to English content under a pt-BR subject/lang tag.
+    [Theory]
+    [InlineData(UserLanguage.English)]
+    [InlineData(UserLanguage.Portuguese)]
+    public void EmailComposer_NeverThrowsForAnyApprovedLanguage(UserLanguage language)
+    {
+        var composer = CreateComposer();
+
+        var confirmation = Record.Exception(() => composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", language));
+        var reset = Record.Exception(() => composer.ComposePasswordReset("player@example.com", "Ana", "token", language));
+
+        Assert.Null(confirmation);
+        Assert.Null(reset);
     }
 
     [Fact]
