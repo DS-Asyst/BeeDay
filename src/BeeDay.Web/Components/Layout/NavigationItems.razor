@@ -7,10 +7,12 @@
 </nav>
 
 <div class="navigation-items navigation-items--actions">
-    <NavigationItem Icon="BeeDayIconName.Account"
-                     Label="@Localizer["NavAccountLabel"]"
-                     Href="/settings"
-                     OnNavigate="OnNavigate" />
+    <div class="navigation-items__account">
+        <NavigationItem Icon="BeeDayIconName.Account"
+                         Label="@Localizer["NavAccountLabel"]"
+                         Href="/settings"
+                         OnNavigate="OnNavigate" />
+    </div>
 
     <form method="post" action="/auth/logout" class="navigation-items__logout-form">
         <AntiforgeryToken />
