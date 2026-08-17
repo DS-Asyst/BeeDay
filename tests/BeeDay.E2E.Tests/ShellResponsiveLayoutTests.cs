@@ -96,6 +96,26 @@ public sealed class ShellResponsiveLayoutTests(PlaywrightAppFixture fixture) : E
         await Expect(drawer).ToBeHiddenAsync();
     }
 
+    [Fact]
+    public async Task MobileHeaderAndDrawerBrandLinksRenderWithoutTheBrowserDefaultUnderline()
+    {
+        // EPIC 27 Sprint 27.12 (epic hardening): regression lock for the missing-::deep bug found
+        // in MobileHeader/MobileSidebar's brand links (same class of bug as DesktopSidebar,
+        // Sprint 27.9) — both used to render the wordmark with the browser's default underline.
+        await Page.SetViewportSizeAsync(390, 844);
+        await LoginToDailyAsync();
+
+        var headerBrand = Page.Locator(".mobile-header__brand");
+        Assert.Equal("none", await headerBrand.EvaluateAsync<string>("element => getComputedStyle(element).textDecorationLine"));
+        Assert.Equal("flex", await headerBrand.EvaluateAsync<string>("element => getComputedStyle(element).display"));
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Open navigation menu" }).ClickAsync();
+        var drawerBrand = Page.Locator("#mobile-navigation .mobile-nav-drawer__brand");
+        await Expect(drawerBrand).ToBeVisibleAsync();
+        Assert.Equal("none", await drawerBrand.EvaluateAsync<string>("element => getComputedStyle(element).textDecorationLine"));
+        Assert.Equal("flex", await drawerBrand.EvaluateAsync<string>("element => getComputedStyle(element).display"));
+    }
+
     private async Task AssertRetiredRegionsAbsentAsync()
     {
         await Expect(Page.Locator(".right-rail, .side-drawer, .support-drawer, .app-footer")).ToHaveCountAsync(0);

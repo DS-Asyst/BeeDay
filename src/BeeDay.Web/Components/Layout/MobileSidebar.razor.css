@@ -61,7 +61,12 @@
     margin-bottom: var(--beeday-spacing-lg);
 }
 
-.mobile-nav-drawer__brand {
+/* EPIC 27 Sprint 27.12: NavLink is a child component, not markup literally written in this
+   file, so its rendered <a> never receives this file's own scope attribute — ::deep is required
+   to reach it (same fix as DesktopSidebar's brand link, Sprint 27.9; flagged as a known,
+   deferred limitation in that sprint's own commit message). Without it the wordmark rendered
+   with the browser's default underline/link color instead of beeday-brand's own styling. */
+.mobile-nav-drawer__header ::deep .mobile-nav-drawer__brand {
     display: flex;
     align-items: center;
     color: inherit;
