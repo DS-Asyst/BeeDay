@@ -163,6 +163,104 @@ public sealed class IdentityInfrastructureTests
         Assert.Null(reset);
     }
 
+    // EPIC 28, Sprint 28.3 (Composition Foundation): the display name is user-controlled input that
+    // reaches HTML unescaped unless encoded — this proves every HTML-significant character survives
+    // as inert text, never as markup, across the full set WebUtility.HtmlEncode is relied upon for.
+    [Theory]
+    [InlineData("<script>alert(1)</script>")]
+    [InlineData("Tom & Jerry")]
+    [InlineData("She said \"hi\"")]
+    public void EmailComposer_EncodesEveryHtmlSignificantCharacterInDisplayName(string displayName)
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", displayName, "token", UserLanguage.English);
+
+        Assert.DoesNotContain(displayName, message.HtmlBody, StringComparison.Ordinal);
+        Assert.Contains(displayName, WebUtility.HtmlDecode(message.HtmlBody), StringComparison.Ordinal);
+    }
+
+    // WebUtility.HtmlEncode also encodes the apostrophe (to a numeric entity) — proven here rather
+    // than assumed, since this composer relies on WebUtility's exact encoding set rather than
+    // reimplementing one.
+    [Fact]
+    public void EmailComposer_PreservesApostrophesAcrossHtmlEncodingAndPlainText()
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "O'Brien", "token", UserLanguage.English);
+
+        Assert.Contains("O'Brien", WebUtility.HtmlDecode(message.HtmlBody), StringComparison.Ordinal);
+        Assert.Contains("O'Brien", message.PlainTextBody, StringComparison.Ordinal);
+    }
+
+    // A raw <script> tag in the display name must never appear as live markup in the HTML body — this
+    // is the concrete injection scenario the encoding above defends against.
+    [Fact]
+    public void EmailComposer_NeverEmitsUnescapedScriptTagsFromDisplayName()
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "<script>alert(1)</script>", "token", UserLanguage.English);
+
+        Assert.DoesNotContain("<script>", message.HtmlBody, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // A very long token (e.g. a future token format change, or a client that pads/wraps values) must
+    // still produce a single, correctly-encoded, unbroken URL in both bodies — no truncation, no
+    // accidental line wrap inside the URL itself.
+    [Fact]
+    public void EmailComposer_HandlesLongTokensWithoutTruncatingOrBreakingTheUrl()
+    {
+        var composer = CreateComposer();
+        var longToken = new string('a', 512);
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Ana", longToken, UserLanguage.English);
+
+        var expectedUrl = $"https://beeday.example/account/confirm-email?token={longToken}";
+        Assert.Contains(expectedUrl, message.HtmlBody, StringComparison.Ordinal);
+        Assert.Contains(expectedUrl, message.PlainTextBody, StringComparison.Ordinal);
+    }
+
+    // HTML and plain text are independently rendered strings (§ "Resend..." comment on
+    // BuildPlainTextTemplate) — this proves they still carry the same essential facts (same subject
+    // title, same callback URL) without requiring byte-for-byte identical output.
+    [Theory]
+    [InlineData("ComposeEmailConfirmation")]
+    [InlineData("ComposePasswordReset")]
+    public void EmailComposer_HtmlAndPlainTextCarryTheSameEssentialFacts(string method)
+    {
+        var composer = CreateComposer();
+
+        var message = method == "ComposeEmailConfirmation"
+            ? composer.ComposeEmailConfirmation("player@example.com", "Ana", "token-value", UserLanguage.English)
+            : composer.ComposePasswordReset("player@example.com", "Ana", "token-value", UserLanguage.English);
+
+        Assert.NotNull(message.PlainTextBody);
+        Assert.NotEqual(message.HtmlBody, message.PlainTextBody);
+        Assert.Contains(message.Subject, WebUtility.HtmlDecode(message.HtmlBody), StringComparison.Ordinal);
+        Assert.Contains(message.Subject, message.PlainTextBody, StringComparison.Ordinal);
+        Assert.Contains("token-value", message.HtmlBody, StringComparison.Ordinal);
+        Assert.Contains("token-value", message.PlainTextBody, StringComparison.Ordinal);
+    }
+
+    // Composition is pure computation over its inputs — running it twice for the same inputs must
+    // produce byte-identical output (no timestamps, random ids, or other hidden nondeterminism baked
+    // into the template), which is what lets 28.9's snapshot-style client-compatibility tests trust a
+    // captured render.
+    [Fact]
+    public void EmailComposer_ProducesDeterministicOutputForTheSameInputs()
+    {
+        var composer = CreateComposer();
+
+        var first = composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", UserLanguage.Portuguese);
+        var second = composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", UserLanguage.Portuguese);
+
+        Assert.Equal(first.HtmlBody, second.HtmlBody);
+        Assert.Equal(first.PlainTextBody, second.PlainTextBody);
+        Assert.Equal(first.Subject, second.Subject);
+    }
+
     [Fact]
     public async Task ResendSender_WhenDisabled_DoesNotCallApi()
     {
