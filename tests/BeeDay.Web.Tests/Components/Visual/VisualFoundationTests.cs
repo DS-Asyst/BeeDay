@@ -117,6 +117,37 @@ public sealed class VisualFoundationTests
     }
 
     [Fact]
+    public void FooterSocialListOverridesTheGroupListDisplayWithSufficientSpecificity()
+    {
+        // Plain CSS specificity, no Blazor isolation involved: the base ".app-footer__group ul {
+        // display: grid; }" rule (class+type selector) silently beat a same-file ".app-footer__
+        // social-list { display: flex; }" override (class-only selector, same file, later source
+        // order — order does not matter once specificity differs) — social icons rendered stacked
+        // vertically instead of in a row until this was corrected (Sprint 27.4).
+        var footer = ReadWebFile("Components", "Layout", "AppFooter.razor.css");
+        Assert.Contains(".app-footer__group ul.app-footer__social-list { display: flex;", footer, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void FooterTextDoesNotDimAlreadyPairedWhiteBelowWcagAaAndSocialPlaceholdersHaveAValidAriaRole()
+    {
+        // White text opacity-dimmed to .82/.78 over the COR0 background measured ~4.42:1/~4.15:1,
+        // under WCAG AA's 4.5:1 minimum — caught live by the repo's axe-core E2E scan on every
+        // public route (the footer is global). Hierarchy must come from size/weight, not opacity,
+        // for any footer text that is always rendered (not just a :hover/:focus transient state).
+        var footerCss = ReadWebFile("Components", "Layout", "AppFooter.razor.css");
+        Assert.Contains(".app-footer__identity p { margin: 0; color: inherit; }", footerCss, StringComparison.Ordinal);
+        var copyrightBlockHasNoOpacity = !System.Text.RegularExpressions.Regex.IsMatch(
+            footerCss, @"\.app-footer__copyright\s*\{[^}]*opacity", System.Text.RegularExpressions.RegexOptions.Singleline);
+        Assert.True(copyrightBlockHasNoOpacity, "app-footer__copyright must not dim its text via opacity.");
+
+        // aria-label alone is prohibited on a bare <span> (role "generic") per the ARIA spec — axe
+        // flagged this as aria-prohibited-attr. role="img" makes it a valid target for aria-label.
+        var footerRazor = ReadWebFile("Components", "Layout", "AppFooter.razor");
+        Assert.Contains("class=\"app-footer__social-unavailable\" role=\"img\" aria-label=", footerRazor, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void RewardAndButtonAliasesPreserveSemanticOwnership()
     {
         var variables = ReadWebFile("wwwroot", "css", "variables.css");

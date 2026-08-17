@@ -1,17 +1,81 @@
+@using BeeDay.Web.Components.DesignSystem.Icons
+@using BeeDay.Web.Components.DesignSystem.Text
 @inject IStringLocalizer<SharedResources> Localizer
 
 <footer class="app-footer">
     <div class="app-footer__content beeday-container">
         <div class="app-footer__identity">
-            <img class="app-footer__brand-mark" src="/assets/brand/beeday-top-navigation.png" alt="beeday" width="866" height="288" />
+            <BeeDayBrand OnDarkSurface="true" Class="app-footer__brand-mark" />
             <p>@Localizer["FooterTagline"]</p>
         </div>
 
-        <nav class="app-footer__links" aria-label="@Localizer["FooterLinksAriaLabel"]">
-            <a href="/experience-system">@Localizer["FooterExperienceSystemLink"]</a>
-            <a href="https://github.com/tiagoarrigoni/BeeDay">@Localizer["FooterGitHubLink"]</a>
-            <a href="https://www.linkedin.com/in/tiago-a-arrigoni-335b9413b/">LinkedIn</a>
-        </nav>
+        <div class="app-footer__groups">
+            <nav class="app-footer__group" aria-labelledby="footer-about-heading">
+                <h2 id="footer-about-heading">@Localizer["FooterAboutUsGroup"]</h2>
+                <ul>
+                    <li><a href="/mission">@Localizer["FooterMissionLink"]</a></li>
+                    <li><a href="/efficacy">@Localizer["FooterEfficacyLink"]</a></li>
+                    <li><a href="/brand-guidelines">@Localizer["FooterBrandGuidelinesLink"]</a></li>
+                    <li><a href="/contact">@Localizer["FooterContactLink"]</a></li>
+                </ul>
+            </nav>
+
+            <nav class="app-footer__group" aria-labelledby="footer-products-heading">
+                <h2 id="footer-products-heading">@Localizer["FooterProductsGroup"]</h2>
+                <ul>
+                    <li><a href="/beeday">@Localizer["FooterProductLink"]</a></li>
+                    <li><a href="/beeday-plus">@Localizer["FooterProductPlusLink"]</a></li>
+                </ul>
+            </nav>
+
+            <nav class="app-footer__group" aria-labelledby="footer-apps-heading">
+                <h2 id="footer-apps-heading">@Localizer["FooterAppsGroup"]</h2>
+                <ul>
+                    <li><a href="/android">@Localizer["FooterAndroidLink"]</a></li>
+                    <li><a href="/ios">@Localizer["FooterIosLink"]</a></li>
+                </ul>
+            </nav>
+
+            <nav class="app-footer__group" aria-labelledby="footer-help-heading">
+                <h2 id="footer-help-heading">@Localizer["FooterHelpGroup"]</h2>
+                <ul>
+                    <li><a href="/faqs">@Localizer["FooterFaqsLink"]</a></li>
+                </ul>
+            </nav>
+
+            <nav class="app-footer__group app-footer__group--legal" aria-labelledby="footer-legal-heading">
+                <h2 id="footer-legal-heading">@Localizer["FooterLegalGroup"]</h2>
+                <ul>
+                    <li><a href="/community-guidelines">@Localizer["FooterCommunityGuidelinesLink"]</a></li>
+                    <li><a href="/terms">@Localizer["FooterTermsLink"]</a></li>
+                    <li><a href="/privacy">@Localizer["FooterPrivacyLink"]</a></li>
+                </ul>
+            </nav>
+
+            <nav class="app-footer__group app-footer__group--social" aria-labelledby="footer-social-heading">
+                <h2 id="footer-social-heading">@Localizer["FooterSocialGroup"]</h2>
+                <ul class="app-footer__social-list">
+                    <li>
+                        <a href="https://www.linkedin.com/in/tiago-a-arrigoni-335b9413b/" aria-label="@Localizer["FooterLinkedInLabel"]">
+                            <BeeDayIcon Name="BeeDayIconName.LinkedIn" Color="BeeDayIconColor.Current" Decorative="true" />
+                        </a>
+                    </li>
+                    <li>
+                        @* No real Instagram/X URL exists in the repository yet (06_ASSETS_AND_OPEN_ITEMS.md) —
+                           rendered as a non-interactive placeholder instead of a link to nowhere or an
+                           invented handle. *@
+                        <span class="app-footer__social-unavailable" role="img" aria-label="@Localizer["FooterInstagramComingSoon"]">
+                            <BeeDayIcon Name="BeeDayIconName.Instagram" Color="BeeDayIconColor.Current" Decorative="true" />
+                        </span>
+                    </li>
+                    <li>
+                        <span class="app-footer__social-unavailable" role="img" aria-label="@Localizer["FooterXComingSoon"]">
+                            <BeeDayIcon Name="BeeDayIconName.X" Color="BeeDayIconColor.Current" Decorative="true" />
+                        </span>
+                    </li>
+                </ul>
+            </nav>
+        </div>
 
         <p class="app-footer__copyright">@Localizer["FooterCopyright"]</p>
     </div>

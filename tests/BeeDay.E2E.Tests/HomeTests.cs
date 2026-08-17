@@ -226,7 +226,8 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         await Expect(getStarted).ToHaveCSSAsync("background-color", "rgb(28, 14, 242)");
         await Page.Mouse.MoveAsync(0, 0);
         await Page.Mouse.UpAsync();
-        Assert.Equal("rgb(247, 247, 247)", await Page.GetByRole(AriaRole.Contentinfo)
+        // EPIC 27 Sprint 27.4: the footer became a brand-surface (COR0) institutional surface.
+        Assert.Equal("rgb(82, 71, 249)", await Page.GetByRole(AriaRole.Contentinfo)
             .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
     }
 

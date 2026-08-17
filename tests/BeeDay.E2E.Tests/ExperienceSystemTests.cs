@@ -52,14 +52,23 @@ public sealed class ExperienceSystemTests(PlaywrightAppFixture fixture) : E2ETes
     }
 
     [Fact]
-    public async Task FooterLinksToTheExperienceSystemFromThePublicHome()
+    public async Task FooterLinksToBrandGuidelinesWhichLinksOnToTheExperienceSystem()
     {
+        // EPIC 27 Sprint 27.4: the footer's standalone "beeday Experience System" entry was removed
+        // in favor of "Brand guidelines" (03_DESIGN_DECISIONS.md §9/§11) — the public destination
+        // that, as of Sprint 27.8, will host the Experience System directly; until then it links on.
         await GotoAsync("/");
 
-        var footerLink = Page.GetByRole(AriaRole.Contentinfo).GetByRole(AriaRole.Link, new() { Name = "beeday Experience System", Exact = true });
-        await Expect(footerLink).ToHaveAttributeAsync("href", "/experience-system");
+        var footerLink = Page.GetByRole(AriaRole.Contentinfo).GetByRole(AriaRole.Link, new() { Name = "Brand guidelines", Exact = true });
+        await Expect(footerLink).ToHaveAttributeAsync("href", "/brand-guidelines");
+        await Expect(Page.GetByRole(AriaRole.Contentinfo).GetByRole(AriaRole.Link, new() { Name = "beeday Experience System" })).ToHaveCountAsync(0);
 
         await footerLink.ClickAsync();
+        await Expect(Page).ToHaveURLAsync(new Regex(@"/brand-guidelines$"));
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Brand guidelines", Level = 1 })).ToBeVisibleAsync();
+
+        var experienceSystemLink = Page.GetByRole(AriaRole.Link, new() { Name = "Open the beeday Experience System" });
+        await experienceSystemLink.ClickAsync();
         await Expect(Page).ToHaveURLAsync(new Regex(@"/experience-system$"));
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "beeday Experience System", Level = 1 })).ToBeVisibleAsync();
     }
