@@ -23,10 +23,11 @@
     text-decoration: none;
 }
 
-.public-header__brand-mark {
-    display: block;
-    height: 2.93rem;
-    width: auto;
+/* EPIC 27 Sprint 27.2: the header lockup grows from the previous 2.93rem bitmap height so the
+   wordmark reads as a real brand mark instead of a small, timid icon. ::deep is required because
+   BeeDayBrand renders its own scoped markup — a plain selector here would never match it. */
+.public-header ::deep .public-header__brand-mark {
+    --beeday-brand-height: 3.4rem;
 }
 
 .public-header__actions { display: flex; align-items: center; gap: var(--beeday-spacing-md); }
@@ -40,5 +41,5 @@
     }
 
     .public-header__actions { gap: var(--beeday-spacing-xs); }
-    .public-header__brand-mark { height: 2.6rem; }
+    .public-header ::deep .public-header__brand-mark { --beeday-brand-height: 2.9rem; }
 }

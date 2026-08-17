@@ -20,9 +20,9 @@ public sealed class LoginTests
         var create = cut.Find("a.public-auth-actions__destination");
         Assert.Equal("/profile/create", create.GetAttribute("href"));
         Assert.Contains("Create account", create.TextContent, StringComparison.Ordinal);
-        Assert.Contains("beeday-button--secondary", create.ClassList);
+        Assert.Contains("beeday-button--important-white", create.ClassList);
 
-        var forgotPassword = cut.Find("a.auth-action-link");
+        var forgotPassword = cut.Find("a.beeday-link");
         Assert.Equal("/account/forgot-password", forgotPassword.GetAttribute("href"));
         Assert.Contains("Forgot password?", forgotPassword.TextContent, StringComparison.Ordinal);
     }

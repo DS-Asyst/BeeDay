@@ -78,7 +78,10 @@ public sealed class VisualFoundationTests
         Assert.Contains("--beeday-palette-cor9: #defff7;", variables, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("--beeday-color-accent-secondary: var(--beeday-palette-cor3);", variables, StringComparison.Ordinal);
         Assert.Contains("--beeday-hero-surface-default: var(--beeday-palette-cor0);", variables, StringComparison.Ordinal);
-        Assert.Contains("--beeday-color-button-important-white-fg: var(--beeday-color-accent-secondary);", variables, StringComparison.Ordinal);
+        // The button text uses the text-safe accent variant, not raw COR3: raw COR3 on white measures
+        // ~2.44:1 (fails WCAG AA's 4.5:1 normal-text minimum, confirmed by the repo's axe-core E2E scan).
+        Assert.Contains("--beeday-color-accent-secondary-on-light: #0b72a6;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-color-button-important-white-fg: var(--beeday-color-accent-secondary-on-light);", variables, StringComparison.Ordinal);
 
         Assert.Contains(".beeday-link {", utilities, StringComparison.Ordinal);
         Assert.Contains("text-decoration: none;", utilities, StringComparison.Ordinal);

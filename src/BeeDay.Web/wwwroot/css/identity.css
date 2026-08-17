@@ -48,9 +48,7 @@
     color: var(--beeday-color-text-primary);
     font-weight: 700;
     text-align: center;
-    text-decoration-line: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 3px;
+    text-decoration: none;
 }
 
 .identity-navigation-link--primary { color: var(--beeday-color-brand-primary); }

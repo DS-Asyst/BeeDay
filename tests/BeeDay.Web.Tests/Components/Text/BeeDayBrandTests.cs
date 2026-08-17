@@ -32,6 +32,19 @@ public sealed class BeeDayBrandTests
     }
 
     [Fact]
+    public void MergesCustomClassAndAdditionalAttributes()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<BeeDayBrand>(parameters => parameters
+            .Add(x => x.Class, "public-header__brand-mark")
+            .AddUnmatched("data-testid", "header-brand"));
+
+        var brand = cut.Find(".beeday-brand");
+        Assert.Contains("public-header__brand-mark", brand.ClassList);
+        Assert.Equal("header-brand", brand.GetAttribute("data-testid"));
+    }
+
+    [Fact]
     public void AppliesInverseVariantOnlyWhenRequested()
     {
         using var context = new BunitContext();
