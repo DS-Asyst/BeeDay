@@ -375,6 +375,20 @@ public sealed class IdentityInfrastructureTests
         Assert.Equal(0, handler.CallCount);
     }
 
+    // EPIC 28, Sprint 28.6 (Evidence-Based Deliverability Remediation): the Sprint 28.5 audit found
+    // this class-level default was the only place still using the wrong brand casing ("BeeDay") for
+    // a visible, marketing-adjacent surface (every recipient's inbox "From" display name) — every
+    // real committed environment already overrode it to "beeday" via appsettings, so this default was
+    // unreachable in practice, but a future environment omitting the override would have silently
+    // regressed brand casing. Locks the correct default in so that can't happen.
+    [Fact]
+    public void ResendOptions_DefaultFromNameMatchesTheBrandContract()
+    {
+        var options = new ResendOptions();
+
+        Assert.Equal("beeday", options.FromName);
+    }
+
     [Fact]
     public async Task ResendSender_SendsExpectedAuthenticatedRequest()
     {

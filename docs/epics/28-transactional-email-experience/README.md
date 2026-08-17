@@ -797,3 +797,127 @@ regardless of which EPIC 28 commit is deployed.
   fact.
 - Resend Insights/dashboard delivery events were not accessible this session (credential-gated) — no
   attempt was made to obtain or bypass that.
+
+---
+
+## Sprint 28.6 — Evidence-Based Deliverability Remediation
+
+**Base local:** `sprint/28.5-deliverability-audit`.
+**Branch:** `sprint/28.6-deliverability-remediation`.
+**Gate:** Gate C — satisfied at the configuration/code-evidence level. Real-HMG retest of the new
+template remains `POST-MERGE PENDING` (unchanged — depends on deployment, not this Sprint).
+
+### Rule followed: every change traces to a specific 28.5 finding — no shotgun debugging
+
+Of the 4 priority-ordered candidates 28.5 produced, exactly **one** was repo-side and evidenced enough
+to act on without inventing a change. The other three are marked `EXTERNAL ACTION REQUIRED` below and
+were **not executed**.
+
+### Applied: repo-side remediation #3 (FromName default casing)
+
+- **Evidence (28.5):** `ResendOptions.FromName`'s C# class-level default was `"BeeDay"` — wrong brand
+  casing for a visible, marketing-adjacent surface (every recipient's inbox "From" name) — while every
+  real committed environment already overrides it correctly to `"beeday"` via `appsettings.json`
+  (base) and `appsettings.Production.json` (explicit), with Homologation inheriting the base value.
+  The default itself was unreachable in practice, but a latent regression risk for any future
+  environment that omitted the override.
+- **Change:** `src/BeeDay.Infrastructure/Configuration/ResendOptions.cs` — `FromName` default
+  `"BeeDay"` → `"beeday"`. One line.
+- **Test:** `ResendOptions_DefaultFromNameMatchesTheBrandContract` (new) — locks the correct default in
+  so it can't silently regress again.
+- **Before/after:** before, a brand-new environment that forgot to set `BeeDay:Email:Resend:FromName`
+  would have sent as `"BeeDay <address>"`; after, it sends as `"beeday <address>"`, consistent with
+  every already-deployed environment's actual behavior. **No claim of Inbox Placement improvement is
+  made** — this is a brand-consistency correction to a currently-unreachable default, not a
+  deliverability fix; it was already the effective behavior in HMG/Production before this change.
+
+### Not applied — `EXTERNAL ACTION REQUIRED`, no automatic action taken
+
+**1. SPF/DKIM/DMARC for the real `FromAddress` domain**
+
+- Evidence: 28.5 found `beeday.com` (a candidate, unconfirmed domain) has a hard-fail `v=spf1 -all`
+  and a null MX; the actual `FromAddress` domain remains a secret, never inspected this session.
+- Exact proposed change: none proposable yet without knowing the real domain. If it is confirmed to be
+  `beeday.com` (or a subdomain), the domain owner would need to add Resend's specific verification
+  records (obtained from the Resend dashboard's domain-verification page — an SPF `include:` addition
+  alongside or replacing the current `-all`, plus the DKIM selector TXT record Resend issues per
+  domain) rather than a value this session can safely guess.
+- Risk/rollback: DNS TXT changes are globally propagating and cached per-record TTL; changing a
+  domain's SPF affects every service that currently relies on its `-all` reject-all policy (unknown
+  whether anything does). Rollback is reverting the TXT record to its prior value.
+- **Status: EXTERNAL ACTION REQUIRED. Not executed.** Owner must first confirm the real sending domain.
+
+**2. `h-beeday.com.br` public DNS resolvability**
+
+- Evidence: 28.5 confirmed this domain (HMG's committed `PublicBaseUrl`/`AllowedHosts`) does not exist
+  in public DNS; it only resolves locally via a hosts-file override to a private address.
+- Exact proposed change: two candidate directions, not a single obvious fix — (a) publish a real public
+  DNS record for `h-beeday.com.br` pointing at a publicly-reachable endpoint for SERV3WEB (a security
+  posture decision, not just a DNS action — it changes whether HMG becomes internet-reachable), or
+  (b) formally document HMG as VPN/LAN-only and confirm every `HmgRecipientGuardOptions:AllowedRecipients`
+  entry has that network access, closing the question without a DNS change at all.
+- Risk/rollback: (a) has real security implications (exposing an internal server publicly) and must not
+  be decided by inference; (b) is zero-risk (documentation only) but requires the owner's confirmation
+  of who is actually on the allowlist and their network access.
+- **Status: EXTERNAL ACTION REQUIRED / decision required. Not executed.**
+
+**3. Reply-To semantics**
+
+- Evidence: 28.5 found no gap in code (Resend already defaults `reply_to` to `From` when omitted); the
+  question of whether the real `FromAddress` is reply-capable depends on the same unknown domain as
+  item 1.
+- **Status: no repo-side defect to remediate — deferred pending item 1's answer, not a `TODO` left
+  behind.** `no repo-side remediation justified` for this item specifically.
+
+**4. Tracking configuration**
+
+- Evidence: no tracking-related field is set anywhere in the app's Resend request payload — tracking
+  behavior, if any, is entirely a Resend account/domain dashboard setting, invisible to and
+  uncontrolled by this repository.
+- **Status: not applicable to repo-side remediation** — there is no code to change; this is
+  `external-verification-needed` only (Resend dashboard, credential-gated).
+
+### Conclusion
+
+`no repo-side remediation justified` for 3 of 4 candidates (items 1/3/4 above are either external or
+already correct); one small, evidenced, zero-risk correction applied (FromName default). **No claim
+of improved Inbox Placement is made anywhere in this Sprint** — that requires a real retest, which is
+`POST-MERGE PENDING`.
+
+### Tests
+
+`ResendOptions_DefaultFromNameMatchesTheBrandContract` (new, `IdentityInfrastructureTests.cs`). No
+other test changed. No test sends real email.
+
+### Documentation updated
+
+This section. `ResendOptions.cs`'s own inline shape didn't carry a comment needing an update (plain
+POCO, no prior comment asserting the old default was intentional).
+
+### Validation Results
+
+```
+dotnet format BeeDay.slnx --verify-no-changes   → clean
+dotnet build BeeDay.slnx                         → 0 errors, 0 warnings
+dotnet test BeeDay.slnx                          → 1387/1387 passed (93 Domain + 85 Application +
+                                                    203 Infrastructure + 841 Web + 165 E2E)
+git status                                       → clean after commit
+```
+
+### Security / Production
+
+No secrets touched or exposed. No DNS changed. Production untouched — `appsettings.Production.json`
+already had the explicit `"beeday"` override before this Sprint; this change only affects the
+unreachable class-level default, not Production's actual committed behavior.
+
+### Runtime validation
+
+Not applicable — the applied change affects only an already-unreachable code path in every real
+environment. `POST-MERGE PENDING`: none newly introduced by this Sprint.
+
+### Risks / Known Limitations
+
+- Items 1 and 2 above remain open, blocking a complete Gate C closure at the "real deliverability
+  proven" level (as opposed to "configuration/code evidence" level, which this Sprint does satisfy) —
+  both require the repository owner's input/decision before any further code or DNS action.
+- No experiment/retest has been run — this Sprint intentionally did not claim one.
