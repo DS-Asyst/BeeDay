@@ -47,6 +47,19 @@ documented the secrets/configuration contract for `ResendOptions:ApiKey`/`FromAd
 Sprint 26.2 implemented §4.1/§8's provider-selection recommendation via `EmailProviderSelector`.
 Originally written in Sprint 26.1, audit-only, no behavior changed by that sprint).
 
+**Update (2026-08-17, EPIC 28 Sprint 28.1 — Repository Baseline & Owner Map):** commit `4e98e1d8`
+("feat(email): activate Resend for Homologation", same day, after this document's Sprint 26.10
+close) flipped `appsettings.Homologation.json` to `Resend:Enabled: true` /
+`Development:Enabled: false`. §5.1 below ("as committed today") and §10.4's forward-looking note are
+now historical snapshots of the Sprint 26.10 state, not the current committed state — both are left
+unrewritten below per this document's own historical-record convention, with a pointer at each spot
+to the current state. The current effective-provider table, deployment status, and the
+Environment-Validated/POST-MERGE-PENDING distinction are owned by
+[`docs/deployment/14-transactional-email-runbook.md`](../deployment/14-transactional-email-runbook.md)
+§2/§6, which this document now defers to for "what is true today" going forward — this document
+remains the owner of the architecture/audit narrative (*why* the system looks the way it does), not
+of the live per-environment state.
+
 ## 1. Scope
 
 This document maps the transactional-email architecture as it exists today and records the proven
@@ -192,12 +205,16 @@ absolute HTTPS URL outside Development (documented in `docs/deployment/02-runtim
 §4.1). Both reads use the same configuration key and therefore always agree once bound — no
 divergence risk found.
 
-### 5.1 Per-environment effective provider (as committed today)
+### 5.1 Per-environment effective provider (as committed at Sprint 26.10 close, 2026-08-16)
+
+**Historical snapshot — superseded for Homologation on 2026-08-17, see the header Update note above.**
+For the current committed state, see
+[`14-transactional-email-runbook.md`](../deployment/14-transactional-email-runbook.md) §2.
 
 | Environment | `Resend:Enabled` | `Development:Enabled` | `Development:Directory` | Effective sender |
 |---|---|---|---|---|
 | Development (`appsettings.json` base) | not set (defaults `false`) | not set (defaults `true`) | not set (defaults `"Data/Emails"`, relative) | `DevelopmentEmailSender`, writes inside content root |
-| Homologation (`appsettings.Homologation.json`) | `false` | `true` | `"C:\\Apps\\BeeDay-Data\\Emails"` (absolute, external) | `DevelopmentEmailSender`, **directory outside content root** |
+| Homologation (`appsettings.Homologation.json`) | `false` | `true` | `"C:\\Apps\\BeeDay-Data\\Emails"` (absolute, external) | `DevelopmentEmailSender`, **directory outside content root** — **as of 2026-08-17 this row is historical; committed config now selects `ResendEmailSender` wrapped by the HMG guard, not yet redeployed to SERV3WEB (runbook §6)** |
 | Production (`appsettings.Production.json`) | `true` | not set in this file | not set in this file | `ResendEmailSender` (never actually loaded today — see §5.2) |
 
 ### 5.2 Production file is inert today
@@ -413,11 +430,13 @@ which asserts the test's own recipient strings never appear in any captured log 
 a deliberate, auditable line in source control, not an inferred default (Production's `Resend`
 section was already `Enabled: true` before this sprint; this is the one new key). Guarded by
 `HmgRecipientGuardDependencyInjectionTests.CommittedProductionAppsettings_ExplicitlyDisablesHmgRecipientGuard`,
-which reads the real committed file. `appsettings.Homologation.json` is untouched by this sprint —
-it still resolves to the `Development` provider (§5.1), so the guard's default (`Enabled: true`,
-fail-closed) is not yet exercised there; it only becomes relevant the moment a future sprint flips
-Homologation's `Resend:Enabled` to `true`, at which point the guard's own default protects it
-automatically.
+which reads the real committed file. `appsettings.Homologation.json` was untouched by this sprint —
+at Sprint 26.4 close it still resolved to the `Development` provider (§5.1), so the guard's default
+(`Enabled: true`, fail-closed) was not yet exercised there; it would only become relevant the moment
+a future sprint flipped Homologation's `Resend:Enabled` to `true`, at which point the guard's own
+default would protect it automatically. **That moment arrived 2026-08-17** (commit `4e98e1d8`, see
+the header Update note) — the guard's fail-closed default is now the active code path for
+Homologation once redeployed; current status: runbook §6.
 
 ### 10.5 Allowlist storage — not committed to source control
 
