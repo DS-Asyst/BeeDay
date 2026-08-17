@@ -45,4 +45,28 @@ public sealed class InstitutionalPageShellTests
         var brand = cut.Find(".beeday-hero__brand-context .beeday-brand");
         Assert.DoesNotContain("beeday-brand--inverse", brand.ClassList);
     }
+
+    [Fact]
+    public void RendersPrimaryActionInTheHeroWhenSupplied()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<InstitutionalPageShell>(parameters => parameters
+            .Add(component => component.PageContext, "beeday")
+            .Add(component => component.Title, "beeday")
+            .Add(component => component.PrimaryAction, builder => builder.AddMarkupContent(0, "<a class=\"beeday-button\" href=\"/profile/create\">Get started</a>")));
+
+        var cta = cut.Find(".beeday-hero__primary-action a");
+        Assert.Equal("/profile/create", cta.GetAttribute("href"));
+    }
+
+    [Fact]
+    public void OmitsPrimaryActionWrapperWhenNotSupplied()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<InstitutionalPageShell>(parameters => parameters
+            .Add(component => component.PageContext, "Mission")
+            .Add(component => component.Title, "Our mission"));
+
+        Assert.Empty(cut.FindAll(".beeday-hero__primary-action"));
+    }
 }

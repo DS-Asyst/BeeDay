@@ -3,7 +3,7 @@
 @using BeeDay.Web.Components.DesignSystem.Text
 
 <article class="institutional-page">
-    <BeeDayHero Surface="Surface" Title="@Title" Subtitle="@Description" Illustration="@Illustration">
+    <BeeDayHero Surface="Surface" Title="@Title" Subtitle="@Description" Illustration="@Illustration" PrimaryAction="@PrimaryAction">
         <BrandContext>
             @* The lockup text color is forced to inherit the hero's own paired foreground in
                BeeDayHero.razor.css — correct for every COR0-COR9 surface by construction, unlike
@@ -25,6 +25,7 @@
     [Parameter] public string? Description { get; set; }
     [Parameter] public BeeDayPaletteToken Surface { get; set; } = BeeDayPaletteToken.Cor0;
     [Parameter] public RenderFragment? Illustration { get; set; }
+    [Parameter] public RenderFragment? PrimaryAction { get; set; }
     [Parameter] public string? BodyClass { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 }

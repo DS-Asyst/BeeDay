@@ -35,6 +35,9 @@ public sealed class InstitutionalPagesTests(PlaywrightAppFixture fixture) : E2ET
     [InlineData("/efficacy", "Efficacy")]
     [InlineData("/contact", "Contact us")]
     [InlineData("/beeday", "beeday")]
+    [InlineData("/beeday-plus", "beeday Plus")]
+    [InlineData("/android", "beeday for Android")]
+    [InlineData("/ios", "beeday for iOS")]
     [InlineData("/faqs", "beeday FAQs")]
     [InlineData("/terms", "Terms of use")]
     public async Task RepresentativeRoutesRenderWithoutHorizontalOverflowOnMobile(string route, string heading)
@@ -58,6 +61,26 @@ public sealed class InstitutionalPagesTests(PlaywrightAppFixture fixture) : E2ET
 
         await Page.Keyboard.PressAsync("Enter");
         await Expect(Page.GetByText("beeday is a personal productivity application")).ToBeVisibleAsync();
+    }
+
+    [Theory]
+    [InlineData("/beeday", "Get started")]
+    [InlineData("/beeday-plus", "Try beeday today")]
+    [InlineData("/android", "Try beeday today")]
+    [InlineData("/ios", "Try beeday today")]
+    public async Task ProductAndAppPagesKeepTheHeroCtaFullyVisibleOnMobileAndItLinksToRegistration(string route, string ctaLabel)
+    {
+        // EPIC 27 Sprint 27.6 acceptance: "Mobile não corta hero/CTA."
+        await Page.SetViewportSizeAsync(390, 844);
+        await GotoAsync(route);
+
+        var cta = Page.GetByRole(AriaRole.Link, new() { Name = ctaLabel, Exact = true });
+        await Expect(cta).ToBeVisibleAsync();
+        await Expect(cta).ToHaveAttributeAsync("href", "/profile/create");
+        var box = await cta.BoundingBoxAsync();
+        Assert.NotNull(box);
+        Assert.InRange(box!.X, 0, 390);
+        Assert.True(box.X + box.Width <= 390 + 1, "CTA extends past the mobile viewport width.");
     }
 
     [Fact]
