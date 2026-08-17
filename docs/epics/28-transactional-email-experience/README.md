@@ -556,3 +556,101 @@ POST-MERGE-PENDING items.
 
 None new. Same residual items as Sprint 28.2 (pt-BR copy not brand-voice-reviewed yet; preheader
 still deferred) carried forward unchanged to Sprint 28.4.
+
+---
+
+## Sprint 28.4 — Identity Transactional Email Experience
+
+**Base local:** `sprint/28.3-email-composition-foundation`.
+**Branch:** `sprint/28.4-identity-email-experience`.
+**Gate:** Gate B (Transactional Email Experience) — satisfied at the implementation/test level; real
+HMG/inbox evidence is `POST-MERGE PENDING` per the shared rules (unchanged from prior Sprints).
+
+### Before implementing (re-read per the Sprint's own instruction)
+
+`docs/design-system/01-foundations.md` §2 (color tokens) and §3 (typography),
+`docs/brand/02-writing-voice-localization.md` (voice/tone/glossary, "E-mail transacional" section),
+`docs/web/07-localization.md`, `docs/ux/` (accessibility-adjacent), and
+`docs/infrastructure/06-transactional-email.md` (own prior sections). Brand values reconfirmed
+directly in `src/BeeDay.Web/wwwroot/css/variables.css` — `#5247F9` primary,
+`#FFFFFF`/`#F7F7F7` surface, `#2F2737`/`#514858`/`#817789` text, `#E5E5E5` border — no divergence
+found between docs and code for these values.
+
+### What changed
+
+**`IdentityEmailComposer`** — full visual/content rewrite of `BuildHtmlTemplate` (table-based,
+`role="presentation"`, inline styles, light Surface/Content tokens replacing the old dark off-token
+palette §13.2 had flagged) and `BuildPlainTextTemplate` (now opens with the `beeday` wordmark and
+includes the fallback-link block). `EmailContentKeys`/`EmailContent` (28.3) extended with
+`Preheader`/`FallbackLinkIntro` fields — same extension seam, no new abstraction.
+
+**`EmailResources.*.resx`** — grew from 9 to 12 keys: added `FallbackLinkIntro` (shared),
+`ConfirmationPreheader`, `ResetPreheader`. Rewrote `ConfirmationFooter`/`ResetFooter` in both cultures
+to a consistent, Security/Identity-toned pattern ("valid for X, single use, ignore if not requested")
+— the Confirmation flow gained the ignore-instruction it was missing; Reset's equivalent sentence was
+reworded for parity, not changed in meaning. No expiry duration changed — both still match
+`IdentityTokenLifetimes` exactly (24h/1h), unchanged code.
+
+**Content per flow** (subject/preheader/heading/greeting/body/CTA/fallback-link/footer/plain-text) —
+all reviewed against the checklist; no item invented (validity durations verified against real code,
+not assumed).
+
+### Visual identity applied
+
+- `beeday` wordmark, lowercase, Brand Primary `#5247F9`, Coiny-first font stack — scoped to exactly
+  one `<span>`, never body/CTA text (Nunito-first stack there).
+- Light Surface (`#FFFFFF`)/Content (`#2F2737`/`#514858`/`#817789`)/Border (`#E5E5E5`) tokens replace
+  the prior dark palette.
+- Table-based (`role="presentation"`) layout for Outlook/Gmail/iCloud compatibility; every style
+  inlined; no remote images anywhere (nothing to block).
+- Hidden preheader (with zero-width-space/combining-grapheme-joiner padding) — culture-aware, distinct
+  from the subject, one per flow.
+- Callback URL shown twice: CTA `href` and a visible, clickable fallback link with its own intro
+  sentence — for clients/policies that strip buttons.
+
+### Tests added
+
+`tests/BeeDay.Infrastructure.Tests/IdentityInfrastructureTests.cs` (11 new tests, on top of 28.1-28.3's
+31): brand wordmark lowercase in both bodies, culture-aware preheader distinct from subject (both
+languages), callback URL present twice in HTML (CTA + fallback), Nunito/Coiny font-stack scoping
+(Coiny appears exactly once), table-based layout + no `<img>` tags, ignore-instruction present in both
+languages for both flows. Existing footer-text assertions updated for the new "valid for X" wording.
+
+### Documentation updated
+
+`docs/infrastructure/06-transactional-email.md` — new §13.6 ("Transactional Email as an Experience
+System surface") declaring the relationship to Brand/Design System/Writing/Localization explicitly,
+per this Sprint's own instruction, without creating a parallel "Email Design System" document.
+
+### Validation Results
+
+```
+dotnet format BeeDay.slnx --verify-no-changes   → clean
+dotnet build BeeDay.slnx                         → 0 errors, 0 warnings
+dotnet test BeeDay.slnx                          → 1386/1386 passed (93 Domain + 85 Application +
+                                                    202 Infrastructure + 841 Web + 165 E2E)
+git status                                       → clean after commit
+```
+
+### Security / Production
+
+No secrets touched. Production untouched. Encoding/escaping unchanged from 28.3 (same
+`WebUtility.HtmlEncode` calls, now applied to two additional fields — preheader and fallback-link
+intro — both proven encoded by the existing safety tests' pattern).
+
+### Runtime validation
+
+Not applicable — no deployment-dependent behavior. `POST-MERGE PENDING`: real-client rendering
+(Gmail/Outlook/iCloud actual inbox appearance) is Sprint 28.9's explicit scope, not claimed here —
+this Sprint's evidence is code-level (deterministic HTML/plain-text assertions), not a rendered
+screenshot in a real client.
+
+### Risks / Known Limitations
+
+- Real email-client rendering (Outlook desktop's Word engine especially) has not been visually
+  verified in an actual client — Sprint 28.9 owns that QA pass explicitly.
+- pt-BR copy is still a functional translation reviewed against the Voice/Tone doc's rules by this
+  Sprint (not by a native-speaker product review outside this session) — flagged, not claimed as a
+  final linguistic sign-off.
+- No preheader/fallback-link A/B or deliverability-impact evidence exists yet — that belongs to
+  Sprint 28.5/28.6.

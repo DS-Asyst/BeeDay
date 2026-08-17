@@ -65,7 +65,7 @@ public sealed class IdentityInfrastructureTests
 
         Assert.Equal("Reset your beeday password", message.Subject);
         Assert.Contains("https://beeday.example/account/reset-password?token=reset-token", message.HtmlBody, StringComparison.Ordinal);
-        Assert.Contains("expires in 1 hour", message.HtmlBody, StringComparison.Ordinal);
+        Assert.Contains("valid for 1 hour", message.HtmlBody, StringComparison.Ordinal);
     }
 
     // Epic 26, Sprint 26.6: #5247F9 is the single officially approved beeday Brand Color
@@ -109,7 +109,7 @@ public sealed class IdentityInfrastructureTests
         Assert.NotNull(message.PlainTextBody);
         Assert.DoesNotContain('<', message.PlainTextBody);
         Assert.Contains("https://beeday.example/account/reset-password?token=reset-token", message.PlainTextBody, StringComparison.Ordinal);
-        Assert.Contains("expires in 1 hour", message.PlainTextBody, StringComparison.Ordinal);
+        Assert.Contains("valid for 1 hour", message.PlainTextBody, StringComparison.Ordinal);
     }
 
     // EPIC 28, Sprint 28.2 (ADR-006): the composer must render each recipient's own persisted
@@ -259,6 +259,107 @@ public sealed class IdentityInfrastructureTests
         Assert.Equal(first.HtmlBody, second.HtmlBody);
         Assert.Equal(first.PlainTextBody, second.PlainTextBody);
         Assert.Equal(first.Subject, second.Subject);
+    }
+
+    // EPIC 28, Sprint 28.4 (Identity Transactional Email Experience): the beeday wordmark must appear
+    // in both bodies, lowercase, matching the brand contract (CLAUDE.md §13) — never "Bee day"/"BeeDay"
+    // as a visible brand element.
+    [Theory]
+    [InlineData("ComposeEmailConfirmation")]
+    [InlineData("ComposePasswordReset")]
+    public void EmailComposer_ShowsTheBrandWordmarkInLowercase(string method)
+    {
+        var composer = CreateComposer();
+
+        var message = method == "ComposeEmailConfirmation"
+            ? composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", UserLanguage.English)
+            : composer.ComposePasswordReset("player@example.com", "Ana", "token", UserLanguage.English);
+
+        Assert.Contains(">beeday<", message.HtmlBody, StringComparison.Ordinal);
+        Assert.DoesNotContain("BeeDay", message.HtmlBody, StringComparison.Ordinal);
+        Assert.Contains("beeday", message.PlainTextBody, StringComparison.Ordinal);
+    }
+
+    // The preheader is the hidden preview text most clients show next to the subject in the inbox
+    // list — it must exist, be culture-aware, and never repeat the subject verbatim (that would waste
+    // the extra context a preheader is for).
+    [Theory]
+    [InlineData(UserLanguage.English, "Confirm your email to finish setting up your beeday account.")]
+    [InlineData(UserLanguage.Portuguese, "Confirme seu e-mail para concluir a configuração da sua conta beeday.")]
+    public void EmailComposer_IncludesACultureAwarePreheaderDistinctFromTheSubject(UserLanguage language, string expectedPreheader)
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", language);
+
+        Assert.Contains(expectedPreheader, WebUtility.HtmlDecode(message.HtmlBody), StringComparison.Ordinal);
+        Assert.NotEqual(message.Subject, expectedPreheader);
+    }
+
+    // The callback URL must appear twice in the HTML body: once as the CTA's href (for clients that
+    // render the button) and once as visible, clickable text (for clients/policies that strip
+    // buttons or render only plain links) — this is the "fallback link" the EPIC package's content
+    // checklist names explicitly.
+    [Fact]
+    public void EmailComposer_ShowsTheCallbackUrlAsVisibleFallbackTextInAdditionToTheButton()
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", UserLanguage.English);
+        var url = "https://beeday.example/account/confirm-email?token=token";
+
+        var occurrences = message.HtmlBody.Split(url).Length - 1;
+        Assert.True(occurrences >= 2, $"Expected the callback URL to appear at least twice (CTA href + visible fallback link), found {occurrences}.");
+    }
+
+    // Product/UI text (headings, body, CTA, footer) must stay on the Nunito stack; Coiny is reserved
+    // for the brand wordmark only (docs/design-system/01-foundations.md §3 — "Coiny não é fonte de
+    // produto"). This is a structural check, not a rendering one: it proves the two font stacks are
+    // assigned to the right elements, not that a browser renders them a particular way.
+    [Fact]
+    public void EmailComposer_UsesNunitoForProductTextAndReservesCoinyForTheBrandWordmark()
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", UserLanguage.English);
+
+        Assert.Contains("'Coiny','Nunito','Segoe UI',sans-serif", message.HtmlBody, StringComparison.Ordinal);
+        Assert.Contains("'Nunito','Segoe UI',Arial,sans-serif", message.HtmlBody, StringComparison.Ordinal);
+        // The Coiny-first stack must be scoped to the wordmark span only, not the whole document body.
+        var coinyOccurrences = message.HtmlBody.Split("'Coiny'").Length - 1;
+        Assert.Equal(1, coinyOccurrences);
+    }
+
+    // Email clients (Outlook desktop especially) require table-based layout for predictable rendering
+    // and cannot depend on remote images being loaded — this proves both structural constraints hold.
+    [Fact]
+    public void EmailComposer_UsesTableBasedLayoutAndNoRemoteImages()
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", UserLanguage.English);
+
+        Assert.Contains("role=\"presentation\"", message.HtmlBody, StringComparison.Ordinal);
+        Assert.DoesNotContain("<img", message.HtmlBody, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // The footer must instruct the recipient to ignore the email if they didn't initiate the request
+    // (CLAUDE.md-adjacent product requirement named explicitly by the EPIC 28 content checklist) —
+    // for both flows, in both languages.
+    [Theory]
+    [InlineData("ComposeEmailConfirmation", UserLanguage.English, "ignore")]
+    [InlineData("ComposeEmailConfirmation", UserLanguage.Portuguese, "ignorar")]
+    [InlineData("ComposePasswordReset", UserLanguage.English, "ignore")]
+    [InlineData("ComposePasswordReset", UserLanguage.Portuguese, "ignorar")]
+    public void EmailComposer_InstructsTheRecipientToIgnoreAnUnrequestedEmail(string method, UserLanguage language, string expectedWord)
+    {
+        var composer = CreateComposer();
+
+        var message = method == "ComposeEmailConfirmation"
+            ? composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", language)
+            : composer.ComposePasswordReset("player@example.com", "Ana", "token", language);
+
+        Assert.Contains(expectedWord, message.PlainTextBody, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

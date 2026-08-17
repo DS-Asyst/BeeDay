@@ -715,6 +715,54 @@ is not required for the culture-transport foundation; Sprint 28.3/28.4 can add i
 another contract break if visual work needs it. `Reply-To` was evaluated and left unchanged —
 deliverability/alignment work (Sprint 28.5/28.6), not a localization concern.
 
+### 13.6 Transactional Email as an Experience System surface (EPIC 28, Sprint 28.4)
+
+Confirmation and reset emails now visibly express the same beeday Experience System the rest of the
+product does, adapted to email clients' real constraints — not a parallel identity:
+
+- **Brand:** the `beeday` wordmark (lowercase, `#5247F9`) opens every email, matching the brand
+  contract (`CLAUDE.md` §13,
+  [`docs/epics/25-design-system-brand-evolution/README.md`](../epics/25-design-system-brand-evolution/README.md)).
+- **Typography:** Product/UI text (heading, body, CTA, footer) uses the same font-family stack as the
+  product's own `--beeday-font-body` role (`"Nunito","Segoe UI",Arial,sans-serif`); the wordmark alone
+  uses the `--beeday-font-display` stack (`"Coiny","Nunito","Segoe UI",sans-serif`) — Coiny never
+  reaches body/CTA text, matching
+  [`01-foundations.md`](../design-system/01-foundations.md) §3's "Coiny não é fonte de produto".
+  Both stacks list system fallbacks first-class, so a blocked/unavailable remote font degrades to a
+  legible sans-serif, never breaks layout or hierarchy — fonts are progressive enhancement, not a
+  functional requirement, per this Epic's own constraint.
+- **Color/surface:** the template now uses the product's actual light Surface/Content tokens
+  (`#FFFFFF` surface, `#2F2737`/`#514858`/`#817789` text, `#E5E5E5` border,
+  [`01-foundations.md`](../design-system/01-foundations.md) §2.4) instead of the dark, off-token
+  palette §13.2 above left as a known gap — literal hex values remain unavoidable (email HTML cannot
+  consume CSS custom properties), but each one now tracks its source token, listed inline in
+  `IdentityEmailComposer.cs`.
+- **Writing:** copy follows the Security/Identity tone row in
+  [`docs/brand/02-writing-voice-localization.md`](../brand/02-writing-voice-localization.md)
+  ("direto e protetivo... condição, validade, próximo passo") — both flows now state validity, single
+  use, and an explicit ignore-if-not-requested instruction (the Confirmation flow gained this
+  instruction this Sprint; Reset already had an equivalent sentence, reworded for parity). No expiry
+  claim was invented — both durations (24h confirmation, 1h reset) match
+  `IdentityTokenLifetimes` (`src/BeeDay.Application/Features/Identity/Handlers/IdentityHandlers.cs`)
+  exactly, unchanged by this Sprint.
+- **Localization:** the `EmailResources` catalog (ADR-006, Sprint 28.2) grew from 9 to 12 keys this
+  Sprint — added `FallbackLinkIntro` (shared) and `ConfirmationPreheader`/`ResetPreheader` (one per
+  flow) — still narrow, still Infrastructure-owned, no architecture change.
+- **Client compatibility (foundation for Sprint 28.9's full QA pass):** the HTML body is now
+  table-based (`role="presentation"`) rather than `<div>`-based flexbox, the layout Outlook's desktop
+  (Word-engine) renderer needs for predictable results; every style is inlined; no remote image is
+  used anywhere in the template (nothing to block); the callback URL appears twice — once as the CTA's
+  `href`, once as visible, clickable fallback text — for clients/policies that strip or don't render
+  buttons; a hidden preheader (with zero-width-space/combining-grapheme-joiner padding, the standard
+  technique preventing body text from bleeding into the inbox preview) gives every flow its own
+  preview text, distinct from the subject.
+
+This is still the same single owner named in §13.1 (`IdentityEmailComposer`, two shared builders) —
+no second Design System, no template engine, no marketing/campaign framework. Full before/after
+example HTML for both flows: see the new tests in
+`tests/BeeDay.Infrastructure.Tests/IdentityInfrastructureTests.cs` (EPIC 28, Sprint 28.4 section),
+which assert on the wordmark, preheader, fallback link, and font-stack scoping directly.
+
 ## 14. Observability, resilience & abuse controls (Epic 26, Sprint 26.7)
 
 ### 14.1 Observable state model
