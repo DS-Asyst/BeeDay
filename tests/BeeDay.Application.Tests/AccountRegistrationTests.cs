@@ -5,6 +5,7 @@ using BeeDay.Application.Features.Users.Handlers;
 using BeeDay.Application.Features.Users.Requests;
 using BeeDay.Domain.Entities;
 using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
 
 namespace BeeDay.Application.Tests;
 
@@ -19,7 +20,8 @@ public sealed class AccountRegistrationTests
             repository,
             new FakePasswordService(),
             new FakeConfirmationIssuer(),
-            emailSender);
+            emailSender,
+            new FakeIdentityRequestThrottle());
 
         var userId = await handler.Handle(
             new CreateAccountCommand(new CreateAccountRequest(
@@ -53,7 +55,8 @@ public sealed class AccountRegistrationTests
             repository,
             new FakePasswordService(),
             new FakeConfirmationIssuer(),
-            emailSender);
+            emailSender,
+            new FakeIdentityRequestThrottle());
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => handler.Handle(
             new CreateAccountCommand(new CreateAccountRequest(
@@ -68,6 +71,35 @@ public sealed class AccountRegistrationTests
         Assert.Single(repository.UserTokensData);
     }
 
+    // Epic 26, Sprint 26.7: reuses the same per-email throttle already protecting
+    // resend-confirmation/forgot-password — stops a rapid double-submit of the same address from
+    // issuing two confirmation emails/creating two rows. Does not (and cannot) limit registration
+    // volume across distinct addresses; see docs/infrastructure/06-transactional-email.md §14.
+    [Fact]
+    public async Task CreateAccount_WhenThrottled_ThrowsAndDoesNotCreateUserOrSendEmail()
+    {
+        var repository = new FakeUnitOfWork();
+        var emailSender = new FakeEmailSender();
+        var handler = new CreateAccountCommandHandler(
+            repository,
+            new FakePasswordService(),
+            new FakeConfirmationIssuer(),
+            emailSender,
+            new FakeIdentityRequestThrottle { AllowNextAcquire = false });
+
+        var exception = await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
+            new CreateAccountCommand(new CreateAccountRequest(
+                "Tiago",
+                "tiago@example.com",
+                "Password123",
+                "tiago")),
+            TestContext.Current.CancellationToken));
+
+        Assert.Contains("wait", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(repository.UsersData);
+        Assert.Empty(emailSender.Messages);
+    }
+
     [Fact]
     public async Task CreateUser_CreatesUserAndSendsConfirmation()
     {
@@ -77,7 +109,8 @@ public sealed class AccountRegistrationTests
             repository,
             new FakePasswordService(),
             new FakeConfirmationIssuer(),
-            emailSender);
+            emailSender,
+            new FakeIdentityRequestThrottle());
 
         var userId = await handler.Handle(
             new CreateUserCommand(new CreateUserRequest("Tiago", "tiago@example.com", "Password123")),
@@ -98,7 +131,8 @@ public sealed class AccountRegistrationTests
             repository,
             new FakePasswordService(),
             new FakeConfirmationIssuer(),
-            emailSender);
+            emailSender,
+            new FakeIdentityRequestThrottle());
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => handler.Handle(
             new CreateUserCommand(new CreateUserRequest("Tiago", "tiago@example.com", "Password123")),
@@ -106,6 +140,27 @@ public sealed class AccountRegistrationTests
 
         Assert.Single(repository.UsersData);
         Assert.Single(repository.UserTokensData);
+    }
+
+    [Fact]
+    public async Task CreateUser_WhenThrottled_ThrowsAndDoesNotCreateUserOrSendEmail()
+    {
+        var repository = new FakeUnitOfWork();
+        var emailSender = new FakeEmailSender();
+        var handler = new CreateUserCommandHandler(
+            repository,
+            new FakePasswordService(),
+            new FakeConfirmationIssuer(),
+            emailSender,
+            new FakeIdentityRequestThrottle { AllowNextAcquire = false });
+
+        var exception = await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
+            new CreateUserCommand(new CreateUserRequest("Tiago", "tiago@example.com", "Password123")),
+            TestContext.Current.CancellationToken));
+
+        Assert.Contains("wait", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(repository.UsersData);
+        Assert.Empty(emailSender.Messages);
     }
 
     private sealed class FakeConfirmationIssuer : IEmailConfirmationIssuer
@@ -141,4 +196,14 @@ public sealed class AccountRegistrationTests
         public bool NeedsRehash(string passwordHash) => false;
     }
 
+    private sealed class FakeIdentityRequestThrottle : IIdentityRequestThrottle
+    {
+        public bool AllowNextAcquire { get; set; } = true;
+
+        public bool TryAcquire(string operation, string subject, TimeSpan cooldown, out TimeSpan retryAfter)
+        {
+            retryAfter = AllowNextAcquire ? TimeSpan.Zero : TimeSpan.FromSeconds(42);
+            return AllowNextAcquire;
+        }
+    }
 }

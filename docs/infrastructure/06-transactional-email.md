@@ -13,10 +13,16 @@ and `git log`/`git show` on the files above. Cross-checked against
 [`docs/deployment/02-runtime-configuration.md`](../deployment/02-runtime-configuration.md)
 (already current as of Sprint 18.4).
 
-**Last verified:** 2026-08-16 (Epic 26, Sprint 26.6 — §13 added: transactional email template
-ownership/conventions, the brand-color correction (`#7A4FCB` → `#5247F9`), the new plain-text
-alternative, and the documented decision not to localize email content (architectural boundary,
-`docs/web/07-localization.md` §9). Sprint 26.5 added §12: full Identity email flow and
+**Last verified:** 2026-08-16 (Epic 26, Sprint 26.7 — §14 added: the observable state model
+(requested/blocked/attempted/accepted/failed), 3-way failure classification in `ResendEmailSender`
+with no automatic retries, recipient-address masking in `DevelopmentEmailSender`'s log lines
+(`EmailAddressLogMasking`, new), and a per-email throttle now protecting `CreateAccountCommandHandler`/
+`CreateUserCommandHandler` — reusing `IIdentityRequestThrottle`, with the mass-registration
+volume/distinct-address gap explicitly documented as not addressed. Sprint 26.6 added §13:
+transactional email template ownership/conventions, the brand-color correction (`#7A4FCB` →
+`#5247F9`), the new plain-text alternative, and the documented decision not to localize email content
+(architectural boundary, `docs/web/07-localization.md` §9). Sprint 26.5 added §12: full Identity
+email flow and
 `PublicBaseUrl` link-integrity audit, closing test gaps for the production origin guard and the
 persistence-succeeds-delivery-fails boundary. Sprint 26.4 added §10: the
 centralized, fail-closed HMG recipient guard, `HmgRecipientGuardedEmailSender`. Sprint 26.3 formally
@@ -633,7 +639,46 @@ Infrastructure senders accept a fully-rendered `EmailMessage`. Either requires t
 explicit approval per `CLAUDE.md` §3.5 ("Do not create... new architectural patterns... unless the
 user explicitly approves").
 
-## 14. Related documentation
+## 14. Observability, resilience & abuse controls (Epic 26, Sprint 26.7)
+
+### 14.1 Observable state model
+
+Terminology for reading logs/troubleshooting, mapped to where each state is actually produced:
+
+| State | Where | Notes |
+|---|---|---|
+| Send requested | (not separately logged) | The MediatR handler calling `IEmailSender.SendAsync` is the request; no dedicated log line exists at that call site — the next state below is the first log evidence. |
+| Safety blocked | `HmgRecipientGuardedEmailSender` (§10) | `LogWarning`, no recipient logged. Only reachable when Resend is selected and the guard is enabled. |
+| Provider request attempted | `ResendEmailSender.SendAsync`, before the HTTP call | `LogInformation`, includes `Subject` (safe — distinguishes confirmation vs. reset, never the recipient or body). |
+| Provider accepted | `ResendEmailSender.SendAsync`, on a 2xx response | `LogInformation`, includes Resend's own response `id` as `ProviderMessageId` when parseable (`"(unavailable)"` otherwise) — a safe, non-secret correlation identifier. **This is provider acceptance, not mailbox delivery** — no code in this repository observes or claims delivery; do not read this log line as proof the recipient received anything. |
+| Provider request failed | `ResendEmailSender.SendAsync`, three distinct causes | See §14.2 — each classified and logged distinctly. |
+| Development capture (not a "provider" state) | `DevelopmentEmailSender.SendAsync` | `LogInformation`, recipient masked (§14.3) — this path never talks to Resend at all; it is not part of the acceptance/failure state model above. |
+
+`send requested` has no dedicated log line because the calling MediatR handlers (`CreateAccountCommandHandler`, `CreateUserCommandHandler`, `ResendEmailConfirmationCommandHandler`, `RequestPasswordResetCommandHandler`) have no `ILogger` today and this sprint did not add one — the state is implied by "attempted" (or "blocked") appearing at all.
+
+### 14.2 Failure classification (no automatic retries)
+
+`ResendEmailSender` distinguishes three failure causes, each logged at `Error` before rethrowing — never swallowed, never retried automatically (the master instructions explicitly prohibit adding retries that could duplicate a side effect unless proven safe; Resend's `Idempotency-Key` header, sent on every request, would make a retry *technically* safe, but no proven operational requirement justifies adding one in this sprint, so none was added):
+
+1. **Transient network/connection error** — `httpClient.SendAsync` itself throws `HttpRequestException` (DNS failure, connection refused, TLS failure, ...); no HTTP response was ever received.
+2. **Timeout** — `httpClient.SendAsync` throws `OperationCanceledException`/`TaskCanceledException` whose token is **not** the caller's own `cancellationToken` — HttpClient's own configured `Timeout` (30s, set at DI registration) fired. Distinguished from caller-requested cancellation, which propagates silently (unlogged, since it is expected/intentional, e.g. a shutdown or a genuinely cancelled request) rather than being reported as a failure.
+3. **Provider rejection** — a real HTTP response with a non-2xx status code; logged with the status code.
+
+Configuration errors (missing API key/`FromAddress`) are caught earlier, at startup, by `ResendOptions`'s `ValidateOnStart()` (`docs/deployment/02-runtime-configuration.md` §6) — they never reach `ResendEmailSender.SendAsync` at all, so they are not part of this runtime classification.
+
+### 14.3 Logging: what is safe, what is masked, what never appears
+
+- **Never logged anywhere in the email path** (confirmed by re-reading every log call site in `ResendEmailSender`, `DevelopmentEmailSender`, `HmgRecipientGuardedEmailSender`, `IdentityEmailComposer`): the Resend API key, password hashes, confirmation/reset tokens, or a full token-bearing callback URL.
+- **`ResendEmailSender`/`HmgRecipientGuardedEmailSender`:** never log the recipient address, in any state, in any branch — the strictest policy in the codebase, appropriate for the path that can reach real external delivery.
+- **`DevelopmentEmailSender`** (local-only, file-capture path — see §6): its two log lines named the full recipient address before this sprint. Now masked via `EmailAddressLogMasking.Mask` (new, `Identity/EmailAddressLogMasking.cs`) — at most the first 1–2 local-part characters plus the domain (`ti***@beeday.example`), never the full address. The captured `.json`/`.html` files on disk still contain the full address (required for a developer to identify which captured email is which) — only the *log line* is masked, consistent with the sprint's "never log unnecessary plaintext recipient PII" requirement, which is about logs specifically. This is the one and only masking rule introduced; it is not a general PII framework — no equivalent existed before, and none was needed anywhere else, since the other two senders already never log the recipient at all.
+
+### 14.4 Abuse controls: registration now throttled, mass-registration volume is not
+
+**Audited, reused, extended by exactly one call site pattern already established:** `IIdentityRequestThrottle`/`MemoryIdentityRequestThrottle` already protected `ResendEmailConfirmationCommandHandler` and `RequestPasswordResetCommandHandler` (per-submitted-email, 60s cooldown; §12.3). `CreateAccountCommandHandler` and `CreateUserCommandHandler` had no throttle check at all before this sprint — closed by adding the identical pattern (`throttle.TryAcquire("account-creation", email, 60s, ...)`, throws the same "please wait N seconds" shape `DomainErrorLocalizer` already translates generically) to both. No new abuse-control mechanism was built — this is 100% reuse of existing infrastructure, per the master instructions' explicit preference.
+
+**What this does and does not protect against:** the per-email throttle stops a rapid double-submit of the *same* address from creating two accounts or issuing two confirmation emails (a real, if narrow, gap — see §12.3's transactional-boundary note for why two concurrent requests for the same not-yet-existing email could otherwise both reach the email-send step). It does **not**, and structurally cannot, limit registration *volume* across many *distinct* email addresses — an attacker registering many different fake or victim addresses in rapid succession is throttled per-address, so each new address resets the cooldown. That is a different abuse vector (mass email-bombing via registration, or resource exhaustion), requiring a volume/IP-based control — the same category of protection `LoginRateLimiterOptions`/`LoginRateLimiterFactory` already provides for `/auth/login` specifically. Extending an equivalent control to registration was evaluated and **not implemented in this sprint**: it would be new abuse-control infrastructure (not reuse of an existing, provably-applicable mechanism), which the master instructions explicitly restrict ("Do not introduce... an alternate rate limiter... unless the existing repository audit demonstrates that it is necessary and consistent with current architecture" — necessity is plausible here, but the decision belongs to whoever owns Identity/security scope broadly, not unilaterally to an email-focused sprint). Recorded here as an explicit, open finding rather than silently left unaddressed.
+
+## 15. Related documentation
 
 - [`04-services.md`](04-services.md) — existing Infrastructure services inventory, including the
   `ResendEmailSender`/`DevelopmentEmailSender` summary this document expands on with the HMG root

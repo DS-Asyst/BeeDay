@@ -20,7 +20,7 @@ public sealed class DevelopmentEmailSender(
 
         if (!_options.Enabled)
         {
-            logger.LogInformation("Development email capture is disabled. Suppressed email to {Recipient}.", message.Recipient);
+            logger.LogInformation("Development email capture is disabled. Suppressed email to {Recipient}.", EmailAddressLogMasking.Mask(message.Recipient));
             return;
         }
 
@@ -65,7 +65,7 @@ public sealed class DevelopmentEmailSender(
 
         logger.LogInformation(
             "Development email captured for {Recipient}. Preview: {PreviewPath}",
-            message.Recipient,
+            EmailAddressLogMasking.Mask(message.Recipient),
             htmlPath);
     }
 }

@@ -5,11 +5,12 @@
 `HealthChecks/SqlServerHealthCheck.cs`, `Background/*.cs`, `Configuration/*.cs`, e
 `InfrastructureServiceCollectionExtensions.cs` (para lifetime/registro).
 
-**Última verificação:** 2026-08-16 (Epic 26, Sprint 26.6) — seção Email atualizada com a alternativa
-em texto plano e a correção da cor de marca; Sprint 26.4 atualizou a mesma seção com
-`HmgRecipientGuardedEmailSender`; Sprint 26.2 atualizou a mesma seção com `EmailProviderSelector`;
-verificação anterior em 2026-08-09 (Sprint 18.6) — `Caching/MemoryApplicationCache.cs` removido (ver
-achado abaixo).
+**Última verificação:** 2026-08-16 (Epic 26, Sprint 26.7) — seção Email atualizada com observabilidade
+(logs de estado, classificação de falha, mascaramento de destinatário) e o throttle de registro;
+Sprint 26.6 atualizou a mesma seção com a alternativa em texto plano e a correção da cor de marca;
+Sprint 26.4 atualizou a mesma seção com `HmgRecipientGuardedEmailSender`; Sprint 26.2 atualizou a
+mesma seção com `EmailProviderSelector`; verificação anterior em 2026-08-09 (Sprint 18.6) —
+`Caching/MemoryApplicationCache.cs` removido (ver achado abaixo).
 
 ## Event Journal — `JsonEventJournal`
 
@@ -70,6 +71,18 @@ descartada por engano. Sem lock global, sem `BackgroundService`/`Timer` novo, se
 
 A escolha entre os dois acontece inteiramente em tempo de DI (`InfrastructureServiceCollectionExtensions`),
 nunca em runtime por requisição.
+
+**EPIC 26, Sprint 26.7 — observabilidade e classificação de falha:** `ResendEmailSender` agora
+registra "attempted" (antes da chamada HTTP) e "accepted" (com o `id` da resposta do Resend, quando
+disponível) — sucesso era completamente silencioso antes. Falhas são classificadas em 3 causas
+distintas antes de propagar sem retry automático: erro de rede/conexão (`HttpRequestException` da
+própria chamada), timeout do `HttpClient` (distinto de cancelamento pelo chamador, que propaga sem
+log) e rejeição do provider (resposta HTTP não-2xx). `DevelopmentEmailSender` passou a mascarar o
+destinatário em seus 2 logs (`EmailAddressLogMasking`, novo) — o arquivo `.json`/`.html` capturado em
+disco continua com o endereço completo (necessário para diagnóstico local); só a linha de log é
+mascarada. Ver [`06-transactional-email.md`](06-transactional-email.md) §14 para o modelo de estados
+completo e a auditoria de controles de abuso (throttle agora também em `CreateAccountCommandHandler`/
+`CreateUserCommandHandler`, reaproveitando `IIdentityRequestThrottle` sem criar mecanismo novo).
 
 **EPIC 26, Sprint 26.6 — alternativa em texto plano:** `EmailMessage` ganhou um 4º membro posicional
 opcional, `PlainTextBody` (padrão `null`, não quebra nenhum call site de 3 argumentos existente).

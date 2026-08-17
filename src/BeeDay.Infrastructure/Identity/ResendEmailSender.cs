@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 using BeeDay.Application.Common.Identity;
 using BeeDay.Infrastructure.Configuration;
 using Microsoft.Extensions.Logging;
@@ -37,15 +38,67 @@ public sealed class ResendEmailSender(
             text = message.PlainTextBody
         });
 
-        using var response = await httpClient.SendAsync(request, cancellationToken);
-        if (response.IsSuccessStatusCode)
+        // "Subject" is the only per-message identifier safe to log — it distinguishes confirmation
+        // from password-reset without ever touching the recipient address or token-bearing body.
+        logger.LogInformation("Resend request attempted. Subject={Subject}", message.Subject);
+
+        HttpResponseMessage response;
+        try
         {
-            return;
+            response = await httpClient.SendAsync(request, cancellationToken);
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            // HttpClient reports its own configured Timeout as a TaskCanceledException carrying an
+            // internal token, not the caller's — distinguishing "we gave up waiting" (a transient,
+            // classifiable failure) from genuine caller-requested cancellation (the `when` clause
+            // above lets that case propagate silently, unlogged, since it is expected/intentional).
+            logger.LogError("Resend request timed out. Subject={Subject}", message.Subject);
+            throw;
+        }
+        catch (HttpRequestException exception)
+        {
+            // Thrown by SendAsync itself (DNS/connection failure, TLS failure, ...) — no HTTP response
+            // was ever received, so this is a transient network error, not a provider rejection.
+            logger.LogError(exception, "Resend request failed before a response was received. Subject={Subject}", message.Subject);
+            throw;
         }
 
-        logger.LogError(
-            "Resend rejected an identity email. StatusCode={StatusCode}",
-            (int)response.StatusCode);
-        throw new HttpRequestException($"Resend email delivery failed with HTTP {(int)response.StatusCode}.", null, response.StatusCode);
+        using (response)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                var providerMessageId = await TryReadProviderMessageIdAsync(response, cancellationToken);
+                logger.LogInformation(
+                    "Resend accepted the request. ProviderMessageId={ProviderMessageId}",
+                    providerMessageId ?? "(unavailable)");
+                return;
+            }
+
+            logger.LogError(
+                "Resend rejected the request. StatusCode={StatusCode}",
+                (int)response.StatusCode);
+            throw new HttpRequestException($"Resend email delivery failed with HTTP {(int)response.StatusCode}.", null, response.StatusCode);
+        }
+    }
+
+    // Resend's success response is {"id": "..."} — a safe, non-secret provider message identifier,
+    // useful for correlating a captured "accepted" log line with the provider's own delivery records.
+    // Never throws: an unparseable/unexpected response body must not turn a successful send into a
+    // reported failure.
+    private static async Task<string?> TryReadProviderMessageIdAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+            return document.RootElement.TryGetProperty("id", out var idElement)
+                ? idElement.GetString()
+                : null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
     }
 }
