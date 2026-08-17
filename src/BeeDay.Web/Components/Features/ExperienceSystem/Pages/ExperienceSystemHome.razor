@@ -1,11 +1,15 @@
 @page "/experience-system"
+@page "/brand-guidelines"
 @attribute [AllowAnonymous]
 @layout BeeDay.Web.Components.Layout.PublicLayout
 @inject IStringLocalizer<ExperienceSystemResources> Localizer
 
+@* EPIC 27 Sprint 27.8: "Brand guidelines" is the public name/URL for this page
+   (03_DESIGN_DECISIONS.md §9/§11); "/experience-system" remains a working route to the same
+   content rather than being removed, since it predates this Epic and nothing requires breaking it. *@
 <PageTitle>@Localizer["RootPageTitle"]</PageTitle>
 
-<ExperienceSystemPage Eyebrow="@Localizer["RootEyebrow"]" Title="@Localizer["RootTitle"]" Description="@Localizer["RootIntro"]">
+<ExperienceSystemPage Eyebrow="@Localizer["RootEyebrow"]" Title="@Localizer["RootTitle"]" Description="@Localizer["RootIntro"]" ShowBrandGuidelinesHero="true">
     <ExperienceSystemTopicGrid AriaLabel="@Localizer["RootGridAriaLabel"]" Items="PillarLinks" />
 
     <section class="experience-system-section" aria-labelledby="root-closing-heading">

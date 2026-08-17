@@ -27,14 +27,6 @@
   <data name="EfficacyPendingEvidenceTitle" xml:space="preserve"><value>What we'll publish here</value></data>
   <data name="EfficacyPendingEvidenceBody" xml:space="preserve"><value>No studies, surveys, or usage metrics about beeday's effectiveness are published yet. This section is reserved for that evidence once it exists — not for claims we can't back up.</value></data>
 
-  <data name="BrandGuidelinesPageContext" xml:space="preserve"><value>Brand guidelines</value></data>
-  <data name="BrandGuidelinesPageTitle" xml:space="preserve"><value>Brand guidelines — beeday</value></data>
-  <data name="BrandGuidelinesTitle" xml:space="preserve"><value>Brand guidelines</value></data>
-  <data name="BrandGuidelinesIntro" xml:space="preserve"><value>The beeday Experience System — our Brand, UI Design System, and UX System, documented in one place.</value></data>
-  <data name="BrandGuidelinesBodyTitle" xml:space="preserve"><value>This page is being rebuilt</value></data>
-  <data name="BrandGuidelinesBody" xml:space="preserve"><value>Brand guidelines is becoming the public home for the full beeday Experience System, with its own navigation. Until that lands, the complete documentation is already available.</value></data>
-  <data name="BrandGuidelinesLinkLabel" xml:space="preserve"><value>Open the beeday Experience System</value></data>
-
   <data name="ContactPageContext" xml:space="preserve"><value>Contact us</value></data>
   <data name="ContactPageTitle" xml:space="preserve"><value>Contact us — beeday</value></data>
   <data name="ContactTitle" xml:space="preserve"><value>Contact us</value></data>
