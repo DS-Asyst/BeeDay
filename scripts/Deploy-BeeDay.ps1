@@ -120,11 +120,22 @@ function ConvertTo-BeeDayRecipientList {
         Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 }
 
+# Hotfix 26.9.2 (GitHub Actions run 31993611105): named $script:hmgRecipientList, NOT
+# $script:hmgAllowedRecipients - PowerShell variable names are case-insensitive, and
+# "hmgAllowedRecipients" collides with the -HmgAllowedRecipients parameter above (same name, only
+# the leading letter's case differs). When this script runs as the top-level invocation - exactly
+# how deploy-hmg.yml's wrapper invokes it via `&` - a script parameter and a same-named (modulo
+# case) $script:-scoped variable do not reliably behave as one stable, array-typed slot: proven
+# empirically (see PR description) that reading $script:hmgAllowedRecipients back after this exact
+# assignment returned a raw System.String, not the array actually produced by the right-hand side,
+# which is what made .Count throw two sprints in a row despite Hotfix 26.9.1's array-shape fix
+# being correct in isolation. Renamed here to a name that cannot collide with any parameter.
+#
 # Parsed once here (not inline in Set-BeeDayEnvironmentVariables) so the same list backs both the
 # redaction list immediately below and the App Pool variables later — real recipient addresses are
 # PII, not merely operational data, so they are redacted from $deployLogsPath exactly like the
 # connection strings and the Resend API key are.
-$script:hmgAllowedRecipients = @(ConvertTo-BeeDayRecipientList -RecipientsRaw $HmgAllowedRecipients)
+$script:hmgRecipientList = @(ConvertTo-BeeDayRecipientList -RecipientsRaw $HmgAllowedRecipients)
 
 # Exception messages can echo back raw parameter values verbatim (e.g. a malformed connection
 # string thrown by SqlConnectionStringBuilder, or a driver error that embeds its input). GitHub
@@ -133,7 +144,7 @@ $script:hmgAllowedRecipients = @(ConvertTo-BeeDayRecipientList -RecipientsRaw $H
 # any log pipeline GitHub controls. Every message that reaches Write-DeployMessage or Write-Error
 # is scrubbed of these literal values first, so the real error text is preserved but a credential
 # can never end up persisted on disk in the clear.
-$script:secretValuesToRedact = @($MigrationConnectionString, $AppConnectionString, $ResendApiKey) + $script:hmgAllowedRecipients |
+$script:secretValuesToRedact = @($MigrationConnectionString, $AppConnectionString, $ResendApiKey) + $script:hmgRecipientList |
     Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
 
 function Protect-DeploySecret {
@@ -768,8 +779,18 @@ function Set-BeeDayEnvironmentVariables {
     # always safe: Homologation today (Resend.Enabled=false) never even reaches that code path.
     # Left empty, the guard's default (Enabled=true, no recipients) fails closed at startup rather
     # than the App Pool silently keeping a stale allowlist from a previous deploy.
-    for ($i = 0; $i -lt $script:hmgAllowedRecipients.Count; $i++) {
-        $variables["BeeDay__Email__HmgRecipientGuard__AllowedRecipients__$i"] = $script:hmgAllowedRecipients[$i]
+    #
+    # Hotfix 26.9.2: foreach instead of a .Count-indexed for loop, on top of the rename above -
+    # not because foreach alone would have fixed the collision (it would not: iterating a bare
+    # string still iterates its characters, silently, which is worse than the crash this replaces),
+    # but because a .Count/index dependency on a $script:-scoped collection has now bitten this
+    # exact variable twice. The @() here is defensive, not speculative: if $script:hmgRecipientList
+    # were ever a bare string again (e.g. a future collision), foreach over @($string) enumerates
+    # it as the one element it is, rather than looping per character.
+    $i = 0
+    foreach ($recipient in @($script:hmgRecipientList)) {
+        $variables["BeeDay__Email__HmgRecipientGuard__AllowedRecipients__$i"] = $recipient
+        $i++
     }
 
     if (Test-BeeDayUsesPrivilegedIisControl) {
