@@ -52,6 +52,25 @@ public sealed class InstitutionalPageShellTests
     }
 
     [Fact]
+    public void RendersHeroAndBodyAsSiblingsWithoutAWrappingArticle()
+    {
+        // Sprint 29.2: nesting BeeDayHero inside a single wrapping <article class="institutional-page">
+        // let polish.css's shared reading-width rule (which matches only direct children of
+        // .beeday-main) cap the hero's own full-bleed background to 72rem, rendering it as a small
+        // centered card instead of a full-width colored band. The hero and body are now separate root
+        // elements — mirroring ExperienceSystemPage's existing sibling structure.
+        using var context = new BunitContext();
+        var cut = context.Render<InstitutionalPageShell>(parameters => parameters
+            .Add(component => component.PageContext, "Mission")
+            .Add(component => component.Title, "Our mission")
+            .AddChildContent("<p>Body content.</p>"));
+
+        Assert.Empty(cut.FindAll("article.institutional-page"));
+        Assert.NotNull(cut.Find("header.beeday-hero"));
+        Assert.NotNull(cut.Find("article.institutional-page__body"));
+    }
+
+    [Fact]
     public void RendersPrimaryActionInTheHeroWhenSupplied()
     {
         using var context = new BunitContext();

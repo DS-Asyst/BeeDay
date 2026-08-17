@@ -4,7 +4,11 @@
 `src/BeeDay.Web/Components/**/*.razor` e leitura das 3 primeiras linhas de cada arquivo resultante
 (`@page`, `@attribute`, `@layout`/`@rendermode`), mais `Components/Routes.razor` e `Components/App.razor`.
 
-**Última verificação:** 2026-08-16 (Sprint 25.17 — beeday Experience System) — adicionadas as 21
+**Última verificação:** 2026-08-17 (Sprint 29.2) — adicionado o §9 sobre as 11 páginas
+institucionais (EPIC 27) e a correção de layout full-bleed dessa Sprint; a tabela de rotas em §3
+**não foi reauditada** nesta passagem e continua sem essas 11 rotas — gap pré-existente desde a
+EPIC 27, fora do escopo desta Sprint, reportado e não corrigido silenciosamente.
+Verificação anterior: 2026-08-16 (Sprint 25.17 — beeday Experience System) — adicionadas as 21
 rotas públicas do `beeday Experience System` (`/experience-system/*`), todas `PublicLayout` e
 `AllowAnonymous`; corrigida uma lacuna encontrada nesta Sprint: `/brand/typography`
 (`Features/Brand/Pages/TypographyGuidelines.razor`, introduzida na Sprint 25.4) nunca tinha sido
@@ -171,7 +175,43 @@ continua ativa em `LoginDestinationResolver.Resolve` (pós-login, `Program.cs`) 
 "Continue to BeeDay" tanto de `PublicHeader` quanto da própria `Home.razor` — reutilizando a regra
 existente em vez de duplicá-la uma quarta vez.
 
-## 9. O `beeday Experience System` (Sprint 25.17)
+## 9. As 11 páginas institucionais (EPIC 27, layout corrigido na Sprint 29.2)
+
+`/mission`, `/efficacy`, `/contact`, `/beeday`, `/beeday-plus`, `/android`, `/ios`, `/faqs`,
+`/community-guidelines`, `/terms`, `/privacy` — `Components/Features/Institutional/Pages/`, sob
+`PublicLayout`. Cada rota usa um de quatro templates compartilhados
+(`Components/Institutional/Components/`) — `EditorialPageTemplate` (Mission, Efficacy, Contact),
+`ProductPageTemplate` (beeday, beeday Plus, Android, iOS), `HelpPageTemplate` (FAQs) ou
+`LegalDocumentPageTemplate` (Community guidelines, Terms, Privacy) — todos passando apenas
+`PageContext`/`Title`/`Description` (mais `PrimaryAction` no Product) para o shell real,
+`InstitutionalPageShell`, que renderiza um `BeeDayHero` colorido seguido do corpo da página. Nenhuma
+página institucional define CSS próprio; o vocabulário compartilhado vive em `wwwroot/css/
+institutional.css`.
+
+`Surface` (a cor sólida do `BeeDayHero`) tem um default por template — `Cor0` para
+Editorial/Help/Product, `Cor8` para Legal — e nenhuma das 11 páginas o sobrescreve; ver
+[`brand/03-color-palette.md`](../brand/03-color-palette.md) para a paleta completa e a regra que
+restringe page headers a `Cor0`/`Cor8` (os dois únicos tokens cujo contraste com texto branco passa
+WCAG AA).
+
+**Sprint 29.2 — full-bleed e alinhamento de eixo:** até então, `InstitutionalPageShell` envolvia o
+`BeeDayHero` e o corpo da página num único `<article class="institutional-page">`. A regra
+compartilhada de reading-width de `polish.css` (`.beeday-main > :where(section, article, .beeday-page,
+.page-content)`) casa apenas com filhos diretos de `.beeday-main` — como esse `<article>` era um filho
+direto, ele (hero incluído) ficava limitado a 72rem, fazendo o header colorido renderizar como um
+pequeno card centralizado em vez de uma faixa full-bleed. O shell agora renderiza o hero e o corpo
+como irmãos, filhos diretos de `.beeday-main` — o mesmo padrão que `ExperienceSystemPage` já usava
+para seu próprio `BeeDayHero` (§10). Isso também corrigiu um desalinhamento de eixo: os quatro
+templates antes estreitavam o corpo para 42-48rem (editorial/help/legal — product já usava os 72rem
+da regra base, por falta de uma classe `--product` correspondente) enquanto o hero permanecia em
+72rem; as quatro famílias agora compartilham a mesma largura de 72rem do hero.
+
+Diferente do Experience System (§10), as páginas institucionais não têm uma navegação lateral
+contextual: a taxonomia real que as agrupa é apenas a lista plana de grupos do `AppFooter` (About us,
+Products, Apps, Help, Privacy and terms), sem subcategorias — insuficiente para justificar uma
+sidebar sem inventar uma hierarquia que não existe.
+
+## 10. O `beeday Experience System` (Sprint 25.17)
 
 `/experience-system` é o ponto de entrada público e navegável para tudo que a EPIC 25 formalizou —
 Brand System, UI Design System e UX System — distinto de `docs/` (que continua sendo a
@@ -193,7 +233,7 @@ patterns) — nenhuma folha de CSS global paralela foi criada; o vocabulário vi
 (`.experience-system-section`, tabelas, callouts) vive no CSS isolado de `ExperienceSystemPage`, via
 seletores `::deep`.
 
-## 10. Fontes de verdade
+## 11. Fontes de verdade
 
 - Busca `@page` em `src/BeeDay.Web/Components/**/*.razor` (42 ocorrências, 40 arquivos — inclui a
   rota de compatibilidade `LegacyHomeRedirect.razor` da Sprint 21.12 e as 21 rotas do `beeday

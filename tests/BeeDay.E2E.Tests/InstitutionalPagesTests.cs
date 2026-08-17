@@ -50,6 +50,54 @@ public sealed class InstitutionalPagesTests(PlaywrightAppFixture fixture) : E2ET
         Assert.False(await Page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
     }
 
+    [Theory]
+    [InlineData("/mission", "rgb(82, 71, 249)")]
+    [InlineData("/efficacy", "rgb(82, 71, 249)")]
+    [InlineData("/contact", "rgb(82, 71, 249)")]
+    [InlineData("/beeday", "rgb(82, 71, 249)")]
+    [InlineData("/beeday-plus", "rgb(82, 71, 249)")]
+    [InlineData("/android", "rgb(82, 71, 249)")]
+    [InlineData("/ios", "rgb(82, 71, 249)")]
+    [InlineData("/faqs", "rgb(82, 71, 249)")]
+    [InlineData("/community-guidelines", "rgb(16, 15, 62)")]
+    [InlineData("/terms", "rgb(16, 15, 62)")]
+    [InlineData("/privacy", "rgb(16, 15, 62)")]
+    public async Task PageHeaderIsFullBleedAxisAlignedWithBodyAndUsesAPageHeaderEligibleColor(string route, string expectedBackgroundColor)
+    {
+        // Sprint 29.2: the hero used to render as a small card capped to 72rem by an accidental CSS
+        // cascade interaction (nesting it inside a reading-width-limited <article>) — this protects
+        // three things at once: the header spans the full viewport width (not just 72rem), its
+        // content row shares the same left edge as the body content below it, and every route's
+        // color is one of the two COR0-COR9 tokens whose contrast with white text passes WCAG AA
+        // (Cor0 #5247F9 or Cor8 #100F3E — docs/brand/03-color-palette.md).
+        await Page.SetViewportSizeAsync(1920, 1000);
+        await GotoAsync(route);
+
+        var hero = Page.Locator(".beeday-hero");
+        var heroRow = Page.Locator(".beeday-hero__row");
+        var body = Page.Locator(".institutional-page__body");
+        await Expect(hero).ToBeVisibleAsync();
+
+        Assert.Equal(expectedBackgroundColor, await hero.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+
+        var heroBox = await hero.BoundingBoxAsync();
+        var heroRowBox = await heroRow.BoundingBoxAsync();
+        var bodyBox = await body.BoundingBoxAsync();
+        Assert.NotNull(heroBox);
+        Assert.NotNull(heroRowBox);
+        Assert.NotNull(bodyBox);
+
+        // The hero fills essentially the whole 1920px viewport (only .beeday-main's own <= 2rem
+        // gutter stands between it and the edge) instead of being capped to the 72rem reading width
+        // a nested <article> used to impose on it — same full-bleed behavior ExperienceSystemHome's
+        // already-correct sibling hero has. Before this Sprint's fix, a centered 72rem card here
+        // would sit at X ~ (1920 - 1152) / 2 = 384px and be only 1152px wide.
+        Assert.True(heroBox!.X < 40, $"the hero should start near the viewport edge, not be centered as a card (X={heroBox.X}).");
+        Assert.True(heroBox.Width > 1800, $"the hero must not be capped to the 72rem reading width (Width={heroBox.Width}).");
+        Assert.InRange(Math.Abs(heroRowBox!.X - bodyBox!.X), 0, 1);
+        Assert.InRange(Math.Abs(heroRowBox.Width - bodyBox.Width), 0, 1);
+    }
+
     [Fact]
     public async Task FaqsAccordionIsKeyboardOperableAndTogglesWithoutHover()
     {

@@ -1,10 +1,16 @@
 /* EPIC 27 Sprint 27.3 — institutional page framework: the shared shell (hero, via BeeDayHero) and
    the four content-family variants (editorial, product, help, legal). Documentation/guidelines
    (Brand guidelines) gets its own sidebar layout in Sprint 27.8; until then it scaffolds through the
-   editorial family like the other not-yet-filled pages. */
+   editorial family like the other not-yet-filled pages.
+   Sprint 29.2: the four families previously narrowed this shared width per family (editorial 46rem,
+   help 48rem, legal 42rem; product had no matching rule at all and silently fell back to this same
+   72rem base) — that mismatch put the body content on a different horizontal axis than the hero's
+   own 72rem row (BeeDayHero.razor.css), and read as a narrow column lost in a much wider page. All
+   four families now share this single width, matching the hero row exactly. */
 
 .institutional-hero__context-label {
-    font-size: var(--beeday-font-size-sm);
+    font-size: var(--beeday-font-size-md);
+    font-weight: var(--beeday-font-weight-bold);
     letter-spacing: var(--beeday-letter-spacing-label);
     text-transform: uppercase;
 }
@@ -30,9 +36,6 @@
 }
 
 .institutional-page__body section + section { margin-top: var(--beeday-spacing-2xl); }
-
-/* Institutional/editorial — Mission, Efficacy, Contact us: a single readable column. */
-.institutional-page__body--editorial { max-width: 46rem; }
 
 /* Product/marketing — beeday, beeday Plus, Android, iOS: full-width sections, room for a feature
    grid and a CTA row (populated in Sprint 27.6). */
@@ -73,8 +76,6 @@
 }
 
 /* Help — beeday FAQs: a native, keyboard- and touch-accessible accordion. */
-.institutional-page__body--help { max-width: 48rem; }
-
 .institutional-faq { display: grid; gap: var(--beeday-spacing-sm); }
 
 .institutional-faq__item {
@@ -102,7 +103,6 @@
 .institutional-faq__item p { margin: var(--beeday-spacing-sm) 0 0; }
 
 /* Legal/document — Community guidelines, Terms, Privacy: reading-first, no fabricated clauses. */
-.institutional-page__body--legal { max-width: 42rem; }
 
 /* Shared "content pending" callout — used by the legal/document pages (no approved clauses exist
    yet) and Efficacy (no evidence/metrics exist yet). Generic name and generic styling since the

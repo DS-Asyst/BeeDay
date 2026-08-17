@@ -7,12 +7,13 @@
     --beeday-color-brand-primary-light: #827afc;
     --beeday-color-brand-primary-soft: #f8f7ff;
 
-    /* Palette — COR0-COR9 (EPIC 27, Design & Experience). The only authorized source for new hero
-       surfaces and Tag colors going forward. COR0 aliases the existing Brand Primary value instead
-       of repeating the literal, so the two never drift; COR1-COR9 are net-new physical values
-       scoped to hero-surface/tag usage, not additional brand colors. Foreground pairings are
-       WCAG-checked per 03_DESIGN_DECISIONS.md and centralized here so hero/tag consumers never pick
-       an ad hoc foreground. */
+    /* Palette — COR0-COR9 (EPIC 27, Design & Experience; official HEX values and page-header
+       eligibility rule formally documented in docs/brand/03-color-palette.md as of Sprint 29.2). The
+       only authorized source for new hero surfaces and Tag colors going forward. COR0 aliases the
+       existing Brand Primary value instead of repeating the literal, so the two never drift; COR1-
+       COR9 are net-new physical values scoped to hero-surface/tag usage, not additional brand
+       colors. Foreground pairings are WCAG-checked and centralized here so hero/tag consumers never
+       pick an ad hoc foreground. */
     --beeday-palette-cor0: var(--beeday-color-brand-primary);
     --beeday-palette-cor1: #ce82ff;
     --beeday-palette-cor2: #58cc02;
@@ -54,7 +55,7 @@
     --beeday-color-content-strong: var(--beeday-palette-cor8);
 
     /* Hero surface — the centralized default for institutional/marketing solid-color heroes when a
-       page does not select one of COR0-COR9 explicitly (03_DESIGN_DECISIONS.md §8). */
+       page does not select one of COR0-COR9 explicitly (docs/brand/03-color-palette.md). */
     --beeday-hero-surface-default: var(--beeday-palette-cor0);
     --beeday-hero-surface-default-foreground: var(--beeday-palette-cor0-foreground);
 

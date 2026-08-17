@@ -2,7 +2,8 @@ namespace BeeDay.Web.Components.DesignSystem;
 
 /// <summary>
 /// The ten-color beeday brand palette (COR0-COR9) — the only palette authorized for new hero
-/// surfaces and Tag colors (EPIC 27, 03_DESIGN_DECISIONS.md §2). Centralizing the enum keeps
+/// surfaces and Tag colors (EPIC 27; see docs/brand/03-color-palette.md for the official HEX
+/// values and the base/semantic/component token architecture). Centralizing the enum keeps
 /// hero-surface and Tag-color consumers from diverging on which ten colors exist.
 /// </summary>
 public enum BeeDayPaletteToken
@@ -39,9 +40,11 @@ public static class BeeDayPaletteTokenExtensions
 
     /// <summary>
     /// True for the two palette slots whose approved foreground is white (Cor0, Cor8); every other
-    /// slot pairs with the dark Cor8 foreground (03_DESIGN_DECISIONS.md §2 contrast table). Consumers
-    /// that layer a second element — such as an inverse brand lockup — on top of a chosen surface use
-    /// this to pick the matching variant instead of guessing.
+    /// slot pairs with the dark Cor8 foreground (docs/brand/03-color-palette.md's contrast table).
+    /// These same two are also the only tokens eligible for the page-header role (Sprint 29.2),
+    /// where a colored surface must always carry white text. Consumers that layer a second element
+    /// — such as an inverse brand lockup — on top of a chosen surface use this to pick the matching
+    /// variant instead of guessing.
     /// </summary>
     public static bool IsWhiteForeground(this BeeDayPaletteToken token) =>
         token is BeeDayPaletteToken.Cor0 or BeeDayPaletteToken.Cor8;

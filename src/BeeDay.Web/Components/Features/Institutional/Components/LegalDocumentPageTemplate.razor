@@ -1,8 +1,11 @@
 @using BeeDay.Web.Components.DesignSystem
 
 @* Legal/document family: Community guidelines, Terms, Privacy (04_PAGES_AND_ROUTES.md). Reading
-   width is prioritized over decoration; no fabricated legal content — see each page's own remarks. *@
-<InstitutionalPageShell PageContext="@PageContext" Title="@Title" Description="@Description" Surface="Surface" BodyClass="institutional-page__body--legal">
+   width is prioritized over decoration; no fabricated legal content — see each page's own remarks.
+   Defaults to Cor8 (dark navy), not Cor0, per the page-header eligibility contract in
+   docs/brand/03-color-palette.md — legal/document pages don't share Editorial/Help/Product's brand-
+   primary default. *@
+<InstitutionalPageShell PageContext="@PageContext" Title="@Title" Description="@Description" Surface="Surface">
     @ChildContent
 </InstitutionalPageShell>
 
@@ -10,6 +13,6 @@
     [Parameter, EditorRequired] public string PageContext { get; set; } = string.Empty;
     [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
     [Parameter] public string? Description { get; set; }
-    [Parameter] public BeeDayPaletteToken Surface { get; set; } = BeeDayPaletteToken.Cor0;
+    [Parameter] public BeeDayPaletteToken Surface { get; set; } = BeeDayPaletteToken.Cor8;
     [Parameter] public RenderFragment? ChildContent { get; set; }
 }

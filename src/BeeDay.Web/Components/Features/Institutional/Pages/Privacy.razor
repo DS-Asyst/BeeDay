@@ -1,7 +1,6 @@
 @page "/privacy"
 @attribute [AllowAnonymous]
 @layout BeeDay.Web.Components.Layout.PublicLayout
-@using BeeDay.Web.Components.DesignSystem
 @using BeeDay.Web.Components.Features.Institutional.Components
 @inject IStringLocalizer<InstitutionalResources> Localizer
 
@@ -9,7 +8,7 @@
 
 @* No approved privacy-policy text exists in the repository yet. This delivers the document
    structure and an explicit pending-review state — no fabricated clauses (06_ASSETS_AND_OPEN_ITEMS.md). *@
-<LegalDocumentPageTemplate PageContext="@Localizer["PrivacyPageContext"]" Title="@Localizer["PrivacyTitle"]" Description="@Localizer["PrivacyIntro"]" Surface="BeeDayPaletteToken.Cor8">
+<LegalDocumentPageTemplate PageContext="@Localizer["PrivacyPageContext"]" Title="@Localizer["PrivacyTitle"]" Description="@Localizer["PrivacyIntro"]">
     <p class="institutional-pending-notice">@Localizer["LegalPendingReview"]</p>
     <nav class="institutional-legal__toc" aria-labelledby="privacy-toc-heading">
         <h2 id="privacy-toc-heading">@Localizer["PrivacyTocTitle"]</h2>
