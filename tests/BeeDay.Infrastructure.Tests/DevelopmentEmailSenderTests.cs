@@ -11,14 +11,16 @@ using Xunit;
 namespace BeeDay.Infrastructure.Tests;
 
 /// <summary>
-/// First direct unit coverage of <see cref="DevelopmentEmailSender"/> (Epic 26, Sprint 26.1 §7
-/// recorded this as a proven test-coverage gap; closed here for the capture-file mechanics this
-/// sprint's plain-text alternative depends on — the content-root guard bug from Sprint 26.1 §6
-/// remains a separate, already-tracked, still-open item, not addressed by this sprint).
+/// Direct unit coverage of <see cref="DevelopmentEmailSender"/> (first added Sprint 26.6, for the
+/// capture-file mechanics the plain-text alternative depends on). Sprint 26.9 adds the tests that
+/// prove the actual fix for the Sprint 26.1-proven HMG root cause (§6 of the transactional-email
+/// doc): an absolute configured <c>Directory</c> now succeeds instead of throwing, while a relative
+/// path attempting to escape the content root via <c>..</c> segments still fails exactly as before.
 /// </summary>
 public sealed class DevelopmentEmailSenderTests : IDisposable
 {
     private readonly string contentRoot = Path.Combine(Path.GetTempPath(), "beeday-dev-email-sender-tests", Guid.NewGuid().ToString("N"));
+    private readonly List<string> externalDirectoriesToClean = [];
 
     public DevelopmentEmailSenderTests() => Directory.CreateDirectory(contentRoot);
 
@@ -27,6 +29,14 @@ public sealed class DevelopmentEmailSenderTests : IDisposable
         if (Directory.Exists(contentRoot))
         {
             Directory.Delete(contentRoot, recursive: true);
+        }
+
+        foreach (var directory in externalDirectoriesToClean)
+        {
+            if (Directory.Exists(directory))
+            {
+                Directory.Delete(directory, recursive: true);
+            }
         }
     }
 
@@ -80,6 +90,44 @@ public sealed class DevelopmentEmailSenderTests : IDisposable
             TestContext.Current.CancellationToken);
 
         Assert.False(Directory.Exists(Path.Combine(contentRoot, "Data/Emails")));
+    }
+
+    // Reproduces the exact shape of the proven HMG root cause: a configured Directory that is an
+    // absolute path outside the content root (appsettings.Homologation.json's real, committed
+    // C:\Apps\BeeDay-Data\Emails relative to content root C:\Apps\BeeDay.Web) — chosen deliberately
+    // so captured emails survive a redeploy, matching Data Protection Keys/Event Journal. Before the
+    // Sprint 26.9 fix, every call with a configuration shaped like this threw before writing anything.
+    [Fact]
+    public async Task SendAsync_WithAbsoluteDirectoryOutsideContentRoot_Succeeds()
+    {
+        var externalDirectory = Path.Combine(Path.GetTempPath(), "beeday-dev-email-sender-tests-external", Guid.NewGuid().ToString("N"));
+        externalDirectoriesToClean.Add(externalDirectory);
+        var sender = new DevelopmentEmailSender(
+            new TestHostEnvironment { ContentRootPath = contentRoot },
+            Options.Create(new DevelopmentEmailOptions { Enabled = true, Directory = externalDirectory }),
+            NullLogger<DevelopmentEmailSender>.Instance);
+
+        await sender.SendAsync(
+            new EmailMessage("player@example.com", "Subject", "<p>Body</p>", "Body"),
+            TestContext.Current.CancellationToken);
+
+        Assert.Single(new DirectoryInfo(externalDirectory).GetFiles("*.html"));
+    }
+
+    // The guard's original purpose — a relative Directory must still resolve inside the content
+    // root — must remain fully protected; only the absolute-path case above changed.
+    [Fact]
+    public async Task SendAsync_WithRelativeDirectoryEscapingContentRoot_StillThrows()
+    {
+        var sender = new DevelopmentEmailSender(
+            new TestHostEnvironment { ContentRootPath = contentRoot },
+            Options.Create(new DevelopmentEmailOptions { Enabled = true, Directory = "../../../escaped" }),
+            NullLogger<DevelopmentEmailSender>.Instance);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            sender.SendAsync(
+                new EmailMessage("player@example.com", "Subject", "<p>Body</p>"),
+                TestContext.Current.CancellationToken));
     }
 
     private DevelopmentEmailSender CreateSender(bool enabled = true) =>

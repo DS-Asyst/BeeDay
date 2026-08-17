@@ -175,8 +175,10 @@ evidência completa dessa distinção.
 ## 5. Secrets
 
 Tabela abaixo é do ponto de vista de `deploy-prd.yml` (5 secrets, todos checados em "Validate
-deployment secrets"). `deploy-hmg.yml` usa os mesmos 5 **mais** `BEEDAY_APP_CONNECTION` e
-`BEEDAY_MIGRATOR_CONNECTION` (necessários porque só HMG roda `-RunMigrations`, ver §4.1) — esses 2
+deployment secrets"). `deploy-hmg.yml` usa os mesmos 5 **mais** `BEEDAY_APP_CONNECTION`,
+`BEEDAY_MIGRATOR_CONNECTION` (necessários porque só HMG roda `-RunMigrations`, ver §4.1) e
+`BEEDAY_HMG_ALLOWED_RECIPIENTS` (EPIC 26, Sprint 26.9 — allowlist do
+`HmgRecipientGuardedEmailSender`, ver `docs/infrastructure/06-transactional-email.md` §10) — esses 3
 não passam por nenhuma checagem explícita de secret ausente antes de `Deploy-BeeDay.ps1` ser
 chamado.
 
@@ -189,6 +191,7 @@ chamado.
 | `BEEDAY_ALLOWED_HOSTS` | `AllowedHosts` | Sim |
 | `BEEDAY_APP_CONNECTION` (só `deploy-hmg.yml`) | connection string da aplicação | Não — sem step de validação de secrets em `deploy-hmg.yml` |
 | `BEEDAY_MIGRATOR_CONNECTION` (só `deploy-hmg.yml`) | connection string do migration bundle | Não — idem |
+| `BEEDAY_HMG_ALLOWED_RECIPIENTS` (só `deploy-hmg.yml`) | `BeeDay__Email__HmgRecipientGuard__AllowedRecipients__0`, `__1`, ... (uma variável por destinatário, `Deploy-BeeDay.ps1` faz o split por `;`) | Não — idem; ainda não existe como secret no GitHub nesta Sprint (§6), lido como vazio, o que faz `Deploy-BeeDay.ps1` pular essas variáveis inteiramente (mesmo padrão de ausência graciosa do Resend acima) |
 
 `Deploy-BeeDay.ps1` declara `[string]$ResendFromName = "BeeDay"` como valor padrão do parâmetro —
 então, mesmo sem o secret `BEEDAY_RESEND_FROM_NAME` configurado no GitHub (que faria a variável de
@@ -227,6 +230,16 @@ passar silenciosamente até o e-mail de fato ser enviado com remetente em branco
   de rollback do binário, deixa o schema na versão nova enquanto o código volta à versão antiga —
   risco reconhecido pela própria estrutura do script (comentário equivalente já existia nos
   documentos anteriores, ver [`04-operations.md`](04-operations.md) §2).
+- **EPIC 26, Sprint 26.9:** `BEEDAY_HMG_ALLOWED_RECIPIENTS` foi adicionado a `deploy-hmg.yml`/
+  `Deploy-BeeDay.ps1` nesta Sprint, preparando a automação para quando Resend for de fato ativado em
+  HMG — mas o secret em si **não foi criado no GitHub por esta Sprint** (Claude Code não tem acesso
+  para configurar secrets do repositório, e o valor é PII de destinatário, não deve entrar no
+  código-fonte). Enquanto o secret não existir, a variável de ambiente do workflow resolve para
+  vazio e `Deploy-BeeDay.ps1` pula essas variáveis do App Pool inteiramente — comportamento idêntico
+  ao já estabelecido para Resend quando `BEEDAY_RESEND_API_KEY`/`BEEDAY_RESEND_FROM_ADDRESS` estão
+  ausentes. Homologation continua no provider Development hoje (`Resend:Enabled=false`,
+  `appsettings.Homologation.json`), então esta lacuna não tem efeito prático até uma ativação real
+  de Resend em HMG ser explicitamente decidida e executada pelo responsável pelo repositório.
 
 ## 7. Fontes consultadas
 

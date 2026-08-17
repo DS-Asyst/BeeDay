@@ -230,6 +230,13 @@ jobs:
           BEEDAY_RESEND_API_KEY: ${{ secrets.BEEDAY_RESEND_API_KEY }}
           BEEDAY_RESEND_FROM_ADDRESS: ${{ secrets.BEEDAY_RESEND_FROM_ADDRESS }}
           BEEDAY_RESEND_FROM_NAME: ${{ secrets.BEEDAY_RESEND_FROM_NAME }}
+          # Epic 26, Sprint 26.9: the HMG recipient safety guard's allowlist (Sprint 26.4),
+          # semicolon-separated. Not yet defined as a repository secret as of this sprint — reads as
+          # empty until the owner adds BEEDAY_HMG_ALLOWED_RECIPIENTS, at which point
+          # Deploy-BeeDay.ps1 picks it up with no further workflow change. Homologation stays on the
+          # Development provider today (Resend.Enabled=false, appsettings.Homologation.json), so
+          # this has no effect until that changes.
+          BEEDAY_HMG_ALLOWED_RECIPIENTS: ${{ secrets.BEEDAY_HMG_ALLOWED_RECIPIENTS }}
           BEEDAY_ALLOWED_HOSTS: ${{ secrets.BEEDAY_ALLOWED_HOSTS }}
           BEEDAY_APP_CONNECTION: ${{ secrets.BEEDAY_APP_CONNECTION }}
           BEEDAY_MIGRATOR_CONNECTION: ${{ secrets.BEEDAY_MIGRATOR_CONNECTION }}
@@ -243,6 +250,7 @@ jobs:
               -ResendApiKey $env:BEEDAY_RESEND_API_KEY `
               -ResendFromAddress $env:BEEDAY_RESEND_FROM_ADDRESS `
               -ResendFromName $env:BEEDAY_RESEND_FROM_NAME `
+              -HmgAllowedRecipients $env:BEEDAY_HMG_ALLOWED_RECIPIENTS `
               -AllowedHosts $env:BEEDAY_ALLOWED_HOSTS `
               -SiteName "BeeDay-HMG" `
               -AppPoolName "BeeDay-Web-AppPool" `

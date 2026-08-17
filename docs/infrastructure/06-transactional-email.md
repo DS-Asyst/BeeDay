@@ -13,7 +13,14 @@ and `git log`/`git show` on the files above. Cross-checked against
 [`docs/deployment/02-runtime-configuration.md`](../deployment/02-runtime-configuration.md)
 (already current as of Sprint 18.4).
 
-**Last verified:** 2026-08-16 (Epic 26, Sprint 26.8 — §15 added: cross-sprint coverage-matrix audit
+**Last verified:** 2026-08-16 (Epic 26, Sprint 26.9 — §16 added: Gate D verdict — blocked on the
+documented external prerequisite (no SERV3-WEB/Resend-secret access this session), not fabricated.
+Repository-side readiness completed instead: the actual Sprint 26.1 HMG root cause is fixed
+(`DevelopmentEmailSender`'s content-root guard now trusts a deliberately-configured absolute
+`Directory`, relative-path traversal protection unchanged) and `HmgRecipientGuardOptions:AllowedRecipients`
+is wired through `Deploy-BeeDay.ps1`/`deploy-hmg.yml` (Sprint 26.4 §10.5's deferred item) — neither
+deployed to HMG by this sprint, both code-complete only. Sprint 26.8 added §15: cross-sprint
+coverage-matrix audit
 (Gate C — PASS), closing one real gap found by the audit (provider-failure handling for
 resend-confirmation/forgot-password had no coverage; proven, not fixed — see §15.4) and explicitly
 carrying forward the two residual items that remain out of scope for an audit sprint (the HMG
@@ -781,7 +788,80 @@ try/catch structure already exercised by the network-failure test).
   correct under test doubles, not that HMG itself currently sends real email (§6.3 already states
   that classification explicitly).
 
-## 16. Related documentation
+## 16. HMG deployment & end-to-end validation — Gate D (Epic 26, Sprint 26.9)
+
+### 16.1 Repository state vs. environment state (`CLAUDE.md` §8.2)
+
+This section distinguishes what this sprint actually did (repository changes, code-complete,
+locally validated) from what it did not and could not do (anything requiring SERV3-WEB access or
+the real Resend secret). No claim below conflates the two.
+
+### 16.2 Blocker: no infrastructure/secret access available to this sprint
+
+Per the master instructions' explicit secret-handling boundary, the real HMG Resend API key was
+never requested, read, or referenced. No SSH/RDP/PowerShell-remoting access to SERV3-WEB was
+available in this session, so no step of the "controlled HMG sequence" in the Sprint 26.9 prompt
+(deploy → recycle → health check → controlled allowlisted account creation → provider acceptance →
+inbox receipt → HMG callback confirmation → resend/forgot-password/reset validation) was executed
+against the real environment. **None of that sequence is claimed as done here.** This is the
+external prerequisite the sprint's own instructions anticipate recording rather than fabricating.
+
+### 16.3 What was completed instead: repository-side deployment readiness
+
+Two concrete gaps that specifically blocked a future real HMG activation were closed:
+
+1. **The actual HMG root cause, fixed** (`DevelopmentEmailSender.cs`) — the Sprint 26.1-proven bug
+   (§6): the content-root guard now trusts a deliberately-configured *absolute* `Directory` value
+   as-is (HMG's own `C:\Apps\BeeDay-Data\Emails`, outside content root
+   `C:\Apps\BeeDay.Web`), while a *relative* `Directory` still cannot escape the content root via
+   `..` segments — the guard's original, still-intact purpose. Proven by two new tests
+   (`DevelopmentEmailSenderTests.SendAsync_WithAbsoluteDirectoryOutsideContentRoot_Succeeds` /
+   `_WithRelativeDirectoryEscapingContentRoot_StillThrows`) reproducing the exact configuration
+   shape committed in `appsettings.Homologation.json`. **This is code-complete, not environment
+   validated** (§8.2) — it was never deployed to or exercised against the real SERV3-WEB. Until it
+   is promoted through `deploy-hmg.yml`, HMG's currently-running binary still has the old, broken
+   guard; this fix only takes effect on HMG's *next* real deployment.
+2. **`HmgRecipientGuardOptions:AllowedRecipients` wired through the deploy chain** — the item
+   Sprint 26.4 §10.5 explicitly deferred ("tracked as a prerequisite for actually enabling Resend on
+   HMG in a later sprint"). `Deploy-BeeDay.ps1` gained an optional `-HmgAllowedRecipients` parameter
+   (semicolon-separated, mirroring `AllowedHosts`'s own convention — .NET's array-binding needs one
+   indexed App Pool variable per recipient, unlike `AllowedHosts` itself, which ASP.NET Core reads
+   as a single delimited string), redacted from `$deployLogsPath` the same way connection
+   strings/the Resend API key already are (recipient addresses are PII). `deploy-hmg.yml` reads an
+   optional `BEEDAY_HMG_ALLOWED_RECIPIENTS` secret and passes it through — **not yet created as a
+   GitHub secret by this sprint** (no access to configure repository secrets, and the value is real
+   recipient PII that must never enter source control). Absent, exactly like the equivalent Resend
+   variables already do when their own secrets are unset, `Deploy-BeeDay.ps1` skips these App Pool
+   variables entirely — zero effect on today's deployments.
+
+### 16.4 What remains explicitly not done
+
+- HMG has **not** been redeployed with either change above — both are code-complete, sitting in
+  this stacked PR chain, not yet promoted.
+- `appsettings.Homologation.json`'s `Resend:Enabled`/`Development:Enabled` were **not** changed —
+  HMG still resolves to the Development/file provider today, deliberately. Flipping this is a real
+  behavior activation decision (real outbound email starts flowing) that requires the owner's
+  explicit approval and the real secret being available through the now-prepared injection channel
+  — this sprint prepared the mechanism, it did not pull the trigger.
+- `BEEDAY_HMG_ALLOWED_RECIPIENTS` does not exist as a GitHub secret; no real recipient address was
+  requested, seen, or written anywhere in this sprint's diff.
+- No account was created against HMG, no email was sent through Resend, no inbox was checked, no
+  HMG callback was exercised. Zero evidence exists from this sprint for any state in the "controlled
+  HMG sequence" described in §16.2, because none of that sequence ran.
+
+### 16.5 Gate D verdict
+
+**Not met — blocked on the documented external prerequisite (§16.2), not fabricated.** Per the
+roadmap's own definition, this is an accepted outcome for Sprint 26.9: "Gate D: real HMG evidence
+exists, **or** the PR explicitly records which external prerequisite prevented that evidence."
+Repository-side readiness (§16.3) is complete and locally validated (mandatory + Release gates, see
+below); real-environment validation requires the repository owner to run `deploy-hmg.yml` (or an
+equivalent manual promotion) with SERV3-WEB access this session never had, and — only when the
+owner is ready to activate real Resend delivery on HMG — to create the
+`BEEDAY_HMG_ALLOWED_RECIPIENTS` secret and flip `appsettings.Homologation.json`'s provider flags in
+a future, explicitly-scoped change.
+
+## 17. Related documentation
 
 - [`04-services.md`](04-services.md) — existing Infrastructure services inventory, including the
   `ResendEmailSender`/`DevelopmentEmailSender` summary this document expands on with the HMG root

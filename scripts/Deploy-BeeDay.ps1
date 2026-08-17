@@ -17,6 +17,16 @@ param(
     [string]$ResendFromAddress,
     [string]$ResendFromName = "BeeDay",
 
+    # Epic 26, Sprint 26.9: the HMG recipient safety guard's allowlist (HmgRecipientGuardOptions,
+    # Sprint 26.4) — semicolon-separated, matching this script's own AllowedHosts convention below
+    # (.NET's Microsoft.Extensions.Configuration array-binding needs one indexed env var per entry,
+    # unlike AllowedHosts, which ASP.NET Core reads as a single semicolon-delimited string itself).
+    # Optional and empty by default, same graceful-absence pattern as Resend above: Homologation
+    # today runs Resend.Enabled=false, so the guard is never even bound, and leaving this empty
+    # means Set-BeeDayEnvironmentVariables skips these variables entirely. Real addresses only ever
+    # flow through this parameter at deploy time — never hardcoded in this script or in Git.
+    [string]$HmgAllowedRecipients,
+
     [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
     [string]$AllowedHosts,
@@ -95,6 +105,14 @@ if (-not [string]::IsNullOrWhiteSpace($AppConnectionString) `
     throw "AppConnectionString and MigrationConnectionString must not be the same value - the application must never use the migrator credential."
 }
 
+# Parsed once here (not inline in Set-BeeDayEnvironmentVariables) so the same list backs both the
+# redaction list immediately below and the App Pool variables later — real recipient addresses are
+# PII, not merely operational data, so they are redacted from $deployLogsPath exactly like the
+# connection strings and the Resend API key are.
+$script:hmgAllowedRecipients = @($HmgAllowedRecipients -split ';') |
+    ForEach-Object { $_.Trim() } |
+    Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+
 # Exception messages can echo back raw parameter values verbatim (e.g. a malformed connection
 # string thrown by SqlConnectionStringBuilder, or a driver error that embeds its input). GitHub
 # Actions masks known secrets in the runner's own log capture, but that masking never reaches
@@ -102,7 +120,7 @@ if (-not [string]::IsNullOrWhiteSpace($AppConnectionString) `
 # any log pipeline GitHub controls. Every message that reaches Write-DeployMessage or Write-Error
 # is scrubbed of these literal values first, so the real error text is preserved but a credential
 # can never end up persisted on disk in the clear.
-$script:secretValuesToRedact = @($MigrationConnectionString, $AppConnectionString, $ResendApiKey) |
+$script:secretValuesToRedact = @($MigrationConnectionString, $AppConnectionString, $ResendApiKey) + $script:hmgAllowedRecipients |
     Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
 
 function Protect-DeploySecret {
@@ -730,6 +748,15 @@ function Set-BeeDayEnvironmentVariables {
         $variables["BeeDay__Email__Resend__ApiKey"] = $ResendApiKey
         $variables["BeeDay__Email__Resend__FromAddress"] = $ResendFromAddress
         $variables["BeeDay__Email__Resend__FromName"] = $ResendFromName
+    }
+
+    # HmgRecipientGuardOptions.AllowedRecipients (Epic 26, Sprint 26.4/26.9) — only bound/validated
+    # at all when the Resend provider is selected (EmailProviderSelector), so leaving this empty is
+    # always safe: Homologation today (Resend.Enabled=false) never even reaches that code path.
+    # Left empty, the guard's default (Enabled=true, no recipients) fails closed at startup rather
+    # than the App Pool silently keeping a stale allowlist from a previous deploy.
+    for ($i = 0; $i -lt $script:hmgAllowedRecipients.Count; $i++) {
+        $variables["BeeDay__Email__HmgRecipientGuard__AllowedRecipients__$i"] = $script:hmgAllowedRecipients[$i]
     }
 
     if (Test-BeeDayUsesPrivilegedIisControl) {
