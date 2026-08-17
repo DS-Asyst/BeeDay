@@ -4,16 +4,15 @@
 .home-hero__visual { display: grid; width: min(100%, 32rem); aspect-ratio: 1; margin-inline: auto; place-items: center; }
 .home-hero__image { display: block; width: 100%; height: 100%; object-fit: contain; }
 .home-hero__content { width: min(100%, 31rem); }
-.home-hero h1 { margin: 0; color: var(--beeday-color-text-primary); font-size: clamp(2.5rem, 5vw, 4.25rem); font-weight: var(--beeday-font-weight-black); letter-spacing: -.035em; line-height: 1.04; }
+.home-hero h1 { margin: 0; color: var(--beeday-color-text-primary); font-family: var(--beeday-font-display); font-size: clamp(2.5rem, 5vw, 4.25rem); font-weight: var(--beeday-font-weight-regular); line-height: 1.1; }
 .home-hero__content > p { margin: var(--beeday-spacing-lg) 0 0; color: var(--beeday-color-text-secondary); font-size: var(--beeday-font-size-lg); line-height: var(--beeday-line-height-relaxed); }
 .home-hero__actions { display: grid; width: min(100%, 21rem); margin-top: var(--beeday-spacing-xl); gap: var(--beeday-spacing-md); }
 .home-hero__actions > a { width: 100%; min-height: 3.25rem; text-decoration: none; }
-.home-hero__login { color: var(--beeday-color-brand-primary); }
 .home-how { margin-inline: calc(-1 * var(--beeday-page-gutter)); padding-inline: var(--beeday-page-gutter); background: #d5eefd; }
 .home-how__inner { display: grid; width: min(100%, 72rem); margin-inline: auto; gap: var(--beeday-spacing-3xl); padding-block: clamp(3rem, 6vw, 5rem); }
 .home-section__heading { max-width: 42rem; margin-inline: auto; text-align: center; }
 .home-page__eyebrow { display: inline-block; margin-bottom: var(--beeday-spacing-sm); color: var(--beeday-color-brand-primary); font-size: var(--beeday-font-size-sm); font-weight: var(--beeday-font-weight-black); letter-spacing: var(--beeday-letter-spacing-label); }
-.home-section__heading h2 { margin: 0; color: var(--beeday-color-text-primary); font-size: clamp(2rem, 5vw, 3rem); font-weight: var(--beeday-font-weight-extrabold); letter-spacing: -.02em; line-height: 1.08; }
+.home-section__heading h2 { margin: 0; color: var(--beeday-color-text-primary); font-family: var(--beeday-font-display); font-size: clamp(2rem, 5vw, 3rem); font-weight: var(--beeday-font-weight-regular); line-height: 1.15; }
 .home-section__heading p { margin: var(--beeday-spacing-lg) 0 0; color: var(--beeday-color-text-secondary); font-size: var(--beeday-font-size-lg); line-height: var(--beeday-line-height-relaxed); }
 .home-how__composition { position: relative; }
 .home-how__visual { position: absolute; top: 0; left: 50%; display: grid; width: min(20.4vw, 14.4rem); aspect-ratio: 1; transform: translateX(-50%); place-items: center; }

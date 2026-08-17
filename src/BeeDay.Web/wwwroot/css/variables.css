@@ -40,6 +40,14 @@
        Not a second brand color. */
     --beeday-color-accent-secondary: var(--beeday-palette-cor3);
 
+    /* Accent secondary, text-safe — the same hue/identity as COR3, darkened for use as TEXT on a
+       light/white surface. Raw COR3 (#1CB0F6) measures ~2.44:1 against white, failing WCAG AA's
+       4.5:1 normal-text minimum (confirmed by the repo's automated axe-core scan); this token
+       measures ~5.29:1. Use this for text/icons on light surfaces; raw --beeday-color-accent-
+       secondary remains correct for non-text uses (borders, depth, surfaces) where the stricter
+       text-contrast ratio does not apply. */
+    --beeday-color-accent-secondary-on-light: #0b72a6;
+
     /* Dark/content-strong — COR8/#100F3E. A stronger dark than --beeday-color-text-primary, used as
        the foreground paired with light/mid palette surfaces (see the palette foreground pairings
        above) and wherever the Epic 27 brand surfaces need the strong-dark role. */
@@ -141,7 +149,7 @@
        the explicit "important white button" cases called out in 03_DESIGN_DECISIONS.md §5. */
     --beeday-color-button-important-white-bg: var(--beeday-color-surface);
     --beeday-color-button-important-white-bg-hover: var(--beeday-color-surface-muted);
-    --beeday-color-button-important-white-fg: var(--beeday-color-accent-secondary);
+    --beeday-color-button-important-white-fg: var(--beeday-color-accent-secondary-on-light);
     --beeday-color-button-important-white-outline: var(--beeday-color-accent-secondary);
     --beeday-color-button-important-white-depth: var(--beeday-color-accent-secondary);
     --beeday-color-button-important-white-shadow: var(--beeday-color-accent-secondary);

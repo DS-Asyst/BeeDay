@@ -1,6 +1,7 @@
-<span class="beeday-brand @(OnDarkSurface ? "beeday-brand--inverse" : null)"
+<span class="beeday-brand @(OnDarkSurface ? "beeday-brand--inverse" : null) @Class"
       role="img"
-      aria-label="beeday">
+      aria-label="beeday"
+      @attributes="AdditionalAttributes">
     @if (ShowIcon)
     {
         <img class="beeday-brand__icon" src="/assets/brand/bee.png" alt="" aria-hidden="true" width="279" height="287" loading="lazy" decoding="async" />
@@ -11,4 +12,6 @@
 @code {
     [Parameter] public bool OnDarkSurface { get; set; }
     [Parameter] public bool ShowIcon { get; set; } = true;
+    [Parameter] public string? Class { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 }

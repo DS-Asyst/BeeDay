@@ -199,7 +199,9 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         Assert.NotNull(headerBox);
         Assert.NotNull(heroBox);
         Assert.InRange(Math.Abs((headerBox!.Y + headerBox.Height) - heroBox!.Y), 0, 1);
-        Assert.Equal("46.875px", await Page.Locator(".public-header__brand-mark")
+        // EPIC 27 Sprint 27.2: the header lockup grows from the previous bitmap's 46.875px so the
+        // wordmark reads as a real brand mark instead of a small, timid icon.
+        Assert.Equal("54.4062px", await Page.Locator(".public-header__brand-mark")
             .EvaluateAsync<string>("element => getComputedStyle(element).height"));
 
         var heroActions = Page.Locator(".home-hero__actions");
@@ -213,6 +215,9 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
             .EvaluateAsync<string>("element => getComputedStyle(element).color"));
         Assert.Equal("rgb(255, 255, 255)", await existingAccount
             .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+        // Text-safe accent (not raw COR3, which measures ~2.44:1 on white and fails WCAG AA).
+        Assert.Equal("rgb(11, 114, 166)", await existingAccount
+            .EvaluateAsync<string>("element => getComputedStyle(element).color"));
         await existingAccount.FocusAsync();
         Assert.Equal("solid", await existingAccount.EvaluateAsync<string>("element => getComputedStyle(element).outlineStyle"));
         await getStarted.HoverAsync();

@@ -61,23 +61,6 @@
 .auth-feedback--error { background: var(--beeday-color-danger-soft); color: var(--beeday-color-danger); }
 .auth-feedback--success { background: var(--beeday-color-success-soft); color: var(--beeday-color-success); }
 
-.auth-action-link {
-    color: var(--beeday-color-text-primary);
-    font-weight: var(--beeday-font-weight-bold);
-    text-decoration-line: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 3px;
-    transition: color var(--beeday-transition-fast);
-}
-
-.auth-action-link:hover { color: var(--beeday-color-brand-primary); }
-.auth-action-link:active { color: var(--beeday-color-brand-primary-active); }
-.auth-action-link:focus-visible {
-    border-radius: 2px;
-    outline: 2px solid var(--beeday-color-brand-primary);
-    outline-offset: 3px;
-}
-
 .auth-form__options {
     display: flex;
     align-items: center;

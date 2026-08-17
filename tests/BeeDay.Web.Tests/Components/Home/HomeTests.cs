@@ -26,7 +26,7 @@ public sealed class HomeTests
 
         Assert.Single(cut.FindAll("a[href='/profile/create']"));
         Assert.NotNull(cut.Find(".home-hero__login[href='/login']"));
-        Assert.Contains("beeday-button--secondary", cut.Find(".home-hero__login").ClassList);
+        Assert.Contains("beeday-button--important-white", cut.Find(".home-hero__login").ClassList);
     }
 
     [Fact]
