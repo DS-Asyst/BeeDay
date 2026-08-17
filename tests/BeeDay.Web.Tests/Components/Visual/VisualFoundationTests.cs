@@ -45,16 +45,49 @@ public sealed class VisualFoundationTests
     }
 
     [Fact]
-    public void SharedBrandUsesTheOfficialPrimaryInEverySupportedMode()
+    public void SharedBrandUsesOfficialPrimaryByDefaultAndRealWhiteOnDarkSurfaces()
     {
+        // EPIC 27 Sprint 27.1: the inverse lockup used on brand/dark surfaces (Footer, brand-surface
+        // heroes) now renders real white instead of repeating Brand Primary as a historical no-op.
         var brand = ReadWebFile("Components", "DesignSystem", "Text", "BeeDayBrand.razor.css");
 
         Assert.Contains(".beeday-brand__bee,", brand, StringComparison.Ordinal);
         Assert.Contains(".beeday-brand__day { color: var(--beeday-color-brand-primary); }", brand, StringComparison.Ordinal);
         Assert.Contains(".beeday-brand--inverse .beeday-brand__bee,", brand, StringComparison.Ordinal);
-        Assert.Contains(".beeday-brand--inverse .beeday-brand__day { color: var(--beeday-color-brand-primary); }", brand, StringComparison.Ordinal);
+        Assert.Contains(".beeday-brand--inverse .beeday-brand__day { color: var(--beeday-color-text-inverse); }", brand, StringComparison.Ordinal);
+        Assert.Contains(".beeday-brand__icon {", brand, StringComparison.Ordinal);
         Assert.DoesNotContain("--beeday-color-brand-yellow", brand, StringComparison.Ordinal);
-        Assert.DoesNotContain("--beeday-color-text-inverse", brand, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Epic27PaletteFoundationsAreCentralizedAndPairedWithAForeground()
+    {
+        var variables = ReadWebFile("wwwroot", "css", "variables.css");
+        var utilities = ReadWebFile("wwwroot", "css", "utilities.css");
+        var designSystem = ReadWebFile("wwwroot", "css", "design-system.css");
+
+        Assert.Contains("--beeday-palette-cor0: var(--beeday-color-brand-primary);", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-palette-cor1: #ce82ff;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-palette-cor2: #58cc02;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-palette-cor3: #1cb0f6;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-palette-cor4: #ffb100;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-palette-cor5: #ff7878;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-palette-cor6: #ffffff;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-palette-cor7: #ececed;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-palette-cor8: #100f3e;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-palette-cor9: #defff7;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-color-accent-secondary: var(--beeday-palette-cor3);", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-hero-surface-default: var(--beeday-palette-cor0);", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-color-button-important-white-fg: var(--beeday-color-accent-secondary);", variables, StringComparison.Ordinal);
+
+        Assert.Contains(".beeday-link {", utilities, StringComparison.Ordinal);
+        Assert.Contains("text-decoration: none;", utilities, StringComparison.Ordinal);
+        for (var i = 0; i <= 9; i++)
+        {
+            Assert.Contains($".beeday-surface-cor{i} {{ background: var(--beeday-palette-cor{i}); color: var(--beeday-palette-cor{i}-foreground); }}", utilities, StringComparison.Ordinal);
+        }
+
+        Assert.Contains(".beeday-button--important-white {", designSystem, StringComparison.Ordinal);
     }
 
     [Fact]

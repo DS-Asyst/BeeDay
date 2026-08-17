@@ -9,5 +9,6 @@ public enum BeeDayButtonVariant
     Back,
     Danger,
     ConfirmationDanger,
-    ConfirmationCancel
+    ConfirmationCancel,
+    ImportantWhite
 }

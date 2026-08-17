@@ -99,6 +99,18 @@
     --beeday-button-shadow: var(--beeday-color-button-danger-shadow);
 }
 
+/* Important White — white surface, Accent Secondary (COR3) text/outline. Reserved for the explicit
+   "important white button" cases called out in 03_DESIGN_DECISIONS.md §5 (e.g. I ALREADY HAVE AN
+   ACCOUNT, CREATE ACCOUNT), not a general secondary replacement. */
+.beeday-button--important-white {
+    --beeday-button-background: var(--beeday-color-button-important-white-bg);
+    --beeday-button-background-hover: var(--beeday-color-button-important-white-bg-hover);
+    --beeday-button-foreground: var(--beeday-color-button-important-white-fg);
+    --beeday-button-outline: var(--beeday-color-button-important-white-outline);
+    --beeday-button-depth: var(--beeday-color-button-important-white-depth);
+    --beeday-button-shadow: var(--beeday-color-button-important-white-shadow);
+}
+
 /* Cancel actions are deliberately neutral: white surface and black text. */
 .beeday-button--confirmation-cancel {
     --beeday-button-background: var(--beeday-color-button-confirmation-cancel-bg);

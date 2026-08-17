@@ -16,6 +16,22 @@ public sealed class BeeDayBrandTests
     }
 
     [Fact]
+    public void RendersTheApprovedBeeIconByDefaultAndCanOptOut()
+    {
+        using var context = new BunitContext();
+        var withIcon = context.Render<BeeDayBrand>().Find(".beeday-brand");
+        var iconImage = withIcon.QuerySelector(".beeday-brand__icon");
+        Assert.NotNull(iconImage);
+        Assert.Equal("/assets/brand/bee.png", iconImage.GetAttribute("src"));
+        Assert.Equal("", iconImage.GetAttribute("alt"));
+        Assert.Equal("true", iconImage.GetAttribute("aria-hidden"));
+
+        var withoutIcon = context.Render<BeeDayBrand>(parameters => parameters.Add(x => x.ShowIcon, false))
+            .Find(".beeday-brand");
+        Assert.Null(withoutIcon.QuerySelector(".beeday-brand__icon"));
+    }
+
+    [Fact]
     public void AppliesInverseVariantOnlyWhenRequested()
     {
         using var context = new BunitContext();
