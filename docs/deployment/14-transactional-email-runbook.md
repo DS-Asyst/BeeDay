@@ -16,8 +16,11 @@ account-creation flow produced `.txt`/`.json`/`.html` artifacts in `C:\Apps\BeeD
 With that proven and the four Resend secrets now present in the GitHub `homologation` Environment,
 a dedicated activation change (`appsettings.Homologation.json`: `Resend:Enabled` → `true`,
 `Development:Enabled` → `false`) flips Homologation to the Resend provider — see §2 and §6, updated
-accordingly. This activation change is code-complete; real Resend inbox E2E (§11) has not yet been
-executed and can only happen after this change is deployed — see §19.
+accordingly. The first deployment against that activation (run `32009214798`, #190) failed on a
+third, distinct root cause — a privileged-boundary contract mismatch between `Deploy-BeeDay.ps1`
+and `Invoke-BeeDayIisControl.ps1`, unrelated to Resend itself — fixed by **Hotfix 26.9.3**; see §6.
+Real Resend inbox E2E (§11) has not yet been executed and can only happen after Hotfix 26.9.3 is
+deployed — see §19.
 
 **Audience:** whoever performs a transactional-email-related deployment, troubleshoots a delivery
 issue, or evaluates activating Resend on a new environment (HMG or PRD). For the *architecture*
@@ -139,6 +142,21 @@ State distinction (`CLAUDE.md` §8.2).
   account-creation flow produced `.txt`/`.json`/`.html` artifacts in `C:\Apps\BeeDay-Data\Emails`,
   proving the Sprint 26.9 content-root guard fix (§7 below) works against the real, committed
   absolute-path configuration.
+- After Resend activation (step 4 below) merged, the first real deployment against it (run
+  [`32009214798`](https://github.com/tiagoarrigoni/BeeDay/actions/runs/32009214798), #190) reached
+  privileged IIS CONFIGURE — one HMG recipient configured, so `Deploy-BeeDay.ps1` wrote 9 App Pool
+  variables — and failed there: `Invoke-BeeDayIisControl.ps1`'s own CONFIGURE allow-list (a fixed
+  exact-name list, enforced on the SYSTEM-run privileged side of the boundary, independent of
+  `Deploy-BeeDay.ps1`'s own contract) did not yet permit
+  `BeeDay__Email__HmgRecipientGuard__AllowedRecipients__N`, so the very first recipient variable was
+  rejected outright. Rollback ran exactly as designed (STOP → RESTORE → START → health check →
+  "Rollback completed and previous version is healthy.") — Hotfix 26.9.1's rollback fix is unchanged
+  and remains Environment Validated. Fixed by **Hotfix 26.9.3**, which extends the privileged
+  allow-list with a narrow regex accepting only the exact
+  `BeeDay__Email__HmgRecipientGuard__AllowedRecipients__<non-negative integer>` shape
+  `Deploy-BeeDay.ps1` can produce — never a prefix/wildcard — and adds a second, read-only
+  regression suite to the same preflight, covering the privileged script's own validator directly
+  (the gap that let 18/18 pass on run #190 despite this exact mismatch).
 
 Activating real Resend delivery on HMG required, in order:
 
@@ -305,12 +323,16 @@ email body containing a live callback link.
 - `deploy-prd.yml`'s `production` GitHub Environment does not exist yet (§4.1) — part of PRD's
   future real provisioning, not this Epic's scope.
 - Real HMG *email* E2E evidence (§11 actually executed against Resend) does not exist yet. This is
-  no longer an infrastructure-access blocker — Hotfix 26.9.1/26.9.2 proved real HMG deployment
-  evidence is obtainable (GitHub Actions run logs, `gh` CLI), run `32004712401` confirms the
+  no longer an infrastructure-access blocker — Hotfixes 26.9.1/26.9.2 proved real HMG deployment
+  evidence is obtainable (GitHub Actions run logs, `gh` CLI), run `32004712401` confirmed the
   deployment mechanism itself is reliable, and the Resend secrets and configuration activation
-  (§6 steps 1–4) are all complete. The remaining blocker is §6 steps 5–6: the activation change has
-  not yet been deployed through `deploy-hmg.yml`, and the real smoke test (§11) has not been
-  executed. See [`06-transactional-email.md`](../infrastructure/06-transactional-email.md) §16.
+  (§6 steps 1–4) are all complete. The first deployment attempt against the activated
+  configuration (run `32009214798`, #190) itself failed on a *third*, distinct root cause — a
+  privileged-boundary contract mismatch, fixed by Hotfix 26.9.3 — proving the deployment mechanism
+  was not yet fully exercised for this specific payload shape (one HMG recipient variable) before
+  that run. The remaining blocker is §6 steps 5–6: Hotfix 26.9.3 has not yet been deployed through
+  `deploy-hmg.yml`, and the real smoke test (§11) has not been executed. See
+  [`06-transactional-email.md`](../infrastructure/06-transactional-email.md) §16.
 
 ## 20. Related documentation
 
