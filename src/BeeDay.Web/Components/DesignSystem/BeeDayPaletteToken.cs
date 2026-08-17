@@ -36,4 +36,13 @@ public static class BeeDayPaletteTokenExtensions
         BeeDayPaletteToken.Cor9 => "beeday-surface-cor9",
         _ => "beeday-surface-cor0"
     };
+
+    /// <summary>
+    /// True for the two palette slots whose approved foreground is white (Cor0, Cor8); every other
+    /// slot pairs with the dark Cor8 foreground (03_DESIGN_DECISIONS.md §2 contrast table). Consumers
+    /// that layer a second element — such as an inverse brand lockup — on top of a chosen surface use
+    /// this to pick the matching variant instead of guessing.
+    /// </summary>
+    public static bool IsWhiteForeground(this BeeDayPaletteToken token) =>
+        token is BeeDayPaletteToken.Cor0 or BeeDayPaletteToken.Cor8;
 }

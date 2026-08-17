@@ -1,3 +1,4 @@
+using BeeDay.Web.Components.DesignSystem;
 using BeeDay.Web.Components.DesignSystem.Icons;
 using BeeDay.Web.Components.DesignSystem.Layout;
 using Microsoft.AspNetCore.Components.Rendering;
@@ -176,6 +177,62 @@ public sealed class BeeDayHeroTests
         Assert.Equal("daily-hero", header.GetAttribute("data-testid"));
     }
 
+    [Theory]
+    [InlineData(BeeDayPaletteToken.Cor0, "beeday-surface-cor0")]
+    [InlineData(BeeDayPaletteToken.Cor3, "beeday-surface-cor3")]
+    [InlineData(BeeDayPaletteToken.Cor8, "beeday-surface-cor8")]
+    public void AppliesTheSurfacePairingClassWhenSet(BeeDayPaletteToken surface, string expectedClass)
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<BeeDayHero>(parameters => parameters
+            .Add(component => component.Title, "Mission")
+            .Add(component => component.Surface, surface));
+
+        Assert.Contains(expectedClass, cut.Find("header").ClassList);
+    }
+
+    [Fact]
+    public void OmitsSurfaceClassWhenNotSet()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<BeeDayHero>(parameters => parameters
+            .Add(component => component.Title, "Inventory"));
+
+        Assert.DoesNotContain(cut.Find("header").ClassList, cssClass => cssClass.StartsWith("beeday-surface-", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void AppliesCompactModifierClassWhenRequested()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<BeeDayHero>(parameters => parameters
+            .Add(component => component.Title, "Wallet")
+            .Add(component => component.Compact, true));
+
+        Assert.Contains("beeday-hero--compact", cut.Find("header").ClassList);
+    }
+
+    [Fact]
+    public void RendersBrandContextWhenSupplied()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<BeeDayHero>(parameters => parameters
+            .Add(component => component.Title, "Mission")
+            .Add(component => component.BrandContext, builder => builder.AddContent(0, "beeday Mission")));
+
+        Assert.Contains("beeday Mission", cut.Find(".beeday-hero__brand-context").TextContent);
+    }
+
+    [Fact]
+    public void OmitsBrandContextWrapperWhenNotSupplied()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<BeeDayHero>(parameters => parameters
+            .Add(component => component.Title, "Mission"));
+
+        Assert.Empty(cut.FindAll(".beeday-hero__brand-context"));
+    }
+
     [Fact]
     public void RendersOnlyTheHeadingWhenAllOptionalParametersAreOmitted()
     {
@@ -183,6 +240,7 @@ public sealed class BeeDayHeroTests
         var cut = context.Render<BeeDayHero>(parameters => parameters
             .Add(component => component.Title, "Title-only Hero"));
 
+        Assert.Empty(cut.FindAll(".beeday-hero__brand-context"));
         Assert.Empty(cut.FindAll(".beeday-hero__eyebrow"));
         Assert.Empty(cut.FindAll(".beeday-hero__subtitle"));
         Assert.Empty(cut.FindAll(".beeday-hero__illustration"));

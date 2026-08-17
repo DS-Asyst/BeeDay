@@ -1,0 +1,15 @@
+@using BeeDay.Web.Components.DesignSystem
+
+@* Legal/document family: Community guidelines, Terms, Privacy (04_PAGES_AND_ROUTES.md). Reading
+   width is prioritized over decoration; no fabricated legal content — see each page's own remarks. *@
+<InstitutionalPageShell PageContext="@PageContext" Title="@Title" Description="@Description" Surface="Surface" BodyClass="institutional-page__body--legal">
+    @ChildContent
+</InstitutionalPageShell>
+
+@code {
+    [Parameter, EditorRequired] public string PageContext { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public BeeDayPaletteToken Surface { get; set; } = BeeDayPaletteToken.Cor0;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

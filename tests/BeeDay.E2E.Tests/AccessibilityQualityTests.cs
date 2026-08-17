@@ -19,6 +19,18 @@ public sealed class AccessibilityQualityTests(PlaywrightAppFixture fixture) : E2
     [InlineData("/brand/typography")]
     [InlineData("/experience-system")]
     [InlineData("/login")]
+    [InlineData("/mission")]
+    [InlineData("/efficacy")]
+    [InlineData("/brand-guidelines")]
+    [InlineData("/contact")]
+    [InlineData("/beeday")]
+    [InlineData("/beeday-plus")]
+    [InlineData("/android")]
+    [InlineData("/ios")]
+    [InlineData("/faqs")]
+    [InlineData("/community-guidelines")]
+    [InlineData("/terms")]
+    [InlineData("/privacy")]
     public async Task PublicHighValuePages_HaveNoAutomaticallyDetectableViolations(string route)
     {
         await Page.SetViewportSizeAsync(1280, 900);

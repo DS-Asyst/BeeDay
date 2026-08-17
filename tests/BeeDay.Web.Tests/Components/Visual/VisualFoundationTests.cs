@@ -94,6 +94,29 @@ public sealed class VisualFoundationTests
     }
 
     [Fact]
+    public void HeroSurfacePairingsAreDefinedInsideTheIsolatedStylesheetNotThePlainUtilityClass()
+    {
+        // Blazor CSS isolation adds a scope attribute to .beeday-hero, which outranks a plain
+        // .beeday-surface-corN utility class regardless of load order (discovered in Sprint 27.3 —
+        // the institutional hero silently rendered white instead of its chosen COR surface until
+        // fixed). The pairing must be re-declared as a compound selector inside BeeDayHero.razor.css.
+        var hero = ReadWebFile("Components", "DesignSystem", "Layout", "BeeDayHero.razor.css");
+
+        Assert.Contains("background: var(--beeday-hero-surface-bg, var(--beeday-color-surface));", hero, StringComparison.Ordinal);
+        for (var i = 0; i <= 9; i++)
+        {
+            Assert.Contains($".beeday-hero.beeday-surface-cor{i} {{ --beeday-hero-surface-bg: var(--beeday-palette-cor{i}); --beeday-hero-surface-fg: var(--beeday-palette-cor{i}-foreground); }}", hero, StringComparison.Ordinal);
+        }
+
+        // BeeDayBrand's own fixed default/inverse colors do not reliably contrast against every
+        // COR0-COR9 surface (brand-primary purple text failed WCAG color-contrast against COR3/COR4
+        // in a real axe-core E2E run); the hero's brand-context slot must force the lockup text to
+        // inherit the surface's own paired foreground instead.
+        Assert.Contains(".beeday-hero__brand-context ::deep .beeday-brand__bee,", hero, StringComparison.Ordinal);
+        Assert.Contains(".beeday-hero__brand-context ::deep .beeday-brand__day { color: inherit; }", hero, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void RewardAndButtonAliasesPreserveSemanticOwnership()
     {
         var variables = ReadWebFile("wwwroot", "css", "variables.css");

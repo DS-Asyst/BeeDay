@@ -1,0 +1,130 @@
+/* EPIC 27 Sprint 27.3 — institutional page framework: the shared shell (hero, via BeeDayHero) and
+   the four content-family variants (editorial, product, help, legal). Documentation/guidelines
+   (Brand guidelines) gets its own sidebar layout in Sprint 27.8; until then it scaffolds through the
+   editorial family like the other not-yet-filled pages. */
+
+.institutional-hero__context-label {
+    font-size: var(--beeday-font-size-sm);
+    letter-spacing: var(--beeday-letter-spacing-label);
+    text-transform: uppercase;
+}
+
+.institutional-page__body {
+    width: min(100% - 2 * var(--beeday-page-gutter), 72rem);
+    margin-inline: auto;
+    padding-block: clamp(2.5rem, 5vw, 4rem);
+}
+
+.institutional-page__body h2 {
+    margin: 0 0 var(--beeday-spacing-md);
+    color: var(--beeday-color-text-primary);
+    font-size: var(--beeday-font-size-2xl);
+    font-weight: var(--beeday-font-weight-extrabold);
+    line-height: var(--beeday-line-height-tight);
+}
+
+.institutional-page__body p {
+    margin: 0 0 var(--beeday-spacing-md);
+    color: var(--beeday-color-text-secondary);
+    line-height: var(--beeday-line-height-relaxed);
+}
+
+.institutional-page__body section + section { margin-top: var(--beeday-spacing-2xl); }
+
+/* Institutional/editorial — Mission, Efficacy, Contact us: a single readable column. */
+.institutional-page__body--editorial { max-width: 46rem; }
+
+/* Product/marketing — beeday, beeday Plus, Android, iOS: full-width sections, room for a feature
+   grid and a CTA row (populated in Sprint 27.6). */
+.institutional-product__features {
+    display: grid;
+    margin: var(--beeday-spacing-lg) 0;
+    gap: var(--beeday-spacing-lg);
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+
+.institutional-product__feature {
+    padding: var(--beeday-spacing-lg);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-lg);
+    background: var(--beeday-color-surface);
+}
+
+.institutional-product__feature h3 {
+    margin: 0 0 var(--beeday-spacing-xs);
+    color: var(--beeday-color-text-primary);
+    font-size: var(--beeday-font-size-lg);
+    font-weight: var(--beeday-font-weight-bold);
+}
+
+.institutional-product__feature p { margin: 0; }
+
+.institutional-product__status {
+    display: inline-flex;
+    margin-bottom: var(--beeday-spacing-md);
+    padding: var(--beeday-spacing-xs) var(--beeday-spacing-sm);
+    border-radius: var(--beeday-radius-pill);
+    background: var(--beeday-color-surface-muted);
+    color: var(--beeday-color-text-secondary);
+    font-size: var(--beeday-font-size-xs);
+    font-weight: var(--beeday-font-weight-bold);
+    letter-spacing: var(--beeday-letter-spacing-label);
+    text-transform: uppercase;
+}
+
+/* Help — beeday FAQs: a native, keyboard- and touch-accessible accordion. */
+.institutional-page__body--help { max-width: 48rem; }
+
+.institutional-faq { display: grid; gap: var(--beeday-spacing-sm); }
+
+.institutional-faq__item {
+    padding: var(--beeday-spacing-md) var(--beeday-spacing-lg);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-lg);
+    background: var(--beeday-color-surface);
+}
+
+.institutional-faq__item summary {
+    color: var(--beeday-color-text-primary);
+    font-weight: var(--beeday-font-weight-bold);
+    cursor: pointer;
+    list-style: none;
+}
+
+.institutional-faq__item summary::-webkit-details-marker { display: none; }
+
+.institutional-faq__item summary:focus-visible {
+    outline: var(--beeday-border-width) solid var(--beeday-color-brand-primary);
+    outline-offset: 3px;
+    border-radius: var(--beeday-radius-xs);
+}
+
+.institutional-faq__item p { margin: var(--beeday-spacing-sm) 0 0; }
+
+/* Legal/document — Community guidelines, Terms, Privacy: reading-first, no fabricated clauses. */
+.institutional-page__body--legal { max-width: 42rem; }
+
+.institutional-legal__pending {
+    margin-bottom: var(--beeday-spacing-lg);
+    padding: var(--beeday-spacing-md) var(--beeday-spacing-lg);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-lg);
+    background: var(--beeday-color-info-soft);
+    color: var(--beeday-color-text-primary);
+    font-weight: var(--beeday-font-weight-bold);
+}
+
+.institutional-legal__toc {
+    margin-bottom: var(--beeday-spacing-xl);
+    padding: var(--beeday-spacing-md) var(--beeday-spacing-lg);
+    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
+    border-radius: var(--beeday-radius-lg);
+    background: var(--beeday-color-surface-muted);
+}
+
+.institutional-legal__toc h2 { margin-bottom: var(--beeday-spacing-sm); font-size: var(--beeday-font-size-md); }
+.institutional-legal__toc ol { display: grid; margin: 0; padding-left: 1.2rem; gap: var(--beeday-spacing-xs); }
+
+@media (max-width: 34rem) {
+    .institutional-page__body { padding-block: var(--beeday-spacing-xl); }
+}

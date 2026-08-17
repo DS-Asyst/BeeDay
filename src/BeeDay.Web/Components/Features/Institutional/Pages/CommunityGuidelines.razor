@@ -1,0 +1,23 @@
+@page "/community-guidelines"
+@attribute [AllowAnonymous]
+@layout BeeDay.Web.Components.Layout.PublicLayout
+@using BeeDay.Web.Components.DesignSystem
+@using BeeDay.Web.Components.Features.Institutional.Components
+@inject IStringLocalizer<InstitutionalResources> Localizer
+
+<PageTitle>@Localizer["CommunityGuidelinesPageTitle"]</PageTitle>
+
+@* No approved community-guidelines text exists in the repository yet. This delivers the document
+   structure and an explicit pending-review state — no fabricated clauses (06_ASSETS_AND_OPEN_ITEMS.md). *@
+<LegalDocumentPageTemplate PageContext="@Localizer["CommunityGuidelinesPageContext"]" Title="@Localizer["CommunityGuidelinesTitle"]" Description="@Localizer["CommunityGuidelinesIntro"]" Surface="BeeDayPaletteToken.Cor9">
+    <p class="institutional-legal__pending">@Localizer["LegalPendingReview"]</p>
+    <nav class="institutional-legal__toc" aria-labelledby="community-guidelines-toc-heading">
+        <h2 id="community-guidelines-toc-heading">@Localizer["CommunityGuidelinesTocTitle"]</h2>
+        <ol>
+            <li>@Localizer["CommunityGuidelinesSection1"]</li>
+            <li>@Localizer["CommunityGuidelinesSection2"]</li>
+            <li>@Localizer["CommunityGuidelinesSection3"]</li>
+            <li>@Localizer["CommunityGuidelinesSection4"]</li>
+        </ol>
+    </nav>
+</LegalDocumentPageTemplate>

@@ -1,0 +1,122 @@
+/* First real styling for BeeDayHero (previously scaffolded, unstyled, with no production consumer —
+   see HeroCatalog.razor). EPIC 27 Sprint 27.3 is its first real consumer: the institutional page
+   shell. Surface is optional so non-solid consumers (onboarding, and any future neutral use) keep a
+   sensible baseline instead of opting into a colored background. */
+.beeday-hero {
+    display: grid;
+    gap: var(--beeday-spacing-lg);
+    width: 100%;
+    padding: clamp(2.5rem, 6vw, 4.5rem) var(--beeday-page-gutter);
+    background: var(--beeday-hero-surface-bg, var(--beeday-color-surface));
+    color: var(--beeday-hero-surface-fg, inherit);
+}
+
+.beeday-hero--compact {
+    padding: clamp(1.5rem, 3.2vw, 2.4rem) var(--beeday-page-gutter);
+}
+
+/* Surface pairings, defined here (not relying on the plain .beeday-surface-corN utility) because
+   Blazor CSS isolation adds a scope attribute to .beeday-hero, which structurally outranks a plain
+   global class selector regardless of stylesheet load order — a same-specificity utility class on
+   this element would silently lose to the base background/color declarations above. Setting the
+   custom properties here, read by the base rule's var() fallback, sidesteps that entirely. */
+.beeday-hero.beeday-surface-cor0 { --beeday-hero-surface-bg: var(--beeday-palette-cor0); --beeday-hero-surface-fg: var(--beeday-palette-cor0-foreground); }
+.beeday-hero.beeday-surface-cor1 { --beeday-hero-surface-bg: var(--beeday-palette-cor1); --beeday-hero-surface-fg: var(--beeday-palette-cor1-foreground); }
+.beeday-hero.beeday-surface-cor2 { --beeday-hero-surface-bg: var(--beeday-palette-cor2); --beeday-hero-surface-fg: var(--beeday-palette-cor2-foreground); }
+.beeday-hero.beeday-surface-cor3 { --beeday-hero-surface-bg: var(--beeday-palette-cor3); --beeday-hero-surface-fg: var(--beeday-palette-cor3-foreground); }
+.beeday-hero.beeday-surface-cor4 { --beeday-hero-surface-bg: var(--beeday-palette-cor4); --beeday-hero-surface-fg: var(--beeday-palette-cor4-foreground); }
+.beeday-hero.beeday-surface-cor5 { --beeday-hero-surface-bg: var(--beeday-palette-cor5); --beeday-hero-surface-fg: var(--beeday-palette-cor5-foreground); }
+.beeday-hero.beeday-surface-cor6 { --beeday-hero-surface-bg: var(--beeday-palette-cor6); --beeday-hero-surface-fg: var(--beeday-palette-cor6-foreground); }
+.beeday-hero.beeday-surface-cor7 { --beeday-hero-surface-bg: var(--beeday-palette-cor7); --beeday-hero-surface-fg: var(--beeday-palette-cor7-foreground); }
+.beeday-hero.beeday-surface-cor8 { --beeday-hero-surface-bg: var(--beeday-palette-cor8); --beeday-hero-surface-fg: var(--beeday-palette-cor8-foreground); }
+.beeday-hero.beeday-surface-cor9 { --beeday-hero-surface-bg: var(--beeday-palette-cor9); --beeday-hero-surface-fg: var(--beeday-palette-cor9-foreground); }
+
+.beeday-hero__row {
+    display: flex;
+    width: min(100%, 72rem);
+    margin-inline: auto;
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 3rem);
+}
+
+.beeday-hero__illustration {
+    display: grid;
+    flex: none;
+    width: min(28vw, 14rem);
+    place-items: center;
+}
+
+.beeday-hero__content { flex: 1 1 auto; min-width: 0; }
+
+.beeday-hero__brand-context {
+    display: flex;
+    margin-bottom: var(--beeday-spacing-sm);
+    align-items: center;
+    gap: var(--beeday-spacing-sm);
+    font-weight: var(--beeday-font-weight-bold);
+    opacity: .92;
+}
+
+/* Slot content is a child component (e.g. BeeDayBrand) — ::deep is required to size it here. */
+.beeday-hero__brand-context ::deep .beeday-brand { --beeday-brand-height: 1.35rem; }
+
+/* Force the lockup text to inherit the hero's own paired foreground (white on COR0/COR8, dark COR8
+   everywhere else) instead of BeeDayBrand's own default/inverse colors. BeeDayBrand only models two
+   fixed colors (brand-primary purple or white); neither reliably contrasts against every COR0-COR9
+   surface (e.g. brand-primary purple text failed WCAG color-contrast against COR3/COR4 — caught by
+   the repo's axe-core E2E scan). Inheriting the surface's own computed foreground is correct for
+   all ten surfaces by construction, so OnDarkSurface is deliberately not used for this slot. */
+.beeday-hero__brand-context ::deep .beeday-brand__bee,
+.beeday-hero__brand-context ::deep .beeday-brand__day { color: inherit; }
+
+.beeday-hero__eyebrow {
+    display: inline-block;
+    margin-bottom: var(--beeday-spacing-sm);
+    opacity: .85;
+    font-size: var(--beeday-font-size-sm);
+    font-weight: var(--beeday-font-weight-black);
+    letter-spacing: var(--beeday-letter-spacing-label);
+    text-transform: uppercase;
+}
+
+.beeday-hero h1 {
+    margin: 0;
+    color: inherit;
+    font-family: var(--beeday-font-display);
+    font-size: clamp(2rem, 4.6vw, 3.4rem);
+    font-weight: var(--beeday-font-weight-regular);
+    line-height: 1.12;
+}
+
+.beeday-hero--compact h1 { font-size: clamp(1.7rem, 3.4vw, 2.4rem); }
+
+.beeday-hero__subtitle {
+    margin: var(--beeday-spacing-md) 0 0;
+    max-width: 46rem;
+    color: inherit;
+    opacity: .88;
+    font-size: var(--beeday-font-size-lg);
+    line-height: var(--beeday-line-height-relaxed);
+}
+
+.beeday-hero--compact .beeday-hero__subtitle { margin-top: var(--beeday-spacing-sm); font-size: var(--beeday-font-size-md); }
+
+.beeday-hero__primary-action { flex: none; }
+
+.beeday-hero__supporting {
+    width: min(100%, 72rem);
+    margin-inline: auto;
+    color: inherit;
+    opacity: .88;
+}
+
+@media (max-width: 46rem) {
+    .beeday-hero__row { flex-direction: column; text-align: center; }
+    .beeday-hero__illustration { width: min(48vw, 12rem); }
+    .beeday-hero__brand-context { justify-content: center; }
+    .beeday-hero__subtitle { margin-inline: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .beeday-hero { transition: none; }
+}

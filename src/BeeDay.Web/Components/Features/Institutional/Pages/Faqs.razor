@@ -1,0 +1,29 @@
+@page "/faqs"
+@attribute [AllowAnonymous]
+@layout BeeDay.Web.Components.Layout.PublicLayout
+@using BeeDay.Web.Components.DesignSystem
+@using BeeDay.Web.Components.Features.Institutional.Components
+@inject IStringLocalizer<InstitutionalResources> Localizer
+
+<PageTitle>@Localizer["FaqsPageTitle"]</PageTitle>
+
+<HelpPageTemplate PageContext="@Localizer["FaqsPageContext"]" Title="@Localizer["FaqsTitle"]" Description="@Localizer["FaqsIntro"]" Surface="BeeDayPaletteToken.Cor4">
+    <div class="institutional-faq">
+        <details class="institutional-faq__item">
+            <summary>@Localizer["FaqsQ1Question"]</summary>
+            <p>@Localizer["FaqsQ1Answer"]</p>
+        </details>
+        <details class="institutional-faq__item">
+            <summary>@Localizer["FaqsQ2Question"]</summary>
+            <p>@Localizer["FaqsQ2Answer"]</p>
+        </details>
+        <details class="institutional-faq__item">
+            <summary>@Localizer["FaqsQ3Question"]</summary>
+            <p>@Localizer["FaqsQ3Answer"]</p>
+        </details>
+        <details class="institutional-faq__item">
+            <summary>@Localizer["FaqsQ4Question"]</summary>
+            <p>@Localizer["FaqsQ4Answer"]</p>
+        </details>
+    </div>
+</HelpPageTemplate>

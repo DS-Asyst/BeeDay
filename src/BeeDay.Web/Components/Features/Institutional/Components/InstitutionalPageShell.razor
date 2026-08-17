@@ -1,0 +1,30 @@
+@using BeeDay.Web.Components.DesignSystem
+@using BeeDay.Web.Components.DesignSystem.Layout
+@using BeeDay.Web.Components.DesignSystem.Text
+
+<article class="institutional-page">
+    <BeeDayHero Surface="Surface" Title="@Title" Subtitle="@Description" Illustration="@Illustration">
+        <BrandContext>
+            @* The lockup text color is forced to inherit the hero's own paired foreground in
+               BeeDayHero.razor.css — correct for every COR0-COR9 surface by construction, unlike
+               BeeDayBrand's own fixed default/inverse colors — so OnDarkSurface is not set here. *@
+            <BeeDayBrand />
+            <span class="institutional-hero__context-label">@PageContext</span>
+        </BrandContext>
+    </BeeDayHero>
+    <div class="institutional-page__body @BodyClass">
+        @ChildContent
+    </div>
+</article>
+
+@code {
+    /// <summary>The page's name as shown next to the brand lockup in the hero, e.g. "Mission".</summary>
+    [Parameter, EditorRequired] public string PageContext { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public BeeDayPaletteToken Surface { get; set; } = BeeDayPaletteToken.Cor0;
+    [Parameter] public RenderFragment? Illustration { get; set; }
+    [Parameter] public string? BodyClass { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}
