@@ -1,3 +1,5 @@
+/* Sprint 29.3: canonical --beeday-color-overlay token, not a hardcoded purple literal — see the
+   matching comment on .editor-modal-backdrop in editor-modal.css for the full rationale. */
 .beeday-feedback-backdrop {
     position: fixed;
     inset: 0;
@@ -5,7 +7,7 @@
     display: grid;
     place-items: center;
     padding: 1rem;
-    background: rgb(35 18 56 / 82%);
+    background: var(--beeday-color-overlay);
     backdrop-filter: blur(3px);
 }
 

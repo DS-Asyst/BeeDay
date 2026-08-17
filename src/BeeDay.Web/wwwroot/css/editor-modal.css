@@ -1,4 +1,9 @@
-/* Shared editor modal used by Habit, Task, To-Do and Project. */
+/* Shared editor modal used by Habit, Task, To-Do, Project, Transaction and Tag. */
+/* Sprint 29.3: the canonical backdrop is --beeday-color-overlay (a neutral, low-chroma dark slate)
+   instead of a hardcoded purple literal — the strong purple/violet overlay competed visually with
+   the modal itself. This token was already the intended canonical value (introduced in EPIC 21's
+   color audit) and was already live on ProjectWorkspace's own backdrop; this brings the editor
+   modals and delete confirmation onto the same token instead of each hardcoding its own purple. */
 .editor-modal-backdrop {
     position: fixed;
     inset: 0;
@@ -6,7 +11,7 @@
     display: grid;
     place-items: center;
     padding: var(--beeday-spacing-md);
-    background: rgb(35 25 45 / 70%);
+    background: var(--beeday-color-overlay);
     backdrop-filter: blur(2px);
 }
 

@@ -23,16 +23,22 @@ public sealed class AppFooterTests
     }
 
     [Fact]
-    public void OpensWithADecorativeInlineSvgWaveSeparatorBeforeItsRealContent()
+    public void OpensWithTheOfficialDecorativeWaveAssetBeforeItsRealContent()
     {
+        // Sprint 29.1 built this separator as an inline hand-drawn SVG path; Sprint 29.3 replaces it
+        // with the official asset prepared for this composition (assets/footer/footer-wave.svg),
+        // used as provided rather than recreated as markup.
         using var context = new BunitContext().WithLocalization();
         var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<AppFooter>());
 
         var footer = cut.Find("footer.app-footer");
         var wave = cut.Find(".app-footer__wave");
         Assert.Equal("true", wave.GetAttribute("aria-hidden"));
-        Assert.NotNull(wave.QuerySelector("svg path"));
-        Assert.Empty(wave.QuerySelectorAll("img"));
+        Assert.Empty(wave.QuerySelectorAll("svg"));
+        var image = wave.QuerySelector("img");
+        Assert.NotNull(image);
+        Assert.Equal("/assets/footer/footer-wave.svg", image.GetAttribute("src"));
+        Assert.Equal(string.Empty, image.GetAttribute("alt"));
         Assert.Contains("app-footer__wave", footer.Children[0].ClassList);
     }
 

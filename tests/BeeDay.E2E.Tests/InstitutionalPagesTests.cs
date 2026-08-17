@@ -64,12 +64,16 @@ public sealed class InstitutionalPagesTests(PlaywrightAppFixture fixture) : E2ET
     [InlineData("/privacy", "rgb(16, 15, 62)")]
     public async Task PageHeaderIsFullBleedAxisAlignedWithBodyAndUsesAPageHeaderEligibleColor(string route, string expectedBackgroundColor)
     {
-        // Sprint 29.2: the hero used to render as a small card capped to 72rem by an accidental CSS
-        // cascade interaction (nesting it inside a reading-width-limited <article>) — this protects
-        // three things at once: the header spans the full viewport width (not just 72rem), its
-        // content row shares the same left edge as the body content below it, and every route's
-        // color is one of the two COR0-COR9 tokens whose contrast with white text passes WCAG AA
-        // (Cor0 #5247F9 or Cor8 #100F3E — docs/brand/03-color-palette.md).
+        // Sprint 29.2 fixed the hero rendering as a small card capped to 72rem (nesting it inside a
+        // reading-width-limited <article>), but only got it to fill .beeday-main's own padded content
+        // box (~1856px of a 1920px viewport) — still leaving a visible white gutter (.beeday-main's
+        // own <= 2rem padding-inline) at the true viewport edges. Sprint 29.3 closes that gap via
+        // BeeDayHero's --beeday-hero-bleed-inset (see BeeDayHero.razor.css/polish.css), so this now
+        // asserts genuine edge-to-edge, not just "wider than before". This protects three things at
+        // once: the header spans the true viewport width, its content row shares the same left edge
+        // as the body content below it, and every route's color is one of the two COR0-COR9 tokens
+        // whose contrast with white text passes WCAG AA (Cor0 #5247F9 or Cor8 #100F3E —
+        // docs/brand/03-color-palette.md).
         await Page.SetViewportSizeAsync(1920, 1000);
         await GotoAsync(route);
 
@@ -87,13 +91,11 @@ public sealed class InstitutionalPagesTests(PlaywrightAppFixture fixture) : E2ET
         Assert.NotNull(heroRowBox);
         Assert.NotNull(bodyBox);
 
-        // The hero fills essentially the whole 1920px viewport (only .beeday-main's own <= 2rem
-        // gutter stands between it and the edge) instead of being capped to the 72rem reading width
-        // a nested <article> used to impose on it — same full-bleed behavior ExperienceSystemHome's
-        // already-correct sibling hero has. Before this Sprint's fix, a centered 72rem card here
-        // would sit at X ~ (1920 - 1152) / 2 = 384px and be only 1152px wide.
-        Assert.True(heroBox!.X < 40, $"the hero should start near the viewport edge, not be centered as a card (X={heroBox.X}).");
-        Assert.True(heroBox.Width > 1800, $"the hero must not be capped to the 72rem reading width (Width={heroBox.Width}).");
+        // Genuine edge-to-edge: before Sprint 29.2's fix, a centered 72rem card here would sit at
+        // X ~ (1920 - 1152) / 2 = 384px and be only 1152px wide; before Sprint 29.3's fix, it would
+        // sit at X ~ 32px (.beeday-main's own gutter) and be ~1856px wide.
+        Assert.InRange(heroBox!.X, 0, 1);
+        Assert.InRange(Math.Abs(heroBox.Width - 1920), 0, 1);
         Assert.InRange(Math.Abs(heroRowBox!.X - bodyBox!.X), 0, 1);
         Assert.InRange(Math.Abs(heroRowBox.Width - bodyBox.Width), 0, 1);
     }

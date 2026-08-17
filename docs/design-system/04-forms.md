@@ -3,7 +3,9 @@
 **Fonte da verdade:** verificado diretamente em `src/BeeDay.Web/Components/DesignSystem/Forms/`
 (6 componentes) e `src/BeeDay.Web/wwwroot/css/forms.css`, `editor-modal.css`, `identity.css`.
 
-**Última verificação:** 2026-08-16 (Sprint 25.12, EPIC 25 — Daily/Project convergence).
+**Última verificação:** 2026-08-17 (Sprint 29.3 — removida a divergência de `wallet.css` no campo
+Amount/Date da Transaction; ver a linha de `wallet.css` na tabela abaixo). Verificação anterior:
+2026-08-16 (Sprint 25.12, EPIC 25 — Daily/Project convergence).
 
 ## 1. Objetivo
 
@@ -92,7 +94,7 @@ removeu a implementação paralela de inputs em `identity.css`: `ForgotPassword`
 | `forms.css` | Componentes `Forms/` do Design System | É a origem de `.beeday-field*` |
 | `editor-modal.css` | Os 4 editores de atividade (Habit/Task/Todo/Project) | Não — declara `.editor-modal__hero input`, `.editor-modal__field input` com seu próprio border/box-shadow/focus, valores próximos mas não idênticos aos de `.beeday-field__control` |
 | `identity.css` | Layout e feedback das 5 páginas Identity | Sim — os três formulários usam `BeeDayInput`; o arquivo não redefine inputs |
-| `wallet.css` | `WalletFilters`, `TransactionFormModal`, `TagFormModal` | Sim nos filtros — busca, selects e datas usam as primitives; valor financeiro e picker de cor continuam especializados nos modais |
+| `wallet.css` | `WalletFilters`, `TransactionFormModal`, `TagFormModal` | Sim nos filtros — busca, selects e datas usam as primitives; valor financeiro (raw `InputNumber`, sem componente BeeDay dedicado) e picker de cor continuam especializados nos modais. Até a Sprint 29.3, `wallet.css` também redeclarava `.wallet-editor-grid .editor-modal__field input` com `min-height`/`border`/`radius` menores que `editor-modal.css`, afetando não só o campo de valor mas também a Data (nativo, dentro de `BeeDayDateInput`) só porque ambos são `input` — removido; a Transaction agora herda o mesmo contrato de `editor-modal.css` que os demais editores, sem regra própria |
 | `ActivityFilterBar.razor.css` | Busca debounced do Daily | Sim — `BeeDayInput.UpdateOnInput` preserva debounce de 300ms; menu de criação continua especializado |
 
 `Login` mantém `<form method="post">` e controles HTML para preservar nomes, antiforgery,
