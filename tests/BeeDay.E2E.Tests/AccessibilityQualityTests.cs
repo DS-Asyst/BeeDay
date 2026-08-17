@@ -63,6 +63,14 @@ public sealed class AccessibilityQualityTests(PlaywrightAppFixture fixture) : E2
         var dialog = Page.GetByRole(AriaRole.Dialog);
         await Expect(dialog).ToBeVisibleAsync();
         await AssertAxeCleanAsync(dialog, "Wallet transaction dialog");
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Cancel" }).ClickAsync();
+        await Expect(dialog).ToBeHiddenAsync();
+
+        // EPIC 27 Sprint 27.11: the new 10-swatch COR0-COR9 tag color picker (role="radiogroup").
+        await Page.GetByRole(AriaRole.Button, new() { Name = "New tag" }).ClickAsync();
+        var tagDialog = Page.GetByRole(AriaRole.Dialog);
+        await Expect(tagDialog).ToBeVisibleAsync();
+        await AssertAxeCleanAsync(tagDialog, "Wallet tag dialog");
     }
 
     private async Task LoginAsync()

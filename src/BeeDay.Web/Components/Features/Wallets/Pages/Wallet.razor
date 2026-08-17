@@ -23,17 +23,23 @@
 else
 {
     <div class="wallet-page beeday-fade-in" aria-busy="@_interaction.IsBusy.ToString().ToLowerInvariant()">
-        <BeeDayPageHeader Class="wallet-page__header"
-                          Eyebrow="@Localizer["PersonalFinanceEyebrow"]"
-                          Title="@Localizer["WalletHeading"]"
-                          Description="@Localizer["WalletDescription"]">
-            <Actions>
-                <BeeDayButton Variant="BeeDayButtonVariant.Primary"
+        @* EPIC 27 Sprint 27.11: a solid, compact hero — roughly half the height of the Brand
+           guidelines hero (BeeDayHero.razor.cs's Compact parameter was added specifically for
+           this). The illustration slot is intentionally left empty: no final asset exists yet
+           (06_ASSETS_AND_OPEN_ITEMS.md), and BeeDayHero already renders correctly without one. *@
+        <BeeDayHero Compact="true"
+                    Surface="BeeDayPaletteToken.Cor0"
+                    Class="wallet-page__hero"
+                    Eyebrow="@Localizer["PersonalFinanceEyebrow"]"
+                    Title="@Localizer["WalletHeading"]"
+                    Subtitle="@Localizer["WalletDescription"]">
+            <PrimaryAction>
+                <BeeDayButton Variant="BeeDayButtonVariant.ImportantWhite"
                                Icon="BeeDayIconName.Add"
                                Disabled="_interaction.IsBusy"
                                OnClick="OpenCreateTransaction">@Localizer["NewTransactionButton"]</BeeDayButton>
-            </Actions>
-        </BeeDayPageHeader>
+            </PrimaryAction>
+        </BeeDayHero>
 
         @if (!string.IsNullOrWhiteSpace(_errorMessage))
         {

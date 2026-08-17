@@ -154,7 +154,8 @@
   <data name="TagSummaryHeading" xml:space="preserve"><value>Tag</value></data>
   <data name="TagSummaryDescription" xml:space="preserve"><value>Organize your income and expenses.</value></data>
   <data name="ColorLabel" xml:space="preserve"><value>Color</value></data>
-  <data name="SelectTagColorAriaLabel" xml:space="preserve"><value>Select tag color</value></data>
+  <data name="TagColorSwatchLabel" xml:space="preserve"><value>Color {0}</value></data>
+  <data name="TagColorSelectedLabel" xml:space="preserve"><value>Selected</value></data>
   <data name="SaveButtonLabel" xml:space="preserve"><value>Save</value></data>
   <data name="CreateButtonLabel" xml:space="preserve"><value>Create</value></data>
 </root>
