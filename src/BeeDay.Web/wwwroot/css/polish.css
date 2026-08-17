@@ -35,7 +35,9 @@ body { min-width: 20rem; }
 .beeday-button:has(.beeday-icon):not(.beeday-button--full-width) { padding-inline-start: calc(var(--beeday-grid) * 1.5); }
 
 .beeday-field { gap: var(--beeday-grid); }
-.beeday-field__control--textarea { min-height: 7rem; line-height: 1.5; }
+/* Sprint 29.3: the textarea min-height/line-height rule that used to be here moved to forms.css,
+   the actual owner of control-height contracts (see forms.css for the full note) — it was silently
+   overriding forms.css's own, different value for this exact selector. */
 
 /* Unified surfaces */
 .beeday-card--padded { padding: clamp(1rem, 2.5vw, 1.5rem); }
@@ -49,6 +51,13 @@ body { min-width: 20rem; }
 .beeday-main { padding-inline: var(--beeday-page-gutter); padding-block: calc(var(--beeday-grid) * 3); }
 .beeday-main--authenticated { padding: 0; }
 .beeday-main--authenticated > :where(section, article, .beeday-page, .page-content) { width: 100%; max-width: none; }
+
+/* Sprint 29.3: lets BeeDayHero's own --beeday-hero-bleed-inset margin cancel exactly this main's
+   padding-inline, so a colored page header reaches the true viewport edges instead of stopping at
+   this padded content box (see BeeDayHero.razor.css). Scoped to PublicLayout's own main only —
+   .beeday-main--authenticated already has zero padding, so Wallet's hero has nothing to cancel and
+   is correctly unaffected by this token remaining unset there. */
+.public-layout__main { --beeday-hero-bleed-inset: var(--beeday-page-gutter); }
 
 /* Avoid animation-driven layout shift */
 .beeday-button,

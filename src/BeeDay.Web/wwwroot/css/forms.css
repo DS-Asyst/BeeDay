@@ -25,8 +25,14 @@
 .beeday-field__control::placeholder { color: var(--beeday-color-text-muted); opacity: 1; }
 .beeday-field__control:hover:not(:disabled):not([readonly]) { border-color: var(--beeday-color-border-strong); }
 
+/* Sprint 29.3: min-height/line-height moved here from polish.css, which redeclared this same
+   selector and — loading after this file in App.razor with equal specificity — silently won,
+   making this rule's own 4.3rem value dead/unreachable. Forms owns control-height contracts, not
+   the page-rhythm utility sheet; the live 7rem value (unchanged) is preserved, just consolidated
+   into its correct owner. */
 .beeday-field__control--textarea {
-    min-height: 4.3rem;
+    min-height: 7rem;
+    line-height: 1.5;
     resize: vertical;
 }
 

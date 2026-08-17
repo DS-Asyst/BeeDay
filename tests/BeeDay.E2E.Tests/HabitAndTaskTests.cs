@@ -68,9 +68,13 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
     }
 
     [Fact]
-    public async Task TaskCheckbox_HoverPreviewsTheCheckWithoutCompletingUntilClicked()
+    public async Task TaskCheckbox_HoverNeverPreviewsTheCheckBeforeCompletion()
     {
-        // EPIC 27 Sprint 27.10 acceptance: "Hover mostra check sem marcar antes do clique."
+        // Sprint 29.3: EPIC 27 Sprint 27.10 originally made hover fade the check glyph to partial
+        // opacity as a "preview" — that read as a false completed affordance on an item that hadn't
+        // actually been completed yet, so it was removed. Hover may still change the checkbox's own
+        // surface/border for affordance, but the glyph itself must stay fully hidden until the item
+        // is genuinely completed.
         await LoginToDailyAsync();
         var title = $"E2E Hover {Guid.NewGuid():N}"[..24];
 
@@ -88,9 +92,7 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
 
         await checkbox.HoverAsync();
         await Page.WaitForTimeoutAsync(200);
-        var hoveredOpacity = await glyph.EvaluateAsync<string>("element => getComputedStyle(element).opacity");
-        Assert.NotEqual("0", hoveredOpacity);
-        Assert.NotEqual("1", hoveredOpacity);
+        Assert.Equal("0", await glyph.EvaluateAsync<string>("element => getComputedStyle(element).opacity"));
 
         // Hovering alone must never have completed it.
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Complete {title}" })).ToBeVisibleAsync();
@@ -147,7 +149,17 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
 
         await Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Project: {title}" }).ClickAsync();
         await Expect(editor).ToBeVisibleAsync();
-        await editor.GetByRole(AriaRole.Button, new() { Name = "Open Project" }).ClickAsync();
+
+        // Sprint 29.3: Open Project used to opt into Compact="true", rendering shorter/smaller-text
+        // than the Cancel button sitting right next to it in the same footer row — this protects
+        // the fix by comparing their real computed heights instead of just a class assertion.
+        var openProjectButton = editor.GetByRole(AriaRole.Button, new() { Name = "Open Project" });
+        var cancelButton = editor.GetByRole(AriaRole.Button, new() { Name = "Cancel" });
+        Assert.Equal(
+            await cancelButton.EvaluateAsync<string>("element => getComputedStyle(element).height"),
+            await openProjectButton.EvaluateAsync<string>("element => getComputedStyle(element).height"));
+
+        await openProjectButton.ClickAsync();
 
         var workspace = Page.GetByRole(AriaRole.Dialog, new() { Name = title });
         await Expect(workspace).ToBeVisibleAsync();

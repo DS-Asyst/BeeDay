@@ -1,11 +1,24 @@
 /* First real styling for BeeDayHero (previously scaffolded, unstyled, with no production consumer —
    see HeroCatalog.razor). EPIC 27 Sprint 27.3 is its first real consumer: the institutional page
    shell. Surface is optional so non-solid consumers (onboarding, and any future neutral use) keep a
-   sensible baseline instead of opting into a colored background. */
+   sensible baseline instead of opting into a colored background.
+   Sprint 29.3: --beeday-hero-bleed-inset lets the hero cancel out its ancestor's own inline padding
+   (via a negative margin equal to that padding) so a colored Surface reaches the true edges of its
+   layout region instead of stopping at the padded content box — the same technique Home.razor.css's
+   own full-bleed sections already use. The token defaults to 0 (no-op) so contexts that never set it
+   — the authenticated shell's Wallet hero, which has no ancestor padding to cancel — are unaffected;
+   polish.css opts PublicLayout's <main> in specifically (see .public-layout__main there). Sprint
+   29.2 only got the hero to fill its ancestor's padded content box, still leaving visible white
+   gutters at the true viewport edges on Institutional/ExperienceSystem pages — this closes that gap.
+   No explicit width: for a block-level grid container, width:auto already fills the containing
+   block and — critically — auto-width absorbs negative margins symmetrically (stretching the box on
+   both sides), unlike an explicit width:100%, which fixes the content width regardless of margins
+   and would only shift the box instead of widening it (confirmed the hard way: with width:100% this
+   rule moved the hero's left edge to the viewport edge but left its right edge exactly where it was). */
 .beeday-hero {
     display: grid;
     gap: var(--beeday-spacing-lg);
-    width: 100%;
+    margin-inline: calc(-1 * var(--beeday-hero-bleed-inset, 0px));
     padding: clamp(2.5rem, 6vw, 4.5rem) var(--beeday-page-gutter);
     background: var(--beeday-hero-surface-bg, var(--beeday-color-surface));
     color: var(--beeday-hero-surface-fg, inherit);

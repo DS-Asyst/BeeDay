@@ -190,17 +190,13 @@
     font-weight: 700;
 }
 
-.wallet-editor-grid .editor-modal__field input {
-    width: 100%;
-    min-height: 2.6rem;
-    box-sizing: border-box;
-    border: 1px solid var(--beeday-color-border);
-    border-radius: var(--beeday-radius-xs);
-    background: var(--beeday-color-surface);
-    color: var(--beeday-color-text-primary);
-    padding: .65rem .75rem;
-    font: inherit;
-}
+/* Sprint 29.3: the field-styling override that used to live here (shorter min-height, thinner
+   border, --beeday-radius-xs instead of -lg) was removed — it fought editor-modal.css's own shared
+   ".editor-modal__field input, select" rule (same shape of selector, just wallet-scoped) with higher
+   specificity, so the Transaction editor's Amount field (a raw InputNumber) and Date field (native
+   input inside the shared BeeDayDateInput) rendered shorter and more square than every other field
+   in the same modal. Removing it lets the shared foundation's contract win here too, with no
+   replacement rule needed. Layout rules below (grid columns, field/label spacing) are unaffected. */
 
 @media (max-width: 720px) {
     .wallet-editor-grid {

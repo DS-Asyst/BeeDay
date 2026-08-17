@@ -1,9 +1,10 @@
 .activity-card{--activity-accent:var(--beeday-color-task);--activity-accent-dark:var(--beeday-color-task-dark);position:relative;display:grid;grid-template-columns:2.45rem minmax(0,1fr) 2.25rem;min-height:5.35rem;overflow:hidden}.activity-card--task{--activity-accent:var(--beeday-color-task);--activity-accent-dark:var(--beeday-color-task-dark)}.activity-card--todo{--activity-accent:var(--beeday-color-todo);--activity-accent-dark:var(--beeday-color-todo-dark)}.activity-card--project{--activity-accent:var(--beeday-color-project);--activity-accent-dark:var(--beeday-color-project-dark)}
-/* The checkbox's own outline/background is always visible (no opacity toggle
-   on .activity-card__checkbox itself) — only the inner .activity-card__checkbox-glyph
-   (the checkmark) fades in on hover/focus/completed, so the control reads as
-   a real toggle at rest instead of appearing only on interaction. */
-.activity-card__rail{display:flex;align-items:flex-start;justify-content:center;padding-top:.5rem;background:var(--activity-accent)}.activity-card__checkbox{display:grid;place-items:center;width:1.55rem;height:1.55rem;padding:0;border:2px solid rgb(255 255 255 / 88%);border-radius:.14rem;background:rgb(255 255 255 / 88%);color:var(--activity-accent-dark);font-size:.95rem;font-weight:700;cursor:pointer;box-shadow:0 1px 2px rgb(50 30 20 / 12%);transition:transform .12s ease,background-color .12s ease,color .12s ease}.activity-card__checkbox-glyph{display:inline-flex;align-items:center;justify-content:center;opacity:0;transform:scale(.7);transition:opacity .12s ease,transform .12s ease}.activity-card__checkbox:hover{transform:scale(1.06);background:var(--beeday-color-surface)}.activity-card__checkbox:hover .activity-card__checkbox-glyph{opacity:.62;transform:scale(1)}.activity-card__checkbox:focus-visible .activity-card__checkbox-glyph{opacity:.62;transform:scale(1)}.activity-card__checkbox:active{transform:scale(.96)}
+/* Sprint 29.3: the checkbox's own surface/border is always visible at rest (an empty box), and
+   hover/focus/active may only change surface/border/scale — never the check glyph itself. Earlier
+   sprints faded the glyph in at partial opacity on hover/focus/active as a "preview"; that read as
+   a false completed affordance before the click actually happened, so it was removed. The glyph now
+   appears only when Completed is actually true (.activity-card--completed below). */
+.activity-card__rail{display:flex;align-items:flex-start;justify-content:center;padding-top:.5rem;background:var(--activity-accent)}.activity-card__checkbox{display:grid;place-items:center;width:1.55rem;height:1.55rem;padding:0;border:2px solid rgb(255 255 255 / 88%);border-radius:.14rem;background:rgb(255 255 255 / 88%);color:var(--activity-accent-dark);font-size:.95rem;font-weight:700;cursor:pointer;box-shadow:0 1px 2px rgb(50 30 20 / 12%);transition:transform .12s ease,background-color .12s ease,color .12s ease}.activity-card__checkbox-glyph{display:inline-flex;align-items:center;justify-content:center;opacity:0;transform:scale(.7);transition:opacity .12s ease,transform .12s ease}.activity-card__checkbox:hover{transform:scale(1.06);background:var(--beeday-color-surface)}.activity-card__checkbox:active{transform:scale(.96)}
 .activity-card__body{min-width:0;padding:.66rem .72rem .55rem}.activity-card__title-row{display:flex;align-items:center;gap:.3rem}.activity-card h3{margin:0;overflow:hidden;color:var(--beeday-color-card-title);font-size:.82rem;font-weight:650;line-height:1.25;text-overflow:ellipsis;white-space:nowrap}.activity-card p{display:-webkit-box;margin:.22rem 0 0;overflow:hidden;color:var(--beeday-color-card-description);font-size:.64rem;line-height:1.4;-webkit-box-orient:vertical;-webkit-line-clamp:2}.activity-card__star{color:var(--beeday-color-card-star);font-size:.74rem}.activity-card__meta{display:inline-block;margin-top:.42rem;padding:.12rem .35rem;border-radius:.15rem;color:var(--beeday-color-card-meta-text);background:var(--beeday-color-card-meta-bg);font-size:.55rem;font-weight:700}
 .activity-card__menu{align-self:start;justify-self:center;width:1.35rem;height:1.55rem;margin-top:.48rem;padding:0;border:0;color:#756c7d;background:transparent;font-size:1.15rem;font-weight:700;line-height:1;cursor:pointer}.activity-card__menu:hover{color:var(--beeday-color-brand-primary-hover)}.activity-card--completed{opacity:.66}.activity-card--completed h3{text-decoration:line-through}.activity-card--completed .activity-card__checkbox{background:var(--beeday-color-surface)}.activity-card--completed .activity-card__checkbox-glyph{opacity:1;transform:scale(1)}
 @media(max-width:650px){.activity-card{grid-template-columns:2.65rem minmax(0,1fr) 2.4rem}}
@@ -574,19 +575,17 @@
    visible "empty box" at rest) and its check glyph faintly visible (opacity .55) even when
    pending. border-color: currentColor keeps the box in sync with .activity-card__checkbox's
    own color per state (muted at rest, brand primary on hover/focus/press, success once
-   completed) without duplicating that logic here. */
+   completed) without duplicating that logic here.
+   Sprint 29.3: this block used to also fade the glyph to opacity .62 on hover/focus-visible/active
+   as a "preview" of completion — that read as a false completed affordance on a task/to-do that
+   hadn't actually been completed yet. Removed; hover/focus/active still change the checkbox's own
+   surface/border/scale below, just never the glyph's opacity. */
 .activity-card__checkbox {
     border: 2px solid currentColor;
     border-radius: var(--beeday-radius-sm);
 }
 
 .activity-card__checkbox-glyph { opacity: 0; }
-
-.activity-card__checkbox:hover .activity-card__checkbox-glyph,
-.activity-card__checkbox:focus-visible .activity-card__checkbox-glyph,
-.activity-card__checkbox:active .activity-card__checkbox-glyph {
-    opacity: .62;
-}
 
 .activity-card--completed .activity-card__checkbox-glyph { opacity: 1; }
 

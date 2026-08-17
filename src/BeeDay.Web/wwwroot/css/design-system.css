@@ -109,7 +109,9 @@
 /* Important White — white surface, neutral border, Accent Secondary (COR3, text-safe) text.
    Reserved for the explicit "important white button" cases (e.g. I ALREADY HAVE AN ACCOUNT, CREATE
    ACCOUNT), not a general secondary replacement. See --beeday-color-button-important-white-* in
-   variables.css for why the border/depth/shadow are neutral rather than colored. */
+   variables.css for why the border/depth/shadow are neutral rather than colored, and for Sprint
+   29.3's #2CBAFF design-reference note (text stays the accessible --accent-secondary-on-light token
+   — #2CBAFF itself fails WCAG AA as text on white, same as the COR3 it was already using). */
 .beeday-button--important-white {
     --beeday-button-background: var(--beeday-color-button-important-white-bg);
     --beeday-button-background-hover: var(--beeday-color-button-important-white-bg-hover);
