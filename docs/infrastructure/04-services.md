@@ -5,7 +5,8 @@
 `HealthChecks/SqlServerHealthCheck.cs`, `Background/*.cs`, `Configuration/*.cs`, e
 `InfrastructureServiceCollectionExtensions.cs` (para lifetime/registro).
 
-**Última verificação:** 2026-08-16 (Epic 26, Sprint 26.4) — seção Email atualizada com
+**Última verificação:** 2026-08-16 (Epic 26, Sprint 26.6) — seção Email atualizada com a alternativa
+em texto plano e a correção da cor de marca; Sprint 26.4 atualizou a mesma seção com
 `HmgRecipientGuardedEmailSender`; Sprint 26.2 atualizou a mesma seção com `EmailProviderSelector`;
 verificação anterior em 2026-08-09 (Sprint 18.6) — `Caching/MemoryApplicationCache.cs` removido (ver
 achado abaixo).
@@ -64,11 +65,21 @@ descartada por engano. Sem lock global, sem `BackgroundService`/`Timer` novo, se
 | Interface | `IEmailSender` | `IEmailSender` |
 | Lifetime | Typed `HttpClient` (`AddHttpClient<IEmailSender, ResendEmailSender>`) | Singleton |
 | Registrado quando | `BeeDay:Email:Resend:Enabled = true` | Caso contrário (padrão) |
-| Mecanismo | `POST https://api.resend.com/emails`, `Authorization: Bearer {ApiKey}`, `User-Agent: BeeDay/1.0`, `Idempotency-Key` novo por request, timeout 30s. Lança `HttpRequestException` em falha (não engolida) | Escreve 2 arquivos por e-mail em `{ContentRoot}/{Directory}` (padrão `Data/Emails`): `{timestamp}-{hex}.html` (corpo) e `.json` (metadados: destinatário, assunto, arquivo, timestamp) |
+| Mecanismo | `POST https://api.resend.com/emails`, `Authorization: Bearer {ApiKey}`, `User-Agent: BeeDay/1.0`, `Idempotency-Key` novo por request, timeout 30s, campo `text` opcional (`EmailMessage.PlainTextBody`). Lança `HttpRequestException` em falha (não engolida) | Escreve 2 ou 3 arquivos por e-mail em `{ContentRoot}/{Directory}` (padrão `Data/Emails`): `{timestamp}-{hex}.html` (corpo), `.txt` opcional (texto plano, só se `PlainTextBody` presente) e `.json` (metadados: destinatário, assunto, `HtmlFile`, `PlainTextFile`, timestamp) |
 | Proteção | — | Guarda contra path traversal — lança `InvalidOperationException` se o diretório resolvido escapar da raiz de conteúdo |
 
 A escolha entre os dois acontece inteiramente em tempo de DI (`InfrastructureServiceCollectionExtensions`),
 nunca em runtime por requisição.
+
+**EPIC 26, Sprint 26.6 — alternativa em texto plano:** `EmailMessage` ganhou um 4º membro posicional
+opcional, `PlainTextBody` (padrão `null`, não quebra nenhum call site de 3 argumentos existente).
+`IdentityEmailComposer` (`Identity/IdentityEmailComposer.cs`) agora produz esse texto para os dois
+fluxos (`ComposeEmailConfirmation`/`ComposePasswordReset`), junto com a correção da cor de marca
+usada no botão de call-to-action — de `#7A4FCB` (roxo pré-EPIC-25) para `#5247F9`, a única Brand
+Color oficialmente aprovada (`docs/design-system/01-foundations.md` §2.2). Ver
+[`06-transactional-email.md`](06-transactional-email.md) §13 para a análise completa, incluindo a
+decisão documentada de não localizar o conteúdo dos e-mails (fronteira arquitetural preservada com
+`docs/web/07-localization.md` §9).
 
 **EPIC 26, Sprint 26.4 — `HmgRecipientGuardedEmailSender`:** whenever `EmailProviderSelector`
 resolves `EmailProvider.Resend`, `IEmailSender` is registered as `HmgRecipientGuardedEmailSender`

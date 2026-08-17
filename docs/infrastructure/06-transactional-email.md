@@ -13,9 +13,12 @@ and `git log`/`git show` on the files above. Cross-checked against
 [`docs/deployment/02-runtime-configuration.md`](../deployment/02-runtime-configuration.md)
 (already current as of Sprint 18.4).
 
-**Last verified:** 2026-08-16 (Epic 26, Sprint 26.5 — §12 added: full Identity email flow and
+**Last verified:** 2026-08-16 (Epic 26, Sprint 26.6 — §13 added: transactional email template
+ownership/conventions, the brand-color correction (`#7A4FCB` → `#5247F9`), the new plain-text
+alternative, and the documented decision not to localize email content (architectural boundary,
+`docs/web/07-localization.md` §9). Sprint 26.5 added §12: full Identity email flow and
 `PublicBaseUrl` link-integrity audit, closing test gaps for the production origin guard and the
-persistence-succeeds-delivery-fails boundary; no production code changed. Sprint 26.4 added §10: the
+persistence-succeeds-delivery-fails boundary. Sprint 26.4 added §10: the
 centralized, fail-closed HMG recipient guard, `HmgRecipientGuardedEmailSender`. Sprint 26.3 formally
 documented the secrets/configuration contract for `ResendOptions:ApiKey`/`FromAddress` in
 [`docs/deployment/02-runtime-configuration.md`](../deployment/02-runtime-configuration.md) §6;
@@ -547,7 +550,90 @@ whoever owns that call site, not an email-architecture change. Given `CreateUser
 confirmation email through the exact same path as `CreateAccountCommand`, it now has the same test
 coverage (§12.3) so it is not a silent gap if it is ever wired up.
 
-## 13. Related documentation
+## 13. Transactional email templates (Epic 26, Sprint 26.6)
+
+### 13.1 Ownership and extension convention
+
+`IdentityEmailComposer` (`src/BeeDay.Infrastructure/Identity/IdentityEmailComposer.cs`) is the single
+owner of every transactional email template in the product — confirmed exhaustive by the flow
+inventory in §3/§12.1 (only `ComposeEmailConfirmation`/`ComposePasswordReset` exist; no other
+template-producing code was found anywhere in `src/`). Both methods share one HTML builder
+(`BuildHtmlTemplate`) and one plain-text builder (`BuildPlainTextTemplate`) parameterized by title,
+greeting name, introduction, action label/URL, and footer — a new transactional email flow extends
+this composer with a third `Compose*` method reusing the same two builders, not a new template
+system. This mirrors the "one class per Options-bound concern" pattern already used throughout
+Infrastructure (e.g. `ResendEmailSender`/`DevelopmentEmailSender` each owning one delivery mechanism)
+and matches the sprint's own constraint: centralize without introducing a parallel Design System or a
+general-purpose template engine.
+
+### 13.2 Brand color corrected
+
+The HTML template used `#7A4FCB` (a pre-EPIC-25 purple) for its call-to-action button — inconsistent
+with `#5247F9`, the single officially approved beeday Brand Color
+(`docs/design-system/01-foundations.md` §2.2; `CLAUDE.md` §13; confirmed against
+`src/BeeDay.Web/wwwroot/css/variables.css:4`, `--beeday-color-brand-primary: #5247f9`). Corrected in
+this sprint (`IdentityEmailComposer.BrandColor`). The template's dark background/surface (`#17131f`)
+does not correspond to any current design-system surface token (the product's actual default surface
+is light, `--beeday-color-surface: #ffffff`) — left unchanged deliberately: no design-system contract
+names an "official" email surface color to converge on, and a full visual redesign of an
+email-client-rendered template (no visual-regression tooling exists for that) is a materially
+different, riskier scope than the sprint's "reuse applicable tokens conceptually" mandate. Flagged
+here as a candidate for a future, deliberately-scoped design sprint if the owner wants full parity.
+
+### 13.3 Plain-text alternative
+
+`EmailMessage` (`src/BeeDay.Application/Common/Identity/IEmailSender.cs`) gained an optional 4th
+positional member, `PlainTextBody` (defaults to `null` — every existing 3-argument call site remains
+valid; not a breaking change to this public Application contract). `IdentityEmailComposer` now
+populates it for both flows. `ResendEmailSender` forwards it as Resend's documented `text` field
+(`null` when absent, matching Resend's own optional-field contract).
+`DevelopmentEmailSender` captures it as a third `{base-name}.txt` file alongside the existing
+`.html`/`.json` pair when present, and records the file name (or `null`) in the metadata JSON's new
+`PlainTextFile` field — additive only; `EmailCaptureWebApplicationFactory`
+(`tests/BeeDay.Web.Tests/Integration/`) filters strictly by `*.html`, so its token-recovery and
+email-count helpers are unaffected.
+
+### 13.4 HMG subject distinction — already centralized, not duplicated here
+
+The sprint's own requirement ("HMG subject distinction through the official safety/config/template
+path rather than duplicated conditionals") is already satisfied structurally, by
+`HmgRecipientGuardedEmailSender` (§10, Sprint 26.4): it prepends `HmgRecipientGuardOptions.SubjectPrefix`
+(default `"[HMG] "`) to every allowed message's subject at the delivery boundary, once, regardless of
+which flow produced the email. `IdentityEmailComposer` has no HMG/environment awareness and must not
+gain any — adding a conditional here would be exactly the duplicated-conditional pattern the sprint
+explicitly prohibits. No change was needed or made in this sprint for this requirement.
+
+### 13.5 Content localization — not implemented, architectural boundary documented
+
+Every template string is English-only, hardcoded in `IdentityEmailComposer`. The product has a full
+en-US/pt-BR localization system (`docs/web/07-localization.md`), so this sprint evaluated reusing it
+per the master instructions' "do not create a second source of truth for localization; reuse/extend
+if it exists."
+
+**Not implemented, because the existing localization system is documented and tested as exclusively
+Web-owned:** `docs/web/07-localization.md` §9 states, as an audited, zero-exception invariant,
+"`Domain` e `Application` permanecem inteiramente livres de `IStringLocalizer`/`CultureInfo`... Nenhum
+dos dois tradutores existe em `BeeDay.Domain`/`BeeDay.Application`/`BeeDay.Infrastructure`" —
+confirmed by that document's own grep-verified claim of 0 occurrences of `IStringLocalizer`/
+`ResourceManager` outside `BeeDay.Web`. `IdentityEmailComposer` lives in Infrastructure. Adding
+`IStringLocalizer`/`.resx` there would not be "reusing" the existing system — it would violate this
+specific, deliberately-audited architectural boundary and create a second pattern for how localization
+enters non-Web layers, which CLAUDE.md's core operating principles rank preserving architecture above
+completing an individual task's nice-to-have. The alternative — moving email *composition* into Web,
+with Infrastructure only sending an already-rendered message — is a legitimate design, but it is a
+materially larger architectural change (moving ownership of `IIdentityEmailComposer`'s implementation
+across a layer boundary, touching every call site in `UserHandlers.cs`/`IdentityHandlers.cs`) than
+this sprint's "centralize templates" mandate justifies unilaterally.
+
+**Recommendation, not actioned:** if transactional email localization is wanted, it should be its own
+scoped decision — either (a) extend `docs/web/07-localization.md`'s boundary explicitly to allow a
+narrow, Infrastructure-owned resource catalog for email strings only (a deliberate architecture
+change, not a silent one), or (b) move composition to Web (calling `IStringLocalizer` there) and have
+Infrastructure senders accept a fully-rendered `EmailMessage`. Either requires the repository owner's
+explicit approval per `CLAUDE.md` §3.5 ("Do not create... new architectural patterns... unless the
+user explicitly approves").
+
+## 14. Related documentation
 
 - [`04-services.md`](04-services.md) — existing Infrastructure services inventory, including the
   `ResendEmailSender`/`DevelopmentEmailSender` summary this document expands on with the HMG root

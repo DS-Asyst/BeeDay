@@ -44,11 +44,21 @@ public sealed class DevelopmentEmailSender(
         var metadataPath = Path.Combine(directory, $"{baseName}.json");
 
         await File.WriteAllTextAsync(htmlPath, message.HtmlBody, cancellationToken);
+
+        string? plainTextFileName = null;
+        if (message.PlainTextBody is { Length: > 0 })
+        {
+            var plainTextPath = Path.Combine(directory, $"{baseName}.txt");
+            await File.WriteAllTextAsync(plainTextPath, message.PlainTextBody, cancellationToken);
+            plainTextFileName = Path.GetFileName(plainTextPath);
+        }
+
         var metadata = JsonSerializer.Serialize(new
         {
             message.Recipient,
             message.Subject,
             HtmlFile = Path.GetFileName(htmlPath),
+            PlainTextFile = plainTextFileName,
             CapturedAtUtc = DateTimeOffset.UtcNow
         }, new JsonSerializerOptions { WriteIndented = true });
         await File.WriteAllTextAsync(metadataPath, metadata, cancellationToken);

@@ -66,6 +66,50 @@ public sealed class IdentityInfrastructureTests
         Assert.Contains("expires in 1 hour", message.HtmlBody, StringComparison.Ordinal);
     }
 
+    // Epic 26, Sprint 26.6: #5247F9 is the single officially approved beeday Brand Color
+    // (docs/design-system/01-foundations.md §2.2; CLAUDE.md §13) — the CTA button must use it, and
+    // the stale pre-EPIC-25 purple (#7A4FCB) this template used before must be fully gone.
+    [Theory]
+    [InlineData("ComposeEmailConfirmation")]
+    [InlineData("ComposePasswordReset")]
+    public void EmailComposer_UsesTheCurrentBrandColorForTheCallToAction(string method)
+    {
+        var composer = CreateComposer();
+
+        var message = method == "ComposeEmailConfirmation"
+            ? composer.ComposeEmailConfirmation("player@example.com", "Tiago", "token")
+            : composer.ComposePasswordReset("player@example.com", "Tiago", "token");
+
+        Assert.Contains("#5247F9", message.HtmlBody, StringComparison.Ordinal);
+        Assert.DoesNotContain("#7A4FCB", message.HtmlBody, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void EmailComposer_IncludesAPlainTextAlternativeWithTheSameLink()
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Tiago", "a+b/c=");
+
+        Assert.NotNull(message.PlainTextBody);
+        Assert.DoesNotContain('<', message.PlainTextBody);
+        Assert.Contains("https://beeday.example/account/confirm-email?token=a%2Bb%2Fc%3D", message.PlainTextBody, StringComparison.Ordinal);
+        Assert.Contains("Tiago", message.PlainTextBody, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void EmailComposer_PasswordResetPlainTextMatchesTheHtmlLinkAndExpiry()
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposePasswordReset("player@example.com", "Tiago", "reset-token");
+
+        Assert.NotNull(message.PlainTextBody);
+        Assert.DoesNotContain('<', message.PlainTextBody);
+        Assert.Contains("https://beeday.example/account/reset-password?token=reset-token", message.PlainTextBody, StringComparison.Ordinal);
+        Assert.Contains("expires in 1 hour", message.PlainTextBody, StringComparison.Ordinal);
+    }
+
     [Fact]
     public async Task ResendSender_WhenDisabled_DoesNotCallApi()
     {
@@ -96,7 +140,7 @@ public sealed class IdentityInfrastructureTests
         var sender = CreateSender(handler, EnabledOptions());
 
         await sender.SendAsync(
-            new EmailMessage("player@example.com", "Confirm", "<p>Hello</p>"),
+            new EmailMessage("player@example.com", "Confirm", "<p>Hello</p>", "Hello"),
             TestContext.Current.CancellationToken);
 
         Assert.NotNull(captured);
@@ -114,6 +158,27 @@ public sealed class IdentityInfrastructureTests
         Assert.Equal("player@example.com", root.GetProperty("to")[0].GetString());
         Assert.Equal("Confirm", root.GetProperty("subject").GetString());
         Assert.Equal("<p>Hello</p>", root.GetProperty("html").GetString());
+        Assert.Equal("Hello", root.GetProperty("text").GetString());
+    }
+
+    [Fact]
+    public async Task ResendSender_WhenPlainTextBodyIsAbsent_OmitsItAsNull()
+    {
+        string? payload = null;
+        var handler = new StubHttpMessageHandler(async request =>
+        {
+            payload = await request.Content!.ReadAsStringAsync(TestContext.Current.CancellationToken);
+            return new HttpResponseMessage(HttpStatusCode.OK);
+        });
+        var sender = CreateSender(handler, EnabledOptions());
+
+        await sender.SendAsync(
+            new EmailMessage("player@example.com", "Subject", "<p>Body</p>"),
+            TestContext.Current.CancellationToken);
+
+        Assert.NotNull(payload);
+        using var document = JsonDocument.Parse(payload);
+        Assert.Equal(JsonValueKind.Null, document.RootElement.GetProperty("text").ValueKind);
     }
 
     [Fact]

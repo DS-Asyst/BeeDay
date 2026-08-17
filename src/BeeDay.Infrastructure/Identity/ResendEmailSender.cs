@@ -33,7 +33,8 @@ public sealed class ResendEmailSender(
             from = $"{_options.FromName} <{_options.FromAddress}>",
             to = new[] { message.Recipient },
             subject = message.Subject,
-            html = message.HtmlBody
+            html = message.HtmlBody,
+            text = message.PlainTextBody
         });
 
         using var response = await httpClient.SendAsync(request, cancellationToken);
