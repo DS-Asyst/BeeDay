@@ -52,10 +52,6 @@ public sealed class ProductionLikeWebApplicationFactory : BeeDayWebApplicationFa
 
     protected override string EnvironmentName => "Production";
 
-    // Already held for this instance's entire construct-through-dispose lifetime (field initializer
-    // above) — CreateHost must not acquire it again on the same non-reentrant semaphore.
-    protected override bool CreateHostAcquiresEnvironmentVariableLock => false;
-
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
