@@ -778,6 +778,42 @@ example HTML for both flows: see the new tests in
 `tests/BeeDay.Infrastructure.Tests/IdentityInfrastructureTests.cs` (EPIC 28, Sprint 28.4 section),
 which assert on the wordmark, preheader, fallback link, and font-stack scoping directly.
 
+### 13.7 Client compatibility, responsive & accessibility matrix (EPIC 28, Sprint 28.9)
+
+A real client only inspected in Gmail/Outlook/iCloud is stronger evidence than any automated
+approximation — this Sprint did not have that access, so every row below is honest about which
+category it is. Automated rows use
+`tests/BeeDay.E2E.Tests/EmailClientCompatibilityTests.cs` (real Chromium via Playwright, rendering
+the actual `IdentityEmailComposer` HTML output directly — no live app/route involved) plus the
+existing HTML-safety/parity coverage from Sprints 28.3-28.4.
+
+| Scenario | Automated/Manual | Evidence | Result | Limitation | Follow-up |
+|---|---|---|---|---|---|
+| Desktop width (1280px) | Automated | `Flow_RendersWithoutHorizontalOverflow_AtNarrowAndDesktopWidths` | Pass | Chromium layout only, not Outlook's Word engine | Manual Outlook desktop check, POST-MERGE PENDING |
+| Narrow/mobile width (390px) | Automated | Same test, 390px viewport (matches this repo's existing narrow-viewport convention) | Pass | Same as above | Manual Gmail/iCloud mobile check, POST-MERGE PENDING |
+| Long display name (46 characters) | Automated | Same test, stress-case display name in `Flows()` | Pass, no overflow | N/A | None |
+| Long URL (512-char token) | Automated | Sprint 28.3's `EmailComposer_HandlesLongTokensWithoutTruncatingOrBreakingTheUrl` | Pass | N/A | None |
+| Images blocked | Automated (structural) | `Template_NeverReferencesAnyRemoteAsset` — zero `<img>` tags exist | Pass — nothing to block | N/A, by construction | None |
+| Custom fonts blocked | Automated (structural) | Same test — no `<link>`/`@import`/`fonts.googleapis.com` reference anywhere; font stacks (§13.6) list system fallbacks first-class | Pass | Does not prove how every client's *own* font substitution renders Nunito/Coiny visually — only that nothing is required to load | Manual visual check, POST-MERGE PENDING |
+| Contrast | Automated | `Flow_HasNoAutomaticallyDetectableAccessibilityViolations` (axe-core) | **Found and fixed this Sprint**: `#817789` (text-muted) on white measured ~4.26:1, under WCAG AA's 4.5:1 — every muted-text role now uses `#514858` (text-secondary, ~8.7:1) instead; re-scanned clean | Axe covers automatically-detectable contrast only, not full manual WCAG review | None planned — this was the one real defect this Sprint's automated QA found |
+| CTA readability/label | Automated | Sprints 28.3-28.4 brand-color/label tests + this Sprint's axe scan (button included, no violation) | Pass | N/A | None |
+| Plain-text alternative | Automated | Sprint 28.3's `EmailComposer_HtmlAndPlainTextCarryTheSameEssentialFacts` | Pass | N/A | None |
+| HTML/plain parity | Automated | Same as above | Pass | Not byte-identical by design (never required to be) | None |
+| Localized expansion (pt-BR) | Automated | `Flows()` includes pt-BR at both viewports, including the long-name stress case | Pass, no overflow | Only tests layout, not native-speaker readability | None (copy review is Sprint 28.4's completed scope) |
+| Text scaling (OS/client zoom) | Not attempted | — | — | Playwright viewport resize approximates responsive width, not OS-level text-scale/zoom behavior | Manual check across at least one mobile client, POST-MERGE PENDING |
+| Gmail desktop | Manual only | — | — | No credentialed Gmail access this session | `POST-MERGE PENDING` — runbook §11 checklist, once deployed |
+| Gmail mobile | Manual only | — | — | Same | `POST-MERGE PENDING` |
+| Outlook desktop (Word engine) | Manual only | — | — | Fundamentally different rendering engine from Chromium; cannot be approximated by this Sprint's tooling | `POST-MERGE PENDING` — highest-priority manual check given Outlook's historically strict HTML/CSS support |
+| Outlook web | Manual only | — | — | Same | `POST-MERGE PENDING` |
+| iCloud Mail | Manual only | — | — | No credentialed iCloud Mail access this session | `POST-MERGE PENDING` |
+
+**Explicitly accepted axe exceptions** (documented, not silently suppressed):
+`landmark-one-main`/`region` (moderate) fire because this is a full standalone HTML document with no
+`<main>`/ARIA-landmark structure — not a recognized HTML-email accessibility technique, and some
+email-client HTML sanitizers strip or mishandle ARIA landmarks. Adding them would not improve any
+real screen reader's handling of an email and risks client-compatibility regressions for no benefit.
+Every other axe rule, including `color-contrast`, still applies and is enforced.
+
 ## 14. Observability, resilience & abuse controls (Epic 26, Sprint 26.7)
 
 ### 14.1 Observable state model

@@ -123,8 +123,14 @@ public sealed class IdentityEmailComposer(IOptions<IdentityEmailOptions> options
     private const string CanvasColor = "#F7F7F7"; // --beeday-color-surface-muted
     private const string SurfaceColor = "#FFFFFF"; // --beeday-color-surface / --beeday-color-background
     private const string TextPrimaryColor = "#2F2737"; // --beeday-color-text-primary
-    private const string TextSecondaryColor = "#514858"; // --beeday-color-text-secondary
-    private const string TextMutedColor = "#817789"; // --beeday-color-text-muted
+    // --beeday-color-text-secondary — used for every "muted" text role in this template (fallback
+    // link intro, footer, footer credit line) instead of --beeday-color-text-muted (#817789): EPIC 28,
+    // Sprint 28.9's automated axe accessibility scan measured #817789 on white at ~4.26:1, under
+    // WCAG AA's 4.5:1 for normal text (the same pre-existing gap already known and deferred for that
+    // token elsewhere in the product, DEFER 25.15) — a brand-new template has no reason to inherit
+    // that deferred debt. #514858 on white measures ~8.7:1, comfortably AA/AAA-compliant, and is
+    // already an approved brand token, not a new color.
+    private const string TextSecondaryColor = "#514858";
     private const string BorderColor = "#E5E5E5"; // --beeday-color-border
 
     // Email clients are not browsers: no CSS custom properties, no guaranteed remote font, and
@@ -181,14 +187,14 @@ public sealed class IdentityEmailComposer(IOptions<IdentityEmailOptions> options
         </td>
         </tr>
         </table>
-        <p style="margin:0 0 6px;font-size:13px;line-height:1.5;color:{{TextMutedColor}};">{{safeFallbackLinkIntro}}</p>
+        <p style="margin:0 0 6px;font-size:13px;line-height:1.5;color:{{TextSecondaryColor}};">{{safeFallbackLinkIntro}}</p>
         <p style="margin:0 0 28px;font-size:13px;line-height:1.5;word-break:break-all;"><a href="{{safeActionUrl}}" style="color:{{BrandColor}};">{{safeActionUrl}}</a></p>
-        <p style="margin:0 0 24px;font-size:13px;line-height:1.5;color:{{TextMutedColor}};">{{safeFooter}}</p>
+        <p style="margin:0 0 24px;font-size:13px;line-height:1.5;color:{{TextSecondaryColor}};">{{safeFooter}}</p>
         </td>
         </tr>
         <tr>
         <td style="padding:16px 32px 32px;border-top:1px solid {{BorderColor}};font-family:{{productFontStack}};">
-        <p style="margin:0;font-size:12px;line-height:1.5;color:{{TextMutedColor}};">beeday</p>
+        <p style="margin:0;font-size:12px;line-height:1.5;color:{{TextSecondaryColor}};">beeday</p>
         </td>
         </tr>
         </table>
