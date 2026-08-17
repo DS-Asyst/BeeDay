@@ -9,7 +9,13 @@ leitura direta de `src/BeeDay.Application/`, `src/BeeDay.Infrastructure/`, `src/
 `Deploy-BeeDay.ps1`, `deploy-hmg.yml`, e `git log`/`git show`. Nenhuma afirmação de "estado atual"
 abaixo vem de memória do pacote da Epic — cada uma foi reverificada no checkout desta Sprint.
 
-**Última verificação:** 2026-08-17 (Sprint 28.1 — Repository Baseline & Owner Map).
+**Última verificação:** 2026-08-17 (Sprint 28.10 — Final Quality Gate, HMG Validation Readiness &
+Epic Closure Preparation — closes the autonomous execution of this Epic).
+
+**EPIC STATUS: `IMPLEMENTATION READY — POST-MERGE HMG VALIDATION PENDING`** — see the Consolidated
+Closure Report immediately below for the full picture, including PRs already merged mid-Epic and a
+currently-failed HMG redeploy discovered during closure (transient GitHub infrastructure issue, not
+a code defect).
 
 **Escopo da Epic:** evoluir os e-mails transacionais entregues pela EPIC 26 (transporte funcional
 validado) para uma superfície oficial do beeday Experience System: identidade visual, copy,
@@ -29,6 +35,69 @@ fornecido pelo responsável do repositório (não versionado neste diretório).
 - Brand contract (`beeday` lowercase, `#5247F9`): [`CLAUDE.md`](../../../CLAUDE.md) §13,
   [`docs/epics/25-design-system-brand-evolution/README.md`](../25-design-system-brand-evolution/README.md).
 - Governança de Git/aprovação: [`CLAUDE.md`](../../../CLAUDE.md).
+
+---
+
+## Consolidated Closure Report (as of Sprint 28.10)
+
+**EPIC STATUS: `IMPLEMENTATION READY — POST-MERGE HMG VALIDATION PENDING`**
+
+### Branches and PRs, in required merge order
+
+| # | Sprint | Branch | Commit | PR | Status |
+|---|---|---|---|---|---|
+| 1 | 28.1 — Repository Baseline & Owner Map | `sprint/28.1-email-baseline` | `a76769e` | [#171](https://github.com/tiagoarrigoni/BeeDay/pull/171) | **Merged** into `hmg` |
+| 2 | 28.2 — Experience & Localization Contract (ADR-006) | `sprint/28.2-email-experience-localization-contract` | `c190bc8` | [#172](https://github.com/tiagoarrigoni/BeeDay/pull/172) | **Merged** into `hmg` |
+| 3 | 28.3 — Composition Foundation | `sprint/28.3-email-composition-foundation` | `2184dfe` | [#173](https://github.com/tiagoarrigoni/BeeDay/pull/173) | **Merged** into `hmg` |
+| 4 | 28.4 — Identity Email Experience | `sprint/28.4-identity-email-experience` | `4d2c3cd` | [#174](https://github.com/tiagoarrigoni/BeeDay/pull/174) | **Merged** into `hmg` (redeploy failed — see below) |
+| 5 | 28.5 — Deliverability Diagnostic Audit | `sprint/28.5-deliverability-audit` | `3f3a817` | [#175](https://github.com/tiagoarrigoni/BeeDay/pull/175) | Open, not merged |
+| 6 | 28.6 — Evidence-Based Deliverability Remediation | `sprint/28.6-deliverability-remediation` | `e759fa1` | [#176](https://github.com/tiagoarrigoni/BeeDay/pull/176) | Open, not merged |
+| 7 | 28.7 — Observability Operationalization | `sprint/28.7-email-observability` | `8236e63` | [#177](https://github.com/tiagoarrigoni/BeeDay/pull/177) | Open, not merged |
+| 8 | 28.8 — HMG Guard Negative Smoke | `sprint/28.8-hmg-guard-negative-smoke` | `79c39c4` | [#178](https://github.com/tiagoarrigoni/BeeDay/pull/178) | Open, not merged |
+| 9 | 28.9 — Client Compatibility & A11y QA | `sprint/28.9-email-client-qa` | `38b1f75` | [#179](https://github.com/tiagoarrigoni/BeeDay/pull/179) | Open, not merged |
+| 10 | 28.10 — Final Gate & Closure (this Sprint) | `sprint/28.10-epic-closure` | recorded after commit, below | **Final implementation PR — pending creation** | Open, not merged |
+
+**Recommended merge sequence:** #175 → #176 → #177 → #178 → #179 → (this Sprint's PR), strictly in
+order — each PR's diff currently includes the still-open predecessors' commits (expected stacked-PR
+behavior); merging in order collapses each subsequent PR's diff to just its own Sprint's changes.
+
+### Gates — final status
+
+| Gate | Scope | Status |
+|---|---|---|
+| Gate 0 (28.1) | Repository truth baseline | ✅ Satisfied |
+| Gate A (28.2) | Experience & Localization architecture | ✅ Satisfied |
+| Gate B (28.4) | Transactional Email Experience implementation/tests | ✅ Satisfied at code level |
+| Gate C (28.5-28.6) | Deliverability evidence & remediation | ✅ Satisfied — baseline + evidenced remediation; 2 items remain `EXTERNAL ACTION REQUIRED` (owner decision, not this Epic's authority) |
+| Gate D (28.7-28.8) | Observability & HMG Safety preparation | ✅ Satisfied at code/script level |
+| Gate E (28.9) | Client Compatibility automated QA | ✅ Satisfied — automated portion; manual client rows explicitly `POST-MERGE PENDING` |
+| Gate F (28.10) | Epic closure preparation | ✅ Satisfied at the level the stacked flow permits |
+
+### POST-MERGE PENDING — everything still outstanding, in one place
+
+1. **PRs #175-179 and this Sprint's PR still need review and sequential merge** into `hmg`.
+2. **`deploy-hmg.yml` run `32052620566` (triggered by PR #174's merge) failed** at the artifact-download
+   step due to a transient GitHub API outage — not a code defect. HMG's running binary does not yet
+   contain even Sprint 28.1. **Not retried by this session** (a real infrastructure action requiring
+   the repository owner's initiative) — recommend `gh run rerun 32052620566` or a fresh push-triggered
+   redeploy once the remaining PRs are merged.
+3. **All real-HMG runtime evidence** (Confirmation E2E, Password Reset E2E, allowlisted positive
+   path, negative Guard proof via `EmailEventIds.GuardBlocked`/absence of `ProviderAttempted`, log
+   availability, deliverability re-test) — none of it can be collected until the redeploy above
+   succeeds. Use `POST_MERGE/01_HMG_FINAL_VALIDATION.md` (from the EPIC 28 planning package) once it
+   does.
+4. **Deliverability external actions** (Sprint 28.6): confirm the real Resend `FromAddress` domain
+   and check its SPF/DKIM/DMARC against the exact commands in `06-transactional-email.md`/the epic
+   README Sprint 28.5 section; decide whether `h-beeday.com.br`'s public DNS unresolvability is
+   intentional (VPN/LAN-only HMG) or needs a public record.
+5. **Manual client evidence** (Sprint 28.9): Gmail desktop/mobile, Outlook desktop/web, iCloud Mail —
+   5 matrix rows, `docs/infrastructure/06-transactional-email.md` §13.7.
+6. **Text scaling/OS zoom** (Sprint 28.9): not attempted at all this Epic, automated or manual.
+
+### What Sprint 28.10 did NOT do
+
+Did not merge any PR. Did not retry the failed deployment. Did not modify DNS, secrets, or
+Production. Did not fabricate any runtime evidence for the items above.
 
 ---
 
@@ -1187,3 +1256,131 @@ client rows in the matrix, and "text scaling" (not attempted this Sprint at all)
   Outlook desktop's materially different (Word-based) rendering engine.
 - Text scaling/OS-level zoom behavior was not approximated this Sprint at all (viewport resize is not
   the same mechanism) — flagged, not silently treated as covered by the width tests.
+
+---
+
+## Sprint 28.10 — Final Quality Gate, HMG Validation Readiness & Epic Closure Preparation
+
+**Base local:** `sprint/28.9-email-client-qa`.
+**Branch:** `sprint/28.10-epic-closure`.
+**Gate:** Gate F — satisfied at the level the stacked flow permits (see EPIC STATUS below).
+**This is the final implementation PR of EPIC 28. No further Sprint follows it automatically.**
+
+### Cross-cutting audit (hmg-base of 28.1 → HEAD of 28.10)
+
+Full diff: 31 files changed, 2866 insertions(+), 110 deletions(-), across 9 commits
+(`a76769e`..`38b1f75`). Reviewed directly, not sampled:
+
+- **Dependency direction:** `BeeDay.Application.csproj` still references only `BeeDay.Domain`;
+  `BeeDay.Domain.csproj` references nothing. No new Infrastructure/Web reference was introduced
+  anywhere in Application or Domain across the whole stack.
+- **Duplicate owners:** exactly one `IIdentityEmailComposer` implementation
+  (`IdentityEmailComposer.cs`) exists; exactly one `IEmailSender` registration path per provider in
+  `InfrastructureServiceCollectionExtensions.cs` (Resend branch → `HmgRecipientGuardedEmailSender`
+  wrapping `ResendEmailSender`; else branch → `DevelopmentEmailSender`) — unchanged shape from before
+  this Epic, no bypass introduced.
+- **Direct Resend usage:** `api.resend.com` appears in exactly one file
+  (`InfrastructureServiceCollectionExtensions.cs`, the `AddHttpClient<ResendEmailSender>` base
+  address) — no other file talks to Resend directly.
+- **HMG Guard:** never weakened, never bypassed, `AllowedRecipients` never widened by any Sprint
+  (confirmed by re-reading every Sprint's own report above, not just this final grep pass).
+- **Secrets:** no `re_`-prefixed API-key-shaped literal exists anywhere in this diff outside the
+  `"re_test"` test fixture value already present before this Epic. No `FromAddress`/`ApiKey` value
+  was ever read, echoed, or guessed.
+- **PII/logging:** no log call in `HmgRecipientGuardedEmailSender`/`ResendEmailSender` interpolates a
+  recipient anywhere in this diff; `DevelopmentEmailSender`'s two lines still mask via
+  `EmailAddressLogMasking` (unchanged from before this Epic).
+- **Production:** zero diff on `appsettings.Production.json` across the entire stack — confirmed by
+  `git diff` directly, not inferred.
+- **Homologation/base config:** zero diff on `appsettings.Homologation.json`/`appsettings.json`/
+  `web.config` across the entire stack — the Resend-activation change (commit `4e98e1d8`) predates
+  Sprint 28.1 and was never touched by this Epic.
+- **TODO/placeholder introduced by this Epic:** none found (one incidental match was this document's
+  own prose describing that a TODO was *not* left — a false positive, not a real placeholder).
+- **Old brand casing in email-visible content:** none — every visible string in `EmailResources.*.resx`
+  and the composer's own literals use `beeday` lowercase; the only `BeeDay` occurrences left are
+  technical identifiers (namespaces, class names), which the brand contract explicitly permits.
+- **Docs divergence:** none newly introduced — every doc update across Sprints 28.1-28.9 followed the
+  "dated Update note, don't rewrite history" convention already established by this repository.
+
+### Quality gate (executed this Sprint, exact CLAUDE.md commands)
+
+```
+dotnet format BeeDay.slnx --verify-no-changes           → clean
+dotnet build BeeDay.slnx                                 → 0 errors, 0 warnings
+dotnet build BeeDay.slnx --configuration Release --warnaserror → 0 errors, 0 warnings
+dotnet ef migrations has-pending-model-changes
+  --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure
+                                                           → "No changes have been made to the model
+                                                             since the last migration." (expected —
+                                                             this Epic touched no Domain entities/EF
+                                                             mapping)
+dotnet test BeeDay.slnx (Debug)                           → 1407/1407 passed as of Sprint 28.9
+                                                             (unchanged this Sprint — no code diff)
+dotnet test BeeDay.slnx --configuration Release           → recorded in the Git section below
+git status                                                → confirmed clean after commit
+```
+
+### HMG validation readiness — important state discovered this Sprint
+
+**The stacked-PR flow is already partially in motion**, discovered by fetching `origin/hmg` this
+Sprint: PRs **#171 (28.1), #172 (28.2), #173 (28.3), and #174 (28.4) have already been merged into
+`hmg`**, in the correct order, by the repository owner. `hmg`'s tip (`0be7411`) now contains Sprints
+28.1-28.4. PRs #175-179 (28.5-28.9) and this Sprint's PR remain open, stacked, unmerged.
+
+**Repository State vs. Runtime State (`CLAUDE.md` §8.2), observed directly, not assumed:** the
+`deploy-hmg.yml` run triggered by PR #174's merge (run `32052620566`) **failed** — not from any
+EPIC 28 code defect, but at the "Download validated publish artifact" step, with
+`Unable to download artifact(s): No server is currently available to service your request` — the
+same class of transient GitHub API outage this session hit repeatedly during PR creation throughout
+Sprints 28.3-28.9. The failure occurred *before* IIS was ever touched (no stop/replace/rollback
+attempted), so HMG's actually-running binary is unaffected and unchanged — it does not yet contain
+even Sprint 28.1. **This session did not retry or re-trigger that deployment** — doing so is a real
+infrastructure action outside this Sprint's authorization; the repository owner should re-run that
+workflow (`gh run rerun 32052620566` or via the Actions UI) when convenient. PRs #172 and #173's own
+deploys (triggered by their merges) succeeded.
+
+**Consequence:** even the portion of the Epic already merged into `hmg` is not yet running on
+SERV3WEB. Every runtime-dependent claim in this Epic remains `POST-MERGE PENDING` in the fullest
+sense — pending both the remaining PR merges (28.5-28.10) *and* a successful redeploy.
+
+### EPIC STATUS
+
+```text
+IMPLEMENTATION READY — POST-MERGE HMG VALIDATION PENDING
+```
+
+Not `RUNTIME VALIDATED` (HMG does not yet run any of this Epic's code, confirmed directly above,
+not assumed). Not `BLOCKED` (no unresolved material defect exists — the deploy failure is an
+external, transient infrastructure issue, not a code/architecture problem this Epic introduced).
+
+### Documentation final sync check
+
+All 8 required owner areas confirmed synchronized as of this Sprint, each already updated in the
+Sprint that changed it (not deferred to this one): Transactional Email
+(`06-transactional-email.md`, §13.1-13.7, §14.1, §10.4.1), Localization (`07-localization.md` §8,
+ADR-006), Experience System cross-reference (`06-transactional-email.md` §13.6), Deliverability audit/
+remediation (`06-transactional-email.md`, epic README Sprints 28.5-28.6), Observability
+(`03-observability.md` §2.1/§7), Deployment/runbook (`14-transactional-email-runbook.md` §11.1, §13),
+Safety Guard smoke (`14-transactional-email-runbook.md` §11.1, `06-transactional-email.md` §10.4.1),
+client compatibility matrix (`06-transactional-email.md` §13.7).
+
+### Validation Results (Release)
+
+```
+dotnet test BeeDay.slnx --configuration Release   → 1407/1407 passed (93 Domain + 85 Application +
+                                                     212 Infrastructure + 176 E2E + 841 Web) —
+                                                     identical count to the Debug run at Sprint 28.9,
+                                                     confirming no configuration-specific regression
+```
+
+### Security / Production
+
+No secrets touched, read, or exposed at any point across all 10 Sprints. Production never modified
+(zero diff, confirmed by direct `git diff` this Sprint). No unauthorized deploy/merge/DNS/PRD action
+taken.
+
+### Runtime validation
+
+`POST-MERGE PENDING` for the entire Epic — see "HMG validation readiness" above for the precise,
+currently-observed reason (partial merge + failed redeploy, not a code defect).
