@@ -1,9 +1,14 @@
 <span class="beeday-brand @(OnDarkSurface ? "beeday-brand--inverse" : null)"
       role="img"
       aria-label="beeday">
+    @if (ShowIcon)
+    {
+        <img class="beeday-brand__icon" src="/assets/brand/bee.png" alt="" aria-hidden="true" width="279" height="287" loading="lazy" decoding="async" />
+    }
     <span class="beeday-brand__bee" aria-hidden="true">bee</span><span class="beeday-brand__day" aria-hidden="true">day</span>
 </span>
 
 @code {
     [Parameter] public bool OnDarkSurface { get; set; }
+    [Parameter] public bool ShowIcon { get; set; } = true;
 }

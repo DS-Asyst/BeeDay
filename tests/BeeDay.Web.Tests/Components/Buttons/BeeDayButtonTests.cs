@@ -27,6 +27,7 @@ public sealed class BeeDayButtonTests
     [InlineData(BeeDayButtonVariant.Danger, "beeday-button--danger")]
     [InlineData(BeeDayButtonVariant.ConfirmationDanger, "beeday-button--confirmation-danger")]
     [InlineData(BeeDayButtonVariant.ConfirmationCancel, "beeday-button--confirmation-cancel")]
+    [InlineData(BeeDayButtonVariant.ImportantWhite, "beeday-button--important-white")]
     public void AppliesVariantClass(BeeDayButtonVariant variant, string expectedClass)
     {
         using var context = new BunitContext();

@@ -88,6 +88,7 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
         await Expect(brand).ToBeVisibleAsync();
         await Expect(brand).ToHaveAttributeAsync("role", "img");
         await Expect(brand).ToHaveAttributeAsync("aria-label", "beeday");
+        await Expect(brand.Locator(".beeday-brand__icon")).ToBeVisibleAsync();
         await Expect(brand.Locator(".beeday-brand__bee")).ToHaveTextAsync("bee");
         await Expect(brand.Locator(".beeday-brand__day")).ToHaveTextAsync("day");
     }
