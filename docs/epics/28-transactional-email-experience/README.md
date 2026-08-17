@@ -1098,3 +1098,92 @@ real stdout) is `POST-MERGE PENDING`, per the runbook §11.1 procedure.
 ### Risks / Known Limitations
 
 None new — this Sprint strictly added test coverage and documentation; no production code changed.
+
+---
+
+## Sprint 28.9 — Email Client Compatibility, Responsive & Accessibility QA
+
+**Base local:** `sprint/28.8-hmg-guard-negative-smoke`.
+**Branch:** `sprint/28.9-email-client-qa`.
+**Gate:** Gate E — satisfied at the automated level; manual client evidence explicitly separated and
+marked `POST-MERGE PENDING`, not fabricated.
+
+### Approach
+
+Reused this repository's existing, already-approved tooling rather than introducing a new one: this
+solution's own Playwright (Chromium) — already a dependency of `BeeDay.E2E.Tests` — renders the real
+`IdentityEmailComposer` HTML output directly (no live app or route involved, so a new lightweight
+`EmailPreviewPlaywrightFixture` skips the full ASP.NET host boot the existing app fixture requires),
+and `Deque.AxeCore.Playwright` — already used by `AccessibilityQualityTests.cs` for the live product —
+runs the same automated accessibility scan against that HTML. New `BeeDay.E2E.Tests` → `BeeDay.Infrastructure`
+project reference was needed to construct the composer directly.
+
+### Finding — and fix
+
+The first scan run found a real, previously-undetected defect: `color-contrast` (axe severity
+"serious") on the fallback-link intro, footer, and footer-credit paragraphs, all using
+`--beeday-color-text-muted` (`#817789`, ~4.26:1 on white — under WCAG AA's 4.5:1 for normal text).
+This is the same known, already-deferred contrast gap for that exact token elsewhere in the product
+(`DEFER 25.15`) — but a brand-new template built this Epic has no reason to inherit that debt. Fixed
+by switching every muted-text role in the email template to `--beeday-color-text-secondary`
+(`#514858`, ~8.7:1 — comfortably AA/AAA), an already-approved brand token, not a new color. Re-scanned
+clean. This is the one real "small correction" this Sprint's own rules permit
+("markup/style/content necessária para compatibilidade, sem redesign novo") — everything else in the
+matrix below passed without changes needed.
+
+### Compatibility matrix
+
+Full matrix (17 rows: desktop/narrow width, long name, long URL, images/fonts blocked, contrast, CTA,
+plain-text parity, pt-BR expansion, text scaling, and Gmail/Outlook/iCloud desktop+mobile) recorded in
+the owning document: [`06-transactional-email.md`](../../infrastructure/06-transactional-email.md)
+§13.7 — not duplicated here. Summary: 12 rows automated and passing (1 after the fix above), 1 row
+("text scaling") not attempted this Sprint (documented as such, not silently skipped), 5 rows
+(Gmail desktop/mobile, Outlook desktop/web, iCloud Mail) `POST-MERGE PENDING` — no credentialed
+client access this session, and none fabricated.
+
+### Accepted axe exceptions (documented, not suppressed)
+
+`landmark-one-main`/`region` (moderate) — fire because axe's rule set expects a web-application page
+with `<main>`/ARIA-landmark structure; that is not a recognized HTML-email accessibility technique
+and some client sanitizers mishandle ARIA landmarks. Explicitly excluded with a code comment
+explaining why; every other rule, including `color-contrast`, remains enforced.
+
+### Tests added
+
+- `tests/BeeDay.E2E.Tests/EmailPreviewPlaywrightFixture.cs` (new) — lean Chromium-only fixture,
+  independent of the full-app `PlaywrightAppFixture`.
+- `tests/BeeDay.E2E.Tests/EmailClientCompatibilityTests.cs` (new, 11 tests): no-horizontal-overflow at
+  390px/1280px across 5 flow/language/content combinations (including a 46-character display name and
+  pt-BR), axe accessibility scan per combination, and a structural "never references any remote asset"
+  check (no `<img>`, `<link>`, `@import`, `<script>`, or Google Fonts URL).
+
+### Documentation updated
+
+`docs/infrastructure/06-transactional-email.md` §13.7 (new compatibility matrix, the accepted axe
+exceptions, and the contrast-fix rationale).
+
+### Validation Results
+
+```
+dotnet format BeeDay.slnx --verify-no-changes   → clean
+dotnet build BeeDay.slnx                         → 0 errors, 0 warnings
+dotnet test BeeDay.slnx                          → 1407/1407 passed (93 Domain + 85 Application +
+                                                    212 Infrastructure + 176 E2E + 841 Web)
+```
+
+### Security / Production
+
+No secrets touched. No real email client credentials used or requested. Production untouched.
+
+### Runtime validation
+
+Not applicable to the automated portion (code/browser-level only). `POST-MERGE PENDING`: the 5 manual
+client rows in the matrix, and "text scaling" (not attempted this Sprint at all).
+
+### Risks / Known Limitations
+
+- Manual client evidence (Gmail/Outlook/iCloud, real inbox rendering) remains entirely outstanding —
+  Playwright/Chromium is an approximation, explicitly not claimed as equivalence, especially for
+  Outlook desktop's materially different (Word-based) rendering engine.
+- Text scaling/OS-level zoom behavior was not approximated this Sprint at all (viewport resize is not
+  the same mechanism) — flagged, not silently treated as covered by the width tests.
