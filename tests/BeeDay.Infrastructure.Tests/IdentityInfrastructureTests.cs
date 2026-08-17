@@ -4,6 +4,7 @@ using System.Text.Json;
 using BeeDay.Application.Common.Identity;
 using BeeDay.Infrastructure.Configuration;
 using BeeDay.Infrastructure.Identity;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Xunit;
@@ -199,6 +200,99 @@ public sealed class IdentityInfrastructureTests
         Assert.DoesNotContain("re_test", exception.Message, StringComparison.Ordinal);
     }
 
+    // Epic 26, Sprint 26.7: observable state model — "provider request attempted" and "provider
+    // accepted" (with Resend's own message id, a safe, non-secret correlation identifier) must both
+    // be logged; success was previously entirely silent.
+    [Fact]
+    public async Task ResendSender_OnSuccess_LogsAttemptedThenAcceptedWithProviderMessageId()
+    {
+        var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("{\"id\":\"resend-message-id\"}", Encoding.UTF8, "application/json")
+        });
+        var logger = new RecordingLogger<ResendEmailSender>();
+        var sender = CreateSender(handler, EnabledOptions(), logger);
+
+        await sender.SendAsync(
+            new EmailMessage("player@example.com", "Confirm", "<p>Hello</p>"),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, logger.Entries.Count);
+        Assert.Contains(logger.Entries, e => e.Level == LogLevel.Information && e.Message.Contains("attempted", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(logger.Entries, e => e.Level == LogLevel.Information && e.Message.Contains("accepted", StringComparison.OrdinalIgnoreCase) && e.Message.Contains("resend-message-id", StringComparison.Ordinal));
+        Assert.All(logger.Entries, e =>
+        {
+            Assert.DoesNotContain("player@example.com", e.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("re_test", e.Message, StringComparison.Ordinal);
+        });
+    }
+
+    [Fact]
+    public async Task ResendSender_WhenApiRejectsRequest_LogsRejectionWithStatusCodeButNoRecipientOrApiKey()
+    {
+        var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.Unauthorized)
+        {
+            Content = new StringContent("invalid_api_key")
+        });
+        var logger = new RecordingLogger<ResendEmailSender>();
+        var sender = CreateSender(handler, EnabledOptions(), logger);
+
+        await Assert.ThrowsAsync<HttpRequestException>(() =>
+            sender.SendAsync(
+                new EmailMessage("player@example.com", "Subject", "Body"),
+                TestContext.Current.CancellationToken));
+
+        var rejection = Assert.Single(logger.Entries, e => e.Level == LogLevel.Error);
+        Assert.Contains("401", rejection.Message, StringComparison.Ordinal);
+        Assert.All(logger.Entries, e =>
+        {
+            Assert.DoesNotContain("player@example.com", e.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("re_test", e.Message, StringComparison.Ordinal);
+        });
+    }
+
+    // Distinguishes a transient network failure (no HTTP response ever received) from a provider
+    // rejection (a real HTTP response with a non-2xx status) — both must be classified/logged
+    // distinctly, per the sprint's required state model, without adding an automatic retry.
+    [Fact]
+    public async Task ResendSender_WhenNetworkFails_LogsTransientFailureAndRethrowsWithoutRetrying()
+    {
+        var attempts = 0;
+        var handler = new StubHttpMessageHandler((Func<HttpRequestMessage, HttpResponseMessage>)(_ =>
+        {
+            attempts++;
+            throw new HttpRequestException("Simulated DNS/connection failure.");
+        }));
+        var logger = new RecordingLogger<ResendEmailSender>();
+        var sender = CreateSender(handler, EnabledOptions(), logger);
+
+        await Assert.ThrowsAsync<HttpRequestException>(() =>
+            sender.SendAsync(
+                new EmailMessage("player@example.com", "Subject", "Body"),
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal(1, attempts);
+        var failure = Assert.Single(logger.Entries, e => e.Level == LogLevel.Error);
+        Assert.NotNull(failure.Exception);
+        Assert.DoesNotContain("player@example.com", failure.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task ResendSender_WhenCallerCancels_PropagatesWithoutLoggingAFailure()
+    {
+        var handler = new StubHttpMessageHandler((Func<HttpRequestMessage, HttpResponseMessage>)(_ =>
+            throw new NotImplementedException("Should never be reached: cancellation must be observed first.")));
+        var logger = new RecordingLogger<ResendEmailSender>();
+        var sender = CreateSender(handler, EnabledOptions(), logger);
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            sender.SendAsync(new EmailMessage("player@example.com", "Subject", "Body"), cts.Token));
+
+        Assert.DoesNotContain(logger.Entries, e => e.Level == LogLevel.Error);
+    }
+
     private static IdentityEmailComposer CreateComposer() => new(Options.Create(new IdentityEmailOptions
     {
         PublicBaseUrl = "https://beeday.example",
@@ -206,11 +300,11 @@ public sealed class IdentityInfrastructureTests
         PasswordResetPath = "/account/reset-password"
     }));
 
-    private static ResendEmailSender CreateSender(HttpMessageHandler handler, ResendOptions options) =>
+    private static ResendEmailSender CreateSender(HttpMessageHandler handler, ResendOptions options, ILogger<ResendEmailSender>? logger = null) =>
         new(
             new HttpClient(handler) { BaseAddress = new Uri("https://api.resend.com/") },
             Options.Create(options),
-            NullLogger<ResendEmailSender>.Instance);
+            logger ?? NullLogger<ResendEmailSender>.Instance);
 
     private static ResendOptions EnabledOptions() => new()
     {
@@ -231,8 +325,28 @@ public sealed class IdentityInfrastructureTests
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             CallCount++;
             return await responder(request);
+        }
+    }
+
+    private sealed class RecordingLogger<T> : ILogger<T>
+    {
+        public List<(LogLevel Level, Exception? Exception, string Message)> Entries { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            Entries.Add((logLevel, exception, formatter(state, exception)));
         }
     }
 }

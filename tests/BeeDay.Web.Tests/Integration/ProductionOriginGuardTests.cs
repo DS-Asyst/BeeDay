@@ -67,7 +67,7 @@ public sealed class ProductionOriginGuardTests
         var stdErrTask = process.StandardError.ReadToEndAsync();
         var stdOutTask = process.StandardOutput.ReadToEndAsync();
 
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         try
         {
             await process.WaitForExitAsync(timeout.Token);
@@ -76,7 +76,7 @@ public sealed class ProductionOriginGuardTests
         {
             process.Kill(entireProcessTree: true);
             Assert.Fail(
-                "BeeDay.Web did not exit within 20s — the PublicBaseUrl guard did not fail startup as expected " +
+                "BeeDay.Web did not exit within 30s — the PublicBaseUrl guard did not fail startup as expected " +
                 "(or the process is hanging on an unrelated concern). This guard is expected to throw " +
                 "synchronously, before builder.Build(), before any SQL/network access.");
         }

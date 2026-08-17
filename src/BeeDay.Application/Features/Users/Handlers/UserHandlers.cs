@@ -15,10 +15,23 @@ public sealed class CreateUserCommandHandler(
     IUnitOfWork unitOfWork,
     IPasswordService passwordService,
     IEmailConfirmationIssuer confirmationIssuer,
-    IEmailSender emailSender) : IRequestHandler<CreateUserCommand, Guid>
+    IEmailSender emailSender,
+    IIdentityRequestThrottle throttle) : IRequestHandler<CreateUserCommand, Guid>
 {
     public async Task<Guid> Handle(CreateUserCommand command, CancellationToken cancellationToken)
     {
+        // Reuses the same per-email throttle already protecting resend-confirmation/forgot-password
+        // (Epic 26, Sprint 26.7) — stops a rapid double-submit of the same address from ever issuing
+        // two confirmation emails for one account. Does not, and cannot, limit registration volume
+        // across distinct email addresses — that is a different abuse vector (mass registration with
+        // many fake/victim addresses), deliberately not addressed here; see
+        // docs/infrastructure/06-transactional-email.md §14 for why a new rate limiter for that case
+        // was not built in this sprint.
+        if (!throttle.TryAcquire("account-creation", command.Request.Email.Trim(), TimeSpan.FromSeconds(60), out var retryAfter))
+        {
+            throw new InvalidDomainStateException($"Please wait {Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds))} seconds before trying again.");
+        }
+
         Guid id;
         EmailMessage confirmationEmail;
 
@@ -59,10 +72,17 @@ public sealed class CreateAccountCommandHandler(
     IUnitOfWork unitOfWork,
     IPasswordService passwordService,
     IEmailConfirmationIssuer confirmationIssuer,
-    IEmailSender emailSender) : IRequestHandler<CreateAccountCommand, Guid>
+    IEmailSender emailSender,
+    IIdentityRequestThrottle throttle) : IRequestHandler<CreateAccountCommand, Guid>
 {
     public async Task<Guid> Handle(CreateAccountCommand command, CancellationToken cancellationToken)
     {
+        // See CreateUserCommandHandler above for the rationale and its documented limits.
+        if (!throttle.TryAcquire("account-creation", command.Request.Email.Trim(), TimeSpan.FromSeconds(60), out var retryAfter))
+        {
+            throw new InvalidDomainStateException($"Please wait {Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds))} seconds before trying again.");
+        }
+
         Guid userId;
         EmailMessage confirmationEmail;
 
