@@ -60,8 +60,11 @@ public sealed class CoreComponentContractTests
             filesWithNativeControls += fileContainsNativeControl ? 1 : 0;
         }
 
-        Assert.Equal(29, counts["button"]);
-        Assert.Equal(14, counts["input"]);
+        // EPIC 27 Sprint 27.11: TagFormModal's native <input type="color"> (plus its paired
+        // <InputText>, which this regex never counted) was replaced by a single looped native
+        // <button> rendering the 10-swatch COR0-COR9 picker — one fewer input, one more button.
+        Assert.Equal(30, counts["button"]);
+        Assert.Equal(13, counts["input"]);
         Assert.Equal(0, counts["select"]);
         Assert.Equal(0, counts["textarea"]);
         Assert.Equal(43, counts.Values.Sum());

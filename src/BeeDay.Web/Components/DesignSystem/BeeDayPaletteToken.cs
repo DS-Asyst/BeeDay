@@ -45,4 +45,24 @@ public static class BeeDayPaletteTokenExtensions
     /// </summary>
     public static bool IsWhiteForeground(this BeeDayPaletteToken token) =>
         token is BeeDayPaletteToken.Cor0 or BeeDayPaletteToken.Cor8;
+
+    /// <summary>
+    /// The token's literal hex value, matching wwwroot/css/variables.css's --beeday-palette-corN
+    /// custom properties. Used where a real string value is required rather than a CSS class —
+    /// e.g. the Wallet Tag color picker (EPIC 27 Sprint 27.11), which persists a hex string.
+    /// </summary>
+    public static string ToHexColor(this BeeDayPaletteToken token) => token switch
+    {
+        BeeDayPaletteToken.Cor0 => "#5247F9",
+        BeeDayPaletteToken.Cor1 => "#CE82FF",
+        BeeDayPaletteToken.Cor2 => "#58CC02",
+        BeeDayPaletteToken.Cor3 => "#1CB0F6",
+        BeeDayPaletteToken.Cor4 => "#FFB100",
+        BeeDayPaletteToken.Cor5 => "#FF7878",
+        BeeDayPaletteToken.Cor6 => "#FFFFFF",
+        BeeDayPaletteToken.Cor7 => "#ECECED",
+        BeeDayPaletteToken.Cor8 => "#100F3E",
+        BeeDayPaletteToken.Cor9 => "#DEFFF7",
+        _ => "#5247F9"
+    };
 }

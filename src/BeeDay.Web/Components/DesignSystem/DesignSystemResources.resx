@@ -189,6 +189,9 @@
   <data name="ValidationHexColorFormat" xml:space="preserve">
     <value>Use a valid hexadecimal color.</value>
   </data>
+  <data name="ValidationTagColorPalette" xml:space="preserve">
+    <value>Choose one of the 10 official colors.</value>
+  </data>
   <data name="ValidationTitleRequired" xml:space="preserve">
     <value>Title is required.</value>
   </data>

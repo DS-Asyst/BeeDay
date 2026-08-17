@@ -30,6 +30,7 @@ public static class ValidationMessageLocalizer
         ["Name cannot exceed 100 characters."] = "ValidationNameMaxLength",
         ["Notes cannot exceed 500 characters."] = "ValidationNotesMaxLength",
         ["Use a valid hexadecimal color."] = "ValidationHexColorFormat",
+        ["Choose one of the 10 official colors."] = "ValidationTagColorPalette",
         ["Title is required."] = "ValidationTitleRequired",
         ["Title cannot exceed 100 characters."] = "ValidationTitleMaxLength",
         ["Project is required."] = "ValidationProjectRequired"
