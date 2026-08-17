@@ -654,3 +654,146 @@ screenshot in a real client.
   final linguistic sign-off.
 - No preheader/fallback-link A/B or deliverability-impact evidence exists yet — that belongs to
   Sprint 28.5/28.6.
+
+---
+
+## Sprint 28.5 — Deliverability & Inbox Placement Diagnostic Audit
+
+**Base local:** `sprint/28.4-identity-email-experience`.
+**Branch:** `sprint/28.5-deliverability-audit`.
+**Gate:** Gate C — partial (baseline complete; remediation is Sprint 28.6's scope). **No DNS changed
+by this Sprint.**
+
+### Repository audit
+
+| Concern | Finding | Classification |
+|---|---|---|
+| `From`/`FromName` | `ResendEmailSender.cs:34` builds `"{FromName} <{FromAddress}>"`. C# class default (`ResendOptions.cs:9`) is `"BeeDay"` (wrong brand casing), **but every committed config that actually runs overrides it to `"beeday"`** — confirmed by reading `src/BeeDay.Web/appsettings.json:34` and `appsettings.Production.json:48` directly (both literal `"FromName": "beeday"`); `appsettings.Homologation.json` has no override, so it inherits the base file's `"beeday"`. Effective FromName in every real environment is already lowercase-correct. | `confirmed-good` (effective config); the unreachable C# default is `suspicious-but-unproven` severity-`informational` (dead code path today, only a defense-in-depth cleanup candidate) |
+| `Reply-To` | No `reply_to` field is ever sent to Resend (`ResendEmailSender.cs:32-39` sends only `from`/`to`/`subject`/`html`/`text`) — Resend's own default behavior when `reply_to` is omitted is to use the `From` address, so no orphaned reply-to exists. Whether `FromAddress` (secret) is itself reply-capable or a no-reply-style address is unknown to this audit. | `confirmed-good` (no gap in code); `external-verification-needed` (whether the real address accepts replies) |
+| Sending domain/subdomain | `FromAddress` is a GitHub Environment secret (`BEEDAY_RESEND_FROM_ADDRESS`) — never committed, never logged, not inspected or requested by this Sprint (`docs/deployment/02-runtime-configuration.md` §6 confirms it's always empty in every committed `appsettings*.json`). **This is the single biggest blocker to a complete deliverability audit** — SPF/DKIM/DMARC alignment cannot be checked against the correct domain without knowing it. | `external-verification-needed` — repository owner must supply the domain (not the secret value) for 28.6, or run the DNS commands below directly |
+| `PublicBaseUrl`/links | `appsettings.Homologation.json` sets both `AllowedHosts` and `IdentityEmail:PublicBaseUrl` to `h-beeday.com.br` / `https://h-beeday.com.br`. **Direct DNS verification this session found `h-beeday.com.br` does not exist in public DNS at all** (`nslookup h-beeday.com.br` → `Non-existent domain`, confirmed twice, independent of any local override). It resolves only on this development machine, to a private RFC1918 address `192.168.15.9`, via a literal entry in `C:\Windows\System32\drivers\etc\hosts` (`Get-Content ...\hosts \| Select-String beeday` confirmed the line directly). **This means: every confirmation/reset link Resend would deliver to a real HMG recipient points at a hostname unreachable from outside this machine's local network/VPN**, unless the recipient's own device has an equivalent hosts entry or is on the same private network as `192.168.15.9`. | `confirmed-defect` **if** allowlisted HMG recipients are expected to click links from arbitrary networks; `suspicious-but-unproven` **if** HMG is deliberately an internal/VPN-only environment and every `AllowedRecipients` entry already has the required network access (plausible given HMG's small, curated allowlist — but not confirmed either way this session) |
+| HTML/plain text | Both present on every message (`EmailMessage.HtmlBody`/`PlainTextBody`), confirmed by Sprints 28.3/28.4's own test suite. | `confirmed-good` |
+| Tracking settings | No tracking-related field is set anywhere in the Resend request payload — click/open tracking, if any, is entirely controlled by Resend's own account/domain-level dashboard settings, invisible to this repository. | `external-verification-needed` |
+| Provider `MessageId`/event semantics | `ResendEmailSender.cs:71-74` logs the provider's own response `id` on acceptance — correctly distinguished from delivery (§14.1 of the infrastructure doc). No provider webhook/event ingestion exists in this repository (no code consumes Resend's delivery/bounce/complaint webhooks). | `confirmed-good` (accept-vs-deliver distinction already correct in code); `not-applicable` today for event ingestion (not built, not claimed) |
+| Headers configurable by the app | Only `Authorization`, `User-Agent` (`"BeeDay/1.0"`, not brand-visible), and `Idempotency-Key` (a fresh GUID per send — correct, prevents accidental duplicate sends on retry) are set. No `List-Unsubscribe` or similar bulk-mail signal headers — not expected to matter for low-volume transactional mail, but noted. | `confirmed-good` (nothing incorrect); `informational` |
+| Documentation/runbooks | `14-transactional-email-runbook.md` already distinguishes "provider accepted" from "delivered" from "inbox placement" (§15, §6) and explicitly states real Resend inbox E2E has not yet occurred (carried over from Sprint 28.1's D3 finding — still unresolved this Sprint, still flagged, not assumed). | `confirmed-good` (doc discipline); D3 itself remains `external-verification-needed` |
+
+### External audit (read-only, no authentication, no secrets touched)
+
+Performed via this session's own outbound DNS resolution (`nslookup` and PowerShell `Resolve-DnsName`,
+cross-checked against each other and against known-good public domains `google.com`/`github.com` to
+confirm the resolver path reaches real public DNS and isn't purely sandboxed) — **2026-08-17**:
+
+- `beeday.com.br` (the apex the HMG subdomain belongs to): registered (has `SOA`/`NS` — primary
+  `e.sec.dns.br`, `registro.br`), but **no SPF, no DMARC, no MX record at all** — a bare registration,
+  not configured for mail in either direction.
+- `beeday.com` (a *different* domain — no `.br`): apex SPF is `v=spf1 -all` (hard-fail — "nothing is
+  authorized to send as this domain") and MX is a null MX (`0 .` — "accepts no mail"). Multiple
+  arbitrary subdomains (`hmg.beeday.com`, `app.beeday.com`, `www.beeday.com`, and even an invented
+  `h.beeday.com`) all resolved to the identical IP pair (`76.223.54.146`, `13.248.169.48`), and
+  differently-purposed TXT lookups (`_dmarc.beeday.com`, `resend._domainkey.beeday.com`) both returned
+  the identical `v=spf1 -all` string — strong evidence of a **wildcard DNS zone** (likely a
+  parking/placeholder configuration), meaning none of these specific-hostname answers under
+  `beeday.com` can be trusted as intentionally-configured, distinct records. Only the apex SPF/MX are
+  credible as deliberate configuration.
+- **This audit could not determine which of these domains (if either) is the real Resend `FromAddress`
+  domain** — that value is a secret, correctly never exposed to this session. If Resend's `FromAddress`
+  uses `beeday.com` or any subdomain of it, the apex `v=spf1 -all` would cause **every message to fail
+  SPF** for that domain (a hard, confirmed-cause explanation *if* that's the sending domain — but this
+  audit does not know that it is, so this is listed as a ranked hypothesis, not a proven cause).
+
+**Exact commands for the repository owner to re-run once the real `FromAddress` domain is known** (safe,
+public, read-only, no credentials needed):
+
+```text
+nslookup -type=TXT <domain>                    # SPF
+nslookup -type=TXT _dmarc.<domain>              # DMARC
+nslookup -type=TXT resend._domainkey.<domain>   # Resend's documented DKIM selector convention
+nslookup -type=MX <domain>
+```
+
+### Baseline classification of delivery-state evidence (per the Sprint's required separation)
+
+| State | Evidence available to this session |
+|---|---|
+| Provider request | Code-confirmed (`ResendEmailSender.cs:43`, "Resend request attempted" log line) |
+| Provider accepted | Code-confirmed logging exists (line 72-74); no real send has occurred with the current code (Homologation not yet redeployed post-activation, per Sprint 28.1's baseline) |
+| Provider delivered/event | Not implemented (no webhook ingestion) — `not-applicable` today |
+| Mailbox receipt | No evidence this session — requires a real send |
+| Spam/Junk placement | The EPIC package's own claim of a prior Junk-placement observation remains **unverified** (Sprint 28.1 finding D3, still open) — not treated as established fact |
+
+`accepted != delivered != inbox placement` is preserved throughout this table — no state is inferred
+from another.
+
+### Hypotheses ranked by evidence (for Sprint 28.6)
+
+1. **(Strong evidence, but domain-identity-dependent)** If Resend's `FromAddress` uses `beeday.com` or
+   a subdomain, the domain's own `v=spf1 -all` guarantees SPF failure for every send — this alone would
+   fully explain any delivery problem, without needing a Junk-placement anecdote to justify
+   investigating it. Confirming the domain is the single highest-leverage next step.
+2. **(Confirmed, independent of the domain question)** `h-beeday.com.br` is not publicly resolvable —
+   any real, non-VPN recipient cannot load the confirmation/reset link at all. This is a link-usability
+   defect regardless of whether it also affects deliverability scoring.
+3. **(Speculative, no evidence either way)** Content/reputation signals (new domain age, low sending
+   volume, generic transactional content) — plausible contributors to any provider's spam
+   classification, but nothing in this repository can confirm or rule this out; would need Resend
+   Insights (credential-gated).
+
+### Remediation candidates for Sprint 28.6, priority-ordered (not implemented this Sprint)
+
+1. **External, requires repository owner decision — not auto-executable:** confirm the real
+   `FromAddress` domain and its SPF/DKIM/DMARC state using the commands above; if it resolves to
+   `beeday.com`'s reject-all SPF, that is very likely the root cause and needs a DNS change (out of
+   this Epic's authority — `04_EXECUTION_CONSIDERATIONS.md` §E: "DNS é operação externa e não está
+   autorizada automaticamente").
+2. **External, requires repository owner decision:** confirm whether `h-beeday.com.br`'s public
+   unresolvability is intentional (VPN/LAN-only HMG, all `AllowedRecipients` have that access) or a
+   real gap that needs a public DNS record.
+3. **Code, low-risk, safe for 28.6 to implement directly:** correct `ResendOptions.FromName`'s C#
+   class-level default from `"BeeDay"` to `"beeday"` for consistency (currently unreachable dead code
+   — every committed environment already overrides it — but still worth correcting so the default
+   itself can never regress brand casing if a future environment omits the override).
+4. **Deferred pending #1's answer:** whether to explicitly set `reply_to` in the Resend payload,
+   depending on whether the real `FromAddress` is reply-capable.
+
+### Tests
+
+None added — this Sprint audited configuration and external DNS state, not application behavior. No
+test sends real email (unchanged from all prior Sprints).
+
+### Documentation updated
+
+This section (baseline report, owner-existing document — no new documentation tree created, per the
+Sprint's own instruction).
+
+### Validation Results
+
+```
+dotnet format BeeDay.slnx --verify-no-changes   → clean (no source changes this Sprint)
+dotnet build BeeDay.slnx                         → 0 errors, 0 warnings
+dotnet test BeeDay.slnx                          → 1386/1386 passed, unchanged from Sprint 28.4
+                                                    (93+85+202+841+165 across 5 projects)
+git status                                       → clean after commit
+```
+
+### Security / Production
+
+No secrets read, requested, or exposed — `FromAddress`'s actual value was never inspected, only its
+absence from committed config confirmed. No DNS record was changed. Production untouched — this audit
+did not query anything specific to `prd` (which has no runtime, `CLAUDE.md` §8.2).
+
+### Runtime validation
+
+Not applicable — audit only. The `h-beeday.com.br` DNS finding is itself a piece of environment
+evidence (not code-dependent), gathered directly this session, not `POST-MERGE PENDING` — it is true
+regardless of which EPIC 28 commit is deployed.
+
+### Risks / Known Limitations
+
+- The real `FromAddress` domain remains unknown to this session — the single largest gap in this
+  audit, entirely by design (secret protection), not an oversight.
+- DNS wildcard behavior on `beeday.com` means several of this session's TXT lookups under that domain
+  are not trustworthy as distinct, intentional records — flagged explicitly rather than reported as
+  fact.
+- Resend Insights/dashboard delivery events were not accessible this session (credential-gated) — no
+  attempt was made to obtain or bypass that.
