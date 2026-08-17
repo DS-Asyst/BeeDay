@@ -1,13 +1,12 @@
 @page "/efficacy"
 @attribute [AllowAnonymous]
 @layout BeeDay.Web.Components.Layout.PublicLayout
-@using BeeDay.Web.Components.DesignSystem
 @using BeeDay.Web.Components.Features.Institutional.Components
 @inject IStringLocalizer<InstitutionalResources> Localizer
 
 <PageTitle>@Localizer["EfficacyPageTitle"]</PageTitle>
 
-<EditorialPageTemplate PageContext="@Localizer["EfficacyPageContext"]" Title="@Localizer["EfficacyTitle"]" Description="@Localizer["EfficacyIntro"]" Surface="BeeDayPaletteToken.Cor3">
+<EditorialPageTemplate PageContext="@Localizer["EfficacyPageContext"]" Title="@Localizer["EfficacyTitle"]" Description="@Localizer["EfficacyIntro"]">
     <section aria-labelledby="efficacy-body-heading">
         <h2 id="efficacy-body-heading">@Localizer["EfficacyBodyTitle"]</h2>
         <p>@Localizer["EfficacyBody"]</p>

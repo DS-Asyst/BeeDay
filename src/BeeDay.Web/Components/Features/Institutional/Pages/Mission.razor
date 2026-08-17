@@ -1,13 +1,12 @@
 @page "/mission"
 @attribute [AllowAnonymous]
 @layout BeeDay.Web.Components.Layout.PublicLayout
-@using BeeDay.Web.Components.DesignSystem
 @using BeeDay.Web.Components.Features.Institutional.Components
 @inject IStringLocalizer<InstitutionalResources> Localizer
 
 <PageTitle>@Localizer["MissionPageTitle"]</PageTitle>
 
-<EditorialPageTemplate PageContext="@Localizer["MissionPageContext"]" Title="@Localizer["MissionTitle"]" Description="@Localizer["MissionIntro"]" Surface="BeeDayPaletteToken.Cor0">
+<EditorialPageTemplate PageContext="@Localizer["MissionPageContext"]" Title="@Localizer["MissionTitle"]" Description="@Localizer["MissionIntro"]">
     <section aria-labelledby="mission-body-heading">
         <h2 id="mission-body-heading">@Localizer["MissionBodyTitle"]</h2>
         <p>@Localizer["MissionBody"]</p>

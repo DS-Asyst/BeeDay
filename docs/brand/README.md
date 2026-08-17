@@ -5,8 +5,8 @@ wordmark, personagens, ilustração e linguagem verbal; componentes, states e fo
 interface continuam pertencendo ao [`design-system/`](../design-system/README.md).
 
 **Fonte da verdade:** ativos e consumers atuais em `src/BeeDay.Web`, contratos documentados pela
-EPIC 25 e testes que protegem o markup correspondente. Última verificação: 2026-08-16, Sprint
-25.16.
+EPIC 25 e testes que protegem o markup correspondente. Última verificação: 2026-08-17, Sprint 29.2
+(paleta oficial de cores).
 
 ## Documentos
 
@@ -14,6 +14,7 @@ EPIC 25 e testes que protegem o markup correspondente. Última verificação: 20
 |---|---|
 | [`01-character-illustration.md`](01-character-illustration.md) | Inventário, personagens confirmados, shape language, composição, acessibilidade e performance |
 | [`02-writing-voice-localization.md`](02-writing-voice-localization.md) | Narrativa, Voice, Tone, Style, glossário e política bilíngue |
+| [`03-color-palette.md`](03-color-palette.md) | Official Brand Color Palette (COR0-COR9), arquitetura base→semantic→component, regra de elegibilidade de page header |
 
 ## Limites
 

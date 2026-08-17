@@ -184,6 +184,71 @@ public sealed class InstitutionalPagesTests
     }
 
     [Fact]
+    public void EveryRouteUsesAPageHeaderEligibleSurface()
+    {
+        // Sprint 29.2: page headers are restricted to Cor0/Cor8 — the only two COR0-COR9 tokens whose
+        // contrast with white text passes WCAG AA 4.5:1 (docs/brand/03-color-palette.md). Editorial,
+        // Help and Product default to Cor0 (brand primary); Legal/document pages default to the more
+        // formal Cor8 (dark navy). Protects the 11 routes from drifting back to one of the other 8,
+        // previously arbitrary, tokens (Efficacy was Cor3, Contact Cor2, Faqs Cor4, ProductPlus Cor1,
+        // Android Cor2, Ios Cor3, CommunityGuidelines Cor9, Terms Cor7 — none of which pass).
+        using var context = new BunitContext().WithLocalization();
+
+        void AssertEligible<TComponent>(string expectedSurfaceClass)
+            where TComponent : Microsoft.AspNetCore.Components.IComponent
+        {
+            var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<TComponent>());
+            Assert.Contains(expectedSurfaceClass, cut.Find("header.beeday-hero").ClassList);
+        }
+
+        AssertEligible<Mission>("beeday-surface-cor0");
+        AssertEligible<Efficacy>("beeday-surface-cor0");
+        AssertEligible<Contact>("beeday-surface-cor0");
+        AssertEligible<Product>("beeday-surface-cor0");
+        AssertEligible<ProductPlus>("beeday-surface-cor0");
+        AssertEligible<Android>("beeday-surface-cor0");
+        AssertEligible<Ios>("beeday-surface-cor0");
+        AssertEligible<Faqs>("beeday-surface-cor0");
+        AssertEligible<CommunityGuidelines>("beeday-surface-cor8");
+        AssertEligible<Terms>("beeday-surface-cor8");
+        AssertEligible<Privacy>("beeday-surface-cor8");
+    }
+
+    [Fact]
+    public void NoPageUsesTheRemovedPerFamilyBodyWidthModifierClassesOrWrappingArticle()
+    {
+        // Sprint 29.2: editorial/help/legal previously narrowed body width to 42-48rem while the
+        // hero row stayed at 72rem (product had no matching rule and silently fell back to 72rem
+        // already), misaligning the two axes. All four families now share the shell's single
+        // .institutional-page__body width, and the hero is no longer nested inside a wrapping
+        // <article class="institutional-page"> that accidentally capped its full-bleed background.
+        using var context = new BunitContext().WithLocalization();
+        var markups = new[]
+        {
+            BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Mission>()).Markup,
+            BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Efficacy>()).Markup,
+            BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Contact>()).Markup,
+            BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Product>()).Markup,
+            BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<ProductPlus>()).Markup,
+            BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Android>()).Markup,
+            BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Ios>()).Markup,
+            BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Faqs>()).Markup,
+            BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<CommunityGuidelines>()).Markup,
+            BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Terms>()).Markup,
+            BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Privacy>()).Markup,
+        };
+
+        Assert.All(markups, markup =>
+        {
+            Assert.DoesNotContain("institutional-page__body--editorial", markup, StringComparison.Ordinal);
+            Assert.DoesNotContain("institutional-page__body--help", markup, StringComparison.Ordinal);
+            Assert.DoesNotContain("institutional-page__body--legal", markup, StringComparison.Ordinal);
+            Assert.DoesNotContain("institutional-page__body--product", markup, StringComparison.Ordinal);
+            Assert.DoesNotContain("class=\"institutional-page\"", markup, StringComparison.Ordinal);
+        });
+    }
+
+    [Fact]
     public void NoPageMarkupReferencesDuolingoOrLoremIpsum()
     {
         using var context = new BunitContext().WithLocalization();

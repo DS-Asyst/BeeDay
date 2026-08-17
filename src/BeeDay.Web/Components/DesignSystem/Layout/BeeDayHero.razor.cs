@@ -15,8 +15,11 @@ public partial class BeeDayHero
 
     /// <summary>
     /// The solid COR0-COR9 background this hero renders on, paired automatically with its
-    /// WCAG-checked foreground (03_DESIGN_DECISIONS.md §8). Null keeps the hero's neutral/
-    /// transparent default background for non-solid contexts (e.g. onboarding).
+    /// WCAG-checked foreground (docs/brand/03-color-palette.md). Null keeps the hero's neutral/
+    /// transparent default background for non-solid contexts (e.g. onboarding). Generic here — not
+    /// restricted to the two page-header-eligible tokens (Cor0/Cor8) — because BeeDayHero is a
+    /// shared primitive with non-page-header consumers too (e.g. the Wallet hero); that narrower
+    /// restriction is enforced by the Institutional page templates, not this component.
     /// </summary>
     [Parameter] public BeeDayPaletteToken? Surface { get; set; }
 
