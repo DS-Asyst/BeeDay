@@ -112,17 +112,4 @@
   <data name="Step5Description" xml:space="preserve">
     <value>Cada passo conta. Reconheça suas vitórias e continue evoluindo.</value>
   </data>
-  <data name="TopicsAboutTitle" xml:space="preserve"><value>Sobre nós</value></data>
-  <data name="TopicsMission" xml:space="preserve"><value>Nossa missão</value></data>
-  <data name="TopicsContact" xml:space="preserve"><value>Fale conosco</value></data>
-  <data name="TopicsSocialTitle" xml:space="preserve"><value>Social</value></data>
-  <data name="TopicsAppsTitle" xml:space="preserve"><value>Apps</value></data>
-  <data name="TopicsAndroid" xml:space="preserve"><value>App Android</value></data>
-  <data name="TopicsIos" xml:space="preserve"><value>App iOS</value></data>
-  <data name="TopicsHelpTitle" xml:space="preserve"><value>Ajuda e suporte</value></data>
-  <data name="TopicsHelpCenter" xml:space="preserve"><value>Central de ajuda</value></data>
-  <data name="TopicsFaq" xml:space="preserve"><value>FAQ</value></data>
-  <data name="TopicsPrivacyTitle" xml:space="preserve"><value>Privacidade e termos</value></data>
-  <data name="TopicsPrivacyPolicy" xml:space="preserve"><value>Política de privacidade</value></data>
-  <data name="TopicsTerms" xml:space="preserve"><value>Termos</value></data>
 </root>

@@ -8,6 +8,28 @@
     color: var(--beeday-palette-cor0-foreground);
 }
 
+/* Sprint 29.1: the white-to-brand-surface transition is the footer's own top edge, built as an
+   inline vector path (flat sides, symmetric dip) instead of the raster wave-site.png the Home page
+   used to render above a now-removed duplicate footer block. The wrapper's own background is the
+   page's standard white surface so the path's unfilled trough reads as a continuation of whatever
+   white content precedes the footer, not a hardcoded shape-specific color. */
+.app-footer__wave {
+    display: block;
+    width: 100%;
+    line-height: 0;
+    background: var(--beeday-color-background);
+}
+
+.app-footer__wave svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.app-footer__wave path {
+    fill: var(--beeday-palette-cor0);
+}
+
 .app-footer__content {
     display: grid;
     gap: var(--beeday-spacing-2xl);

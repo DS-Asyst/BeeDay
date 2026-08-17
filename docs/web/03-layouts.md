@@ -19,6 +19,13 @@ Daily, Wallet ou Account. O link do footer para Typography foi substituído por 
 `/experience-system` nesta Sprint — `/brand/typography` continua acessível diretamente e a partir da
 navegação interna do Experience System, apenas deixou de ter um link próprio no footer.
 
+Desde a Sprint 29.1, `AppFooter` abre com um separador ondulado (`.app-footer__wave`): um `<path>`
+SVG inline, `aria-hidden="true"`, preenchido com `--beeday-palette-cor0` (o mesmo token do fundo do
+footer) sobre um wrapper com `--beeday-color-background` (branco, a superfície pública padrão que
+precede o footer). Substitui a antiga combinação Home-specific de `wave-site.png` + bloco de tópicos
+duplicado que ficava entre o conteúdo da Home e o footer real — ver
+[`docs/brand/01-character-illustration.md`](../brand/01-character-illustration.md).
+
 ## Navegação autenticada
 
 `NavigationItems` é a fonte compartilhada por `DesktopSidebar` e `MobileSidebar`:

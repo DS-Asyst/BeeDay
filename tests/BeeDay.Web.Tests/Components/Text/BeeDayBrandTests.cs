@@ -53,4 +53,21 @@ public sealed class BeeDayBrandTests
         Assert.DoesNotContain("beeday-brand--inverse", defaultBrand.Find(".beeday-brand").ClassList);
         Assert.Contains("beeday-brand--inverse", inverseBrand.Find(".beeday-brand").ClassList);
     }
+
+    [Fact]
+    public void OnDarkSurface_SwapsTheIconToTheApprovedNonWhiteBackgroundVariant()
+    {
+        using var context = new BunitContext();
+
+        var defaultIcon = context.Render<BeeDayBrand>().Find(".beeday-brand__icon");
+        Assert.Equal("/assets/brand/bee.png", defaultIcon.GetAttribute("src"));
+        Assert.Equal("279", defaultIcon.GetAttribute("width"));
+        Assert.Equal("287", defaultIcon.GetAttribute("height"));
+
+        var onDarkSurfaceIcon = context.Render<BeeDayBrand>(parameters => parameters.Add(x => x.OnDarkSurface, true))
+            .Find(".beeday-brand__icon");
+        Assert.Equal("/assets/brand/bee-color-neutral.png", onDarkSurfaceIcon.GetAttribute("src"));
+        Assert.Equal("1254", onDarkSurfaceIcon.GetAttribute("width"));
+        Assert.Equal("1254", onDarkSurfaceIcon.GetAttribute("height"));
+    }
 }

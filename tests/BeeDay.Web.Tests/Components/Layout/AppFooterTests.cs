@@ -15,6 +15,25 @@ public sealed class AppFooterTests
         var brand = cut.Find(".app-footer__identity .beeday-brand");
         Assert.Contains("app-footer__brand-mark", brand.ClassList);
         Assert.Contains("beeday-brand--inverse", brand.ClassList);
+
+        // OnDarkSurface="true" (COR0 background) must use the non-white-background bee variant.
+        var icon = brand.QuerySelector(".beeday-brand__icon");
+        Assert.NotNull(icon);
+        Assert.Equal("/assets/brand/bee-color-neutral.png", icon.GetAttribute("src"));
+    }
+
+    [Fact]
+    public void OpensWithADecorativeInlineSvgWaveSeparatorBeforeItsRealContent()
+    {
+        using var context = new BunitContext().WithLocalization();
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<AppFooter>());
+
+        var footer = cut.Find("footer.app-footer");
+        var wave = cut.Find(".app-footer__wave");
+        Assert.Equal("true", wave.GetAttribute("aria-hidden"));
+        Assert.NotNull(wave.QuerySelector("svg path"));
+        Assert.Empty(wave.QuerySelectorAll("img"));
+        Assert.Contains("app-footer__wave", footer.Children[0].ClassList);
     }
 
     [Fact]

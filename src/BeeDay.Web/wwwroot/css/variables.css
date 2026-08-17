@@ -145,14 +145,18 @@
     --beeday-color-button-warning-depth: #c9820d;
     --beeday-color-button-warning-shadow: #5f410d;
 
-    /* Important White — a white-surface button whose text/outline use Accent Secondary (COR3), for
-       the explicit "important white button" cases called out in 03_DESIGN_DECISIONS.md §5. */
+    /* Important White — a plain white-surface button (neutral border/depth, same family as
+       --secondary and --back below) whose TEXT is Accent Secondary (COR3, text-safe variant), for
+       the explicit "important white button" cases (e.g. I ALREADY HAVE AN ACCOUNT, CREATE ACCOUNT).
+       Sprint 29.1: EPIC 27 Sprint 27.1 originally colored outline/depth/shadow with raw Accent
+       Secondary too, which painted the button's border and pressed edge in blue and read as a
+       colored surface rather than a white one — the requested change was the text color only. */
     --beeday-color-button-important-white-bg: var(--beeday-color-surface);
     --beeday-color-button-important-white-bg-hover: var(--beeday-color-surface-muted);
     --beeday-color-button-important-white-fg: var(--beeday-color-accent-secondary-on-light);
-    --beeday-color-button-important-white-outline: var(--beeday-color-accent-secondary);
-    --beeday-color-button-important-white-depth: var(--beeday-color-accent-secondary);
-    --beeday-color-button-important-white-shadow: var(--beeday-color-accent-secondary);
+    --beeday-color-button-important-white-outline: var(--beeday-color-border-strong);
+    --beeday-color-button-important-white-depth: var(--beeday-color-border-strong);
+    --beeday-color-button-important-white-shadow: var(--beeday-color-border-strong);
 
     --beeday-color-button-back-bg: var(--beeday-color-surface);
     --beeday-color-button-back-bg-hover: var(--beeday-color-surface-muted);
