@@ -674,6 +674,28 @@ Infrastructure senders accept a fully-rendered `EmailMessage`. Either requires t
 explicit approval per `CLAUDE.md` §3.5 ("Do not create... new architectural patterns... unless the
 user explicitly approves").
 
+**Update (2026-08-17, EPIC 28 Sprint 28.2 — Experience & Localization Contract):** the repository
+owner explicitly commissioned this decision via the EPIC 28 planning package. Option (a) above was
+adopted, formalized in [ADR-006](../adr/ADR-006-transactional-email-localization-boundary.md):
+`IIdentityEmailComposer.ComposeEmailConfirmation`/`ComposePasswordReset` now take a
+`BeeDay.Domain.Enums.UserLanguage language` parameter (the caller's already-persisted
+`User.Language` — never inferred from environment, `Accept-Language`, or `CurrentUICulture`);
+`IdentityEmailComposer` resolves strings from a new, narrow, Infrastructure-owned catalog
+(`src/BeeDay.Infrastructure/Identity/EmailResources.resx`/`.en-US.resx`/`.pt-BR.resx`, 9 keys) via
+`System.Resources.ResourceManager.GetString(name, explicitCultureInfo)` — not
+`Microsoft.Extensions.Localization`/`IStringLocalizer`, and not a per-call mutation of any thread's
+`CurrentUICulture`. This is a second, deliberately separate resx catalog from the Web project's 19
+(`docs/web/07-localization.md` §8) — not a duplicate of it, since Infrastructure cannot reference Web,
+and not a violation of the "no second localization system" rule, since it owns exactly the 9 email
+strings and nothing else. Content is a first-pass functional translation (subject/greeting/
+introduction/footer/CTA for both flows) carried over verbatim from this section's existing English
+strings, not a brand-voice copy pass — Sprint 28.4 (Identity Transactional Email Experience) owns
+revising both languages' wording together. Preheader remains outside the `EmailMessage`/composer
+contract (an internal template detail, not promoted to a public parameter) — Sprint 28.2 decided this
+is not required for the culture-transport foundation; Sprint 28.3/28.4 can add it later without
+another contract break if visual work needs it. `Reply-To` was evaluated and left unchanged —
+deliverability/alignment work (Sprint 28.5/28.6), not a localization concern.
+
 ## 14. Observability, resilience & abuse controls (Epic 26, Sprint 26.7)
 
 ### 14.1 Observable state model

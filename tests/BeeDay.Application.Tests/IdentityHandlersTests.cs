@@ -61,6 +61,25 @@ public sealed class IdentityHandlersTests
         Assert.Single(fixture.Email.Messages);
     }
 
+    // EPIC 28, Sprint 28.2 (ADR-006): the handler must forward the recipient's own persisted
+    // User.Language to the composer, never a hardcoded/default value — proven here by setting a
+    // non-default language on the user before triggering the flow.
+    [Fact]
+    public async Task ResendConfirmation_PassesTheUsersOwnLanguageToTheComposer()
+    {
+        var fixture = new Fixture();
+        var user = fixture.AddUser(confirmed: false);
+        user.UpdatePreferences(UserLanguage.Portuguese, user.Theme);
+        var handler = new ResendEmailConfirmationCommandHandler(
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+
+        await handler.Handle(
+            new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest(user.Email)),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal([UserLanguage.Portuguese], fixture.Composer.ConfirmationLanguages);
+    }
+
     // Epic 26, Sprint 26.8 cross-sprint audit finding: unlike registration (§3.1/§12.3 — one
     // transaction, then the email send outside it), ResendEmailConfirmationCommandHandler has no
     // transaction at all. IUserTokenRepository.RevokeActiveAsync/AddAsync are each their own
@@ -195,6 +214,23 @@ public sealed class IdentityHandlersTests
         Assert.Single(fixture.Email.Messages);
     }
 
+    // EPIC 28, Sprint 28.2 (ADR-006): same contract as ResendConfirmation above, for the reset flow.
+    [Fact]
+    public async Task RequestPasswordReset_PassesTheUsersOwnLanguageToTheComposer()
+    {
+        var fixture = new Fixture();
+        var user = fixture.AddUser(confirmed: true);
+        user.UpdatePreferences(UserLanguage.Portuguese, user.Theme);
+        var handler = new RequestPasswordResetCommandHandler(
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+
+        await handler.Handle(
+            new RequestPasswordResetCommand(new RequestPasswordResetRequest(user.Email)),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal([UserLanguage.Portuguese], fixture.Composer.ResetLanguages);
+    }
+
     [Fact]
     public async Task ResetPassword_ChangesPasswordAndConsumesToken()
     {
@@ -283,10 +319,20 @@ public sealed class IdentityHandlersTests
 
     private sealed class FakeEmailComposer : IIdentityEmailComposer
     {
-        public EmailMessage ComposeEmailConfirmation(string recipient, string displayName, string rawToken) =>
-            new(recipient, "Confirm email", rawToken);
-        public EmailMessage ComposePasswordReset(string recipient, string displayName, string rawToken) =>
-            new(recipient, "Reset password", rawToken);
+        public List<UserLanguage> ConfirmationLanguages { get; } = [];
+        public List<UserLanguage> ResetLanguages { get; } = [];
+
+        public EmailMessage ComposeEmailConfirmation(string recipient, string displayName, string rawToken, UserLanguage language)
+        {
+            ConfirmationLanguages.Add(language);
+            return new(recipient, "Confirm email", rawToken);
+        }
+
+        public EmailMessage ComposePasswordReset(string recipient, string displayName, string rawToken, UserLanguage language)
+        {
+            ResetLanguages.Add(language);
+            return new(recipient, "Reset password", rawToken);
+        }
     }
 
     private sealed class FakeEmailSender : IEmailSender

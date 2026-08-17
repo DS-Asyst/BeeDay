@@ -346,3 +346,129 @@ implemented" today.
 5. **Font/brand policy for email clients**: confirm Nunito/Coiny fallback strategy for HTML email
    (webfonts unreliable) without importing the site's CSS wholesale — input for 28.4's template work,
    decided in principle by 28.2/28.3.
+
+---
+
+## Sprint 28.2 — Transactional Email Experience & Localization Contract
+
+**Base local:** `sprint/28.1-email-baseline` (not `hmg` — per the stacked-branching rule).
+**Branch:** `sprint/28.2-email-experience-localization-contract`.
+**Gate:** Gate A (Experience & Localization Architecture) — satisfied at the level this Sprint owns.
+
+### Decisions taken (answering the 9 questions from the Sprint prompt)
+
+1. **Culture source:** `User.Language` (Domain, already persisted) — the only approved source.
+2. **Transport:** a new required 4th parameter, `UserLanguage language`, on
+   `IIdentityEmailComposer.ComposeEmailConfirmation`/`ComposePasswordReset`. All 3 real call sites
+   (`EmailConfirmationIssuer.Issue`, `ResendEmailConfirmationCommandHandler`,
+   `RequestPasswordResetCommandHandler`) now pass `user.Language` explicitly.
+3. **Owning layer:** the decision itself is Application-contract-shaped (the interface lives in
+   Application); the resolution mechanism is entirely Infrastructure-internal.
+4. **Reusing the official Localization System:** not reused directly — Infrastructure cannot depend on
+   Web. A new, narrow, Infrastructure-owned `.resx` catalog was created instead (see below), formalized
+   in **ADR-006**.
+5. **Where transactional strings live:** `src/BeeDay.Infrastructure/Identity/EmailResources.resx` /
+   `.en-US.resx` / `.pt-BR.resx` — 9 keys (`Greeting`, `Confirmation{Title,Introduction,Footer,ActionLabel}`,
+   `Reset{Title,Introduction,Footer,ActionLabel}`).
+6. **HTML/plain text:** unchanged pattern — the same `BuildHtmlTemplate`/`BuildPlainTextTemplate` pair
+   in `IdentityEmailComposer`, now both taking the resolved `CultureInfo` and reading from the new
+   catalog instead of `const string` literals.
+7. **Preheader:** stays an internal composer detail, not promoted to `EmailMessage`/the public
+   contract, this Sprint — no confirmed need yet; revisit in 28.3/28.4 if visual work requires it.
+8. **Typography/fallback principle for email:** not implemented visually this Sprint (explicitly out of
+   scope — "no redesign completo"); the existing HTML template's `font-family:Arial,sans-serif` inline
+   style already follows the "safe system fallback, no custom webfont" principle Nunito/Coiny cannot
+   satisfy in email clients — 28.3/28.4 own any visual change.
+9. **Reply-To:** evaluated, left unchanged — a deliverability/alignment concern (28.5/28.6), not a
+   localization one.
+
+### Implementation
+
+- `src/BeeDay.Application/Common/Identity/IIdentityEmailComposer.cs` — added `UserLanguage language`
+  parameter to both methods, documented the contract (recipient's persisted language only, never
+  ambient/request state).
+- `src/BeeDay.Application/Common/Identity/IEmailConfirmationIssuer.cs` — `Issue` now passes
+  `user.Language` to the composer.
+- `src/BeeDay.Application/Features/Identity/Handlers/IdentityHandlers.cs` — both direct composer call
+  sites (`ResendEmailConfirmationCommandHandler`, `RequestPasswordResetCommandHandler`) pass
+  `user.Language`.
+- `src/BeeDay.Infrastructure/Identity/EmailResources.resx`/`.en-US.resx`/`.pt-BR.resx` (new) — the
+  9-key catalog.
+- `src/BeeDay.Infrastructure/Identity/IdentityEmailComposer.cs` — rewritten to resolve strings via
+  `ResourceManager.GetString(name, explicitCultureInfo)`, with a private `UserLanguage → CultureInfo`
+  mapping (deliberately not reusing `BeeDay.Web.Localization.BeeDayCultures`, which Infrastructure
+  cannot reference). HTML `<html lang="...">` now reflects the resolved culture.
+- `docs/adr/ADR-006-transactional-email-localization-boundary.md` (new) — formal record of this
+  decision, alternatives rejected, and explicit restrictions on future work at this boundary.
+- `docs/adr/README.md` — indexed ADR-006.
+- `docs/infrastructure/06-transactional-email.md` §13.5 — dated Update note recording that Sprint
+  26.6's deferred option (a) was adopted, pointing to ADR-006; historical Sprint 26.6 prose left
+  intact.
+
+### Architectural impact
+
+No dependency-direction change. Domain/Application/Infrastructure/Web boundaries unchanged;
+`PersistenceContractBoundaryTests.ApplicationAssembly_DoesNotReferenceInfrastructure` still passes
+unmodified. The only new "dependency" is Infrastructure's own `EmailResources.resx`
+(`System.Resources.ResourceManager`, part of the BCL) — no new package reference, no
+`Microsoft.Extensions.Localization`/`IStringLocalizer` usage anywhere in Infrastructure.
+
+### Compatibility
+
+`IIdentityEmailComposer`'s two methods gained a required 4th parameter — a breaking signature change,
+but to an internal-only contract with exactly 3 real call sites, all updated in this same commit; no
+external consumer exists. No overload/default was added (see ADR-006 "Compatibilidade").
+
+### Tests added or updated
+
+- `tests/BeeDay.Infrastructure.Tests/IdentityInfrastructureTests.cs` — 6 existing tests updated to the
+  new signature (all still assert English content, `UserLanguage.English`); 4 new tests:
+  `EmailComposer_ComposesConfirmationInTheRequestedLanguage`/`...PasswordResetInTheRequestedLanguage`
+  (theory, en-US + pt-BR, asserts subject/greeting/`<html lang>`), and
+  `EmailComposer_NeverThrowsForAnyApprovedLanguage` (both languages resolve every key without
+  exception).
+- `tests/BeeDay.Application.Tests/IdentityHandlersTests.cs` — `FakeEmailComposer` now records the
+  language it received; 2 new tests
+  (`ResendConfirmation_PassesTheUsersOwnLanguageToTheComposer`,
+  `RequestPasswordReset_PassesTheUsersOwnLanguageToTheComposer`) prove the handlers forward the real
+  user's `Language`, not a default, end-to-end through the MediatR handler.
+- No test sends real email (unchanged — all existing fakes/stubs preserved).
+
+### Documentation updated
+
+`docs/adr/ADR-006-transactional-email-localization-boundary.md` (new), `docs/adr/README.md`,
+`docs/infrastructure/06-transactional-email.md` §13.5, this file.
+
+### Validation Results
+
+```
+dotnet format BeeDay.slnx --verify-no-changes   → clean after one auto-fix pass (CRLF line endings on
+                                                    the rewritten IdentityEmailComposer.cs — the Write
+                                                    tool produced LF; `dotnet format` corrected it,
+                                                    re-verified clean)
+dotnet build BeeDay.slnx                         → 0 errors, 0 warnings
+dotnet test BeeDay.slnx                          → 1366/1366 passed (93 Domain + 85 Application +
+                                                    182 Infrastructure + 165 E2E + 841 Web)
+git status                                       → clean after commit (see Git section below)
+```
+
+### Security / Production
+
+No secrets touched. No new external dependency. Production (`prd`) untouched — no file under
+`appsettings.Production.json`'s scope was changed. pt-BR translations contain no PII, tokens, or
+secrets — static UI copy only.
+
+### Runtime validation
+
+Not applicable — this Sprint is architecture/composer-level, no deployment-dependent behavior.
+`POST-MERGE PENDING`: none introduced by this Sprint specifically (the pre-existing Homologation
+Resend-activation POST-MERGE-PENDING item from Sprint 28.1 is unaffected by this Sprint's changes).
+
+### Risks / Known Limitations
+
+- pt-BR copy is a first-pass functional translation, not a brand-voice-reviewed final copy — Sprint
+  28.4 owns revising both languages together.
+- The `UserLanguage ↔ CultureInfo` mapping now exists in two places (Web's `BeeDayCultures`,
+  Infrastructure's private switch in `IdentityEmailComposer`) — an unavoidable, explicitly-accepted
+  duplication at the layer boundary (ADR-006). Any future third language must update both.
+- Preheader remains unaddressed — deferred, not forgotten (tracked for 28.3/28.4).

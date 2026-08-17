@@ -23,8 +23,9 @@ no momento da decisão. Reescrever essas referências destruiria o valor de regi
 | [`ADR-003-aggregate-repositories.md`](ADR-003-aggregate-repositories.md) | Repositórios por Aggregate Root + read services, em vez de repositório genérico. |
 | [`ADR-004-sql-server-runtime-cutover.md`](ADR-004-sql-server-runtime-cutover.md) | Corte de runtime para SQL Server como único provider. |
 | [`ADR-005-json-legacy-removal.md`](ADR-005-json-legacy-removal.md) | Remoção completa do pipeline JSON legado e de `LevelUpData`. |
+| [`ADR-006-transactional-email-localization-boundary.md`](ADR-006-transactional-email-localization-boundary.md) | Culture de e-mail transacional transportada via `User.Language`, catálogo `.resx` estreito Infrastructure-owned, sem `IStringLocalizer`/estado global. |
 
 ## Ordem de leitura recomendada
 
-Ordem numérica (001 → 005) — cada ADR referencia explicitamente os anteriores que ainda são
+Ordem numérica (001 → 006) — cada ADR referencia explicitamente os anteriores que ainda são
 válidos.

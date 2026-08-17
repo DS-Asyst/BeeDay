@@ -33,7 +33,7 @@ public sealed class EmailConfirmationIssuer(
             tokenService.HashToken(rawToken),
             now,
             now.Add(IdentityTokenLifetimes.EmailConfirmation));
-        var message = emailComposer.ComposeEmailConfirmation(user.Email, user.Name, rawToken);
+        var message = emailComposer.ComposeEmailConfirmation(user.Email, user.Name, rawToken, user.Language);
         return (token, message);
     }
 }
