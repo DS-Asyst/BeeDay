@@ -1,0 +1,17 @@
+@page "/beeday-plus"
+@attribute [AllowAnonymous]
+@layout BeeDay.Web.Components.Layout.PublicLayout
+@using BeeDay.Web.Components.DesignSystem
+@using BeeDay.Web.Components.Features.Institutional.Components
+@inject IStringLocalizer<InstitutionalResources> Localizer
+
+<PageTitle>@Localizer["ProductPlusPageTitle"]</PageTitle>
+
+@* No price, entitlement, or benefit is invented here (06_ASSETS_AND_OPEN_ITEMS.md) — beeday Plus
+   does not exist in the product yet. *@
+<ProductPageTemplate PageContext="@Localizer["ProductPlusPageContext"]" Title="@Localizer["ProductPlusTitle"]" Description="@Localizer["ProductPlusIntro"]" Surface="BeeDayPaletteToken.Cor1">
+    <section aria-label="@Localizer["ProductPlusTitle"]">
+        <span class="institutional-product__status">@Localizer["ProductPlusStatus"]</span>
+        <p>@Localizer["ProductPlusBody"]</p>
+    </section>
+</ProductPageTemplate>

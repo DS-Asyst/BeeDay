@@ -7,10 +7,22 @@ public partial class BeeDayHero
     [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
     [Parameter] public string? Eyebrow { get; set; }
     [Parameter] public string? Subtitle { get; set; }
+    [Parameter] public RenderFragment? BrandContext { get; set; }
     [Parameter] public RenderFragment? Illustration { get; set; }
     [Parameter] public RenderFragment? PrimaryAction { get; set; }
     [Parameter] public RenderFragment? SupportingContent { get; set; }
     [Parameter] public BeeDayHeroVariant Variant { get; set; } = BeeDayHeroVariant.Default;
+
+    /// <summary>
+    /// The solid COR0-COR9 background this hero renders on, paired automatically with its
+    /// WCAG-checked foreground (03_DESIGN_DECISIONS.md §8). Null keeps the hero's neutral/
+    /// transparent default background for non-solid contexts (e.g. onboarding).
+    /// </summary>
+    [Parameter] public BeeDayPaletteToken? Surface { get; set; }
+
+    /// <summary>Roughly halves the hero's vertical padding — the Wallet hero (Sprint 27.11) uses this.</summary>
+    [Parameter] public bool Compact { get; set; }
+
     [Parameter] public string? Class { get; set; }
     [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
@@ -23,8 +35,10 @@ public partial class BeeDayHero
                 BeeDayHeroVariant.Onboarding => "beeday-hero--onboarding",
                 _ => null
             };
+            var surfaceClass = Surface?.ToSurfaceCssClass();
+            var compactClass = Compact ? "beeday-hero--compact" : null;
 
-            return string.Join(' ', new[] { "beeday-hero", variantClass, Class }
+            return string.Join(' ', new[] { "beeday-hero", variantClass, surfaceClass, compactClass, Class }
                 .Where(value => !string.IsNullOrWhiteSpace(value)));
         }
     }

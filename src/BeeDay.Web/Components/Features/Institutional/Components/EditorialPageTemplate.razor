@@ -1,0 +1,14 @@
+@using BeeDay.Web.Components.DesignSystem
+
+@* Institutional/editorial family: Mission, Efficacy, Contact us (04_PAGES_AND_ROUTES.md). *@
+<InstitutionalPageShell PageContext="@PageContext" Title="@Title" Description="@Description" Surface="Surface" BodyClass="institutional-page__body--editorial">
+    @ChildContent
+</InstitutionalPageShell>
+
+@code {
+    [Parameter, EditorRequired] public string PageContext { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public BeeDayPaletteToken Surface { get; set; } = BeeDayPaletteToken.Cor0;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}
