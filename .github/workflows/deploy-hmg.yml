@@ -223,6 +223,20 @@ jobs:
           & ".\scripts\iis-control\Request-BeeDayIisControlPromotion.ps1" `
               -CommitSha "${{ github.sha }}"
 
+      # Hotfix 26.9.2: two consecutive real deployments (runs 31986772973 and 31993611105) failed
+      # inside Deploy-BeeDay.ps1's own recipient-enumeration logic - both times after IIS had
+      # already been stopped. This runs the deploy script's own regression suite, on this exact
+      # runner (SERV3WEB, Windows PowerShell 5.1 - the same engine that exposed both defects and
+      # the only place that engine is available in this pipeline), BEFORE "Deploy to IIS with
+      # rollback" so a regression of this kind fails closed here instead of stopping the site
+      # again. Read-only: no IIS, no SQL, no application files touched, no secrets required or
+      # read (the suite uses only synthetic parameter values) - see
+      # scripts/tests/Test-DeployBeeDayRecovery.ps1 for what it proves.
+      - name: Validate deployment script regression suite
+        shell: powershell
+        run: |
+          & ".\scripts\tests\Test-DeployBeeDayRecovery.ps1"
+
       - name: Deploy to IIS with rollback
         shell: powershell
         env:

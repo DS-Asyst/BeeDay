@@ -105,13 +105,37 @@ if (-not [string]::IsNullOrWhiteSpace($AppConnectionString) `
     throw "AppConnectionString and MigrationConnectionString must not be the same value - the application must never use the migrator credential."
 }
 
+# Hotfix 26.9.1 (GitHub Actions run 31986772973): a PowerShell pipeline that filters out every
+# emitted object returns $null, not an empty array - "" -split ';' still yields one empty-string
+# element, which Where-Object then filters away entirely. Under Set-StrictMode -Version Latest,
+# $null.Count later throws "The property 'Count' cannot be found on this object", which is exactly
+# what crashed both attempts of that run. @() around the pipeline guards the function's OWN use of
+# the result, but a zero-object function return still collapses to $null again at the call site -
+# confirmed empirically - so the call below must independently wrap the call itself in @() too.
+function ConvertTo-BeeDayRecipientList {
+    param([AllowEmptyString()][Parameter(Mandatory = $true)][string]$RecipientsRaw)
+
+    return @($RecipientsRaw -split ';' |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+}
+
+# Hotfix 26.9.2 (GitHub Actions run 31993611105): named $script:hmgRecipientList, NOT
+# $script:hmgAllowedRecipients - PowerShell variable names are case-insensitive, and
+# "hmgAllowedRecipients" collides with the -HmgAllowedRecipients parameter above (same name, only
+# the leading letter's case differs). When this script runs as the top-level invocation - exactly
+# how deploy-hmg.yml's wrapper invokes it via `&` - a script parameter and a same-named (modulo
+# case) $script:-scoped variable do not reliably behave as one stable, array-typed slot: proven
+# empirically (see PR description) that reading $script:hmgAllowedRecipients back after this exact
+# assignment returned a raw System.String, not the array actually produced by the right-hand side,
+# which is what made .Count throw two sprints in a row despite Hotfix 26.9.1's array-shape fix
+# being correct in isolation. Renamed here to a name that cannot collide with any parameter.
+#
 # Parsed once here (not inline in Set-BeeDayEnvironmentVariables) so the same list backs both the
 # redaction list immediately below and the App Pool variables later — real recipient addresses are
 # PII, not merely operational data, so they are redacted from $deployLogsPath exactly like the
 # connection strings and the Resend API key are.
-$script:hmgAllowedRecipients = @($HmgAllowedRecipients -split ';') |
-    ForEach-Object { $_.Trim() } |
-    Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+$script:hmgRecipientList = @(ConvertTo-BeeDayRecipientList -RecipientsRaw $HmgAllowedRecipients)
 
 # Exception messages can echo back raw parameter values verbatim (e.g. a malformed connection
 # string thrown by SqlConnectionStringBuilder, or a driver error that embeds its input). GitHub
@@ -120,7 +144,7 @@ $script:hmgAllowedRecipients = @($HmgAllowedRecipients -split ';') |
 # any log pipeline GitHub controls. Every message that reaches Write-DeployMessage or Write-Error
 # is scrubbed of these literal values first, so the real error text is preserved but a credential
 # can never end up persisted on disk in the clear.
-$script:secretValuesToRedact = @($MigrationConnectionString, $AppConnectionString, $ResendApiKey) + $script:hmgAllowedRecipients |
+$script:secretValuesToRedact = @($MigrationConnectionString, $AppConnectionString, $ResendApiKey) + $script:hmgRecipientList |
     Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
 
 function Protect-DeploySecret {
@@ -755,8 +779,18 @@ function Set-BeeDayEnvironmentVariables {
     # always safe: Homologation today (Resend.Enabled=false) never even reaches that code path.
     # Left empty, the guard's default (Enabled=true, no recipients) fails closed at startup rather
     # than the App Pool silently keeping a stale allowlist from a previous deploy.
-    for ($i = 0; $i -lt $script:hmgAllowedRecipients.Count; $i++) {
-        $variables["BeeDay__Email__HmgRecipientGuard__AllowedRecipients__$i"] = $script:hmgAllowedRecipients[$i]
+    #
+    # Hotfix 26.9.2: foreach instead of a .Count-indexed for loop, on top of the rename above -
+    # not because foreach alone would have fixed the collision (it would not: iterating a bare
+    # string still iterates its characters, silently, which is worse than the crash this replaces),
+    # but because a .Count/index dependency on a $script:-scoped collection has now bitten this
+    # exact variable twice. The @() here is defensive, not speculative: if $script:hmgRecipientList
+    # were ever a bare string again (e.g. a future collision), foreach over @($string) enumerates
+    # it as the one element it is, rather than looping per character.
+    $i = 0
+    foreach ($recipient in @($script:hmgRecipientList)) {
+        $variables["BeeDay__Email__HmgRecipientGuard__AllowedRecipients__$i"] = $recipient
+        $i++
     }
 
     if (Test-BeeDayUsesPrivilegedIisControl) {
@@ -951,7 +985,18 @@ try {
 }
 catch {
     $deploymentError = Protect-DeploySecret $_.Exception.Message
-    Write-Error "Deployment failed: $deploymentError"
+
+    # Hotfix 26.9.1 (GitHub Actions run 31986772973): under the script-wide
+    # $ErrorActionPreference = "Stop" (line 87), a bare Write-Error escalates to a terminating
+    # error and unwinds out of this catch block immediately - it never even reaches
+    # "Starting rollback...", let alone the rollback attempt itself. That is exactly what both
+    # attempts of that run did: the failure was logged, and the entire rollback silently never
+    # ran. -ErrorAction Continue keeps this call non-terminating (it still writes to the error
+    # stream and is still visible in the log - nothing here is swallowed), so execution reliably
+    # reaches the rollback attempt and, afterward, the explicit throw below. The same escalation
+    # risk applies to the inner "Rollback also failed" Write-Error, so it gets the same treatment
+    # - a failed rollback must not skip the final throw either.
+    Write-Error "Deployment failed: $deploymentError" -ErrorAction Continue
 
     Write-DeployMessage "Starting rollback to the previous application version..."
 
@@ -965,7 +1010,7 @@ catch {
         Write-DeployMessage "Rollback completed and previous version is healthy."
     }
     catch {
-        Write-Error "Rollback also failed: $(Protect-DeploySecret $_.Exception.Message)"
+        Write-Error "Rollback also failed: $(Protect-DeploySecret $_.Exception.Message)" -ErrorAction Continue
     }
 
     throw "Deployment failed and rollback was attempted. Original error: $deploymentError"
