@@ -245,6 +245,62 @@ provider message id, and a plain confirmation ("inbox received: yes/no") — nev
 copy of the email body containing the live token, never the raw allowlisted address beyond what
 already appears in the masked/redacted evidence above.
 
+### 11.1 Negative smoke — non-allowlisted recipient (EPIC 28, Sprint 28.8)
+
+**Threat model:** prove that a recipient who is *not* on `HmgRecipientGuardOptions.AllowedRecipients`
+is blocked before Resend is ever reached — i.e. the guard is not merely present in code, but actually
+fail-closed in the deployed configuration. The risk this protects against: a misconfiguration or
+regression that lets Homologation's Resend integration deliver to an arbitrary, non-approved address.
+
+**Preconditions:**
+
+- The guard is enabled (`HmgRecipientGuardOptions:Enabled` — default `true`; confirm it wasn't
+  explicitly disabled for the environment under test).
+- The recipient used for the negative case is **never** a real external address — use a
+  syntactically-valid but non-deliverable address (an RFC 2606 reserved TLD, e.g.
+  `something@example.invalid`) that is guaranteed absent from the allowlist. Never widen
+  `AllowedRecipients` to "test" the block — that would test nothing.
+
+**Automated evidence (proven this Sprint, safe to re-run anywhere, including CI):**
+`tests/BeeDay.Infrastructure.Tests/HmgRecipientGuardDependencyInjectionTests.cs` —
+`Host_WhenRecipientIsNotAllowlisted_TheRealResendHttpClientIsNeverInvoked` builds the real DI graph
+(`AddBeeDayInfrastructure`, unmodified), resolves the real `HmgRecipientGuardedEmailSender` wrapping
+the real `ResendEmailSender`, and replaces only the deepest possible seam — `ResendEmailSender`'s own
+`HttpClient` transport — with a call-counting stub. Sending to a non-allowlisted recipient asserts
+`CallCount == 0` at that exact boundary. Its positive-path counterpart,
+`Host_WhenRecipientIsAllowlisted_TheRealResendHttpClientIsInvokedExactlyOnce`, proves the same harness
+doesn't just happen to never call anything — the allowlisted case reaches the transport exactly once.
+This is the strongest automated proof available without deploying and sending through the real
+Resend API.
+
+**Runtime evidence on real HMG (`POST-MERGE PENDING` until the merged commits are deployed):**
+
+1. Deploy completes; standard health check passes.
+2. Trigger a flow (e.g. resend-confirmation or forgot-password) for the same kind of
+   `*.invalid`-style, deliberately non-allowlisted address used above — never a real external
+   address.
+3. Confirm the guard's **blocked** log line appears
+   (`EmailEventIds.GuardBlocked`, 7101 — [`03-observability.md`](03-observability.md) §2.1), with no
+   recipient in the log line (proven never to happen, `HmgRecipientGuardedEmailSenderTests.SendAsync_NeverLogsTheRawRecipientAddress_ForAllowedOrBlockedRecipients`).
+4. Confirm **no** "provider request attempted" (`ProviderAttempted`, 7103) log line follows — the
+   absence of that EventId in the stdout window around the blocked line is the runtime evidence that
+   Resend was never invoked (this repository has no code path that could call Resend without first
+   logging that attempt, per §14.1 of the transactional-email doc).
+5. Confirm the subject prefix (`[HMG] `) is irrelevant to this outcome — the guard blocks by
+   recipient, never by subject/body content (`HmgRecipientGuardedEmailSenderTests` proves the prefix
+   logic and the allow/block decision are independent).
+
+If real HMG does not offer a safe way to trigger step 2 without also attempting a real send to a
+non-allowlisted address through some other path, do not invent one — stop, document the limitation,
+and rely on the automated evidence above as the Gate D-local proof; runtime confirmation stays
+`POST-MERGE PENDING` explicitly, not silently assumed.
+
+**Explicit rule:** the guard blocking a recipient must always be provable as "the provider was never
+reached," never merely "the app returned success/silently" — a future change that made the block
+happen *after* a Resend call (e.g. by discarding the response) would violate this rule even though
+the email would still not be delivered; this negative smoke exists specifically to catch that class
+of regression, not just "no email arrived."
+
 ## 12. Rollback procedure
 
 Not email-specific — the same mechanism protects every deploy. `Deploy-BeeDay.ps1` automatically

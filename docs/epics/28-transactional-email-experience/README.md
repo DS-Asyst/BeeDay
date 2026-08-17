@@ -1026,3 +1026,75 @@ accumulated files, both require the merged commits to be deployed first.
   post-merge, out-of-repository action.
 - Event Journal's own retention gap (distinct from the stdout gap this Sprint closed) remains open —
   explicitly out of this Sprint's scope (email/stdout only), not silently dropped.
+
+---
+
+## Sprint 28.8 — HMG Recipient Guard Negative Smoke Harness & Safety Evidence
+
+**Base local:** `sprint/28.7-email-observability`.
+**Branch:** `sprint/28.8-hmg-guard-negative-smoke`.
+**Gate:** Gate D local — satisfied. Real-HMG runtime confirmation of the negative path remains
+`POST-MERGE PENDING` (unchanged principle from every prior Sprint).
+
+### Audit
+
+`HmgRecipientGuardedEmailSenderTests.cs` already proved the negative path at the unit level (a fake
+inner sender is never invoked for a blocked recipient) and the fail-closed startup contract already
+had dedicated coverage (`HmgRecipientGuardDependencyInjectionTests.Host_WhenResendSelectedAndGuardLeftAtDefault_FailsToStartPredictably`).
+What was missing: proof at the **real DI/transport boundary** production actually uses, not just a
+hand-rolled fake standing in for the downstream sender.
+
+### What changed
+
+Two new tests in `HmgRecipientGuardDependencyInjectionTests.cs`, both building the real, unmodified
+`AddBeeDayInfrastructure` DI graph and replacing only `ResendEmailSender`'s own `HttpClient`
+transport with a call-counting stub (no fake ever stands in for the guard itself):
+
+- `Host_WhenRecipientIsNotAllowlisted_TheRealResendHttpClientIsNeverInvoked` — a deliberately fake,
+  RFC 2606-reserved (`.invalid`) recipient never reaches the transport (`CallCount == 0`).
+- `Host_WhenRecipientIsAllowlisted_TheRealResendHttpClientIsInvokedExactlyOnce` — the positive-path
+  counterpart, proving the harness genuinely distinguishes allowed from blocked rather than the
+  transport being universally unreachable.
+
+No fake/mock replaced the guard. No real network call. `AllowedRecipients` was never widened. No
+existing test weakened.
+
+### Documentation updated
+
+- `docs/deployment/14-transactional-email-runbook.md` §11.1 (new): threat model, preconditions
+  (never a real address, guard must be enabled), the automated evidence above, the runtime
+  (`POST-MERGE PENDING`) counterpart procedure using the new `EmailEventIds.GuardBlocked`/
+  `ProviderAttempted` (7101/7103) EventIds from Sprint 28.7, and an explicit rule distinguishing "the
+  provider was never reached" from "no email arrived" (the regression class this smoke specifically
+  guards against).
+- `docs/infrastructure/06-transactional-email.md` §10.4.1 (new): cross-references the same evidence
+  from the architecture-doc side.
+
+### Tests
+
+7/7 pass in `HmgRecipientGuardDependencyInjectionTests.cs` (5 existing + 2 new). Full suite recorded
+below.
+
+### Validation Results
+
+```
+dotnet format BeeDay.slnx --verify-no-changes   → clean
+dotnet build BeeDay.slnx                         → 0 errors, 0 warnings
+dotnet test BeeDay.slnx                          → 1396/1396 passed (93+85+212+841+165 across 5 projects)
+git status                                       → clean after commit
+```
+
+### Security / Production
+
+No secrets touched. `AllowedRecipients` never widened. No real network call in any test. No server
+touched. Production untouched.
+
+### Runtime validation
+
+Not applicable — the strongest evidence this Sprint can produce is at the code/DI boundary. Real HMG
+confirmation (an actual blocked send observed via `GuardBlocked`/absence of `ProviderAttempted` in
+real stdout) is `POST-MERGE PENDING`, per the runbook §11.1 procedure.
+
+### Risks / Known Limitations
+
+None new — this Sprint strictly added test coverage and documentation; no production code changed.

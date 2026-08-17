@@ -103,6 +103,76 @@ public sealed class HmgRecipientGuardDependencyInjectionTests
         await host.StopAsync(TestContext.Current.CancellationToken);
     }
 
+    // EPIC 28, Sprint 28.8 (HMG Recipient Guard Negative Smoke Harness & Safety Evidence): the
+    // strongest automated proof this repository can produce that "non-allowlisted recipient -> guard
+    // blocks -> provider not invoked" holds at the REAL boundary production uses — not a
+    // hand-rolled fake standing in for the guard (HmgRecipientGuardedEmailSender itself is the real,
+    // unmodified class, resolved from the real DI graph exactly as AddBeeDayInfrastructure wires it),
+    // only the deepest possible seam (ResendEmailSender's own HttpClient transport) is replaced, so a
+    // regression that let a blocked recipient reach Resend would make this test fail by construction,
+    // not by coincidence. Never sends over a real network, never widens AllowedRecipients, never
+    // touches a real/synthetic-but-plausible external address (the recipient below is a
+    // syntactically-valid but deliberately fake ".invalid" address — RFC 2606 reserved — never
+    // dispatched anywhere since the guard blocks it before any transport is reached).
+    [Fact]
+    public async Task Host_WhenRecipientIsNotAllowlisted_TheRealResendHttpClientIsNeverInvoked()
+    {
+        var handler = new RecordingHttpMessageHandler();
+        using var host = BuildHost(
+            new Dictionary<string, string?>
+            {
+                [$"{ResendOptions.SectionName}:Enabled"] = "true",
+                [$"{ResendOptions.SectionName}:ApiKey"] = "re_test_only_used_in_memory_never_a_real_key",
+                [$"{ResendOptions.SectionName}:FromAddress"] = "noreply@beeday.example",
+                [$"{DevelopmentEmailOptions.SectionName}:Enabled"] = "false",
+                [$"{HmgRecipientGuardOptions.SectionName}:Enabled"] = "true",
+                [$"{HmgRecipientGuardOptions.SectionName}:AllowedRecipients:0"] = "owner@beeday.example"
+            },
+            services => services.AddHttpClient<ResendEmailSender>().ConfigurePrimaryHttpMessageHandler(() => handler));
+
+        await host.StartAsync(TestContext.Current.CancellationToken);
+
+        var sender = host.Services.GetRequiredService<IEmailSender>();
+        await sender.SendAsync(
+            new EmailMessage("not-allowlisted@example.invalid", "Subject", "<p>Body</p>"),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(0, handler.CallCount);
+
+        await host.StopAsync(TestContext.Current.CancellationToken);
+    }
+
+    // Positive-path counterpart at the same real boundary, so a future change that broke the
+    // allowlisted path could not hide behind the negative test above going green for the wrong
+    // reason (e.g. the HTTP client being unreachable for every recipient, not just blocked ones).
+    [Fact]
+    public async Task Host_WhenRecipientIsAllowlisted_TheRealResendHttpClientIsInvokedExactlyOnce()
+    {
+        var handler = new RecordingHttpMessageHandler();
+        using var host = BuildHost(
+            new Dictionary<string, string?>
+            {
+                [$"{ResendOptions.SectionName}:Enabled"] = "true",
+                [$"{ResendOptions.SectionName}:ApiKey"] = "re_test_only_used_in_memory_never_a_real_key",
+                [$"{ResendOptions.SectionName}:FromAddress"] = "noreply@beeday.example",
+                [$"{DevelopmentEmailOptions.SectionName}:Enabled"] = "false",
+                [$"{HmgRecipientGuardOptions.SectionName}:Enabled"] = "true",
+                [$"{HmgRecipientGuardOptions.SectionName}:AllowedRecipients:0"] = "owner@beeday.example"
+            },
+            services => services.AddHttpClient<ResendEmailSender>().ConfigurePrimaryHttpMessageHandler(() => handler));
+
+        await host.StartAsync(TestContext.Current.CancellationToken);
+
+        var sender = host.Services.GetRequiredService<IEmailSender>();
+        await sender.SendAsync(
+            new EmailMessage("owner@beeday.example", "Subject", "<p>Body</p>"),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, handler.CallCount);
+
+        await host.StopAsync(TestContext.Current.CancellationToken);
+    }
+
     [Fact]
     public void CommittedProductionAppsettings_ExplicitlyDisablesHmgRecipientGuard()
     {
@@ -115,7 +185,7 @@ public sealed class HmgRecipientGuardDependencyInjectionTests
         Assert.Equal(JsonValueKind.False, enabled.ValueKind);
     }
 
-    private static IHost BuildHost(Dictionary<string, string?> settings)
+    private static IHost BuildHost(Dictionary<string, string?> settings, Action<IServiceCollection>? configureServices = null)
     {
         settings[$"{SqlServerOptions.SectionName}:ConnectionString"] = TestConnectionString;
 
@@ -125,8 +195,34 @@ public sealed class HmgRecipientGuardDependencyInjectionTests
                 configuration.Sources.Clear();
                 configuration.AddInMemoryCollection(settings);
             })
-            .ConfigureServices((context, services) => services.AddBeeDayInfrastructure(context.Configuration))
+            .ConfigureServices((context, services) =>
+            {
+                services.AddBeeDayInfrastructure(context.Configuration);
+                // Applied after AddBeeDayInfrastructure so it overrides that method's own
+                // AddHttpClient<ResendEmailSender> primary handler — IHttpClientFactory composes
+                // configuration for a given typed client, and the last-registered primary handler
+                // factory wins, which is exactly the seam this file's negative/positive smoke tests
+                // need without touching AddBeeDayInfrastructure itself.
+                configureServices?.Invoke(services);
+            })
             .Build();
+    }
+
+    // Counts real invocations of the transport ResendEmailSender's HttpClient would use — never
+    // performs a real network call itself (always returns a canned in-memory response), so this test
+    // file makes zero real HTTP requests regardless of which path (allowed/blocked) is exercised.
+    private sealed class RecordingHttpMessageHandler : HttpMessageHandler
+    {
+        public int CallCount { get; private set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            CallCount++;
+            return Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+            {
+                Content = new StringContent("{\"id\":\"smoke-test-message-id\"}", System.Text.Encoding.UTF8, "application/json")
+            });
+        }
     }
 
     private static string GetWebProjectDirectory()

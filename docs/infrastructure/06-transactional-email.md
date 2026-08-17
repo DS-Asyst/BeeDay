@@ -438,6 +438,21 @@ default would protect it automatically. **That moment arrived 2026-08-17** (comm
 the header Update note) — the guard's fail-closed default is now the active code path for
 Homologation once redeployed; current status: runbook §6.
 
+### 10.4.1 Negative smoke — provider non-invocation proven at the real DI boundary (EPIC 28, Sprint 28.8)
+
+Beyond the unit-level proof in §10.3 (the fake inner sender is never called for a blocked recipient),
+`tests/BeeDay.Infrastructure.Tests/HmgRecipientGuardDependencyInjectionTests.cs` proves the same
+outcome at the deepest realistic boundary: the real DI graph (`AddBeeDayInfrastructure`, unmodified),
+the real `HmgRecipientGuardedEmailSender` wrapping the real `ResendEmailSender`, with only
+`ResendEmailSender`'s own `HttpClient` transport replaced by a call-counting stub.
+`Host_WhenRecipientIsNotAllowlisted_TheRealResendHttpClientIsNeverInvoked` asserts zero calls reach
+that transport for a non-allowlisted (deliberately fake, `.invalid`-TLD) recipient;
+`Host_WhenRecipientIsAllowlisted_TheRealResendHttpClientIsInvokedExactlyOnce` proves the same harness
+correctly reaches it exactly once for an allowlisted one — so the negative result cannot be explained
+by the transport being unreachable for every recipient. Full threat model, preconditions, and the
+runtime (`POST-MERGE PENDING`) counterpart of this evidence:
+[`14-transactional-email-runbook.md`](../deployment/14-transactional-email-runbook.md) §11.1.
+
 ### 10.5 Allowlist storage — not committed to source control
 
 `AllowedRecipients` is real-world PII (personal email addresses) and must never be hardcoded in
