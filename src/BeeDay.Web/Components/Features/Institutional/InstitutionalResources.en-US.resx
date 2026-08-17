@@ -92,7 +92,9 @@
   <data name="FaqsQ3Question" xml:space="preserve"><value>Is beeday available on mobile?</value></data>
   <data name="FaqsQ3Answer" xml:space="preserve"><value>Yes. beeday's web app is fully responsive and works from a mobile browser today; dedicated Android and iOS apps are coming soon.</value></data>
   <data name="FaqsQ4Question" xml:space="preserve"><value>Where can I get help or report an issue?</value></data>
-  <data name="FaqsQ4Answer" xml:space="preserve"><value>Visit our Contact us page for support and feedback channels.</value></data>
+  <data name="FaqsQ4AnswerLeadIn" xml:space="preserve"><value>Visit our</value></data>
+  <data name="FaqsQ4ContactLinkLabel" xml:space="preserve"><value>Contact us</value></data>
+  <data name="FaqsQ4AnswerTrailer" xml:space="preserve"><value>page for support and feedback channels.</value></data>
 
   <data name="CommunityGuidelinesPageContext" xml:space="preserve"><value>Community guidelines</value></data>
   <data name="CommunityGuidelinesPageTitle" xml:space="preserve"><value>Community guidelines — beeday</value></data>

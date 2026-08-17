@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
@@ -61,6 +62,35 @@ public sealed class InstitutionalPagesTests(PlaywrightAppFixture fixture) : E2ET
 
         await Page.Keyboard.PressAsync("Enter");
         await Expect(Page.GetByText("beeday is a personal productivity application")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task FaqsHelpAnswerLinksThroughToTheRealContactPage()
+    {
+        await GotoAsync("/faqs");
+
+        await Page.GetByText("Where can I get help or report an issue?", new() { Exact = true }).ClickAsync();
+        var contactLink = Page.Locator(".institutional-faq__item").GetByRole(AriaRole.Link, new() { Name = "Contact us", Exact = true });
+        await Expect(contactLink).ToBeVisibleAsync();
+        await Expect(contactLink).ToHaveAttributeAsync("href", "/contact");
+        Assert.Equal("none", await contactLink.EvaluateAsync<string>("element => getComputedStyle(element).textDecorationLine"));
+
+        await contactLink.ClickAsync();
+        await Expect(Page).ToHaveURLAsync(new Regex(@"/contact$"));
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Contact us", Level = 1 })).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task FaqsAccordionTogglesOnTouchTapWithoutHover()
+    {
+        await using var touchContext = await Fixture.Browser.NewContextAsync(new() { HasTouch = true, ViewportSize = new() { Width = 390, Height = 844 } });
+        var touchPage = await touchContext.NewPageAsync();
+        await touchPage.GotoAsync($"{Fixture.ServerAddress}/faqs");
+        await touchPage.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        var question = touchPage.GetByText("Is beeday available on mobile?", new() { Exact = true });
+        await question.TapAsync();
+        await Expect(touchPage.GetByText("dedicated Android and iOS apps are coming soon")).ToBeVisibleAsync();
     }
 
     [Theory]
