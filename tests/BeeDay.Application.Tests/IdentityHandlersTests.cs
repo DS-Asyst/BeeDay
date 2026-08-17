@@ -61,6 +61,34 @@ public sealed class IdentityHandlersTests
         Assert.Single(fixture.Email.Messages);
     }
 
+    // Epic 26, Sprint 26.8 cross-sprint audit finding: unlike registration (§3.1/§12.3 — one
+    // transaction, then the email send outside it), ResendEmailConfirmationCommandHandler has no
+    // transaction at all. IUserTokenRepository.RevokeActiveAsync/AddAsync are each their own
+    // auto-committing call (EfUserTokenRepository.cs — every method acquires its own short-lived
+    // DbContext and calls SaveChanges immediately). By the time emailSender.SendAsync runs, the old
+    // token is already revoked and the new one already persisted — both independently of whether the
+    // send succeeds. This test proves that real behavior using the fake repository, which mutates its
+    // in-memory lists synchronously on each call, matching the real EF repository's per-call-commit
+    // semantics for this purpose.
+    [Fact]
+    public async Task ResendConfirmation_WhenEmailSendFails_TokenMutationsArePersistedDespiteTheFailure()
+    {
+        var fixture = new Fixture();
+        fixture.Email.ThrowOnSend = true;
+        var user = fixture.AddUser(confirmed: false);
+        var previous = fixture.AddToken(user, UserTokenType.EmailConfirmation, "old-token", Now.AddHours(1));
+        var handler = new ResendEmailConfirmationCommandHandler(
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => handler.Handle(
+            new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest(user.Email)),
+            TestContext.Current.CancellationToken));
+
+        Assert.True(previous.IsRevoked);
+        Assert.Equal(2, fixture.Repository.UserTokensData.Count);
+        Assert.Empty(fixture.Email.Messages);
+    }
+
     [Fact]
     public async Task ResendConfirmation_WhenThrottled_ThrowsAndDoesNotSendEmail()
     {
@@ -111,6 +139,26 @@ public sealed class IdentityHandlersTests
             TestContext.Current.CancellationToken);
 
         Assert.Empty(fixture.Repository.UserTokensData);
+        Assert.Empty(fixture.Email.Messages);
+    }
+
+    // Same finding as ResendConfirmation_WhenEmailSendFails_TokenMutationsArePersistedDespiteTheFailure
+    // above, for RequestPasswordResetCommandHandler.
+    [Fact]
+    public async Task RequestPasswordReset_WhenEmailSendFails_NewTokenIsPersistedDespiteTheFailure()
+    {
+        var fixture = new Fixture();
+        fixture.Email.ThrowOnSend = true;
+        var user = fixture.AddUser(confirmed: true);
+        var handler = new RequestPasswordResetCommandHandler(
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => handler.Handle(
+            new RequestPasswordResetCommand(new RequestPasswordResetRequest(user.Email)),
+            TestContext.Current.CancellationToken));
+
+        var token = Assert.Single(fixture.Repository.UserTokensData);
+        Assert.Equal(UserTokenType.PasswordReset, token.Type);
         Assert.Empty(fixture.Email.Messages);
     }
 
@@ -244,8 +292,15 @@ public sealed class IdentityHandlersTests
     private sealed class FakeEmailSender : IEmailSender
     {
         public List<EmailMessage> Messages { get; } = [];
+        public bool ThrowOnSend { get; set; }
+
         public Task SendAsync(EmailMessage message, CancellationToken cancellationToken = default)
         {
+            if (ThrowOnSend)
+            {
+                throw new InvalidOperationException("Simulated provider failure.");
+            }
+
             Messages.Add(message);
             return Task.CompletedTask;
         }
