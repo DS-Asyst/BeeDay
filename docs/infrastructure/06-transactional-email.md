@@ -13,7 +13,12 @@ and `git log`/`git show` on the files above. Cross-checked against
 [`docs/deployment/02-runtime-configuration.md`](../deployment/02-runtime-configuration.md)
 (already current as of Sprint 18.4).
 
-**Last verified:** 2026-08-16 (Epic 26, Sprint 26.7 — §14 added: the observable state model
+**Last verified:** 2026-08-16 (Epic 26, Sprint 26.8 — §15 added: cross-sprint coverage-matrix audit
+(Gate C — PASS), closing one real gap found by the audit (provider-failure handling for
+resend-confirmation/forgot-password had no coverage; proven, not fixed — see §15.4) and explicitly
+carrying forward the two residual items that remain out of scope for an audit sprint (the HMG
+directory-guard bug, §6/§7; the mass-registration volume gap, §14.4). Sprint 26.7 added §14: the
+observable state model
 (requested/blocked/attempted/accepted/failed), 3-way failure classification in `ResendEmailSender`
 with no automatic retries, recipient-address masking in `DevelopmentEmailSender`'s log lines
 (`EmailAddressLogMasking`, new), and a per-email throttle now protecting `CreateAccountCommandHandler`/
@@ -678,7 +683,105 @@ Configuration errors (missing API key/`FromAddress`) are caught earlier, at star
 
 **What this does and does not protect against:** the per-email throttle stops a rapid double-submit of the *same* address from creating two accounts or issuing two confirmation emails (a real, if narrow, gap — see §12.3's transactional-boundary note for why two concurrent requests for the same not-yet-existing email could otherwise both reach the email-send step). It does **not**, and structurally cannot, limit registration *volume* across many *distinct* email addresses — an attacker registering many different fake or victim addresses in rapid succession is throttled per-address, so each new address resets the cooldown. That is a different abuse vector (mass email-bombing via registration, or resource exhaustion), requiring a volume/IP-based control — the same category of protection `LoginRateLimiterOptions`/`LoginRateLimiterFactory` already provides for `/auth/login` specifically. Extending an equivalent control to registration was evaluated and **not implemented in this sprint**: it would be new abuse-control infrastructure (not reuse of an existing, provably-applicable mechanism), which the master instructions explicitly restrict ("Do not introduce... an alternate rate limiter... unless the existing repository audit demonstrates that it is necessary and consistent with current architecture" — necessity is plausible here, but the decision belongs to whoever owns Identity/security scope broadly, not unilaterally to an email-focused sprint). Recorded here as an explicit, open finding rather than silently left unaddressed.
 
-## 15. Related documentation
+## 15. Cross-sprint coverage matrix — Gate C (Epic 26, Sprint 26.8)
+
+Consolidates the automated coverage built across Sprints 26.2–26.7 against the Epic's own coverage
+matrix, closes the one substantial gap found, and states the Gate C verdict (roadmap: "repository
+quality and safety contract are proven enough for controlled HMG activation"). This sprint is not
+the first testing sprint — the matrix below is mostly *verification* that earlier sprints already
+did their job, not new test authorship, per the sprint's own instructions.
+
+### 15.1 Environment/provider
+
+| Item | Covered by | Status |
+|---|---|---|
+| Development → File/local provider | `EmailProviderDependencyInjectionTests.AddBeeDayInfrastructure_DevelopmentEnvironmentSettings_...` | ✅ |
+| Homologation → Resend provider | No HMG-labeled test exists, because HMG's actual committed configuration resolves to the Development provider today (proven root cause, §6) — a literal "Homologation" test would be indistinguishable from the generic Resend-selected tests below, since `EmailProviderSelector`/DI wiring is entirely environment-name-agnostic (confirmed by reading the code: no branch anywhere keys off environment name). Covered by the generic case. | ✅ (via generic case) |
+| Production → Resend provider | `EmailProviderDependencyInjectionTests.AddBeeDayInfrastructure_ProductionEnvironmentSettings_ResolveHmgRecipientGuardedEmailSenderWrappingResendExactlyOnce`; `HmgRecipientGuardDependencyInjectionTests` (generic Resend+guard host boot) | ✅ |
+| Invalid/unknown provider configuration | `EmailProviderDependencyInjectionTests.AddBeeDayInfrastructure_WhenBothProvidersEnabled_ThrowsAtRegistrationTime` / `_WhenNoProviderEnabled_...` | ✅ |
+| Missing required provider config | `EmailSecretsConfigurationTests.Host_WhenResendSelectedWithoutApiKey_...` / `_WithoutFromAddress_...` | ✅ |
+| Provider DI composition | `EmailProviderDependencyInjectionTests`, `HmgRecipientGuardDependencyInjectionTests`, `BeeDayDbContextTests.AddBeeDayInfrastructure_ResolvesDbContextFactoryWithoutThrowing` (proves the full `AddBeeDayInfrastructure` graph, not just email) | ✅ |
+
+### 15.2 HMG safety
+
+| Item | Covered by | Status |
+|---|---|---|
+| Allowed recipient | `HmgRecipientGuardedEmailSenderTests.SendAsync_WhenRecipientIsAllowed_...` | ✅ |
+| Blocked recipient | `SendAsync_WhenRecipientIsBlocked_DoesNotInvokeInnerSender` | ✅ |
+| Safety config absent/invalid → fail closed | `HmgRecipientGuardDependencyInjectionTests.Host_WhenResendSelectedAndGuardLeftAtDefault_FailsToStartPredictably` | ✅ |
+| External provider not invoked when blocked | Same test as "blocked recipient" — asserts the inner (real) sender is never called | ✅ |
+| Production not accidentally subject to the allowlist | `CommittedProductionAppsettings_ExplicitlyDisablesHmgRecipientGuard` (parses the real committed JSON) + the Production DI test above (`Enabled=false`) | ✅ |
+| HMG sender/subject distinction | `SendAsync_WhenRecipientIsAllowed_InvokesInnerSenderWithPrefixedSubject`, `SendAsync_DoesNotDoublePrefixAnAlreadyPrefixedSubject` | ✅ |
+
+### 15.3 Identity
+
+| Item | Covered by | Status |
+|---|---|---|
+| Account creation confirmation request | `AccountRegistrationTests.CreateAccount_CreatesUserWithProfileAtomically` / `CreateUser_CreatesUserAndSendsConfirmation` | ✅ |
+| Confirmation callback | `EmailConfirmationIntegrationTests.ConfirmEmail_WithValidToken_...` (+ invalid/expired/reused) | ✅ |
+| Confirmation resend | `EmailConfirmationIntegrationTests.ResendEmailConfirmation_*`, `IdentityHandlersTests.ResendConfirmation_*` | ✅ |
+| Forgot password | `PasswordResetIntegrationTests.RequestPasswordReset_*`, `IdentityHandlersTests.RequestPasswordReset_*` | ✅ |
+| Password reset request/callback | `PasswordResetIntegrationTests.ResetPassword_*` | ✅ |
+| Invalid/expired/used token behavior | Both integration suites (§12.1) + `IdentityHandlersTests` (`ConfirmEmail_RejectsExpiredToken`, `ResetPassword_RejectsReusedToken`) | ✅ |
+| User-enumeration-safe responses | `RequestPasswordReset_DoesNotRevealMissingEmail`/`_ForNonexistentEmail_CompletesSilently...`, `ResendConfirmation_WhenThrottled_BehavesIdenticallyForAnUnknownEmail` (§12.3) | ✅ |
+| Provider failure handling | Registration: `AccountRegistrationTests.*_WhenEmailSendFails_...` (§12.3). **Gap found and closed this sprint:** resend-confirmation/forgot-password had zero coverage of this case — see §15.4. | ✅ (closed this sprint) |
+| Callback/base URL integrity | §12.2, `ProductionOriginGuardTests` | ✅ |
+
+### 15.4 New this sprint: provider failure has no transaction to protect it, for two flows
+
+Registration's "persistence succeeds, delivery fails" boundary (§3.1/§12.3) is a *transactional*
+boundary — one `IUnitOfWork` transaction commits, then the email send happens outside it.
+`ResendEmailConfirmationCommandHandler`/`RequestPasswordResetCommandHandler` are architecturally
+different and were never audited for this specific question before: they take
+`IUserRepository`/`IUserTokenRepository` directly, not `IUnitOfWork`, and
+`EfUserTokenRepository.RevokeActiveAsync`/`AddAsync` (`src/BeeDay.Infrastructure/Persistence/SqlServer/Repositories/EfUserTokenRepository.cs`)
+each acquire their own short-lived `DbContext` and call `SaveChanges` immediately — there is no
+transaction spanning the two calls, let alone one that also covers the email send after them. By the
+time `emailSender.SendAsync` runs, the previous token is already revoked and the new one already
+persisted, independently of the send's outcome.
+
+**Proven, not fixed:** `IdentityHandlersTests.ResendConfirmation_WhenEmailSendFails_TokenMutationsArePersistedDespiteTheFailure`
+and `RequestPasswordReset_WhenEmailSendFails_NewTokenIsPersistedDespiteTheFailure` (new this sprint)
+assert exactly this: the token mutations survive a thrown `SendAsync`, and the exception still
+propagates (not swallowed). This is now a second, explicitly documented instance of the same
+accepted transactional boundary as §3.1/§12.3 — not introduced by this sprint, only proven and
+recorded. No production code changed: per the master instructions and the roadmap ("test/audit
+consolidation + minimal production change only if a proven coverage gap requires a testability seam
+consistent with architecture"), the appropriate response to a documented, accepted boundary is a
+test proving its actual behavior, not a new Outbox/distributed-transaction mechanism.
+
+**Practical consequence for resend-confirmation specifically:** a user whose resend attempt hits a
+transient provider failure has their previous (possibly still valid) token revoked and a new one
+minted that they never receive — they must wait out the 60s throttle and try again. Forgot-password
+has a milder version of the same shape (a new token is persisted but never delivered); its own next
+request simply revokes and replaces it, same as the success path already does.
+
+### 15.5 Templates, Observability/security
+
+Templates (subject/link contracts, escaping, plain text, localization) — §13, all covered, including
+the documented non-localization decision (§13.5). Observability/security (state semantics, no
+secret/token logging, PII minimization, failure classification, cancellation) — §14, all covered,
+including the one documented practical limit (HttpClient's own `Timeout` firing is not separately
+simulated — impractical to do deterministically in a fast unit test; its code path is the same
+try/catch structure already exercised by the network-failure test).
+
+### 15.6 Gate C verdict
+
+**PASS**, with the residual scope explicitly carried forward rather than silently closed:
+
+- Repository quality and safety contract (provider selection, HMG guard, template safety, failure
+  classification, abuse controls) are proven by the matrix above — deterministic, provider-faked,
+  zero real Resend calls anywhere in the suite.
+- Two residual items, both already tracked in earlier sections, not resolved by this sprint because
+  they are out of an audit sprint's scope: the HMG directory-guard bug itself (§6/§7 — the actual
+  root cause of the empty `C:\Apps\BeeDay-Data\Emails`, still unfixed as of this sprint) and the
+  mass-registration volume/IP-based abuse gap (§14.4).
+- Sprint 26.9 (HMG Deployment & End-to-End Validation) is the designated gate for real-environment
+  evidence — nothing in this sprint substitutes for that; this matrix proves the code paths are
+  correct under test doubles, not that HMG itself currently sends real email (§6.3 already states
+  that classification explicitly).
+
+## 16. Related documentation
 
 - [`04-services.md`](04-services.md) — existing Infrastructure services inventory, including the
   `ResendEmailSender`/`DevelopmentEmailSender` summary this document expands on with the HMG root
