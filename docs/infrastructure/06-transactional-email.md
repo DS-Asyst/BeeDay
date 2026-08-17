@@ -830,9 +830,29 @@ Two concrete gaps that specifically blocked a future real HMG activation were cl
    strings/the Resend API key already are (recipient addresses are PII). `deploy-hmg.yml` reads an
    optional `BEEDAY_HMG_ALLOWED_RECIPIENTS` secret and passes it through — **not yet created as a
    GitHub secret by this sprint** (no access to configure repository secrets, and the value is real
-   recipient PII that must never enter source control). Absent, exactly like the equivalent Resend
-   variables already do when their own secrets are unset, `Deploy-BeeDay.ps1` skips these App Pool
-   variables entirely — zero effect on today's deployments.
+   recipient PII that must never enter source control). This section originally claimed that, absent
+   the secret, `Deploy-BeeDay.ps1` "skips these App Pool variables entirely — zero effect on today's
+   deployments," exactly like the equivalent Resend variables.
+
+   **Correction (Hotfix 26.9.1):** that claim was wrong and was disproven by a real incident. The
+   first real run of `deploy-hmg.yml` after this sprint's PR merged (GitHub Actions run
+   `31986772973`, both attempts) failed in "Deploy to IIS with rollback" with `The property 'Count'
+   cannot be found on this object` — a PowerShell pipeline that filters out every element returns
+   `$null`, not an empty array, and `$null.Count` throws under `Set-StrictMode -Version Latest`. The
+   documented rollback (see [`docs/deployment/01-deployment.md`](../deployment/01-deployment.md) §6)
+   also never ran during that incident, from a second, independent defect: the `Write-Error` that
+   logged the failure inherited the script-wide
+   `$ErrorActionPreference = "Stop"` and itself became terminating, aborting the `catch` block before
+   "Starting rollback..." was reached. Both defects were fixed in **Hotfix 26.9.1**
+   (`fix/epic-26-hmg-deploy-recovery`, a dedicated branch off `hmg`) — the recipient list is now
+   built by `ConvertTo-BeeDayRecipientList`, which always returns a real collection even when empty,
+   and both `Write-Error` calls in the rollback path use `-ErrorAction Continue`. With the hotfix
+   applied, an absent secret does behave as originally intended (no `AllowedRecipients__N` variables
+   emitted, no exception) — but that was only true starting with the hotfix, not since this sprint.
+   No email was sent during the incident itself: the application process never restarted in either
+   failed attempt, so no email-sending code path ever executed. See
+   [`docs/deployment/01-deployment.md`](../deployment/01-deployment.md) §6 for the equivalent
+   correction on the deployment-pipeline side.
 
 ### 16.4 What remains explicitly not done
 
