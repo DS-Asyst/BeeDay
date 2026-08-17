@@ -24,6 +24,8 @@
   <data name="EfficacyIntro" xml:space="preserve"><value>Como o beeday busca ajudar as pessoas a construir hábitos melhores.</value></data>
   <data name="EfficacyBodyTitle" xml:space="preserve"><value>Nossas evidências atuais</value></data>
   <data name="EfficacyBody" xml:space="preserve"><value>O beeday é construído em torno de uma ideia simples: pequenas ações mensuráveis se acumulam em progresso real ao longo do tempo. Ainda não publicamos estudos independentes ou métricas de uso sobre a eficácia do beeday. Esta página será atualizada com evidências reais assim que estiverem disponíveis — não publicaremos resultados que não possamos sustentar.</value></data>
+  <data name="EfficacyPendingEvidenceTitle" xml:space="preserve"><value>O que vamos publicar aqui</value></data>
+  <data name="EfficacyPendingEvidenceBody" xml:space="preserve"><value>Nenhum estudo, pesquisa ou métrica de uso sobre a eficácia do beeday está publicado ainda. Esta seção está reservada para essas evidências quando existirem — não para afirmações que não possamos sustentar.</value></data>
 
   <data name="BrandGuidelinesPageContext" xml:space="preserve"><value>Brand guidelines</value></data>
   <data name="BrandGuidelinesPageTitle" xml:space="preserve"><value>Brand guidelines — beeday</value></data>

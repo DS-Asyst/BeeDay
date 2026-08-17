@@ -32,6 +32,8 @@ public sealed class InstitutionalPagesTests(PlaywrightAppFixture fixture) : E2ET
 
     [Theory]
     [InlineData("/mission", "Our mission")]
+    [InlineData("/efficacy", "Efficacy")]
+    [InlineData("/contact", "Contact us")]
     [InlineData("/beeday", "beeday")]
     [InlineData("/faqs", "beeday FAQs")]
     [InlineData("/terms", "Terms of use")]
@@ -56,6 +58,26 @@ public sealed class InstitutionalPagesTests(PlaywrightAppFixture fixture) : E2ET
 
         await Page.Keyboard.PressAsync("Enter");
         await Expect(Page.GetByText("beeday is a personal productivity application")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task EfficacyDisclosesNoPublishedEvidenceInsteadOfFabricatedMetrics()
+    {
+        await GotoAsync("/efficacy");
+
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "What we'll publish here", Level = 2 })).ToBeVisibleAsync();
+        await Expect(Page.GetByText("not yet published", new() { Exact = false })).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task ContactUsLinksToTheRealExistingGitHubAndLinkedInChannels()
+    {
+        await GotoAsync("/contact");
+
+        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Open an issue on GitHub" }))
+            .ToHaveAttributeAsync("href", "https://github.com/tiagoarrigoni/BeeDay");
+        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Connect on LinkedIn" }))
+            .ToHaveAttributeAsync("href", "https://www.linkedin.com/in/tiago-a-arrigoni-335b9413b/");
     }
 
     [Fact]

@@ -18,6 +18,18 @@ public sealed class InstitutionalPagesTests
     }
 
     [Fact]
+    public void EfficacyDisclosesNoPublishedEvidenceInsteadOfFabricatingMetricsOrStudies()
+    {
+        using var context = new BunitContext().WithLocalization();
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Efficacy>());
+
+        Assert.Contains("not yet published", cut.Markup, StringComparison.OrdinalIgnoreCase);
+        Assert.NotNull(cut.Find(".institutional-pending-notice"));
+        // No invented percentages or day-streak-style claims anywhere in the page's own copy.
+        Assert.DoesNotMatch(@"\d+\s*%", cut.Markup);
+    }
+
+    [Fact]
     public void BrandGuidelinesRendersItsHeadingAndLinksToTheExperienceSystem()
     {
         using var context = new BunitContext().WithLocalization();
@@ -102,7 +114,7 @@ public sealed class InstitutionalPagesTests
         var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<CommunityGuidelines>());
 
         Assert.Equal("Community guidelines", cut.Find("h1").TextContent.Trim());
-        Assert.Contains("pending review", cut.Find(".institutional-legal__pending").TextContent, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("pending review", cut.Find(".institutional-pending-notice").TextContent, StringComparison.OrdinalIgnoreCase);
         Assert.NotEmpty(cut.FindAll(".institutional-legal__toc li"));
     }
 
@@ -113,7 +125,7 @@ public sealed class InstitutionalPagesTests
         var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Terms>());
 
         Assert.Equal("Terms of use", cut.Find("h1").TextContent.Trim());
-        Assert.Contains("pending review", cut.Find(".institutional-legal__pending").TextContent, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("pending review", cut.Find(".institutional-pending-notice").TextContent, StringComparison.OrdinalIgnoreCase);
         Assert.NotEmpty(cut.FindAll(".institutional-legal__toc li"));
     }
 
@@ -124,7 +136,7 @@ public sealed class InstitutionalPagesTests
         var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Privacy>());
 
         Assert.Equal("Privacy policy", cut.Find("h1").TextContent.Trim());
-        Assert.Contains("pending review", cut.Find(".institutional-legal__pending").TextContent, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("pending review", cut.Find(".institutional-pending-notice").TextContent, StringComparison.OrdinalIgnoreCase);
         Assert.NotEmpty(cut.FindAll(".institutional-legal__toc li"));
     }
 
@@ -145,7 +157,7 @@ public sealed class InstitutionalPagesTests
         var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<Terms>());
 
         Assert.Equal("Termos de uso", cut.Find("h1").TextContent.Trim());
-        Assert.Contains("revisão", cut.Find(".institutional-legal__pending").TextContent, StringComparison.Ordinal);
+        Assert.Contains("revisão", cut.Find(".institutional-pending-notice").TextContent, StringComparison.Ordinal);
     }
 
     [Fact]

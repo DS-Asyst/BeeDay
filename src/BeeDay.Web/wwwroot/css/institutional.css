@@ -104,7 +104,10 @@
 /* Legal/document — Community guidelines, Terms, Privacy: reading-first, no fabricated clauses. */
 .institutional-page__body--legal { max-width: 42rem; }
 
-.institutional-legal__pending {
+/* Shared "content pending" callout — used by the legal/document pages (no approved clauses exist
+   yet) and Efficacy (no evidence/metrics exist yet). Generic name and generic styling since the
+   same honest-disclosure pattern applies to any not-yet-available content, not only legal text. */
+.institutional-pending-notice {
     margin-bottom: var(--beeday-spacing-lg);
     padding: var(--beeday-spacing-md) var(--beeday-spacing-lg);
     border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
