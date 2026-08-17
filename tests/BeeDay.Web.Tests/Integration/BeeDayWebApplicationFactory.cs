@@ -56,6 +56,16 @@ public class BeeDayWebApplicationFactory : WebApplicationFactory<Program>
     /// <summary>Extra configuration merged in on top of database isolation and rate-limiter settings.</summary>
     protected virtual IReadOnlyDictionary<string, string?> AdditionalConfiguration { get; } = new Dictionary<string, string?>();
 
+    /// <summary>
+    /// Whether <see cref="CreateHost"/> should acquire <see cref="ProductionEnvironmentVariableTestLock"/>
+    /// itself before calling into the real host startup. <see langword="true"/> for every ordinary
+    /// factory. Overridden to <see langword="false"/> only by factories (e.g.
+    /// <see cref="ProductionLikeWebApplicationFactory"/>) that already hold this same lock for their
+    /// entire construct-through-dispose lifetime — a second acquisition on the non-reentrant
+    /// underlying semaphore, from the same instance, would deadlock itself.
+    /// </summary>
+    protected virtual bool CreateHostAcquiresEnvironmentVariableLock => true;
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment(EnvironmentName);
@@ -81,7 +91,15 @@ public class BeeDayWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override IHost CreateHost(IHostBuilder builder)
     {
-        var host = base.CreateHost(builder);
+        // Program.cs's production startup guards (and every ValidateOnStart Options check) read
+        // process-wide environment variables synchronously during this call. Serialized against
+        // ProductionLikeWebApplicationFactory/ProductionOriginGuardTests's factory, which mutate those
+        // same variables around their own lifecycle — see ProductionEnvironmentVariableTestLock.
+        // Factories that already hold that lock for their whole lifetime opt out here (see
+        // CreateHostAcquiresEnvironmentVariableLock) to avoid deadlocking themselves.
+        var host = CreateHostAcquiresEnvironmentVariableLock
+            ? CreateHostUnderLock(builder)
+            : base.CreateHost(builder);
 
         using var scope = host.Services.CreateScope();
         var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<BeeDayDbContext>>();
@@ -89,6 +107,14 @@ public class BeeDayWebApplicationFactory : WebApplicationFactory<Program>
         context.Database.Migrate();
 
         return host;
+    }
+
+    private IHost CreateHostUnderLock(IHostBuilder builder)
+    {
+        using (ProductionEnvironmentVariableTestLock.Acquire())
+        {
+            return base.CreateHost(builder);
+        }
     }
 
     /// <summary>Creates and persists a confirmed, active User with a known password, bypassing HTTP.</summary>
