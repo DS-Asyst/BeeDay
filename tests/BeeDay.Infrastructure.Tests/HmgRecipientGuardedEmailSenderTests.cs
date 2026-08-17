@@ -1,5 +1,6 @@
 using BeeDay.Application.Common.Identity;
 using BeeDay.Infrastructure.Configuration;
+using BeeDay.Infrastructure.Diagnostics;
 using BeeDay.Infrastructure.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -113,9 +114,28 @@ public sealed class HmgRecipientGuardedEmailSenderTests
         }
     }
 
+    // EPIC 28, Sprint 28.7: an operator must be able to tell "allowed" from "blocked" by a stable
+    // EventId, not just by parsing message text — this proves the two log lines carry the right ones.
+    [Fact]
+    public async Task SendAsync_LogsTheCorrectEventIdForAllowedAndBlockedRecipients()
+    {
+        var inner = new RecordingEmailSender();
+        var logger = new RecordingLogger<HmgRecipientGuardedEmailSender>();
+        var sender = new HmgRecipientGuardedEmailSender(
+            inner,
+            Options.Create(new HmgRecipientGuardOptions { Enabled = true, AllowedRecipients = [AllowedRecipient] }),
+            logger);
+
+        await sender.SendAsync(new EmailMessage(AllowedRecipient, "Subject", "<p>Body</p>"), TestContext.Current.CancellationToken);
+        await sender.SendAsync(new EmailMessage(BlockedRecipient, "Subject", "<p>Body</p>"), TestContext.Current.CancellationToken);
+
+        Assert.Contains(logger.Entries, e => e.EventId.Id == EmailEventIds.GuardAllowed.Id);
+        Assert.Contains(logger.Entries, e => e.EventId.Id == EmailEventIds.GuardBlocked.Id);
+    }
+
     private sealed class RecordingLogger<T> : ILogger<T>
     {
-        public List<(LogLevel Level, Exception? Exception, string Message)> Entries { get; } = [];
+        public List<(LogLevel Level, EventId EventId, Exception? Exception, string Message)> Entries { get; } = [];
 
         public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
 
@@ -128,7 +148,7 @@ public sealed class HmgRecipientGuardedEmailSenderTests
             Exception? exception,
             Func<TState, Exception?, string> formatter)
         {
-            Entries.Add((logLevel, exception, formatter(state, exception)));
+            Entries.Add((logLevel, eventId, exception, formatter(state, exception)));
         }
     }
 }

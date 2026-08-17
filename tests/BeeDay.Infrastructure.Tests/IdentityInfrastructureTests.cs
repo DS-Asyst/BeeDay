@@ -4,6 +4,7 @@ using System.Text.Json;
 using BeeDay.Application.Common.Identity;
 using BeeDay.Domain.Enums;
 using BeeDay.Infrastructure.Configuration;
+using BeeDay.Infrastructure.Diagnostics;
 using BeeDay.Infrastructure.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -596,9 +597,77 @@ public sealed class IdentityInfrastructureTests
         }
     }
 
+    // EPIC 28, Sprint 28.7: an operator must be able to filter Resend's four log states
+    // (attempted/accepted/rejected/timed-out) by a stable EventId, not just message text.
+    [Fact]
+    public async Task ResendSender_OnSuccess_LogsTheAttemptedAndAcceptedEventIds()
+    {
+        var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("{\"id\":\"resend-message-id\"}", Encoding.UTF8, "application/json")
+        });
+        var logger = new RecordingLogger<ResendEmailSender>();
+        var sender = CreateSender(handler, EnabledOptions(), logger);
+
+        await sender.SendAsync(
+            new EmailMessage("player@example.com", "Confirm", "<p>Hello</p>"),
+            TestContext.Current.CancellationToken);
+
+        Assert.Contains(logger.Entries, e => e.EventId.Id == EmailEventIds.ProviderAttempted.Id);
+        Assert.Contains(logger.Entries, e => e.EventId.Id == EmailEventIds.ProviderAccepted.Id);
+    }
+
+    [Fact]
+    public async Task ResendSender_WhenApiRejectsRequest_LogsTheRejectedEventId()
+    {
+        var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.Unauthorized)
+        {
+            Content = new StringContent("invalid_api_key")
+        });
+        var logger = new RecordingLogger<ResendEmailSender>();
+        var sender = CreateSender(handler, EnabledOptions(), logger);
+
+        await Assert.ThrowsAsync<HttpRequestException>(() =>
+            sender.SendAsync(
+                new EmailMessage("player@example.com", "Subject", "Body"),
+                TestContext.Current.CancellationToken));
+
+        Assert.Contains(logger.Entries, e => e.EventId.Id == EmailEventIds.ProviderRejected.Id);
+    }
+
+    [Fact]
+    public async Task ResendSender_WhenNetworkFails_LogsTheNetworkFailureEventId()
+    {
+        var handler = new StubHttpMessageHandler((Func<HttpRequestMessage, HttpResponseMessage>)(_ =>
+            throw new HttpRequestException("Simulated DNS/connection failure.")));
+        var logger = new RecordingLogger<ResendEmailSender>();
+        var sender = CreateSender(handler, EnabledOptions(), logger);
+
+        await Assert.ThrowsAsync<HttpRequestException>(() =>
+            sender.SendAsync(
+                new EmailMessage("player@example.com", "Subject", "Body"),
+                TestContext.Current.CancellationToken));
+
+        Assert.Contains(logger.Entries, e => e.EventId.Id == EmailEventIds.ProviderNetworkFailure.Id);
+    }
+
+    [Fact]
+    public async Task ResendSender_WhenDisabled_LogsTheDisabledEventId()
+    {
+        var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK));
+        var logger = new RecordingLogger<ResendEmailSender>();
+        var sender = CreateSender(handler, new ResendOptions { Enabled = false }, logger);
+
+        await sender.SendAsync(
+            new EmailMessage("player@example.com", "Subject", "<p>Body</p>"),
+            TestContext.Current.CancellationToken);
+
+        Assert.Contains(logger.Entries, e => e.EventId.Id == EmailEventIds.ProviderDisabled.Id);
+    }
+
     private sealed class RecordingLogger<T> : ILogger<T>
     {
-        public List<(LogLevel Level, Exception? Exception, string Message)> Entries { get; } = [];
+        public List<(LogLevel Level, EventId EventId, Exception? Exception, string Message)> Entries { get; } = [];
 
         public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
 
@@ -611,7 +680,7 @@ public sealed class IdentityInfrastructureTests
             Exception? exception,
             Func<TState, Exception?, string> formatter)
         {
-            Entries.Add((logLevel, exception, formatter(state, exception)));
+            Entries.Add((logLevel, eventId, exception, formatter(state, exception)));
         }
     }
 }

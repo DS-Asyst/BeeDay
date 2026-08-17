@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using BeeDay.Application.Common.Identity;
 using BeeDay.Infrastructure.Configuration;
+using BeeDay.Infrastructure.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -21,7 +22,7 @@ public sealed class ResendEmailSender(
 
         if (!_options.Enabled)
         {
-            logger.LogInformation("Email delivery is disabled. Identity email was suppressed.");
+            logger.LogInformation(EmailEventIds.ProviderDisabled, "Email delivery is disabled. Identity email was suppressed.");
             return;
         }
 
@@ -40,7 +41,7 @@ public sealed class ResendEmailSender(
 
         // "Subject" is the only per-message identifier safe to log — it distinguishes confirmation
         // from password-reset without ever touching the recipient address or token-bearing body.
-        logger.LogInformation("Resend request attempted. Subject={Subject}", message.Subject);
+        logger.LogInformation(EmailEventIds.ProviderAttempted, "Resend request attempted. Subject={Subject}", message.Subject);
 
         HttpResponseMessage response;
         try
@@ -53,14 +54,14 @@ public sealed class ResendEmailSender(
             // internal token, not the caller's — distinguishing "we gave up waiting" (a transient,
             // classifiable failure) from genuine caller-requested cancellation (the `when` clause
             // above lets that case propagate silently, unlogged, since it is expected/intentional).
-            logger.LogError("Resend request timed out. Subject={Subject}", message.Subject);
+            logger.LogError(EmailEventIds.ProviderTimedOut, "Resend request timed out. Subject={Subject}", message.Subject);
             throw;
         }
         catch (HttpRequestException exception)
         {
             // Thrown by SendAsync itself (DNS/connection failure, TLS failure, ...) — no HTTP response
             // was ever received, so this is a transient network error, not a provider rejection.
-            logger.LogError(exception, "Resend request failed before a response was received. Subject={Subject}", message.Subject);
+            logger.LogError(EmailEventIds.ProviderNetworkFailure, exception, "Resend request failed before a response was received. Subject={Subject}", message.Subject);
             throw;
         }
 
@@ -70,12 +71,14 @@ public sealed class ResendEmailSender(
             {
                 var providerMessageId = await TryReadProviderMessageIdAsync(response, cancellationToken);
                 logger.LogInformation(
+                    EmailEventIds.ProviderAccepted,
                     "Resend accepted the request. ProviderMessageId={ProviderMessageId}",
                     providerMessageId ?? "(unavailable)");
                 return;
             }
 
             logger.LogError(
+                EmailEventIds.ProviderRejected,
                 "Resend rejected the request. StatusCode={StatusCode}",
                 (int)response.StatusCode);
             throw new HttpRequestException($"Resend email delivery failed with HTTP {(int)response.StatusCode}.", null, response.StatusCode);

@@ -780,6 +780,15 @@ Terminology for reading logs/troubleshooting, mapped to where each state is actu
 
 `send requested` has no dedicated log line because the calling MediatR handlers (`CreateAccountCommandHandler`, `CreateUserCommandHandler`, `ResendEmailConfirmationCommandHandler`, `RequestPasswordResetCommandHandler`) have no `ILogger` today and this sprint did not add one — the state is implied by "attempted" (or "blocked") appearing at all.
 
+**Update (2026-08-17, EPIC 28 Sprint 28.7 — Observability Operationalization):** every log call site
+in this table now carries a typed `EventId` (`BeeDay.Infrastructure.Diagnostics.EmailEventIds`) —
+retrofitted onto the exact existing calls, no new log statement added, no message text changed. Full
+EventId-to-state mapping and an operator filtering recipe:
+[`docs/deployment/03-observability.md`](../deployment/03-observability.md) §2.1. The stdout
+rotation/retention gap this document's §7 (observability doc) used to leave open is now closed by
+`scripts/Clear-BeeDayStdoutLogs.ps1` — Code Complete, not yet Environment Validated (not scheduled on
+any real server by this Sprint).
+
 ### 14.2 Failure classification (no automatic retries)
 
 `ResendEmailSender` distinguishes three failure causes, each logged at `Error` before rethrowing — never swallowed, never retried automatically (the master instructions explicitly prohibit adding retries that could duplicate a side effect unless proven safe; Resend's `Idempotency-Key` header, sent on every request, would make a retry *technically* safe, but no proven operational requirement justifies adding one in this sprint, so none was added):

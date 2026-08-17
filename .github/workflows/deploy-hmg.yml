@@ -246,6 +246,7 @@ jobs:
         run: |
           & ".\scripts\tests\Test-DeployBeeDayRecovery.ps1"
           & ".\scripts\tests\Test-InvokeBeeDayIisControlContract.ps1"
+          & ".\scripts\tests\Test-ClearBeeDayStdoutLogs.ps1"
 
       - name: Deploy to IIS with rollback
         shell: powershell

@@ -1,5 +1,6 @@
 using BeeDay.Application.Common.Identity;
 using BeeDay.Infrastructure.Configuration;
+using BeeDay.Infrastructure.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -35,7 +36,7 @@ public sealed class HmgRecipientGuardedEmailSender(
 
         if (!IsAllowedRecipient(message.Recipient))
         {
-            logger.LogWarning("HMG recipient guard blocked an outbound email: recipient is not on the allowed list.");
+            logger.LogWarning(EmailEventIds.GuardBlocked, "HMG recipient guard blocked an outbound email: recipient is not on the allowed list.");
             return;
         }
 
@@ -43,7 +44,7 @@ public sealed class HmgRecipientGuardedEmailSender(
             ? message
             : message with { Subject = _options.SubjectPrefix + message.Subject };
 
-        logger.LogInformation("HMG recipient guard allowed an outbound email to a listed recipient.");
+        logger.LogInformation(EmailEventIds.GuardAllowed, "HMG recipient guard allowed an outbound email to a listed recipient.");
         await innerSender.SendAsync(guardedMessage, cancellationToken).ConfigureAwait(false);
     }
 
