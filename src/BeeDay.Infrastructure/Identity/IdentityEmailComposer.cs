@@ -25,30 +25,56 @@ public sealed class IdentityEmailComposer(IOptions<IdentityEmailOptions> options
     private static readonly CultureInfo EnglishCulture = CultureInfo.GetCultureInfo("en-US");
     private static readonly CultureInfo PortugueseCulture = CultureInfo.GetCultureInfo("pt-BR");
 
-    public EmailMessage ComposeEmailConfirmation(string recipient, string displayName, string rawToken, UserLanguage language)
-    {
-        var culture = ResolveCulture(language);
-        var url = BuildUrl(_options.ConfirmationPath, rawToken);
-        var title = GetString("ConfirmationTitle", culture);
-        var introduction = GetString("ConfirmationIntroduction", culture);
-        var footer = GetString("ConfirmationFooter", culture);
-        var actionLabel = GetString("ConfirmationActionLabel", culture);
-        var body = BuildHtmlTemplate(culture, title, displayName, introduction, actionLabel, url, footer);
-        var plainText = BuildPlainTextTemplate(culture, title, displayName, introduction, url, footer);
-        return new EmailMessage(recipient, title, body, plainText);
-    }
+    // EPIC 28, Sprint 28.3: the resource-key set that distinguishes "which flow" from the otherwise
+    // identical composition steps both public methods used to repeat inline (Sprint 28.2 shape).
+    // Not a generic template framework — just the one seam this Sprint's audit found was real
+    // duplication between the two flows.
+    private sealed record EmailContentKeys(string TitleKey, string IntroductionKey, string FooterKey, string ActionLabelKey);
 
-    public EmailMessage ComposePasswordReset(string recipient, string displayName, string rawToken, UserLanguage language)
+    private static readonly EmailContentKeys ConfirmationKeys = new(
+        "ConfirmationTitle", "ConfirmationIntroduction", "ConfirmationFooter", "ConfirmationActionLabel");
+
+    private static readonly EmailContentKeys ResetKeys = new(
+        "ResetTitle", "ResetIntroduction", "ResetFooter", "ResetActionLabel");
+
+    // The single, already-culture-resolved shape both renderers below consume. Keeping this as one
+    // cohesive value (rather than 5-6 loose positional string parameters, the Sprint 28.2 shape) is
+    // the extension seam 28.4 needs for template/visual work without another signature churn across
+    // both flows.
+    private sealed record EmailContent(
+        string Title,
+        string Greeting,
+        string Introduction,
+        string ActionLabel,
+        string ActionUrl,
+        string Footer);
+
+    public EmailMessage ComposeEmailConfirmation(string recipient, string displayName, string rawToken, UserLanguage language) =>
+        Compose(recipient, displayName, rawToken, language, _options.ConfirmationPath, ConfirmationKeys);
+
+    public EmailMessage ComposePasswordReset(string recipient, string displayName, string rawToken, UserLanguage language) =>
+        Compose(recipient, displayName, rawToken, language, _options.PasswordResetPath, ResetKeys);
+
+    private EmailMessage Compose(
+        string recipient,
+        string displayName,
+        string rawToken,
+        UserLanguage language,
+        string path,
+        EmailContentKeys keys)
     {
         var culture = ResolveCulture(language);
-        var url = BuildUrl(_options.PasswordResetPath, rawToken);
-        var title = GetString("ResetTitle", culture);
-        var introduction = GetString("ResetIntroduction", culture);
-        var footer = GetString("ResetFooter", culture);
-        var actionLabel = GetString("ResetActionLabel", culture);
-        var body = BuildHtmlTemplate(culture, title, displayName, introduction, actionLabel, url, footer);
-        var plainText = BuildPlainTextTemplate(culture, title, displayName, introduction, url, footer);
-        return new EmailMessage(recipient, title, body, plainText);
+        var content = new EmailContent(
+            Title: GetString(keys.TitleKey, culture),
+            Greeting: string.Format(culture, GetString("Greeting", culture), displayName),
+            Introduction: GetString(keys.IntroductionKey, culture),
+            ActionLabel: GetString(keys.ActionLabelKey, culture),
+            ActionUrl: BuildUrl(path, rawToken),
+            Footer: GetString(keys.FooterKey, culture));
+
+        var body = BuildHtmlTemplate(culture, content);
+        var plainText = BuildPlainTextTemplate(content);
+        return new EmailMessage(recipient, content.Title, body, plainText);
     }
 
     // The only UserLanguage -> culture mapping Infrastructure is allowed to own (ADR-006). Deliberately
@@ -85,22 +111,14 @@ public sealed class IdentityEmailComposer(IOptions<IdentityEmailOptions> options
     // still track the canonical token's value rather than an independently chosen shade.
     private const string BrandColor = "#5247F9";
 
-    private static string BuildHtmlTemplate(
-        CultureInfo culture,
-        string title,
-        string displayName,
-        string introduction,
-        string actionLabel,
-        string actionUrl,
-        string footer)
+    private static string BuildHtmlTemplate(CultureInfo culture, EmailContent content)
     {
-        var greeting = string.Format(culture, GetString("Greeting", culture), displayName);
-        var safeTitle = WebUtility.HtmlEncode(title);
-        var safeGreeting = WebUtility.HtmlEncode(greeting);
-        var safeIntroduction = WebUtility.HtmlEncode(introduction);
-        var safeActionLabel = WebUtility.HtmlEncode(actionLabel);
-        var safeActionUrl = WebUtility.HtmlEncode(actionUrl);
-        var safeFooter = WebUtility.HtmlEncode(footer);
+        var safeTitle = WebUtility.HtmlEncode(content.Title);
+        var safeGreeting = WebUtility.HtmlEncode(content.Greeting);
+        var safeIntroduction = WebUtility.HtmlEncode(content.Introduction);
+        var safeActionLabel = WebUtility.HtmlEncode(content.ActionLabel);
+        var safeActionUrl = WebUtility.HtmlEncode(content.ActionUrl);
+        var safeFooter = WebUtility.HtmlEncode(content.Footer);
 
         return $$"""
         <!doctype html>
@@ -124,26 +142,17 @@ public sealed class IdentityEmailComposer(IOptions<IdentityEmailOptions> options
     // Resend (and every mainstream mail provider) accepts a plain-text alternative alongside the HTML
     // body — required by clients that don't render HTML and improves spam-filter scoring for the ones
     // that do. No encoding needed: this is not markup, so there is no injection surface to escape
-    // against; the raw display name and URL are safe to interpolate directly.
-    private static string BuildPlainTextTemplate(
-        CultureInfo culture,
-        string title,
-        string displayName,
-        string introduction,
-        string actionUrl,
-        string footer)
-    {
-        var greeting = string.Format(culture, GetString("Greeting", culture), displayName);
-        return $"""
-        {title}
+    // against; the raw content is safe to interpolate directly.
+    private static string BuildPlainTextTemplate(EmailContent content) =>
+        $"""
+        {content.Title}
 
-        {greeting}
+        {content.Greeting}
 
-        {introduction}
+        {content.Introduction}
 
-        {actionUrl}
+        {content.ActionUrl}
 
-        {footer}
+        {content.Footer}
         """;
-    }
 }

@@ -607,6 +607,25 @@ Infrastructure (e.g. `ResendEmailSender`/`DevelopmentEmailSender` each owning on
 and matches the sprint's own constraint: centralize without introducing a parallel Design System or a
 general-purpose template engine.
 
+**Update (2026-08-17, EPIC 28 Sprint 28.3 — Composition Foundation):** the duplication this section
+already flagged as tolerable (both `Compose*` methods repeating the same ~8-line shape) was factored
+out once ADR-006 (Sprint 28.2) added a 4th parameter to both — repeating the culture-resolution +
+6-string-lookup block twice was no longer "the smallest owner," so both methods now delegate to one
+private `Compose(recipient, displayName, rawToken, language, path, EmailContentKeys keys)`, with the
+resolved strings carried as one private `EmailContent` record instead of loose positional parameters.
+This is still not a template engine or a second Design System — `EmailContentKeys` is exactly the two
+values (`ConfirmationKeys`/`ResetKeys`) needed to distinguish the two real flows, and `EmailContent` is
+the same six fields §13.1 already named, just carried as one value instead of six. A third
+`Compose*` method (a future flow) would add one more `EmailContentKeys` constant and one more
+one-line public method — no new builder, no new abstraction. `BuildHtmlTemplate`/`BuildPlainTextTemplate`
+are unchanged in shape (still the same two shared builders), only their parameter list was collapsed
+from 6-7 positional strings to one `EmailContent`. HTML-safety coverage was also extended this Sprint:
+`WebUtility.HtmlEncode` is proven (not assumed) to encode `<`, `>`, `&`, `"`, and `'` from
+user-controlled display names, long tokens are proven to produce one unbroken URL in both bodies, and
+composition is proven deterministic (same inputs → byte-identical output) —
+`tests/BeeDay.Infrastructure.Tests/IdentityInfrastructureTests.cs`. No visual/copy change — that
+remains Sprint 28.4's scope.
+
 ### 13.2 Brand color corrected
 
 The HTML template used `#7A4FCB` (a pre-EPIC-25 purple) for its call-to-action button — inconsistent

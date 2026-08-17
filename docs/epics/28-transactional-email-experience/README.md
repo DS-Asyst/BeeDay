@@ -472,3 +472,87 @@ Resend-activation POST-MERGE-PENDING item from Sprint 28.1 is unaffected by this
   Infrastructure's private switch in `IdentityEmailComposer`) — an unavoidable, explicitly-accepted
   duplication at the layer boundary (ADR-006). Any future third language must update both.
 - Preheader remains unaddressed — deferred, not forgotten (tracked for 28.3/28.4).
+
+---
+
+## Sprint 28.3 — Transactional Email Composition Foundation
+
+**Base local:** `sprint/28.2-email-experience-localization-contract`.
+**Branch:** `sprint/28.3-email-composition-foundation`.
+**Gate:** foundation for Gate B (final Gate B check happens at the close of 28.4).
+
+### Audit (re-confirmed before changing anything)
+
+- `EmailMessage` shape unchanged since 28.1 (`Recipient`, `Subject`, `HtmlBody`, `PlainTextBody?`).
+- Consumers unchanged: `EmailConfirmationIssuer.Issue`, `ResendEmailConfirmationCommandHandler`,
+  `RequestPasswordResetCommandHandler` (same 3 call sites as 28.2).
+- Escaping: `WebUtility.HtmlEncode` on every interpolated HTML value, confirmed still applied to all 6
+  content fields after the 28.2 refactor.
+- URL generation: unchanged, one `BuildUrl(path, rawToken)` shared by both flows.
+- **Duplication found:** after ADR-006 added the 4th parameter, both `Compose*` public methods had
+  grown to ~8 nearly-identical lines differing only in which resource keys and which path they used —
+  real, provable duplication, not hypothetical. This Sprint's one substantive change addresses exactly
+  this.
+- Tests: 27 tests existed on `IdentityInfrastructureTests.cs` after 28.2; audited for HTML-safety gaps
+  — found no test for `&`, `"`, or `'` in display names (only `<`/`>` via `Tiago <Admin>`), no long-URL
+  test, no explicit HTML/plain-text parity test, no determinism test.
+- Provider boundary / HMG subject prefix boundary: confirmed unchanged — `HmgRecipientGuardedEmailSender`
+  still applies `SubjectPrefix` centrally, once, never touched by the composer.
+
+### Implementation
+
+- `IdentityEmailComposer` — both `Compose*` public methods now delegate to one private
+  `Compose(recipient, displayName, rawToken, language, path, EmailContentKeys keys)`; the 6 resolved
+  strings are carried as one private `EmailContent` record instead of positional parameters.
+  `BuildHtmlTemplate`/`BuildPlainTextTemplate` now take `EmailContent` instead of 6-7 loose strings.
+  No behavior change — same HTML/plain text output for the same inputs (proven by the new determinism
+  test below).
+- No new public contract, no new template engine, no preheader (still deferred — no confirmed need
+  found this Sprint either), no visual/copy change.
+
+### Tests added
+
+`tests/BeeDay.Infrastructure.Tests/IdentityInfrastructureTests.cs`:
+
+- `EmailComposer_EncodesEveryHtmlSignificantCharacterInDisplayName` (`<script>`, `&`, `"`).
+- `EmailComposer_NeverEmitsUnescapedScriptTagsFromDisplayName`.
+- `EmailComposer_PreservesApostrophesAcrossHtmlEncodingAndPlainText` (proves, doesn't assume, that
+  `WebUtility.HtmlEncode` also encodes `'`).
+- `EmailComposer_HandlesLongTokensWithoutTruncatingOrBreakingTheUrl` (512-char token).
+- `EmailComposer_HtmlAndPlainTextCarryTheSameEssentialFacts` (both flows — same subject/URL present in
+  both bodies, without requiring byte-identical output).
+- `EmailComposer_ProducesDeterministicOutputForTheSameInputs`.
+
+### Documentation updated
+
+`docs/infrastructure/06-transactional-email.md` §13.1 — dated Update note describing the
+`Compose`/`EmailContentKeys`/`EmailContent` refactor as the extension seam for future flows;
+historical Sprint 26.6 prose left intact. No new "Email Design System" document created.
+
+### Validation Results
+
+```
+dotnet format BeeDay.slnx --verify-no-changes   → clean (one auto-fix pass needed first — the Write
+                                                    tool produced LF on the rewritten
+                                                    IdentityEmailComposer.cs again; `dotnet format`
+                                                    corrected it, re-verified clean)
+dotnet build BeeDay.slnx                         → 0 errors, 0 warnings
+dotnet test BeeDay.slnx                          → 1375/1375 passed (93 Domain + 85 Application +
+                                                    191 Infrastructure + 841 Web + 165 E2E)
+git status                                       → clean after commit
+```
+
+### Security / Production
+
+No secrets touched. Production untouched. New HTML-safety tests strengthen, not weaken, injection
+coverage.
+
+### Runtime validation
+
+Not applicable — internal refactor only, no deployment-dependent behavior. No new
+POST-MERGE-PENDING items.
+
+### Risks / Known Limitations
+
+None new. Same residual items as Sprint 28.2 (pt-BR copy not brand-voice-reviewed yet; preheader
+still deferred) carried forward unchanged to Sprint 28.4.
