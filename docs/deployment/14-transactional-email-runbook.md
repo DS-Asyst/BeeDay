@@ -5,6 +5,14 @@ verified elsewhere in this repository — it does not re-derive them. Every clai
 document that owns it. Built at the close of Epic 26 (Sprints 26.1–26.10, 2026-08-16); re-verify
 against the linked documents if either drifts from this one.
 
+**Post-close update (2026-08-17):** the first two real HMG deployments after this Epic's own PR
+stack merged both failed inside `Deploy-BeeDay.ps1` itself — not in application code, not in
+Resend (still inactive) — and were fixed by Hotfix 26.9.1 and Hotfix 26.9.2. Both are now
+Environment Validated: HMG deployment run
+[`32004712401`](https://github.com/tiagoarrigoni/BeeDay/actions/runs/32004712401) (run #188)
+completed successfully end to end, including the new pre-deployment regression-suite gate. §6
+below is updated accordingly; §11's real Resend smoke test remains not executed — see §6 and §19.
+
 **Audience:** whoever performs a transactional-email-related deployment, troubleshoots a delivery
 issue, or evaluates activating Resend on a new environment (HMG or PRD). For the *architecture*
 narrative (how the current system was audited, designed, and tested sprint by sprint), see
@@ -97,24 +105,50 @@ not a default). Full contract, decorator behavior, and fail-closed proof:
 
 ## 6. Current HMG state — Resend is not active
 
-**As of this Epic's close, HMG still resolves to `DevelopmentEmailSender` (§2 table)** —
-`Resend:Enabled=false` in the committed `appsettings.Homologation.json`. The empty
+**HMG still resolves to `DevelopmentEmailSender` (§2 table)** — `Resend:Enabled=false` in the
+committed `appsettings.Homologation.json`, unchanged by any of the events below. The empty
 `C:\Apps\BeeDay-Data\Emails` directory that originally triggered this Epic (§7 below) was a code
-defect (the content-root guard), not a configuration or credential problem — that defect is fixed as
-of Sprint 26.9, but **the fix has not yet been deployed to HMG**, and Resend has not been activated
-there. Activating real Resend delivery on HMG requires, in order:
+defect (the content-root guard), not a configuration or credential problem — that defect, and
+everything through Hotfix 26.9.2 below, is now live on HMG's running binary.
 
-1. Merge the full Epic 26 PR stack (#143 → #152, ascending, one at a time — see §14) into `hmg`.
-2. Deploy the merged `hmg` to SERV3-WEB through `deploy-hmg.yml` — this alone makes the Sprint 26.9
-   directory-guard fix live, independent of whether Resend is ever enabled.
+**Deployment history since this Epic's PR stack merged (2026-08-16/17):**
+
+- The first real HMG deployment after Sprint 26.9's PR merged (run `31986772973`) failed in
+  "Deploy to IIS with rollback" with a PowerShell null/`.Count` crash while building the
+  `HmgRecipientGuardOptions.AllowedRecipients` App Pool variables — fixed by **Hotfix 26.9.1**,
+  which also fixed a second, independent defect that had silently prevented the documented
+  rollback from ever running on any deployment failure.
+- The next real deployment (run `31993611105`) proved Hotfix 26.9.1's rollback fix worked
+  end-to-end on real HMG (STOP → restore-skip → START → health check → "Rollback completed and
+  previous version is healthy.") but still failed the same way — a second, distinct root cause:
+  `$script:hmgAllowedRecipients` collided, case-insensitively, with the `-HmgAllowedRecipients`
+  script parameter of the same name. Fixed by **Hotfix 26.9.2**, which also added a read-only
+  regression-suite preflight to `deploy-hmg.yml`, running before IIS is ever stopped.
+- HMG deployment run [`32004712401`](https://github.com/tiagoarrigoni/BeeDay/actions/runs/32004712401)
+  (run #188) completed successfully end to end on SERV3WEB: the new "Validate deployment script
+  regression suite" preflight passed, "Deploy to IIS with rollback" passed, and the deployment
+  completed successfully — **Environment Validated**, not merely code-complete.
+
+None of the above activated Resend or touched `Resend:Enabled`/`Development:Enabled` — HMG remains
+on `DevelopmentEmailSender` throughout. Activating real Resend delivery on HMG still requires, in
+order:
+
+1. ~~Merge the full Epic 26 PR stack (#143 → #152) and the two hotfixes (#154, #155) into `hmg`.~~
+   **Done** — all merged, deployed, and Environment Validated per the history above.
+2. ~~Deploy the merged `hmg` to SERV3-WEB through `deploy-hmg.yml`.~~ **Done** — run `32004712401`.
 3. The repository owner creates the `BEEDAY_HMG_ALLOWED_RECIPIENTS` GitHub secret (homologation
-   environment) with the real, approved recipient list — semicolon-separated (§4).
+   environment) with the real, approved recipient list — semicolon-separated (§4). **Still not
+   created** — confirmed via `gh secret list --env homologation`.
 4. A separate, explicitly-scoped change flips `appsettings.Homologation.json`'s
-   `Resend:Enabled`/`Development:Enabled` — **not done by this Epic**, since it is a real behavior
-   activation decision requiring deliberate review, not something to bundle into a stacked-branch
-   sprint chain.
+   `Resend:Enabled`/`Development:Enabled` — **not done by this Epic or either hotfix**, since it is
+   a real behavior activation decision requiring deliberate review, not something to bundle into a
+   stacked-branch sprint chain or a deployment-recovery hotfix.
 5. Redeploy through `deploy-hmg.yml` again.
 6. Execute the smoke-test checklist in §11 for real, on HMG, with a real allowlisted address.
+
+**Real email/inbox E2E through Resend remains pending** — steps 3–6 above have not occurred. Do not
+infer or claim Resend delivery evidence from the deployment successes described above: those prove
+the deployment *mechanism* is now reliable, not that any email has been sent through Resend.
 
 ## 7. Sender/subject behavior
 
@@ -256,8 +290,14 @@ email body containing a live callback link.
 - No dedicated email-subsystem health check exists (§10) — evaluated, not built.
 - `deploy-prd.yml`'s `production` GitHub Environment does not exist yet (§4.1) — part of PRD's
   future real provisioning, not this Epic's scope.
-- Real HMG E2E evidence (§11 actually executed) does not exist yet — blocked on infrastructure
-  access this Epic never had; see [`06-transactional-email.md`](../infrastructure/06-transactional-email.md) §16.
+- Real HMG *email* E2E evidence (§11 actually executed against Resend) does not exist yet. This is
+  no longer an infrastructure-access blocker — Hotfix 26.9.1/26.9.2 proved real HMG deployment
+  evidence is obtainable (GitHub Actions run logs, `gh` CLI), and run `32004712401` confirms the
+  deployment mechanism itself is now reliable. The remaining blocker is §6 steps 3–6: the
+  `BEEDAY_HMG_ALLOWED_RECIPIENTS` secret has not been created and
+  `Resend:Enabled`/`Development:Enabled` have not been flipped — both deliberate activation
+  decisions outside this Epic's and both hotfixes' scope. See
+  [`06-transactional-email.md`](../infrastructure/06-transactional-email.md) §16.
 
 ## 20. Related documentation
 
