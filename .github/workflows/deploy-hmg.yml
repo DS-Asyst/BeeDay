@@ -232,10 +232,20 @@ jobs:
       # again. Read-only: no IIS, no SQL, no application files touched, no secrets required or
       # read (the suite uses only synthetic parameter values) - see
       # scripts/tests/Test-DeployBeeDayRecovery.ps1 for what it proves.
+      #
+      # Hotfix 26.9.3: a THIRD real deployment (run 32009214798) failed after IIS STOP - not from
+      # a Deploy-BeeDay.ps1 defect this time, but from a contract mismatch with the privileged
+      # Invoke-BeeDayIisControl.ps1's own CONFIGURE allow-list, which the suite above cannot catch
+      # because it stubs the privileged call entirely rather than exercising the real validator on
+      # the other side of that boundary. Test-InvokeBeeDayIisControlContract.ps1 closes that gap:
+      # also read-only (pure string/regex validation against the extracted real allow-list/
+      # validator - no IIS, no SQL, no C:\Ops\BeeDay file touched), so both suites belong in the
+      # same preflight, before the same "Deploy to IIS with rollback" step.
       - name: Validate deployment script regression suite
         shell: powershell
         run: |
           & ".\scripts\tests\Test-DeployBeeDayRecovery.ps1"
+          & ".\scripts\tests\Test-InvokeBeeDayIisControlContract.ps1"
 
       - name: Deploy to IIS with rollback
         shell: powershell
