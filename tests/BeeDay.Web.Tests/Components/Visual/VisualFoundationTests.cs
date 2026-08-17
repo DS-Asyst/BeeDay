@@ -60,6 +60,23 @@ public sealed class VisualFoundationTests
     }
 
     [Fact]
+    public void AuthenticatedSidebarCentersItsBrandAndGivesAccountATextSafeAccentOnlyWhenInactive()
+    {
+        // EPIC 27 Sprint 27.9: the sidebar's brand lockup is centered and sized for the shell chrome
+        // (was left-aligned at the bare 1.75rem component default before this sprint); Account uses
+        // the text-safe COR3 accent (03_DESIGN_DECISIONS.md §4) but only in its resting state, so it
+        // never borrows the active-route pill it isn't entitled to when it isn't the current page.
+        var desktopSidebar = ReadWebFile("Components", "Layout", "DesktopSidebar.razor.css");
+        var navigationItems = ReadWebFile("Components", "Layout", "NavigationItems.razor.css");
+
+        Assert.Contains("justify-content: center;", desktopSidebar, StringComparison.Ordinal);
+        Assert.Contains("--beeday-brand-height: 2.25rem;", desktopSidebar, StringComparison.Ordinal);
+
+        Assert.Contains(".navigation-items__account ::deep .navigation-item:not(.is-active) { color: var(--beeday-color-accent-secondary-on-light); }", navigationItems, StringComparison.Ordinal);
+        Assert.DoesNotContain(".navigation-items__account ::deep .navigation-item.is-active", navigationItems, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Epic27PaletteFoundationsAreCentralizedAndPairedWithAForeground()
     {
         var variables = ReadWebFile("wwwroot", "css", "variables.css");

@@ -18,14 +18,21 @@
     }
 }
 
-.desktop-sidebar__brand-link {
+/* NavLink is a child component, not markup literally written in this file, so its rendered <a>
+   never receives DesktopSidebar's own scope attribute — ::deep is required to reach it at all
+   (same fix as PublicHeader's brand mark, EPIC 27 Sprint 27.2). Without it every declaration
+   below is a silent no-op: the link renders with browser-default <a> layout instead. */
+.desktop-sidebar ::deep .desktop-sidebar__brand-link {
     display: flex;
     min-height: 3.5rem;
     align-items: center;
+    justify-content: center;
     padding-inline: var(--beeday-spacing-sm);
     border-radius: var(--beeday-radius-md);
     text-decoration: none;
 }
 
-.desktop-sidebar__brand-link:hover { background: var(--beeday-color-surface-muted); }
-.desktop-sidebar__brand-link:focus-visible { outline: var(--beeday-border-width) solid var(--beeday-color-brand-primary); outline-offset: 2px; box-shadow: var(--beeday-focus-ring); }
+.desktop-sidebar ::deep .desktop-sidebar__brand-link .beeday-brand { --beeday-brand-height: 2.25rem; }
+
+.desktop-sidebar ::deep .desktop-sidebar__brand-link:hover { background: var(--beeday-color-surface-muted); }
+.desktop-sidebar ::deep .desktop-sidebar__brand-link:focus-visible { outline: var(--beeday-border-width) solid var(--beeday-color-brand-primary); outline-offset: 2px; box-shadow: var(--beeday-focus-ring); }

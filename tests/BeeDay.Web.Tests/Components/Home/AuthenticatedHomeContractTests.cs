@@ -28,6 +28,15 @@ public sealed class AuthenticatedHomeContractTests
         Assert.DoesNotContain("+20 XP", Source, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public void OnlyOneOpenDailyControlRemainsOnTheProfilePage()
+    {
+        // EPIC 27 Sprint 27.9: the header's "Open Daily" button is the only surviving CTA; the
+        // redundant duplicate link that used to sit next to "Weekly activity" was removed.
+        var occurrences = Source.Split("OpenDailyButtonLabel", StringSplitOptions.None).Length - 1;
+        Assert.Equal(1, occurrences);
+    }
+
     private static string ResolveRepoRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

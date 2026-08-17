@@ -45,6 +45,32 @@ public sealed class ShellResponsiveLayoutTests(PlaywrightAppFixture fixture) : E
         Assert.False(await HasDocumentOverflowAsync());
     }
 
+    [Fact]
+    public async Task DesktopSidebarCentersItsBrandAndGivesAccountATextSafeAccentWhenNotActive()
+    {
+        // EPIC 27 Sprint 27.9 acceptance: "Marca está realmente centralizada na largura útil da
+        // sidebar" / "Account usa accent sem parecer estado ativo de navegação quando não for."
+        await Page.SetViewportSizeAsync(1280, 800);
+        await LoginToDailyAsync();
+
+        var brandLink = Page.Locator("a.desktop-sidebar__brand-link");
+        var brandContent = brandLink.Locator(".beeday-brand");
+        var linkBox = await brandLink.BoundingBoxAsync();
+        var contentBox = await brandContent.BoundingBoxAsync();
+        Assert.NotNull(linkBox);
+        Assert.NotNull(contentBox);
+        var linkCenter = linkBox!.X + linkBox.Width / 2;
+        var contentCenter = contentBox!.X + contentBox.Width / 2;
+        Assert.InRange(Math.Abs(linkCenter - contentCenter), 0, 2);
+
+        // /daily is the current route here, so Account (/settings) must show only its resting
+        // accent — never the active-route pill it isn't entitled to.
+        var accountItem = Page.Locator(".desktop-sidebar a[href='/settings']");
+        Assert.Equal("rgb(11, 114, 166)", await accountItem.EvaluateAsync<string>("element => getComputedStyle(element).color"));
+        Assert.Null(await accountItem.GetAttributeAsync("aria-current"));
+        Assert.Equal("rgba(0, 0, 0, 0)", await accountItem.EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+    }
+
     [Theory]
     [InlineData(1024, 800)]
     [InlineData(1199, 800)]
