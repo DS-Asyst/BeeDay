@@ -11,9 +11,18 @@
    Sprint 29.5: min-height (plus position:relative/overflow:hidden, ready for a future absolutely-
    positioned illustration) gives the surface real "editorial cover" presence instead of reading as a
    colored strip with text — applying the reference's structural principle (a tall hero with strong
-   vertical presence) through beeday's own token scale, not a literal copy of its CSS. */
+   vertical presence) through beeday's own token scale, not a literal copy of its CSS.
+   Sprint 29.6: switched grid -> an explicit flex column with justify-content:flex-start. display:grid
+   with an implicit single auto-sized row left the block-axis distribution of the extra free space
+   (introduced by min-height) to the grid's own normal/default align-content behavior — which packed
+   .beeday-hero__row away from the block-start instead of anchoring it there, pushing brand+nav down
+   and opening a large empty gap above them instead of below. flex-start on an explicit flex container
+   is unambiguous: children (the row, and the optional SupportingContent slot) pack at the top, and
+   any leftover space from min-height lands after the last child instead, never before the first. */
 .beeday-hero {
-    display: grid;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
     position: relative;
     gap: var(--beeday-spacing-lg);
     overflow: hidden;

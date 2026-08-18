@@ -12,21 +12,26 @@
    symmetric dip). Sprint 29.3 replaced it with an official SVG asset (assets/footer/footer-wave.svg,
    viewBox 0 0 1920x1060). Sprint 29.5 replaced that asset's content in place with a second, final
    official artwork (imgDefaultFooterHome.svg) — same path, same viewBox, same "no opaque background
-   of its own" contract, so no markup/CSS change was needed here beyond this note; only the file's
-   bytes changed. The asset is used as provided, at its own full aspect ratio, full width, no crop, no
-   raster conversion. The wrapper's own background is still the page's standard white surface, since
-   the SVG's canvas has no opaque background layer of its own. */
+   of its own" contract, so no markup change was needed; only the file's bytes changed.
+   Sprint 29.6: Sprint 29.5 rendered the image at width:100%/height:auto, its own full viewBox
+   aspect ratio (1920:1060, ~1.81:1) stretched across the entire page width — on a 1440px viewport
+   that is ~795px tall, reading as an independent giant section instead of a transition into the
+   footer. This asset is not used as full-bleed background artwork; it is capped by max-height (not
+   object-fit, which would either crop or letterbox) so it shrinks as a whole, aspect-ratio intact,
+   no crop, centered as a compact transition mark instead of a page-width banner. */
 .app-footer__wave {
-    display: block;
+    display: flex;
+    justify-content: center;
     width: 100%;
-    line-height: 0;
     background: var(--beeday-color-background);
 }
 
 .app-footer__wave img {
     display: block;
-    width: 100%;
+    width: auto;
+    max-width: 100%;
     height: auto;
+    max-height: clamp(8rem, 14vw, 14rem);
 }
 
 .app-footer__content {
