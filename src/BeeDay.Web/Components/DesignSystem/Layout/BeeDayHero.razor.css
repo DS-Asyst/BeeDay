@@ -96,8 +96,9 @@
 }
 
 /* Slot content is a child component (e.g. BeeDayBrand) — ::deep is required to size it here. */
-.beeday-hero__brand-context ::deep .beeday-brand { --beeday-brand-height: 1.35rem; }
-
+.beeday-hero__brand-context ::deep .beeday-brand {
+    --beeday-brand-height: clamp(1.5rem, 1.8vw, 1.7rem);
+}
 /* Force the lockup text to inherit the hero's own paired foreground (white on COR0/COR8, dark COR8
    everywhere else) instead of BeeDayBrand's own default/inverse colors. BeeDayBrand only models two
    fixed colors (brand-primary purple or white); neither reliably contrasts against every COR0-COR9

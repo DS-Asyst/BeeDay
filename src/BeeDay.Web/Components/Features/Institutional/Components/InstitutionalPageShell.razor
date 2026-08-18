@@ -24,8 +24,17 @@
            see docs/brand/03-color-palette.md), and OnDarkSurface is what selects the official
            non-white-background bee icon (bee-color-neutral.png) instead of the white-surface-only
            brand-purple one. *@
-        <BeeDayBrand OnDarkSurface="true" />
-        <span class="institutional-hero__context-label">@PageContext</span>
+
+        <a class="institutional-hero__home-link"
+           href="/"
+           aria-label="beeday">
+            <BeeDayBrand OnDarkSurface="true" />
+        </a>
+
+        <span class="institutional-hero__context-label">
+            @PageContext
+        </span>
+
     </BrandContext>
     <HeaderNav>
         <EditorialSectionNav Section="Section" CurrentHref="@CurrentHref" />
