@@ -46,7 +46,13 @@
        4.5:1 normal-text minimum (confirmed by the repo's automated axe-core scan); this token
        measures ~5.29:1. Use this for text/icons on light surfaces; raw --beeday-color-accent-
        secondary remains correct for non-text uses (borders, depth, surfaces) where the stricter
-       text-contrast ratio does not apply. */
+       text-contrast ratio does not apply.
+       Sprint 29.3: the important-white CTA's requested design reference moved to #2CBAFF, a
+       marginally brighter/more saturated blue in the same ~200° hue family as COR3/#1CB0F6 (verified
+       by HSL conversion: #2CBAFF is H199.6° S100% L58.6%, #1CB0F6 is H199.3° S92% L53.7%, this token
+       is H200.1° S88% L34.7% — same hue, just darker). #2CBAFF itself measures ~2.19:1 against
+       white, also failing WCAG AA as text — this token remains the correct accessible representative
+       of that same blue family for TEXT use; no new literal or token was introduced. */
     --beeday-color-accent-secondary-on-light: #0b72a6;
 
     /* Dark/content-strong — COR8/#100F3E. A stronger dark than --beeday-color-text-primary, used as

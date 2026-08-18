@@ -62,9 +62,10 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         await Expect(brandClosure).ToHaveCSSAsync("background-color", "rgb(255, 255, 255)");
         // Sprint 29.1: the duplicate footer-like block (wave PNG + About/Social/Apps/Help/Privacy
         // topics) that used to sit between the Home content and the real AppFooter was removed —
-        // AppFooter is the single official footer, opening with its own inline SVG wave separator.
+        // AppFooter is the single official footer, opening with its own decorative wave separator
+        // (Sprint 29.1: an inline hand-drawn SVG path; Sprint 29.3: the official prepared asset).
         await Expect(brandClosure.Locator(".home-brand-closure__wave, .home-brand-closure__base, .home-brand-topics")).ToHaveCountAsync(0);
-        await Expect(footerWave.Locator("svg")).ToBeVisibleAsync();
+        await Expect(footerWave.Locator("img")).ToBeVisibleAsync();
         await Expect(footerWave).ToHaveAttributeAsync("aria-hidden", "true");
         await Expect(footerWave.Locator("a, button, [tabindex]")).ToHaveCountAsync(0);
         await brandClosure.Locator("img").EvaluateAllAsync<object?>(

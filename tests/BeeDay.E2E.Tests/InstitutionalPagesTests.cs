@@ -65,13 +65,7 @@ public sealed class InstitutionalPagesTests(PlaywrightAppFixture fixture) : E2ET
     [InlineData("/privacy", "rgb(16, 15, 62)")]
     public async Task PageHeaderIsFullBleedAxisAlignedWithBodyAndUsesAPageHeaderEligibleColor(string route, string expectedBackgroundColor)
     {
-        // Sprint 29.4: the header+hero is now a single surface (EditorialLayout, no separate white
-        // PublicHeader) and reaches the true viewport edges via BeeDayHero's --beeday-hero-bleed-inset
-        // (opted into by .editorial-layout__main in polish.css) — genuine edge-to-edge, not just
-        // "wider than a centered card". Brand guidelines moved here from the ExperienceSystemHome
-        // shell in this Sprint, now sharing Cor0 with the rest of its "About us" family instead of
-        // the Cor8 it used before. Every route's color is one of the two COR0-COR9 tokens whose
-        // contrast with white text passes WCAG AA (Cor0 #5247F9 or Cor8 #100F3E —
+
         // docs/brand/03-color-palette.md).
         await Page.SetViewportSizeAsync(1920, 1000);
         await GotoAsync(route);
@@ -89,6 +83,7 @@ public sealed class InstitutionalPagesTests(PlaywrightAppFixture fixture) : E2ET
         Assert.NotNull(heroBox);
         Assert.NotNull(heroRowBox);
         Assert.NotNull(bodyBox);
+
 
         Assert.InRange(heroBox!.X, 0, 1);
         Assert.InRange(Math.Abs(heroBox.Width - 1920), 0, 1);

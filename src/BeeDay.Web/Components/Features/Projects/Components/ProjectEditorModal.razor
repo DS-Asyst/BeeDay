@@ -44,8 +44,12 @@
     <SecondaryAction>
         @if (IsEditing)
         {
+            @* Sprint 29.3: Compact="true" made this button 2.25rem tall with a smaller font-size
+               instead of the shared 2.75rem the sibling Cancel/Delete buttons in the same
+               .editor-modal__footer-actions row use (EditorModalShell.razor) — the only footer
+               action in any editor to opt into Compact. Removed; width still varies with the
+               label, only height/typography now match every other footer action. *@
             <BeeDayButton Variant="BeeDayButtonVariant.Secondary"
-                           Compact="true"
                            OnClick="OpenProject">@Localizer["OpenProjectButton"]</BeeDayButton>
         }
     </SecondaryAction>

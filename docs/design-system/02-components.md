@@ -2,7 +2,8 @@
 
 **Fonte da verdade:** todos os `.razor`/`.razor.cs` sob
 `src/BeeDay.Web/Components/DesignSystem`, mais `Components/Behaviors/DragDrop/BeeDaySortable`.
-Revalidado em 2026-08-16 pelas Sprints 25.8–25.12.
+Revalidado em 2026-08-16 pelas Sprints 25.8–25.12; contrato de backdrop revalidado na Sprint 29.3
+(2026-08-17).
 
 ## 1. Inventário atual
 
@@ -21,7 +22,7 @@ um zero significa primitive preservada/testada sem consumer runtime atual.
 | `BeeDayButton` | Ação canônica. `Variant`, `Type`, `Disabled`, `IsLoading`, `FullWidth`, `Compact`, `Icon`, `IconSize`, `Class`, `OnClick`, `ChildContent`, attributes | 22 | 8 variants; default/hover/pressed/focus/disabled/loading. `<button>`, `disabled`, `aria-busy`; loading preserva o label acessível. `BeeDayButtonTests`; `design-system.css` |
 | `BeeDayCard` | Surface sem estado interno. `Class`, `Padded`, `Muted`, `Prominent`, `Interactive`, `ChildContent`, attributes | 9 | `<article>`; interactive oferece chrome/focus, mas semântica/teclado pertencem ao consumer. `BeeDayCardTests`; `design-system.css` |
 | `BeeDayCardMenu` | Menu Edit/Delete posicionado. `Title`, `Class`, `TriggerClass`, `Disabled`, `OnEdit`, `OnDelete`, `OpenChanged` | 0 | trigger nativo, `aria-expanded`, `role=menu/menuitem`, Escape/outside click, medição JS. Mantido por contrato/testes. `BeeDayCardMenuTests`/placement tests; CSS isolado |
-| `BeeDayConfirmDialog` | Confirmação destrutiva. `IsOpen`, `IsBusy`, `Title`, `Message`, textos opcionais, labels opcionais, callbacks | 5 | open/busy; `alertdialog`, modal, labelled/described/busy; foco inicial em Cancel, trap, Escape/backdrop e restore. `BeeDayConfirmDialogTests` + E2E; `feedback.css`/focus scope |
+| `BeeDayConfirmDialog` | Confirmação destrutiva. `IsOpen`, `IsBusy`, `Title`, `Message`, textos opcionais, labels opcionais, callbacks | 5 | open/busy; `alertdialog`, modal, labelled/described/busy; foco inicial em Cancel, trap, Escape/backdrop e restore. Backdrop `--beeday-color-overlay` (claro/neutro/translúcido, canônico desde a Sprint 29.3 — não mais um roxo hardcoded). `BeeDayConfirmDialogTests` + E2E; `feedback.css`/focus scope |
 | `BeeDayToastHost` | Host da fila de `ToastService`; sem parâmetros | 3 layouts | `status`/`alert`, live region e dismiss nativo com target 44px. `BeeDayToastHostTests`; `feedback.css` |
 | `BeeDayLoading` | Feedback global controlado por `IsVisible`, `Label?` | 4 | `role=status`, polite live, label localizada; reduced motion mantém conteúdo. `FeedbackComponentTests`; `feedback.css` |
 | `BeeDaySkeleton` | Placeholder com `Lines`, `Class?` | 2 | busy visual, não interativo; shimmer reduzido. `FeedbackComponentTests`; `feedback.css` |
@@ -49,7 +50,7 @@ um zero significa primitive preservada/testada sem consumer runtime atual.
 
 | Primitive | Responsabilidade e contrato público | Consumers | Estados, a11y, responsive, teste e CSS |
 |---|---|---:|---|
-| `EditorModalShell` | `Model`, `Title`, `TitleId`, `SubmitLabel?`, `ShowDelete`, `IsBusy`, 3 slots e 3 callbacks | 6 | modal labelled/busy; foco inicial no primeiro field, trap, Escape, nested-confirm e restore; delete mantém 44px. `EditorModalShellTests` + E2E; `editor-modal.css`/focus scope |
+| `EditorModalShell` | `Model`, `Title`, `TitleId`, `SubmitLabel?`, `ShowDelete`, `IsBusy`, 3 slots e 3 callbacks | 6 | modal labelled/busy; foco inicial no primeiro field, trap, Escape, nested-confirm e restore; delete mantém 44px. Backdrop `--beeday-color-overlay`, mesmo token de `BeeDayConfirmDialog`/`BeeDayFeedbackModal`/`MobileSidebar` (Sprint 29.3). `SecondaryAction` não deve receber `Compact` — o mesmo footer já usa a escala padrão em Cancel/Delete. `EditorModalShellTests` + E2E; `editor-modal.css`/focus scope |
 | `BeeDayBrand` | `OnDarkSurface` compatível | 11 | wordmark textual `beeday`, `role=img`, label fixa lowercase; sem variants de cor. `BeeDayBrandTests`; CSS isolado |
 | `SearchHighlight` | `Text`, `SearchTerm` | 2 | `<mark>` para matches case-insensitive; sem estado interativo. `SearchHighlightTests`; `animations.css` |
 | `BeeDayProgressBar` | `Label`, `AriaLabel?`, `Value`, `Maximum`, `ValueText?`, `Tone` | 4 | `Primary`/`Reward`; empty/partial/complete/unavailable; label visível pode ter contexto acessível mais específico. `BeeDayProgressBarTests`; CSS isolado |

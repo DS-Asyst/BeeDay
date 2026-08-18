@@ -1,8 +1,5 @@
 # Layouts
 
-**Última verificação:** 2026-08-18 — Sprint 29.4 (novo `EditorialLayout`). Verificação anterior:
-2026-08-13 — Sprint 21.12, EPIC 21.
-
 ## Layouts ativos
 
 | Layout | Uso | Estrutura |
@@ -22,46 +19,6 @@ um link para `/experience-system` na Sprint 25.17 — `/brand/typography` contin
 diretamente e a partir da navegação interna do Experience System, apenas deixou de ter um link
 próprio no footer.
 
-Desde a Sprint 29.1, `AppFooter` abre com um separador ondulado (`.app-footer__wave`): um `<path>`
-SVG inline, `aria-hidden="true"`, preenchido com `--beeday-palette-cor0` (o mesmo token do fundo do
-footer) sobre um wrapper com `--beeday-color-background` (branco, a superfície pública padrão que
-precede o footer). Substitui a antiga combinação Home-specific de `wave-site.png` + bloco de tópicos
-duplicado que ficava entre o conteúdo da Home e o footer real — ver
-[`docs/brand/01-character-illustration.md`](../brand/01-character-illustration.md). `EditorialFooter`
-(Sprint 29.4) não usa essa onda nem esse fundo colorido — é branco e minimalista (ver abaixo).
-
-## `EditorialLayout` (Sprint 29.4)
-
-`Components/Layout/EditorialLayout.razor` é o layout do microsite editorial público (as 12 páginas
-ligadas pelo `AppFooter` — ver [`02-routing-and-pages.md`](02-routing-and-pages.md) §9). Diferente de
-`PublicLayout`, não renderiza `PublicHeader`: sem a barra branca fixa, sem bandeiras de idioma, sem o
-botão "Continue to beeday" nessas páginas especificamente. Header e hero passam a ser uma única
-superfície colorida — a marca beeday e a navegação contextual (`EditorialSectionNav`) fazem parte do
-próprio `BeeDayHero`, via seu novo parâmetro `HeaderNav`, renderizado por `InstitutionalPageShell`. A
-troca de idioma continua funcionando por baixo (cookie de cultura, `pt-BR`/`en-US`) — apenas o
-seletor visual de bandeiras não aparece nessas páginas. `AppFooter` é substituído por
-`EditorialFooter` (ver abaixo). `Home`, `Login`, os fluxos de autenticação e `/experience-system/*`
-continuam em `PublicLayout`, inalterados — a remoção do header branco é específica das páginas
-listadas em `02-routing-and-pages.md` §9.
-
-`.editorial-layout__main` (`polish.css`) define `--beeday-hero-bleed-inset: var(--beeday-page-gutter)`
-— o mesmo mecanismo de full-bleed que `BeeDayHero.razor.css` já usa (`margin-inline: calc(-1 *
-var(--beeday-hero-bleed-inset, 0px))`, sem `width` explícito para que o auto-width absorva a margem
-negativa simetricamente): a superfície colorida do header+hero alcança as bordas reais do viewport,
-não apenas a caixa de conteúdo com padding. Contextos que nunca definem essa variável (o hero
-compacto da Wallet, por exemplo) permanecem inalterados — o token vale `0px` por padrão.
-
-## `EditorialFooter` (Sprint 29.4)
-
-`Components/Layout/EditorialFooter.razor` — fundo branco, sem colunas, sem mascote, sem seletor de
-idioma, sem links duplicados (contrato explícito: nada do `AppFooter` grande deve aparecer aqui).
-Composição: um botão circular "Back to top" no início da linha (reaproveita o ícone `ChevronDown` do
-Icon System, rotacionado 180° via CSS — nenhum asset novo), o link central "BUY ME A COFFEE"
-(`href="/buy-me-a-coffee"` — contrato de rota; a página em si está fora do escopo desta Sprint, sem
-integração de pagamento), e o copyright (`SharedResources.FooterCopyright`, a mesma chave que
-`AppFooter` já usa, não duplicada). O scroll do Back to Top usa um módulo JS dedicado
-(`wwwroot/js/beeday-editorial-footer.js`) que respeita `prefers-reduced-motion` antes de escolher
-`behavior: 'smooth'` vs. `'auto'`.
 
 ## Navegação autenticada
 

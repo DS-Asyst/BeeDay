@@ -35,7 +35,9 @@ body { min-width: 20rem; }
 .beeday-button:has(.beeday-icon):not(.beeday-button--full-width) { padding-inline-start: calc(var(--beeday-grid) * 1.5); }
 
 .beeday-field { gap: var(--beeday-grid); }
-.beeday-field__control--textarea { min-height: 7rem; line-height: 1.5; }
+/* Sprint 29.3: the textarea min-height/line-height rule that used to be here moved to forms.css,
+   the actual owner of control-height contracts (see forms.css for the full note) — it was silently
+   overriding forms.css's own, different value for this exact selector. */
 
 /* Unified surfaces */
 .beeday-card--padded { padding: clamp(1rem, 2.5vw, 1.5rem); }
@@ -50,14 +52,7 @@ body { min-width: 20rem; }
 .beeday-main--authenticated { padding: 0; }
 .beeday-main--authenticated > :where(section, article, .beeday-page, .page-content) { width: 100%; max-width: none; }
 
-/* Sprint 29.4: EditorialLayout's own <main> (not .beeday-main — no fixed header to offset for). Sets
-   --beeday-hero-bleed-inset so BeeDayHero's own negative margin (BeeDayHero.razor.css) exactly
-   cancels this gutter, letting the colored header+hero surface reach the true viewport edges. */
-.editorial-layout__main {
-    padding-inline: var(--beeday-page-gutter);
-    padding-block: calc(var(--beeday-grid) * 3);
-    --beeday-hero-bleed-inset: var(--beeday-page-gutter);
-}
+
 
 /* Avoid animation-driven layout shift */
 .beeday-button,

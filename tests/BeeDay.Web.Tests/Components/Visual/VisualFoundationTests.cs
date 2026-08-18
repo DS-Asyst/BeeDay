@@ -77,21 +77,27 @@ public sealed class VisualFoundationTests
     }
 
     [Fact]
-    public void ActivityCardCheckboxIsATrueEmptyBoxAtRestWithAPreviewOnlyOnHoverFocusOrPress()
+    public void ActivityCardCheckboxIsATrueEmptyBoxAtRestAndNeverPreviewsTheCheckBeforeCompletion()
     {
-        // EPIC 27 Sprint 27.10: pending/default must be a real empty box (no visible check, but a
-        // visible border), previewing the check only on hover/focus-visible/press, and only
-        // becoming persistent once the item is actually completed. This supersedes an earlier,
-        // conflicting rule that left the glyph faintly visible (opacity .55) even when pending.
+        // EPIC 27 Sprint 27.10 made pending/default a real empty box (no visible check, but a
+        // visible border) — that part still holds. Sprint 29.3 removed the hover/focus/active
+        // "preview" it also introduced (glyph fading to opacity .62 on hover alone): a task/to-do
+        // hovered before being completed visually suggested a check mark, which read as a false
+        // completed affordance. The glyph now appears only once the item is actually completed;
+        // hover/focus/active may still change surface/border/scale for affordance, just not the
+        // glyph's own opacity.
         var cards = ReadWebFile("wwwroot", "css", "cards.css");
 
         Assert.Contains("border: 2px solid currentColor;", cards, StringComparison.Ordinal);
         Assert.Contains(".activity-card__checkbox-glyph { opacity: 0; }", cards, StringComparison.Ordinal);
-        Assert.Contains(".activity-card__checkbox:active .activity-card__checkbox-glyph", cards, StringComparison.Ordinal);
-        Assert.Contains("opacity: .62;", cards, StringComparison.Ordinal);
         Assert.Contains(".activity-card--completed .activity-card__checkbox-glyph { opacity: 1; }", cards, StringComparison.Ordinal);
         Assert.Contains(".activity-card__checkbox:focus-visible {", cards, StringComparison.Ordinal);
         Assert.Contains("transform: scale(.92);", cards, StringComparison.Ordinal);
+        Assert.DoesNotContain(":hover .activity-card__checkbox-glyph", cards, StringComparison.Ordinal);
+        Assert.DoesNotContain(":focus-visible .activity-card__checkbox-glyph", cards, StringComparison.Ordinal);
+        Assert.DoesNotContain(":active .activity-card__checkbox-glyph", cards, StringComparison.Ordinal);
+        Assert.DoesNotContain("opacity: .62", cards, StringComparison.Ordinal);
+        Assert.DoesNotContain("opacity:.62", cards, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -286,6 +292,8 @@ public sealed class VisualFoundationTests
         var feedback = ReadWebFile("wwwroot", "css", "feedback.css");
         var editorModal = ReadWebFile("wwwroot", "css", "editor-modal.css");
         var projectWorkspace = ReadWebFile("Components", "Features", "Projects", "Components", "ProjectWorkspace.razor.css");
+        var beeDayFeedbackModal = ReadWebFile("Components", "Features", "Experience", "Feedback", "BeeDayFeedbackModal.razor.css");
+        var mobileSidebar = ReadWebFile("Components", "Layout", "MobileSidebar.razor.css");
 
         Assert.Contains("--beeday-border-width-subtle: 1px;", variables, StringComparison.Ordinal);
         Assert.Contains("--beeday-border-width: 2px;", variables, StringComparison.Ordinal);
@@ -317,6 +325,19 @@ public sealed class VisualFoundationTests
         Assert.DoesNotMatch("#[0-9a-fA-F]{3,8}", projectWorkspace);
         Assert.DoesNotContain("--beeday-radius-control", variables, StringComparison.Ordinal);
         Assert.DoesNotContain("--beeday-shadow-activity", variables, StringComparison.Ordinal);
+
+        // Sprint 29.3: every full-viewport modal/drawer scrim now shares the same canonical
+        // --beeday-color-overlay token instead of each hardcoding its own purple/violet literal
+        // (four different rgb() values existed before this Sprint) — a light/neutral/translucent
+        // backdrop is the approved contract; it must not compete visually with the modal itself.
+        Assert.Contains("background: var(--beeday-color-overlay);", editorModal, StringComparison.Ordinal);
+        Assert.Contains("background: var(--beeday-color-overlay);", feedback, StringComparison.Ordinal);
+        Assert.Contains("background: var(--beeday-color-overlay);", beeDayFeedbackModal, StringComparison.Ordinal);
+        Assert.Contains("background: var(--beeday-color-overlay);", mobileSidebar, StringComparison.Ordinal);
+        Assert.DoesNotContain("rgb(35 25 45", editorModal, StringComparison.Ordinal);
+        Assert.DoesNotContain("rgb(47 27 72", feedback, StringComparison.Ordinal);
+        Assert.DoesNotContain("rgb(35 18 56", beeDayFeedbackModal, StringComparison.Ordinal);
+        Assert.DoesNotContain("rgb(35 25 45", mobileSidebar, StringComparison.Ordinal);
     }
 
     [Fact]

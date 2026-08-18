@@ -8,11 +8,14 @@
     color: var(--beeday-palette-cor0-foreground);
 }
 
-/* Sprint 29.1: the white-to-brand-surface transition is the footer's own top edge, built as an
-   inline vector path (flat sides, symmetric dip) instead of the raster wave-site.png the Home page
-   used to render above a now-removed duplicate footer block. The wrapper's own background is the
-   page's standard white surface so the path's unfilled trough reads as a continuation of whatever
-   white content precedes the footer, not a hardcoded shape-specific color. */
+/* Sprint 29.1 built the white-to-brand-surface transition as an inline vector path (flat sides,
+   symmetric dip). Sprint 29.3 replaces it with the official SVG asset prepared for this composition
+   (assets/footer/footer-wave.svg) — not visually approved as inline geometry, so it isn't recreated
+   here; the asset is used as provided, at its own full aspect ratio (1920x1060), full width, no
+   crop. Its canvas has no opaque background of its own (the purple wave shape and decorative
+   elements sit on transparency), so the wrapper's own background is still the page's standard white
+   surface, exactly as the Sprint 29.1 path-based version required — only the foreground artwork
+   changed, not this element's role or backdrop. */
 .app-footer__wave {
     display: block;
     width: 100%;
@@ -20,14 +23,10 @@
     background: var(--beeday-color-background);
 }
 
-.app-footer__wave svg {
+.app-footer__wave img {
     display: block;
     width: 100%;
     height: auto;
-}
-
-.app-footer__wave path {
-    fill: var(--beeday-palette-cor0);
 }
 
 .app-footer__content {

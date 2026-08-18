@@ -30,17 +30,21 @@ public sealed class ProjectEditorModalTests : BunitContext
     }
 
     [Fact]
-    public void OpenProjectAction_MatchesNewTagsVisualWeight()
+    public void OpenProjectAction_MatchesTheSharedFooterActionScaleNotACompactVariant()
     {
-        // Compact + the comic border/shadow treatment, no icon — same size and shape family
-        // as WalletTagManager's "New tag" button, not the larger plain pixel-button style.
+        // Sprint 29.3: this button previously opted into Compact="true" specifically to match
+        // WalletTagManager's smaller "New tag" button — but it sits in the same
+        // .editor-modal__footer-actions row as the shell's own Cancel button (EditorModalShell.razor),
+        // which is never Compact, so Open Project read as visibly undersized next to it. Compact is
+        // removed: Open Project now shares the same height/typography contract as every other footer
+        // action across every editor, while its width still varies with the label like any button.
         var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => Render<ProjectEditorModal>(parameters => parameters
             .Add(component => component.Model, new ProjectEditorModel { Title = "Kitchen remodel" })
             .Add(component => component.IsEditing, true)));
 
         var button = cut.FindAll("button").First(element => element.TextContent.Contains("Open Project", StringComparison.Ordinal));
 
-        Assert.Contains("beeday-button--compact", button.ClassList);
+        Assert.DoesNotContain("beeday-button--compact", button.ClassList);
         Assert.Contains("beeday-button--secondary", button.ClassList);
         Assert.DoesNotContain("beeday-button--comic", button.ClassList);
         Assert.Empty(button.QuerySelectorAll("svg"));

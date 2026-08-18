@@ -1,12 +1,13 @@
 # Official Brand Color Palette
 
-**Fonte da verdade:** decisão explícita de Brand do responsável pelo repositório, registrada nesta
-Sprint (29.2, 2026-08-17) porque a EPIC 27 nunca a documentou apesar de já tê-la implementado em
+**Fonte da verdade:** decisão explícita de Brand do responsável pelo repositório, registrada na
+Sprint 29.2 (2026-08-17) porque a EPIC 27 nunca a documentou apesar de já tê-la implementado em
 código — `src/BeeDay.Web/wwwroot/css/variables.css` (`--beeday-palette-cor0` a `-cor9`) e
 `src/BeeDay.Web/Components/DesignSystem/BeeDayPaletteToken.cs` (o enum `BeeDayPaletteToken`), ambos
 introduzidos na EPIC 27 Sprint 27.1. Comentários de código anteriores a esta Sprint referenciam um
-`03_DESIGN_DECISIONS.md` que nunca existiu neste repositório; esta é a primeira documentação real e
-committed da paleta.
+`03_DESIGN_DECISIONS.md` que nunca existiu neste repositório; esta foi a primeira documentação real e
+committed da paleta. Sprint 29.3 (2026-08-17) acrescentou a seção sobre a referência cromática do CTA
+branco importante, abaixo.
 
 ## A paleta
 
@@ -147,3 +148,15 @@ Editorial/Help/Product usam por padrão o brand-primary `Cor0`; páginas Legal/d
 escuro, mais formal. Uma página futura em um dos quatro templates existentes herda o padrão da sua
 família automaticamente; uma família de página genuinamente nova precisaria de seu próprio padrão
 explícito e documentado, escolhido entre `{Cor0, Cor8}`.
+
+## Referência cromática do CTA branco importante (Sprint 29.3)
+
+`#2CBAFF` é a referência de design solicitada para o texto dos CTAs brancos importantes (ex. "I
+ALREADY HAVE AN ACCOUNT"/"JÁ TENHO UMA CONTA", "Create account"). **Não é uma décima primeira cor da
+paleta** — `COR0`-`COR9` permanece fechada. `#2CBAFF` mede ~2.19:1 de contraste contra branco,
+abaixo do mínimo WCAG AA de 4.5:1 para texto — a mesma situação de `COR3`/`#1CB0F6` (~2.44:1), a
+referência anterior para esse mesmo papel. Ambas pertencem à mesma família de matiz (~200° em HSL);
+o token técnico já existente `--beeday-color-accent-secondary-on-light` (`#0B72A6`, ~5.29:1) continua sendo o representante
+acessível correto dessa família para uso em texto — nenhum novo literal ou token foi criado. Ambos os
+tokens (`--beeday-color-accent-secondary` e sua variante `-on-light`) estão declarados e comentados
+em `src/BeeDay.Web/wwwroot/css/variables.css`, próximos à declaração da paleta COR0-COR9.

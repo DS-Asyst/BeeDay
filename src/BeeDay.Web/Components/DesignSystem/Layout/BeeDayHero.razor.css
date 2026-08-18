@@ -2,16 +2,7 @@
    see HeroCatalog.razor). EPIC 27 Sprint 27.3 is its first real consumer: the institutional page
    shell. Surface is optional so non-solid consumers (onboarding, and any future neutral use) keep a
    sensible baseline instead of opting into a colored background.
-   Sprint 29.3 (reapplied here in Sprint 29.4 because hmg had not merged Sprint 29.3's PR yet at
-   branch time — see the Sprint 29.4 report): --beeday-hero-bleed-inset lets the hero cancel out its
-   ancestor's own inline padding (via a negative margin equal to that padding) so a colored Surface
-   reaches the true edges of its layout region instead of stopping at the padded content box. The
-   token defaults to 0 (no-op) so contexts that never set it (e.g. the authenticated shell's Wallet
-   hero, which has no ancestor padding to cancel) are unaffected; polish.css opts specific layout
-   <main> elements in. No explicit width: for a block-level grid container, width:auto already fills
-   the containing block and — critically — auto-width absorbs negative margins symmetrically
-   (stretching the box on both sides), unlike an explicit width:100%, which fixes the content width
-   regardless of margins and would only shift the box instead of widening it. */
+
 .beeday-hero {
     display: grid;
     gap: var(--beeday-spacing-lg);

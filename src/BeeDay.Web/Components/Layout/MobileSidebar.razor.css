@@ -1,11 +1,13 @@
 /* Sprint 21.3 (EPIC 21) — mobile equivalent of the Lingo Sheet-wrapped Sidebar documented in
    docs/epics/21-lingo-product-experience/README.md §3 (w-3/4 capped sm:max-w-sm). Reuses
-   a compact cap matching the desktop navigation proportions. */
+   a compact cap matching the desktop navigation proportions.
+   Sprint 29.3: canonical --beeday-color-overlay token, not a hardcoded purple literal — see the
+   matching comment on .editor-modal-backdrop in editor-modal.css for the full rationale. */
 .mobile-nav-backdrop {
     position: fixed;
     inset: 0;
     z-index: var(--beeday-z-drawer-backdrop);
-    background: rgb(35 25 45 / 55%);
+    background: var(--beeday-color-overlay);
     opacity: 0;
     visibility: hidden;
     transition: opacity var(--beeday-transition-emphasized), var(--beeday-transition-visibility);
