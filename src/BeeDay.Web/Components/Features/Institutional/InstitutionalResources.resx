@@ -14,9 +14,16 @@
   <data name="MissionPageContext" xml:space="preserve"><value>Mission</value></data>
   <data name="MissionPageTitle" xml:space="preserve"><value>Our mission — beeday</value></data>
   <data name="MissionTitle" xml:space="preserve"><value>Our mission</value></data>
-  <data name="MissionIntro" xml:space="preserve"><value>Be better every day — one small, trackable step at a time.</value></data>
-  <data name="MissionBodyTitle" xml:space="preserve"><value>Why beeday exists</value></data>
-  <data name="MissionBody" xml:space="preserve"><value>We believe consistency, not intensity, is what changes a life. beeday brings habits, tasks, projects, and personal finance into a single place so progress stays visible and manageable, without turning everyday life into a game with artificial stakes.</value></data>
+  <data name="MissionIntro" xml:space="preserve"><value>Be better every day. beeday exists to help people turn intention into progress — one small step at a time.</value></data>
+  <data name="MissionStory1Headline" xml:space="preserve"><value>consistency, not perfection.</value></data>
+  <data name="MissionStory1Body" xml:space="preserve"><value>We believe lasting change doesn't come from the intensity of a single day, but from the continuity of small actions over time.</value></data>
+  <data name="MissionStory2Headline" xml:space="preserve"><value>progress you can see.</value></data>
+  <data name="MissionStory2Body" xml:space="preserve"><value>Habits, tasks, projects, and personal finance stay together, so your progress stays visible, organized, and easy to follow.</value></data>
+  <data name="MissionStory3Headline" xml:space="preserve"><value>everything in one place.</value></data>
+  <data name="MissionStory3Body" xml:space="preserve"><value>beeday connects routine, goals, and personal organization into one simple experience, so you spend less energy trying to control everything and more energy moving forward.</value></data>
+  <data name="MissionStory4Headline" xml:space="preserve"><value>the control stays with you.</value></data>
+  <data name="MissionStory4Body" xml:space="preserve"><value>beeday isn't here to decide for you. It's here to support your choices, bring clarity to your progress, and make your next step easier to see.</value></data>
+  <data name="MissionClosingStatement" xml:space="preserve"><value>it isn't about doing it all. it's about continuing to move forward.</value></data>
 
   <data name="EfficacyPageContext" xml:space="preserve"><value>Efficacy</value></data>
   <data name="EfficacyPageTitle" xml:space="preserve"><value>Efficacy — beeday</value></data>
@@ -121,4 +128,11 @@
   <data name="PrivacySection5" xml:space="preserve"><value>Contact</value></data>
 
   <data name="LegalPendingReview" xml:space="preserve"><value>This document's full legal text is pending review and has not been published yet. The structure below reflects the sections it will cover.</value></data>
+
+  <data name="BrandGuidelinesPageContext" xml:space="preserve"><value>Brand guidelines</value></data>
+  <data name="BrandGuidelinesPageTitle" xml:space="preserve"><value>Brand guidelines — beeday</value></data>
+  <data name="BrandGuidelinesTitle" xml:space="preserve"><value>Brand guidelines</value></data>
+  <data name="BrandGuidelinesIntro" xml:space="preserve"><value>The beeday name, color, and voice — documented in one place, kept in sync with the product.</value></data>
+  <data name="BrandGuidelinesIdentityBody" xml:space="preserve"><value>beeday is written lowercase, always. The brand color is #5247F9 (COR0), paired with nine other physical tones that make up the full palette below — the same ten colors used across the product's hero surfaces and Wallet tags.</value></data>
+  <data name="BrandGuidelinesMoreBody" xml:space="preserve"><value>Wordmark, typography, illustration, characters, and writing each have their own page in the menu — the same real specimens already used across the product, not separate marketing artwork.</value></data>
 </root>

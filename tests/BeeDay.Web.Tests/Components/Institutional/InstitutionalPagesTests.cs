@@ -29,9 +29,24 @@ public sealed class InstitutionalPagesTests
         Assert.DoesNotMatch(@"\d+\s*%", cut.Markup);
     }
 
-    // Brand guidelines moved to ExperienceSystemHome (a second @page route on the same component
-    // that already powers /experience-system) in Sprint 27.8 — see ExperienceSystemHomeTests for
-    // its coverage. The Institutional feature no longer owns this route.
+    [Fact]
+    public void MissionRendersTheFourApprovedStoryBlocksAndTheClosingStatement()
+    {
+        using var context = new BunitContext().WithLocalization();
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Mission>());
+
+        var blocks = cut.FindAll(".editorial-story-block__headline");
+        Assert.Equal(5, blocks.Count);
+        Assert.Equal("consistency, not perfection.", blocks[0].TextContent.Trim());
+        Assert.Equal("progress you can see.", blocks[1].TextContent.Trim());
+        Assert.Equal("everything in one place.", blocks[2].TextContent.Trim());
+        Assert.Equal("the control stays with you.", blocks[3].TextContent.Trim());
+        Assert.Equal("it isn't about doing it all. it's about continuing to move forward.", blocks[4].TextContent.Trim());
+        Assert.Contains("editorial-story-block--centered", cut.FindAll(".editorial-story-block")[4].ClassList);
+    }
+
+    // Brand guidelines moved off ExperienceSystemHome to its own Institutional page in Sprint 29.4
+    // (see BrandGuidelinesTests) — /experience-system keeps the original ExperienceSystemHome shell.
 
     [Fact]
     public void ContactRendersRealExistingGitHubAndLinkedInChannelsWithoutFabricatedEmail()
@@ -212,6 +227,9 @@ public sealed class InstitutionalPagesTests
         AssertEligible<CommunityGuidelines>("beeday-surface-cor8");
         AssertEligible<Terms>("beeday-surface-cor8");
         AssertEligible<Privacy>("beeday-surface-cor8");
+        // Sprint 29.4: Brand guidelines is now grouped with Mission/Efficacy/Contact ("About us"),
+        // so it now uses their same Cor0 default instead of the Cor8 it used as ExperienceSystemHome.
+        AssertEligible<BrandGuidelines>("beeday-surface-cor0");
     }
 
     [Fact]
@@ -236,6 +254,7 @@ public sealed class InstitutionalPagesTests
             BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<CommunityGuidelines>()).Markup,
             BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Terms>()).Markup,
             BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Privacy>()).Markup,
+            BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<BrandGuidelines>()).Markup,
         };
 
         Assert.All(markups, markup =>
@@ -265,6 +284,7 @@ public sealed class InstitutionalPagesTests
             BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<CommunityGuidelines>()).Markup,
             BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Terms>()).Markup,
             BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Privacy>()).Markup,
+            BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<BrandGuidelines>()).Markup,
         };
 
         Assert.All(markups, markup =>
@@ -272,6 +292,44 @@ public sealed class InstitutionalPagesTests
             Assert.DoesNotContain("duolingo", markup, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("lorem ipsum", markup, StringComparison.OrdinalIgnoreCase);
         });
+    }
+
+    [Fact]
+    public void EveryEditorialRouteDeclaresTheEditorialLayoutNotThePublicLayout()
+    {
+        // Sprint 29.4 §6/§37/§38: these 12 routes no longer render PublicHeader (white top nav,
+        // language-switcher flags, "Continue to beeday") or AppFooter — @layout EditorialLayout
+        // replaces @layout PublicLayout for exactly the footer's editorial page families. bUnit
+        // renders a page component directly, not through its declared layout, so this is verified by
+        // reading each page's own source — the same technique ExperienceSystemHomeTests already uses
+        // for its own @layout/@page assertions.
+        var pagesRoot = Path.Combine(ResolveRepoRoot(), "src", "BeeDay.Web", "Components", "Features", "Institutional", "Pages");
+        var pageFiles = new[]
+        {
+            "Mission.razor", "Efficacy.razor", "Contact.razor", "Product.razor", "ProductPlus.razor",
+            "Android.razor", "Ios.razor", "Faqs.razor", "CommunityGuidelines.razor", "Terms.razor",
+            "Privacy.razor", "BrandGuidelines.razor"
+        };
+
+        Assert.All(pageFiles, fileName =>
+        {
+            var source = File.ReadAllText(Path.Combine(pagesRoot, fileName));
+            Assert.Contains("@layout BeeDay.Web.Components.Layout.EditorialLayout", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("@layout BeeDay.Web.Components.Layout.PublicLayout", source, StringComparison.Ordinal);
+        });
+    }
+
+    private static string ResolveRepoRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "BeeDay.slnx")))
+        {
+            directory = directory.Parent;
+        }
+
+        return directory?.FullName
+            ?? throw new InvalidOperationException("Could not locate the repository root from the test output directory.");
     }
 
     private static void AssertRendersHeroAndHeading<TComponent>(Func<BunitContext, IRenderedComponent<TComponent>> render, string expectedHeading, string expectedPageContext)

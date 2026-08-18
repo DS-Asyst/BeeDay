@@ -50,6 +50,15 @@ body { min-width: 20rem; }
 .beeday-main--authenticated { padding: 0; }
 .beeday-main--authenticated > :where(section, article, .beeday-page, .page-content) { width: 100%; max-width: none; }
 
+/* Sprint 29.4: EditorialLayout's own <main> (not .beeday-main — no fixed header to offset for). Sets
+   --beeday-hero-bleed-inset so BeeDayHero's own negative margin (BeeDayHero.razor.css) exactly
+   cancels this gutter, letting the colored header+hero surface reach the true viewport edges. */
+.editorial-layout__main {
+    padding-inline: var(--beeday-page-gutter);
+    padding-block: calc(var(--beeday-grid) * 3);
+    --beeday-hero-bleed-inset: var(--beeday-page-gutter);
+}
+
 /* Avoid animation-driven layout shift */
 .beeday-button,
 .beeday-card--interactive,
@@ -59,6 +68,7 @@ body { min-width: 20rem; }
     :root { --beeday-reading-width: 100%; }
     .beeday-main { padding-block: calc(var(--beeday-grid) * 2); }
     .beeday-main--authenticated { padding-block: 0; }
+    .editorial-layout__main { padding-block: calc(var(--beeday-grid) * 2); }
 }
 
 @media (max-width: 42rem) {

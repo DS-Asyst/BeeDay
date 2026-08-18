@@ -4,11 +4,12 @@
 `src/BeeDay.Web/Components/**/*.razor` e leitura das 3 primeiras linhas de cada arquivo resultante
 (`@page`, `@attribute`, `@layout`/`@rendermode`), mais `Components/Routes.razor` e `Components/App.razor`.
 
-**Última verificação:** 2026-08-17 (Sprint 29.2) — adicionado o §9 sobre as 11 páginas
-institucionais (EPIC 27) e a correção de layout full-bleed dessa Sprint; a tabela de rotas em §3
-**não foi reauditada** nesta passagem e continua sem essas 11 rotas — gap pré-existente desde a
-EPIC 27, fora do escopo desta Sprint, reportado e não corrigido silenciosamente.
-Verificação anterior: 2026-08-16 (Sprint 25.17 — beeday Experience System) — adicionadas as 21
+**Última verificação:** 2026-08-18 (Sprint 29.4) — §9 reescrito: as 11 páginas institucionais mais
+`/brand-guidelines` (agora sua própria página, movida de `ExperienceSystemHome.razor`) passam a usar
+o novo `EditorialLayout` em vez de `PublicLayout`, com header+hero unificados e navegação contextual
+por família. A tabela de rotas em §3 foi atualizada para incluir essas 12 rotas — fechando o gap
+reportado (não corrigido) na Sprint 29.2. Verificação anterior: 2026-08-17 (Sprint 29.2) — correção
+de layout full-bleed. Verificação anterior: 2026-08-16 (Sprint 25.17 — beeday Experience System) — adicionadas as 21
 rotas públicas do `beeday Experience System` (`/experience-system/*`), todas `PublicLayout` e
 `AllowAnonymous`; corrigida uma lacuna encontrada nesta Sprint: `/brand/typography`
 (`Features/Brand/Pages/TypographyGuidelines.razor`, introduzida na Sprint 25.4) nunca tinha sido
@@ -89,6 +90,18 @@ e `<HeadOutlet />`. O `<body>` contém apenas `<Routes @rendermode="InteractiveS
 | `/design-system/icons` | `DesignSystem/Pages/IconCatalog.razor` | `MainLayout` (padrão) | `Authorize` | — |
 | `/design-system/hero` | `DesignSystem/Pages/HeroCatalog.razor` | `MainLayout` (padrão) | `Authorize` | — |
 | `/brand/typography`, `/experience-system/brand/typography` (mesmo componente, 2 rotas) | `Features/Brand/Pages/TypographyGuidelines.razor` | `PublicLayout` | `AllowAnonymous` | — |
+| `/mission` | `Features/Institutional/Pages/Mission.razor` | `EditorialLayout` | `AllowAnonymous` | — |
+| `/efficacy` | `Features/Institutional/Pages/Efficacy.razor` | `EditorialLayout` | `AllowAnonymous` | — |
+| `/brand-guidelines` | `Features/Institutional/Pages/BrandGuidelines.razor` | `EditorialLayout` | `AllowAnonymous` | — |
+| `/contact` | `Features/Institutional/Pages/Contact.razor` | `EditorialLayout` | `AllowAnonymous` | — |
+| `/beeday` | `Features/Institutional/Pages/Product.razor` | `EditorialLayout` | `AllowAnonymous` | — |
+| `/beeday-plus` | `Features/Institutional/Pages/ProductPlus.razor` | `EditorialLayout` | `AllowAnonymous` | — |
+| `/android` | `Features/Institutional/Pages/Android.razor` | `EditorialLayout` | `AllowAnonymous` | — |
+| `/ios` | `Features/Institutional/Pages/Ios.razor` | `EditorialLayout` | `AllowAnonymous` | — |
+| `/faqs` | `Features/Institutional/Pages/Faqs.razor` | `EditorialLayout` | `AllowAnonymous` | — |
+| `/community-guidelines` | `Features/Institutional/Pages/CommunityGuidelines.razor` | `EditorialLayout` | `AllowAnonymous` | — |
+| `/terms` | `Features/Institutional/Pages/Terms.razor` | `EditorialLayout` | `AllowAnonymous` | — |
+| `/privacy` | `Features/Institutional/Pages/Privacy.razor` | `EditorialLayout` | `AllowAnonymous` | — |
 | `/experience-system` | `Features/ExperienceSystem/Pages/ExperienceSystemHome.razor` | `PublicLayout` | `AllowAnonymous` | — |
 | `/experience-system/brand` | `Features/ExperienceSystem/Pages/Brand/BrandOverview.razor` | `PublicLayout` | `AllowAnonymous` | — |
 | `/experience-system/brand/identity` | `Features/ExperienceSystem/Pages/Brand/BrandIdentity.razor` | `PublicLayout` | `AllowAnonymous` | — |
@@ -112,11 +125,14 @@ e `<HeadOutlet />`. O `<body>` contém apenas `<Routes @rendermode="InteractiveS
 | `/not-found` | `Pages/NotFound.razor` | `MainLayout` (explícito) | `AllowAnonymous` | — |
 | `/Error` | `Pages/Error.razor` | `MainLayout` (padrão) | `AllowAnonymous` | — |
 
-42 rotas em 40 arquivos `.razor`. Duas famílias de rota compartilham componente: `Account.razor`
-(`/account`, `/settings`) e `TypographyGuidelines.razor` (`/brand/typography`,
-`/experience-system/brand/typography` — a segunda rota foi adicionada na Sprint 25.17 como alias
-canônico dentro do `beeday Experience System`, preservando a primeira por compatibilidade e sem
-duplicar conteúdo).
+42 rotas. Duas famílias de rota compartilham componente: `Account.razor` (`/account`, `/settings`) e
+`TypographyGuidelines.razor` (`/brand/typography`, `/experience-system/brand/typography` — a segunda
+rota foi adicionada na Sprint 25.17 como alias canônico dentro do `beeday Experience System`,
+preservando a primeira por compatibilidade e sem duplicar conteúdo). Até a Sprint 29.4,
+`/brand-guidelines` também compartilhava componente com `/experience-system`
+(`ExperienceSystemHome.razor`); essa Sprint moveu `/brand-guidelines` para seu próprio arquivo
+(`Institutional/Pages/BrandGuidelines.razor`), então cada rota da tabela acima tem hoje seu próprio
+arquivo `.razor`, exceto as duas famílias citadas.
 
 ## 4. Páginas com `@rendermode` explícito vs. implícito
 
@@ -175,43 +191,89 @@ continua ativa em `LoginDestinationResolver.Resolve` (pós-login, `Program.cs`) 
 "Continue to BeeDay" tanto de `PublicHeader` quanto da própria `Home.razor` — reutilizando a regra
 existente em vez de duplicá-la uma quarta vez.
 
-## 9. As 11 páginas institucionais (EPIC 27, layout corrigido na Sprint 29.2)
+## 9. O microsite editorial: 12 páginas institucionais (EPIC 27, reconstruído na Sprint 29.4)
 
-`/mission`, `/efficacy`, `/contact`, `/beeday`, `/beeday-plus`, `/android`, `/ios`, `/faqs`,
-`/community-guidelines`, `/terms`, `/privacy` — `Components/Features/Institutional/Pages/`, sob
-`PublicLayout`. Cada rota usa um de quatro templates compartilhados
-(`Components/Institutional/Components/`) — `EditorialPageTemplate` (Mission, Efficacy, Contact),
-`ProductPageTemplate` (beeday, beeday Plus, Android, iOS), `HelpPageTemplate` (FAQs) ou
-`LegalDocumentPageTemplate` (Community guidelines, Terms, Privacy) — todos passando apenas
-`PageContext`/`Title`/`Description` (mais `PrimaryAction` no Product) para o shell real,
-`InstitutionalPageShell`, que renderiza um `BeeDayHero` colorido seguido do corpo da página. Nenhuma
-página institucional define CSS próprio; o vocabulário compartilhado vive em `wwwroot/css/
-institutional.css`.
+`/mission`, `/efficacy`, `/brand-guidelines`, `/contact`, `/beeday`, `/beeday-plus`, `/android`,
+`/ios`, `/faqs`, `/community-guidelines`, `/terms`, `/privacy` —
+`Components/Features/Institutional/Pages/`, sob `EditorialLayout` (não `PublicLayout` — ver
+[`03-layouts.md`](03-layouts.md)). Estas são exatamente as páginas ligadas pelas famílias do
+`AppFooter` (About us, Products, Apps, Help and support, Privacy and terms); links sociais externos
+não entram nessa lista. Cada rota usa um de quatro templates compartilhados
+(`Components/Institutional/Components/`) — `EditorialPageTemplate` (Mission, Efficacy, Brand
+guidelines, Contact — família "About us"), `ProductPageTemplate` (beeday/beeday Plus — família
+"Products"; Android/iOS — família "Apps"), `HelpPageTemplate` (FAQs — família "Help") ou
+`LegalDocumentPageTemplate` (Community guidelines, Terms, Privacy — família "Legal") — todos
+passando `PageContext`/`Title`/`Description`/`Section` (mais `PrimaryAction` no Product) para o shell
+real, `InstitutionalPageShell`, que renderiza um `BeeDayHero` colorido seguido do corpo da página.
+Nenhuma página institucional define CSS próprio de layout; o vocabulário compartilhado vive em
+`wwwroot/css/institutional.css`.
 
 `Surface` (a cor sólida do `BeeDayHero`) tem um default por template — `Cor0` para
-Editorial/Help/Product, `Cor8` para Legal — e nenhuma das 11 páginas o sobrescreve; ver
-[`brand/03-color-palette.md`](../brand/03-color-palette.md) para a paleta completa e a regra que
-restringe page headers a `Cor0`/`Cor8` (os dois únicos tokens cujo contraste com texto branco passa
-WCAG AA).
+Editorial/Help/Product (Brand guidelines incluída, como parte de "About us"), `Cor8` para Legal — e
+nenhuma das 12 páginas o sobrescreve; ver [`brand/03-color-palette.md`](../brand/03-color-palette.md)
+para a paleta completa e a regra que restringe page headers a `Cor0`/`Cor8` (os dois únicos tokens
+cujo contraste com texto branco passa WCAG AA).
 
-**Sprint 29.2 — full-bleed e alinhamento de eixo:** até então, `InstitutionalPageShell` envolvia o
-`BeeDayHero` e o corpo da página num único `<article class="institutional-page">`. A regra
-compartilhada de reading-width de `polish.css` (`.beeday-main > :where(section, article, .beeday-page,
-.page-content)`) casa apenas com filhos diretos de `.beeday-main` — como esse `<article>` era um filho
-direto, ele (hero incluído) ficava limitado a 72rem, fazendo o header colorido renderizar como um
-pequeno card centralizado em vez de uma faixa full-bleed. O shell agora renderiza o hero e o corpo
-como irmãos, filhos diretos de `.beeday-main` — o mesmo padrão que `ExperienceSystemPage` já usava
-para seu próprio `BeeDayHero` (§10). Isso também corrigiu um desalinhamento de eixo: os quatro
-templates antes estreitavam o corpo para 42-48rem (editorial/help/legal — product já usava os 72rem
-da regra base, por falta de uma classe `--product` correspondente) enquanto o hero permanecia em
-72rem; as quatro famílias agora compartilham a mesma largura de 72rem do hero.
+**Sprint 29.4 — header e hero como uma única superfície, navegação contextual.** Antes desta Sprint,
+essas páginas ainda usavam `PublicHeader` (a mesma barra branca fixa da Home, com bandeiras de
+idioma e o botão "Continue to beeday") acima do `BeeDayHero` colorido — dois elementos visuais
+competindo, sem integração. `EditorialLayout` (`Components/Layout/EditorialLayout.razor`) substitui
+isso: não renderiza `PublicHeader` nem `AppFooter`; a marca e a navegação contextual agora fazem
+parte do próprio `BeeDayHero`, via um novo parâmetro `HeaderNav` (`BeeDayHero.razor`), na mesma linha
+do `BrandContext` existente, empurrado para a extremidade oposta (`justify-content: space-between`).
+`InstitutionalPageShell` passa `<EditorialSectionNav>` nesse slot. Também passa `Eyebrow` ao
+`BeeDayHero` pela primeira vez — a categoria da família (`AboutUsEyebrow`/`ProductsEyebrow`/etc.,
+`InstitutionalResources`, já existentes e localizados pt-BR/en-US, nunca antes usados por nenhuma
+página real) — em vez do rótulo por página que já existia ao lado da marca (`PageContext`, mantido).
 
-Diferente do Experience System (§10), as páginas institucionais não têm uma navegação lateral
-contextual: a taxonomia real que as agrupa é apenas a lista plana de grupos do `AppFooter` (About us,
-Products, Apps, Help, Privacy and terms), sem subcategorias — insuficiente para justificar uma
-sidebar sem inventar uma hierarquia que não existe.
+**Contextual Section Navigation.** `EditorialSectionRegistry`
+(`Components/Features/Institutional/EditorialSectionRegistry.cs`) é a fonte única de verdade: um
+`enum EditorialSection` (`AboutUs`, `Products`, `Apps`, `Help`, `Legal`) mapeado para a mesma lista de
+links de cada grupo do `AppFooter`, reaproveitando as chaves `FooterXLink` já existentes em
+`SharedResources` — nenhuma tradução nova para os rótulos da navegação. `InstitutionalPageShell`
+resolve a rota atual via `NavigationManager` e passa `Section`/`CurrentHref` para
+`EditorialSectionNav.razor`, que renderiza os links da própria família com `aria-current="page"` no
+item atual (distinguido também por peso de fonte e sublinhado, não só cor). Uma família de uma única
+página (Help/FAQs) não renderiza navegação — não há irmãos para mostrar. O parâmetro `Section` é
+obrigatório em `InstitutionalPageShell`; os quatro templates o repassam (`EditorialPageTemplate`
+default `AboutUs`, `HelpPageTemplate` fixo `Help`, `LegalDocumentPageTemplate` fixo `Legal`,
+`ProductPageTemplate` sem default — Product/ProductPlus passam `Products`, Android/Ios passam `Apps`,
+já que um único template atende duas famílias do footer).
+
+**Editorial Story Blocks.** O corpo de Mission foi reescrito com a narrativa aprovada (`Localizer`
+com as novas chaves `MissionStory1..4Headline/Body` e `MissionClosingStatement`,
+`InstitutionalResources`), usando o novo componente `EditorialStoryBlock.razor` — um headline curto
+mais um parágrafo de apoio, sem cards, sem imagem inventada (nenhuma seção precisou de uma). As
+demais páginas foram reorganizadas na mesma linguagem visual sem inventar fatos novos: Efficacy
+mantém seu aviso de evidência pendente como um callout distinto (não vira story block, para não
+perder ênfase); Contact preserva seus links reais; as páginas Product/Apps preservam seus cards de
+feature (`institutional-product__features`, semântica de superfície legítima) e status "Coming soon";
+FAQ passou de cards com borda para linhas separadas por `border-bottom` (`institutional-faq__item`,
+mesmo `<details>/<summary>` de antes); as páginas legais preservam a estrutura de aviso + sumário.
+
+**`/brand-guidelines` — página própria, sidebar real.** Até esta Sprint, `/brand-guidelines` era uma
+segunda rota `@page` no mesmo componente que atende `/experience-system`
+(`ExperienceSystemHome.razor`), mostrando o grid de 3 cards Brand/UI/UX. Agora é
+`Institutional/Pages/BrandGuidelines.razor`, própria, na família "About us" (mesma navegação
+contextual de Mission/Efficacy/Contact). O corpo reaproveita — não duplica — `ExperienceSystemPillarNav`
+e `ExperienceSystemTopicNav` (`Pillar="ExperienceSystemPillar.Brand"`) como sidebar esquerda: a
+taxonomia real do Brand System do beeday (Identity, Wordmark, Color, Typography, Illustration,
+Characters, Writing), a mesma já usada em cada `/experience-system/brand/*`, não uma inventada. O
+antigo grid de 3 cards não aparece mais nesta rota — `/experience-system` continua com ele, inalterado,
+fora do escopo desta Sprint (não é uma rota do footer).
+
+**Editorial footer.** `EditorialLayout` renderiza `EditorialFooter.razor` em vez de `AppFooter`: fundo
+branco, sem colunas, sem mascote, sem seletor de idioma — apenas um botão circular "Back to top"
+(`ChevronDown` do Icon System, rotacionado 180° via CSS, sem novo asset), um link central "BUY ME A
+COFFEE" (`href="/buy-me-a-coffee"` — contrato de rota, página completa fora do escopo desta Sprint) e
+o copyright (`SharedResources.FooterCopyright`, reaproveitado do `AppFooter`, não duplicado).
 
 ## 10. O `beeday Experience System` (Sprint 25.17)
+
+**Nota Sprint 29.4:** desde que `/brand-guidelines` ganhou sua própria página (§9), o título/eyebrow
+desta rota (`RootTitle`/`RootPageTitle`/`RootEyebrow`, `ExperienceSystemResources`) deixou de
+emprestar "Brand guidelines" — voltou a descrever a si mesma ("beeday Experience System"), já que as
+duas rotas não compartilham mais componente.
 
 `/experience-system` é o ponto de entrada público e navegável para tudo que a EPIC 25 formalizou —
 Brand System, UI Design System e UX System — distinto de `docs/` (que continua sendo a
@@ -247,3 +309,9 @@ seletores `::deep`.
   `Components/ExperienceSystemPage.razor(.css)`, `ExperienceSystemPillarNav.razor`,
   `ExperienceSystemTopicNav.razor`, `ExperienceSystemTopicGrid.razor` e os 20 arquivos de página sob
   `Pages/` (Sprint 25.17).
+- `src/BeeDay.Web/Components/Features/Institutional/` completo, incluindo
+  `EditorialSection.cs`/`EditorialSectionLink.cs`/`EditorialSectionRegistry.cs`,
+  `Components/InstitutionalPageShell.razor`, `Components/EditorialSectionNav.razor`,
+  `Components/EditorialStoryBlock.razor`, os 4 templates, e as 12 páginas sob `Pages/` (Sprint 29.4).
+- `src/BeeDay.Web/Components/Layout/EditorialLayout.razor`, `EditorialFooter.razor(.cs/.css)` (Sprint
+  29.4).

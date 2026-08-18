@@ -1,14 +1,21 @@
 @page "/mission"
 @attribute [AllowAnonymous]
-@layout BeeDay.Web.Components.Layout.PublicLayout
+@layout BeeDay.Web.Components.Layout.EditorialLayout
 @using BeeDay.Web.Components.Features.Institutional.Components
 @inject IStringLocalizer<InstitutionalResources> Localizer
 
 <PageTitle>@Localizer["MissionPageTitle"]</PageTitle>
 
+@* Sprint 29.4: full editorial rewrite per the approved Mission narrative — statement + intro read
+   as one flowing hero subtitle (BeeDayHero has one Subtitle slot; the prompt's separate "statement"
+   and "introduction" lines combine naturally as one sentence, verbatim), then four story blocks,
+   then the closing statement. No claims beyond what's given here. *@
 <EditorialPageTemplate PageContext="@Localizer["MissionPageContext"]" Title="@Localizer["MissionTitle"]" Description="@Localizer["MissionIntro"]">
-    <section aria-labelledby="mission-body-heading">
-        <h2 id="mission-body-heading">@Localizer["MissionBodyTitle"]</h2>
-        <p>@Localizer["MissionBody"]</p>
-    </section>
+    <div class="editorial-story-blocks">
+        <EditorialStoryBlock Headline="@Localizer["MissionStory1Headline"]" Support="@Localizer["MissionStory1Body"]" />
+        <EditorialStoryBlock Headline="@Localizer["MissionStory2Headline"]" Support="@Localizer["MissionStory2Body"]" />
+        <EditorialStoryBlock Headline="@Localizer["MissionStory3Headline"]" Support="@Localizer["MissionStory3Body"]" />
+        <EditorialStoryBlock Headline="@Localizer["MissionStory4Headline"]" Support="@Localizer["MissionStory4Body"]" />
+        <EditorialStoryBlock Headline="@Localizer["MissionClosingStatement"]" Centered="true" />
+    </div>
 </EditorialPageTemplate>

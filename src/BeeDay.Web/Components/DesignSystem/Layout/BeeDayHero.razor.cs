@@ -8,6 +8,14 @@ public partial class BeeDayHero
     [Parameter] public string? Eyebrow { get; set; }
     [Parameter] public string? Subtitle { get; set; }
     [Parameter] public RenderFragment? BrandContext { get; set; }
+
+    /// <summary>
+    /// Sprint 29.4: rendered on the opposite end of the same row as <see cref="BrandContext"/>
+    /// (top-right on a colored header+hero surface) — the editorial microsite's contextual section
+    /// navigation. Optional and independent of BrandContext so other BeeDayHero consumers (Wallet,
+    /// onboarding) are unaffected.
+    /// </summary>
+    [Parameter] public RenderFragment? HeaderNav { get; set; }
     [Parameter] public RenderFragment? Illustration { get; set; }
     [Parameter] public RenderFragment? PrimaryAction { get; set; }
     [Parameter] public RenderFragment? SupportingContent { get; set; }

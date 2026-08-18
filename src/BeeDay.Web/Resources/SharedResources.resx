@@ -276,4 +276,13 @@
   <data name="DomainErrorGeneric" xml:space="preserve">
     <value>Something went wrong. Try again in a moment.</value>
   </data>
+  <data name="EditorialSectionNavAriaLabel" xml:space="preserve">
+    <value>Section pages</value>
+  </data>
+  <data name="EditorialFooterBackToTopLabel" xml:space="preserve">
+    <value>Back to top</value>
+  </data>
+  <data name="EditorialFooterBuyMeACoffee" xml:space="preserve">
+    <value>BUY ME A COFFEE</value>
+  </data>
 </root>

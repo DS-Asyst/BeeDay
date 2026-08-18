@@ -14,9 +14,16 @@
   <data name="MissionPageContext" xml:space="preserve"><value>Missão</value></data>
   <data name="MissionPageTitle" xml:space="preserve"><value>Nossa missão — beeday</value></data>
   <data name="MissionTitle" xml:space="preserve"><value>Nossa missão</value></data>
-  <data name="MissionIntro" xml:space="preserve"><value>Seja melhor a cada dia — um pequeno passo mensurável de cada vez.</value></data>
-  <data name="MissionBodyTitle" xml:space="preserve"><value>Por que o beeday existe</value></data>
-  <data name="MissionBody" xml:space="preserve"><value>Acreditamos que consistência, não intensidade, é o que muda uma vida. O beeday reúne hábitos, tarefas, projetos e finanças pessoais em um só lugar, para que o progresso continue visível e administrável, sem transformar o dia a dia em um jogo com apostas artificiais.</value></data>
+  <data name="MissionIntro" xml:space="preserve"><value>Seja melhor a cada dia. O beeday existe para ajudar pessoas a transformar intenção em progresso — um pequeno passo de cada vez.</value></data>
+  <data name="MissionStory1Headline" xml:space="preserve"><value>consistência. não perfeição.</value></data>
+  <data name="MissionStory1Body" xml:space="preserve"><value>Acreditamos que mudanças duradouras não nascem da intensidade de um único dia, mas da continuidade de pequenas ações ao longo do tempo.</value></data>
+  <data name="MissionStory2Headline" xml:space="preserve"><value>progresso que você consegue ver.</value></data>
+  <data name="MissionStory2Body" xml:space="preserve"><value>Hábitos, tarefas, projetos e finanças pessoais ficam juntos para que o seu desenvolvimento continue visível, organizado e possível de acompanhar.</value></data>
+  <data name="MissionStory3Headline" xml:space="preserve"><value>tudo em um só lugar.</value></data>
+  <data name="MissionStory3Body" xml:space="preserve"><value>O beeday conecta rotina, objetivos e organização pessoal em uma experiência simples, para que você gaste menos energia tentando controlar tudo e mais energia avançando.</value></data>
+  <data name="MissionStory4Headline" xml:space="preserve"><value>o controle continua com você.</value></data>
+  <data name="MissionStory4Body" xml:space="preserve"><value>O beeday não existe para decidir por você. Ele existe para apoiar suas escolhas, dar clareza ao seu progresso e tornar o próximo passo mais fácil de enxergar.</value></data>
+  <data name="MissionClosingStatement" xml:space="preserve"><value>não se trata de fazer tudo. trata-se de continuar avançando.</value></data>
 
   <data name="EfficacyPageContext" xml:space="preserve"><value>Eficácia</value></data>
   <data name="EfficacyPageTitle" xml:space="preserve"><value>Eficácia — beeday</value></data>
@@ -121,4 +128,11 @@
   <data name="PrivacySection5" xml:space="preserve"><value>Contato</value></data>
 
   <data name="LegalPendingReview" xml:space="preserve"><value>O texto jurídico completo deste documento está em revisão e ainda não foi publicado. A estrutura abaixo reflete as seções que ele abordará.</value></data>
+
+  <data name="BrandGuidelinesPageContext" xml:space="preserve"><value>Diretrizes de marca</value></data>
+  <data name="BrandGuidelinesPageTitle" xml:space="preserve"><value>Diretrizes de marca — beeday</value></data>
+  <data name="BrandGuidelinesTitle" xml:space="preserve"><value>Diretrizes de marca</value></data>
+  <data name="BrandGuidelinesIntro" xml:space="preserve"><value>O nome, a cor e a voz do beeday — documentados em um só lugar, sempre sincronizados com o produto.</value></data>
+  <data name="BrandGuidelinesIdentityBody" xml:space="preserve"><value>beeday é escrito sempre em minúsculas. A cor de marca é #5247F9 (COR0), pareada com outros nove tons físicos que compõem a paleta completa abaixo — as mesmas dez cores usadas nas superfícies de hero do produto e nas tags da Wallet.</value></data>
+  <data name="BrandGuidelinesMoreBody" xml:space="preserve"><value>Wordmark, tipografia, ilustração, personagens e escrita têm cada um sua própria página no menu — os mesmos specimens reais já usados no produto, não peças de marketing separadas.</value></data>
 </root>

@@ -1,6 +1,7 @@
 @page "/beeday-plus"
 @attribute [AllowAnonymous]
-@layout BeeDay.Web.Components.Layout.PublicLayout
+@layout BeeDay.Web.Components.Layout.EditorialLayout
+@using BeeDay.Web.Components.Features.Institutional
 @using BeeDay.Web.Components.Features.Institutional.Components
 @inject IStringLocalizer<InstitutionalResources> Localizer
 
@@ -8,7 +9,7 @@
 
 @* No price, entitlement, or benefit is invented here (06_ASSETS_AND_OPEN_ITEMS.md) — beeday Plus
    does not exist in the product yet. *@
-<ProductPageTemplate PageContext="@Localizer["ProductPlusPageContext"]" Title="@Localizer["ProductPlusTitle"]" Description="@Localizer["ProductPlusIntro"]">
+<ProductPageTemplate PageContext="@Localizer["ProductPlusPageContext"]" Title="@Localizer["ProductPlusTitle"]" Description="@Localizer["ProductPlusIntro"]" Section="EditorialSection.Products">
     <PrimaryAction>
         <a class="beeday-button beeday-button--important-white" href="/profile/create">@Localizer["TryBeedayToday"]</a>
     </PrimaryAction>

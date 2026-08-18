@@ -1,11 +1,21 @@
 /* First real styling for BeeDayHero (previously scaffolded, unstyled, with no production consumer —
    see HeroCatalog.razor). EPIC 27 Sprint 27.3 is its first real consumer: the institutional page
    shell. Surface is optional so non-solid consumers (onboarding, and any future neutral use) keep a
-   sensible baseline instead of opting into a colored background. */
+   sensible baseline instead of opting into a colored background.
+   Sprint 29.3 (reapplied here in Sprint 29.4 because hmg had not merged Sprint 29.3's PR yet at
+   branch time — see the Sprint 29.4 report): --beeday-hero-bleed-inset lets the hero cancel out its
+   ancestor's own inline padding (via a negative margin equal to that padding) so a colored Surface
+   reaches the true edges of its layout region instead of stopping at the padded content box. The
+   token defaults to 0 (no-op) so contexts that never set it (e.g. the authenticated shell's Wallet
+   hero, which has no ancestor padding to cancel) are unaffected; polish.css opts specific layout
+   <main> elements in. No explicit width: for a block-level grid container, width:auto already fills
+   the containing block and — critically — auto-width absorbs negative margins symmetrically
+   (stretching the box on both sides), unlike an explicit width:100%, which fixes the content width
+   regardless of margins and would only shift the box instead of widening it. */
 .beeday-hero {
     display: grid;
     gap: var(--beeday-spacing-lg);
-    width: 100%;
+    margin-inline: calc(-1 * var(--beeday-hero-bleed-inset, 0px));
     padding: clamp(2.5rem, 6vw, 4.5rem) var(--beeday-page-gutter);
     background: var(--beeday-hero-surface-bg, var(--beeday-color-surface));
     color: var(--beeday-hero-surface-fg, inherit);
@@ -48,9 +58,20 @@
 
 .beeday-hero__content { flex: 1 1 auto; min-width: 0; }
 
+/* Sprint 29.4: also the row for HeaderNav (contextual section navigation), pushed to the opposite
+   end via space-between. Font-weight/opacity moved onto __brand-context-start only, so HeaderNav's
+   own link styling (EditorialSectionNav.razor.css) isn't doubly dimmed by this row's own opacity. */
 .beeday-hero__brand-context {
     display: flex;
+    flex-wrap: wrap;
     margin-bottom: var(--beeday-spacing-sm);
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--beeday-spacing-sm) var(--beeday-spacing-lg);
+}
+
+.beeday-hero__brand-context-start {
+    display: flex;
     align-items: center;
     gap: var(--beeday-spacing-sm);
     font-weight: var(--beeday-font-weight-bold);
@@ -80,10 +101,19 @@
 .beeday-hero__brand-context ::deep .beeday-brand.beeday-brand--inverse .beeday-brand__bee,
 .beeday-hero__brand-context ::deep .beeday-brand.beeday-brand--inverse .beeday-brand__day { color: inherit; }
 
+/* Sprint 29.4: Eyebrow went unused by every real institutional page before this Sprint wired it up
+   (InstitutionalPageShell), so this class's actual rendered color was never exercised until now.
+   design-system.css (global, unscoped) has a legacy rule hardcoding .beeday-hero__eyebrow to
+   --beeday-color-brand-primary — wrong for a multi-surface COR0-COR9 hero, and never overridden here
+   before because this file never declared its own `color`. axe-core caught it failing WCAG AA
+   against Cor8 (#100F3E): brand-primary purple text on very dark navy. `color: inherit`, scoped to
+   this file, outranks the global rule the same way `.beeday-hero h1`'s own `color: inherit` already
+   does (Blazor's scope attribute boosts specificity) — correct for every COR0-COR9 surface by
+   construction, matching every other hero text element. */
 .beeday-hero__eyebrow {
     display: inline-block;
     margin-bottom: var(--beeday-spacing-sm);
-    opacity: .85;
+    color: inherit;
     font-size: var(--beeday-font-size-sm);
     font-weight: var(--beeday-font-weight-black);
     letter-spacing: var(--beeday-letter-spacing-label);

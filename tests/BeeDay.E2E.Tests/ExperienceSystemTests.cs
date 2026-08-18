@@ -7,7 +7,7 @@ namespace BeeDay.E2E.Tests;
 public sealed class ExperienceSystemTests(PlaywrightAppFixture fixture) : E2ETestBase(fixture)
 {
     [Theory]
-    [InlineData("/experience-system", "Brand guidelines")]
+    [InlineData("/experience-system", "beeday Experience System")]
     [InlineData("/brand-guidelines", "Brand guidelines")]
     [InlineData("/experience-system/brand", "Brand System")]
     [InlineData("/experience-system/brand/identity", "Identity")]
@@ -45,7 +45,7 @@ public sealed class ExperienceSystemTests(PlaywrightAppFixture fixture) : E2ETes
         await Page.SetViewportSizeAsync(width, height);
         await GotoAsync("/experience-system");
 
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Brand guidelines", Level = 1 })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "beeday Experience System", Level = 1 })).ToBeVisibleAsync();
         await Expect(Page.Locator("a.experience-system-topic-grid__card[href='/experience-system/brand']")).ToContainTextAsync("Brand System");
         await Expect(Page.Locator("a.experience-system-topic-grid__card[href='/experience-system/ui']")).ToContainTextAsync("UI Design System");
         await Expect(Page.Locator("a.experience-system-topic-grid__card[href='/experience-system/ux']")).ToContainTextAsync("UX System");
@@ -53,13 +53,13 @@ public sealed class ExperienceSystemTests(PlaywrightAppFixture fixture) : E2ETes
     }
 
     [Fact]
-    public async Task FooterLinksDirectlyToTheBrandGuidelinesHeroAndDocumentation()
+    public async Task FooterLinksDirectlyToTheBrandGuidelinesEditorialPageAndItsSidebarTaxonomy()
     {
         // EPIC 27 Sprint 27.4: the footer's standalone "beeday Experience System" entry was removed
-        // in favor of "Brand guidelines" (03_DESIGN_DECISIONS.md §9/§11). Sprint 27.8 made
-        // "/brand-guidelines" a second route directly on the same page that already serves
-        // "/experience-system", so the footer now lands the visitor on the real content immediately
-        // — no separate landing-then-link-onward hop.
+        // in favor of "Brand guidelines" (03_DESIGN_DECISIONS.md §9/§11). Sprint 29.4 moved
+        // "/brand-guidelines" off the shared ExperienceSystemHome component to its own Institutional
+        // page, using the editorial shell and a left sidebar (ExperienceSystemPillarNav +
+        // ExperienceSystemTopicNav) instead of the 3-card pillar grid it used before.
         await GotoAsync("/");
 
         var footerLink = Page.GetByRole(AriaRole.Contentinfo).GetByRole(AriaRole.Link, new() { Name = "Brand guidelines", Exact = true });
@@ -71,9 +71,9 @@ public sealed class ExperienceSystemTests(PlaywrightAppFixture fixture) : E2ETes
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Brand guidelines", Level = 1 })).ToBeVisibleAsync();
         await Expect(Page.Locator("header.beeday-hero")).ToBeVisibleAsync();
 
-        await Page.Locator("a.experience-system-topic-grid__card[href='/experience-system/brand']").ClickAsync();
-        await Expect(Page).ToHaveURLAsync(new Regex(@"/experience-system/brand$"));
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Brand System", Level = 1 })).ToBeVisibleAsync();
+        await Page.Locator(".experience-system-topic-nav a", new() { HasTextString = "Wordmark" }).ClickAsync();
+        await Expect(Page).ToHaveURLAsync(new Regex(@"/experience-system/brand/wordmark$"));
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Wordmark", Level = 1 })).ToBeVisibleAsync();
     }
 
     [Fact]
@@ -149,7 +149,7 @@ public sealed class ExperienceSystemTests(PlaywrightAppFixture fixture) : E2ETes
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Português (Brasil)" }).ClickAsync();
 
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Brand guidelines", Level = 1 })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "beeday Experience System", Level = 1 })).ToBeVisibleAsync();
         await Expect(Page.GetByText("Construído a partir do que já está no ar")).ToBeVisibleAsync();
         Assert.False(await Page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
     }

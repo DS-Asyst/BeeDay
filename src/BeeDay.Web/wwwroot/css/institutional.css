@@ -37,6 +37,15 @@
 
 .institutional-page__body section + section { margin-top: var(--beeday-spacing-2xl); }
 
+/* Sprint 29.4 — editorial story blocks: predictable narrative rhythm (EditorialStoryBlock.razor)
+   instead of "H2, paragraph, H2, paragraph" thrown vertically. */
+.editorial-story-blocks {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 4rem);
+}
+
+.editorial-story-blocks + section { margin-top: var(--beeday-spacing-2xl); }
+
 /* Product/marketing — beeday, beeday Plus, Android, iOS: full-width sections, room for a feature
    grid and a CTA row (populated in Sprint 27.6). */
 .institutional-product__features {
@@ -75,15 +84,18 @@
     text-transform: uppercase;
 }
 
-/* Help — beeday FAQs: a native, keyboard- and touch-accessible accordion. */
-.institutional-faq { display: grid; gap: var(--beeday-spacing-sm); }
+/* Help — beeday FAQs: a native, keyboard- and touch-accessible accordion. Sprint 29.4: separator
+   rows, not four small bordered cards floating in empty space (§19) — the editorial microsite
+   avoids the card-per-fragment pattern for content that isn't its own surface. */
+.institutional-faq { display: grid; }
 
 .institutional-faq__item {
-    padding: var(--beeday-spacing-md) var(--beeday-spacing-lg);
-    border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
-    border-radius: var(--beeday-radius-lg);
-    background: var(--beeday-color-surface);
+    padding: var(--beeday-spacing-md) 0;
+    border-bottom: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
 }
+
+.institutional-faq__item:first-child { padding-top: 0; }
+.institutional-faq__item:last-child { border-bottom: none; }
 
 .institutional-faq__item summary {
     color: var(--beeday-color-text-primary);
