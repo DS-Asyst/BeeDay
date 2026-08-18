@@ -7,7 +7,7 @@
     display: grid;
     gap: var(--beeday-spacing-lg);
     margin-inline: calc(-1 * var(--beeday-hero-bleed-inset, 0px));
-    padding: clamp(2.5rem, 6vw, 4.5rem) var(--beeday-page-gutter);
+    padding: clamp(3rem, 7vw, 5.5rem) var(--beeday-page-gutter);
     background: var(--beeday-hero-surface-bg, var(--beeday-color-surface));
     color: var(--beeday-hero-surface-fg, inherit);
 }
@@ -51,11 +51,15 @@
 
 /* Sprint 29.4: also the row for HeaderNav (contextual section navigation), pushed to the opposite
    end via space-between. Font-weight/opacity moved onto __brand-context-start only, so HeaderNav's
-   own link styling (EditorialSectionNav.razor.css) isn't doubly dimmed by this row's own opacity. */
+   own link styling (EditorialSectionNav.razor.css) isn't doubly dimmed by this row's own opacity.
+   The generous margin-bottom below (quick fix, visual reference only — see the Sprint 29.4 report)
+   gives the surface the same "large, airy header before the title" proportion as the approved
+   documentation-page reference: brand+nav sit near the top of the surface, then open space, then
+   eyebrow/title/subtitle — instead of the title crowding the nav row directly beneath it. */
 .beeday-hero__brand-context {
     display: flex;
     flex-wrap: wrap;
-    margin-bottom: var(--beeday-spacing-sm);
+    margin-bottom: clamp(2rem, 7vw, 5rem);
     align-items: center;
     justify-content: space-between;
     gap: var(--beeday-spacing-sm) var(--beeday-spacing-lg);
