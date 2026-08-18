@@ -2,10 +2,22 @@
    see HeroCatalog.razor). EPIC 27 Sprint 27.3 is its first real consumer: the institutional page
    shell. Surface is optional so non-solid consumers (onboarding, and any future neutral use) keep a
    sensible baseline instead of opting into a colored background.
-
+   Sprint 29.3 (reapplied in Sprint 29.4 since hmg had not merged it yet at branch time):
+   --beeday-hero-bleed-inset lets the hero cancel out its ancestor's own inline padding (negative
+   margin-inline equal to that padding) so a colored Surface reaches the true edges of its layout
+   region. Defaults to 0 (no-op) for contexts that never set it (e.g. Wallet's compact hero); opted
+   in per-container by polish.css. No explicit width: block-level auto-width absorbs the negative
+   margin symmetrically, unlike width:100%, which only shifts the box instead of widening it.
+   Sprint 29.5: min-height (plus position:relative/overflow:hidden, ready for a future absolutely-
+   positioned illustration) gives the surface real "editorial cover" presence instead of reading as a
+   colored strip with text — applying the reference's structural principle (a tall hero with strong
+   vertical presence) through beeday's own token scale, not a literal copy of its CSS. */
 .beeday-hero {
     display: grid;
+    position: relative;
     gap: var(--beeday-spacing-lg);
+    overflow: hidden;
+    min-height: clamp(22rem, 32vw, 36rem);
     margin-inline: calc(-1 * var(--beeday-hero-bleed-inset, 0px));
     padding: clamp(3rem, 7vw, 5.5rem) var(--beeday-page-gutter);
     background: var(--beeday-hero-surface-bg, var(--beeday-color-surface));
@@ -13,6 +25,7 @@
 }
 
 .beeday-hero--compact {
+    min-height: 0;
     padding: clamp(1.5rem, 3.2vw, 2.4rem) var(--beeday-page-gutter);
 }
 
@@ -52,14 +65,14 @@
 /* Sprint 29.4: also the row for HeaderNav (contextual section navigation), pushed to the opposite
    end via space-between. Font-weight/opacity moved onto __brand-context-start only, so HeaderNav's
    own link styling (EditorialSectionNav.razor.css) isn't doubly dimmed by this row's own opacity.
-   The generous margin-bottom below (quick fix, visual reference only — see the Sprint 29.4 report)
-   gives the surface the same "large, airy header before the title" proportion as the approved
-   documentation-page reference: brand+nav sit near the top of the surface, then open space, then
-   eyebrow/title/subtitle — instead of the title crowding the nav row directly beneath it. */
+   Sprint 29.5: the generous margin-bottom (increased again) is what gives the now-taller surface its
+   "large, airy header before the title" proportion — brand+nav sit near the top edge, then open
+   space (scaling with the hero's own min-height via vw), then eyebrow/title/subtitle — instead of
+   the title crowding the nav row directly beneath it. */
 .beeday-hero__brand-context {
     display: flex;
     flex-wrap: wrap;
-    margin-bottom: clamp(2rem, 7vw, 5rem);
+    margin-bottom: clamp(2.5rem, 9vw, 6.5rem);
     align-items: center;
     justify-content: space-between;
     gap: var(--beeday-spacing-sm) var(--beeday-spacing-lg);
@@ -115,20 +128,24 @@
     text-transform: uppercase;
 }
 
+/* Sprint 29.5: larger ceiling (3.4rem -> 4rem) gives the H1 more presence on wide viewports, matching
+   the taller surface above — the floor is untouched so small viewports are unaffected. */
 .beeday-hero h1 {
     margin: 0;
     color: inherit;
     font-family: var(--beeday-font-display);
-    font-size: clamp(2rem, 4.6vw, 3.4rem);
+    font-size: clamp(2rem, 5.2vw, 4rem);
     font-weight: var(--beeday-font-weight-regular);
     line-height: 1.12;
 }
 
 .beeday-hero--compact h1 { font-size: clamp(1.7rem, 3.4vw, 2.4rem); }
 
+/* Sprint 29.5: narrower ceiling (46rem -> 36rem) keeps the lead a true editorial column instead of
+   spanning nearly the full row width now that the row itself has more room to work with. */
 .beeday-hero__subtitle {
     margin: var(--beeday-spacing-md) 0 0;
-    max-width: 46rem;
+    max-width: 36rem;
     color: inherit;
     opacity: .88;
     font-size: var(--beeday-font-size-lg);
@@ -147,6 +164,10 @@
 }
 
 @media (max-width: 46rem) {
+    /* Sprint 29.5: the desktop min-height clamp would otherwise floor at 22rem here too — taller
+       than this stacked, centered mobile layout needs. Content (padding + the brand-context gap
+       above) still gives the surface real presence without forcing empty space underneath. */
+    .beeday-hero { min-height: 0; }
     .beeday-hero__row { flex-direction: column; text-align: center; }
     .beeday-hero__illustration { width: min(48vw, 12rem); }
     .beeday-hero__brand-context { justify-content: center; }
