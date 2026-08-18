@@ -42,7 +42,10 @@ public sealed class BrandTypographyTests(PlaywrightAppFixture fixture) : E2ETest
 
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Tipografia com propósito", Level = 1 })).ToBeVisibleAsync();
         await Expect(Page.Locator(".brand-typography__accented-sample")).ToHaveTextAsync("Pequenas ações, grandes conquistas.");
-        await Expect(Page.GetByRole(AriaRole.Contentinfo).GetByRole(AriaRole.Link, new() { Name = "Brand guidelines" })).ToBeVisibleAsync();
+        // Sprint 29.4: fixed a real localization gap — FooterBrandGuidelinesLink was still the
+        // English "Brand guidelines" in SharedResources.pt-BR.resx (unused until this Sprint reused
+        // the same key for the editorial header's contextual navigation).
+        await Expect(Page.GetByRole(AriaRole.Contentinfo).GetByRole(AriaRole.Link, new() { Name = "Diretrizes de marca" })).ToBeVisibleAsync();
         await Expect(Page.Locator(".brand-typography__display-sample")).ToHaveTextAsync("beeday");
         Assert.False(await Page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
     }

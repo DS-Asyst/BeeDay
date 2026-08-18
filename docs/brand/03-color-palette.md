@@ -117,7 +117,12 @@ Institutional/Components/`) definem `Surface` como `Cor0` (Editorial/Help/Produc
 por padrão, e nenhuma das 11 páginas institucionais reais sobrescreve esse valor. `ExperienceSystemHome`
 já usava `Cor8` para seu hero antes desta Sprint — já estava em conformidade.
 
-### Mapeamento efetivo (Sprint 29.2)
+### Mapeamento efetivo (Sprint 29.2, atualizado na Sprint 29.4)
+
+**Sprint 29.4:** `/brand-guidelines` deixou de compartilhar componente/superfície com
+`/experience-system` (`Cor8`) e virou sua própria página institucional, na família Editorial ("About
+us") — agora `Cor0`, como Mission/Efficacy/Contact. `/experience-system` continua `Cor8`, sozinho na
+linha `ExperienceSystemPage`.
 
 | Página | Rota | Template | `CORx` | HEX |
 |---|---|---|---|---|
@@ -129,10 +134,11 @@ já usava `Cor8` para seu hero antes desta Sprint — já estava em conformidade
 | Android | `/android` | Product | `Cor0` | `#5247F9` |
 | iOS | `/ios` | Product | `Cor0` | `#5247F9` |
 | FAQs | `/faqs` | Help | `Cor0` | `#5247F9` |
+| Brand guidelines | `/brand-guidelines` | Editorial | `Cor0` | `#5247F9` |
 | Community guidelines | `/community-guidelines` | Legal | `Cor8` | `#100F3E` |
 | Terms | `/terms` | Legal | `Cor8` | `#100F3E` |
 | Privacy | `/privacy` | Legal | `Cor8` | `#100F3E` |
-| Experience System home / Brand guidelines | `/experience-system`, `/brand-guidelines` | `ExperienceSystemPage` | `Cor8` | `#100F3E` |
+| Experience System home | `/experience-system` | `ExperienceSystemPage` | `Cor8` | `#100F3E` |
 
 Antes desta Sprint, 8 das 11 rotas institucionais usavam um dos oito tokens não elegíveis (Efficacy
 `Cor3`, Contact `Cor2`, Faqs `Cor4`, ProductPlus `Cor1`, Android `Cor2`, Ios `Cor3`,

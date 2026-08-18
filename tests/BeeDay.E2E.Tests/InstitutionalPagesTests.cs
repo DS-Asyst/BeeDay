@@ -53,6 +53,7 @@ public sealed class InstitutionalPagesTests(PlaywrightAppFixture fixture) : E2ET
     [Theory]
     [InlineData("/mission", "rgb(82, 71, 249)")]
     [InlineData("/efficacy", "rgb(82, 71, 249)")]
+    [InlineData("/brand-guidelines", "rgb(82, 71, 249)")]
     [InlineData("/contact", "rgb(82, 71, 249)")]
     [InlineData("/beeday", "rgb(82, 71, 249)")]
     [InlineData("/beeday-plus", "rgb(82, 71, 249)")]
@@ -64,15 +65,7 @@ public sealed class InstitutionalPagesTests(PlaywrightAppFixture fixture) : E2ET
     [InlineData("/privacy", "rgb(16, 15, 62)")]
     public async Task PageHeaderIsFullBleedAxisAlignedWithBodyAndUsesAPageHeaderEligibleColor(string route, string expectedBackgroundColor)
     {
-        // Sprint 29.2 fixed the hero rendering as a small card capped to 72rem (nesting it inside a
-        // reading-width-limited <article>), but only got it to fill .beeday-main's own padded content
-        // box (~1856px of a 1920px viewport) — still leaving a visible white gutter (.beeday-main's
-        // own <= 2rem padding-inline) at the true viewport edges. Sprint 29.3 closes that gap via
-        // BeeDayHero's --beeday-hero-bleed-inset (see BeeDayHero.razor.css/polish.css), so this now
-        // asserts genuine edge-to-edge, not just "wider than before". This protects three things at
-        // once: the header spans the true viewport width, its content row shares the same left edge
-        // as the body content below it, and every route's color is one of the two COR0-COR9 tokens
-        // whose contrast with white text passes WCAG AA (Cor0 #5247F9 or Cor8 #100F3E —
+
         // docs/brand/03-color-palette.md).
         await Page.SetViewportSizeAsync(1920, 1000);
         await GotoAsync(route);
@@ -91,9 +84,7 @@ public sealed class InstitutionalPagesTests(PlaywrightAppFixture fixture) : E2ET
         Assert.NotNull(heroRowBox);
         Assert.NotNull(bodyBox);
 
-        // Genuine edge-to-edge: before Sprint 29.2's fix, a centered 72rem card here would sit at
-        // X ~ (1920 - 1152) / 2 = 384px and be only 1152px wide; before Sprint 29.3's fix, it would
-        // sit at X ~ 32px (.beeday-main's own gutter) and be ~1856px wide.
+
         Assert.InRange(heroBox!.X, 0, 1);
         Assert.InRange(Math.Abs(heroBox.Width - 1920), 0, 1);
         Assert.InRange(Math.Abs(heroRowBox!.X - bodyBox!.X), 0, 1);
@@ -202,5 +193,71 @@ public sealed class InstitutionalPagesTests(PlaywrightAppFixture fixture) : E2ET
             var html = await Page.ContentAsync();
             Assert.DoesNotContain("duolingo", html, StringComparison.OrdinalIgnoreCase);
         }
+    }
+
+    [Fact]
+    public async Task NoWhitePublicHeaderFlagsOrContinueButtonRenderOnAnyEditorialRoute()
+    {
+        foreach (var route in new[] { "/mission", "/efficacy", "/brand-guidelines", "/contact", "/beeday", "/beeday-plus", "/android", "/ios", "/faqs", "/community-guidelines", "/terms", "/privacy" })
+        {
+            await GotoAsync(route);
+            Assert.Equal(0, await Page.Locator(".public-header").CountAsync());
+            Assert.Equal(0, await Page.Locator(".public-language-switcher").CountAsync());
+            await Expect(Page.GetByText("Continue to beeday", new() { Exact = true })).Not.ToBeVisibleAsync();
+        }
+    }
+
+    [Fact]
+    public async Task ContextualNavigationOnMissionShowsOnlyItsOwnAboutUsFamilyWithCurrentPageMarked()
+    {
+        await Page.SetViewportSizeAsync(1280, 800);
+        await GotoAsync("/mission");
+
+        var nav = Page.Locator(".editorial-section-nav");
+        await Expect(nav).ToBeVisibleAsync();
+        await Expect(nav.GetByRole(AriaRole.Link)).ToHaveCountAsync(4);
+        await Expect(nav.GetByRole(AriaRole.Link, new() { Name = "Mission", Exact = true })).ToHaveAttributeAsync("aria-current", "page");
+        await Expect(nav.GetByRole(AriaRole.Link, new() { Name = "Efficacy", Exact = true })).ToBeVisibleAsync();
+        await Expect(nav.GetByRole(AriaRole.Link, new() { Name = "beeday for Android", Exact = true })).Not.ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task EditorialFooterBackToTopScrollsToTheTopAndBuyMeACoffeeLinksToItsContractualRoute()
+    {
+        // A short viewport guarantees the page overflows vertically regardless of how tall Mission's
+        // own content happens to be, so Back to Top always has real scroll distance to undo.
+        await Page.SetViewportSizeAsync(1280, 500);
+        await GotoAsync("/mission");
+        await Page.Locator(".editorial-footer").ScrollIntoViewIfNeededAsync();
+        var scrollYAfterScrollingToFooter = await Page.EvaluateAsync<int>("() => window.scrollY");
+        Assert.True(scrollYAfterScrollingToFooter > 0, $"expected scrollY > 0 after scrolling to the footer, got {scrollYAfterScrollingToFooter}.");
+
+        var backToTop = Page.GetByRole(AriaRole.Button, new() { Name = "Back to top" });
+        await Expect(backToTop).ToBeVisibleAsync();
+        await backToTop.ClickAsync();
+        await Page.WaitForFunctionAsync("() => window.scrollY === 0");
+
+        var coffee = Page.GetByRole(AriaRole.Link, new() { Name = "BUY ME A COFFEE", Exact = true });
+        await Expect(coffee).ToBeVisibleAsync();
+        await Expect(coffee).ToHaveAttributeAsync("href", "/buy-me-a-coffee");
+
+        // Sprint 29.4 §27: Back to Top sits at the row start, independent of the centered coffee link.
+        var backToTopBox = await backToTop.BoundingBoxAsync();
+        var coffeeBox = await coffee.BoundingBoxAsync();
+        Assert.NotNull(backToTopBox);
+        Assert.NotNull(coffeeBox);
+        Assert.True(backToTopBox!.X < coffeeBox!.X, "Back to Top must sit to the left of the centered Buy Me a Coffee link.");
+    }
+
+    [Fact]
+    public async Task MobileEditorialHeaderStaysUsableWithoutHorizontalOverflowOnTheDenseAboutUsFamily()
+    {
+        // "About us" is the densest family (4 links) — the representative case for §11's mobile
+        // navigation requirement.
+        await Page.SetViewportSizeAsync(390, 844);
+        await GotoAsync("/mission");
+
+        Assert.False(await Page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
+        await Expect(Page.Locator(".editorial-section-nav")).ToBeVisibleAsync();
     }
 }

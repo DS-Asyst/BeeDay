@@ -5,9 +5,18 @@
             <div class="beeday-hero__illustration">@Illustration</div>
         }
         <div class="beeday-hero__content">
-            @if (BrandContext is not null)
+            @if (BrandContext is not null || HeaderNav is not null)
             {
-                <div class="beeday-hero__brand-context">@BrandContext</div>
+                <div class="beeday-hero__brand-context">
+                    @if (BrandContext is not null)
+                    {
+                        <div class="beeday-hero__brand-context-start">@BrandContext</div>
+                    }
+                    @if (HeaderNav is not null)
+                    {
+                        <div class="beeday-hero__brand-context-nav">@HeaderNav</div>
+                    }
+                </div>
             }
             @if (!string.IsNullOrWhiteSpace(Eyebrow))
             {

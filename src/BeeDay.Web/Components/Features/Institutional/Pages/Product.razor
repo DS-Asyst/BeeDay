@@ -1,12 +1,13 @@
 @page "/beeday"
 @attribute [AllowAnonymous]
-@layout BeeDay.Web.Components.Layout.PublicLayout
+@layout BeeDay.Web.Components.Layout.EditorialLayout
+@using BeeDay.Web.Components.Features.Institutional
 @using BeeDay.Web.Components.Features.Institutional.Components
 @inject IStringLocalizer<InstitutionalResources> Localizer
 
 <PageTitle>@Localizer["ProductPageTitle"]</PageTitle>
 
-<ProductPageTemplate PageContext="@Localizer["ProductPageContext"]" Title="@Localizer["ProductTitle"]" Description="@Localizer["ProductIntro"]">
+<ProductPageTemplate PageContext="@Localizer["ProductPageContext"]" Title="@Localizer["ProductTitle"]" Description="@Localizer["ProductIntro"]" Section="EditorialSection.Products">
     <PrimaryAction>
         @* important-white (not the default primary/brand-colored variant) because this hero's own
            surface is already brand-primary (COR0) — a solid-purple button would have poor contrast

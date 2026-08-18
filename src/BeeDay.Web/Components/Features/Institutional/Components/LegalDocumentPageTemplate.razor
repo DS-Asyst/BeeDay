@@ -1,11 +1,12 @@
 @using BeeDay.Web.Components.DesignSystem
+@using BeeDay.Web.Components.Features.Institutional
 
-@* Legal/document family: Community guidelines, Terms, Privacy (04_PAGES_AND_ROUTES.md). Reading
-   width is prioritized over decoration; no fabricated legal content — see each page's own remarks.
-   Defaults to Cor8 (dark navy), not Cor0, per the page-header eligibility contract in
-   docs/brand/03-color-palette.md — legal/document pages don't share Editorial/Help/Product's brand-
-   primary default. *@
-<InstitutionalPageShell PageContext="@PageContext" Title="@Title" Description="@Description" Surface="Surface">
+@* Legal/document family: Community guidelines, Terms, Privacy (04_PAGES_AND_ROUTES.md) — "Privacy
+   and terms" in AppFooter.razor. Reading width is prioritized over decoration; no fabricated legal
+   content — see each page's own remarks. Defaults to Cor8 (dark navy), not Cor0, per the page-header
+   eligibility contract in docs/brand/03-color-palette.md — legal/document pages don't share
+   Editorial/Help/Product's brand-primary default. *@
+<InstitutionalPageShell PageContext="@PageContext" Title="@Title" Description="@Description" Surface="Surface" Section="EditorialSection.Legal">
     @ChildContent
 </InstitutionalPageShell>
 

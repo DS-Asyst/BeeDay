@@ -63,12 +63,13 @@ public sealed class CoreComponentContractTests
         // EPIC 27 Sprint 27.11: TagFormModal's native <input type="color"> (plus its paired
         // <InputText>, which this regex never counted) was replaced by a single looped native
         // <button> rendering the 10-swatch COR0-COR9 picker — one fewer input, one more button.
-        Assert.Equal(30, counts["button"]);
+        // Sprint 29.4: EditorialFooter.razor adds one native <button> (Back to Top).
+        Assert.Equal(31, counts["button"]);
         Assert.Equal(13, counts["input"]);
         Assert.Equal(0, counts["select"]);
         Assert.Equal(0, counts["textarea"]);
-        Assert.Equal(43, counts.Values.Sum());
-        Assert.Equal(20, filesWithNativeControls);
+        Assert.Equal(44, counts.Values.Sum());
+        Assert.Equal(21, filesWithNativeControls);
     }
 
     private static string ResolveRepoRoot()

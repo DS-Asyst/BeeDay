@@ -1,15 +1,21 @@
 @using BeeDay.Web.Components.DesignSystem
 @using BeeDay.Web.Components.DesignSystem.Layout
 @using BeeDay.Web.Components.DesignSystem.Text
+@using BeeDay.Web.Components.Features.Institutional
+@inject NavigationManager Navigation
+@inject IStringLocalizer<InstitutionalResources> EyebrowLocalizer
 
-@* Sprint 29.2: the hero is a sibling of the body article — both direct children of PublicLayout's
+@* Sprint 29.2: the hero is a sibling of the body article — both direct children of the layout's
    <main> — instead of nested inside a single wrapping <article>. polish.css's shared reading-width
    rule (`.beeday-main > :where(section, article, .beeday-page, .page-content)`) matches direct
    children only; nesting the hero inside that article previously capped its own full-bleed
    background to the 72rem reading width, rendering it as a small centered card instead of a
    full-width colored band (docs/web/03-layouts.md). Mirrors the sibling structure ExperienceSystemPage
-   already uses for its own BeeDayHero. *@
-<BeeDayHero Surface="Surface" Title="@Title" Subtitle="@Description" Illustration="@Illustration" PrimaryAction="@PrimaryAction">
+   already uses for its own BeeDayHero.
+   Sprint 29.4: header and hero are now a single surface — EditorialSectionNav renders as
+   BeeDayHero's HeaderNav, on the opposite end of the same row as the brand lockup, instead of a
+   separate white PublicHeader above the hero (docs/web/03-layouts.md). *@
+<BeeDayHero Surface="Surface" Eyebrow="@EyebrowLocalizer[EditorialSectionRegistry.GetFamilyEyebrowResourceKey(Section)]" Title="@Title" Subtitle="@Description" Illustration="@Illustration" PrimaryAction="@PrimaryAction">
     <BrandContext>
         @* The lockup TEXT color is forced to inherit the hero's own paired foreground in
            BeeDayHero.razor.css — correct for every COR0-COR9 surface by construction, unlike
@@ -21,6 +27,9 @@
         <BeeDayBrand OnDarkSurface="true" />
         <span class="institutional-hero__context-label">@PageContext</span>
     </BrandContext>
+    <HeaderNav>
+        <EditorialSectionNav Section="Section" CurrentHref="@CurrentHref" />
+    </HeaderNav>
 </BeeDayHero>
 <article class="institutional-page__body">
     @ChildContent
@@ -41,7 +50,13 @@
     /// constraint on BeeDayHero itself, which other consumers (e.g. Wallet) use with Cor0 too.
     /// </summary>
     [Parameter] public BeeDayPaletteToken Surface { get; set; } = BeeDayPaletteToken.Cor0;
+
+    /// <summary>The page's own footer family, resolved to its contextual navigation siblings.</summary>
+    [Parameter, EditorRequired] public EditorialSection Section { get; set; }
+
     [Parameter] public RenderFragment? Illustration { get; set; }
     [Parameter] public RenderFragment? PrimaryAction { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string CurrentHref => "/" + Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0];
 }

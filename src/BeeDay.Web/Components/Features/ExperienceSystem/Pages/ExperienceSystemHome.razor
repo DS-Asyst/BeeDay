@@ -1,12 +1,13 @@
 @page "/experience-system"
-@page "/brand-guidelines"
 @attribute [AllowAnonymous]
 @layout BeeDay.Web.Components.Layout.PublicLayout
 @inject IStringLocalizer<ExperienceSystemResources> Localizer
 
-@* EPIC 27 Sprint 27.8: "Brand guidelines" is the public name/URL for this page
-   (03_DESIGN_DECISIONS.md §9/§11); "/experience-system" remains a working route to the same
-   content rather than being removed, since it predates this Epic and nothing requires breaking it. *@
+@* Sprint 29.4: "/brand-guidelines" moved off this component to its own page
+   (Institutional/Pages/BrandGuidelines.razor), using the editorial microsite shell instead of this
+   page's own card-grid ExperienceSystemPage shell — Brand guidelines is a real footer/editorial page
+   now (AppFooter.razor "About us"), while this route stays the Brand/UI/UX pillar entry point it was
+   before, unaffected. *@
 <PageTitle>@Localizer["RootPageTitle"]</PageTitle>
 
 <ExperienceSystemPage Eyebrow="@Localizer["RootEyebrow"]" Title="@Localizer["RootTitle"]" Description="@Localizer["RootIntro"]" ShowBrandGuidelinesHero="true">

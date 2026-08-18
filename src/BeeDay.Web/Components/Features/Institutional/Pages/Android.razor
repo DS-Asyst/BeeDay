@@ -1,6 +1,7 @@
 @page "/android"
 @attribute [AllowAnonymous]
-@layout BeeDay.Web.Components.Layout.PublicLayout
+@layout BeeDay.Web.Components.Layout.EditorialLayout
+@using BeeDay.Web.Components.Features.Institutional
 @using BeeDay.Web.Components.Features.Institutional.Components
 @inject IStringLocalizer<InstitutionalResources> Localizer
 
@@ -8,7 +9,7 @@
 
 @* No Play Store URL exists yet — an honest "coming soon" state, not a placeholder link
    (06_ASSETS_AND_OPEN_ITEMS.md). *@
-<ProductPageTemplate PageContext="@Localizer["AndroidPageContext"]" Title="@Localizer["AndroidTitle"]" Description="@Localizer["AndroidIntro"]">
+<ProductPageTemplate PageContext="@Localizer["AndroidPageContext"]" Title="@Localizer["AndroidTitle"]" Description="@Localizer["AndroidIntro"]" Section="EditorialSection.Apps">
     <PrimaryAction>
         <a class="beeday-button beeday-button--important-white" href="/profile/create">@Localizer["TryBeedayToday"]</a>
     </PrimaryAction>

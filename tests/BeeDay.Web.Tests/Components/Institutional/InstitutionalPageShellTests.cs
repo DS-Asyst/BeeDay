@@ -1,5 +1,7 @@
 using BeeDay.Web.Components.DesignSystem;
+using BeeDay.Web.Components.Features.Institutional;
 using BeeDay.Web.Components.Features.Institutional.Components;
+using BeeDay.Web.Tests.Localization;
 
 namespace BeeDay.Web.Tests.Components.Institutional;
 
@@ -8,13 +10,14 @@ public sealed class InstitutionalPageShellTests
     [Fact]
     public void RendersHeroWithBrandContextTitleAndDescription()
     {
-        using var context = new BunitContext();
-        var cut = context.Render<InstitutionalPageShell>(parameters => parameters
+        using var context = new BunitContext().WithLocalization();
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<InstitutionalPageShell>(parameters => parameters
             .Add(component => component.PageContext, "Mission")
             .Add(component => component.Title, "Our mission")
             .Add(component => component.Description, "Be better every day.")
             .Add(component => component.Surface, BeeDayPaletteToken.Cor0)
-            .AddChildContent("<p>Body content.</p>"));
+            .Add(component => component.Section, EditorialSection.AboutUs)
+            .AddChildContent("<p>Body content.</p>")));
 
         Assert.Equal("Our mission", cut.Find("h1").TextContent);
         Assert.Contains("Mission", cut.Find(".institutional-hero__context-label").TextContent);
@@ -22,6 +25,11 @@ public sealed class InstitutionalPageShellTests
         Assert.Contains("Be better every day.", cut.Find(".beeday-hero__subtitle").TextContent);
         Assert.Contains("Body content.", cut.Find(".institutional-page__body").InnerHtml);
         Assert.Contains("beeday-surface-cor0", cut.Find("header.beeday-hero").ClassList);
+        // Sprint 29.4: the family eyebrow ("About us") now renders above the H1, and the contextual
+        // navigation for the same family renders as HeaderNav (see EditorialSectionNavTests for its
+        // own coverage) — this test only needs to confirm the eyebrow text and slot are wired.
+        Assert.Contains("ABOUT US", cut.Find(".beeday-hero__eyebrow").TextContent);
+        Assert.NotNull(cut.Find(".editorial-section-nav"));
     }
 
     [Theory]
@@ -38,11 +46,12 @@ public sealed class InstitutionalPageShellTests
         // BeeDayHero.razor.css forces the lockup text to inherit the hero's own paired foreground for
         // every COR0-COR9 surface instead — see the CSS-source assertion in VisualFoundationTests for
         // that half of the contract, since bUnit cannot resolve computed CSS cascade/specificity.
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var cut = context.Render<InstitutionalPageShell>(parameters => parameters
             .Add(component => component.PageContext, "Mission")
             .Add(component => component.Title, "Our mission")
-            .Add(component => component.Surface, surface));
+            .Add(component => component.Surface, surface)
+            .Add(component => component.Section, EditorialSection.AboutUs));
 
         var brand = cut.Find(".beeday-hero__brand-context .beeday-brand");
         Assert.Contains("beeday-brand--inverse", brand.ClassList);
@@ -59,10 +68,11 @@ public sealed class InstitutionalPageShellTests
         // .beeday-main) cap the hero's own full-bleed background to 72rem, rendering it as a small
         // centered card instead of a full-width colored band. The hero and body are now separate root
         // elements — mirroring ExperienceSystemPage's existing sibling structure.
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var cut = context.Render<InstitutionalPageShell>(parameters => parameters
             .Add(component => component.PageContext, "Mission")
             .Add(component => component.Title, "Our mission")
+            .Add(component => component.Section, EditorialSection.AboutUs)
             .AddChildContent("<p>Body content.</p>"));
 
         Assert.Empty(cut.FindAll("article.institutional-page"));
@@ -73,10 +83,11 @@ public sealed class InstitutionalPageShellTests
     [Fact]
     public void RendersPrimaryActionInTheHeroWhenSupplied()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var cut = context.Render<InstitutionalPageShell>(parameters => parameters
             .Add(component => component.PageContext, "beeday")
             .Add(component => component.Title, "beeday")
+            .Add(component => component.Section, EditorialSection.Products)
             .Add(component => component.PrimaryAction, builder => builder.AddMarkupContent(0, "<a class=\"beeday-button\" href=\"/profile/create\">Get started</a>")));
 
         var cta = cut.Find(".beeday-hero__primary-action a");
@@ -86,10 +97,11 @@ public sealed class InstitutionalPageShellTests
     [Fact]
     public void OmitsPrimaryActionWrapperWhenNotSupplied()
     {
-        using var context = new BunitContext();
+        using var context = new BunitContext().WithLocalization();
         var cut = context.Render<InstitutionalPageShell>(parameters => parameters
             .Add(component => component.PageContext, "Mission")
-            .Add(component => component.Title, "Our mission"));
+            .Add(component => component.Title, "Our mission")
+            .Add(component => component.Section, EditorialSection.AboutUs));
 
         Assert.Empty(cut.FindAll(".beeday-hero__primary-action"));
     }

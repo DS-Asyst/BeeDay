@@ -139,7 +139,7 @@
     <value>Eficácia</value>
   </data>
   <data name="FooterBrandGuidelinesLink" xml:space="preserve">
-    <value>Brand guidelines</value>
+    <value>Diretrizes de marca</value>
   </data>
   <data name="FooterContactLink" xml:space="preserve">
     <value>Fale conosco</value>
@@ -275,5 +275,14 @@
   </data>
   <data name="DomainErrorGeneric" xml:space="preserve">
     <value>Algo deu errado. Tente novamente em instantes.</value>
+  </data>
+  <data name="EditorialSectionNavAriaLabel" xml:space="preserve">
+    <value>Páginas da seção</value>
+  </data>
+  <data name="EditorialFooterBackToTopLabel" xml:space="preserve">
+    <value>Voltar ao topo</value>
+  </data>
+  <data name="EditorialFooterBuyMeACoffee" xml:space="preserve">
+    <value>BUY ME A COFFEE</value>
   </data>
 </root>
