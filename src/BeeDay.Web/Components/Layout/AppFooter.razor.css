@@ -37,19 +37,50 @@
    FooterNavigation's own full-bleed background), but the artwork inside it
    never does. */
 .app-footer__wave {
+    --app-footer-wave-width: min(100%, clamp(30rem, 40vw, 44rem));
+    position: relative;
     display: flex;
-    justify-content: center;
     width: 100%;
+    justify-content: center;
+    overflow: hidden;
     background: var(--beeday-color-background);
 }
 
-.app-footer__wave img {
-    display: block;
-    width: auto;
-    max-width: min(100%, 1440px);
-    height: auto;
-    max-height: clamp(6rem, 9vw, 11rem);
-}
+    /*
+ * The SVG is centered. Its purple surface reaches the left/right edges
+ * at roughly 57.4% of its 1920x1060 viewBox height.
+ *
+ * These pseudo-elements continue that purple surface to both viewport
+ * edges without painting behind the white central notch.
+ */
+    .app-footer__wave::before,
+    .app-footer__wave::after {
+        position: absolute;
+        top: 57.4%;
+        bottom: 0;
+        z-index: 0;
+        width: max( 0px, calc((100% - var(--app-footer-wave-width)) / 2 + 1px) );
+        background: var(--beeday-palette-cor0);
+        content: "";
+        pointer-events: none;
+    }
+
+    .app-footer__wave::before {
+        left: 0;
+    }
+
+    .app-footer__wave::after {
+        right: 0;
+    }
+
+    .app-footer__wave img {
+        position: relative;
+        z-index: 1;
+        display: block;
+        width: var(--app-footer-wave-width);
+        max-width: none;
+        height: auto;
+    }
 
 /* ============================================================================
    FooterNavigation — identity, groups, and links. Canonical typography and

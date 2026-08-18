@@ -1,0 +1,19 @@
+# BeeDay project-scoped Codex configuration.
+#
+# This file defines technical execution boundaries. It does not replace the
+# authorization model in AGENTS.md.
+#
+# Codex loads project-scoped .codex configuration only when the repository is
+# trusted by the local Codex client.
+
+approval_policy = "on-request"
+approvals_reviewer = "auto_review"
+default_permissions = ":workspace"
+
+# Keep the durable AGENTS.md contract inside Codex's normal project-instruction
+# budget. The current file is intentionally below this limit.
+project_doc_max_bytes = 32768
+
+# Prefer cached/indexed web context by default. Tasks that require current live
+# information can explicitly request live search when appropriate.
+web_search = "cached"
