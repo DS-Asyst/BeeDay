@@ -8,17 +8,34 @@
     color: var(--beeday-palette-cor0-foreground);
 }
 
-/* Sprint 29.1 built the white-to-brand-surface transition as an inline vector path (flat sides,
-   symmetric dip). Sprint 29.3 replaced it with an official SVG asset (assets/footer/footer-wave.svg,
-   viewBox 0 0 1920x1060). Sprint 29.5 replaced that asset's content in place with a second, final
-   official artwork (imgDefaultFooterHome.svg) — same path, same viewBox, same "no opaque background
-   of its own" contract, so no markup change was needed; only the file's bytes changed.
-   Sprint 29.6: Sprint 29.5 rendered the image at width:100%/height:auto, its own full viewBox
-   aspect ratio (1920:1060, ~1.81:1) stretched across the entire page width — on a 1440px viewport
-   that is ~795px tall, reading as an independent giant section instead of a transition into the
-   footer. This asset is not used as full-bleed background artwork; it is capped by max-height (not
-   object-fit, which would either crop or letterbox) so it shrinks as a whole, aspect-ratio intact,
-   no crop, centered as a compact transition mark instead of a page-width banner. */
+/* ============================================================================
+   FooterArtwork — the white-to-brand-surface transition. Sizes independently
+   of FooterNavigation below: it never scales the rest of the footer, and the
+   rest of the footer never scales it. See §"FooterNavigation" further down
+   for the same independence from the artwork's side.
+
+   Sprint 29.1 built this as an inline vector path (flat sides, symmetric
+   dip). Sprint 29.3 replaced it with an official SVG asset
+   (assets/footer/footer-wave.svg, viewBox 0 0 1920x1060). Sprint 29.5
+   replaced that asset's content in place with a second, final official
+   artwork (imgDefaultFooterHome.svg) — same path, same viewBox, same "no
+   opaque background of its own" contract, so no markup change was needed;
+   only the file's bytes changed (still true — the SVG itself is not touched
+   again here).
+
+   Sprint 29.6 first capped the render by max-height instead of the
+   width:100%/height:auto Sprint 29.5 shipped (which stretched the asset's
+   own ~1.81:1 viewBox across the full page width — ~795px tall on a 1440px
+   viewport, reading as an independent giant section). Sprint 29.7 tightens
+   that further: a smaller, more conservative clamp ceiling (11rem, was
+   14rem) and a gentler vw coefficient (9vw, was 14vw) so growth on wide
+   viewports stays proportional to a transition mark, never to a page
+   section; max-width matches FooterNavigation's own 1440px container
+   (`.beeday-container`, utilities.css) so neither element outgrows the
+   other's reference frame on ultra-wide viewports — this wrapper spans the
+   full page width (the purple dip still needs to reach both edges to meet
+   FooterNavigation's own full-bleed background), but the artwork inside it
+   never does. */
 .app-footer__wave {
     display: flex;
     justify-content: center;
@@ -29,11 +46,26 @@
 .app-footer__wave img {
     display: block;
     width: auto;
-    max-width: 100%;
+    max-width: min(100%, 1440px);
     height: auto;
-    max-height: clamp(8rem, 14vw, 14rem);
+    max-height: clamp(6rem, 9vw, 11rem);
 }
 
+/* ============================================================================
+   FooterNavigation — identity, groups, and links. Canonical typography and
+   spacing tokens throughout (no vw-scaled font-size anywhere in this
+   section) so it never shrinks in step with FooterArtwork above; only the
+   grid reflows (see the breakpoints below), never the type scale.
+   Sprint 29.7: this top padding is NOT the "excess purple gap" — reducing it
+   was tried and reverted. Home.razor.css's own .home-brand-closure (the
+   character illustration between the "how it works" section and AppFooter,
+   outside this Sprint's scope) pulls itself down with a large intentional
+   negative margin-bottom (clamp(-14rem, -12vw, -5rem)) so it visually
+   overlaps into the footer's white/purple transition by design; this
+   padding is the clearance that keeps the identity block below that
+   overlap. Reducing it collided the wordmark with the illustration. The
+   real fix for the "too much empty purple" complaint was FooterArtwork's
+   own oversized render above, already addressed there. */
 .app-footer__content {
     display: grid;
     gap: var(--beeday-spacing-2xl);
@@ -87,6 +119,10 @@
 .app-footer__social-unavailable { display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; color: inherit; }
 .app-footer__social-unavailable { opacity: .45; }
 
+/* ============================================================================
+   FooterLegal — divider + copyright. Part of FooterNavigation's own document
+   flow (`.app-footer__content`'s grid, gap var(--beeday-spacing-2xl)), not a
+   separately-scaled element; canonical small-text token, untouched. */
 .app-footer__copyright {
     margin: 0;
     padding-top: var(--beeday-spacing-md);
