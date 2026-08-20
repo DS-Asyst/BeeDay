@@ -145,6 +145,11 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F015 | média | `docs/deployment/04-operations.md` ainda afirmava que não existiam deploy automatizado de HMG nem aplicação de migrations, além de registrar caminhos e fluxo de release obsoletos; os workflows e a execução real provam o fluxo CI artifact -> HMG Deployment -> HMG Verification | `FIXED` | 30.3 |
 | BD30-F016 | alta | o rollback de HMG restaura aplicação e configuração do App Pool, mas não desfaz migrations; embora `Deploy-BeeDay.ps1` implemente `-BackupDatabase`, `deploy-hmg.yml` não o habilita e não há evidência versionada de backup SQL externo correlacionado ao deploy | `OPEN` | 30.25 |
 | BD30-F017 | média | cada deploy cria backups de aplicação e dados em `C:\Apps\BeeDay-Backups`, mas não existe política versionada de retenção, expurgo ou restore automatizado de uma execução histórica | `OPEN` | 30.25 |
+| BD30-F018 | alta | a confirmação de e-mail tem cobertura robusta de Application/Integration para sucesso, token inválido/expirado/replay, reenvio e throttle, mas nenhuma jornada Chromium atravessa um link real até liberar o login | `OPEN` | 30.10 |
+| BD30-F019 | alta | não existe E2E de to-do; criação, edição, conclusão, reload e exclusão dentro do workspace são provados apenas parcialmente por componentes, Application e repositories | `OPEN` | 30.13 |
+| BD30-F020 | média | o E2E de projeto cria e abre o workspace, mas não prova mutações de to-do nem persistência do workspace após reload | `OPEN` | 30.14 |
+| BD30-F021 | média | os E2Es de conta cobrem perfil e idioma, mas não tema, alteração de senha nem recovery visível dos demais saves suportados | `OPEN` | 30.11 |
+| BD30-F022 | baixa | dez suítes repetiam seletores e submissão do mesmo formulário de login como arranjo, aumentando drift sem acrescentar evidência funcional | `FIXED` | 30.4 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -313,3 +318,61 @@ executadas pelo pipeline observado.
 | `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.446/1.446 (93 Domain, 85 Application, 212 Infrastructure, 863 Web, 193 E2E); E2E 6m27s |
 | `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
 | `git diff --check` | PASS |
+
+## 11. Sprint 30.4 — Functional Journey Matrix & E2E Foundation
+
+### 11.1 Inventário auditado
+
+| Inventário | Estado na Sprint 30.4 | Evidência e limite |
+|---|---|---|
+| INV-004 — páginas e rotas | `MAPPED` | jornadas públicas, identidade, Daily, Wallet, conta e recovery mapeadas; a reconciliação do inventário de 54 rotas permanece em 30.17 por BD30-F002 |
+| INV-005 — componentes Blazor | `MAPPED` | componentes de auth, onboarding, dashboard, editores, workspace, Wallet e conta ligados às jornadas correspondentes; auditorias funcionais permanecem nas Sprints 30.10–30.20 |
+| INV-010 — testes automatizados | `VERIFIED` | evidência Domain/Application/Infrastructure/Web/E2E correlacionada por jornada e gaps explicitamente atribuídos |
+| INV-015 — autenticação e autorização | `MAPPED` | cadastro, confirmação, login, autorização, cultura de sessão e logout correlacionados entre navegador e Integration; auditoria profunda permanece em 30.10 |
+| INV-016 — localização | `MAPPED` | en-US/pt-BR, cookies, preferências e fluxos público/autenticado correlacionados; auditoria profunda permanece em 30.20 |
+
+`MAPPED` significa que a jornada e suas provas foram localizadas, não que a área funcional inteira
+foi aprovada antecipadamente. `VERIFIED` em INV-010 significa que a fundação pertencente à Sprint
+30.4 foi inspecionada e que ausência de evidência material virou finding com owner.
+
+### 11.2 Matriz e findings
+
+`docs/testing/03-functional-journey-matrix.md` registra as quatorze jornadas pedidas, incluindo
+happy path, validação/recovery, persistência, autorização/navegação, nível da evidência e plano de
+verificação. Visitante, cadastro, login, onboarding, Daily, hábitos, tarefas, Wallet, localização e
+logout possuem prova E2E representativa combinada com testes nas camadas proprietárias.
+
+Quatro lacunas materiais foram abertas, sem implementação em massa fora do escopo:
+
+- `BD30-F018`: confirmação de e-mail não atravessa um link real em Chromium (30.10);
+- `BD30-F019`: to-do não possui jornada E2E (30.13);
+- `BD30-F020`: workspace de projeto não prova mutações de to-do/reload (30.14);
+- `BD30-F021`: conta não possui E2E representativo para tema, senha e recovery dos demais saves
+  (30.11).
+
+### 11.3 Fundação E2E
+
+O arranjo de login repetido em dez suítes foi consolidado em `SubmitLoginAsync`, fechando
+`BD30-F022`. O helper reutiliza `GotoAsync` e somente abre, preenche e submete o formulário. Ele não
+semeia usuário, não escolhe destino e não contém assertions; URLs, navegação e resultados continuam
+visíveis em cada teste. `AccountLifecycleTests` permaneceu inline porque ali o próprio login é o
+comportamento sob teste.
+
+Não houve mudança de comportamento de produto, regra de negócio, arquitetura, contrato público,
+schema, migration ou Design System.
+
+### 11.4 Quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| E2E focado das jornadas migradas | PASS, 3/3 (`HabitAndTaskTests`, `WalletTests`, `SettingsLocalizationTests`) |
+| primeira verificação de `dotnet format BeeDay.slnx --verify-no-changes` | FAIL somente por `ENDOFLINE` nas linhas C# alteradas pelo patch; `dotnet format ... whitespace --include` foi aplicado exclusivamente aos onze arquivos E2E da Sprint |
+| `dotnet format BeeDay.slnx --verify-no-changes` após a correção mecânica | PASS, exit 0 |
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx` | PASS, 1.446/1.446 (93 Domain, 85 Application, 212 Infrastructure, 863 Web, 193 E2E); E2E 6m31s |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.446/1.446 (93 Domain, 85 Application, 212 Infrastructure, 863 Web, 193 E2E); E2E 6m32s |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+| links relativos dos documentos alterados | PASS, nenhum destino ausente |
+| `git status --short` | branch dedicada; 14 arquivos da Sprint; governança local, `CLAUDE.md` modificado e `.github/upgrades/` preservados fora do escopo |

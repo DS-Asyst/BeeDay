@@ -18,10 +18,7 @@ public sealed class WalletTests(PlaywrightAppFixture fixture) : E2ETestBase(fixt
         var email = $"e2e-wallet-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
 
-        await GotoAsync("/login");
-        await Page.GetByLabel("Email").FillAsync(email);
-        await Page.GetByLabel("Password").FillAsync(Password);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
+        await SubmitLoginAsync(email, Password);
         await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
         await GotoAsync("/daily");
         // See AccountLifecycleTests.LoginAsync's remarks: a redirect-triggered navigation
@@ -82,10 +79,7 @@ public sealed class WalletTests(PlaywrightAppFixture fixture) : E2ETestBase(fixt
         var email = $"e2e-wallet-pt-br-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
 
-        await GotoAsync("/login");
-        await Page.GetByLabel("Email").FillAsync(email);
-        await Page.GetByLabel("Password").FillAsync(Password);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
+        await SubmitLoginAsync(email, Password);
         await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
 
         await GotoAsync("/account");
@@ -259,10 +253,7 @@ public sealed class WalletTests(PlaywrightAppFixture fixture) : E2ETestBase(fixt
         var email = $"e2e-wallet-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
 
-        await GotoAsync("/login");
-        await Page.GetByLabel("Email").FillAsync(email);
-        await Page.GetByLabel("Password").FillAsync(Password);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
+        await SubmitLoginAsync(email, Password);
         await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
         await GotoAsync("/wallet");
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
