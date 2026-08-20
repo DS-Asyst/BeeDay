@@ -1,6 +1,7 @@
 @page "/account/confirm-email"
 @attribute [AllowAnonymous]
 @layout OnboardingLayout
+@implements IDisposable
 @using BeeDay.Web.Components.Features.Identity
 @inject MediatR.ISender Sender
 @inject IStringLocalizer<IdentityResources> Localizer
@@ -82,6 +83,13 @@
 
     private ConfirmationPageState _state = ConfirmationPageState.Processing;
     private string _error = string.Empty;
+    private readonly CancellationTokenSource _cts = new();
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -97,8 +105,11 @@
         try
         {
             await Sender.Send(new BeeDay.Application.Features.Identity.Commands.ConfirmEmailCommand(
-                new BeeDay.Application.Features.Identity.Requests.ConfirmEmailRequest(Token)));
+                new BeeDay.Application.Features.Identity.Requests.ConfirmEmailRequest(Token)), _cts.Token);
             _state = ConfirmationPageState.Confirmed;
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
         }
         catch (Exception exception)
         {

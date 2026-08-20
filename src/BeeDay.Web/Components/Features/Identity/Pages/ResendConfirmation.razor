@@ -25,15 +25,19 @@
 @code {
     [SupplyParameterFromQuery(Name = "email")] public string? Email { get; set; }
     private readonly EmailForm _model = new(); private bool _busy; private bool _submitted; private string? _error; private int _secondsRemaining; private PeriodicTimer? _timer; private CancellationTokenSource? _countdownCts;
+    // Separate from _countdownCts above (cancelled/recreated every StartCountdown call) — this one
+    // spans the page's whole lifetime and only cancels on Dispose, so the mutation call itself is
+    // cancelled if the user navigates away mid-request.
+    private readonly CancellationTokenSource _pageCts = new();
     private string ButtonText => _busy
         ? Localizer["SendingButton"]
         : _secondsRemaining > 0
             ? Localizer["ResendAvailableInSeconds", _secondsRemaining]
             : Localizer["ResendEmailButton"];
     protected override void OnParametersSet() { if (!string.IsNullOrWhiteSpace(Email) && string.IsNullOrWhiteSpace(_model.Email)) _model.Email = Email.Trim(); }
-    private async Task SubmitAsync() { if (_busy || _secondsRemaining > 0) return; _busy=true; _error=null; try { await Sender.Send(new BeeDay.Application.Features.Identity.Commands.ResendEmailConfirmationCommand(new(_model.Email))); _submitted=true; StartCountdown(); } catch(Exception ex) { _error=DomainErrorLocalizer.Translate(ex, SharedLocalizer); } finally { _busy=false; } }
+    private async Task SubmitAsync() { if (_busy || _secondsRemaining > 0) return; _busy=true; _error=null; try { await Sender.Send(new BeeDay.Application.Features.Identity.Commands.ResendEmailConfirmationCommand(new(_model.Email)), _pageCts.Token); _submitted=true; StartCountdown(); } catch(OperationCanceledException) when (_pageCts.IsCancellationRequested) { } catch(Exception ex) { _error=DomainErrorLocalizer.Translate(ex, SharedLocalizer); } finally { _busy=false; } }
     private void StartCountdown() { _secondsRemaining=60; _countdownCts?.Cancel(); _countdownCts=new(); _timer=new(TimeSpan.FromSeconds(1)); _=RunCountdownAsync(_countdownCts.Token); }
     private async Task RunCountdownAsync(CancellationToken token) { try { while (_secondsRemaining>0 && await _timer!.WaitForNextTickAsync(token)) { _secondsRemaining--; await InvokeAsync(StateHasChanged); } } catch(OperationCanceledException) { } }
-    public void Dispose() { _countdownCts?.Cancel(); _countdownCts?.Dispose(); _timer?.Dispose(); }
+    public void Dispose() { _countdownCts?.Cancel(); _countdownCts?.Dispose(); _timer?.Dispose(); _pageCts.Cancel(); _pageCts.Dispose(); }
     private sealed class EmailForm { [System.ComponentModel.DataAnnotations.Required, System.ComponentModel.DataAnnotations.EmailAddress] public string Email { get; set; } = string.Empty; }
 }

@@ -55,7 +55,7 @@ todo achado termine como `FIXED`, `VERIFIED` ou `ACCEPTED RISK`.
 | INV-004 | Application | 95 arquivos rastreados; 10 diretórios de Feature; nenhuma referência a Infrastructure, Web ou EF Core | `VERIFIED` | 30.6 |
 | INV-005 | Infrastructure | 58 arquivos rastreados; SQL Server, serviços técnicos, DI, health checks e configuração | `VERIFIED` | 30.7 |
 | INV-006 | Persistência e migrations | um `BeeDayDbContext`, uma migration versionada e o model snapshot, em 3 arquivos de migration | `VERIFIED` | 30.7 |
-| INV-007 | Web e composição | 460 arquivos rastreados; 17 diretórios de Feature; nenhum acesso direto a `BeeDayDbContext` | `BASELINED` | 30.8 |
+| INV-007 | Web e composição | 460 arquivos rastreados; 17 diretórios de Feature; nenhum acesso direto a `BeeDayDbContext` | `VERIFIED` | 30.8 |
 | INV-008 | Rotas e shell | 54 declarações `@page` encontradas diretamente em componentes Razor | `BASELINED` | 30.17 |
 | INV-009 | Fluxos funcionais | Identity/Auth/User, Dashboard, Habits, Tasks, Todos, Projects, Wallets, Experience, Onboarding e páginas públicas identificados | `BASELINED` | 30.4, 30.10–30.18 |
 | INV-010 | Testes | 198 arquivos rastreados em 5 projetos; baseline executado contra LocalDB e Chromium | `BASELINED` | 30.24 |
@@ -162,6 +162,9 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F032 | baixa | `EfHabitRepository.AddAsync`/`EfProjectRepository.AddAsync`/`EfRecurringTaskRepository.AddAsync`/`EfProjectRepository.AddTodoAsync` calculam a próxima `Position` via `MaxAsync` seguido de um insert separado, sem índice/constraint único em `(UserId, Position)` (ou `(ProjectId, Position)` para Todo) — duas inserções concorrentes do mesmo usuário podem computar o mesmo `maxPosition` e persistir ordinais duplicados; não há perda de dado, apenas dessincronia cosmética de ordenação, autocorrigível no próximo reorder | `OPEN` | 30.25 |
 | BD30-F033 | baixa | `EfWalletReadService.ApplyOrdering` ordena `Transaction` por `Description`/`Amount`/`CreatedAtUtc` sem índice cobrindo esses campos (apenas `IX_Transactions_Wallet_Date` existe) — SQL Server ordena em tempdb após o seek por `WalletId`; impacto real baixo dado o volume típico de transações por usuário em um app financeiro pessoal | `OPEN` | 30.21 |
 | BD30-F034 | alta | histórico de `ExperienceEntry` não era persistido antes da correção da Sprint 30.7 (`BD30-F030`); alternar conclusão/reabertura repetida de Todo/Task/Project podia conceder XP duplicado sem limite antes da correção. Existência e magnitude de inflação histórica em HMG/produção **não quantificadas** por esta Sprint — nenhuma consulta ou mutação de banco de HMG/produção foi executada. As linhas de `ExperienceEntry` persistidas antes da correção podem ser insuficientes para reconstruir `TotalExperience` corretamente de forma determinística (o histórico anterior à correção nunca existiu). Nenhuma mutação de banco está autorizada por este achado; nenhum reset/recálculo arbitrário é permitido | `OPEN` | 30.16 |
+| BD30-F035 | média | `BeeDayWebService` (20 métodos) e os call sites diretos de `ISender.Send` em `Wallet.razor` e nas páginas de Identity/Account/Onboarding nunca propagavam um `CancellationToken` real — toda chamada usava implicitamente `CancellationToken.None`, então navegar para longe ou fechar o circuito Blazor Server nunca cancelava uma mutação/query em andamento no servidor | `FIXED` | 30.8 |
+| BD30-F036 | baixa | `EmailConfirmationSent.razor`/`ResendConfirmation.razor`: `StartCountdown()` reatribui `_timer`/`_cts` sem descartar a instância anterior se chamado uma segunda vez antes do `Dispose()` do componente — hoje inalcançável em uso normal (o botão fica desabilitado enquanto `_secondsRemaining > 0`), portanto latente, não explorável | `OPEN` | 30.10 |
+| BD30-F037 | baixa | polimento de UX não-bloqueante: cards individuais do Dashboard (Habit/Task/Todo/Project) não têm `Disabled` vinculado a `State.IsBusy` (só o overlay global `BeeDayLoading` reflete ocupado — a proteção contra double-submit é real, aplicada em `DashboardState.ExecuteAsync`, mas o clique num segundo card fica sem feedback visual imediato); e `Wallet.razor.RefreshAfterMutationAsync` não chama `StateHasChanged()` uma segunda vez após zerar `_highlightBalance`, então o destaque visual do saldo pode não sumir até outro render não relacionado ocorrer | `OPEN` | 30.20 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -692,3 +695,131 @@ reinvestigar o que já havia sido confirmado e corrigido nesta sessão. O achado
 (`BD30-F030`) foi investigado diretamente por esta sessão, não pelo subagente — incluindo a prova
 empírica contra LocalDB real antes de qualquer alteração de código, seguindo a mesma disciplina de
 "evidência substitui suposição" já aplicada nas Sprints anteriores da EPIC 30.
+
+## 15. Sprint 30.8 — Blazor Runtime & DI Audit
+
+### 15.1 Inventário e fronteiras
+
+Auditados contra o Issue #205: registros de DI além de `Program.cs`, interações do circuito de
+longa duração com `IDbContextFactory`/repositórios/serviços de estado/disposables, handlers
+assíncronos, re-entrância, double-submit, cancelamento, rendering loops e recuperação de erro em
+componentes de mutação. `INV-007` passa a `VERIFIED`.
+
+Reconhecimento amplo foi delegado a um subagente Explore somente-leitura; cada achado relatado foi
+verificado nesta sessão antes de qualquer ação (grep direto de `AddScoped`/`AddSingleton`/
+`AddTransient`, leitura completa de `BeeDayWebService.cs`, contagem de métodos e busca por
+`CancellationToken`).
+
+Resultado por categoria:
+
+- **Registros de DI**: as 11 chamadas encontradas em todo `src/BeeDay.Web` estão em `Program.cs`,
+  todas `Scoped` (correto para Blazor Server — vida do circuito). Nenhum `AddSingleton` capturando
+  estado por usuário/circuito existe. Zero achado.
+- **Disposables de circuito longo**: 14 implementações de `IDisposable`/`IAsyncDisposable`
+  auditadas; toda assinatura de evento tem sua desinscrição correspondente em `Dispose`. Zero
+  achado, exceto `BD30-F036` (abaixo).
+- **Re-entrância/double-submit**: protegido de forma centralizada e consistente — `DashboardState.
+  ExecuteAsync` (guarda `IsBusy`) cobre todas as mutações de Habit/Task/Todo/Project;
+  `WalletInteractionState.TryBegin/End` cobre Wallet; `Account.razor` usa guardas `_xBusy` por
+  seção. Zero achado de correção; `BD30-F037` registra um polimento visual não-bloqueante.
+- **Cancelamento**: achado sistêmico real, ver §15.2.
+- **Rendering loops**: nenhuma chamada de `StateHasChanged()` fora da thread de UI ou dentro de
+  loop/timer sem `InvokeAsync`. Zero achado de correção; parte de `BD30-F037` (Wallet.razor).
+- **Recuperação de erro em mutações**: todo componente de mutação amostrado envolve a chamada em
+  `try/catch` e traduz a exceção para toast/mensagem inline — nenhum caminho de exceção não tratada
+  encontrado capaz de derrubar o circuito. Zero achado.
+- **Reconexão**: `ReconnectModal` customizado e localizado, construído sobre o template padrão do
+  Blazor Web App; nenhum `CircuitHandler` customizado. Apenas informativo, não é achado.
+
+### 15.2 `BD30-F035` — cancelamento nunca propagado, corrigido
+
+`BeeDayWebService` (20 métodos) e os call sites diretos de `ISender.Send` em `Wallet.razor` e nas
+páginas de Identity/Account/Onboarding nunca aceitavam nem propagavam um `CancellationToken` —
+toda chamada usava implicitamente `CancellationToken.None`, confirmado por
+`grep -n "CancellationToken" src/BeeDay.Web/Services/BeeDayWebService.cs` (zero resultado) antes da
+correção. A cadeia Application/Infrastructure já respeitava corretamente um token real em toda a
+sua extensão (confirmado nas Sprints 30.6/30.7) — a lacuna era exclusivamente a origem, em Web.
+
+Correção mínima, sem novo contrato público além de parâmetros opcionais com valor padrão:
+
+- `BeeDayWebService`: todos os 20 métodos ganham `CancellationToken cancellationToken = default`,
+  repassado a `sender.Send(request, cancellationToken)`.
+- `DashboardState` (Scoped, vida do circuito) passa a `IDisposable`, possui um
+  `CancellationTokenSource` próprio cancelado em `Dispose()` (chamado automaticamente pelo
+  container de DI ao final do circuito), e o token é encaminhado em todo `store.XAsync(...)`
+  disparado por esse único ponto de escolha — cobrindo de uma vez Habits, Tasks, Todos e Projects.
+  `ExecuteAsync` ganha um `catch (OperationCanceledException) when (cancellation.
+  IsCancellationRequested)` para não mostrar um toast de erro genérico quando o cancelamento veio
+  do próprio `Dispose`.
+- `Wallet.razor` ganha `@implements IDisposable` com seu próprio `CancellationTokenSource`
+  (cancelado quando o roteador do Blazor descarta a página ao navegar para longe — granularidade
+  de página, não de circuito inteiro), encaminhado nos 10 call sites de `Sender.Send`, com a mesma
+  proteção contra toast espúrio em cada `catch`.
+- `Account.razor`, `Tutorial.razor` (Onboarding) e as 5 páginas de Identity
+  (`ConfirmEmail`/`EmailConfirmationSent`/`ForgotPassword`/`ResendConfirmation`/`ResetPassword`)
+  recebem o mesmo padrão — cada uma com seu próprio `CancellationTokenSource` de vida da página.
+  Nas duas páginas que já tinham um `CancellationTokenSource` para o timer de contagem regressiva,
+  um segundo token dedicado (`_pageCts`) foi adicionado deliberadamente separado, para não
+  confundir o cancelamento da mutação com o ciclo de reinício do timer.
+- Escopo deliberadamente não estendido: `InitializeCoreAsync`/`OnInitializedAsync` de carregamento
+  inicial (chamados uma única vez por circuito/página) não ganharam o mesmo guard de exceção —
+  risco de cancelamento concorrente nesse ponto específico é despreziável.
+
+### 15.3 Achados menores (não corrigidos, encaminhados)
+
+- `BD30-F036` (nova, baixa): `PeriodicTimer`/`CancellationTokenSource` do contador regressivo em
+  `EmailConfirmationSent.razor`/`ResendConfirmation.razor` não são descartados antes de serem
+  reatribuídos numa segunda chamada a `StartCountdown()` — hoje inalcançável (botão desabilitado
+  enquanto a contagem corre). Encaminhado à Sprint 30.10.
+- `BD30-F037` (nova, baixa): cards individuais do Dashboard não vinculam `Disabled` a
+  `State.IsBusy` (proteção real existe, só falta feedback visual por card); `Wallet.razor` não
+  chama `StateHasChanged()` uma segunda vez ao encerrar o destaque de saldo. Encaminhado à Sprint
+  30.20.
+
+### 15.4 Implementação
+
+- `src/BeeDay.Web/Services/BeeDayWebService.cs` — `CancellationToken` opcional em todos os métodos.
+- `src/BeeDay.Web/Components/Features/Dashboard/State/DashboardState.cs` — `IDisposable` +
+  `CancellationTokenSource` de circuito, encaminhado em todo call site.
+- `src/BeeDay.Web/Components/Features/Wallets/Pages/Wallet.razor` — `IDisposable` +
+  `CancellationTokenSource` de página, encaminhado nos 10 call sites de `Sender.Send`.
+- `src/BeeDay.Web/Components/Features/Account/Pages/Account.razor`,
+  `src/BeeDay.Web/Components/Features/Onboarding/Pages/Tutorial.razor`,
+  `src/BeeDay.Web/Components/Features/Identity/Pages/{ConfirmEmail,EmailConfirmationSent,
+  ForgotPassword,ResendConfirmation,ResetPassword}.razor` — mesmo padrão.
+- `tests/BeeDay.Web.Tests/Components/Dashboard/DashboardStateCancellationTests.cs` (novo) — prova
+  que o token encaminhado não está cancelado antes de `Dispose`, que `Dispose` cancela o mesmo token
+  usado pela mutação, e que um cancelamento disparado durante uma operação em andamento não produz
+  um toast de erro genérico.
+
+Nenhuma mudança de contrato público de Application/Domain, de schema, ou de comportamento visível
+ao usuário em operação normal — o efeito só é observável quando uma requisição é genuinamente
+abandonada (navegação, fechamento de aba, queda de circuito).
+
+### 15.5 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet test tests/BeeDay.Web.Tests/... --filter DashboardStateCancellationTests` | PASS, 3/3 |
+| `dotnet test tests/BeeDay.Web.Tests/...` completo | PASS, 866/866 |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx` | PASS, 1.504/1.504 (117 Domain, 113 Application, 215 Infrastructure, 866 Web, 193 E2E); E2E 6m41s |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.504/1.504 (mesma distribuição); E2E 6m29s |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+
+O suite E2E completo (Chromium — Dashboard, Wallet, Identity, Account, Onboarding) passou em Debug
+e Release após a mudança, confirmando que nenhum fluxo real de usuário foi afetado pela propagação
+de cancelamento.
+
+### 15.6 Continuidade e entrega
+
+Reconhecimento amplo (DI, disposables, re-entrância, cancelamento, rendering, recuperação de erro,
+reconexão) foi delegado a um subagente Explore somente-leitura. O único achado MAJOR
+(`BD30-F035`) foi verificado de forma independente nesta sessão antes de qualquer correção (leitura
+direta de `BeeDayWebService.cs`, confirmação de zero uso de `CancellationToken`) e corrigido de
+ponta a ponta nos dois pontos de escolha centralizados (`DashboardState`, `WalletInteractionState`
+via `Wallet.razor`) mais as sete páginas restantes que chamam `ISender`/`BeeDayWebService`
+diretamente — fechando a lacuna sistêmica por completo, não apenas parcialmente.
