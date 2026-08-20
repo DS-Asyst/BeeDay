@@ -9,6 +9,9 @@ public sealed class Transaction : Entity
 {
     public const int MaximumDescriptionLength = 120;
     public const int MaximumNotesLength = 500;
+    public const decimal MaximumAmount = 999999999999m;
+
+    private Transaction() { }
 
     public Guid WalletId { get; private set; }
 
@@ -103,6 +106,11 @@ public sealed class Transaction : Entity
         if (amount <= 0m)
         {
             throw new DomainValidationException(nameof(amount), "Transaction amount must be greater than zero.");
+        }
+
+        if (amount > MaximumAmount)
+        {
+            throw new DomainValidationException(nameof(amount), $"Transaction amount cannot exceed {MaximumAmount}.");
         }
 
         if (decimal.Round(amount, 2, MidpointRounding.AwayFromZero) != amount)

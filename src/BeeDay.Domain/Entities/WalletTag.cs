@@ -6,6 +6,8 @@ namespace BeeDay.Domain.Entities;
 
 public sealed partial class WalletTag : Entity
 {
+    private WalletTag() { }
+
     public const int MaximumNameLength = 40;
     public const string DefaultColor = "#7A4FCB";
 

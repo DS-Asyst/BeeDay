@@ -37,7 +37,8 @@ caracteres (`MaximumLength`) — única entre os 6 sem exigência de não-vazio.
 
 **Arquivo:** `ValueObjects/EmailAddress.cs`. **Uso:** `User.Email`, via `User.Create`/`UpdateAccount`.
 **Validação:** obrigatório, normalizado para minúsculas, máximo 254 caracteres, formato validado
-por `System.Net.Mail.MailAddress.TryCreate` (não por regex própria).
+por `System.Net.Mail.MailAddress.TryCreate` (não por regex própria). O endereço parseado deve ser
+igual ao input normalizado, impedindo display-name como `Alice <alice@example.com>`.
 
 ## `Nickname`
 
@@ -63,22 +64,19 @@ demais (construtor privado, `static Create`). **Uso:** quantidade de XP a conced
 `UserExperience.Add`/`TryAdd`. **Validação:** `Amount` deve ser `> 0` — sem limite superior próprio
 além do overflow checado em `UserExperience.Add`.
 
-## `ExperienceSource` (semântica de Value Object, implementado como classe)
+## `ExperienceSource`
 
-**Arquivo:** `Experience/ExperienceSource.cs`. Diferente dos demais, é uma classe `sealed` comum
-(não `record struct`) — mas se comporta como Value Object: sem identidade própria (`Entity.Id`),
-criado só via `static Create`, sem nenhum método de mutação após a criação. A escolha de classe em
-vez de struct é consistente com seu uso como **Complex Type** do EF Core em
+**Arquivo:** `Experience/ExperienceSource.cs`. É um `sealed record` com igualdade estrutural, sem
+identidade própria (`Entity.Id`), criado só via `static Create` e sem método de mutação. A escolha
+de referência é consistente com seu uso como **Complex Type** do EF Core em
 `ExperienceEntryConfiguration.cs` (ver `docs/architecture/06-persistence-architecture.md` §3).
 **Uso:** identifica a origem de uma concessão de XP (`ExperienceEntry.Source`). **Validação:**
 `ReferenceId`, se fornecido, não pode ser `Guid.Empty`; `Description` opcional, máximo 160
 caracteres (`MaximumDescriptionLength`); `Type` deve ser um `ExperienceSourceType` válido.
 
-**Nota sobre comparação:** por ser uma classe comum sem `Equals`/`GetHashCode` sobrescritos,
-`ExperienceSource` usa igualdade por referência por padrão — duas instâncias com os mesmos valores
-não são `==` entre si. Isso é relevante para a lógica de deduplicação em `UserExperience.TryAdd`,
-que compara campos individuais (`Source.Type`, `Source.ReferenceId`) manualmente em vez de
-comparar a instância `Source` inteira — contornando a ausência de igualdade por valor.
+**Comparação:** duas instâncias com `Type`, `ReferenceId` e `Description` iguais são iguais por
+valor. A deduplicação explicita sua chave de negócio (`Type`, `ReferenceId`, `RewardType`) e não
+depende da descrição.
 
 ## Fontes de verdade
 

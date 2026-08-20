@@ -1,10 +1,14 @@
 using BeeDay.Domain.Abstractions;
+using BeeDay.Domain.Common;
 using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
 
 namespace BeeDay.Domain.Experience;
 
 public sealed class ExperienceEntry : Entity
 {
+    private ExperienceEntry() { }
+
     public Guid UserId { get; private set; }
 
     public long Amount { get; private set; }
@@ -46,6 +50,48 @@ public sealed class ExperienceEntry : Entity
         }
 
         ArgumentNullException.ThrowIfNull(source);
+
+        if (reward.Amount <= 0)
+        {
+            throw new DomainValidationException(nameof(reward), "Experience reward must be greater than zero.");
+        }
+
+        EnumValidation.Defined(rewardType, nameof(rewardType));
+
+        if (experienceBefore < 0)
+        {
+            throw new DomainValidationException(nameof(experienceBefore), "Experience before the reward cannot be negative.");
+        }
+
+        long expectedExperienceAfter;
+        try
+        {
+            expectedExperienceAfter = checked(experienceBefore + reward.Amount);
+        }
+        catch (OverflowException)
+        {
+            throw new DomainValidationException(nameof(experienceAfter), "Experience after the reward exceeds the supported range.");
+        }
+
+        if (experienceAfter != expectedExperienceAfter)
+        {
+            throw new DomainValidationException(nameof(experienceAfter), "Experience after the reward must equal the previous total plus the reward.");
+        }
+
+        if (levelBefore != ExperienceCurve.GetLevel(experienceBefore))
+        {
+            throw new DomainValidationException(nameof(levelBefore), "Level before the reward does not match the experience curve.");
+        }
+
+        if (levelAfter != ExperienceCurve.GetLevel(experienceAfter))
+        {
+            throw new DomainValidationException(nameof(levelAfter), "Level after the reward does not match the experience curve.");
+        }
+
+        if (grantedAtUtc.HasValue && grantedAtUtc.Value == default)
+        {
+            throw new DomainValidationException(nameof(grantedAtUtc), "Experience grant time is required when provided.");
+        }
 
         return new ExperienceEntry
         {

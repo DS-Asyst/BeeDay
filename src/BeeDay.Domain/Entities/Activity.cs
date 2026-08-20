@@ -1,6 +1,7 @@
 using BeeDay.Domain.Abstractions;
 using BeeDay.Domain.Common;
 using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
 using BeeDay.Domain.ValueObjects;
 
 namespace BeeDay.Domain.Entities;
@@ -28,6 +29,12 @@ public abstract class Activity : Entity
         {
             throw new ArgumentException("User identifier is required.", nameof(userId));
         }
+
+        if (UserId != Guid.Empty && UserId != userId)
+        {
+            throw new InvalidDomainStateException("An Activity owner cannot be reassigned.");
+        }
+
         UserId = userId;
     }
 

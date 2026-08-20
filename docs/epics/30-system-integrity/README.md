@@ -51,7 +51,7 @@ todo achado termine como `FIXED`, `VERIFIED` ou `ACCEPTED RISK`.
 |---|---|---|---|---|
 | INV-001 | Governança e raiz | 10 arquivos na raiz, incluindo `CLAUDE.md`, solução, contratos de build e manifesto de ferramentas | `VERIFIED` | 30.1 |
 | INV-002 | Solução e dependências | 9 projetos: 4 em `src/` e 5 em `tests/`; referências preservam `Domain <- Application <- Infrastructure <- Web` | `VERIFIED` | 30.9 |
-| INV-003 | Domain | 47 arquivos rastreados; nenhum uso de EF Core ou ASP.NET Core | `BASELINED` | 30.5 |
+| INV-003 | Domain | 47 arquivos rastreados e auditados integralmente; inventário por artefato em `docs/domain/audit-inventory.md`; guards rejeitam dependências de framework/camadas superiores | `VERIFIED` | 30.5 |
 | INV-004 | Application | 95 arquivos rastreados; 10 diretórios de Feature; nenhuma referência a Infrastructure, Web ou EF Core | `BASELINED` | 30.6 |
 | INV-005 | Infrastructure | 58 arquivos rastreados; SQL Server, serviços técnicos, DI, health checks e configuração | `BASELINED` | 30.7 |
 | INV-006 | Persistência e migrations | um `BeeDayDbContext`, uma migration versionada e o model snapshot, em 3 arquivos de migration | `BASELINED` | 30.7 |
@@ -150,6 +150,14 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F020 | média | o E2E de projeto cria e abre o workspace, mas não prova mutações de to-do nem persistência do workspace após reload | `OPEN` | 30.14 |
 | BD30-F021 | média | os E2Es de conta cobrem perfil e idioma, mas não tema, alteração de senha nem recovery visível dos demais saves suportados | `OPEN` | 30.11 |
 | BD30-F022 | baixa | dez suítes repetiam seletores e submissão do mesmo formulário de login como arranjo, aumentando drift sem acrescentar evidência funcional | `FIXED` | 30.4 |
+| BD30-F023 | alta | doze tipos controlados por factory expunham construtor público implícito e permitiam criar aggregates/entities/values sem qualquer invariante; não havia consumer versionado desses construtores | `FIXED` | 30.5 |
+| BD30-F024 | alta | `Activity.AssignOwner`, `Todo.Update` e `Project.AddTodo` permitiam transferência direta de owner/Project, composição cross-user e identidade duplicada na coleção | `FIXED` | 30.5 |
+| BD30-F025 | alta | `UserToken` aceitava `createdAtUtc` default e podia ser marcado como usado antes de sua própria criação | `FIXED` | 30.5 |
+| BD30-F026 | média | `EmailAddress.Create` aceitava sintaxe de display-name do `MailAddress`, preservando o wrapper completo como identidade em vez do endereço canônico | `FIXED` | 30.5 |
+| BD30-F027 | alta | `ExperienceSource` tinha igualdade por referência e `ExperienceEntry.Create` aceitava reward, totais, níveis, enum e timestamp mutuamente inconsistentes | `FIXED` | 30.5 |
+| BD30-F028 | média | `Transaction` protegia positividade e escala, mas não o máximo monetário de `999999999999` já exposto pelo contrato público do formulário | `FIXED` | 30.5 |
+| BD30-F029 | baixa | comentários de `Profile` ainda justificavam a modelagem pelo adapter JSON já removido | `FIXED` | 30.5 |
+| BD30-F030 | alta | `UserExperience.Entries` participa da deduplicação em memória, porém é ignorada no mapping relacional; `ExperienceEntry` é top-level, o repositório não hidrata a coleção e `EnsureExperienceState` não possui consumer | `OPEN` | 30.7 (revalidar impacto em 30.16) |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -376,3 +384,68 @@ schema, migration ou Design System.
 | `git diff --check` | PASS |
 | links relativos dos documentos alterados | PASS, nenhum destino ausente |
 | `git status --short` | branch dedicada; 14 arquivos da Sprint; governança local, `CLAUDE.md` modificado e `.github/upgrades/` preservados fora do escopo |
+
+## 12. Sprint 30.5 — Domain Complete Audit
+
+### 12.1 Inventário e fronteiras
+
+Os 47 arquivos rastreados em `src/BeeDay.Domain` foram lidos e classificados individualmente em
+`docs/domain/audit-inventory.md`. `INV-003` passa a `VERIFIED`: o projeto não referencia outra
+camada nem package de framework, e o guard automatizado agora rejeita ASP.NET Core, EF Core,
+Application, Infrastructure, Web e serialização JSON.
+
+Factories, mutações, enums, nullability, datas, dinheiro, igualdade e estados derivados foram
+confrontados com todos os testes de Domain e com os consumers necessários para validar contratos.
+Construtores de materialização permanecem privados e as factories públicas são o caminho de
+criação. A compatibilidade do mapping EF foi verificada separadamente pelos testes de DbContext.
+
+### 12.2 Invariantes corrigidas
+
+- ownership de `Activity` não pode ser transferido; `Project` rejeita To-Do cross-user/duplicado e
+  a mudança direta de `Todo.ProjectId` foi fechada, preservando a movimentação pelo aggregate root;
+- tokens exigem creation time real e somente são usáveis dentro da janela criação-expiração;
+- display-name de e-mail não pode entrar como identidade canônica;
+- `ExperienceSource` possui igualdade por valor e `ExperienceEntry` revalida reward, total,
+  níveis, enum, overflow e timestamp;
+- `Transaction` protege o máximo monetário já assumido pelo formulário público;
+- `SessionVersion` não sofre wraparound silencioso;
+- comentários de `Profile` passaram a refletir a fronteira atual, sem citar o adapter JSON removido.
+
+Os doze tipos controlados por factory não possuem mais construtor público implícito. A busca por
+consumers confirmou que nenhum código versionado dependia desse caminho inválido, e os testes de
+Domain/EF cobrem criação e materialização válidas.
+
+### 12.3 Finding cross-layer encaminhado
+
+`BD30-F030` permanece `OPEN`: `UserExperience.Entries` é usada para histórico/deduplicação em
+memória, mas o mapping relacional atual ignora a coleção, `ExperienceEntry` é top-level, o
+repositório não hidrata o histórico e `EnsureExperienceState` não é chamado. A correção envolve
+responsabilidade de persistência e pertence à Sprint 30.7; a Sprint 30.16 deve revalidar o impacto
+funcional sobre rewards. Nenhuma alteração de mapping ou migration foi feita na 30.5.
+
+### 12.4 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| testes novos antes da correção | reprodução determinística: FAIL, 22/22 estados inválidos aceitos pelo código anterior |
+| testes novos após a correção | PASS, 24/24 |
+| `dotnet test tests/BeeDay.Domain.Tests/BeeDay.Domain.Tests.csproj --no-restore` | PASS, 117/117 |
+| testes direcionados de mapping do DbContext | PASS, 35/35 |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx` | PASS, 1.470/1.470 (117 Domain, 85 Application, 212 Infrastructure, 863 Web, 193 E2E); E2E 6m46s |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.470/1.470 (117 Domain, 85 Application, 212 Infrastructure, 863 Web, 193 E2E); E2E 6m43s |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+
+### 12.5 Continuidade e entrega
+
+A Sprint foi retomada de um handoff Codex -> Claude Code com a implementação, os testes e o
+Ledger já escritos até a lacuna dos gates finais; esta sessão revisou o diff completo linha a
+linha (entidades, Experience, EmailAddress, testes e documentação), confirmou por busca de
+consumers que `Todo.Update`/`Project.AddTodo`/`ExperienceSource` não quebram nenhum chamador
+versionado de Application/Infrastructure, e então executou os gates acima do zero. `CLAUDE.md`
+permaneceu modificado na árvore de trabalho antes desta Sprint (reescrita de governança alheia ao
+escopo do Domain audit) e foi deliberadamente mantido fora do commit da Sprint 30.5, junto com os
+diretórios locais `.claude/`, `.agents/`, `.codex/`, o arquivo `AGENTS.md` e `.github/upgrades/`.

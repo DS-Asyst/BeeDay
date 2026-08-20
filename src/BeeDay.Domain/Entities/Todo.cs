@@ -5,6 +5,8 @@ namespace BeeDay.Domain.Entities;
 
 public sealed class Todo : Activity
 {
+    private Todo() { }
+
     public Guid ProjectId { get; private set; }
 
     public DateOnly? DueDate { get; private set; }
@@ -21,6 +23,11 @@ public sealed class Todo : Activity
         if (projectId == Guid.Empty)
         {
             throw new DomainValidationException("ProjectId", "A To-Do must belong to a Project.");
+        }
+
+        if (ProjectId != Guid.Empty && ProjectId != projectId)
+        {
+            throw new InvalidDomainStateException("A To-Do can only move between Projects through its owning Project.");
         }
 
         ProjectId = projectId;
