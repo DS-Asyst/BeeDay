@@ -1,5 +1,7 @@
+using System.ComponentModel.DataAnnotations;
 using BeeDay.Web.Components.Features.Wallets.Components;
 using BeeDay.Web.Components.Features.Wallets.Models;
+using BeeDay.Web.Tests.Localization;
 
 namespace BeeDay.Web.Tests.Components.Wallet;
 
@@ -57,4 +59,38 @@ public sealed class TransactionFormModalTests : BunitContext
         Assert.Equal("Wallet", icon.GetAttribute("data-icon"));
         Assert.DoesNotContain("◇", cut.Markup, StringComparison.Ordinal);
     }
+
+    [Theory]
+    [InlineData("en-US")]
+    [InlineData("pt-BR")]
+    public void AmountRange_ValidatesMinimumWithoutDependingOnCurrentCulture(string culture)
+    {
+        BunitLocalizationSupport.WithUiCulture(culture, () =>
+        {
+            var model = CreateValidModel(0.01m);
+            var validationContext = new ValidationContext(model)
+            {
+                MemberName = nameof(TransactionFormModel.Amount)
+            };
+
+            Assert.True(Validator.TryValidateProperty(
+                model.Amount,
+                validationContext,
+                validationResults: null));
+
+            model.Amount = 0m;
+
+            Assert.False(Validator.TryValidateProperty(
+                model.Amount,
+                validationContext,
+                validationResults: null));
+        });
+    }
+
+    private static TransactionFormModel CreateValidModel(decimal amount) => new()
+    {
+        Description = "Coffee",
+        Amount = amount,
+        TransactionDate = new DateTime(2026, 8, 20)
+    };
 }

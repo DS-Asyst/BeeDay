@@ -140,6 +140,8 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F010 | baixa | o índice de documentação classifica `authentication/` e `developer/` como reservados e `api/` como não reauditado | `OPEN` | 30.28 |
 | BD30-F011 | baixa | `docs/infrastructure/README.md` registra 5 classes Options; o repositório possui 6 Options atuais, além de `EmailProvider` e `EmailProviderSelector` | `OPEN` | 30.7 |
 | BD30-F012 | baixa | existe documentação versionada da EPIC 28, mas ela não aparece no índice `docs/README.md` | `OPEN` | 30.28 |
+| BD30-F013 | alta | em HMG, validar `TransactionFormModel.Amount` sob `pt-BR` lançava `ArgumentException`/`FormatException` em `RangeAttribute.SetupConversion` ao interpretar o limite textual `"0.01"` pela cultura corrente; a falha ocorria no `EditForm`, antes de MediatR e antes de qualquer `INSERT` | `FIXED` | 30.2 |
+| BD30-F014 | baixa | os logs do mesmo período contêm warnings do EF Core sobre MARS/savepoints, mas a cadeia causal confirmada do incidente termina na validação DataAnnotations antes de MediatR/persistência; não há evidência de participação desses warnings nesta falha | `OPEN` | 30.7 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -173,3 +175,66 @@ auditável dos achados às Sprints corretas.
 
 O readiness local foi atingido. O encerramento da Sprint depende da PR aprovada pelos checks
 obrigatórios, merge em `hmg`, atualização do Project para `Done` e fechamento da Issue #196.
+
+## 9. Sprint 30.2 — Wallet Transaction Runtime Root Cause
+
+### 9.1 Evidência de runtime e cadeia causal
+
+Os logs `stdout` do SERV3WEB reproduziram múltiplas vezes a falha ao submeter uma transação no
+Wallet:
+
+```text
+System.ArgumentException: 0.01 is not a valid value for Decimal
+  ---> System.FormatException: The input string '0.01' was not in a correct format.
+  at System.ComponentModel.DecimalConverter.FromString(...)
+  at System.ComponentModel.DataAnnotations.RangeAttribute.SetupConversion()
+  at System.ComponentModel.DataAnnotations.RangeAttribute.IsValid(...)
+```
+
+O código em `TransactionFormModel.Amount` usava
+`[Range(typeof(decimal), "0.01", "999999999999")]`. O overload recebe limites textuais e, sem uma
+política explícita, tentava converter `"0.01"` pela cultura corrente. Em `pt-BR`, que espera vírgula
+como separador decimal, a conversão do limite falhava dentro do pipeline de validação do
+`EditForm`/`InputNumber`. Portanto, `CreateTransactionCommand` não chegava ao MediatR e nenhum
+`INSERT` era emitido para o SQL Server. Constraints, migration, FK e persistência não participam da
+causa confirmada.
+
+### 9.2 Correção mínima
+
+O limite de negócio foi preservado em `0.01m`. A anotação existente passou a declarar
+`ParseLimitsInInvariantCulture = true`, fazendo apenas os limites textuais do atributo serem
+interpretados de forma determinística. Não houve mudança em Domain, Application, Infrastructure,
+schema, migration, contrato público ou Design System.
+
+Os warnings EF Core sobre MARS/savepoints observados no mesmo conjunto de logs foram registrados
+separadamente como `BD30-F014`. Correlação temporal não estabelece causalidade, e a evidência atual
+prova que esta exceção acontece antes da fronteira de persistência.
+
+### 9.3 Regressão e comportamento funcional
+
+- teste determinístico executa a validação de `Amount` sob `en-US` e `pt-BR`, aceitando o mínimo
+  `0.01m` e rejeitando `0m`;
+- antes da correção, o caso `pt-BR` reproduziu a mesma `ArgumentException` com
+  `RangeAttribute.SetupConversion`, enquanto `en-US` passou;
+- após a correção, os dois casos passaram;
+- E2E autenticado muda a preferência real para português, cria tag e transação de receita no mínimo
+  `0.01`, edita para `0.02`, exclui a transação e confirma saldo/estado interativo após cada ação;
+- o diálogo fecha normalmente e `aria-busy` retorna a `false`, comprovando que a exceção não encerra
+  mais o circuito Blazor nos fluxos de criação e edição.
+
+### 9.4 Quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| teste unitário direcionado antes da correção | reprodução determinística: `en-US` PASS; `pt-BR` FAIL com a exceção de runtime |
+| teste unitário direcionado após a correção | PASS, 2/2 |
+| E2E Wallet direcionado | PASS, 1/1 |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 após correção mecânica de line endings somente nos três arquivos C# alterados |
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| primeira execução integral Debug | interrompida deliberadamente para o refresh obrigatório de governança; nenhuma falha de teste observada |
+| `dotnet test BeeDay.slnx` após o refresh | PASS, 1.446/1.446 (93 Domain, 85 Application, 212 Infrastructure, 863 Web, 193 E2E) |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.446/1.446 (93 Domain, 85 Application, 212 Infrastructure, 863 Web, 193 E2E) |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+| `git status` | branch dedicada; quatro arquivos da Sprint; governança local, `CLAUDE.md` modificado e `.github/upgrades/` preservados fora do escopo e do staging |
