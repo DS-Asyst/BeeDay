@@ -161,6 +161,7 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F030 | alta | `UserExperience.Entries` participa da deduplicação em memória, porém era ignorada no mapping relacional; `ExperienceEntry` é top-level e nada jamais adicionava novas entries ao `DbSet` — confirmado por teste real contra LocalDB: nenhuma linha era persistida, e a mesma fonte podia ser recompensada indefinidamente (recompletar um Todo/Task/Project já concluído antes) | `FIXED` | 30.7 (revalidar impacto em 30.16) |
 | BD30-F032 | baixa | `EfHabitRepository.AddAsync`/`EfProjectRepository.AddAsync`/`EfRecurringTaskRepository.AddAsync`/`EfProjectRepository.AddTodoAsync` calculam a próxima `Position` via `MaxAsync` seguido de um insert separado, sem índice/constraint único em `(UserId, Position)` (ou `(ProjectId, Position)` para Todo) — duas inserções concorrentes do mesmo usuário podem computar o mesmo `maxPosition` e persistir ordinais duplicados; não há perda de dado, apenas dessincronia cosmética de ordenação, autocorrigível no próximo reorder | `OPEN` | 30.25 |
 | BD30-F033 | baixa | `EfWalletReadService.ApplyOrdering` ordena `Transaction` por `Description`/`Amount`/`CreatedAtUtc` sem índice cobrindo esses campos (apenas `IX_Transactions_Wallet_Date` existe) — SQL Server ordena em tempdb após o seek por `WalletId`; impacto real baixo dado o volume típico de transações por usuário em um app financeiro pessoal | `OPEN` | 30.21 |
+| BD30-F034 | alta | histórico de `ExperienceEntry` não era persistido antes da correção da Sprint 30.7 (`BD30-F030`); alternar conclusão/reabertura repetida de Todo/Task/Project podia conceder XP duplicado sem limite antes da correção. Existência e magnitude de inflação histórica em HMG/produção **não quantificadas** por esta Sprint — nenhuma consulta ou mutação de banco de HMG/produção foi executada. As linhas de `ExperienceEntry` persistidas antes da correção podem ser insuficientes para reconstruir `TotalExperience` corretamente de forma determinística (o histórico anterior à correção nunca existiu). Nenhuma mutação de banco está autorizada por este achado; nenhum reset/recálculo arbitrário é permitido | `OPEN` | 30.16 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -613,6 +614,42 @@ XP outra vez, sem limite, sem nunca gravar o histórico correspondente em `Exper
 - `BD30-F011`/`BD30-F014` confirmados ainda precisos nesta auditoria; não corrigidos, permanecem de
   propriedade de suas Sprints já atribuídas (30.7 documental / 30.7 já fechado por causa raiz na
   30.2 — mantidos conforme o Ledger original).
+
+### 14.4.1 `BD30-F034` — integridade histórica de `TotalExperience`, encaminhado à Sprint 30.16
+
+A correção de `BD30-F030` (§14.2–14.3) é a remediação correta e completa para o defeito de
+persistência/deduplicação daqui em diante — aceita explicitamente pelo owner como tal. Ela não
+constitui, e não tenta constituir, uma correção retroativa de dados. Isso é registrado aqui como um
+achado de integridade de dados **separado**, distinto da causa raiz já fechada:
+
+- histórico de `ExperienceEntry` não era persistido antes da correção desta Sprint;
+- alternar conclusão/reabertura repetidamente de um Todo/Task/Project podia, antes da correção,
+  conceder XP duplicado sem limite a cada repetição;
+- a existência e a magnitude de qualquer inflação histórica em HMG/produção **não foram
+  quantificadas** por esta Sprint — nenhuma consulta ou mutação foi executada contra banco de
+  HMG/produção;
+- as linhas de `ExperienceEntry` que porventura já existam de antes da correção podem ser
+  insuficientes para reconstruir `TotalExperience` de forma determinística, precisamente porque o
+  histórico correspondente às concessões duplicadas nunca foi persistido;
+- **nenhuma mutação de banco de dados está autorizada por este achado**;
+- **nenhum reset ou recálculo arbitrário de `TotalExperience` é permitido** sem um plano de correção
+  revisado e aprovação explícita do owner.
+
+Este achado é atribuído principalmente à Sprint 30.16 — Experience, XP, Level & Rewards Audit, que
+deve determinar, usando evidência de repositório e de banco:
+
+1. se o XP histórico afetado pode ser identificado;
+2. se o XP correto pode ser reconstruído de forma determinística;
+3. quais fontes de recompensa (Habit/Task/Todo/Project) são afetadas;
+4. se repetições legítimas de Habit podem ser distinguidas de concessões duplicadas de
+   Todo/Task/Project;
+5. se uma correção automatizada é segura;
+6. se seria necessária reconciliação manual ou parcial;
+7. o raio de impacto exato em HMG e, separadamente, em produção.
+
+Qualquer mutação real de dados em HMG/produção permanece fora desta autorização e exige aprovação
+explícita do owner após um plano de correção revisado. Este achado não bloqueia as demais Sprints
+de auditoria da EPIC 30.
 
 ### 14.5 Implementação
 
