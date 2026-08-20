@@ -53,8 +53,8 @@ todo achado termine como `FIXED`, `VERIFIED` ou `ACCEPTED RISK`.
 | INV-002 | Solução e dependências | 9 projetos: 4 em `src/` e 5 em `tests/`; referências preservam `Domain <- Application <- Infrastructure <- Web` | `VERIFIED` | 30.9 |
 | INV-003 | Domain | 47 arquivos rastreados e auditados integralmente; inventário por artefato em `docs/domain/audit-inventory.md`; guards rejeitam dependências de framework/camadas superiores | `VERIFIED` | 30.5 |
 | INV-004 | Application | 95 arquivos rastreados; 10 diretórios de Feature; nenhuma referência a Infrastructure, Web ou EF Core | `VERIFIED` | 30.6 |
-| INV-005 | Infrastructure | 58 arquivos rastreados; SQL Server, serviços técnicos, DI, health checks e configuração | `BASELINED` | 30.7 |
-| INV-006 | Persistência e migrations | um `BeeDayDbContext`, uma migration versionada e o model snapshot, em 3 arquivos de migration | `BASELINED` | 30.7 |
+| INV-005 | Infrastructure | 58 arquivos rastreados; SQL Server, serviços técnicos, DI, health checks e configuração | `VERIFIED` | 30.7 |
+| INV-006 | Persistência e migrations | um `BeeDayDbContext`, uma migration versionada e o model snapshot, em 3 arquivos de migration | `VERIFIED` | 30.7 |
 | INV-007 | Web e composição | 460 arquivos rastreados; 17 diretórios de Feature; nenhum acesso direto a `BeeDayDbContext` | `BASELINED` | 30.8 |
 | INV-008 | Rotas e shell | 54 declarações `@page` encontradas diretamente em componentes Razor | `BASELINED` | 30.17 |
 | INV-009 | Fluxos funcionais | Identity/Auth/User, Dashboard, Habits, Tasks, Todos, Projects, Wallets, Experience, Onboarding e páginas públicas identificados | `BASELINED` | 30.4, 30.10–30.18 |
@@ -158,7 +158,9 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F027 | alta | `ExperienceSource` tinha igualdade por referência e `ExperienceEntry.Create` aceitava reward, totais, níveis, enum e timestamp mutuamente inconsistentes | `FIXED` | 30.5 |
 | BD30-F028 | média | `Transaction` protegia positividade e escala, mas não o máximo monetário de `999999999999` já exposto pelo contrato público do formulário | `FIXED` | 30.5 |
 | BD30-F029 | baixa | comentários de `Profile` ainda justificavam a modelagem pelo adapter JSON já removido | `FIXED` | 30.5 |
-| BD30-F030 | alta | `UserExperience.Entries` participa da deduplicação em memória, porém é ignorada no mapping relacional; `ExperienceEntry` é top-level, o repositório não hidrata a coleção e `EnsureExperienceState` não possui consumer | `OPEN` | 30.7 (revalidar impacto em 30.16) |
+| BD30-F030 | alta | `UserExperience.Entries` participa da deduplicação em memória, porém era ignorada no mapping relacional; `ExperienceEntry` é top-level e nada jamais adicionava novas entries ao `DbSet` — confirmado por teste real contra LocalDB: nenhuma linha era persistida, e a mesma fonte podia ser recompensada indefinidamente (recompletar um Todo/Task/Project já concluído antes) | `FIXED` | 30.7 (revalidar impacto em 30.16) |
+| BD30-F032 | baixa | `EfHabitRepository.AddAsync`/`EfProjectRepository.AddAsync`/`EfRecurringTaskRepository.AddAsync`/`EfProjectRepository.AddTodoAsync` calculam a próxima `Position` via `MaxAsync` seguido de um insert separado, sem índice/constraint único em `(UserId, Position)` (ou `(ProjectId, Position)` para Todo) — duas inserções concorrentes do mesmo usuário podem computar o mesmo `maxPosition` e persistir ordinais duplicados; não há perda de dado, apenas dessincronia cosmética de ordenação, autocorrigível no próximo reorder | `OPEN` | 30.25 |
+| BD30-F033 | baixa | `EfWalletReadService.ApplyOrdering` ordena `Transaction` por `Description`/`Amount`/`CreatedAtUtc` sem índice cobrindo esses campos (apenas `IX_Transactions_Wallet_Date` existe) — SQL Server ordena em tempdb após o seek por `WalletId`; impacto real baixo dado o volume típico de transações por usuário em um app financeiro pessoal | `OPEN` | 30.21 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -540,3 +542,116 @@ para acelerar a cobertura; cada achado relatado foi verificado independentemente
 de qualquer ação — a lacuna de cobertura de teste foi confirmada por busca de referência própria
 (zero resultado para os 17 nomes de handler em `tests/`), e as assinaturas de método/registro de
 cada Handler tocado foram lidas diretamente do código antes de escrever qualquer teste novo.
+
+## 14. Sprint 30.7 — Infrastructure / EF Core / SQL Server Audit
+
+### 14.1 Inventário e fronteiras
+
+Os 58 arquivos de `src/BeeDay.Infrastructure` foram auditados contra o Issue #204: índices,
+constraints, comportamento de FK, precisão decimal, armazenamento de data/hora, tracking, risco de
+N+1, atomicidade de transação e ciclo de vida de contexto para uso em Blazor Server. `INV-005` e
+`INV-006` passam a `VERIFIED`.
+
+`EfRepositoryBase`/`IDbContextFactory` confirmados corretos: todo repositório cria um `DbContext`
+de vida curta por operação (nunca compartilhado entre requisições de um circuito Blazor Server);
+`EfUnitOfWork` é registrado `AddTransient`, não `AddScoped`, com contexto próprio descartado ao
+final da unidade de trabalho. Precisão decimal (`decimal(19,2)` via convenção global), datas
+(`date`/`datetimeoffset(7)`), tracking (`AsNoTracking` em toda leitura, tracking apenas onde
+RowVersion exige) e transação explícita (`BeginTransactionAsync`/`CommitTransactionAsync` com
+rollback implícito ao descartar sem commit) — todos verificados sem achado. A migration única
+(`InitialCreate`) não diverge do modelo atual; as duas seções de SQL bruto (`UX_Users_Nickname`,
+`UX_ExperienceEntries_Dedup`) batem exatamente com a justificativa documentada nas Configurations.
+
+### 14.2 BD30-F030 — causa raiz confirmada e corrigida
+
+Investigação dirigida por evidência (não pela suposição do achado herdado da Sprint 30.5) confirmou
+que o problema é mais severo do que o texto original descrevia. `UserConfiguration.cs` ignora
+deliberadamente `UserExperience.Entries` (correto: `ExperienceEntry` já é uma entidade top-level
+relacionada a `User` diretamente, mapear de novo sob `UserExperience` duplicaria o relacionamento),
+mas nenhum outro código em `src/BeeDay.Infrastructure` jamais adicionava uma nova `ExperienceEntry`
+ao `DbSet` correspondente — confirmado por busca (`grep -rn "ExperienceEntries.Add"` = zero
+resultados) e por um teste real contra LocalDB escrito nesta Sprint
+(`EfUserRepositoryTests.UpdateAsync_MutationGrantsExperience_PersistsTheExperienceEntry`), que
+falhou antes da correção (`Assert.Single() Failure: The collection was empty`).
+
+Consequência confirmada, não hipotética: como `Entries` nunca é hidratada ao carregar o `User`,
+`UserExperience.TryAdd` — o único caminho de concessão automática de XP, usado por toda conclusão
+de Habit/Task/Todo/Project — sempre comparava contra uma coleção vazia. Recompletar um Todo/Task/
+Project já concedido antes (desmarcar e marcar de novo, um fluxo de UI real e suportado) concedia
+XP outra vez, sem limite, sem nunca gravar o histórico correspondente em `ExperienceEntries`.
+
+### 14.3 Correção mínima
+
+- `UserExperience.Hydrate(IReadOnlyList<ExperienceEntry>)` (novo, `internal`): atribui entries já
+  persistidas sem repassar por `Add` (que duplicaria `TotalExperience`, já carregado
+  independentemente de sua própria coluna). Hook de materialização, não uma regra de negócio nova.
+- `BeeDay.Domain.csproj` ganha `InternalsVisibleTo` para `BeeDay.Infrastructure` — grant de
+  visibilidade unidirecional (Infrastructure enxerga internals de Domain), não uma referência de
+  assembly; `DomainAssemblyBoundaryTests` confirma que Domain continua sem depender de
+  Infrastructure.
+- `EfUserRepository.UpdateAsync` agora: (1) carrega as `ExperienceEntries` existentes do usuário
+  (`WHERE UserId = @userId`, coberta pelo índice `IX_ExperienceEntries_User_Time`) e hidrata
+  `user.Experience` antes de invocar a mutação — assim `TryAdd` compara contra histórico real, não
+  uma coleção sempre vazia; (2) após a mutação, adiciona ao `DbSet` qualquer entry cujo `Id` não
+  estava no conjunto pré-carregado — fechando o outro defeito (linhas nunca persistidas).
+- Escopo da mudança: apenas `UpdateAsync` (todas as mutações de `User`, não só concessão de XP)
+  paga uma consulta indexada adicional; `GetByIdAsync`/`GetByEmailAsync` (chamadas a cada requisição
+  autenticada) permanecem inalterados.
+- Confirmado que a exceção de Habit ao dedup continua correta: `ExperienceRewardService.Grant` já
+  usa `Guid.NewGuid()` como `SourceId` para `ExperienceSourceType.Habit` (nunca o Id do próprio
+  Habit), então a hidratação não pode gerar falso-positivo bloqueando registro repetido de Habit —
+  provado por teste dedicado.
+
+### 14.4 Achados menores (não corrigidos, encaminhados)
+
+- `BD30-F032` (nova, baixa): corrida de `Position` sob inserção concorrente em Habit/RecurringTask/
+  Project/Todo — sem índice único, apenas cosmética, autocorrigível no próximo reorder. Encaminhada
+  à Sprint 30.25 (endurecimento amplo já proprietário de CI/CD e deployment nesta EPIC).
+- `BD30-F033` (nova, baixa): ordenação de `Transaction` por `Description`/`Amount`/`CreatedAtUtc`
+  sem índice cobrindo esses campos além do seek por `WalletId`. Encaminhada à Sprint 30.21
+  (Performance & Efficiency Audit).
+- `BD30-F011`/`BD30-F014` confirmados ainda precisos nesta auditoria; não corrigidos, permanecem de
+  propriedade de suas Sprints já atribuídas (30.7 documental / 30.7 já fechado por causa raiz na
+  30.2 — mantidos conforme o Ledger original).
+
+### 14.5 Implementação
+
+- `src/BeeDay.Domain/Experience/UserExperience.cs` — novo método `internal Hydrate(...)`.
+- `src/BeeDay.Domain/BeeDay.Domain.csproj` — `InternalsVisibleTo` para `BeeDay.Infrastructure`.
+- `src/BeeDay.Infrastructure/Persistence/SqlServer/Repositories/EfUserRepository.cs` —
+  `UpdateAsync` hidrata e persiste `ExperienceEntries` corretamente.
+- `tests/BeeDay.Infrastructure.Tests/Persistence/SqlServer/Repositories/EfUserRepositoryTests.cs`
+  — 3 testes novos contra LocalDB real: persistência da entry, dedup entre chamadas separadas
+  (recompletar o mesmo Todo/Task/Project não concede XP duas vezes), e não-regressão do registro
+  repetido de Habit.
+
+Nenhuma mudança de contrato público de Application, de schema (nenhuma migration nova — a tabela e
+o índice já existiam desde `InitialCreate`), ou de Design System.
+
+### 14.6 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet test tests/BeeDay.Infrastructure.Tests/... --filter EfUserRepositoryTests` antes da correção | reprodução determinística: FAIL (`Assert.Single() Failure: The collection was empty`) |
+| `dotnet test tests/BeeDay.Infrastructure.Tests/... --filter EfUserRepositoryTests` após a correção | PASS, 9/9 |
+| `dotnet test tests/BeeDay.Domain.Tests/...` | PASS, 117/117 |
+| `dotnet test tests/BeeDay.Infrastructure.Tests/...` completo | PASS, 215/215 |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx` | PASS, 1.501/1.501 (117 Domain, 113 Application, 215 Infrastructure, 863 Web, 193 E2E); E2E 6m47s |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.501/1.501 (mesma distribuição); E2E 6m39s |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+
+Os suites E2E (Chromium, jornadas de Habit/Task/Todo incluindo conclusão e XP) passaram em Debug e
+Release após a correção, confirmando o caminho de concessão de experiência de ponta a ponta.
+
+### 14.7 Continuidade e entrega
+
+Reconhecimento amplo do restante de Infrastructure (Configurations, repositórios, migration,
+Options) foi delegado a um subagente Explore somente-leitura, com instrução explícita para não
+reinvestigar o que já havia sido confirmado e corrigido nesta sessão. O achado mais severo
+(`BD30-F030`) foi investigado diretamente por esta sessão, não pelo subagente — incluindo a prova
+empírica contra LocalDB real antes de qualquer alteração de código, seguindo a mesma disciplina de
+"evidência substitui suposição" já aplicada nas Sprints anteriores da EPIC 30.
