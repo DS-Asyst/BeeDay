@@ -6,6 +6,8 @@ namespace BeeDay.Domain.Entities;
 
 public sealed class Project : Activity
 {
+    private Project() { }
+
     public string Color { get; private set; } = ProjectColor.Default;
 
     public DateOnly? ExpectedDate { get; private set; }
@@ -86,6 +88,22 @@ public sealed class Project : Activity
     public void AddTodo(Todo todo)
     {
         ArgumentNullException.ThrowIfNull(todo);
+
+        if (Todos.Any(existingTodo => existingTodo.Id == todo.Id))
+        {
+            throw new InvalidDomainStateException($"To-Do '{todo.Id}' already belongs to project '{Id}'.");
+        }
+
+        if (UserId != Guid.Empty && todo.UserId != Guid.Empty && todo.UserId != UserId)
+        {
+            throw new InvalidDomainStateException("A Project cannot contain a To-Do owned by another User.");
+        }
+
+        if (UserId != Guid.Empty && todo.UserId == Guid.Empty)
+        {
+            todo.AssignOwner(UserId);
+        }
+
         todo.AssignTo(Id);
         Todos.Add(todo);
         Touch();

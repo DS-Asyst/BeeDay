@@ -14,8 +14,11 @@ public sealed class DomainAssemblyBoundaryTests
     private static readonly string[] ForbiddenAssemblyNames =
     [
         "System.Text.Json",
+        "Microsoft.AspNetCore",
         "Microsoft.EntityFrameworkCore",
+        "BeeDay.Application",
         "BeeDay.Infrastructure",
+        "BeeDay.Web",
     ];
 
     [Fact]

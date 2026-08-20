@@ -5,6 +5,8 @@ namespace BeeDay.Domain.Experience;
 
 public sealed class UserExperience
 {
+    private UserExperience() { }
+
     public long TotalExperience { get; private set; }
 
     public IReadOnlyList<ExperienceEntry> Entries { get; private set; } = [];

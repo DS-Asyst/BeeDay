@@ -9,6 +9,8 @@ namespace BeeDay.Domain.Entities;
 
 public sealed class User : Entity
 {
+    private User() { }
+
     public string Name { get; private set; } = string.Empty;
     public string Email { get; private set; } = string.Empty;
     public string PasswordHash { get; private set; } = string.Empty;
@@ -128,7 +130,7 @@ public sealed class User : Entity
     /// is also used for transparent hash-format upgrades on login, which must not sign out the
     /// very session being created.
     /// </summary>
-    public void InvalidateSessions() { SessionVersion++; Touch(); }
+    public void InvalidateSessions() { SessionVersion = checked(SessionVersion + 1); Touch(); }
 
     public void CompleteProfile(string nickname, string? avatar)
     {

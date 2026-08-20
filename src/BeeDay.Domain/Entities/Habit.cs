@@ -5,6 +5,8 @@ namespace BeeDay.Domain.Entities;
 
 public sealed class Habit : Activity
 {
+    private Habit() { }
+
     public HabitDirection Direction { get; private set; } = HabitDirection.Both;
 
     public HabitDifficulty Difficulty { get; private set; } = HabitDifficulty.Easy;

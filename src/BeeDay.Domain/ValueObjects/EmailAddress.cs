@@ -15,7 +15,9 @@ public readonly record struct EmailAddress
         {
             throw new DomainValidationException("email", "Email is required.");
         }
-        if (normalized.Length > MaximumLength || !System.Net.Mail.MailAddress.TryCreate(normalized, out _))
+        if (normalized.Length > MaximumLength ||
+            !System.Net.Mail.MailAddress.TryCreate(normalized, out var parsed) ||
+            !string.Equals(parsed.Address, normalized, StringComparison.OrdinalIgnoreCase))
         {
             throw new DomainValidationException("email", "Email is invalid.");
         }

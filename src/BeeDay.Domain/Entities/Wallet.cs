@@ -6,6 +6,8 @@ namespace BeeDay.Domain.Entities;
 
 public sealed class Wallet : Entity
 {
+    private Wallet() { }
+
     public Guid UserId { get; private set; }
 
     public DateTimeOffset CreatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;

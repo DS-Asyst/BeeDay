@@ -28,7 +28,7 @@ em texto puro — apenas seu hash (`TokenHash`), gerado e verificado em Infrastr
 |---|---|
 | `static Create(userId, type, tokenHash, createdAtUtc, expiresAtUtc)` | Fábrica |
 | `IsExpired(nowUtc)` | `nowUtc >= ExpiresAtUtc` |
-| `EnsureCanBeUsed(expectedType, nowUtc)` | Lança se tipo errado, já usado, revogado, ou expirado |
+| `EnsureCanBeUsed(expectedType, nowUtc)` | Lança se tipo errado, já usado, revogado, anterior à criação ou expirado |
 | `MarkAsUsed(expectedType, usedAtUtc)` | Chama `EnsureCanBeUsed` internamente, depois define `UsedAtUtc` |
 | `Revoke(revokedAtUtc)` | No-op se já usado/revogado; valida `revokedAtUtc >= CreatedAtUtc` |
 
@@ -38,11 +38,12 @@ em texto puro — apenas seu hash (`TokenHash`), gerado e verificado em Infrastr
 2. **Tipo deve ser um `UserTokenType` válido**: checado via `Enum.IsDefined` diretamente em `Create`
    (não usa `EnumValidation.Defined` como o resto do Domain — inconsistência menor, não corrigida
    nesta Sprint por ser código, não documentação).
-3. **Expiração deve ser posterior à criação**: `expiresAtUtc <= createdAtUtc` lança
+3. **Criação deve ser informada**: `createdAtUtc == default` lança `DomainValidationException`.
+4. **Expiração deve ser posterior à criação**: `expiresAtUtc <= createdAtUtc` lança
    `DomainValidationException`.
-4. **Um token só pode ser usado uma vez, do tipo certo, e dentro da validade** — `EnsureCanBeUsed`
-   é o único portão de uso, checado nesta ordem: tipo → usado → revogado → expirado.
-5. **Revogação é idempotente e não retroativa**: `Revoke` não faz nada se já usado/revogado; lança
+5. **Um token só pode ser usado uma vez, do tipo certo, e dentro da validade** — `EnsureCanBeUsed`
+   é o único portão de uso, checado nesta ordem: tipo → usado → revogado → ainda não válido → expirado.
+6. **Revogação é idempotente e não retroativa**: `Revoke` não faz nada se já usado/revogado; lança
    se `revokedAtUtc < CreatedAtUtc`.
 
 ## Ownership
