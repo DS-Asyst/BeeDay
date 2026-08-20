@@ -77,6 +77,76 @@ public sealed class WalletTests(PlaywrightAppFixture fixture) : E2ETestBase(fixt
     }
 
     [Fact]
+    public async Task MinimumTransaction_CreateEditAndDeleteInPortuguese_KeepsCircuitInteractive()
+    {
+        var email = $"e2e-wallet-pt-br-{Guid.NewGuid():N}@beeday.invalid";
+        await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
+
+        await GotoAsync("/login");
+        await Page.GetByLabel("Email").FillAsync(email);
+        await Page.GetByLabel("Password").FillAsync(Password);
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
+        await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
+
+        await GotoAsync("/account");
+        await Page.GetByLabel("Language").SelectOptionAsync(new SelectOptionValue { Label = "Portuguese" });
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Save Preferences" }).ClickAsync();
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Minha Conta" })).ToBeVisibleAsync();
+
+        await GotoAsync("/wallet");
+        await Expect(Page.Locator(".wallet-page > .beeday-hero")).ToBeVisibleAsync();
+
+        var balance = Page.Locator(".wallet-summary__card--balance strong");
+        await Expect(balance).ToHaveTextAsync(new Regex(@"^\$\s*0,00$"));
+
+        var tagName = $"Tag {Guid.NewGuid():N}"[..16];
+        var tagDialog = Page.GetByRole(AriaRole.Dialog);
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Nova tag" }).ClickAsync();
+        await Expect(tagDialog).ToBeVisibleAsync();
+        await tagDialog.GetByLabel("Nome").FillAsync(tagName);
+        await tagDialog.GetByRole(AriaRole.Button, new() { Name = "Criar" }).ClickAsync();
+        await Expect(tagDialog).ToBeHiddenAsync();
+
+        const string description = "Receita minima E2E";
+        var transactionDialog = Page.GetByRole(AriaRole.Dialog);
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Nova transação" }).ClickAsync();
+        await Expect(transactionDialog).ToBeVisibleAsync();
+        await transactionDialog.GetByLabel("Descrição").FillAsync(description);
+        await transactionDialog.GetByLabel("Tipo").SelectOptionAsync(new SelectOptionValue { Label = "Receita" });
+        await transactionDialog.GetByLabel("Valor").FillAsync("0.01");
+        await transactionDialog.GetByLabel("Tag").SelectOptionAsync(new SelectOptionValue { Label = tagName });
+        await transactionDialog.GetByRole(AriaRole.Button, new() { Name = "Criar" }).ClickAsync();
+        await Expect(transactionDialog).ToBeHiddenAsync();
+
+        await Expect(balance).ToHaveTextAsync(new Regex(@"^\$\s*0,01$"));
+        await Expect(Page.Locator(".wallet-page")).ToHaveAttributeAsync("aria-busy", "false");
+
+        var transactionCard = Page.Locator($"[role='button'][aria-label^='Editar transação: {description}']");
+        await transactionCard.ClickAsync();
+        await Expect(transactionDialog).ToBeVisibleAsync();
+        await transactionDialog.GetByLabel("Valor").FillAsync("0.02");
+        await transactionDialog.GetByRole(AriaRole.Button, new() { Name = "Salvar" }).ClickAsync();
+        await Expect(transactionDialog).ToBeHiddenAsync();
+
+        await Expect(balance).ToHaveTextAsync(new Regex(@"^\$\s*0,02$"));
+        await Expect(Page.Locator(".wallet-page")).ToHaveAttributeAsync("aria-busy", "false");
+
+        await transactionCard.ClickAsync();
+        await Expect(transactionDialog).ToBeVisibleAsync();
+        await transactionDialog.GetByRole(AriaRole.Button, new() { Name = "Excluir", Exact = true }).ClickAsync();
+        await Expect(transactionDialog).ToBeHiddenAsync();
+
+        var confirmation = Page.GetByRole(AriaRole.Alertdialog);
+        await Expect(confirmation).ToBeVisibleAsync();
+        await confirmation.GetByRole(AriaRole.Button, new() { Name = "Excluir transação" }).ClickAsync();
+        await Expect(confirmation).ToBeHiddenAsync();
+
+        await Expect(balance).ToHaveTextAsync(new Regex(@"^\$\s*0,00$"));
+        await Expect(transactionCard).ToHaveCountAsync(0);
+        await Expect(Page.Locator(".wallet-page")).ToHaveAttributeAsync("aria-busy", "false");
+    }
+
+    [Fact]
     public async Task Hero_IsRoughlyHalfTheHeightOfTheBrandGuidelinesHeroAndWorksWithoutAnIllustration()
     {
         // EPIC 27 Sprint 27.11 acceptance: "Hero não ocupa a altura completa de Brand guidelines;

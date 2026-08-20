@@ -8,7 +8,7 @@ public sealed class TransactionFormModel
     [Required, StringLength(120, MinimumLength = 2)]
     public string Description { get; set; } = string.Empty;
 
-    [Range(typeof(decimal), "0.01", "999999999999")]
+    [Range(typeof(decimal), "0.01", "999999999999", ParseLimitsInInvariantCulture = true)]
     public decimal Amount { get; set; }
 
     public TransactionType Type { get; set; } = TransactionType.Expense;
