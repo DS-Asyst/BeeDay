@@ -1,169 +1,204 @@
 # Operations
 
-**Fonte da verdade:** verificado diretamente em `scripts/Deploy-BeeDay.ps1`,
-`src/BeeDay.Infrastructure/Persistence/SqlServer/Migrations/`,
-`src/BeeDay.Infrastructure/Persistence/SqlServer/BeeDayDbContextFactory.cs`, `BeeDay.slnx`,
-histórico de commits (`git log`).
+**Fonte da verdade:** `.github/workflows/ci.yml`, `.github/workflows/deploy-hmg.yml`,
+`.github/workflows/verify-hmg.yml`, `scripts/Deploy-BeeDay.ps1`, scripts sob
+`scripts/iis-control/`, migrations versionadas e evidência não sensível dos GitHub Actions.
 
-**Última verificação:** 2026-08-07.
+**Última verificação:** 2026-08-20, Sprint 30.3.
 
 ## 1. Objetivo
 
-Documentar os procedimentos operacionais reais deste repositório: o que `Deploy-BeeDay.ps1`
-realmente faz como backup/restore, como migrations são aplicadas, e como uma release é versionada e
-publicada — sem inventar um procedimento que o código não implementa.
+Documentar o fluxo operacional real de HMG: proveniência do artefato, configuração obrigatória,
+migrations, IIS, health checks, backup e rollback. Valores de secrets não fazem parte deste
+documento e não devem ser extraídos para comprovação operacional.
 
-## 2. Backup
+## 2. Proveniência reproduzível do artefato em HMG
 
-**Único mecanismo de backup do repositório**: `Deploy-BeeDay.ps1`, executado automaticamente antes
-de cada deploy (não como uma rotina agendada separada — não foi encontrada nenhuma Scheduled
-Task/cron/workflow de backup independente do deploy):
+Um push em `hmg` dispara `deploy-hmg.yml`. O workflow não recompila o merge e não aceita um
+artefato escolhido apenas pelo nome da branch. Ele:
+
+1. resolve o PR associado ao commit de merge em `hmg` e exige que o PR tenha como origem este
+   mesmo repositório;
+2. obtém o `head_sha` validado desse PR;
+3. localiza uma execução bem-sucedida de `ci.yml`, evento `pull_request`, com o mesmo `head_sha`;
+4. baixa dessa execução os artifacts `beeday-publish` e `beeday-migrations`, com verificação de
+   digest pelo GitHub Actions;
+5. implanta o publish e executa o EF bundle correspondente;
+6. publica `beeday-hmg-deployment-info`, contendo `mergeSha`, `sourceSha`, `pullRequest`,
+   `validationRunId`, `workflowRun`, ambiente, resultado e timestamp;
+7. `verify-hmg.yml` consome esse registro, lê o `sourceSha` implantado e só então executa readiness
+   e smoke test.
+
+O contrato completo e o procedimento de auditoria estão em
+[`12-artifact-provenance.md`](12-artifact-provenance.md).
+
+### Evidência operacional de 2026-08-20
+
+| Elo | Evidência |
+|---|---|
+| PR validado | PR #266, `head_sha` `069ad8465a684c5e5c5e6641cd97928a598ce437` |
+| CI de origem | run `32385656296`, conclusão `success` |
+| Publish | artifact `beeday-publish`, digest `sha256:45fd08cbe22792421eb8aa12a42dfd3cee0bae859775520ff41c78fa65a9b616` |
+| Migrations | artifact `beeday-migrations`, digest `sha256:79e1af27d8f0dc7870a58bb82ddee5f8fe9152e59a73b8781e905714d7316d7c` |
+| Merge em HMG | `9b87ff2c05d9715dc7026879b59c866bccc2c372` |
+| Deploy | run `32390796350`, conclusão `success` |
+| Registro | artifact `beeday-hmg-deployment-info`; `sourceSha` confirmado pela verificação |
+| Pós-deploy | run `32391001814`, conclusão `success` |
+
+Essa cadeia prova qual código validado originou o artefato implantado, mesmo quando o SHA do merge
+em `hmg` é diferente do SHA da branch do PR.
+
+## 3. Banco e migrations
+
+O repositório possui uma migration EF Core, `20260803111144_InitialCreate`, e seu model snapshot.
+O CI gera `efbundle.exe` a partir do mesmo SHA que gera o publish. Em HMG, o workflow passa uma
+credencial exclusiva de migração ao bundle e uma credencial de aplicação separada ao App Pool;
+nenhuma delas é gravada no artifact ou exibida em logs.
+
+Na evidência operacional acima, o bundle retornou:
+
+```text
+No migrations were applied. The database is already up to date.
+```
+
+O quality gate local também retornou
+`No changes have been made to the model since the last migration.`. Em conjunto com readiness SQL
+HTTP 200 após o deploy, isso confirma que o modelo versionado, o histórico EF de HMG e o runtime
+implantado estavam compatíveis nessa execução. A auditoria não fez consulta ad hoc às tabelas de
+negócio nem leu dados de HMG.
+
+O comando local canônico é:
+
+```powershell
+dotnet ef migrations has-pending-model-changes `
+  --project src/BeeDay.Infrastructure `
+  --startup-project src/BeeDay.Infrastructure
+```
+
+## 4. Configuração obrigatória sem exposição de secrets
+
+O GitHub Environment `homologation` possui os oito nomes exigidos pelo workflow:
+
+- `BEEDAY_ALLOWED_HOSTS`;
+- `BEEDAY_APP_CONNECTION`;
+- `BEEDAY_HMG_ALLOWED_RECIPIENTS`;
+- `BEEDAY_MIGRATOR_CONNECTION`;
+- `BEEDAY_PUBLIC_BASE_URL`;
+- `BEEDAY_RESEND_API_KEY`;
+- `BEEDAY_RESEND_FROM_ADDRESS`;
+- `BEEDAY_RESEND_FROM_NAME`.
+
+A API do GitHub expõe somente nomes e timestamps, nunca os valores. O deploy observado configurou
+dez variáveis permitidas no App Pool e iniciou a aplicação com sucesso. Isso comprova presença,
+aceitação pelo allowlist do controle privilegiado e suficiência para o startup; não comprova nem
+deve revelar os valores.
+
+O estado versionado de provider de e-mail e comentários históricos ainda divergentes pertence ao
+finding `BD30-F006`, atribuído à Sprint 30.25.
+
+## 5. Contrato IIS de HMG
+
+| Item | Contrato atual |
+|---|---|
+| Site | `BeeDay-HMG` |
+| App Pool | `BeeDay-Web-AppPool` |
+| Destino | `C:\Apps\BeeDay.Web` |
+| Ambiente | `Homologation` |
+| Readiness | `https://h-beeday.com.br/health/ready` |
+| Dados externos | `C:\Apps\BeeDay-Data` |
+| Backups | `C:\Apps\BeeDay-Backups` |
+
+O runner de baixo privilégio não manipula diretamente `applicationHost.config`. Operações
+`STOP`, `CONFIGURE`, `START` e `RESTORE` usam o protocolo de requests e Scheduled Tasks descrito em
+[`05-privileged-iis-control.md`](05-privileged-iis-control.md).
+
+No deploy `32390796350`, as três operações executadas retornaram `exitCode=0`; `STOP` convergiu site
+e pool para `Stopped`, `CONFIGURE` preservou esse estado, e `START` convergiu ambos para `Started`.
+
+## 6. Health checks
+
+Há duas camadas complementares:
+
+- `Deploy-BeeDay.ps1` chama `/health/ready` depois de iniciar o IIS. Falha após seis tentativas
+  aciona rollback;
+- `verify-hmg.yml`, disparado somente após deploy bem-sucedido, repete `/health/ready` e faz smoke
+  em `/login`, exigindo HTTP 200 e o marcador esperado da aplicação.
+
+Na evidência de 2026-08-20, readiness passou na primeira tentativa com HTTP 200 e `/login` retornou
+HTTP 200 com conteúdo esperado. `/health/ready` inclui o `SqlServerHealthCheck`, portanto testa
+conectividade do runtime com SQL Server, não apenas disponibilidade do processo web.
+
+## 7. Backup e rollback
+
+Antes de migrations ou substituição do publish, o script cria:
 
 ```text
 C:\Apps\BeeDay-Backups\
-├── Application\BeeDay-{yyyyMMdd-HHmmss}\   cópia completa de C:\Apps\BeeDay antes de substituir
-└── Data\BeeDay-Data-{yyyyMMdd-HHmmss}\      cópia completa de C:\Apps\BeeDay-Data\Data antes do deploy
+|-- Application\BeeDay-{yyyyMMdd-HHmmss}\
+`-- Data\BeeDay-Data-{yyyyMMdd-HHmmss}\
 ```
 
-Ambos os backups são cópias de arquivo simples (`Copy-Item -Recurse`), não um mecanismo de backup de
-banco de dados — **o backup de dados do script cobre apenas o diretório `Data` (Event Journal e
-afins), nunca o banco SQL Server em si**. Não há `BACKUP DATABASE`/backup nativo do SQL Server
-acionado por nenhum script deste repositório — se existe uma rotina de backup do banco (Manutenção
-de Plano do SQL Server Agent, Azure Backup, etc.), ela vive fora deste repositório e não é
-verificável a partir do código-fonte.
+O deploy observado criou ambos os backups. O diretório `Application` contém a versão anterior de
+`C:\Apps\BeeDay.Web`; `Data` protege especificamente `C:\Apps\BeeDay-Data\Data`. Event Journal,
+chaves de Data Protection, e-mails e logs ficam em diretórios externos irmãos e não fazem parte
+desse backup `Data`. Nenhuma rotina versionada expurga esses diretórios antigos.
 
-**Retenção**: nenhuma. Cada deploy cria um novo diretório com timestamp; nada no script remove
-backups antigos — o diretório `C:\Apps\BeeDay-Backups\` cresce indefinidamente a cada deploy, sem
-rotação/expurgo automatizado.
+Se uma etapa falhar, o rollback automático:
 
-## 3. Restore
+1. para site e App Pool;
+2. restaura a configuração anterior do App Pool correlacionada à tentativa atual;
+3. restaura os arquivos da aplicação;
+4. reinicia IIS;
+5. exige readiness saudável da versão restaurada;
+6. mantém a execução como falha e preserva o erro original.
 
-Dois caminhos distintos, ambos dentro do próprio `Deploy-BeeDay.ps1`:
+As suites de regressão do deploy exercitam esse caminho antes de tocar IIS ou SQL reais.
 
-### 3.1 Rollback automático (durante um deploy que falha)
+### Limites conhecidos
 
-Se qualquer etapa entre parar o IIS e o health check pós-deploy lançar uma exceção, o script:
-1. Para o IIS novamente.
-2. Restaura os arquivos de aplicação a partir do backup feito no início desta mesma execução
-   (`$applicationBackupPath`).
-3. Reinicia o IIS e roda o health check de novo.
-4. Propaga o erro original mesmo se o rollback foi bem-sucedido (`throw` no `catch` externo) —
-   quem invoca o script (o job `deploy` do workflow) sempre vê a execução como falha, mesmo que o
-   site tenha voltado a ficar saudável.
+- o rollback automático não restaura o diretório `Data`; ele apenas preserva e reporta o backup;
+- o rollback automático não desfaz migrations;
+- `Deploy-BeeDay.ps1` oferece `-BackupDatabase`, mas `deploy-hmg.yml` não habilita essa opção e não
+  existe evidência versionada de um backup SQL externo associado ao deploy;
+- não existe restore automatizado de um backup histórico nem política versionada de retenção.
 
-**O que o rollback automático não faz**: reverter uma migration de banco aplicada, restaurar
-`Data` a partir do backup (o backup de dados é feito mas nunca copiado de volta automaticamente —
-só reportado como disponível: `"Persistent data was not replaced. Backup available at: ..."`).
+As lacunas de proteção SQL/migration e retenção estão registradas no Audit Ledger como
+`BD30-F016` e `BD30-F017`, atribuídas à Sprint 30.25. Habilitar `BACKUP DATABASE` exige antes um
+diretório no SERV4SQL, permissões mínimas e política de retenção; não deve ser improvisado por uma
+auditoria documental.
 
-### 3.2 Restore manual (não automatizado)
-
-Não há script neste repositório para restaurar um backup de aplicação ou de dados fora do fluxo de
-rollback automático de um deploy em andamento — restaurar um backup de uma execução anterior (ex.:
-"voltar para o deploy de 3 dias atrás") exigiria copiar manualmente
-`C:\Apps\BeeDay-Backups\Application\BeeDay-{timestamp}` de volta para `C:\Apps\BeeDay` e reiniciar o
-IIS à mão; nenhum script automatiza esse cenário.
-
-## 4. Recovery — o que falha se os caminhos de dados estiverem errados
-
-`appsettings.Production.json` já foi corrigido na Sprint 18.4 para usar `C:\Apps\BeeDay-Data\...`,
-consistente com o que `Deploy-BeeDay.ps1` provisiona — mas isso é reconciliação de nomenclatura, não
-prova de funcionamento real: **PRD não está provisionado hoje** (decisão arquitetural, ver
-[`02-runtime-configuration.md`](02-runtime-configuration.md) §5.1), então nenhum disaster recovery
-real de produção foi ou pode ser exercitado a partir deste arquivo ainda. Quando PRD for
-provisionado, `Deploy-BeeDay.ps1` continua sem validar que os caminhos internos da configuração da
-aplicação batem com os caminhos externos que ele mesmo prepara — vale revalidar isso no momento do
-provisionamento real, não assumir que a correção de nomenclatura desta Sprint já cobre o cenário.
-
-Para HMG, o mesmo tipo de divergência (`stdout` em `web.config` apontando para `LevelUp-Data`
-enquanto `Deploy-BeeDay.ps1` só protege `BeeDay-Data`) foi confirmado ativo em produção real (Sprint
-18.4 verificou Runtime State em SERV3WEB) e corrigido no repositório — migração operacional
-(promoção + validação pós-deploy) ainda pendente, path antigo não apagado.
-
-## 5. Migrations
-
-**Uma única migration existe**: `20260803111144_InitialCreate.cs` — consistente com a decisão de
-banco greenfield (ADR-002: sem migração de dados legados, banco começa vazio). Aplicada:
-
-- **Em produção/deploy**: não há um step explícito de `dotnet ef database update` em nenhum dos 2
-  workflows nem em `Deploy-BeeDay.ps1` — não confirmado nesta auditoria como/quando a migration é
-  aplicada ao banco de produção real (`SqlServerOptions.ConnectionString` de produção). Pode ser
-  aplicada manualmente, por um mecanismo fora deste repositório, ou (menos provável, não confirmado)
-  automaticamente pelo próprio `BeeDayDbContext`.
-- **Em testes** (`EfLocalDbTestBase`, ver [`docs/testing/01-testing-strategy.md`](../testing/01-testing-strategy.md)
-  §4): `Database.MigrateAsync()` explícito, contra um banco LocalDB descartável por teste.
-- **Verificação de deriva** (executada nesta Sprint como parte do quality gate): `BeeDay.Web` **não**
-  referencia `Microsoft.EntityFrameworkCore.Design` (confirmado — `dotnet ef` recusa usá-lo como
-  `--startup-project`); o comando correto usa `BeeDay.Infrastructure` como projeto e startup-project
-  ao mesmo tempo:
-
-  ```powershell
-  dotnet ef migrations has-pending-model-changes `
-    --project src/BeeDay.Infrastructure/BeeDay.Infrastructure.csproj `
-    --startup-project src/BeeDay.Infrastructure/BeeDay.Infrastructure.csproj
-  ```
-
-  Resultado desta Sprint: **"No changes have been made to the model since the last migration."** —
-  `InitialCreate` reflete exatamente o modelo atual, sem deriva.
-- **Em design-time** (`dotnet ef migrations add`/`dotnet ef database update` executados por um
-  desenvolvedor): `BeeDayDbContextFactory` (`IDesignTimeDbContextFactory<BeeDayDbContext>`)
-  constrói o `DbContext` sem subir o host completo do `BeeDay.Web` (evita as guardas de produção,
-  rate limiter, etc.), usando a variável de ambiente `BEEDAY_DESIGNTIME_CONNECTION` ou, na
-  ausência dela, o fallback hardcoded `Server=(localdb)\mssqllocaldb;Database=BeeDayDev;...`.
-
-## 6. Versionamento e branches
-
-`git log` confirma o padrão: commits marcados por EPIC/Sprint (ex. "EPIC 16 — ...", "Sprint 16.7"),
-sem tags de versão semântica (`git tag` não inspecionado nesta auditoria como parte do escopo, mas
-nenhum `CHANGELOG.md` com números de versão formais foi encontrado além de
-`docs/CHANGELOG.md`, cujo conteúdo não foi lido nesta Sprint). Branches: `prd` (produção, protegida
-— `deploy-prd.yml` só implanta a partir dela), `hmg` (integração/homologação, alvo de PR e do
-`ci.yml`), branches de feature temporárias (convenção, não impor por nenhum workflow deste
-repositório).
-
-## 7. Processo de release
+## 8. Fluxo atual de HMG
 
 ```mermaid
 flowchart LR
-    Feature[branch de feature] -->|PR| HMG[hmg]
-    HMG -->|ci.yml valida PR| HMG
-    HMG -->|push direto ou merge de PR| CIHmg["ci.yml valida push em hmg\n(sem deploy)"]
-    HMG -->|PR aprovado| PRD[prd]
-    PRD -->|push| DeployPrd["deploy-prd.yml\nvalidate -> deploy"]
-    DeployPrd -->|environment: production\npossível aprovação manual do GitHub| Runner[Runner self-hosted SERV3-WEB1]
-    Runner --> Live[BeeDay em produção]
+    Branch[branch de Sprint] -->|PR para hmg| CI[Pull Request Validation]
+    CI -->|success + merge| HMG[hmg]
+    HMG --> Deploy[HMG Deployment]
+    Deploy -->|artifacts do head_sha validado| IIS[IIS BeeDay-HMG]
+    IIS --> Verify[HMG Verification]
+    Verify --> Ready[readiness + smoke]
 ```
 
-Não há evidência de um workflow de deploy para `hmg` — merges/pushes em `hmg` só passam pela
-validação de `ci.yml` (build+test+publish+validação de artefato), nunca implantados automaticamente
-em nenhum ambiente por este repositório. Se HMG é implantado, é por um processo fora deste
-repositório — ver achado em [`01-deployment.md`](01-deployment.md) §6.
+Promotion para `main`/`prd` e deploy de produção são fluxos separados e não foram executados nesta
+auditoria.
 
-## 8. Manutenção
+## 9. Manutenção e evidência operacional
 
-Nenhuma rotina de manutenção agendada (índice, estatísticas do SQL Server, limpeza do Event
-Journal, expurgo de backups) foi encontrada em nenhum script ou workflow deste repositório —
-tudo listado abaixo é uma tarefa manual, não automatizada:
+- backups de aplicação/dados não têm expurgo automático versionado;
+- `Clear-BeeDayStdoutLogs.ps1` possui testes de parsing, retenção, idempotência e `-WhatIf`;
+- Event Journal, índices/estatísticas SQL e renovação de certificado dependem de contratos próprios
+  ou operação externa, conforme os runbooks específicos;
+- logs e artifacts de GitHub Actions têm retenção finita; os IDs acima são evidência histórica,
+  enquanto o método de proveniência é o contrato durável.
 
-- Expurgo de `C:\Apps\BeeDay-Backups\` (sem retenção — ver §2).
-- Rotação/arquivamento de `BeeDayEvents.ndjson` (cresce indefinidamente — ver
-  [`03-observability.md`](03-observability.md) §4).
-- Rotação do log de stdout do IIS (`stdoutLogFile`, ver
-  [`02-runtime-configuration.md`](02-runtime-configuration.md) §5) — o módulo `AspNetCoreModuleV2`
-  tem sua própria política de rotação por tamanho, não configurada explicitamente em `web.config`
-  deste repositório (usa o padrão do módulo).
-- Renovação de certificado TLS/HTTPS do IIS — fora do escopo deste repositório (gerenciado no
-  próprio IIS/Windows Server).
+## 10. Fontes consultadas
 
-## 9. Fontes consultadas
-
-- `scripts/Deploy-BeeDay.ps1` (backup, rollback, health check).
-- `src/BeeDay.Infrastructure/Persistence/SqlServer/Migrations/20260803111144_InitialCreate.cs`,
-  `BeeDayDbContextFactory.cs`.
-- `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure/... --startup-project src/BeeDay.Infrastructure/...`,
-  executado nesta sessão (confirma ausência de deriva de modelo).
-- `.github/workflows/ci.yml`, `deploy-prd.yml`.
-- `git log --oneline` (padrão de commit/branch).
-- [`docs/adr/ADR-002-greenfield-database.md`](../adr/ADR-002-greenfield-database.md) (decisão de
-  banco greenfield, referenciada não re-explicada).
-- [`02-runtime-configuration.md`](02-runtime-configuration.md), [`03-observability.md`](03-observability.md),
-  [`docs/infrastructure/README.md`](../infrastructure/README.md).
+- `.github/workflows/ci.yml`, `deploy-hmg.yml`, `verify-hmg.yml`;
+- `scripts/Deploy-BeeDay.ps1` e `scripts/iis-control/`;
+- `scripts/tests/`;
+- `src/BeeDay.Infrastructure/Persistence/SqlServer/Migrations/`;
+- `src/BeeDay.Infrastructure/HealthChecks/SqlServerHealthCheck.cs`;
+- [`05-privileged-iis-control.md`](05-privileged-iis-control.md);
+- [`10-hmg-deployment-verification.md`](10-hmg-deployment-verification.md);
+- [`12-artifact-provenance.md`](12-artifact-provenance.md);
+- GitHub Actions runs `32385656296`, `32390796350` e `32391001814`.
