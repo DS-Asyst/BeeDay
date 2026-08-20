@@ -2,6 +2,7 @@
 @page "/settings"
 @attribute [Authorize]
 @rendermode InteractiveServer
+@implements IDisposable
 @using BeeDay.Web.Components.Features.Account.Components
 @using BeeDay.Web.Components.Features.Account.Models
 @using BeeDay.Web.Localization
@@ -51,6 +52,7 @@
     private readonly ProfileFormModel _profile = new();
     private readonly SecurityFormModel _security = new();
     private readonly PreferencesFormModel _preferences = new();
+    private readonly CancellationTokenSource _cts = new();
     private UserLanguage _initialLanguage;
     private bool _isLoading = true;
     private bool _profileBusy;
@@ -58,12 +60,18 @@
     private bool _preferencesBusy;
     private bool IsAnyBusy => _profileBusy || _securityBusy || _preferencesBusy;
 
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+
     protected override async Task OnInitializedAsync()
     {
         try
         {
             await UserInitializer.EnsureInitializedAsync();
-            var user = await Store.GetCurrentUserAsync();
+            var user = await Store.GetCurrentUserAsync(_cts.Token);
             if (user is not { HasProfile: true })
             {
                 Navigation.NavigateTo("/profile/create", true);
@@ -76,6 +84,9 @@
             _preferences.Language = user.Language;
             _preferences.Theme = user.Theme;
             _initialLanguage = user.Language;
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
         }
         catch (Exception ex)
         {
@@ -93,8 +104,11 @@
         _profileBusy = true;
         try
         {
-            await Store.UpdateUserAsync(_profile.Name.Trim(), _profile.Email.Trim());
+            await Store.UpdateUserAsync(_profile.Name.Trim(), _profile.Email.Trim(), _cts.Token);
             Toast.ShowSuccess(Localizer["ToastProfileSavedMessage"], Localizer["ToastProfileSavedTitle"]);
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
         }
         catch (Exception ex)
         {
@@ -112,9 +126,12 @@
         _securityBusy = true;
         try
         {
-            await Store.ChangePasswordAsync(_security.CurrentPassword, _security.NewPassword, _security.ConfirmNewPassword);
+            await Store.ChangePasswordAsync(_security.CurrentPassword, _security.NewPassword, _security.ConfirmNewPassword, _cts.Token);
             _security.Clear();
             Toast.ShowSuccess(Localizer["ToastPasswordChangedMessage"], Localizer["ToastPasswordChangedTitle"]);
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
         }
         catch (Exception ex)
         {
@@ -132,7 +149,7 @@
         _preferencesBusy = true;
         try
         {
-            await Store.UpdatePreferencesAsync(_preferences.Language, _preferences.Theme);
+            await Store.UpdatePreferencesAsync(_preferences.Language, _preferences.Theme, _cts.Token);
 
             if (_preferences.Language != _initialLanguage)
             {
@@ -145,6 +162,9 @@
             }
 
             Toast.ShowSuccess(Localizer["ToastPreferencesSavedMessage"], Localizer["ToastPreferencesSavedTitle"]);
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
         }
         catch (Exception ex)
         {
