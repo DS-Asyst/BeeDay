@@ -98,10 +98,7 @@ public sealed class VisualFoundationTests(PlaywrightAppFixture fixture) : E2ETes
         var email = $"e2e-foundations-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
 
-        await GotoAsync("/login");
-        await Page.GetByLabel("Email").FillAsync(email);
-        await Page.GetByLabel("Password").FillAsync(Password);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
+        await SubmitLoginAsync(email, Password);
         await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
         await GotoAsync("/daily");
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);

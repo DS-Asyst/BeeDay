@@ -78,10 +78,7 @@ public sealed class AccessibilityQualityTests(PlaywrightAppFixture fixture) : E2
         var email = $"e2e-axe-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
 
-        await GotoAsync("/login");
-        await Page.GetByLabel("Email").FillAsync(email);
-        await Page.GetByLabel("Password").FillAsync(Password);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
+        await SubmitLoginAsync(email, Password);
         await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
     }

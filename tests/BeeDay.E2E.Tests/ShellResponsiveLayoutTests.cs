@@ -128,10 +128,7 @@ public sealed class ShellResponsiveLayoutTests(PlaywrightAppFixture fixture) : E
     {
         var email = $"e2e-shell-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
-        await GotoAsync("/login");
-        await Page.GetByLabel("Email").FillAsync(email);
-        await Page.GetByLabel("Password").FillAsync(Password);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
+        await SubmitLoginAsync(email, Password);
         await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
         await GotoAsync("/daily");
     }

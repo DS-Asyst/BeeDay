@@ -131,10 +131,7 @@ public sealed class NavigationTests(PlaywrightAppFixture fixture) : E2ETestBase(
 
     private async Task LoginAsync(string email)
     {
-        await GotoAsync("/login");
-        await Page.GetByLabel("Email").FillAsync(email);
-        await Page.GetByLabel("Password").FillAsync(Password);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
+        await SubmitLoginAsync(email, Password);
         await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
         await GotoAsync("/daily");
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);

@@ -30,9 +30,7 @@ public sealed class Epic21ConsolidationTests(PlaywrightAppFixture fixture) : E2E
 
         var email = $"e2e-epic21-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
-        await Page.GetByLabel("Email").FillAsync(email);
-        await Page.GetByLabel("Password").FillAsync(Password);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
+        await SubmitLoginAsync(email, Password);
         await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
