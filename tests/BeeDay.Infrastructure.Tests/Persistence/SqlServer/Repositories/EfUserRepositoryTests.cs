@@ -1,4 +1,6 @@
 using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Experience;
 using BeeDay.Infrastructure.Persistence.Exceptions;
 using BeeDay.Infrastructure.Persistence.SqlServer.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -86,6 +88,83 @@ public sealed class EfUserRepositoryTests : EfLocalDbTestBase
 
         var loaded = await repository.GetByIdAsync(user.Id, cancellationToken);
         Assert.Equal("Augusta Ada King", loaded!.Name);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_MutationGrantsExperience_PersistsTheExperienceEntry()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfUserRepository(ContextFactory);
+        var user = User.Create("Marie Curie", "marie@example.com");
+        await repository.AddAsync(user, cancellationToken);
+        var sourceId = Guid.NewGuid();
+
+        await repository.UpdateAsync(user.Id, u => u.TryAddExperience(
+            ExperienceReward.Create(7),
+            ExperienceSource.Create(ExperienceSourceType.Todo, sourceId),
+            ExperienceRewardType.Completion), cancellationToken);
+
+        await using var context = await ContextFactory.CreateDbContextAsync(cancellationToken);
+        var entries = await context.ExperienceEntries
+            .Where(entry => entry.UserId == user.Id)
+            .ToListAsync(cancellationToken);
+        Assert.Single(entries);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_MutationGrantsExperienceTwiceForTheSameSourceAcrossSeparateCalls_GrantsOnlyOnce()
+    {
+        // Reproduces re-toggling an already-once-completed Todo/Task/Project complete again: two
+        // independent UpdateAsync calls (each its own User load, as a real repeat HTTP request would
+        // be), granting experience for the exact same (SourceType, SourceId, RewardType) both times.
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfUserRepository(ContextFactory);
+        var user = User.Create("Rosalind Franklin", "rosalind@example.com");
+        await repository.AddAsync(user, cancellationToken);
+        var sourceId = Guid.NewGuid();
+
+        async Task GrantAsync() => await repository.UpdateAsync(user.Id, u => u.TryAddExperience(
+            ExperienceReward.Create(7),
+            ExperienceSource.Create(ExperienceSourceType.Todo, sourceId),
+            ExperienceRewardType.Completion), cancellationToken);
+
+        await GrantAsync();
+        await GrantAsync();
+
+        var loaded = await repository.GetByIdAsync(user.Id, cancellationToken);
+        await using var context = await ContextFactory.CreateDbContextAsync(cancellationToken);
+        var entries = await context.ExperienceEntries
+            .Where(entry => entry.UserId == user.Id)
+            .ToListAsync(cancellationToken);
+
+        Assert.Equal(7, loaded!.Experience.TotalExperience);
+        Assert.Single(entries);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_MutationGrantsExperienceForTheSameHabitAcrossSeparateCalls_GrantsEveryTime()
+    {
+        // Habit rewards are deliberately exempt from the (SourceType, SourceId) dedup rule — each call
+        // supplies a fresh source id (ExperienceRewardService.Grant for ExperienceSourceType.Habit uses
+        // Guid.NewGuid(), never the Habit's own id), and the database's UX_ExperienceEntries_Dedup index
+        // is filtered to exclude SourceType = Habit for the same reason. Hydration must not turn this
+        // into a false-positive duplicate.
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new EfUserRepository(ContextFactory);
+        var user = User.Create("Barbara McClintock", "barbara@example.com");
+        await repository.AddAsync(user, cancellationToken);
+
+        async Task RegisterHabitAsync() => await repository.UpdateAsync(user.Id, u => u.TryAddExperience(
+            ExperienceReward.Create(1),
+            ExperienceSource.Create(ExperienceSourceType.Habit, Guid.NewGuid()),
+            ExperienceRewardType.Completion), cancellationToken);
+
+        await RegisterHabitAsync();
+        await RegisterHabitAsync();
+        await RegisterHabitAsync();
+
+        var loaded = await repository.GetByIdAsync(user.Id, cancellationToken);
+        Assert.Equal(3, loaded!.Experience.TotalExperience);
     }
 
     [Fact]
