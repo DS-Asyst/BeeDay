@@ -52,7 +52,7 @@ todo achado termine como `FIXED`, `VERIFIED` ou `ACCEPTED RISK`.
 | INV-001 | Governança e raiz | 10 arquivos na raiz, incluindo `CLAUDE.md`, solução, contratos de build e manifesto de ferramentas | `VERIFIED` | 30.1 |
 | INV-002 | Solução e dependências | 9 projetos: 4 em `src/` e 5 em `tests/`; referências preservam `Domain <- Application <- Infrastructure <- Web` | `VERIFIED` | 30.9 |
 | INV-003 | Domain | 47 arquivos rastreados e auditados integralmente; inventário por artefato em `docs/domain/audit-inventory.md`; guards rejeitam dependências de framework/camadas superiores | `VERIFIED` | 30.5 |
-| INV-004 | Application | 95 arquivos rastreados; 10 diretórios de Feature; nenhuma referência a Infrastructure, Web ou EF Core | `BASELINED` | 30.6 |
+| INV-004 | Application | 95 arquivos rastreados; 10 diretórios de Feature; nenhuma referência a Infrastructure, Web ou EF Core | `VERIFIED` | 30.6 |
 | INV-005 | Infrastructure | 58 arquivos rastreados; SQL Server, serviços técnicos, DI, health checks e configuração | `BASELINED` | 30.7 |
 | INV-006 | Persistência e migrations | um `BeeDayDbContext`, uma migration versionada e o model snapshot, em 3 arquivos de migration | `BASELINED` | 30.7 |
 | INV-007 | Web e composição | 460 arquivos rastreados; 17 diretórios de Feature; nenhum acesso direto a `BeeDayDbContext` | `BASELINED` | 30.8 |
@@ -130,7 +130,8 @@ atuais vivem em Domain.Tests e Application.Tests.
 |---|---|---|---|---|
 | BD30-F001 | média | `docs/testing/README.md` e `01-testing-strategy.md` registram 1.116 testes (93/73/129/741/80); o baseline atual executou 1.443 (93/85/212/861/192) | `OPEN` | 30.24 |
 | BD30-F002 | média | `docs/web/02-routing-and-pages.md` registra 42 rotas; a busca atual encontrou 54 declarações `@page` | `OPEN` | 30.17 |
-| BD30-F003 | baixa | `docs/application/README.md` declara 9 Features, mas enumera e o repositório contém 10 diretórios | `OPEN` | 30.6 |
+| BD30-F003 | baixa | `docs/application/README.md` declara 9 Features, mas enumera e o repositório contém 10 diretórios | `FIXED` | 30.6 |
+| BD30-F031 | média | 17 dos 27 handlers de Application não tinham teste direto em `tests/BeeDay.Application.Tests` (confirmado por busca de referência), incluindo dois handlers multi-write com transação (`UpdateTodoCommandHandler` no branch cross-Project, `UpdateTransactionCommandHandler`, `DeleteTransactionCommandHandler`) cuja correção de fronteira transacional só era provada por inspeção de código | `FIXED` | 30.6 |
 | BD30-F004 | baixa | `docs/architecture/02-solution-structure.md` descreve Solution Items antigos (`docs/ai` e `docs/development`); `BeeDay.slnx` aponta atualmente para `docs/developer/README.md` e outros itens existentes | `OPEN` | 30.28 |
 | BD30-F005 | baixa | 27 referências, em 19 arquivos de código/teste, apontam para 7 caminhos de documentação removidos ou movidos | `OPEN` | 30.26 |
 | BD30-F006 | alta | o estado versionado de HMG seleciona Resend (`true`) e Development (`false`), enquanto `docs/deployment/01-deployment.md` e `02-runtime-configuration.md` ainda descrevem a seleção inversa; o runbook mais novo distingue corretamente repository state de runtime state | `OPEN` | 30.25 |
@@ -449,3 +450,93 @@ versionado de Application/Infrastructure, e então executou os gates acima do ze
 permaneceu modificado na árvore de trabalho antes desta Sprint (reescrita de governança alheia ao
 escopo do Domain audit) e foi deliberadamente mantido fora do commit da Sprint 30.5, junto com os
 diretórios locais `.claude/`, `.agents/`, `.codex/`, o arquivo `AGENTS.md` e `.github/upgrades/`.
+
+## 13. Sprint 30.6 — Application / CQRS Complete Audit
+
+### 13.1 Inventário e fronteiras
+
+Os 11 arquivos de Handlers (1.387 linhas) e os 9 contratos em `Common/Contracts/` (8 repositórios +
+`IUnitOfWork`) foram auditados integralmente contra os critérios do Issue #203: autorização/
+ownership, cancellation token, acoplamento a Infrastructure/UI, fronteira transacional, duplicação/
+tamanho de handler, semântica de exceção e contrato de resposta. `INV-004` passa a `VERIFIED`.
+
+Resultado: zero violação confirmada em qualquer uma das sete categorias. Toda operação por Id
+resolve `userId` via `CurrentUserGuard.RequireUserId` e escopa a busca pelo repositório
+correspondente; nenhum `CancellationToken.None` aparece em `src/BeeDay.Application`; nenhum arquivo
+referencia `Microsoft.EntityFrameworkCore`, `Microsoft.AspNetCore.*` ou tipo de Infrastructure/Web;
+todo handler multi-write usa `IUnitOfWork` dentro de `try { Begin → ... → Commit } finally {
+DisposeAsync }`; nenhum handler contém `catch` (exceções de Domain/Application propagam sem
+wrapper); e toda Response é um record read-only mapeado explicitamente, sem Aggregate vazando para
+fora da camada.
+
+### 13.2 Achados
+
+- `BD30-F003` fechado: `docs/application/README.md` contava "9 Features" enquanto já listava e o
+  repositório contém 10 diretórios (`Authentication`, `Dashboard`, `Habits`, `Identity`,
+  `Ordering`, `Projects`, `Tasks`, `Todos`, `Users`, `Wallets`). Corrigido nas duas ocorrências.
+- `BD30-F031` (nova, média, fechada nesta Sprint): 17 dos 27 handlers não tinham teste direto —
+  `CreateProjectCommandHandler`, `UpdateProjectCommandHandler`, `DeleteProjectCommandHandler`,
+  `CreateTodoCommandHandler`, `UpdateTodoCommandHandler`, `DeleteTodoCommandHandler`,
+  `UpdateHabitCommandHandler`, `DeleteHabitCommandHandler`, `RegisterHabitNegativeCommandHandler`,
+  `UpdateTaskCommandHandler`, `DeleteTaskCommandHandler`, `UpdateTransactionCommandHandler`,
+  `DeleteTransactionCommandHandler`, `GetTransactionByIdQueryHandler`, `GetWalletTagsQueryHandler`,
+  `GetDashboardQueryHandler`, `UpdateCurrentUserAvatarCommandHandler`. Confirmado por busca de
+  referência de cada nome de classe em `tests/BeeDay.Application.Tests` antes de escrever qualquer
+  teste. Isso incluía dois dos handlers multi-write com `IUnitOfWork` (`UpdateTodoCommandHandler`
+  no branch cross-Project, `UpdateTransactionCommandHandler`, `DeleteTransactionCommandHandler`)
+  cuja correção transacional só era comprovada por inspeção de código, não por teste determinístico.
+- Duas observações menores sem ação: `AddAsync`/`RemoveAsync` dos 8 repositórios escopam ownership
+  pelo `UserId` já atribuído ao Aggregate (não por parâmetro `userId` explícito, ao contrário de
+  `Get`/`Update`/`List`) — padrão uniforme e seguro, todo call site atribui o owner antes de chamar;
+  e `ITransactionRepository` escopa por `walletId`/`walletTagId`, não por `userId` diretamente —
+  seguro porque todo call site resolve esse id a partir de uma busca já escopada por `userId`
+  (`WalletLookup.RequireCurrentWalletAsync`/`RequireOwnedTagAsync`). Nenhuma das duas é um defeito;
+  registradas aqui para rastreabilidade, sem finding próprio.
+- Confirmado (não novo): a duplicação estrutural entre `IWalletReadService.TransactionQueryFilter`
+  e `Features.Wallets.Queries.GetTransactionsQuery` já é documentada em
+  `docs/application/04-contracts.md` como decisão intencional; e as ~19 referências XML doc a
+  caminhos de `docs/architecture/*` removidos (`Common/Contracts/*.cs` e arquivos adjacentes) são a
+  mesma família já coberta por `BD30-F005`, de propriedade da Sprint 30.26 — nenhuma das duas foi
+  alterada nesta Sprint.
+
+### 13.3 Implementação
+
+Nenhuma mudança de comportamento em `src/BeeDay.Application`. A remediação de `BD30-F031` foi
+inteiramente em testes novos:
+
+- `tests/BeeDay.Application.Tests/ProjectHandlersTests.cs` (novo) — Create/Update/Delete de
+  Project, incluindo rejeição cross-user.
+- `tests/BeeDay.Application.Tests/TodoHandlersTests.cs` (novo) — Create/Update (mesmo Project e
+  movimentação entre Projects)/Delete de Todo, incluindo rejeição cross-user.
+- `tests/BeeDay.Application.Tests/HabitTaskManagementHandlersTests.cs` (novo) — Update/Delete de
+  Habit, `RegisterHabitNegative`, Update/Delete de Task, incluindo rejeição cross-user.
+- `tests/BeeDay.Application.Tests/DashboardHandlerTests.cs` (novo) — `GetDashboardQueryHandler`
+  encaminha o `userId` autenticado e devolve a resposta do read service sem alteração.
+- `tests/BeeDay.Application.Tests/WalletHandlersTests.cs` (estendido) — Update/Delete de
+  Transaction (incluindo rejeição cross-user), `GetTransactionByIdQueryHandler` e
+  `GetWalletTagsQueryHandler`.
+- `tests/BeeDay.Application.Tests/UserAccountHandlersTests.cs` (estendido) —
+  `UpdateCurrentUserAvatarCommandHandler`.
+
+`docs/application/README.md` corrigido (9 → 10 Features, duas ocorrências).
+
+### 13.4 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet test tests/BeeDay.Application.Tests/BeeDay.Application.Tests.csproj` | PASS, 113/113 (85 preexistentes + 28 novos) |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx` | PASS, 1.498/1.498 (117 Domain, 113 Application, 212 Infrastructure, 863 Web, 193 E2E) |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.498/1.498 (mesma distribuição) |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+
+### 13.5 Continuidade e entrega
+
+Reconhecimento amplo (11 handlers, 9 contratos) foi delegado a um subagente Explore somente-leitura
+para acelerar a cobertura; cada achado relatado foi verificado independentemente nesta sessão antes
+de qualquer ação — a lacuna de cobertura de teste foi confirmada por busca de referência própria
+(zero resultado para os 17 nomes de handler em `tests/`), e as assinaturas de método/registro de
+cada Handler tocado foram lidas diretamente do código antes de escrever qualquer teste novo.
