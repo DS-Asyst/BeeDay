@@ -142,6 +142,9 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F012 | baixa | existe documentação versionada da EPIC 28, mas ela não aparece no índice `docs/README.md` | `OPEN` | 30.28 |
 | BD30-F013 | alta | em HMG, validar `TransactionFormModel.Amount` sob `pt-BR` lançava `ArgumentException`/`FormatException` em `RangeAttribute.SetupConversion` ao interpretar o limite textual `"0.01"` pela cultura corrente; a falha ocorria no `EditForm`, antes de MediatR e antes de qualquer `INSERT` | `FIXED` | 30.2 |
 | BD30-F014 | baixa | os logs do mesmo período contêm warnings do EF Core sobre MARS/savepoints, mas a cadeia causal confirmada do incidente termina na validação DataAnnotations antes de MediatR/persistência; não há evidência de participação desses warnings nesta falha | `OPEN` | 30.7 |
+| BD30-F015 | média | `docs/deployment/04-operations.md` ainda afirmava que não existiam deploy automatizado de HMG nem aplicação de migrations, além de registrar caminhos e fluxo de release obsoletos; os workflows e a execução real provam o fluxo CI artifact -> HMG Deployment -> HMG Verification | `FIXED` | 30.3 |
+| BD30-F016 | alta | o rollback de HMG restaura aplicação e configuração do App Pool, mas não desfaz migrations; embora `Deploy-BeeDay.ps1` implemente `-BackupDatabase`, `deploy-hmg.yml` não o habilita e não há evidência versionada de backup SQL externo correlacionado ao deploy | `OPEN` | 30.25 |
+| BD30-F017 | média | cada deploy cria backups de aplicação e dados em `C:\Apps\BeeDay-Backups`, mas não existe política versionada de retenção, expurgo ou restore automatizado de uma execução histórica | `OPEN` | 30.25 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -238,3 +241,75 @@ prova que esta exceção acontece antes da fronteira de persistência.
 | `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
 | `git diff --check` | PASS |
 | `git status` | branch dedicada; quatro arquivos da Sprint; governança local, `CLAUDE.md` modificado e `.github/upgrades/` preservados fora do escopo e do staging |
+
+## 10. Sprint 30.3 — HMG Runtime, Database & Deployment Parity
+
+### 10.1 Inventário auditado
+
+| Inventário | Estado na Sprint 30.3 | Evidência e limite |
+|---|---|---|
+| INV-006 — persistência e migrations | `VERIFIED` | migration, snapshot, EF bundle, ausência de model drift e estado `up to date` em HMG; auditoria interna da persistência permanece em 30.7 |
+| INV-011 — workflows | `VERIFIED` | cadeia HMG de `ci.yml` para `deploy-hmg.yml` e `verify-hmg.yml`; auditoria ampla de CI/CD permanece em 30.25 |
+| INV-013 — configuração | `VERIFIED` | nomes dos oito secrets obrigatórios presentes, payload de dez variáveis aceito pelo App Pool e startup saudável; valores permaneceram secretos |
+| INV-018 — resiliência/observabilidade | `VERIFIED` | readiness SQL, smoke e contrato de rollback inspecionados; auditoria sistêmica permanece em 30.23 |
+| INV-020 — CI/CD e ambientes | `VERIFIED` | proveniência code -> artifact -> HMG comprovada por SHAs, run IDs, artifacts e digests |
+
+`VERIFIED` nesta matriz significa que o contrato de paridade pertencente à 30.3 foi inspecionado e
+confirmado. Não encerra as auditorias profundas já atribuídas às Sprints indicadas.
+
+### 10.2 Proveniência confirmada
+
+O merge de HMG `9b87ff2c05d9715dc7026879b59c866bccc2c372` foi associado pelo workflow ao
+PR #266 e ao `head_sha` validado `069ad8465a684c5e5c5e6641cd97928a598ce437`. A execução CI
+`32385656296` produziu `beeday-publish` e `beeday-migrations`; os digests observados no download
+foram, respectivamente, `45fd08cbe22792421eb8aa12a42dfd3cee0bae859775520ff41c78fa65a9b616` e
+`79e1af27d8f0dc7870a58bb82ddee5f8fe9152e59a73b8781e905714d7316d7c`.
+
+O HMG Deployment `32390796350` implantou esses artifacts e publicou
+`beeday-hmg-deployment-info`. O HMG Verification `32391001814` consumiu esse registro e confirmou o
+mesmo `sourceSha`, sem depender do SHA diferente do merge.
+
+### 10.3 Banco, configuração e runtime
+
+- o repositório contém somente `20260803111144_InitialCreate` e o model snapshot correspondente;
+- `dotnet ef migrations has-pending-model-changes` confirmou ausência de deriva local;
+- o bundle executado contra HMG informou que nenhuma migration precisava ser aplicada e que o
+  banco já estava atualizado;
+- a API do GitHub confirmou a presença dos oito nomes de secrets exigidos no Environment
+  `homologation`, sem expor valores;
+- o deploy configurou dez variáveis permitidas no App Pool;
+- `BeeDay-HMG` e `BeeDay-Web-AppPool` convergiram com `exitCode=0` em `STOP`, `CONFIGURE` e `START`;
+- readiness, incluindo `SqlServerHealthCheck`, passou com HTTP 200; o smoke `/login` também passou
+  com HTTP 200 e conteúdo esperado.
+
+Não houve consulta a dados de negócio, leitura de secret, alteração manual do banco/IIS ou ação em
+produção.
+
+### 10.4 Rollback, findings e correção
+
+O deploy criou backups reais de aplicação e dados antes da promoção. As regressões de script
+confirmaram que falhas chegam ao rollback, restauram a configuração do App Pool, reiniciam IIS,
+executam health check após restore e ainda encerram o job com erro.
+
+O runbook operacional obsoleto foi reescrito conforme o comportamento atual, fechando
+`BD30-F015`. Os limites já comprovados foram explicitados: rollback não restaura `Data`, não desfaz
+migrations, o workflow de HMG não habilita o backup SQL já suportado pelo script e não existe
+retenção/restore histórico automatizado. `BD30-F016` e `BD30-F017` foram atribuídos à Sprint 30.25,
+que é proprietária do endurecimento amplo de CI/CD e deployment. `BD30-F006` também permanece nessa
+Sprint para reconciliar a documentação/configuração de providers de e-mail.
+
+Não houve mudança de código, arquitetura, contrato público, schema, workflow ou estado do ambiente.
+Testes novos não se aplicam a esta correção documental; as suites existentes de deploy foram
+executadas pelo pipeline observado.
+
+### 10.5 Quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx` | PASS, 1.446/1.446 (93 Domain, 85 Application, 212 Infrastructure, 863 Web, 193 E2E); E2E 6m25s |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.446/1.446 (93 Domain, 85 Application, 212 Infrastructure, 863 Web, 193 E2E); E2E 6m27s |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
