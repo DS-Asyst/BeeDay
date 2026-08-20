@@ -52,6 +52,7 @@ testes em `tests/BeeDay.Web.Tests`". Ver [`CONVENTIONS.md`](CONVENTIONS.md).
 | [`epics/20-home-visual-experience/`](epics/20-home-visual-experience/README.md) | EPIC 20 — Home & Visual Experience: decisões aprovadas, discovery transversal, Visual Adoption Map, roadmap de Sprints | Histórico concluído |
 | [`epics/21-lingo-product-experience/`](epics/21-lingo-product-experience/README.md) | EPIC 21 — Lingo-Based Product Experience & Design System: especificação de migração Lingo → BeeDay, component mapping, gamification capability matrix | Histórico concluído |
 | [`epics/25-design-system-brand-evolution/`](epics/25-design-system-brand-evolution/README.md) | EPIC 25 — beeday Design System & Brand System Evolution: contrato de marca, governança, implementação e gate final | Concluída na Sprint 25.16 |
+| [`epics/30-system-integrity/`](epics/30-system-integrity/README.md) | EPIC 30 — System Integrity & Complete Engineering Audit: inventário versionado, Audit Ledger, findings e ownership por Sprint | Em andamento — baseline criado na Sprint 30.1 |
 
 ## Templates
 
