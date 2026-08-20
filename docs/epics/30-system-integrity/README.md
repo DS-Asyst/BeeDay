@@ -137,7 +137,7 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F006 | alta | o estado versionado de HMG seleciona Resend (`true`) e Development (`false`), enquanto `docs/deployment/01-deployment.md` e `02-runtime-configuration.md` ainda descrevem a seleção inversa; o runbook mais novo distingue corretamente repository state de runtime state | `OPEN` | 30.25 |
 | BD30-F007 | média | não existe `.runsettings`, referência a coverlet ou coleta formal de cobertura | `OPEN` | 30.24 |
 | BD30-F008 | média | não existe workflow CodeQL nem configuração Dependabot versionada | `OPEN` | 30.22 |
-| BD30-F009 | média | existem apenas dois guards automatizados de dependência, cobrindo Domain e Application; Infrastructure e Web não têm guard equivalente | `OPEN` | 30.9 |
+| BD30-F009 | média | existem apenas dois guards automatizados de dependência, cobrindo Domain e Application; Infrastructure e Web não têm guard equivalente | `FIXED` | 30.9 |
 | BD30-F010 | baixa | o índice de documentação classifica `authentication/` e `developer/` como reservados e `api/` como não reauditado | `OPEN` | 30.28 |
 | BD30-F011 | baixa | `docs/infrastructure/README.md` registra 5 classes Options; o repositório possui 6 Options atuais, além de `EmailProvider` e `EmailProviderSelector` | `OPEN` | 30.7 |
 | BD30-F012 | baixa | existe documentação versionada da EPIC 28, mas ela não aparece no índice `docs/README.md` | `OPEN` | 30.28 |
@@ -823,3 +823,89 @@ direta de `BeeDayWebService.cs`, confirmação de zero uso de `CancellationToken
 ponta a ponta nos dois pontos de escolha centralizados (`DashboardState`, `WalletInteractionState`
 via `Wallet.razor`) mais as sete páginas restantes que chamam `ISender`/`BeeDayWebService`
 diretamente — fechando a lacuna sistêmica por completo, não apenas parcialmente.
+
+## 16. Sprint 30.9 — Architecture Consolidation & Module Boundaries
+
+### 16.1 Método e evidência
+
+O escopo desta Sprint é sintetizar os achados das Sprints 30.5–30.8 (não reabrir a auditoria
+baseline inteira) em busca de módulos superdimensionados, responsabilidades mal alocadas,
+abstrações duplicadas e fronteiras fracas — e só alterar estrutura onde a evidência já coletada
+justifica.
+
+Revisão de todo achado aberto nas Sprints 30.5–30.8 (`BD30-F023`–`BD30-F037`): `BD30-F030`/
+`BD30-F035` (persistência e cancelamento) já foram corrigidos em suas Sprints de origem;
+`BD30-F032`/`BD30-F033`/`BD30-F034`/`BD30-F036`/`BD30-F037` são achados pontuais de índice,
+integridade de dado histórica ou polimento de UX, já corretamente encaminhados às suas Sprints
+proprietárias (30.10, 30.16, 30.20, 30.21, 30.25) — nenhum descreve um módulo superdimensionado,
+responsabilidade mal alocada ou abstração duplicada que pertença à consolidação desta Sprint.
+Nenhum dos quatro achados de auditoria de camada (Domain 30.5, Application 30.6, Infrastructure
+30.7, Web 30.8) relatou duplicação estrutural não documentada, camada oversized, ou abstração
+paralela — os quatro concluíram a camada correspondente já limpa, com achados isolados e pequenos.
+
+O único item genuinamente estrutural, de propriedade explícita desta Sprint, é `BD30-F009`
+(baseline da Sprint 30.1): Domain e Application já tinham um guard automatizado real de fronteira
+de assembly (`DomainAssemblyBoundaryTests`, `PersistenceContractBoundaryTests.
+ApplicationAssembly_DoesNotReferenceInfrastructure`); Infrastructure e Web não tinham nenhum —
+a fronteira era verdadeira apenas por convenção observada manualmente (INV-005/INV-007), não por
+teste que a trava contra regressão futura.
+
+### 16.2 `BD30-F009` — guards de fronteira ausentes em Infrastructure e Web, corrigidos
+
+Antes de escrever qualquer guard, as referências reais de `BeeDay.Infrastructure.dll` e
+`BeeDay.Web.dll` foram inspecionadas via `Assembly.GetReferencedAssemblies()` (não suposição) para
+evitar um forbidden-list com falso positivo:
+
+- `BeeDay.Infrastructure.dll` não referencia `BeeDay.Web` nem qualquer assembly de Blazor
+  Components, apesar do `FrameworkReference` a `Microsoft.AspNetCore.App` (que só disponibiliza o
+  framework compartilhado para resolução, não força referência real a tipo algum) — confirmado
+  antes de travar o guard.
+- `BeeDay.Web.dll` não referencia `Microsoft.EntityFrameworkCore`/`.Relational`/`.SqlServer` nem
+  `Microsoft.Data.SqlClient` diretamente — confirma com evidência automatizada o que INV-007 já
+  afirmava por inspeção manual.
+
+Dois guards novos, no mesmo estilo dos dois já existentes (inspeção de metadata do assembly
+compilado, não busca em texto-fonte):
+
+- `tests/BeeDay.Infrastructure.Tests/InfrastructureAssemblyBoundaryTests.cs` — trava que
+  Infrastructure nunca referencia `BeeDay.Web` ou assemblies de Blazor Components.
+- `tests/BeeDay.Web.Tests/WebAssemblyBoundaryTests.cs` — trava que Web nunca referencia EF Core ou
+  um client SQL Server diretamente, preservando a regra de que toda persistência passa
+  exclusivamente pelos contratos públicos de Infrastructure.
+
+Nenhuma mudança de comportamento, contrato público, schema ou Design System — os dois guards
+apenas tornam permanente, contra regressão futura, uma fronteira que já era verdadeira.
+
+### 16.3 Decisão da Sprint
+
+Nenhuma consolidação/divisão estrutural adicional foi identificada com evidência suficiente das
+Sprints 30.5–30.8 para justificar mudança de código além de `BD30-F009`. Consistente com o próprio
+princípio da Sprint ("Split or consolidate modules... only where evidence justifies the change" e
+"No rewrite for aesthetic preference"), nenhuma reestruturação especulativa foi proposta.
+
+### 16.4 Implementação
+
+- `tests/BeeDay.Infrastructure.Tests/InfrastructureAssemblyBoundaryTests.cs` (novo).
+- `tests/BeeDay.Web.Tests/WebAssemblyBoundaryTests.cs` (novo).
+
+### 16.5 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet test tests/BeeDay.Infrastructure.Tests/... --filter InfrastructureAssemblyBoundaryTests` | PASS, 1/1 |
+| `dotnet test tests/BeeDay.Web.Tests/... --filter WebAssemblyBoundaryTests` | PASS, 1/1 |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx` | PASS, 1.506/1.506 (117 Domain, 113 Application, 216 Infrastructure, 867 Web, 193 E2E); E2E 6m24s |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.506/1.506 (mesma distribuição); E2E 6m23s |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+
+### 16.6 Continuidade e entrega
+
+Sprint deliberadamente pequena e focada: a evidência já coletada nas quatro Sprints anteriores não
+apontava para nenhuma reestruturação de módulo, e a Sprint corretamente reconheceu isso em vez de
+inventar trabalho. O único item estrutural de propriedade real desta Sprint (`BD30-F009`) foi
+fechado com evidência empírica (inspeção real do assembly compilado antes de escrever o guard),
+não suposição sobre o que "deveria" estar referenciado.
