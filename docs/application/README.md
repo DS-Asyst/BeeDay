@@ -17,7 +17,7 @@ esse handler invalidava nunca era populado em produção).
 `BeeDay.Application` orquestra casos de uso: recebe um Command ou Query (via MediatR), aplica
 validação (FluentValidation), carrega/muta um Aggregate do Domain através de uma interface de
 repositório, e devolve uma Response — sem nunca conhecer EF Core, SQL Server, ou HTTP diretamente.
-É a camada onde vivem as 9 Features do produto (Authentication, Dashboard, Habits, Identity,
+É a camada onde vivem as 10 Features do produto (Authentication, Dashboard, Habits, Identity,
 Ordering, Projects, Tasks, Todos, Users, Wallets).
 
 ## Organização
@@ -35,7 +35,7 @@ src/BeeDay.Application/
 │   └── Security/            ICurrentUserContext, IPasswordService, PasswordPolicy, CurrentUserGuard
 ├── DependencyInjection/    AddBeeDayApplication() — único ponto de registro DI desta camada
 ├── Exceptions/              ApplicationValidationException
-└── Features/                 9 pastas, cada uma com Commands/, Queries/ (se houver),
+└── Features/                 10 pastas, cada uma com Commands/, Queries/ (se houver),
                                 Handlers/, Requests/, Responses/ (se houver), Validation/
 ```
 

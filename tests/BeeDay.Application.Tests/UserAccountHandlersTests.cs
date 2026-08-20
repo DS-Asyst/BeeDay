@@ -96,6 +96,19 @@ public sealed class UserAccountHandlersTests
     }
 
     [Fact]
+    public async Task UpdateAvatar_ChangesTheCurrentUsersAvatar()
+    {
+        var repository = CreateRepository("hash:Current123", out var context, out var user);
+        var handler = new UpdateCurrentUserAvatarCommandHandler(repository.Users, context);
+
+        await handler.Handle(
+            new UpdateCurrentUserAvatarCommand(new UpdateUserAvatarRequest("avatar-42.png")),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal("avatar-42.png", user.Avatar);
+    }
+
+    [Fact]
     public async Task CompleteOnboarding_MarksCurrentUserAsCompleted()
     {
         var repository = CreateRepository("hash:Current123", out var context, out var user);

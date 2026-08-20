@@ -91,6 +91,113 @@ public sealed class WalletHandlersTests
     }
 
     [Fact]
+    public async Task UpdateTransaction_ChangesFieldsForTheCurrentUsersWallet()
+    {
+        var repo = new FakeUnitOfWork();
+        var user = CreateCurrentUser(repo);
+        var context = new FakeCurrentUserContext(user.Id);
+        var create = new CreateTransactionCommandHandler(repo, context);
+        var transactionId = await create.Handle(
+            new(new("Original", 100m, TransactionType.Expense, new DateOnly(2026, 7, 1), null, null)),
+            TestContext.Current.CancellationToken);
+
+        var update = new UpdateTransactionCommandHandler(repo, context);
+        await update.Handle(
+            new(transactionId, new("Renamed", 150m, TransactionType.Expense, new DateOnly(2026, 7, 2), null, "Updated")),
+            TestContext.Current.CancellationToken);
+
+        var transaction = Assert.Single(repo.TransactionsData);
+        Assert.Equal("Renamed", transaction.Description);
+        Assert.Equal(150m, transaction.Amount);
+        Assert.Equal("Updated", transaction.Notes);
+    }
+
+    [Fact]
+    public async Task UpdateTransaction_RejectsTransactionFromAnotherUsersWallet()
+    {
+        var repo = new FakeUnitOfWork();
+        var current = CreateCurrentUser(repo);
+        var other = CreateCurrentUser(repo);
+        var otherTransactionId = await new CreateTransactionCommandHandler(repo, new FakeCurrentUserContext(other.Id)).Handle(
+            new(new("Private", 50m, TransactionType.Expense, new DateOnly(2026, 7, 1), null, null)),
+            TestContext.Current.CancellationToken);
+
+        var handler = new UpdateTransactionCommandHandler(repo, new FakeCurrentUserContext(current.Id));
+        await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
+            new(otherTransactionId, new("Hijacked", 999m, TransactionType.Expense, new DateOnly(2026, 7, 1), null, null)),
+            TestContext.Current.CancellationToken));
+        Assert.Equal("Private", repo.TransactionsData.Single(t => t.Id == otherTransactionId).Description);
+    }
+
+    [Fact]
+    public async Task DeleteTransaction_RemovesTransactionAndTouchesWallet()
+    {
+        var repo = new FakeUnitOfWork();
+        var user = CreateCurrentUser(repo);
+        var context = new FakeCurrentUserContext(user.Id);
+        var create = new CreateTransactionCommandHandler(repo, context);
+        var transactionId = await create.Handle(
+            new(new("Disposable", 30m, TransactionType.Expense, new DateOnly(2026, 7, 1), null, null)),
+            TestContext.Current.CancellationToken);
+
+        await new DeleteTransactionCommandHandler(repo, context).Handle(new(transactionId), TestContext.Current.CancellationToken);
+
+        Assert.Empty(repo.TransactionsData);
+    }
+
+    [Fact]
+    public async Task DeleteTransaction_RejectsTransactionFromAnotherUsersWallet()
+    {
+        var repo = new FakeUnitOfWork();
+        var current = CreateCurrentUser(repo);
+        var other = CreateCurrentUser(repo);
+        var otherTransactionId = await new CreateTransactionCommandHandler(repo, new FakeCurrentUserContext(other.Id)).Handle(
+            new(new("Private", 50m, TransactionType.Expense, new DateOnly(2026, 7, 1), null, null)),
+            TestContext.Current.CancellationToken);
+
+        var handler = new DeleteTransactionCommandHandler(repo, new FakeCurrentUserContext(current.Id));
+        await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
+            new(otherTransactionId), TestContext.Current.CancellationToken));
+        Assert.Single(repo.TransactionsData);
+    }
+
+    [Fact]
+    public async Task GetTransactionById_ReturnsOnlyTheCurrentUsersTransaction()
+    {
+        var repo = new FakeUnitOfWork();
+        var user = CreateCurrentUser(repo);
+        var context = new FakeCurrentUserContext(user.Id);
+        var transactionId = await new CreateTransactionCommandHandler(repo, context).Handle(
+            new(new("Coffee", 12m, TransactionType.Expense, new DateOnly(2026, 7, 1), null, null)),
+            TestContext.Current.CancellationToken);
+
+        var handler = new GetTransactionByIdQueryHandler(new FakeWalletReadService(repo), context);
+        var found = await handler.Handle(new(transactionId), TestContext.Current.CancellationToken);
+        var notFound = await handler.Handle(new(Guid.NewGuid()), TestContext.Current.CancellationToken);
+
+        Assert.NotNull(found);
+        Assert.Equal("Coffee", found.Description);
+        Assert.Null(notFound);
+    }
+
+    [Fact]
+    public async Task GetWalletTags_ReturnsOnlyTheCurrentUsersTags()
+    {
+        var repo = new FakeUnitOfWork();
+        var user = CreateCurrentUser(repo);
+        var context = new FakeCurrentUserContext(user.Id);
+        await new CreateWalletTagCommandHandler(repo.WalletTags, context).Handle(new(new("Food", null)), TestContext.Current.CancellationToken);
+        var other = CreateCurrentUser(repo);
+        await new CreateWalletTagCommandHandler(repo.WalletTags, new FakeCurrentUserContext(other.Id)).Handle(
+            new(new("Private", null)), TestContext.Current.CancellationToken);
+
+        var handler = new GetWalletTagsQueryHandler(new FakeWalletReadService(repo), context);
+        var tags = await handler.Handle(new(), TestContext.Current.CancellationToken);
+
+        Assert.Equal("Food", Assert.Single(tags).Name);
+    }
+
+    [Fact]
     public async Task CreateTag_RejectsDuplicateNameForCurrentUser()
     {
         var repo = new FakeUnitOfWork();
