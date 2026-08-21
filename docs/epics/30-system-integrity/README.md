@@ -179,13 +179,13 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F049 | média | nenhum teste baseado em viewport real (Playwright) cobria `/profile/create` Etapa 2 (apelido), `/account`/`/settings` (as 3 seções) ou `/onboarding/tutorial` — `LoginExperienceTests` só provava a Etapa 1 do cadastro; `AccountLifecycleTests`/`SettingsLocalizationTests` nunca chamavam `SetViewportSizeAsync` | `FIXED` | 30.11 |
 | BD30-F050 | média | `HabitResetCounter` (Daily/Weekly/Monthly) está totalmente cabeado — coluna no banco, validação de Domain, editor de UI, documentação — mas nada no código jamais reseta `PositiveCount`/`NegativeCount` com base em tempo decorrido, fronteira de calendário ou job agendado; `RegisterPositive`/`RegisterNegative` só incrementam, para sempre. O campo é hoje decoração de UI sem efeito comportamental. Definir a semântica real de reset (quando? em qual fuso/cultura? via leitura ou job?) é uma decisão de produto, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
 | BD30-F051 | média | `EfUserRepository.UpdateAsync` recarrega **todas** as `ExperienceEntry` de um usuário a cada chamada — não só em registros de Habit, mas em qualquer mutação de User (confirmação de e-mail, redefinição de senha, troca de nome/e-mail). Habit é a única fonte de XP deliberadamente isenta de deduplicação (`UserExperience.cs`, por design — cada clique deve premiar XP independentemente), então é a única cujo volume de `ExperienceEntry` cresce sem limite por usuário ativo; nenhuma estratégia de arquivamento/paginação existe. Lista de Habits em `/daily` também não é paginada/virtualizada — nenhum teste cria mais de 2 Habits para o mesmo usuário em toda a suíte, então isso nunca foi exercitado em escala | `OPEN` | 30.21 |
-| BD30-F052 | baixa | `ActivityAttribute` (Strength/Dexterity/Intelligence/Vitality) é persistido, validado e round-tripa corretamente, mas não existe controle de UI para defini-lo em nenhum dos 4 editores de atividade (Habit/Task/Todo/Project) — confirmado por busca por `ActivityAttribute` em todo `*.razor` de `src/BeeDay.Web`, zero resultados fora de sintaxe `@attributes` não relacionada. Toda atividade criada pelo produto hoje tem `Attribute = null` para sempre; um valor já existente (via API/dados diretos) sobrevive a uma edição intacto, só não pode ser definido pela UI. Gap cross-cutting, não específico de Habit | `OPEN` | 30.19 |
+| BD30-F052 | baixa | `ActivityAttribute` (Strength/Dexterity/Intelligence/Vitality) é persistido, validado e round-tripa corretamente, mas não existe controle de UI para defini-lo em nenhum dos 4 editores de atividade (Habit/Task/Todo/Project) — confirmado por busca por `ActivityAttribute` em todo `*.razor` de `src/BeeDay.Web`, zero resultados fora de sintaxe `@attributes` não relacionada. Toda atividade criada pelo produto hoje tem `Attribute = null` para sempre; um valor já existente (via API/dados diretos) sobrevive a uma edição intacto, só não pode ser definido pela UI. Gap cross-cutting, não específico de Habit. **Reverificado na Sprint 30.19**: ainda preciso, sem mudança. Construir 4 novos controles de formulário com plumbing completo (Application, resx, testes) é trabalho de feature genuíno, não consolidação — fora do limite explícito desta Sprint ("audit/consolidation Sprint, not a redesign"). Reatribuído de "30.19" para decisão do proprietário: a auditoria já confirmou o gap três vezes (30.11, 30.15/similar, 30.19) sem informação nova; o próximo passo é priorização de produto, não mais investigação | `OPEN` | decisão do proprietário |
 | BD30-F053 | baixa | `EfHabitRepository.RemoveAsync` (e o mesmo padrão em `EfTaskRepository`/`EfTodoRepository`/`EfProjectRepository` conforme aplicável) busca a linha só por `Id`, sem reverificar `UserId` — depende inteiramente do único call site (`DeleteHabitCommandHandler`) já ter verificado posse via `HabitLookup.RequireExistsAsync` antes. Seguro hoje (único call site confirmado, corretamente guardado), mas é uma lacuna de defesa em profundidade: o método do repositório não é seguro por posse isoladamente, então um futuro chamador direto que pule a pré-verificação poderia excluir silenciosamente o Habit de outro usuário | `OPEN` | 30.22 |
 | BD30-F054 | alta | `RecurringTask.Repeat` (Daily/Weekly/Monthly) está totalmente cabeado — Domain, persistência, editor de UI, documentação — mas `RecurringTask` não sobrescreve `ToggleCompletion()` (herda a implementação padrão de `Activity`, um simples flip de booleano); nenhum código no repositório jamais reabre uma Task recorrente com base em fronteira de calendário. É a mesma classe de lacuna que `BD30-F050` (Habit), confirmada de forma independente para Task. Efeito colateral agravante: como a dedução de XP por origem é permanente e correta por design para Task (ao contrário de Habit), uma Task "Diária" completada uma vez **nunca mais pode gerar XP**, mesmo desmarcando e marcando de novo manualmente — os dois mecanismos, cada um correto isoladamente, se combinam para anular o propósito de gamificação de uma Task "recorrente". Definir a semântica real de reabertura é uma decisão de produto, não inventada por esta auditoria — mesma decisão pendente de `BD30-F050`, possivelmente a mesma decisão para os dois achados | `OPEN` | decisão do proprietário |
 | BD30-F055 | baixa | `Todo.DueDate` é persistido e exibido como texto formatado, mas não tem nenhum efeito funcional: nenhum indicador visual de atraso existe em `src/` (`grep` por "overdue"/"atrasad" não encontra nada), a ordenação da lista usa exclusivamente `Position` (drag-and-drop), não `DueDate`, e `Todo` não sobrescreve `ToggleCompletion()` — completar um To-Do atrasado se comporta identicamente a completar um no prazo. Nenhum bug de fuso/cultura na conversão de data em si (`BeeDayWebService.ToDateOnly` é direto; `DueDateInput_StaysIsoFormatted_RegardlessOfCulture` já prova o campo permanece ISO sob pt-BR) | `OPEN` | 30.20 |
 | BD30-F056 | média | `Project.Archived` é persistido, validado e round-tripa corretamente (`EfProjectRepositoryTests` prova a persistência), mas `ProjectEditorModal.razor` não tem nenhum controle de UI para defini-lo — pior que `BD30-F050`/`BD30-F054` (que ao menos têm um seletor visível, só sem efeito), este campo é inteiramente inalcançável pela UI. Mesmo que fosse setado diretamente no banco, nada a jusante o trata de forma diferente: `EfDashboardReadService` não filtra por ele, `DashboardState.FilteredProjects`/`ProjectContextOptions` não o excluem, o board Ativo/Concluído usa `Status` (não `Archived`), e o reorder de Projects compartilha uma única sequência de `Position` sem particionar por `Archived`. Decisão de produto necessária: construir a UI de arquivamento + filtragem, ou remover o campo morto | `OPEN` | decisão do proprietário |
 | BD30-F057 | baixa | `DashboardState.DeleteCurrentEditorItemAsync` (compartilhado por Habit/Task/Todo/Project) toca a animação de remoção do card (`RemovingItemId`, ~170ms) **antes** de emitir a requisição de exclusão ao servidor — se a exclusão subsequente falhar (rede, conflito), `RemovingItemId` já foi limpo e `ReloadAsync()` nunca é alcançado (o catch só mostra um toast de erro), então o card reaparece no estado normal após já ter "desaparecido" visualmente um instante antes, ao lado de um toast de erro. Padrão cross-cutting pré-existente, não introduzido nem específico desta Sprint | `OPEN` | 30.20 |
-| BD30-F058 | média | Sort por Amount/Description em Wallet estava totalmente cabeado Application→Infrastructure→testes (`Wallet.razor.ResolveSort`, `TransactionSortField`, `EfWalletReadService.ApplyOrdering`), mas o `<select>` renderizado só oferecia as duas opções de data — as outras 4 opções só eram alcançáveis setando o parâmetro `Sort` diretamente em teste, nunca por um usuário real. **Corrigido nesta Sprint**: 4 novas `<option>` adicionadas a `WalletFilters.razor` (mesmos valores já suportados pelo backend). Já o filtro de faixa de valor (`GetTransactionsQuery.MinimumAmount`/`MaximumAmount`, validado e testado em Application/Infrastructure) continua com **zero superfície de UI** — nenhum input, nenhuma propriedade de estado, nada em `WalletFilters.razor`. Diferente de `BD30-F050`/`BD30-F054`/`BD30-F056`, não é uma questão de semântica de produto ambígua (ordenar por valor e filtrar por faixa de valor têm significado óbvio e não-controverso) — é trabalho de engenharia represado, não decisão de produto | `OPEN` | 30.19 |
+| BD30-F058 | média | Sort por Amount/Description em Wallet estava totalmente cabeado Application→Infrastructure→testes (`Wallet.razor.ResolveSort`, `TransactionSortField`, `EfWalletReadService.ApplyOrdering`), mas o `<select>` renderizado só oferecia as duas opções de data — as outras 4 opções só eram alcançáveis setando o parâmetro `Sort` diretamente em teste, nunca por um usuário real. **Corrigido nesta Sprint**: 4 novas `<option>` adicionadas a `WalletFilters.razor` (mesmos valores já suportados pelo backend). Já o filtro de faixa de valor (`GetTransactionsQuery.MinimumAmount`/`MaximumAmount`, validado e testado em Application/Infrastructure) continua com **zero superfície de UI** — nenhum input, nenhuma propriedade de estado, nada em `WalletFilters.razor`. Diferente de `BD30-F050`/`BD30-F054`/`BD30-F056`, não é uma questão de semântica de produto ambígua (ordenar por valor e filtrar por faixa de valor têm significado óbvio e não-controverso) — é trabalho de engenharia represado, não decisão de produto. **Reverificado na Sprint 30.19**: `WalletFilters.razor` ainda não tem nenhum input Min/Max amount; `grep` por `MinimumAmount`/`MaximumAmount` em `src/BeeDay.Web` continua zero. Construir essa UI é trabalho de feature genuíno (novo input, novo estado, nova validação client-side), fora do limite desta Sprint de consolidação. Reatribuído para decisão do proprietário — não por ambiguidade de produto (o significado é claro), mas porque não há mais Sprint de auditoria dedicada a construir features novas no restante do roteiro da EPIC 30 | `OPEN` | decisão do proprietário |
 | BD30-F059 | alta | Cards de `WalletTag`/`Transaction` (`WalletTagManager.razor`, `TransactionList.razor`) perdem toda interatividade de clique/teclado para itens adicionados a uma lista já populada dentro da mesma sessão de circuito Blazor Server — confirmado reproduzível para o primeiro Tag criado (lista vazia→1), um segundo Tag criado logo em seguida, e uma segunda Transaction criada logo em seguida; imune a espera explícita (até 1s), a `Force: true` (bypassa verificações de actionability do Playwright, descartando interceptação/overlay como causa), e independente de clique vs. `Enter` via teclado. Um `GotoAsync` real (reload completo de página) sempre restaura a interatividade. **Causa raiz não identificada** — `@key` foi adicionado a ambos os `@foreach` como bom-senso defensivo (Blazor best practice já ausente), mas comprovadamente **não** resolveu o sintoma nos testes que o reproduziram; `DialogFocusScope`/`beeday-dialog-focus.js` foi inspecionado por completo sem revelar um bug óbvio. Cards de Transaction/Habit/Task/Todo/Project em Sprints anteriores desta EPIC nunca expuseram isso porque toda sequência de duas interações em um mesmo teste já continha um `GotoAsync` de reload no meio (para provar persistência) — não porque o padrão estivesse imune. Workaround confirmado (reload) aplicado nos dois novos testes E2E desta Sprint que o encontraram | `OPEN` | 30.24 |
 | BD30-F060 | baixa | não existia cobertura E2E provando que completar Task/Todo/Project concede XP visivelmente (só Habit tinha, desde a Sprint 30.12) e o modal de level-up (`BeeDayFeedbackModal`) nunca havia sido exercitado ponta a ponta (só bUnit) — nenhum teste anterior disparava uma execução real de handler + publicação real de domain event + render real do Blazor Server através de um level-up de fato. **Corrigido nesta Sprint**: `CompleteTask_UpdatesXp` prova visibilidade de XP para Task via navegador real; `CompleteTask_AtALevelBoundary_ShowsTheLevelUpModalExactlyOnce` semeia o usuário 5 XP abaixo do limite documentado/testado de Level 2 (100 XP) via novo parâmetro `initialExperience` de `E2EWebApplicationFactory.SeedUserAsync` (usa `User.AddExperience`, não-dedup, só para arranjo de teste) e prova o modal aparecendo exatamente uma vez, com os níveis corretos, e não reaparecendo após reload. Residual não corrigido, de baixo valor: Todo/Project não têm o mesmo teste de visibilidade de XP especificamente — aceito porque os três dividem exatamente o mesmo `ToggleTodoCommandHandler`/`ExecuteExperienceOperationAsync`, já provado correto nas camadas Application/Infrastructure (§23.1, item D.8) | `FIXED` | 30.16 |
 | BD30-F061 | baixa | não existe nenhuma UI (nem endpoint de leitura em Application) que exponha o histórico de `ExperienceEntry` ao usuário ou a um admin — a única superfície visível é o toast efêmero de level-up (`BeeDayFeedbackStore`, escopo de circuito, últimos 3 itens, nunca lê do banco). O trabalho de persistência corrigido pela `BD30-F030` (Sprint 30.7) não tem, hoje, nenhum consumidor além dessa lógica de dedup interna. Construir uma tela de histórico é uma decisão de produto, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
@@ -199,6 +199,11 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F069 | baixa | `/terms`, `/privacy` e `/community-guidelines` não contêm nenhum texto legal real — cada uma renderiza só um aviso proeminente de "revisão pendente" (`LegalPendingReview`) mais uma lista de títulos de seção sem corpo. Comportamento deliberado, testado (E2E e bUnit) e documentado no próprio código como divulgação honesta em vez de cláusulas inventadas — não é um defeito de engenharia. Registrado nesta Sprint exatamente como o critério de aceite exige: item pendente de revisão jurídica/aprovação do proprietário, nenhum texto legal foi inventado ou proposto por esta auditoria | `OPEN` | decisão do proprietário |
 | BD30-F070 | baixa | `RepresentativeRoutesRenderWithoutHorizontalOverflowOnMobile` cobria 9 das 12 rotas institucionais em viewport mobile — `/brand-guidelines` (a rota estruturalmente mais complexa da família, única que embute a navegação de pilar/tópico do Experience System) nunca tinha sido testada especificamente em mobile. **Corrigido nesta Sprint**: `/brand-guidelines` adicionada ao teste. `/privacy` e `/community-guidelines` foram deliberadamente mantidas fora — compartilham o mesmo template exato de `/terms` (já coberto), mesmo padrão de amostragem representativa já usado em `MobileEditorialHeaderStaysUsableWithoutHorizontalOverflowOnTheDenseAboutUsFamily` (testa só `/mission` pela família "About us") | `FIXED` | 30.18 |
 | BD30-F071 | baixa | a cobertura E2E de troca de idioma ao vivo (via seletor de idioma real) para o `beeday Experience System` existe só para a página raiz (`/experience-system`) — as outras 20 rotas da subárvore dependem só de correção testada em nível de `resx`/componente, nunca exercitadas com o seletor real de idioma em navegador. Baixo risco (mesmo padrão resx comprovadamente correto em todas), mas gap de cobertura real. Encaminhado como expansão opcional de cobertura, não defeito | `OPEN` | 30.20 |
+| BD30-F072 | baixa | drift de token de cor confirmado em 2 pontos: `CreateProfile.razor.css` referenciava `var(--beeday-color-danger-text, #b3261e)` — um custom property nunca definido em `variables.css` em lugar nenhum, então o fallback hardcoded `#b3261e` era sempre o valor real aplicado, divergindo silenciosamente do token canônico `--beeday-color-danger` (`#d33b46`) usado em todo o resto do app; `feedback.css` usava hex bruto (`#e2f5e9`/`#fde8e8`) quase-idêntico, mas não igual, aos tokens já existentes `--beeday-color-success-soft`/`--beeday-color-danger-soft` para o fundo dos ícones de toast. **Corrigido nesta Sprint**: ambos convergidos para os tokens canônicos existentes | `FIXED` | 30.19 |
+| BD30-F073 | baixa | `@keyframes beeday-spin` definido de forma idêntica em dois stylesheets globais diferentes (`design-system.css` e `feedback.css`), ambos carregados em toda página — duplicação sem propósito, cada consumidor (`.beeday-button__loader`, spinner de `BeeDayLoading`) referenciando por nome, então qualquer uma das duas definições já bastava. **Corrigido nesta Sprint**: consolidado em uma única definição | `FIXED` | 30.19 |
+| BD30-F074 | baixa | `BeeDayCardMenu` (mais `CardActionMenuCoordinator`/`CardMenuPlacement`) tinha zero consumidores de produção em todo `src/` — confirmado por busca completa por `<BeeDayCardMenu`. Superado por um refactor anterior que tornou os cards inteiros clicáveis para editar (commit `05a7ad3`), mas o componente, seu serviço de coordenação, sua geometria de posicionamento e dois arquivos de teste dedicados nunca foram removidos. **Corrigido nesta Sprint**: componente, serviço, geometria, os dois arquivos de teste dedicados, o registro de DI em `Program.cs` e as 3 chaves `resx` exclusivas (`CardMenu*`) removidos; `CoreComponentContractTests` (inventário de componentes e contagem de controles nativos) atualizado para refletir a remoção | `FIXED` | 30.19 |
+| BD30-F075 | baixa | CSS morta remanescente em `cards.css`, ligada ao mesmo padrão de interação superado pela `BD30-F074`: `.activity-card__menu`, `.habit-card__menu`, `.activity-card--menu-open`, `.habit-card--menu-open`, `.activity-card__actions` — confirmado por busca de marcação que nenhum desses seletores casa com qualquer elemento hoje. Tentativa de remoção iniciada nesta Sprint e revertida ao descobrir que o escopo real é maior do que o inicialmente visível — pelo menos 6 localizações separadas no arquivo, algumas como regras isoladas e outras entrelaçadas em grupos de seletores separados por vírgula que também contêm seletores ainda vivos (ex.: `.activity-card__checkbox, .habit-card__score-button, .activity-card__menu, .habit-card__menu { ... }`). Remover parcialmente sob pressão de tempo de uma Sprint de auditoria é mais arriscado do que documentar e encaminhar para uma limpeza dedicada com verificação visual adequada | `OPEN` | 30.26 |
+| BD30-F076 | baixa | regra global obsoleta `.beeday-hero__eyebrow` em `design-system.css` já causou uma falha real de WCAG-AA (capturada pelo scan axe-core do repositório) por conflitar com o CSS isolado de `BeeDayHero.razor.css` em superfícies COR0-COR9 multi-cor; corrigida à época via um truque de especificidade (`color: inherit` no CSS isolado, que tecnicamente ganha da regra global) em vez de remover/escopar a regra obsoleta. Funcionalmente correta hoje, mas frágil — depende da ordem de cascata entre dois arquivos permanecer exatamente como está, em vez da regra obsoleta simplesmente não existir mais. Já autodocumentada em comentário no código; registrada aqui para acompanhamento formal | `OPEN` | 30.26 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -2354,3 +2359,169 @@ Sprint foi confirmar isso com evidência e registrá-lo formalmente para decisã
 exatamente como o critério de aceite exige, sem inventar nenhum texto. Um gap real de cobertura
 mobile foi fechado (`BD30-F070`); um gap de cobertura de localização de baixo risco foi encaminhado
 (`BD30-F071`). Nenhuma mutação de banco HMG/produção foi executada ou é necessária.
+
+## 26. Sprint 30.19 — Design System Complete Audit
+
+### 26.1 Escopo e método
+
+Auditoria completa da biblioteca de Design System compartilhada (`src/BeeDay.Web/Components/DesignSystem/`,
+27 componentes `.razor`) e sua camada de fundação (`variables.css`, sistema de ícones, 18 stylesheets
+globais) contra o inventário `INV-015`, ainda `BASELINED` desde a Sprint 30.1. Sprint de
+auditoria/consolidação, não de redesign — o boundary explícito da Issue proíbe criar nova linguagem
+visual ou reescrever componentes funcionais sem evidência.
+
+Duas obrigações encaminhadas de Sprints anteriores foram reverificadas: `BD30-F052` (Sprint 30.11,
+gap de UI de `ActivityAttribute`) e a metade restante de `BD30-F058` (Sprint 30.15, filtro de faixa
+de valor do Wallet). Ambas confirmadas ainda precisas — ver §26.5.
+
+### 26.2 Achados confirmados — corretos, sem defeito
+
+- **Sistema de ícones**: padrão único e canônico (sprite SVG via `BeeDayIcon.razor`), nenhuma
+  implementação concorrente encontrada em toda a base.
+- **Reuso de componentes estruturais**: `BeeDayButton` (17 consumidores), `BeeDayIcon` (20),
+  `BeeDayInput` (13), `EditorModalShell` (todos os 6 editores de formulário), `BeeDayConfirmDialog`
+  (5) — nenhuma reimplementação local encontrada em Wallet/Habits/Tasks/Todos/Projects/Account.
+  Componentes "molécula" (`ActivityCard`, `HabitCard`, `TransactionCard`, `WalletSummary`,
+  `ProgressMetricCard`, `ExperienceBar`) corretamente envolvem `BeeDayCard` em vez de duplicar a
+  base do cartão.
+- **Variantes de botão**: 9 variantes declaradas, todas com CSS e tokens dedicados; zero
+  `style=` inline sobrescrevendo `<BeeDayButton>` em qualquer consumidor.
+- **Shell de modal/diálogo**: todos os 6 editores reutilizam `EditorModalShell`; os dois desvios
+  encontrados (`BeeDayConfirmDialog`/`BeeDayFeedbackModal` para diálogos não-editor,
+  `ProjectWorkspace` para um painel de workspace completo) reutilizam corretamente o primitivo de
+  foco `DialogFocusScope` e são variantes de produto legítimas, não duplicação.
+- **Foco visível**: baseline global de especificidade zero (`::where(...):focus-visible` em
+  `app.css`) mais ajustes locais por componente, todos derivando cor do mesmo token — inclusive
+  evidência positiva de autocorreção documentada (um anel duplo em Wallet já foi encontrado e
+  removido em favor da regra fundacional).
+- **Variantes de produto legítimas**: paleta dedicada de Habit (`--beeday-habit-color-*`), cartão
+  de saldo do Wallet, checkbox nativo de `Login.razor` (única exceção técnica justificada — formulário
+  HTML puro, sem `EditContext`, mas replica manualmente o mesmo contrato visual de `BeeDayCheckbox`)
+  — nenhuma flagrada como defeito.
+- **`BeeDayCheckbox`**: zero consumidores de produção hoje, mas não é código morto — nenhum editor
+  atual tem campo booleano dentro de um `EditForm`; o componente já está testado e pronto para o
+  primeiro campo que precisar dele. Decisão explícita desta Sprint: manter, não remover.
+
+### 26.3 `BD30-F072`/`BD30-F073` — drift de token e duplicação de `@keyframes`, corrigidos
+
+Dois pontos de drift de valor hardcoded confirmados e corrigidos: `CreateProfile.razor.css`
+referenciava um custom property nunca definido (`--beeday-color-danger-text`), então seu fallback
+hardcoded sempre vencia, divergindo do token canônico `--beeday-color-danger`; `feedback.css` usava
+hex bruto quase-idêntico aos tokens `--beeday-color-success-soft`/`--beeday-color-danger-soft` já
+existentes para o fundo dos ícones de toast. `@keyframes beeday-spin` estava definido identicamente
+em dois stylesheets globais sempre carregados juntos — consolidado em uma única definição.
+
+### 26.4 `BD30-F074` — `BeeDayCardMenu` órfão, removido
+
+`BeeDayCardMenu` (mais seu serviço de coordenação `CardActionMenuCoordinator` e sua geometria de
+posicionamento `CardMenuPlacement`) tinha zero consumidores de produção em toda a base — confirmado
+por busca completa por `<BeeDayCardMenu`. O histórico do Git mostra que um refactor anterior tornou
+os cards inteiros clicáveis para editar (`05a7ad3`), superando o propósito original do componente
+(um menu kebab Editar/Excluir), mas o componente, seu serviço, sua geometria e dois arquivos de
+teste dedicados nunca foram removidos.
+
+**Removidos nesta Sprint**: `BeeDayCardMenu.razor`/`.razor.cs`/`.razor.css`, `CardMenuPlacement.cs`,
+`CardActionMenuCoordinator.cs`, `BeeDayCardMenuTests.cs`, `CardMenuPlacementCalculatorTests.cs`, o
+registro de DI em `Program.cs`, as 3 chaves `resx` exclusivas (`CardMenuEditLabel`/
+`CardMenuDeleteLabel`/`CardMenuOptionsForAriaLabel`, em 3 arquivos), e a menção obsoleta no
+comentário de `DesignSystemResources.cs`. `CoreComponentContractTests.cs` — o teste de inventário
+que trava a lista canônica de componentes compartilhados e a contagem de controles nativos — foi
+atualizado para refletir a remoção (lista de componentes, contagem de `<button>` 31→28, soma total
+44→41, arquivos com controle nativo 21→20). `WalletUiCoverageTests.cs` tinha um registro de DI
+supérfluo para o serviço removido (nunca efetivamente consumido por aquele teste), também limpo.
+
+### 26.5 Reverificação de achados encaminhados — sem correção, escopo confirmado fora desta Sprint
+
+`BD30-F052` (gap de UI de `ActivityAttribute`) e a metade restante de `BD30-F058` (filtro de faixa
+de valor do Wallet) foram reverificados: ambos continuam precisos, sem mudança desde suas Sprints
+originais. Construir essas duas superfícies de UI (um seletor de atributo em 4 editores; um filtro
+de Min/Max amount no Wallet) é trabalho de feature genuíno — novos campos, novo estado, nova
+validação client-side, novos testes — não consolidação de duplicatas, e está fora do limite
+explícito desta Sprint ("audit/consolidation Sprint, not a redesign"). Ambos reatribuídos de suas
+Sprints de auditoria para decisão do proprietário: a investigação já foi repetida sem informação
+nova, e não existe nenhuma Sprint restante no roteiro da EPIC 30 dedicada a construir features —
+o próximo passo é priorização de produto, não mais auditoria.
+
+### 26.6 `BD30-F075`/`BD30-F076` — achados confirmados, não corrigidos, encaminhados
+
+**`BD30-F075`** (CSS morta remanescente ligada ao mesmo padrão superado pela `BD30-F074`): uma
+tentativa de remover `.activity-card__menu`, `.habit-card__menu`, `.activity-card--menu-open`,
+`.habit-card--menu-open` e `.activity-card__actions` de `cards.css` foi iniciada e revertida nesta
+Sprint. A busca de marcação confirma que nenhum desses seletores casa com qualquer elemento
+renderizado hoje — mas o escopo real da CSS morta é maior do que ficou visível inicialmente: pelo
+menos 6 localizações separadas no arquivo, algumas como regras `!important` isoladas cuja remoção
+já provou ser sutil nesta mesma Sprint (ver a nota de cautela abaixo), e outras entrelaçadas em
+grupos de seletores separados por vírgula que também contêm seletores ainda vivos (por exemplo,
+`.activity-card__checkbox, .habit-card__score-button, .activity-card__menu, .habit-card__menu { ... }`
+— remover só a parte morta exige editar cada grupo individualmente, não apagar o bloco inteiro).
+Corrigir isso sob a janela de uma Sprint de auditoria, sem verificação visual real disponível neste
+ambiente, era mais arriscado do que documentar com precisão e encaminhar para uma limpeza dedicada.
+
+**Nota de cautela registrada durante esta Sprint**: uma primeira tentativa de consolidar a regra
+`:focus-within` duplicada de `.activity-card`/`.habit-card` (que parecia, à primeira vista, ser uma
+cópia 100% redundante de uma regra anterior no mesmo arquivo) foi corretamente revertida ao
+perceber que a cópia posterior usa `!important` — e por isso não é redundante: sem ela, uma regra
+`!important` diferente e mais tardia no arquivo (que define `border-color`/`box-shadow` da base do
+cartão, também com `!important`) venceria mesmo com o cartão em foco, silenciosamente eliminando o
+indicador visual de foco. Este é exatamente o tipo de comportamento não-intuitivo de cascata que
+justifica a decisão de não prosseguir com a limpeza mais ampla da `BD30-F075` sem verificação visual
+real.
+
+**`BD30-F076`** (regra global obsoleta `.beeday-hero__eyebrow`): já causou uma falha real de
+WCAG-AA no passado (capturada pelo scan axe-core do repositório), corrigida à época via um truque de
+especificidade em vez de remover a regra obsoleta. Funcionalmente correta hoje, mas frágil — depende
+da ordem de cascata entre dois arquivos permanecer exatamente como está. Já autodocumentada em
+comentário no código; registrada aqui para acompanhamento formal, sem alteração nesta Sprint.
+
+### 26.7 Implementação
+
+- `src/BeeDay.Web/Components/Features/ProfileCreation/Pages/CreateProfile.razor.css` — token de cor
+  corrigido (`BD30-F072`).
+- `src/BeeDay.Web/wwwroot/css/feedback.css` — fundos de ícone de toast convergidos para tokens
+  existentes (`BD30-F072`); `@keyframes beeday-spin` duplicado removido (`BD30-F073`).
+- `src/BeeDay.Web/Components/DesignSystem/Cards/BeeDayCardMenu.razor`/`.razor.cs`/`.razor.css`,
+  `CardMenuPlacement.cs`, `src/BeeDay.Web/Services/CardActionMenuCoordinator.cs` — removidos
+  (`BD30-F074`).
+- `src/BeeDay.Web/Program.cs` — registro de DI do serviço removido removido.
+- `src/BeeDay.Web/Components/DesignSystem/DesignSystemResources.resx`/`.en-US.resx`/`.pt-BR.resx` —
+  3 chaves `CardMenu*` removidas de cada; `DesignSystemResources.cs` — comentário atualizado.
+- `tests/BeeDay.Web.Tests/Components/Cards/BeeDayCardMenuTests.cs`,
+  `CardMenuPlacementCalculatorTests.cs` — removidos.
+- `tests/BeeDay.Web.Tests/Components/DesignSystem/CoreComponentContractTests.cs` — inventário e
+  contagens de controle nativo atualizados.
+- `tests/BeeDay.Web.Tests/Components/Wallet/WalletUiCoverageTests.cs` — registro de DI supérfluo
+  removido.
+- `docs/epics/30-system-integrity/README.md` — nova Seção 26; achados `BD30-F072`–`BD30-F076`;
+  `BD30-F052` e a metade restante de `BD30-F058` reatribuídos.
+
+Nenhuma mudança de contrato público, comportamento de produto, schema, migration. Nenhuma mutação de
+banco HMG/produção foi executada ou é necessária.
+
+### 26.8 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| `dotnet test tests/BeeDay.Web.Tests/...` (completo) | PASS, 874/874 |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx` (Debug, completo) | 1.546/1.547 na primeira execução (121 Domain, 119 Application, 216 Infrastructure, 874 Web, 216/217 E2E) — 1 falha em `HomeTests.PublicHomeIsResponsiveAccessibleAndDoesNotOverflow(width: 1920, height: 1080)`, `TimeoutException` em `GotoAsync("/")`/screenshot. Classificada `TRANSIENT/FLAKY` com evidência: Home pública não tocada por esta Sprint, terceira ocorrência consecutiva (Sprints 30.17/30.18/30.19) da mesma assinatura já documentada em `BD30-F042`, sempre um teste diferente, reexecução isolada PASSOU limpa (7/7) |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.547/1.547 (121 Domain, 119 Application, 216 Infrastructure, 874 Web, 217 E2E) — execução limpa, 0 falhas; confirma `TRANSIENT/FLAKY` da execução Debug |
+| `dotnet ef migrations has-pending-model-changes` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+
+### 26.9 Continuidade e entrega
+
+Esta Sprint confirmou que o Design System é maduro e ativamente reusado — a grande maioria da
+auditoria (variantes de botão, canonicidade do shell de modal, sistema de ícones, foco visível,
+padrões de composição de cartão/empty-state) não encontrou nenhum defeito. Os achados reais foram
+todos de baixa severidade: drift de token pontual, duplicação de `@keyframes`, e um subsistema
+inteiro (`BeeDayCardMenu`) órfão desde um refactor anterior e agora removido. Uma tentativa de
+limpeza mais ampla de CSS morta foi corretamente revertida ao descobrir escopo maior do que o
+inicialmente visível — e ao descobrir, no processo, uma dependência de cascata `!important`
+não-óbvia que uma remoção apressada teria quebrado silenciosamente. Isso reforça a disciplina desta
+auditoria: evidência forte não é o mesmo que risco baixo, e a menor correção correta às vezes é não
+corrigir ainda. Os dois achados de UI ausente encaminhados por Sprints anteriores (`BD30-F052`,
+`BD30-F058`) foram reverificados uma última vez e reatribuídos à decisão do proprietário — a
+auditoria já cumpriu seu papel investigativo nesses dois casos. Nenhuma mutação de banco HMG/produção
+foi executada ou é necessária.

@@ -126,15 +126,6 @@
   <data name="LoadingDefaultLabel" xml:space="preserve">
     <value>Salvando alterações...</value>
   </data>
-  <data name="CardMenuEditLabel" xml:space="preserve">
-    <value>EDITAR</value>
-  </data>
-  <data name="CardMenuDeleteLabel" xml:space="preserve">
-    <value>EXCLUIR</value>
-  </data>
-  <data name="CardMenuOptionsForAriaLabel" xml:space="preserve">
-    <value>Opções para {0}</value>
-  </data>
   <data name="EditorModalDeleteButton" xml:space="preserve">
     <value>Excluir</value>
   </data>

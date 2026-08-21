@@ -126,15 +126,6 @@
   <data name="LoadingDefaultLabel" xml:space="preserve">
     <value>Saving changes...</value>
   </data>
-  <data name="CardMenuEditLabel" xml:space="preserve">
-    <value>EDIT</value>
-  </data>
-  <data name="CardMenuDeleteLabel" xml:space="preserve">
-    <value>DELETE</value>
-  </data>
-  <data name="CardMenuOptionsForAriaLabel" xml:space="preserve">
-    <value>Options for {0}</value>
-  </data>
   <data name="EditorModalDeleteButton" xml:space="preserve">
     <value>Delete</value>
   </data>
