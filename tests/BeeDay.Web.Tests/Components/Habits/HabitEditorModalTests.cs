@@ -2,6 +2,7 @@ using BeeDay.Domain.Enums;
 using BeeDay.Web.Components.Features.Habits.Components;
 using BeeDay.Web.Components.Features.Habits.Models;
 using BeeDay.Web.Tests.Localization;
+using Microsoft.AspNetCore.Components;
 
 namespace BeeDay.Web.Tests.Components.Habits;
 
@@ -105,6 +106,66 @@ public sealed class HabitEditorModalTests : BunitContext
 
         Assert.Contains("Beber água", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Pelo menos 2 litros por dia", cut.Markup, StringComparison.Ordinal);
+    }
+
+    // EPIC 30 Sprint 30.12: no test previously proved the Model passed to OnSave actually reflects
+    // what the user typed/selected — only that the callback exists and that submit-label text is
+    // culture-correct. Also proves TogglePositive/ToggleNegative actually flip Direction, not just
+    // the "active" CSS class the direction buttons render from it.
+    [Fact]
+    public async Task Save_PassesTheEditedFieldsToOnSave()
+    {
+        HabitEditorModel? saved = null;
+        var model = new HabitEditorModel { Title = "Original", Description = "Original notes" };
+
+        var cut = Render<HabitEditorModal>(parameters => parameters
+            .Add(component => component.Model, model)
+            .Add(component => component.IsEditing, true)
+            .Add(component => component.OnSave, EventCallback.Factory.Create<HabitEditorModel>(this, m => saved = m)));
+
+        cut.Find("#habit-title").Change("Drink water");
+        cut.Find("#habit-notes").Change("At least 2 liters a day");
+        cut.Find("#habit-difficulty").Change(nameof(HabitDifficulty.Hard));
+        cut.Find("#habit-reset-counter").Change(nameof(HabitResetCounter.Weekly));
+        cut.Find(".habit-editor__direction-button:nth-child(2)").Click();
+        await cut.Find(".editor-modal__header-save").ClickAsync();
+
+        Assert.NotNull(saved);
+        Assert.Equal("Drink water", saved.Title);
+        Assert.Equal("At least 2 liters a day", saved.Description);
+        Assert.Equal(HabitDifficulty.Hard, saved.Difficulty);
+        Assert.Equal(HabitResetCounter.Weekly, saved.ResetCounter);
+        Assert.Equal(HabitDirection.Positive, saved.Direction);
+    }
+
+    [Fact]
+    public void TogglePositive_OnABothDirectionHabit_SwitchesToNegativeOnly()
+    {
+        var model = new HabitEditorModel { Title = "Study", Direction = HabitDirection.Both };
+        var cut = Render<HabitEditorModal>(parameters => parameters
+            .Add(component => component.Model, model)
+            .Add(component => component.IsEditing, true));
+
+        cut.Find(".habit-editor__direction-button:nth-child(1)").Click();
+
+        Assert.Equal(HabitDirection.Negative, model.Direction);
+        Assert.DoesNotContain("active", cut.Find(".habit-editor__direction-button:nth-child(1)").GetAttribute("class"), StringComparison.Ordinal);
+        Assert.Contains("active", cut.Find(".habit-editor__direction-button:nth-child(2)").GetAttribute("class"), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ToggleNegative_OnABothDirectionHabit_SwitchesToPositiveOnly()
+    {
+        var model = new HabitEditorModel { Title = "Study", Direction = HabitDirection.Both };
+        var cut = Render<HabitEditorModal>(parameters => parameters
+            .Add(component => component.Model, model)
+            .Add(component => component.IsEditing, true));
+
+        cut.Find(".habit-editor__direction-button:nth-child(2)").Click();
+
+        Assert.Equal(HabitDirection.Positive, model.Direction);
+        Assert.Contains("active", cut.Find(".habit-editor__direction-button:nth-child(1)").GetAttribute("class"), StringComparison.Ordinal);
+        Assert.DoesNotContain("active", cut.Find(".habit-editor__direction-button:nth-child(2)").GetAttribute("class"), StringComparison.Ordinal);
     }
 
     [Fact]

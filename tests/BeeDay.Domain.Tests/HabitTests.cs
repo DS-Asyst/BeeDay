@@ -28,6 +28,28 @@ public sealed class HabitTests
     }
 
     [Fact]
+    public void RegisterNegative_IncrementsNegativeCounter()
+    {
+        var habit = Habit.Create("Avoid sugar", null, HabitDirection.Both, HabitDifficulty.Medium, HabitResetCounter.Daily);
+
+        habit.RegisterNegative();
+
+        Assert.Equal(1, habit.NegativeCount);
+    }
+
+    // EPIC 30 Sprint 30.12: mirrors RegisterPositive_DoesNotChangeNegativeOnlyHabit — the equivalent
+    // no-op branch for a Positive-only habit had no test.
+    [Fact]
+    public void RegisterNegative_DoesNotChangePositiveOnlyHabit()
+    {
+        var habit = Habit.Create("Study", null, HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily);
+
+        habit.RegisterNegative();
+
+        Assert.Equal(0, habit.NegativeCount);
+    }
+
+    [Fact]
     public void Create_RejectsEmptyTitle()
     {
         Assert.Throws<DomainValidationException>(() =>
