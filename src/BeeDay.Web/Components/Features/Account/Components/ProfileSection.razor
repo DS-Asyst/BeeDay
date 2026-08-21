@@ -15,7 +15,11 @@
             <BeeDayInput Id="account-nickname" Label="@Localizer["NicknameLabel"]" ReadOnly="true" @bind-Value="Model.Nickname" />
         </div>
 
+        <BeeDayInput Id="account-current-password" Label="@Localizer["CurrentPasswordLabel"]"
+                      @bind-Value="Model.CurrentPassword" type="password" autocomplete="current-password" />
+
         <p class="beeday-settings-form__hint">@Localizer["ProfileHint"]</p>
+        <p class="beeday-settings-form__hint">@Localizer["ProfileEmailChangeHint"]</p>
     </BeeDaySettingsForm>
 </BeeDaySettingsSection>
 

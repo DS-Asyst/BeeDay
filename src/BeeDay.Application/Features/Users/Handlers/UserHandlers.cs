@@ -5,6 +5,7 @@ using BeeDay.Application.Features.Users.Commands;
 using BeeDay.Application.Features.Users.Queries;
 using BeeDay.Application.Features.Users.Responses;
 using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
 using BeeDay.Domain.Exceptions;
 using BeeDay.Domain.ValueObjects;
 using MediatR;
@@ -181,21 +182,71 @@ public sealed class UpdateCurrentUserPreferencesCommandHandler(IUserRepository r
     }
 }
 
-public sealed class UpdateCurrentUserAccountCommandHandler(IUserRepository repository, ICurrentUserContext currentUser)
-    : IRequestHandler<UpdateCurrentUserAccountCommand>
+/// <summary>
+/// EPIC 30 Sprint 30.11 / BD30-F044: an email change is treated as security-sensitive, exactly like a
+/// password change (<see cref="ChangeCurrentUserPasswordCommandHandler"/>) — the current password must
+/// be verified before it is allowed, otherwise a hijacked session (stolen cookie, XSS) alone would be
+/// enough to repoint Email and, from there, take over the account via forgot-password. A Name-only
+/// save never touches the password check. <see cref="User.UpdateAccount"/> itself resets
+/// <c>IsEmailConfirmed</c> on an actual email change; this handler issues and sends the fresh
+/// confirmation email the same way <see cref="CreateAccountCommandHandler"/> does at registration.
+/// </summary>
+public sealed class UpdateCurrentUserAccountCommandHandler(
+    IUnitOfWork unitOfWork,
+    IPasswordService passwordService,
+    IEmailConfirmationIssuer confirmationIssuer,
+    IEmailSender emailSender,
+    IClock clock,
+    ICurrentUserContext currentUser) : IRequestHandler<UpdateCurrentUserAccountCommand>
 {
     public async Task Handle(UpdateCurrentUserAccountCommand command, CancellationToken cancellationToken)
     {
         var userId = CurrentUserGuard.RequireUserId(currentUser);
-        await UserLookup.RequireExistsAsync(repository, userId, cancellationToken);
+        var user = await UserLookup.RequireExistsAsync(unitOfWork.Users, userId, cancellationToken);
 
         var request = command.Request;
-        if (await repository.IsEmailInUseAsync(request.Email.Trim(), userId, cancellationToken))
+        if (await unitOfWork.Users.IsEmailInUseAsync(request.Email.Trim(), userId, cancellationToken))
         {
             throw new InvalidDomainStateException($"Email '{request.Email}' is already registered.");
         }
 
-        await repository.UpdateAsync(userId, user => user.UpdateAccount(request.Name, request.Email), cancellationToken);
+        var emailChanged = !string.Equals(user.Email, EmailAddress.Create(request.Email).Value, StringComparison.Ordinal);
+        if (emailChanged &&
+            (string.IsNullOrWhiteSpace(user.PasswordHash) || !passwordService.Verify(request.CurrentPassword, user.PasswordHash)))
+        {
+            throw new InvalidDomainStateException("The current password is incorrect.");
+        }
+
+        EmailMessage? confirmationEmail = null;
+
+        try
+        {
+            await unitOfWork.BeginTransactionAsync(cancellationToken);
+
+            await unitOfWork.Users.UpdateAsync(userId, u => u.UpdateAccount(request.Name, request.Email), cancellationToken);
+
+            if (emailChanged)
+            {
+                var now = clock.UtcNow;
+                await unitOfWork.UserTokens.RevokeActiveAsync(userId, UserTokenType.EmailConfirmation, now, cancellationToken);
+
+                var updatedUser = await UserLookup.RequireExistsAsync(unitOfWork.Users, userId, cancellationToken);
+                var (token, message) = confirmationIssuer.Issue(updatedUser);
+                await unitOfWork.UserTokens.AddAsync(token, cancellationToken);
+                confirmationEmail = message;
+            }
+
+            await unitOfWork.CommitTransactionAsync(cancellationToken);
+        }
+        finally
+        {
+            await unitOfWork.DisposeAsync();
+        }
+
+        if (confirmationEmail is not null)
+        {
+            await emailSender.SendAsync(confirmationEmail, cancellationToken);
+        }
     }
 }
 

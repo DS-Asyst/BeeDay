@@ -25,7 +25,7 @@ public sealed class BeeDayWebService(ISender sender)
         sender.Send(new CreateAccountCommand(new(name, email, password, nickname, avatar)), cancellationToken);
     public Task<Guid> CreateUserAsync(string name, string email, string password, CancellationToken cancellationToken = default) => sender.Send(new CreateUserCommand(new(name, email, password)), cancellationToken);
     public Task CompleteUserProfileAsync(string fullName, string nickname, string? avatar = null, CancellationToken cancellationToken = default) => sender.Send(new CompleteUserProfileCommand(new(fullName, nickname, avatar)), cancellationToken);
-    public Task UpdateUserAsync(string name, string email, CancellationToken cancellationToken = default) => sender.Send(new UpdateCurrentUserAccountCommand(new(name, email)), cancellationToken);
+    public Task UpdateUserAsync(string name, string email, string currentPassword = "", CancellationToken cancellationToken = default) => sender.Send(new UpdateCurrentUserAccountCommand(new(name, email, currentPassword)), cancellationToken);
     public Task UpdatePreferencesAsync(UserLanguage language, UserTheme theme, CancellationToken cancellationToken = default) => sender.Send(new UpdateCurrentUserPreferencesCommand(new(language, theme)), cancellationToken);
     public Task CompleteOnboardingAsync(CancellationToken cancellationToken = default) => sender.Send(new CompleteCurrentUserOnboardingCommand(), cancellationToken);
     public Task ChangePasswordAsync(string currentPassword, string newPassword, string confirmNewPassword, CancellationToken cancellationToken = default) => sender.Send(new ChangeCurrentUserPasswordCommand(new(currentPassword, newPassword, confirmNewPassword)), cancellationToken);
