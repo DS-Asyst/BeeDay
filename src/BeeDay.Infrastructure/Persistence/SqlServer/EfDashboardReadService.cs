@@ -2,6 +2,7 @@ using BeeDay.Application.Features.Dashboard.Contracts;
 using BeeDay.Application.Features.Dashboard.Responses;
 using BeeDay.Application.Features.Wallets.Responses;
 using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
 using BeeDay.Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
@@ -46,16 +47,28 @@ internal sealed class EfDashboardReadService(IDbContextFactory<BeeDayDbContext> 
         WalletSummaryResponse? walletSummary = null;
         if (wallet is not null)
         {
-            var transactions = await context.Transactions.AsNoTracking()
-                .Where(transaction => transaction.WalletId == wallet.Id)
-                .ToListAsync(cancellationToken);
+            var walletTransactions = context.Transactions.AsNoTracking()
+                .Where(transaction => transaction.WalletId == wallet.Id);
+
+            // Aggregated in SQL (SUM/COUNT) instead of loading every transaction row over the network
+            // just to sum them in memory — this query runs on every dashboard load and after every
+            // unrelated Habit/Task/Todo/Project mutation (DashboardState.ReloadAsync always reloads
+            // the wallet summary too), so the full-row-transfer cost was paid far more often than the
+            // wallet page itself is visited.
+            var totalIncome = await walletTransactions
+                .Where(transaction => transaction.Type == TransactionType.Income)
+                .SumAsync(transaction => (decimal?)transaction.Amount, cancellationToken) ?? 0m;
+            var totalExpenses = await walletTransactions
+                .Where(transaction => transaction.Type == TransactionType.Expense)
+                .SumAsync(transaction => (decimal?)transaction.Amount, cancellationToken) ?? 0m;
+            var transactionCount = await walletTransactions.CountAsync(cancellationToken);
 
             walletSummary = new WalletSummaryResponse(
                 wallet.Id,
-                wallet.CalculateBalance(transactions),
-                wallet.CalculateTotalIncome(transactions),
-                wallet.CalculateTotalExpenses(transactions),
-                transactions.Count,
+                totalIncome - totalExpenses,
+                totalIncome,
+                totalExpenses,
+                transactionCount,
                 wallet.UpdatedAtUtc);
         }
 
