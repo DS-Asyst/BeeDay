@@ -4,7 +4,11 @@
 `src/BeeDay.Web/Components/**/*.razor` e leitura das 3 primeiras linhas de cada arquivo resultante
 (`@page`, `@attribute`, `@layout`/`@rendermode`), mais `Components/Routes.razor` e `Components/App.razor`.
 
-**Última verificação:** 2026-08-18 (Sprint 29.4) — §9 reescrito: as 11 páginas institucionais mais
+**Última verificação:** 2026-08-21 (Sprint 30.17, EPIC 30) — `BD30-F002` corrigido: a tabela em §3 já
+estava correta (54 rotas, 52 arquivos) desde a Sprint 29.4, mas três menções de prosa nas §1, §3 e §11
+ainda diziam "42 rotas"/"42 ocorrências, 40 arquivos", desatualizadas desde antes da Sprint 25.17.
+Corrigidas para o valor real e verificado nesta Sprint. Nenhuma rota foi adicionada, removida ou
+reclassificada. Verificação anterior: 2026-08-18 (Sprint 29.4) — §9 reescrito: as 11 páginas institucionais mais
 `/brand-guidelines` (agora sua própria página, movida de `ExperienceSystemHome.razor`) passam a usar
 o novo `EditorialLayout` em vez de `PublicLayout`, com header+hero unificados e navegação contextual
 por família. A tabela de rotas em §3 foi atualizada para incluir essas 12 rotas — fechando o gap
@@ -23,7 +27,7 @@ rotas preservadas da verificação de 2026-08-07.
 
 ## 1. Objetivo
 
-Mapear as 42 rotas `@page` do repositório, seu layout e atributo de autorização, e descrever o
+Mapear as 54 rotas `@page` do repositório, seu layout e atributo de autorização, e descrever o
 shell HTML (`App.razor`) e o `Router` (`Routes.razor`) que as hospedam.
 
 ## 2. Shell e Router
@@ -125,7 +129,7 @@ e `<HeadOutlet />`. O `<body>` contém apenas `<Routes @rendermode="InteractiveS
 | `/not-found` | `Pages/NotFound.razor` | `MainLayout` (explícito) | `AllowAnonymous` | — |
 | `/Error` | `Pages/Error.razor` | `MainLayout` (padrão) | `AllowAnonymous` | — |
 
-42 rotas. Duas famílias de rota compartilham componente: `Account.razor` (`/account`, `/settings`) e
+54 rotas. Duas famílias de rota compartilham componente: `Account.razor` (`/account`, `/settings`) e
 `TypographyGuidelines.razor` (`/brand/typography`, `/experience-system/brand/typography` — a segunda
 rota foi adicionada na Sprint 25.17 como alias canônico dentro do `beeday Experience System`,
 preservando a primeira por compatibilidade e sem duplicar conteúdo). Até a Sprint 29.4,
@@ -297,10 +301,10 @@ seletores `::deep`.
 
 ## 11. Fontes de verdade
 
-- Busca `@page` em `src/BeeDay.Web/Components/**/*.razor` (42 ocorrências, 40 arquivos — inclui a
+- Busca `@page` em `src/BeeDay.Web/Components/**/*.razor` (54 ocorrências, 52 arquivos — inclui a
   rota de compatibilidade `LegacyHomeRedirect.razor` da Sprint 21.12 e as 21 rotas do `beeday
   Experience System`/Brand Guidelines reconciliadas na Sprint 25.17).
-- Primeiras linhas de cada um dos 40 arquivos resultantes.
+- Primeiras linhas de cada um dos 52 arquivos resultantes.
 - `src/BeeDay.Web/Components/Routes.razor`, `App.razor`.
 - `src/BeeDay.Web/Components/Features/Home/Pages/Home.razor`,
   `src/BeeDay.Web/Components/Layout/PublicLayout.razor`, `PublicHeader.razor`,

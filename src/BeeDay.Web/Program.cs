@@ -240,6 +240,13 @@ if (!app.Environment.IsDevelopment() && productionHosting.ForwardedHeaders.Enabl
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler();
 
+// MapRazorComponents only registers an endpoint for each discovered @page route — it does not
+// add an implicit catch-all fallback, so a request to a URL matching no @page (a typo, a stale
+// external link, a bookmark) terminates routing with a bare, empty 404 before Blazor's own
+// Router/NotFoundPage ever runs. Re-executing against the real /not-found page (itself a normal
+// @page route) reuses the same styled, localized NotFound component instead of duplicating it.
+app.UseStatusCodePagesWithReExecute("/not-found");
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseHsts();
