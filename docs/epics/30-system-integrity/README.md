@@ -56,7 +56,7 @@ todo achado termine como `FIXED`, `VERIFIED` ou `ACCEPTED RISK`.
 | INV-005 | Infrastructure | 58 arquivos rastreados; SQL Server, serviços técnicos, DI, health checks e configuração | `VERIFIED` | 30.7 |
 | INV-006 | Persistência e migrations | um `BeeDayDbContext`, uma migration versionada e o model snapshot, em 3 arquivos de migration | `VERIFIED` | 30.7 |
 | INV-007 | Web e composição | 460 arquivos rastreados; 17 diretórios de Feature; nenhum acesso direto a `BeeDayDbContext` | `VERIFIED` | 30.8 |
-| INV-008 | Rotas e shell | 54 declarações `@page` encontradas diretamente em componentes Razor | `BASELINED` | 30.17 |
+| INV-008 | Rotas e shell | 54 declarações `@page` em 52 arquivos, reconfirmadas byte-a-byte na Sprint 30.17 contra `docs/web/02-routing-and-pages.md` §3 — zero rota indocumentada, zero rota obsoleta documentada, zero rota duplicada | `VERIFIED` | 30.17 |
 | INV-009 | Fluxos funcionais | Identity/Auth/User, Dashboard, Habits, Tasks, Todos, Projects, Wallets, Experience, Onboarding e páginas públicas identificados | `MAPPED` (Identity/Auth `VERIFIED` na 30.10) | 30.4, 30.10–30.18 |
 | INV-010 | Testes | 198 arquivos rastreados em 5 projetos; baseline executado contra LocalDB e Chromium | `BASELINED` | 30.24 |
 | INV-011 | Workflows | 6 workflows: PR Validation, HMG Deployment, HMG Verification, Release Quality Gate, Production Deployment e Promotion Policy | `BASELINED` | 30.25 |
@@ -129,7 +129,7 @@ atuais vivem em Domain.Tests e Application.Tests.
 | ID | Severidade | Evidência confirmada | Estado | Sprint proprietária |
 |---|---|---|---|---|
 | BD30-F001 | média | `docs/testing/README.md` e `01-testing-strategy.md` registram 1.116 testes (93/73/129/741/80); o baseline atual executou 1.443 (93/85/212/861/192) | `OPEN` | 30.24 |
-| BD30-F002 | média | `docs/web/02-routing-and-pages.md` registra 42 rotas; a busca atual encontrou 54 declarações `@page` | `OPEN` | 30.17 |
+| BD30-F002 | média | `docs/web/02-routing-and-pages.md` registra 42 rotas; a busca atual encontrou 54 declarações `@page`. **Corrigido na Sprint 30.17**: a tabela do §3 já estava correta (54 rotas/52 arquivos) desde a Sprint 29.4 — a divergência estava só em 3 menções de prosa (§1, rodapé do §3, §11) nunca atualizadas desde antes da Sprint 25.17, agora corrigidas para o valor real | `FIXED` | 30.17 |
 | BD30-F003 | baixa | `docs/application/README.md` declara 9 Features, mas enumera e o repositório contém 10 diretórios | `FIXED` | 30.6 |
 | BD30-F031 | média | 17 dos 27 handlers de Application não tinham teste direto em `tests/BeeDay.Application.Tests` (confirmado por busca de referência), incluindo dois handlers multi-write com transação (`UpdateTodoCommandHandler` no branch cross-Project, `UpdateTransactionCommandHandler`, `DeleteTransactionCommandHandler`) cuja correção de fronteira transacional só era provada por inspeção de código | `FIXED` | 30.6 |
 | BD30-F004 | baixa | `docs/architecture/02-solution-structure.md` descreve Solution Items antigos (`docs/ai` e `docs/development`); `BeeDay.slnx` aponta atualmente para `docs/developer/README.md` e outros itens existentes | `OPEN` | 30.28 |
@@ -190,6 +190,12 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F060 | baixa | não existia cobertura E2E provando que completar Task/Todo/Project concede XP visivelmente (só Habit tinha, desde a Sprint 30.12) e o modal de level-up (`BeeDayFeedbackModal`) nunca havia sido exercitado ponta a ponta (só bUnit) — nenhum teste anterior disparava uma execução real de handler + publicação real de domain event + render real do Blazor Server através de um level-up de fato. **Corrigido nesta Sprint**: `CompleteTask_UpdatesXp` prova visibilidade de XP para Task via navegador real; `CompleteTask_AtALevelBoundary_ShowsTheLevelUpModalExactlyOnce` semeia o usuário 5 XP abaixo do limite documentado/testado de Level 2 (100 XP) via novo parâmetro `initialExperience` de `E2EWebApplicationFactory.SeedUserAsync` (usa `User.AddExperience`, não-dedup, só para arranjo de teste) e prova o modal aparecendo exatamente uma vez, com os níveis corretos, e não reaparecendo após reload. Residual não corrigido, de baixo valor: Todo/Project não têm o mesmo teste de visibilidade de XP especificamente — aceito porque os três dividem exatamente o mesmo `ToggleTodoCommandHandler`/`ExecuteExperienceOperationAsync`, já provado correto nas camadas Application/Infrastructure (§23.1, item D.8) | `FIXED` | 30.16 |
 | BD30-F061 | baixa | não existe nenhuma UI (nem endpoint de leitura em Application) que exponha o histórico de `ExperienceEntry` ao usuário ou a um admin — a única superfície visível é o toast efêmero de level-up (`BeeDayFeedbackStore`, escopo de circuito, últimos 3 itens, nunca lê do banco). O trabalho de persistência corrigido pela `BD30-F030` (Sprint 30.7) não tem, hoje, nenhum consumidor além dessa lógica de dedup interna. Construir uma tela de histórico é uma decisão de produto, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
 | BD30-F062 | baixa | excluir um Habit/Task/Todo/Project já recompensado não revoga nem ajusta o XP concedido — comportamento deliberado por design (`ExperienceEntryConfiguration.cs` documenta em comentário: sem FK para a origem, `ExperienceEntries` é histórico append-only, cópia do que aconteceu, não referência viva). A decisão está corretamente implementada e comentada no código, mas não está ratificada em nenhum lugar de `docs/` (`docs/domain/business-rules.md` só declara a curva/nível como determinística, nada sobre revogação por exclusão) | `OPEN` | 30.28 |
+| BD30-F063 | alta | `app.MapRazorComponents<App>()` registra um endpoint só para cada `@page` descoberto — não existe fallback catch-all implícito. Qualquer requisição para uma URL sem `@page` correspondente (erro de digitação, link externo obsoleto, favorito antigo) terminava o roteamento do ASP.NET Core com um 404 vazio (`Content-Length: 0`, sem HTML algum), sem nunca alcançar o `NotFoundPage` do `Router` do Blazor — confirmado empiricamente via `curl` contra o servidor real, contrastado com `/login` (200, HTML completo) e `/not-found` (200, mesma rota funcionando quando acessada diretamente). Nenhum teste anterior (E2E ou integração) exercitava uma URL genuinamente inexistente contra o pipeline HTTP real — só bUnit, que renderiza `NotFound.razor` diretamente, sem passar pelo roteamento. **Corrigido nesta Sprint**: `app.UseStatusCodePagesWithReExecute("/not-found")` reexecuta a requisição contra a rota `/not-found` real (já existente, estilizada, localizada) sempre que a resposta termina em um status 4xx/5xx sem corpo já escrito — não interfere com nenhuma resposta que já tenha corpo (JSON de `GlobalExceptionHandler`) nem com redirects de autenticação (302, com `Location`). Verificado com `curl` antes/depois da correção e com a suíte completa de `AuthorizationIntegrationTests`/`AntiforgeryIntegrationTests`/`ProblemDetailsIntegrationTests` (892/892 em `BeeDay.Web.Tests`, nenhuma regressão) | `FIXED` | 30.17 |
+| BD30-F064 | baixa | `EditorialFooter.razor` linka para `/buy-me-a-coffee` em todas as 12 páginas institucionais; a rota não existe (contrato de rota já pré-anunciado como fora de escopo em `docs/web/02-routing-and-pages.md` desde a Sprint 29.4). Antes da `BD30-F063`, clicar mostrava uma página completamente em branco; após a correção desta Sprint, mostra a página real de Not Found (estilizada, localizada) — o link continua não-funcional, mas já não produz mais uma tela em branco. Construir a página ou remover o link é decisão de produto, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
+| BD30-F065 | média | `/Error` (`Pages/Error.razor`) existe mas nunca é produzida por nenhum caminho de código — `GlobalExceptionHandler` sempre emite JSON `ProblemDetails` para qualquer exceção na pipeline HTTP, nunca redireciona para `/Error`. Separadamente, nenhum `<ErrorBoundary>` existe em toda a árvore de componentes (`grep` por `ErrorBoundary` em `src/BeeDay.Web` = zero resultados) — uma exceção não tratada dentro do render/event-handler de qualquer página interativa (ex.: um clique em `Wallet.razor`) encerra o circuito SignalR sem nenhuma tela de recuperação além do `ReconnectModal` genérico tentando reconectar a um circuito que já não existe. Ambos são gaps de arquitetura de resiliência a erros, não defeitos pontuais de rota — encaminhados à Sprint 30.23 (Resilience & Observability) em vez de corrigidos aqui, dado o risco de uma mudança especulativa na pipeline global de exceções sem o escopo dedicado que o tema merece | `OPEN` | 30.23 |
+| BD30-F066 | baixa | não existia teste E2E/integração provando o ciclo completo `returnUrl` (hit anônimo em rota protegida → redirect para `/login?returnUrl=...` → login → volta exatamente para a página originalmente pedida) nem uma URL genuinamente inexistente atingindo o `NotFoundPage` do Router real (só bUnit, que renderiza `NotFound.razor` direto). **Corrigido nesta Sprint**: `AuthorizationIntegrationTests.Anonymous_ProtectedPageRedirect_CarriesTheOriginalPathAsReturnUrl` (nova) prova o `returnUrl` correto no redirect anônimo; `LoginIntegrationTests.Login_WithLocalReturnUrl_RedirectsToTheOriginallyRequestedPage` (nova) completa o ciclo até o destino pós-login; `NavigationTests.NonexistentRoute_RendersTheNotFoundPage` (E2E, nova) prova a `BD30-F063` corrigida contra um navegador real | `FIXED` | 30.17 |
+| BD30-F067 | baixa | a subárvore `/experience-system` (21 rotas públicas de documentação) não tem nenhum ponto de entrada direto no header/footer/nav de topo — só é alcançável via múltiplos saltos a partir do link `/brand-guidelines` no rodapé institucional, depois pela navegação de pilar/tópico interna. Não é uma rota quebrada (toda a subárvore é alcançável), apenas discoverability fraca para uma área de 21 rotas. Decisão de produto/IA de navegação, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
+| BD30-F068 | baixa | os dois wizards de onboarding (`Tutorial.razor`, `CreateProfile.razor`) mantêm o passo atual fora da URL (campo privado / `ProfileCreationState` escopado por DI, nenhum query string) — padrão consistente entre os dois, não um defeito isolado. Voltar/avançar no navegador sai do wizard inteiro em vez de andar entre os passos, comportamento previsível mas não documentado como decisão. Fora do escopo de roteamento propriamente dito (nenhuma rota quebra ou produz 404); observação de arquitetura de interação encaminhada a uma Sprint de UX | `OPEN` | 30.20 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -2086,3 +2092,155 @@ de XP foi ampliada de Habit-somente para incluir Task e o modal de level-up pont
 primeira vez (`BD30-F060`). Dois achados de baixa severidade foram encaminhados (`BD30-F061` decisão
 de produto, `BD30-F062` gap de documentação). Nenhuma mutação de banco HMG/produção foi executada ou
 é necessária.
+
+## 24. Sprint 30.17 — Navigation, Routing & Application Shell Audit
+
+### 24.1 Escopo e método
+
+Auditoria completa de navegação, roteamento e shell da aplicação: inventário de todas as rotas
+`@page`, links, redirects, gates de autorização, estados de layout, navegação de header/footer,
+parâmetros de rota, comportamento de voltar/avançar do navegador, refresh/deep link, acesso não
+autorizado, e experiências de not-found/erro/reconexão — contra o estado atual do repositório,
+incluindo a reverificação explícita de `BD30-F002` (encaminhada pela Sprint 30.1).
+
+Leitura completa de: todos os 54 `@page` do repositório e seus atributos de layout/autorização;
+`docs/web/02-routing-and-pages.md`; `MainLayout`/`DesktopSidebar`/`MobileSidebar`/`MobileHeader`/
+`NavigationItems`/`PublicHeader`/`AppFooter`/`EditorialFooter`; `LoginDestinationResolver.cs`,
+`Program.cs` (autenticação/autorização/pipeline HTTP), `RedirectToLogin.razor`; `Routes.razor`,
+`App.razor`, `NotFound.razor`, `Error.razor`, `GlobalExceptionHandler.cs`, `ReconnectModal.razor`;
+`Tutorial.razor`, `CreateProfile.razor`/`ProfileCreationState.cs`; e toda a suíte de testes de
+navegação/roteamento em `tests/BeeDay.Web.Tests/Integration` e `tests/BeeDay.E2E.Tests`.
+
+### 24.2 Inventário de rotas — confirmado correto, `BD30-F002` corrigido
+
+**54 declarações `@page` em 52 arquivos `.razor`**, reconfirmadas exaustivamente (nenhuma rota
+parametrizada existe hoje no repositório; toda página declara exatamente um de
+`[Authorize]`/`[AllowAnonymous]`). Comparação byte-a-byte contra a tabela do §3 de
+`docs/web/02-routing-and-pages.md`: **100% de correspondência** — zero rota indocumentada, zero rota
+obsoleta ainda documentada, zero rota duplicada.
+
+A divergência original de `BD30-F002` ("doc registra 42, busca encontrou 54") não estava na tabela
+em si — a tabela já estava correta desde a Sprint 29.4 — mas em três menções de prosa isoladas (§1,
+rodapé do §3, §11) nunca atualizadas desde antes da Sprint 25.17 (quando as 21 rotas do `beeday
+Experience System` foram adicionadas). Corrigidas nesta Sprint para o valor real. `INV-008` passa de
+`BASELINED` para `VERIFIED`.
+
+### 24.3 `BD30-F063` — 404 vazio para qualquer rota inexistente, corrigido (achado mais significativo)
+
+Escrever `NavigationTests.NonexistentRoute_RendersTheNotFoundPage` (E2E, nova) revelou que
+`app.MapRazorComponents<App>()` só registra um endpoint para cada `@page` descoberto — não existe
+fallback catch-all implícito. Confirmado empiricamente via `curl` direto contra o servidor real
+(não apenas leitura de código): uma requisição para uma URL sem `@page` correspondente retornava
+
+```text
+HTTP/1.1 404 Not Found
+Content-Length: 0
+```
+
+— nenhum HTML, nenhum conteúdo, nada — contra `/login` (200, HTML completo) e `/not-found` (200,
+a mesma página funcionando quando acessada diretamente pela sua própria rota). O `NotFoundPage` do
+`Router` do Blazor (`Routes.razor`) nunca era alcançado: o roteamento do ASP.NET Core terminava
+antes de a árvore de componentes sequer começar a renderizar. Nenhum teste anterior (E2E ou
+integração) exercitava uma URL genuinamente inexistente contra o pipeline HTTP real —
+`NotFoundTests.cs` (bUnit) renderiza `NotFound.razor` diretamente, contornando o roteamento por
+completo.
+
+Impacto real: qualquer erro de digitação de URL, link externo obsoleto, favorito antigo, ou
+resultado de busca desatualizado mostrava uma tela completamente em branco em produção — não uma
+página amigável, não uma mensagem, nada. Isso também explica e agrava `BD30-F064` (link morto
+`/buy-me-a-coffee`, presente em todas as 12 páginas institucionais).
+
+**Correção mínima**: `app.UseStatusCodePagesWithReExecute("/not-found")`, adicionado logo após
+`app.UseExceptionHandler()` em `Program.cs`. Reexecuta a requisição contra a rota `/not-found` real
+(já existente, estilizada, localizada) sempre que a resposta termina em um status 4xx/5xx sem corpo
+já escrito. Não interfere com respostas que já têm corpo (JSON de `GlobalExceptionHandler`, usado
+por endpoints de API) nem com redirects de autenticação (302 com `Location`, usado pelo cookie
+middleware) — verificado por reexecução manual (`curl` antes/depois) e pela suíte completa de
+`AuthorizationIntegrationTests`/`AntiforgeryIntegrationTests`/`ProblemDetailsIntegrationTests`
+(892/892 em `BeeDay.Web.Tests`, nenhuma regressão).
+
+### 24.4 Outros achados confirmados — corretos, sem defeito
+
+- **Shell desktop/mobile**: `DesktopSidebar`/`MobileSidebar` renderizam o mesmo componente
+  compartilhado `NavigationItems` — paridade de destinos garantida por construção, não por dois
+  inventários mantidos separadamente. Confirmado por `NavigationTests.cs`/`ShellResponsiveLayoutTests.cs`.
+- **Duplicação/sobreposição de rotas**: zero rotas duplicadas em toda a base.
+- **`LoginDestinationResolver`/`IsLocalPath`**: reverificado — implementação única, canônica,
+  reutilizada em todos os 3 pontos que precisam de proteção contra open-redirect
+  (`Login.razor`, `/auth/login`, `/auth/logout`, `/culture/set`). `BD30-F038` (Sprint 30.10)
+  permanece corrigida, sem regressão nem implementação duplicada mais fraca em nenhum outro lugar.
+- **`ReturnUrl` através do login**: preservado corretamente ponta a ponta, agora com cobertura de
+  teste explícita (§24.5/`BD30-F066`) em vez de apenas inferido por inspeção de código.
+- **Modal de reconexão** (`ReconnectModal.razor`): totalmente customizado, estilizado e localizado
+  — não é o padrão não-estilizado do SDK.
+
+### 24.5 `BD30-F066` — cobertura de teste ausente para o ciclo de `returnUrl` e para 404 real, corrigido
+
+Nenhum teste anterior provava o ciclo completo `returnUrl` (hit anônimo em rota protegida →
+redirect com `returnUrl` correto → login → volta exatamente à página pedida) nem uma URL
+genuinamente inexistente atingindo o roteamento real. Corrigido com 3 testes novos:
+`AuthorizationIntegrationTests.Anonymous_ProtectedPageRedirect_CarriesTheOriginalPathAsReturnUrl`,
+`LoginIntegrationTests.Login_WithLocalReturnUrl_RedirectsToTheOriginallyRequestedPage`, e
+`NavigationTests.NonexistentRoute_RendersTheNotFoundPage` (E2E) — este último é também a prova de
+regressão da `BD30-F063`.
+
+### 24.6 Achados menores/informativos (não corrigidos, encaminhados)
+
+- `BD30-F064` (baixa, decisão do proprietário): link morto `/buy-me-a-coffee` em todas as 12 páginas
+  institucionais — já pré-anunciado como fora de escopo desde a Sprint 29.4; após a correção da
+  `BD30-F063` já não mostra mais página em branco, mostra a página real de Not Found.
+- `BD30-F065` (média, → 30.23): `/Error` nunca é produzida por nenhum caminho de código (órfã) e
+  nenhum `<ErrorBoundary>` existe em toda a árvore de componentes — uma exceção não tratada dentro
+  de qualquer página interativa encerra o circuito sem tela de recuperação além do Reconnect
+  genérico. Gap de arquitetura de resiliência a erros, fora do escopo estrito de roteamento;
+  encaminhado à Sprint dedicada a resiliência/observability em vez de uma correção especulativa na
+  pipeline global de exceções.
+- `BD30-F067` (baixa, decisão do proprietário): subárvore `/experience-system` (21 rotas) sem ponto
+  de entrada direto no nav de topo — discoverability fraca, não rota quebrada.
+- `BD30-F068` (baixa, → 30.20): os dois wizards de onboarding mantêm o passo atual fora da URL —
+  padrão consistente, comportamento de voltar/avançar previsível (sai do wizard), observação de
+  interação encaminhada a uma Sprint de UX.
+
+### 24.7 Implementação
+
+- `src/BeeDay.Web/Program.cs` — `app.UseStatusCodePagesWithReExecute("/not-found")` (`BD30-F063`).
+- `docs/web/02-routing-and-pages.md` — 3 linhas de prosa corrigidas de "42"/"40" para "54"/"52"
+  (`BD30-F002`), changelog atualizado.
+- `tests/BeeDay.Web.Tests/Integration/AuthorizationIntegrationTests.cs` — novo teste
+  `Anonymous_ProtectedPageRedirect_CarriesTheOriginalPathAsReturnUrl`.
+- `tests/BeeDay.Web.Tests/Integration/LoginIntegrationTests.cs` — novo teste
+  `Login_WithLocalReturnUrl_RedirectsToTheOriginallyRequestedPage`.
+- `tests/BeeDay.E2E.Tests/NavigationTests.cs` — novo teste `NonexistentRoute_RendersTheNotFoundPage`.
+
+Nenhuma mudança de contrato público de Application, schema, migration ou Design System. Nenhuma
+mutação de banco HMG/produção foi executada ou é necessária.
+
+### 24.8 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `curl` manual contra `/this-route-does-not-exist-e2e` (antes da correção) | 404, `Content-Length: 0`, corpo vazio — reprodução confirmada |
+| `curl` manual contra `/this-route-does-not-exist-e2e` (depois da correção) | 404, HTML completo, `Not Found`/`does not exist` presentes no corpo |
+| `curl` manual contra `/login` e `/not-found` (antes e depois) | 200 em ambos os casos, sem alteração — nenhuma regressão nas rotas existentes |
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| `dotnet test tests/BeeDay.Web.Tests/...` (completo) | PASS, 892/892 |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter NavigationTests` | PASS, 8/8 |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx` (Debug, completo) | 1.563/1.564 na primeira execução (121 Domain, 119 Application, 216 Infrastructure, 892 Web, 215/216 E2E) — 1 falha em `InstitutionalPagesTests.EveryRouteRendersItsHeroAndHeadingWithoutHorizontalOverflowOnDesktop(route: "/brand-guidelines")`, `TimeoutException` em `GotoAsync`/screenshot. Classificada `TRANSIENT/FLAKY` com evidência: rota institucional não tocada por esta Sprint, assinatura idêntica à `BD30-F042` já documentada (contenção LocalDB/Playwright), reexecução isolada do teste PASSOU limpa (12/12, incluindo o caso `/brand-guidelines`) |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.564/1.564 (121 Domain, 119 Application, 216 Infrastructure, 892 Web, 216 E2E) — execução limpa, 0 falhas; confirma `TRANSIENT/FLAKY` da execução Debug (o mesmo caso `/brand-guidelines` passou aqui de primeira) |
+| `dotnet ef migrations has-pending-model-changes` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+
+### 24.9 Continuidade e entrega
+
+O achado mais significativo desta Sprint foi descoberto pela própria escrita de um teste E2E novo,
+não pela auditoria de código isolada: `MapRazorComponents<App>()` nunca teve um fallback catch-all
+implícito, então toda URL inexistente — erro de digitação, link externo obsoleto, favorito antigo —
+mostrava uma tela completamente em branco em produção, sem nunca alcançar o `NotFoundPage` estilizado
+e localizado que já existia e funcionava perfeitamente quando acessado diretamente. A correção
+(`UseStatusCodePagesWithReExecute`) é mínima, padrão do ASP.NET Core, verificada empiricamente
+antes/depois via `curl` contra o servidor real e sem nenhuma regressão na suíte completa de
+autenticação/autorização/antiforgery/problem-details. `BD30-F002` foi fechada com uma correção
+estritamente documental. Quatro achados menores foram encaminhados com evidência completa, nenhum
+inventado. Nenhuma mutação de banco HMG/produção foi executada ou é necessária.

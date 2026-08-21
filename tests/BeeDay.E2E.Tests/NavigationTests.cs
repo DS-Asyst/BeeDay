@@ -111,6 +111,17 @@ public sealed class NavigationTests(PlaywrightAppFixture fixture) : E2ETestBase(
         await Expect(drawer).ToBeHiddenAsync();
     }
 
+    // EPIC 30 Sprint 30.17: NotFoundTests.cs (bUnit) already renders the NotFound component
+    // directly, bypassing the router entirely. Nothing previously proved a genuinely nonexistent
+    // URL actually reaches Routes.razor's NotFoundPage fallback in a real browser.
+    [Fact]
+    public async Task NonexistentRoute_RendersTheNotFoundPage()
+    {
+        await GotoAsync("/this-route-does-not-exist-e2e");
+
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Not Found" })).ToBeVisibleAsync();
+    }
+
     [Fact]
     public async Task Desktop_LogoutRemainsDirectlyAccessibleInSecondaryNavigation()
     {

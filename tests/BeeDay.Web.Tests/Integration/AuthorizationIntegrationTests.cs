@@ -53,6 +53,23 @@ public sealed class AuthorizationIntegrationTests(BeeDayWebApplicationFactory fa
         Assert.Contains("/login", response.Headers.Location!.ToString(), StringComparison.Ordinal);
     }
 
+    // EPIC 30 Sprint 30.17: the anonymous-rejection assertion above only checked that the redirect
+    // target contains "/login" — it never confirmed the returnUrl actually carries the originally
+    // requested path. LoginIntegrationTests.Login_WithLocalReturnUrl_RedirectsToTheOriginallyRequestedPage
+    // completes the round trip by asserting the post-login redirect lands back on it.
+    [Theory]
+    [MemberData(nameof(ProtectedPages))]
+    public async Task Anonymous_ProtectedPageRedirect_CarriesTheOriginalPathAsReturnUrl(string path)
+    {
+        var cancellationToken = Xunit.TestContext.Current.CancellationToken;
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.GetAsync(path, cancellationToken);
+
+        var location = response.Headers.Location!.ToString();
+        Assert.Contains($"returnUrl={Uri.EscapeDataString(path)}", location, StringComparison.Ordinal);
+    }
+
     [Theory]
     [MemberData(nameof(ProtectedPages))]
     public async Task Authenticated_CanAccessProtectedPage(string path)
