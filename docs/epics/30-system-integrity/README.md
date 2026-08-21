@@ -161,7 +161,7 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F030 | alta | `UserExperience.Entries` participa da deduplicação em memória, porém era ignorada no mapping relacional; `ExperienceEntry` é top-level e nada jamais adicionava novas entries ao `DbSet` — confirmado por teste real contra LocalDB: nenhuma linha era persistida, e a mesma fonte podia ser recompensada indefinidamente (recompletar um Todo/Task/Project já concluído antes) | `FIXED` | 30.7 (revalidar impacto em 30.16) |
 | BD30-F032 | baixa | `EfHabitRepository.AddAsync`/`EfProjectRepository.AddAsync`/`EfRecurringTaskRepository.AddAsync`/`EfProjectRepository.AddTodoAsync` calculam a próxima `Position` via `MaxAsync` seguido de um insert separado, sem índice/constraint único em `(UserId, Position)` (ou `(ProjectId, Position)` para Todo) — duas inserções concorrentes do mesmo usuário podem computar o mesmo `maxPosition` e persistir ordinais duplicados; não há perda de dado, apenas dessincronia cosmética de ordenação, autocorrigível no próximo reorder | `OPEN` | 30.25 |
 | BD30-F033 | baixa | `EfWalletReadService.ApplyOrdering` ordena `Transaction` por `Description`/`Amount`/`CreatedAtUtc` sem índice cobrindo esses campos (apenas `IX_Transactions_Wallet_Date` existe) — SQL Server ordena em tempdb após o seek por `WalletId`; impacto real baixo dado o volume típico de transações por usuário em um app financeiro pessoal | `OPEN` | 30.21 |
-| BD30-F034 | alta | histórico de `ExperienceEntry` não era persistido antes da correção da Sprint 30.7 (`BD30-F030`); alternar conclusão/reabertura repetida de Todo/Task/Project podia conceder XP duplicado sem limite antes da correção. Existência e magnitude de inflação histórica em HMG/produção **não quantificadas** por esta Sprint — nenhuma consulta ou mutação de banco de HMG/produção foi executada. As linhas de `ExperienceEntry` persistidas antes da correção podem ser insuficientes para reconstruir `TotalExperience` corretamente de forma determinística (o histórico anterior à correção nunca existiu). Nenhuma mutação de banco está autorizada por este achado; nenhum reset/recálculo arbitrário é permitido | `OPEN` | 30.16 |
+| BD30-F034 | alta | histórico de `ExperienceEntry` não era persistido antes da correção da Sprint 30.7 (`BD30-F030`); alternar conclusão/reabertura repetida de Todo/Task/Project podia conceder XP duplicado sem limite antes da correção. Existência e magnitude de inflação histórica em HMG/produção **não quantificadas** por esta Sprint — nenhuma consulta ou mutação de banco de HMG/produção foi executada. As linhas de `ExperienceEntry` persistidas antes da correção podem ser insuficientes para reconstruir `TotalExperience` corretamente de forma determinística (o histórico anterior à correção nunca existiu). Nenhuma mutação de banco está autorizada por este achado; nenhum reset/recálculo arbitrário é permitido. **Investigação concluída na Sprint 30.16** (§23.2): as 7 perguntas encaminhadas foram todas respondidas com evidência — nenhuma pode ser resolvida com os dados/ferramentas atuais. Reconstrução determinística não é possível (o próprio escalar `TotalExperience` já incorpora qualquer inflação histórica, indistinguível de XP legítimo, porque as entries que provariam a diferença nunca existiram); correção automatizada não seria segura; reconciliação manual não é viável sem elas; e não existe no repositório nenhum mecanismo seguro e somente-leitura para quantificar o raio de impacto em HMG/produção. Prosseguir exigiria duas decisões do proprietário fora da autoridade desta auditoria: construir uma capacidade de leitura segura contra HMG/produção, e decidir se algum esforço de reconciliação vale a pena dado que a reconstrução completa é matematicamente impossível | `OPEN` | decisão do proprietário |
 | BD30-F035 | média | `BeeDayWebService` (20 métodos) e os call sites diretos de `ISender.Send` em `Wallet.razor` e nas páginas de Identity/Account/Onboarding nunca propagavam um `CancellationToken` real — toda chamada usava implicitamente `CancellationToken.None`, então navegar para longe ou fechar o circuito Blazor Server nunca cancelava uma mutação/query em andamento no servidor | `FIXED` | 30.8 |
 | BD30-F036 | baixa | `EmailConfirmationSent.razor`/`ResendConfirmation.razor`: `StartCountdown()` reatribui `_timer`/`_cts` sem descartar a instância anterior se chamado uma segunda vez antes do `Dispose()` do componente — hoje inalcançável em uso normal (o botão fica desabilitado enquanto `_secondsRemaining > 0`), portanto latente, não explorável | `OPEN` | 30.10 |
 | BD30-F037 | baixa | polimento de UX não-bloqueante: cards individuais do Dashboard (Habit/Task/Todo/Project) não têm `Disabled` vinculado a `State.IsBusy` (só o overlay global `BeeDayLoading` reflete ocupado — a proteção contra double-submit é real, aplicada em `DashboardState.ExecuteAsync`, mas o clique num segundo card fica sem feedback visual imediato); e `Wallet.razor.RefreshAfterMutationAsync` não chama `StateHasChanged()` uma segunda vez após zerar `_highlightBalance`, então o destaque visual do saldo pode não sumir até outro render não relacionado ocorrer | `OPEN` | 30.20 |
@@ -187,6 +187,9 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F057 | baixa | `DashboardState.DeleteCurrentEditorItemAsync` (compartilhado por Habit/Task/Todo/Project) toca a animação de remoção do card (`RemovingItemId`, ~170ms) **antes** de emitir a requisição de exclusão ao servidor — se a exclusão subsequente falhar (rede, conflito), `RemovingItemId` já foi limpo e `ReloadAsync()` nunca é alcançado (o catch só mostra um toast de erro), então o card reaparece no estado normal após já ter "desaparecido" visualmente um instante antes, ao lado de um toast de erro. Padrão cross-cutting pré-existente, não introduzido nem específico desta Sprint | `OPEN` | 30.20 |
 | BD30-F058 | média | Sort por Amount/Description em Wallet estava totalmente cabeado Application→Infrastructure→testes (`Wallet.razor.ResolveSort`, `TransactionSortField`, `EfWalletReadService.ApplyOrdering`), mas o `<select>` renderizado só oferecia as duas opções de data — as outras 4 opções só eram alcançáveis setando o parâmetro `Sort` diretamente em teste, nunca por um usuário real. **Corrigido nesta Sprint**: 4 novas `<option>` adicionadas a `WalletFilters.razor` (mesmos valores já suportados pelo backend). Já o filtro de faixa de valor (`GetTransactionsQuery.MinimumAmount`/`MaximumAmount`, validado e testado em Application/Infrastructure) continua com **zero superfície de UI** — nenhum input, nenhuma propriedade de estado, nada em `WalletFilters.razor`. Diferente de `BD30-F050`/`BD30-F054`/`BD30-F056`, não é uma questão de semântica de produto ambígua (ordenar por valor e filtrar por faixa de valor têm significado óbvio e não-controverso) — é trabalho de engenharia represado, não decisão de produto | `OPEN` | 30.19 |
 | BD30-F059 | alta | Cards de `WalletTag`/`Transaction` (`WalletTagManager.razor`, `TransactionList.razor`) perdem toda interatividade de clique/teclado para itens adicionados a uma lista já populada dentro da mesma sessão de circuito Blazor Server — confirmado reproduzível para o primeiro Tag criado (lista vazia→1), um segundo Tag criado logo em seguida, e uma segunda Transaction criada logo em seguida; imune a espera explícita (até 1s), a `Force: true` (bypassa verificações de actionability do Playwright, descartando interceptação/overlay como causa), e independente de clique vs. `Enter` via teclado. Um `GotoAsync` real (reload completo de página) sempre restaura a interatividade. **Causa raiz não identificada** — `@key` foi adicionado a ambos os `@foreach` como bom-senso defensivo (Blazor best practice já ausente), mas comprovadamente **não** resolveu o sintoma nos testes que o reproduziram; `DialogFocusScope`/`beeday-dialog-focus.js` foi inspecionado por completo sem revelar um bug óbvio. Cards de Transaction/Habit/Task/Todo/Project em Sprints anteriores desta EPIC nunca expuseram isso porque toda sequência de duas interações em um mesmo teste já continha um `GotoAsync` de reload no meio (para provar persistência) — não porque o padrão estivesse imune. Workaround confirmado (reload) aplicado nos dois novos testes E2E desta Sprint que o encontraram | `OPEN` | 30.24 |
+| BD30-F060 | baixa | não existia cobertura E2E provando que completar Task/Todo/Project concede XP visivelmente (só Habit tinha, desde a Sprint 30.12) e o modal de level-up (`BeeDayFeedbackModal`) nunca havia sido exercitado ponta a ponta (só bUnit) — nenhum teste anterior disparava uma execução real de handler + publicação real de domain event + render real do Blazor Server através de um level-up de fato. **Corrigido nesta Sprint**: `CompleteTask_UpdatesXp` prova visibilidade de XP para Task via navegador real; `CompleteTask_AtALevelBoundary_ShowsTheLevelUpModalExactlyOnce` semeia o usuário 5 XP abaixo do limite documentado/testado de Level 2 (100 XP) via novo parâmetro `initialExperience` de `E2EWebApplicationFactory.SeedUserAsync` (usa `User.AddExperience`, não-dedup, só para arranjo de teste) e prova o modal aparecendo exatamente uma vez, com os níveis corretos, e não reaparecendo após reload. Residual não corrigido, de baixo valor: Todo/Project não têm o mesmo teste de visibilidade de XP especificamente — aceito porque os três dividem exatamente o mesmo `ToggleTodoCommandHandler`/`ExecuteExperienceOperationAsync`, já provado correto nas camadas Application/Infrastructure (§23.1, item D.8) | `FIXED` | 30.16 |
+| BD30-F061 | baixa | não existe nenhuma UI (nem endpoint de leitura em Application) que exponha o histórico de `ExperienceEntry` ao usuário ou a um admin — a única superfície visível é o toast efêmero de level-up (`BeeDayFeedbackStore`, escopo de circuito, últimos 3 itens, nunca lê do banco). O trabalho de persistência corrigido pela `BD30-F030` (Sprint 30.7) não tem, hoje, nenhum consumidor além dessa lógica de dedup interna. Construir uma tela de histórico é uma decisão de produto, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
+| BD30-F062 | baixa | excluir um Habit/Task/Todo/Project já recompensado não revoga nem ajusta o XP concedido — comportamento deliberado por design (`ExperienceEntryConfiguration.cs` documenta em comentário: sem FK para a origem, `ExperienceEntries` é histórico append-only, cópia do que aconteceu, não referência viva). A decisão está corretamente implementada e comentada no código, mas não está ratificada em nenhum lugar de `docs/` (`docs/domain/business-rules.md` só declara a curva/nível como determinística, nada sobre revogação por exclusão) | `OPEN` | 30.28 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -1924,3 +1927,162 @@ auditoria de código propriamente dita, mas da própria escrita de testes E2E no
 de interatividade, reproduzível e evidenciado com rigor, mas cuja causa raiz não foi alcançada dentro
 do escopo desta Sprint — registrado com workaround confirmado em vez de uma correção especulativa
 sem certeza do mecanismo. Nenhuma mutação de banco HMG/produção foi executada ou é necessária.
+
+## 23. Sprint 30.16 — Experience, XP, Level & Rewards Audit
+
+### 23.1 Escopo e método
+
+Auditoria completa do subsistema de gamificação (XP, nível, recompensas) contra o estado atual do
+repositório, incluindo a obrigação específica encaminhada pela `BD30-F034` (Sprint 30.7, §14.4.1):
+determinar, usando evidência de repositório e de banco, se o XP histórico anterior à correção da
+`BD30-F030` pode ser identificado, reconstruído ou reconciliado.
+
+Nota de escopo: o repositório contém dois conceitos distintos ambos chamados "Experience System" —
+`src/BeeDay.Web/Components/Features/ExperienceSystem/*` é o site de documentação do Design System
+(Brand/UI/UX), não gamificação. Esta Sprint audita exclusivamente `src/BeeDay.Domain/Experience/*`
+e `src/BeeDay.Application/Common/Experience/*` (o sistema de XP/Nível), confirmado por leitura
+completa de `UserExperience.cs`, `ExperienceEntry.cs`, `ExperienceSource.cs`, `ExperienceReward.cs`,
+`ExperienceCurve.cs`/`LinearExperienceCurve.cs`, todos os handlers de Habit/Task/Todo que concedem
+XP, `EfUserRepository.cs`, `BeeDayFeedback*` (modal de level-up), `ExperienceBar.razor`, e toda a
+suíte de testes relacionada em `tests/BeeDay.Domain.Tests`, `tests/BeeDay.Application.Tests`,
+`tests/BeeDay.Infrastructure.Tests`, `tests/BeeDay.Web.Tests` e `tests/BeeDay.E2E.Tests`.
+
+**A. Mecânica de concessão de XP — confirmada correta.** A chave de dedup de `UserExperience.TryAdd`
+é `(UserId, Source.Type, Source.ReferenceId, RewardType)`. Habit está corretamente isento (usa
+sempre `Guid.NewGuid()` como `SourceId`, nunca o Id do próprio Habit), confirmado tanto no Domain
+(`EnsureValidState`) quanto por um índice único filtrado no banco que exclui explicitamente
+`SourceType = 0` (Habit). Todos os 3 pontos de concessão de produção (`RegisterHabitPositiveCommandHandler`,
+`ToggleTaskCommandHandler`, `ToggleTodoCommandHandler` — este último também concede o reward de
+Project quando o último Todo do Project completa, não existe handler dedicado de "completar Project")
+passam pelo mesmo caminho de persistência já corrigido pela `BD30-F030`; `grep` por `.AddExperience(`
+(caminho não-dedup) fora de teste retorna zero resultados de produção. Onboarding não concede XP
+(não é bug — simplesmente não existe essa concessão).
+
+**Corrida/concorrência — confirmada protegida em duas camadas independentes**, ambas com prova
+empírica contra LocalDB real (`EfUserRepositoryTests.cs`): (1) índice único filtrado
+`UX_ExperienceEntries_Dedup` no banco rejeita duas inserções concorrentes da mesma chave de dedup;
+(2) `RowVersion` otimista em `Users`/`UserExperience` (via o loop global de `BeeDayDbContext.cs`)
+faz o segundo `SaveChangesAsync` perdedor lançar `DbUpdateConcurrencyException`, mapeada para
+`ConcurrencyConflictException`. Como cada concessão ocorre dentro de uma transação explícita
+descartada (rollback automático) em caso de exceção, uma corrida real nunca produz duplicação
+silenciosa nem estado parcial.
+
+**B. Cálculo de nível — confirmado correto.** `LinearExperienceCurve` implementa uma curva
+triangular (`100 * (nível-1) * nível / 2`), com custo por nível linearmente crescente (100, 200,
+300, 400 XP). Não existe documento em `docs/` especificando a curva numérica pretendida — não é
+evidência de divergência, apenas ausência de uma especificação externa para comparar. Fronteiras
+exatas (99→nível 1, 100→nível 2, 299→nível 2, 300→nível 3) e overflow em `long.MaxValue` já eram
+testados em `ExperienceDomainTests.cs`; nenhum off-by-one encontrado.
+
+**Feedback de level-up — confirmado correto.** O modal (`BeeDayFeedbackModal`/`BeeDayFeedbackStore`,
+escopo de circuito, dedup por `HashSet<Guid>` de `ExperienceEntryId`) nunca repete o mesmo level-up
+e nunca reaparece após reload (novo circuito = store vazia). Provado em bUnit
+(`BeeDayFeedbackTests.cs`) mas, antes desta Sprint, nunca ponta a ponta contra um level-up real (ver
+`BD30-F060`).
+
+**C. Histórico de recompensa — nenhuma UI/query expõe `ExperienceEntry`.** Confirmado por busca
+completa em `src/BeeDay.Application` e `src/BeeDay.Web`: não existe query, read-service, nem método
+de repositório que retorne o histórico persistido de `ExperienceEntry` — a única superfície visível
+é o toast efêmero de level-up (últimos 3 itens, escopo de sessão, nunca lê do banco). Registrado como
+`BD30-F061` (decisão de produto, não corrigida).
+
+**D. Testes e integrações cruzadas.** Cobertura forte e já existente para as duas garantias centrais:
+`Completing_task_twice_grants_experience_only_once` e `Completing_last_todo_grants_todo_and_project_rewards_once`
+(`ExperienceRewardPipelineTests.cs`) provam que alternar conclusão 3× não concede XP duplicado para
+Task/Todo/Project; `Positive_habit_grants_experience_for_each_distinct_occurrence` prova o oposto
+para Habit (repetição legítima). Gap real confirmado e corrigido nesta Sprint: nenhum E2E provava
+visibilidade de XP para Task/Todo/Project (só Habit), e o modal de level-up nunca fora exercitado
+ponta a ponta (`BD30-F060`).
+
+Exclusão de um item já recompensado nunca revoga o XP concedido — comportamento deliberado (comentário
+de código em `ExperienceEntryConfiguration.cs` confirma o racional: histórico append-only, sem FK
+para a origem), mas não ratificado em `docs/`. Registrado como `BD30-F062`, encaminhado à Sprint 30.28
+(documentação).
+
+### 23.2 `BD30-F034` — conclusão da investigação de integridade histórica de `TotalExperience`
+
+As 7 perguntas encaminhadas pela Sprint 30.7 (§14.4.1) foram investigadas com evidência de
+repositório. Nenhuma consulta ou mutação foi executada contra banco de HMG/produção — essa restrição
+permanece integralmente respeitada.
+
+1. **O XP histórico afetado pode ser identificado?** Não. Antes da correção da `BD30-F030`,
+   nenhuma linha de `ExperienceEntry` era persistida — nem para concessões legítimas, nem para as
+   duplicadas. Não existe, portanto, nenhum registro diferencial que distinga uma da outra para o
+   período afetado.
+2. **O XP correto pode ser reconstruído de forma determinística?** Não. O escalar `TotalExperience`
+   em si (coluna simples em `Users`) era corretamente persistido a cada mutação mesmo antes da
+   correção — só o *histórico auditável* (`ExperienceEntry`) não era. Isso significa que qualquer
+   inflação histórica já está incorporada ao valor atual do total, de forma indistinguível de XP
+   legítimo, precisamente porque a evidência que provaria a diferença nunca existiu.
+3. **Quais fontes são afetadas?** Task, Todo e Project — qualquer aggregate cujo `SourceId` de
+   dedup é o Id do próprio item, e que pode ser desmarcado/remarcado repetidamente pela UI real.
+   Habit nunca é afetado: cada registro é, por design, uma concessão legítima e independente (nunca
+   dedup), então "repetir" não é um bug para Habit.
+4. **Repetições legítimas de Habit podem ser distinguidas de duplicatas de Todo/Task/Project?** Sim,
+   mecanicamente (chave de dedup, `SourceId` fixo vs. sempre novo) — mas não a nível de dados
+   históricos para o período afetado, pelo mesmo motivo do item 2: não há entries para interrogar.
+5. **Uma correção automatizada é segura?** Não. Qualquer heurística de correção seria, por
+   definição, um palpite sobre dados que não existem — sem base factual para validar o resultado.
+6. **Seria necessária reconciliação manual ou parcial?** Mesmo uma reconciliação manual não é viável
+   com a estrutura de dados atual: não há trilha de auditoria a examinar para o período afetado, com
+   ou sem acesso ao banco.
+7. **Qual o raio de impacto exato em HMG e, separadamente, em produção?** Não determinável por esta
+   Sprint. Busca completa em `scripts/`, `.github/workflows/` e `docs/deployment/` confirma que **não
+   existe no repositório nenhum mecanismo seguro, documentado e somente-leitura para consultar o SQL
+   Server de HMG ou produção** a partir de um contexto local/CI — o único acesso com capacidade de
+   escrita SQL real é `scripts/Deploy-BeeDay.ps1` (migração/backup, protegido por secrets do
+   GitHub Actions, executado apenas dentro dos jobs `deploy-hmg.yml`/`deploy-prd.yml`), e
+   `verify-hmg.yml` faz apenas checagens HTTP (`/health/ready`, `/login`), nunca SQL. Nenhuma
+   conexão foi tentada, conforme a restrição desta investigação.
+
+**Conclusão**: a integridade histórica de `TotalExperience` não pode ser resolvida com os dados e
+ferramentas disponíveis hoje — o próprio dado que permitiria resolvê-la nunca foi persistido. Prosseguir
+exige duas decisões do proprietário, fora da autoridade desta auditoria: (a) se vale investir na
+construção de uma capacidade de leitura segura contra HMG/produção; e (b) se, dado que a reconstrução
+determinística e completa é matematicamente impossível, algum esforço de reconciliação parcial ainda
+teria valor. `BD30-F034` permanece `OPEN`, reatribuída de "30.16" para "decisão do proprietário" — a
+investigação que lhe cabia está concluída; nenhuma ação adicional de auditoria pode avançá-la.
+
+### 23.3 Implementação
+
+- `tests/BeeDay.E2E.Tests/E2EWebApplicationFactory.cs` — `SeedUserAsync` ganha o parâmetro opcional
+  `initialExperience` (usa `User.AddExperience`, não-dedup, só para arranjo de teste), permitindo
+  posicionar um usuário perto de um limite de nível antes de dirigir a ação real de level-up pelo
+  navegador. Assinatura anterior preservada por compatibilidade (todo call site existente usa o
+  parâmetro nomeado `onboardingCompleted:`, então nenhum call site precisou mudar).
+- `tests/BeeDay.E2E.Tests/HabitAndTaskTests.cs` — `LoginToDailyAsync` ganha o mesmo parâmetro
+  opcional; dois novos testes: `CompleteTask_UpdatesXp` (visibilidade de XP para Task, espelhando o
+  teste já existente de Habit) e `CompleteTask_AtALevelBoundary_ShowsTheLevelUpModalExactlyOnce`
+  (semeia 95 XP, completa uma Task de 5 XP, cruza exatamente o limite de 100 XP do Nível 2, prova o
+  modal aparecendo uma vez com os níveis corretos e não reaparecendo após reload).
+
+Nenhuma mudança de comportamento de produto, regra de domínio, contrato público, schema, migration
+ou Design System. Nenhuma mutação de banco HMG/produção foi executada ou é necessária.
+
+### 23.4 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors (corrigido 1 warning CS0419 de `<see cref>` ambíguo introduzido durante a implementação) |
+| `dotnet format BeeDay.slnx whitespace --include ...` | aplicado aos 2 arquivos novos/alterados |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter HabitAndTaskTests` | PASS, 13/13 |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter CompleteTask_UpdatesXp\|CompleteTask_AtALevelBoundary` | PASS, 2/2 (execução isolada de confirmação, adicional à suíte completa acima) |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx` (Debug, completo) | PASS, 1.555/1.555 (121 Domain, 119 Application, 216 Infrastructure, 884 Web, 215 E2E) — execução limpa, 0 falhas |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.555/1.555 (121 Domain, 119 Application, 216 Infrastructure, 884 Web, 215 E2E) — execução limpa, 0 falhas |
+
+### 23.5 Continuidade e entrega
+
+O achado mais significativo desta Sprint não foi um defeito de código — a mecânica de XP, dedup,
+concorrência e nível está correta e bem testada — mas a conclusão definitiva de que `BD30-F034` não
+pode ser resolvida pela auditoria: os dados que permitiriam quantificar ou corrigir qualquer inflação
+histórica nunca existiram, e não existe ferramenta segura no repositório para sequer consultar
+HMG/produção. Essa conclusão evita que Sprints futuras repitam a mesma investigação sem uma nova
+capacidade (leitura segura de HMG/produção) ou uma decisão explícita do proprietário. Cobertura E2E
+de XP foi ampliada de Habit-somente para incluir Task e o modal de level-up ponta a ponta pela
+primeira vez (`BD30-F060`). Dois achados de baixa severidade foram encaminhados (`BD30-F061` decisão
+de produto, `BD30-F062` gap de documentação). Nenhuma mutação de banco HMG/produção foi executada ou
+é necessária.

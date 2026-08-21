@@ -203,6 +203,66 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Task: {title}" })).ToHaveCountAsync(0);
     }
 
+    // EPIC 30 Sprint 30.16: the only prior XP-visibility E2E coverage was Habit
+    // (CreateAndCompleteHabit_UpdatesBalanceAndXp) — Task, Todo, and Project completion never had
+    // browser-level proof that completing them visibly grants XP.
+    [Fact]
+    public async Task CompleteTask_UpdatesXp()
+    {
+        await LoginToDailyAsync();
+        var title = $"E2E Task Xp {Guid.NewGuid():N}"[..24];
+
+        var xpBefore = await ReadExperienceTextAsync();
+
+        await OpenActivityMenuAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Task" }).ClickAsync();
+        var dialog = Page.GetByRole(AriaRole.Dialog);
+        await dialog.GetByLabel("Title").FillAsync(title);
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
+        await Expect(dialog).ToBeHiddenAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = $"Complete {title}" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Show completed tasks" }).ClickAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Mark {title} as incomplete" })).ToBeVisibleAsync();
+
+        var xpAfter = await ReadExperienceTextAsync();
+        Assert.NotEqual(xpBefore, xpAfter);
+    }
+
+    // EPIC 30 Sprint 30.16: the level-up modal (BeeDayFeedbackModal) previously had bUnit coverage
+    // only (BeeDayFeedbackTests.cs) — never verified end-to-end through a real handler execution,
+    // real domain-event publish, and real Blazor Server render. Seeding the user 5 XP below the
+    // Level 2 threshold (100, per LinearExperienceCurve's documented/tested boundary) means the
+    // single Task completion below (5 XP, ExperienceRewardPolicy) crosses it exactly.
+    [Fact]
+    public async Task CompleteTask_AtALevelBoundary_ShowsTheLevelUpModalExactlyOnce()
+    {
+        await LoginToDailyAsync(initialExperience: 95);
+        var title = $"E2E Task LevelUp {Guid.NewGuid():N}"[..24];
+
+        await OpenActivityMenuAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Task" }).ClickAsync();
+        var editor = Page.GetByRole(AriaRole.Dialog);
+        await editor.GetByLabel("Title").FillAsync(title);
+        await editor.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
+        await Expect(editor).ToBeHiddenAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = $"Complete {title}" }).ClickAsync();
+
+        var levelUpModal = Page.GetByRole(AriaRole.Dialog, new() { Name = "BE BETTER EVERY DAY" });
+        await Expect(levelUpModal).ToBeVisibleAsync();
+        await Expect(levelUpModal.GetByTestId("previous-level")).ToHaveTextAsync("1");
+        await Expect(levelUpModal.GetByTestId("new-level")).ToHaveTextAsync("2");
+
+        await levelUpModal.GetByRole(AriaRole.Button, new() { Name = "Continue" }).ClickAsync();
+        await Expect(levelUpModal).ToBeHiddenAsync();
+
+        // A full reload starts a new circuit with a fresh, empty feedback store — the modal must
+        // not reappear for an already-consumed level-up.
+        await GotoAsync("/daily");
+        await Expect(Page.GetByRole(AriaRole.Dialog, new() { Name = "BE BETTER EVERY DAY" })).ToHaveCountAsync(0);
+    }
+
     [Fact]
     public async Task TaskCheckbox_HoverNeverPreviewsTheCheckBeforeCompletion()
     {
@@ -329,10 +389,10 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
         await Expect(card.Locator("svg.beeday-icon")).ToHaveCountAsync(0);
     }
 
-    private async Task LoginToDailyAsync()
+    private async Task LoginToDailyAsync(long? initialExperience = null)
     {
         var email = $"e2e-activity-{Guid.NewGuid():N}@beeday.invalid";
-        await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
+        await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true, initialExperience: initialExperience);
 
         await SubmitLoginAsync(email, Password);
         await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));

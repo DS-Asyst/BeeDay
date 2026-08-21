@@ -3,6 +3,8 @@ using System.Text.RegularExpressions;
 using BeeDay.Application.Common.Contracts;
 using BeeDay.Application.Common.Security;
 using BeeDay.Domain.Entities;
+using BeeDay.Domain.Enums;
+using BeeDay.Domain.Experience;
 using BeeDay.Infrastructure.Persistence.SqlServer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -131,9 +133,12 @@ public sealed class E2EWebApplicationFactory : WebApplicationFactory<Program>
     /// Creates a confirmed, active User directly through the repository (bypassing HTTP/UI), with
     /// onboarding optionally already completed. Every E2E test that needs a signed-in starting point
     /// uses this for arrange-only setup; the actual behavior under test is always driven through the
-    /// real browser afterward.
+    /// real browser afterward. <paramref name="initialExperience"/> seeds a starting XP total (via
+    /// the unconditional, non-deduplicated <c>User.AddExperience</c>, never the dedup-checked
+    /// <c>TryAddExperience</c>) so a test can position a user close to a level-up boundary before
+    /// driving the actual level-up action through the real browser.
     /// </summary>
-    public async Task<User> SeedUserAsync(string email, string password, bool onboardingCompleted)
+    public async Task<User> SeedUserAsync(string email, string password, bool onboardingCompleted, long? initialExperience = null)
     {
         using var scope = Services.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
@@ -146,6 +151,13 @@ public sealed class E2EWebApplicationFactory : WebApplicationFactory<Program>
         if (onboardingCompleted)
         {
             user.CompleteOnboarding();
+        }
+
+        if (initialExperience is long amount)
+        {
+            user.AddExperience(
+                ExperienceReward.Create(amount),
+                ExperienceSource.Create(ExperienceSourceType.Task, Guid.NewGuid()));
         }
 
         await repository.AddAsync(user);
