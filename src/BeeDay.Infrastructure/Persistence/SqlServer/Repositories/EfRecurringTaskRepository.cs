@@ -57,8 +57,10 @@ internal sealed class EfRecurringTaskRepository : EfRepositoryBase, IRecurringTa
         await using var lease = await AcquireContextAsync(cancellationToken);
         var context = lease.Context;
 
-        // See EfHabitRepository.RemoveAsync for why this re-fetches by Id instead of attaching `task`.
-        var tracked = await context.RecurringTasks.SingleAsync(existing => existing.Id == task.Id, cancellationToken);
+        // See EfHabitRepository.RemoveAsync for why this re-fetches by Id instead of attaching
+        // `task`, and for why the UserId filter is defense-in-depth (BD30-F053).
+        var tracked = await context.RecurringTasks.SingleAsync(
+            existing => existing.Id == task.Id && existing.UserId == task.UserId, cancellationToken);
         context.RecurringTasks.Remove(tracked);
         await EfConcurrencySaveChanges.ExecuteAsync(context, cancellationToken);
     }

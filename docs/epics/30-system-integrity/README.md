@@ -136,7 +136,7 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F005 | baixa | 27 referências, em 19 arquivos de código/teste, apontam para 7 caminhos de documentação removidos ou movidos | `OPEN` | 30.26 |
 | BD30-F006 | alta | o estado versionado de HMG seleciona Resend (`true`) e Development (`false`), enquanto `docs/deployment/01-deployment.md` e `02-runtime-configuration.md` ainda descrevem a seleção inversa; o runbook mais novo distingue corretamente repository state de runtime state | `OPEN` | 30.25 |
 | BD30-F007 | média | não existe `.runsettings`, referência a coverlet ou coleta formal de cobertura | `OPEN` | 30.24 |
-| BD30-F008 | média | não existe workflow CodeQL nem configuração Dependabot versionada | `OPEN` | 30.22 |
+| BD30-F008 | média | não existe workflow CodeQL nem configuração Dependabot versionada. **Reverificado na Sprint 30.22**: metade corrigida — `.github/dependabot.yml` adicionado (ecossistemas `nuget` e `github-actions`, semanal, sem impacto operacional — não cria check obrigatório, não roda código, apenas configura o serviço nativo do GitHub para abrir PRs de atualização). CodeQL deliberadamente não adicionado nesta Sprint: é um novo workflow do GitHub Actions que consome minutos de CI a cada push/PR e tipicamente se torna um check obrigatório uma vez configurado — mudança de maior impacto operacional na pipeline de CI/CD, mais adequada à Sprint dedicada a CI/CD do que a uma correção pontual de segurança. Reatribuída (só a parte de CodeQL) para 30.25 | `OPEN` | 30.25 |
 | BD30-F009 | média | existem apenas dois guards automatizados de dependência, cobrindo Domain e Application; Infrastructure e Web não têm guard equivalente | `FIXED` | 30.9 |
 | BD30-F010 | baixa | o índice de documentação classifica `authentication/` e `developer/` como reservados e `api/` como não reauditado | `OPEN` | 30.28 |
 | BD30-F011 | baixa | `docs/infrastructure/README.md` registra 5 classes Options; o repositório possui 6 Options atuais, além de `EmailProvider` e `EmailProviderSelector` | `OPEN` | 30.7 |
@@ -168,19 +168,19 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F038 | média | `Login.razor` mantinha uma implementação própria de `IsLocalPath` para sanitizar `ReturnUrl`, distinta e mais fraca que a canônica de `LoginDestinationResolver` — só rejeitava `//`, não a variante `/\` que navegadores normalizam para URL absoluta; a decisão de redirecionamento real em `POST /auth/login` já usava a canônica completa, então não era explorável via o próprio fluxo de login, mas era uma fronteira de segurança duplicada e incompleta | `FIXED` | 30.10 |
 | BD30-F039 | alta | `ConfirmEmail.razor` enviava `ConfirmEmailCommand` em `OnInitializedAsync`, que roda duas vezes sob o `@rendermode="InteractiveServer"` global (`<Routes>` em `App.razor`) — uma vez no prerender estático, outra na reconexão interativa. A primeira chamada confirmava o e-mail corretamente; a segunda, idêntica, era corretamente rejeitada pela proteção contra replay de token — mas essa segunda rejeição é o estado final que o navegador do usuário real exibe, então todo usuário real via "Link já utilizado" no primeiro clique legítimo em um link de confirmação real. Só detectável por um teste de navegador real (Chromium) — nenhum teste unitário/bUnit/integração via `HttpClient` exercita as duas passagens de render do Blazor Server | `FIXED` | 30.10 |
 | BD30-F040 | baixa | `User.SetActive` (que corretamente invalida sessões ao desativar) não é chamado por nenhum Command/handler alcançável — só por testes. **Determinação da Sprint 30.11** (auditoria funcional completa de Profile/Onboarding/Account/Settings, incluindo inspeção direta de `Account.razor` e as três seções de Settings): classificado como **fluxo de produto ausente**, não código morto — o método de Domain está correto, testado e o guard de `OnValidatePrincipal` (`!user.IsActive`) funciona; simplesmente não existe hoje nenhuma entrada de produto (autoatendimento ou administrativa) que o alcance. Decidir se/como construir essa entrada é uma decisão de política de produto fora da autoridade desta auditoria — não inventada aqui | `OPEN` | decisão do proprietário |
-| BD30-F041 | baixa | `MemoryIdentityRequestThrottle` e `LoginRateLimiterFactory` (`PartitionedRateLimiter`) são ambos em memória, por instância de processo — corretos para o único servidor IIS de HMG hoje, mas não compartilhados entre instâncias; uma futura implantação horizontalmente escalada (PRD em Azure, ainda não provisionada) contornaria o limite de taxa distribuindo requisições entre instâncias | `OPEN` | 30.22 |
+| BD30-F041 | baixa | `MemoryIdentityRequestThrottle` e `LoginRateLimiterFactory` (`PartitionedRateLimiter`) são ambos em memória, por instância de processo — corretos para o único servidor IIS de HMG hoje, mas não compartilhados entre instâncias; uma futura implantação horizontalmente escalada (PRD em Azure, ainda não provisionada) contornaria o limite de taxa distribuindo requisições entre instâncias. **Reverificado na Sprint 30.22**: premissa inalterada, nenhuma evidência de escalonamento horizontal introduzida desde a Sprint 30.10. A condição que tornaria isso relevante (PRD provisionado com múltiplas instâncias) ainda não existe — reatribuído para decisão do proprietário, a ser revisitado quando/se essa condição mudar | `OPEN` | decisão do proprietário |
 | BD30-F042 | média | confiabilidade da suíte E2E em Debug: três execuções completas de `dotnet test BeeDay.slnx` durante a Sprint 30.10 produziram, respectivamente, 6/194, 1/194 e 1/194 falhas — nunca o mesmo teste duas vezes, sempre `TimeoutException` de navegação (`GotoAsync`)/screenshot, nunca um teste de Identity/Auth desta Sprint. A execução `--configuration Release` subsequente passou 194/194 sem qualquer falha. Evidência suporta `CHANGE-CAUSED = NO` para a Sprint 30.10, mas confirma um problema real de confiabilidade da suíte E2E em Debug, independente desta Sprint. **Não confirmado como causa raiz** — contenção LocalDB/Playwright é registrada aqui apenas como padrão observado/hipótese consistente com uma anotação de memória de sessão anterior a esta Sprint, não como causa provada por esta auditoria. A Sprint 30.24 deve investigar a causa real e definir o contrato de repetibilidade de teste | `OPEN` | 30.24 |
 | BD30-F043 | baixa | `ProfileCreationState.cs` (state class `AddScoped`, mesmo padrão de ciclo de vida de `DashboardState`) nunca propagava `CancellationToken` em suas 4 chamadas a `BeeDayWebService` — a varredura da Sprint 30.8 (`BD30-F035`) só buscou `*.razor`/`*.razor.cs`, e esta é uma classe `.cs` simples, fora do glob | `FIXED` | 30.11 |
 | BD30-F044 | alta | `UpdateCurrentUserAccountCommandHandler` permitia alterar o e-mail da conta sem reverificar a senha atual e sem resetar `IsEmailConfirmed` — uma sessão sequestrada (cookie roubado, XSS) bastava para trocar silenciosamente o e-mail para um endereço controlado pelo atacante, que `RequestPasswordResetCommandHandler` então tratava como já confirmado, habilitando um fluxo completo de esqueci-minha-senha e bloqueio do dono legítimo. Primitivo de account takeover real | `FIXED` | 30.11 |
 | BD30-F045 | média | `Tutorial.razor.NextAsync`, no slide final, chamava `Store.CompleteOnboardingAsync()` sem `try/catch` e o componente não injetava `ToastService` — uma falha (rede, 5xx transitório, sessão expirada) se propagava como exceção não tratada no circuito Blazor, sem nenhum feedback ao usuário, ao contrário de todo outro caminho de salvamento do app | `FIXED` | 30.11 |
 | BD30-F046 | baixa | `docs/web/04-feature-components.md` descrevia `Tutorial.razor` navegando para `/daily` ao concluir o onboarding; o código real (e `LoginDestinationResolver.Resolve`) sempre navegou para `/profile` | `FIXED` | 30.11 |
 | BD30-F047 | média | `AuthenticatedCultureSynchronizer.SynchronizeAtLoginAsync`: um cookie `BeeDay.Culture` desatualizado em um segundo dispositivo/navegador, ao logar, silenciosamente sobrescreve uma alteração de idioma deliberada feita em Settings — comportamento documentado e intencional (cookie explícito sempre vence naquela sessão), mas conflita com o critério de aceite "preferência de idioma permanece consistente entre sessões autenticadas". Decisão de produto necessária: cookie deveria ceder à conta no login, ou cookies não deveriam sobreviver a uma troca de idioma na conta | `OPEN` | 30.20 |
-| BD30-F048 | baixa | `Program.cs` grava `ClaimTypes.Name`/`ClaimTypes.Email` no cookie `BeeDay.Auth` (até 14 dias, "remember me") no login, mas nunca os atualiza após uma edição de Nome/E-mail em Account — hoje inofensivo (`grep` confirma que nada no código lê essas duas claims de volta), mas é PII potencialmente desatualizada sentada num cookie de longa duração | `OPEN` | 30.22 |
+| BD30-F048 | baixa | `Program.cs` grava `ClaimTypes.Name`/`ClaimTypes.Email` no cookie `BeeDay.Auth` (até 14 dias, "remember me") no login, mas nunca os atualiza após uma edição de Nome/E-mail em Account — hoje inofensivo (`grep` confirma que nada no código lê essas duas claims de volta), mas é PII potencialmente desatualizada sentada num cookie de longa duração. **Corrigido na Sprint 30.22**: as duas claims removidas na emissão do cookie em vez de mantidas sincronizadas — nenhum código em `src/` lê `ClaimTypes.Name`/`ClaimTypes.Email` de volta, incluindo a propriedade implícita `ClaimsPrincipal.Identity.Name` (confirmado por busca dedicada, zero usos), então minimização de dados (não guardar PII que nada consome) é a correção mais simples e segura, em vez de adicionar lógica para reemitir o cookie a cada edição de Account. Suíte completa de Web.Tests (875/875) e E2E de login/conta/home autenticada (25/25) confirmam nenhuma regressão | `FIXED` | 30.22 |
 | BD30-F049 | média | nenhum teste baseado em viewport real (Playwright) cobria `/profile/create` Etapa 2 (apelido), `/account`/`/settings` (as 3 seções) ou `/onboarding/tutorial` — `LoginExperienceTests` só provava a Etapa 1 do cadastro; `AccountLifecycleTests`/`SettingsLocalizationTests` nunca chamavam `SetViewportSizeAsync` | `FIXED` | 30.11 |
 | BD30-F050 | média | `HabitResetCounter` (Daily/Weekly/Monthly) está totalmente cabeado — coluna no banco, validação de Domain, editor de UI, documentação — mas nada no código jamais reseta `PositiveCount`/`NegativeCount` com base em tempo decorrido, fronteira de calendário ou job agendado; `RegisterPositive`/`RegisterNegative` só incrementam, para sempre. O campo é hoje decoração de UI sem efeito comportamental. Definir a semântica real de reset (quando? em qual fuso/cultura? via leitura ou job?) é uma decisão de produto, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
 | BD30-F051 | média | `EfUserRepository.UpdateAsync` recarrega **todas** as `ExperienceEntry` de um usuário a cada chamada — não só em registros de Habit, mas em qualquer mutação de User (confirmação de e-mail, redefinição de senha, troca de nome/e-mail). Habit é a única fonte de XP deliberadamente isenta de deduplicação (`UserExperience.cs`, por design — cada clique deve premiar XP independentemente), então é a única cujo volume de `ExperienceEntry` cresce sem limite por usuário ativo; nenhuma estratégia de arquivamento/paginação existe. Lista de Habits em `/daily` também não é paginada/virtualizada — nenhum teste cria mais de 2 Habits para o mesmo usuário em toda a suíte, então isso nunca foi exercitado em escala. **Reverificado na Sprint 30.21** (Sprint proprietária): consulta ainda usa o índice `IX_ExperienceEntries_User_Time` (seek, não scan) — o problema não é lentidão de busca, é volume de linhas retornadas e hidratadas sem limite. Magnitude real em produção **não determinável** por esta auditoria (mesma restrição já estabelecida pela `BD30-F034` — nenhum acesso de leitura a HMG/produção). Uma correção real exigiria trocar o mecanismo de dedup de "carregar toda a coleção" para uma consulta pontual por chave (`SourceType`/`SourceId`/`RewardType`) — uma mudança de arquitetura na fronteira Domain/Infrastructure do sistema de XP, já auditada e corrigida múltiplas vezes nesta EPIC (`BD30-F030`), com risco real de reintroduzir um bug de correção em um subsistema sensível, sem evidência de que o problema já é real hoje. Reatribuído para decisão do proprietário | `OPEN` | decisão do proprietário |
 | BD30-F052 | baixa | `ActivityAttribute` (Strength/Dexterity/Intelligence/Vitality) é persistido, validado e round-tripa corretamente, mas não existe controle de UI para defini-lo em nenhum dos 4 editores de atividade (Habit/Task/Todo/Project) — confirmado por busca por `ActivityAttribute` em todo `*.razor` de `src/BeeDay.Web`, zero resultados fora de sintaxe `@attributes` não relacionada. Toda atividade criada pelo produto hoje tem `Attribute = null` para sempre; um valor já existente (via API/dados diretos) sobrevive a uma edição intacto, só não pode ser definido pela UI. Gap cross-cutting, não específico de Habit. **Reverificado na Sprint 30.19**: ainda preciso, sem mudança. Construir 4 novos controles de formulário com plumbing completo (Application, resx, testes) é trabalho de feature genuíno, não consolidação — fora do limite explícito desta Sprint ("audit/consolidation Sprint, not a redesign"). Reatribuído de "30.19" para decisão do proprietário: a auditoria já confirmou o gap três vezes (30.11, 30.15/similar, 30.19) sem informação nova; o próximo passo é priorização de produto, não mais investigação | `OPEN` | decisão do proprietário |
-| BD30-F053 | baixa | `EfHabitRepository.RemoveAsync` (e o mesmo padrão em `EfTaskRepository`/`EfTodoRepository`/`EfProjectRepository` conforme aplicável) busca a linha só por `Id`, sem reverificar `UserId` — depende inteiramente do único call site (`DeleteHabitCommandHandler`) já ter verificado posse via `HabitLookup.RequireExistsAsync` antes. Seguro hoje (único call site confirmado, corretamente guardado), mas é uma lacuna de defesa em profundidade: o método do repositório não é seguro por posse isoladamente, então um futuro chamador direto que pule a pré-verificação poderia excluir silenciosamente o Habit de outro usuário | `OPEN` | 30.22 |
+| BD30-F053 | baixa | `EfHabitRepository.RemoveAsync` (e o mesmo padrão em `EfTaskRepository`/`EfTodoRepository`/`EfProjectRepository` conforme aplicável) busca a linha só por `Id`, sem reverificar `UserId` — depende inteiramente do único call site (`DeleteHabitCommandHandler`) já ter verificado posse via `HabitLookup.RequireExistsAsync` antes. Seguro hoje (único call site confirmado, corretamente guardado), mas é uma lacuna de defesa em profundidade: o método do repositório não é seguro por posse isoladamente, então um futuro chamador direto que pule a pré-verificação poderia excluir silenciosamente o Habit de outro usuário. **Reverificado e corrigido na Sprint 30.22**: escopo confirmado por inspeção direta como idêntico em `EfHabitRepository`, `EfRecurringTaskRepository` (Task), `EfProjectRepository`, `EfTransactionRepository` e `EfWalletTagRepository` — 5 repositórios, não só Habit/Task. `Todo` não faz parte (a exclusão de Todo já é escopada por `UserId` via o Project pai). Corrigido nos 5: o predicado de re-busca em `RemoveAsync` agora também exige `UserId`/`WalletId` igual ao da entidade já verificada recebida pelo chamador — nenhuma mudança de comportamento no caminho legítimo (a entidade recebida já é a correta em todo call site real, confirmado pelos 216 testes de Infrastructure passando sem alteração), só torna um chamador futuro que pule a verificação de posse falhar alto (exceção) em vez de excluir silenciosamente a linha de outro usuário. Não foi viável escrever um teste automatizado do caso "objeto de domínio malformado com UserId adulterado" sem reflexão — a API pública do Domain estruturalmente não permite construir essa combinação inválida; correção validada por inspeção de código (uma cláusula de predicado adicionada) e pela suíte de testes existente permanecendo verde | `FIXED` | 30.22 |
 | BD30-F054 | alta | `RecurringTask.Repeat` (Daily/Weekly/Monthly) está totalmente cabeado — Domain, persistência, editor de UI, documentação — mas `RecurringTask` não sobrescreve `ToggleCompletion()` (herda a implementação padrão de `Activity`, um simples flip de booleano); nenhum código no repositório jamais reabre uma Task recorrente com base em fronteira de calendário. É a mesma classe de lacuna que `BD30-F050` (Habit), confirmada de forma independente para Task. Efeito colateral agravante: como a dedução de XP por origem é permanente e correta por design para Task (ao contrário de Habit), uma Task "Diária" completada uma vez **nunca mais pode gerar XP**, mesmo desmarcando e marcando de novo manualmente — os dois mecanismos, cada um correto isoladamente, se combinam para anular o propósito de gamificação de uma Task "recorrente". Definir a semântica real de reabertura é uma decisão de produto, não inventada por esta auditoria — mesma decisão pendente de `BD30-F050`, possivelmente a mesma decisão para os dois achados | `OPEN` | decisão do proprietário |
 | BD30-F055 | baixa | `Todo.DueDate` é persistido e exibido como texto formatado, mas não tem nenhum efeito funcional: nenhum indicador visual de atraso existe em `src/` (`grep` por "overdue"/"atrasad" não encontra nada), a ordenação da lista usa exclusivamente `Position` (drag-and-drop), não `DueDate`, e `Todo` não sobrescreve `ToggleCompletion()` — completar um To-Do atrasado se comporta identicamente a completar um no prazo. Nenhum bug de fuso/cultura na conversão de data em si (`BeeDayWebService.ToDateOnly` é direto; `DueDateInput_StaysIsoFormatted_RegardlessOfCulture` já prova o campo permanece ISO sob pt-BR) | `OPEN` | 30.20 |
 | BD30-F056 | média | `Project.Archived` é persistido, validado e round-tripa corretamente (`EfProjectRepositoryTests` prova a persistência), mas `ProjectEditorModal.razor` não tem nenhum controle de UI para defini-lo — pior que `BD30-F050`/`BD30-F054` (que ao menos têm um seletor visível, só sem efeito), este campo é inteiramente inalcançável pela UI. Mesmo que fosse setado diretamente no banco, nada a jusante o trata de forma diferente: `EfDashboardReadService` não filtra por ele, `DashboardState.FilteredProjects`/`ProjectContextOptions` não o excluem, o board Ativo/Concluído usa `Status` (não `Archived`), e o reorder de Projects compartilha uma única sequência de `Position` sem particionar por `Archived`. Decisão de produto necessária: construir a UI de arquivamento + filtragem, ou remover o campo morto | `OPEN` | decisão do proprietário |
@@ -216,6 +216,7 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F086 | baixa | `DashboardState.ReloadAsync` sempre recarrega o dashboard inteiro (Habits+Tasks+Projects+Todos+resumo do Wallet+perfil/XP) após qualquer mutação individual — registrar um único Habit dispara a mesma recarga completa que abrir a página do zero. Prioridade reduzida nesta Sprint após a correção da `BD30-F084` já ter eliminado o componente mais caro (transferência completa da tabela de transações); o que resta é uma contagem pequena e já fixa de consultas (6, sem N+1, ver `BD30-F084`), então o ganho de uma recarga granular por seção é incerto sem medição adicional, e reescrever o contrato de recarga do `DashboardState` é mudança de arquitetura genuína, não uma correção pontual. Encaminhado sem correção nesta Sprint | `OPEN` | decisão do proprietário |
 | BD30-F087 | baixa | a Home pública (`/`) referencia duas imagens PNG não otimizadas de 1,7–1,8 MB cada (`home-team-fall.png`, `home-team.png` — a segunda com `fetchpriority="high"`, carregada antecipadamente acima da dobra), sem variante WebP/AVIF nem `srcset` responsivo; os ícones de bandeira do seletor de idioma público também carregam em tamanho muito maior (140–171 KB) do que o necessário para um ícone pequeno. Fora do caminho crítico autenticado que esta Sprint nomeia (`/daily`, `/wallet`) — confirmado que nenhuma imagem acima de 200 KB é referenciada em Dashboard/Wallet. Encaminhado como hygiene de assets, não defeito de performance do caminho crítico | `OPEN` | 30.26 |
 | BD30-F088 | baixa | não existe nenhum passo de build dedicado a bundling/minificação de CSS/JS (`grep` por bundler/webpack/esbuild/LibMan em toda configuração de build não encontra nada) — a minificação em `cards.css`/`wallet.css` é acidental (já commitada minificada), enquanto `design-system.css`/`variables.css`/`app.css` permanecem formatados. Mitigado hoje por `app.MapStaticAssets()`, que já aplica compressão gzip/Brotli e fingerprinting de conteúdo em tempo de build/publish independentemente do arquivo-fonte estar minificado — gap de hygiene, não defeito de performance medido | `OPEN` | 30.26 |
+| BD30-F089 | média | nenhum header de segurança além de HSTS (`UseHsts()`, fora de Development) era definido pela aplicação — `Referrer-Policy`, `X-Content-Type-Options` e `Permissions-Policy` estavam ausentes de toda resposta, confirmado por um teste de integração dedicado (`SecurityHeadersIntegrationTests`) que já provava esse estado explicitamente. `X-Frame-Options` e uma CSP básica (`frame-ancestors 'self'`) já eram enviados automaticamente pelo próprio framework Razor Components, independente de configuração da aplicação — não fazem parte deste achado. **Corrigido nesta Sprint**: novo `SecurityHeadersMiddleware` (`src/BeeDay.Web/Diagnostics/`) define os 3 headers ausentes em toda resposta; deliberadamente não toca `X-Frame-Options`/CSP para não competir com os valores já corretos do framework (sobrescrever arriscaria um valor silenciosamente substituído ou um header conflitante, dependendo do tipo de resposta) — verificado empiricamente que o teste que prova os headers do framework continua passando sem alteração. Uma CSP completa (`script-src` etc.) permanece planejada, não tentada aqui — precisa de desenho e verificação dedicados, não uma adição pontual de header | `FIXED` | 30.22 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -2806,3 +2807,153 @@ reatribuição para decisão do proprietário (`BD30-F051`), ambos com justifica
 permanecerem indefinidamente abertos sem próximo passo claro. Quatro achados menores foram
 encaminhados com evidência completa, nenhum corrigido especulativamente. Nenhuma mutação de banco
 HMG/produção foi executada ou é necessária.
+
+## 29. Sprint 30.22 — Security & Privacy Audit
+
+### 29.1 Escopo e método
+
+Auditoria de segurança e privacidade: autenticação, autorização, isolamento de posse (IDOR),
+sessão, cookies, antiforgery/CSRF, validação de entrada, rate limiting, dados sensíveis em logs/
+diagnóstico/erros/configuração, headers de segurança, e privilégio mínimo em workflows/scripts.
+Limite explícito: nenhum teste destrutivo, ataque de credencial, ou probe inseguro contra ambientes
+compartilhados sem autorização explícita do proprietário — nenhum foi executado.
+
+Quatro achados encaminhados por Sprints anteriores foram reverificados nesta Sprint (proprietária de
+todos): `BD30-F008` (CodeQL/Dependabot), `BD30-F041` (rate limiter em memória), `BD30-F048` (PII em
+cookie de longa duração), `BD30-F053` (defesa em profundidade de posse em `RemoveAsync`) — ver §29.3.
+
+### 29.2 Achados confirmados — corretos, sem defeito (nenhum IDOR ou bypass de autenticação encontrado)
+
+**Nenhum IDOR ou bypass de autenticação atualmente explorável foi encontrado.** Todo handler que
+aceita um id de entidade do cliente (Habit/Task/Todo/Project/Transaction/WalletTag) verifica posse
+duas vezes de forma independente: um helper `*Lookup.RequireExistsAsync`/`RequireOwned*Async` na
+camada de Application, e um filtro `UserId`/`WalletId` na própria consulta EF da camada de
+Infrastructure — nenhum handler faz um `FindById` puro. Confirmado por inspeção direta de todos os
+handlers de mutação de Habit/Task/Todo/Project/Wallet.
+
+- **Wallet Transaction/WalletTag**: nenhum caminho de leitura ou escrita permite acessar/editar/
+  excluir a Transaction ou WalletTag de outro usuário adivinhando/enumerando um Guid — todo caminho
+  resolve primeiro o Wallet do usuário chamador, depois escopa a busca a esse Wallet específico.
+- **`MultiUserIsolationIntegrationTests.cs`**: prova ponta a ponta, contra o pipeline HTTP real com
+  dois usuários reais, que Dashboard, Habit (registro positivo), Task, Project, Todo, Transaction,
+  WalletTag e avatar de Perfil não vazam nem podem ser mutados entre usuários. Gap de cobertura (não
+  de código): `UpdateHabitCommand`/`DeleteHabitCommand`/`RegisterHabitNegativeCommand` não são
+  exercitados nesse arquivo especificamente — código já provado seguro por inspeção (mesmo padrão de
+  `RegisterHabitPositiveCommand`, já coberto), mas não por este teste de integração específico.
+- **Cookie de autenticação**: `HttpOnly`, `SameSite=Lax`, `Secure` forçado em Produção
+  independentemente do esquema da requisição — provado por teste dedicado contra uma factory
+  "production-like".
+- **`OnValidatePrincipal`**: controle de invalidação de sessão (`SessionVersion`) intacto e
+  incondicional em toda requisição autenticada — provado por 9 cenários reais (troca de senha, reset,
+  desativação) em `SessionInvalidationIntegrationTests.cs`.
+- **Antiforgery/CSRF**: `/auth/login`, `/auth/logout`, `/culture/set` rejeitam requisições sem token
+  válido, provado por testes de integração reais, não só inspeção de middleware; GET nunca muta
+  estado.
+- **Rate limiting**: valores de produção (`IpPermitLimit=10`, `EmailPermitLimit=5`, janela de 1 min)
+  não sobrescritos por nenhum `appsettings*.json`, então se aplicam incondicionalmente em Homologação
+  e Produção; resend de confirmação e reset de senha usam a mesma resposta genérica independente de a
+  conta existir, sem enumeração possível.
+- **`GlobalExceptionHandler`**: detalhes técnicos de exceção só incluídos quando
+  `IsDevelopment()` — nunca em Homologação/Produção, em nenhum dos branches.
+- **Logging de senha/token**: nenhuma ocorrência de senha ou token bruto passado a um logger em todo
+  `src/`; endereço de e-mail só logado (em `DevelopmentEmailSender`) já mascarado.
+- **Secrets commitados**: nenhum segredo real encontrado em `appsettings*.json` — o único valor com
+  formato de segredo é um placeholder de desenvolvimento (`CHANGEME`) já documentado como nunca
+  conectado.
+- **Privilégio mínimo em workflows**: todos os 6 workflows declaram um bloco `permissions:` mínimo e
+  explícito; nenhum segredo é ecoado em log em nenhum deles.
+
+### 29.3 `BD30-F089` — headers de segurança ausentes, corrigido
+
+`Referrer-Policy`, `X-Content-Type-Options` e `Permissions-Policy` estavam ausentes de toda resposta
+— confirmado por um teste de integração já existente e dedicado a esse estado
+(`SecurityHeadersIntegrationTests`). Descoberta importante durante a implementação: `X-Frame-Options`
+e uma CSP básica (`frame-ancestors 'self'`) **já** são enviados automaticamente pelo próprio
+framework Razor Components, independente de qualquer configuração desta aplicação — confirmado pelo
+mesmo arquivo de teste e por `docs/security/01-security-baseline.md`. Definir `X-Frame-Options`
+diretamente no novo middleware teria arriscado um valor silenciosamente sobrescrito pelo framework
+(ou um header conflitante, dependendo do tipo de resposta) — evitado deliberadamente.
+
+**Corrigido**: novo `SecurityHeadersMiddleware` define os 3 headers genuinamente ausentes em toda
+resposta, registrado logo após `CorrelationIdMiddleware`. Verificado que o teste que prova os
+headers do framework (`X-Frame-Options`/CSP) continua passando sem nenhuma alteração — confirmando
+que não foi introduzido nenhum conflito. Teste existente que provava a ausência
+(`LoginPage_DoesNotYetSendReferrerPolicyContentTypeOptionsOrPermissionsPolicy`) atualizado para
+provar a presença, exatamente como sua própria documentação instruía. `docs/security/
+01-security-baseline.md` §4 atualizado para o novo estado real. Uma CSP completa (`script-src` etc.)
+permanece planejada, deliberadamente não tentada aqui.
+
+### 29.4 Reverificação de achados encaminhados
+
+**`BD30-F008`** (CodeQL/Dependabot ausentes): metade corrigida — `.github/dependabot.yml`
+adicionado (ecossistemas `nuget` e `github-actions`, semanal). Sem impacto operacional: não cria
+check obrigatório, não executa código, apenas configura o serviço nativo do GitHub. CodeQL
+deliberadamente não adicionado — é um novo workflow que consome minutos de CI a cada push/PR e
+tipicamente se torna check obrigatório, mudança de maior impacto na pipeline de CI/CD mais adequada
+à Sprint dedicada a isso. Reatribuído (só a parte de CodeQL) para 30.25.
+
+**`BD30-F041`** (rate limiter em memória, por processo): premissa reverificada e inalterada; nenhuma
+evidência de escalonamento horizontal desde a Sprint 30.10. A condição que tornaria isso relevante
+(PRD provisionado com múltiplas instâncias) ainda não existe. Reatribuído para decisão do
+proprietário, a revisitar quando essa condição mudar.
+
+**`BD30-F048`** (PII potencialmente desatualizada em cookie de 14 dias): corrigido — as claims
+`ClaimTypes.Name`/`ClaimTypes.Email` removidas da emissão do cookie em vez de mantidas sincronizadas.
+Confirmado por busca dedicada (incluindo a propriedade implícita `ClaimsPrincipal.Identity.Name`)
+que nada em `src/` as lê de volta — minimização de dados é a correção mais simples e segura.
+
+**`BD30-F053`** (`RemoveAsync` sem reverificação de `UserId`, defesa em profundidade): escopo
+confirmado idêntico em 5 repositórios (Habit/Task/Project/Transaction/WalletTag — Todo já é seguro
+via o Project pai). Corrigido nos 5: o predicado de re-busca em `RemoveAsync` agora também exige
+`UserId`/`WalletId` igual ao da entidade já verificada pelo chamador. Nenhuma mudança de
+comportamento no caminho legítimo — confirmado pelos 216 testes de Infrastructure passando sem
+alteração.
+
+### 29.5 Implementação
+
+- `src/BeeDay.Web/Diagnostics/SecurityHeadersMiddleware.cs` (novo) — 3 headers ausentes (`BD30-F089`).
+- `src/BeeDay.Web/Program.cs` — middleware registrado; claims `Name`/`Email` removidas do login
+  (`BD30-F048`).
+- `.github/dependabot.yml` (novo) — ecossistemas `nuget`/`github-actions` (`BD30-F008`, metade).
+- `src/BeeDay.Infrastructure/Persistence/SqlServer/Repositories/EfHabitRepository.cs`,
+  `EfRecurringTaskRepository.cs`, `EfProjectRepository.cs`, `EfTransactionRepository.cs`,
+  `EfWalletTagRepository.cs` — filtro de posse em `RemoveAsync` (`BD30-F053`).
+- `tests/BeeDay.Web.Tests/Integration/SecurityHeadersIntegrationTests.cs` — teste atualizado para o
+  novo estado.
+- `docs/security/01-security-baseline.md` — §4 atualizado.
+- `docs/epics/30-system-integrity/README.md` — nova Seção 29; achado `BD30-F089`; `BD30-F008`/
+  `BD30-F041`/`BD30-F048`/`BD30-F053` dispositionados.
+
+Nenhuma mudança de contrato público de Application, schema, migration. Nenhuma mutação de banco
+HMG/produção foi executada ou é necessária. Nenhum probe destrutivo ou ataque de credencial foi
+executado contra nenhum ambiente.
+
+### 29.6 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet test tests/BeeDay.Web.Tests/... --filter SecurityHeadersIntegrationTests` | PASS, 3/3 |
+| `dotnet test tests/BeeDay.Web.Tests/...` (completo) | PASS, 875/875 |
+| `dotnet test tests/BeeDay.Infrastructure.Tests/...` (completo, contra LocalDB real) | PASS, 216/216 |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter LoginExperienceTests\|AccountLifecycleTests\|AuthenticatedHomeTests` | PASS, 25/25 |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx` (Debug, completo) | PASS, 1.550/1.550 (121 Domain, 119 Application, 216 Infrastructure, 875 Web, 219 E2E) — execução limpa, 0 falhas |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.550/1.550 (121 Domain, 119 Application, 216 Infrastructure, 875 Web, 219 E2E) — execução limpa, 0 falhas |
+| `dotnet ef migrations has-pending-model-changes` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+
+### 29.7 Continuidade e entrega
+
+O resultado mais importante desta Sprint é negativo, no bom sentido: nenhum IDOR ou bypass de
+autenticação explorável foi encontrado em toda a superfície de mutação por id do produto — cada
+handler verifica posse duas vezes, de forma independente, em duas camadas diferentes. O achado real
+mais significativo (`BD30-F089`, headers de segurança ausentes) foi corrigido com cuidado extra ao
+descobrir, através de um teste de integração já existente e muito bem documentado, que o próprio
+framework Razor Components já controla `X-Frame-Options` e uma CSP básica — evitando duplicar ou
+competir com esse controle. Quatro achados encaminhados de Sprints anteriores foram todos
+dispositionados nesta Sprint (proprietária de todos): dois corrigidos (`BD30-F048`, `BD30-F053`,
+este último estendendo a correção a 5 repositórios em vez de só Habit/Task), um parcialmente
+corrigido com a parte de maior impacto operacional encaminhada à Sprint de CI/CD (`BD30-F008`), e um
+reatribuído para decisão do proprietário por depender de uma condição de infraestrutura que ainda
+não existe (`BD30-F041`). Nenhuma mutação de banco HMG/produção foi executada ou é necessária.

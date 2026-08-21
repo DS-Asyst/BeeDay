@@ -73,10 +73,12 @@ internal sealed class EfProjectRepository : EfRepositoryBase, IProjectRepository
         var context = lease.Context;
 
         // See EfHabitRepository.RemoveAsync for why this re-fetches by Id instead of attaching
-        // `project` directly. Todos are not loaded here — deleting the Project row cascades to its
-        // Todos at the database level (FK_Todos_Projects_ProjectId, ON DELETE CASCADE), so there is no
-        // need to materialize the child rows just to remove them.
-        var tracked = await context.Projects.SingleAsync(existing => existing.Id == project.Id, cancellationToken);
+        // `project` directly (including why the UserId filter is defense-in-depth, BD30-F053).
+        // Todos are not loaded here — deleting the Project row cascades to its Todos at the database
+        // level (FK_Todos_Projects_ProjectId, ON DELETE CASCADE), so there is no need to materialize
+        // the child rows just to remove them.
+        var tracked = await context.Projects.SingleAsync(
+            existing => existing.Id == project.Id && existing.UserId == project.UserId, cancellationToken);
         context.Projects.Remove(tracked);
         await EfConcurrencySaveChanges.ExecuteAsync(context, cancellationToken);
     }
