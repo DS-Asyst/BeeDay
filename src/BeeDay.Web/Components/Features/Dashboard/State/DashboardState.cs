@@ -242,6 +242,14 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
             selectedProjectId = null;
         }
 
+        // EPIC 30 Sprint 30.14: OpenProject already re-derives from data.Projects on every read, so a
+        // stale OpenProjectId here has no observable effect — this only keeps the two "current
+        // project" ids symmetric, matching selectedProjectId's own reset above.
+        if (OpenProjectId is Guid openProjectId && !data.Projects.Any(project => project.Id == openProjectId))
+        {
+            OpenProjectId = null;
+        }
+
         Changed?.Invoke();
     }
 

@@ -148,7 +148,7 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F017 | média | cada deploy cria backups de aplicação e dados em `C:\Apps\BeeDay-Backups`, mas não existe política versionada de retenção, expurgo ou restore automatizado de uma execução histórica | `OPEN` | 30.25 |
 | BD30-F018 | alta | a confirmação de e-mail tem cobertura robusta de Application/Integration para sucesso, token inválido/expirado/replay, reenvio e throttle, mas nenhuma jornada Chromium atravessa um link real até liberar o login | `FIXED` | 30.10 |
 | BD30-F019 | alta | não existia E2E de to-do; criação, edição, conclusão, reload e exclusão eram provados apenas parcialmente por componentes, Application e repositories. Corrigido: `tests/BeeDay.E2E.Tests/TodoLifecycleTests.cs` (novo) prova, via Chromium real, criar um To-Do dentro de um Project, alternar conclusão, editar (com persistência após reload) e excluir (com confirmação) | `FIXED` | 30.13 |
-| BD30-F020 | média | o E2E de projeto cria e abre o workspace, mas não prova mutações de to-do nem persistência do workspace após reload | `OPEN` | 30.14 |
+| BD30-F020 | média | o E2E de projeto criava e abria o workspace, mas não provava mutações de to-do nem persistência do workspace após reload. A Sprint 30.13 fechou a primeira metade (`TodoLifecycleTests.cs` prova mutações de Todo dentro do workspace, com persistência verificada no board após reload) mas nunca reabria o próprio workspace pós-reload. Corrigido: `tests/BeeDay.E2E.Tests/ProjectLifecycleTests.cs` (novo) prova a barra de progresso e a lista de To-Dos do workspace sobrevivendo a um reload real de página, além de editar e excluir um Project, ambos antes sem qualquer cobertura E2E | `FIXED` | 30.14 |
 | BD30-F021 | média | os E2Es de conta cobrem perfil e idioma, mas não tema, alteração de senha nem recovery visível dos demais saves suportados | `OPEN` | 30.11 |
 | BD30-F022 | baixa | dez suítes repetiam seletores e submissão do mesmo formulário de login como arranjo, aumentando drift sem acrescentar evidência funcional | `FIXED` | 30.4 |
 | BD30-F023 | alta | doze tipos controlados por factory expunham construtor público implícito e permitiam criar aggregates/entities/values sem qualquer invariante; não havia consumer versionado desses construtores | `FIXED` | 30.5 |
@@ -183,6 +183,8 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F053 | baixa | `EfHabitRepository.RemoveAsync` (e o mesmo padrão em `EfTaskRepository`/`EfTodoRepository`/`EfProjectRepository` conforme aplicável) busca a linha só por `Id`, sem reverificar `UserId` — depende inteiramente do único call site (`DeleteHabitCommandHandler`) já ter verificado posse via `HabitLookup.RequireExistsAsync` antes. Seguro hoje (único call site confirmado, corretamente guardado), mas é uma lacuna de defesa em profundidade: o método do repositório não é seguro por posse isoladamente, então um futuro chamador direto que pule a pré-verificação poderia excluir silenciosamente o Habit de outro usuário | `OPEN` | 30.22 |
 | BD30-F054 | alta | `RecurringTask.Repeat` (Daily/Weekly/Monthly) está totalmente cabeado — Domain, persistência, editor de UI, documentação — mas `RecurringTask` não sobrescreve `ToggleCompletion()` (herda a implementação padrão de `Activity`, um simples flip de booleano); nenhum código no repositório jamais reabre uma Task recorrente com base em fronteira de calendário. É a mesma classe de lacuna que `BD30-F050` (Habit), confirmada de forma independente para Task. Efeito colateral agravante: como a dedução de XP por origem é permanente e correta por design para Task (ao contrário de Habit), uma Task "Diária" completada uma vez **nunca mais pode gerar XP**, mesmo desmarcando e marcando de novo manualmente — os dois mecanismos, cada um correto isoladamente, se combinam para anular o propósito de gamificação de uma Task "recorrente". Definir a semântica real de reabertura é uma decisão de produto, não inventada por esta auditoria — mesma decisão pendente de `BD30-F050`, possivelmente a mesma decisão para os dois achados | `OPEN` | decisão do proprietário |
 | BD30-F055 | baixa | `Todo.DueDate` é persistido e exibido como texto formatado, mas não tem nenhum efeito funcional: nenhum indicador visual de atraso existe em `src/` (`grep` por "overdue"/"atrasad" não encontra nada), a ordenação da lista usa exclusivamente `Position` (drag-and-drop), não `DueDate`, e `Todo` não sobrescreve `ToggleCompletion()` — completar um To-Do atrasado se comporta identicamente a completar um no prazo. Nenhum bug de fuso/cultura na conversão de data em si (`BeeDayWebService.ToDateOnly` é direto; `DueDateInput_StaysIsoFormatted_RegardlessOfCulture` já prova o campo permanece ISO sob pt-BR) | `OPEN` | 30.20 |
+| BD30-F056 | média | `Project.Archived` é persistido, validado e round-tripa corretamente (`EfProjectRepositoryTests` prova a persistência), mas `ProjectEditorModal.razor` não tem nenhum controle de UI para defini-lo — pior que `BD30-F050`/`BD30-F054` (que ao menos têm um seletor visível, só sem efeito), este campo é inteiramente inalcançável pela UI. Mesmo que fosse setado diretamente no banco, nada a jusante o trata de forma diferente: `EfDashboardReadService` não filtra por ele, `DashboardState.FilteredProjects`/`ProjectContextOptions` não o excluem, o board Ativo/Concluído usa `Status` (não `Archived`), e o reorder de Projects compartilha uma única sequência de `Position` sem particionar por `Archived`. Decisão de produto necessária: construir a UI de arquivamento + filtragem, ou remover o campo morto | `OPEN` | decisão do proprietário |
+| BD30-F057 | baixa | `DashboardState.DeleteCurrentEditorItemAsync` (compartilhado por Habit/Task/Todo/Project) toca a animação de remoção do card (`RemovingItemId`, ~170ms) **antes** de emitir a requisição de exclusão ao servidor — se a exclusão subsequente falhar (rede, conflito), `RemovingItemId` já foi limpo e `ReloadAsync()` nunca é alcançado (o catch só mostra um toast de erro), então o card reaparece no estado normal após já ter "desaparecido" visualmente um instante antes, ao lado de um toast de erro. Padrão cross-cutting pré-existente, não introduzido nem específico desta Sprint | `OPEN` | 30.20 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -1600,3 +1602,149 @@ diferentes, sugerem fortemente que ambas compartilham a mesma causa raiz de prod
 "recorrência"/"reset" projetado na UI/Domain antes de sua semântica de runtime ter sido decidida) e
 provavelmente merecem uma única decisão do proprietário cobrindo os dois. Nenhuma mutação de banco
 HMG/produção foi executada ou é necessária.
+
+## 21. Sprint 30.14 — Projects & Project Workspace Audit
+
+### 21.1 Escopo e método
+
+Issue #211. Auditoria funcional completa de Project e seu workspace: CRUD, cálculo de progresso,
+ordenação, filtro de contexto, impacto de exclusão em views relacionadas, isolamento de posse,
+suposições de UI otimista, cancelamento/feedback, e estados vazio/muitos-projects/recurso-deletado.
+`Project.cs`, `ProjectCommandHandlers.cs`, `EfProjectRepository.cs`, `ReorderActivitiesCommandHandler.cs`,
+`ProjectEditorModal`/`ProjectWorkspace` (razor + code-behind), `DashboardModalState.cs`,
+`DashboardState.cs`, `ProjectContextFilter.razor`, `Home.razor`, e todos os testes relacionados a
+Project em Domain/Application/Infrastructure/Web/E2E foram lidos integralmente. Cruzado com
+`BD30-F020` (já atribuído a esta Sprint) e revisão explícita de `tests/BeeDay.E2E.Tests/
+TodoLifecycleTests.cs` (Sprint 30.13) para determinar exatamente o que esse achado ainda deixava sem
+prova.
+
+### 21.2 Achados confirmados — corretos, sem defeito
+
+- **Isolamento de posse**: confirmado em toda a superfície de Project (Create/Update/Delete/Reorder),
+  tanto na guarda do handler (`ProjectLookup.RequireExistsAsync`) quanto na query SQL de cada método
+  de `EfProjectRepository`, mais a verificação redundante em `ReorderActivitiesCommandHandler.EnsureOwned`.
+- **Cálculo de progresso**: `Project.ProgressPercentage` é sempre derivado ao vivo da coleção
+  `Todos` em memória (nunca persistido — `Ignore()` no EF Core), com guarda explícita para 0 Todos
+  (`TotalTodos == 0 ? 0m : ...`). Não há contador em cache que possa dessincronizar após add/toggle/
+  delete/move — coberto por `ProjectTests.Empty_project_is_planned_with_zero_progress` e os casos de
+  100%/50%.
+- **Recurso deletado / rota obsoleta enquanto workspace aberto**: `DashboardState.OpenProject` é uma
+  propriedade computada que rederiva de `data?.Projects` a cada leitura — nunca uma referência
+  cacheada obsoleta. `Home.razor` só renderiza `&lt;ProjectWorkspace&gt;` quando essa propriedade não é
+  nula, então um Project excluído em outra aba simplesmente some do workspace no próximo reload, sem
+  exceção nem dialog órfão. Mesma garantia para `ProjectContextFilter`/`selectedProjectId`
+  (`ReloadAsync` já zerava esse campo se o Project selecionado sumisse). Único ponto de assimetria
+  encontrado e corrigido nesta Sprint: `OpenProjectId` (ao contrário de `selectedProjectId`) não era
+  resetado para `null` em `ReloadAsync` — sem efeito observável (já que `OpenProject` sempre rederiva),
+  mas corrigido por simetria e higiene de estado.
+- **Cascata de exclusão / views relacionadas**: `ON DELETE CASCADE` remove Todos ao excluir o Project
+  (reconfirmado, já provado na Sprint 30.13); não existe caminho de UI para ter o editor (com o botão
+  Delete) e o workspace do mesmo Project abertos simultaneamente.
+- **Cancelamento e feedback de UI**: toda mutação de Project (criar/editar/excluir/reordenar) usa o
+  mesmo `ExecuteAsync` compartilhado com `cancellation.Token` real e toasts de sucesso/erro — padrão
+  `BD30-F035` já aplicado sem exceção para Project.
+- **`Project.Color`**: campo mantido apenas porque o value object de Domain ainda o exige, mas a UI
+  não expõe seleção manual há Sprints — decisão de produto já documentada, não um bug de round-trip.
+- **Documentação**: `docs/domain/project.md` documenta `Archived` apenas como campo persistido, sem
+  reivindicar nenhum comportamento de filtragem — confirma que `BD30-F056` é uma lacuna funcional
+  real, não deriva de documentação desatualizada.
+
+### 21.3 `BD30-F020` — cobertura E2E de workspace incompleta, corrigido
+
+A Sprint 30.13 fechou a metade de "mutações de Todo dentro do workspace" (`TodoLifecycleTests.cs`),
+mas nenhum teste jamais reabria o próprio workspace após um reload real para reconferir sua barra de
+progresso ou lista de To-Dos — a outra metade do achado, ainda aberta. Novo arquivo
+`tests/BeeDay.E2E.Tests/ProjectLifecycleTests.cs`, 3 testes via Chromium real:
+
+- Barra de progresso e lista de To-Dos do workspace sobrevivem a um reload de página real (criar
+  Project, adicionar 2 To-Dos no workspace, completar 1 no board, `GotoAsync("/daily")`, reabrir o
+  workspace, reconferir "Project progress 50%" e o estado concluído/pendente de cada item).
+- Editar os campos do próprio Project (Título/Notas) persiste após reload — nunca provado antes.
+- Excluir um Project (com confirmação) o remove do board e do reload subsequente — nunca provado
+  antes.
+
+Uma race condition real foi encontrada e corrigida durante a escrita do primeiro teste: clicar em
+"Complete" só despacha o evento DOM, não espera o round-trip do Blazor Server que persiste a
+mutação — navegar imediatamente após (`GotoAsync`) podia recarregar a página antes do toggle ter
+sido de fato persistido. Corrigido aguardando a confirmação visual do toggle (o texto acessível do
+botão mudar) antes de navegar, mesmo padrão já usado em outros testes desta suíte.
+
+### 21.4 `BD30-F056` — `Project.Archived` sem nenhum controle de UI, decisão de produto necessária
+
+Pior que `BD30-F050`/`BD30-F054` (que ao menos têm um seletor visível, só sem efeito de runtime):
+`Archived` é persistido e round-tripa corretamente (`EfProjectRepositoryTests`), mas
+`ProjectEditorModal.razor` não tem absolutamente nenhum controle vinculado a ele — mesmo que o campo
+fosse setado diretamente no banco, nada a jusante o trataria de forma diferente: `EfDashboardReadService`
+não filtra por ele, `DashboardState.FilteredProjects`/`ProjectContextOptions` não o excluem, o board
+Ativo/Concluído usa `Status` (não `Archived`), e o reorder de Projects compartilha uma única sequência
+de `Position` sem particionar por `Archived` (projects arquivados e ativos podem se intercalar
+livremente no drag-and-drop). Novo teste `ArchivedField_HasNoRenderedControlToSetIt` em
+`ProjectEditorModalTests.cs` torna essa ausência explícita e à prova de regressão, em vez de depender
+apenas da leitura do arquivo razor.
+
+Decisão de produto necessária: construir a UI de arquivamento + filtragem correspondente, ou remover
+o campo morto. Não inventada por esta auditoria — mesmo princípio já aplicado a `BD30-F040`/`BD30-F050`/
+`BD30-F054`.
+
+### 21.5 Achados menores/informativos (não corrigidos, encaminhados)
+
+- `BD30-F057` (nova, baixa): `DashboardState.DeleteCurrentEditorItemAsync` (compartilhado por
+  Habit/Task/Todo/Project) toca a animação de remoção do card antes de emitir a requisição de
+  exclusão ao servidor — se a exclusão subsequente falhar, o card reaparece após já ter "desaparecido"
+  visualmente um instante antes. Padrão cross-cutting pré-existente, não específico de Project.
+  Encaminhada à Sprint 30.20 (UX).
+- Reconfirmação (sem novo ID): mesmo padrão de lista não-paginada/não-virtualizada já observado para
+  Habit na Sprint 30.12 (`BD30-F051`) também se aplica ao board de Projects — nenhuma paginação,
+  nenhum teste cria mais de 2 Projects para o mesmo usuário.
+
+### 21.6 Implementação
+
+- `src/BeeDay.Web/Components/Features/Dashboard/State/DashboardState.cs` — `ReloadAsync` agora também
+  reseta `OpenProjectId` quando o Project correspondente não existe mais na resposta fresca,
+  simétrico ao reset já existente de `selectedProjectId`.
+- `tests/BeeDay.Web.Tests/Components/Dashboard/DashboardStateTests.cs` — novo teste
+  `OpenProjectWorkspace_WhenTheProjectDisappearsOnReload_ClosesWithoutCrashing`, tornando à prova de
+  regressão o critério de aceite "nenhum crash de recurso deletado permanece sem tratamento".
+- `tests/BeeDay.Web.Tests/Components/Projects/ProjectEditorModalTests.cs` — novo teste
+  `Save_PassesTheEditedFieldsToOnSave` (Título/Notas/Data prevista) e
+  `ArchivedField_HasNoRenderedControlToSetIt` (`BD30-F056`).
+- `tests/BeeDay.E2E.Tests/ProjectLifecycleTests.cs` (novo) — 3 testes, fechando `BD30-F020`.
+
+Nenhuma mudança de comportamento de produção nesta Sprint além da correção de higiene de estado
+(`OpenProjectId`, sem efeito observável antes ou depois); o achado material (`BD30-F056`) exige
+decisão do proprietário antes de qualquer implementação.
+
+### 21.7 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| `dotnet test tests/BeeDay.Web.Tests/... --filter DashboardStateTests` | PASS, 9/9 |
+| `dotnet test tests/BeeDay.Web.Tests/... --filter ProjectEditorModalTests` | PASS, 12/12 |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter HabitAndTaskTests\|TodoLifecycleTests\|ProjectLifecycleTests` | PASS, 17/17 |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+| `dotnet test BeeDay.slnx` (Debug, completo, 1ª execução) | 1.545/1.546 — 1 falha: `ActivityFilterBarTests.SharedSearchInputPreservesTheDebouncedFilterContract`, timeout de `WaitForAssertion` do bUnit (a própria mensagem do bUnit aponta "highly utilized or slower hardware"). Arquivo/componente não tocados nesta Sprint |
+| `dotnet test tests/BeeDay.Web.Tests/... --filter ActivityFilterBarTests` (retry) | PASS, 3/3 — inclusive o caso exato que falhou antes |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.546/1.546 (119 Domain, 117 Application, 216 Infrastructure, 883 Web, 211 E2E) — execução limpa, 0 falhas |
+
+**Classificação da falha Debug:** `TRANSIENT/FLAKY` (ambiente/carga de máquina), não `CHANGE-CAUSED`.
+`ActivityFilterBarTests.cs` e o componente que exercita não foram tocados por esta Sprint (escopo
+desta Sprint é inteiramente Project); o retry imediato do mesmo teste, incluindo o caso exato que
+falhou, passou 100% (3/3). Padrão distinto do já registrado em `BD30-F042` (aquele é `TimeoutException`
+de navegação Playwright em E2E; este é timeout de `WaitForAssertion` do bUnit em Web.Tests) — não
+adicionado a `BD30-F042` para não diluir sua evidência específica; registrado aqui apenas como
+evidência de execução, sem novo ID.
+
+### 21.8 Continuidade e entrega
+
+Terceira Sprint seguida (30.12 Habit, 30.13 Task, agora 30.14 Project) a encontrar um campo
+totalmente implementado do banco à UI sem efeito comportamental real — desta vez o caso mais extremo,
+já que `Archived` nem sequer tem um controle de UI para ser exercitado. O padrão consistente nas três
+Sprints sugere que uma única revisão de produto, cobrindo os três achados (`BD30-F050`, `BD30-F054`,
+`BD30-F056`) juntos, provavelmente é mais eficiente do que três decisões separadas. `BD30-F020` está
+agora genuinamente fechado (não apenas parcialmente, como a Sprint 30.13 deixou) — o workspace, não
+só o board, agora tem prova de persistência real após reload. Nenhuma mutação de banco HMG/produção
+foi executada ou é necessária.
