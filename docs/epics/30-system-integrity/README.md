@@ -59,8 +59,8 @@ todo achado termine como `FIXED`, `VERIFIED` ou `ACCEPTED RISK`.
 | INV-008 | Rotas e shell | 54 declarações `@page` em 52 arquivos, reconfirmadas byte-a-byte na Sprint 30.17 contra `docs/web/02-routing-and-pages.md` §3 — zero rota indocumentada, zero rota obsoleta documentada, zero rota duplicada | `VERIFIED` | 30.17 |
 | INV-009 | Fluxos funcionais | Identity/Auth/User, Dashboard, Habits, Tasks, Todos, Projects, Wallets, Experience, Onboarding e páginas públicas identificados | `MAPPED` (Identity/Auth `VERIFIED` na 30.10) | 30.4, 30.10–30.18 |
 | INV-010 | Testes | 198 arquivos rastreados em 5 projetos; baseline executado contra LocalDB e Chromium | `BASELINED` | 30.24 |
-| INV-011 | Workflows | 6 workflows: PR Validation, HMG Deployment, HMG Verification, Release Quality Gate, Production Deployment e Promotion Policy | `BASELINED` | 30.25 |
-| INV-012 | Scripts | 12 scripts PowerShell; todos passam pelo parser do PowerShell sem erro sintático | `BASELINED` | 30.25, 30.26 |
+| INV-011 | Workflows | 6 workflows: PR Validation, HMG Deployment, HMG Verification, Release Quality Gate, Production Deployment e Promotion Policy. **Reverificado na Sprint 30.25**: os 6 continuam corretos frente a `docs/deployment/*.md`, exceto um comentário desatualizado em `deploy-hmg.yml` (parte de `BD30-F006`, corrigido). 7º workflow novo adicionado nesta Sprint: `codeql.yml` (`BD30-F008`) | `VERIFIED` | 30.25 |
+| INV-012 | Scripts | 12 scripts PowerShell; todos passam pelo parser do PowerShell sem erro sintático. **Reverificado na Sprint 30.25**: os 12 continuam parseando sem erro; 2 novos adicionados (`Clear-BeeDayBackups.ps1`, `scripts/tests/Test-ClearBeeDayBackups.ps1`, `BD30-F017`), total agora 14 | `VERIFIED` | 30.25, 30.26 |
 | INV-013 | Configuração | contratos raiz, 4 `appsettings`, `launchSettings.json`, `web.config` e 8 tipos auxiliares sob `Infrastructure/Configuration` | `BASELINED` | 30.3, 30.22, 30.25 |
 | INV-014 | Documentação | 123 arquivos rastreados; 537 links Markdown relativos verificados, sem link quebrado real | `BASELINED` | 30.28 |
 | INV-015 | Design System | 69 arquivos de componentes, 18 arquivos CSS, 5 arquivos JS e 64 assets de ícone sob `design/` | `BASELINED` | 30.19 |
@@ -134,9 +134,9 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F031 | média | 17 dos 27 handlers de Application não tinham teste direto em `tests/BeeDay.Application.Tests` (confirmado por busca de referência), incluindo dois handlers multi-write com transação (`UpdateTodoCommandHandler` no branch cross-Project, `UpdateTransactionCommandHandler`, `DeleteTransactionCommandHandler`) cuja correção de fronteira transacional só era provada por inspeção de código | `FIXED` | 30.6 |
 | BD30-F004 | baixa | `docs/architecture/02-solution-structure.md` descreve Solution Items antigos (`docs/ai` e `docs/development`); `BeeDay.slnx` aponta atualmente para `docs/developer/README.md` e outros itens existentes | `OPEN` | 30.28 |
 | BD30-F005 | baixa | 27 referências, em 19 arquivos de código/teste, apontam para 7 caminhos de documentação removidos ou movidos | `OPEN` | 30.26 |
-| BD30-F006 | alta | o estado versionado de HMG seleciona Resend (`true`) e Development (`false`), enquanto `docs/deployment/01-deployment.md` e `02-runtime-configuration.md` ainda descrevem a seleção inversa; o runbook mais novo distingue corretamente repository state de runtime state | `OPEN` | 30.25 |
+| BD30-F006 | alta | o estado versionado de HMG seleciona Resend (`true`) e Development (`false`), enquanto `docs/deployment/01-deployment.md` e `02-runtime-configuration.md` ainda descrevem a seleção inversa; o runbook mais novo distingue corretamente repository state de runtime state. **Corrigido na Sprint 30.25**: os dois documentos corrigidos (§6/nota do incidente e tabela §3/§6.7 respectivamente, preservando o texto histórico do incidente original — só a afirmação de estado "hoje" foi corrigida, não a narrativa do que aconteceu na época). Descoberta adicional durante a correção: a mesma afirmação invertida também existia como comentário de código em `deploy-hmg.yml` e duas vezes em `scripts/Deploy-BeeDay.ps1` — corrigidos também, embora não afetassem comportamento (a lógica do script já era condicionada aos valores reais dos parâmetros, não ao texto do comentário). `docs/infrastructure/06-transactional-email.md` já estava correto, não precisou de correção | `FIXED` | 30.25 |
 | BD30-F007 | média | não existe `.runsettings`, referência a coverlet ou coleta formal de cobertura. **Corrigido na Sprint 30.24**: `coverlet.collector` adicionado aos 5 projetos de teste (`Directory.Packages.props` + `PackageReference` em cada `.csproj`, mesmo padrão de `PrivateAssets`/`IncludeAssets` já usado para `xunit.runner.visualstudio`) — `dotnet test --collect:"XPlat Code Coverage"` agora produz `coverage.cobertura.xml` por projeto, verificado por execução real. Nenhum threshold/gate de cobertura adicionado deliberadamente — decisão de política (qual % é aceitável, se deveria bloquear PR) fora da autoridade de uma auditoria de engenharia de teste; o limite explícito da Sprint também instruía não otimizar para cobertura de linha como objetivo primário | `FIXED` | 30.24 |
-| BD30-F008 | média | não existe workflow CodeQL nem configuração Dependabot versionada. **Reverificado na Sprint 30.22**: metade corrigida — `.github/dependabot.yml` adicionado (ecossistemas `nuget` e `github-actions`, semanal, sem impacto operacional — não cria check obrigatório, não roda código, apenas configura o serviço nativo do GitHub para abrir PRs de atualização). CodeQL deliberadamente não adicionado nesta Sprint: é um novo workflow do GitHub Actions que consome minutos de CI a cada push/PR e tipicamente se torna um check obrigatório uma vez configurado — mudança de maior impacto operacional na pipeline de CI/CD, mais adequada à Sprint dedicada a CI/CD do que a uma correção pontual de segurança. Reatribuída (só a parte de CodeQL) para 30.25 | `OPEN` | 30.25 |
+| BD30-F008 | média | não existe workflow CodeQL nem configuração Dependabot versionada. **Reverificado na Sprint 30.22**: metade corrigida — `.github/dependabot.yml` adicionado (ecossistemas `nuget` e `github-actions`, semanal, sem impacto operacional — não cria check obrigatório, não roda código, apenas configura o serviço nativo do GitHub para abrir PRs de atualização). CodeQL deliberadamente não adicionado nesta Sprint: é um novo workflow do GitHub Actions que consome minutos de CI a cada push/PR e tipicamente se torna um check obrigatório uma vez configurado — mudança de maior impacto operacional na pipeline de CI/CD, mais adequada à Sprint dedicada a CI/CD do que a uma correção pontual de segurança. Reatribuída (só a parte de CodeQL) para 30.25. **Corrigido na Sprint 30.25**: novo `.github/workflows/codeql.yml` (`csharp`, `build-mode: autobuild`, PR para `hmg` + semanal), deliberadamente não obrigatório — ver §32.5 para o resultado real do primeiro run (disparado pelo próprio PR desta Sprint) | `FIXED` | 30.25 |
 | BD30-F009 | média | existem apenas dois guards automatizados de dependência, cobrindo Domain e Application; Infrastructure e Web não têm guard equivalente | `FIXED` | 30.9 |
 | BD30-F010 | baixa | o índice de documentação classifica `authentication/` e `developer/` como reservados e `api/` como não reauditado | `OPEN` | 30.28 |
 | BD30-F011 | baixa | `docs/infrastructure/README.md` registra 5 classes Options; o repositório possui 6 Options atuais, além de `EmailProvider` e `EmailProviderSelector` | `OPEN` | 30.7 |
@@ -144,8 +144,8 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F013 | alta | em HMG, validar `TransactionFormModel.Amount` sob `pt-BR` lançava `ArgumentException`/`FormatException` em `RangeAttribute.SetupConversion` ao interpretar o limite textual `"0.01"` pela cultura corrente; a falha ocorria no `EditForm`, antes de MediatR e antes de qualquer `INSERT` | `FIXED` | 30.2 |
 | BD30-F014 | baixa | os logs do mesmo período contêm warnings do EF Core sobre MARS/savepoints, mas a cadeia causal confirmada do incidente termina na validação DataAnnotations antes de MediatR/persistência; não há evidência de participação desses warnings nesta falha | `OPEN` | 30.7 |
 | BD30-F015 | média | `docs/deployment/04-operations.md` ainda afirmava que não existiam deploy automatizado de HMG nem aplicação de migrations, além de registrar caminhos e fluxo de release obsoletos; os workflows e a execução real provam o fluxo CI artifact -> HMG Deployment -> HMG Verification | `FIXED` | 30.3 |
-| BD30-F016 | alta | o rollback de HMG restaura aplicação e configuração do App Pool, mas não desfaz migrations; embora `Deploy-BeeDay.ps1` implemente `-BackupDatabase`, `deploy-hmg.yml` não o habilita e não há evidência versionada de backup SQL externo correlacionado ao deploy | `OPEN` | 30.25 |
-| BD30-F017 | média | cada deploy cria backups de aplicação e dados em `C:\Apps\BeeDay-Backups`, mas não existe política versionada de retenção, expurgo ou restore automatizado de uma execução histórica | `OPEN` | 30.25 |
+| BD30-F016 | alta | o rollback de HMG restaura aplicação e configuração do App Pool, mas não desfaz migrations; embora `Deploy-BeeDay.ps1` implemente `-BackupDatabase`, `deploy-hmg.yml` não o habilita e não há evidência versionada de backup SQL externo correlacionado ao deploy. **Reverificado na Sprint 30.25**: confirmado por leitura direta do bloco de rollback completo (`Deploy-BeeDay.ps1`) — a função `Backup-BeeDayDatabase` existe, funciona (`Invoke-Sqlcmd ... BACKUP DATABASE`), mas é genuinamente inalcançável de qualquer workflow hoje; o rollback nunca reverte migration alguma, só restaura arquivos de aplicação. **Não corrigido deliberadamente**: habilitar `-BackupDatabase` mudaria o comportamento do próximo deploy real de HMG contra o SQL Server real (permissão de escrita da conta de serviço não verificada, espaço em disco não verificado) — mutação de ambiente fora da autoridade desta auditoria, e dependeria de `BD30-F017` já estar resolvido para não acumular backups SQL sem limite. Decisão do proprietário | `OPEN` | decisão do proprietário |
+| BD30-F017 | média | cada deploy cria backups de aplicação e dados em `C:\Apps\BeeDay-Backups`, mas não existe política versionada de retenção, expurgo ou restore automatizado de uma execução histórica. **Corrigido na Sprint 30.25**: novo `scripts/Clear-BeeDayBackups.ps1` — mesmo padrão autônomo/idempotente de `Clear-BeeDayStdoutLogs.ps1` (não vinculado a nenhum deploy/rollback crítico, não agendado automaticamente), com um piso de segurança adicional (`-MinimumToKeep`, default 3) que nunca expurga os N pares mais recentes mesmo que todos estejam além de `-RetentionDays` — justificado porque, até `BD30-F016` ser resolvido, esse é o único material de rollback que o processo de deploy possui. Cobertura de regressão nova (`scripts/tests/Test-ClearBeeDayBackups.ps1`, 15 asserções) provada por execução real, incluindo o piso de segurança e `-WhatIf`; adicionada ao mesmo preflight de `deploy-hmg.yml` que já valida as demais suítes de regressão do deploy. Restore automatizado de um backup histórico específico permanece manual — fora do escopo desta correção pontual de retenção | `FIXED` | 30.25 |
 | BD30-F018 | alta | a confirmação de e-mail tem cobertura robusta de Application/Integration para sucesso, token inválido/expirado/replay, reenvio e throttle, mas nenhuma jornada Chromium atravessa um link real até liberar o login | `FIXED` | 30.10 |
 | BD30-F019 | alta | não existia E2E de to-do; criação, edição, conclusão, reload e exclusão eram provados apenas parcialmente por componentes, Application e repositories. Corrigido: `tests/BeeDay.E2E.Tests/TodoLifecycleTests.cs` (novo) prova, via Chromium real, criar um To-Do dentro de um Project, alternar conclusão, editar (com persistência após reload) e excluir (com confirmação) | `FIXED` | 30.13 |
 | BD30-F020 | média | o E2E de projeto criava e abria o workspace, mas não provava mutações de to-do nem persistência do workspace após reload. A Sprint 30.13 fechou a primeira metade (`TodoLifecycleTests.cs` prova mutações de Todo dentro do workspace, com persistência verificada no board após reload) mas nunca reabria o próprio workspace pós-reload. Corrigido: `tests/BeeDay.E2E.Tests/ProjectLifecycleTests.cs` (novo) prova a barra de progresso e a lista de To-Dos do workspace sobrevivendo a um reload real de página, além de editar e excluir um Project, ambos antes sem qualquer cobertura E2E | `FIXED` | 30.14 |
@@ -159,7 +159,7 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F028 | média | `Transaction` protegia positividade e escala, mas não o máximo monetário de `999999999999` já exposto pelo contrato público do formulário | `FIXED` | 30.5 |
 | BD30-F029 | baixa | comentários de `Profile` ainda justificavam a modelagem pelo adapter JSON já removido | `FIXED` | 30.5 |
 | BD30-F030 | alta | `UserExperience.Entries` participa da deduplicação em memória, porém era ignorada no mapping relacional; `ExperienceEntry` é top-level e nada jamais adicionava novas entries ao `DbSet` — confirmado por teste real contra LocalDB: nenhuma linha era persistida, e a mesma fonte podia ser recompensada indefinidamente (recompletar um Todo/Task/Project já concluído antes) | `FIXED` | 30.7 (revalidar impacto em 30.16) |
-| BD30-F032 | baixa | `EfHabitRepository.AddAsync`/`EfProjectRepository.AddAsync`/`EfRecurringTaskRepository.AddAsync`/`EfProjectRepository.AddTodoAsync` calculam a próxima `Position` via `MaxAsync` seguido de um insert separado, sem índice/constraint único em `(UserId, Position)` (ou `(ProjectId, Position)` para Todo) — duas inserções concorrentes do mesmo usuário podem computar o mesmo `maxPosition` e persistir ordinais duplicados; não há perda de dado, apenas dessincronia cosmética de ordenação, autocorrigível no próximo reorder | `OPEN` | 30.25 |
+| BD30-F032 | baixa | `EfHabitRepository.AddAsync`/`EfProjectRepository.AddAsync`/`EfRecurringTaskRepository.AddAsync`/`EfProjectRepository.AddTodoAsync` calculam a próxima `Position` via `MaxAsync` seguido de um insert separado, sem índice/constraint único em `(UserId, Position)` (ou `(ProjectId, Position)` para Todo) — duas inserções concorrentes do mesmo usuário podem computar o mesmo `maxPosition` e persistir ordinais duplicados; não há perda de dado, apenas dessincronia cosmética de ordenação, autocorrigível no próximo reorder. **Reverificado na Sprint 30.25**: confirmado ainda preciso — os 4 índices (`IX_Habits_User_Position`, `IX_Projects_User_Position`, `IX_RecurringTasks_User_Position`, `IX_Todos_Project_Position`) existem, nenhum com `.IsUnique()`, ao contrário do idioma já estabelecido no mesmo código-base para colunas genuinamente únicas (`WalletTagConfiguration`, `UserConfiguration`, `UserTokenConfiguration` chamam `.IsUnique()` explicitamente). **Não corrigido deliberadamente**: adicionar a constraint é uma migration de schema que falharia (ou, pior, teria efeito indefinido) se qualquer duplicata de `Position` já existir hoje em dados reais de HMG/produção — verificar isso exigiria acesso de leitura a um banco de HMG/produção que esta auditoria não tem nem está autorizada a usar. Decisão do proprietário: alguém com acesso de leitura autorizado ao banco de HMG precisa verificar ausência de duplicatas antes que essa migration possa ser considerada segura | `OPEN` | decisão do proprietário |
 | BD30-F033 | baixa | `EfWalletReadService.ApplyOrdering` ordena `Transaction` por `Description`/`Amount`/`CreatedAtUtc` sem índice cobrindo esses campos (apenas `IX_Transactions_Wallet_Date` existe) — SQL Server ordena em tempdb após o seek por `WalletId`; impacto real baixo dado o volume típico de transações por usuário em um app financeiro pessoal. **Decisão da Sprint 30.21** (Sprint proprietária): reverificado, premissa inalterada. Risco aceito explicitamente — adicionar 3 índices novos tem custo real de escrita (todo insert/update de Transaction passa a manter mais índices) sem evidência de consulta lenta real ou de volume que justifique o trade-off; adicionar índice especulativo contraria o limite explícito desta Sprint contra otimização especulativa. Reavaliar se o volume de transações por usuário mudar materialmente | `ACCEPTED RISK` | 30.21 |
 | BD30-F034 | alta | histórico de `ExperienceEntry` não era persistido antes da correção da Sprint 30.7 (`BD30-F030`); alternar conclusão/reabertura repetida de Todo/Task/Project podia conceder XP duplicado sem limite antes da correção. Existência e magnitude de inflação histórica em HMG/produção **não quantificadas** por esta Sprint — nenhuma consulta ou mutação de banco de HMG/produção foi executada. As linhas de `ExperienceEntry` persistidas antes da correção podem ser insuficientes para reconstruir `TotalExperience` corretamente de forma determinística (o histórico anterior à correção nunca existiu). Nenhuma mutação de banco está autorizada por este achado; nenhum reset/recálculo arbitrário é permitido. **Investigação concluída na Sprint 30.16** (§23.2): as 7 perguntas encaminhadas foram todas respondidas com evidência — nenhuma pode ser resolvida com os dados/ferramentas atuais. Reconstrução determinística não é possível (o próprio escalar `TotalExperience` já incorpora qualquer inflação histórica, indistinguível de XP legítimo, porque as entries que provariam a diferença nunca existiram); correção automatizada não seria segura; reconciliação manual não é viável sem elas; e não existe no repositório nenhum mecanismo seguro e somente-leitura para quantificar o raio de impacto em HMG/produção. Prosseguir exigiria duas decisões do proprietário fora da autoridade desta auditoria: construir uma capacidade de leitura segura contra HMG/produção, e decidir se algum esforço de reconciliação vale a pena dado que a reconstrução completa é matematicamente impossível | `OPEN` | decisão do proprietário |
 | BD30-F035 | média | `BeeDayWebService` (20 métodos) e os call sites diretos de `ISender.Send` em `Wallet.razor` e nas páginas de Identity/Account/Onboarding nunca propagavam um `CancellationToken` real — toda chamada usava implicitamente `CancellationToken.None`, então navegar para longe ou fechar o circuito Blazor Server nunca cancelava uma mutação/query em andamento no servidor | `FIXED` | 30.8 |
@@ -3324,3 +3324,175 @@ porque "parecia certa". `BD30-F094` é a prova de que auditar o sistema de teste
 testes em si, mas sobre toda a cadeia até um humano conseguir agir sobre uma falha real — um E2E
 falhando em CI sem seus artefatos de diagnóstico é quase tão inútil quanto não ter o teste. Nenhuma
 mutação de banco HMG/produção foi executada ou é necessária.
+
+## 32. Sprint 30.25 — CI/CD, IIS, HMG & Production Readiness Audit
+
+### 32.1 Escopo e método
+
+Auditoria de CI/CD, IIS/HMG e prontidão de produção: os 6 workflows do GitHub Actions e os 12
+scripts PowerShell já baselinados (`INV-011`/`INV-012`); reconciliação de `docs/deployment/
+01-deployment.md`/`02-runtime-configuration.md` contra o estado real versionado de HMG (`BD30-F006`);
+adição do workflow CodeQL deliberadamente adiado da Sprint 30.22 (`BD30-F008`); postura de rollback/
+backup de HMG (`BD30-F016`/`BD30-F017`); e reverificação de uma race condition de `Position` já
+identificada em Sprints anteriores (`BD30-F032`).
+
+**Correção administrativa de Issue, antes do início desta Sprint**: a Issue #222 (título correto,
+"Sprint 30.25 — CI/CD, IIS, HMG & Production Readiness Audit") continha, no corpo, o texto verbatim
+da Sprint 30.30 (número de Sprint errado, "Depends on" errado, auto-referência de número de Issue
+errada) — confirmado comparando contra a Issue #227 (a Issue real e corretamente populada da Sprint
+30.30). Corrigido sob a autoridade de administração de Issues da EPIC (`CLAUDE.md` §7.4/§9.7) antes
+de iniciar o trabalho, usando os achados já atribuídos a esta Sprint no Audit Ledger como fonte de
+verdade para o escopo real.
+
+Limite explícito, herdado do padrão já estabelecido nas 24 Sprints anteriores desta EPIC (o "EPIC 30
+Remaining Sprint Global Execution Contract" referenciado pela Issue segue não encontrado em nenhum
+lugar do repositório nem do GitHub): nenhuma ação destrutiva de Git/infraestrutura; nenhuma mutação
+de ambiente HMG/produção real fora do consequência normal de um merge autorizado em `hmg`; nenhum
+workflow de deploy/promoção disparado manualmente como parte da validação desta Sprint.
+
+### 32.2 `BD30-F006` — documentação de runtime config de HMG invertida, corrigida
+
+`docs/deployment/01-deployment.md` e `02-runtime-configuration.md` descreviam Homologation com
+`Resend:Enabled=false`/`Development:Enabled=true` — o oposto do `appsettings.Homologation.json`
+atualmente commitado (`Resend:Enabled=true`/`Development:Enabled=false`, confirmado por leitura
+direta do arquivo). O runbook mais novo (`14-transactional-email-runbook.md`) e
+`docs/infrastructure/06-transactional-email.md` já estavam corretos — só os dois documentos mais
+antigos ficaram para trás quando o provider foi de fato invertido em uma Sprint anterior.
+
+**Corrigido**: os dois documentos corrigidos — preservando deliberadamente a narrativa histórica de
+incidentes já registrada (Sprint 26.9, Hotfix 26.9.1) exatamente como aconteceu, e corrigindo
+apenas a afirmação de estado presente ("hoje"/"atual") embutida nessas seções, que havia se tornado
+falsa com o tempo. `docs/deployment/README.md`'s "Estado real de HMG e PRD" (se aplicável) e
+`06-transactional-email.md` não precisaram de correção — já estavam certos.
+
+**Descoberta adicional durante a implementação** (não fazia parte do escopo original do achado): a
+mesma afirmação invertida também existia como comentário de código, não só em documentação —
+`deploy-hmg.yml` (linha do secret `BEEDAY_HMG_ALLOWED_RECIPIENTS`) e duas ocorrências em
+`scripts/Deploy-BeeDay.ps1` (doc-comment do parâmetro `-ResendApiKey` e o comentário da lógica de
+`Set-BeeDayEnvironmentVariables` que escreve as variáveis do Resend no App Pool). Corrigidos também
+— sem nenhuma mudança de comportamento (a lógica de ambos já era condicionada aos valores reais dos
+parâmetros/secrets recebidos em tempo de deploy, nunca ao texto do comentário).
+
+### 32.3 `BD30-F017` — sem retenção de backups de deploy, corrigido
+
+Cada deploy de HMG cria um par de backups completos (aplicação + dados) em `C:\Apps\BeeDay-Backups`,
+mas nada jamais os expurga — confirmado por busca completa em todos os 12 scripts por lógica de
+limpeza baseada em idade: só `Clear-BeeDayStdoutLogs.ps1` existe, e mira um diretório completamente
+diferente (`C:\Apps\BeeDay-Data\Logs`).
+
+**Corrigido**: novo `scripts/Clear-BeeDayBackups.ps1`, mesmo padrão autônomo/idempotente já
+estabelecido por `Clear-BeeDayStdoutLogs.ps1` — deliberadamente não vinculado ao caminho crítico de
+deploy/rollback de `Deploy-BeeDay.ps1`, para que uma falha aqui nunca possa afetar um deploy real.
+Diferente do limpador de logs, cada backup aqui é uma árvore de diretório inteira (não um arquivo
+único), e o timestamp usado para decidir idade é extraído do próprio nome do diretório (formato
+`yyyyMMdd-HHmmss`, o mesmo que `Deploy-BeeDay.ps1` já usa para criá-los) em vez de confiado a
+metadados do sistema de arquivos — que seriam ambíguos para uma árvore cujos arquivos internos foram
+copiados em instantes ligeiramente diferentes durante o backup.
+
+Piso de segurança adicional além do padrão do limpador de logs: `-MinimumToKeep` (default 3) nunca
+expurga os N pares mais recentes de cada tipo, mesmo que todos estejam além de `-RetentionDays` —
+justificado porque, até `BD30-F016` ser resolvido, o backup de aplicação/dados é o **único** material
+de rollback que este processo de deploy possui; zerar os backups por completo após um período longo
+sem deploys removeria essa rede de segurança silenciosamente.
+
+Verificado por execução real, não só leitura de código: um diretório de teste temporário com pares
+antigos/recentes provou remoção correta dos pares além do piso, preservação dos pares recentes e do
+piso de segurança, idempotência (segunda execução sem nada a remover não lança erro), `-WhatIf` não
+removendo nada, e um diretório com nome não-correspondente ao padrão nunca sendo tocado
+independentemente da idade. Cobertura de regressão nova (`scripts/tests/Test-ClearBeeDayBackups.ps1`,
+15 asserções, mesmo padrão sem framework/orientado a código de saída já usado pelos demais scripts de
+teste desta pasta) — adicionada ao mesmo step `Validate deployment script regression suite` de
+`deploy-hmg.yml` que já valida as outras 3 suítes antes de qualquer deploy real tocar IIS.
+
+### 32.4 `BD30-F016`/`BD30-F032` — reverificados, confirmados, não corrigidos deliberadamente
+
+**`BD30-F016`** (alta): confirmado por leitura direta do bloco de rollback completo de
+`Deploy-BeeDay.ps1` — `Backup-BeeDayDatabase` existe e funciona (`Invoke-Sqlcmd ... BACKUP DATABASE`),
+mas é genuinamente inalcançável de qualquer workflow hoje (`-BackupDatabase` nunca é passado nem por
+`deploy-hmg.yml` nem por `deploy-prd.yml`); o rollback nunca reverte uma migration, só restaura
+arquivos de aplicação a partir do backup. **Não corrigido deliberadamente**: habilitar
+`-BackupDatabase` mudaria o comportamento do **próximo deploy real de HMG** contra o SQL Server real
+— permissão de escrita da conta de serviço no diretório de destino não verificada, espaço em disco
+não verificado, e dependeria de `BD30-F017` (agora corrigido) para não acumular backups SQL sem
+limite. Mutação de comportamento de ambiente real fora da autoridade desta auditoria — decisão do
+proprietário.
+
+**`BD30-F032`** (baixa): confirmado ainda preciso por leitura direta das 4 configurações EF Core —
+os 4 índices (`IX_Habits_User_Position`, `IX_Projects_User_Position`, `IX_RecurringTasks_User_Position`,
+`IX_Todos_Project_Position`) existem, nenhum com `.IsUnique()`, ao contrário do idioma já estabelecido
+no mesmo código-base para colunas genuinamente únicas (confirmado comparando com
+`WalletTagConfiguration`/`UserConfiguration`/`UserTokenConfiguration`, que chamam `.IsUnique()`
+explicitamente — a ausência aqui não é uma lacuna de leitura, é genuinamente diferente do padrão).
+**Não corrigido deliberadamente**: adicionar a constraint é uma migration de schema que falharia (ou
+teria efeito indefinido) se qualquer duplicata de `Position` já existir hoje em dados reais de HMG/
+produção — verificar isso exige acesso de leitura a um banco de HMG/produção que esta auditoria não
+tem nem está autorizada a usar. Decisão do proprietário: alguém com acesso de leitura autorizado
+precisa verificar ausência de duplicatas antes que essa migration possa ser considerada segura.
+
+### 32.5 `BD30-F008` — workflow CodeQL adicionado (portão informativo, não obrigatório)
+
+Metade Dependabot já corrigida na Sprint 30.22; a metade CodeQL foi deliberadamente adiada para esta
+Sprint, com o motivo já registrado no achado: um novo workflow do GitHub Actions tipicamente se torna
+um check obrigatório uma vez configurado, mudança de maior impacto operacional mais adequada à Sprint
+dedicada a CI/CD.
+
+**Corrigido**: novo `.github/workflows/codeql.yml` — `github/codeql-action/init`+`analyze` para
+`csharp`, `build-mode: autobuild`, disparado em PR para `hmg` (mesma fronteira de `ci.yml`) e
+semanalmente (`schedule`, mesma cadência de `dependabot.yml`). Deliberadamente **não** obrigatório —
+este repositório trata uma transição de check obrigatório como uma decisão de ritual real (ver o
+próprio comentário de cabeçalho de `ci.yml` sobre como sua superfície de check obrigatório só mudou
+após prova empírica); essa decisão pertence ao proprietário, não a esta Sprint. `permissions:` mínimo
+e explícito (`contents: read`, `security-events: write` — o único novo escopo, necessário só para
+`codeql-action/upload-sarif`), mesmo padrão já em uso em todo o resto de `.github/workflows/`.
+
+**Validação real do primeiro run**: como o workflow dispara em `pull_request: [hmg]`, o próprio PR
+desta Sprint contra `hmg` já constitui a primeira execução real — resultado registrado em §32.7 antes
+da entrega, não assumido a partir da sintaxe YAML sozinha.
+
+### 32.6 Implementação
+
+- `docs/deployment/01-deployment.md`, `02-runtime-configuration.md` — `Resend`/`Development`
+  corrigidos, narrativa histórica preservada (`BD30-F006`).
+- `.github/workflows/deploy-hmg.yml` — comentário desatualizado corrigido (`BD30-F006`); novo step
+  de teste de regressão adicionado ao preflight (`BD30-F017`).
+- `scripts/Deploy-BeeDay.ps1` — 2 comentários desatualizados corrigidos (`BD30-F006`).
+- `scripts/Clear-BeeDayBackups.ps1` (novo) — retenção de backups com piso de segurança (`BD30-F017`).
+- `scripts/tests/Test-ClearBeeDayBackups.ps1` (novo) — 15 asserções (`BD30-F017`).
+- `docs/deployment/04-operations.md` — §7/§9 atualizados para o novo estado de `BD30-F016`/`BD30-F017`.
+- `.github/workflows/codeql.yml` (novo) — análise CodeQL informativa (`BD30-F008`).
+- `docs/epics/30-system-integrity/README.md` — nova Seção 32; `BD30-F006`/`BD30-F017`/`BD30-F008`
+  corrigidos; `BD30-F016`/`BD30-F032` reverificados e reatribuídos para decisão do proprietário;
+  `INV-011`/`INV-012` reverificados.
+
+Nenhuma mudança de contrato público de Application, schema, migration. Nenhuma mutação de banco
+HMG/produção foi executada ou é necessária. O novo workflow `codeql.yml` é o único item desta Sprint
+cujo primeiro efeito real só se observa em CI, não localmente — resultado real registrado abaixo.
+
+### 32.7 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `[System.Management.Automation.Language.Parser]::ParseFile` (todos os `.ps1` tocados) | PASS, 0 erros de sintaxe |
+| `scripts/tests/Test-ClearBeeDayBackups.ps1` (execução real, isolado) | PASS, 15/15 asserções |
+| `python3 -c "import yaml; yaml.safe_load(...)"` (`deploy-hmg.yml`, `codeql.yml`) | PASS, YAML válido |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 avisos, 0 erros |
+| `dotnet test BeeDay.slnx` (Debug, completo) | PASS, 1.555/1.555 (121 Domain, 119 Application, 216 Infrastructure, 879 Web, 220 E2E) — execução limpa, 0 falhas |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.555/1.555 (121 Domain, 119 Application, 216 Infrastructure, 879 Web, 220 E2E) — execução limpa, 0 falhas |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+| `codeql.yml` — primeiro run real (PR #290 desta Sprint contra `hmg`) | PASS — jobs `CodeQL Analysis` (5m45s) e `CodeQL` (3s) verdes; `build-mode: autobuild` compilou `BeeDay.slnx` com sucesso |
+
+### 32.8 Continuidade e entrega
+
+Três achados de infraestrutura real desta Sprint (`BD30-F016`, `BD30-F032`) foram corretamente
+identificados como **não seguros para corrigir sem acesso que esta auditoria não tem** — habilitar
+backup SQL contra o HMG real, ou adicionar uma constraint única sem antes verificar duplicatas em
+dados reais, são ambos mutações que exigem verificação prévia fora do alcance de uma auditoria
+documental/de código. Corrigir apenas o que é seguro corrigir sem essa verificação (`BD30-F017`,
+a ferramenta de retenção que se torna prerequisito quando `BD30-F016` for eventualmente resolvido) e
+documentar precisamente o que falta, com evidência real, é o resultado correto — não uma correção
+parcial insegura. A correção administrativa da Issue #222 no início desta Sprint (corpo duplicado da
+Sprint 30.30) é um lembrete de que a própria infraestrutura de tracking da EPIC precisa do mesmo
+padrão de verificação que o código. Nenhuma mutação de banco HMG/produção foi executada ou é
+necessária.

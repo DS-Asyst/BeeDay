@@ -247,6 +247,7 @@ jobs:
           & ".\scripts\tests\Test-DeployBeeDayRecovery.ps1"
           & ".\scripts\tests\Test-InvokeBeeDayIisControlContract.ps1"
           & ".\scripts\tests\Test-ClearBeeDayStdoutLogs.ps1"
+          & ".\scripts\tests\Test-ClearBeeDayBackups.ps1"
 
       - name: Deploy to IIS with rollback
         shell: powershell
@@ -258,9 +259,10 @@ jobs:
           # Epic 26, Sprint 26.9: the HMG recipient safety guard's allowlist (Sprint 26.4),
           # semicolon-separated. Not yet defined as a repository secret as of this sprint — reads as
           # empty until the owner adds BEEDAY_HMG_ALLOWED_RECIPIENTS, at which point
-          # Deploy-BeeDay.ps1 picks it up with no further workflow change. Homologation stays on the
-          # Development provider today (Resend.Enabled=false, appsettings.Homologation.json), so
-          # this has no effect until that changes.
+          # Deploy-BeeDay.ps1 picks it up with no further workflow change. Sprint 30.25 (BD30-F006):
+          # Homologation has since flipped to the Resend provider (Resend.Enabled=true,
+          # appsettings.Homologation.json) - this guard is live, not dormant, whenever the secret
+          # above is populated.
           BEEDAY_HMG_ALLOWED_RECIPIENTS: ${{ secrets.BEEDAY_HMG_ALLOWED_RECIPIENTS }}
           BEEDAY_ALLOWED_HOSTS: ${{ secrets.BEEDAY_ALLOWED_HOSTS }}
           BEEDAY_APP_CONNECTION: ${{ secrets.BEEDAY_APP_CONNECTION }}

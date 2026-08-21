@@ -160,12 +160,22 @@ As suites de regressão do deploy exercitam esse caminho antes de tocar IIS ou S
 - o rollback automático não desfaz migrations;
 - `Deploy-BeeDay.ps1` oferece `-BackupDatabase`, mas `deploy-hmg.yml` não habilita essa opção e não
   existe evidência versionada de um backup SQL externo associado ao deploy;
-- não existe restore automatizado de um backup histórico nem política versionada de retenção.
+- não existe restore automatizado de um backup histórico.
 
-As lacunas de proteção SQL/migration e retenção estão registradas no Audit Ledger como
-`BD30-F016` e `BD30-F017`, atribuídas à Sprint 30.25. Habilitar `BACKUP DATABASE` exige antes um
-diretório no SERV4SQL, permissões mínimas e política de retenção; não deve ser improvisado por uma
-auditoria documental.
+A lacuna de proteção SQL/migration está registrada no Audit Ledger como `BD30-F016`, ainda `OPEN`
+após a Sprint 30.25 — habilitar `BACKUP DATABASE` exige antes verificar permissão de escrita da
+conta de serviço do SQL Server no diretório de destino, espaço em disco disponível, e depende da
+política de retenção abaixo já existir para não acumular backups SQL sem limite; mudar o
+comportamento do próximo deploy real de HMG (`deploy-hmg.yml`) é mutação de ambiente fora da
+autoridade de uma auditoria de engenharia — decisão do proprietário.
+
+**Corrigido na Sprint 30.25 (`BD30-F017`)**: novo `scripts/Clear-BeeDayBackups.ps1` — mesmo padrão
+autônomo/idempotente de `Clear-BeeDayStdoutLogs.ps1`, com um piso de segurança adicional
+(`-MinimumToKeep`, default 3) que nunca expurga os N pares de backup mais recentes mesmo que todos
+estejam além de `-RetentionDays` — importante porque, até `BD30-F016` ser resolvido, o backup de
+aplicação/dados é o único material de rollback que este processo de deploy possui. Não vinculado a
+nenhum agendamento automático (mesmo modelo operacional do script de logs — rodar manualmente ou via
+uma Tarefa Agendada do Windows, não provisionada por este repositório).
 
 ## 8. Fluxo atual de HMG
 
@@ -184,8 +194,11 @@ auditoria.
 
 ## 9. Manutenção e evidência operacional
 
-- backups de aplicação/dados não têm expurgo automático versionado;
-- `Clear-BeeDayStdoutLogs.ps1` possui testes de parsing, retenção, idempotência e `-WhatIf`;
+- backups de aplicação/dados têm expurgo disponível via `Clear-BeeDayBackups.ps1` (Sprint 30.25,
+  `BD30-F017`) — ferramenta autônoma, não agendada automaticamente por este repositório;
+- `Clear-BeeDayStdoutLogs.ps1`/`Clear-BeeDayBackups.ps1` possuem testes de parsing, retenção,
+  idempotência e `-WhatIf`, executados no mesmo preflight de `deploy-hmg.yml` que valida o restante
+  da suíte de regressão do deploy;
 - Event Journal, índices/estatísticas SQL e renovação de certificado dependem de contratos próprios
   ou operação externa, conforme os runbooks específicos;
 - logs e artifacts de GitHub Actions têm retenção finita; os IDs acima são evidência histórica,

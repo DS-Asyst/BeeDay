@@ -250,10 +250,13 @@ passar silenciosamente até o e-mail de fato ser enviado com remetente em branco
   rollback usam `-ErrorAction Continue`. Com o hotfix aplicado, a ausência do secret volta a ter o
   comportamento graciosamente-vazio originalmente pretendido (nenhuma variável
   `AllowedRecipients__N` é emitida, sem exceção) — mas isso só passou a ser verdade a partir do
-  hotfix, não desde a Sprint 26.9 original. Homologation continua no provider Development hoje
-  (`Resend:Enabled=false`, `appsettings.Homologation.json`); nenhum e-mail de fato foi enviado
-  durante o incidente, pois o processo da aplicação nunca chegou a reiniciar em nenhuma das duas
-  tentativas.
+  hotfix, não desde a Sprint 26.9 original. Homologation estava no provider Development na época
+  deste incidente (Sprint 26.9, `Resend:Enabled=false`); nenhum e-mail de fato foi enviado durante
+  o incidente, pois o processo da aplicação nunca chegou a reiniciar em nenhuma das duas tentativas.
+  **Esse estado foi invertido posteriormente** — o `appsettings.Homologation.json` atual tem
+  `Resend:Enabled=true`/`Development:Enabled=false` (confirmado por `BD30-F006`, Sprint 30.25); ver
+  [`14-transactional-email-runbook.md`](14-transactional-email-runbook.md) §2 para o estado real
+  vigente, não reproduzido aqui para não duplicar uma fonte que já pode mudar de novo.
 
 ## 7. Fontes consultadas
 
