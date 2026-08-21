@@ -123,7 +123,7 @@ public static class InfrastructureServiceCollectionExtensions
         });
 
         // The 8 per-Aggregate persistence contracts defined in EPIC 13
-        // (docs/architecture/07-persistence-contracts.md), adapted against SQL Server (EPIC 14). Every
+        // (docs/history/persistence-contracts.md), adapted against SQL Server (EPIC 14). Every
         // production handler depends on one of these (or IUnitOfWork below) as of Sprint 14.6 — SQL
         // Server is the only active runtime provider.
         services.AddScoped<IUserRepository, EfUserRepository>();

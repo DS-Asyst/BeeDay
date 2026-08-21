@@ -315,8 +315,7 @@
 .beeday-hero__content { min-width: 0; }
 
 .beeday-page-header__eyebrow,
-.beeday-section-header__eyebrow,
-.beeday-hero__eyebrow {
+.beeday-section-header__eyebrow {
     display: block;
     margin-bottom: var(--beeday-spacing-xs);
     color: var(--beeday-color-brand-primary);
@@ -391,8 +390,6 @@
     border-radius: var(--beeday-radius-lg);
     background: var(--beeday-color-brand-primary-soft);
 }
-
-.beeday-hero--onboarding .beeday-hero__eyebrow { color: var(--beeday-color-brand-primary-active); }
 
 @media (max-width: 30rem) {
     .beeday-hero__illustration { min-width: 3rem; min-height: 3rem; }

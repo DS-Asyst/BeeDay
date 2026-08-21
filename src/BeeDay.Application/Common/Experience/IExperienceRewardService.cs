@@ -10,7 +10,7 @@ public interface IExperienceRewardService
     /// Grants XP directly on an already-loaded <paramref name="user"/> — the caller is responsible for
     /// loading the User and persisting it afterward (e.g. via <c>IUserRepository.UpdateAsync</c> or
     /// <c>IUnitOfWork</c>). Previously took <c>LevelUpData</c> and resolved the User internally — a
-    /// violation of Contract-First flagged in docs/architecture/07-persistence-contracts.md §5.1,
+    /// violation of Contract-First flagged in docs/history/persistence-contracts.md §5.1,
     /// corrected here on the Sprint 14.6 cutover.
     /// </summary>
     public ExperienceEntry? Grant(

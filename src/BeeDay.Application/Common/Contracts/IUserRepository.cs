@@ -4,7 +4,7 @@ namespace BeeDay.Application.Common.Contracts;
 
 /// <summary>
 /// Persistence boundary for the <c>User</c> Aggregate (identity, profile, session state, and the
-/// embedded XP/level history). See docs/architecture/07-persistence-contracts.md for the ownership
+/// embedded XP/level history). See docs/history/persistence-contracts.md for the ownership
 /// and consistency rationale — this port never accepts or returns <c>LevelUpData</c>.
 /// </summary>
 public interface IUserRepository
@@ -27,7 +27,7 @@ public interface IUserRepository
 
     /// <summary>
     /// Loads the User tracked, applies <paramref name="mutation"/>, and persists the result — the
-    /// missing piece identified in docs/architecture/07-persistence-contracts.md §6/§10/§13 for
+    /// missing piece identified in docs/history/persistence-contracts.md §6/§10/§13 for
     /// persisting a mutation on an already-loaded Aggregate. <paramref name="mutation"/> is pure Domain
     /// logic; the adapter never exposes any Infrastructure/EF Core concept (e.g. RowVersion) here.
     /// </summary>

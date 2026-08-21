@@ -18,19 +18,6 @@
     cursor: grab;
 }
 
-    /*
- * Keeps the card with an open menu above the other cards.
- *
- * Cada item do sortable cria um contexto de empilhamento por causa das
- * animations that use transform. Without this z-index, the following cards cover
- * the lower part of the menu, causing the DELETE option to appear only on the
- * last card in the list.
- */
-    .beeday-sortable__item:has(.activity-card--menu-open),
-    .beeday-sortable__item:has(.habit-card--menu-open) {
-        z-index: 100;
-    }
-
 .beeday-sortable__item:focus-visible {
     outline: var(--beeday-focus-ring);
     outline-offset: 2px;

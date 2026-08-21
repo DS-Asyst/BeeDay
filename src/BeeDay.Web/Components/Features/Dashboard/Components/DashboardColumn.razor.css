@@ -88,7 +88,6 @@
     flex: 0 0 auto;
 }
 
-/* Sprint 1.7 — column polish */
 .dashboard-column {
     transition: border-color var(--beeday-transition-normal), box-shadow var(--beeday-transition-normal);
 }
@@ -167,7 +166,6 @@
     min-width: 0;
 }
 
-/* UX / Visual Refinement — Sprint 6.1: retro UI column headings */
 .dashboard-column__heading h2 {
     font-family: var(--beeday-font-body);
     font-size: 1.48rem;

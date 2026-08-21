@@ -17,7 +17,7 @@ namespace BeeDay.Application.Tests;
 /// <c>BeeDay.Application</c> itself never references <c>BeeDay.Infrastructure</c>.
 ///
 /// Sprint 14.5 approved and implemented <see cref="IUnitOfWork"/> (see
-/// docs/architecture/07-persistence-contracts.md §6/§9/§10/§13) — the guard below now allows exactly
+/// docs/history/persistence-contracts.md §6/§9/§10/§13) — the guard below now allows exactly
 /// that one, non-generic type instead of rejecting anything named "UnitOfWork".
 /// </summary>
 public sealed class PersistenceContractBoundaryTests
@@ -51,7 +51,7 @@ public sealed class PersistenceContractBoundaryTests
             Assert.False(
                 contract.IsGenericTypeDefinition,
                 $"{contract.FullName} is a generic repository abstraction (e.g. IRepository<T>) — " +
-                "docs/architecture/07-persistence-contracts.md forbids Generic Repository.");
+                "docs/history/persistence-contracts.md forbids Generic Repository.");
 
             // IUnitOfWork (Sprint 14.5) is the one deliberately approved Unit of Work abstraction —
             // everything else that merely looks like one (by name) is still rejected, guarding against
@@ -64,7 +64,7 @@ public sealed class PersistenceContractBoundaryTests
             Assert.False(
                 contract.Name.Contains("UnitOfWork", StringComparison.OrdinalIgnoreCase),
                 $"{contract.FullName} looks like a second Unit of Work abstraction — only IUnitOfWork " +
-                "(Sprint 14.5, docs/architecture/07-persistence-contracts.md §9/§10/§13) is approved.");
+                "(Sprint 14.5, docs/history/persistence-contracts.md §9/§10/§13) is approved.");
         }
     }
 

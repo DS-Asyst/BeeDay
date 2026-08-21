@@ -67,7 +67,7 @@ public interface IProjectRepository
 
     /// <summary>
     /// Reassigns a Todo from its current Project to <paramref name="destinationProjectId"/> — approved
-    /// in docs/architecture/07-persistence-contracts.md §10, implemented here.
+    /// in docs/history/persistence-contracts.md §10, implemented here.
     /// </summary>
     public Task MoveTodoAsync(
         Guid userId,

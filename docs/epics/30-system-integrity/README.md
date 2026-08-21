@@ -69,7 +69,7 @@ todo achado termine como `FIXED`, `VERIFIED` ou `ACCEPTED RISK`.
 | INV-018 | Resiliência e observabilidade | exception handling, health checks, Event Journal, logs e recuperação de deploy localizados | `BASELINED` | 30.23 |
 | INV-019 | Performance | pipeline de performance, comportamento assíncrono, CI e documentação de medições localizados | `BASELINED` | 30.21 |
 | INV-020 | CI/CD e ambientes | fluxo branch -> HMG -> main -> prd, artifacts, EF bundle, deploy e gates localizados | `BASELINED` | 30.2, 30.3, 30.25 |
-| INV-021 | Naming e higiene | superfícies públicas `beeday`, identificadores técnicos `BeeDay.*` e referências históricas localizados | `BASELINED` | 30.26, 30.27 |
+| INV-021 | Naming e higiene | superfícies públicas `beeday`, identificadores técnicos `BeeDay.*` e referências históricas localizados. **Parcialmente reverificado na Sprint 30.26**: a metade "referências históricas" concluída — ver `BD30-F005` (caminhos de documentação quebrados) e a varredura de comentários puramente cronológicos (§33.2). A metade "consistência de naming `beeday`/`BeeDay.*`" permanece para a Sprint 30.27, dedicada a isso | `BASELINED` | 30.26, 30.27 |
 | INV-022 | Regressão e encerramento | comandos, suites e estados realistas identificados como gate integrado final | `BASELINED` | 30.29, 30.30 |
 
 Distribuição rastreada no snapshot:
@@ -133,7 +133,7 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F003 | baixa | `docs/application/README.md` declara 9 Features, mas enumera e o repositório contém 10 diretórios | `FIXED` | 30.6 |
 | BD30-F031 | média | 17 dos 27 handlers de Application não tinham teste direto em `tests/BeeDay.Application.Tests` (confirmado por busca de referência), incluindo dois handlers multi-write com transação (`UpdateTodoCommandHandler` no branch cross-Project, `UpdateTransactionCommandHandler`, `DeleteTransactionCommandHandler`) cuja correção de fronteira transacional só era provada por inspeção de código | `FIXED` | 30.6 |
 | BD30-F004 | baixa | `docs/architecture/02-solution-structure.md` descreve Solution Items antigos (`docs/ai` e `docs/development`); `BeeDay.slnx` aponta atualmente para `docs/developer/README.md` e outros itens existentes | `OPEN` | 30.28 |
-| BD30-F005 | baixa | 27 referências, em 19 arquivos de código/teste, apontam para 7 caminhos de documentação removidos ou movidos | `OPEN` | 30.26 |
+| BD30-F005 | baixa | 27 referências, em 19 arquivos de código/teste, apontam para 7 caminhos de documentação removidos ou movidos. **Corrigido na Sprint 30.26**: recontagem real encontrou 29 referências em 20 arquivos apontando para 8 caminhos (pequena variação frente à contagem original, não uma divergência material) — todas corrigidas. Confirmado, antes de cada correção, que a numeração de seção original (`§2.3`, `§5.1`, `§10` etc.) foi preservada intacta nos documentos arquivados em `docs/history/`, então cada citação foi repontada só no caminho do arquivo, não na seção — mecânico e de baixo risco, não uma decisão editorial de "qual doc atual corresponde". `docs/application/README.md`'s próprio achado registrado atualizado para refletir a correção. 1 referência sem predecessor real (`DESIGN_SYSTEM_CHANGELOG.md` → `docs/design-system/migration-guide.md`, confirmado via `git log --follow` nunca ter existido) repontada para `docs/design-system/README.md` com nota explicando a origem | `FIXED` | 30.26 |
 | BD30-F006 | alta | o estado versionado de HMG seleciona Resend (`true`) e Development (`false`), enquanto `docs/deployment/01-deployment.md` e `02-runtime-configuration.md` ainda descrevem a seleção inversa; o runbook mais novo distingue corretamente repository state de runtime state. **Corrigido na Sprint 30.25**: os dois documentos corrigidos (§6/nota do incidente e tabela §3/§6.7 respectivamente, preservando o texto histórico do incidente original — só a afirmação de estado "hoje" foi corrigida, não a narrativa do que aconteceu na época). Descoberta adicional durante a correção: a mesma afirmação invertida também existia como comentário de código em `deploy-hmg.yml` e duas vezes em `scripts/Deploy-BeeDay.ps1` — corrigidos também, embora não afetassem comportamento (a lógica do script já era condicionada aos valores reais dos parâmetros, não ao texto do comentário). `docs/infrastructure/06-transactional-email.md` já estava correto, não precisou de correção | `FIXED` | 30.25 |
 | BD30-F007 | média | não existe `.runsettings`, referência a coverlet ou coleta formal de cobertura. **Corrigido na Sprint 30.24**: `coverlet.collector` adicionado aos 5 projetos de teste (`Directory.Packages.props` + `PackageReference` em cada `.csproj`, mesmo padrão de `PrivateAssets`/`IncludeAssets` já usado para `xunit.runner.visualstudio`) — `dotnet test --collect:"XPlat Code Coverage"` agora produz `coverage.cobertura.xml` por projeto, verificado por execução real. Nenhum threshold/gate de cobertura adicionado deliberadamente — decisão de política (qual % é aceitável, se deveria bloquear PR) fora da autoridade de uma auditoria de engenharia de teste; o limite explícito da Sprint também instruía não otimizar para cobertura de linha como objetivo primário | `FIXED` | 30.24 |
 | BD30-F008 | média | não existe workflow CodeQL nem configuração Dependabot versionada. **Reverificado na Sprint 30.22**: metade corrigida — `.github/dependabot.yml` adicionado (ecossistemas `nuget` e `github-actions`, semanal, sem impacto operacional — não cria check obrigatório, não roda código, apenas configura o serviço nativo do GitHub para abrir PRs de atualização). CodeQL deliberadamente não adicionado nesta Sprint: é um novo workflow do GitHub Actions que consome minutos de CI a cada push/PR e tipicamente se torna um check obrigatório uma vez configurado — mudança de maior impacto operacional na pipeline de CI/CD, mais adequada à Sprint dedicada a CI/CD do que a uma correção pontual de segurança. Reatribuída (só a parte de CodeQL) para 30.25. **Corrigido na Sprint 30.25**: novo `.github/workflows/codeql.yml` (`csharp`, `build-mode: autobuild`, PR para `hmg` + semanal), deliberadamente não obrigatório — ver §32.5 para o resultado real do primeiro run (disparado pelo próprio PR desta Sprint) | `FIXED` | 30.25 |
@@ -196,7 +196,7 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F090 | média | `ConcurrencyConflictException` é `PersistenceException` (herança) mas não tinha nenhum `case` próprio em `GlobalExceptionHandler.Map` — caía no `case PersistenceException`, mapeado para 503 "Persistence unavailable... Try again shortly". Uma resposta enganosa: um conflito de concorrência otimista significa que o registro *mudou* sob o usuário, não que o armazenamento está indisponível — repetir a mesma escrita obsoleta falha de novo, sempre; o usuário precisa recarregar o registro primeiro, não só tentar de novo. **Corrigido nesta Sprint**: novo `case ConcurrencyConflictException`, posicionado antes do `case PersistenceException` mais amplo (a ordem importa — pattern matching de tipo por herança usa o primeiro `case` compatível), mapeado para 409 Conflict com mensagem acionável ("This record was changed by another operation. Reload the page and try again."). Não é alcançável pela suíte de integração HTTP existente pelo mesmo motivo já documentado em `ProblemDetailsIntegrationTests` (só ocorre dentro de uma chamada MediatR feita por um componente Razor sobre o circuito SignalR, nunca a partir de uma requisição HTTP crua) — coberto em vez disso por teste unitário direto contra `GlobalExceptionHandler.Map` (novo `GlobalExceptionHandlerTests.cs`), habilitado por um novo `InternalsVisibleTo` de `BeeDay.Web` para `BeeDay.Web.Tests`, mesmo padrão já usado por `BeeDay.Infrastructure.csproj` | `FIXED` | 30.23 |
 | BD30-F091 | baixa | `CorrelationIdMiddleware` só existe na pipeline HTTP ASP.NET Core (`app.UseMiddleware<CorrelationIdMiddleware>()`) e seu `logger.BeginScope` só está ativo durante `await next(context)` daquela requisição HTTP específica — confirmado por leitura direta do middleware e por `builder.Logging.AddJsonConsole(options => options.IncludeScopes = true)` em `Program.cs` (a infraestrutura de log já grava scopes quando presentes). Em Blazor Server, isso cobre a requisição HTTP inicial (primeiro render/negotiate), mas cada interação subsequente do usuário (clique disparando um comando MediatR) roda sobre o circuito SignalR já estabelecido, fora de qualquer nova invocação desse middleware — então `LoggingBehavior`/`LoggingErrorBoundary` e qualquer outro log emitido durante uma mutação disparada por circuito **não carrega `CorrelationId`** nos logs de produção, ao contrário de uma falha capturada por `GlobalExceptionHandler` na pipeline HTTP. Construir uma correlação com escopo de circuito (ex.: um `CircuitHandler` gerando um id por circuito, propagado via DI escopado ao MediatR) é uma mudança de arquitetura de observability genuína, fora do limite desta auditoria — não implementada especulativamente | `OPEN` | decisão do proprietário |
 | BD30-F092 | baixa | nenhuma configuração explícita de `CommandTimeout` existe em toda a base (`grep` por `CommandTimeout` em `src/` = zero resultados) — toda consulta/gravação SQL Server depende do default implícito do ADO.NET/EF Core (30s). Definir um valor explícito é uma decisão de política (qual latência é aceitável para o workload real do BeeDay?), não inventada por esta auditoria | `OPEN` | decisão do proprietário |
-| BD30-F093 | baixa | `LoggingBehavior.Handle` (Application) loga sucesso/falha de todo request MediatR sem nenhum `EventId` — inconsistente com a convenção já estabelecida em `WebEventIds.cs` (Web) para logs estruturados pesquisáveis por id. Application não tem hoje nenhuma convenção equivalente de `EventId`; criar uma agora para um único call site seria uma nova abstração sem uso comprovado além dele — encaminhado como hygiene, não corrigido especulativamente | `OPEN` | 30.26 |
+| BD30-F093 | baixa | `LoggingBehavior.Handle` (Application) loga sucesso/falha de todo request MediatR sem nenhum `EventId` — inconsistente com a convenção já estabelecida em `WebEventIds.cs` (Web) para logs estruturados pesquisáveis por id. Application não tem hoje nenhuma convenção equivalente de `EventId`; criar uma agora para um único call site seria uma nova abstração sem uso comprovado além dele — encaminhado como hygiene, não corrigido especulativamente. **Reverificado na Sprint 30.26**: correção de precisão — são 3 chamadas `logger.Log*` (duas `LogInformation`, uma `LogError`), não 2 como o achado original registrava; nenhuma usa `EventId`. Premissa e disposição inalteradas — ainda não corrigido, mesma razão (nova convenção sem uso comprovado além de um único call site) | `OPEN` | decisão do proprietário |
 | BD30-F094 | média | `E2ETestBase.cs` já captura screenshot + trace do Playwright em toda falha de teste E2E (salvos em `e2e-artifacts/` sob o próprio output de build do projeto de teste), mas `release-quality-gate.yml` (único workflow que roda `BeeDay.E2E.Tests` — `ci.yml` não) só faz upload de `${{ runner.temp }}\TestResults` (arquivos `.trx`), nunca do diretório `e2e-artifacts` — um E2E falhando em CI perde o screenshot/trace assim que o runner é destruído, exatamente o cenário em que esses artefatos mais fazem falta (não é possível reproduzir localmente sem eles). **Corrigido nesta Sprint**: novo step `Upload E2E failure artifacts` em `release-quality-gate.yml`, `if: always()`, `if-no-files-found: ignore` (testes passando não produzem nenhum arquivo, por design) | `FIXED` | 30.24 |
 | BD30-F066 | baixa | não existia teste E2E/integração provando o ciclo completo `returnUrl` (hit anônimo em rota protegida → redirect para `/login?returnUrl=...` → login → volta exatamente para a página originalmente pedida) nem uma URL genuinamente inexistente atingindo o `NotFoundPage` do Router real (só bUnit, que renderiza `NotFound.razor` direto). **Corrigido nesta Sprint**: `AuthorizationIntegrationTests.Anonymous_ProtectedPageRedirect_CarriesTheOriginalPathAsReturnUrl` (nova) prova o `returnUrl` correto no redirect anônimo; `LoginIntegrationTests.Login_WithLocalReturnUrl_RedirectsToTheOriginallyRequestedPage` (nova) completa o ciclo até o destino pós-login; `NavigationTests.NonexistentRoute_RendersTheNotFoundPage` (E2E, nova) prova a `BD30-F063` corrigida contra um navegador real | `FIXED` | 30.17 |
 | BD30-F067 | baixa | a subárvore `/experience-system` (21 rotas públicas de documentação) não tem nenhum ponto de entrada direto no header/footer/nav de topo — só é alcançável via múltiplos saltos a partir do link `/brand-guidelines` no rodapé institucional, depois pela navegação de pilar/tópico interna. Não é uma rota quebrada (toda a subárvore é alcançável), apenas discoverability fraca para uma área de 21 rotas. Decisão de produto/IA de navegação, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
@@ -207,8 +207,8 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F072 | baixa | drift de token de cor confirmado em 2 pontos: `CreateProfile.razor.css` referenciava `var(--beeday-color-danger-text, #b3261e)` — um custom property nunca definido em `variables.css` em lugar nenhum, então o fallback hardcoded `#b3261e` era sempre o valor real aplicado, divergindo silenciosamente do token canônico `--beeday-color-danger` (`#d33b46`) usado em todo o resto do app; `feedback.css` usava hex bruto (`#e2f5e9`/`#fde8e8`) quase-idêntico, mas não igual, aos tokens já existentes `--beeday-color-success-soft`/`--beeday-color-danger-soft` para o fundo dos ícones de toast. **Corrigido nesta Sprint**: ambos convergidos para os tokens canônicos existentes | `FIXED` | 30.19 |
 | BD30-F073 | baixa | `@keyframes beeday-spin` definido de forma idêntica em dois stylesheets globais diferentes (`design-system.css` e `feedback.css`), ambos carregados em toda página — duplicação sem propósito, cada consumidor (`.beeday-button__loader`, spinner de `BeeDayLoading`) referenciando por nome, então qualquer uma das duas definições já bastava. **Corrigido nesta Sprint**: consolidado em uma única definição | `FIXED` | 30.19 |
 | BD30-F074 | baixa | `BeeDayCardMenu` (mais `CardActionMenuCoordinator`/`CardMenuPlacement`) tinha zero consumidores de produção em todo `src/` — confirmado por busca completa por `<BeeDayCardMenu`. Superado por um refactor anterior que tornou os cards inteiros clicáveis para editar (commit `05a7ad3`), mas o componente, seu serviço de coordenação, sua geometria de posicionamento e dois arquivos de teste dedicados nunca foram removidos. **Corrigido nesta Sprint**: componente, serviço, geometria, os dois arquivos de teste dedicados, o registro de DI em `Program.cs` e as 3 chaves `resx` exclusivas (`CardMenu*`) removidos; `CoreComponentContractTests` (inventário de componentes e contagem de controles nativos) atualizado para refletir a remoção | `FIXED` | 30.19 |
-| BD30-F075 | baixa | CSS morta remanescente em `cards.css`, ligada ao mesmo padrão de interação superado pela `BD30-F074`: `.activity-card__menu`, `.habit-card__menu`, `.activity-card--menu-open`, `.habit-card--menu-open`, `.activity-card__actions` — confirmado por busca de marcação que nenhum desses seletores casa com qualquer elemento hoje. Tentativa de remoção iniciada nesta Sprint e revertida ao descobrir que o escopo real é maior do que o inicialmente visível — pelo menos 6 localizações separadas no arquivo, algumas como regras isoladas e outras entrelaçadas em grupos de seletores separados por vírgula que também contêm seletores ainda vivos (ex.: `.activity-card__checkbox, .habit-card__score-button, .activity-card__menu, .habit-card__menu { ... }`). Remover parcialmente sob pressão de tempo de uma Sprint de auditoria é mais arriscado do que documentar e encaminhar para uma limpeza dedicada com verificação visual adequada | `OPEN` | 30.26 |
-| BD30-F076 | baixa | regra global obsoleta `.beeday-hero__eyebrow` em `design-system.css` já causou uma falha real de WCAG-AA (capturada pelo scan axe-core do repositório) por conflitar com o CSS isolado de `BeeDayHero.razor.css` em superfícies COR0-COR9 multi-cor; corrigida à época via um truque de especificidade (`color: inherit` no CSS isolado, que tecnicamente ganha da regra global) em vez de remover/escopar a regra obsoleta. Funcionalmente correta hoje, mas frágil — depende da ordem de cascata entre dois arquivos permanecer exatamente como está, em vez da regra obsoleta simplesmente não existir mais. Já autodocumentada em comentário no código; registrada aqui para acompanhamento formal | `OPEN` | 30.26 |
+| BD30-F075 | baixa | CSS morta remanescente em `cards.css`, ligada ao mesmo padrão de interação superado pela `BD30-F074`: `.activity-card__menu`, `.habit-card__menu`, `.activity-card--menu-open`, `.habit-card--menu-open`, `.activity-card__actions` — confirmado por busca de marcação que nenhum desses seletores casa com qualquer elemento hoje. Tentativa de remoção iniciada nesta Sprint e revertida ao descobrir que o escopo real é maior do que o inicialmente visível — pelo menos 6 localizações separadas no arquivo, algumas como regras isoladas e outras entrelaçadas em grupos de seletores separados por vírgula que também contêm seletores ainda vivos (ex.: `.activity-card__checkbox, .habit-card__score-button, .activity-card__menu, .habit-card__menu { ... }`). Remover parcialmente sob pressão de tempo de uma Sprint de auditoria é mais arriscado do que documentar e encaminhar para uma limpeza dedicada com verificação visual adequada. **Corrigido na Sprint 30.26**: escopo real mapeado por completo antes de qualquer remoção — 15 localizações em `cards.css` (não 6), das quais 2 eram linhas minificadas com conteúdo vivo entrelaçado no mesmo texto (removidas por substring, não por linha) e 2 eram grupos de seletor mistos (`.activity-card__checkbox, .habit-card__score-button, .activity-card__menu, .habit-card__menu`, aparecendo duas vezes) onde só os 2 seletores mortos foram removidos da lista, preservando a regra intacta para os 2 seletores vivos — CSS comma-grouped selectors não compartilham cascata entre si, então essa edição é seguramente neutra para os seletores vivos por construção, não por sorte. Escopo adicional descoberto e corrigido no mesmo achado: `dragdrop.css` (uma regra `:has()` inteira, morta), `app.css` (`.card-action-menu`/`@keyframes card-menu-enter`, órfãos desde a remoção de `BeeDayCardMenu.razor` numa Sprint anterior) e `wwwroot/js/beeday-card-menu.js` (57 linhas, o módulo JS que só esse componente já removido chamava — zero referências confirmadas em todo `src/`, deletado). Verificado por zero `grep` remanescente dos 5 seletores em todo `src/BeeDay.Web`, build limpo, e execução real de 118 testes E2E (`AccessibilityQualityTests` 18/18, `InstitutionalPagesTests`/`ExperienceSystemTests`/`HomeTests` 100/100) sem regressão | `FIXED` | 30.26 |
+| BD30-F076 | baixa | regra global obsoleta `.beeday-hero__eyebrow` em `design-system.css` já causou uma falha real de WCAG-AA (capturada pelo scan axe-core do repositório) por conflitar com o CSS isolado de `BeeDayHero.razor.css` em superfícies COR0-COR9 multi-cor; corrigida à época via um truque de especificidade (`color: inherit` no CSS isolado, que tecnicamente ganha da regra global) em vez de remover/escopar a regra obsoleta. Funcionalmente correta hoje, mas frágil — depende da ordem de cascata entre dois arquivos permanecer exatamente como está, em vez da regra obsoleta simplesmente não existir mais. Já autodocumentada em comentário no código; registrada aqui para acompanhamento formal. **Corrigido na Sprint 30.26**: confirmado por leitura completa das duas regras que `BeeDayHero.razor.css` já fornece um valor próprio para **cada** propriedade que a regra global fornecia (não só `color`) — removê-la não tem efeito visual algum, apenas elimina a corrida de cascata. Removida a entrada `.beeday-hero__eyebrow` do grupo global (preservando `.beeday-page-header__eyebrow`/`.beeday-section-header__eyebrow`, que continuam precisando dela) e a regra de override específica de onboarding (`.beeday-hero--onboarding .beeday-hero__eyebrow`, que só definia `color` e já estava completamente sombreada). Comentário em `BeeDayHero.razor.css` atualizado para não descrever mais uma corrida de especificidade que não existe mais. Confirmado por `grep`: nenhum outro consumidor de `.beeday-hero__eyebrow` em todo `src/`. Verificado com a suíte `AccessibilityQualityTests` completa (18/18, incluindo os cenários COR0-COR9 que originalmente capturaram a falha) sem regressão | `FIXED` | 30.26 |
 | BD30-F077 | alta | regressão confirmada de touch target: o comentário e os valores de `cards.css` (`"Sprint 21.14: activity actions retain a 44px target"`) declaram a intenção explícita de checkbox/badge de Task/Todo/Project em `2.75rem` (44px, alvo WCAG comum), adicionados no commit `698e157` (2026-08-13) logo após a definição base do seletor — mas um bloco "compact layout" mais antigo (commit `5532d327`, 2026-07-25) já existia mais adiante no mesmo arquivo redeclarando os mesmos seletores para `1.55rem` (~24.8px) e a coluna de grid para `2.35rem`, sem nenhuma relação com acessibilidade em seu próprio comentário. Como CSS resolve por ordem de código-fonte entre seletores de especificidade igual, a regra mais recente (e com intenção de acessibilidade documentada) perdia silenciosamente para a mais antiga, meramente por estar posicionada antes no arquivo. Habit não é afetado (nunca teve um fix de 44px documentado). **Corrigido nesta Sprint**: removida a redeclaração conflitante de `grid-template-columns`/`width`/`height` para `.activity-card`/`.activity-card__checkbox`/`.activity-card__project-status` no bloco "compact layout", deixando o valor de 44px já declarado (e já correto) prevalecer; `.habit-card__score-button` mantido intocado (nenhuma intenção de 44px jamais registrada para ele). Verificado visualmente via captura de tela real e por toda a suíte E2E de Habit/Task/Todo/Project/Shell (31/31), sem regressão de layout | `FIXED` | 30.20 |
 | BD30-F078 | baixa | `BeeDaySortable.razor` aplicava um `aria-label` literal em inglês (`"Hold and drag this card to reorder it. Use the arrow keys when focused."`) a cada item arrastável de Habits/Tasks/Todos/Projects em `/daily`, em ambas as culturas — o `AriaLabel` de nível de lista já era corretamente localizado por cada consumidor, só o rótulo por item estava hardcoded no componente compartilhado. **Corrigido nesta Sprint**: novo parâmetro `ItemAriaLabel` com valor padrão em inglês (mesmo contrato de `AriaLabel`), conectado a uma nova chave `resx` (`ReorderItemAriaLabel`) em `DashboardResources`, usada nos 4 pontos de uso em `Home.razor` | `FIXED` | 30.20 |
 | BD30-F079 | média | nenhum dos 5 componentes de formulário compartilhados (`BeeDayInput`, `BeeDayTextArea`, `BeeDaySelect`, `BeeDayDateInput`, `BeeDayCheckbox`) associava programaticamente seu controle à própria mensagem de validação (`BeeDayValidationMessage`) — sem `aria-describedby`, um usuário de leitor de tela que navega de volta a um campo já inválido não recebe nenhum sinal da causa, violando o padrão WCAG 4.1.2/3.3.1 de "identificação de erro associada programaticamente ao controle", já implementado corretamente para o próprio `role="alert"` da mensagem. Afeta todos os 6 editores de atividade/tag/transação, já que todos compartilham esses 5 componentes. **Corrigido nesta Sprint**: `BeeDayValidationMessage` ganha um `Id` opcional aplicado a um novo wrapper em torno das mensagens; cada um dos 5 componentes de formulário passa `aria-describedby="{Id}-validation"` para seu controle nativo e `Id="{Id}-validation"` para `BeeDayValidationMessage`, sempre que `ShowValidationMessage` está ativo. Novo teste bUnit (`InputAssociatesItsValidationMessageViaAriaDescribedby`) prova a associação, incluindo a atualização em tempo real quando uma mensagem de validação aparece | `FIXED` | 30.20 |
@@ -3496,3 +3496,209 @@ parcial insegura. A correção administrativa da Issue #222 no início desta Spr
 Sprint 30.30) é um lembrete de que a própria infraestrutura de tracking da EPIC precisa do mesmo
 padrão de verificação que o código. Nenhuma mutação de banco HMG/produção foi executada ou é
 necessária.
+
+## 33. Sprint 30.26 — Code Hygiene & Historical Comment Purge
+
+### 33.1 Escopo e método
+
+Remoção de ruído de manutenção morto e histórico obsoleto preservando racional técnico durável:
+varredura ampla de `src/`, `tests/`, `scripts/`, `.github/` por comentários de cronologia
+Epic/Sprint/PR sem valor além de rotular quando algo foi feito; varredura por `TODO`/`FIXME`/`HACK`;
+reverificação de referências de documentação quebradas (`BD30-F005`); CSS/JS morto remanescente
+(`BD30-F075` e escopo mais amplo descoberto durante a implementação); e uma regra CSS global obsoleta
+já causadora de um bug real de WCAG (`BD30-F076`).
+
+Investigação delegada a um agente de exploração somente-leitura antes de qualquer mudança de código —
+metodologia igual à já usada em todas as Sprints anteriores desta EPIC. Limite explícito, herdado do
+padrão já estabelecido (o "EPIC 30 Remaining Sprint Global Execution Contract" referenciado pela
+Issue segue não encontrado em nenhum lugar do repositório nem do GitHub): não reescrever histórico
+imutável de ADR, não excluir código baseado só em busca estática sem considerar descoberta em tempo
+de execução/reflexão/configuração — nenhuma remoção nesta Sprint dependeu disso; toda remoção teve
+evidência de zero consumidor real (`grep` completo, build limpo, testes reais).
+
+### 33.2 Varredura de ruído de cronologia — resultado
+
+~188 arquivos em `src/`/`tests/`/`scripts/`/`.github/` contêm menção a "Sprint"/"Epic" em comentários.
+Achado principal: **a esmagadora maioria já é racional durável, não ruído** — cada comentário lido
+por completo (não só a linha correspondente ao grep) explica um "porquê"/restrição/incidente real, não
+apenas rotula "quando". Confirma que Sprints anteriores desta EPIC já limparam a maior parte do que
+havia para limpar.
+
+**Ruído genuíno encontrado e removido**: ~10 comentários de rótulo puro (só nomeiam uma Sprint, sem
+nenhuma informação além disso), todos em CSS — `wallet.css` (2), `polish.css`, `app.css`,
+`cards.css`, `DashboardColumn.razor.css` (2), `ProjectWorkspace.razor.css` (2). Removidos por
+completo — comentários puros, zero risco de código. Um candidato borderline
+(`HabitEditorModal.razor.css`, "Sprint 6.2 — preserve the current Habit visual state while editing")
+foi **mantido** por explicar um racional real (por que as variantes de cor `.habit-editor--*` existem),
+não apenas rotular uma data.
+
+**`TODO`/`FIXME`/`HACK`**: zero ocorrências em `src/`, `tests/`, `scripts/` — confirmado por duas
+buscas independentes. Nenhuma ação necessária; confirma a própria premissa do escopo da Sprint.
+
+### 33.3 `BD30-F005` — referências de documentação quebradas, corrigidas
+
+Recontagem real encontrou 29 referências (não 27) em 20 arquivos (não 19) apontando para 8 caminhos
+(não 7) — pequena variação frente à contagem original de uma Sprint anterior, não uma divergência
+material; a diferença é `DESIGN_SYSTEM_CHANGELOG.md` (não capturado antes) e a separação de
+`docs/architecture/03-dependency-rules.md`/`docs/data/01-relational-model.md` como dois caminhos
+distintos em vez de um agrupamento.
+
+**Descoberta chave que tornou a correção mecânica em vez de uma escolha editorial arriscada**: os 5
+documentos "movidos" (`docs/architecture/05-domain-aggregate-map.md`,
+`07-persistence-contracts.md`, `02-target-architecture.md`, `01-current-state.md`,
+`06-domain-persistence-map.md`) foram de fato **arquivados em `docs/history/` com a numeração de
+seção original preservada intacta** — confirmado por leitura direta de cada arquivo de destino antes
+de qualquer correção (ex.: `docs/history/domain-aggregate-map.md` ainda tem `### 2.3 Habit`, `###
+2.4 RecurringTask`, `### 2.7 Transaction`, `### 2.8 WalletTag`, exatamente as seções que
+`IHabitRepository.cs`/`ITransactionRepository.cs`/`IWalletTagRepository.cs` já citavam). Isso
+significa a correção correta é repontar só o **caminho** do arquivo, preservando a citação de seção
+exatamente como estava — não uma decisão editorial de "qual doc atual corresponde a isso", que teria
+exigido verificar/inventar uma nova numeração de seção em um documento diferente.
+
+**Corrigido**: os 5 caminhos arquivados repontados para `docs/history/*` (16 referências, 14 arquivos
+de código/teste); mais 2 correções mecânicas de renumeração/renomeação simples
+(`docs/architecture/03-dependency-rules.md` → `04-dependency-rules.md`, 2 referências;
+`docs/data/01-relational-model.md` → `docs/persistence/01-relational-model.md`, 1 referência
+compartilhada com o grupo anterior). 1 referência sem predecessor real
+(`DESIGN_SYSTEM_CHANGELOG.md` → `docs/design-system/migration-guide.md`, confirmado via `git log
+--follow` nunca ter existido) repontada para `docs/design-system/README.md` com nota explicando a
+origem. `docs/application/README.md`'s próprio "Achado relevante (reportado, não corrigido)"
+atualizado para "corrigido" — esse documento já havia identificado exatamente essa lacuna numa Sprint
+anterior e a marcado explicitamente fora de escopo daquela Sprint (`código` estava na lista de "não
+alterar" ali). Verificado por varredura completa: zero referências quebradas remanescentes em
+`src/`/`tests/`/`scripts/`/`.github/workflows`. `ADR-003-aggregate-repositories.md` deliberadamente
+**não** tocado — é um registro histórico imutável de decisão arquitetural, cita o nome do documento
+como era chamado na época da decisão, não uma referência quebrada a corrigir.
+
+### 33.4 `BD30-F075` — CSS/JS morto, escopo real mapeado e corrigido por completo
+
+A tentativa de remoção revertida numa Sprint anterior identificou corretamente que o escopo real era
+maior do que os 6 pontos inicialmente visíveis — mas não chegou a mapeá-lo por completo. Esta Sprint
+mapeou e verificou cada localização antes de remover qualquer coisa:
+
+**Em `cards.css`**: 15 localizações (não 6), classificadas por risco antes da edição:
+
+- 2 linhas minificadas com o seletor morto entrelaçado no mesmo texto que regras vivas (`.activity-
+  card--completed{...}`, `.habit-card__body p{...}`) — removidas por substituição de substring
+  precisa, não por deleção de linha inteira, preservando o conteúdo vivo adjacente.
+- 2 grupos de seletor mistos (`.activity-card__checkbox, .habit-card__score-button,
+  .activity-card__menu, .habit-card__menu { ... }`, aparecendo duas vezes com corpos diferentes) —
+  só os 2 seletores mortos removidos da lista, a regra preservada intacta para os 2 seletores vivos.
+  Seletores separados por vírgula em CSS não compartilham cascata entre si (cada um casa
+  independentemente contra o mesmo bloco de declaração) — essa edição é seguramente neutra para os
+  seletores vivos **por construção da linguagem**, não por verificação empírica de sorte.
+- As demais 11 localizações eram regras/blocos `@media` isolados, inteiramente compostos por
+  seletores mortos — removidos por completo.
+
+**Escopo adicional descoberto durante esta Sprint, fora do arquivo original**:
+
+- `dragdrop.css`: uma regra `:has(.activity-card--menu-open), :has(.habit-card--menu-open)` inteira
+  (com um comentário explicando a correção de stacking-context que a motivou) — ambos os seletores
+  `:has()` nunca podem casar, já que as classes que testam nunca são aplicadas. Removida por completo.
+- `app.css`: `.card-action-menu`/`@keyframes card-menu-enter`, órfãos desde que `BeeDayCardMenu.razor`
+  foi removido numa Sprint anterior (commit `244059a`) — o CSS de suporte ficou para trás. Removidos.
+- `wwwroot/js/beeday-card-menu.js` (57 linhas): o módulo JS que só `BeeDayCardMenu.razor.cs` (já
+  removido) chamava (`measureGeometry`, `registerOutsideClick`, `unregisterOutsideClick`) —
+  confirmado zero referências a esse arquivo ou a qualquer uma das 3 funções exportadas em todo
+  `src/`. Deletado. Esse é muito provavelmente o motivo real pelo qual a tentativa anterior foi
+  revertida por "escopo maior do que o inicialmente visível" — a remoção do componente `BeeDayCardMenu`
+  deixou resíduo em 3 arquivos que uma busca só em `cards.css` nunca encontraria.
+
+**Verificação real, não só leitura de código**: `grep` confirmando zero das 5 classes mortas em todo
+`src/BeeDay.Web` após as edições; build limpo; `AccessibilityQualityTests` (18/18) e
+`InstitutionalPagesTests`/`ExperienceSystemTests`/`HomeTests` (100/100, cobrindo as páginas que
+renderizam os cards e o hero afetados) executados de verdade, sem regressão.
+
+### 33.5 `BD30-F076` — regra CSS global obsoleta, corrigida
+
+Confirmado por leitura completa das duas regras (`design-system.css:317-327`/`:394`
+vs. `BeeDayHero.razor.css:131-139`) que a regra escopada já fornece um valor próprio para **cada**
+propriedade que a regra global fornecia (`display`, `margin-bottom`, `color`, `font-size`,
+`font-weight`, `letter-spacing`, `text-transform`) — não só `color`, que era o único ponto que o
+comentário original da correção de WCAG mencionava. Remover a entrada global não tem efeito visual
+algum; só elimina a corrida de cascata que o comentário original descrevia como "frágil".
+
+**Corrigido**: `.beeday-hero__eyebrow` removido do grupo global em `design-system.css`
+(`.beeday-page-header__eyebrow`/`.beeday-section-header__eyebrow`, que continuam precisando da regra,
+preservados intactos), e a regra de override específica de onboarding
+(`.beeday-hero--onboarding .beeday-hero__eyebrow { color: ... }`, que só definia `color` e já estava
+completamente sombreada — nem sequer mencionada pelo comentário original, uma descoberta desta
+Sprint) também removida. Comentário em `BeeDayHero.razor.css` atualizado para não descrever mais uma
+corrida de especificidade que não existe mais. Verificado: `grep` confirma nenhum outro consumidor de
+`.beeday-hero__eyebrow` em todo `src/`; `AccessibilityQualityTests` completa (18/18, incluindo os
+cenários COR0-COR9 que originalmente capturaram a falha de WCAG) sem regressão.
+
+### 33.6 Achados forwarded, reverificados sem correção nesta Sprint
+
+- **`BD30-F059`** (alta, Wallet card interactivity): nenhuma nova evidência ou tentativa nesta
+  Sprint — a hipótese estrutural já foi testada e refutada na Sprint 30.24; não é um achado de
+  hygiene de código, é um defeito de causa raiz desconhecida sem nova pista para investigar. Repetir
+  uma tentativa sem evidência nova violaria a mesma disciplina que motivou a reversão da Sprint 30.24.
+  Permanece `OPEN`, decisão do proprietário (ver Ledger).
+- **`BD30-F093`** (LoggingBehavior EventId): reverificado, premissa confirmada com uma correção de
+  precisão (3 chamadas de log, não 2). Ainda não corrigido — mesma razão já registrada (nova
+  convenção sem uso comprovado além de um único call site).
+- **`BD30-F071`** (cobertura E2E de troca de idioma) e **`BD30-F087`/`BD30-F088`** (otimização de
+  imagens públicas, ausência de bundler) — expansão de cobertura/trabalho de engenharia de
+  performance/asset, não hygiene de comentários/código morto. Fora do escopo temático desta Sprint
+  específica; permanecem `OPEN`, forwarded.
+- **`INV-021`** — metade "referências históricas" concluída por esta Sprint (`BD30-F005`, §33.2);
+  metade "consistência de naming `beeday`/`BeeDay.*`" permanece para a Sprint 30.27, dedicada a isso.
+
+### 33.7 Implementação
+
+- `src/BeeDay.Application/Common/Contracts/*.cs` (7 arquivos), `Common/Experience/
+  IExperienceRewardService.cs`, `Common/Identity/IEmailConfirmationIssuer.cs`, `Features/Dashboard/
+  Contracts/IDashboardReadService.cs`, `Features/Dashboard/Queries/GetDashboardQuery.cs`,
+  `Features/Dashboard/Responses/DashboardResponse.cs`, `Features/Wallets/Contracts/
+  IWalletReadService.cs`, `Features/Wallets/Handlers/WalletQueryHandlers.cs` — caminhos de
+  documentação corrigidos (`BD30-F005`).
+- `src/BeeDay.Infrastructure/DependencyInjection/InfrastructureServiceCollectionExtensions.cs` —
+  idem.
+- `tests/BeeDay.Application.Tests/{CurrentUserGuardTests,FakeUnitOfWork,
+  PersistenceContractBoundaryTests}.cs` — idem.
+- `src/BeeDay.Web/DESIGN_SYSTEM_CHANGELOG.md`, `docs/application/README.md` — repontados/atualizados
+  (`BD30-F005`).
+- `src/BeeDay.Web/wwwroot/css/{cards,dragdrop,app,wallet,polish}.css` — CSS morto removido
+  (`BD30-F075`); comentários de rótulo puro removidos (§33.2).
+- `src/BeeDay.Web/wwwroot/js/beeday-card-menu.js` — deletado, órfão (`BD30-F075`).
+- `src/BeeDay.Web/wwwroot/css/design-system.css`, `src/BeeDay.Web/Components/DesignSystem/Layout/
+  BeeDayHero.razor.css` — regra global obsoleta removida, comentário atualizado (`BD30-F076`).
+- `src/BeeDay.Web/Components/Features/Dashboard/Components/DashboardColumn.razor.css`,
+  `Features/Projects/Components/ProjectWorkspace.razor.css` — comentários de rótulo puro removidos
+  (§33.2).
+- `docs/epics/30-system-integrity/README.md` — nova Seção 33; `BD30-F005`/`BD30-F075`/`BD30-F076`
+  corrigidos; `BD30-F093` reverificado (correção de precisão); `INV-021` parcialmente reverificado.
+
+Nenhuma mudança de contrato público de Application, schema, migration. Nenhuma mutação de banco
+HMG/produção foi executada ou é necessária.
+
+### 33.8 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `grep` de verificação (5 seletores mortos, `.beeday-hero__eyebrow`, caminhos de doc quebrados) | PASS, zero remanescentes em `src/`/`tests/`/`scripts/`/`.github/workflows` |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter AccessibilityQualityTests` | PASS, 18/18 |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter InstitutionalPagesTests\|ExperienceSystemTests\|HomeTests` | PASS, 100/100 |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 avisos, 0 erros |
+| `dotnet test BeeDay.slnx` (Debug, completo) | PASS, 1.555/1.555 (121 Domain, 119 Application, 216 Infrastructure, 879 Web, 220 E2E) — execução limpa, 0 falhas |
+| `dotnet test BeeDay.slnx --configuration Release` (1ª execução) | 1 falha isolada: `ActivityFilterBarTests.SharedSearchInputPreservesTheDebouncedFilterContract` (`WaitForAssertion` do bUnit) — mesma assinatura documentada em `docs/testing/README.md` desde a Sprint 25.16 e mecanismo confirmado pela `BD30-F042` (Sprint 30.24): concorrência entre projetos de teste sob `dotnet test BeeDay.slnx` como comando único. Não relacionado a nenhuma mudança desta Sprint (nenhum arquivo tocado por esta Sprint tem relação com `ActivityFilterBar`, debounce de busca, ou Projects) |
+| `dotnet test tests/BeeDay.Web.Tests/... --configuration Release --filter ActivityFilterBarTests` (retry isolado) | PASS, 3/3 — confirma `TRANSIENT/FLAKY`, `CHANGE-CAUSED = NO` |
+| `dotnet test BeeDay.slnx --configuration Release` (2ª execução, completa) | PASS, 1.555/1.555 (121/119/216/879/220) — execução limpa, 0 falhas |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+
+### 33.9 Continuidade e entrega
+
+O padrão mais importante desta Sprint: em cada um dos 3 achados de código morto/obsoleto
+(`BD30-F005`, `BD30-F075`, `BD30-F076`), a investigação real revelou que o escopo verdadeiro era
+diferente (geralmente maior) do que o achado original documentava — não porque os achados anteriores
+estivessem errados, mas porque cada um foi descoberto e registrado antes de uma varredura completa
+ser viável. `BD30-F075` em particular é a confirmação de que a decisão de reverter em vez de corrigir
+parcialmente numa Sprint anterior foi a correta: o escopo real (15 localizações em `cards.css`, mais
+3 arquivos adicionais) era genuinamente maior do que o inicialmente visível, e só ficou seguro de
+corrigir depois de mapeado por completo. A única falha observada nos quality gates (`ActivityFilterBarTests`)
+foi imediatamente reconhecível como o padrão já documentado pela `BD30-F042`, classificada com
+evidência (não suposição) e confirmada `CHANGE-CAUSED = NO` por retry isolado antes de prosseguir.
+Nenhuma mutação de banco HMG/produção foi executada ou é necessária.
