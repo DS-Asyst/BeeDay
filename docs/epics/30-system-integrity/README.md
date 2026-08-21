@@ -196,6 +196,9 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F066 | baixa | não existia teste E2E/integração provando o ciclo completo `returnUrl` (hit anônimo em rota protegida → redirect para `/login?returnUrl=...` → login → volta exatamente para a página originalmente pedida) nem uma URL genuinamente inexistente atingindo o `NotFoundPage` do Router real (só bUnit, que renderiza `NotFound.razor` direto). **Corrigido nesta Sprint**: `AuthorizationIntegrationTests.Anonymous_ProtectedPageRedirect_CarriesTheOriginalPathAsReturnUrl` (nova) prova o `returnUrl` correto no redirect anônimo; `LoginIntegrationTests.Login_WithLocalReturnUrl_RedirectsToTheOriginallyRequestedPage` (nova) completa o ciclo até o destino pós-login; `NavigationTests.NonexistentRoute_RendersTheNotFoundPage` (E2E, nova) prova a `BD30-F063` corrigida contra um navegador real | `FIXED` | 30.17 |
 | BD30-F067 | baixa | a subárvore `/experience-system` (21 rotas públicas de documentação) não tem nenhum ponto de entrada direto no header/footer/nav de topo — só é alcançável via múltiplos saltos a partir do link `/brand-guidelines` no rodapé institucional, depois pela navegação de pilar/tópico interna. Não é uma rota quebrada (toda a subárvore é alcançável), apenas discoverability fraca para uma área de 21 rotas. Decisão de produto/IA de navegação, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
 | BD30-F068 | baixa | os dois wizards de onboarding (`Tutorial.razor`, `CreateProfile.razor`) mantêm o passo atual fora da URL (campo privado / `ProfileCreationState` escopado por DI, nenhum query string) — padrão consistente entre os dois, não um defeito isolado. Voltar/avançar no navegador sai do wizard inteiro em vez de andar entre os passos, comportamento previsível mas não documentado como decisão. Fora do escopo de roteamento propriamente dito (nenhuma rota quebra ou produz 404); observação de arquitetura de interação encaminhada a uma Sprint de UX | `OPEN` | 30.20 |
+| BD30-F069 | baixa | `/terms`, `/privacy` e `/community-guidelines` não contêm nenhum texto legal real — cada uma renderiza só um aviso proeminente de "revisão pendente" (`LegalPendingReview`) mais uma lista de títulos de seção sem corpo. Comportamento deliberado, testado (E2E e bUnit) e documentado no próprio código como divulgação honesta em vez de cláusulas inventadas — não é um defeito de engenharia. Registrado nesta Sprint exatamente como o critério de aceite exige: item pendente de revisão jurídica/aprovação do proprietário, nenhum texto legal foi inventado ou proposto por esta auditoria | `OPEN` | decisão do proprietário |
+| BD30-F070 | baixa | `RepresentativeRoutesRenderWithoutHorizontalOverflowOnMobile` cobria 9 das 12 rotas institucionais em viewport mobile — `/brand-guidelines` (a rota estruturalmente mais complexa da família, única que embute a navegação de pilar/tópico do Experience System) nunca tinha sido testada especificamente em mobile. **Corrigido nesta Sprint**: `/brand-guidelines` adicionada ao teste. `/privacy` e `/community-guidelines` foram deliberadamente mantidas fora — compartilham o mesmo template exato de `/terms` (já coberto), mesmo padrão de amostragem representativa já usado em `MobileEditorialHeaderStaysUsableWithoutHorizontalOverflowOnTheDenseAboutUsFamily` (testa só `/mission` pela família "About us") | `FIXED` | 30.18 |
+| BD30-F071 | baixa | a cobertura E2E de troca de idioma ao vivo (via seletor de idioma real) para o `beeday Experience System` existe só para a página raiz (`/experience-system`) — as outras 20 rotas da subárvore dependem só de correção testada em nível de `resx`/componente, nunca exercitadas com o seletor real de idioma em navegador. Baixo risco (mesmo padrão resx comprovadamente correto em todas), mas gap de cobertura real. Encaminhado como expansão opcional de cobertura, não defeito | `OPEN` | 30.20 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -2244,3 +2247,110 @@ antes/depois via `curl` contra o servidor real e sem nenhuma regressão na suít
 autenticação/autorização/antiforgery/problem-details. `BD30-F002` foi fechada com uma correção
 estritamente documental. Quatro achados menores foram encaminhados com evidência completa, nenhum
 inventado. Nenhuma mutação de banco HMG/produção foi executada ou é necessária.
+
+## 25. Sprint 30.18 — Public & Experience System Audit
+
+### 25.1 Escopo e método
+
+Auditoria completa das superfícies públicas (anônimas) da aplicação: Home pública (`/`), as 12
+páginas institucionais (`Mission`, `Efficacy`, `BrandGuidelines`, `Contact`, `Product`,
+`ProductPlus`, `Android`, `Ios`, `Faqs`, `CommunityGuidelines`, `Terms`, `Privacy`) e as 21 rotas do
+`beeday Experience System` (documentação pública de Brand/UI/UX — não confundir com o sistema de
+gamificação XP auditado na Sprint 30.16, que compartilha o nome mas é um conceito completamente
+diferente). A Sprint 30.17 já auditou o roteamento/shell propriamente dito (54 rotas, todas
+corretamente autorizadas, `BD30-F063` corrigida); esta Sprint audita completude de conteúdo,
+integridade de links, independência de estado autenticado, responsividade e localização.
+
+Esta Issue referencia um "EPIC 30 Remaining Sprint Global Execution Contract" que não foi
+encontrado em nenhum lugar do repositório nem das Issues do GitHub (busca completa executada,
+sem resultado). Na ausência desse documento, esta Sprint seguiu o `CLAUDE.md` vigente e o padrão
+já demonstrado nas 17 Sprints anteriores desta EPIC, que cobrem integralmente governança de
+repositório, método de auditoria, validação, relato e autoridade de Git — nenhuma lacuna de
+autoridade foi identificada.
+
+### 25.2 Achados confirmados — corretos, sem defeito
+
+- **Integridade de links internos**: todos os links de `AppFooter`, `EditorialFooter`,
+  `PublicHeader`, navegação do Experience System e CTAs de Home/institucionais resolvem para rotas
+  reais, exceto `/buy-me-a-coffee` (já `BD30-F064`, Sprint 30.17, decisão do proprietário —
+  reconfirmado ainda presente e ainda um link morto, não reinvestigado).
+- **Links externos**: apenas domínios reais (LinkedIn, GitHub) — zero `example.com`, `href="#"`
+  ou `href=""` em toda a superfície auditada.
+- **CTAs**: todos os botões "Get started"/"Try beeday today"/"Continue to beeday" apontam para
+  rotas/handlers reais, nenhum `<a href="#">` morto.
+- **"Coming soon" honestos**: Android/iOS (sem link de loja inventado), beeday Plus (sem preço
+  inventado), Efficacy (sem métrica/estudo inventado), ícones sociais Instagram/X (`<span>`
+  não-interativo, não link morto) — todos deliberados, testados, com comentário de código
+  explicando a decisão de não inventar conteúdo.
+- **Independência de estado autenticado**: nenhuma das 12 páginas institucionais nem das 21 do
+  Experience System injeta `ICurrentUserContext`, `ISender` ou qualquer serviço de acesso a dados —
+  são puramente estáticas, dirigidas por `resx`. Os únicos dois usos de `AuthorizeView` (`Home.razor`,
+  `PublicHeader.razor`) estão corretamente restritos ao branch `<Authorized>`, sem dependência para
+  o visitante anônimo.
+- **Duplicação de conteúdo**: `/beeday` vs `/beeday-plus` e `/android` vs `/ios` são
+  diferenciados de propósito, não duplicação acidental.
+- **Localização**: 100% dirigida por `.resx` (`en-US`/`pt-BR`), nenhum texto hardcoded encontrado.
+- **Placeholder/conteúdo obsoleto**: zero ocorrências reais de `Lorem ipsum`/`TODO`/`TBD` em toda
+  a superfície (duas correspondências de grep eram falsos positivos verificados).
+
+### 25.3 `BD30-F069` — conteúdo legal pendente, registrado conforme critério de aceite
+
+`/terms`, `/privacy` e `/community-guidelines` não contêm texto legal real — cada uma renderiza um
+aviso proeminente e testado ("revisão legal pendente") mais uma lista de títulos de seção sem corpo.
+Este é exatamente o comportamento que o critério de aceite desta Sprint exige ("Missing/unapproved
+legal content is recorded for owner/legal review rather than invented") — nenhum texto legal foi
+proposto, inventado ou avaliado quanto à correção jurídica por esta auditoria. Registrado como
+achado de baixa severidade, aberto, aguardando decisão/aprovação do proprietário — não é um defeito
+de engenharia (a divulgação honesta já está corretamente implementada e testada).
+
+### 25.4 `BD30-F070` — cobertura mobile institucional incompleta, corrigido
+
+`RepresentativeRoutesRenderWithoutHorizontalOverflowOnMobile` cobria 9 das 12 rotas institucionais.
+`/brand-guidelines` — a rota estruturalmente mais complexa da família institucional, a única que
+embute a navegação de pilar/tópico do Experience System — nunca tinha sido testada especificamente
+em viewport mobile. Corrigida com uma nova linha `InlineData`. `/privacy` e `/community-guidelines`
+foram deliberadamente mantidas fora da adição: compartilham o template exato de `/terms` (já
+coberto), seguindo o mesmo padrão de amostragem representativa já estabelecido no restante da suíte.
+
+### 25.5 Achados menores/informativos (não corrigidos, encaminhados)
+
+- `BD30-F071` (baixa, → 30.20): troca de idioma ao vivo via seletor real só é testada em E2E para
+  a página raiz do Experience System (`/experience-system`) — as outras 20 rotas dependem só de
+  correção testada em nível de `resx`/componente. Baixo risco, gap de cobertura real.
+- Reconfirmados sem alteração de estado: `BD30-F064` (link morto `/buy-me-a-coffee`, decisão do
+  proprietário) e `BD30-F067` (subárvore `/experience-system` sem entrada direta no nav de topo,
+  decisão do proprietário) — ambos da Sprint 30.17, ainda precisos.
+
+### 25.6 Implementação
+
+- `tests/BeeDay.E2E.Tests/InstitutionalPagesTests.cs` — `/brand-guidelines` adicionada a
+  `RepresentativeRoutesRenderWithoutHorizontalOverflowOnMobile` (`BD30-F070`).
+- `docs/epics/30-system-integrity/README.md` — nova Seção 25, achados `BD30-F069`–`BD30-F071`.
+
+Nenhuma mudança de comportamento de produto, regra de negócio, contrato público, schema, migration
+ou Design System. Nenhum texto legal foi escrito ou proposto. Nenhuma mutação de banco HMG/produção
+foi executada ou é necessária.
+
+### 25.7 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter InstitutionalPagesTests` | PASS, 49/49 |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx` (Debug, completo) | PASS, 1.565/1.565 (121 Domain, 119 Application, 216 Infrastructure, 892 Web, 217 E2E) — execução limpa, 0 falhas |
+| `dotnet test BeeDay.slnx --configuration Release` | 1.564/1.565 na primeira execução (121 Domain, 119 Application, 216 Infrastructure, 892 Web, 216/217 E2E) — 1 falha em `ShellResponsiveLayoutTests.TabletAndMobileUseOneDrawerShellWithoutDocumentOverflow(width: 900, height: 800)`, `TimeoutException` em `GotoAsync("/login")`/screenshot. Classificada `TRANSIENT/FLAKY` com evidência: teste de shell responsivo não tocado por esta Sprint, assinatura idêntica à `BD30-F042` já documentada, reexecução isolada PASSOU limpa (6/6) |
+| `dotnet ef migrations has-pending-model-changes` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+
+### 25.8 Continuidade e entrega
+
+Esta Sprint confirmou que as superfícies públicas do produto estão em bom estado: nenhum link
+morto novo, nenhuma dependência acidental de estado autenticado, nenhum conteúdo placeholder real,
+localização completa e consistente. O único achado de conteúdo genuíno (`BD30-F069`, texto legal
+pendente) já estava corretamente tratado como divulgação honesta pelo produto — o papel desta
+Sprint foi confirmar isso com evidência e registrá-lo formalmente para decisão do proprietário,
+exatamente como o critério de aceite exige, sem inventar nenhum texto. Um gap real de cobertura
+mobile foi fechado (`BD30-F070`); um gap de cobertura de localização de baixo risco foi encaminhado
+(`BD30-F071`). Nenhuma mutação de banco HMG/produção foi executada ou é necessária.

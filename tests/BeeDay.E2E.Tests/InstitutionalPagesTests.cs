@@ -31,9 +31,18 @@ public sealed class InstitutionalPagesTests(PlaywrightAppFixture fixture) : E2ET
         Assert.False(await Page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
     }
 
+    // EPIC 30 Sprint 30.18: /brand-guidelines added — it is structurally the most complex
+    // institutional route (embeds the Experience System pillar/topic nav, unlike every other
+    // route here), so it was the one member of this "representative" set genuinely worth its own
+    // mobile-overflow assertion rather than relying on another route's coverage. /privacy and
+    // /community-guidelines were deliberately left out of this addition: they share the exact same
+    // "pending legal review" template as /terms (already covered here), so /terms already stands
+    // in for that whole family the same way /mission already does for the "About us" family
+    // (see MobileEditorialHeaderStaysUsableWithoutHorizontalOverflowOnTheDenseAboutUsFamily).
     [Theory]
     [InlineData("/mission", "Our mission")]
     [InlineData("/efficacy", "Efficacy")]
+    [InlineData("/brand-guidelines", "Brand guidelines")]
     [InlineData("/contact", "Contact us")]
     [InlineData("/beeday", "beeday")]
     [InlineData("/beeday-plus", "beeday Plus")]
