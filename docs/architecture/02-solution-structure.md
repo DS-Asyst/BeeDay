@@ -89,11 +89,12 @@ completa sem a referência (0 erros). Removida na Sprint 18.3.
 
 Listados no `.slnx` como itens soltos, apenas para exibição no Visual Studio:
 `.editorconfig`, `.gitattributes`, `.gitignore`, `CLAUDE.md`, `Directory.Build.props`,
-`Directory.Packages.props`, `LICENSE`, `README.md`, `docs/README.md`, mais 4 referências a
-`docs/*/README.md` — destas últimas, `docs/architecture/README.md` e `docs/domain/README.md` e
-`docs/design-system/README.md` já existem desde a Sprint 16.2; `docs/ai/README.md` e
-`docs/development/README.md` seguem inexistentes (ver achado reportado no relatório da Sprint 16.2,
-seção 12 — fora do escopo desta Sprint corrigir o `.slnx`).
+`Directory.Packages.props`, `LICENSE`, `README.md`, mais 5 referências a `docs/*/README.md`
+(`docs/README.md`, `docs/architecture/README.md`, `docs/design-system/README.md`,
+`docs/developer/README.md`, `docs/domain/README.md`) — todas existem atualmente, confirmado por
+leitura direta do `.slnx` e do disco na Sprint 30.28 (`BD30-F004`). O `.slnx` já foi corrigido desde
+o achado original da Sprint 16.2 (que citava `docs/ai/README.md`/`docs/development/README.md` como
+referências mortas); este texto só não havia sido atualizado para acompanhar essa correção.
 
 ## 5. Central Package Management
 
