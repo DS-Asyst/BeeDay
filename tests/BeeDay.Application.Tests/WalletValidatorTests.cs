@@ -1,6 +1,7 @@
 using BeeDay.Application.Features.Wallets.Queries;
 using BeeDay.Application.Features.Wallets.Requests;
 using BeeDay.Application.Features.Wallets.Validation;
+using BeeDay.Domain.Entities;
 using BeeDay.Domain.Enums;
 using FluentValidation;
 
@@ -23,6 +24,44 @@ public sealed class WalletValidatorTests
             context,
             TestContext.Current.CancellationToken);
         Assert.False(result.IsValid);
+    }
+
+    // EPIC 30 Sprint 30.15 / BD30-F058: this validator previously had no upper bound at all — only
+    // Transaction.ValidateAmount (Domain) rejected an over-limit Amount, so a direct-EF/bulk-import
+    // write bypassing Domain would not have been caught here either. Domain's own boundary is proven
+    // separately in TransactionTests; this proves this specific FluentValidation rule.
+    [Fact]
+    public async Task SaveTransaction_RejectsAmountAboveTheMaximum()
+    {
+        var request = new SaveTransactionRequest(
+            "Item",
+            Transaction.MaximumAmount + 0.01m,
+            TransactionType.Expense,
+            new DateOnly(2026, 7, 25),
+            null,
+            null);
+        var context = new ValidationContext<SaveTransactionRequest>(request);
+        var result = await new SaveTransactionRequestValidator().ValidateAsync(
+            context,
+            TestContext.Current.CancellationToken);
+        Assert.False(result.IsValid);
+    }
+
+    [Fact]
+    public async Task SaveTransaction_AcceptsAmountExactlyAtTheMaximum()
+    {
+        var request = new SaveTransactionRequest(
+            "Item",
+            Transaction.MaximumAmount,
+            TransactionType.Expense,
+            new DateOnly(2026, 7, 25),
+            null,
+            null);
+        var context = new ValidationContext<SaveTransactionRequest>(request);
+        var result = await new SaveTransactionRequestValidator().ValidateAsync(
+            context,
+            TestContext.Current.CancellationToken);
+        Assert.True(result.IsValid);
     }
 
     [Fact]

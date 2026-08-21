@@ -167,6 +167,34 @@ public sealed class WalletFiltersTests : BunitContext
         Assert.True(invoked);
     }
 
+    // EPIC 30 Sprint 30.15 / BD30-F058: Amount/Description sort was fully wired end to end
+    // (Wallet.razor.ResolveSort, TransactionSortField, EfWalletReadService.ApplyOrdering) but the
+    // rendered <select> only ever offered the two date options — the other 4 values were reachable
+    // only by setting the Sort parameter directly in a test, never by an actual user selecting them.
+    [Fact]
+    public async Task SortSelect_OffersAllSixOptions_AndSelectingAmountInvokesSortChangedWithTheRightValue()
+    {
+        string? selected = null;
+
+        await BunitLocalizationSupport.WithUiCultureAsync("en-US", async () =>
+        {
+            var cut = Render<WalletFilters>(parameters => parameters
+                .Add(component => component.Sort, "date-desc")
+                .Add(component => component.SortChanged, value => selected = value));
+
+            await cut.Find(".wallet-filter-toggle").ClickAsync();
+
+            var options = cut.Find("#wallet-sort-filter").Children.Select(option => option.TextContent).ToList();
+            Assert.Equal(
+                ["Newest first", "Oldest first", "Amount (highest first)", "Amount (lowest first)", "Description (A-Z)", "Description (Z-A)"],
+                options);
+
+            cut.Find("#wallet-sort-filter").Change("amount-desc");
+        });
+
+        Assert.Equal("amount-desc", selected);
+    }
+
     private static WalletTagResponse CreateTag(string name) =>
         new(Guid.NewGuid(), name, "#7A4FCB", 0, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
 }
