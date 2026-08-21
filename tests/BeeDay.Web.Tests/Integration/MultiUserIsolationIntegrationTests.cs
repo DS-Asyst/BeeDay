@@ -75,8 +75,11 @@ public sealed class MultiUserIsolationIntegrationTests(BeeDayWebApplicationFacto
     }
 
     [Fact]
-    public async Task User_CannotUpdateOrDeleteAnotherUsersTask()
+    public async Task User_CannotToggleUpdateOrDeleteAnotherUsersTask()
     {
+        // EPIC 30 Sprint 30.13: Toggle was the one Task mutation missing from this test — Update/
+        // Delete rejection was already proven, but nothing sent ToggleTaskCommand as a non-owning
+        // user, unlike Todo's equivalent test below (User_CannotModifyAnotherUsersTodo).
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         var (alice, bob) = await SeedTwoUsersAsync("isolation-task");
         var taskId = await CreateTaskAsync(bob.Id, cancellationToken);
@@ -85,11 +88,14 @@ public sealed class MultiUserIsolationIntegrationTests(BeeDayWebApplicationFacto
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
+            sender.Send(new ToggleTaskCommand(taskId), cancellationToken));
+        await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
             sender.Send(new UpdateTaskCommand(taskId, new SaveTaskRequest("Hijacked", "", TaskRepeat.None)), cancellationToken));
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
             sender.Send(new DeleteTaskCommand(taskId), cancellationToken));
 
         var task = await FindAsync(data => data.RecurringTasks.Single(item => item.Id == taskId));
+        Assert.False(task.Completed);
         Assert.Equal("Bob task", task.Title);
     }
 
