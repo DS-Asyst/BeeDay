@@ -1,0 +1,56 @@
+name: BeeDay — CodeQL
+
+# EPIC 30, Sprint 30.25 (BD30-F008, CodeQL portion — the Dependabot half was already added in
+# Sprint 30.22). Deliberately informational, not a required check: this repository treats a
+# required-check transition as a real-ceremony decision (see ci.yml's own header comment on how its
+# required-check surface changed only after empirical proof) — that decision belongs to the owner,
+# not to this Sprint. This workflow analyzes and uploads results to the repository's Security tab;
+# nothing here blocks a PR or a merge.
+#
+# Triggered on PR to hmg (same boundary ci.yml already gates on) so new code gets scanned before
+# integration, plus a weekly schedule (same cadence as dependabot.yml) so already-merged code still
+# gets periodic coverage without depending on new PR activity.
+on:
+  pull_request:
+    branches:
+      - hmg
+
+  schedule:
+    - cron: "0 6 * * 1"
+
+  workflow_dispatch:
+
+concurrency:
+  group: beeday-codeql-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: CodeQL Analysis
+
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6.0.0
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
+          build-mode: autobuild
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:csharp"

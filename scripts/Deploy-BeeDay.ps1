@@ -7,12 +7,12 @@ param(
     [ValidatePattern("^https://")]
     [string]$PublicBaseUrl,
 
-    # Resend is optional: an environment that doesn't send transactional email through it (e.g.
-    # Homologation today, which runs Resend.Enabled=false / Development.Enabled=true) simply
+    # Resend is optional: an environment that doesn't send transactional email through it simply
     # doesn't pass these. Leaving both ApiKey and FromAddress empty means Set-BeeDayEnvironmentVariables
     # skips the Resend variables entirely rather than overwriting the App Pool with blanks — the
-    # existing IIS configuration for Resend is left exactly as it is. Passing them (as
-    # deploy-prd.yml already does) enables Resend the same way it always has.
+    # existing IIS configuration for Resend is left exactly as it is. Passing them (as both
+    # deploy-hmg.yml and deploy-prd.yml already do — Sprint 30.25, BD30-F006: Homologation flipped
+    # to Resend.Enabled=true / Development.Enabled=false) enables Resend the same way it always has.
     [string]$ResendApiKey,
     [string]$ResendFromAddress,
     [string]$ResendFromName = "beeday",
@@ -764,10 +764,10 @@ function Set-BeeDayEnvironmentVariables {
     }
 
     # Resend stays fully out of the App Pool config when either value is absent, instead of
-    # writing blanks over whatever is already configured there — that's what lets Homologation
-    # (Resend.Enabled=false / Development.Enabled=true, committed in appsettings.Homologation.json)
-    # go untouched today, and lets the exact same parameters turn Resend on later without any
-    # script change.
+    # writing blanks over whatever is already configured there — the same parameters both turned
+    # Resend on for Homologation (Sprint 30.25, BD30-F006: appsettings.Homologation.json now
+    # committed with Resend.Enabled=true / Development.Enabled=false) and would let a future
+    # environment stay untouched without any script change.
     if (-not [string]::IsNullOrWhiteSpace($ResendApiKey) -and -not [string]::IsNullOrWhiteSpace($ResendFromAddress)) {
         $variables["BeeDay__Email__Resend__ApiKey"] = $ResendApiKey
         $variables["BeeDay__Email__Resend__FromAddress"] = $ResendFromAddress

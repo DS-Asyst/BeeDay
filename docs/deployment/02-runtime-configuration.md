@@ -39,7 +39,7 @@ exatamente o pipeline padrão de `WebApplication.CreateBuilder(args)`, sem `AddA
 |---|---|---|
 | `appsettings.json` (base) | `Server=(localdb)\mssqllocaldb;Database=BeeDayDev;...` (valor commitado — ver nota abaixo) | Valores de desenvolvimento local por padrão |
 | `appsettings.Development.json` | (não definido — herda do base) | Só ajusta `Logging:LogLevel` (mais verboso para `Microsoft.AspNetCore`, silencia `Circuits`) |
-| `appsettings.Homologation.json` | `Server=SERV4SQL;Database=BeeDay_HMG;Trusted_Connection=True;...` (commitado; `deploy-hmg.yml` sobrescreve via `BEEDAY_APP_CONNECTION`) | **É o arquivo que HMG realmente carrega hoje** — `ASPNETCORE_ENVIRONMENT=Homologation` é fixado em `web.config` e passado explicitamente por `deploy-hmg.yml`, confirmado por Runtime State real (Sprint 18.4). `AllowedHosts=h-beeday.com.br`, `Resend:Enabled=false`, `Email:Development:Enabled=true` |
+| `appsettings.Homologation.json` | `Server=SERV4SQL;Database=BeeDay_HMG;Trusted_Connection=True;...` (commitado; `deploy-hmg.yml` sobrescreve via `BEEDAY_APP_CONNECTION`) | **É o arquivo que HMG realmente carrega hoje** — `ASPNETCORE_ENVIRONMENT=Homologation` é fixado em `web.config` e passado explicitamente por `deploy-hmg.yml`, confirmado por Runtime State real (Sprint 18.4). `AllowedHosts=h-beeday.com.br`, `Resend:Enabled=true`, `Email:Development:Enabled=false` (invertido desde a ativação do Resend em HMG — corrigido pela `BD30-F006`, Sprint 30.25; ver [`14-transactional-email-runbook.md`](14-transactional-email-runbook.md) §2) |
 | `appsettings.Production.json` | `""` (vazio — **deve** ser injetado via variável de ambiente/secret) | **Não corresponde a nenhum ambiente provisionado hoje** — ver §5. `Hosting:ForwardedHeaders` habilitado, `Resend:Enabled: true` |
 
 **Nota sobre o arquivo local no momento desta auditoria:** o `appsettings.json` neste checkout tem
@@ -226,11 +226,15 @@ genérico o suficiente.
 ### 6.7 Produção permanece não ativada por esta Sprint
 
 Nada nesta Sprint habilita `Resend:Enabled=true` em `appsettings.Homologation.json` nem executa
-`deploy-prd.yml` contra um ambiente real. `appsettings.Homologation.json` continua com
-`Resend:Enabled=false`/`Development:Enabled=true` — a mesma seleção de provider documentada em
-[`06-transactional-email.md`](../infrastructure/06-transactional-email.md) §5.1, inalterada por esta
-Sprint. Ligar Resend em HMG depende da guarda de destinatário centralizada da Sprint 26.4 (Gate B do
-roadmap do EPIC 26) — não deste contrato de secrets isoladamente.
+`deploy-prd.yml` contra um ambiente real. Na época desta Sprint, `appsettings.Homologation.json`
+continuava com `Resend:Enabled=false`/`Development:Enabled=true` — a mesma seleção de provider
+documentada em [`06-transactional-email.md`](../infrastructure/06-transactional-email.md) §5.1,
+inalterada por esta Sprint. Ligar Resend em HMG dependia da guarda de destinatário centralizada da
+Sprint 26.4 (Gate B do roadmap do EPIC 26) — não deste contrato de secrets isoladamente. **Esse
+estado foi invertido posteriormente**: o `appsettings.Homologation.json` atual tem
+`Resend:Enabled=true`/`Development:Enabled=false` (corrigido pela `BD30-F006`, Sprint 30.25); ver
+[`14-transactional-email-runbook.md`](14-transactional-email-runbook.md) §2 para o estado real
+vigente.
 
 ## 7. Fontes consultadas
 
