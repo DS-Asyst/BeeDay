@@ -160,7 +160,7 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F029 | baixa | comentários de `Profile` ainda justificavam a modelagem pelo adapter JSON já removido | `FIXED` | 30.5 |
 | BD30-F030 | alta | `UserExperience.Entries` participa da deduplicação em memória, porém era ignorada no mapping relacional; `ExperienceEntry` é top-level e nada jamais adicionava novas entries ao `DbSet` — confirmado por teste real contra LocalDB: nenhuma linha era persistida, e a mesma fonte podia ser recompensada indefinidamente (recompletar um Todo/Task/Project já concluído antes) | `FIXED` | 30.7 (revalidar impacto em 30.16) |
 | BD30-F032 | baixa | `EfHabitRepository.AddAsync`/`EfProjectRepository.AddAsync`/`EfRecurringTaskRepository.AddAsync`/`EfProjectRepository.AddTodoAsync` calculam a próxima `Position` via `MaxAsync` seguido de um insert separado, sem índice/constraint único em `(UserId, Position)` (ou `(ProjectId, Position)` para Todo) — duas inserções concorrentes do mesmo usuário podem computar o mesmo `maxPosition` e persistir ordinais duplicados; não há perda de dado, apenas dessincronia cosmética de ordenação, autocorrigível no próximo reorder | `OPEN` | 30.25 |
-| BD30-F033 | baixa | `EfWalletReadService.ApplyOrdering` ordena `Transaction` por `Description`/`Amount`/`CreatedAtUtc` sem índice cobrindo esses campos (apenas `IX_Transactions_Wallet_Date` existe) — SQL Server ordena em tempdb após o seek por `WalletId`; impacto real baixo dado o volume típico de transações por usuário em um app financeiro pessoal | `OPEN` | 30.21 |
+| BD30-F033 | baixa | `EfWalletReadService.ApplyOrdering` ordena `Transaction` por `Description`/`Amount`/`CreatedAtUtc` sem índice cobrindo esses campos (apenas `IX_Transactions_Wallet_Date` existe) — SQL Server ordena em tempdb após o seek por `WalletId`; impacto real baixo dado o volume típico de transações por usuário em um app financeiro pessoal. **Decisão da Sprint 30.21** (Sprint proprietária): reverificado, premissa inalterada. Risco aceito explicitamente — adicionar 3 índices novos tem custo real de escrita (todo insert/update de Transaction passa a manter mais índices) sem evidência de consulta lenta real ou de volume que justifique o trade-off; adicionar índice especulativo contraria o limite explícito desta Sprint contra otimização especulativa. Reavaliar se o volume de transações por usuário mudar materialmente | `ACCEPTED RISK` | 30.21 |
 | BD30-F034 | alta | histórico de `ExperienceEntry` não era persistido antes da correção da Sprint 30.7 (`BD30-F030`); alternar conclusão/reabertura repetida de Todo/Task/Project podia conceder XP duplicado sem limite antes da correção. Existência e magnitude de inflação histórica em HMG/produção **não quantificadas** por esta Sprint — nenhuma consulta ou mutação de banco de HMG/produção foi executada. As linhas de `ExperienceEntry` persistidas antes da correção podem ser insuficientes para reconstruir `TotalExperience` corretamente de forma determinística (o histórico anterior à correção nunca existiu). Nenhuma mutação de banco está autorizada por este achado; nenhum reset/recálculo arbitrário é permitido. **Investigação concluída na Sprint 30.16** (§23.2): as 7 perguntas encaminhadas foram todas respondidas com evidência — nenhuma pode ser resolvida com os dados/ferramentas atuais. Reconstrução determinística não é possível (o próprio escalar `TotalExperience` já incorpora qualquer inflação histórica, indistinguível de XP legítimo, porque as entries que provariam a diferença nunca existiram); correção automatizada não seria segura; reconciliação manual não é viável sem elas; e não existe no repositório nenhum mecanismo seguro e somente-leitura para quantificar o raio de impacto em HMG/produção. Prosseguir exigiria duas decisões do proprietário fora da autoridade desta auditoria: construir uma capacidade de leitura segura contra HMG/produção, e decidir se algum esforço de reconciliação vale a pena dado que a reconstrução completa é matematicamente impossível | `OPEN` | decisão do proprietário |
 | BD30-F035 | média | `BeeDayWebService` (20 métodos) e os call sites diretos de `ISender.Send` em `Wallet.razor` e nas páginas de Identity/Account/Onboarding nunca propagavam um `CancellationToken` real — toda chamada usava implicitamente `CancellationToken.None`, então navegar para longe ou fechar o circuito Blazor Server nunca cancelava uma mutação/query em andamento no servidor | `FIXED` | 30.8 |
 | BD30-F036 | baixa | `EmailConfirmationSent.razor`/`ResendConfirmation.razor`: `StartCountdown()` reatribui `_timer`/`_cts` sem descartar a instância anterior se chamado uma segunda vez antes do `Dispose()` do componente — hoje inalcançável em uso normal (o botão fica desabilitado enquanto `_secondsRemaining > 0`), portanto latente, não explorável | `OPEN` | 30.10 |
@@ -178,7 +178,7 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F048 | baixa | `Program.cs` grava `ClaimTypes.Name`/`ClaimTypes.Email` no cookie `BeeDay.Auth` (até 14 dias, "remember me") no login, mas nunca os atualiza após uma edição de Nome/E-mail em Account — hoje inofensivo (`grep` confirma que nada no código lê essas duas claims de volta), mas é PII potencialmente desatualizada sentada num cookie de longa duração | `OPEN` | 30.22 |
 | BD30-F049 | média | nenhum teste baseado em viewport real (Playwright) cobria `/profile/create` Etapa 2 (apelido), `/account`/`/settings` (as 3 seções) ou `/onboarding/tutorial` — `LoginExperienceTests` só provava a Etapa 1 do cadastro; `AccountLifecycleTests`/`SettingsLocalizationTests` nunca chamavam `SetViewportSizeAsync` | `FIXED` | 30.11 |
 | BD30-F050 | média | `HabitResetCounter` (Daily/Weekly/Monthly) está totalmente cabeado — coluna no banco, validação de Domain, editor de UI, documentação — mas nada no código jamais reseta `PositiveCount`/`NegativeCount` com base em tempo decorrido, fronteira de calendário ou job agendado; `RegisterPositive`/`RegisterNegative` só incrementam, para sempre. O campo é hoje decoração de UI sem efeito comportamental. Definir a semântica real de reset (quando? em qual fuso/cultura? via leitura ou job?) é uma decisão de produto, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
-| BD30-F051 | média | `EfUserRepository.UpdateAsync` recarrega **todas** as `ExperienceEntry` de um usuário a cada chamada — não só em registros de Habit, mas em qualquer mutação de User (confirmação de e-mail, redefinição de senha, troca de nome/e-mail). Habit é a única fonte de XP deliberadamente isenta de deduplicação (`UserExperience.cs`, por design — cada clique deve premiar XP independentemente), então é a única cujo volume de `ExperienceEntry` cresce sem limite por usuário ativo; nenhuma estratégia de arquivamento/paginação existe. Lista de Habits em `/daily` também não é paginada/virtualizada — nenhum teste cria mais de 2 Habits para o mesmo usuário em toda a suíte, então isso nunca foi exercitado em escala | `OPEN` | 30.21 |
+| BD30-F051 | média | `EfUserRepository.UpdateAsync` recarrega **todas** as `ExperienceEntry` de um usuário a cada chamada — não só em registros de Habit, mas em qualquer mutação de User (confirmação de e-mail, redefinição de senha, troca de nome/e-mail). Habit é a única fonte de XP deliberadamente isenta de deduplicação (`UserExperience.cs`, por design — cada clique deve premiar XP independentemente), então é a única cujo volume de `ExperienceEntry` cresce sem limite por usuário ativo; nenhuma estratégia de arquivamento/paginação existe. Lista de Habits em `/daily` também não é paginada/virtualizada — nenhum teste cria mais de 2 Habits para o mesmo usuário em toda a suíte, então isso nunca foi exercitado em escala. **Reverificado na Sprint 30.21** (Sprint proprietária): consulta ainda usa o índice `IX_ExperienceEntries_User_Time` (seek, não scan) — o problema não é lentidão de busca, é volume de linhas retornadas e hidratadas sem limite. Magnitude real em produção **não determinável** por esta auditoria (mesma restrição já estabelecida pela `BD30-F034` — nenhum acesso de leitura a HMG/produção). Uma correção real exigiria trocar o mecanismo de dedup de "carregar toda a coleção" para uma consulta pontual por chave (`SourceType`/`SourceId`/`RewardType`) — uma mudança de arquitetura na fronteira Domain/Infrastructure do sistema de XP, já auditada e corrigida múltiplas vezes nesta EPIC (`BD30-F030`), com risco real de reintroduzir um bug de correção em um subsistema sensível, sem evidência de que o problema já é real hoje. Reatribuído para decisão do proprietário | `OPEN` | decisão do proprietário |
 | BD30-F052 | baixa | `ActivityAttribute` (Strength/Dexterity/Intelligence/Vitality) é persistido, validado e round-tripa corretamente, mas não existe controle de UI para defini-lo em nenhum dos 4 editores de atividade (Habit/Task/Todo/Project) — confirmado por busca por `ActivityAttribute` em todo `*.razor` de `src/BeeDay.Web`, zero resultados fora de sintaxe `@attributes` não relacionada. Toda atividade criada pelo produto hoje tem `Attribute = null` para sempre; um valor já existente (via API/dados diretos) sobrevive a uma edição intacto, só não pode ser definido pela UI. Gap cross-cutting, não específico de Habit. **Reverificado na Sprint 30.19**: ainda preciso, sem mudança. Construir 4 novos controles de formulário com plumbing completo (Application, resx, testes) é trabalho de feature genuíno, não consolidação — fora do limite explícito desta Sprint ("audit/consolidation Sprint, not a redesign"). Reatribuído de "30.19" para decisão do proprietário: a auditoria já confirmou o gap três vezes (30.11, 30.15/similar, 30.19) sem informação nova; o próximo passo é priorização de produto, não mais investigação | `OPEN` | decisão do proprietário |
 | BD30-F053 | baixa | `EfHabitRepository.RemoveAsync` (e o mesmo padrão em `EfTaskRepository`/`EfTodoRepository`/`EfProjectRepository` conforme aplicável) busca a linha só por `Id`, sem reverificar `UserId` — depende inteiramente do único call site (`DeleteHabitCommandHandler`) já ter verificado posse via `HabitLookup.RequireExistsAsync` antes. Seguro hoje (único call site confirmado, corretamente guardado), mas é uma lacuna de defesa em profundidade: o método do repositório não é seguro por posse isoladamente, então um futuro chamador direto que pule a pré-verificação poderia excluir silenciosamente o Habit de outro usuário | `OPEN` | 30.22 |
 | BD30-F054 | alta | `RecurringTask.Repeat` (Daily/Weekly/Monthly) está totalmente cabeado — Domain, persistência, editor de UI, documentação — mas `RecurringTask` não sobrescreve `ToggleCompletion()` (herda a implementação padrão de `Activity`, um simples flip de booleano); nenhum código no repositório jamais reabre uma Task recorrente com base em fronteira de calendário. É a mesma classe de lacuna que `BD30-F050` (Habit), confirmada de forma independente para Task. Efeito colateral agravante: como a dedução de XP por origem é permanente e correta por design para Task (ao contrário de Habit), uma Task "Diária" completada uma vez **nunca mais pode gerar XP**, mesmo desmarcando e marcando de novo manualmente — os dois mecanismos, cada um correto isoladamente, se combinam para anular o propósito de gamificação de uma Task "recorrente". Definir a semântica real de reabertura é uma decisão de produto, não inventada por esta auditoria — mesma decisão pendente de `BD30-F050`, possivelmente a mesma decisão para os dois achados | `OPEN` | decisão do proprietário |
@@ -211,6 +211,11 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F081 | média | o drawer de navegação mobile (`MobileSidebar.razor`) já movia o foco para seu próprio botão de fechar ao abrir, mas nada devolvia o foco ao gatilho (`MobileHeader`'s hamburger) ao fechar — via Escape, clique no backdrop, ou o próprio botão de fechar —, deixando o foco de teclado/leitor de tela perdido em `<body>`. Diferente dos diálogos baseados em `EditorModalShell`/`DialogFocusScope` (confirmados corretos nesta Sprint), o drawer nunca usou esse primitivo compartilhado. **Corrigido nesta Sprint**: `MobileHeader.razor` ganha uma `ElementReference` para seu próprio botão e devolve o foco a ele quando `IsNavOpen` transiciona de `true` para `false` — espelhando exatamente o padrão já usado por `MobileSidebar` para a transição inversa (abrir). Novo teste E2E (`Mobile_ClosingTheDrawerReturnsFocusToTheHamburgerTrigger`) prova o foco restaurado após Escape em um navegador real | `FIXED` | 30.20 |
 | BD30-F082 | baixa | o menu de criação de atividade (`ActivityFilterBar.razor`, `role="menu"`) não tem nenhum tratamento de teclado além de Tab/Enter alcançarem os itens — sem Escape para fechar, sem navegação por setas (que a própria semântica ARIA de `role="menu"` implica), sem dispensa por clique fora, e não está conectado a `DialogFocusScope` como todo outro overlay do app. Não é um bloqueio duro (Tab/Enter continuam funcionando), mas não cumpre o contrato de interação que seu próprio papel ARIA anuncia. Corrigir com segurança exigiria adicionar suporte a `ElementReference`/foco em `BeeDayButton` (componente compartilhado do Design System) ou um helper de foco via JS interop — infraestrutura não construída nesta Sprint; um meio-conserto (só Escape, sem devolução de foco) foi deliberadamente descartado por poder deixar o foco pior do que está hoje. Trabalho de engenharia represado, não decisão de produto | `OPEN` | decisão do proprietário |
 | BD30-F083 | baixa | existe uma alternativa de teclado real para reordenar Habits/Tasks/Todos/Projects (`beeday-sortable.js`, `ArrowUp`/`ArrowDown` no item focado, mesmo caminho `NotifyReorderAsync` do arrasto por mouse), mas nenhum teste E2E em toda a suíte exercita isso (`grep` por `ArrowUp\|ArrowDown\|Reorder` em `tests/BeeDay.E2E.Tests` não encontra nenhum). Gap de cobertura real para uma capacidade de acessibilidade já implementada e correta | `OPEN` | 30.24 |
+| BD30-F084 | alta | `EfDashboardReadService.GetAsync` e `EfWalletReadService.GetSummaryAsync` carregavam **todas** as transações do Wallet de um usuário pela rede só para somar `Balance`/`TotalIncome`/`TotalExpenses` em memória via `Wallet.CalculateBalance`/`CalculateTotalIncome`/`CalculateTotalExpenses` (métodos de Domain, sem acesso a EF, corretos para consultas já carregadas mas inadequados como estratégia de leitura). O custo era pago duplamente: em todo carregamento de `/daily` **e** em toda visita a `/wallet`, e — pior — `DashboardState.ReloadAsync` recarrega o resumo do Wallet após **qualquer** mutação de Habit/Task/Todo/Project, não só de Wallet, então o carregamento completo da tabela de transações acontecia a cada clique em um Habit, não só ao abrir o Wallet. **Corrigido nesta Sprint**: as duas leitoras agora agregam em SQL (`SumAsync` condicional por `TransactionType`, `CountAsync`) em vez de materializar cada linha — mesmo resultado, transferência de dados mínima independente do volume de transações. Equivalência funcional comprovada pelos testes já existentes (`EfWalletReadServiceTests.GetSummaryAsync_CalculatesBalanceIncomeAndExpenses`, `EfDashboardReadServiceTests` — ambos passaram sem alteração, mesmos valores exatos antes/depois) | `FIXED` | 30.21 |
+| BD30-F085 | baixa | nenhuma paginação/arquivamento existe para as coleções de Habits/Tasks/Projects/Todos de um usuário na camada de leitura (`EfDashboardReadService.GetAsync` carrega o conjunto completo, sempre) — mesma classe estrutural de crescimento ilimitado por usuário já registrada para `ExperienceEntry` (`BD30-F051`), mas aqui afetando os próprios itens do dashboard, não só seu histórico de XP. A única mitigação existente é de renderização (`BeeDaySortable`'s virtualização de DOM a partir de um limiar), que não reduz a consulta SQL nem o payload transferido. Nenhum teste no repositório cria mais de poucos itens por usuário, então isso nunca foi exercitado em escala real. Decisão de produto sobre limites/paginação necessária, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
+| BD30-F086 | baixa | `DashboardState.ReloadAsync` sempre recarrega o dashboard inteiro (Habits+Tasks+Projects+Todos+resumo do Wallet+perfil/XP) após qualquer mutação individual — registrar um único Habit dispara a mesma recarga completa que abrir a página do zero. Prioridade reduzida nesta Sprint após a correção da `BD30-F084` já ter eliminado o componente mais caro (transferência completa da tabela de transações); o que resta é uma contagem pequena e já fixa de consultas (6, sem N+1, ver `BD30-F084`), então o ganho de uma recarga granular por seção é incerto sem medição adicional, e reescrever o contrato de recarga do `DashboardState` é mudança de arquitetura genuína, não uma correção pontual. Encaminhado sem correção nesta Sprint | `OPEN` | decisão do proprietário |
+| BD30-F087 | baixa | a Home pública (`/`) referencia duas imagens PNG não otimizadas de 1,7–1,8 MB cada (`home-team-fall.png`, `home-team.png` — a segunda com `fetchpriority="high"`, carregada antecipadamente acima da dobra), sem variante WebP/AVIF nem `srcset` responsivo; os ícones de bandeira do seletor de idioma público também carregam em tamanho muito maior (140–171 KB) do que o necessário para um ícone pequeno. Fora do caminho crítico autenticado que esta Sprint nomeia (`/daily`, `/wallet`) — confirmado que nenhuma imagem acima de 200 KB é referenciada em Dashboard/Wallet. Encaminhado como hygiene de assets, não defeito de performance do caminho crítico | `OPEN` | 30.26 |
+| BD30-F088 | baixa | não existe nenhum passo de build dedicado a bundling/minificação de CSS/JS (`grep` por bundler/webpack/esbuild/LibMan em toda configuração de build não encontra nada) — a minificação em `cards.css`/`wallet.css` é acidental (já commitada minificada), enquanto `design-system.css`/`variables.css`/`app.css` permanecem formatados. Mitigado hoje por `app.MapStaticAssets()`, que já aplica compressão gzip/Brotli e fingerprinting de conteúdo em tempo de build/publish independentemente do arquivo-fonte estar minificado — gap de hygiene, não defeito de performance medido | `OPEN` | 30.26 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -2674,3 +2679,130 @@ teste). Seis achados encaminhados por Sprints anteriores foram reverificados; do
 de arquitetura genuíno e foram reatribuídos para decisão do proprietário ou para a Sprint de
 completude de testes, em vez de permanecerem indefinidamente presos a uma Sprint de auditoria que já
 cumpriu seu papel investigativo. Nenhuma mutação de banco HMG/produção foi executada ou é necessária.
+
+## 28. Sprint 30.21 — Performance & Efficiency Audit
+
+### 28.1 Escopo e método
+
+Auditoria de performance/eficiência mensurável: contagem de consultas SQL, padrões N+1, trabalho
+repetido de persistência/rede, renderização desnecessária, paginação, e assets estáticos grandes.
+Limite explícito da Sprint: nenhuma micro-otimização especulativa, nenhuma reescrita de arquitetura
+justificada só por teoria — apenas gargalos confirmados com evidência.
+
+Dois achados encaminhados por Sprints anteriores foram reverificados nesta Sprint (proprietária de
+ambos): `BD30-F033` (índice de ordenação do Wallet) e `BD30-F051` (recarga completa de
+`ExperienceEntry`) — ver §28.4.
+
+### 28.2 Achados confirmados — corretos, sem defeito
+
+- **`EfDashboardReadService.GetAsync`**: exatamente 6 consultas SQL fixas por carregamento de
+  `/daily` (Users, Habits, RecurringTasks, Projects+Todos via `Include`, Wallets, Transactions) —
+  contagem fixa, sem padrão N+1 (nenhum loop emitindo uma consulta por item).
+- **Paginação do Wallet**: `EfWalletReadService.ListTransactionsAsync` usa `Skip`/`Take` sobre o
+  `IQueryable` antes de `ToListAsync`, traduzido para `OFFSET`/`FETCH` real no SQL Server — não é
+  "buscar tudo e fatiar em memória". `CountAsync` também traduzido para SQL, não contado em memória.
+  Lookup de `WalletTag` por transação é feito em lote sobre a página já carregada, não por linha.
+- **`@key` em loops de lista do Dashboard**: presente em todos os loops de Habit/Task/Todo/Project,
+  tanto no branch virtualizado quanto no plano de `BeeDaySortable`, e nas listas de itens concluídos
+  em `Home.razor`.
+- **`IDbContextFactory` — nenhum `DbContext` de ciclo de vida do circuito**: `grep` por
+  `BeeDayDbContext` em `src/BeeDay.Web` retorna zero resultados; todo repositório/leitora cria um
+  contexto novo por operação via `AddDbContextFactory`, documentado explicitamente no código como
+  decisão deliberada (memória/correção sob circuitos Blazor Server de longa duração).
+- **Nenhum outro repositório repete o padrão da `BD30-F051`**: dos 8 repositórios auditados, só
+  `EfUserRepository.UpdateAsync` faz o eager-load desproporcional; os demais (`AddAsync` de
+  Habit/Project/RecurringTask) fazem só um `MaxAsync` escalar para `Position`, proporcional à
+  mutação.
+
+### 28.3 `BD30-F084` — carga completa de transações para calcular resumo do Wallet, corrigido (achado mais significativo)
+
+`EfDashboardReadService.GetAsync` e `EfWalletReadService.GetSummaryAsync` carregavam **todas** as
+transações de um usuário pela rede só para somar `Balance`/`TotalIncome`/`TotalExpenses` em memória
+via métodos de Domain (`Wallet.CalculateBalance`/`CalculateTotalIncome`/`CalculateTotalExpenses`) —
+corretos como lógica de cálculo, mas inadequados como estratégia de leitura, já que `Domain` não tem
+acesso a `SUM`/`COUNT` do SQL Server. O custo era pago duplamente: em todo carregamento de `/daily`
+e em toda visita a `/wallet` — e, mais grave, `DashboardState.ReloadAsync` recarrega o resumo do
+Wallet após **qualquer** mutação de Habit/Task/Todo/Project, não só de Wallet, então a tabela
+completa de transações era transferida a cada clique em um Habit, não só ao abrir o Wallet.
+
+**Corrigido**: as duas leitoras agora agregam em SQL (`SumAsync` condicional por `TransactionType`,
+`CountAsync`) em vez de materializar cada linha em `List<Transaction>` — mesmo resultado, transferência
+de dados independente do volume de transações do usuário. Equivalência funcional comprovada pelos
+testes de integração já existentes contra LocalDB real (`EfWalletReadServiceTests.
+GetSummaryAsync_CalculatesBalanceIncomeAndExpenses`, `EfDashboardReadServiceTests`) — ambos passaram
+sem nenhuma alteração de asserção, confirmando valores exatos idênticos antes/depois da mudança.
+`Wallet.CalculateBalance`/`CalculateTotalIncome`/`CalculateTotalExpenses` permanecem no Domain,
+usados por outro código (testes de Domain, handlers de Application que já operam sobre um conjunto
+pequeno já carregado) — não removidos, não código morto.
+
+### 28.4 Reverificação de achados encaminhados
+
+**`BD30-F033`** (ordenação do Wallet sem índice cobrindo `Description`/`Amount`/`CreatedAtUtc`):
+premissa reverificada e inalterada. Decisão desta Sprint (proprietária): risco aceito explicitamente
+— adicionar 3 índices novos tem custo real de escrita (todo insert/update de `Transaction` passa a
+manter mais índices) sem evidência de consulta lenta real ou de volume que justifique o trade-off;
+adicionar um índice especulativo contrariaria o limite explícito desta Sprint. Estado alterado de
+`OPEN` para `ACCEPTED RISK`.
+
+**`BD30-F051`** (`EfUserRepository.UpdateAsync` recarrega toda `ExperienceEntry`): reverificado,
+premissa inalterada — a consulta já usa `IX_ExperienceEntries_User_Time` (seek, não scan); o problema
+é volume de linhas retornadas sem limite, não velocidade de busca. Magnitude real em produção **não
+determinável** por esta auditoria, mesma restrição já estabelecida pela `BD30-F034` (nenhum acesso de
+leitura a HMG/produção). Uma correção real exigiria trocar o mecanismo de dedup de "carregar toda a
+coleção" para uma consulta pontual por chave — mudança de arquitetura na fronteira Domain/
+Infrastructure do sistema de XP, já auditada e corrigida múltiplas vezes nesta EPIC (`BD30-F030`),
+com risco real de reintroduzir um bug de correção sem evidência de que o problema já é real hoje.
+Reatribuído de "30.21" para decisão do proprietário.
+
+### 28.5 Achados menores confirmados, não corrigidos, encaminhados
+
+- `BD30-F085` (baixa, decisão do proprietário): nenhuma paginação/arquivamento existe para as
+  coleções de Habits/Tasks/Projects/Todos na camada de leitura — mesma classe estrutural de
+  crescimento ilimitado por usuário já registrada para `ExperienceEntry` (`BD30-F051`), mas aqui
+  afetando os próprios itens do dashboard.
+- `BD30-F086` (baixa, decisão do proprietário): `DashboardState.ReloadAsync` sempre recarrega o
+  dashboard inteiro após qualquer mutação individual. Prioridade reduzida nesta Sprint após a
+  correção da `BD30-F084` já ter eliminado o componente mais caro dessa recarga.
+- `BD30-F087` (baixa, → 30.26): imagens PNG grandes (1,7–1,8 MB) não otimizadas na Home pública,
+  fora do caminho crítico autenticado que esta Sprint audita.
+- `BD30-F088` (baixa, → 30.26): ausência de passo de build para bundling/minificação de CSS/JS,
+  já mitigada por `MapStaticAssets` — gap de hygiene, não defeito de performance medido.
+
+### 28.6 Implementação
+
+- `src/BeeDay.Infrastructure/Persistence/SqlServer/EfDashboardReadService.cs`,
+  `EfWalletReadService.cs` — agregação SQL em vez de carga completa de transações (`BD30-F084`).
+- `docs/epics/30-system-integrity/README.md` — nova Seção 28; achados `BD30-F084`–`BD30-F088`;
+  `BD30-F033` alterado para `ACCEPTED RISK`; `BD30-F051` reatribuído.
+
+Nenhuma mudança de contrato público de Application (mesmo `WalletSummaryResponse`, mesmos valores),
+schema, migration ou Design System. Nenhuma mutação de banco HMG/produção foi executada ou é
+necessária.
+
+### 28.7 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet test tests/BeeDay.Infrastructure.Tests/...` (completo, contra LocalDB real) | PASS, 216/216 — inclui `GetSummaryAsync_CalculatesBalanceIncomeAndExpenses` e as asserções de `Balance` em `EfDashboardReadServiceTests`, mesmos valores exatos antes/depois |
+| `dotnet test tests/BeeDay.Application.Tests/...` (completo) | PASS, 119/119 |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx` (Debug, completo) | PASS, 1.550/1.550 (121 Domain, 119 Application, 216 Infrastructure, 875 Web, 219 E2E) — execução limpa, 0 falhas |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.550/1.550 (121 Domain, 119 Application, 216 Infrastructure, 875 Web, 219 E2E) — execução limpa, 0 falhas |
+| `dotnet ef migrations has-pending-model-changes` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+
+### 28.8 Continuidade e entrega
+
+O achado mais significativo desta Sprint (`BD30-F084`) tinha uma característica rara: o custo não
+era pago só ao visitar o Wallet, mas a cada carregamento de `/daily` e após qualquer mutação de
+Habit/Task/Todo/Project, por causa de como `DashboardState.ReloadAsync` sempre recarrega o resumo
+do Wallet junto. A correção (agregação em SQL) é mínima, preserva o contrato público exatamente, e
+foi verificada por igualdade de resultado antes/depois nos testes de integração já existentes contra
+LocalDB real — nenhum teste novo foi necessário para provar correção, só a execução da suíte já
+existente. Dois achados encaminhados de Sprints anteriores foram reverificados e receberam disposição
+final desta Sprint (proprietária de ambos): um risco aceito explicitamente (`BD30-F033`) e uma
+reatribuição para decisão do proprietário (`BD30-F051`), ambos com justificativa registrada em vez de
+permanecerem indefinidamente abertos sem próximo passo claro. Quatro achados menores foram
+encaminhados com evidência completa, nenhum corrigido especulativamente. Nenhuma mutação de banco
+HMG/produção foi executada ou é necessária.
