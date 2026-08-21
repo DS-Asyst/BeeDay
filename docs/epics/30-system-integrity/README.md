@@ -3106,12 +3106,12 @@ HMG/produção foi executada ou é necessária.
 |---|---|
 | `dotnet build BeeDay.slnx` | PASS, 0 avisos, 0 erros |
 | `dotnet test tests/BeeDay.Web.Tests/...` (completo) | PASS, 879/879 |
-| `dotnet format BeeDay.slnx --verify-no-changes` | PENDENTE (a executar antes da entrega) |
-| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PENDENTE (a executar antes da entrega) |
-| `dotnet test BeeDay.slnx` (Debug, completo) | PENDENTE (a executar antes da entrega) |
-| `dotnet test BeeDay.slnx --configuration Release` | PENDENTE (a executar antes da entrega) |
-| `dotnet ef migrations has-pending-model-changes` | PENDENTE (a executar antes da entrega) |
-| `git diff --check` | PENDENTE (a executar antes da entrega) |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 avisos, 0 erros |
+| `dotnet test BeeDay.slnx` (Debug, completo) | PASS, 1.554/1.554 (121 Domain, 119 Application, 216 Infrastructure, 879 Web, 219 E2E) — execução limpa, 0 falhas |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.554/1.554 (121 Domain, 119 Application, 216 Infrastructure, 879 Web, 219 E2E) — execução limpa, 0 falhas |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
 
 ### 30.7 Continuidade e entrega
 
