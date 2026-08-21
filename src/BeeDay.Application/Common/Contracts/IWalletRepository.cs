@@ -5,7 +5,7 @@ namespace BeeDay.Application.Common.Contracts;
 /// <summary>
 /// Persistence boundary for the <c>Wallet</c> Aggregate. Deliberately thin — Wallet owns no child
 /// entities and stores no balance; balance is always computed from externally supplied Transactions
-/// (see docs/architecture/06-domain-persistence-map.md §2.6).
+/// (see docs/history/domain-persistence-map.md §2.6).
 /// </summary>
 public interface IWalletRepository
 {

@@ -28,7 +28,7 @@ public interface IWalletReadService
 /// <summary>
 /// Read-service filter shape — deliberately distinct from
 /// <c>Features.Wallets.Queries.GetTransactionsQuery</c> (the MediatR request DTO). The two are
-/// allowed to diverge per docs/architecture/03-dependency-rules.md §3 ("Contract DTO ≠ Command ≠
+/// allowed to diverge per docs/architecture/04-dependency-rules.md §3 ("Contract DTO ≠ Command ≠
 /// Domain Entity..."); today they happen to carry the same fields.
 /// </summary>
 public sealed record TransactionQueryFilter(

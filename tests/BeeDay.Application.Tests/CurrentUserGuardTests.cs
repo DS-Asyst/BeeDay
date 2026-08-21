@@ -36,7 +36,7 @@ public sealed class CurrentUserGuardTests
 
     /// <summary>
     /// Covers the single-argument overload introduced in Sprint 13.4 for handlers migrated off
-    /// <c>LevelUpData</c> (docs/architecture/07-persistence-contracts.md). It only extracts the
+    /// <c>LevelUpData</c> (docs/history/persistence-contracts.md). It only extracts the
     /// claim — existence/ownership is deliberately not its job anymore; the next Aggregate repository
     /// call in the handler is responsible for that (see the overload's XML doc).
     /// </summary>

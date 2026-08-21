@@ -56,20 +56,6 @@ h1:focus {
     content: "An error has occurred.";
 }
 
-/* Card action menu — outer trigger-positioning context only; the panel and
-   its items are a scoped Design System component (BeeDayCardMenu.razor.css)
-   which owns their actual visual styling. */
-.card-action-menu {
-    position: relative;
-    z-index: 4;
-}
-
-@keyframes card-menu-enter {
-    from { opacity: 0; transform: translateY(-.25rem) scale(.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* Sprint 1.7 — global interaction polish */
 html {
     scroll-behavior: smooth;
     scrollbar-color: #aea5b5 transparent;

@@ -2,7 +2,7 @@ namespace BeeDay.Application.Common.Contracts;
 
 /// <summary>
 /// Coordinates multiple Aggregate repositories against a single, shared persistence session so their
-/// writes can be committed or rolled back together. See docs/architecture/07-persistence-contracts.md
+/// writes can be committed or rolled back together. See docs/history/persistence-contracts.md
 /// §6/§10/§13 — the 8 per-Aggregate ports were deliberately left without a way to persist a mutation on
 /// an already-loaded Aggregate, pending this piece. Every repository exposed here operates against the
 /// same underlying persistence session for the lifetime of this instance — never a fresh one per call,
