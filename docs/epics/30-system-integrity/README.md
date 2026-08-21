@@ -3481,7 +3481,7 @@ cujo primeiro efeito real só se observa em CI, não localmente — resultado re
 | `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.555/1.555 (121 Domain, 119 Application, 216 Infrastructure, 879 Web, 220 E2E) — execução limpa, 0 falhas |
 | `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
 | `git diff --check` | PASS |
-| `codeql.yml` — primeiro run real (PR desta Sprint contra `hmg`) | PENDENTE (a registrar antes da entrega — ver §32.6) |
+| `codeql.yml` — primeiro run real (PR #290 desta Sprint contra `hmg`) | PASS — jobs `CodeQL Analysis` (5m45s) e `CodeQL` (3s) verdes; `build-mode: autobuild` compilou `BeeDay.slnx` com sucesso |
 
 ### 32.8 Continuidade e entrega
 
