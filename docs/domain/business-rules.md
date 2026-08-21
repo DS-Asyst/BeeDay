@@ -107,11 +107,22 @@ conteúdo completo de cada arquivo de teste.
 | Histórico de XP revalida toda a transição | `ExperienceEntry.cs`, `Create` | Impede reward, total, nível ou timestamp inconsistentes mesmo por chamada direta | `DomainValidationException` | `DomainInvariantAuditTests.ExperienceEntry_RejectsInconsistentExperienceTransition` |
 | Source de XP tem igualdade por valor | `ExperienceSource.cs`, record | Identidade da origem depende dos valores, não da referência CLR | Igualdade estrutural | `DomainInvariantAuditTests.ExperienceSource_UsesValueEquality` |
 
+**Exclusão de item recompensado não revoga XP concedido (`BD30-F062`, decisão de persistência, não
+invariante de Domain)**: apagar um Habit/RecurringTask/Todo/Project que já gerou um
+`ExperienceEntry` não reverte o XP concedido. Não há FK entre `ExperienceEntries.SourceId` e a
+origem — `ExperienceEntries` é histórico (uma cópia do que aconteceu no momento da concessão), não
+uma referência viva ao agregado de origem. A decisão está corretamente implementada e comentada em
+`src/BeeDay.Infrastructure/Persistence/SqlServer/Configurations/ExperienceEntryConfiguration.cs`; ver
+também `docs/persistence/01-relational-model.md` §2 "ExperienceEntries".
+
 ## Fontes de verdade
 
 **Arquivos consultados:** todos os arquivos de `src/BeeDay.Domain/Entities/`,
 `src/BeeDay.Domain/Experience/`, `src/BeeDay.Domain/ValueObjects/` (mesmos já citados nos
-documentos por agregado).
+documentos por agregado); `src/BeeDay.Infrastructure/Persistence/SqlServer/Configurations/
+ExperienceEntryConfiguration.cs` (Sprint 30.28, `BD30-F062` — a única citação de Infrastructure
+neste documento, necessária porque a decisão de não revogar XP na exclusão é implementada e
+comentada na configuração de persistência, não em nenhum arquivo de Domain).
 **Testes consultados (nomes de método confirmados por grep, não por leitura integral):**
 `tests/BeeDay.Domain.Tests/HabitTests.cs`, `ProjectTests.cs`, `WalletTests.cs`, `WalletTagTests.cs`,
 `TransactionTests.cs`, `UserProfileRulesTests.cs`, `UserSessionHardeningTests.cs`,

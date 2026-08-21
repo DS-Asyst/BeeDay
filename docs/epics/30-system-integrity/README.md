@@ -62,7 +62,7 @@ todo achado termine como `FIXED`, `VERIFIED` ou `ACCEPTED RISK`.
 | INV-011 | Workflows | 6 workflows: PR Validation, HMG Deployment, HMG Verification, Release Quality Gate, Production Deployment e Promotion Policy. **Reverificado na Sprint 30.25**: os 6 continuam corretos frente a `docs/deployment/*.md`, exceto um comentário desatualizado em `deploy-hmg.yml` (parte de `BD30-F006`, corrigido). 7º workflow novo adicionado nesta Sprint: `codeql.yml` (`BD30-F008`) | `VERIFIED` | 30.25 |
 | INV-012 | Scripts | 12 scripts PowerShell; todos passam pelo parser do PowerShell sem erro sintático. **Reverificado na Sprint 30.25**: os 12 continuam parseando sem erro; 2 novos adicionados (`Clear-BeeDayBackups.ps1`, `scripts/tests/Test-ClearBeeDayBackups.ps1`, `BD30-F017`), total agora 14 | `VERIFIED` | 30.25, 30.26 |
 | INV-013 | Configuração | contratos raiz, 4 `appsettings`, `launchSettings.json`, `web.config` e 8 tipos auxiliares sob `Infrastructure/Configuration` | `BASELINED` | 30.3, 30.22, 30.25 |
-| INV-014 | Documentação | 123 arquivos rastreados; 537 links Markdown relativos verificados, sem link quebrado real | `BASELINED` | 30.28 |
+| INV-014 | Documentação | 123 arquivos rastreados; 537 links Markdown relativos verificados, sem link quebrado real. **Reverificado na Sprint 30.28**: recontagem real encontra 124 arquivos `.md` e 527 links Markdown relativos (contagem própria já derivou um pouco desde o baseline original — variação natural do corpus, não um erro de contagem anterior). 1 falso positivo verificado (`docs/CONVENTIONS.md:66`, um exemplo de sintaxe `![descrição](caminho)` na própria prosa, não um link real). Zero links quebrados confirmados — mesma conclusão do baseline original, só os totais atualizados | `VERIFIED` | 30.28 |
 | INV-015 | Design System | 69 arquivos de componentes, 18 arquivos CSS, 5 arquivos JS e 64 assets de ícone sob `design/` | `BASELINED` | 30.19 |
 | INV-016 | UX, responsividade e localização | 133 arquivos Razor, 66 CSS e 60 recursos `.resx` no conjunto `src/` + `tests/` | `BASELINED` | 30.20 |
 | INV-017 | Segurança e privacidade | autenticação, rate limiting, session version, antiforgery, headers e limites operacionais localizados | `BASELINED` | 30.22 |
@@ -132,15 +132,15 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F002 | média | `docs/web/02-routing-and-pages.md` registra 42 rotas; a busca atual encontrou 54 declarações `@page`. **Corrigido na Sprint 30.17**: a tabela do §3 já estava correta (54 rotas/52 arquivos) desde a Sprint 29.4 — a divergência estava só em 3 menções de prosa (§1, rodapé do §3, §11) nunca atualizadas desde antes da Sprint 25.17, agora corrigidas para o valor real | `FIXED` | 30.17 |
 | BD30-F003 | baixa | `docs/application/README.md` declara 9 Features, mas enumera e o repositório contém 10 diretórios | `FIXED` | 30.6 |
 | BD30-F031 | média | 17 dos 27 handlers de Application não tinham teste direto em `tests/BeeDay.Application.Tests` (confirmado por busca de referência), incluindo dois handlers multi-write com transação (`UpdateTodoCommandHandler` no branch cross-Project, `UpdateTransactionCommandHandler`, `DeleteTransactionCommandHandler`) cuja correção de fronteira transacional só era provada por inspeção de código | `FIXED` | 30.6 |
-| BD30-F004 | baixa | `docs/architecture/02-solution-structure.md` descreve Solution Items antigos (`docs/ai` e `docs/development`); `BeeDay.slnx` aponta atualmente para `docs/developer/README.md` e outros itens existentes | `OPEN` | 30.28 |
+| BD30-F004 | baixa | `docs/architecture/02-solution-structure.md` descreve Solution Items antigos (`docs/ai` e `docs/development`); `BeeDay.slnx` aponta atualmente para `docs/developer/README.md` e outros itens existentes. **Corrigido na Sprint 30.28**: confirmado por leitura direta do `.slnx` — a lista real tem 5 referências a `docs/*/README.md` (não 4), todas existentes no disco; `docs/ai`/`docs/development` não aparecem mais no `.slnx` desde que corrigido numa Sprint anterior, só o texto deste documento nunca foi atualizado para acompanhar. Corrigido | `FIXED` | 30.28 |
 | BD30-F005 | baixa | 27 referências, em 19 arquivos de código/teste, apontam para 7 caminhos de documentação removidos ou movidos. **Corrigido na Sprint 30.26**: recontagem real encontrou 29 referências em 20 arquivos apontando para 8 caminhos (pequena variação frente à contagem original, não uma divergência material) — todas corrigidas. Confirmado, antes de cada correção, que a numeração de seção original (`§2.3`, `§5.1`, `§10` etc.) foi preservada intacta nos documentos arquivados em `docs/history/`, então cada citação foi repontada só no caminho do arquivo, não na seção — mecânico e de baixo risco, não uma decisão editorial de "qual doc atual corresponde". `docs/application/README.md`'s próprio achado registrado atualizado para refletir a correção. 1 referência sem predecessor real (`DESIGN_SYSTEM_CHANGELOG.md` → `docs/design-system/migration-guide.md`, confirmado via `git log --follow` nunca ter existido) repontada para `docs/design-system/README.md` com nota explicando a origem | `FIXED` | 30.26 |
 | BD30-F006 | alta | o estado versionado de HMG seleciona Resend (`true`) e Development (`false`), enquanto `docs/deployment/01-deployment.md` e `02-runtime-configuration.md` ainda descrevem a seleção inversa; o runbook mais novo distingue corretamente repository state de runtime state. **Corrigido na Sprint 30.25**: os dois documentos corrigidos (§6/nota do incidente e tabela §3/§6.7 respectivamente, preservando o texto histórico do incidente original — só a afirmação de estado "hoje" foi corrigida, não a narrativa do que aconteceu na época). Descoberta adicional durante a correção: a mesma afirmação invertida também existia como comentário de código em `deploy-hmg.yml` e duas vezes em `scripts/Deploy-BeeDay.ps1` — corrigidos também, embora não afetassem comportamento (a lógica do script já era condicionada aos valores reais dos parâmetros, não ao texto do comentário). `docs/infrastructure/06-transactional-email.md` já estava correto, não precisou de correção | `FIXED` | 30.25 |
 | BD30-F007 | média | não existe `.runsettings`, referência a coverlet ou coleta formal de cobertura. **Corrigido na Sprint 30.24**: `coverlet.collector` adicionado aos 5 projetos de teste (`Directory.Packages.props` + `PackageReference` em cada `.csproj`, mesmo padrão de `PrivateAssets`/`IncludeAssets` já usado para `xunit.runner.visualstudio`) — `dotnet test --collect:"XPlat Code Coverage"` agora produz `coverage.cobertura.xml` por projeto, verificado por execução real. Nenhum threshold/gate de cobertura adicionado deliberadamente — decisão de política (qual % é aceitável, se deveria bloquear PR) fora da autoridade de uma auditoria de engenharia de teste; o limite explícito da Sprint também instruía não otimizar para cobertura de linha como objetivo primário | `FIXED` | 30.24 |
 | BD30-F008 | média | não existe workflow CodeQL nem configuração Dependabot versionada. **Reverificado na Sprint 30.22**: metade corrigida — `.github/dependabot.yml` adicionado (ecossistemas `nuget` e `github-actions`, semanal, sem impacto operacional — não cria check obrigatório, não roda código, apenas configura o serviço nativo do GitHub para abrir PRs de atualização). CodeQL deliberadamente não adicionado nesta Sprint: é um novo workflow do GitHub Actions que consome minutos de CI a cada push/PR e tipicamente se torna um check obrigatório uma vez configurado — mudança de maior impacto operacional na pipeline de CI/CD, mais adequada à Sprint dedicada a CI/CD do que a uma correção pontual de segurança. Reatribuída (só a parte de CodeQL) para 30.25. **Corrigido na Sprint 30.25**: novo `.github/workflows/codeql.yml` (`csharp`, `build-mode: autobuild`, PR para `hmg` + semanal), deliberadamente não obrigatório — ver §32.5 para o resultado real do primeiro run (disparado pelo próprio PR desta Sprint) | `FIXED` | 30.25 |
 | BD30-F009 | média | existem apenas dois guards automatizados de dependência, cobrindo Domain e Application; Infrastructure e Web não têm guard equivalente | `FIXED` | 30.9 |
-| BD30-F010 | baixa | o índice de documentação classifica `authentication/` e `developer/` como reservados e `api/` como não reauditado | `OPEN` | 30.28 |
+| BD30-F010 | baixa | o índice de documentação classifica `authentication/` e `developer/` como reservados e `api/` como não reauditado. **Reverificado na Sprint 30.28**: confirmado que a classificação do índice (`docs/README.md`) continua exatamente correta — `docs/authentication/README.md` e `docs/developer/README.md` seguem sendo placeholders vazios que apontam para `security/`/`README.md` da raiz respectivamente (nenhum documento próprio vive nessas pastas ainda), e nenhuma Sprint desta EPIC auditou o conteúdo de `docs/api/beeday.v1.yaml` (busca completa no Ledger, zero menções). Não é uma contradição — a classificação já reflete a realidade | `VERIFIED` | 30.28 |
 | BD30-F011 | baixa | `docs/infrastructure/README.md` registra 5 classes Options; o repositório possui 6 Options atuais, além de `EmailProvider` e `EmailProviderSelector` | `OPEN` | 30.7 |
-| BD30-F012 | baixa | existe documentação versionada da EPIC 28, mas ela não aparece no índice `docs/README.md` | `OPEN` | 30.28 |
+| BD30-F012 | baixa | existe documentação versionada da EPIC 28, mas ela não aparece no índice `docs/README.md`. **Corrigido na Sprint 30.28**: nova linha adicionada à tabela de Epics de `docs/README.md`, entre EPIC 25 e EPIC 30 (ordem numérica preservada), mesmo formato das demais linhas — status refletindo o próprio cabeçalho da EPIC 28 (`IMPLEMENTATION READY — POST-MERGE HMG VALIDATION PENDING`, Sprint 28.10), não forçado no padrão "Concluída"/"Em andamento" das outras duas por não corresponder exatamente a nenhum dos dois | `FIXED` | 30.28 |
 | BD30-F013 | alta | em HMG, validar `TransactionFormModel.Amount` sob `pt-BR` lançava `ArgumentException`/`FormatException` em `RangeAttribute.SetupConversion` ao interpretar o limite textual `"0.01"` pela cultura corrente; a falha ocorria no `EditForm`, antes de MediatR e antes de qualquer `INSERT` | `FIXED` | 30.2 |
 | BD30-F014 | baixa | os logs do mesmo período contêm warnings do EF Core sobre MARS/savepoints, mas a cadeia causal confirmada do incidente termina na validação DataAnnotations antes de MediatR/persistência; não há evidência de participação desses warnings nesta falha | `OPEN` | 30.7 |
 | BD30-F015 | média | `docs/deployment/04-operations.md` ainda afirmava que não existiam deploy automatizado de HMG nem aplicação de migrations, além de registrar caminhos e fluxo de release obsoletos; os workflows e a execução real provam o fluxo CI artifact -> HMG Deployment -> HMG Verification | `FIXED` | 30.3 |
@@ -189,7 +189,7 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F059 | alta | Cards de `WalletTag`/`Transaction` (`WalletTagManager.razor`, `TransactionList.razor`) perdem toda interatividade de clique/teclado para itens adicionados a uma lista já populada dentro da mesma sessão de circuito Blazor Server — confirmado reproduzível para o primeiro Tag criado (lista vazia→1), um segundo Tag criado logo em seguida, e uma segunda Transaction criada logo em seguida; imune a espera explícita (até 1s), a `Force: true` (bypassa verificações de actionability do Playwright, descartando interceptação/overlay como causa), e independente de clique vs. `Enter` via teclado. Um `GotoAsync` real (reload completo de página) sempre restaura a interatividade. **Causa raiz não identificada** — `@key` foi adicionado a ambos os `@foreach` como bom-senso defensivo (Blazor best practice já ausente), mas comprovadamente **não** resolveu o sintoma nos testes que o reproduziram; `DialogFocusScope`/`beeday-dialog-focus.js` foi inspecionado por completo sem revelar um bug óbvio. Cards de Transaction/Habit/Task/Todo/Project em Sprints anteriores desta EPIC nunca expuseram isso porque toda sequência de duas interações em um mesmo teste já continha um `GotoAsync` de reload no meio (para provar persistência) — não porque o padrão estivesse imune. Workaround confirmado (reload) aplicado nos dois novos testes E2E desta Sprint que o encontraram. **Hipótese testada e refutada na Sprint 30.24**: `WalletTagManager`/`TransactionCard` são os únicos consumidores de `BeeDayCard` que passam `@onclick`/`@onkeydown` como atributos splatados via `AdditionalAttributes`/`@attributes` (todo outro card interativo do produto — `ActivityCard`, `HabitCard` — liga esses handlers diretamente, sem splat); essa era uma hipótese estrutural plausível e testável. Experimento real conduzido: `BeeDayCard` ganhou `OnClick`/`OnKeyDown` tipados, os dois consumidores migrados para usá-los em vez do splat, e os dois testes E2E que reproduzem o defeito foram executados repetidamente com o workaround de reload removido. Resultado: **a hipótese não se sustentou** — `CreateExpenseTransaction_DecreasesBalanceCorrectly` (reabrir a segunda Transaction) continuou falhando de forma consistente e idêntica (mesmo sintoma, mesma linha) mesmo com a correção aplicada. A mudança foi revertida por completo (`git checkout --`) antes de qualquer commit, exatamente pelo mesmo princípio já estabelecido na Sprint 30.19 (`BD30-F075`): não enviar uma correção não comprovada. Causa raiz genuína permanece desconhecida; o splat de atributos via `AdditionalAttributes` está descartado como explicação (refutado por evidência direta, não apenas não confirmado) | `OPEN` | 30.26 |
 | BD30-F060 | baixa | não existia cobertura E2E provando que completar Task/Todo/Project concede XP visivelmente (só Habit tinha, desde a Sprint 30.12) e o modal de level-up (`BeeDayFeedbackModal`) nunca havia sido exercitado ponta a ponta (só bUnit) — nenhum teste anterior disparava uma execução real de handler + publicação real de domain event + render real do Blazor Server através de um level-up de fato. **Corrigido nesta Sprint**: `CompleteTask_UpdatesXp` prova visibilidade de XP para Task via navegador real; `CompleteTask_AtALevelBoundary_ShowsTheLevelUpModalExactlyOnce` semeia o usuário 5 XP abaixo do limite documentado/testado de Level 2 (100 XP) via novo parâmetro `initialExperience` de `E2EWebApplicationFactory.SeedUserAsync` (usa `User.AddExperience`, não-dedup, só para arranjo de teste) e prova o modal aparecendo exatamente uma vez, com os níveis corretos, e não reaparecendo após reload. Residual não corrigido, de baixo valor: Todo/Project não têm o mesmo teste de visibilidade de XP especificamente — aceito porque os três dividem exatamente o mesmo `ToggleTodoCommandHandler`/`ExecuteExperienceOperationAsync`, já provado correto nas camadas Application/Infrastructure (§23.1, item D.8) | `FIXED` | 30.16 |
 | BD30-F061 | baixa | não existe nenhuma UI (nem endpoint de leitura em Application) que exponha o histórico de `ExperienceEntry` ao usuário ou a um admin — a única superfície visível é o toast efêmero de level-up (`BeeDayFeedbackStore`, escopo de circuito, últimos 3 itens, nunca lê do banco). O trabalho de persistência corrigido pela `BD30-F030` (Sprint 30.7) não tem, hoje, nenhum consumidor além dessa lógica de dedup interna. Construir uma tela de histórico é uma decisão de produto, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
-| BD30-F062 | baixa | excluir um Habit/Task/Todo/Project já recompensado não revoga nem ajusta o XP concedido — comportamento deliberado por design (`ExperienceEntryConfiguration.cs` documenta em comentário: sem FK para a origem, `ExperienceEntries` é histórico append-only, cópia do que aconteceu, não referência viva). A decisão está corretamente implementada e comentada no código, mas não está ratificada em nenhum lugar de `docs/` (`docs/domain/business-rules.md` só declara a curva/nível como determinística, nada sobre revogação por exclusão) | `OPEN` | 30.28 |
+| BD30-F062 | baixa | excluir um Habit/Task/Todo/Project já recompensado não revoga nem ajusta o XP concedido — comportamento deliberado por design (`ExperienceEntryConfiguration.cs` documenta em comentário: sem FK para a origem, `ExperienceEntries` é histórico append-only, cópia do que aconteceu, não referência viva). A decisão está corretamente implementada e comentada no código, mas não está ratificada em nenhum lugar de `docs/` (`docs/domain/business-rules.md` só declara a curva/nível como determinística, nada sobre revogação por exclusão). **Corrigido na Sprint 30.28**: nova nota adicionada a `docs/domain/business-rules.md`, logo após a tabela de regras de Experience, ratificando a decisão com a citação exata do comentário de código-fonte que a implementa; `ExperienceEntryConfiguration.cs` também adicionado à lista de "Fontes de verdade" do documento (única citação de Infrastructure ali, necessária porque a decisão vive na configuração de persistência, não em nenhum arquivo de Domain) | `FIXED` | 30.28 |
 | BD30-F063 | alta | `app.MapRazorComponents<App>()` registra um endpoint só para cada `@page` descoberto — não existe fallback catch-all implícito. Qualquer requisição para uma URL sem `@page` correspondente (erro de digitação, link externo obsoleto, favorito antigo) terminava o roteamento do ASP.NET Core com um 404 vazio (`Content-Length: 0`, sem HTML algum), sem nunca alcançar o `NotFoundPage` do `Router` do Blazor — confirmado empiricamente via `curl` contra o servidor real, contrastado com `/login` (200, HTML completo) e `/not-found` (200, mesma rota funcionando quando acessada diretamente). Nenhum teste anterior (E2E ou integração) exercitava uma URL genuinamente inexistente contra o pipeline HTTP real — só bUnit, que renderiza `NotFound.razor` diretamente, sem passar pelo roteamento. **Corrigido nesta Sprint**: `app.UseStatusCodePagesWithReExecute("/not-found")` reexecuta a requisição contra a rota `/not-found` real (já existente, estilizada, localizada) sempre que a resposta termina em um status 4xx/5xx sem corpo já escrito — não interfere com nenhuma resposta que já tenha corpo (JSON de `GlobalExceptionHandler`) nem com redirects de autenticação (302, com `Location`). Verificado com `curl` antes/depois da correção e com a suíte completa de `AuthorizationIntegrationTests`/`AntiforgeryIntegrationTests`/`ProblemDetailsIntegrationTests` (892/892 em `BeeDay.Web.Tests`, nenhuma regressão) | `FIXED` | 30.17 |
 | BD30-F064 | baixa | `EditorialFooter.razor` linka para `/buy-me-a-coffee` em todas as 12 páginas institucionais; a rota não existe (contrato de rota já pré-anunciado como fora de escopo em `docs/web/02-routing-and-pages.md` desde a Sprint 29.4). Antes da `BD30-F063`, clicar mostrava uma página completamente em branco; após a correção desta Sprint, mostra a página real de Not Found (estilizada, localizada) — o link continua não-funcional, mas já não produz mais uma tela em branco. Construir a página ou remover o link é decisão de produto, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
 | BD30-F065 | média | `/Error` (`Pages/Error.razor`) existe mas nunca é produzida por nenhum caminho de código — `GlobalExceptionHandler` sempre emite JSON `ProblemDetails` para qualquer exceção na pipeline HTTP, nunca redireciona para `/Error`. Separadamente, nenhum `<ErrorBoundary>` existe em toda a árvore de componentes (`grep` por `ErrorBoundary` em `src/BeeDay.Web` = zero resultados) — uma exceção não tratada dentro do render/event-handler de qualquer página interativa (ex.: um clique em `Wallet.razor`) encerra o circuito SignalR sem nenhuma tela de recuperação além do `ReconnectModal` genérico tentando reconectar a um circuito que já não existe. Ambos são gaps de arquitetura de resiliência a erros, não defeitos pontuais de rota — encaminhados à Sprint 30.23 (Resilience & Observability) em vez de corrigidos aqui, dado o risco de uma mudança especulativa na pipeline global de exceções sem o escopo dedicado que o tema merece. **Corrigido na Sprint 30.23**: novo `BeeDayErrorBoundary.razor` (composição sobre `LoggingErrorBoundary : ErrorBoundary`, que sobrescreve o extension point documentado `OnErrorAsync` para logar com `WebEventIds.CircuitError`) envolve `@Body` nos 4 layouts (`MainLayout`, `PublicLayout`, `OnboardingLayout`, `EditorialLayout`), renderizando um fallback de marca (`BeeDayEmptyState` + botão Recarregar) em vez de encerrar o circuito sem recuperação. `/Error` (órfã, nunca produzida por nenhum caminho real) permanece fora de escopo — decisão de mantê-la ou removê-la é de produto, não desta correção pontual de resiliência | `FIXED` | 30.23 |
@@ -3809,3 +3809,121 @@ verificação. Os 2 residuais técnicos que restam (`BD30-F095`/`BD30-F096`) nã
 ativo ou tentar uma migração de infraestrutura sem autoridade para executá-la, exatamente o
 comportamento que o limite explícito desta Sprint pedia. Nenhuma mutação de banco ou ambiente HMG/
 produção foi executada ou é necessária.
+
+## 35. Sprint 30.28 — Documentation & Repository Truth Consolidation
+
+### 35.1 Escopo e método
+
+Reconciliação de `CLAUDE.md`, `README.md` raiz, `docs/README.md`, e demais documentos de estado
+atual (arquitetura, testes, deployment, segurança, Experience System, índices de ADR) contra o
+comportamento verificado; resolução dos achados de documentação do Audit Ledger atribuídos a esta
+Sprint (`BD30-F004`, `BD30-F010`, `BD30-F012`, `BD30-F062`); reverificação do baseline de inventário
+de documentação (`INV-014`). Limite explícito: não antecipar a EPIC 31 reescrevendo documentação só
+por estilo — esta Sprint fecha contradições verificadas necessárias para a verdade da EPIC 30, não
+uma reconstrução ampla de documentação; ADRs históricos permanecem imutáveis, superseder em vez de
+reescrever.
+
+Investigação delegada a um agente de exploração somente-leitura antes de qualquer mudança — mesma
+metodologia já usada em toda esta EPIC. O "EPIC 30 Remaining Sprint Global Execution Contract"
+referenciado pela Issue segue não encontrado em nenhum lugar do repositório nem do GitHub.
+
+### 35.2 `INV-014` — baseline de inventário de documentação, reverificado
+
+Recontagem real: **124 arquivos `.md`** sob `docs/` (não 123) e **527 links Markdown relativos**
+verificados (não 537) — pequena variação natural do corpus desde o baseline original, não um erro de
+contagem anterior. 1 falso positivo identificado e descartado (`docs/CONVENTIONS.md:66`, um exemplo
+de sintaxe `![descrição](caminho)` na própria prosa do documento, não um link real). **Zero links
+quebrados confirmados** — mesma conclusão do baseline original, só os totais numéricos atualizados.
+
+### 35.3 `BD30-F004` — Solution Items desatualizados em `02-solution-structure.md`, corrigido
+
+Confirmado por leitura direta do `BeeDay.slnx`: a pasta `/Solution Items/` real tem 8 arquivos soltos
+mais 5 referências a `docs/*/README.md` (`docs/README.md`, `docs/architecture/README.md`,
+`docs/design-system/README.md`, `docs/developer/README.md`, `docs/domain/README.md`) — todas
+existentes no disco, confirmado. O texto do documento ainda descrevia só 4 referências e citava
+`docs/ai/README.md`/`docs/development/README.md` como itens mortos referenciados no `.slnx` — na
+verdade, o próprio `.slnx` já havia sido corrigido numa Sprint anterior (o achado original, do
+relatório da Sprint 16.2, foi resolvido no código; só o texto deste documento nunca foi atualizado
+para acompanhar essa correção). **Corrigido**: §4 reescrito para refletir a lista real e atual,
+citando `BD30-F004`/Sprint 30.28 como a correção.
+
+### 35.4 `BD30-F010` — classificação do índice de documentação, reverificada sem contradição
+
+**Reverificado, não corrigido — a classificação já está certa.** `docs/authentication/README.md` e
+`docs/developer/README.md` seguem sendo placeholders vazios genuínos (confirmado por leitura
+completa dos dois, 16-18 linhas cada, nenhum conteúdo próprio, apontando corretamente para
+`security/`/`README.md` da raiz enquanto isso), e nenhuma Sprint desta EPIC de fato auditou o
+conteúdo de `docs/api/beeday.v1.yaml` (busca completa no Ledger por `docs/api`/`OpenAPI`/
+`beeday.v1.yaml`, zero menções). O índice de `docs/README.md` já descreve essa realidade com
+precisão — não havia contradição para fechar, só uma reconfirmação a registrar.
+
+### 35.5 `BD30-F012` — documentação da EPIC 28 ausente do índice, corrigida
+
+Confirmado: `docs/epics/28-transactional-email-experience/README.md` existe (1.386 linhas,
+verificado até a Sprint 28.10) mas não tinha entrada na tabela de Epics de `docs/README.md`.
+**Corrigido**: nova linha inserida entre EPIC 25 e EPIC 30 (ordem numérica preservada), mesmo formato
+das demais linhas da tabela. Status da linha reflete o próprio cabeçalho da EPIC 28
+(`IMPLEMENTATION READY — POST-MERGE HMG VALIDATION PENDING`) em vez de forçar um encaixe artificial
+no padrão "Concluída"/"Em andamento" usado pelas outras duas Epics já listadas — nenhuma das duas
+descreve com precisão o estado real e distinto da EPIC 28.
+
+### 35.6 `BD30-F062` — decisão de não revogar XP na exclusão, ratificada em `docs/domain/`
+
+Confirmado o gap: o comentário em `ExperienceEntryConfiguration.cs` (linhas 85-89) já explica
+corretamente a decisão (sem FK para a origem, `ExperienceEntries` é histórico append-only), mas
+`docs/domain/business-rules.md` nunca ratificava essa decisão em prosa — só documentava a curva/
+nível como determinística. **Corrigido**: nova nota inserida logo após a tabela de regras de
+Experience, citando a decisão com a mesma linguagem do comentário de código-fonte que a implementa, e
+apontando para `docs/persistence/01-relational-model.md` §2 "ExperienceEntries" (seção confirmada
+existente antes da citação). `ExperienceEntryConfiguration.cs` também adicionado à lista de "Fontes
+de verdade" do documento — a única citação de Infrastructure nesse documento, necessária porque essa
+decisão específica vive na configuração de persistência, não em nenhum arquivo de Domain, e o próprio
+documento declara honestidade de fonte como convenção.
+
+### 35.7 Verificação ampla adicional — nenhuma nova contradição encontrada
+
+Leitura das seções de `CLAUDE.md` que fazem afirmações sobre estado do repositório (não as seções de
+governança/processo, que são regras, não afirmações verificáveis), mais `README.md` raiz e
+`docs/README.md`, contra a realidade atual: cor de marca (`#5247F9`), nome da solução (`BeeDay.slnx`),
+contagem de 8 interfaces de repositório escopadas por Aggregate, contagem de 9 arquivos `.csproj`,
+referências de workflow, `TargetFramework net10.0` — todos confirmados corretos por verificação
+direta. Nenhuma nova contradição encontrada além dos 4 achados já atribuídos a esta Sprint. Passagem
+de esforço razoável, não uma auditoria exaustiva frase a frase — registrado como tal, não como
+garantia de zero contradição em qualquer lugar do corpus de documentação.
+
+### 35.8 Implementação
+
+- `docs/architecture/02-solution-structure.md` — §4 corrigido (`BD30-F004`).
+- `docs/README.md` — nova linha da EPIC 28 na tabela de Epics (`BD30-F012`).
+- `docs/domain/business-rules.md` — nova nota ratificando a decisão de não revogar XP na exclusão,
+  fonte de verdade atualizada (`BD30-F062`).
+- `docs/epics/30-system-integrity/README.md` — nova Seção 35; `INV-014` reverificado; `BD30-F004`/
+  `BD30-F012`/`BD30-F062` corrigidos; `BD30-F010` reverificado sem contradição.
+
+Nenhuma mudança de código, contrato público, schema ou migration. Nenhuma mutação de banco HMG/
+produção foi executada ou é necessária.
+
+### 35.9 Regressão e quality gates locais
+
+Sem mudança de código de produção/teste/script/workflow nesta Sprint — apenas documentação Markdown.
+
+| Comando | Resultado observado |
+|---|---|
+| Verificação manual de links relativos alterados/citados nesta Sprint (`.slnx`, `01-relational-model.md` §2, `docs/README.md`) | PASS — todos resolvem para arquivos/seções reais, confirmado por leitura direta |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 avisos, 0 erros |
+| `git diff --check` | PASS |
+
+Suíte de testes completa não reexecutada — nenhum arquivo de código/teste foi alterado; build e
+format continuam válidos para confirmar que nada no repositório quebrou.
+
+### 35.10 Continuidade e entrega
+
+Um padrão se repete nesta Sprint, já visto em `BD30-F004`/`BD30-F006` (Sprint 30.25) e `BD30-F075`/
+`BD30-F076` (Sprint 30.26): a causa raiz da divergência documental quase nunca é "o código mudou e a
+doc nunca foi escrita" — é "o código foi corrigido corretamente numa Sprint anterior, mas o texto que
+descrevia o problema anterior nunca foi atualizado para descrever a correção". `BD30-F010` reforça o
+outro lado da mesma disciplina: nem toda entrada `OPEN` do Ledger é uma contradição real esperando
+correção — reverificar e confirmar "já está certo" é um resultado tão válido quanto corrigir, e mais
+honesto do que editar um texto que já estava preciso só para ter algo para marcar como `FIXED`.
+Nenhuma mutação de banco HMG/produção foi executada ou é necessária.
