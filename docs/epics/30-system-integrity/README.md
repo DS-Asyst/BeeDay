@@ -167,9 +167,16 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F037 | baixa | polimento de UX não-bloqueante: cards individuais do Dashboard (Habit/Task/Todo/Project) não têm `Disabled` vinculado a `State.IsBusy` (só o overlay global `BeeDayLoading` reflete ocupado — a proteção contra double-submit é real, aplicada em `DashboardState.ExecuteAsync`, mas o clique num segundo card fica sem feedback visual imediato); e `Wallet.razor.RefreshAfterMutationAsync` não chama `StateHasChanged()` uma segunda vez após zerar `_highlightBalance`, então o destaque visual do saldo pode não sumir até outro render não relacionado ocorrer | `OPEN` | 30.20 |
 | BD30-F038 | média | `Login.razor` mantinha uma implementação própria de `IsLocalPath` para sanitizar `ReturnUrl`, distinta e mais fraca que a canônica de `LoginDestinationResolver` — só rejeitava `//`, não a variante `/\` que navegadores normalizam para URL absoluta; a decisão de redirecionamento real em `POST /auth/login` já usava a canônica completa, então não era explorável via o próprio fluxo de login, mas era uma fronteira de segurança duplicada e incompleta | `FIXED` | 30.10 |
 | BD30-F039 | alta | `ConfirmEmail.razor` enviava `ConfirmEmailCommand` em `OnInitializedAsync`, que roda duas vezes sob o `@rendermode="InteractiveServer"` global (`<Routes>` em `App.razor`) — uma vez no prerender estático, outra na reconexão interativa. A primeira chamada confirmava o e-mail corretamente; a segunda, idêntica, era corretamente rejeitada pela proteção contra replay de token — mas essa segunda rejeição é o estado final que o navegador do usuário real exibe, então todo usuário real via "Link já utilizado" no primeiro clique legítimo em um link de confirmação real. Só detectável por um teste de navegador real (Chromium) — nenhum teste unitário/bUnit/integração via `HttpClient` exercita as duas passagens de render do Blazor Server | `FIXED` | 30.10 |
-| BD30-F040 | baixa | `User.SetActive` (que corretamente invalida sessões ao desativar) não é chamado por nenhum Command/handler alcançável — só por testes. Não há hoje nenhum fluxo de produto (autoatendimento ou administrativo) que desative uma conta; o comportamento de segurança em `OnValidatePrincipal` (rejeitar `!user.IsActive`) está implementado e testado, mas nunca é exercido por uma ação real de usuário | `OPEN` | 30.11 |
+| BD30-F040 | baixa | `User.SetActive` (que corretamente invalida sessões ao desativar) não é chamado por nenhum Command/handler alcançável — só por testes. **Determinação da Sprint 30.11** (auditoria funcional completa de Profile/Onboarding/Account/Settings, incluindo inspeção direta de `Account.razor` e as três seções de Settings): classificado como **fluxo de produto ausente**, não código morto — o método de Domain está correto, testado e o guard de `OnValidatePrincipal` (`!user.IsActive`) funciona; simplesmente não existe hoje nenhuma entrada de produto (autoatendimento ou administrativa) que o alcance. Decidir se/como construir essa entrada é uma decisão de política de produto fora da autoridade desta auditoria — não inventada aqui | `OPEN` | decisão do proprietário |
 | BD30-F041 | baixa | `MemoryIdentityRequestThrottle` e `LoginRateLimiterFactory` (`PartitionedRateLimiter`) são ambos em memória, por instância de processo — corretos para o único servidor IIS de HMG hoje, mas não compartilhados entre instâncias; uma futura implantação horizontalmente escalada (PRD em Azure, ainda não provisionada) contornaria o limite de taxa distribuindo requisições entre instâncias | `OPEN` | 30.22 |
 | BD30-F042 | média | confiabilidade da suíte E2E em Debug: três execuções completas de `dotnet test BeeDay.slnx` durante a Sprint 30.10 produziram, respectivamente, 6/194, 1/194 e 1/194 falhas — nunca o mesmo teste duas vezes, sempre `TimeoutException` de navegação (`GotoAsync`)/screenshot, nunca um teste de Identity/Auth desta Sprint. A execução `--configuration Release` subsequente passou 194/194 sem qualquer falha. Evidência suporta `CHANGE-CAUSED = NO` para a Sprint 30.10, mas confirma um problema real de confiabilidade da suíte E2E em Debug, independente desta Sprint. **Não confirmado como causa raiz** — contenção LocalDB/Playwright é registrada aqui apenas como padrão observado/hipótese consistente com uma anotação de memória de sessão anterior a esta Sprint, não como causa provada por esta auditoria. A Sprint 30.24 deve investigar a causa real e definir o contrato de repetibilidade de teste | `OPEN` | 30.24 |
+| BD30-F043 | baixa | `ProfileCreationState.cs` (state class `AddScoped`, mesmo padrão de ciclo de vida de `DashboardState`) nunca propagava `CancellationToken` em suas 4 chamadas a `BeeDayWebService` — a varredura da Sprint 30.8 (`BD30-F035`) só buscou `*.razor`/`*.razor.cs`, e esta é uma classe `.cs` simples, fora do glob | `FIXED` | 30.11 |
+| BD30-F044 | alta | `UpdateCurrentUserAccountCommandHandler` permitia alterar o e-mail da conta sem reverificar a senha atual e sem resetar `IsEmailConfirmed` — uma sessão sequestrada (cookie roubado, XSS) bastava para trocar silenciosamente o e-mail para um endereço controlado pelo atacante, que `RequestPasswordResetCommandHandler` então tratava como já confirmado, habilitando um fluxo completo de esqueci-minha-senha e bloqueio do dono legítimo. Primitivo de account takeover real | `FIXED` | 30.11 |
+| BD30-F045 | média | `Tutorial.razor.NextAsync`, no slide final, chamava `Store.CompleteOnboardingAsync()` sem `try/catch` e o componente não injetava `ToastService` — uma falha (rede, 5xx transitório, sessão expirada) se propagava como exceção não tratada no circuito Blazor, sem nenhum feedback ao usuário, ao contrário de todo outro caminho de salvamento do app | `FIXED` | 30.11 |
+| BD30-F046 | baixa | `docs/web/04-feature-components.md` descrevia `Tutorial.razor` navegando para `/daily` ao concluir o onboarding; o código real (e `LoginDestinationResolver.Resolve`) sempre navegou para `/profile` | `FIXED` | 30.11 |
+| BD30-F047 | média | `AuthenticatedCultureSynchronizer.SynchronizeAtLoginAsync`: um cookie `BeeDay.Culture` desatualizado em um segundo dispositivo/navegador, ao logar, silenciosamente sobrescreve uma alteração de idioma deliberada feita em Settings — comportamento documentado e intencional (cookie explícito sempre vence naquela sessão), mas conflita com o critério de aceite "preferência de idioma permanece consistente entre sessões autenticadas". Decisão de produto necessária: cookie deveria ceder à conta no login, ou cookies não deveriam sobreviver a uma troca de idioma na conta | `OPEN` | 30.20 |
+| BD30-F048 | baixa | `Program.cs` grava `ClaimTypes.Name`/`ClaimTypes.Email` no cookie `BeeDay.Auth` (até 14 dias, "remember me") no login, mas nunca os atualiza após uma edição de Nome/E-mail em Account — hoje inofensivo (`grep` confirma que nada no código lê essas duas claims de volta), mas é PII potencialmente desatualizada sentada num cookie de longa duração | `OPEN` | 30.22 |
+| BD30-F049 | média | nenhum teste baseado em viewport real (Playwright) cobria `/profile/create` Etapa 2 (apelido), `/account`/`/settings` (as 3 seções) ou `/onboarding/tutorial` — `LoginExperienceTests` só provava a Etapa 1 do cadastro; `AccountLifecycleTests`/`SettingsLocalizationTests` nunca chamavam `SetViewportSizeAsync` | `FIXED` | 30.11 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -1091,3 +1098,206 @@ vez de "e-mail confirmado", embora a confirmação em si tenha sido aplicada cor
 mutação de banco HMG/produção foi executada ou é necessária para esta correção — o defeito era
 inteiramente de apresentação (dupla execução de um efeito colateral idempotente-mas-não-realmente),
 não de dado corrompido.
+
+## 18. Sprint 30.11 — Profile, Onboarding, Account & Settings Audit
+
+### 18.1 Escopo e método
+
+Issue #208. Auditoria funcional completa de `/profile/create` (as duas etapas), `/onboarding/tutorial`,
+`/account`/`/settings` (as três seções: Profile, Security, Preferences) e da state class dedicada de
+cada jornada. Método explicitamente exigido pelo proprietário: round-trip de cada campo editável até
+seu Command/Handler e de volta; recuperação de estado inválido/parcial; consistência de idioma entre
+sessões/dispositivos; existência de fonte de verdade duplicada (localStorage, claims obsoletas em
+cookie); comportamento em conta já existente (reentrada em `/profile/create`, `/onboarding/tutorial`,
+`/welcome`); cobertura mobile/desktop; lacunas de teste; e deriva de documentação. Revisão adicional
+específica do achado encaminhado pela Sprint 30.10: `BD30-F040` (`User.SetActive` inalcançável).
+
+Toda a lógica de Command/Handler de User (`UserHandlers.cs`), as três seções de `Account.razor`, os
+dois passos de `CreateProfile.razor`/`ProfileCreationState.cs`, `Tutorial.razor`, e a sincronização de
+cultura autenticada (`AuthenticatedCultureSynchronizer.cs`) foram lidos integralmente.
+
+### 18.2 `BD30-F044` — troca de e-mail sem reverificação de senha, primitivo de account takeover, corrigido (BLOCKER)
+
+`UpdateCurrentUserAccountCommandHandler` persistia uma troca de e-mail sem exigir a senha atual e sem
+resetar `IsEmailConfirmed`. Como `RequestPasswordResetCommandHandler` só envia o e-mail de redefinição
+quando `IsEmailConfirmed == true`, uma conta cujo e-mail acabara de ser trocado continuava sendo
+tratada como "confirmada" — mesmo para um endereço que o usuário nunca provou controlar. Cadeia de
+exploração completa: uma sessão sequestrada (cookie roubado, XSS, dispositivo destravado) bastava para
+trocar silenciosamente o e-mail para um endereço do atacante; a partir daí, o fluxo padrão de
+"esqueci minha senha" ficava imediatamente disponível para o atacante, sem qualquer notificação ao
+endereço antigo e sem qualquer prova de posse do novo. Isso é um primitivo completo de account
+takeover, não um problema teórico — a mesma classe de defeito documentada pela OWASP como
+reautenticação insuficiente em alteração de e-mail.
+
+Correção mínima e completa, seguindo padrões já estabelecidos no próprio código:
+
+- `User.UpdateAccount` (Domain): ao detectar que o e-mail normalizado realmente mudou, reseta
+  `IsEmailConfirmed = false` e `EmailConfirmedAtUtc = null` — o mesmo estado de uma conta recém-criada.
+- `UpdateCurrentUserAccountCommandHandler` (Application): exige e verifica a senha atual
+  (`IPasswordService.Verify`) sempre que o e-mail muda — exatamente o mesmo padrão já usado por
+  `ChangeCurrentUserPasswordCommandHandler` para trocar a senha — e, dentro da mesma transação, revoga
+  qualquer token de confirmação ativo e emite um novo via `IEmailConfirmationIssuer` (o mesmo
+  componente que `CreateAccountCommandHandler` usa no cadastro), enviando um e-mail de confirmação real
+  ao endereço novo.
+- `ProfileSection.razor`/`Account.razor.cs` (Web): novo campo "Current password" (mesmo padrão visual
+  de `SecuritySection.razor`, `type="password"`, `autocomplete="current-password"`), exigido no
+  cliente somente quando o e-mail realmente muda (rastreado via `_initialEmail`) — uma troca de Nome
+  isolada nunca pede senha. Toast dedicado avisa que a nova senha... (a nova confirmação de e-mail
+  precisa ser verificada no novo endereço).
+
+Nenhuma mudança de contrato público quebra compatibilidade: `UpdateUserAccountRequest.CurrentPassword`
+tem valor padrão `""`, e `BeeDayWebService.UpdateUserAsync` mantém um parâmetro opcional. Nenhuma
+mutação de banco HMG/produção foi necessária — o defeito era inteiramente de lógica de aplicação,
+sem dado corrompido a corrigir.
+
+4 novos testes em `UserAccountHandlersTests.cs` provam: troca só de Nome não exige senha e mantém
+`IsEmailConfirmed`; troca de e-mail com senha incorreta é rejeitada (e-mail não muda); troca de e-mail
+sem senha é rejeitada; troca de e-mail com senha correta reseta a confirmação, revoga tokens antigos e
+envia exatamente um e-mail de confirmação novo ao endereço novo.
+
+### 18.3 `BD30-F045` — exceção não tratada ao concluir onboarding, corrigido
+
+`Tutorial.razor.NextAsync`, no último slide, chamava `Store.CompleteOnboardingAsync()` sem
+`try/catch`, e o componente não injetava `ToastService`. Uma falha (rede, 5xx transitório, sessão
+expirada) se propagava como exceção não tratada dentro do circuito Blazor Server, sem qualquer
+feedback ao usuário — o único caminho de salvamento do app sem esse tratamento; `Account.razor`,
+`ProfileCreationState.CompleteProfileAsync` e todo o resto já seguiam o padrão
+`catch (OperationCanceledException) when (...) { } catch (Exception ex) { Toast.ShowError(...) }`.
+Corrigido replicando exatamente esse padrão, com um novo recurso `ToastCompleteErrorTitle` en-US/pt-BR/
+neutro. Novo teste em `TutorialTests.cs` (`WhenCompletingOnboardingFails_...`) simula a falha via
+`StubSender` e prova que um toast localizado aparece e o usuário permanece na última tela, em vez de
+uma exceção não tratada.
+
+### 18.4 `BD30-F043` — `ProfileCreationState` nunca propagava cancelamento, corrigido
+
+Gap residual do `BD30-F035` (Sprint 30.8): aquela varredura buscou apenas `*.razor`/`*.razor.cs`, e
+`ProfileCreationState.cs` é uma state class `.cs` simples (`AddScoped`, mesmo ciclo de vida de
+`DashboardState`) — suas 4 chamadas a `BeeDayWebService` sempre usavam `CancellationToken.None`
+implícito. Corrigido com o mesmo padrão já estabelecido: `CancellationTokenSource` de ciclo de vida do
+circuito + `IDisposable` + token propagado em toda chamada + `catch (OperationCanceledException) when
+(cancellation.IsCancellationRequested)`. O método `GetStatusAsync()` (código morto, zero chamadores
+confirmados por busca em `src`/`tests`) foi removido no mesmo commit. 3 novos testes em
+`ProfileCreationStateCancellationTests.cs`, espelhando `DashboardStateCancellationTests.cs`.
+
+### 18.5 `BD30-F049` — cobertura de viewport ausente para Account/Tutorial/Etapa 2 do cadastro, corrigido
+
+`LoginExperienceTests.CreateAccountMatchesPublicAuthenticationLayout` já provava a Etapa 1 (conta) do
+cadastro em 3 larguras; nada provava a Etapa 2 (apelido), `/account` (as 3 seções) ou
+`/onboarding/tutorial` — confirmado por busca de `SetViewportSizeAsync` em todo `BeeDay.E2E.Tests`
+(15 arquivos usam o padrão) cruzada com os arquivos que tocam essas três rotas. Novo arquivo
+`tests/BeeDay.E2E.Tests/AccountResponsiveLayoutTests.cs`: 3 testes × 2 larguras (390×844, 1280×800),
+mesmo padrão de `LoginExperienceTests` (`document.documentElement.scrollWidth >
+document.documentElement.clientWidth`). Executados via browser Chromium real contra as três rotas —
+6/6 passaram, nenhum overflow horizontal encontrado em nenhuma largura.
+
+### 18.6 `BD30-F040` — determinação: fluxo de produto ausente, não código morto
+
+Sprint 30.10 encaminhou a esta Sprint a pergunta: `User.SetActive` é código morto, fluxo de produto
+ausente, capacidade reservada intencionalmente, ou outro estado documentado? A auditoria funcional
+completa desta Sprint — inspeção direta de `Account.razor` e das três seções de Settings, e busca por
+qualquer Command/handler alcançável que chame `SetActive` — confirma que **nenhuma** entrada de
+produto (autoatendimento em Settings ou fluxo administrativo) existe hoje. `ProfileSection.razor` só
+edita Nome/E-mail (mais o novo campo de senha do `BD30-F044`); `SecuritySection.razor` só troca senha;
+`PreferencesSection.razor` só ajusta idioma/tema. Nenhum botão, link ou rota "excluir conta"/
+"desativar conta" existe em lugar nenhum do `src/BeeDay.Web` auditado nesta e nas Sprints anteriores.
+
+Classificação final: **fluxo de produto ausente**, não código morto — o método de Domain está correto,
+testado, e o guard de segurança em `OnValidatePrincipal` funciona; simplesmente não há hoje nenhuma
+ação real de usuário que o alcance. Não é capacidade "reservada" documentada em nenhum ADR ou
+documento de produto encontrado.
+
+Consistente com a instrução explícita do proprietário para esta Sprint ("não inventar uma política de
+produto de desativação"): esta auditoria **não** decide se/como construir autoatendimento ou fluxo
+administrativo de desativação — isso é uma decisão de política de produto, fora da autoridade de uma
+auditoria. O achado permanece `OPEN`, reclassificado de "Sprint 30.11" para "decisão do proprietário"
+na tabela de achados — não há mais trabalho de auditoria a fazer aqui até que o proprietário decida se
+quer essa capacidade.
+
+### 18.7 Achados menores/informativos (não corrigidos, encaminhados)
+
+- `BD30-F047` (nova, média): `AuthenticatedCultureSynchronizer.SynchronizeAtLoginAsync` implementa,
+  deliberadamente e por documentação existente, a regra "um cookie `BeeDay.Culture` explícito sempre
+  vence naquela sessão, e a conta converge para ele". Consequência não coberta pelo critério de aceite
+  desta auditoria ("preferência de idioma permanece consistente entre sessões autenticadas"): trocar o
+  idioma em Settings no Dispositivo A e depois logar no Dispositivo B com um cookie `BeeDay.Culture`
+  desatualizado silenciosamente reverte a preferência de conta recém-alterada de volta ao valor do
+  cookie antigo, sem qualquer aviso. Comportamento documentado, não um bug de implementação — mas
+  conflita com o critério de aceite conforme escrito. Decisão de produto necessária (cookie deveria
+  ceder à conta no login? cookies não deveriam sobreviver a uma troca de idioma via conta?).
+  Encaminhada à Sprint 30.20 (UX, responsividade e localização), que já é proprietária de `INV-016`.
+- `BD30-F048` (nova, baixa): `Program.cs` grava `ClaimTypes.Name`/`ClaimTypes.Email` no cookie
+  `BeeDay.Auth` no login (até 14 dias sob "remember me"), mas nunca os atualiza após uma edição de
+  Nome/E-mail em Account — hoje inofensivo (busca confirma que nada em
+  `AuthenticatedUserInitializer.cs`/`HttpCurrentUserContext.cs`/`OnValidatePrincipal` lê essas duas
+  claims de volta), mas é PII potencialmente desatualizada sentada num cookie de longa duração.
+  Encaminhada à Sprint 30.22 (Segurança e privacidade), que já é proprietária de `INV-017`.
+- Achado de UX não-bloqueante, corrigido diretamente (sem necessidade de nova entrada no Ledger):
+  `SecurityHint` (Account → Security) não avisava que trocar a senha desconecta todos os dispositivos,
+  incluindo o atual — comportamento correto e já intencional (`InvalidateSessions()`), só faltava a
+  mensagem proativa. Texto adicionado em en-US/pt-BR/neutro.
+
+### 18.8 Implementação
+
+- `src/BeeDay.Domain/Entities/User.cs` — `UpdateAccount` reseta `IsEmailConfirmed`/
+  `EmailConfirmedAtUtc` quando o e-mail muda de fato (`BD30-F044`).
+- `src/BeeDay.Application/Features/Users/Handlers/UserHandlers.cs` — `UpdateCurrentUserAccountCommandHandler`
+  reescrito: reverificação de senha, transação, revogação/emissão de token de confirmação, envio de
+  e-mail (`BD30-F044`).
+- `src/BeeDay.Application/Features/Users/Requests/UpdateUserAccountRequest.cs` — novo campo opcional
+  `CurrentPassword`.
+- `src/BeeDay.Application/Features/Users/Validation/CommandValidators.cs` — `MaximumLength` defensivo
+  em `CurrentPassword` (sem `NotEmpty`, já que é condicional).
+- `src/BeeDay.Web/Services/BeeDayWebService.cs` — `UpdateUserAsync` propaga `currentPassword`.
+- `src/BeeDay.Web/Components/Features/Account/Components/ProfileSection.razor`,
+  `src/BeeDay.Web/Components/Features/Account/Models/ProfileFormModel.cs`,
+  `src/BeeDay.Web/Components/Features/Account/Pages/Account.razor` — campo de senha atual condicional,
+  toast dedicado de confirmação pendente, guard client-side (`BD30-F044`); hint de logout em toda troca
+  de senha (`SecurityHint`).
+- `src/BeeDay.Web/Components/Features/Onboarding/Pages/Tutorial.razor` — `try/catch` +
+  `ToastService` em `NextAsync` (`BD30-F045`).
+- `src/BeeDay.Web/Components/Features/ProfileCreation/State/ProfileCreationState.cs` — cancelamento
+  propagado, `GetStatusAsync()` morto removido (`BD30-F043`).
+- `src/BeeDay.Web/Components/Features/Account/AccountResources.*.resx`,
+  `src/BeeDay.Web/Components/Features/Onboarding/OnboardingResources.*.resx` — novos recursos en-US/
+  pt-BR/neutro.
+- `docs/web/04-feature-components.md` — corrige `/daily` → `/profile` na descrição de `Tutorial.razor`
+  (`BD30-F046`).
+- `tests/BeeDay.Application.Tests/UserAccountHandlersTests.cs` — 4 novos testes (`BD30-F044`).
+- `tests/BeeDay.Application.Tests/FeatureServicesTests.cs` — novo teste
+  `CompleteUserProfileHandler_RejectsASecondProfileCompletion`, fechando a única lacuna real que a
+  auditoria confirmou nos handlers de perfil (os outros dois cenários já eram cobertos).
+- `tests/BeeDay.Web.Tests/Components/Onboarding/TutorialTests.cs` — novo teste de falha (`BD30-F045`).
+- `tests/BeeDay.Web.Tests/Components/ProfileCreation/ProfileCreationStateCancellationTests.cs` (novo)
+  — 3 testes (`BD30-F043`).
+- `tests/BeeDay.E2E.Tests/AccountResponsiveLayoutTests.cs` (novo) — 3 testes × 2 larguras (`BD30-F049`).
+
+Nenhuma mudança de política de produto de identidade além do que `BD30-F044` exige por segurança;
+nenhuma mudança de schema (`IsEmailConfirmed`/`EmailConfirmedAtUtc` já existiam); nenhuma mutação de
+banco HMG/produção.
+
+### 18.9 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| `dotnet test tests/BeeDay.Application.Tests/...` | PASS, 117/117 |
+| `dotnet test tests/BeeDay.Web.Tests/...` | PASS, 873/873 |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter AccountResponsiveLayoutTests` | PASS, 6/6 |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter TutorialTests` | PASS, 8/8 |
+| `dotnet test BeeDay.slnx` (Debug, completo) | PASS, 1.525/1.525 (117 Domain, 117 Application, 216 Infrastructure, 875 Web, 200 E2E) — execução limpa, 0 falhas, ~7min de E2E |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.525/1.525 — execução limpa, 0 falhas |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+
+### 18.10 Continuidade e entrega
+
+`BD30-F044` é o achado mais severo desta EPIC até agora: um primitivo completo de account takeover
+alcançável por qualquer sessão sequestrada, não uma fraqueza teórica. Como `BD30-F038`/`BD30-F039` na
+Sprint 30.10, só se tornou visível auditando o fluxo completo de ponta a ponta (Domain → Application →
+Web → e-mail) em vez de qualquer camada isolada — nenhum teste unitário anterior falhava, porque
+nenhum testava o comportamento de confirmação em uma troca de e-mail. Nenhuma mutação de banco HMG/
+produção foi executada ou é necessária: o defeito era inteiramente de lógica de aplicação (nenhum
+usuário real precisa de correção retroativa, já que `IsEmailConfirmed` só é lido para decidir se um
+e-mail de redefinição é enviado — não há histórico incorreto a reconciliar).

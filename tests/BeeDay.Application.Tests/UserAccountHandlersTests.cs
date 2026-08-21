@@ -1,3 +1,4 @@
+using BeeDay.Application.Common.Identity;
 using BeeDay.Application.Common.Security;
 using BeeDay.Application.Features.Users.Commands;
 using BeeDay.Application.Features.Users.Handlers;
@@ -56,17 +57,74 @@ public sealed class UserAccountHandlersTests
     }
 
     [Fact]
-    public async Task UpdateProfile_ChangesNameAndEmail()
+    public async Task UpdateAccount_NameOnlyChange_DoesNotRequirePasswordAndKeepsEmailConfirmed()
     {
         var repository = CreateRepository("hash:Current123", out var context, out var user);
-        var handler = new UpdateCurrentUserAccountCommandHandler(repository.Users, context);
+        user.ConfirmEmail(user.CreatedAtUtc);
+        var emailSender = new FakeEmailSender();
+        var handler = CreateHandler(repository, context, emailSender);
 
         await handler.Handle(
-            new UpdateCurrentUserAccountCommand(new UpdateUserAccountRequest("Tiago Arrigoni", "tiago@beeday.invalid")),
+            new UpdateCurrentUserAccountCommand(new UpdateUserAccountRequest("Tiago Arrigoni", user.Email)),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal("Tiago Arrigoni", user.Name);
+        Assert.True(user.IsEmailConfirmed);
+        Assert.Empty(emailSender.Messages);
+        Assert.Empty(repository.UserTokensData);
+    }
+
+    // BD30-F044 (EPIC 30 Sprint 30.11): before this fix, UpdateCurrentUserAccountCommandHandler let a
+    // hijacked session silently repoint Email — with no password check and no confirmation reset —
+    // which RequestPasswordResetCommandHandler's IsEmailConfirmed gate then treated as already-verified,
+    // a full account-takeover primitive. These four tests prove the closed gap.
+    [Fact]
+    public async Task UpdateAccount_EmailChange_RejectsAnIncorrectCurrentPassword()
+    {
+        var repository = CreateRepository("hash:Current123", out var context, out var user);
+        var handler = CreateHandler(repository, context, new FakeEmailSender());
+
+        var exception = await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
+            new UpdateCurrentUserAccountCommand(new UpdateUserAccountRequest("Tiago", "tiago@beeday.invalid", "Wrong123")),
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal("The current password is incorrect.", exception.Message);
+        Assert.Equal("test@beeday.invalid", user.Email);
+    }
+
+    [Fact]
+    public async Task UpdateAccount_EmailChange_RejectsAMissingCurrentPassword()
+    {
+        var repository = CreateRepository("hash:Current123", out var context, out var user);
+        var handler = CreateHandler(repository, context, new FakeEmailSender());
+
+        await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
+            new UpdateCurrentUserAccountCommand(new UpdateUserAccountRequest("Tiago", "tiago@beeday.invalid")),
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal("test@beeday.invalid", user.Email);
+    }
+
+    [Fact]
+    public async Task UpdateAccount_EmailChange_ResetsConfirmationAndSendsAFreshConfirmationEmailToTheNewAddress()
+    {
+        var repository = CreateRepository("hash:Current123", out var context, out var user);
+        user.ConfirmEmail(user.CreatedAtUtc);
+        var emailSender = new FakeEmailSender();
+        var handler = CreateHandler(repository, context, emailSender);
+
+        await handler.Handle(
+            new UpdateCurrentUserAccountCommand(new UpdateUserAccountRequest("Tiago Arrigoni", "tiago@beeday.invalid", "Current123")),
             TestContext.Current.CancellationToken);
 
         Assert.Equal("Tiago Arrigoni", user.Name);
         Assert.Equal("tiago@beeday.invalid", user.Email);
+        Assert.False(user.IsEmailConfirmed);
+        Assert.Null(user.EmailConfirmedAtUtc);
+        var message = Assert.Single(emailSender.Messages);
+        Assert.Equal("tiago@beeday.invalid", message.Recipient);
+        var token = Assert.Single(repository.UserTokensData);
+        Assert.Equal(UserTokenType.EmailConfirmation, token.Type);
     }
 
     [Fact]
@@ -74,10 +132,10 @@ public sealed class UserAccountHandlersTests
     {
         var repository = CreateRepository("hash:Current123", out var context, out _);
         repository.UsersData.Add(User.Create("Other User", "other@beeday.invalid"));
-        var handler = new UpdateCurrentUserAccountCommandHandler(repository.Users, context);
+        var handler = CreateHandler(repository, context, new FakeEmailSender());
 
         await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
-            new UpdateCurrentUserAccountCommand(new UpdateUserAccountRequest("Tiago", "other@beeday.invalid")),
+            new UpdateCurrentUserAccountCommand(new UpdateUserAccountRequest("Tiago", "other@beeday.invalid", "Current123")),
             TestContext.Current.CancellationToken));
     }
 
@@ -144,6 +202,35 @@ public sealed class UserAccountHandlersTests
         repository.UsersData.Add(user);
         context = new FakeCurrentUserContext(user.Id);
         return repository;
+    }
+
+    private static UpdateCurrentUserAccountCommandHandler CreateHandler(
+        FakeUnitOfWork repository, FakeCurrentUserContext context, IEmailSender emailSender) =>
+        new(repository, new FakePasswordService(), new FakeConfirmationIssuer(), emailSender, new FakeClock(DateTimeOffset.UtcNow), context);
+
+    private sealed class FakeConfirmationIssuer : IEmailConfirmationIssuer
+    {
+        public (UserToken Token, EmailMessage Message) Issue(User user)
+        {
+            var now = user.CreatedAtUtc;
+            var token = UserToken.Create(user.Id, UserTokenType.EmailConfirmation, "hash:confirmation", now, now.AddHours(24));
+            return (token, new EmailMessage(user.Email, "Confirm", "Body"));
+        }
+    }
+
+    private sealed class FakeEmailSender : IEmailSender
+    {
+        public List<EmailMessage> Messages { get; } = [];
+        public Task SendAsync(EmailMessage message, CancellationToken cancellationToken = default)
+        {
+            Messages.Add(message);
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class FakeClock(DateTimeOffset now) : IClock
+    {
+        public DateTimeOffset UtcNow { get; } = now;
     }
 
     private sealed class FakePasswordService : IPasswordService

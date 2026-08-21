@@ -85,6 +85,12 @@
   <data name="ToastProfileErrorTitle" xml:space="preserve">
     <value>O perfil não foi salvo</value>
   </data>
+  <data name="ToastProfileCurrentPasswordRequiredMessage" xml:space="preserve">
+    <value>Informe sua senha atual para alterar seu endereço de e-mail.</value>
+  </data>
+  <data name="ToastProfileEmailChangedMessage" xml:space="preserve">
+    <value>Seu perfil foi atualizado. Verifique seu novo e-mail para confirmá-lo.</value>
+  </data>
   <data name="ToastPasswordChangedMessage" xml:space="preserve">
     <value>Sua senha foi alterada.</value>
   </data>
@@ -127,6 +133,9 @@
   <data name="ProfileHint" xml:space="preserve">
     <value>Seu apelido é permanente depois que seu perfil é criado.</value>
   </data>
+  <data name="ProfileEmailChangeHint" xml:space="preserve">
+    <value>Alterar seu e-mail exige sua senha atual. Enviaremos um novo link de confirmação para o novo endereço.</value>
+  </data>
   <data name="SecurityEyebrow" xml:space="preserve">
     <value>SENHA</value>
   </data>
@@ -149,7 +158,7 @@
     <value>Alterar Senha</value>
   </data>
   <data name="SecurityHint" xml:space="preserve">
-    <value>Use pelo menos 8 caracteres, incluindo uma letra e um número.</value>
+    <value>Use pelo menos 8 caracteres, incluindo uma letra e um número. Você será desconectado de todos os dispositivos, incluindo este, após a alteração.</value>
   </data>
   <data name="PreferencesEyebrow" xml:space="preserve">
     <value>EXPERIÊNCIA</value>

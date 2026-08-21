@@ -63,6 +63,7 @@
   <data name="BackButton" xml:space="preserve"><value>VOLTAR</value></data>
   <data name="NextButton" xml:space="preserve"><value>PRÓXIMO</value></data>
   <data name="EnterBeeDayButton" xml:space="preserve"><value>ENTRAR NO beeday</value></data>
+  <data name="ToastCompleteErrorTitle" xml:space="preserve"><value>Não foi possível concluir o onboarding</value></data>
   <data name="Slide1Eyebrow" xml:space="preserve"><value>01 — DIÁRIO</value></data>
   <data name="Slide1Title" xml:space="preserve"><value>Seu centro de comando</value></data>
   <data name="Slide1IconLabel" xml:space="preserve"><value>Diário</value></data>

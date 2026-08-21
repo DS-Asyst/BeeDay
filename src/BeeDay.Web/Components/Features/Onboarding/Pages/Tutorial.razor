@@ -3,9 +3,12 @@
 @layout BeeDay.Web.Components.Layout.OnboardingLayout
 @implements IDisposable
 @using BeeDay.Web.Components.Features.Onboarding
+@using BeeDay.Web.Localization
 @inject BeeDayWebService Store
 @inject NavigationManager Navigation
+@inject ToastService Toast
 @inject IStringLocalizer<OnboardingResources> Localizer
+@inject IStringLocalizer<SharedResources> SharedLocalizer
 
 <PageTitle>@Localizer["PageTitle"]</PageTitle>
 
@@ -118,6 +121,13 @@
         {
             await Store.CompleteOnboardingAsync(_cts.Token);
             Navigation.NavigateTo("/profile", forceLoad: true, replace: true);
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
+        }
+        catch (Exception exception)
+        {
+            Toast.ShowError(DomainErrorLocalizer.Translate(exception, SharedLocalizer), Localizer["ToastCompleteErrorTitle"]);
         }
         finally
         {

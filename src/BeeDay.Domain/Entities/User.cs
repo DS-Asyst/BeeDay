@@ -72,10 +72,27 @@ public sealed class User : Entity
     }
 
     public void UpdateName(string name) { Name = UserName.Create(name).Value; Touch(); }
+
+    /// <summary>
+    /// EPIC 30 Sprint 30.11 / BD30-F044: an email change resets confirmation state, exactly like a
+    /// freshly-registered account. Without this, an attacker who hijacks a session (stolen cookie,
+    /// XSS) could silently repoint Email to an address they control — it was previously left
+    /// "confirmed" — then immediately pass <c>RequestPasswordResetCommandHandler</c>'s
+    /// <c>IsEmailConfirmed</c> gate to lock the real owner out. The Application-layer caller
+    /// (<c>UpdateCurrentUserAccountCommandHandler</c>) closes the rest of the gap by requiring the
+    /// current password before calling this for an email change.
+    /// </summary>
     public void UpdateAccount(string name, string email)
     {
         Name = UserName.Create(name).Value;
-        Email = EmailAddress.Create(email).Value;
+        var normalizedEmail = EmailAddress.Create(email).Value;
+        if (!string.Equals(Email, normalizedEmail, StringComparison.Ordinal))
+        {
+            Email = normalizedEmail;
+            IsEmailConfirmed = false;
+            EmailConfirmedAtUtc = null;
+        }
+
         Touch();
     }
     public void UpdatePreferences(UserLanguage language, UserTheme theme)
