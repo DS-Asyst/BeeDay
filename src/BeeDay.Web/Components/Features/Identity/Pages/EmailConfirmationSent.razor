@@ -32,6 +32,6 @@
             ? Localizer["ResendAvailableInSeconds", _secondsRemaining]
             : Localizer["ResendConfirmationButton"];
     private async Task ResendAsync() { if (_busy || _secondsRemaining>0 || string.IsNullOrWhiteSpace(Email)) return; _busy=true; _error=null; try { await Sender.Send(new BeeDay.Application.Features.Identity.Commands.ResendEmailConfirmationCommand(new(Email.Trim())), _pageCts.Token); _resent=true; StartCountdown(); } catch(OperationCanceledException) when (_pageCts.IsCancellationRequested) { } catch(Exception ex) { _error=DomainErrorLocalizer.Translate(ex, SharedLocalizer); } finally { _busy=false; } }
-    private void StartCountdown(){_secondsRemaining=60;_cts?.Cancel();_cts=new();_timer=new(TimeSpan.FromSeconds(1));_=RunAsync(_cts.Token);} private async Task RunAsync(CancellationToken token){try{while(_secondsRemaining>0&&await _timer!.WaitForNextTickAsync(token)){_secondsRemaining--;await InvokeAsync(StateHasChanged);}}catch(OperationCanceledException){}}
+    private void StartCountdown(){_secondsRemaining=60;_cts?.Cancel();_cts?.Dispose();_timer?.Dispose();_cts=new();_timer=new(TimeSpan.FromSeconds(1));_=RunAsync(_cts.Token);} private async Task RunAsync(CancellationToken token){try{while(_secondsRemaining>0&&await _timer!.WaitForNextTickAsync(token)){_secondsRemaining--;await InvokeAsync(StateHasChanged);}}catch(OperationCanceledException){}}
     public void Dispose(){_cts?.Cancel();_cts?.Dispose();_timer?.Dispose();_pageCts.Cancel();_pageCts.Dispose();}
 }
