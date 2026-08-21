@@ -1,0 +1,32 @@
+@inject IStringLocalizer<DesignSystemResources> Localizer
+@inject NavigationManager Navigation
+
+@* EPIC 30 Sprint 30.23 (BD30-F065): before this component existed, an unhandled exception thrown
+   from any page's render tree or event handler tore down the entire SignalR circuit — the user saw
+   the exact same generic "connection lost, trying to reconnect" experience as a real network blip,
+   with no distinguishable "something in the app broke" message and no recovery beyond a full page
+   reload the user had to think to try themselves. Wrapping @Body in this component (via
+   LoggingErrorBoundary, the stock ErrorBoundary with server-side logging added) keeps the circuit
+   alive and renders this branded, localized fallback instead. *@
+<LoggingErrorBoundary>
+    <ChildContent>
+        @ChildContent
+    </ChildContent>
+    <ErrorContent>
+        <div class="beeday-error-boundary" role="alert">
+            <BeeDayEmptyState Title="@Localizer["ErrorBoundaryTitle"]"
+                              Description="@Localizer["ErrorBoundaryMessage"]"
+                              Icon="BeeDayIconName.ValidationError" />
+            <BeeDayButton Variant="BeeDayButtonVariant.Primary" OnClick="Reload">@Localizer["ErrorBoundaryReloadButton"]</BeeDayButton>
+        </div>
+    </ErrorContent>
+</LoggingErrorBoundary>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    // A full reload establishes a brand new circuit rather than calling ErrorBoundary.Recover() to
+    // resume the same one — the component tree state that led to the exception is not known to be
+    // safe to resume, so starting clean is the predictable, safe default recovery action.
+    private void Reload() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+}

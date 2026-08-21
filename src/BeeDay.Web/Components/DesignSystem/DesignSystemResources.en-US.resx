@@ -126,6 +126,15 @@
   <data name="LoadingDefaultLabel" xml:space="preserve">
     <value>Saving changes...</value>
   </data>
+  <data name="ErrorBoundaryTitle" xml:space="preserve">
+    <value>Something went wrong</value>
+  </data>
+  <data name="ErrorBoundaryMessage" xml:space="preserve">
+    <value>This page ran into an unexpected problem. Reloading usually fixes it.</value>
+  </data>
+  <data name="ErrorBoundaryReloadButton" xml:space="preserve">
+    <value>Reload page</value>
+  </data>
   <data name="EditorModalDeleteButton" xml:space="preserve">
     <value>Delete</value>
   </data>

@@ -7,7 +7,7 @@
    replaced by the minimal white EditorialFooter (§26). Home, Login, and other PublicLayout
    consumers are unaffected — they keep PublicLayout. *@
 <div class="editorial-layout">
-    <main class="editorial-layout__main">@Body</main>
+    <main class="editorial-layout__main"><BeeDayErrorBoundary>@Body</BeeDayErrorBoundary></main>
     <EditorialFooter />
     <BeeDayToastHost />
 </div>

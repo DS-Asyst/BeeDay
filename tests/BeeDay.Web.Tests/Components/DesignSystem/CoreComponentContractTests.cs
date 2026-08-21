@@ -20,7 +20,7 @@ public sealed class CoreComponentContractTests
         {
             "BeeDayBrand", "BeeDayButton", "BeeDayCard", "BeeDayCheckbox",
             "BeeDayConfirmDialog", "BeeDayDashboardSkeleton", "BeeDayDateInput", "BeeDayEmptyState",
-            "BeeDayHero", "BeeDayIcon", "BeeDayInput", "BeeDayLoading", "BeeDayPageHeader",
+            "BeeDayErrorBoundary", "BeeDayHero", "BeeDayIcon", "BeeDayInput", "BeeDayLoading", "BeeDayPageHeader",
             "BeeDayProgressBar", "BeeDaySectionHeader", "BeeDaySelect", "BeeDaySettingsForm",
             "BeeDaySettingsSection", "BeeDaySkeleton", "BeeDayTextArea", "BeeDayToastHost",
             "BeeDayValidationMessage", "EditorModalShell", "SearchHighlight"

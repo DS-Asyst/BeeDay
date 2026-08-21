@@ -94,6 +94,15 @@ public sealed class GlobalExceptionHandler(
                 StatusCodes.Status400BadRequest,
                 "Malformed request",
                 includeTechnicalDetails ? exception.Message : "The request could not be processed. Reload the page and try again."),
+            // ConcurrencyConflictException IS-A PersistenceException, so this arm must stay ahead of
+            // the broader PersistenceException arm below. An optimistic-concurrency conflict means
+            // the record itself changed under the user, not that the data store is unavailable —
+            // "try again shortly" would be actively misleading here, since retrying the identical
+            // stale write fails again; the user needs to reload the record first.
+            ConcurrencyConflictException => Create(
+                StatusCodes.Status409Conflict,
+                "Concurrency conflict",
+                "This record was changed by another operation. Reload the page and try again."),
             PersistenceException => Create(
                 StatusCodes.Status503ServiceUnavailable,
                 "Persistence unavailable",
