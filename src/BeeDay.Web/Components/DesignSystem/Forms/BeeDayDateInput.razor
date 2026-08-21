@@ -20,11 +20,12 @@
                    ValueChanged="ValueChanged"
                    ValueExpression="ValueExpression"
                    disabled="@Disabled"
+                   aria-describedby="@(ShowValidationMessage ? ValidationMessageId : null)"
                    @attributes="AdditionalAttributes" />
         <BeeDayIcon Name="BeeDayIconName.Calendar" Size="BeeDayIconSize.Small" Color="BeeDayIconColor.Muted" Class="beeday-field__control-icon" />
     </span>
 </label>
 @if (ShowValidationMessage)
 {
-    <BeeDayValidationMessage For="ValueExpression" />
+    <BeeDayValidationMessage For="ValueExpression" Id="@ValidationMessageId" />
 }

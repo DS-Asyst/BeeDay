@@ -57,6 +57,30 @@ public sealed class ProjectLifecycleTests(PlaywrightAppFixture fixture) : E2ETes
         }
     }
 
+    // EPIC 30 Sprint 30.20: the Project workspace panel — the most layout-complex authenticated
+    // surface after Wallet, embedding its own To-Do list and progress bar — had zero narrow-viewport
+    // overflow coverage anywhere in the suite, unlike /daily, /wallet, /account and the onboarding
+    // routes (all covered elsewhere).
+    [Fact]
+    public async Task ProjectWorkspace_RendersWithoutHorizontalOverflowOnMobile()
+    {
+        await LoginToDailyAsync();
+        var projectTitle = $"E2E Project Mobile {Guid.NewGuid():N}"[..24];
+        var todoTitle = $"E2E Todo Mobile {Guid.NewGuid():N}"[..24];
+
+        await CreateProjectAsync(projectTitle);
+        await using (await OpenProjectWorkspaceAsync(projectTitle))
+        {
+            await CreateTodoInOpenWorkspaceAsync(todoTitle);
+
+            await Page.SetViewportSizeAsync(390, 844);
+            var workspace = Page.GetByRole(AriaRole.Dialog, new() { Name = projectTitle });
+            await Expect(workspace.GetByRole(AriaRole.Progressbar)).ToBeVisibleAsync();
+            await Expect(workspace.Locator(".project-workspace__todo").Filter(new() { HasText = todoTitle })).ToBeVisibleAsync();
+            Assert.False(await Page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth"));
+        }
+    }
+
     [Fact]
     public async Task EditProject_UpdatesFieldsAndPersistsAfterReload()
     {

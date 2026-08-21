@@ -7,6 +7,7 @@
                    ValueChanged="ValueChanged"
                    ValueExpression="ValueExpression"
                    disabled="@Disabled"
+                   aria-describedby="@(ShowValidationMessage ? ValidationMessageId : null)"
                    @attributes="AdditionalAttributes" />
     <span class="beeday-checkbox__visual" aria-hidden="true">
         <BeeDayIcon Name="BeeDayIconName.CheckboxUnchecked" Size="BeeDayIconSize.Small" Class="beeday-checkbox__unchecked" />
@@ -16,5 +17,5 @@
 </label>
 @if (ShowValidationMessage)
 {
-    <BeeDayValidationMessage For="ValueExpression" />
+    <BeeDayValidationMessage For="ValueExpression" Id="@ValidationMessageId" />
 }

@@ -96,6 +96,24 @@ public sealed class NavigationTests(PlaywrightAppFixture fixture) : E2ETestBase(
         await Expect(Page.Locator("#mobile-navigation")).ToBeHiddenAsync();
     }
 
+    // EPIC 30 Sprint 30.20: the drawer already moves focus to its own close button on open, but
+    // nothing previously returned focus to the hamburger trigger when it closed — via Escape, the
+    // backdrop, or the close button — leaving keyboard/screen-reader focus lost to <body>.
+    [Fact]
+    public async Task Mobile_ClosingTheDrawerReturnsFocusToTheHamburgerTrigger()
+    {
+        await Page.SetViewportSizeAsync(390, 844);
+        await LoginToDailyAsync();
+
+        var trigger = Page.GetByRole(AriaRole.Button, new() { Name = "Open navigation menu" });
+        await trigger.ClickAsync();
+        await Expect(Page.Locator("#mobile-navigation")).ToBeVisibleAsync();
+
+        await Page.Keyboard.PressAsync("Escape");
+        await Expect(Page.Locator("#mobile-navigation")).ToBeHiddenAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Open navigation menu" })).ToBeFocusedAsync();
+    }
+
     [Fact]
     public async Task Mobile_CloseButtonCloses()
     {

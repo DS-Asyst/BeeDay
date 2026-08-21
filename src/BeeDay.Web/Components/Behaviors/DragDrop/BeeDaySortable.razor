@@ -12,7 +12,7 @@
             <div class="beeday-sortable__item beeday-card-enter @(RemovingItemId == itemId ? "beeday-card-leave" : string.Empty)"
                  data-sortable-item="@itemId"
                  role="listitem"
-                 aria-label="Hold and drag this card to reorder it. Use the arrow keys when focused."
+                 aria-label="@ItemAriaLabel"
                  @key="itemId">
                 @ItemTemplate(itemId)
             </div>
@@ -25,7 +25,7 @@
             <div class="beeday-sortable__item beeday-card-enter @(RemovingItemId == itemId ? "beeday-card-leave" : string.Empty)"
                  data-sortable-item="@itemId"
                  role="listitem"
-                 aria-label="Hold and drag this card to reorder it. Use the arrow keys when focused."
+                 aria-label="@ItemAriaLabel"
                  @key="itemId">
                 @ItemTemplate(itemId)
             </div>

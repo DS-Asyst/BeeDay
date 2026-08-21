@@ -14,6 +14,7 @@ public partial class BeeDaySortable : IAsyncDisposable
     [Parameter, EditorRequired] public EventCallback<SortableReorderEvent> OnReorder { get; set; }
     [Parameter, EditorRequired] public string CollectionKey { get; set; } = string.Empty;
     [Parameter] public string AriaLabel { get; set; } = "Reorderable activity list";
+    [Parameter] public string ItemAriaLabel { get; set; } = "Hold and drag this card to reorder it. Use the arrow keys when focused.";
     [Parameter] public string? Class { get; set; }
     [Parameter] public int VirtualizationThreshold { get; set; } = 30;
     [Parameter] public float ItemSize { get; set; } = 86f;

@@ -12,6 +12,7 @@ public partial class BeeDayValidationMessage<TValue> : IDisposable
 
     [CascadingParameter] private EditContext? EditContext { get; set; }
     [Parameter, EditorRequired] public Expression<Func<TValue>> For { get; set; } = default!;
+    [Parameter] public string? Id { get; set; }
 
     private FieldIdentifier _fieldIdentifier;
     private IReadOnlyList<string> _messages = Array.Empty<string>();
