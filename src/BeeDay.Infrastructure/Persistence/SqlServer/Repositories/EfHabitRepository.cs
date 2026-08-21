@@ -61,8 +61,13 @@ internal sealed class EfHabitRepository : EfRepositoryBase, IHabitRepository
         // habit was materialized by a different, already-disposed context (e.g. a prior GetAsync) — its
         // RowVersion (shadow, never exposed to Domain) is unknown to this instance. Re-fetching by Id
         // tracks the current row, including its real RowVersion, so the DELETE's concurrency check is
-        // genuine instead of a guaranteed mismatch against a default value.
-        var tracked = await context.Habits.SingleAsync(existing => existing.Id == habit.Id, cancellationToken);
+        // genuine instead of a guaranteed mismatch against a default value. The UserId filter is
+        // defense-in-depth (EPIC 30 Sprint 30.22, BD30-F053): the sole call site already verifies
+        // ownership before constructing habit, so this never changes behavior for a legitimate
+        // caller — it only makes a hypothetical future caller that skips that check fail loudly
+        // instead of silently deleting another user's row.
+        var tracked = await context.Habits.SingleAsync(
+            existing => existing.Id == habit.Id && existing.UserId == habit.UserId, cancellationToken);
         context.Habits.Remove(tracked);
         await EfConcurrencySaveChanges.ExecuteAsync(context, cancellationToken);
     }

@@ -133,8 +133,13 @@ em si, parte da garantia.
 - CSP — uma CSP completa (script-src etc.) ainda está planejada; o framework Razor Components já
   envia `Content-Security-Policy: frame-ancestors 'self'` e `X-Frame-Options: SAMEORIGIN`
   automaticamente em toda resposta renderizada, independentemente de qualquer configuração desta
-  aplicação — confirmado via teste de integração (`SecurityHeadersIntegrationTests`).
-  Referrer-Policy, X-Content-Type-Options e Permissions-Policy continuam ausentes;
+  aplicação — confirmado via teste de integração (`SecurityHeadersIntegrationTests`);
+- Referrer-Policy (`strict-origin-when-cross-origin`), X-Content-Type-Options (`nosniff`) e
+  Permissions-Policy (`camera=(), microphone=(), geolocation=()`) — implementados na Sprint 30.22
+  da EPIC 30 (`SecurityHeadersMiddleware`, `src/BeeDay.Web/Diagnostics/SecurityHeadersMiddleware.cs`),
+  registrado logo após `CorrelationIdMiddleware` em `Program.cs`, aplicado a toda resposta.
+  Deliberadamente não define `X-Frame-Options` nem CSP — o framework Razor Components já os
+  controla, e sobrescrevê-los aqui arriscaria um header conflitante ou silenciosamente substituído;
 - headers de segurança testados — `SecurityHeadersIntegrationTests` cobre o estado real acima.
 
 ## 5. LGPD

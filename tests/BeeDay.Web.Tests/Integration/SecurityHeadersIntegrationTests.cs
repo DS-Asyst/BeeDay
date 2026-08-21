@@ -2,14 +2,14 @@ namespace BeeDay.Web.Tests.Integration;
 
 /// <summary>
 /// Verifies the security response headers this app ACTUALLY sends today, rather than assuming from
-/// reading Program.cs. Two sources contribute headers: Program.cs itself (only <c>UseHsts()</c>,
-/// Production-only) and ASP.NET Core's Razor Components framework, which — independent of anything
-/// this app configures — automatically adds <c>Content-Security-Policy: frame-ancestors 'self'</c>,
-/// <c>X-Frame-Options: SAMEORIGIN</c>, and no-cache Cache-Control/Pragma headers to every
-/// interactive-server-rendered response. docs/security/01-security-baseline.md lists a (fuller,
-/// script-src-covering) CSP as "planejada" (planned, not required this sprint); Referrer-Policy,
-/// X-Content-Type-Options, and Permissions-Policy are not claimed as implemented anywhere, and
-/// indeed aren't sent — recorded here as current state, not added speculatively.
+/// reading Program.cs. Two sources contribute headers: Program.cs (<c>UseHsts()</c>,
+/// Production-only, plus <c>SecurityHeadersMiddleware</c> since EPIC 30 Sprint 30.22 —
+/// X-Content-Type-Options, Referrer-Policy, Permissions-Policy) and ASP.NET Core's Razor Components
+/// framework, which — independent of anything this app configures — automatically adds
+/// <c>Content-Security-Policy: frame-ancestors 'self'</c>, <c>X-Frame-Options: SAMEORIGIN</c>, and
+/// no-cache Cache-Control/Pragma headers to every interactive-server-rendered response.
+/// docs/security/01-security-baseline.md lists a fuller, script-src-covering CSP as still planned —
+/// deliberately not attempted here (see the middleware's own doc comment for why).
 /// </summary>
 /// <remarks>
 /// HSTS could not be verified through <see cref="ProductionLikeWebApplicationFactory"/>:
@@ -42,19 +42,26 @@ public sealed class SecurityHeadersIntegrationTests(BeeDayWebApplicationFactory 
         Assert.True(response.Headers.CacheControl?.NoCache);
     }
 
+    // EPIC 30 Sprint 30.22: SecurityHeadersMiddleware now sends all three. Deliberately does not
+    // touch X-Frame-Options/CSP — the framework already owns those (see the class comment above and
+    // LoginPage_IncludesFrameworkProvidedFrameAncestorsAndClickjackingHeaders, still passing
+    // unchanged, confirming no conflict was introduced).
     [Fact]
-    public async Task LoginPage_DoesNotYetSendReferrerPolicyContentTypeOptionsOrPermissionsPolicy()
+    public async Task LoginPage_SendsReferrerPolicyContentTypeOptionsAndPermissionsPolicy()
     {
         var cancellationToken = Xunit.TestContext.Current.CancellationToken;
         using var client = factory.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
 
         var response = await client.GetAsync("/login", cancellationToken);
 
-        // Current, real state — not a requirement. If any of these become part of the security
-        // baseline, update this test (and docs/security/01-security-baseline.md) in the same change.
-        Assert.False(response.Headers.Contains("Referrer-Policy"));
-        Assert.False(response.Headers.Contains("X-Content-Type-Options"));
-        Assert.False(response.Headers.Contains("Permissions-Policy"));
+        Assert.True(response.Headers.TryGetValues("Referrer-Policy", out var referrerPolicy));
+        Assert.Contains(referrerPolicy, value => value.Equals("strict-origin-when-cross-origin", StringComparison.Ordinal));
+
+        Assert.True(response.Headers.TryGetValues("X-Content-Type-Options", out var contentTypeOptions));
+        Assert.Contains(contentTypeOptions, value => value.Equals("nosniff", StringComparison.Ordinal));
+
+        Assert.True(response.Headers.TryGetValues("Permissions-Policy", out var permissionsPolicy));
+        Assert.Contains(permissionsPolicy, value => value.Equals("camera=(), microphone=(), geolocation=()", StringComparison.Ordinal));
     }
 
     [Fact]
