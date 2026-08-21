@@ -177,6 +177,10 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F047 | média | `AuthenticatedCultureSynchronizer.SynchronizeAtLoginAsync`: um cookie `BeeDay.Culture` desatualizado em um segundo dispositivo/navegador, ao logar, silenciosamente sobrescreve uma alteração de idioma deliberada feita em Settings — comportamento documentado e intencional (cookie explícito sempre vence naquela sessão), mas conflita com o critério de aceite "preferência de idioma permanece consistente entre sessões autenticadas". Decisão de produto necessária: cookie deveria ceder à conta no login, ou cookies não deveriam sobreviver a uma troca de idioma na conta | `OPEN` | 30.20 |
 | BD30-F048 | baixa | `Program.cs` grava `ClaimTypes.Name`/`ClaimTypes.Email` no cookie `BeeDay.Auth` (até 14 dias, "remember me") no login, mas nunca os atualiza após uma edição de Nome/E-mail em Account — hoje inofensivo (`grep` confirma que nada no código lê essas duas claims de volta), mas é PII potencialmente desatualizada sentada num cookie de longa duração | `OPEN` | 30.22 |
 | BD30-F049 | média | nenhum teste baseado em viewport real (Playwright) cobria `/profile/create` Etapa 2 (apelido), `/account`/`/settings` (as 3 seções) ou `/onboarding/tutorial` — `LoginExperienceTests` só provava a Etapa 1 do cadastro; `AccountLifecycleTests`/`SettingsLocalizationTests` nunca chamavam `SetViewportSizeAsync` | `FIXED` | 30.11 |
+| BD30-F050 | média | `HabitResetCounter` (Daily/Weekly/Monthly) está totalmente cabeado — coluna no banco, validação de Domain, editor de UI, documentação — mas nada no código jamais reseta `PositiveCount`/`NegativeCount` com base em tempo decorrido, fronteira de calendário ou job agendado; `RegisterPositive`/`RegisterNegative` só incrementam, para sempre. O campo é hoje decoração de UI sem efeito comportamental. Definir a semântica real de reset (quando? em qual fuso/cultura? via leitura ou job?) é uma decisão de produto, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
+| BD30-F051 | média | `EfUserRepository.UpdateAsync` recarrega **todas** as `ExperienceEntry` de um usuário a cada chamada — não só em registros de Habit, mas em qualquer mutação de User (confirmação de e-mail, redefinição de senha, troca de nome/e-mail). Habit é a única fonte de XP deliberadamente isenta de deduplicação (`UserExperience.cs`, por design — cada clique deve premiar XP independentemente), então é a única cujo volume de `ExperienceEntry` cresce sem limite por usuário ativo; nenhuma estratégia de arquivamento/paginação existe. Lista de Habits em `/daily` também não é paginada/virtualizada — nenhum teste cria mais de 2 Habits para o mesmo usuário em toda a suíte, então isso nunca foi exercitado em escala | `OPEN` | 30.21 |
+| BD30-F052 | baixa | `ActivityAttribute` (Strength/Dexterity/Intelligence/Vitality) é persistido, validado e round-tripa corretamente, mas não existe controle de UI para defini-lo em nenhum dos 4 editores de atividade (Habit/Task/Todo/Project) — confirmado por busca por `ActivityAttribute` em todo `*.razor` de `src/BeeDay.Web`, zero resultados fora de sintaxe `@attributes` não relacionada. Toda atividade criada pelo produto hoje tem `Attribute = null` para sempre; um valor já existente (via API/dados diretos) sobrevive a uma edição intacto, só não pode ser definido pela UI. Gap cross-cutting, não específico de Habit | `OPEN` | 30.19 |
+| BD30-F053 | baixa | `EfHabitRepository.RemoveAsync` (e o mesmo padrão em `EfTaskRepository`/`EfTodoRepository`/`EfProjectRepository` conforme aplicável) busca a linha só por `Id`, sem reverificar `UserId` — depende inteiramente do único call site (`DeleteHabitCommandHandler`) já ter verificado posse via `HabitLookup.RequireExistsAsync` antes. Seguro hoje (único call site confirmado, corretamente guardado), mas é uma lacuna de defesa em profundidade: o método do repositório não é seguro por posse isoladamente, então um futuro chamador direto que pule a pré-verificação poderia excluir silenciosamente o Habit de outro usuário | `OPEN` | 30.22 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -1301,3 +1305,147 @@ nenhum testava o comportamento de confirmação em uma troca de e-mail. Nenhuma 
 produção foi executada ou é necessária: o defeito era inteiramente de lógica de aplicação (nenhum
 usuário real precisa de correção retroativa, já que `IsEmailConfirmed` só é lido para decidir se um
 e-mail de redefinição é enviado — não há histórico incorreto a reconciliar).
+
+## 19. Sprint 30.12 — Habits Complete Audit
+
+### 19.1 Escopo e método
+
+Issue #209. Auditoria funcional completa de Habit: CRUD (criar/editar/excluir), direção (Positive/
+Negative/Both), dificuldade, `ResetCounter`, registro positivo/negativo, isolamento de posse,
+integração com XP/Experience, eficiência de consulta, feedback de mutação na UI, e paridade de
+documentação. `Habit.cs`, `HabitCommandHandlers.cs`, `EfHabitRepository.cs`,
+`ReorderActivitiesCommandHandler.cs`, `UserExperience.cs`, `EfUserRepository.cs`, `HabitCard.razor`/
+`HabitEditorModal.razor` e seus code-behind, `DashboardState.cs`, e todos os testes relacionados a
+Habit em Domain/Application/Infrastructure/Web/E2E foram lidos integralmente, junto com
+`docs/domain/habit.md` e a seção de Habit em `docs/web/04-feature-components.md`.
+
+Nenhum achado aberto pré-existente estava atribuído a esta Sprint no Ledger — auditoria partiu de
+evidência nova, não de um backlog a fechar.
+
+### 19.2 Achados confirmados — corretos, sem defeito
+
+- **Isolamento de posse**: `HabitLookup.RequireExistsAsync` escopa toda leitura por `userId` antes de
+  qualquer mutação; `EfHabitRepository` refiltra por `UserId` a nível SQL em `UpdateAsync`/`GetAsync`/
+  `ReorderAsync`; `ReorderActivitiesCommandHandler.EnsureOwned` rejeita um payload de reorder contendo
+  o Id de Habit de outro usuário. Coberto por `HabitTaskManagementHandlersTests`,
+  `MultiUserIsolationTests` e um teste de integração real contra LocalDB
+  (`MultiUserIsolationIntegrationTests.User_CannotRegisterAnotherUsersHabit`).
+- **Transação de XP atômica**: `RegisterHabitPositiveCommandHandler` incrementa o contador e concede
+  XP na mesma transação (`EfUnitOfWork`); uma falha em qualquer ponto reverte ambos via dispose de
+  transação não commitada. Habit é deliberadamente isento da deduplicação por origem que Task/Todo/
+  Project usam (`UserExperience.cs` — cada clique deve premiar XP independentemente, por design,
+  coberto por `ExperienceRewardPipelineTests.Positive_habit_grants_experience_for_each_distinct_occurrence`).
+  **Não é** um caso análogo a `BD30-F030` (Sprint 30.7) — lá a persistência falhava silenciosamente;
+  aqui o comportamento de não-dedução é intencional e testado.
+- **Cancelamento e feedback de mutação**: `DashboardState` propaga um `CancellationTokenSource` de
+  ciclo de vida do circuito (padrão `BD30-F035`) por toda operação de Habit; toasts de sucesso/erro
+  cobrem criar/editar/excluir/reordenar (registrar positivo/negativo intencionalmente não emite toast
+  de sucesso — o pulso de XP na barra de Experience é o único feedback positivo, consistente com o
+  mesmo padrão em Task/Todo).
+- **Eficiência de consulta na leitura**: `EfDashboardReadService` carrega Habits com uma única query
+  `AsNoTracking()`; `ExperienceEntry` nunca é junto/carregado na leitura do dashboard (só os campos
+  escalares pré-computados `TotalExperience`/`CurrentLevel` são usados). Sem N+1 nem dado não
+  relacionado carregado.
+- **Estado vazio**: `/daily` renderiza um card de estado vazio apropriado quando `ActiveCount == 0`.
+- **Documentação**: `docs/domain/habit.md` e a seção de Habit em `docs/web/04-feature-components.md`
+  batem exatamente com `Habit.cs`/`HabitCommandHandlers.cs`/`HabitEditorModal.razor.cs`/
+  `HabitVisualState.cs`, incluindo a ausência documentada (não inventada) de qualquer mecanismo de
+  reset para `ResetCounter` — confirma que `BD30-F050` é uma lacuna funcional real do produto, não uma
+  deriva de documentação.
+
+### 19.3 `BD30-F050` — `HabitResetCounter` sem efeito comportamental, decisão de produto necessária
+
+`ResetCounter` (Daily/Weekly/Monthly) é validado no Domain, persistido, exposto no editor de UI e
+documentado — mas nenhuma linha de código jamais reseta `PositiveCount`/`NegativeCount` com base em
+tempo decorrido ou fronteira de calendário; `RegisterPositive`/`RegisterNegative` só incrementam, para
+sempre, e não existe job/`BackgroundService` relacionado a Habit no único `BackgroundTaskWorker` do
+app. Um usuário que cria um hábito "Beber água" com reset Diário, esperando o saldo zerar a cada novo
+dia (comportamento que `docs/domain/habit.md` descreve como inspiração de apps de hábito comparáveis),
+vê o saldo acumular indefinidamente — o campo é hoje decoração de UI sem efeito.
+
+Esta auditoria **não** implementa a semântica de reset: decidir quando o reset ocorre (fuso horário?
+cultura? no próximo registro após a fronteira? via job agendado?) é uma decisão de produto genuína,
+com múltiplas opções válidas, fora da autoridade de uma auditoria — consistente com a instrução do
+proprietário de não inventar política de produto (mesmo princípio já aplicado a `BD30-F040` na Sprint
+30.11). Registrado com evidência completa; nenhuma Sprint futura foi atribuída até que o proprietário
+defina a semântica esperada.
+
+### 19.4 `BD30-F051` — crescimento ilimitado de `ExperienceEntry`, recarregado em toda mutação de User
+
+`EfUserRepository.UpdateAsync` recarrega **todas** as `ExperienceEntry` de um usuário antes de
+qualquer mutação — não só em registros de Habit, mas em qualquer chamada que passe por esse método
+(confirmação de e-mail, redefinição de senha, troca de nome/e-mail via `BD30-F044`). Habit é a única
+origem de XP deliberadamente isenta de deduplicação, então é a única cujo volume de linhas cresce sem
+limite por usuário ativo ao longo do tempo; nenhuma estratégia de arquivamento, expurgo ou paginação
+existe. A lista de Habits em `/daily` também não é paginada/virtualizada, e nenhum teste da suíte cria
+mais de 2 Habits para o mesmo usuário — este cenário nunca foi exercitado em escala real. Sem
+impacto observado hoje (nenhuma evidência de degradação em HMG), mas é uma lacuna de performance
+real, direta consequência do design correto (não-dedução) de Habit. Encaminhada à Sprint 30.21
+(Performance), que já é proprietária de `INV-019`.
+
+### 19.5 Achados menores/informativos (não corrigidos, encaminhados)
+
+- `BD30-F052` (nova, baixa): `ActivityAttribute` não tem controle de UI em nenhum dos 4 editores de
+  atividade (Habit/Task/Todo/Project) — cross-cutting, não específico de Habit. Encaminhada à Sprint
+  30.19 (Design System), que já é proprietária de `INV-015`.
+- `BD30-F053` (nova, baixa): `EfHabitRepository.RemoveAsync` não reverifica `UserId` isoladamente,
+  depende do único call site já ter verificado posse — sem exploração ativa hoje, mas uma lacuna de
+  defesa em profundidade. Encaminhada à Sprint 30.22 (Segurança e privacidade), que já é proprietária
+  de `INV-017`.
+- Reconfirmação (sem novo ID): `BD30-F037` (Sprint 30.9, `OPEN`, atribuída à 30.20) — cards individuais
+  do Dashboard sem `Disabled` vinculado a `State.IsBusy` — já cobre exatamente o padrão observado nos
+  botões +/− de `HabitCard.razor`; a proteção real contra duplo-clique existe (`DashboardState.
+  ExecuteAsync` seta `IsBusy` de forma síncrona antes do primeiro `await`), mas depende inteiramente
+  da garantia de despacho single-threaded do Blazor Server, sem reforço visual. Nenhuma entrada nova
+  necessária.
+
+### 19.6 Implementação
+
+- `tests/BeeDay.Domain.Tests/HabitTests.cs` — 2 novos testes: `RegisterNegative_IncrementsNegativeCounter`
+  e o par que faltava de `RegisterPositive_DoesNotChangeNegativeOnlyHabit`
+  (`RegisterNegative_DoesNotChangePositiveOnlyHabit`).
+- `tests/BeeDay.Web.Tests/Components/Habits/HabitEditorModalTests.cs` — 3 novos testes: prova que
+  `OnSave` recebe exatamente os campos editados (Título/Notas/Dificuldade/ResetCounter/Direção), e que
+  `TogglePositive`/`ToggleNegative` de fato alternam `Direction` (não só a classe CSS `active`).
+- `tests/BeeDay.E2E.Tests/HabitAndTaskTests.cs` — 3 novos testes via Chromium real: registrar negativo
+  atualiza o saldo; editar um Habit persiste o novo título após reload; excluir um Habit (via
+  confirmação) o remove do board e do reload subsequente. Antes desta Sprint, a única cobertura E2E de
+  Habit era criar + registrar positivo.
+
+Nenhuma mudança de comportamento de produção nesta Sprint — os dois achados material (`BD30-F050`,
+`BD30-F051`) exigem decisão do proprietário/Sprint futura antes de qualquer correção; o trabalho desta
+Sprint é inteiramente fechamento de lacunas de teste sobre comportamento já correto, mais achados
+registrados com evidência.
+
+### 19.7 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| `dotnet test tests/BeeDay.Domain.Tests/... --filter HabitTests` | PASS, 6/6 |
+| `dotnet test tests/BeeDay.Web.Tests/... --filter HabitEditorModalTests` | PASS, 14/14 |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter HabitAndTaskTests` | PASS, 9/9 |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+| `dotnet test BeeDay.slnx` (Debug, completo, 1ª execução) | 1.527/1.528 — 1 falha: `LoginExperienceTests.CreateAccountMatchesPublicAuthenticationLayout(width: 390, height: 844)`, `TimeoutException` em `GotoAsync("/profile/create")`. Arquivo não tocado nesta Sprint (só Habit foi alterado) |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter LoginExperienceTests` (retry) | PASS, 10/10 — inclusive o caso exato que falhou antes |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.533/1.533 (119 Domain, 117 Application, 216 Infrastructure, 878 Web, 203 E2E) — execução limpa, 0 falhas |
+
+**Classificação da falha Debug:** `TRANSIENT/FLAKY` (mesmo padrão já registrado em `BD30-F042`), não
+`CHANGE-CAUSED`. `LoginExperienceTests.cs` não foi tocado por esta Sprint (escopo desta Sprint é
+inteiramente Habit); o retry imediato do mesmo teste, incluindo o caso exato que falhou, passou
+100% (10/10). Nenhuma nova investigação de causa raiz feita aqui — `BD30-F042` já é proprietário
+dessa investigação (Sprint 30.24).
+
+### 19.8 Continuidade e entrega
+
+Esta Sprint confirma que a arquitetura de Habit (isolamento de posse, atomicidade de XP, cancelamento,
+eficiência de leitura) está correta e bem testada onde já era exercitada — os dois achados materiais
+(`BD30-F050`, `BD30-F051`) são lacunas de completude de produto/performance, não bugs de correção
+ativos, e ambos exigem uma decisão fora da autoridade de auditoria antes de qualquer implementação:
+`BD30-F050` porque a semântica de reset tem múltiplas opções de design válidas; `BD30-F051` porque
+qualquer estratégia de arquivamento/expurgo de `ExperienceEntry` toca infraestrutura compartilhada
+usada por toda mutação de User, não só Habit, e afeta decisões de retenção de histórico de XP que vão
+além do escopo desta Sprint. Nenhuma mutação de banco HMG/produção foi executada ou é necessária.

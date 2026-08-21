@@ -40,6 +40,84 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
         Assert.NotEqual(xpBefore, xpAfter);
     }
 
+    // EPIC 30 Sprint 30.12 (BD30-F049 pattern continued): the only prior Habit E2E coverage was
+    // create + register-positive. Edit, delete, and register-negative had no browser-level coverage
+    // anywhere in the suite.
+    [Fact]
+    public async Task RegisterNegativeForHabit_UpdatesBalance()
+    {
+        await LoginToDailyAsync();
+        var title = $"E2E Habit Neg {Guid.NewGuid():N}"[..24];
+
+        await OpenActivityMenuAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Habit" }).ClickAsync();
+        var dialog = Page.GetByRole(AriaRole.Dialog);
+        await dialog.GetByLabel("Title").FillAsync(title);
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
+        await Expect(dialog).ToBeHiddenAsync();
+
+        var card = Page.Locator(".habit-card").Filter(new() { Has = Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Habit: {title}" }) });
+        await Expect(card.Locator(".habit-card__balance")).ToHaveTextAsync("0");
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = $"Register negative for {title}" }).ClickAsync();
+        await Expect(card.Locator(".habit-card__balance")).ToHaveTextAsync("-1");
+    }
+
+    [Fact]
+    public async Task EditHabit_UpdatesTitleAndPersistsAfterReload()
+    {
+        await LoginToDailyAsync();
+        var title = $"E2E Habit Edit {Guid.NewGuid():N}"[..24];
+        var updatedTitle = $"E2E Habit Edited {Guid.NewGuid():N}"[..24];
+
+        await OpenActivityMenuAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Habit" }).ClickAsync();
+        var dialog = Page.GetByRole(AriaRole.Dialog);
+        await dialog.GetByLabel("Title").FillAsync(title);
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
+        await Expect(dialog).ToBeHiddenAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Habit: {title}" }).ClickAsync();
+        await Expect(dialog).ToBeVisibleAsync();
+        await dialog.GetByLabel("Title").FillAsync(updatedTitle);
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Save" }).ClickAsync();
+        await Expect(dialog).ToBeHiddenAsync();
+
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Habit: {updatedTitle}" })).ToBeVisibleAsync();
+
+        await GotoAsync("/daily");
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Habit: {updatedTitle}" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Habit: {title}" })).ToHaveCountAsync(0);
+    }
+
+    [Fact]
+    public async Task DeleteHabit_RemovesItFromTheBoardAfterConfirmation()
+    {
+        await LoginToDailyAsync();
+        var title = $"E2E Habit Delete {Guid.NewGuid():N}"[..24];
+
+        await OpenActivityMenuAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Habit" }).ClickAsync();
+        var dialog = Page.GetByRole(AriaRole.Dialog);
+        await dialog.GetByLabel("Title").FillAsync(title);
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
+        await Expect(dialog).ToBeHiddenAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Habit: {title}" }).ClickAsync();
+        await Expect(dialog).ToBeVisibleAsync();
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Delete", Exact = true }).ClickAsync();
+
+        var confirmation = Page.GetByRole(AriaRole.Alertdialog);
+        await Expect(confirmation).ToBeVisibleAsync();
+        await confirmation.GetByRole(AriaRole.Button, new() { Name = "Delete Habit" }).ClickAsync();
+
+        await Expect(dialog).ToBeHiddenAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Habit: {title}" })).ToHaveCountAsync(0);
+
+        await GotoAsync("/daily");
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Habit: {title}" })).ToHaveCountAsync(0);
+    }
+
     [Fact]
     public async Task CreateAndCompleteTask_TogglesCompletion()
     {
