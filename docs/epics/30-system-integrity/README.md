@@ -69,7 +69,7 @@ todo achado termine como `FIXED`, `VERIFIED` ou `ACCEPTED RISK`.
 | INV-018 | Resiliência e observabilidade | exception handling, health checks, Event Journal, logs e recuperação de deploy localizados | `BASELINED` | 30.23 |
 | INV-019 | Performance | pipeline de performance, comportamento assíncrono, CI e documentação de medições localizados | `BASELINED` | 30.21 |
 | INV-020 | CI/CD e ambientes | fluxo branch -> HMG -> main -> prd, artifacts, EF bundle, deploy e gates localizados | `BASELINED` | 30.2, 30.3, 30.25 |
-| INV-021 | Naming e higiene | superfícies públicas `beeday`, identificadores técnicos `BeeDay.*` e referências históricas localizados. **Parcialmente reverificado na Sprint 30.26**: a metade "referências históricas" concluída — ver `BD30-F005` (caminhos de documentação quebrados) e a varredura de comentários puramente cronológicos (§33.2). A metade "consistência de naming `beeday`/`BeeDay.*`" permanece para a Sprint 30.27, dedicada a isso | `BASELINED` | 30.26, 30.27 |
+| INV-021 | Naming e higiene | superfícies públicas `beeday`, identificadores técnicos `BeeDay.*` e referências históricas localizados. **Parcialmente reverificado na Sprint 30.26**: a metade "referências históricas" concluída — ver `BD30-F005` (caminhos de documentação quebrados) e a varredura de comentários puramente cronológicos (§33.2). A metade "consistência de naming `beeday`/`BeeDay.*`" permanece para a Sprint 30.27, dedicada a isso. **Concluído na Sprint 30.27**: nenhum defeito de branding não conhecido encontrado em nenhuma superfície visível ao usuário (~1.305 arquivos contêm "beeday" em alguma capitalização; amostragem ampla de `.resx`/páginas/e-mails confirma casing correto e consistente em 100% do amostrado). Nenhuma ocorrência viva de "Bee Day"/"BEE DAY" encontrada — as 2 únicas menções históricas (`docs/epics/20-home-visual-experience/README.md`) descrevem um estado já corrigido no código atual. `LevelUp` remanescente: majoritariamente histórico/ADR legítimo (preservado, não reescrito); os 2 únicos residuais tecnicamente vivos já eram conhecidos e documentados alhures — formalizados nesta Sprint como `BD30-F095`/`BD30-F096` | `VERIFIED` | 30.26, 30.27 |
 | INV-022 | Regressão e encerramento | comandos, suites e estados realistas identificados como gate integrado final | `BASELINED` | 30.29, 30.30 |
 
 Distribuição rastreada no snapshot:
@@ -198,6 +198,8 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F092 | baixa | nenhuma configuração explícita de `CommandTimeout` existe em toda a base (`grep` por `CommandTimeout` em `src/` = zero resultados) — toda consulta/gravação SQL Server depende do default implícito do ADO.NET/EF Core (30s). Definir um valor explícito é uma decisão de política (qual latência é aceitável para o workload real do BeeDay?), não inventada por esta auditoria | `OPEN` | decisão do proprietário |
 | BD30-F093 | baixa | `LoggingBehavior.Handle` (Application) loga sucesso/falha de todo request MediatR sem nenhum `EventId` — inconsistente com a convenção já estabelecida em `WebEventIds.cs` (Web) para logs estruturados pesquisáveis por id. Application não tem hoje nenhuma convenção equivalente de `EventId`; criar uma agora para um único call site seria uma nova abstração sem uso comprovado além dele — encaminhado como hygiene, não corrigido especulativamente. **Reverificado na Sprint 30.26**: correção de precisão — são 3 chamadas `logger.Log*` (duas `LogInformation`, uma `LogError`), não 2 como o achado original registrava; nenhuma usa `EventId`. Premissa e disposição inalteradas — ainda não corrigido, mesma razão (nova convenção sem uso comprovado além de um único call site) | `OPEN` | decisão do proprietário |
 | BD30-F094 | média | `E2ETestBase.cs` já captura screenshot + trace do Playwright em toda falha de teste E2E (salvos em `e2e-artifacts/` sob o próprio output de build do projeto de teste), mas `release-quality-gate.yml` (único workflow que roda `BeeDay.E2E.Tests` — `ci.yml` não) só faz upload de `${{ runner.temp }}\TestResults` (arquivos `.trx`), nunca do diretório `e2e-artifacts` — um E2E falhando em CI perde o screenshot/trace assim que o runner é destruído, exatamente o cenário em que esses artefatos mais fazem falta (não é possível reproduzir localmente sem eles). **Corrigido nesta Sprint**: novo step `Upload E2E failure artifacts` em `release-quality-gate.yml`, `if: always()`, `if-no-files-found: ignore` (testes passando não produzem nenhum arquivo, por design) | `FIXED` | 30.24 |
+| BD30-F095 | baixa | `BeeDayClaimTypes.SessionVersion` (`src/BeeDay.Web/Services/Authentication/BeeDayClaimTypes.cs`) tem valor literal `"levelup:session_version"` — residual do nome de produto pré-rebrand num identificador tecnicamente vivo, usado em toda emissão de claim (`Program.cs`, login) e toda validação de sessão (`OnValidatePrincipal`). Já documentado em `docs/architecture/README.md` e `docs/security/01-security-baseline.md` como achado conhecido, não uma descoberta desta Sprint. **Reverificado e formalizado no Ledger na Sprint 30.27**: renomear o valor literal invalidaria todo cookie de sessão já emitido em produção/HMG (toda claim `levelup:session_version` existente deixaria de casar com o novo nome, forçando logout de todo usuário ativo) — mutação de comportamento de sessão real, precisa de rollout coordenado (ex.: aceitar os dois nomes de claim por um período de transição), não uma renomeação mecânica de texto. Nenhuma superfície visível ao usuário é afetada — é um nome de claim interno, nunca exibido | `OPEN` | decisão do proprietário |
+| BD30-F096 | baixa | o caminho real no servidor HMG (`SERV3WEB`) ainda é `C:\Apps\LevelUp-Data\...`, não `C:\Apps\BeeDay-Data\...` — apesar de `web.config`, `appsettings.Production.json`, `Deploy-BeeDay.ps1` e os novos `Clear-BeeDayBackups.ps1`/`Clear-BeeDayStdoutLogs.ps1` já terem sido corrigidos para referenciar `BeeDay-Data` desde a Sprint 18.4. Já documentado como "migração operacional ainda pendente" em `docs/deployment/02-runtime-configuration.md` §5 e `docs/architecture/README.md`, não uma descoberta desta Sprint. **Reverificado e formalizado no Ledger na Sprint 30.27**: nenhuma mudança de repositório pode corrigir isso — é um diretório real num servidor real que precisa ser migrado/renomeado por uma operação de infraestrutura (mover/renomear a pasta, validar que a aplicação real ainda escreve/lê corretamente no novo caminho), fora do alcance de uma auditoria de código. Nenhuma mutação de ambiente HMG foi executada por esta auditoria | `OPEN` | decisão do proprietário |
 | BD30-F066 | baixa | não existia teste E2E/integração provando o ciclo completo `returnUrl` (hit anônimo em rota protegida → redirect para `/login?returnUrl=...` → login → volta exatamente para a página originalmente pedida) nem uma URL genuinamente inexistente atingindo o `NotFoundPage` do Router real (só bUnit, que renderiza `NotFound.razor` direto). **Corrigido nesta Sprint**: `AuthorizationIntegrationTests.Anonymous_ProtectedPageRedirect_CarriesTheOriginalPathAsReturnUrl` (nova) prova o `returnUrl` correto no redirect anônimo; `LoginIntegrationTests.Login_WithLocalReturnUrl_RedirectsToTheOriginallyRequestedPage` (nova) completa o ciclo até o destino pós-login; `NavigationTests.NonexistentRoute_RendersTheNotFoundPage` (E2E, nova) prova a `BD30-F063` corrigida contra um navegador real | `FIXED` | 30.17 |
 | BD30-F067 | baixa | a subárvore `/experience-system` (21 rotas públicas de documentação) não tem nenhum ponto de entrada direto no header/footer/nav de topo — só é alcançável via múltiplos saltos a partir do link `/brand-guidelines` no rodapé institucional, depois pela navegação de pilar/tópico interna. Não é uma rota quebrada (toda a subárvore é alcançável), apenas discoverability fraca para uma área de 21 rotas. Decisão de produto/IA de navegação, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
 | BD30-F068 | baixa | os dois wizards de onboarding (`Tutorial.razor`, `CreateProfile.razor`) mantêm o passo atual fora da URL (campo privado / `ProfileCreationState` escopado por DI, nenhum query string) — padrão consistente entre os dois, não um defeito isolado. Voltar/avançar no navegador sai do wizard inteiro em vez de andar entre os passos, comportamento previsível mas não documentado como decisão. Fora do escopo de roteamento propriamente dito (nenhuma rota quebra ou produz 404); observação de arquitetura de interação encaminhada a uma Sprint de UX. **Reverificado na Sprint 30.20**: ainda preciso, sem mudança. Tornar o passo refletido na URL é trabalho de arquitetura de interação genuíno (query string, guards de navegação, testes), fora do limite de uma auditoria; reatribuído para decisão do proprietário | `OPEN` | decisão do proprietário |
@@ -3702,3 +3704,108 @@ corrigir depois de mapeado por completo. A única falha observada nos quality ga
 foi imediatamente reconhecível como o padrão já documentado pela `BD30-F042`, classificada com
 evidência (não suposição) e confirmada `CHANGE-CAUSED = NO` por retry isolado antes de prosseguir.
 Nenhuma mutação de banco HMG/produção foi executada ou é necessária.
+
+## 34. Sprint 30.27 — Official `beeday` Naming Consolidation
+
+### 34.1 Escopo e método
+
+Inventário completo de ocorrências de `BeeDay`, `Bee Day`, `BEE DAY`, `beeday` e `LevelUp` (o nome de
+produto pré-rebrand) em todo o repositório; classificação de cada uma como naming de produto/visual,
+prosa de documentação, identificador técnico, contrato de configuração/externo, fixture de teste, ou
+histórico imutável; normalização de naming visível ao usuário para `beeday` onde necessário;
+preservação de identificadores técnicos `BeeDay.*` sem migração especulativa. Limite explícito da
+própria Issue, respeitado por completo: **nenhum find-and-replace cego** — toda mudança avaliada
+individualmente por classificação, nenhuma decidida por padrão de texto sozinho.
+
+Investigação delegada a um agente de exploração somente-leitura antes de qualquer mudança — mesma
+metodologia já usada em toda esta EPIC. O "EPIC 30 Remaining Sprint Global Execution Contract"
+referenciado pela Issue segue não encontrado em nenhum lugar do repositório nem do GitHub, mesma
+ausência já documentada em Sprints anteriores.
+
+### 34.2 Resultado — nenhum defeito de branding não conhecido encontrado
+
+**O resultado mais importante desta Sprint é negativo, no bom sentido** (mesmo padrão já observado na
+Sprint 30.22 para autenticação/posse): ~1.305 arquivos contêm "beeday" em alguma capitalização;
+amostragem ampla e deliberada de páginas, `.resx` (en-US/pt-BR/neutro), e-mails transacionais e
+componentes de marca compartilhados (`BeeDayBrand.razor`, consumido por 12+ páginas/layouts) não
+encontrou nenhuma superfície visível ao usuário com casing incorreto — `beeday` minúsculo
+consistentemente em 100% do amostrado, `BeeDay`/`BeeDay.*` PascalCase consistentemente correto em
+identificadores técnicos (namespaces, classes, `.csproj`, `BeeDay.slnx`, chaves de configuração,
+nomes de workflow/job de CI). A política de marca-vs-identidade-técnica já está documentada e
+acessível (`CLAUDE.md` §5, `docs/brand/02-writing-voice-localization.md` §59-65) e é seguida de forma
+consistente em todo o código amostrado.
+
+**`Bee Day`/`BEE DAY` (com espaço)**: zero ocorrências vivas em todo o repositório. As únicas 2
+menções (`docs/epics/20-home-visual-experience/README.md`, um relatório de Sprint histórico da EPIC
+20) descrevem um estado do componente `BeeDayBrand` que já foi corrigido no código atual
+(`aria-label="beeday"`, confirmado por leitura direta) — registro histórico correto, não uma
+referência quebrada; preservado sem alteração, consistente com o limite desta Sprint contra reescrever
+histórico imutável.
+
+**`LevelUp`**: ~300 linhas encontradas, majoritariamente ADRs (`docs/adr/ADR-001`–`ADR-005`) e
+`docs/history/*.md` citando corretamente os nomes reais da época pré-rebrand — já explicitamente
+autorizados como histórico imutável por `docs/adr/README.md` §13-14 e `CLAUDE.md` §5. Nenhuma
+referência morta/sem propósito encontrada distinta desse histórico legítimo.
+
+### 34.3 `BD30-F095`/`BD30-F096` — os 2 únicos residuais tecnicamente vivos, formalizados no Ledger
+
+Dois identificadores tecnicamente vivos (não histórico, não prosa) ainda carregam o nome pré-rebrand
+— ambos já conhecidos e documentados em `docs/architecture/README.md`/`docs/security/
+01-security-baseline.md`/`docs/deployment/02-runtime-configuration.md` antes desta Sprint, não
+descobertas novas. O valor desta Sprint foi formalizá-los no Audit Ledger canônico (onde ainda não
+tinham um `BD30-Fxxx` próprio) e reconfirmar que a razão de não corrigi-los ainda é sólida, não
+esquecimento:
+
+- **`BD30-F095`**: `BeeDayClaimTypes.SessionVersion` tem valor literal `"levelup:session_version"`,
+  ativamente usado em toda emissão/validação de claim de sessão. Renomear o valor invalidaria todo
+  cookie de sessão já emitido em HMG/produção — mutação de comportamento de sessão real que exige
+  rollout coordenado (ex.: aceitar os dois nomes de claim durante uma transição), não um find-and-
+  replace de texto. Exatamente o tipo de mudança que o limite explícito desta Sprint pede para NÃO
+  fazer sem essa coordenação.
+- **`BD30-F096`**: o diretório real no servidor HMG (`SERV3WEB`) ainda é `C:\Apps\LevelUp-Data\...`,
+  não `C:\Apps\BeeDay-Data\...`, apesar de todo o código/scripts do repositório já referenciarem o
+  nome novo desde a Sprint 18.4. Nenhuma mudança de repositório pode corrigir isso — é uma migração
+  de infraestrutura real (mover/renomear a pasta, validar leitura/escrita no novo caminho pela
+  aplicação real), fora do alcance de uma auditoria de código.
+
+Ambos permanecem `OPEN`, decisão do proprietário — nem esta Sprint nem nenhuma anterior tinha
+autoridade para executar qualquer uma das duas mudanças, e nenhuma foi tentada.
+
+### 34.4 Implementação
+
+Nenhuma mudança de código nesta Sprint — a investigação confirmou que o estado atual já está correto
+em toda superfície viva verificável, e os 2 únicos residuais técnicos exigem coordenação fora da
+autoridade de uma auditoria (`BD30-F095`/`BD30-F096`, formalizados, não corrigidos).
+
+- `docs/epics/30-system-integrity/README.md` — nova Seção 34; achados `BD30-F095`/`BD30-F096`
+  registrados; `INV-021` concluído (`VERIFIED`).
+
+Nenhuma mudança de contrato público de Application, schema, migration. Nenhuma mutação de banco ou
+ambiente HMG/produção foi executada ou é necessária.
+
+### 34.5 Regressão e quality gates locais
+
+Sem mudança de código de produção/teste nesta Sprint — apenas o Ledger. Gates executados para
+confirmar que o repositório permanece consistente:
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 avisos, 0 erros |
+| `git diff --check` | PASS |
+
+Suíte de testes completa não reexecutada nesta Sprint — nenhum arquivo de código, teste, script ou
+workflow foi alterado; apenas a doc do Ledger, cuja consistência não é verificada por
+`dotnet test`. Build e format continuam válidos para confirmar que nada no repositório quebrou.
+
+### 34.6 Continuidade e entrega
+
+Assim como a Sprint 30.22 (Security & Privacy), o resultado mais valioso desta Sprint é a ausência
+de um achado novo, não a presença de um — depois de 27 Sprints de auditoria contínua sobre o mesmo
+repositório, incluindo Sprints inteiras dedicadas a Design System, UX/localização e agora naming, a
+consistência de branding já está genuinamente correta, não apenas aparentemente correta por falta de
+verificação. Os 2 residuais técnicos que restam (`BD30-F095`/`BD30-F096`) não são lacunas de auditoria
+— são decisões corretas de não fazer um find-and-replace irresponsável em um identificador de sessão
+ativo ou tentar uma migração de infraestrutura sem autoridade para executá-la, exatamente o
+comportamento que o limite explícito desta Sprint pedia. Nenhuma mutação de banco ou ambiente HMG/
+produção foi executada ou é necessária.
