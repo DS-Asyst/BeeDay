@@ -389,6 +389,47 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
         await Expect(card.Locator("svg.beeday-icon")).ToHaveCountAsync(0);
     }
 
+    // EPIC 30 Sprint 30.24 (BD30-F083): beeday-sortable.js has implemented an ArrowUp/ArrowDown
+    // keyboard alternative to drag-and-drop reordering (same NotifyReorderAsync path) since it was
+    // written, but no E2E test anywhere in the suite ever exercised it — a real, accessible
+    // capability with zero browser-level proof it actually works end to end.
+    [Fact]
+    public async Task ArrowDown_ReordersHabitsAndPersistsAfterReload()
+    {
+        await LoginToDailyAsync();
+        var titleA = $"E2E Reorder A {Guid.NewGuid():N}"[..24];
+        var titleB = $"E2E Reorder B {Guid.NewGuid():N}"[..24];
+
+        await OpenActivityMenuAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Habit" }).ClickAsync();
+        var dialog = Page.GetByRole(AriaRole.Dialog);
+        await dialog.GetByLabel("Title").FillAsync(titleA);
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
+        await Expect(dialog).ToBeHiddenAsync();
+
+        await OpenActivityMenuAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Habit" }).ClickAsync();
+        await dialog.GetByLabel("Title").FillAsync(titleB);
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
+        await Expect(dialog).ToBeHiddenAsync();
+
+        var items = Page.Locator("[data-sortable-key='habits'] [data-sortable-item]");
+        await Expect(items).ToHaveCountAsync(2);
+        await Expect(items.Nth(0)).ToContainTextAsync(titleA);
+        await Expect(items.Nth(1)).ToContainTextAsync(titleB);
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Habit: {titleA}" }).FocusAsync();
+        await Page.Keyboard.PressAsync("ArrowDown");
+
+        await Expect(items.Nth(0)).ToContainTextAsync(titleB);
+        await Expect(items.Nth(1)).ToContainTextAsync(titleA);
+
+        await GotoAsync("/daily");
+        var itemsAfterReload = Page.Locator("[data-sortable-key='habits'] [data-sortable-item]");
+        await Expect(itemsAfterReload.Nth(0)).ToContainTextAsync(titleB);
+        await Expect(itemsAfterReload.Nth(1)).ToContainTextAsync(titleA);
+    }
+
     private async Task LoginToDailyAsync(long? initialExperience = null)
     {
         var email = $"e2e-activity-{Guid.NewGuid():N}@beeday.invalid";

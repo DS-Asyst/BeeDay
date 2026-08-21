@@ -6,23 +6,19 @@ E2E), banco de teste real (LocalDB), testes arquiteturais de fronteira, e fluxo 
 **Fonte da verdade:** reconstruído por completo na Sprint 16.9 a partir de `tests/*`, `BeeDay.slnx`
 e execução real de `dotnet test BeeDay.slnx --configuration Release --no-build`.
 
-**Última verificação:** 2026-08-16 (Sprint 25.16, EPIC 25 — gate final) — 1.116 testes, 0 falhas
-reais (93 Domain, 73 Application, 129 Infrastructure, 741 Web, 80 E2E), reconfirmado por execução
-completa em Debug e Release nesta Sprint. A primeira passada em Debug reportou uma falha isolada em
-`ActivityFilterBarTests.SharedSearchInputPreservesTheDebouncedFilterContract` (bUnit
-`WaitForAssertion` sob contenção da suíte completa); retry isolado da classe: 3/3 aprovados — mesmo
-padrão de contenção já registrado neste documento (§7), não uma regressão. O inventário histórico
-detalhado por arquivo em [`01-testing-strategy.md`](01-testing-strategy.md) está reconciliado.
-
-> **Nota da EPIC 30:** essas contagens são um baseline histórico e já não representam a suíte
-> atual. A reconciliação numérica permanece aberta como `BD30-F001` para a Sprint 30.24; a matriz
-> funcional abaixo não antecipa esse trabalho.
+**Última verificação:** 2026-08-21 (Sprint 30.24, EPIC 30 — `BD30-F001`) — **1.554 testes, 0 falhas**
+(121 Domain, 119 Application, 216 Infrastructure, 879 Web, 219 E2E), confirmado por execução real de
+`dotnet test BeeDay.slnx` completa em Debug e Release ao final da Sprint 30.23. O baseline de
+1.116 (93/73/129/741/80) registrado desde a Sprint 25.16 estava desatualizado em ~40% — a suíte
+cresceu organicamente ao longo das Sprints 26–30 sem que este contador fosse revisitado. O inventário
+histórico detalhado por arquivo em [`01-testing-strategy.md`](01-testing-strategy.md) foi reconciliado
+para o mesmo total.
 
 ## Documentos
 
 | Documento | Status |
 |---|---|
-| [`01-testing-strategy.md`](01-testing-strategy.md) | Histórico — estratégia válida; inventário numérico pendente de reconciliação por `BD30-F001` na Sprint 30.24. |
+| [`01-testing-strategy.md`](01-testing-strategy.md) | Atual — estratégia e inventário numérico reconciliados na Sprint 30.24 (`BD30-F001`). |
 | [`02-design-system-quality-gates.md`](02-design-system-quality-gates.md) | Atual — axe, contraste, localização, estratégia visual/responsiva, artefatos e integração CI da Sprint 25.15. |
 | [`03-functional-journey-matrix.md`](03-functional-journey-matrix.md) | Atual — ownership, evidência por camada e gaps das jornadas suportadas, auditados na Sprint 30.4. |
 
