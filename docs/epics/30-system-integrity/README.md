@@ -3927,3 +3927,121 @@ outro lado da mesma disciplina: nem toda entrada `OPEN` do Ledger é uma contrad
 correção — reverificar e confirmar "já está certo" é um resultado tão válido quanto corrigir, e mais
 honesto do que editar um texto que já estava preciso só para ter algo para marcar como `FIXED`.
 Nenhuma mutação de banco HMG/produção foi executada ou é necessária.
+
+## 36. Sprint 30.29 — Full-System Regression & Realistic State Validation
+
+### 36.1 Escopo e método
+
+Revalidação ponta a ponta do sistema auditado usando estados realistas e jornadas cross-feature
+antes do fechamento da EPIC: reexecução completa da suíte automatizada (gate de regressão global);
+reexecução da matriz de jornadas críticas; cobertura de estado de dados existente/realista (não só
+usuário vazio/recém-criado), ambas as culturas suportadas, transições de autenticação/sessão, estados
+desktop/mobile, navegação profunda e interações cross-feature; caminhos de erro/recuperação
+representativos. Ambiente HMG ou outro ambiente representativo implantado só quando autorizado/
+disponível — nenhum acesso a HMG ao vivo está autorizado para esta auditoria; não tentado, registrado
+como tal em vez de simulado. Limite explícito: dados sintéticos/representativos seguros, nunca dados
+pessoais ou sensíveis de produção copiados só para tornar HMG realista — nenhum dado real foi
+copiado ou usado.
+
+Investigação delegada a um agente de exploração somente-leitura antes de qualquer mudança de código
+— mesma metodologia já usada em toda esta EPIC. O "EPIC 30 Remaining Sprint Global Execution
+Contract" referenciado pela Issue segue não encontrado em nenhum lugar do repositório nem do GitHub.
+
+### 36.2 Regressão completa — resultado
+
+**Suíte completa executada duas vezes (Debug e Release), ambas limpas**: 1.556/1.556 (121 Domain,
+119 Application, 216 Infrastructure, 879 Web, 221 E2E — o 221º é o novo teste desta Sprint, ver
+§36.4) em cada configuração, zero falhas, nenhum retry necessário. Nenhuma regressão de nenhuma das
+28 Sprints anteriores desta EPIC se manifestou na suíte completa.
+
+### 36.3 Investigação — gap real identificado: estado realista cross-feature nunca exercitado
+
+A investigação confirmou que **nenhum teste E2E em toda a suíte (todos os ~221 casos, antes desta
+Sprint) exercitava um usuário com dados pré-existentes em múltiplas features simultaneamente**.
+`E2EWebApplicationFactory.SeedUserAsync` só cria um `User` vazio — nenhum gancho de seed de
+Habit/Task/Project/Wallet existe nele; toda semente de dados de feature em todo teste é criada pelo
+próprio navegador dentro daquele teste específico, sempre com o mínimo necessário para aquela única
+jornada. Confirmado por amostragem de ~20 testes em `HabitAndTaskTests`/`WalletTests`/
+`ProjectLifecycleTests`/`TodoLifecycleTests`/`AccountLifecycleTests`/`NavigationTests` — nenhum
+combina Habit + Task + Project/To-Do + Wallet no mesmo usuário, e nenhum navega entre áreas de
+feature verificando que o estado de uma sobrevive à visita a outra.
+
+Outros achados secundários da investigação (cobertura pt-BR parcial fora de Wallet; nenhuma prova
+E2E do `BeeDayErrorBoundary` da Sprint 30.23 renderizando num circuito real; nenhuma verificação
+explícita de navegação cross-feature independente do gap de seed) foram deliberadamente **não**
+perseguidos com testes dedicados — a própria instrução desta investigação priorizava um único gap de
+maior valor em vez de completismo de cobertura, e o gap de estado realista/cross-feature é
+exatamente o nome desta Sprint.
+
+### 36.4 Novo teste E2E — estado realista cross-feature
+
+Novo `CrossFeatureRealisticStateTests.
+UserWithDataAcrossHabitsTasksProjectsAndWallet_KeepsAllStateAcrossCrossFeatureNavigation`: cria um
+Habit, uma Task, um Project com um To-Do dentro do workspace, registra positivo no Habit e completa a
+Task (duas fontes de XP diferentes, provando que o total realmente agrega entre tipos de feature, não
+só a mais recente), depois cria uma Tag e uma Transaction em Wallet — tudo no mesmo usuário, mesma
+sessão de circuito. Em seguida navega Daily → Wallet → Daily → Wallet, verificando em cada parada que
+todo o estado criado antes permanece exatamente como foi deixado, e finalmente reconfirma que o XP
+total lido antes do primeiro cross-over é idêntico ao lido depois de duas idas-e-voltas completas
+(prova de que navegação cross-feature nunca corrompe ou reseta XP).
+
+**Um near-miss real durante a escrita do teste, corrigido, não um defeito de produto**: a primeira
+execução falhou — a Task nunca aparecia marcada como concluída depois do cross-over, mesmo tendo sido
+clicada. Investigação imediata (antes de registrar qualquer achado) revelou a causa: o próprio teste
+chamava `ReadExperienceTextAsync()` (que navega para `/profile` internamente) logo após o clique de
+"Complete", sem esperar nem confirmar que a conclusão realmente havia se efetivado — a navegação
+subsequente corria à frente da confirmação visual da mutação. Corrigido adicionando a mesma asserção
+imediata já usada para o Habit (`Show completed tasks` → `Mark ... as incomplete` visível) antes de
+prosseguir. 3/3 execuções isoladas aprovadas depois da correção. Registrado aqui com o mesmo padrão
+de honestidade já estabelecido nesta EPIC: investigar antes de concluir "é uma regressão", em vez de
+abrir um achado por um bug do próprio teste.
+
+### 36.5 `docs/testing/03-functional-journey-matrix.md` — reconciliada (achado adicional, fora do escopo original)
+
+Durante a investigação, `BD30-F018`/`BD30-F019`/`BD30-F020` apareceram marcados `GAP` na matriz de
+jornadas — mas os três já estão `FIXED`/fechados há várias Sprints (30.10/30.13/30.14
+respectivamente), confirmado por evidência real (`AccountLifecycleTests.
+CreateAccount_ConfirmsEmailThroughARealLink_ThenUnlocksLogin`, `TodoLifecycleTests`,
+`ProjectLifecycleTests`, todos já existentes). `git log --follow` confirma a matriz nunca recebeu
+nenhuma edição desde sua criação na Sprint 30.4 — os três fechamentos aconteceram, mas o documento
+que deveria refletir isso nunca foi tocado. **Corrigido**: as 3 linhas da tabela executiva (§2) e a
+tabela do plano de fechamento (§5) atualizadas para `E2E` + `LAYERED`/"Fechado", com a evidência real
+citada. `BD30-F021` (o 4º `GAP` da tabela) reverificado como genuinamente ainda `OPEN` no Ledger —
+não tocado, sua marcação já está correta.
+
+### 36.6 Implementação
+
+- `tests/BeeDay.E2E.Tests/CrossFeatureRealisticStateTests.cs` (novo) — 1 teste, prova estado
+  realista cross-feature sobrevivendo a navegação cross-feature.
+- `docs/testing/03-functional-journey-matrix.md` — 3 linhas de `GAP` obsoletas corrigidas para
+  refletir fechamentos já ocorridos; nota de reconciliação adicionada.
+- `docs/epics/30-system-integrity/README.md` — nova Seção 36.
+
+Nenhuma mudança de código de produção. Nenhuma mutação de banco HMG/produção foi executada ou é
+necessária.
+
+### 36.7 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter UserWithDataAcrossHabitsTasksProjectsAndWallet...` (x3 isolado) | PASS, 3/3 |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 avisos, 0 erros |
+| `dotnet test BeeDay.slnx` (Debug, completo) | PASS, 1.556/1.556 (121 Domain, 119 Application, 216 Infrastructure, 879 Web, 221 E2E) — execução limpa, 0 falhas |
+| `dotnet test BeeDay.slnx --configuration Release` (completo) | PASS, 1.556/1.556 (121 Domain, 119 Application, 216 Infrastructure, 879 Web, 221 E2E) — execução limpa, 0 falhas |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+
+### 36.8 Continuidade e entrega
+
+O resultado mais importante desta Sprint: a suíte de regressão completa passou limpa em Debug e
+Release, sem uma única falha de nenhuma das 28 Sprints anteriores desta EPIC — nenhum Critical/High
+permanece silenciosamente aberto, exatamente o critério de aceite pedido. O gap real encontrado
+(estado realista cross-feature nunca exercitado) foi fechado com um teste genuíno, não decorativo —
+e o near-miss durante sua escrita (uma falha real do próprio teste, não do produto) foi corretamente
+investigado antes de ser registrado como qualquer coisa, reforçando pela enésima vez nesta EPIC que
+"parece uma regressão" e "é uma regressão" são coisas diferentes que exigem evidência para
+distinguir. A reconciliação da matriz de jornadas (achado descoberto, não buscado) é um lembrete de
+que documentos de rastreamento de teste também podem ficar desatualizados como qualquer outra
+documentação — o mesmo padrão já visto em `BD30-F004`/`BD30-F006`/`BD30-F075`/`BD30-F076`. Nenhuma
+mutação de banco HMG/produção foi executada ou é necessária.

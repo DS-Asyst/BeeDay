@@ -4,6 +4,13 @@ Matriz reconstruída na Sprint 30.4 a partir das rotas, componentes, handlers, r
 existentes no repositório. Ela não substitui os contratos de cada área: concentra a evidência que
 prova cada jornada e torna explícito onde a prova ainda é apenas por camadas ou está ausente.
 
+**Reconciliada na Sprint 30.29** (Full-System Regression & Realistic State Validation): três `GAP`
+já fechados em Sprints anteriores (`BD30-F018`/`BD30-F019`/`BD30-F020`) nunca haviam sido atualizados
+aqui — a matriz não recebeu nenhuma edição desde sua criação até esta Sprint. Corrigido; ver §5.
+Também nesta Sprint: primeira jornada E2E cobrindo estado realista com múltiplas features
+simultâneas (Habit + Task + Project/To-Do + Wallet) na mesma sessão de usuário, navegando entre
+elas — `CrossFeatureRealisticStateTests`, ver `tests/BeeDay.E2E.Tests/`.
+
 ## 1. Como interpretar a matriz
 
 | Estado | Significado |
@@ -23,14 +30,14 @@ navegação, cookies, circuitos Blazor ou comportamento do navegador.
 |---|---|---|---|---|---|---|
 | visitante | 30.18 / 30.24 | Home pública, CTAs e páginas públicas em `HomeTests` | responsividade, a11y, foco e fallback de cultura | cookie de cultura em Integration | público permitido; rotas protegidas redirecionam | `E2E` |
 | cadastro | 30.10 / 30.24 | navegador chega a confirmação pendente | validators, throttle e falha de e-mail em Application/Integration | criação atômica de usuário/perfil/token | links públicos e destino de confirmação | `E2E` + `LAYERED` |
-| confirmação de e-mail | 30.10 / 30.24 | token válido confirmado em Integration | inválido, expirado, replay, reenvio e throttle | token consumido e usuário confirmado | login bloqueado antes e aceito depois | `GAP` BD30-F018 |
+| confirmação de e-mail | 30.10 / 30.24 | `CreateAccount_ConfirmsEmailThroughARealLink_ThenUnlocksLogin` atravessa um link real em Chromium | inválido, expirado, replay, reenvio e throttle | token consumido e usuário confirmado | login bloqueado antes e aceito depois | `E2E` + `LAYERED` |
 | login | 30.10 / 30.24 | login real direciona a profile/onboarding | senha inválida, usuário ausente/inativo/não confirmado sem enumeração | cookie e session version | destinos e limites protegidos comprovados | `E2E` + `LAYERED` |
 | onboarding | 30.11 / 30.24 | navegador completa o fluxo e chega ao Daily | componentes e validator de perfil | flag de conclusão e perfil em Application | login escolhe onboarding ou profile | `E2E` + `LAYERED` |
 | Daily | 30.17 / 30.24 | shell autenticado, dashboard e deep links | skeleton/estados vazios/componentes | snapshot SQL em `EfDashboardReadServiceTests` | acesso protegido, sidebar e drawer | `E2E` + `LAYERED` |
 | hábitos | 30.12 / 30.24 | criar e concluir atualiza saldo e XP | título inválido e regras no Domain/Application/Web | round-trip, update, reorder, delete e concorrência SQL | isolamento por usuário e retorno ao Daily | `E2E` + `LAYERED` |
 | tarefas | 30.13 / 30.24 | criar e concluir, inclusive teclado | repeat inválido e estados do editor | round-trip, update, reorder, delete e concorrência SQL | isolamento por usuário e Daily | `E2E` + `LAYERED` |
-| to-dos | 30.13 / 30.24 | componentes e handlers exercitam o contrato | editor, data opcional, ownership e reward | add/update/remove/move/reorder SQL | workspace protegido e isolamento por usuário | `GAP` BD30-F019 |
-| projetos/workspace | 30.14 / 30.24 | criar projeto e abrir workspace | descrição inválida e estados de componente | projeto e filhos persistidos com ordem/cascade | workspace parte do Daily autenticado | `GAP` BD30-F020 |
+| to-dos | 30.13 / 30.24 | criar, editar (com persistência), concluir e excluir um To-Do em `TodoLifecycleTests` | editor, data opcional, ownership e reward | add/update/remove/move/reorder SQL | workspace protegido e isolamento por usuário | `E2E` + `LAYERED` |
+| projetos/workspace | 30.14 / 30.24 | criar projeto, abrir workspace, mutar to-do dentro dele e recarregar preservando progresso em `ProjectLifecycleTests` | descrição inválida e estados de componente | projeto e filhos persistidos com ordem/cascade | workspace parte do Daily autenticado | `E2E` + `LAYERED` |
 | Wallet | 30.15 / 30.24 | criar tag/transação; editar/excluir mínimo em pt-BR | validators, ownership, duplicidade e recovery do modal | repositories e read service SQL | rota protegida e navegação pelo shell | `E2E` + `LAYERED` |
 | configurações/conta | 30.11 / 30.24 | perfil e idioma salvos pelo navegador | erro localizado e regras de senha/perfil | idioma/tema/perfil em Application e integração | `/account`/`/settings` protegidos | `GAP` BD30-F021 |
 | localização | 30.20 / 30.24 | alternância pública e autenticada en-US/pt-BR | cookie ausente, inválido e cultura não suportada | preferência persiste e converge com cookie | cultura preservada entre auth/logout | `E2E` + `LAYERED` |
@@ -64,9 +71,12 @@ navegação, cookies, circuitos Blazor ou comportamento do navegador.
   `EfRecurringTaskRepositoryTests` e `EfProjectRepositoryTests` provam a persistência SQL,
   ordenação, mutações, concorrência e filhos do projeto.
 - `MultiUserIsolationIntegrationTests` impede acesso cruzado aos cinco agregados.
-- Não existe jornada E2E de to-do (`BD30-F019`). O E2E de projeto também não cria, altera,
-  conclui ou recarrega um to-do dentro do workspace (`BD30-F020`). As Sprints 30.13 e 30.14 são
-  proprietárias dessas provas; 30.24 deve somente consolidá-las no gate transversal.
+- **Fechado nas Sprints 30.13/30.14** (`BD30-F019`/`BD30-F020`, reverificado na Sprint 30.29):
+  `TodoLifecycleTests` prova criar um To-Do dentro de um Project, alternar conclusão, editar (com
+  persistência após reload) e excluir; `ProjectLifecycleTests` prova o workspace sobrevivendo a um
+  reload real de página com progresso e lista de To-Dos intactos, além de editar/excluir o Project.
+  Esta matriz ficou desatualizada por várias Sprints depois que o gap foi fechado — nenhuma edição
+  havia sido feita desde a criação original (Sprint 30.4); corrigida na Sprint 30.29.
 
 ### 3.3 Wallet
 
@@ -107,13 +117,18 @@ destinos são o comportamento sob teste.
 
 ## 5. Plano de fechamento dos gaps
 
-| Finding | Prova mínima esperada | Sprint |
-|---|---|---|
-| BD30-F018 | confirmação por link real no navegador, login bloqueado antes e permitido depois | 30.10 |
-| BD30-F019 | criar, editar, concluir, recarregar e excluir um to-do no workspace | 30.13 |
-| BD30-F020 | projeto + mutação de to-do + reload preservando workspace e progresso | 30.14 |
-| BD30-F021 | casos representativos de tema/senha e recovery visível de save de conta | 30.11 |
-| BD30-F001/BD30-F007 | reconciliar inventário de testes e instituir cobertura formal | 30.24 |
+**Reverificado na Sprint 30.29** — este plano descrevia o estado no momento da criação da matriz
+(Sprint 30.4); `BD30-F018`/`BD30-F019`/`BD30-F020` já estão fechados há várias Sprints (30.10/30.13/
+30.14 respectivamente), só a tabela abaixo e as linhas correspondentes em §2 nunca haviam sido
+atualizadas para refletir isso.
+
+| Finding | Prova mínima esperada | Sprint | Situação |
+|---|---|---|---|
+| BD30-F018 | confirmação por link real no navegador, login bloqueado antes e permitido depois | 30.10 | Fechado — `AccountLifecycleTests.CreateAccount_ConfirmsEmailThroughARealLink_ThenUnlocksLogin` |
+| BD30-F019 | criar, editar, concluir, recarregar e excluir um to-do no workspace | 30.13 | Fechado — `TodoLifecycleTests` |
+| BD30-F020 | projeto + mutação de to-do + reload preservando workspace e progresso | 30.14 | Fechado — `ProjectLifecycleTests` |
+| BD30-F021 | casos representativos de tema/senha e recovery visível de save de conta | 30.11 | Ainda `OPEN` no Ledger — ver `docs/epics/30-system-integrity/README.md` |
+| BD30-F001/BD30-F007 | reconciliar inventário de testes e instituir cobertura formal | 30.24 | Fechado — ver Ledger Sprint 30.24 |
 
 As Sprints funcionais devem manter os asserts de negócio próximos da jornada. A Sprint 30.24 deve
 reconciliar inventário, execução, cobertura e publicação de artifacts, sem transformar helpers em
