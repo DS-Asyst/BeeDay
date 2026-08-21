@@ -220,7 +220,6 @@ builder.Services.AddScoped<DashboardState>();
 builder.Services.AddScoped<BeeDayFeedbackStore>();
 builder.Services.AddScoped<INotificationHandler<DomainEventNotification>, BeeDayFeedbackEventHandler>();
 builder.Services.AddScoped<ProfileCreationState>();
-builder.Services.AddScoped<CardActionMenuCoordinator>();
 
 var app = builder.Build();
 

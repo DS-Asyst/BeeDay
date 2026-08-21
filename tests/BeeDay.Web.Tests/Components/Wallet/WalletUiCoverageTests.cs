@@ -241,7 +241,6 @@ public sealed class TransactionListTests : BunitContext
 {
     public TransactionListTests()
     {
-        Services.AddScoped<BeeDay.Web.Services.CardActionMenuCoordinator>();
         Services.AddLogging();
         Services.AddLocalization();
     }

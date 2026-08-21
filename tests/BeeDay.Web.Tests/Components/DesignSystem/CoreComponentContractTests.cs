@@ -18,7 +18,7 @@ public sealed class CoreComponentContractTests
             .ToArray();
         var expected = new[]
         {
-            "BeeDayBrand", "BeeDayButton", "BeeDayCard", "BeeDayCardMenu", "BeeDayCheckbox",
+            "BeeDayBrand", "BeeDayButton", "BeeDayCard", "BeeDayCheckbox",
             "BeeDayConfirmDialog", "BeeDayDashboardSkeleton", "BeeDayDateInput", "BeeDayEmptyState",
             "BeeDayHero", "BeeDayIcon", "BeeDayInput", "BeeDayLoading", "BeeDayPageHeader",
             "BeeDayProgressBar", "BeeDaySectionHeader", "BeeDaySelect", "BeeDaySettingsForm",
@@ -64,12 +64,15 @@ public sealed class CoreComponentContractTests
         // <InputText>, which this regex never counted) was replaced by a single looped native
         // <button> rendering the 10-swatch COR0-COR9 picker — one fewer input, one more button.
         // Sprint 29.4: EditorialFooter.razor adds one native <button> (Back to Top).
-        Assert.Equal(31, counts["button"]);
+        // EPIC 30 Sprint 30.19: BeeDayCardMenu.razor (3 native <button>s, zero production
+        // consumers, superseded by click-to-edit cards) was removed as dead code — one fewer file
+        // with native controls, three fewer buttons.
+        Assert.Equal(28, counts["button"]);
         Assert.Equal(13, counts["input"]);
         Assert.Equal(0, counts["select"]);
         Assert.Equal(0, counts["textarea"]);
-        Assert.Equal(44, counts.Values.Sum());
-        Assert.Equal(21, filesWithNativeControls);
+        Assert.Equal(41, counts.Values.Sum());
+        Assert.Equal(20, filesWithNativeControls);
     }
 
     private static string ResolveRepoRoot()

@@ -195,8 +195,8 @@
     font-weight: 700;
 }
 
-.beeday-toast--success .beeday-toast__icon { background: #e2f5e9; color: var(--beeday-color-success); }
-.beeday-toast--error .beeday-toast__icon { background: #fde8e8; color: var(--beeday-color-danger); }
+.beeday-toast--success .beeday-toast__icon { background: var(--beeday-color-success-soft); color: var(--beeday-color-success); }
+.beeday-toast--error .beeday-toast__icon { background: var(--beeday-color-danger-soft); color: var(--beeday-color-danger); }
 
 .beeday-toast__content strong {
     display: block;
@@ -333,7 +333,7 @@
     to { opacity: 1; transform: translateX(0); }
 }
 
-@keyframes beeday-spin { to { transform: rotate(360deg); } }
+/* beeday-spin is defined once, in design-system.css — both stylesheets load on every page. */
 
 @keyframes beeday-shimmer {
     from { background-position: 200% 0; }
