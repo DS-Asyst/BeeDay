@@ -185,6 +185,8 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F055 | baixa | `Todo.DueDate` é persistido e exibido como texto formatado, mas não tem nenhum efeito funcional: nenhum indicador visual de atraso existe em `src/` (`grep` por "overdue"/"atrasad" não encontra nada), a ordenação da lista usa exclusivamente `Position` (drag-and-drop), não `DueDate`, e `Todo` não sobrescreve `ToggleCompletion()` — completar um To-Do atrasado se comporta identicamente a completar um no prazo. Nenhum bug de fuso/cultura na conversão de data em si (`BeeDayWebService.ToDateOnly` é direto; `DueDateInput_StaysIsoFormatted_RegardlessOfCulture` já prova o campo permanece ISO sob pt-BR) | `OPEN` | 30.20 |
 | BD30-F056 | média | `Project.Archived` é persistido, validado e round-tripa corretamente (`EfProjectRepositoryTests` prova a persistência), mas `ProjectEditorModal.razor` não tem nenhum controle de UI para defini-lo — pior que `BD30-F050`/`BD30-F054` (que ao menos têm um seletor visível, só sem efeito), este campo é inteiramente inalcançável pela UI. Mesmo que fosse setado diretamente no banco, nada a jusante o trata de forma diferente: `EfDashboardReadService` não filtra por ele, `DashboardState.FilteredProjects`/`ProjectContextOptions` não o excluem, o board Ativo/Concluído usa `Status` (não `Archived`), e o reorder de Projects compartilha uma única sequência de `Position` sem particionar por `Archived`. Decisão de produto necessária: construir a UI de arquivamento + filtragem, ou remover o campo morto | `OPEN` | decisão do proprietário |
 | BD30-F057 | baixa | `DashboardState.DeleteCurrentEditorItemAsync` (compartilhado por Habit/Task/Todo/Project) toca a animação de remoção do card (`RemovingItemId`, ~170ms) **antes** de emitir a requisição de exclusão ao servidor — se a exclusão subsequente falhar (rede, conflito), `RemovingItemId` já foi limpo e `ReloadAsync()` nunca é alcançado (o catch só mostra um toast de erro), então o card reaparece no estado normal após já ter "desaparecido" visualmente um instante antes, ao lado de um toast de erro. Padrão cross-cutting pré-existente, não introduzido nem específico desta Sprint | `OPEN` | 30.20 |
+| BD30-F058 | média | Sort por Amount/Description em Wallet estava totalmente cabeado Application→Infrastructure→testes (`Wallet.razor.ResolveSort`, `TransactionSortField`, `EfWalletReadService.ApplyOrdering`), mas o `<select>` renderizado só oferecia as duas opções de data — as outras 4 opções só eram alcançáveis setando o parâmetro `Sort` diretamente em teste, nunca por um usuário real. **Corrigido nesta Sprint**: 4 novas `<option>` adicionadas a `WalletFilters.razor` (mesmos valores já suportados pelo backend). Já o filtro de faixa de valor (`GetTransactionsQuery.MinimumAmount`/`MaximumAmount`, validado e testado em Application/Infrastructure) continua com **zero superfície de UI** — nenhum input, nenhuma propriedade de estado, nada em `WalletFilters.razor`. Diferente de `BD30-F050`/`BD30-F054`/`BD30-F056`, não é uma questão de semântica de produto ambígua (ordenar por valor e filtrar por faixa de valor têm significado óbvio e não-controverso) — é trabalho de engenharia represado, não decisão de produto | `OPEN` | 30.19 |
+| BD30-F059 | alta | Cards de `WalletTag`/`Transaction` (`WalletTagManager.razor`, `TransactionList.razor`) perdem toda interatividade de clique/teclado para itens adicionados a uma lista já populada dentro da mesma sessão de circuito Blazor Server — confirmado reproduzível para o primeiro Tag criado (lista vazia→1), um segundo Tag criado logo em seguida, e uma segunda Transaction criada logo em seguida; imune a espera explícita (até 1s), a `Force: true` (bypassa verificações de actionability do Playwright, descartando interceptação/overlay como causa), e independente de clique vs. `Enter` via teclado. Um `GotoAsync` real (reload completo de página) sempre restaura a interatividade. **Causa raiz não identificada** — `@key` foi adicionado a ambos os `@foreach` como bom-senso defensivo (Blazor best practice já ausente), mas comprovadamente **não** resolveu o sintoma nos testes que o reproduziram; `DialogFocusScope`/`beeday-dialog-focus.js` foi inspecionado por completo sem revelar um bug óbvio. Cards de Transaction/Habit/Task/Todo/Project em Sprints anteriores desta EPIC nunca expuseram isso porque toda sequência de duas interações em um mesmo teste já continha um `GotoAsync` de reload no meio (para provar persistência) — não porque o padrão estivesse imune. Workaround confirmado (reload) aplicado nos dois novos testes E2E desta Sprint que o encontraram | `OPEN` | 30.24 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -1748,3 +1750,177 @@ Sprints sugere que uma única revisão de produto, cobrindo os três achados (`B
 agora genuinamente fechado (não apenas parcialmente, como a Sprint 30.13 deixou) — o workspace, não
 só o board, agora tem prova de persistência real após reload. Nenhuma mutação de banco HMG/produção
 foi executada ou é necessária.
+
+## 22. Sprint 30.15 — Wallet, Transactions & Tags Complete Audit
+
+### 22.1 Escopo e método
+
+Issue #212. Esta Sprint carrega um contexto histórico explícito: a Sprint 30.2 já investigou e
+corrigiu um incidente real de produção em HMG (`BD30-F013` — `RangeAttribute.SetupConversion`
+falhava ao interpretar o limite textual `"0.01"` sob `pt-BR`, bloqueando toda submissão de transação
+para usuários em português; corrigido com `ParseLimitsInInvariantCulture = true`). O proprietário
+instruiu explicitamente a não presumir que a Sprint 30.2 resolveu todos os defeitos de Wallet — esta
+Sprint teve como primeira obrigação **reverificar** a correção intacta e **caçar a mesma classe de
+bug** em qualquer outro lugar do código, antes de auditar o restante do escopo (CRUD, saldo,
+precisão decimal, filtros/ordenação/paginação, ciclo de vida de Tag, dados antigos/representativos,
+concorrência, isolamento de posse, recuperação de erro de UI).
+
+`Wallet.cs`, `WalletTag.cs`, `Transaction.cs`, `WalletCommandHandlers.cs`/`WalletQueryHandlers.cs`,
+`WalletValidators.cs`, `EfWalletReadService.cs`, `Ef{Wallet,WalletTag,Transaction}Repository.cs`,
+`TransactionConfiguration.cs`, `Wallet.razor` e todos os componentes/state da Feature, e todos os
+testes relacionados a Wallet em Domain/Application/Infrastructure/Web/E2E foram lidos integralmente.
+
+### 22.2 Reverificação do incidente da Sprint 30.2 e busca pela mesma classe de bug
+
+**Correção intacta, confirmada testada em ambas as culturas.** `TransactionFormModel.Amount` ainda
+declara `[Range(typeof(decimal), "0.01", "999999999999", ParseLimitsInInvariantCulture = true)]`;
+`TransactionFormModalTests.AmountRange_ValidatesMinimumWithoutDependingOnCurrentCulture` prova
+`0.01m` válido e `0m` inválido sob `en-US` e `pt-BR`; o E2E dedicado
+`MinimumTransaction_CreateEditAndDeleteInPortuguese_KeepsCircuitInteractive` continua passando —
+cria, edita e exclui uma transação de `0.01`/`0.02` inteiramente em português, confirmando o
+circuito Blazor nunca quebra.
+
+**Mesma classe de bug: não encontrada em nenhum outro lugar.** `grep` por `[Range(` em todo `src/`
+retorna exatamente essa única ocorrência. Nenhuma outra anotação DataAnnotations usa limite
+numérico como literal de string culture-sensível em todo o repositório; nenhum parsing manual de
+decimal/moeda existe na Feature Wallet — o único input numérico é `InputNumber`, que o Blazor sempre
+interpreta com semântica invariante/HTML, independente de `CultureInfo.CurrentCulture` (confirmado
+pelo próprio E2E em português, que digita `"0.01"` com ponto enquanto a UI exibe saldo com vírgula).
+
+### 22.3 Achados confirmados — corretos, sem defeito
+
+- **Saldo**: `Wallet` não persiste saldo algum — sempre recalculado ao vivo a partir de
+  `Sum(Transaction.SignedAmount)` carregado fresco do SQL Server a cada leitura; sem cache, sem
+  risco de dessincronia. `SignedAmount` deriva o sinal exclusivamente de `Type`, nunca de `Amount`
+  negativo.
+- **Ciclo de vida de Tag / risco de órfão** (critério de aceite explícito do Issue): confirmado
+  seguro em duas camadas independentes — FK `SET NULL` no banco e
+  `DeleteWalletTagCommandHandler` chamando `ClearTagReferencesAsync` explicitamente antes de
+  remover a tag, na mesma transação. `TransactionCard.razor` renderiza "No tag" graciosamente
+  quando `WalletTagId` é nulo. Já testado em Application
+  (`DeleteTag_RemovesAssociationAndKeepsTransaction`); agora também em E2E real (§22.5).
+- **Concorrência**: `RowVersion` shadow property aplicado globalmente a Wallet/WalletTag/Transaction
+  (`BeeDayDbContext.cs`), com `EfConcurrencySaveChanges` convertendo `DbUpdateConcurrencyException`
+  em `ConcurrencyConflictException` — testado para as três entidades em
+  `Ef{Wallet,WalletTag,Transaction}RepositoryTests`.
+- **Isolamento de posse**: guardado e testado exaustivamente (5 testes dedicados em
+  `WalletHandlersTests.cs`) em toda a superfície de Transaction/Tag, incluindo reorder.
+- **Datas antigas/futuras**: sem limite de intervalo de negócio além de rejeitar `default`;
+  comparação de data é por coluna SQL, não por string culture-sensível — sem risco análogo ao
+  incidente da Sprint 30.2.
+- **Documentação**: `docs/domain/{wallet,wallet-tag,transaction}.md` e a seção Wallet de
+  `docs/web/04-feature-components.md` batem exatamente com o código, incluindo a nuance de que a
+  Application não depende só do `SET NULL` do FK.
+
+### 22.4 `BD30-F058` — precisão decimal inconsistente entre camadas, parcialmente corrigido; sort/filtro cabeados mas inalcançáveis
+
+A regra "mínimo `0.01`, máximo `999999999999`, no máximo 2 casas decimais" tinha completude
+desigual entre as quatro camadas: Domain (`Transaction.ValidateAmount`) sempre aplicava as três;
+`SaveTransactionRequestValidator` (Application) aplicava mínimo e casas decimais, mas **não** o
+máximo; a constraint `CK_Transactions_Amount` (banco) só aplicava `> 0`, sem máximo — a escala da
+coluna `decimal(19,2)` já torna ">2 casas decimais" estruturalmente impossível no banco, então só o
+máximo faltava ali também. Sem risco de integridade de dado hoje (Domain sempre executa antes de
+qualquer `SaveChangesAsync`, e roda em toda gravação real do produto), mas uma gravação direta via
+EF/SQL que pulasse Domain (import em lote, ferramenta administrativa futura) não seria bloqueada.
+
+**Corrigido nesta Sprint**: `LessThanOrEqualTo(Transaction.MaximumAmount)` adicionado a
+`SaveTransactionRequestValidator`; nova migration `AddTransactionAmountUpperBoundCheckConstraint`
+aperta `CK_Transactions_Amount` para `[Amount] > 0 AND [Amount] <= 999999999999`. 4 novos testes
+provam o limite exato (`999999999999` aceito, `1000000000000` rejeitado) em Domain e Application —
+nenhum teste em toda a suíte exercitava esse valor-limite antes.
+
+Também descoberto durante esta auditoria e **corrigido**: ordenação por Amount/Description estava
+totalmente cabeada Application→Infrastructure→testes (`Wallet.razor.ResolveSort`,
+`EfWalletReadService.ApplyOrdering`), mas o `<select>` de ordenação só oferecia as duas opções de
+data — as outras 4 só eram alcançáveis via parâmetro de teste, nunca por um usuário real. 4 novas
+`<option>` adicionadas a `WalletFilters.razor`. O filtro de faixa de valor
+(`MinimumAmount`/`MaximumAmount`, também totalmente cabeado e testado em Application/Infrastructure)
+continua sem qualquer superfície de UI — diferente de `BD30-F050`/`BD30-F054`/`BD30-F056`, não é uma
+questão de semântica de produto ambígua, é trabalho de engenharia represado; encaminhado à Sprint
+30.19 (Design System) sem correção nesta Sprint por ser uma feature de UI nova, não uma lacuna de
+teste ou correção pontual.
+
+### 22.5 `BD30-F059` — cards de Tag/Transaction perdem interatividade para itens adicionados na mesma sessão
+
+Descoberto ao escrever os dois novos testes E2E desta Sprint (§22.6), não por auditoria de código: um
+clique (ou `Enter`) em um card de `WalletTag` ou `Transaction` recém-adicionado a uma lista já
+populada, na mesma sessão de circuito, não abre o editor — nenhum diálogo aparece, nenhuma exceção é
+lançada. Confirmado reproduzível para o primeiro Tag criado (lista vazia→1), um segundo Tag criado
+em seguida, e uma segunda Transaction criada em seguida. Descartado como causa: interceptação/overlay
+(`Force: true`, que ignora as verificações de actionability do Playwright, não resolveu); timing
+(espera explícita de até 1s antes do clique não resolveu); clique vs. teclado (ambos falham
+igualmente). `@key="item.Id"` foi adicionado a `WalletTagManager.razor` e `TransactionList.razor`
+(ausente antes — boa prática Blazor de qualquer forma, mantido por higiene), mas comprovadamente
+**não** resolveu o sintoma nos testes que o reproduziram. `DialogFocusScope.cs`/
+`beeday-dialog-focus.js` (o mecanismo de focus-trap dos diálogos) foi lido por completo, sem revelar
+um bug óbvio no código-fonte. Um `GotoAsync` real (reload completo) sempre restaura a interatividade.
+
+Achado retroativo importante: nenhum teste E2E de Habit/Task/Todo/Project das Sprints 30.12–30.14
+jamais expôs isso, mas não porque estivessem imunes — toda sequência de duas interações de edição
+nesses testes já continha um `GotoAsync` de reload no meio, executado por outro motivo (provar
+persistência após reload), o que mascarou coincidentemente o mesmo sintoma. Esta Sprint é a primeira
+a encadear duas aberturas de editor sem reload entre elas por um motivo não relacionado a
+persistência, e por isso a primeira a expor o defeito.
+
+Sem causa raiz identificada nesta Sprint — registrado com evidência completa e workaround
+confirmado (reload) aplicado nos testes que o encontraram, em vez de uma tentativa especulativa de
+correção sem certeza do mecanismo real. Encaminhada à Sprint 30.24, ao lado de `BD30-F042`
+(confiabilidade da suíte E2E) — sintomas distintos (este é perda de vínculo de evento Blazor, aquele
+é timeout de navegação Playwright), mas ambos relacionados a comportamento sob interação rápida
+sucessiva, possivelmente dignos de investigação conjunta.
+
+### 22.6 Cobertura de teste fechada
+
+- `tests/BeeDay.Web.Tests/Components/Wallet/WalletUiCoverageTests.cs` — novo teste
+  `SortSelect_OffersAllSixOptions_AndSelectingAmountInvokesSortChangedWithTheRightValue`.
+- `tests/BeeDay.E2E.Tests/WalletTests.cs` — 2 novos testes: `CreateExpenseTransaction_
+  DecreasesBalanceCorrectly` (nenhum teste E2E prévio jamais criava uma transação de Expense — só
+  Income — deixando o caminho de sinal `SignedAmount` sem cobertura de browser) e
+  `DeletingATag_LeavesItsTransactionVisibleWithNoTag` (o critério de aceite explícito do Issue sobre
+  ciclo de vida de Tag, antes provado só em Application).
+
+### 22.7 Implementação
+
+- `src/BeeDay.Application/Features/Wallets/Validation/WalletValidators.cs` — regra de máximo
+  adicionada a `SaveTransactionRequestValidator` (`BD30-F058`).
+- `src/BeeDay.Infrastructure/Persistence/SqlServer/Configurations/TransactionConfiguration.cs` +
+  nova migration `AddTransactionAmountUpperBoundCheckConstraint` — `CK_Transactions_Amount` aperta
+  o máximo (`BD30-F058`).
+- `src/BeeDay.Web/Components/Features/Wallets/Components/WalletFilters.razor` +
+  `WalletResources.*.resx` — 4 novas opções de ordenação (`BD30-F058`).
+- `src/BeeDay.Web/Components/Features/Wallets/Components/TransactionList.razor`,
+  `WalletTagManager.razor` — `@key` adicionado aos `@foreach` (higiene relacionada a `BD30-F059`,
+  não uma correção comprovada dele).
+- `tests/BeeDay.Domain.Tests/TransactionTests.cs`,
+  `tests/BeeDay.Application.Tests/WalletValidatorTests.cs` — testes de fronteira do valor máximo.
+- `tests/BeeDay.Web.Tests/Components/Wallet/WalletUiCoverageTests.cs`,
+  `tests/BeeDay.E2E.Tests/WalletTests.cs` — testes descritos em §22.6.
+
+Nenhuma mutação de banco HMG/produção foi executada ou é necessária — a nova constraint é aditiva e
+não rejeita nenhum dado que o Domain já não rejeitasse antes em toda gravação real do produto.
+
+### 22.8 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| `dotnet test tests/BeeDay.Domain.Tests/... --filter TransactionTests` | PASS, 11/11 |
+| `dotnet test tests/BeeDay.Application.Tests/... --filter WalletValidatorTests` | PASS, 5/5 |
+| `dotnet test tests/BeeDay.Web.Tests/... --filter WalletFiltersTests` | PASS, 13/13 |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter WalletTests` | PASS, 8/8 (2 execuções consecutivas, ambas limpas) |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+| `dotnet test BeeDay.slnx` (Debug, completo) | PASS, 1.553/1.553 (121 Domain, 119 Application, 216 Infrastructure, 884 Web, 213 E2E) — execução limpa, 0 falhas |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.553/1.553 (121 Domain, 119 Application, 216 Infrastructure, 884 Web, 213 E2E) — execução limpa, 0 falhas |
+
+### 22.9 Continuidade e entrega
+
+Esta Sprint cumpriu sua obrigação mais explícita — reverificar o incidente real de HMG da Sprint
+30.2 e caçar a mesma classe de bug — com resultado limpo: correção intacta, testada, e nenhuma
+recorrência em nenhum outro lugar do código. O achado mais significativo (`BD30-F059`) não veio da
+auditoria de código propriamente dita, mas da própria escrita de testes E2E novos: um defeito real
+de interatividade, reproduzível e evidenciado com rigor, mas cuja causa raiz não foi alcançada dentro
+do escopo desta Sprint — registrado com workaround confirmado em vez de uma correção especulativa
+sem certeza do mecanismo. Nenhuma mutação de banco HMG/produção foi executada ou é necessária.

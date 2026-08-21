@@ -120,6 +120,10 @@
   <data name="OrderLabel" xml:space="preserve"><value>Order</value></data>
   <data name="NewestFirstOption" xml:space="preserve"><value>Newest first</value></data>
   <data name="OldestFirstOption" xml:space="preserve"><value>Oldest first</value></data>
+  <data name="AmountHighestFirstOption" xml:space="preserve"><value>Amount (highest first)</value></data>
+  <data name="AmountLowestFirstOption" xml:space="preserve"><value>Amount (lowest first)</value></data>
+  <data name="DescriptionAToZOption" xml:space="preserve"><value>Description (A-Z)</value></data>
+  <data name="DescriptionZToAOption" xml:space="preserve"><value>Description (Z-A)</value></data>
   <data name="ActiveFilterCountSingular" xml:space="preserve"><value>{0} active filter</value></data>
   <data name="ActiveFilterCountPlural" xml:space="preserve"><value>{0} active filters</value></data>
   <data name="SummaryAriaLabel" xml:space="preserve"><value>Wallet summary</value></data>

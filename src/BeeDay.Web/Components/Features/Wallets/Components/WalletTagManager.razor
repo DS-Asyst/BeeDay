@@ -18,7 +18,8 @@
         <div class="wallet-tag-list">
             @foreach (var tag in Tags)
             {
-                <BeeDayCard Class="wallet-tag-item"
+                <BeeDayCard @key="tag.Id"
+                             Class="wallet-tag-item"
                              Interactive="true"
                              role="button"
                              tabindex="0"
