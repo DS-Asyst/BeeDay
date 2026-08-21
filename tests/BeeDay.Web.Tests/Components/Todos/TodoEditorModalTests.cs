@@ -3,6 +3,7 @@ using BeeDay.Domain.Enums;
 using BeeDay.Web.Components.Features.Todos.Components;
 using BeeDay.Web.Components.Features.Todos.Models;
 using BeeDay.Web.Tests.Localization;
+using Microsoft.AspNetCore.Components;
 
 namespace BeeDay.Web.Tests.Components.Todos;
 
@@ -77,6 +78,34 @@ public sealed class TodoEditorModalTests : BunitContext
 
         var input = cut.Find("#todo-due-date");
         Assert.Equal("2026-03-05", input.GetAttribute("value"));
+    }
+
+    // EPIC 30 Sprint 30.13: mirrors HabitEditorModalTests.Save_PassesTheEditedFieldsToOnSave (added
+    // Sprint 30.12) — no prior test proved OnSave actually receives the edited Title/Description/
+    // DueDate, only that the callback exists and submit-label text is culture-correct.
+    [Fact]
+    public async Task Save_PassesTheEditedFieldsToOnSave()
+    {
+        TodoEditorModel? saved = null;
+        var project = Projects[0];
+        var model = new TodoEditorModel { Title = "Original", Description = "Original notes", ProjectId = project.Id };
+
+        var cut = Render<TodoEditorModal>(parameters => parameters
+            .Add(component => component.Model, model)
+            .Add(component => component.Projects, Projects)
+            .Add(component => component.IsEditing, true)
+            .Add(component => component.OnSave, EventCallback.Factory.Create<TodoEditorModel>(this, m => saved = m)));
+
+        cut.Find("#todo-title").Change("Buy groceries");
+        cut.Find("#todo-notes").Change("Milk, eggs, bread");
+        cut.Find("#todo-due-date").Change("2026-04-10");
+        await cut.Find(".editor-modal__header-save").ClickAsync();
+
+        Assert.NotNull(saved);
+        Assert.Equal("Buy groceries", saved.Title);
+        Assert.Equal("Milk, eggs, bread", saved.Description);
+        Assert.Equal(project.Id, saved.ProjectId);
+        Assert.Equal(new DateTime(2026, 4, 10), saved.DueDate);
     }
 
     [Fact]

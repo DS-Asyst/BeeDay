@@ -145,6 +145,64 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Mark {title} as incomplete" })).ToBeVisibleAsync();
     }
 
+    // EPIC 30 Sprint 30.13: mirrors the Habit edit/delete E2E tests added in Sprint 30.12
+    // (EditHabit_UpdatesTitleAndPersistsAfterReload / DeleteHabit_RemovesItFromTheBoardAfterConfirmation)
+    // — Task previously had E2E coverage only for create + toggle-complete.
+    [Fact]
+    public async Task EditTask_UpdatesTitleAndPersistsAfterReload()
+    {
+        await LoginToDailyAsync();
+        var title = $"E2E Task Edit {Guid.NewGuid():N}"[..24];
+        var updatedTitle = $"E2E Task Edited {Guid.NewGuid():N}"[..24];
+
+        await OpenActivityMenuAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Task" }).ClickAsync();
+        var dialog = Page.GetByRole(AriaRole.Dialog);
+        await dialog.GetByLabel("Title").FillAsync(title);
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
+        await Expect(dialog).ToBeHiddenAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Task: {title}" }).ClickAsync();
+        await Expect(dialog).ToBeVisibleAsync();
+        await dialog.GetByLabel("Title").FillAsync(updatedTitle);
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Save" }).ClickAsync();
+        await Expect(dialog).ToBeHiddenAsync();
+
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Task: {updatedTitle}" })).ToBeVisibleAsync();
+
+        await GotoAsync("/daily");
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Task: {updatedTitle}" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Task: {title}" })).ToHaveCountAsync(0);
+    }
+
+    [Fact]
+    public async Task DeleteTask_RemovesItFromTheBoardAfterConfirmation()
+    {
+        await LoginToDailyAsync();
+        var title = $"E2E Task Delete {Guid.NewGuid():N}"[..24];
+
+        await OpenActivityMenuAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Task" }).ClickAsync();
+        var dialog = Page.GetByRole(AriaRole.Dialog);
+        await dialog.GetByLabel("Title").FillAsync(title);
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
+        await Expect(dialog).ToBeHiddenAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Task: {title}" }).ClickAsync();
+        await Expect(dialog).ToBeVisibleAsync();
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Delete", Exact = true }).ClickAsync();
+
+        var confirmation = Page.GetByRole(AriaRole.Alertdialog);
+        await Expect(confirmation).ToBeVisibleAsync();
+        await confirmation.GetByRole(AriaRole.Button, new() { Name = "Delete Task" }).ClickAsync();
+
+        await Expect(dialog).ToBeHiddenAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Task: {title}" })).ToHaveCountAsync(0);
+
+        await GotoAsync("/daily");
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Task: {title}" })).ToHaveCountAsync(0);
+    }
+
     [Fact]
     public async Task TaskCheckbox_HoverNeverPreviewsTheCheckBeforeCompletion()
     {

@@ -147,7 +147,7 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F016 | alta | o rollback de HMG restaura aplicação e configuração do App Pool, mas não desfaz migrations; embora `Deploy-BeeDay.ps1` implemente `-BackupDatabase`, `deploy-hmg.yml` não o habilita e não há evidência versionada de backup SQL externo correlacionado ao deploy | `OPEN` | 30.25 |
 | BD30-F017 | média | cada deploy cria backups de aplicação e dados em `C:\Apps\BeeDay-Backups`, mas não existe política versionada de retenção, expurgo ou restore automatizado de uma execução histórica | `OPEN` | 30.25 |
 | BD30-F018 | alta | a confirmação de e-mail tem cobertura robusta de Application/Integration para sucesso, token inválido/expirado/replay, reenvio e throttle, mas nenhuma jornada Chromium atravessa um link real até liberar o login | `FIXED` | 30.10 |
-| BD30-F019 | alta | não existe E2E de to-do; criação, edição, conclusão, reload e exclusão dentro do workspace são provados apenas parcialmente por componentes, Application e repositories | `OPEN` | 30.13 |
+| BD30-F019 | alta | não existia E2E de to-do; criação, edição, conclusão, reload e exclusão eram provados apenas parcialmente por componentes, Application e repositories. Corrigido: `tests/BeeDay.E2E.Tests/TodoLifecycleTests.cs` (novo) prova, via Chromium real, criar um To-Do dentro de um Project, alternar conclusão, editar (com persistência após reload) e excluir (com confirmação) | `FIXED` | 30.13 |
 | BD30-F020 | média | o E2E de projeto cria e abre o workspace, mas não prova mutações de to-do nem persistência do workspace após reload | `OPEN` | 30.14 |
 | BD30-F021 | média | os E2Es de conta cobrem perfil e idioma, mas não tema, alteração de senha nem recovery visível dos demais saves suportados | `OPEN` | 30.11 |
 | BD30-F022 | baixa | dez suítes repetiam seletores e submissão do mesmo formulário de login como arranjo, aumentando drift sem acrescentar evidência funcional | `FIXED` | 30.4 |
@@ -181,6 +181,8 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F051 | média | `EfUserRepository.UpdateAsync` recarrega **todas** as `ExperienceEntry` de um usuário a cada chamada — não só em registros de Habit, mas em qualquer mutação de User (confirmação de e-mail, redefinição de senha, troca de nome/e-mail). Habit é a única fonte de XP deliberadamente isenta de deduplicação (`UserExperience.cs`, por design — cada clique deve premiar XP independentemente), então é a única cujo volume de `ExperienceEntry` cresce sem limite por usuário ativo; nenhuma estratégia de arquivamento/paginação existe. Lista de Habits em `/daily` também não é paginada/virtualizada — nenhum teste cria mais de 2 Habits para o mesmo usuário em toda a suíte, então isso nunca foi exercitado em escala | `OPEN` | 30.21 |
 | BD30-F052 | baixa | `ActivityAttribute` (Strength/Dexterity/Intelligence/Vitality) é persistido, validado e round-tripa corretamente, mas não existe controle de UI para defini-lo em nenhum dos 4 editores de atividade (Habit/Task/Todo/Project) — confirmado por busca por `ActivityAttribute` em todo `*.razor` de `src/BeeDay.Web`, zero resultados fora de sintaxe `@attributes` não relacionada. Toda atividade criada pelo produto hoje tem `Attribute = null` para sempre; um valor já existente (via API/dados diretos) sobrevive a uma edição intacto, só não pode ser definido pela UI. Gap cross-cutting, não específico de Habit | `OPEN` | 30.19 |
 | BD30-F053 | baixa | `EfHabitRepository.RemoveAsync` (e o mesmo padrão em `EfTaskRepository`/`EfTodoRepository`/`EfProjectRepository` conforme aplicável) busca a linha só por `Id`, sem reverificar `UserId` — depende inteiramente do único call site (`DeleteHabitCommandHandler`) já ter verificado posse via `HabitLookup.RequireExistsAsync` antes. Seguro hoje (único call site confirmado, corretamente guardado), mas é uma lacuna de defesa em profundidade: o método do repositório não é seguro por posse isoladamente, então um futuro chamador direto que pule a pré-verificação poderia excluir silenciosamente o Habit de outro usuário | `OPEN` | 30.22 |
+| BD30-F054 | alta | `RecurringTask.Repeat` (Daily/Weekly/Monthly) está totalmente cabeado — Domain, persistência, editor de UI, documentação — mas `RecurringTask` não sobrescreve `ToggleCompletion()` (herda a implementação padrão de `Activity`, um simples flip de booleano); nenhum código no repositório jamais reabre uma Task recorrente com base em fronteira de calendário. É a mesma classe de lacuna que `BD30-F050` (Habit), confirmada de forma independente para Task. Efeito colateral agravante: como a dedução de XP por origem é permanente e correta por design para Task (ao contrário de Habit), uma Task "Diária" completada uma vez **nunca mais pode gerar XP**, mesmo desmarcando e marcando de novo manualmente — os dois mecanismos, cada um correto isoladamente, se combinam para anular o propósito de gamificação de uma Task "recorrente". Definir a semântica real de reabertura é uma decisão de produto, não inventada por esta auditoria — mesma decisão pendente de `BD30-F050`, possivelmente a mesma decisão para os dois achados | `OPEN` | decisão do proprietário |
+| BD30-F055 | baixa | `Todo.DueDate` é persistido e exibido como texto formatado, mas não tem nenhum efeito funcional: nenhum indicador visual de atraso existe em `src/` (`grep` por "overdue"/"atrasad" não encontra nada), a ordenação da lista usa exclusivamente `Position` (drag-and-drop), não `DueDate`, e `Todo` não sobrescreve `ToggleCompletion()` — completar um To-Do atrasado se comporta identicamente a completar um no prazo. Nenhum bug de fuso/cultura na conversão de data em si (`BeeDayWebService.ToDateOnly` é direto; `DueDateInput_StaysIsoFormatted_RegardlessOfCulture` já prova o campo permanece ISO sob pt-BR) | `OPEN` | 30.20 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -1449,3 +1451,152 @@ ativos, e ambos exigem uma decisão fora da autoridade de auditoria antes de qua
 qualquer estratégia de arquivamento/expurgo de `ExperienceEntry` toca infraestrutura compartilhada
 usada por toda mutação de User, não só Habit, e afeta decisões de retenção de histórico de XP que vão
 além do escopo desta Sprint. Nenhuma mutação de banco HMG/produção foi executada ou é necessária.
+
+## 20. Sprint 30.13 — Tasks & To-Dos Complete Audit
+
+### 20.1 Escopo e método
+
+Issue #210. Auditoria funcional completa de `RecurringTask` (Task) e `Todo`, tratados separadamente
+onde seu comportamento diverge (recorrência vs. data de vencimento) e em conjunto onde compartilham
+implementação (`Activity`, `ActivityCard.razor`, `DashboardState`). `RecurringTask.cs`, `Todo.cs`,
+`TaskCommandHandlers.cs`, `TodoCommandHandlers.cs`, `EfRecurringTaskRepository.cs`,
+`EfProjectRepository.cs`, `ReorderActivitiesCommandHandler.cs`, `TaskEditorModal`/`TodoEditorModal`
+(razor + code-behind), `DashboardModalState.cs`, `DashboardState.cs`, `ActivityCard.razor`, `Home.razor`
+e todos os testes relacionados a Task/Todo em Domain/Application/Infrastructure/Web/E2E foram lidos
+integralmente, cruzados com o Ledger existente (`BD30-F019`, `BD30-F020`, já atribuídos a esta Sprint e
+à 30.14) para não reabrir achados já rastreados sob um ID novo.
+
+### 20.2 Achados confirmados — corretos, sem defeito
+
+- **Round-trip de CRUD**: todo campo editável de Task (Título/Notas/Repeat) e Todo (Título/Notas/
+  Projeto/Data de vencimento) é hidratado corretamente no editor e persistido de volta —
+  `DashboardModalState.OpenTask/OpenTodo` e `BeeDayWebService.AddTaskAsync/UpdateTaskAsync/
+  AddTodoAsync/UpdateTodoAsync` confirmados por leitura completa.
+- **Idempotência de conclusão e dedução de XP**: `ToggleTaskCommandHandler`/`ToggleTodoCommandHandler`
+  seguem o padrão de transação atômica já corrigido na Sprint 30.7 (`BD30-F030`); a dedução por origem
+  `(UserId, SourceType, ReferenceId, RewardType)` (`UserExperience.cs`) é permanente e testada —
+  desmarcar e marcar de novo o mesmo Task/Todo concede XP só uma vez
+  (`ExperienceRewardPipelineTests.Completing_task_twice_grants_experience_only_once`,
+  `Completing_last_todo_grants_todo_and_project_rewards_once`). Comportamento correto e intencional,
+  distinto por design da isenção de Habit — mas ver `BD30-F054` para a interação inesperada que isso
+  cria quando combinado com a lacuna de recorrência de Task.
+- **Isolamento de posse**: confirmado em toda a superfície de mutação de Task/Todo, incluindo reorder
+  (`ReorderActivitiesCommandHandler.EnsureOwned` para Task; resolução por Project do chamador para
+  Todo) — `EfProjectRepository.UpdateTodoAsync/RemoveTodoAsync/MoveTodoAsync` de fato escopam por
+  `userId` diretamente na query SQL, mais defendido que o padrão `RemoveAsync`-só-por-`Id` de Habit/
+  Task (`BD30-F053`). Provado por `MultiUserIsolationIntegrationTests` (real MediatR + real EF).
+- **Cascata Project → Todo**: `OnDelete(DeleteBehavior.Cascade)` remove Todos ao excluir o Project
+  proprietário; mover um Todo entre Projects do mesmo usuário é atômico
+  (`UpdateTodoCommandHandler`, transação explícita quando `ProjectId` muda).
+- **Freshness de filtros pós-mutação**: `DashboardState.ReloadAsync()` é chamado após toda mutação;
+  `FilteredTasks`/`FilteredTodos` são computados ao vivo, sem coleção derivada que possa ficar obsoleta.
+- **Cancelamento e feedback de UI**: padrão `BD30-F035` já aplicado a toda operação de Task/Todo.
+- **Documentação**: `docs/domain/recurring-task.md` já documenta corretamente que `ToggleCompletion`
+  usa a implementação padrão de `Activity` sem override — confirma que `BD30-F054` é uma lacuna
+  funcional real, não deriva de documentação. `Todo` é intencionalmente não-Aggregate-Root e não tem
+  `todo.md` próprio, por design já documentado em `docs/domain/README.md`.
+
+### 20.3 `BD30-F019` — ausência de E2E de To-Do, corrigido
+
+Nenhum teste Chromium jamais exercitou Todo — criação, edição, conclusão e exclusão eram provadas
+apenas por handlers de Application e por `TodoEditorModalTests` (bUnit). Como um Todo pertence sempre
+a um Project, e "Add To-Do" só existe dentro do workspace do Project (`ProjectWorkspace.razor`), a
+jornada real de um usuário passa por: criar Project → abrir seu workspace → adicionar o To-Do lá →
+manipulá-lo de volta no board `/daily` (onde `ActivityCard` para Todo vive, igual a Habit/Task).
+
+Novo arquivo `tests/BeeDay.E2E.Tests/TodoLifecycleTests.cs`: 3 testes via Chromium real —
+criar um Todo dentro de um Project e alternar sua conclusão; editar um Todo com persistência do novo
+título após reload; excluir um Todo (via confirmação) com remoção confirmada do board e do reload
+subsequente. Todos passaram na primeira execução real contra o app completo.
+
+### 20.4 `BD30-F054` — `RecurringTask.Repeat` sem efeito comportamental, decisão de produto necessária
+
+Mesma classe exata de `BD30-F050` (Habit), confirmada de forma independente para Task:
+`RecurringTask.Repeat` é validado, persistido, editável e documentado, mas `RecurringTask` não
+sobrescreve `ToggleCompletion()` — herda o flip de booleano padrão de `Activity` — e nenhum código do
+repositório (incluindo o único `BackgroundTaskWorker` do app) jamais reabre uma Task com base em
+fronteira de calendário. Uma Task "Diária" completada fica `Completed = true` para sempre até ser
+desmarcada manualmente.
+
+Efeito colateral agravante, novo nesta Sprint: como a dedução de XP por origem é **correta e
+intencional** para Task (ao contrário de Habit — ver `§20.2`), e é permanente por design, uma Task
+"recorrente" completada uma vez **nunca mais concede XP**, mesmo que o usuário desmarque e marque de
+novo manualmente simulando "fazer de novo amanhã". Dois mecanismos, cada um correto isoladamente
+(sem auto-reabertura + dedução permanente), se combinam para anular o propósito de gamificação
+específico de uma Task marcada como recorrente.
+
+Como em `BD30-F050`, esta auditoria não implementa a semântica de reabertura — decidir quando ela
+ocorre (fuso? cultura? no próximo carregamento após a fronteira? via job agendado? e se sim, uma nova
+"ocorrência" deveria contar como uma nova chave de dedução de XP?) é uma decisão de produto genuína,
+possivelmente a **mesma** decisão de `BD30-F050` já que ambos os campos (Habit `ResetCounter`, Task
+`Repeat`) representam o mesmo conceito de produto sob nomes diferentes. Registrado com evidência
+completa; nenhuma Sprint futura atribuída até definição do proprietário.
+
+### 20.5 Achados menores/informativos (não corrigidos, encaminhados)
+
+- `BD30-F055` (nova, baixa): `Todo.DueDate` não tem efeito funcional — sem indicador de atraso, sem
+  ordenação por data (a lista usa só `Position`/drag-and-drop), e completar um Todo atrasado se
+  comporta identicamente a completar um no prazo. Decisão de escopo de produto, não bug de data/fuso
+  (a conversão em si já é testada e correta sob pt-BR). Encaminhada à Sprint 30.20 (UX), que já é
+  proprietária de `INV-016`.
+- Reconfirmação (sem novo ID): `BD30-F052` (`ActivityAttribute` sem controle de UI) — confirmado
+  aplicável a Task e Todo também; o campo round-tripa corretamente na Application/Domain mas nenhum
+  dos dois editores tem controle para defini-lo.
+- Reconfirmação (sem novo ID): `BD30-F037` (cards do Dashboard sem `Disabled` vinculado a
+  `State.IsBusy`) — confirmado aplicável ao checkbox de conclusão de `ActivityCard`, compartilhado por
+  Task/Todo/Habit/Project. Proteção real contra duplo-clique existe (`DashboardState.ExecuteAsync`),
+  só falta o reforço visual.
+- Reconfirmação (sem novo ID): `BD30-F053` (repositório não reverifica `UserId` em `RemoveAsync`) —
+  confirmado aplicável a `EfRecurringTaskRepository.RemoveAsync` também, com o mesmo comentário no
+  código apontando para o padrão de Habit. Observação positiva: `EfProjectRepository.RemoveTodoAsync`
+  **não** tem essa lacuna — já escopa por `userId` diretamente na query, mais defendido que o padrão
+  de Habit/Task.
+
+### 20.6 Implementação
+
+- `tests/BeeDay.Web.Tests/Components/Tasks/TaskEditorModalTests.cs` — novo teste
+  `Save_PassesTheEditedFieldsToOnSave`, provando que `OnSave` recebe exatamente Título/Notas/Repeat
+  editados.
+- `tests/BeeDay.Web.Tests/Components/Todos/TodoEditorModalTests.cs` — novo teste equivalente para
+  Título/Notas/Projeto/Data de vencimento.
+- `tests/BeeDay.Web.Tests/Integration/MultiUserIsolationIntegrationTests.cs` —
+  `User_CannotUpdateOrDeleteAnotherUsersTask` renomeado para
+  `User_CannotToggleUpdateOrDeleteAnotherUsersTask` e estendido para também enviar
+  `ToggleTaskCommand` como usuário não-proprietário (única mutação de Task sem essa cobertura;
+  Todo já a tinha).
+- `tests/BeeDay.E2E.Tests/HabitAndTaskTests.cs` — 2 novos testes: editar uma Task persiste o novo
+  título após reload; excluir uma Task (via confirmação) a remove do board e do reload subsequente
+  (mesmo padrão adicionado para Habit na Sprint 30.12; Task só tinha criar + alternar conclusão).
+- `tests/BeeDay.E2E.Tests/TodoLifecycleTests.cs` (novo) — 3 testes, fechando `BD30-F019`.
+
+Nenhuma mudança de comportamento de produção nesta Sprint — os dois achados materiais (`BD30-F054`,
+`BD30-F055`) exigem decisão do proprietário/Sprint futura antes de qualquer correção; o trabalho desta
+Sprint é inteiramente fechamento de lacunas de teste sobre comportamento já correto, mais achados
+registrados com evidência.
+
+### 20.7 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| `dotnet test tests/BeeDay.Web.Tests/... --filter TaskEditorModalTests\|TodoEditorModalTests` | PASS, 19/19 |
+| `dotnet test tests/BeeDay.Web.Tests/... --filter MultiUserIsolationIntegrationTests` | PASS, 8/8 |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter HabitAndTaskTests` | PASS, 11/11 |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter TodoLifecycleTests` | PASS, 3/3 (primeira execução) |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+| `dotnet test BeeDay.slnx` (Debug, completo) | PASS, 1.540/1.540 (119 Domain, 117 Application, 216 Infrastructure, 880 Web, 208 E2E) — execução limpa, 0 falhas |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.540/1.540 (119 Domain, 117 Application, 216 Infrastructure, 880 Web, 208 E2E) — execução limpa, 0 falhas |
+
+### 20.8 Continuidade e entrega
+
+`BD30-F054` reforça um padrão que já apareceu em `BD30-F050`: um campo de recorrência/reset totalmente
+implementado do banco à UI, mas sem efeito comportamental real — desta vez com uma consequência mais
+severa (bloqueio permanente de XP para o único tipo de atividade explicitamente rotulado como
+"recorrente"). As duas Sprints seguidas encontrando a mesma classe de lacuna, em duas entidades
+diferentes, sugerem fortemente que ambas compartilham a mesma causa raiz de produto (um conceito de
+"recorrência"/"reset" projetado na UI/Domain antes de sua semântica de runtime ter sido decidida) e
+provavelmente merecem uma única decisão do proprietário cobrindo os dois. Nenhuma mutação de banco
+HMG/produção foi executada ou é necessária.
