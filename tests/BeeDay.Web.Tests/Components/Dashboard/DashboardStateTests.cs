@@ -1,5 +1,6 @@
 using BeeDay.Application.Features.Dashboard.Queries;
 using BeeDay.Application.Features.Dashboard.Responses;
+using BeeDay.Application.Features.Habits.Commands;
 using BeeDay.Domain.Enums;
 using BeeDay.Web.Components.Behaviors.DragDrop;
 using BeeDay.Web.Components.Features.Dashboard;
@@ -116,6 +117,44 @@ public sealed class DashboardStateTests
         Assert.Null(state.OpenProject);
     }
 
+    // EPIC 30 Sprint 30.31 (BD30-F057): the removal fade used to clear RemovingItemId 170ms after
+    // starting, unconditionally, *before* the delete command was even sent — so a failing delete
+    // reappeared the card back to normal before the outcome was known, then showed the error toast
+    // afterward. Proves the fix by checking RemovingItemId from inside the fake sender, at the exact
+    // moment the delete command is sent — the only place the old and new sequencing actually differ,
+    // since both leave RemovingItemId null by the time DeleteCurrentHabitAsync's Task completes.
+    [Fact]
+    public async Task DeleteCurrentHabitAsync_WhenTheDeleteCommandFails_StillMarksTheCardAsRemovingAtTheMomentOfTheAttempt()
+    {
+        var habit = new HabitSummary(
+            Guid.NewGuid(), "Test Habit", "", false, null,
+            HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily,
+            0, 0, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddLocalization();
+        var provider = services.BuildServiceProvider();
+        var toastService = new ToastService(provider.GetRequiredService<IStringLocalizer<SharedResources>>());
+
+        DashboardState? state = null;
+        Guid? removingItemIdWhenDeleteWasAttempted = null;
+        var sender = new DeleteFailingSender(habit, () => removingItemIdWhenDeleteWasAttempted = state!.RemovingItemId);
+        var store = new BeeDayWebService(sender);
+        state = new DashboardState(store, toastService, provider.GetRequiredService<IStringLocalizer<DashboardResources>>());
+
+        await BunitLocalizationSupport.WithUiCultureAsync("en-US", async () =>
+        {
+            await state.InitializeAsync();
+            state.OpenHabitEditor(habit);
+            await state.DeleteCurrentHabitAsync();
+        });
+
+        Assert.Equal(habit.Id, removingItemIdWhenDeleteWasAttempted);
+        Assert.Null(state.RemovingItemId);
+        Assert.Equal("The item could not be deleted.", toastService.Messages.Single().Message);
+    }
+
     private static (DashboardState State, ToastService Toasts) CreateState(ISender sender)
     {
         var services = new ServiceCollection();
@@ -144,6 +183,45 @@ public sealed class DashboardStateTests
 
         public Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default) where TRequest : IRequest =>
             throw new NotSupportedException();
+
+        public Task<object?> Send(object request, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
+        public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IStreamRequest<TResponse> request, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
+        public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+    }
+
+    /// <summary>
+    /// Serves <paramref name="habit"/> on every GetDashboardQuery and fails DeleteHabitCommand —
+    /// invoking <paramref name="onDeleteAttempted"/> synchronously at the moment the failing delete
+    /// command is sent, before the exception propagates back to the caller.
+    /// </summary>
+    private sealed class DeleteFailingSender(HabitSummary habit, Action onDeleteAttempted) : ISender
+    {
+        public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
+        {
+            if (request is GetDashboardQuery)
+            {
+                var profile = new UserProfileSummary(Guid.NewGuid(), "tester", "Test User", "", UserLanguage.English, UserTheme.System, 0, 1, 0, 100);
+                return Task.FromResult((TResponse)(object)new DashboardResponse(profile, [habit], [], [], null));
+            }
+
+            throw new NotSupportedException($"Unexpected request: {request.GetType().Name}");
+        }
+
+        public Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default) where TRequest : IRequest
+        {
+            if (request is DeleteHabitCommand)
+            {
+                onDeleteAttempted();
+                throw new InvalidOperationException("Simulated delete failure.");
+            }
+
+            throw new NotSupportedException($"Unexpected request: {typeof(TRequest).Name}");
+        }
 
         public Task<object?> Send(object request, CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();

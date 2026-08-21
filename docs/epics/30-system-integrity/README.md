@@ -61,7 +61,7 @@ todo achado termine como `FIXED`, `VERIFIED` ou `ACCEPTED RISK`.
 | INV-010 | Testes | 198 arquivos rastreados em 5 projetos; baseline executado contra LocalDB e Chromium | `VERIFIED` — **corrigido na Sprint 30.30**: a Sprint 30.24 ("Test Engineering **Complete Audit**") já realizou auditoria real e profunda (causa raiz de flakiness confirmada, cobertura formal instituída, artefatos de falha de CI corrigidos), só nunca promoveu esta linha da tabela mestre | 30.24 |
 | INV-011 | Workflows | 6 workflows: PR Validation, HMG Deployment, HMG Verification, Release Quality Gate, Production Deployment e Promotion Policy. **Reverificado na Sprint 30.25**: os 6 continuam corretos frente a `docs/deployment/*.md`, exceto um comentário desatualizado em `deploy-hmg.yml` (parte de `BD30-F006`, corrigido). 7º workflow novo adicionado nesta Sprint: `codeql.yml` (`BD30-F008`) | `VERIFIED` | 30.25 |
 | INV-012 | Scripts | 12 scripts PowerShell; todos passam pelo parser do PowerShell sem erro sintático. **Reverificado na Sprint 30.25**: os 12 continuam parseando sem erro; 2 novos adicionados (`Clear-BeeDayBackups.ps1`, `scripts/tests/Test-ClearBeeDayBackups.ps1`, `BD30-F017`), total agora 14 | `VERIFIED` | 30.25, 30.26 |
-| INV-013 | Configuração | contratos raiz, 4 `appsettings`, `launchSettings.json`, `web.config` e 8 tipos auxiliares sob `Infrastructure/Configuration` | `BASELINED` — **anotado na Sprint 30.30**: cada Sprint proprietária cobriu só uma fatia da superfície completa de 8 tipos (30.3 paridade de runtime HMG, 30.22 cookie/sessão, 30.25 runtime/deploy) — nenhuma cobriu o inventário de configuração como um todo, então `BASELINED` permanece a classificação honesta, não uma omissão | 30.3, 30.22, 30.25 |
+| INV-013 | Configuração | contratos raiz, 4 `appsettings`, `launchSettings.json`, `web.config` e 8 tipos auxiliares sob `Infrastructure/Configuration` | `VERIFIED` — **promovido na Sprint 30.31**: primeira auditoria a cobrir a superfície completa em uma única passada (nenhuma Sprint proprietária anterior havia feito isso — cada uma cobriu só uma fatia). Os 6 tipos `Options` (`SqlServer`, `IdentityEmail`, `Resend`, `DevelopmentEmail`, `EventJournal`, `HmgRecipientGuard`) e os 2 tipos de seleção de provider (`EmailProvider`/`EmailProviderSelector`) foram lidos por completo, e cada `SectionName` cruzado diretamente contra os 4 `appsettings.*.json`, `launchSettings.json` e `web.config`. Achados da verificação: (1) o invariante de `EmailProviderSelector` (exatamente um entre `Resend:Enabled`/`Development:Enabled`) é satisfeito na configuração efetiva de todo ambiente committado — Development (Resend=false/Development=true), Homologation e Production (ambos Resend=true/Development=false); (2) `HmgRecipientGuard` não aparece em `appsettings.Homologation.json` (só em Production, explicitamente `Enabled: false`) — confirmado, via `deploy-hmg.yml` linha 280 (`-HmgAllowedRecipients $env:BEEDAY_HMG_ALLOWED_RECIPIENTS`), que `AllowedRecipients` é injetado no deploy real via secret de ambiente, não committed — mesmo padrão já usado por `Resend:ApiKey`/`Resend:FromAddress` (ambos vazios nos arquivos committed, também injetados via `deploy-hmg.yml`/`deploy-prd.yml`); nenhuma lacuna real, guard corretamente fail-closed por design caso a injeção falhe; (3) `appsettings.Homologation.json` usa `Trusted_Connection=True` para `SqlServer.ConnectionString` (achado pré-existente já rastreado fora desta EPIC — memória de projeto `project_pending_hmg_sql_login_migration`, não um achado novo); (4) `Password=CHANGEME` em `appsettings.Development.json` já documentado nesta própria EPIC (linha ~2868, Sprint 30.25/`release-quality-gate`) como placeholder de desenvolvimento nunca conectado de fato pelo design-time factory — confirmado, não é um segredo real vazado; (5) `web.config` fixa `ASPNETCORE_ENVIRONMENT=Homologation` (deploy IIS único, HMG) e `launchSettings.json` fixa `Development` (dev local), consistentes com os sufixos dos 4 `appsettings`. Nenhum defeito de configuração novo encontrado — inventário genuinamente completo, não uma promoção mecânica de tabela como os outros 7 itens promovidos na Sprint 30.30 | 30.3, 30.22, 30.25, 30.31 |
 | INV-014 | Documentação | 123 arquivos rastreados; 537 links Markdown relativos verificados, sem link quebrado real. **Reverificado na Sprint 30.28**: recontagem real encontra 124 arquivos `.md` e 527 links Markdown relativos (contagem própria já derivou um pouco desde o baseline original — variação natural do corpus, não um erro de contagem anterior). 1 falso positivo verificado (`docs/CONVENTIONS.md:66`, um exemplo de sintaxe `![descrição](caminho)` na própria prosa, não um link real). Zero links quebrados confirmados — mesma conclusão do baseline original, só os totais atualizados | `VERIFIED` | 30.28 |
 | INV-015 | Design System | 69 arquivos de componentes, 18 arquivos CSS, 5 arquivos JS e 64 assets de ícone sob `design/` | `VERIFIED` — **corrigido na Sprint 30.30**: a Sprint 30.19 ("Design System **Complete Audit**") realizou auditoria real (reuso de componentes, sistema de ícones, 5 achados corrigidos), só nunca promoveu esta linha | 30.19 |
 | INV-016 | UX, responsividade e localização | 133 arquivos Razor, 66 CSS e 60 recursos `.resx` no conjunto `src/` + `tests/` | `VERIFIED` — **corrigido na Sprint 30.30**: a Sprint 30.20 realizou jornadas reais de a11y/responsividade/localização, 9 achados corrigidos, só nunca promoveu esta linha | 30.20 |
@@ -139,7 +139,7 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F008 | média | não existe workflow CodeQL nem configuração Dependabot versionada. **Reverificado na Sprint 30.22**: metade corrigida — `.github/dependabot.yml` adicionado (ecossistemas `nuget` e `github-actions`, semanal, sem impacto operacional — não cria check obrigatório, não roda código, apenas configura o serviço nativo do GitHub para abrir PRs de atualização). CodeQL deliberadamente não adicionado nesta Sprint: é um novo workflow do GitHub Actions que consome minutos de CI a cada push/PR e tipicamente se torna um check obrigatório uma vez configurado — mudança de maior impacto operacional na pipeline de CI/CD, mais adequada à Sprint dedicada a CI/CD do que a uma correção pontual de segurança. Reatribuída (só a parte de CodeQL) para 30.25. **Corrigido na Sprint 30.25**: novo `.github/workflows/codeql.yml` (`csharp`, `build-mode: autobuild`, PR para `hmg` + semanal), deliberadamente não obrigatório — ver §32.5 para o resultado real do primeiro run (disparado pelo próprio PR desta Sprint) | `FIXED` | 30.25 |
 | BD30-F009 | média | existem apenas dois guards automatizados de dependência, cobrindo Domain e Application; Infrastructure e Web não têm guard equivalente | `FIXED` | 30.9 |
 | BD30-F010 | baixa | o índice de documentação classifica `authentication/` e `developer/` como reservados e `api/` como não reauditado. **Reverificado na Sprint 30.28**: confirmado que a classificação do índice (`docs/README.md`) continua exatamente correta — `docs/authentication/README.md` e `docs/developer/README.md` seguem sendo placeholders vazios que apontam para `security/`/`README.md` da raiz respectivamente (nenhum documento próprio vive nessas pastas ainda), e nenhuma Sprint desta EPIC auditou o conteúdo de `docs/api/beeday.v1.yaml` (busca completa no Ledger, zero menções). Não é uma contradição — a classificação já reflete a realidade | `VERIFIED` | 30.28 |
-| BD30-F011 | baixa | `docs/infrastructure/README.md` registra 5 classes Options; o repositório possui 6 Options atuais, além de `EmailProvider` e `EmailProviderSelector`. **Fechamento na Sprint 30.30**: nenhuma Sprint de consolidação de documentação (30.28) pegou este achado; permanece uma correção mecânica pendente, de baixo risco, não perseguida por nenhuma Sprint funcional dedicada | `OPEN` | decisão do proprietário |
+| BD30-F011 | baixa | `docs/infrastructure/README.md` registrava 5 classes Options; o repositório possui 6 Options atuais (`SqlServer`, `IdentityEmail`, `Resend`, `DevelopmentEmail`, `EventJournal`, `HmgRecipientGuard`), além de `EmailProvider`/`EmailProviderSelector` (seleção de provider, não Options), nenhum dos dois citados. **Corrigido na Sprint 30.31**: linha da árvore de organização corrigida com a contagem e os 6 nomes reais, mais a menção explícita dos dois arquivos de seleção de provider — correção mecânica de documentação, confirmada por `ls src/BeeDay.Infrastructure/Configuration/`, sem mudança de código | `FIXED` | 30.31 |
 | BD30-F012 | baixa | existe documentação versionada da EPIC 28, mas ela não aparece no índice `docs/README.md`. **Corrigido na Sprint 30.28**: nova linha adicionada à tabela de Epics de `docs/README.md`, entre EPIC 25 e EPIC 30 (ordem numérica preservada), mesmo formato das demais linhas — status refletindo o próprio cabeçalho da EPIC 28 (`IMPLEMENTATION READY — POST-MERGE HMG VALIDATION PENDING`, Sprint 28.10), não forçado no padrão "Concluída"/"Em andamento" das outras duas por não corresponder exatamente a nenhum dos dois | `FIXED` | 30.28 |
 | BD30-F013 | alta | em HMG, validar `TransactionFormModel.Amount` sob `pt-BR` lançava `ArgumentException`/`FormatException` em `RangeAttribute.SetupConversion` ao interpretar o limite textual `"0.01"` pela cultura corrente; a falha ocorria no `EditForm`, antes de MediatR e antes de qualquer `INSERT` | `FIXED` | 30.2 |
 | BD30-F014 | baixa | os logs do mesmo período contêm warnings do EF Core sobre MARS/savepoints, mas a cadeia causal confirmada do incidente termina na validação DataAnnotations antes de MediatR/persistência; não há evidência de participação desses warnings nesta falha. **Fechamento na Sprint 30.30**: reconfirmado inalterado na Sprint 30.23 (os logs originais do incidente já não existem mais para reanálise) — nenhuma evidência nova é possível sem uma fonte de dados que não existe mais | `OPEN` | decisão do proprietário |
@@ -163,8 +163,8 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F033 | baixa | `EfWalletReadService.ApplyOrdering` ordena `Transaction` por `Description`/`Amount`/`CreatedAtUtc` sem índice cobrindo esses campos (apenas `IX_Transactions_Wallet_Date` existe) — SQL Server ordena em tempdb após o seek por `WalletId`; impacto real baixo dado o volume típico de transações por usuário em um app financeiro pessoal. **Decisão da Sprint 30.21** (Sprint proprietária): reverificado, premissa inalterada. Risco aceito explicitamente — adicionar 3 índices novos tem custo real de escrita (todo insert/update de Transaction passa a manter mais índices) sem evidência de consulta lenta real ou de volume que justifique o trade-off; adicionar índice especulativo contraria o limite explícito desta Sprint contra otimização especulativa. Reavaliar se o volume de transações por usuário mudar materialmente | `ACCEPTED RISK` | 30.21 |
 | BD30-F034 | alta | histórico de `ExperienceEntry` não era persistido antes da correção da Sprint 30.7 (`BD30-F030`); alternar conclusão/reabertura repetida de Todo/Task/Project podia conceder XP duplicado sem limite antes da correção. Existência e magnitude de inflação histórica em HMG/produção **não quantificadas** por esta Sprint — nenhuma consulta ou mutação de banco de HMG/produção foi executada. As linhas de `ExperienceEntry` persistidas antes da correção podem ser insuficientes para reconstruir `TotalExperience` corretamente de forma determinística (o histórico anterior à correção nunca existiu). Nenhuma mutação de banco está autorizada por este achado; nenhum reset/recálculo arbitrário é permitido. **Investigação concluída na Sprint 30.16** (§23.2): as 7 perguntas encaminhadas foram todas respondidas com evidência — nenhuma pode ser resolvida com os dados/ferramentas atuais. Reconstrução determinística não é possível (o próprio escalar `TotalExperience` já incorpora qualquer inflação histórica, indistinguível de XP legítimo, porque as entries que provariam a diferença nunca existiram); correção automatizada não seria segura; reconciliação manual não é viável sem elas; e não existe no repositório nenhum mecanismo seguro e somente-leitura para quantificar o raio de impacto em HMG/produção. Prosseguir exigiria duas decisões do proprietário fora da autoridade desta auditoria: construir uma capacidade de leitura segura contra HMG/produção, e decidir se algum esforço de reconciliação vale a pena dado que a reconstrução completa é matematicamente impossível | `OPEN` | decisão do proprietário |
 | BD30-F035 | média | `BeeDayWebService` (20 métodos) e os call sites diretos de `ISender.Send` em `Wallet.razor` e nas páginas de Identity/Account/Onboarding nunca propagavam um `CancellationToken` real — toda chamada usava implicitamente `CancellationToken.None`, então navegar para longe ou fechar o circuito Blazor Server nunca cancelava uma mutação/query em andamento no servidor | `FIXED` | 30.8 |
-| BD30-F036 | baixa | `EmailConfirmationSent.razor`/`ResendConfirmation.razor`: `StartCountdown()` reatribui `_timer`/`_cts` sem descartar a instância anterior se chamado uma segunda vez antes do `Dispose()` do componente — hoje inalcançável em uso normal (o botão fica desabilitado enquanto `_secondsRemaining > 0`), portanto latente, não explorável. **Fechamento na Sprint 30.30**: reconfirmado inalterado na Sprint 30.23 — mesmo padrão ainda vigente, ainda inalcançável em uso normal | `OPEN` | decisão do proprietário |
-| BD30-F037 | baixa | polimento de UX não-bloqueante: cards individuais do Dashboard (Habit/Task/Todo/Project) não têm `Disabled` vinculado a `State.IsBusy` (só o overlay global `BeeDayLoading` reflete ocupado — a proteção contra double-submit é real, aplicada em `DashboardState.ExecuteAsync`, mas o clique num segundo card fica sem feedback visual imediato); e `Wallet.razor.RefreshAfterMutationAsync` não chama `StateHasChanged()` uma segunda vez após zerar `_highlightBalance`, então o destaque visual do saldo pode não sumir até outro render não relacionado ocorrer. **Fechamento na Sprint 30.30**: polimento de UX não-bloqueante, encontrado e deixado aberto dentro da própria Sprint proprietária; não perseguido por nenhuma Sprint posterior | `OPEN` | decisão do proprietário |
+| BD30-F036 | baixa | `EmailConfirmationSent.razor`/`ResendConfirmation.razor`: `StartCountdown()` reatribuía `_timer`/`_cts` sem descartar a instância anterior se chamado uma segunda vez antes do `Dispose()` do componente — inalcançável em uso normal (o botão fica desabilitado enquanto `_secondsRemaining > 0`), portanto latente, não explorável, mas um vazamento de recurso real (o `PeriodicTimer`/`CancellationTokenSource` anterior nunca era descartado, só cancelado, até o GC finalizar). **Corrigido na Sprint 30.31**: `StartCountdown()`, nos dois arquivos, agora descarta explicitamente `_cts`/`_timer` anteriores (`_cts?.Dispose(); _timer?.Dispose();`) antes de reatribuí-los — mesmo padrão já usado pelo próprio `Dispose()` do componente. Não é comportamento observável (o caminho já era inalcançável em uso normal), então não recebeu um teste dedicado — validado pela suíte completa de regressão (`dotnet test BeeDay.slnx`, Debug e Release, sem falha) | `FIXED` | 30.31 |
+| BD30-F037 | baixa | polimento de UX não-bloqueante, dois sintomas independentes: (a) cards individuais do Dashboard (Habit/Task/Todo/Project) não têm `Disabled` vinculado a `State.IsBusy` (só o overlay global `BeeDayLoading` reflete ocupado — a proteção contra double-submit é real, aplicada em `DashboardState.ExecuteAsync`, mas o clique num segundo card fica sem feedback visual imediato); e (b) `Wallet.razor.RefreshAfterMutationAsync` não chamava `StateHasChanged()` uma segunda vez após zerar `_highlightBalance`, então o destaque visual do saldo podia não sumir até outro render não relacionado ocorrer. **Sprint 30.31 — parcialmente corrigido**: (b) corrigido — `StateHasChanged()` adicionado logo após `_highlightBalance = false` em `RefreshAfterMutationAsync`, mesmo padrão já usado pela atribuição `= true` três linhas acima. (a) **não corrigido, permanece `OPEN`**: dar a `ActivityCard` (componente genérico compartilhado por Habit/Task/Todo/Project) um `Disabled` real exige um novo parâmetro, propagação de `BeeDayCard`, desabilitar tanto o botão de toggle quanto o corpo clicável/`@onkeydown`, e os estados visuais completos exigidos pelo Design System (default/hover/focus/active/disabled) em 4 pontos de uso — trabalho de UI genuíno, maior que uma correção pontual de uma linha, fora do limite de uma Sprint de remediação de defeitos residuais focada em causas raiz. Reatribuído para decisão do proprietário | `OPEN` | decisão do proprietário |
 | BD30-F038 | média | `Login.razor` mantinha uma implementação própria de `IsLocalPath` para sanitizar `ReturnUrl`, distinta e mais fraca que a canônica de `LoginDestinationResolver` — só rejeitava `//`, não a variante `/\` que navegadores normalizam para URL absoluta; a decisão de redirecionamento real em `POST /auth/login` já usava a canônica completa, então não era explorável via o próprio fluxo de login, mas era uma fronteira de segurança duplicada e incompleta | `FIXED` | 30.10 |
 | BD30-F039 | alta | `ConfirmEmail.razor` enviava `ConfirmEmailCommand` em `OnInitializedAsync`, que roda duas vezes sob o `@rendermode="InteractiveServer"` global (`<Routes>` em `App.razor`) — uma vez no prerender estático, outra na reconexão interativa. A primeira chamada confirmava o e-mail corretamente; a segunda, idêntica, era corretamente rejeitada pela proteção contra replay de token — mas essa segunda rejeição é o estado final que o navegador do usuário real exibe, então todo usuário real via "Link já utilizado" no primeiro clique legítimo em um link de confirmação real. Só detectável por um teste de navegador real (Chromium) — nenhum teste unitário/bUnit/integração via `HttpClient` exercita as duas passagens de render do Blazor Server | `FIXED` | 30.10 |
 | BD30-F040 | baixa | `User.SetActive` (que corretamente invalida sessões ao desativar) não é chamado por nenhum Command/handler alcançável — só por testes. **Determinação da Sprint 30.11** (auditoria funcional completa de Profile/Onboarding/Account/Settings, incluindo inspeção direta de `Account.razor` e as três seções de Settings): classificado como **fluxo de produto ausente**, não código morto — o método de Domain está correto, testado e o guard de `OnValidatePrincipal` (`!user.IsActive`) funciona; simplesmente não existe hoje nenhuma entrada de produto (autoatendimento ou administrativa) que o alcance. Decidir se/como construir essa entrada é uma decisão de política de produto fora da autoridade desta auditoria — não inventada aqui | `OPEN` | decisão do proprietário |
@@ -184,9 +184,9 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F054 | alta | `RecurringTask.Repeat` (Daily/Weekly/Monthly) está totalmente cabeado — Domain, persistência, editor de UI, documentação — mas `RecurringTask` não sobrescreve `ToggleCompletion()` (herda a implementação padrão de `Activity`, um simples flip de booleano); nenhum código no repositório jamais reabre uma Task recorrente com base em fronteira de calendário. É a mesma classe de lacuna que `BD30-F050` (Habit), confirmada de forma independente para Task. Efeito colateral agravante: como a dedução de XP por origem é permanente e correta por design para Task (ao contrário de Habit), uma Task "Diária" completada uma vez **nunca mais pode gerar XP**, mesmo desmarcando e marcando de novo manualmente — os dois mecanismos, cada um correto isoladamente, se combinam para anular o propósito de gamificação de uma Task "recorrente". Definir a semântica real de reabertura é uma decisão de produto, não inventada por esta auditoria — mesma decisão pendente de `BD30-F050`, possivelmente a mesma decisão para os dois achados | `OPEN` | decisão do proprietário |
 | BD30-F055 | baixa | `Todo.DueDate` é persistido e exibido como texto formatado, mas não tem nenhum efeito funcional: nenhum indicador visual de atraso existe em `src/` (`grep` por "overdue"/"atrasad" não encontra nada), a ordenação da lista usa exclusivamente `Position` (drag-and-drop), não `DueDate`, e `Todo` não sobrescreve `ToggleCompletion()` — completar um To-Do atrasado se comporta identicamente a completar um no prazo. Nenhum bug de fuso/cultura na conversão de data em si (`BeeDayWebService.ToDateOnly` é direto; `DueDateInput_StaysIsoFormatted_RegardlessOfCulture` já prova o campo permanece ISO sob pt-BR). **Fechamento na Sprint 30.30**: campo sem efeito funcional, encontrado e deixado aberto dentro da própria Sprint proprietária; não perseguido por nenhuma Sprint posterior | `OPEN` | decisão do proprietário |
 | BD30-F056 | média | `Project.Archived` é persistido, validado e round-tripa corretamente (`EfProjectRepositoryTests` prova a persistência), mas `ProjectEditorModal.razor` não tem nenhum controle de UI para defini-lo — pior que `BD30-F050`/`BD30-F054` (que ao menos têm um seletor visível, só sem efeito), este campo é inteiramente inalcançável pela UI. Mesmo que fosse setado diretamente no banco, nada a jusante o trata de forma diferente: `EfDashboardReadService` não filtra por ele, `DashboardState.FilteredProjects`/`ProjectContextOptions` não o excluem, o board Ativo/Concluído usa `Status` (não `Archived`), e o reorder de Projects compartilha uma única sequência de `Position` sem particionar por `Archived`. Decisão de produto necessária: construir a UI de arquivamento + filtragem, ou remover o campo morto | `OPEN` | decisão do proprietário |
-| BD30-F057 | baixa | `DashboardState.DeleteCurrentEditorItemAsync` (compartilhado por Habit/Task/Todo/Project) toca a animação de remoção do card (`RemovingItemId`, ~170ms) **antes** de emitir a requisição de exclusão ao servidor — se a exclusão subsequente falhar (rede, conflito), `RemovingItemId` já foi limpo e `ReloadAsync()` nunca é alcançado (o catch só mostra um toast de erro), então o card reaparece no estado normal após já ter "desaparecido" visualmente um instante antes, ao lado de um toast de erro. Padrão cross-cutting pré-existente, não introduzido nem específico desta Sprint. **Fechamento na Sprint 30.30**: encontrado e deixado aberto dentro da própria Sprint proprietária; não perseguido por nenhuma Sprint posterior | `OPEN` | decisão do proprietário |
+| BD30-F057 | baixa | `DashboardState.DeleteCurrentEditorItemAsync` (compartilhado por Habit/Task/Todo/Project) tocava a animação de remoção do card (`RemovingItemId`, ~170ms) e já limpava `RemovingItemId` **antes** de sequer emitir a requisição de exclusão ao servidor — se a exclusão subsequente falhasse (rede, conflito), o card já havia voltado ao estado visual normal antes mesmo do resultado da exclusão ser conhecido, e só depois um toast de erro aparecia, uma sequência confusa (o card "desiste" da animação de saída antes da falha real acontecer). **Corrigido na Sprint 30.31**: `RemovingItemId` agora só é limpo (em `finally`) depois da tentativa real de `DeleteAsync` — no sucesso, `ReloadAsync()` já roda antes da limpeza, então o item já nem está mais na lista recarregada (sem flash); na falha, o card volta ao normal exatamente no momento em que o toast de erro aparece, não antes. Novo teste de regressão `DeleteCurrentHabitAsync_WhenTheDeleteCommandFails_StillMarksTheCardAsRemovingAtTheMomentOfTheAttempt` (`DashboardStateTests.cs`) prova isso lendo `RemovingItemId` de dentro do `ISender` fake, no exato momento em que o comando de exclusão (que falha) é enviado — confirmado que falha contra o código anterior à correção (revertido temporariamente via `git stash` para validar) e passa com a correção aplicada | `FIXED` | 30.31 |
 | BD30-F058 | média | Sort por Amount/Description em Wallet estava totalmente cabeado Application→Infrastructure→testes (`Wallet.razor.ResolveSort`, `TransactionSortField`, `EfWalletReadService.ApplyOrdering`), mas o `<select>` renderizado só oferecia as duas opções de data — as outras 4 opções só eram alcançáveis setando o parâmetro `Sort` diretamente em teste, nunca por um usuário real. **Corrigido nesta Sprint**: 4 novas `<option>` adicionadas a `WalletFilters.razor` (mesmos valores já suportados pelo backend). Já o filtro de faixa de valor (`GetTransactionsQuery.MinimumAmount`/`MaximumAmount`, validado e testado em Application/Infrastructure) continua com **zero superfície de UI** — nenhum input, nenhuma propriedade de estado, nada em `WalletFilters.razor`. Diferente de `BD30-F050`/`BD30-F054`/`BD30-F056`, não é uma questão de semântica de produto ambígua (ordenar por valor e filtrar por faixa de valor têm significado óbvio e não-controverso) — é trabalho de engenharia represado, não decisão de produto. **Reverificado na Sprint 30.19**: `WalletFilters.razor` ainda não tem nenhum input Min/Max amount; `grep` por `MinimumAmount`/`MaximumAmount` em `src/BeeDay.Web` continua zero. Construir essa UI é trabalho de feature genuíno (novo input, novo estado, nova validação client-side), fora do limite desta Sprint de consolidação. Reatribuído para decisão do proprietário — não por ambiguidade de produto (o significado é claro), mas porque não há mais Sprint de auditoria dedicada a construir features novas no restante do roteiro da EPIC 30 | `OPEN` | decisão do proprietário |
-| BD30-F059 | alta | Cards de `WalletTag`/`Transaction` (`WalletTagManager.razor`, `TransactionList.razor`) perdem toda interatividade de clique/teclado para itens adicionados a uma lista já populada dentro da mesma sessão de circuito Blazor Server — confirmado reproduzível para o primeiro Tag criado (lista vazia→1), um segundo Tag criado logo em seguida, e uma segunda Transaction criada logo em seguida; imune a espera explícita (até 1s), a `Force: true` (bypassa verificações de actionability do Playwright, descartando interceptação/overlay como causa), e independente de clique vs. `Enter` via teclado. Um `GotoAsync` real (reload completo de página) sempre restaura a interatividade. **Causa raiz não identificada** — `@key` foi adicionado a ambos os `@foreach` como bom-senso defensivo (Blazor best practice já ausente), mas comprovadamente **não** resolveu o sintoma nos testes que o reproduziram; `DialogFocusScope`/`beeday-dialog-focus.js` foi inspecionado por completo sem revelar um bug óbvio. Cards de Transaction/Habit/Task/Todo/Project em Sprints anteriores desta EPIC nunca expuseram isso porque toda sequência de duas interações em um mesmo teste já continha um `GotoAsync` de reload no meio (para provar persistência) — não porque o padrão estivesse imune. Workaround confirmado (reload) aplicado nos dois novos testes E2E desta Sprint que o encontraram. **Hipótese testada e refutada na Sprint 30.24**: `WalletTagManager`/`TransactionCard` são os únicos consumidores de `BeeDayCard` que passam `@onclick`/`@onkeydown` como atributos splatados via `AdditionalAttributes`/`@attributes` (todo outro card interativo do produto — `ActivityCard`, `HabitCard` — liga esses handlers diretamente, sem splat); essa era uma hipótese estrutural plausível e testável. Experimento real conduzido: `BeeDayCard` ganhou `OnClick`/`OnKeyDown` tipados, os dois consumidores migrados para usá-los em vez do splat, e os dois testes E2E que reproduzem o defeito foram executados repetidamente com o workaround de reload removido. Resultado: **a hipótese não se sustentou** — `CreateExpenseTransaction_DecreasesBalanceCorrectly` (reabrir a segunda Transaction) continuou falhando de forma consistente e idêntica (mesmo sintoma, mesma linha) mesmo com a correção aplicada. A mudança foi revertida por completo (`git checkout --`) antes de qualquer commit, exatamente pelo mesmo princípio já estabelecido na Sprint 30.19 (`BD30-F075`): não enviar uma correção não comprovada. Causa raiz genuína permanece desconhecida; o splat de atributos via `AdditionalAttributes` está descartado como explicação (refutado por evidência direta, não apenas não confirmado). **Fechamento na Sprint 30.30**: a própria Sprint 30.26 já concluía em prosa "permanece OPEN, decisão do proprietário" — a coluna nunca foi sincronizada com essa conclusão, o que fazia este achado de severidade alta parecer esquecido em vez de deliberadamente investigado e corretamente não corrigido sem confirmação. É o único achado de severidade alta que termina esta EPIC sem causa raiz identificada — risco residual mais significativo do encerramento, ver §37 | `OPEN` | decisão do proprietário |
+| BD30-F059 | alta | Cards de `WalletTag`/`Transaction` (`WalletTagManager.razor`, `TransactionList.razor`) perdem toda interatividade de clique/teclado para itens adicionados a uma lista já populada dentro da mesma sessão de circuito Blazor Server — confirmado reproduzível para o primeiro Tag criado (lista vazia→1), um segundo Tag criado logo em seguida, e uma segunda Transaction criada logo em seguida; imune a espera explícita (até 1s), a `Force: true` (bypassa verificações de actionability do Playwright, descartando interceptação/overlay como causa), e independente de clique vs. `Enter` via teclado. Um `GotoAsync` real (reload completo de página) sempre restaura a interatividade. **Causa raiz não identificada** — `@key` foi adicionado a ambos os `@foreach` como bom-senso defensivo (Blazor best practice já ausente), mas comprovadamente **não** resolveu o sintoma nos testes que o reproduziram; `DialogFocusScope`/`beeday-dialog-focus.js` foi inspecionado por completo sem revelar um bug óbvio. Cards de Transaction/Habit/Task/Todo/Project em Sprints anteriores desta EPIC nunca expuseram isso porque toda sequência de duas interações em um mesmo teste já continha um `GotoAsync` de reload no meio (para provar persistência) — não porque o padrão estivesse imune. Workaround confirmado (reload) aplicado nos dois novos testes E2E desta Sprint que o encontraram. **Hipótese testada e refutada na Sprint 30.24**: `WalletTagManager`/`TransactionCard` são os únicos consumidores de `BeeDayCard` que passam `@onclick`/`@onkeydown` como atributos splatados via `AdditionalAttributes`/`@attributes` (todo outro card interativo do produto — `ActivityCard`, `HabitCard` — liga esses handlers diretamente, sem splat); essa era uma hipótese estrutural plausível e testável. Experimento real conduzido: `BeeDayCard` ganhou `OnClick`/`OnKeyDown` tipados, os dois consumidores migrados para usá-los em vez do splat, e os dois testes E2E que reproduzem o defeito foram executados repetidamente com o workaround de reload removido. Resultado: **a hipótese não se sustentou** — `CreateExpenseTransaction_DecreasesBalanceCorrectly` (reabrir a segunda Transaction) continuou falhando de forma consistente e idêntica (mesmo sintoma, mesma linha) mesmo com a correção aplicada. A mudança foi revertida por completo (`git checkout --`) antes de qualquer commit, exatamente pelo mesmo princípio já estabelecido na Sprint 30.19 (`BD30-F075`): não enviar uma correção não comprovada. Causa raiz genuína permanece desconhecida; o splat de atributos via `AdditionalAttributes` está descartado como explicação (refutado por evidência direta, não apenas não confirmado). **Fechamento na Sprint 30.30**: a própria Sprint 30.26 já concluía em prosa "permanece OPEN, decisão do proprietário" — a coluna nunca foi sincronizada com essa conclusão, o que fazia este achado de severidade alta parecer esquecido em vez de deliberadamente investigado e corretamente não corrigido sem confirmação. **Sprint 30.31 (investigação priorizada, ver §38.2 para o relato completo)**: 9 novas hipóteses testadas e refutadas com reversão honesta de cada experimento antes de prosseguir para a próxima — (1) timing/race de disposal do `beeday-dialog-focus.js` (`DeactivateAsync` sem chamar JS); (2) `DialogFocusScope` inteiro removido de `EditorModalShell.razor` (não só sua chamada JS) — sintoma idêntico, então nem a presença do componente é a causa; (3) forçar 2 renders separados (`StateHasChanged()`+`Task.Yield()`) entre fechar o modal e recarregar a lista; (4) forçar 2 renders com um delay real de 300ms (não só `Task.Yield()`, eliminando qualquer dúvida sobre coalescência de batch); (5) um ciclo de diálogo totalmente não-relacionado (`WalletTagManager`, "New tag") antes da única Transaction, com `Create` — reproduz; (6) o mesmo, mas com `Cancel` em vez de `Create` (sem toast, sem mutação de lista) — reproduz igual; (7) reprodução mínima de um único ciclo (sem diálogo de tag algum) — reproduz; (8) ativação por teclado (`FocusAsync`+`Enter`) em vez de clique do mouse no mesmo cenário mínimo — falha igual (não é específico de `@onclick`); (9) atribuir uma Tag à Transaction (replicando a forma exata do teste `CreateTagAndTransaction_UpdatesBalance`, que passa de forma confiável com clique de mouse simples) — ainda reproduz a falha. **Resultado líquido**: causa raiz genuína permanece desconhecida, mas o espaço de busca foi substancialmente refinado — descartados como explicação: `DialogFocusScope` (presença e chamada JS), coalescência de render batch (mesmo com separação real de rede), tipo de evento (clique vs. teclado), atribuição de Tag, e a necessidade de qualquer relação entre o diálogo "poluidor" e a lista afetada. **Contraste não resolvido, documentado para investigação futura**: o teste já existente `CreateTagAndTransaction_UpdatesBalance` (mesmo arquivo) executa uma forma quase idêntica (diálogo de tag → Transaction com Tag atribuída → interação com o card) e passa de forma confiável via clique de teclado; `MinimumTransaction_CreateEditAndDeleteInPortuguese_KeepsCircuitInteractive` faz o mesmo via clique de mouse comum e também passa — ambos passaram em execução real nesta Sprint (confirmado). A variável real que diferencia os cenários que passam dos que falham não foi isolada dentro do orçamento desta investigação — candidatos não descartados incluem o caminho de entrada de navegação (`GotoAsync` direto vs. navegação SPA a partir de uma página anterior) e a passagem prévia por `/account` alterando cultura/idioma antes de chegar à Wallet. Nenhuma correção foi submetida sem causa raiz confirmada, pelo mesmo princípio já estabelecido nas Sprints 30.19/30.24 — os 2 workarounds de `GotoAsync` continuam intactos e necessários. **Classificação Sprint 30.31**: Categoria D (investigação exaustiva dentro do orçamento desta Sprint, causa raiz não determinável com segurança neste momento) — não Categoria A. É o único achado de severidade alta que termina esta EPIC sem causa raiz identificada — risco residual mais significativo do encerramento, ver §37/§38 | `OPEN` | decisão do proprietário |
 | BD30-F060 | baixa | não existia cobertura E2E provando que completar Task/Todo/Project concede XP visivelmente (só Habit tinha, desde a Sprint 30.12) e o modal de level-up (`BeeDayFeedbackModal`) nunca havia sido exercitado ponta a ponta (só bUnit) — nenhum teste anterior disparava uma execução real de handler + publicação real de domain event + render real do Blazor Server através de um level-up de fato. **Corrigido nesta Sprint**: `CompleteTask_UpdatesXp` prova visibilidade de XP para Task via navegador real; `CompleteTask_AtALevelBoundary_ShowsTheLevelUpModalExactlyOnce` semeia o usuário 5 XP abaixo do limite documentado/testado de Level 2 (100 XP) via novo parâmetro `initialExperience` de `E2EWebApplicationFactory.SeedUserAsync` (usa `User.AddExperience`, não-dedup, só para arranjo de teste) e prova o modal aparecendo exatamente uma vez, com os níveis corretos, e não reaparecendo após reload. Residual não corrigido, de baixo valor: Todo/Project não têm o mesmo teste de visibilidade de XP especificamente — aceito porque os três dividem exatamente o mesmo `ToggleTodoCommandHandler`/`ExecuteExperienceOperationAsync`, já provado correto nas camadas Application/Infrastructure (§23.1, item D.8) | `FIXED` | 30.16 |
 | BD30-F061 | baixa | não existe nenhuma UI (nem endpoint de leitura em Application) que exponha o histórico de `ExperienceEntry` ao usuário ou a um admin — a única superfície visível é o toast efêmero de level-up (`BeeDayFeedbackStore`, escopo de circuito, últimos 3 itens, nunca lê do banco). O trabalho de persistência corrigido pela `BD30-F030` (Sprint 30.7) não tem, hoje, nenhum consumidor além dessa lógica de dedup interna. Construir uma tela de histórico é uma decisão de produto, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
 | BD30-F062 | baixa | excluir um Habit/Task/Todo/Project já recompensado não revoga nem ajusta o XP concedido — comportamento deliberado por design (`ExperienceEntryConfiguration.cs` documenta em comentário: sem FK para a origem, `ExperienceEntries` é histórico append-only, cópia do que aconteceu, não referência viva). A decisão está corretamente implementada e comentada no código, mas não está ratificada em nenhum lugar de `docs/` (`docs/domain/business-rules.md` só declara a curva/nível como determinística, nada sobre revogação por exclusão). **Corrigido na Sprint 30.28**: nova nota adicionada a `docs/domain/business-rules.md`, logo após a tabela de regras de Experience, ratificando a decisão com a citação exata do comentário de código-fonte que a implementa; `ExperienceEntryConfiguration.cs` também adicionado à lista de "Fontes de verdade" do documento (única citação de Infrastructure ali, necessária porque a decisão vive na configuração de persistência, não em nenhum arquivo de Domain) | `FIXED` | 30.28 |
@@ -4105,6 +4105,8 @@ identificou e corrigiu repetidamente em achados individuais (`BD30-F004`/`F006` 
    `INV-013` (Configuração) permanece deliberadamente `BASELINED`, com nota explícita: suas 3
    Sprints proprietárias cada uma cobriu só uma fatia da superfície completa de 8 tipos, nunca o
    inventário como um todo — `BASELINED` continua sendo a classificação honesta ali, não uma omissão.
+   **Promovido para `VERIFIED` na Sprint 30.31** — ver §3 e §38.6: a primeira auditoria a cobrir a
+   superfície completa em uma única passada.
    `INV-022` (Regressão e encerramento) promovido para `VERIFIED` — a Sprint 30.29 já executou a
    suíte completa duas vezes sem falha e fechou o gap de estado realista; esta Sprint fecha o
    restante.
@@ -4113,7 +4115,8 @@ identificou e corrigiu repetidamente em achados individuais (`BD30-F004`/`F006` 
 
 **22 itens de inventário, 21 `VERIFIED`, 1 `BASELINED` deliberadamente parcial** (`INV-013`,
 justificado em §37.2). Nenhum item permanece `NOT AUDITED` ou equivalente — critério de aceite da
-EPIC cumprido integralmente.
+EPIC cumprido integralmente. **Correção da Sprint 30.31 (§38.6): `INV-013` promovido para `VERIFIED`
+nesta Sprint — o estado final real é 22/22 `VERIFIED`, 0 `BASELINED`.**
 
 ### 37.4 Findings — estado final
 
@@ -4125,19 +4128,28 @@ EPIC cumprido integralmente.
 | média | 28 |
 | baixa | 50 |
 
-| Estado final | Total |
+| Estado final (conforme fechado nesta Sprint 30.30) | Total |
 |---|---:|
 | `FIXED` | 58 |
 | `VERIFIED` | 1 |
 | `ACCEPTED RISK` | 1 |
 | `OPEN` (decisão do proprietário, com racional explícito) | 36 |
 
+**Correção da Sprint 30.31 (aritmética verificada por script determinístico, §38.1)**: a tabela acima
+continha um erro aritmético pré-existente (`13 FIXED`/`5 OPEN` para severidade alta somava 18
+corretamente, mas o texto abaixo já citava só 4 IDs como "os 5" — a contagem real sempre foi 4, não
+5). Além disso, 3 achados (`BD30-F011`, `BD30-F036`, `BD30-F057`) foram corrigidos nesta Sprint,
+movendo de `OPEN` para `FIXED`. **Estado final real, após a Sprint 30.31**: `FIXED` 61, `VERIFIED` 1,
+`ACCEPTED RISK` 1, `OPEN` 33 (61+1+1+33 = 96, verificado por contagem programática de todas as 96
+linhas da tabela mestre §6). Ver §38.1 para a reconciliação completa.
+
 **Nenhum achado de severidade alta termina esta auditoria silenciosamente esquecido.** Dos 18
-achados de severidade alta: 13 `FIXED`, 5 `OPEN` — todos os 5 (`BD30-F016`, `BD30-F034`, `BD30-F054`,
-`BD30-F059`, e nenhum outro) já carregavam ou passaram a carregar nesta Sprint (§37.2) a marcação
-`decisão do proprietário` com racional multi-frase escrito. Nenhum achado usa um estado inválido, e
-nenhum acaba com uma coluna "Sprint proprietária" vazia, vaga, ou apontando para uma Sprint futura
-que não existe mais.
+achados de severidade alta: **14 `FIXED`, 4 `OPEN`** (corrigido — não 13/5 como afirmado acima; os 4
+IDs já estavam corretamente listados, só o total "5" estava aritmeticamente errado) — todos os 4
+(`BD30-F016`, `BD30-F034`, `BD30-F054`, `BD30-F059`) já carregavam ou passaram a carregar nesta
+Sprint (§37.2) a marcação `decisão do proprietário` com racional multi-frase escrito. Nenhum achado
+usa um estado inválido, e nenhum acaba com uma coluna "Sprint proprietária" vazia, vaga, ou apontando
+para uma Sprint futura que não existe mais.
 
 ### 37.5 Achados mais significativos corrigidos ao longo da EPIC (seleção, não lista completa)
 
@@ -4216,13 +4228,18 @@ inexistente), `BD30-F067` (baixa descoberta de `/experience-system`), `BD30-F068
 na URL), `BD30-F069` (texto legal pendente, deliberado), `BD30-F047` (cookie de cultura desatualizado
 sobrescreve troca deliberada de idioma).
 
-**Débito técnico/UX de baixo risco, sem Sprint dedicada (7)**
+**Débito técnico/UX de baixo risco, sem Sprint dedicada (7 conforme fechado na Sprint 30.30; 4 após a
+Sprint 30.31 — ver §38.1)**
 
 `BD30-F011` (contagem de Options desatualizada em doc), `BD30-F014` (causalidade de warning EF Core
 não confirmável — logs originais não existem mais), `BD30-F021` (cobertura E2E de conta parcial),
 `BD30-F036` (timer não descartado, latente/inalcançável), `BD30-F037` (polimento de feedback visual
 não-bloqueante), `BD30-F055` (`DueDate` sem efeito funcional), `BD30-F057` (animação de exclusão
-antes da confirmação do servidor).
+antes da confirmação do servidor). **Correção da Sprint 30.31**: `BD30-F011`, `BD30-F036` e
+`BD30-F057` corrigidos (ver §6, §38.1) — saem desta lista. `BD30-F037` permanece, mas só pela metade
+não corrigida (Dashboard `Disabled`/`IsBusy`); a metade do destaque de saldo do Wallet foi corrigida
+junto. Lista residual real após esta Sprint: `BD30-F014`, `BD30-F021`, `BD30-F037` (parcial),
+`BD30-F055` — 4 itens, não 7.
 
 **Hygiene de baixo risco (4)**
 
@@ -4306,3 +4323,316 @@ simplesmente ignorada. O padrão mais recorrente ao longo de toda a EPIC — div
 código/decisão real já é e o que o texto ainda descreve — se provou verdadeiro até para o próprio
 mecanismo de rastreamento da EPIC (§37.2), e foi corrigido pela mesma disciplina de evidência aplicada
 a tudo mais. EPIC 30 encerrada. Nenhuma mutação de banco HMG/produção foi executada ou é necessária.
+
+## 38. Sprint 30.31 — Remediação de Defeitos Residuais & Reconciliação de Encerramento da Auditoria
+
+Sprint de pós-fechamento, aberta pelo proprietário depois que o fechamento da Sprint 30.30 (§37) foi
+revisado e considerado inconsistente com seu próprio modelo declarado de conclusão: aritmética de
+achados errada em pelo menos um ponto, faixa de PR do EPIC pai incompleta, e o achado de maior
+severidade residual (`BD30-F059`) sem uma investigação dedicada e priorizada nesta própria Sprint.
+Objetivo: tornar o encerramento tecnicamente e administrativamente verdadeiro — sem inventar decisão
+de produto, sem mutar HMG/produção, sem tocar `main`/`prd`, sem reescrever achados já resolvidos.
+
+### 38.1 Reconciliação aritmética do Ledger (verificada por script determinístico)
+
+Todas as contagens abaixo foram produzidas por um script Python que faz parsing de toda a tabela
+mestre §6 (regex sobre as 96 linhas `| BD30-Fxxx | severidade | ... | \`estado\` |`), não por leitura
+manual — a mesma disciplina de evidência já exigida pelo restante desta EPIC, aplicada desta vez ao
+próprio mecanismo de contagem.
+
+**Confirmado**: 96 achados (`BD30-F001`–`BD30-F096`), zero duplicatas, zero lacunas na sequência —
+critério de aceite do Ledger cumprido.
+
+**Erro aritmético pré-existente encontrado e corrigido** (não uma mudança de achado, uma correção de
+soma): §37.4/§37.6 afirmavam "13 `FIXED`, 5 `OPEN`" para severidade alta, mas listavam nominalmente
+só 4 IDs como "os 5" (`BD30-F016`, `BD30-F034`, `BD30-F054`, `BD30-F059`) — a contagem real sempre foi
+14 `FIXED`/4 `OPEN` (18 no total), não 13/5. Os 4 IDs em si já estavam corretos; só o total "5" estava
+matematicamente errado, com "e nenhum outro" no próprio texto já contradizendo o número "5" que o
+precedia. Anotado em §37.4 nesta Sprint, sem reescrever a prosa histórica da Sprint 30.30.
+
+**3 achados corrigidos nesta Sprint** (`BD30-F011`, `BD30-F036`, `BD30-F057` — ver §6 e §38.4),
+movendo de `OPEN` para `FIXED`.
+
+**Estado final real do Ledger, após a Sprint 30.31**:
+
+| Estado | Total |
+|---|---:|
+| `FIXED` | 61 |
+| `VERIFIED` | 1 |
+| `ACCEPTED RISK` | 1 |
+| `OPEN` (decisão do proprietário, com racional explícito) | 33 |
+
+61+1+1+33 = 96, verificado.
+
+**Severidade alta (18 total)**: 14 `FIXED`, 4 `OPEN` (`BD30-F016`, `BD30-F034`, `BD30-F054`,
+`BD30-F059` — inalterado desta Sprint, nenhum dos 3 achados corrigidos era severidade alta).
+
+**Inventário**: `INV-013` promovido de `BASELINED` para `VERIFIED` nesta Sprint (§3, §38.6) — estado
+final real é **22/22 `VERIFIED`, 0 `BASELINED`**, não "21 `VERIFIED`, 1 `BASELINED`" como §37.3
+registrava.
+
+### 38.2 `BD30-F059` — investigação priorizada, evidência-guiada, causa raiz ainda não determinável
+
+Prioridade explícita desta Sprint, per instrução do proprietário. Reprodução mínima estabelecida
+antes de qualquer alteração de código de produção: login → criar 1 Transaction via seu próprio
+diálogo (`TransactionFormModal`/`EditorModalShell`) → clicar no card recém-criado → o handler
+`OpenEditTransaction` nunca é invocado no servidor (confirmado por instrumentação direta —
+`Console.WriteLine` na primeira linha do handler nunca imprime quando o defeito reproduz), sem
+nenhum erro de actionability do Playwright, sem exceção no console do navegador além de um aviso
+inofensivo de autofocus.
+
+**9 hipóteses testadas nesta Sprint, cada uma revertida por completo (`git diff`/`git checkout --`
+confirmando zero resíduo) antes de avançar para a próxima**:
+
+1. Timing de disposal do `beeday-dialog-focus.js` (`DeactivateAsync` sem de fato chamar a função JS
+   `deactivate`) — sintoma idêntico, refutada.
+2. `<DialogFocusScope>` removido por completo de `EditorModalShell.razor` (não só sua chamada JS,
+   o componente inteiro) — sintoma idêntico, refutada; nem a presença do componente é a causa.
+3. Forçar 2 renders separados (`StateHasChanged()` + `Task.Yield()`) entre fechar o diálogo e
+   recarregar a lista, em vez de um único método assíncrono contínuo — sintoma idêntico, refutada.
+4. O mesmo, mas com um `Task.Delay(300)` real (não só `Task.Yield()`) entre os dois renders — elimina
+   qualquer dúvida sobre coalescência de render batch (a separação de rede é genuína) — sintoma
+   idêntico, refutada.
+5. Um ciclo de diálogo totalmente não-relacionado (`WalletTagManager`, "New tag", com `Create`) antes
+   da única Transaction criada depois — reproduz igual, confirmando que a causa não é específica do
+   próprio diálogo de Transaction.
+6. O mesmo, mas com `Cancel` em vez de `Create` no diálogo de tag (sem toast, sem mutação de lista de
+   tags) — reproduz igual; elimina toast e mutação de lista como pré-condição.
+7. Reprodução mínima de um único ciclo, sem diálogo de tag algum — só criar 1 Transaction e clicar
+   nela — reproduz; a causa não exige um diálogo "poluidor" anterior não-relacionado.
+8. Ativação por teclado (`FocusAsync` + `Enter`) em vez de clique do mouse, no mesmo cenário mínimo —
+   falha igual; não é específico de `@onclick` versus `@onkeydown`.
+9. Atribuir uma Tag à Transaction, replicando a forma exata do teste já existente
+   `CreateTagAndTransaction_UpdatesBalance` (que passa de forma confiável) — ainda reproduz a falha;
+   atribuição de Tag não é a variável decisiva.
+
+**Contraste real, não resolvido, documentado para investigação futura**: dois testes já existentes no
+mesmo arquivo (`CreateTagAndTransaction_UpdatesBalance`, via ativação por teclado;
+`MinimumTransaction_CreateEditAndDeleteInPortuguese_KeepsCircuitInteractive`, via clique de mouse
+comum) executam formas estruturalmente muito próximas do cenário mínimo acima — diálogo de tag,
+Transaction com Tag atribuída, interação com o card — e **passam de forma confiável**, confirmado por
+execução real nesta Sprint. A variável real que diferencia os cenários que passam dos que falham não
+foi isolada dentro do orçamento desta investigação. Candidatos não descartados, deixados para uma
+futura investigação dedicada: o caminho de entrada de navegação (`GotoAsync` direto para `/wallet`
+via `LoginToWalletAsync`, usado pelos testes que falham, versus navegação SPA a partir de uma página
+anterior já carregada, usada por `CreateTagAndTransaction_UpdatesBalance`); e a passagem prévia por
+`/account` alterando cultura/idioma antes de chegar à Wallet, usada por
+`MinimumTransaction_CreateEditAndDeleteInPortuguese_KeepsCircuitInteractive`.
+
+**Nenhuma correção foi submetida sem causa raiz confirmada** — mesmo princípio já estabelecido nas
+Sprints 30.19/30.24: não enviar uma correção não comprovada. Os 2 workarounds de `GotoAsync` já
+existentes (`CreateExpenseTransaction_DecreasesBalanceCorrectly`,
+`DeletingATag_LeavesItsTransactionVisibleWithNoTag`) permanecem intactos e necessários — nenhum
+arquivo de teste foi alterado no estado final desta Sprint (`git diff` vazio para
+`tests/BeeDay.E2E.Tests/WalletTests.cs` e para todo o código de produção tocado durante a
+investigação — `Wallet.razor`, `DialogFocusScope.cs`, `EditorModalShell.razor` — antes da correção
+real e independente de `BD30-F057`/`F037` neste mesmo arquivo `Wallet.razor`, ver §38.4).
+
+**Classificação Sprint 30.31: Categoria D** (investigação exaustiva dentro do orçamento desta Sprint;
+causa raiz genuína permanece desconhecida; não é seguro fabricar uma correção). Permanece o único
+achado de severidade alta que termina esta EPIC sem causa raiz identificada.
+
+### 38.3 Fila de revisão explícita — disposição de cada item
+
+Os 11 achados que o proprietário pediu para revisar individualmente, verificados contra o estado
+atual do repositório (nenhuma mudança de código relevante ocorreu entre a Sprint 30.30 e esta Sprint
+além do que esta própria Sprint produziu):
+
+- **`BD30-F011`** — verificado ainda impreciso; **corrigido** (Categoria A, ver §38.4).
+- **`BD30-F021`** — verificado ainda `OPEN` (cobertura E2E de conta parcial para tema/senha/recovery).
+  Categoria B/D: não é um defeito de correção pontual, é expansão de suíte de testes (múltiplos novos
+  fluxos E2E) — maior escopo do que uma correção de causa raiz cabe nesta Sprint de remediação
+  focada; decisão de priorização de roadmap de qualidade, não inventada aqui. Reconfirmado, não
+  corrigido.
+- **`BD30-F036`** — verificado ainda presente; **corrigido** (Categoria A, ver §38.4).
+- **`BD30-F037`** — verificado ainda presente, dois sintomas independentes; **um dos dois corrigido**
+  (Categoria A parcial, ver §38.4); o outro (`Disabled`/`IsBusy` nos cards do Dashboard) permanece
+  Categoria B/D — exige um novo parâmetro em `ActivityCard` propagado a 4 pontos de uso com os
+  estados visuais completos exigidos pelo Design System, trabalho de UI genuíno, maior que o limite
+  desta Sprint.
+- **`BD30-F057`** — verificado ainda presente; **corrigido** (Categoria A, ver §38.4).
+- **`BD30-F071`** — verificado ainda `OPEN` (cobertura E2E de troca de idioma só para 1 de 21 rotas
+  do Experience System). Categoria B/D: mesma natureza de `BD30-F021` — expansão de suíte (até 20
+  novos testes), não correção pontual. Reconfirmado, não corrigido.
+- **`BD30-F087`/`BD30-F088`** — verificados ainda `OPEN` (otimização de imagem PNG, bundling/
+  minificação CSS/JS). Categoria B: decisão de introduzir uma etapa de build/pipeline de assets —
+  mudança de infraestrutura de build, decisão do proprietário sobre a ferramenta/processo, não um
+  defeito de código.
+- **`BD30-F091`** — verificado ainda `OPEN` (CorrelationId não propaga a logs de mutação disparados
+  via circuito Blazor Server, só à requisição HTTP inicial). Categoria B/D: a correção real exigiria
+  um `CircuitHandler` gerando um id por circuito propagado via DI escopado ao MediatR — mudança de
+  arquitetura de observability genuína (nova abstração cross-cutting), não uma correção pontual;
+  fora do limite de "menor mudança segura" desta Sprint.
+- **`BD30-F092`** — verificado ainda `OPEN` (sem `CommandTimeout` explícito). Categoria B: decisão de
+  política explícita (qual latência é aceitável para o workload real do BeeDay) — não inventada aqui.
+- **`BD30-F093`** — verificado ainda `OPEN`, premissa reconfirmada (3 chamadas `logger.Log*` sem
+  `EventId`, não 2). Categoria D pelo próprio mérito arquitetural, não por falta de investigação:
+  criar uma convenção de `EventId` nova para Application, hoje, serviria só a este único call site —
+  exatamente o tipo de abstração sem uso comprovado que a governança deste repositório instrui a não
+  adicionar. A disposição correta já era "não corrigir", reconfirmada, não alterada.
+
+### 38.4 Achados corrigidos nesta Sprint (Categoria A)
+
+- **`BD30-F011`** (documentação): `docs/infrastructure/README.md` corrigido de "5 classes Options"
+  para as 6 reais (`SqlServer`, `IdentityEmail`, `Resend`, `DevelopmentEmail`, `EventJournal`,
+  `HmgRecipientGuard`), mais a menção explícita de `EmailProvider`/`EmailProviderSelector` (seleção
+  de provider, não `Options`, antes omitidos). Confirmado por `ls src/BeeDay.Infrastructure/
+  Configuration/`. Correção mecânica de documentação, sem mudança de código.
+- **`BD30-F036`** (vazamento de recurso latente): `EmailConfirmationSent.razor`/
+  `ResendConfirmation.razor` — `StartCountdown()` agora descarta explicitamente o `_cts`/`_timer`
+  anteriores (`?.Dispose()`) antes de reatribuí-los, em vez de só cancelar o CTS e deixar o
+  `PeriodicTimer` anterior para o GC finalizar. Caminho já inalcançável em uso normal (botão
+  desabilitado durante a contagem regressiva), então sem teste dedicado — validado pela suíte
+  completa de regressão.
+- **`BD30-F057`** (sequenciamento de animação de exclusão): `DashboardState.DeleteCurrentEditorItemAsync`
+  — `RemovingItemId` agora só é limpo (em `finally`) depois da tentativa real de `DeleteAsync`, não
+  antes. No sucesso, `ReloadAsync()` já roda antes da limpeza (sem flash, o item já nem está mais na
+  lista); na falha, o card volta ao normal exatamente quando o toast de erro aparece, não antes. Novo
+  teste de regressão `DeleteCurrentHabitAsync_WhenTheDeleteCommandFails_
+  StillMarksTheCardAsRemovingAtTheMomentOfTheAttempt` (`DashboardStateTests.cs`) — lê `RemovingItemId`
+  de dentro do `ISender` fake, no exato momento em que o comando de exclusão (que falha) é enviado;
+  confirmado que falha contra o código anterior (`git stash` temporário do arquivo de produção) e
+  passa com a correção aplicada.
+- **`BD30-F037` (parcial)**: `Wallet.razor.RefreshAfterMutationAsync` ganha um `StateHasChanged()`
+  logo após `_highlightBalance = false`, espelhando a chamada já existente 3 linhas acima quando o
+  destaque liga. Sem teste dedicado (mudança de timing de render sem contrato observável novo,
+  coberta pela suíte completa). A outra metade (Dashboard `Disabled`/`IsBusy`) permanece `OPEN`,
+  ver §38.3.
+
+### 38.5 Demais achados `OPEN` — classificação por categoria (revisão completa, não amostrada)
+
+Os 33 achados `OPEN` finais (§38.1), incluindo os 11 da fila de revisão (§38.3) e `BD30-F059` (§38.2),
+classificados por categoria — nenhum reclassificado para `ACCEPTED RISK` sem autorização do
+proprietário, nenhum comportamento de produto alterado só para eliminar um estado `OPEN`:
+
+**Categoria B — decisão de produto/política (19)**: `BD30-F040` (fluxo de desativação de conta),
+`BD30-F041` (rate limiter em memória, só relevante se PRD escalar), `BD30-F047` (cookie de cultura
+sobrescrevendo troca deliberada de idioma), `BD30-F050`/`BD30-F054` (reset por tempo de Habit/
+RecurringTask), `BD30-F052` (`ActivityAttribute` sem UI), `BD30-F055` (`Todo.DueDate` sem efeito
+funcional), `BD30-F056` (`Project.Archived` sem UI), `BD30-F058` (filtro de faixa de valor em Wallet
+sem UI), `BD30-F061` (sem histórico de XP visível), `BD30-F064` (link de rodapé para rota
+inexistente), `BD30-F067` (baixa descoberta de `/experience-system`), `BD30-F068` (wizards sem passo
+na URL), `BD30-F069` (texto legal pendente, deliberado), `BD30-F085` (sem paginação/arquivamento de
+itens do Dashboard), `BD30-F086` (recarga completa do Dashboard após qualquer mutação), `BD30-F087`/
+`BD30-F088` (pipeline de build de assets), `BD30-F092` (`CommandTimeout` explícito, decisão de
+política).
+
+**Categoria B/D — expansão de cobertura de teste, não defeito de correção pontual (2)**: `BD30-F021`,
+`BD30-F071` (ambos §38.3).
+
+**Categoria C — evidência de ambiente/infraestrutura necessária, fora do alcance desta auditoria de
+código (5)**: `BD30-F016` (rollback de HMG, `-BackupDatabase`), `BD30-F032` (race condition de
+`Position`, precisa verificar ausência de duplicatas em dados reais de HMG/produção), `BD30-F034`
+(inflação histórica de XP, irreconstituível sem acesso a HMG/produção), `BD30-F095` (valor da claim
+de sessão, renomear encerraria toda sessão ativa), `BD30-F096` (caminho real no servidor HMG,
+migração de infraestrutura).
+
+**Categoria D — investigação esgotada / não corrigível com segurança nesta Sprint (7)**: `BD30-F059`
+(§38.2, causa raiz desconhecida), `BD30-F082` (menu de criação de atividade sem tratamento de teclado
+completo — exigiria nova infraestrutura de foco em `BeeDayButton`, não construída), `BD30-F091`
+(CorrelationId por circuito, mudança de arquitetura de observability), `BD30-F093` (convenção de
+`EventId` sem segundo uso comprovado — correta ao não ser criada), `BD30-F014` (causalidade de
+warning EF Core não confirmável, logs originais não existem mais), `BD30-F037` (metade não corrigida
+— ver §38.3/§38.4 para a metade que foi corrigida, já removida da contagem `OPEN`), `BD30-F051` (dedup
+de XP por carregamento completo — mudança de arquitetura na fronteira Domain/Infrastructure já
+auditada e corrigida múltiplas vezes nesta EPIC, risco real de reintroduzir bug num subsistema
+sensível sem evidência de que o problema já é real hoje).
+
+19+2+5+7 = 33, verificado por script determinístico contra a lista real dos 33 IDs `OPEN` — cada um
+dos 33 aparece em exatamente uma categoria, sem lacuna e sem duplicata. `BD30-F011`/`F036`/`F057`
+(corrigidos por completo, §38.4) e a metade corrigida de `BD30-F037` não aparecem nesta lista porque
+não estão mais `OPEN`.
+
+### 38.6 `INV-013` — auditoria de configuração completa (não mais parcial)
+
+Ver §3 para o registro completo da evidência. Resumo: primeira auditoria a ler os 6 tipos `Options` +
+2 tipos de seleção de provider por completo e cruzar cada `SectionName` contra os 4 `appsettings.*.json`,
+`launchSettings.json` e `web.config` numa única passada. Nenhum defeito de configuração novo
+encontrado — o invariante de `EmailProviderSelector` é satisfeito em todo ambiente committed, o guard
+`HmgRecipientGuard` de Homologation depende de injeção real via `deploy-hmg.yml`
+(`BEEDAY_HMG_ALLOWED_RECIPIENTS`, confirmado no próprio workflow) em vez de estar ausente por
+omissão, e o placeholder `CHANGEME` de Development já era conhecido e documentado. Promovido de
+`BASELINED` para `VERIFIED`.
+
+### 38.7 Correção da faixa de PR do EPIC pai
+
+O fechamento da Sprint 30.30 declarava, no corpo da Issue #201, "merged into `hmg` (PRs #268–#295)" —
+incompleto. Verificado nesta Sprint via `gh pr list --base hmg --state merged --limit 100 --json
+number,title,mergedAt`, ordenado por número: a faixa real e completa é **#265–#295** (31 números de PR
+consecutivos, não 28) — omitia `#265` (Sprint 30.1), `#266` (30.2), `#267` (30.3), e `#275`
+("chore(governance): detrack CLAUDE.md, record BD30-F042 E2E reliability finding" — confirmado via
+`gh pr view 275` como uma PR administrativa legítima e exigida pelo proprietário entre as Sprints
+30.10 e 30.11, não uma Sprint numerada por si só, mas parte real da história de merge do EPIC).
+Mapeamento completo Sprint → PR verificado: 30.1→#265, 30.2→#266, 30.3→#267, 30.4→#268, 30.5→#269,
+30.6→#270, 30.7→#271, 30.8→#272, 30.9→#273, 30.10→#274, [#275 administrativa], 30.11→#276,
+30.12→#277, 30.13→#278, 30.14→#279, 30.15→#280, 30.16→#281, 30.17→#282, 30.18→#283, 30.19→#284,
+30.20→#285, 30.21→#286, 30.22→#287, 30.23→#288, 30.24→#289, 30.25→#290, 30.26→#291, 30.27→#292,
+30.28→#293, 30.29→#294, 30.30→#295. Issue #201 e sua Issue/PR desta Sprint atualizadas para citar
+`#265–#295` — ver §38.9 para a entrega no GitHub.
+
+### 38.8 Implementação
+
+- `docs/infrastructure/README.md` — `BD30-F011` corrigido (contagem/nomes reais de `Options`).
+- `src/BeeDay.Web/Components/Features/Identity/Pages/EmailConfirmationSent.razor`,
+  `ResendConfirmation.razor` — `BD30-F036` corrigido (`_cts`/`_timer` descartados antes de
+  reatribuição em `StartCountdown()`).
+- `src/BeeDay.Web/Components/Features/Dashboard/State/DashboardState.cs` — `BD30-F057` corrigido
+  (`RemovingItemId` só limpo após a tentativa real de exclusão).
+- `src/BeeDay.Web/Components/Features/Wallets/Pages/Wallet.razor` — `BD30-F037` parcialmente
+  corrigido (`StateHasChanged()` após `_highlightBalance = false`).
+- `tests/BeeDay.Web.Tests/Components/Dashboard/DashboardStateTests.cs` — novo teste de regressão para
+  `BD30-F057`, mais o fake `DeleteFailingSender`.
+- `docs/epics/30-system-integrity/README.md` — nova Seção 38; tabela mestre §6 atualizada
+  (`BD30-F011`/`F036`/`F037`/`F057`/`F059`); `INV-013` promovido para `VERIFIED` (§3); §37.3/§37.4/
+  §37.6 anotados com as correções aritméticas, sem reescrever a prosa histórica da Sprint 30.30.
+
+Nenhuma mudança de contrato público de Application, schema, migration. Nenhuma mutação de banco HMG/
+produção foi executada ou é necessária. `tests/BeeDay.E2E.Tests/WalletTests.cs` termina esta Sprint
+sem diferença em relação ao estado anterior à Sprint 30.31 (confirmado por `git diff` vazio) — toda a
+instrumentação de diagnóstico usada durante a investigação de `BD30-F059` (§38.2) foi revertida por
+completo antes da entrega.
+
+### 38.9 Regressão e quality gates
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx --configuration Release` | PASS, 0 erros |
+| `dotnet test tests/BeeDay.Web.Tests/... --filter DashboardStateTests` (isolado) | PASS, 10/10, incluindo o novo teste de `BD30-F057` |
+| `dotnet test BeeDay.slnx` (Debug, completo) | PASS, 1.557/1.557 (121 Domain, 119 Application, 216 Infrastructure, 880 Web, 221 E2E) — execução limpa, 0 falhas |
+| `dotnet test BeeDay.slnx --configuration Release` (completo) | PASS, 1.557/1.557 (121 Domain, 119 Application, 216 Infrastructure, 880 Web, 221 E2E) — execução limpa, 0 falhas |
+| `dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+| Verificação determinística de contagem do Ledger (script Python sobre §6) | 96 achados, zero duplicata/lacuna, 61 `FIXED`/1 `VERIFIED`/1 `ACCEPTED RISK`/33 `OPEN`, 14/4 `FIXED`/`OPEN` em severidade alta |
+| `gh pr list --base hmg --state merged` (mapeamento Sprint→PR) | 31 PRs consecutivos `#265`–`#295` confirmados, mapeamento completo por Sprint verificado |
+
+### 38.10 Recomendação final de encerramento
+
+**`READY TO CLOSE`**, com os seguintes fatos objetivos como justificativa:
+
+1. Todos os 33 achados `OPEN` restantes foram revisados individualmente contra o estado atual do
+   repositório (§38.3, §38.5) — nenhum é uma lacuna de investigação esquecida; cada um tem uma
+   categoria (B/C/D) e um racional específico, não genérico.
+2. Todo defeito de engenharia genuinamente corrigível dentro do escopo e do limite de risco desta
+   Sprint foi corrigido e verificado com regressão real (`BD30-F011`, `BD30-F036`, `BD30-F057`, metade
+   de `BD30-F037`) — §38.4.
+3. `BD30-F059` recebeu a investigação dedicada e priorizada exigida, com 9 hipóteses novas testadas e
+   revertidas honestamente, o espaço de busca substancialmente refinado, e nenhuma correção não
+   comprovada submetida — §38.2. Continua sendo o risco residual mais significativo do encerramento,
+   exatamente como já declarado, agora com evidência adicional real por trás dessa afirmação.
+4. Aritmética final do Ledger verificada deterministicamente, não por inspeção — §38.1.
+5. `INV-013` tem um estado final honesto e completo (`VERIFIED`, não mais `BASELINED` parcial) — §38.6.
+6. A faixa de PR do EPIC pai está corrigida e verificada via evidência real do GitHub, não memória —
+   §38.7.
+7. Nenhum achado foi convertido para `ACCEPTED RISK` sem autorização do proprietário; nenhuma decisão
+   de produto foi inventada; nenhuma mutação de HMG/produção ocorreu; `main`/`prd` permanecem
+   intocados durante toda esta Sprint.
+8. Regressão completa passa em Debug e Release após todas as correções (§38.9).
+
+Nenhum bloqueador remanescente impede o fechamento. Os itens Categoria B/C, por definição, nunca
+seriam resolvidos por mais trabalho de auditoria de código — exigem decisão do proprietário ou acesso
+a ambiente que esta auditoria não tem. `BD30-F059` (Categoria D) teria valor real numa investigação
+futura dedicada com mais tempo para isolar a variável de contraste encontrada em §38.2, mas sua
+ausência de causa raiz não é, por si só, um motivo para manter o EPIC formalmente aberto — já estava
+corretamente contabilizada como risco residual antes desta Sprint, e continua sendo agora, com
+evidência mais forte por trás da mesma conclusão.

@@ -344,22 +344,27 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
         await ExecuteAsync(
             async () =>
             {
-                await AnimateRemovalAsync(id);
-                await DeleteAsync(id, expectedType);
-                Modals.CloseEditor();
-                await ReloadAsync();
+                RemovingItemId = id;
+                Changed?.Invoke();
+                await Task.Delay(170);
+
+                try
+                {
+                    await DeleteAsync(id, expectedType);
+                    Modals.CloseEditor();
+                    await ReloadAsync();
+                }
+                finally
+                {
+                    // Only clear once the outcome is known: on success the list has already been
+                    // reloaded without this item by the time this runs, so there is no flash; on
+                    // failure the card reappears exactly when the error toast fires, instead of
+                    // snapping back to normal before the delete attempt even completed.
+                    RemovingItemId = null;
+                }
             },
             successMessage,
             localizer["DeleteErrorMessage"]);
-    }
-
-
-    private async Task AnimateRemovalAsync(Guid id)
-    {
-        RemovingItemId = id;
-        Changed?.Invoke();
-        await Task.Delay(170);
-        RemovingItemId = null;
     }
 
     private async Task ExecuteAsync(

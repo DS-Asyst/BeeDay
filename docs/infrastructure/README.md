@@ -28,7 +28,8 @@ fila de background, journal de auditoria, health check.
 src/BeeDay.Infrastructure/
 ├── Auditing/            JsonEventJournal (log de domain events, append-only, NDJSON)
 ├── Background/           BackgroundTaskQueue + BackgroundTaskWorker (fila + worker)
-├── Configuration/          5 classes Options (SqlServer, IdentityEmail, Resend, DevelopmentEmail, EventJournal)
+├── Configuration/          6 classes Options (SqlServer, IdentityEmail, Resend, DevelopmentEmail, EventJournal,
+│                           HmgRecipientGuard) + EmailProvider/EmailProviderSelector (seleção de provider, não Options)
 ├── DependencyInjection/     InfrastructureServiceCollectionExtensions — único ponto de registro
 ├── Diagnostics/             (vazio — InfrastructureEventIds removido na Sprint 18.3, era código morto)
 ├── HealthChecks/            SqlServerHealthCheck
