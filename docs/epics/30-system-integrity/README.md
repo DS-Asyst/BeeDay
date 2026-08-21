@@ -192,7 +192,11 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F062 | baixa | excluir um Habit/Task/Todo/Project já recompensado não revoga nem ajusta o XP concedido — comportamento deliberado por design (`ExperienceEntryConfiguration.cs` documenta em comentário: sem FK para a origem, `ExperienceEntries` é histórico append-only, cópia do que aconteceu, não referência viva). A decisão está corretamente implementada e comentada no código, mas não está ratificada em nenhum lugar de `docs/` (`docs/domain/business-rules.md` só declara a curva/nível como determinística, nada sobre revogação por exclusão) | `OPEN` | 30.28 |
 | BD30-F063 | alta | `app.MapRazorComponents<App>()` registra um endpoint só para cada `@page` descoberto — não existe fallback catch-all implícito. Qualquer requisição para uma URL sem `@page` correspondente (erro de digitação, link externo obsoleto, favorito antigo) terminava o roteamento do ASP.NET Core com um 404 vazio (`Content-Length: 0`, sem HTML algum), sem nunca alcançar o `NotFoundPage` do `Router` do Blazor — confirmado empiricamente via `curl` contra o servidor real, contrastado com `/login` (200, HTML completo) e `/not-found` (200, mesma rota funcionando quando acessada diretamente). Nenhum teste anterior (E2E ou integração) exercitava uma URL genuinamente inexistente contra o pipeline HTTP real — só bUnit, que renderiza `NotFound.razor` diretamente, sem passar pelo roteamento. **Corrigido nesta Sprint**: `app.UseStatusCodePagesWithReExecute("/not-found")` reexecuta a requisição contra a rota `/not-found` real (já existente, estilizada, localizada) sempre que a resposta termina em um status 4xx/5xx sem corpo já escrito — não interfere com nenhuma resposta que já tenha corpo (JSON de `GlobalExceptionHandler`) nem com redirects de autenticação (302, com `Location`). Verificado com `curl` antes/depois da correção e com a suíte completa de `AuthorizationIntegrationTests`/`AntiforgeryIntegrationTests`/`ProblemDetailsIntegrationTests` (892/892 em `BeeDay.Web.Tests`, nenhuma regressão) | `FIXED` | 30.17 |
 | BD30-F064 | baixa | `EditorialFooter.razor` linka para `/buy-me-a-coffee` em todas as 12 páginas institucionais; a rota não existe (contrato de rota já pré-anunciado como fora de escopo em `docs/web/02-routing-and-pages.md` desde a Sprint 29.4). Antes da `BD30-F063`, clicar mostrava uma página completamente em branco; após a correção desta Sprint, mostra a página real de Not Found (estilizada, localizada) — o link continua não-funcional, mas já não produz mais uma tela em branco. Construir a página ou remover o link é decisão de produto, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
-| BD30-F065 | média | `/Error` (`Pages/Error.razor`) existe mas nunca é produzida por nenhum caminho de código — `GlobalExceptionHandler` sempre emite JSON `ProblemDetails` para qualquer exceção na pipeline HTTP, nunca redireciona para `/Error`. Separadamente, nenhum `<ErrorBoundary>` existe em toda a árvore de componentes (`grep` por `ErrorBoundary` em `src/BeeDay.Web` = zero resultados) — uma exceção não tratada dentro do render/event-handler de qualquer página interativa (ex.: um clique em `Wallet.razor`) encerra o circuito SignalR sem nenhuma tela de recuperação além do `ReconnectModal` genérico tentando reconectar a um circuito que já não existe. Ambos são gaps de arquitetura de resiliência a erros, não defeitos pontuais de rota — encaminhados à Sprint 30.23 (Resilience & Observability) em vez de corrigidos aqui, dado o risco de uma mudança especulativa na pipeline global de exceções sem o escopo dedicado que o tema merece | `OPEN` | 30.23 |
+| BD30-F065 | média | `/Error` (`Pages/Error.razor`) existe mas nunca é produzida por nenhum caminho de código — `GlobalExceptionHandler` sempre emite JSON `ProblemDetails` para qualquer exceção na pipeline HTTP, nunca redireciona para `/Error`. Separadamente, nenhum `<ErrorBoundary>` existe em toda a árvore de componentes (`grep` por `ErrorBoundary` em `src/BeeDay.Web` = zero resultados) — uma exceção não tratada dentro do render/event-handler de qualquer página interativa (ex.: um clique em `Wallet.razor`) encerra o circuito SignalR sem nenhuma tela de recuperação além do `ReconnectModal` genérico tentando reconectar a um circuito que já não existe. Ambos são gaps de arquitetura de resiliência a erros, não defeitos pontuais de rota — encaminhados à Sprint 30.23 (Resilience & Observability) em vez de corrigidos aqui, dado o risco de uma mudança especulativa na pipeline global de exceções sem o escopo dedicado que o tema merece. **Corrigido na Sprint 30.23**: novo `BeeDayErrorBoundary.razor` (composição sobre `LoggingErrorBoundary : ErrorBoundary`, que sobrescreve o extension point documentado `OnErrorAsync` para logar com `WebEventIds.CircuitError`) envolve `@Body` nos 4 layouts (`MainLayout`, `PublicLayout`, `OnboardingLayout`, `EditorialLayout`), renderizando um fallback de marca (`BeeDayEmptyState` + botão Recarregar) em vez de encerrar o circuito sem recuperação. `/Error` (órfã, nunca produzida por nenhum caminho real) permanece fora de escopo — decisão de mantê-la ou removê-la é de produto, não desta correção pontual de resiliência | `FIXED` | 30.23 |
+| BD30-F090 | média | `ConcurrencyConflictException` é `PersistenceException` (herança) mas não tinha nenhum `case` próprio em `GlobalExceptionHandler.Map` — caía no `case PersistenceException`, mapeado para 503 "Persistence unavailable... Try again shortly". Uma resposta enganosa: um conflito de concorrência otimista significa que o registro *mudou* sob o usuário, não que o armazenamento está indisponível — repetir a mesma escrita obsoleta falha de novo, sempre; o usuário precisa recarregar o registro primeiro, não só tentar de novo. **Corrigido nesta Sprint**: novo `case ConcurrencyConflictException`, posicionado antes do `case PersistenceException` mais amplo (a ordem importa — pattern matching de tipo por herança usa o primeiro `case` compatível), mapeado para 409 Conflict com mensagem acionável ("This record was changed by another operation. Reload the page and try again."). Não é alcançável pela suíte de integração HTTP existente pelo mesmo motivo já documentado em `ProblemDetailsIntegrationTests` (só ocorre dentro de uma chamada MediatR feita por um componente Razor sobre o circuito SignalR, nunca a partir de uma requisição HTTP crua) — coberto em vez disso por teste unitário direto contra `GlobalExceptionHandler.Map` (novo `GlobalExceptionHandlerTests.cs`), habilitado por um novo `InternalsVisibleTo` de `BeeDay.Web` para `BeeDay.Web.Tests`, mesmo padrão já usado por `BeeDay.Infrastructure.csproj` | `FIXED` | 30.23 |
+| BD30-F091 | baixa | `CorrelationIdMiddleware` só existe na pipeline HTTP ASP.NET Core (`app.UseMiddleware<CorrelationIdMiddleware>()`) e seu `logger.BeginScope` só está ativo durante `await next(context)` daquela requisição HTTP específica — confirmado por leitura direta do middleware e por `builder.Logging.AddJsonConsole(options => options.IncludeScopes = true)` em `Program.cs` (a infraestrutura de log já grava scopes quando presentes). Em Blazor Server, isso cobre a requisição HTTP inicial (primeiro render/negotiate), mas cada interação subsequente do usuário (clique disparando um comando MediatR) roda sobre o circuito SignalR já estabelecido, fora de qualquer nova invocação desse middleware — então `LoggingBehavior`/`LoggingErrorBoundary` e qualquer outro log emitido durante uma mutação disparada por circuito **não carrega `CorrelationId`** nos logs de produção, ao contrário de uma falha capturada por `GlobalExceptionHandler` na pipeline HTTP. Construir uma correlação com escopo de circuito (ex.: um `CircuitHandler` gerando um id por circuito, propagado via DI escopado ao MediatR) é uma mudança de arquitetura de observability genuína, fora do limite desta auditoria — não implementada especulativamente | `OPEN` | decisão do proprietário |
+| BD30-F092 | baixa | nenhuma configuração explícita de `CommandTimeout` existe em toda a base (`grep` por `CommandTimeout` em `src/` = zero resultados) — toda consulta/gravação SQL Server depende do default implícito do ADO.NET/EF Core (30s). Definir um valor explícito é uma decisão de política (qual latência é aceitável para o workload real do BeeDay?), não inventada por esta auditoria | `OPEN` | decisão do proprietário |
+| BD30-F093 | baixa | `LoggingBehavior.Handle` (Application) loga sucesso/falha de todo request MediatR sem nenhum `EventId` — inconsistente com a convenção já estabelecida em `WebEventIds.cs` (Web) para logs estruturados pesquisáveis por id. Application não tem hoje nenhuma convenção equivalente de `EventId`; criar uma agora para um único call site seria uma nova abstração sem uso comprovado além dele — encaminhado como hygiene, não corrigido especulativamente | `OPEN` | 30.26 |
 | BD30-F066 | baixa | não existia teste E2E/integração provando o ciclo completo `returnUrl` (hit anônimo em rota protegida → redirect para `/login?returnUrl=...` → login → volta exatamente para a página originalmente pedida) nem uma URL genuinamente inexistente atingindo o `NotFoundPage` do Router real (só bUnit, que renderiza `NotFound.razor` direto). **Corrigido nesta Sprint**: `AuthorizationIntegrationTests.Anonymous_ProtectedPageRedirect_CarriesTheOriginalPathAsReturnUrl` (nova) prova o `returnUrl` correto no redirect anônimo; `LoginIntegrationTests.Login_WithLocalReturnUrl_RedirectsToTheOriginallyRequestedPage` (nova) completa o ciclo até o destino pós-login; `NavigationTests.NonexistentRoute_RendersTheNotFoundPage` (E2E, nova) prova a `BD30-F063` corrigida contra um navegador real | `FIXED` | 30.17 |
 | BD30-F067 | baixa | a subárvore `/experience-system` (21 rotas públicas de documentação) não tem nenhum ponto de entrada direto no header/footer/nav de topo — só é alcançável via múltiplos saltos a partir do link `/brand-guidelines` no rodapé institucional, depois pela navegação de pilar/tópico interna. Não é uma rota quebrada (toda a subárvore é alcançável), apenas discoverability fraca para uma área de 21 rotas. Decisão de produto/IA de navegação, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
 | BD30-F068 | baixa | os dois wizards de onboarding (`Tutorial.razor`, `CreateProfile.razor`) mantêm o passo atual fora da URL (campo privado / `ProfileCreationState` escopado por DI, nenhum query string) — padrão consistente entre os dois, não um defeito isolado. Voltar/avançar no navegador sai do wizard inteiro em vez de andar entre os passos, comportamento previsível mas não documentado como decisão. Fora do escopo de roteamento propriamente dito (nenhuma rota quebra ou produz 404); observação de arquitetura de interação encaminhada a uma Sprint de UX. **Reverificado na Sprint 30.20**: ainda preciso, sem mudança. Tornar o passo refletido na URL é trabalho de arquitetura de interação genuíno (query string, guards de navegação, testes), fora do limite de uma auditoria; reatribuído para decisão do proprietário | `OPEN` | decisão do proprietário |
@@ -2957,3 +2961,169 @@ este último estendendo a correção a 5 repositórios em vez de só Habit/Task)
 corrigido com a parte de maior impacto operacional encaminhada à Sprint de CI/CD (`BD30-F008`), e um
 reatribuído para decisão do proprietário por depender de uma condição de infraestrutura que ainda
 não existe (`BD30-F041`). Nenhuma mutação de banco HMG/produção foi executada ou é necessária.
+
+## 30. Sprint 30.23 — Resilience, Errors & Observability Audit
+
+### 30.1 Escopo e método
+
+Auditoria de resiliência a erros e observability: comportamento de exceção não tratada em página
+interativa Blazor Server (ausência de `ErrorBoundary`), mapeamento de exceções conhecidas para
+`ProblemDetails` em `GlobalExceptionHandler`, presença/consistência de `EventId` em logs
+estruturados, e se o `CorrelationId` gerado por requisição realmente se propaga aos logs emitidos
+por mutações disparadas pelo circuito SignalR já estabelecido (não só pela requisição HTTP inicial).
+Limite explícito: nenhuma mudança especulativa na pipeline global de exceções sem certeza do
+mecanismo — quando a evidência estática não bastou para decidir, o achado foi registrado como
+encaminhado em vez de corrigido por suposição.
+
+Um achado encaminhado por Sprint anterior foi reverificado nesta Sprint (proprietária): `BD30-F065`
+(ausência de `ErrorBoundary` e rota `/Error` órfã) — ver §30.2. Dois achados de Sprints anteriores,
+sem relação direta com o escopo desta auditoria mas cronologicamente revisitáveis por tratarem de
+confiabilidade/observability, foram reconferidos por leitura direta do código sem mudança de estado:
+`BD30-F014` (warnings de EF Core MARS/savepoints correlacionados a um incidente histórico — os dois
+arquivos de log daquele período já não existem mais para reanálise; nenhuma evidência nova possível
+nesta Sprint, estado inalterado) e `BD30-F036` (`StartCountdown()` reatribuindo `_timer`/`_cts` sem
+`Dispose` da instância anterior em `EmailConfirmationSent.razor`/`ResendConfirmation.razor` —
+confirmado que ambos os arquivos e o padrão descrito continuam idênticos; ainda inalcançável em uso
+normal, estado inalterado).
+
+### 30.2 `BD30-F065` — ausência de `ErrorBoundary`, corrigido
+
+Nenhum `<ErrorBoundary>` existia em toda a árvore de componentes: uma exceção não tratada dentro do
+render ou de um event handler de qualquer página interativa (ex.: um clique em `Wallet.razor`)
+encerrava o circuito SignalR sem nenhuma tela de recuperação além do `ReconnectModal` genérico
+tentando reconectar a um circuito que já não existe mais — o usuário via a interface travar sem
+explicação nem ação de recuperação disponível.
+
+**Corrigido**: novo `BeeDayErrorBoundary.razor`, envolvendo `@Body` nos 4 layouts do app
+(`MainLayout`, `PublicLayout`, `OnboardingLayout`, `EditorialLayout`). Internamente compõe um novo
+`LoggingErrorBoundary : ErrorBoundary` (C# puro, sem `.razor`) em vez do `<ErrorBoundary>` de estoque
+— `ErrorBoundaryBase.CurrentException` é `protected`, inacessível a partir de um componente que
+apenas compõe (`@ref`) um `<ErrorBoundary>` filho; o padrão de herança, sobrescrevendo o extension
+point documentado `OnErrorAsync(Exception)`, é a forma correta e suportada de interceptar a exceção
+para log (`WebEventIds.CircuitError`, novo). O `ErrorContent` renderiza um `BeeDayEmptyState` de
+marca mais um botão "Recarregar página" (`Navigation.NavigateTo(Navigation.Uri, forceLoad: true)`),
+localizado via `DesignSystemResources` (en-US/pt-BR).
+
+A rota órfã `/Error` (`Pages/Error.razor`, nunca produzida por nenhum caminho de código real,
+confirmado desde a `BD30-F065` original) permanece deliberadamente fora de escopo — mantê-la como
+está, redirecioná-la para dentro do novo `ErrorBoundary`, ou removê-la é decisão de produto, não
+inventada por esta correção pontual de resiliência.
+
+Cobertura nova: `FeedbackComponentTests.cs` ganhou 2 testes dedicados —
+`ErrorBoundary_WhenChildContentThrows_RendersTheBrandedFallbackInsteadOfCrashing` (prova o fallback
+localizado renderizando e nenhum texto de exceção crua vazando ao usuário) e
+`ErrorBoundary_WithNoException_RendersChildContentUnchanged` (prova que o caminho normal, sem
+exceção, não é afetado). `CoreComponentContractTests.SharedPrimitiveInventoryHasOneCanonicalImplementationPerContract`
+atualizado com o novo componente compartilhado (mesma manutenção de "lock" de inventário já feita
+nas Sprints 30.19/30.20); contagens de `NativeControlInventoryStaysExplicitUntilOwningFeatureSprints`
+não mudaram — `BeeDayErrorBoundary.razor` usa `<BeeDayButton>` (tag de componente), não uma tag
+`<button>` nativa, então o regex de varredura não a conta.
+
+### 30.3 `BD30-F090` — `ConcurrencyConflictException` mapeada incorretamente para 503, corrigido
+
+`ConcurrencyConflictException` é `PersistenceException` por herança (`EfConcurrencySaveChanges.cs`
+lança essa subclasse especificamente ao capturar `DbUpdateConcurrencyException`), mas
+`GlobalExceptionHandler.Map` não tinha nenhum `case` próprio para ela — caía no `case
+PersistenceException` mais amplo, mapeado para 503 "Persistence unavailable... Try again shortly".
+Resposta enganosa: um conflito de concorrência otimista significa que o registro em si mudou sob o
+usuário (outra aba, outro dispositivo, outra sessão), não que o SQL Server está indisponível —
+repetir a escrita idêntica e já obsoleta falha de novo, sempre, então "tente novamente em breve" é
+literalmente o conselho errado.
+
+**Corrigido**: novo `case ConcurrencyConflictException`, posicionado antes do `case
+PersistenceException` (a ordem no `switch` importa — pattern matching por tipo com herança usa o
+primeiro `case` compatível), mapeado para 409 Conflict com mensagem acionável ("This record was
+changed by another operation. Reload the page and try again.").
+
+Assim como os demais tipos dessa família (documentado em `ProblemDetailsIntegrationTests.cs`), esta
+exceção não é alcançável pela suíte de integração HTTP existente — só ocorre dentro de uma chamada
+MediatR feita por um componente Razor sobre o circuito SignalR já estabelecido, nunca a partir de uma
+requisição HTTP crua nesta aplicação. Em vez de fabricar um endpoint artificial só para forçá-la (o
+que a documentação da suíte de integração já rejeita deliberadamente), a cobertura nova é um teste
+unitário direto contra `GlobalExceptionHandler.Map` (`GlobalExceptionHandlerTests.cs`, novo),
+habilitado por um novo `<InternalsVisibleTo Include="BeeDay.Web.Tests" />` em `BeeDay.Web.csproj` —
+mesmo padrão já em uso por `BeeDay.Infrastructure.csproj` para `BeeDay.Infrastructure.Tests`/
+`BeeDay.Web.Tests`/`BeeDay.E2E.Tests`. Um segundo teste (`Map_PlainPersistenceException_...`) prova
+que o `case PersistenceException` mais amplo continua correto para o caso não especializado.
+
+### 30.4 `BD30-F091`/`BD30-F092`/`BD30-F093` — gaps de observability confirmados, encaminhados
+
+**`BD30-F091`** (baixa): `CorrelationIdMiddleware` só existe na pipeline HTTP ASP.NET Core e seu
+`logger.BeginScope` só permanece ativo durante `await next(context)` daquela requisição HTTP
+específica — confirmado por leitura direta do middleware e por `builder.Logging.AddJsonConsole(...
+IncludeScopes = true)` em `Program.cs` (a infraestrutura de log já grava scopes quando presentes, não
+é uma questão de configuração faltando). Em Blazor Server isso cobre só a requisição HTTP inicial; a
+partir daí cada interação do usuário roda sobre o circuito SignalR já estabelecido, fora de qualquer
+nova invocação desse middleware — então logs emitidos por `LoggingBehavior`/`LoggingErrorBoundary`
+durante uma mutação disparada por clique **não carregam `CorrelationId`**, ao contrário de uma falha
+capturada por `GlobalExceptionHandler` na pipeline HTTP inicial. Mecanismo confirmado por leitura de
+código com confiança suficiente para registrar como achado (não é mais "não resolvido só por leitura
+estática" como constava na investigação inicial desta Sprint) — mas construir uma correlação com
+escopo de circuito (ex.: `CircuitHandler` gerando um id por circuito, propagado ao pipeline MediatR
+via serviço escopado a esse circuito) é mudança de arquitetura de observability genuína, fora do
+limite de uma auditoria. Não implementada especulativamente.
+
+**`BD30-F092`** (baixa): nenhuma configuração explícita de `CommandTimeout` existe em toda a base
+(`grep` por `CommandTimeout` em `src/` = zero resultados) — toda consulta/gravação SQL Server depende
+do default implícito do ADO.NET/EF Core (30s). Definir um valor explícito é decisão de política (qual
+latência é aceitável para o workload real do BeeDay?), não inventada por esta auditoria.
+
+**`BD30-F093`** (baixa): `LoggingBehavior.Handle` (Application) loga sucesso/falha de todo request
+MediatR sem nenhum `EventId` — inconsistente com a convenção já estabelecida em `WebEventIds.cs`
+(Web) para logs estruturados pesquisáveis por id. Application não tem hoje nenhuma convenção
+equivalente; criar uma agora para um único call site seria nova abstração sem uso comprovado além
+dele. Encaminhado como hygiene para 30.26, mesma Sprint já destino de outros achados de hygiene de
+baixo risco (`BD30-F087`/`BD30-F088`).
+
+### 30.5 Implementação
+
+- `src/BeeDay.Web/Diagnostics/WebEventIds.cs` — novo `CircuitError` (6101).
+- `src/BeeDay.Web/Components/DesignSystem/Feedback/LoggingErrorBoundary.cs` (novo) —
+  `ErrorBoundary` com `OnErrorAsync` sobrescrito para log.
+- `src/BeeDay.Web/Components/DesignSystem/Feedback/BeeDayErrorBoundary.razor`/`.razor.css` (novos) —
+  fallback de marca (`BD30-F065`).
+- `src/BeeDay.Web/Components/DesignSystem/DesignSystemResources.resx`/`.en-US.resx`/`.pt-BR.resx` —
+  3 chaves novas (`ErrorBoundaryTitle`/`ErrorBoundaryMessage`/`ErrorBoundaryReloadButton`).
+- `src/BeeDay.Web/Components/Layout/{MainLayout,PublicLayout,OnboardingLayout,EditorialLayout}.razor`
+  — `@Body` envolvido por `BeeDayErrorBoundary`.
+- `src/BeeDay.Web/Diagnostics/GlobalExceptionHandler.cs` — `case ConcurrencyConflictException`
+  (`BD30-F090`).
+- `src/BeeDay.Web/BeeDay.Web.csproj` — `InternalsVisibleTo` para `BeeDay.Web.Tests`.
+- `tests/BeeDay.Web.Tests/Components/Feedback/FeedbackComponentTests.cs` — 2 testes novos
+  (`BD30-F065`).
+- `tests/BeeDay.Web.Tests/Components/DesignSystem/CoreComponentContractTests.cs` — inventário
+  atualizado.
+- `tests/BeeDay.Web.Tests/Diagnostics/GlobalExceptionHandlerTests.cs` (novo) — 2 testes (`BD30-F090`).
+- `docs/epics/30-system-integrity/README.md` — nova Seção 30; `BD30-F065`/`BD30-F090` corrigidos;
+  `BD30-F091`/`BD30-F092`/`BD30-F093` encaminhados; `BD30-F014`/`BD30-F036` reconfirmados sem mudança.
+
+Nenhuma mudança de contrato público de Application, schema, migration. Nenhuma mutação de banco
+HMG/produção foi executada ou é necessária.
+
+### 30.6 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet build BeeDay.slnx` | PASS, 0 avisos, 0 erros |
+| `dotnet test tests/BeeDay.Web.Tests/...` (completo) | PASS, 879/879 |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PENDENTE (a executar antes da entrega) |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PENDENTE (a executar antes da entrega) |
+| `dotnet test BeeDay.slnx` (Debug, completo) | PENDENTE (a executar antes da entrega) |
+| `dotnet test BeeDay.slnx --configuration Release` | PENDENTE (a executar antes da entrega) |
+| `dotnet ef migrations has-pending-model-changes` | PENDENTE (a executar antes da entrega) |
+| `git diff --check` | PENDENTE (a executar antes da entrega) |
+
+### 30.7 Continuidade e entrega
+
+O achado mais significativo desta Sprint (`BD30-F065`) fechou uma lacuna estrutural real: até esta
+correção, qualquer exceção não tratada no render ou em um event handler de qualquer página
+interativa encerrava o circuito Blazor Server inteiro sem nenhuma tela de recuperação própria do
+produto — só o `ReconnectModal` genérico, tentando reconectar a um circuito que já não existe.
+`BD30-F090`, descoberto durante a implementação (não fazia parte do escopo original do achado), evita
+um conselho de erro literalmente incorreto ("tente novamente em breve" para um conflito de
+concorrência, onde repetir a mesma escrita falha sempre). Os três achados de observability
+remanescentes (`BD30-F091`/`BD30-F092`/`BD30-F093`) foram confirmados por evidência de código, não
+suposição, e corretamente não corrigidos especulativamente — cada um exigiria uma decisão de política
+(qual timeout é aceitável, vale a pena construir correlação com escopo de circuito) ou uma nova
+convenção sem uso comprovado além de um único call site. Nenhuma mutação de banco HMG/produção foi
+executada ou é necessária.

@@ -69,6 +69,44 @@ public sealed class FeedbackComponentTests
         Assert.Equal("Salvando alterações...", cut.Find("[role='status']").GetAttribute("aria-label"));
     }
 
+    // EPIC 30 Sprint 30.23 (BD30-F065): before BeeDayErrorBoundary existed, an unhandled exception
+    // anywhere in a page's render tree tore down the entire circuit — no in-app fallback existed at
+    // all. This proves the branded fallback renders instead of the exception propagating, and that
+    // it replaces (not merely supplements) the original content.
+    [Fact]
+    public void ErrorBoundary_WhenChildContentThrows_RendersTheBrandedFallbackInsteadOfCrashing()
+    {
+        using var context = new BunitContext().WithLocalization();
+
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<BeeDayErrorBoundary>(parameters => parameters
+            .Add(component => component.ChildContent, builder =>
+                throw new InvalidOperationException("Simulated render-time failure."))));
+
+        Assert.Equal("Something went wrong", cut.Find(".beeday-empty-state__title").TextContent);
+        Assert.Equal(
+            "This page ran into an unexpected problem. Reloading usually fixes it.",
+            cut.Find(".beeday-empty-state__description").TextContent);
+        Assert.Contains("Reload page", cut.Find(".beeday-error-boundary button").TextContent);
+        Assert.DoesNotContain("Simulated render-time failure", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ErrorBoundary_WithNoException_RendersChildContentUnchanged()
+    {
+        using var context = new BunitContext().WithLocalization();
+
+        var cut = context.Render<BeeDayErrorBoundary>(parameters => parameters
+            .Add(component => component.ChildContent, builder =>
+            {
+                builder.OpenElement(0, "p");
+                builder.AddContent(1, "normal content");
+                builder.CloseElement();
+            }));
+
+        Assert.Equal("normal content", cut.Find("p").TextContent);
+        Assert.Empty(cut.FindAll(".beeday-error-boundary"));
+    }
+
     [Fact]
     public void SkeletonRendersRequestedNumberOfLines()
     {

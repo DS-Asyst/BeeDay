@@ -12,4 +12,8 @@
     <ProjectReference Include="../BeeDay.Domain/BeeDay.Domain.csproj" />
     <ProjectReference Include="../BeeDay.Infrastructure/BeeDay.Infrastructure.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="BeeDay.Web.Tests" />
+  </ItemGroup>
 </Project>
