@@ -57,7 +57,7 @@ todo achado termine como `FIXED`, `VERIFIED` ou `ACCEPTED RISK`.
 | INV-006 | Persistência e migrations | um `BeeDayDbContext`, uma migration versionada e o model snapshot, em 3 arquivos de migration | `VERIFIED` | 30.7 |
 | INV-007 | Web e composição | 460 arquivos rastreados; 17 diretórios de Feature; nenhum acesso direto a `BeeDayDbContext` | `VERIFIED` | 30.8 |
 | INV-008 | Rotas e shell | 54 declarações `@page` encontradas diretamente em componentes Razor | `BASELINED` | 30.17 |
-| INV-009 | Fluxos funcionais | Identity/Auth/User, Dashboard, Habits, Tasks, Todos, Projects, Wallets, Experience, Onboarding e páginas públicas identificados | `BASELINED` | 30.4, 30.10–30.18 |
+| INV-009 | Fluxos funcionais | Identity/Auth/User, Dashboard, Habits, Tasks, Todos, Projects, Wallets, Experience, Onboarding e páginas públicas identificados | `MAPPED` (Identity/Auth `VERIFIED` na 30.10) | 30.4, 30.10–30.18 |
 | INV-010 | Testes | 198 arquivos rastreados em 5 projetos; baseline executado contra LocalDB e Chromium | `BASELINED` | 30.24 |
 | INV-011 | Workflows | 6 workflows: PR Validation, HMG Deployment, HMG Verification, Release Quality Gate, Production Deployment e Promotion Policy | `BASELINED` | 30.25 |
 | INV-012 | Scripts | 12 scripts PowerShell; todos passam pelo parser do PowerShell sem erro sintático | `BASELINED` | 30.25, 30.26 |
@@ -146,7 +146,7 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F015 | média | `docs/deployment/04-operations.md` ainda afirmava que não existiam deploy automatizado de HMG nem aplicação de migrations, além de registrar caminhos e fluxo de release obsoletos; os workflows e a execução real provam o fluxo CI artifact -> HMG Deployment -> HMG Verification | `FIXED` | 30.3 |
 | BD30-F016 | alta | o rollback de HMG restaura aplicação e configuração do App Pool, mas não desfaz migrations; embora `Deploy-BeeDay.ps1` implemente `-BackupDatabase`, `deploy-hmg.yml` não o habilita e não há evidência versionada de backup SQL externo correlacionado ao deploy | `OPEN` | 30.25 |
 | BD30-F017 | média | cada deploy cria backups de aplicação e dados em `C:\Apps\BeeDay-Backups`, mas não existe política versionada de retenção, expurgo ou restore automatizado de uma execução histórica | `OPEN` | 30.25 |
-| BD30-F018 | alta | a confirmação de e-mail tem cobertura robusta de Application/Integration para sucesso, token inválido/expirado/replay, reenvio e throttle, mas nenhuma jornada Chromium atravessa um link real até liberar o login | `OPEN` | 30.10 |
+| BD30-F018 | alta | a confirmação de e-mail tem cobertura robusta de Application/Integration para sucesso, token inválido/expirado/replay, reenvio e throttle, mas nenhuma jornada Chromium atravessa um link real até liberar o login | `FIXED` | 30.10 |
 | BD30-F019 | alta | não existe E2E de to-do; criação, edição, conclusão, reload e exclusão dentro do workspace são provados apenas parcialmente por componentes, Application e repositories | `OPEN` | 30.13 |
 | BD30-F020 | média | o E2E de projeto cria e abre o workspace, mas não prova mutações de to-do nem persistência do workspace após reload | `OPEN` | 30.14 |
 | BD30-F021 | média | os E2Es de conta cobrem perfil e idioma, mas não tema, alteração de senha nem recovery visível dos demais saves suportados | `OPEN` | 30.11 |
@@ -165,6 +165,10 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F035 | média | `BeeDayWebService` (20 métodos) e os call sites diretos de `ISender.Send` em `Wallet.razor` e nas páginas de Identity/Account/Onboarding nunca propagavam um `CancellationToken` real — toda chamada usava implicitamente `CancellationToken.None`, então navegar para longe ou fechar o circuito Blazor Server nunca cancelava uma mutação/query em andamento no servidor | `FIXED` | 30.8 |
 | BD30-F036 | baixa | `EmailConfirmationSent.razor`/`ResendConfirmation.razor`: `StartCountdown()` reatribui `_timer`/`_cts` sem descartar a instância anterior se chamado uma segunda vez antes do `Dispose()` do componente — hoje inalcançável em uso normal (o botão fica desabilitado enquanto `_secondsRemaining > 0`), portanto latente, não explorável | `OPEN` | 30.10 |
 | BD30-F037 | baixa | polimento de UX não-bloqueante: cards individuais do Dashboard (Habit/Task/Todo/Project) não têm `Disabled` vinculado a `State.IsBusy` (só o overlay global `BeeDayLoading` reflete ocupado — a proteção contra double-submit é real, aplicada em `DashboardState.ExecuteAsync`, mas o clique num segundo card fica sem feedback visual imediato); e `Wallet.razor.RefreshAfterMutationAsync` não chama `StateHasChanged()` uma segunda vez após zerar `_highlightBalance`, então o destaque visual do saldo pode não sumir até outro render não relacionado ocorrer | `OPEN` | 30.20 |
+| BD30-F038 | média | `Login.razor` mantinha uma implementação própria de `IsLocalPath` para sanitizar `ReturnUrl`, distinta e mais fraca que a canônica de `LoginDestinationResolver` — só rejeitava `//`, não a variante `/\` que navegadores normalizam para URL absoluta; a decisão de redirecionamento real em `POST /auth/login` já usava a canônica completa, então não era explorável via o próprio fluxo de login, mas era uma fronteira de segurança duplicada e incompleta | `FIXED` | 30.10 |
+| BD30-F039 | alta | `ConfirmEmail.razor` enviava `ConfirmEmailCommand` em `OnInitializedAsync`, que roda duas vezes sob o `@rendermode="InteractiveServer"` global (`<Routes>` em `App.razor`) — uma vez no prerender estático, outra na reconexão interativa. A primeira chamada confirmava o e-mail corretamente; a segunda, idêntica, era corretamente rejeitada pela proteção contra replay de token — mas essa segunda rejeição é o estado final que o navegador do usuário real exibe, então todo usuário real via "Link já utilizado" no primeiro clique legítimo em um link de confirmação real. Só detectável por um teste de navegador real (Chromium) — nenhum teste unitário/bUnit/integração via `HttpClient` exercita as duas passagens de render do Blazor Server | `FIXED` | 30.10 |
+| BD30-F040 | baixa | `User.SetActive` (que corretamente invalida sessões ao desativar) não é chamado por nenhum Command/handler alcançável — só por testes. Não há hoje nenhum fluxo de produto (autoatendimento ou administrativo) que desative uma conta; o comportamento de segurança em `OnValidatePrincipal` (rejeitar `!user.IsActive`) está implementado e testado, mas nunca é exercido por uma ação real de usuário | `OPEN` | 30.11 |
+| BD30-F041 | baixa | `MemoryIdentityRequestThrottle` e `LoginRateLimiterFactory` (`PartitionedRateLimiter`) são ambos em memória, por instância de processo — corretos para o único servidor IIS de HMG hoje, mas não compartilhados entre instâncias; uma futura implantação horizontalmente escalada (PRD em Azure, ainda não provisionada) contornaria o limite de taxa distribuindo requisições entre instâncias | `OPEN` | 30.22 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -909,3 +913,180 @@ apontava para nenhuma reestruturação de módulo, e a Sprint corretamente recon
 inventar trabalho. O único item estrutural de propriedade real desta Sprint (`BD30-F009`) foi
 fechado com evidência empírica (inspeção real do assembly compilado antes de escrever o guard),
 não suposição sobre o que "deveria" estar referenciado.
+
+## 17. Sprint 30.10 — Identity & Authentication Functional Audit
+
+### 17.1 Escopo e método
+
+Auditado com rigor de evidência explicitamente reforçado pelo owner sobre: cadastro e confirmação
+de e-mail, reenvio, login/logout, esquecimento/redefinição de senha, tokens expirados/inválidos/
+reutilizados, cookies de autenticação, invalidação de sessão após reset/troca de senha/
+desativação, rate limiting, fronteiras cross-user/cross-session, mensagens de falha localizadas,
+exposição de informação sensível em UI/respostas/logs, e integração de autenticação/autorização no
+host Web. `INV-009` (fatia Identity/Auth) passa a `VERIFIED`.
+
+Cada handler de Application (`IdentityHandlers.cs`, `AuthenticationHandlers.cs`), a implementação
+real de hashing de senha (`Pbkdf2PasswordService` — PBKDF2-SHA256, 120.000 iterações, salt de 16
+bytes aleatório, comparação em tempo constante via `CryptographicOperations.FixedTimeEquals`), de
+geração/hash de token (`SecureUserTokenService` — 256 bits de `RandomNumberGenerator`, SHA-256 antes
+de persistir), o throttle em memória (`MemoryIdentityRequestThrottle`), o rate limiter de login
+(`LoginRateLimiterFactory`), e a validação de cookie em `Program.cs` (`OnValidatePrincipal`, recarga
+do `User` a cada requisição autenticada, rejeição por `NameIdentifier`/`SessionVersion` ausentes ou
+divergentes, ou `!IsActive`) foram lidos integralmente nesta Sprint — não apenas referenciados a
+partir de documentação anterior.
+
+### 17.2 `BD30-F038` — guard de open-redirect duplicado e incompleto, corrigido
+
+`LoginDestinationResolver.IsLocalPath` (canônico, já testado contra `//` e `/\`) e uma segunda
+implementação local em `Login.razor` — usada para sanitizar `ReturnUrl` antes de embuti-lo no campo
+oculto do formulário de login — divergiam: a local só rejeitava `//`, nunca a variante `/\` que
+alguns navegadores normalizam para URL absoluta. A decisão real de redirecionamento em
+`POST /auth/login` já usa a canônica completa (`LoginDestinationResolver.Resolve`), então o próprio
+fluxo de login não era explorável por essa lacuna — mas era uma segunda fronteira de segurança,
+divergente e incompleta, sem motivo para existir separadamente. `Login.razor` agora reutiliza
+`LoginDestinationResolver.IsLocalPath` diretamente; a implementação local foi removida. Coberto
+pelos testes já existentes e exaustivos de `LoginDestinationResolverTests` (incluindo o caso
+`/\example.com`); os 13 testes de `LoginTests`/`LoginDestinationResolverTests` passam.
+
+### 17.3 `BD30-F039` — confirmação de e-mail duplamente enviada, mostrando "já usado" no primeiro clique legítimo
+
+Investigação dirigida por evidência: ao escrever o primeiro teste E2E real (Chromium) que
+efetivamente atravessa um link de confirmação (fechando `BD30-F018`), a jornada falhou
+consistentemente mostrando "Link já utilizado" em vez de "E-mail confirmado" — no primeiro e único
+uso do link, nunca reutilizado pelo teste.
+
+**Causa raiz confirmada:** `ConfirmEmail.razor` herda `@rendermode="InteractiveServer"` do
+`<Routes @rendermode="InteractiveServer" />` global em `App.razor`. Um componente interativo do
+Blazor Server ainda pré-renderiza estaticamente uma vez antes de o circuito interativo assumir —
+`OnInitializedAsync` roda nas duas passagens. A primeira (estática) enviava `ConfirmEmailCommand` e
+confirmava o e-mail corretamente; a segunda (interativa), idêntica, era corretamente rejeitada pela
+proteção contra replay de token de `UserToken.EnsureCanBeUsed` — mas é o resultado dessa SEGUNDA
+chamada que o navegador do usuário real efetivamente exibe (a passagem interativa substitui o HTML
+estático). Um usuário real, no seu primeiro e único clique legítimo, sempre veria a mensagem de link
+já usado — apesar de sua conta ter sido corretamente confirmada.
+
+Esse defeito era invisível a toda a cobertura existente: `EmailConfirmationIntegrationTests`
+invoca o handler MediatR diretamente (nunca duas vezes); `IdentityFlowLocalizationIntegrationTests`
+usa `HttpClient.GetStringAsync` (observa só a passagem estática, nunca a interativa). Nenhum teste
+de unidade, bUnit ou integração HTTP deste repositório simula a transição prerender-estático →
+interativo real do Blazor Server — só um navegador genuíno a exercita. Isso confirma exatamente a
+premissa de `BD30-F018`.
+
+**Correção mínima:** a validação de token ausente (sem efeito colateral, sem risco de replay)
+continua rodando nas duas passagens. Só o envio mutante de `ConfirmEmailCommand` foi adiado para a
+passagem interativa, via `if (!RendererInfo.IsInteractive) { return; }` — o padrão recomendado pela
+própria documentação da Microsoft para efeito colateral não-idempotente em `OnInitializedAsync` de
+componente pré-renderizado. A passagem estática passa a exibir o estado "Processing" padrão, que já
+é a UI de espera correta.
+
+**Efeito colateral no teste de integração existente:** `IdentityFlowLocalizationIntegrationTests.
+ConfirmEmail_WithExpiredToken_RendersLocalizedMessage_NotTheRawDomainText` dependia, sem saber, do
+próprio bug — sua asserção só passava porque a passagem estática (a única que `HttpClient` observa)
+chegava a executar o envio mutante antes da correção. Removido e substituído por
+`BeeDay.Web.Tests.Components.Identity.ConfirmEmailTests` (bUnit, com controle explícito de
+`RendererInfo.IsInteractive` via `TestContext.Renderer.SetRendererInfo`), que agora prova
+precisamente as duas passagens: a estática nunca envia o comando; a interativa envia, classifica e
+localiza corretamente a mensagem de expiração (en-US e pt-BR), sem nunca vazar o texto bruto da
+exceção de Domain.
+
+### 17.4 Evidência adicional coletada (sem achado de correção)
+
+- **Hashing de senha e token**: PBKDF2-SHA256/120k iterações/salt aleatório/comparação em tempo
+  constante para senha; 256 bits de CSPRNG + SHA-256 antes de persistir para token de uso único —
+  ambos apropriados às suas respectivas ameaças (senha de baixa entropia vs. token de alta
+  entropia). Zero achado.
+- **Uniformidade de mensagens de falha**: login rejeita conta inexistente, senha errada e e-mail
+  não confirmado com a mesma mensagem genérica (`"Invalid email or password."`); reenvio de
+  confirmação e esquecimento de senha completam silenciosamente para e-mail inexistente/já
+  confirmado/inativo — nenhum dos três vaza existência de conta por diferença de resposta. Zero
+  achado.
+- **Invalidação de sessão**: `ResetPasswordCommandHandler`, `ChangeCurrentUserPasswordCommandHandler`
+  e `User.SetActive(false)` chamam `InvalidateSessions()`; `OnValidatePrincipal` recarrega o `User`
+  e recompara `SessionVersion` a cada requisição autenticada (não just no login), então o efeito é
+  imediato na próxima requisição, não apenas na próxima sessão. Zero achado de correção — ver
+  `BD30-F040` para a lacuna de alcançabilidade de `SetActive`.
+- **Logs**: `Authentication.LoginFailed`/`LoginSucceeded`/`LogoutSucceeded` registram `UserId`/
+  `TraceId`, nunca e-mail/senha em texto puro; `DevelopmentEmailSender`/outros pontos de log de
+  e-mail já usam `EmailAddressLogMasking.Mask`. Mensagem técnica de exceção só aparece em
+  `IsDevelopment()` (`GlobalExceptionHandler`, já auditado na Sprint 30.8/documentado em
+  `docs/web/01-composition-root.md`). Zero achado novo.
+- **Localização**: `AuthenticationResources`/`IdentityResources` en-US/pt-BR têm exatamente as
+  mesmas chaves (16 e 54 respectivamente, diff nomes-a-nomes vazio). Zero achado.
+- **Cross-user/cross-session**: tokens de confirmação/reset resolvem exclusivamente pelo hash
+  armazenado, nunca por contexto do usuário autenticado — não há caminho para um token de um
+  usuário afetar outro. Coberto por `EmailConfirmationIntegrationTests`/`PasswordResetIntegrationTests`
+  já existentes. Zero achado novo.
+
+### 17.5 Achados menores/informativos (não corrigidos, encaminhados)
+
+- `BD30-F040` (nova, baixa): `User.SetActive` está implementado e testado (invalida sessão
+  corretamente), mas nenhum Command/handler de produto o alcança — não existe hoje autoatendimento
+  nem fluxo administrativo de desativação de conta. Encaminhada à Sprint 30.11 (Profile, Onboarding,
+  Account & Settings Audit) para decidir se é escopo de produto ausente ou aceito como está.
+- `BD30-F041` (nova, baixa): o throttle de identidade e o rate limiter de login são ambos em
+  memória, por instância de processo — corretos para a única instância IIS de HMG hoje, mas não
+  sobreviveriam a uma implantação horizontalmente escalada (PRD em Azure, ainda não provisionada).
+  Encaminhada à Sprint 30.22 (Security & Privacy Audit).
+
+### 17.6 Implementação
+
+- `src/BeeDay.Web/Components/Features/Authentication/Pages/Login.razor` — reutiliza
+  `LoginDestinationResolver.IsLocalPath`, remove a implementação local incompleta.
+- `src/BeeDay.Web/Components/Features/Identity/Pages/ConfirmEmail.razor` — adia o envio mutante de
+  `ConfirmEmailCommand` para a passagem interativa via `RendererInfo.IsInteractive`.
+- `tests/BeeDay.E2E.Tests/E2EWebApplicationFactory.cs` — captura de e-mail de desenvolvimento
+  habilitada (diretório descartável por instância), com busca de token filtrada pelo destinatário
+  real via o metadata `.json` companheiro (não apenas "o arquivo mais recente no diretório", que
+  seria uma corrida real dado que a fixture/factory é compartilhada entre todos os métodos de teste
+  da classe via `IClassFixture`).
+- `tests/BeeDay.E2E.Tests/AccountLifecycleTests.cs` — novo teste
+  `CreateAccount_ConfirmsEmailThroughARealLink_ThenUnlocksLogin`, fechando `BD30-F018`.
+- `tests/BeeDay.Web.Tests/Components/Identity/ConfirmEmailTests.cs` (novo) — cobertura bUnit das
+  duas passagens de render, substituindo a asserção de `IdentityFlowLocalizationIntegrationTests`
+  que dependia do bug.
+- `tests/BeeDay.Web.Tests/Integration/IdentityFlowLocalizationIntegrationTests.cs` — remove o teste
+  agora inexprimível via `HttpClient` puro, com nota explícita apontando para a cobertura
+  substituta.
+
+Nenhuma mudança de política de produto de identidade; nenhuma mudança de contrato público de
+Application/Domain; nenhuma mudança de schema.
+
+### 17.7 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| `dotnet test .../AccountLifecycleTests` (antes da correção do double-render) | reprodução determinística: FAIL — "Link já utilizado" em vez de "E-mail confirmado" no primeiro uso |
+| `dotnet test .../AccountLifecycleTests` (após a correção) | PASS, 5/5 |
+| `dotnet test .../LoginTests` + `LoginDestinationResolverTests` | PASS, 13/13 |
+| `dotnet test .../ConfirmEmailTests` (bUnit, novo) | PASS, 4/4 |
+| `dotnet test tests/BeeDay.Web.Tests/...` completo | PASS, 870/870 |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx` (1ª execução) | Debug/Application/Infrastructure/Web 100% PASS; E2E 188/194 — 6 falhas, todas `TimeoutException` de navegação/screenshot, em `Epic21ConsolidationTests`/`BrandTypographyTests`/`WalletTests`/`LoginExperienceTests` (nenhum arquivo tocado nesta Sprint); duração 14m43s (~2× o normal) |
+| `dotnet test BeeDay.slnx` (2ª execução, retry) | E2E 193/194 — 1 falha nova, `InstitutionalPagesTests`, mesmo padrão de timeout; nenhuma repetição das 6 falhas anteriores |
+| `dotnet test tests/BeeDay.E2E.Tests/...` (3ª execução, retry) | E2E 193/194 — 1 falha nova, `HomeTests`, mesmo padrão; nenhuma repetição |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.510/1.510 (117 Domain, 113 Application, 216 Infrastructure, 870 Web, 194 E2E) — execução limpa, 0 falhas |
+| `dotnet ef migrations has-pending-model-changes` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+
+**Classificação da falha E2E em Debug:** `TRANSIENT/FLAKY` (ambiente), não `CHANGE-CAUSED`. Três
+execuções, três conjuntos de testes diferentes falhando (nunca o mesmo teste duas vezes, nunca um
+teste desta Sprint), sempre `TimeoutException` de navegação/screenshot — o padrão de contenção
+LocalDB/Playwright já registrado em memória de projeto anterior a esta Sprint. A execução Release
+subsequente rodou 194/194 sem qualquer falha. Todo teste de Identity/Auth (`AccountLifecycleTests`,
+`LoginTests`, `LoginDestinationResolverTests`, `ConfirmEmailTests`) passou consistentemente nas três
+execuções Debug e na execução Release.
+
+### 17.8 Continuidade e entrega
+
+Esta Sprint reforça por que a auditoria com browser real é irrecusável: dois dos três achados
+corrigidos (`BD30-F038`, `BD30-F039`) eram invisíveis a qualquer teste unitário, bUnit padrão ou de
+integração HTTP já existente — só surgiram ao efetivamente construir o primeiro teste Chromium que
+atravessa um link de confirmação de ponta a ponta, exatamente o gap que `BD30-F018` apontava.
+`BD30-F039` em particular é um defeito de produção real e confirmado: todo usuário que já clicou em
+um link de confirmação de e-mail real via este código viu a mensagem incorreta de "link já usado" em
+vez de "e-mail confirmado", embora a confirmação em si tenha sido aplicada corretamente. Nenhuma
+mutação de banco HMG/produção foi executada ou é necessária para esta correção — o defeito era
+inteiramente de apresentação (dupla execução de um efeito colateral idempotente-mas-não-realmente),
+não de dado corrompido.

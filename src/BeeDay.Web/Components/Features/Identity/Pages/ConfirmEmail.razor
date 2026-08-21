@@ -102,6 +102,22 @@
             return;
         }
 
+        // This page's @rendermode (InteractiveServer, set globally on <Routes> in App.razor) still
+        // statically prerenders once before the interactive circuit takes over — OnInitializedAsync
+        // runs on BOTH passes. The missing-token check above is pure input validation and safe to
+        // run on both; sending ConfirmEmailCommand is not — doing so on the static pass would
+        // consume the token there, and the token-replay guard would then correctly (but confusingly,
+        // to a real user on their first legitimate click) reject the interactive pass's identical
+        // resend a moment later, showing "already used" instead of "confirmed". Deferring only this
+        // mutating call to the interactive pass is the pattern Microsoft's own docs recommend for a
+        // prerendered component with a non-idempotent OnInitializedAsync side effect — the static
+        // pass renders the default Processing state, exactly the "please wait" UI a real
+        // confirmation link should show first regardless.
+        if (!RendererInfo.IsInteractive)
+        {
+            return;
+        }
+
         try
         {
             await Sender.Send(new BeeDay.Application.Features.Identity.Commands.ConfirmEmailCommand(
