@@ -39,6 +39,60 @@ public sealed class AccountLifecycleTests(PlaywrightAppFixture fixture) : E2ETes
     }
 
     [Fact]
+    public async Task CreateAccount_ConfirmsEmailThroughARealLink_ThenUnlocksLogin()
+    {
+        // Closes BD30-F018: every prior journey either stops at "email confirmation pending" or
+        // seeds an already-confirmed user directly through the repository — none actually follows
+        // the link a real recipient would click, through the real browser, all the way to a
+        // successful sign-in gated on that confirmation.
+        var email = $"e2e-confirm-{Guid.NewGuid():N}@beeday.invalid";
+
+        await GotoAsync("/login");
+        await Page.GetByRole(AriaRole.Link, new() { Name = "Create account" }).ClickAsync();
+        await Expect(Page).ToHaveURLAsync(new Regex("/profile/create$"));
+        await Page.GetByLabel("Full name").FillAsync("E2E Confirm User");
+        await Page.GetByLabel("Email").FillAsync(email);
+        await Page.GetByLabel("Password", new() { Exact = true }).FillAsync(Password);
+        await Page.GetByLabel("Confirm password").FillAsync(Password);
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Continue" }).ClickAsync();
+        await Page.GetByLabel("Nickname").FillAsync($"e2e{Guid.NewGuid():N}"[..12]);
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Create account" }).ClickAsync();
+        await Expect(Page).ToHaveURLAsync(new Regex("/account/email-confirmation-sent"));
+
+        // Before confirming: login must still be rejected with the same generic message used for
+        // any other invalid-credentials case (never distinguishing "unconfirmed" from "wrong
+        // password" to an anonymous caller).
+        await SubmitLoginAsync(email, Password);
+        await Expect(Page.GetByText("Invalid email or password.")).ToBeVisibleAsync();
+
+        string? token = null;
+        for (var attempt = 0; attempt < 20 && token is null; attempt++)
+        {
+            token = await Fixture.Factory.TryGetCapturedTokenForRecipientAsync(email, Xunit.TestContext.Current.CancellationToken);
+            if (token is null)
+            {
+                await Task.Delay(100, Xunit.TestContext.Current.CancellationToken);
+            }
+        }
+
+        Assert.False(string.IsNullOrWhiteSpace(token));
+
+        await GotoAsync($"/account/confirm-email?token={Uri.EscapeDataString(token!)}");
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Email confirmed" })).ToBeVisibleAsync();
+
+        await Page.GetByRole(AriaRole.Link, new() { Name = "Sign In" }).ClickAsync();
+        await Expect(Page).ToHaveURLAsync(new Regex("/login"));
+        await Expect(Page.GetByText("Email confirmed. Sign in to continue.")).ToBeVisibleAsync();
+
+        await Page.GetByLabel("Email").FillAsync(email);
+        await Page.GetByLabel("Password").FillAsync(Password);
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
+        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        await Expect(Page).ToHaveURLAsync(new Regex("/onboarding/tutorial$"));
+    }
+
+    [Fact]
     public async Task Login_CompletesOnboarding_ReachesDashboard()
     {
         var email = $"e2e-login-{Guid.NewGuid():N}@beeday.invalid";
