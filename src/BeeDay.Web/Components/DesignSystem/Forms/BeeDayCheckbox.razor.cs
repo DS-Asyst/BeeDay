@@ -16,4 +16,6 @@ public partial class BeeDayCheckbox
     [Parameter] public EventCallback<bool> ValueChanged { get; set; }
     [Parameter, EditorRequired] public Expression<Func<bool>> ValueExpression { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string ValidationMessageId => $"{Id}-validation";
 }

@@ -195,15 +195,22 @@ atuais vivem em Domain.Tests e Application.Tests.
 | BD30-F065 | média | `/Error` (`Pages/Error.razor`) existe mas nunca é produzida por nenhum caminho de código — `GlobalExceptionHandler` sempre emite JSON `ProblemDetails` para qualquer exceção na pipeline HTTP, nunca redireciona para `/Error`. Separadamente, nenhum `<ErrorBoundary>` existe em toda a árvore de componentes (`grep` por `ErrorBoundary` em `src/BeeDay.Web` = zero resultados) — uma exceção não tratada dentro do render/event-handler de qualquer página interativa (ex.: um clique em `Wallet.razor`) encerra o circuito SignalR sem nenhuma tela de recuperação além do `ReconnectModal` genérico tentando reconectar a um circuito que já não existe. Ambos são gaps de arquitetura de resiliência a erros, não defeitos pontuais de rota — encaminhados à Sprint 30.23 (Resilience & Observability) em vez de corrigidos aqui, dado o risco de uma mudança especulativa na pipeline global de exceções sem o escopo dedicado que o tema merece | `OPEN` | 30.23 |
 | BD30-F066 | baixa | não existia teste E2E/integração provando o ciclo completo `returnUrl` (hit anônimo em rota protegida → redirect para `/login?returnUrl=...` → login → volta exatamente para a página originalmente pedida) nem uma URL genuinamente inexistente atingindo o `NotFoundPage` do Router real (só bUnit, que renderiza `NotFound.razor` direto). **Corrigido nesta Sprint**: `AuthorizationIntegrationTests.Anonymous_ProtectedPageRedirect_CarriesTheOriginalPathAsReturnUrl` (nova) prova o `returnUrl` correto no redirect anônimo; `LoginIntegrationTests.Login_WithLocalReturnUrl_RedirectsToTheOriginallyRequestedPage` (nova) completa o ciclo até o destino pós-login; `NavigationTests.NonexistentRoute_RendersTheNotFoundPage` (E2E, nova) prova a `BD30-F063` corrigida contra um navegador real | `FIXED` | 30.17 |
 | BD30-F067 | baixa | a subárvore `/experience-system` (21 rotas públicas de documentação) não tem nenhum ponto de entrada direto no header/footer/nav de topo — só é alcançável via múltiplos saltos a partir do link `/brand-guidelines` no rodapé institucional, depois pela navegação de pilar/tópico interna. Não é uma rota quebrada (toda a subárvore é alcançável), apenas discoverability fraca para uma área de 21 rotas. Decisão de produto/IA de navegação, não inventada por esta auditoria | `OPEN` | decisão do proprietário |
-| BD30-F068 | baixa | os dois wizards de onboarding (`Tutorial.razor`, `CreateProfile.razor`) mantêm o passo atual fora da URL (campo privado / `ProfileCreationState` escopado por DI, nenhum query string) — padrão consistente entre os dois, não um defeito isolado. Voltar/avançar no navegador sai do wizard inteiro em vez de andar entre os passos, comportamento previsível mas não documentado como decisão. Fora do escopo de roteamento propriamente dito (nenhuma rota quebra ou produz 404); observação de arquitetura de interação encaminhada a uma Sprint de UX | `OPEN` | 30.20 |
+| BD30-F068 | baixa | os dois wizards de onboarding (`Tutorial.razor`, `CreateProfile.razor`) mantêm o passo atual fora da URL (campo privado / `ProfileCreationState` escopado por DI, nenhum query string) — padrão consistente entre os dois, não um defeito isolado. Voltar/avançar no navegador sai do wizard inteiro em vez de andar entre os passos, comportamento previsível mas não documentado como decisão. Fora do escopo de roteamento propriamente dito (nenhuma rota quebra ou produz 404); observação de arquitetura de interação encaminhada a uma Sprint de UX. **Reverificado na Sprint 30.20**: ainda preciso, sem mudança. Tornar o passo refletido na URL é trabalho de arquitetura de interação genuíno (query string, guards de navegação, testes), fora do limite de uma auditoria; reatribuído para decisão do proprietário | `OPEN` | decisão do proprietário |
 | BD30-F069 | baixa | `/terms`, `/privacy` e `/community-guidelines` não contêm nenhum texto legal real — cada uma renderiza só um aviso proeminente de "revisão pendente" (`LegalPendingReview`) mais uma lista de títulos de seção sem corpo. Comportamento deliberado, testado (E2E e bUnit) e documentado no próprio código como divulgação honesta em vez de cláusulas inventadas — não é um defeito de engenharia. Registrado nesta Sprint exatamente como o critério de aceite exige: item pendente de revisão jurídica/aprovação do proprietário, nenhum texto legal foi inventado ou proposto por esta auditoria | `OPEN` | decisão do proprietário |
 | BD30-F070 | baixa | `RepresentativeRoutesRenderWithoutHorizontalOverflowOnMobile` cobria 9 das 12 rotas institucionais em viewport mobile — `/brand-guidelines` (a rota estruturalmente mais complexa da família, única que embute a navegação de pilar/tópico do Experience System) nunca tinha sido testada especificamente em mobile. **Corrigido nesta Sprint**: `/brand-guidelines` adicionada ao teste. `/privacy` e `/community-guidelines` foram deliberadamente mantidas fora — compartilham o mesmo template exato de `/terms` (já coberto), mesmo padrão de amostragem representativa já usado em `MobileEditorialHeaderStaysUsableWithoutHorizontalOverflowOnTheDenseAboutUsFamily` (testa só `/mission` pela família "About us") | `FIXED` | 30.18 |
-| BD30-F071 | baixa | a cobertura E2E de troca de idioma ao vivo (via seletor de idioma real) para o `beeday Experience System` existe só para a página raiz (`/experience-system`) — as outras 20 rotas da subárvore dependem só de correção testada em nível de `resx`/componente, nunca exercitadas com o seletor real de idioma em navegador. Baixo risco (mesmo padrão resx comprovadamente correto em todas), mas gap de cobertura real. Encaminhado como expansão opcional de cobertura, não defeito | `OPEN` | 30.20 |
+| BD30-F071 | baixa | a cobertura E2E de troca de idioma ao vivo (via seletor de idioma real) para o `beeday Experience System` existe só para a página raiz (`/experience-system`) — as outras 20 rotas da subárvore dependem só de correção testada em nível de `resx`/componente, nunca exercitadas com o seletor real de idioma em navegador. Baixo risco (mesmo padrão resx comprovadamente correto em todas), mas gap de cobertura real. Encaminhado como expansão opcional de cobertura, não defeito. **Reatribuído na Sprint 30.20**: esta Sprint auditou superfícies autenticadas; expansão de cobertura E2E de superfícies públicas é melhor encaixada na Sprint dedicada a completude de testes | `OPEN` | 30.24 |
 | BD30-F072 | baixa | drift de token de cor confirmado em 2 pontos: `CreateProfile.razor.css` referenciava `var(--beeday-color-danger-text, #b3261e)` — um custom property nunca definido em `variables.css` em lugar nenhum, então o fallback hardcoded `#b3261e` era sempre o valor real aplicado, divergindo silenciosamente do token canônico `--beeday-color-danger` (`#d33b46`) usado em todo o resto do app; `feedback.css` usava hex bruto (`#e2f5e9`/`#fde8e8`) quase-idêntico, mas não igual, aos tokens já existentes `--beeday-color-success-soft`/`--beeday-color-danger-soft` para o fundo dos ícones de toast. **Corrigido nesta Sprint**: ambos convergidos para os tokens canônicos existentes | `FIXED` | 30.19 |
 | BD30-F073 | baixa | `@keyframes beeday-spin` definido de forma idêntica em dois stylesheets globais diferentes (`design-system.css` e `feedback.css`), ambos carregados em toda página — duplicação sem propósito, cada consumidor (`.beeday-button__loader`, spinner de `BeeDayLoading`) referenciando por nome, então qualquer uma das duas definições já bastava. **Corrigido nesta Sprint**: consolidado em uma única definição | `FIXED` | 30.19 |
 | BD30-F074 | baixa | `BeeDayCardMenu` (mais `CardActionMenuCoordinator`/`CardMenuPlacement`) tinha zero consumidores de produção em todo `src/` — confirmado por busca completa por `<BeeDayCardMenu`. Superado por um refactor anterior que tornou os cards inteiros clicáveis para editar (commit `05a7ad3`), mas o componente, seu serviço de coordenação, sua geometria de posicionamento e dois arquivos de teste dedicados nunca foram removidos. **Corrigido nesta Sprint**: componente, serviço, geometria, os dois arquivos de teste dedicados, o registro de DI em `Program.cs` e as 3 chaves `resx` exclusivas (`CardMenu*`) removidos; `CoreComponentContractTests` (inventário de componentes e contagem de controles nativos) atualizado para refletir a remoção | `FIXED` | 30.19 |
 | BD30-F075 | baixa | CSS morta remanescente em `cards.css`, ligada ao mesmo padrão de interação superado pela `BD30-F074`: `.activity-card__menu`, `.habit-card__menu`, `.activity-card--menu-open`, `.habit-card--menu-open`, `.activity-card__actions` — confirmado por busca de marcação que nenhum desses seletores casa com qualquer elemento hoje. Tentativa de remoção iniciada nesta Sprint e revertida ao descobrir que o escopo real é maior do que o inicialmente visível — pelo menos 6 localizações separadas no arquivo, algumas como regras isoladas e outras entrelaçadas em grupos de seletores separados por vírgula que também contêm seletores ainda vivos (ex.: `.activity-card__checkbox, .habit-card__score-button, .activity-card__menu, .habit-card__menu { ... }`). Remover parcialmente sob pressão de tempo de uma Sprint de auditoria é mais arriscado do que documentar e encaminhar para uma limpeza dedicada com verificação visual adequada | `OPEN` | 30.26 |
 | BD30-F076 | baixa | regra global obsoleta `.beeday-hero__eyebrow` em `design-system.css` já causou uma falha real de WCAG-AA (capturada pelo scan axe-core do repositório) por conflitar com o CSS isolado de `BeeDayHero.razor.css` em superfícies COR0-COR9 multi-cor; corrigida à época via um truque de especificidade (`color: inherit` no CSS isolado, que tecnicamente ganha da regra global) em vez de remover/escopar a regra obsoleta. Funcionalmente correta hoje, mas frágil — depende da ordem de cascata entre dois arquivos permanecer exatamente como está, em vez da regra obsoleta simplesmente não existir mais. Já autodocumentada em comentário no código; registrada aqui para acompanhamento formal | `OPEN` | 30.26 |
+| BD30-F077 | alta | regressão confirmada de touch target: o comentário e os valores de `cards.css` (`"Sprint 21.14: activity actions retain a 44px target"`) declaram a intenção explícita de checkbox/badge de Task/Todo/Project em `2.75rem` (44px, alvo WCAG comum), adicionados no commit `698e157` (2026-08-13) logo após a definição base do seletor — mas um bloco "compact layout" mais antigo (commit `5532d327`, 2026-07-25) já existia mais adiante no mesmo arquivo redeclarando os mesmos seletores para `1.55rem` (~24.8px) e a coluna de grid para `2.35rem`, sem nenhuma relação com acessibilidade em seu próprio comentário. Como CSS resolve por ordem de código-fonte entre seletores de especificidade igual, a regra mais recente (e com intenção de acessibilidade documentada) perdia silenciosamente para a mais antiga, meramente por estar posicionada antes no arquivo. Habit não é afetado (nunca teve um fix de 44px documentado). **Corrigido nesta Sprint**: removida a redeclaração conflitante de `grid-template-columns`/`width`/`height` para `.activity-card`/`.activity-card__checkbox`/`.activity-card__project-status` no bloco "compact layout", deixando o valor de 44px já declarado (e já correto) prevalecer; `.habit-card__score-button` mantido intocado (nenhuma intenção de 44px jamais registrada para ele). Verificado visualmente via captura de tela real e por toda a suíte E2E de Habit/Task/Todo/Project/Shell (31/31), sem regressão de layout | `FIXED` | 30.20 |
+| BD30-F078 | baixa | `BeeDaySortable.razor` aplicava um `aria-label` literal em inglês (`"Hold and drag this card to reorder it. Use the arrow keys when focused."`) a cada item arrastável de Habits/Tasks/Todos/Projects em `/daily`, em ambas as culturas — o `AriaLabel` de nível de lista já era corretamente localizado por cada consumidor, só o rótulo por item estava hardcoded no componente compartilhado. **Corrigido nesta Sprint**: novo parâmetro `ItemAriaLabel` com valor padrão em inglês (mesmo contrato de `AriaLabel`), conectado a uma nova chave `resx` (`ReorderItemAriaLabel`) em `DashboardResources`, usada nos 4 pontos de uso em `Home.razor` | `FIXED` | 30.20 |
+| BD30-F079 | média | nenhum dos 5 componentes de formulário compartilhados (`BeeDayInput`, `BeeDayTextArea`, `BeeDaySelect`, `BeeDayDateInput`, `BeeDayCheckbox`) associava programaticamente seu controle à própria mensagem de validação (`BeeDayValidationMessage`) — sem `aria-describedby`, um usuário de leitor de tela que navega de volta a um campo já inválido não recebe nenhum sinal da causa, violando o padrão WCAG 4.1.2/3.3.1 de "identificação de erro associada programaticamente ao controle", já implementado corretamente para o próprio `role="alert"` da mensagem. Afeta todos os 6 editores de atividade/tag/transação, já que todos compartilham esses 5 componentes. **Corrigido nesta Sprint**: `BeeDayValidationMessage` ganha um `Id` opcional aplicado a um novo wrapper em torno das mensagens; cada um dos 5 componentes de formulário passa `aria-describedby="{Id}-validation"` para seu controle nativo e `Id="{Id}-validation"` para `BeeDayValidationMessage`, sempre que `ShowValidationMessage` está ativo. Novo teste bUnit (`InputAssociatesItsValidationMessageViaAriaDescribedby`) prova a associação, incluindo a atualização em tempo real quando uma mensagem de validação aparece | `FIXED` | 30.20 |
+| BD30-F080 | baixa | `ProjectWorkspace.razor` — a superfície autenticada estruturalmente mais complexa depois do Wallet, com sua própria lista de To-Dos e barra de progresso — não tinha nenhuma cobertura E2E de overflow horizontal em viewport estreito, ao contrário de `/daily`, `/wallet`, `/account` e as rotas de onboarding. **Corrigido nesta Sprint**: novo teste `ProjectWorkspace_RendersWithoutHorizontalOverflowOnMobile` (390×844), que passou de primeira, confirmando ausência de overflow real | `FIXED` | 30.20 |
+| BD30-F081 | média | o drawer de navegação mobile (`MobileSidebar.razor`) já movia o foco para seu próprio botão de fechar ao abrir, mas nada devolvia o foco ao gatilho (`MobileHeader`'s hamburger) ao fechar — via Escape, clique no backdrop, ou o próprio botão de fechar —, deixando o foco de teclado/leitor de tela perdido em `<body>`. Diferente dos diálogos baseados em `EditorModalShell`/`DialogFocusScope` (confirmados corretos nesta Sprint), o drawer nunca usou esse primitivo compartilhado. **Corrigido nesta Sprint**: `MobileHeader.razor` ganha uma `ElementReference` para seu próprio botão e devolve o foco a ele quando `IsNavOpen` transiciona de `true` para `false` — espelhando exatamente o padrão já usado por `MobileSidebar` para a transição inversa (abrir). Novo teste E2E (`Mobile_ClosingTheDrawerReturnsFocusToTheHamburgerTrigger`) prova o foco restaurado após Escape em um navegador real | `FIXED` | 30.20 |
+| BD30-F082 | baixa | o menu de criação de atividade (`ActivityFilterBar.razor`, `role="menu"`) não tem nenhum tratamento de teclado além de Tab/Enter alcançarem os itens — sem Escape para fechar, sem navegação por setas (que a própria semântica ARIA de `role="menu"` implica), sem dispensa por clique fora, e não está conectado a `DialogFocusScope` como todo outro overlay do app. Não é um bloqueio duro (Tab/Enter continuam funcionando), mas não cumpre o contrato de interação que seu próprio papel ARIA anuncia. Corrigir com segurança exigiria adicionar suporte a `ElementReference`/foco em `BeeDayButton` (componente compartilhado do Design System) ou um helper de foco via JS interop — infraestrutura não construída nesta Sprint; um meio-conserto (só Escape, sem devolução de foco) foi deliberadamente descartado por poder deixar o foco pior do que está hoje. Trabalho de engenharia represado, não decisão de produto | `OPEN` | decisão do proprietário |
+| BD30-F083 | baixa | existe uma alternativa de teclado real para reordenar Habits/Tasks/Todos/Projects (`beeday-sortable.js`, `ArrowUp`/`ArrowDown` no item focado, mesmo caminho `NotifyReorderAsync` do arrasto por mouse), mas nenhum teste E2E em toda a suíte exercita isso (`grep` por `ArrowUp\|ArrowDown\|Reorder` em `tests/BeeDay.E2E.Tests` não encontra nenhum). Gap de cobertura real para uma capacidade de acessibilidade já implementada e correta | `OPEN` | 30.24 |
 
 Os achados acima não foram corrigidos na Sprint 30.1 porque pertencem explicitamente às Sprints
 proprietárias. Nenhum problema descoberto foi omitido ou expandido silenciosamente para fora do
@@ -2525,3 +2532,145 @@ corrigir ainda. Os dois achados de UI ausente encaminhados por Sprints anteriore
 `BD30-F058`) foram reverificados uma última vez e reatribuídos à decisão do proprietário — a
 auditoria já cumpriu seu papel investigativo nesses dois casos. Nenhuma mutação de banco HMG/produção
 foi executada ou é necessária.
+
+## 27. Sprint 30.20 — UX, Accessibility, Responsive & Localization Audit
+
+### 27.1 Escopo e método
+
+Auditoria de UX/acessibilidade/responsividade/localização nas superfícies **autenticadas** do
+produto (Daily, Habits/Tasks/Todos/Projects, Wallet, Account/Settings, Onboarding) — as superfícies
+públicas/institucionais já foram cobertas na Sprint 30.18, e a consistência do Design System em
+nível de componente já foi auditada na Sprint 30.19. Esta Sprint audita jornadas reais: operabilidade
+por teclado, ordem/visibilidade/restauração de foco, rotulagem semântica, tamanho de alvos de toque,
+zoom/overflow, `prefers-reduced-motion`, acessibilidade de diálogos/overlays, e correção de
+localização `pt-BR`/`en-US`.
+
+Seis achados encaminhados por Sprints anteriores foram reverificados: `BD30-F037`, `BD30-F047`,
+`BD30-F055`, `BD30-F057`, `BD30-F068`, `BD30-F071` — ver §27.6.
+
+Esta Issue também referencia o "EPIC 30 Remaining Sprint Global Execution Contract" não encontrado
+em nenhum lugar do repositório (mesma situação já documentada nas Sprints 30.18/30.19) — seguido o
+`CLAUDE.md` vigente e o padrão já demonstrado nas Sprints anteriores desta EPIC.
+
+### 27.2 Achados confirmados — corretos, sem defeito
+
+- **Restauração de foco em diálogos**: todos os diálogos baseados em `EditorModalShell`/
+  `BeeDayConfirmDialog`/`BeeDayFeedbackModal`/`ProjectWorkspace` (via `DialogFocusScope`) restauram
+  o foco corretamente ao trigger original ao fechar — já provado ponta a ponta por
+  `InteractiveComponentsTests.NestedDialogsTrapKeyboardAndRestoreFocusAcrossEscapeClosures`, incluindo
+  o caso de borda de um diálogo sem filhos focáveis e o trigger removido antes da restauração.
+- **`prefers-reduced-motion`**: respeitado globalmente (`app.css`) e em 32 arquivos CSS adicionais,
+  incluindo um kill-switch universal de duração de animação/transição em `animations.css`.
+- **Alternativa de teclado para drag-and-drop**: `beeday-sortable.js` implementa `ArrowUp`/
+  `ArrowDown` no item focado, usando o mesmo caminho `NotifyReorderAsync` do arrasto por mouse — uma
+  capacidade real, não apenas mouse/touch (cobertura de teste ausente, ver `BD30-F083`).
+- **Chaves `resx`**: nenhuma divergência encontrada entre os pares neutro/`en-US`/`pt-BR` em 9
+  famílias de recursos de área autenticada (531 chaves comparadas no total), nenhum valor vazio.
+- **Independência de estado de circuito**: mecânica de cultura (`AuthenticatedCultureSynchronizer`)
+  inalterada desde a Sprint 30.4, confirmando `BD30-F047` ainda precisa sem drift adicional.
+
+### 27.3 `BD30-F077` — regressão de touch target, corrigida (achado mais significativo)
+
+`cards.css` continha uma correção de 44px (`2.75rem`) para o checkbox de Task/Todo/Project,
+adicionada em 2026-08-13 com comentário explícito referenciando um alvo de toque acessível — mas um
+bloco "compact layout" mais antigo (2026-07-25), posicionado mais adiante no mesmo arquivo,
+redeclarava os mesmos seletores para `1.55rem` (~24.8px) sem nenhuma menção a acessibilidade. Como
+CSS resolve por ordem de código-fonte entre seletores de especificidade igual, a intenção mais
+recente e documentada perdia silenciosamente para a mais antiga. Confirmado via `git log -L` em
+ambos os blocos, cronologia das duas datas de commit, e leitura completa do arquivo.
+
+**Corrigido**: removida a redeclaração conflitante de `grid-template-columns`/`width`/`height` para
+os seletores afetados, deixando a regra de 44px já existente prevalecer. `.habit-card__score-button`
+mantido intocado — nunca teve um fix de 44px documentado, então nenhuma regressão foi confirmada
+para ele especificamente. Verificado visualmente via captura de tela de um teste E2E temporário
+(removido após a verificação) e por toda a suíte E2E de Habit/Task/Todo/Project/Shell (31/31, sem
+regressão de overflow ou layout).
+
+### 27.4 `BD30-F079` — mensagens de validação sem associação `aria-describedby`, corrigido
+
+Nenhum dos 5 componentes de formulário compartilhados associava seu controle à própria mensagem de
+validação. `BeeDayValidationMessage` ganhou um `Id` opcional envolvendo suas mensagens; cada um dos
+5 componentes (`BeeDayInput`, `BeeDayTextArea`, `BeeDaySelect`, `BeeDayDateInput`, `BeeDayCheckbox`)
+agora passa `aria-describedby`/`Id` consistentes, cobrindo todos os 6 editores de atividade/tag/
+transação que os reutilizam. Novo teste bUnit prova a associação inclusive na atualização em tempo
+real quando uma mensagem de validação aparece.
+
+### 27.5 `BD30-F078`/`BD30-F080`/`BD30-F081` — demais achados corrigidos
+
+- `BD30-F078`: `aria-label` por item hardcoded em inglês no componente de reordenação compartilhado
+  (`BeeDaySortable.razor`), afetando as 4 listas de `/daily` em ambas as culturas — corrigido com um
+  novo parâmetro `ItemAriaLabel` localizado.
+- `BD30-F080`: `ProjectWorkspace` (superfície autenticada mais complexa depois do Wallet) sem
+  nenhuma cobertura E2E de overflow mobile — novo teste fechou o gap, passou de primeira.
+- `BD30-F081`: o drawer de navegação mobile nunca devolvia o foco ao seu gatilho (hamburger) ao
+  fechar — `MobileHeader.razor` corrigido para espelhar o padrão de foco já usado por
+  `MobileSidebar` na direção inversa; novo teste E2E prova a restauração após Escape em navegador
+  real.
+
+### 27.6 Reverificação de achados encaminhados
+
+Todos os seis reconfirmados sem alteração desde suas Sprints originais: `BD30-F037` (Disabled não
+vinculado a `IsBusy`; segundo `StateHasChanged()` ausente em `Wallet.razor`), `BD30-F047` (precedência
+de cookie de cultura, decisão do proprietário pendente), `BD30-F055` (`Todo.DueDate` sem efeito
+funcional), `BD30-F057` (animação antes da requisição em `DeleteCurrentEditorItemAsync`). `BD30-F068`
+(estado de passo do wizard fora da URL) e `BD30-F071` (cobertura de troca de idioma do Experience
+System) foram reatribuídos — ver §6 — por serem trabalho de arquitetura/feature genuíno fora do
+limite de uma Sprint de auditoria, e por não haver mais nenhuma Sprint de auditoria restante que
+naturalmente os absorva além de decisão do proprietário ou da Sprint de completude de testes.
+
+### 27.7 Achados menores não corrigidos, encaminhados
+
+`BD30-F082` (menu de criação de atividade sem Escape/clique-fora/navegação por setas): corrigir com
+segurança exigiria adicionar suporte a `ElementReference`/foco em `BeeDayButton` (componente
+compartilhado) ou um helper de foco via JS interop — infraestrutura não construída nesta Sprint. Um
+meio-conserto (só Escape, sem devolução de foco) foi deliberadamente descartado por poder deixar o
+foco pior do que hoje. `BD30-F083` (nenhum teste E2E para a reordenação por teclado já implementada).
+
+### 27.8 Implementação
+
+- `src/BeeDay.Web/wwwroot/css/cards.css` — conflito de touch target removido (`BD30-F077`).
+- `src/BeeDay.Web/Components/DesignSystem/Forms/BeeDayInput.razor`/`.razor.cs`,
+  `BeeDayTextArea.razor`/`.razor.cs`, `BeeDaySelect.razor`/`.razor.cs`,
+  `BeeDayDateInput.razor`/`.razor.cs`, `BeeDayCheckbox.razor`/`.razor.cs`,
+  `BeeDayValidationMessage.razor`/`.razor.cs` — `aria-describedby` (`BD30-F079`).
+- `src/BeeDay.Web/Components/Behaviors/DragDrop/BeeDaySortable.razor`/`.razor.cs`,
+  `src/BeeDay.Web/Components/Features/Dashboard/Pages/Home.razor`,
+  `DashboardResources.resx`/`.en-US.resx`/`.pt-BR.resx` — `ItemAriaLabel` (`BD30-F078`).
+- `src/BeeDay.Web/Components/Layout/MobileHeader.razor` — restauração de foco (`BD30-F081`).
+- `tests/BeeDay.Web.Tests/Components/Forms/BeeDayFormTests.cs` — novo teste (`BD30-F079`).
+- `tests/BeeDay.E2E.Tests/ProjectLifecycleTests.cs` — novo teste (`BD30-F080`).
+- `tests/BeeDay.E2E.Tests/NavigationTests.cs` — novo teste (`BD30-F081`).
+- `docs/epics/30-system-integrity/README.md` — nova Seção 27; achados `BD30-F077`–`BD30-F083`;
+  `BD30-F068`/`BD30-F071` reatribuídos.
+
+Nenhuma mudança de contrato público de Application, schema, migration. Nenhuma mutação de banco
+HMG/produção foi executada ou é necessária.
+
+### 27.9 Regressão e quality gates locais
+
+| Comando | Resultado observado |
+|---|---|
+| captura de tela de verificação visual (teste E2E temporário, removido) | checkbox de Task renderiza em 44px, sem overflow ou quebra de layout |
+| `dotnet test tests/BeeDay.Web.Tests/...` (completo) | PASS, 875/875 |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter HabitAndTaskTests\|ShellResponsiveLayoutTests\|TodoLifecycleTests\|ProjectLifecycleTests` | PASS, 35/35 |
+| `dotnet test tests/BeeDay.E2E.Tests/... --filter NavigationTests` | PASS, 9/9 |
+| `dotnet format BeeDay.slnx --verify-no-changes` | PASS, exit 0 |
+| `dotnet build BeeDay.slnx --configuration Release --warnaserror` | PASS, 0 warnings, 0 errors |
+| `dotnet test BeeDay.slnx` (Debug, completo) | PASS, 1.550/1.550 (121 Domain, 119 Application, 216 Infrastructure, 875 Web, 219 E2E) — execução limpa, 0 falhas |
+| `dotnet test BeeDay.slnx --configuration Release` | PASS, 1.550/1.550 (121 Domain, 119 Application, 216 Infrastructure, 875 Web, 219 E2E) — execução limpa, 0 falhas |
+| `dotnet ef migrations has-pending-model-changes` | PASS, nenhuma mudança pendente no modelo |
+| `git diff --check` | PASS |
+
+### 27.10 Continuidade e entrega
+
+O achado mais significativo desta Sprint (`BD30-F077`) é uma regressão real e silenciosa: uma
+correção de acessibilidade explicitamente documentada e commitada em agosto foi derrotada por uma
+regra CSS mais antiga posicionada mais adiante no arquivo, sem que nenhum teste jamais tivesse
+verificado o tamanho computado do elemento. Cinco achados foram corrigidos com evidência completa e
+verificação visual/E2E; dois foram encaminhados com justificativa precisa de por que corrigi-los
+agora seria mais arriscado do que documentá-los (`BD30-F082`, que exigiria infraestrutura nova de
+foco em um componente compartilhado) ou fora do escopo de consolidação (`BD30-F083`, cobertura de
+teste). Seis achados encaminhados por Sprints anteriores foram reverificados; dois exigiam trabalho
+de arquitetura genuíno e foram reatribuídos para decisão do proprietário ou para a Sprint de
+completude de testes, em vez de permanecerem indefinidamente presos a uma Sprint de auditoria que já
+cumpriu seu papel investigativo. Nenhuma mutação de banco HMG/produção foi executada ou é necessária.

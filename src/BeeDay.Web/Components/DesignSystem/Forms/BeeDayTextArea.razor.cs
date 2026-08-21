@@ -22,4 +22,6 @@ public partial class BeeDayTextArea
     [Parameter] public EventCallback<string?> ValueChanged { get; set; }
     [Parameter, EditorRequired] public Expression<Func<string?>> ValueExpression { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string ValidationMessageId => $"{Id}-validation";
 }

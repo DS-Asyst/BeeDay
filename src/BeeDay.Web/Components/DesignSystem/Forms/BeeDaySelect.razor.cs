@@ -18,4 +18,6 @@ public partial class BeeDaySelect<TValue>
     [Parameter, EditorRequired] public Expression<Func<TValue>> ValueExpression { get; set; } = default!;
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string ValidationMessageId => $"{Id}-validation";
 }

@@ -36,6 +36,7 @@ else if (State.Data?.Profile.HasProfile == true)
                         <BeeDaySortable ItemIds="@habits.Select(item => item.Id).ToList()"
                                          CollectionKey="habits"
                                          AriaLabel="@Localizer["ReorderHabitsAriaLabel"]"
+                                         ItemAriaLabel="@Localizer["ReorderItemAriaLabel"]"
                                          RemovingItemId="@State.RemovingItemId"
                                          OnReorder="State.ReorderHabitsAsync">
                             <ItemTemplate Context="itemId">
@@ -70,6 +71,7 @@ else if (State.Data?.Profile.HasProfile == true)
                         <BeeDaySortable ItemIds="@activeTasks.Select(item => item.Id).ToList()"
                                          CollectionKey="tasks"
                                          AriaLabel="@Localizer["ReorderActiveTasksAriaLabel"]"
+                                         ItemAriaLabel="@Localizer["ReorderItemAriaLabel"]"
                                          RemovingItemId="@State.RemovingItemId"
                                          OnReorder="State.ReorderTasksAsync">
                             <ItemTemplate Context="itemId">
@@ -109,6 +111,7 @@ else if (State.Data?.Profile.HasProfile == true)
                         <BeeDaySortable ItemIds="@activeTodos.Select(item => item.Id).ToList()"
                                          CollectionKey="todos"
                                          AriaLabel="@Localizer["ReorderActiveTodosAriaLabel"]"
+                                         ItemAriaLabel="@Localizer["ReorderItemAriaLabel"]"
                                          RemovingItemId="@State.RemovingItemId"
                                          OnReorder="State.ReorderTodosAsync">
                             <ItemTemplate Context="itemId">
@@ -154,6 +157,7 @@ else if (State.Data?.Profile.HasProfile == true)
                         <BeeDaySortable ItemIds="@activeProjects.Select(item => item.Id).ToList()"
                                          CollectionKey="projects"
                                          AriaLabel="@Localizer["ReorderActiveProjectsAriaLabel"]"
+                                         ItemAriaLabel="@Localizer["ReorderItemAriaLabel"]"
                                          RemovingItemId="@State.RemovingItemId"
                                          OnReorder="State.ReorderProjectsAsync">
                             <ItemTemplate Context="itemId">

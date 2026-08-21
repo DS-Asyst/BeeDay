@@ -112,6 +112,7 @@
   <data name="ProjectsCompletedEmptyTitle" xml:space="preserve"><value>Nenhum projeto concluído</value></data>
   <data name="ProjectsCompletedEmptyDescription" xml:space="preserve"><value>Projetos concluídos aparecerão aqui.</value></data>
   <data name="ReorderActiveProjectsAriaLabel" xml:space="preserve"><value>Reordenar projetos ativos</value></data>
+  <data name="ReorderItemAriaLabel" xml:space="preserve"><value>Segure e arraste este cartão para reordená-lo. Use as setas do teclado quando estiver em foco.</value></data>
   <data name="ActivityCardMarkIncompleteAriaLabel" xml:space="preserve"><value>Marcar {0} como não concluído</value></data>
   <data name="ActivityCardCompleteAriaLabel" xml:space="preserve"><value>Concluir {0}</value></data>
   <data name="ProjectProgressAutoLabel" xml:space="preserve"><value>O progresso do projeto é calculado automaticamente</value></data>

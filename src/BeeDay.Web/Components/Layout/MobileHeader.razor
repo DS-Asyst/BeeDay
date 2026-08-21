@@ -10,7 +10,8 @@
             aria-label="@(IsNavOpen ? Localizer["CloseNavMenuAriaLabel"] : Localizer["OpenNavMenuAriaLabel"])"
             aria-expanded="@(IsNavOpen ? "true" : "false")"
             aria-controls="mobile-navigation"
-            @onclick="OnToggleNav">
+            @onclick="OnToggleNav"
+            @ref="toggleButtonElement">
         <BeeDayIcon Name="@(IsNavOpen ? BeeDayIconName.Close : BeeDayIconName.Menu)" Size="BeeDayIconSize.Large" />
     </button>
 </header>
@@ -18,4 +19,22 @@
 @code {
     [Parameter] public bool IsNavOpen { get; set; }
     [Parameter] public EventCallback OnToggleNav { get; set; }
+
+    private ElementReference toggleButtonElement;
+    private bool wasOpen;
+
+    // EPIC 30 Sprint 30.20: the drawer (MobileSidebar) already moves focus to its own close button
+    // on open, but nothing previously returned focus to this trigger when it closed — via Escape,
+    // the backdrop, the close button, or navigating away — leaving keyboard/screen-reader focus
+    // lost to <body>. Mirrors the same open/close focus-management pattern MobileSidebar already
+    // uses for its own close button, just for the reverse (closing) transition.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (wasOpen && !IsNavOpen)
+        {
+            await toggleButtonElement.FocusAsync();
+        }
+
+        wasOpen = IsNavOpen;
+    }
 }

@@ -20,11 +20,12 @@
                    maxlength="@MaxLength"
                    disabled="@Disabled"
                    readonly="@ReadOnly"
+                   aria-describedby="@(ShowValidationMessage ? ValidationMessageId : null)"
                    @attributes="AdditionalAttributes" />
 </label>
 @if (ShowValidationMessage)
 {
-    <BeeDayValidationMessage For="ValueExpression" />
+    <BeeDayValidationMessage For="ValueExpression" Id="@ValidationMessageId" />
 }
 @if (ShowCounter && MaxLength is > 0)
 {

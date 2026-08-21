@@ -28,6 +28,43 @@ public sealed class BeeDayFormTests
         Assert.Contains("*", cut.Find("label").TextContent);
     }
 
+    // EPIC 30 Sprint 30.20: BeeDayInput's <input> previously had no programmatic association with
+    // its own validation message — a screen-reader user could not discover why a field was invalid
+    // without first navigating to (and past) the separately-rendered message. aria-describedby now
+    // links the two, matching the WCAG 4.1.2 "error identification" pattern already implemented
+    // correctly for the message's own role="alert".
+    [Fact]
+    public void InputAssociatesItsValidationMessageViaAriaDescribedby()
+    {
+        using var context = new BunitContext();
+        context.Services.AddLocalization();
+        var model = new FormTestModel();
+        var editContext = new EditContext(model);
+        var store = new ValidationMessageStore(editContext);
+
+        var cut = context.Render<BeeDayInput>(parameters =>
+        {
+            parameters.AddCascadingValue(editContext);
+            parameters
+                .Add(component => component.Id, "title")
+                .Add(component => component.Value, model.TextValue)
+                .Add(component => component.ValueExpression, () => model.TextValue);
+        });
+
+        Assert.Equal("title-validation", cut.Find("input").GetAttribute("aria-describedby"));
+
+        cut.InvokeAsync(() =>
+        {
+            store.Add(new FieldIdentifier(model, nameof(FormTestModel.TextValue)), "Some unmapped validation failure.");
+            editContext.NotifyValidationStateChanged();
+        });
+        cut.WaitForAssertion(() => Assert.Single(cut.FindAll(".beeday-validation-message")));
+
+        var message = cut.Find("#title-validation");
+        Assert.Contains("Some unmapped validation failure.", message.TextContent);
+        Assert.Equal("title-validation", cut.Find("input").GetAttribute("aria-describedby"));
+    }
+
     [Fact]
     public void InputInvokesValueChanged()
     {
