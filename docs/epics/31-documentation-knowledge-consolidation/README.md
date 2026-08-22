@@ -2027,3 +2027,141 @@ de Epic aplicada ao Ledger, e confirmação de que `docs/history/` permanece con
 dependência indevida por parte de documentos de estado atual.
 
 ---
+## Sprint 31.14 — Root README, Docs Index & Residual Documentation Consolidation
+
+**GitHub Issue:** [#242](https://github.com/tiagoarrigoni/BeeDay/issues/242)
+**Branch:** `sprint/31.14-root-readme-docs-index-residual-documentation-consolidation`
+**Depende de:** #241 (concluída, ver seção acima)
+
+> Segue `CLAUDE.md`, o padrão de planejamento beeday e o Global Execution Contract da EPIC 31 em
+> #228.
+
+### Objetivo da Sprint
+
+Finalizar os pontos de entrada do repositório após a documentação especialista estar estável, e
+resolver toda área residual/órfã de documentação.
+
+### Validação aplicada nesta Sprint (política aprovada pelo owner)
+
+Sprint documental — nenhum código-fonte foi alterado. Suíte completa de testes **não** executada,
+por política aprovada em 2026-08-21.
+
+### 1. `README.md` raiz — verificação e correção (Required work #1/#2)
+
+Todo comando e caminho do `README.md` raiz foi reverificado nesta sessão:
+
+- **Achado — árvore "Repository structure" incompleta:** `design/` (ativos de ícone, consumidos por
+  `scripts/New-IconSprite.ps1`) e `dotnet-tools.json` (manifesto do `dotnet-ef` local) são
+  rastreados pelo Git mas não apareciam na árvore. Adicionados, com uma frase de contexto para cada
+  um.
+- **Achado — comentário HTML residual sem valor informativo:** `<!-- CI/CD validation after default
+  branch migration -->`, adicionado no PR #6 (2026-08-08) só para forçar um diff de teste de
+  `workflow_run` — seu propósito já foi cumprido há muito tempo. Removido (`REMOVED`, achado
+  totalmente órfão, sem valor histórico para um leitor do README).
+- **Verificado e confirmado correto, sem mudança:** todos os comandos de "Start locally"/"Quality
+  gate"/E2E rodam como escritos contra os caminhos reais (`dotnet ef migrations
+  has-pending-model-changes` testado diretamente nesta sessão, incluindo a hipótese de que
+  precisaria de `dotnet tool restore` antes — **falsificada empiricamente**: `dotnet ef --version`
+  funciona neste repositório sem esse passo extra, então nenhuma instrução foi adicionada por uma
+  suposição não confirmada).
+
+### 2. Disposição final de `docs/api/` (Required work #4)
+
+`beeday.v1.yaml` é um rascunho especulativo — o próprio arquivo se autodeclara
+`version: 1.0.0-draft`, `"Contrato inicial futuro. A implementação HTTP completa não faz parte da
+primeira etapa"`, com `servers: https://localhost:5001/api/v1` (placeholder). Nenhuma das rotas
+descritas (`/auth/login` retornando JSON, `/users/me`, `/dashboard`, `/habits`) existe como API REST
+no BeeDay atual — a aplicação é Blazor Server; os poucos endpoints HTTP reais são formulários
+server-rendered, não uma API JSON. **Disposição final:** mantido como artefato de planejamento
+futuro explicitamente especulativo (não removido — tem valor de design), mas `docs/api/README.md` e
+o índice foram reescritos para deixar inequívoco que 0% dele é implementado hoje — não deve ser lido
+como documentação de comportamento atual.
+
+### 3. Disposição final de `docs/developer/` (Required work #5)
+
+Mesmo padrão já estabelecido para `docs/authentication/` na Sprint 31.10: deixa de ser "reservado,
+aguardando Sprint futura" e passa a ser redirecionamento permanente e intencional. As instruções de
+setup já vivem completas e verificadas no `README.md` raiz ("Requirements"/"Start locally"/"Quality
+gate"); um segundo documento aqui duplicaria ou fragmentaria essa informação. Um documento próprio
+pode nascer no futuro se o processo de contribuição crescer além de comandos de setup — não
+antecipado agora sem evidência.
+
+### 4. `docs/README.md` reconstruído (Required work #3)
+
+- **Linha da EPIC 30 corrigida** — a contradição identificada desde a Sprint 31.1 ("Em andamento"
+  vs. a própria EPIC 30 se autodeclarando `COMPLETE`) finalmente fechada: reclassificada para
+  "Histórico concluído", consistente com a reclassificação já aplicada ao Ledger na Sprint 31.13.
+- Linhas de `api/` e `developer/` atualizadas para as disposições finais das seções 2 e 3 acima.
+- Linha de `authentication/` (Sprint 31.10) e `adr/` (Sprint 31.13) já estavam corretas, apenas
+  confirmadas.
+- Linha da EPIC 28 **não** alterada — permanece refletindo corretamente o próprio status
+  autodeclarado da Epic (confirmado pela Sprint 31.13 como um gap operacional genuíno, não um erro
+  de documentação).
+- Ordem de leitura recomendada revisada — continua precisa (item 3 já cobre autenticação via
+  `security/`, consistente com a decisão de ownership da Sprint 31.10).
+
+### 5. `docs/CONVENTIONS.md` (Required work #7)
+
+Revisado — nenhuma mudança de arquitetura de informação desta EPIC (nenhuma pasta criada, movida ou
+removida; nenhum novo tipo de documento introduzido) exige atualização das convenções. Nenhuma
+alteração feita.
+
+### 6. Itens residuais/órfãos do Ledger (Required work #6)
+
+Todos os 21 assuntos canônicos (`Owner topic`) definidos na Sprint 31.2 têm agora sua Sprint dona
+executada — nenhuma das 184 entradas do Ledger permanece sem final state atribuído. O único item
+que continua genuinamente pendente é `Repository Hygiene / Tooling Artifacts`
+(`.github/upgrades/*`, o arquivo `.orig` órfão) — classificado `REMOVED (candidate)` desde a Sprint
+31.2, mas cuja exclusão real requer confirmação explícita do owner (Sprint 31.3), não resolúvel
+unilateralmente por uma Sprint de documentação. Não é um item "sem dono" — é um item com decisão
+final pendente do owner, já registrado como tal desde a Sprint 31.3. Nenhum outro item órfão
+encontrado.
+
+### Critérios de aceite (Issue #242)
+
+- [x] Root README accurately summarizes product, stack, setup, quality-gate entry points,
+      repository structure, documentation entry point, and license — 2 achados corrigidos, restante
+      confirmado.
+- [x] Every command/path shown in root README has been verified — 100%, incluindo teste empírico da
+      hipótese de `dotnet tool restore`.
+- [x] `docs/README.md` matches the final documentation hierarchy — linha da EPIC 30 finalmente
+      corrigida, `api/`/`developer/` atualizados.
+- [x] `docs/api/` has a verified final disposition — mantido como rascunho especulativo, rotulado
+      inequivocamente.
+- [x] `docs/developer/` has a verified final disposition — redirecionamento permanente por design.
+- [x] No reserved/incomplete area remains without an explicit final state — confirmado, 0
+      remanescentes.
+- [x] No Ledger item remains ownerless before Sprint 31.15 — confirmado, 21/21 assuntos com Sprint
+      dona executada; 1 item com ação pendente do owner, não órfão.
+
+### Sprint-specific boundary respeitado
+
+Nenhum detalhe especialista foi despejado no `README.md` raiz — as duas adições (`design/`,
+`dotnet-tools.json`) são uma linha de contexto cada, com link para o documento especialista
+correspondente.
+
+### Riscos residuais
+
+- A remoção dos artefatos de `.github/upgrades/`/arquivo `.orig` continua pendente de decisão
+  explícita do owner (Sprint 31.3) — não bloqueia o fechamento desta EPIC, mas permanece como ação
+  de limpeza sugerida e não executada.
+
+### Validação executada
+
+```bash
+git status
+dotnet format BeeDay.slnx --verify-no-changes
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+dotnet ef --version
+git diff --check
+```
+
+Resultados registrados na seção "Quality/Validation" do relatório final da Sprint enviado ao owner
+nesta conversa.
+
+### Deliverable
+
+`README.md` raiz, `docs/README.md`, `docs/api/README.md` e `docs/developer/README.md` atualizados;
+todas as áreas reservadas com disposição final; Documentation Ledger sem itens órfãos.
+
+---
