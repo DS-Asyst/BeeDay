@@ -45,7 +45,7 @@ jobs:
       # that runner is validated - see the same note on the github-script and download-artifact
       # steps below.
       - name: Checkout deployment scripts
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Build Once, Deploy Many across hmg -> main -> prd: prd is promoted from main exclusively
       # via pull request, and main is promoted from hmg exclusively via pull request (per the

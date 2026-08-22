@@ -63,7 +63,7 @@ jobs:
       # chained runs, see docs/deployment/06-cicd-pipeline-discovery-baseline.md #6.1), a direct
       # push trigger's github.sha is the standard, documented, reliable GitHub Actions behavior.
       - name: Checkout repository
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@v7
 
       # Provenance resolution (Sprint 19.8): finds the pull request that merged into hmg at this
       # commit, reads its recorded HEAD SHA (the exact commit BeeDay CI validated as a PR check -
