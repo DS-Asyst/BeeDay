@@ -31,7 +31,7 @@ src/BeeDay.Application/
 │   ├── Contracts/        8 interfaces de repositório + IUnitOfWork
 │   ├── Events/            DomainEventNotification + 1 INotificationHandler genérico
 │   ├── Experience/         Motor de concessão de XP (Service + Policy)
-│   ├── Identity/           IClock, IEmailSender, IIdentityEmailComposer, IIdentityRequestThrottle, IUserTokenService
+│   ├── Identity/           IClock, IEmailConfirmationIssuer, IEmailSender, IIdentityEmailComposer, IIdentityRequestThrottle, IUserTokenService
 │   └── Security/            ICurrentUserContext, IPasswordService, PasswordPolicy, CurrentUserGuard
 ├── DependencyInjection/    AddBeeDayApplication() — único ponto de registro DI desta camada
 ├── Exceptions/              ApplicationValidationException

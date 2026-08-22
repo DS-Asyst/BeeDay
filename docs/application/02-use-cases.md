@@ -1,6 +1,6 @@
 # Use Cases
 
-**Fonte da verdade:** verificado diretamente em cada `Handlers/*.cs` das 9 Features sob
+**Fonte da verdade:** verificado diretamente em cada `Handlers/*.cs` das 10 Features sob
 `src/BeeDay.Application/Features/`, cruzado com as interfaces em `Common/Contracts/` e
 `Features/*/Contracts/`.
 
@@ -85,7 +85,7 @@ do enum `ActivityCollection` (`Habits`/`Tasks`/`Todos`/`Projects`) no Request.
 | Atualizar nome/e-mail | `UpdateCurrentUserAccountCommand` | `UpdateCurrentUserAccountCommandHandler` | `IUserRepository`, `ICurrentUserContext` | `User` | `IUserRepository` | `void` |
 | Trocar senha | `ChangeCurrentUserPasswordCommand` | `ChangeCurrentUserPasswordCommandHandler` | `IUserRepository`, `IPasswordService`, `ICurrentUserContext` | `User` | `IUserRepository` | `void` |
 | Concluir onboarding | `CompleteCurrentUserOnboardingCommand` | `CompleteCurrentUserOnboardingCommandHandler` | `IUserRepository`, `ICurrentUserContext` | `User` | `IUserRepository` | `void` |
-| Obter usuário atual | `GetCurrentUserQuery` | (Handler correspondente em `UserHandlers.cs`) | `IUserRepository`, `ICurrentUserContext` | `User` | `IUserRepository` | `CurrentUserResponse?` |
+| Obter usuário atual | `GetCurrentUserQuery` | `GetCurrentUserQueryHandler` | `IUserRepository`, `ICurrentUserContext` | `User` | `IUserRepository` | `CurrentUserResponse?` |
 
 ## Wallets
 
@@ -105,14 +105,15 @@ do enum `ActivityCollection` (`Habits`/`Tasks`/`Todos`/`Projects`) no Request.
 
 ## Observação sobre concessão de XP
 
-5 casos de uso concedem XP (`RegisterHabitPositiveCommand`, `ToggleTaskCommand` na conclusão,
-`ToggleTodoCommand` até duas vezes) — nenhum outro Command concede ou revoga experiência. Ver
+3 Commands concedem XP (`RegisterHabitPositiveCommand`, `ToggleTaskCommand` na conclusão,
+`ToggleTodoCommand` — este último até duas vezes na mesma execução, Todo + Project) — nenhum outro
+Command concede ou revoga experiência. Ver
 `docs/domain/domain-events.md` para o detalhamento completo de quando `ExperienceGrantedDomainEvent`/
 `UserLeveledUpDomainEvent` são publicados a partir desses casos de uso.
 
 ## Fontes de verdade
 
-**Arquivos consultados:** todos os `Handlers/*.cs` das 9 Features, todos os `Commands/*.cs`,
+**Arquivos consultados:** todos os `Handlers/*.cs` das 10 Features, todos os `Commands/*.cs`,
 `Queries/*.cs`, `Contracts/*.cs` correspondentes.
 **Handlers consultados:** os ~35 Handlers inventariados na Fase 1, todos citados na tabela acima
 pelo nome exato da classe.
