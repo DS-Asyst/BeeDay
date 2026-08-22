@@ -37,18 +37,15 @@ exatamente o pipeline padrão de `WebApplication.CreateBuilder(args)`, sem `AddA
 
 | Arquivo | `SqlServer:ConnectionString` | Propósito |
 |---|---|---|
-| `appsettings.json` (base) | `Server=(localdb)\mssqllocaldb;Database=BeeDayDev;...` (valor commitado — ver nota abaixo) | Valores de desenvolvimento local por padrão |
+| `appsettings.json` (base) | `""` (vazio, commitado — Sprint 31.12: valor de LocalDB anteriormente commitado aqui não existe mais neste arquivo) | Valores de desenvolvimento local por padrão |
 | `appsettings.Development.json` | (não definido — herda do base) | Só ajusta `Logging:LogLevel` (mais verboso para `Microsoft.AspNetCore`, silencia `Circuits`) |
 | `appsettings.Homologation.json` | `Server=SERV4SQL;Database=BeeDay_HMG;Trusted_Connection=True;...` (commitado; `deploy-hmg.yml` sobrescreve via `BEEDAY_APP_CONNECTION`) | **É o arquivo que HMG realmente carrega hoje** — `ASPNETCORE_ENVIRONMENT=Homologation` é fixado em `web.config` e passado explicitamente por `deploy-hmg.yml`, confirmado por Runtime State real (Sprint 18.4). `AllowedHosts=h-beeday.com.br`, `Resend:Enabled=true`, `Email:Development:Enabled=false` (invertido desde a ativação do Resend em HMG — corrigido pela `BD30-F006`, Sprint 30.25; ver [`14-transactional-email-runbook.md`](14-transactional-email-runbook.md) §2) |
 | `appsettings.Production.json` | `""` (vazio — **deve** ser injetado via variável de ambiente/secret) | **Não corresponde a nenhum ambiente provisionado hoje** — ver §5. `Hosting:ForwardedHeaders` habilitado, `Resend:Enabled: true` |
 
-**Nota sobre o arquivo local no momento desta auditoria:** o `appsettings.json` neste checkout tem
-uma modificação não commitada (`git diff` confirma) — `ConnectionString` aponta para
-`Server=SERV4SQL;Database=BeeDay_HMG;...` em vez do valor commitado acima. Isso foi identificado e
-reportado ao usuário na Sprint 16.8; **não é uma configuração alterada por esta Sprint** (nenhum
-arquivo de configuração foi editado nesta auditoria) e não deve ser incluído em nenhum commit desta
-área de trabalho sem confirmação explícita — ver `CLAUDE.md`, "Safety and Git" (nunca commitar
-configuração local).
+**Nota (Sprint 31.12, EPIC 31):** a modificação local não commitada descrita originalmente aqui
+(Sprint 16.8) não existe mais — `git status`/`git diff` sobre `appsettings.json` estão limpos nesta
+Sprint, e o valor commitado do arquivo é `""`, não o valor de LocalDB anteriormente citado. Nota
+histórica mantida apenas para registro; não reflete o estado atual do checkout.
 
 ## 4. Variáveis de ambiente
 
@@ -81,14 +78,25 @@ primeira requisição. Isso significa que um deploy com configuração quebrada 
 
 ### 4.3 Formato de variável de ambiente (IIS Application Pool)
 
-`Deploy-BeeDay.ps1` grava as variáveis diretamente no Application Pool via
-`Add-WebConfigurationProperty` (não em `web.config`) usando o separador `__` (duplo underscore) do
-`Microsoft.Extensions.Configuration` — ex.: `BeeDay__IdentityEmail__PublicBaseUrl` mapeia para
-`BeeDay:IdentityEmail:PublicBaseUrl`. 6 variáveis são definidas: `ASPNETCORE_ENVIRONMENT`,
-`DOTNET_ENVIRONMENT` (ambas fixas em `"Production"`), `AllowedHosts`,
-`BeeDay__IdentityEmail__PublicBaseUrl`, `BeeDay__Email__Resend__ApiKey`,
-`BeeDay__Email__Resend__FromAddress`, `BeeDay__Email__Resend__FromName` — 7 no total, contando as 2
-de ambiente.
+**Correção (Sprint 31.12, EPIC 31):** esta seção foi verificada pela última vez na Sprint 26.3,
+antes da guarda de destinatário de HMG (Sprint 26.4/26.9) e antes de `Set-BeeDayEnvironmentVariables`
+passar a rotear por controle privilegiado de IIS. Três correções:
+
+1. `ASPNETCORE_ENVIRONMENT`/`DOTNET_ENVIRONMENT` **não** são fixas em `"Production"` — ambas
+   recebem o parâmetro `$Environment` do script, cujo padrão é `"Homologation"`; `deploy-hmg.yml`
+   passa explicitamente `-Environment "Homologation"`. Para o único ambiente real hoje (HMG), o
+   valor gravado é `"Homologation"`.
+2. `Add-WebConfigurationProperty` só é usado no ramo **não privilegiado** de
+   `Set-BeeDayEnvironmentVariables`. Para `BeeDay-HMG`/`BeeDay-Web-AppPool` — o único alvo real —
+   `Test-BeeDayUsesPrivilegedIisControl` é verdadeiro, então a função chama
+   `Invoke-BeeDayPrivilegedIisControl -Operation "CONFIGURE"` em vez disso, passando pela fronteira
+   documentada em [`05-privileged-iis-control.md`](05-privileged-iis-control.md) — nunca grava
+   diretamente via `Add-WebConfigurationProperty` no caso real.
+3. A contagem de variáveis está incompleta: além das citadas, `Set-BeeDayEnvironmentVariables`
+   também define `BeeDay__Persistence__SqlServer__ConnectionString` (quando `-AppConnectionString`
+   é fornecido — sempre o caso em `deploy-hmg.yml`) e, desde a Sprint 26.4/26.9,
+   `BeeDay__Email__HmgRecipientGuard__AllowedRecipients__0`, `__1`, ... (uma por destinatário
+   configurado) — ver [`14-transactional-email-runbook.md`](14-transactional-email-runbook.md) §6.
 
 ## 5. `LevelUp-Data` vs. `BeeDay-Data` e o estado real de HMG/PRD (Sprint 18.4)
 

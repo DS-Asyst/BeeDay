@@ -1812,3 +1812,114 @@ nesta conversa. Toda alegação corrigida foi verificada contra o YAML real (`co
 `13-epic19-final-architecture-report.md`), e Documentation Ledger atualizado.
 
 ---
+## Sprint 31.12 — HMG, IIS, Deployment & Operations Documentation Reconciliation
+
+**GitHub Issue:** [#240](https://github.com/tiagoarrigoni/BeeDay/issues/240)
+**Branch:** `sprint/31.12-hmg-iis-deployment-operations-documentation-reconciliation`
+**Depende de:** #239 (concluída, ver seção acima)
+
+> Segue `CLAUDE.md`, o padrão de planejamento beeday e o Global Execution Contract da EPIC 31 em
+> #228.
+
+### Objetivo da Sprint
+
+Reconciliar os runbooks operacionais com o comportamento real de IIS/HMG/deployment/runtime,
+separando claramente arquitetura de operação.
+
+### Validação aplicada nesta Sprint (política aprovada pelo owner)
+
+Sprint documental — nenhum código-fonte ou script foi alterado. Suíte completa de testes **não**
+executada, por política aprovada em 2026-08-21. Nenhum valor de segredo foi lido ou citado — apenas
+nomes de chave e estrutura não sensível (confirmado por leitura direta dos arquivos `appsettings*`).
+
+### Método
+
+Levantamento inicial delegado (agente de exploração, somente leitura) cobrindo os 8 documentos de
+operações de `docs/deployment/` (`README`, `01`, `02`, `03`, `04`, `05`, `10`, `14`) contra
+`scripts/Deploy-BeeDay.ps1`, os scripts de controle privilegiado de IIS, `web.config`,
+`appsettings.Homologation.json`/`appsettings.Production.json`/`appsettings.json` e os workflows de
+deploy. Todo achado foi reverificado nesta sessão com leitura direta do script/config antes de
+qualquer edição.
+
+### Achados corrigidos (Required work #2)
+
+| Documento | Achado | Correção |
+|---|---|---|
+| `01-deployment.md` (diagrama de sequência) | Ordem do deploy mostrada como "Stop → aplica migration bundle → configura env vars → copia publish → Start" — a ordem real é migration bundle **antes** do Stop (`Deploy-BeeDay.ps1`: `Invoke-BeeDayMigration` roda com o site IIS ainda no ar, só depois `Stop-BeeDayIis`). | Diagrama corrigido para refletir a ordem real. |
+| `01-deployment.md` | `$ResendFromName` citado com valor padrão `"BeeDay"`; real hoje é `"beeday"` (minúsculo, Sprint 30.25). Narrativa de risco de várias frases construída sobre esse valor desatualizado. | Corrigida a citação; narrativa de risco reescrita — o cenário descrito (remetente em branco silenciosamente) não é mais possível (ver próximo achado). |
+| `01-deployment.md` | Tabela dizia que `BEEDAY_RESEND_FROM_NAME` **não** é validado pelo step "Validate deployment secrets" de `deploy-prd.yml` — contradizendo diretamente `docs/deployment/README.md`, que já registrava esse gap como corrigido. `deploy-prd.yml` real inclui esse secret no hashtable `$required`, igual aos outros 4. | Célula da tabela corrigida para "Sim — corrigido"; nota explicando que este documento (última verificação Sprint 19.8) não havia sido sincronizado com o `README.md` (que já refletia a correção). |
+| `02-runtime-configuration.md` | Tabela de `appsettings.json` (base) citava um valor de connection string LocalDB commitado, mais uma nota sobre uma modificação local não commitada (Sprint 16.8) — nenhuma das duas reflete o arquivo hoje: `git status`/`git diff` estão limpos e o valor commitado é `""`. | Tabela e nota corrigidas para o estado atual; nota histórica preservada com rótulo explícito. |
+| `02-runtime-configuration.md` §4.3 | Três problemas na descrição do mecanismo de variáveis de ambiente do App Pool: (1) afirmava `ASPNETCORE_ENVIRONMENT`/`DOTNET_ENVIRONMENT` fixas em `"Production"` — na verdade usam o parâmetro `$Environment` (padrão `"Homologation"`, o que `deploy-hmg.yml` de fato passa); (2) afirmava gravação direta via `Add-WebConfigurationProperty` — o caso real (HMG) passa pela fronteira de controle privilegiado de IIS (`05-privileged-iis-control.md`), nunca grava diretamente; (3) contagem de 7 variáveis omitia a connection string (`BeeDay__Persistence__SqlServer__ConnectionString`) e as variáveis de guarda de destinatário HMG (Sprint 26.4/26.9). | Seção reescrita com nota de correção explícita cobrindo os 3 pontos, cruzando com `05-privileged-iis-control.md` e `14-transactional-email-runbook.md` sem duplicar o detalhe. |
+
+### Conteúdo já correto, confirmado sem reescrita (Required work #2/#4)
+
+`03-observability.md` (health checks, logging, `Clear-BeeDayStdoutLogs.ps1`), `04-operations.md`
+(contrato IIS de HMG, os 8 secrets do GitHub Environment, layout de backup, sequência de rollback de
+6 passos, `Clear-BeeDayBackups.ps1`, as 4 suítes de regressão de script), `05-privileged-iis-control.md`
+(fronteira de duas Scheduled Tasks, allow-list de operações, snapshot admin-only, integração com
+`deploy-hmg.yml`), `10-hmg-deployment-verification.md` (já autodescrito como retrato histórico da
+Sprint 19.6, com atualizações corretas apontando para a mudança de trigger da Sprint 19.8) e
+`14-transactional-email-runbook.md` (o mais atualizado dos 8 — reflete corretamente o decorator
+`HmgRecipientGuardedEmailSender`/Sprint 26.4 e o regex de allow-list do Hotfix 26.9.3) — todos
+conferiram sem nenhum mismatch contra scripts/config reais. Nomes/caminhos de IIS (site `BeeDay-HMG`,
+pool `BeeDay-Web-AppPool`, `C:\Apps\BeeDay.Web`, log `C:\Apps\BeeDay-Data\Logs\stdout`) são
+consistentes nos 4 documentos que os citam — nenhuma divergência entre documentos escritos em
+Sprints diferentes.
+
+### Scripts (`scripts/*.ps1`) — verificação de comentários de cabeçalho
+
+Os scripts efetivamente referenciados pelos 8 documentos de operações (`Deploy-BeeDay.ps1`,
+`Clear-BeeDayBackups.ps1`, `Clear-BeeDayStdoutLogs.ps1`, os 5 de `scripts/iis-control/`, e os 4 de
+`scripts/tests/`) têm comentários de cabeçalho substantivos que já correspondem ao comportamento
+documentado — nenhuma extração adicional necessária além da reconciliação de conteúdo já feita
+acima. `New-IconSprite.ps1` também tem cabeçalho completo (não citado nestes 8 documentos —
+pertence ao domínio de Design System, já coberto na Sprint 31.8). `Reset-TestData.ps1` não tem
+comentário de cabeçalho e não é citado por nenhum dos 8 documentos de operações — é uma utilidade de
+desenvolvimento local, fora do escopo de runbook operacional desta Sprint.
+
+### Critérios de aceite (Issue #240)
+
+- [x] IIS/deployment runbooks match current automation and runtime requirements — 5 correções
+      aplicadas, restante já correto.
+- [x] Migration/rollback/health-check procedures are accurate — ordem de migration corrigida;
+      rollback e health check já estavam corretos.
+- [x] Operational commands/paths referenced in current docs are verified — confirmado, sem
+      divergência entre documentos.
+- [x] HMG/PRD differences are explicit where evidence exists — confirmado (PRD não provisionado,
+      já documentado corretamente).
+- [x] No secret or sensitive credential value appears — confirmado antes e depois das edições.
+- [x] Architecture and runbook responsibilities are not duplicated unnecessarily — nenhuma
+      duplicação nova introduzida; correções cruzam por link, não por cópia.
+
+### Sprint-specific boundary respeitado
+
+Nenhum deploy, mudança de produção ou ampliação de permissão foi feita para validar esta
+documentação — toda verificação foi estática, contra arquivos do repositório.
+
+### Riscos residuais
+
+- Estado real de runtime em SERV3WEB/HMG (variáveis efetivamente gravadas no App Pool hoje,
+  execução agendada dos scripts de limpeza) permanece `UNVERIFIABLE` a partir do repositório — os
+  próprios documentos já rotulam isso corretamente como "Repository State" vs. "Runtime State" não
+  confirmado.
+
+### Validação executada
+
+```bash
+git status
+dotnet format BeeDay.slnx --verify-no-changes
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+git diff --check
+```
+
+Resultados registrados na seção "Quality/Validation" do relatório final da Sprint enviado ao owner
+nesta conversa. Toda alegação corrigida foi verificada contra `Deploy-BeeDay.ps1`,
+`deploy-prd.yml`/`deploy-hmg.yml`, e os arquivos `appsettings*` reais nesta sessão antes de ser
+escrita.
+
+### Deliverable
+
+2 arquivos corrigidos (`docs/deployment/01-deployment.md`, `02-runtime-configuration.md`), e
+Documentation Ledger atualizado.
+
+---
