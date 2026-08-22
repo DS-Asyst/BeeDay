@@ -453,8 +453,8 @@ semelhança numérica. Token global não deve ser usado para corrigir um stackin
 
 ## 9. Duas camadas de CSS: global e isolado por componente
 
-Além das 17 folhas em `wwwroot/css/` e de `wwwroot/app.css` (18 folhas globais carregadas por
-`<link>` em `App.razor`
+Além das 18 folhas em `wwwroot/css/` (inclui `institutional.css`) e de `wwwroot/app.css` (19 folhas
+globais carregadas por `<link>` em `App.razor`
 — ver [`docs/web/05-design-system-integration.md`](../web/05-design-system-integration.md) §3),
 o repositório também usa CSS isolado por componente (`*.razor.css`), compilado pelo SDK Blazor em
 `BeeDay.Web.styles.css` — o bundle que `App.razor` carrega por último (ver

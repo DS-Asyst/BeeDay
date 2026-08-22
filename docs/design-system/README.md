@@ -66,8 +66,8 @@ primitives, não uma contagem copiada para outros documentos, é o contrato mant
 | Pasta | Componentes |
 |---|---|
 | `Buttons/` | `BeeDayButton` |
-| `Cards/` | `BeeDayCard`, `BeeDayCardMenu` |
-| `Feedback/` | `BeeDayConfirmDialog`, `BeeDayDashboardSkeleton`, `BeeDayEmptyState`, `BeeDayLoading`, `BeeDaySkeleton`, `BeeDayToastHost` |
+| `Cards/` | `BeeDayCard` |
+| `Feedback/` | `BeeDayConfirmDialog`, `BeeDayDashboardSkeleton`, `BeeDayEmptyState`, `BeeDayErrorBoundary`, `BeeDayLoading`, `BeeDaySkeleton`, `BeeDayToastHost` |
 | `Forms/` | `BeeDayCheckbox`, `BeeDayDateInput`, `BeeDayInput`, `BeeDaySelect`, `BeeDayTextArea`, `BeeDayValidationMessage` |
 | `Icons/` | `BeeDayIcon` |
 | `Layout/` | `BeeDayHero`, `BeeDayPageHeader`, `BeeDaySectionHeader`, `BeeDaySettingsForm`, `BeeDaySettingsSection` |

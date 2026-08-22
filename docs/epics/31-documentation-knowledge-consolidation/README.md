@@ -1375,3 +1375,102 @@ sessão antes de ser escrita.
 `02-ef-core-strategy.md`), e Documentation Ledger atualizado.
 
 ---
+## Sprint 31.8 — Web, UI & beeday Experience System Documentation Reconciliation
+
+**GitHub Issue:** [#236](https://github.com/tiagoarrigoni/BeeDay/issues/236)
+**Branch:** `sprint/31.8-web-ui-experience-system-documentation-reconciliation`
+**Depende de:** #235 (concluída, ver seção acima)
+
+> Segue `CLAUDE.md`, o padrão de planejamento beeday e o Global Execution Contract da EPIC 31 em
+> #228.
+
+### Objetivo da Sprint
+
+Reconciliar os 21 documentos de `docs/web/`, `docs/ux/`, `docs/design-system/` e `docs/brand/` com
+a experiência Blazor implementada e os contratos de Design/Brand/UX System atuais.
+
+### Validação aplicada nesta Sprint (política aprovada pelo owner)
+
+Sprint documental — nenhum código-fonte foi alterado. Suíte completa de testes **não** executada,
+por política aprovada em 2026-08-21.
+
+### Método
+
+Levantamento inicial delegado (agente de exploração, somente leitura) cobrindo os 21 documentos e
+`src/BeeDay.Web/` por completo. Nesta Sprint, mais do que em qualquer outra desta EPIC, o código
+mudou sob os pés da documentação: EPIC 30 (Sprints 30.17–30.29) fez commits no dia de hoje
+(2026-08-21) que tornaram vários trechos obsoletos horas depois de escritos. Toda alegação do
+levantamento inicial foi reverificada nesta sessão com `grep`/leitura direta — uma alegação
+("37 arquivos CSS isolados" em `01-foundations.md`) não pôde ser confirmada (a string "37" não
+existe no arquivo) e foi descartada sem correção, para não introduzir um fato não evidenciado.
+
+### Achados corrigidos (Required work #2/#4)
+
+| Documento(s) | Achado | Correção |
+|---|---|---|
+| `docs/design-system/02-components.md`, `README.md`, `docs/web/README.md`, `01-composition-root.md`, `05-design-system-integration.md`, `06-testing.md`, `docs/ux/02-accessibility.md` (7 arquivos) | `BeeDayCardMenu` + `CardActionMenuCoordinator` + `CardMenuPlacementCalculator` foram removidos por completo hoje (commit `244059a`, Sprint 30.19, EPIC 30 — zero consumidores em produção, código órfão desde um refactor anterior). Documentados como vivos em 7 lugares. | Todas as 7 ocorrências corrigidas: linhas/células removidas onde o componente era o assunto principal; onde a remoção é o próprio fato relevante (testing, accessibility), reescrito para nomear a remoção explicitamente em vez de apenas apagar a menção. |
+| `docs/design-system/README.md`, `02-components.md` | `BeeDayErrorBoundary` (+ `LoggingErrorBoundary`), adicionado hoje (Sprint 30.23, BD30-F065) e já usado nos 4 layouts, não aparecia em nenhum dos dois documentos. | Adicionado como novo componente/linha em ambos. |
+| `docs/design-system/02-components.md` | Contagem de consumidores de `BeeDayButton` (22) e `BeeDayIcon` (32) desatualizada frente ao uso real hoje. | Recontado via `grep -rl "<Componente" src/BeeDay.Web/Components/` nesta sessão: `BeeDayButton` = 23, `BeeDayIcon` = 37. Corrigido. |
+| `docs/web/01-composition-root.md` §7 (pipeline HTTP) | Faltavam `SecurityHeadersMiddleware` e `UseStatusCodePagesWithReExecute("/not-found")` (ambos adicionados hoje) e `UseRequestLocalization` no diagrama de ordem real. | Diagrama reescrito com os 3 middlewares na posição real confirmada em `Program.cs`. |
+| `docs/web/01-composition-root.md` (tabela de exceções) | Faltava o arm `ConcurrencyConflictException → 409`, que precisa vir antes de `PersistenceException` no `GlobalExceptionHandler` real (`ConcurrencyConflictException` É UM `PersistenceException`). | Linha adicionada com a nota de ordem. |
+| `docs/web/01-composition-root.md` (tabela de DI) | Faltavam `AuthenticatedEntryDestinationResolver` e `AuthenticatedCultureSynchronizer`, registros reais confirmados em `Services/Authentication/`. | Adicionados com descrição verificada contra o código-fonte (XML docs). |
+| `docs/web/05-design-system-integration.md`, `docs/design-system/01-foundations.md`, `docs/web/02-routing-and-pages.md` | `institutional.css` (adicionado em 2026-08-17) faltava na ordem de carregamento; contagem de folhas globais (17→18 em `wwwroot/css/`, 18→19 incluindo `app.css`) e "15 folhas específicas" (real: 18) desatualizadas. | As 3 seções corrigidas com a contagem/ordem real confirmada via `ls`/leitura de `App.razor`. |
+| `docs/web/06-testing.md` §3 | `GlobalExceptionHandlerTests.cs` (teste de unidade) ausente do mapeamento — só o teste de integração estava listado. | Adicionado. |
+| `docs/web/06-testing.md` §8 | 7 classes de teste E2E reais ausentes da tabela (`AccountResponsiveLayoutTests`, `ProjectLifecycleTests`, `TodoLifecycleTests`, `CrossFeatureRealisticStateTests`, `ExperienceSystemTests`, `InstitutionalPagesTests`, `EmailClientCompatibilityTests`), a maioria adicionada em Sprints recentes da EPIC 30. | Todas as 7 adicionadas com descrição extraída do XML doc/summary real de cada arquivo. |
+| `docs/brand/02-writing-voice-localization.md` | "17 catálogos `.resx` / 650 chaves" apresentado como contagem atual; `docs/web/07-localization.md` já havia corrigido o mesmo fato para 19 catálogos/1181 chaves (Sprint 28.1), preservando o texto histórico da Sprint 25.14 com uma nota de atualização — este documento não tinha o mesmo tratamento. | Aplicado o mesmo padrão: texto histórico preservado, nota de atualização 31.8 adicionada apontando para a contagem real, sem reescrever a descrição da amostra de 2026-08-16. |
+
+### Conteúdo já correto, confirmado sem reescrita (Required work #4)
+
+O inventário de 54 rotas/52 arquivos (`02-routing-and-pages.md` §3), os 4 layouts ativos
+(`03-layouts.md`), `BeeDayCultures` (apenas en-US/pt-BR, en-US default), a paleta completa
+COR0–COR9 e a tabela de elegibilidade de page header (`docs/brand/03-color-palette.md`), os 6
+componentes de formulário (`04-forms.md`), a pilha de teste bUnit/xUnit.v3/AngleSharp
+(`06-testing.md` §2), o comportamento de fallback de ícone e o enum de 58 ícones
+(`03-icons.md`), e a ausência confirmada de `TopNavigation.razor` (já corretamente documentada como
+removida) — todos conferiram sem nenhum mismatch e permanecem inalterados.
+
+### Critérios de aceite (Issue #236)
+
+Esta Sprint não define critérios de aceite formais na Issue além do objetivo geral da EPIC — a
+reconciliação cobriu 100% dos 21 documentos do escopo, removeu toda referência a componente
+inexistente apresentado como atual, adicionou os 2 componentes/serviços reais ausentes, e corrigiu
+9 contagens/ordens desatualizadas, todas evidenciadas por leitura direta do código nesta sessão.
+
+### Sprint-specific boundary respeitado
+
+Nenhum componente, rota ou padrão de UI foi redesenhado — todas as correções alinham a documentação
+ao código já existente (a maior parte dele alterado por Sprints da EPIC 30 no mesmo dia).
+
+### Riscos residuais
+
+- Este é o documento-set mais volátil da EPIC 31 até agora — a EPIC 30 seguiu fazendo commits no
+  código de UI durante o mesmo dia desta reconciliação. Uma nova auditoria pode encontrar drift
+  adicional em poucos dias.
+- Contagens de "consumidores" (`BeeDayButton`/`BeeDayIcon`/etc.) são inerentemente voláteis —
+  recontadas nesta Sprint via `grep`, não garantidas estáveis a médio prazo.
+- Uma alegação do levantamento inicial ("37 arquivos CSS isolados" vs. 47 reais) não pôde ser
+  localizada/confirmada em `01-foundations.md` e foi deliberadamente descartada sem correção — se o
+  achado for real, está em outro lugar não identificado nesta Sprint.
+
+### Validação executada
+
+```bash
+git status
+dotnet format BeeDay.slnx --verify-no-changes
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+git diff --check
+```
+
+Resultados registrados na seção "Quality/Validation" do relatório final da Sprint enviado ao owner
+nesta conversa. Toda contagem/citação corrigida foi reverificada com `grep`/leitura direta nesta
+sessão antes de ser escrita; nenhuma alegação do levantamento inicial foi aceita sem essa
+reverificação.
+
+### Deliverable
+
+10 arquivos corrigidos (`docs/web/README.md`, `01-composition-root.md`, `02-routing-and-pages.md`,
+`05-design-system-integration.md`, `06-testing.md`; `docs/design-system/README.md`,
+`01-foundations.md`, `02-components.md`; `docs/ux/02-accessibility.md`;
+`docs/brand/02-writing-voice-localization.md`), e Documentation Ledger atualizado.
+
+---

@@ -35,7 +35,7 @@ Assert.Contains(expectedClass, cut.Find("button").ClassList);
 | Área do código | Teste(s) |
 |---|---|
 | `CorrelationIdMiddleware` | `Diagnostics/CorrelationIdMiddlewareTests.cs` |
-| `GlobalExceptionHandler` / mapeamento de exceção → `ProblemDetails` | `Integration/ProblemDetailsIntegrationTests.cs` |
+| `GlobalExceptionHandler` / mapeamento de exceção → `ProblemDetails` | `Diagnostics/GlobalExceptionHandlerTests.cs` (unidade), `Integration/ProblemDetailsIntegrationTests.cs` (HTTP real) |
 | Autenticação por cookie, `OnValidatePrincipal`, `SessionVersion` | `Integration/CookieIntegrationTests.cs`, `SessionInvalidationIntegrationTests.cs` |
 | `/auth/login`, `/auth/logout` | `Integration/LoginIntegrationTests.cs`, `LogoutIntegrationTests.cs` |
 | `LoginRateLimiterFactory`/`Options` (unidade) | `Services/Authentication/LoginRateLimiterFactoryTests.cs` |
@@ -104,7 +104,7 @@ identificado nesta auditoria. `TopNavigation.razor` foi removida na Sprint 21.3 
 | Componente | Teste(s) |
 |---|---|
 | `BeeDayButton` | `Components/Buttons/BeeDayButtonTests.cs` |
-| `BeeDayCard` / `BeeDayCardMenu` (+ cálculo de posicionamento) | `Components/Cards/BeeDayCardTests.cs`, `BeeDayCardMenuTests.cs`, `CardMenuPlacementCalculatorTests.cs` |
+| `BeeDayCard` | `Components/Cards/BeeDayCardTests.cs` (`BeeDayCardMenuTests.cs`/`CardMenuPlacementCalculatorTests.cs` removidos junto com o componente na Sprint 30.19) |
 | `BeeDayIcon` | `Components/Icons/BeeDayIconTests.cs` |
 | `BeeDayBrand` / `SearchHighlight` | `Components/Text/BeeDayBrandTests.cs`, `SearchHighlightTests.cs` |
 | Componentes de atividade (badges/atributos combinados) | `Components/DesignSystem/ActivityComponentsTests.cs` |
@@ -133,6 +133,13 @@ As classes de fluxo usam a infraestrutura descrita em `docs/testing/01-testing-s
 | `InteractiveComponentsTests.cs`, `IconSystemTests.cs` | Lifecycle de dialogs/menus e sprite de ícones no browser real |
 | `LoginExperienceTests.cs`, `SettingsLocalizationTests.cs` | Auth/Identity responsivo e persistência de cultura |
 | `AccessibilityQualityTests.cs` | axe em Home, Typography, Login, Daily, Wallet e diálogo canônico |
+| `AccountResponsiveLayoutTests.cs` (Sprint 30.11) | Overflow-free em mobile/tablet/desktop para `/profile/create` Passo 2, `/account` (3 seções) e `/onboarding/tutorial` |
+| `ProjectLifecycleTests.cs` (Sprint 30.14) | Estado do workspace de um Project (progress bar, lista de To-Do embutida) sobrevive a reload; editar/remover Project |
+| `TodoLifecycleTests.cs` (Sprint 30.13) | Criar/alternar/editar/remover To-Do a partir do workspace de um Project, via board do Dashboard |
+| `CrossFeatureRealisticStateTests.cs` (Sprint 30.29) | Estado realista cruzando Habits/Task/Project-Todo/Wallet numa mesma sessão; navegação entre features não perde/corrompe dado; XP total reflete múltiplas features |
+| `ExperienceSystemTests.cs` | Conteúdo público de `/experience-system` (`beeday Experience System`) |
+| `InstitutionalPagesTests.cs` (EPIC 27, Sprint 27.3) | As 12 rotas institucionais e seu shell de hero compartilhado |
+| `EmailClientCompatibilityTests.cs` (EPIC 28, Sprint 28.9) | Renderiza o HTML real de `IdentityEmailComposer` em Chromium — aproximação, não evidência de paridade Gmail/Outlook/iCloud (ver matriz em `docs/epics/28-transactional-email-experience/README.md`) |
 
 ## 9. Contagem de referência
 

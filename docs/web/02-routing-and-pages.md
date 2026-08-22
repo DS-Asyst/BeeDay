@@ -33,7 +33,7 @@ shell HTML (`App.razor`) e o `Router` (`Routes.razor`) que as hospedam.
 ## 2. Shell e Router
 
 `App.razor` é o único `.razor` sem `@page` que produz HTML de documento completo (`<!DOCTYPE html>`).
-Carrega, nesta ordem: fontes Google (`Inter`, `Jersey 25`), `app.css`, 15 folhas de CSS específicas
+Carrega, nesta ordem: fontes Google (`Inter`, `Jersey 25`), `app.css`, 18 folhas de CSS específicas
 sob `css/` (ver [`05-design-system-integration.md`](05-design-system-integration.md) §3 para a
 ordem completa e por que ela importa), o bundle isolado de `BeeDay.Web.styles.css`, `<ImportMap />`
 e `<HeadOutlet />`. O `<body>` contém apenas `<Routes @rendermode="InteractiveServer" />`,

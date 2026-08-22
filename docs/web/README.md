@@ -31,10 +31,10 @@ src/BeeDay.Web/
 ├── Resources/                     SharedResources (catálogo cross-cutting) — ver 07-localization.md
 ├── Services/
 │   ├── BeeDayWebService.cs       fachada MediatR usada pela maioria dos componentes Feature
-│   ├── AuthenticatedUserInitializer, HttpCurrentUserContext, ToastService,
-│   │   CardActionMenuCoordinator
+│   ├── AuthenticatedUserInitializer, HttpCurrentUserContext, ToastService
 │   └── Authentication/            LoginDestinationResolver, LoginRateLimiterFactory/Options,
-│                                    BeeDayClaimTypes
+│                                    BeeDayClaimTypes, AuthenticatedEntryDestinationResolver,
+│                                    AuthenticatedCultureSynchronizer
 ├── Components/
 │   ├── App.razor, Routes.razor    shell HTML raiz e Router
 │   ├── Layout/                     MainLayout, OnboardingLayout, DesktopSidebar, MobileHeader/
