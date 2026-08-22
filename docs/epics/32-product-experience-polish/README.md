@@ -495,10 +495,22 @@ usado em texto normal (não grande/UI) não está fechado.
 **Evidência:** achado de código/documentação já verificado —
 `docs/ux/02-accessibility.md` §9, `DesignSystemContrastTests`.
 
+**Evidência adicional (navegador, Sprint 32.3):** varredura axe ao vivo contra `/profile` (rota nunca
+antes varrida por nenhum teste automatizado — `AccessibilityQualityTests` cobre `/daily` e `/wallet`,
+não `/profile`) confirmou `color-contrast (serious)` em múltiplos elementos que usam `text-muted`
+nesta página: a descrição do cabeçalho ("Choose one next step and keep your day moving."), o label
+"Level" e o valor "X of 100 experience points" do `ExperienceBar`, e a descrição do card "Weekly
+history is not available yet". Confirmado pré-existente e não causado pela Sprint 32.3: o parágrafo
+do cabeçalho usava o mesmo token `text-muted` antes da refatoração para `BeeDayPageHeader` (via
+`.product-home__header p`) e continua usando o mesmo token depois (via `.beeday-page-header p`
+compartilhado) — nenhuma mudança de cor foi introduzida, apenas a página passou a ser varrida pela
+primeira vez.
+
 **Resolution:** não aplicável — `DISCOVERED`.
 
 **Regression Protection:** a definir pela Sprint 32.13 (candidato: inventário completo de usos
-restantes de `text-muted` em texto normal e migração ou promoção documentada do token).
+restantes de `text-muted` em texto normal e migração ou promoção documentada do token; incluir
+`/profile` no inventário e, se prático, na cobertura axe existente).
 
 ---
 
@@ -732,6 +744,143 @@ markup agora também aplica a classe manualmente a partir do mesmo método que j
   `RouteMode_AlternateHrefDoesNotMatchUnrelatedRoutes` (bUnit).
 - `NavigationTests.Desktop_VisitingTheAccountAliasStillMarksAccountAsCurrent` (E2E, Chromium real).
 
+### EXP32-F016 — `/profile` reimplementava à mão o padrão eyebrow-título-descrição-ações em vez de reusar `BeeDayPageHeader`
+
+| Campo | Valor |
+|---|---|
+| Área | Layouts de página / headings / header-action rows |
+| Rota/Página | `/profile` |
+| Componente | `DashboardHome.razor` (`.product-home__header`) vs. `BeeDayPageHeader` |
+| Severidade | MEDIUM |
+| Device | Shared |
+| Accessibility Impact | Partial (ver evidência abaixo — `aria-labelledby` apontava para um `id` que só rotulava o título, não o cabeçalho inteiro; corrigido para `aria-label` equivalente) |
+| Owning Sprint | 32.3 (Page Layout Consistency) |
+| State | **FIXED** — Sprint 32.3 |
+
+**Interação:** N/A (achado estrutural de layout/CSS, não uma interação isolada).
+
+**Comportamento anterior:** `DashboardHome.razor` (`/profile`) renderizava um `<header class="product-home__header">` com um `<span>` de data como pseudo-eyebrow, `<h1>` e `<p>` de descrição, e o botão "Open Daily" — reimplementando à mão exatamente o shape "eyebrow → título → descrição → ações" que `docs/design-system/02-components.md` §5 e `docs/ux/01-guidelines.md` §2 já documentam como o contrato compartilhado de `BeeDayPageHeader`/`BeeDaySectionHeader`/`BeeDayHero`. `/settings` (`Account.razor`) já consumia `BeeDayPageHeader` para o mesmo shape; `/profile` era a única página do arquétipo "página de conteúdo autenticada" que não reusava nenhum dos três primitives — uma duplicação de CSS/markup feature-local (`.product-home__header`, `.product-home__header h1`, `.product-home__date`) que o Required Work #6 da Issue #247 pede para evitar.
+
+**Evidência (navegador, nesta Sprint):** captura de tela em 1440px confirmou que o `<h1>` de `/profile` renderizava em `clamp(1.75rem, 4vw, 2.35rem)` (medido: 37.6px) enquanto o `<h1>` de `/settings`, usando `BeeDayPageHeader`, renderiza em `clamp(2rem, 5vw, 3.2rem)` (medido: 51.2px) — a mesma família de conteúdo (página autenticada de card/seção, não o board operacional do Daily nem o hero financeiro do Wallet) com duas escalas tipográficas de título diferentes, sem nenhuma justificativa documentada para a diferença.
+
+**Resolution:** `DashboardHome.razor` agora usa `<BeeDayPageHeader Eyebrow="@DateTime.Today...\" Title="..." Description="...">` com o botão "Open Daily" no slot `Actions`, eliminando o `<header>` bespoke. O `aria-labelledby="home-heading"` da `<section>` externa (que dependia de um `id` no `<h1>`, inacessível através do componente compartilhado) foi substituído por `aria-label` com o mesmo texto do título — preserva o nome acessível da seção sem depender de um `id` que `BeeDayPageHeader` não expõe no `<h1>`. CSS feature-local morta (`.product-home__header`, `.product-home__header h1`, `.product-home__date`, e os overrides de mobile equivalentes no media query de 42rem) foi removida de `DashboardHome.razor.css`; o colapso para coluna em mobile e a largura total do botão de ação em telas estreitas agora vêm inteiramente do contrato compartilhado (`design-system.css`/`polish.css`), já testado por `Account`/`ExperienceSystem`.
+
+**Regression Protection:**
+- `AuthenticatedHomeContractTests` (bUnit, já existente) — continua verde sem alteração: ainda confirma a rota, o estado compartilhado, os primitives oficiais (`BeeDayCard`/`BeeDayButton`/`BeeDayIcon`/`BeeDayProgressBar`/`ExperienceBar`) e exatamente uma ocorrência do CTA "Open Daily".
+- `AuthenticatedHomeTests.MobileAndTabletPrioritizeEssentialProgressWithoutLegacyRegionsOrOverflow` (E2E, Chromium real, 7 larguras reais incluindo 390px/430px móvel) — confirma heading acessível visível, ausência de overflow horizontal e navegação mobile funcionando após a troca de componente.
+- `AuthenticatedHomeTests.LoginEntersProfileWithDesktopShellAndHonestWeeklyState` e `OnlyOneOpenDailyControlRemainsOnProfile` (E2E) — confirmam o heading "Welcome back" e o único CTA "Open Daily" continuam expostos com o papel/nome corretos.
+- `Epic21ConsolidationTests.FinalExperienceMatrixHasNoDocumentOverflow` (E2E, 7 larguras) e `ShellResponsiveLayoutTests` — revalidados sem alteração de comportamento.
+
+---
+
+### EXP32-F017 — `wallet.css` tinha duas declarações conflitantes de `.wallet-page`, com a centralização dependente de cascata implícita
+
+| Campo | Valor |
+|---|---|
+| Área | Layouts de página / max-widths e gutters |
+| Rota/Página | `/wallet` |
+| Componente | `wwwroot/css/wallet.css` |
+| Severidade | LOW |
+| Device | Shared |
+| Accessibility Impact | No |
+| Owning Sprint | 32.3 (Page Layout Consistency) |
+| State | **FIXED** — Sprint 32.3 |
+
+**Interação:** N/A (achado estrutural de CSS).
+
+**Comportamento anterior:** `wallet.css` continha duas regras `.wallet-page` separadas: uma legada, minificada, no topo do arquivo (`width:min(1440px,100%);margin:0 auto;padding:2rem 1.5rem 3rem`, sem comentário, misturada com outras regras minificadas antigas) e outra, formatada e comentada ("Wallet visual alignment with My Account"), mais abaixo (`width: min(76rem, 100%); padding: 2rem clamp(1rem, 3vw, 2.5rem) 4rem;`). Pela ordem de cascata, a segunda regra sobrescrevia `width`/`padding` da primeira, mas **não declarava `margin`** — a centralização (`margin: 0 auto`) da página inteira dependia silenciosamente da regra legada, que parecia morta (largura/padding totalmente sobrescritos) mas na verdade ainda era a única fonte da centralização.
+
+**Problema:** duas fontes de verdade para o mesmo seletor, uma delas parecendo mais morta do que estava — exatamente o tipo de "CSS feature-local quando uma fundação já existe" que o Required Work #6 da Issue #247 pede para evitar, e um risco real para qualquer edição futura que removesse a regra legada (aparentemente segura de remover) sem perceber que ela ainda fornecia `margin: 0 auto`.
+
+**Evidência (navegador, nesta Sprint):** captura de tela de `/wallet` em 1440px antes e depois da consolidação é pixel-idêntica (mesma posição/largura do container, `getBoundingClientRect` idêntico); `WalletTests.Hero_IsRoughlyHalfTheHeightOfTheBrandGuidelinesHeroAndWorksWithoutAnIllustration` (E2E) permanece verde sem alteração, confirmando que a consolidação não mudou nenhum pixel renderizado.
+
+**Resolution:** consolidada em uma única regra `.wallet-page` (mantendo `width: min(76rem, 100%)`, `padding: 2rem clamp(1rem, 3vw, 2.5rem) 4rem`, cor de texto), agora declarando `margin: 0 auto` explicitamente. A regra legada de 1440px foi removida.
+
+**Regression Protection:** `WalletTests` (E2E, suíte completa) e `AccessibilityQualityTests.DailyWalletAndCanonicalDialog_HaveNoAutomaticallyDetectableViolations` revalidados sem alteração de comportamento.
+
+---
+
+### EXP32-F018 — Daily (`/daily`) não tem cabeçalho de página visível
+
+| Campo | Valor |
+|---|---|
+| Área | Layouts de página / headings |
+| Rota/Página | `/daily` |
+| Componente | `Home.razor` (`<h1 class="beeday-visually-hidden">`) |
+| Severidade | N/A (exceção documentada, não um defeito) |
+| Device | Shared |
+| Accessibility Impact | No (o `<h1>` existe e é alcançável por leitor de tela; apenas não é visível) |
+| Owning Sprint | 32.3 (Page Layout Consistency) |
+| State | **ACCEPTED** — Sprint 32.3 |
+
+**Interação:** N/A.
+
+**Comportamento atual:** ao contrário de `/profile`, `/settings` (`BeeDayPageHeader`) e `/wallet` (`BeeDayHero`), o Daily não renderiza nenhum cabeçalho visível — apenas um `<h1 class="beeday-visually-hidden">` para leitores de tela, com a `ActivityFilterBar` (busca + botão "+ Activity") liderando visualmente a hierarquia da página.
+
+**Por que isso não é um achado a corrigir:** Daily é o board operacional denso do produto (4 colunas, scroll interno, densidade de informação alta) — um arquétipo de página distinto de "página de conteúdo" (Profile/Account) ou "hero de produto" (Wallet). Adicionar um cabeçalho visível redistribuiria espaço vertical de um board já otimizado para densidade, o que seria redesenho de fluxo de produto (`docs/epics/32-product-experience-polish/README.md` §2.2 proíbe isso) e não polimento de consistência de layout. A ausência de rationale documentado para essa exceção — ao contrário de `Home.razor` (marketing, já documentado em `docs/ux/01-guidelines.md` §4) — era a lacuna real; corrigida nesta Sprint apenas documentando a exceção (`docs/ux/01-guidelines.md` §2), sem alterar comportamento.
+
+**Evidência (navegador, nesta Sprint):** captura de tela de `/daily` em 1440px confirma o board começando no topo absoluto da workspace, sem nenhum título/eyebrow visível, com a barra de busca/criação como primeira linha visual.
+
+**Resolution:** `docs/ux/01-guidelines.md` §2 atualizado para documentar explicitamente a exceção do Daily (ver também correção da referência incorreta a `BeeDayPageHeader` para Wallet, que na verdade usa `BeeDayHero` — texto anterior estava desatualizado).
+
+**Regression Protection:** N/A — nenhuma mudança de comportamento; documentação apenas.
+
+---
+
+### EXP32-F019 — Larguras de container diferem entre Profile (64rem) e Account/Wallet (76rem)
+
+| Campo | Valor |
+|---|---|
+| Área | Layouts de página / max-widths |
+| Rota/Página | `/profile` vs. `/settings`, `/wallet` |
+| Componente | `.product-home` (`DashboardHome.razor.css`) vs. `.account-page` (`Account.razor.css`) e `.wallet-page` (`wallet.css`) |
+| Severidade | N/A (diferença intencional, guiada por conteúdo) |
+| Device | Desktop (onde a diferença de largura máxima é perceptível) |
+| Accessibility Impact | No |
+| Owning Sprint | 32.3 (Page Layout Consistency) |
+| State | **ACCEPTED** — Sprint 32.3 |
+
+**Interação:** N/A.
+
+**Comportamento atual:** `.product-home` usa `max-width: 64rem`; `.account-page` e `.wallet-page` usam `width: min(76rem, 100%)`.
+
+**Por que isso não é um achado a corrigir:** `settings.css` confirma que os formulários de `/settings` usam `grid-template-columns: repeat(2, minmax(0, 1fr))` (campos Name/Email lado a lado) e `wallet.css` confirma que `/wallet` usa um grid de duas colunas (`minmax(0,1fr) 330px`, painel de transações + painel de tags) — ambos precisam de mais largura horizontal para conteúdo de duas colunas. `/profile` é uma pilha de cards de coluna única (progresso, atividade semanal, projeto em andamento); 64rem é suficiente para esse conteúdo sem linhas de texto excessivamente longas. A diferença é, portanto, guiada por conteúdo, não uma inconsistência não explicada — forçar os três para a mesma largura arriscaria linhas de card desnecessariamente longas em `/profile` sem nenhum benefício de consistência real.
+
+**Evidência:** `src/BeeDay.Web/wwwroot/css/settings.css` linha 36 (`grid-template-columns: repeat(2, minmax(0, 1fr))`); `src/BeeDay.Web/wwwroot/css/wallet.css` (`.wallet-workspace{display:grid;grid-template-columns:minmax(0,1fr) 330px...}`); `DashboardHome.razor` confirmado como pilha vertical de `BeeDayCard` de coluna única.
+
+**Resolution:** nenhuma mudança de código. Documentado aqui para que Sprints futuras (32.15 Daily, 32.16 Wallet, 32.17 Settings) não reabram esta diferença como achado não explicado.
+
+**Regression Protection:** N/A — nenhuma mudança de comportamento.
+
+---
+
+### EXP32-F020 — `role="status"` em `<article>` do card "Weekly activity unavailable" viola aria-allowed-role
+
+| Campo | Valor |
+|---|---|
+| Área | Teclado/foco/acessibilidade (transversal — ARIA) |
+| Rota/Página | `/profile` |
+| Componente | `BeeDayCard` consumido por `DashboardHome.razor` (`.product-home__weekly-unavailable`, `.product-home__status`) |
+| Severidade | LOW |
+| Device | Shared |
+| Accessibility Impact | Yes |
+| Owning Sprint | 32.13 (Focus, Keyboard & Interaction Accessibility) |
+| State | DISCOVERED |
+
+**Interação:** leitor de tela navegando pelo card "Weekly activity" quando o histórico semanal está indisponível (e, pelo mesmo padrão, o card de status de "Profile unavailable").
+
+**Comportamento atual:** `DashboardHome.razor` passa `role="status"` para `BeeDayCard`, que renderiza um `<article>` (`<article class="beeday-card beeday-card--padded product-home__weekly-unavailable" role="status">`). Axe (varredura ao vivo desta Sprint, primeira vez que `/profile` foi varrida — `AccessibilityQualityTests` não cobria esta rota antes) reporta `aria-allowed-role (minor)`: `role="status"` não é um papel ARIA permitido para o elemento `<article>` pela especificação ARIA-in-HTML.
+
+**Problema:** o `role="status"` é semanticamente correto para anunciar a região como uma live region de status a leitores de tela, mas o elemento hospedeiro (`<article>`, que já carrega semântica própria de "conteúdo autocontido") não é um alvo permitido para esse papel — um `<div>` seria o hospedeiro correto. Não causado nem tocado pela Sprint 32.3; descoberto porque esta foi a primeira varredura automatizada de `/profile`.
+
+**Evidência (navegador, nesta Sprint):** resultado do axe-core contra `/profile` (Chromium real, `Deque.AxeCore.Playwright`) listando a violação `aria-allowed-role` para o node exato acima.
+
+**Resolution:** não aplicável — `DISCOVERED`.
+
+**Regression Protection:** a definir pela Sprint 32.13 (candidato: `BeeDayCard` oferecer uma variante que renderiza `<div>` em vez de `<article>` quando `role="status"`/`role="alert"` é passado, ou os consumidores pararem de usar `role="status"` sobre `<article>`; adicionar `/profile` à cobertura axe de `AccessibilityQualityTests` como parte da correção).
+
+---
+
 ## 7. Achados pré-existentes roteados para dentro da EPIC 32
 
 | ID original | Ledger de origem | Achado | Sprint EPIC 32 |
@@ -800,7 +949,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | Sprint | Achados herdados desta Sprint |
 |---|---|
 | 32.2 — Application Shell & Navigation Fluidity | EXP32-F014, EXP32-F015 — ambos `FIXED` nesta Sprint |
-| 32.3 — Page Layout Consistency | nenhum achado novo; 4 layouts revalidados sem defeito |
+| 32.3 — Page Layout Consistency | EXP32-F016, EXP32-F017 — ambos `FIXED` nesta Sprint; EXP32-F018, EXP32-F019 — `ACCEPTED` (exceções documentadas); EXP32-F020 — novo, roteado para 32.13; EXP32-F009 — evidência adicional (`/profile`) |
 | 32.4 — Buttons & Action Hierarchy | EXP32-F001 |
 | 32.5 — Forms & Input Experience | EXP32-F005, EXP32-F006 (cross-ref), EXP32-F007, EXP32-F011 (cross-ref), EXP32-F012 (cross-ref) |
 | 32.6 — Modal & Dialog Experience | EXP32-F002 (cross-ref) |
@@ -810,7 +959,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.10 — Empty States & First-Use Experience | EXP32-F013 (cross-ref) |
 | 32.11 — Errors, Recovery & User Feedback | EXP32-F007 (cross-ref) |
 | 32.12 — Toasts, Notifications & Confirmation Feedback | nenhum achado novo |
-| 32.13 — Focus, Keyboard & Interaction Accessibility | EXP32-F001 (cross-ref), EXP32-F002, EXP32-F008, EXP32-F009, EXP32-F010 |
+| 32.13 — Focus, Keyboard & Interaction Accessibility | EXP32-F001 (cross-ref), EXP32-F002, EXP32-F008, EXP32-F009, EXP32-F010, EXP32-F020 |
 | 32.14 — Responsive & Mobile Interaction Polish | risco residual de §9 (evidência de navegador móvel pendente) |
 | 32.15 — Daily Experience Polish | EXP32-F004 (cross-ref), EXP32-F010 (cross-ref) |
 | 32.16 — Wallet Experience Polish | EXP32-F005 (cross-ref), EXP32-F006 |
