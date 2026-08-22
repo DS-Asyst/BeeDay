@@ -1923,3 +1923,107 @@ escrita.
 Documentation Ledger atualizado.
 
 ---
+## Sprint 31.13 — ADR & Historical Documentation Consolidation
+
+**GitHub Issue:** [#241](https://github.com/tiagoarrigoni/BeeDay/issues/241)
+**Branch:** `sprint/31.13-adr-historical-documentation-consolidation`
+**Depende de:** #240 (concluída, ver seção acima)
+
+> Segue `CLAUDE.md`, o padrão de planejamento beeday e o Global Execution Contract da EPIC 31 em
+> #228.
+
+### Objetivo da Sprint
+
+Aplicar a baseline de validade de ADR estabelecida na Sprint 31.2 e consolidar a documentação
+histórica, sem reescrever história.
+
+### Validação aplicada nesta Sprint (política aprovada pelo owner)
+
+Sprint documental — nenhum código-fonte foi alterado. Suíte completa de testes **não** executada,
+por política aprovada em 2026-08-21.
+
+### 1. Baseline de validade de ADR aplicada (Required work #1/#2)
+
+Adicionada coluna "Validade atual" à tabela de `docs/adr/README.md`, com a classificação de cada um
+dos 6 ADRs exatamente como estabelecida na Sprint 31.2: `VALID` para ADR-002/003/004/005/006,
+`CONFLICTING` para ADR-001. **Nenhum corpo de ADR foi alterado** — apenas o índice recebeu a
+classificação e os links de supersessão. A supersessão parcial ADR-004→ADR-005 (já autodocumentada
+no cabeçalho do próprio ADR-004 desde sua criação) agora também está explícita e cruzada no índice,
+satisfazendo "superseded relationships are traceable" sem duplicar o texto do ADR.
+
+`ADR-001` permanece `CONFLICTING` sem resolução forçada nesta Sprint — a nota no índice registra
+que o objetivo arquitetural foi alcançado por um meio diferente do decidido (interfaces dentro de
+`BeeDay.Application`, não um projeto `Contracts` separado) e que a escolha entre `NEW ADR REQUIRED`
+(documentar formalmente a forma final) ou aceitar a divergência como está é uma decisão de
+arquitetura/produto que cabe ao owner, não a esta Sprint de documentação. Nenhum ADR novo foi
+criado unilateralmente.
+
+### 2. Reclassificação de histórico de Epic (Required work #3, achados da Sprint 31.1/31.2)
+
+| Item | Estado (Sprint 31.1/31.2) | Reclassificação (Sprint 31.13) |
+|---|---|---|
+| `docs/epics/30-system-integrity/README.md` (`DOC-097`) | `STALE` — o próprio arquivo já se autodeclara "EPIC 30 — COMPLETE", mas a linha de índice em `docs/README.md` ainda dizia "Em andamento" | O **artefato em si** é internamente consistente e correto (autodeclaração de conclusão, sem contradição interna) — reclassificado para `HISTORICAL`, ao lado das EPICs 20/21/25. A correção física da linha de índice em `docs/README.md` permanece com a Sprint 31.14 (dona desse arquivo), evitando edição duplicada/conflitante entre Sprints. |
+| `docs/epics/28-transactional-email-experience/README.md` (`DOC-096`) | `PARTIALLY_CURRENT` — status "IMPLEMENTATION READY — POST-MERGE HMG VALIDATION PENDING" (Sprint 28.10), anterior à auditoria completa da EPIC 30 | **Verificado nesta Sprint**: a EPIC 30 (`docs/epics/30-system-integrity/README.md` §35.5, achado `BD30-F012`) confirmou apenas que a linha de índice de `docs/README.md` reflete com precisão o cabeçalho da própria EPIC 28 — **não** reverificou nem encerrou a validação HMG pós-merge pendente. Permanece `PARTIALLY_CURRENT`: código completo (`Code Complete`), validação HMG pós-merge continua sem confirmação registrada (`Environment Validated` não alcançado). Não é um achado de documentação a corrigir — é um gap operacional genuíno, registrado aqui para visibilidade do owner, fora do escopo desta EPIC de documentação resolver. |
+
+### 3. `docs/history/` — confirmado congelado (Required work #4)
+
+`git log -- docs/history/` confirma que nenhum commit toca essa pasta desde a consolidação original
+da EPIC 16 e um refactor subsequente — nenhuma escrita nova, consistente com a convenção de
+"histórico congelado". Busca por `docs/history/` citado como **"Fonte da verdade"** (evidência ativa,
+não apenas link "ver também") em qualquer documento de estado atual: **zero ocorrências** — nenhum
+documento atual depende de material histórico como evidência viva.
+
+### 4. Narrativas obsoletas em documentos de estado atual (Required work #5)
+
+As Sprints especialistas 31.4–31.12 já verificaram, cada uma dentro do seu próprio recorte, se
+menções a `LevelUp`/JSON legado em documentos de estado atual (`docs/domain/business-rules.md`,
+`docs/domain/domain-events.md`, e outros dos 30 arquivos identificados na Sprint 31.1) permanecem
+corretamente enquadradas como contexto histórico, não como afirmação de estado atual — nenhuma delas
+encontrou uma menção apresentada indevidamente como atual (ver relatórios das Sprints 31.4/31.5/31.9
+acima). Esta Sprint não encontrou nenhuma ocorrência nova fora desse conjunto já coberto.
+
+### Critérios de aceite (Issue #241)
+
+- [x] Every ADR has a clear current status — 6/6 classificados no índice.
+- [x] Superseded ADR relationships are traceable — ADR-004→ADR-005 explícito e cruzado.
+- [x] ADR historical content is not rewritten — confirmado, nenhum corpo de ADR alterado.
+- [x] Historically valuable obsolete documentation is preserved appropriately — `docs/history/`
+      intocado; `docs/epics/20/21/25/30` preservados como `HISTORICAL`.
+- [x] Current-state docs no longer depend on obsolete migration/Sprint narratives — confirmado,
+      zero citações de `docs/history/` como fonte da verdade em documento atual.
+- [x] `REMOVED` is used only where justified by the EPIC contract — nenhum `REMOVED` aplicado nesta
+      Sprint; nenhuma remoção foi necessária.
+
+### Sprint-specific boundary respeitado
+
+Nenhum ADR foi reescrito para parecer mais limpo. Nenhuma decisão de produto/arquitetura foi tomada
+em nome do owner — a divergência do ADR-001 foi classificada e documentada, não resolvida
+unilateralmente com um ADR novo ou uma reescrita.
+
+### Riscos residuais
+
+- `ADR-001` permanece `CONFLICTING` — decisão de criar um `NEW ADR` formal ou aceitar a divergência
+  como está cabe ao owner.
+- EPIC 28 (`docs/epics/28-transactional-email-experience/README.md`) permanece com validação HMG
+  pós-merge pendente sem confirmação registrada — gap operacional genuíno, não resolúvel a partir
+  do repositório.
+
+### Validação executada
+
+```bash
+git status
+dotnet format BeeDay.slnx --verify-no-changes
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+git diff --check
+```
+
+Resultados registrados na seção "Quality/Validation" do relatório final da Sprint enviado ao owner
+nesta conversa.
+
+### Deliverable
+
+`docs/adr/README.md` atualizado com a baseline de validade completa, reclassificação de histórico
+de Epic aplicada ao Ledger, e confirmação de que `docs/history/` permanece congelado e sem
+dependência indevida por parte de documentos de estado atual.
+
+---
