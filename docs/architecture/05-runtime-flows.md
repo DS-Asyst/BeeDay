@@ -82,7 +82,7 @@ nesta seção. Isso não é uma regra universal da Web: `Wallet.razor` e as pág
 
 ## 3. Login
 
-Rastreado em `src/BeeDay.Web/Program.cs` (endpoint `/auth/login`, linhas 247-316) e
+Rastreado em `src/BeeDay.Web/Program.cs` (endpoint `/auth/login`, linhas 295-381) e
 `LoginRateLimiterFactory.cs`.
 
 ```mermaid

@@ -7,7 +7,7 @@ integração correspondentes em `tests/BeeDay.Web.Tests/Integration/`.
 
 ## 1. Autenticação por cookie
 
-Configurada em `src/BeeDay.Web/Program.cs:124-171` via
+Configurada em `src/BeeDay.Web/Program.cs:127-183` via
 `AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(...)`:
 
 | Opção | Valor |
@@ -25,7 +25,7 @@ vez do comportamento padrão do framework.
 
 ## 2. Validação de sessão a cada requisição (`OnValidatePrincipal`)
 
-`Program.cs:144-170`, executado em toda requisição autenticada:
+`Program.cs:146-183`, executado em toda requisição autenticada:
 
 1. Extrai `ClaimTypes.NameIdentifier` — se ausente ou não for GUID, `RejectPrincipal()` + `SignOutAsync`.
 2. Extrai a claim `BeeDayClaimTypes.SessionVersion` — se ausente ou não-inteira, rejeita.
@@ -42,8 +42,8 @@ reportado aqui como achado, não corrigido nesta Sprint (fora de escopo: "não a
 
 ## 3. Invalidação de sessão (`SessionVersion`)
 
-`User.SessionVersion` (`src/BeeDay.Domain/Entities/User.cs:33`, inicia em `1`).
-`User.InvalidateSessions()` (linha 131) incrementa o valor; chamado explicitamente em três pontos:
+`User.SessionVersion` (`src/BeeDay.Domain/Entities/User.cs:35`, inicia em `1`).
+`User.InvalidateSessions()` (linha 150) incrementa o valor; chamado explicitamente em três pontos:
 
 | Evento | Handler |
 |---|---|
@@ -65,7 +65,7 @@ Qualquer cookie emitido antes dessas ações passa a falhar na próxima checagem
 | E-mail | `Request.Form["email"]` normalizado (trim + upper) | 5 tentativas | 1 min (4 segmentos) |
 
 Config: seção `BeeDay:RateLimiting:Login` (`LoginRateLimiterOptions.cs`). Aplicado ao endpoint
-`POST /auth/login` via `.AddEndpointFilter(...)` (`Program.cs:302-316`); resposta ao exceder:
+`POST /auth/login` via `.AddEndpointFilter(...)` (`Program.cs:367-381`); resposta ao exceder:
 HTTP 429, texto genérico `"Too many attempts. Please wait and try again."` — idêntica
 independentemente de o e-mail pertencer a uma conta real (verificado por teste, ver §8).
 
@@ -114,7 +114,7 @@ reinícios) com cooldown de 60 segundos por operação+e-mail, e **nunca revelam
 
 Nenhuma configuração customizada de `AddAntiforgery(...)` existe no repositório — usa-se o serviço
 padrão de antiforgery do Blazor Server (registrado implicitamente por `AddRazorComponents()`).
-`app.UseAntiforgery()` está no pipeline (`Program.cs:219`), após autenticação/autorização.
+`app.UseAntiforgery()` está no pipeline (`Program.cs:267`), após autenticação/autorização.
 
 Como esta é uma aplicação Blazor Server (não MVC), não existe atributo
 `[ValidateAntiForgeryToken]` em lugar nenhum — a proteção vem de:
