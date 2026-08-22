@@ -46,7 +46,7 @@ testes em `tests/BeeDay.Web.Tests`". Ver [`CONVENTIONS.md`](CONVENTIONS.md).
 | [`brand/`](brand/README.md) | Brand System: identidade, personagens, ilustração, escrita e localização | Atual — Character/Illustration e Writing/Voice/Tone formalizados na EPIC 25 |
 | [`ux/`](ux/README.md) | Diretrizes de UX, acessibilidade, responsividade | Correto — reconstruído por completo na Sprint 16.8 a partir do código atual |
 | [`api/`](api/README.md) | Especificação OpenAPI | Não reauditado quanto ao conteúdo |
-| [`adr/`](adr/README.md) | Registros de decisão arquitetural | Correto (histórico, imutável) |
+| [`adr/`](adr/README.md) | Registros de decisão arquitetural | Correto (histórico, imutável) — baseline de validade atual dos 6 ADRs aplicada na Sprint 31.13 |
 | [`developer/`](developer/README.md) | Guia de contribuição, setup de ambiente | Reservado — ver `README.md` da raiz enquanto isso |
 | [`history/`](history/README.md) | Diários de sprint e transições já concluídas | Correto (histórico, congelado) |
 | [`epics/20-home-visual-experience/`](epics/20-home-visual-experience/README.md) | EPIC 20 — Home & Visual Experience: decisões aprovadas, discovery transversal, Visual Adoption Map, roadmap de Sprints | Histórico concluído |
@@ -54,7 +54,7 @@ testes em `tests/BeeDay.Web.Tests`". Ver [`CONVENTIONS.md`](CONVENTIONS.md).
 | [`epics/25-design-system-brand-evolution/`](epics/25-design-system-brand-evolution/README.md) | EPIC 25 — beeday Design System & Brand System Evolution: contrato de marca, governança, implementação e gate final | Concluída na Sprint 25.16 |
 | [`epics/28-transactional-email-experience/`](epics/28-transactional-email-experience/README.md) | EPIC 28 — Transactional Email Experience, Deliverability & Observability: baseline, contrato de localização, composição, deliverability e fechamento consolidado | `IMPLEMENTATION READY — POST-MERGE HMG VALIDATION PENDING` (status próprio da Epic, na Sprint 28.10) |
 | [`epics/30-system-integrity/`](epics/30-system-integrity/README.md) | EPIC 30 — System Integrity & Complete Engineering Audit: inventário versionado, Audit Ledger, findings e ownership por Sprint | Em andamento — baseline criado na Sprint 30.1 |
-| [`epics/31-documentation-knowledge-consolidation/`](epics/31-documentation-knowledge-consolidation/README.md) | EPIC 31 — Repository Documentation & Knowledge Consolidation: Documentation Ledger, ADR validity baseline, reconciliação por área | Em andamento — reconciliação de arquitetura, domínio, aplicação, infraestrutura, persistência, web/UX/design/marca, testes, segurança/autenticação, CI/CD e deployment/operações concluída (Sprints 31.1–31.12) |
+| [`epics/31-documentation-knowledge-consolidation/`](epics/31-documentation-knowledge-consolidation/README.md) | EPIC 31 — Repository Documentation & Knowledge Consolidation: Documentation Ledger, ADR validity baseline, reconciliação por área | Em andamento — reconciliação por área e baseline de validade de ADR concluídas (Sprints 31.1–31.13) |
 
 ## Templates
 
