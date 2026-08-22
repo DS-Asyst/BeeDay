@@ -31,15 +31,14 @@ else if (State.Data?.Profile.HasProfile == true)
     var dashboard = State.Data;
     var activeProject = dashboard.Projects.Where(project => !project.Completed).OrderByDescending(project => project.Featured).FirstOrDefault();
 
-    <section class="product-home beeday-fade-in" aria-labelledby="home-heading">
-        <header class="product-home__header">
-            <div>
-                <span class="product-home__date">@DateTime.Today.ToString("dddd, MMMM d")</span>
-                <h1 id="home-heading">@Localizer["WelcomeBackHeading", dashboard.Profile.Nickname]</h1>
-                <p>@Localizer["ChooseNextStepDescription"]</p>
-            </div>
-            <BeeDayButton Icon="BeeDayIconName.Daily" OnClick="GoToDaily">@Localizer["OpenDailyButtonLabel"]</BeeDayButton>
-        </header>
+    <section class="product-home beeday-fade-in" aria-label="@Localizer["WelcomeBackHeading", dashboard.Profile.Nickname]">
+        <BeeDayPageHeader Eyebrow="@DateTime.Today.ToString("dddd, MMMM d")"
+                          Title="@Localizer["WelcomeBackHeading", dashboard.Profile.Nickname]"
+                          Description="@Localizer["ChooseNextStepDescription"]">
+            <Actions>
+                <BeeDayButton Icon="BeeDayIconName.Daily" OnClick="GoToDaily">@Localizer["OpenDailyButtonLabel"]</BeeDayButton>
+            </Actions>
+        </BeeDayPageHeader>
 
         <section class="product-home__progress" aria-label="@Localizer["YourProgressAriaLabel"]">
             <ExperienceBar Model="ExperienceViewModel.From(dashboard.Profile)"

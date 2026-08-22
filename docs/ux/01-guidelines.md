@@ -23,8 +23,13 @@ O padrão estrutural de cabeçalho (`BeeDayPageHeader`/`BeeDaySectionHeader`/`Be
 [`docs/design-system/02-components.md`](../design-system/02-components.md) §5) é: eyebrow (rótulo
 pequeno, maiúsculo, cor de marca) → título (H1/H2, Nunito) → descrição (Nunito,
 text-secondary) → ações (à direita em telas largas, empilhadas abaixo em `max-width: 42rem`). Esse
-padrão se repete em Account e Wallet via `BeeDayPageHeader`, preservando containers e conteúdos
-próprios; `Home.razor` permanece uma composição de marketing deliberadamente própria.
+padrão se repete em Account e Profile via `BeeDayPageHeader` (Sprint 32.3 alinhou Profile, que antes
+reimplementava o mesmo shape à mão) e em Wallet via `BeeDayHero` (escala mais rica, com surface de
+cor — ver §7.1), preservando containers e conteúdos próprios; `Home.razor` permanece uma composição
+de marketing deliberadamente própria. Daily (`/daily`) permanece uma exceção intencional documentada:
+seu `<h1>` é `beeday-visually-hidden` porque a barra de busca/criação lidera a hierarquia visual do
+board operacional, não um cabeçalho de página — ver `docs/epics/32-product-experience-polish/README.md`
+§6 (EXP32-F016).
 
 ## 3. Feedback de ação
 
