@@ -1,7 +1,8 @@
 # EPIC 31 — beeday Repository Documentation & Knowledge Consolidation
 
 **GitHub Issue:** [#228](https://github.com/tiagoarrigoni/BeeDay/issues/228)
-**Status:** Em andamento — Sprints 31.1 e 31.2 concluídas
+**Status:** `COMPLETE` — as 15 Sprints (31.1–31.15) concluídas; ver "EPIC 31 — Encerramento" ao
+final deste documento para o relatório de fechamento e o ledger de Sprints/PRs.
 
 ## Objetivo
 
@@ -965,7 +966,7 @@ já afirmava sobre comportamento, apenas corrigindo onde encontrar a evidência 
 
 ### Lacuna de citação de ADR fechada (Required work #5)
 
-Nenhum dos 9 documentos citava [ADR-003](../adr/ADR-003-aggregate-repositories.md) — a decisão
+Nenhum dos 9 documentos citava [ADR-003](../../adr/ADR-003-aggregate-repositories.md) — a decisão
 mais diretamente relacionada ao §7-8 de `06-persistence-architecture.md` (repositórios por
 Aggregate + read services + `IUnitOfWork`), classificada `VALID` na Sprint 31.2. Adicionada uma
 citação explícita no início do §7, evitando duplicar o conteúdo do ADR (apenas um link + uma frase
@@ -2163,5 +2164,190 @@ nesta conversa.
 
 `README.md` raiz, `docs/README.md`, `docs/api/README.md` e `docs/developer/README.md` atualizados;
 todas as áreas reservadas com disposição final; Documentation Ledger sem itens órfãos.
+
+---
+## Sprint 31.15 — Documentation Integrity & Final Knowledge Gate
+
+**GitHub Issue:** [#243](https://github.com/tiagoarrigoni/BeeDay/issues/243)
+**Branch:** `sprint/31.15-documentation-integrity-final-knowledge-gate`
+**Depende de:** #242 (concluída, ver seção acima)
+
+> Segue `CLAUDE.md`, o padrão de planejamento beeday e o Global Execution Contract da EPIC 31 em
+> #228.
+
+### Objetivo da Sprint
+
+Provar a integridade da documentação de todo o repositório e fechar a EPIC 31 apenas quando o
+sistema de conhecimento resultante for internamente consistente e baseado em evidência.
+
+### Decisão do owner antes da validação (Sprint 31.3 → 31.15)
+
+Os 7 artefatos locais-apenas classificados `REMOVED (candidate)` desde a Sprint 31.2
+(`.github/upgrades/scenarios/dotnet-version-upgrade/*`, 6 arquivos, e
+`scripts/iis-control/Provision-BeeDayHmgIisControl.ps1.orig`) foram apresentados ao owner nesta
+Sprint para a decisão final que faltava. **Decisão: excluir ambos.** Confirmado `git ls-files` para
+os dois alvos antes da exclusão (nenhum rastreado — remoção não afeta histórico do Git). Excluídos.
+Outcome do Ledger: `REMOVED` (7 itens), a única categoria "Repository Hygiene / Tooling Artifacts"
+que permanecia em estado não-terminal (`UNKNOWN`) até esta Sprint.
+
+### 1. Revisão de todo o Ledger e estado terminal (Required work #1/#2)
+
+Consolidação por assunto canônico (21 tópicos definidos na Sprint 31.2, mais o artefato criado na
+Sprint 31.3), com o estado terminal final e a Sprint que o fechou:
+
+| Owner topic | Itens | Estado terminal final | Sprint(s) |
+|---|---|---|---|
+| Architecture | 9 | `CURRENT` | 31.4 |
+| Domain Model | 15 | `CURRENT` (1 era `DUPLICATED`, resolvido para `CURRENT`) | 31.5 |
+| Application / CQRS | 7 | `CURRENT` | 31.6 |
+| Infrastructure & Persistence | 10 | `CURRENT` | 31.7 |
+| Web / UX / Presentation | 12 | `CURRENT` | 31.8 |
+| Design System | 5 | `CURRENT` | 31.8 |
+| Brand System | 4 | `CURRENT` | 31.8 |
+| Testing & Quality Engineering | 4 | `CURRENT` | 31.9 |
+| Security | 3 | `CURRENT` | 31.10 |
+| Authentication & Identity | 1 | `CURRENT` (redirecionamento permanente por design) | 31.10 |
+| CI/CD & GitHub Engineering | 16 | `CURRENT` | 31.11 |
+| Deployment & Operations | 22 | `CURRENT` | 31.12 |
+| Architecture Decision Records | 7 | `HISTORICAL` (validade classificada, corpo imutável) | 31.2/31.13 |
+| Epic History (EPIC 20/21/25/30) | 6 | `HISTORICAL` | 31.13 (EPIC 30 reclassificado de `STALE`) |
+| Epic History (EPIC 28) | 1 | `CURRENT` (documentação honesta de um gap operacional real, não um defeito documental) | 31.13 |
+| Historical Documentation (`docs/history/`) | 10 | `HISTORICAL` (congelado desde a EPIC 16) | 31.13 |
+| Documentation Governance | 14 | `CURRENT` | 31.2/31.14 |
+| Repository Entry Points (`README.md` raiz) | 1 | `CURRENT` | 31.3/31.14 |
+| API Contract | 2 | `CURRENT` (rotulado explicitamente como especulativo) | 31.14 |
+| Developer Guide | 1 | `CURRENT` (redirecionamento permanente por design) | 31.14 |
+| AI/Project Governance | 28 | `CURRENT` (27 classificados na Sprint 31.3 + 1 criado na mesma Sprint) | 31.3 |
+| Repository Hygiene / Tooling Artifacts | 7 | `REMOVED` | 31.15 (decisão do owner, ver acima) |
+| **Total** | **185** | | |
+
+**Distribuição final:** `CURRENT` = 155, `HISTORICAL` = 23, `REMOVED` = 7, `SUPERSEDED` = 0.
+**100% dos itens em estado terminal válido** — nenhum `UNKNOWN`, `NOT REVIEWED`, `STALE`,
+`DUPLICATED` ou `PARTIALLY_CURRENT` remanescente.
+
+### 2. Varredura de integridade repositório-wide (Required work #3)
+
+- **Links relativos quebrados:** verificado programaticamente todos os links Markdown relativos em
+  126 arquivos (`docs/**/*.md` + `README.md` raiz). Encontrado e corrigido **1 link real quebrado**
+  introduzido pela própria Sprint 31.4 desta EPIC (`docs/epics/31-.../README.md`, citação de
+  ADR-003 com um `../` a menos). Os 3 outros "quebrados" reportados pelo scanner são falsos
+  positivos já documentados pela própria EPIC 30 (`docs/CONVENTIONS.md:66`, um exemplo de sintaxe
+  `![descrição](caminho)` na prosa, não um link real) — confirmado, nenhuma ação necessária.
+- **Segredos/valores sensíveis:** varredura por padrões de senha/API key/connection string em todo
+  `docs/` e `README.md` raiz. Único hit: `Password=CHANGEME` em uma citação dentro de
+  `docs/epics/30-system-integrity/README.md` — já documentado pela própria EPIC 30 como placeholder
+  de desenvolvimento nunca conectado de fato, não um segredo real. Nenhum segredo introduzido por
+  esta EPIC.
+- **Artefatos de governança de IA indevidamente rastreados:** `git ls-files CLAUDE.md AGENTS.md
+  .claude .agents .codex` retorna vazio — confirmado que nenhum dos 14 Sprints desta EPIC rastreou
+  acidentalmente um artefato de governança de IA.
+- **Fontes canônicas duplicadas:** busca por declarações de "owner canônico"/"documento canônico"
+  em `docs/` — apenas as declarações già estabelecidas nesta própria EPIC (`docs/authentication/`→
+  `security/`, `docs/README.md`→`README.md` raiz, `docs/domain/audit-inventory.md`) e uma menção
+  pré-existente da EPIC 25, sem sobreposição ou conflito.
+- **Nomes/caminhos de workflow desatualizados:** já verificado exaustivamente na Sprint 31.11
+  (todos os 7 workflows + `dependabot.yml` + `pull_request_template.md` existem exatamente como
+  citados).
+- **Contradição de arquitetura de estado atual:** nenhuma nova encontrada além do já classificado
+  (`ADR-001` = `CONFLICTING`, decisão pendente do owner, registrado na Sprint 31.13 — não é uma
+  "contradição não rastreada", é uma divergência conhecida e documentada).
+
+### 3. Root README e índice de documentação refletem o repositório final (Required work #4)
+
+Confirmado na Sprint 31.14 e reverificado nesta Sprint: `README.md` raiz e `docs/README.md` não têm
+mais nenhuma linha com status "Reservado"/"Em andamento"/"não tem conteúdo ainda" — toda área tem
+disposição final explícita.
+
+### 4. Quality gate final (Required work #5)
+
+```bash
+git status
+dotnet format BeeDay.slnx --verify-no-changes
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+dotnet test BeeDay.slnx
+dotnet test BeeDay.slnx --configuration Release
+dotnet ef migrations has-pending-model-changes --project src/BeeDay.Infrastructure --startup-project src/BeeDay.Infrastructure
+git diff --check
+```
+
+| Comando | Resultado |
+|---|---|
+| `dotnet format --verify-no-changes` | Limpo, 0 alterações necessárias |
+| `dotnet build --configuration Release --warnaserror` | 0 Avisos, 0 Erros |
+| `dotnet test` (Debug) | **1.557/1.557 aprovados** (121 Domain, 119 Application, 216 Infrastructure, 880 Web, 221 E2E) |
+| `dotnet test --configuration Release` | **1.557/1.557 aprovados** (121 Domain, 119 Application, 216 Infrastructure, 880 Web, 221 E2E) |
+| `dotnet ef migrations has-pending-model-changes` | "No changes have been made to the model since the last migration." |
+| `git diff --check` | Limpo, 0 erros de espaço em branco |
+| `git status` | Limpo (só edições intencionais desta Sprint) |
+
+### Critérios de aceite (Issue #243)
+
+- [x] 100% of Documentation Ledger entries are in valid terminal states — confirmado (seção 1).
+- [x] Every maintained subject has one canonical owner — 22 assuntos, cada um com exatamente um
+      documento/área canônica.
+- [x] No known broken internal documentation link remains — 1 encontrado e corrigido nesta Sprint.
+- [x] No known stale current-state command/path/workflow name remains — confirmado, cumulativo com
+      as 14 Sprints anteriores.
+- [x] No known current-state architecture contradiction remains — a única divergência conhecida
+      (`ADR-001`) está classificada e roteada para decisão do owner, não "não rastreada".
+- [x] No unintended duplicate canonical source remains — confirmado.
+- [x] No critical project rule exists only in removed/untracked agent configuration — confirmado na
+      Sprint 31.3 (o único `PROJECT_RULE` sem lar rastreado foi migrado para `README.md` raiz).
+- [x] No secret or sensitive value is introduced — confirmado, varredura completa.
+- [x] Root README and `docs/README.md` accurately represent the final state — confirmado.
+- [x] Final repository quality gates required by current governance are actually executed and
+      reported — ver seção 4.
+- [x] EPIC 31 can be closed from evidence rather than subjective judgment — este relatório é essa
+      evidência.
+
+### Sprint-specific boundary respeitado
+
+Esta Sprint foi um gate de fechamento, não uma nova rodada de redesenho documental. A única correção
+de conteúdo foi o link quebrado (item de integridade, não de redesenho). A única ação de exclusão
+foi feita com decisão explícita do owner, coletada nesta própria Sprint.
+
+### Riscos residuais no fechamento da EPIC 31
+
+- `ADR-001` permanece `CONFLICTING` — decisão de criar um `NEW ADR` formal ou aceitar a divergência
+  como está cabe ao owner (Sprint 31.13).
+- `docs/epics/28-transactional-email-experience/README.md` — validação HMG pós-merge continua sem
+  confirmação registrada; gap operacional genuíno, não um defeito de documentação (Sprint 31.13).
+- Nenhum outro risco residual de documentação identificado.
+
+### Deliverable
+
+Relatório de Integridade de Documentação (este documento), Documentation Ledger 100% em estados
+terminais válidos, e validação completa final executada e registrada.
+
+---
+
+## EPIC 31 — Encerramento
+
+**Status final: EPIC 31 — COMPLETE.**
+
+15 Sprints executadas (31.1–31.15), 15 Pull Requests mesclados em `hmg`, 185 artefatos de
+documentação inventariados e levados a estado terminal válido, 6 ADRs classificados quanto à
+validade atual, 2 áreas reservadas (`docs/authentication/`, `docs/developer/`) resolvidas para
+redirecionamento permanente, 1 área especulativa (`docs/api/`) rotulada inequivocamente, e 7
+artefatos de disco não rastreados removidos por decisão explícita do owner. Nenhuma ação em `main`
+ou `prd` foi realizada ou necessária — todo o trabalho ficou dentro do limite autônomo de `hmg`.
+
+| Sprint | Branch | PR | Merge em `hmg` |
+|---|---|---|---|
+| 31.1 | `sprint/31.1-documentation-baseline-inventory` | #300 | `b9f594e` |
+| 31.2 | `sprint/31.2-canonical-architecture-adr-baseline` | #301 | `35b2507` |
+| 31.3 | `sprint/31.3-ai-governance-extraction-repository-cleanup` | #302 | `1fb5cf9` |
+| 31.4 | `sprint/31.4-architecture-documentation-reconciliation` | #303 | `e62d8c5` |
+| 31.5 | `sprint/31.5-domain-functional-model-documentation-reconciliation` | #304 | `4412d70` |
+| 31.6 | `sprint/31.6-application-use-case-documentation-reconciliation` | #305 | `a1714bb` |
+| 31.7 | `sprint/31.7-infrastructure-persistence-documentation-reconciliation` | #306 | `642856a` |
+| 31.8 | `sprint/31.8-web-ui-experience-system-documentation-reconciliation` | #307 | `a8be715` |
+| 31.9 | `sprint/31.9-testing-quality-engineering-documentation-reconciliation` | #308 | `ca3bf87` |
+| 31.10 | `sprint/31.10-security-identity-privacy-documentation-reconciliation` | #309 | `b185d3c` |
+| 31.11 | `sprint/31.11-cicd-github-engineering-documentation-reconciliation` | #310 | `c6be299` |
+| 31.12 | `sprint/31.12-hmg-iis-deployment-operations-documentation-reconciliation` | #311 | `fa17a83` |
+| 31.13 | `sprint/31.13-adr-historical-documentation-consolidation` | #312 | `cc758fa` |
+| 31.14 | `sprint/31.14-root-readme-docs-index-residual-documentation-consolidation` | #313 | `016b23f` |
+| 31.15 | `sprint/31.15-documentation-integrity-final-knowledge-gate` | (esta Sprint — ver PR de fechamento no GitHub, Issue #243) | (ver PR de fechamento) |
 
 ---
