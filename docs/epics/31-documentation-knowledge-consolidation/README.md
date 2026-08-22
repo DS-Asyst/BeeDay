@@ -1167,3 +1167,106 @@ nesta conversa.
 canonicidade) atualizados; Documentation Ledger sincronizado (`DOC-077` → `CURRENT`).
 
 ---
+## Sprint 31.6 — Application & Use-Case Documentation Reconciliation
+
+**GitHub Issue:** [#234](https://github.com/tiagoarrigoni/BeeDay/issues/234)
+**Branch:** `sprint/31.6-application-use-case-documentation-reconciliation`
+**Depende de:** #233 (concluída, ver seção acima)
+
+> Segue `CLAUDE.md`, o padrão de planejamento beeday e o Global Execution Contract da EPIC 31 em
+> #228.
+
+### Objetivo da Sprint
+
+Reconciliar os 7 documentos de `docs/application/` com a orquestração real de casos de uso, sem
+inventar padrões não implementados.
+
+### Validação aplicada nesta Sprint (política aprovada pelo owner)
+
+Sprint documental — nenhum código-fonte foi alterado. Suíte completa de testes **não** executada,
+por política aprovada em 2026-08-21.
+
+### Método
+
+Levantamento inicial delegado (agente de exploração, somente leitura) cobrindo os 10 diretórios de
+`Features/`, os 4 Behaviors do pipeline MediatR, as 8 interfaces de repositório + `IUnitOfWork`, a
+única exceção própria de Application, e os 37 Commands + 6 Queries reais. Todo achado de
+discrepância foi reverificado nesta sessão com `grep`/leitura direta antes de qualquer edição.
+
+### Achados corrigidos (Required work #2)
+
+| Documento | Achado | Correção |
+|---|---|---|
+| `04-contracts.md` | Afirmava que apenas `UpdateTodoCommandHandler` usa `IUnitOfWork` completo, sendo o padrão comum injetar o repositório isolado. Na realidade, **13 Handlers em 6 Features** usam `IUnitOfWork`, a maioria com transação explícita coordenando 2+ Aggregates — é um padrão central, não uma exceção. | Seção reescrita listando os 13 Handlers reais por Feature, mantendo os Handlers de escrita única (sem transação) como contraste correto. |
+| `04-contracts.md` | `IProjectRepository` citado com 13 métodos; contagem real é 12 (mesmo achado já corrigido em `docs/architecture/06-persistence-architecture.md` na Sprint 31.4 — agora consistente nos dois documentos). | Corrigido para 12. |
+| `01-cqrs.md` | Tabela Command/Query dizia "24 comandos" sem retorno; contagem real (`grep` de `record.*Command`) é 31 (37 comandos totais − 6 com retorno). | Corrigido para 31. |
+| `01-cqrs.md`, `02-use-cases.md` (3 ocorrências) | "9 Features" — contagem real é 10 (`Authentication, Dashboard, Habits, Identity, Ordering, Projects, Tasks, Todos, Users, Wallets`), consistente com a própria listagem de `README.md` e com o corpo dos dois documentos, que já têm 10 seções. | Corrigido para 10 nas 3 ocorrências. |
+| `02-use-cases.md` | "5 casos de uso concedem XP" citando apenas 3 Commands na mesma frase — não fechava a conta mesmo contando `ToggleTodoCommand` como até duas concessões (máximo 4). | Reescrito para "3 Commands concedem XP", com a ressalva de que `ToggleTodoCommand` pode conceder duas vezes na mesma execução. |
+| `02-use-cases.md` | Linha "Obter usuário atual" citava o Handler apenas como "(Handler correspondente em `UserHandlers.cs`)", em vez do nome de classe real, diferente de toda outra linha da tabela. | Nomeado explicitamente `GetCurrentUserQueryHandler`. |
+| `README.md` | Listagem de `Common/Identity/` omitia `IEmailConfirmationIssuer.cs` (6 arquivos reais, 5 listados) — interface com implementação concreta registrada em DI e usada por 4 Handlers de Identity/Users. | Adicionado à listagem. |
+
+### Padrão de orquestração documentado (Required work #3)
+
+`03-pipeline.md` documentava apenas o `ApplicationActionDomainEvent` sintético publicado pelo
+`DomainEventBehavior`. Adicionada uma nota distinguindo esse caminho do caminho **manual** de
+publicação dos eventos de domínio reais (`ExperienceGrantedDomainEvent`/`UserLeveledUpDomainEvent`,
+definidos em `Domain/Events/`), disparados diretamente pelos 3 Handlers que concedem XP via
+`ExperienceRewardEventPublisher` — sem duplicar o detalhe já coberto por `docs/domain/domain-
+events.md`, apenas um link cruzado.
+
+### Conteúdo já correto, confirmado sem reescrita (Required work #4)
+
+A descrição dos 4 Behaviors do pipeline (`03-pipeline.md`) conferiu linha a linha sem nenhum
+mismatch — ordem de registro, lógica de cada um, incluindo o trecho de reflexão do
+`DomainEventBehavior` reproduzido verbatim. A hierarquia de exceções (`05-exceptions.md`) também
+não teve nenhum mismatch: `ApplicationValidationException` é a única exceção própria, exceções de
+Domain propagam sem tradução, `ActivityNotFoundException` confirmada inexistente no repositório
+inteiro. O catálogo completo de casos de uso por Feature em `02-use-cases.md` (Commands, Queries,
+Handlers, Contracts, Aggregate, Repository, Resultado) conferiu 100% correto exceto os 2 achados
+acima — todas as outras ~35 linhas de tabela permanecem inalteradas.
+
+### Critérios de aceite (Issue #234)
+
+- [x] Documented commands/queries/use-case patterns exist — confirmado; 3 contagens corrigidas.
+- [x] Application documentation reflects actual dependency boundaries — `IUnitOfWork`/repositório
+      isolado corrigido para refletir o padrão real.
+- [x] Critical application flows have accurate orchestration descriptions — pipeline e concessão
+      de XP verificados e (no segundo caso) complementados.
+- [x] UI concerns are not presented as Application responsibilities — nenhuma menção de
+      Razor/Blazor/HTTP encontrada nos 7 documentos.
+- [x] Idempotency/cancellation/authorization claims are only made where verified — verificado:
+      propagação de `CancellationToken` confirmada em handlers de 5 Features distintas; guards de
+      ownership (`RequireExistsAsync`/`RequireOwnedTagAsync`/`EnsureOwned`) e checagens de
+      duplicidade (`IsNameInUseAsync`/`IsEmailInUseAsync`) confirmados como reais, não apenas
+      afirmados.
+
+### Sprint-specific boundary respeitado
+
+Nenhuma preocupação de apresentação (Razor/Blazor/HTTP) foi documentada como responsabilidade de
+Application. Nenhum padrão foi inventado — todas as correções acima alinham a documentação ao que
+o código já faz.
+
+### Riscos residuais
+
+Nenhum. Todos os achados desta Sprint foram corrigidos; nenhuma correção pendente foi identificada
+que dependa de outra Sprint especialista.
+
+### Validação executada
+
+```bash
+git status
+dotnet format BeeDay.slnx --verify-no-changes
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+git diff --check
+```
+
+Resultados registrados na seção "Quality/Validation" do relatório final da Sprint enviado ao owner
+nesta conversa. Toda contagem/citação corrigida foi reverificada com `grep`/leitura direta nesta
+sessão antes de ser escrita.
+
+### Deliverable
+
+5 arquivos de `docs/application/` corrigidos (`01-cqrs.md`, `02-use-cases.md`, `03-pipeline.md`,
+`04-contracts.md`, `README.md`), e Documentation Ledger atualizado.
+
+---

@@ -91,6 +91,15 @@ inversa.
   `new DomainEventNotification(domainEvent)`, via `IPublisher.Publish(...)` do MediatR.
 - Retorna a resposta original do Handler, sem modificação.
 
+**Segundo caminho de publicação, fora deste Behavior:** os eventos de domínio "de verdade"
+(`ExperienceGrantedDomainEvent`/`UserLeveledUpDomainEvent`, definidos em `src/BeeDay.Domain/
+Events/`) não passam pelo pipeline acima — são publicados manualmente por
+`Common/Experience/ExperienceRewardEventPublisher.cs`, chamado diretamente pelos 3 Handlers que
+concedem XP (`RegisterHabitPositiveCommandHandler`, `ToggleTaskCommandHandler`,
+`ToggleTodoCommandHandler`). `ApplicationActionDomainEvent` (este Behavior) é um evento de
+auditoria sintético, construído pela própria Application — não um evento que o Domain levantou. Ver
+`docs/domain/domain-events.md` para o fluxo completo de concessão de XP.
+
 ## Diagrama de execução
 
 ```mermaid
