@@ -7,7 +7,8 @@
 recorte especificamente operacional: onde cada mecanismo de segurança é configurado/implantado, não
 apenas que ele existe.
 
-**Última verificação:** 2026-08-07.
+**Última verificação:** 2026-08-21 (Sprint 31.10, EPIC 31) — verificação anterior 2026-08-07 não
+capturou `SecurityHeadersMiddleware`, adicionado na Sprint 30.22 (§5 corrigido).
 
 ## 1. Objetivo
 
@@ -38,6 +39,14 @@ Nenhum segredo é logado — confirmado por `Program.cs`'s handlers de log de au
 `UserId`/`TraceId`/booleanos), e `01-security-baseline.md` §2 confirma que hash/senha nunca são
 registrados.
 
+**E-mail (PII) em log:** `ResendEmailSender`/`HmgRecipientGuardedEmailSender` nunca logam o
+endereço do destinatário, em nenhuma forma. `DevelopmentEmailSender` (só ativo fora de produção) é
+a única exceção — sua linha de log usa `EmailAddressLogMasking.Mask`
+(`src/BeeDay.Infrastructure/Identity/EmailAddressLogMasking.cs`), que preserva só os 2 primeiros
+caracteres da parte local do endereço (`ab***@domain`), suficiente para diferenciar execuções de
+teste locais sem imprimir o e-mail completo. Não é um framework geral de mascaramento de PII —
+existe apenas para essa linha específica.
+
 ## 4. Rate Limiting
 
 Detalhado por completo em [`docs/web/01-composition-root.md`](../web/01-composition-root.md) §9 —
@@ -52,9 +61,16 @@ variável de ambiente de deploy — os valores de produção são sempre os padr
 
 Conforme `01-security-baseline.md` §4 (testado via `SecurityHeadersIntegrationTests`): o framework
 Blazor Server já envia `Content-Security-Policy: frame-ancestors 'self'` e
-`X-Frame-Options: SAMEORIGIN` automaticamente, independente de configuração desta aplicação. Nenhum
-middleware de headers de segurança adicional (`UseHsts` à parte — ver abaixo) foi encontrado em
-`Program.cs` — sem `Referrer-Policy`, `X-Content-Type-Options` ou `Permissions-Policy` explícitos.
+`X-Frame-Options: SAMEORIGIN` automaticamente, independente de configuração desta aplicação.
+
+`SecurityHeadersMiddleware` (`src/BeeDay.Web/Diagnostics/SecurityHeadersMiddleware.cs`, adicionado
+na Sprint 30.22, registrado logo após `CorrelationIdMiddleware` em `Program.cs`) define os três
+headers que faltavam: `X-Content-Type-Options: nosniff`, `Referrer-Policy:
+strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`.
+Deliberadamente não define `X-Frame-Options`/CSP — o framework já os envia (parágrafo acima); uma
+CSP completa (`script-src` etc.) exige uma Sprint dedicada, não uma adição pontual de header (ver
+Audit Ledger da Sprint 30.22).
+
 `UseHsts()` roda fora de Development, mas — conforme já documentado em
 [`docs/testing/`](../testing/README.md) — não é verificável via `WebApplicationFactory`/TestServer
 por essa nunca realizar handshake TLS real; em produção real (atrás de IIS com HTTPS), o header é
