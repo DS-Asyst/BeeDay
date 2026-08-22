@@ -606,6 +606,18 @@ propaga `--configuration Release` para os 4 projetos de `src/` (mas propaga corr
 de `tests/`) — candidata a uma Sprint futura de correção de build, não necessariamente dentro do
 escopo restante da EPIC 19.
 
+**Resolvido em 2026-08-22** (bloqueio real de promoção `hmg → main`, PR #316): causa raiz isolada
+por reprodução determinística, incrementando o `.slnx` projeto a projeto e pasta a pasta — não é
+`src/` em si, é qualquer projeto hospedado em uma pasta lógica aninhada em dois ou mais níveis
+(`/src/` → `/src/Core/` → projeto). Pastas de nível único (`/tests/`, ou `/src/` sem subpastas)
+sempre resolveram `Release` corretamente; a suposição registrada aqui ("dívida de `src/` vs.
+`tests/`") estava parcialmente certa quanto ao sintoma, mas a causa real era profundidade de
+aninhamento, não a pasta em si. Corrigido achatando `/src/Core/`, `/src/Infrastructure/` e
+`/src/Presentation/` em um único `/src/` de nível único, igual a `/tests/` — ver
+`docs/architecture/02-solution-structure.md` §1 para a evidência completa e
+`docs/deployment/11-release-quality-gate.md` §23.9 para a atualização do achado espelhado da Sprint
+19.7.1.
+
 ### 27.11 Local Validation Results (pós-correção)
 
 | Comando | Executado | Resultado |

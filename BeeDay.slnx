@@ -1,15 +1,9 @@
 <Solution>
   <Folder Name="/src/">
-    <Folder Name="/src/Core/">
-      <Project Path="src/BeeDay.Domain/BeeDay.Domain.csproj" />
-      <Project Path="src/BeeDay.Application/BeeDay.Application.csproj" />
-    </Folder>
-    <Folder Name="/src/Infrastructure/">
-      <Project Path="src/BeeDay.Infrastructure/BeeDay.Infrastructure.csproj" />
-    </Folder>
-    <Folder Name="/src/Presentation/">
-      <Project Path="src/BeeDay.Web/BeeDay.Web.csproj" />
-    </Folder>
+    <Project Path="src/BeeDay.Domain/BeeDay.Domain.csproj" />
+    <Project Path="src/BeeDay.Application/BeeDay.Application.csproj" />
+    <Project Path="src/BeeDay.Infrastructure/BeeDay.Infrastructure.csproj" />
+    <Project Path="src/BeeDay.Web/BeeDay.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/BeeDay.Domain.Tests/BeeDay.Domain.Tests.csproj" />
