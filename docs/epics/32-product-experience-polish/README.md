@@ -173,31 +173,50 @@ Sprint proprietária listada; nenhuma foi aplicada nesta Sprint (§1.1).
 | Device | Shared (afeta qualquer input method, mas o impacto prático é maior para leitor de tela) |
 | Accessibility Impact | Yes |
 | Owning Sprint | 32.4 (Buttons & Action Hierarchy) — cross-ref 32.13 (Focus, Keyboard & Interaction Accessibility) |
-| State | DISCOVERED |
+| State | **FIXED** — Sprint 32.4 |
 
 **Interação:** alternar qual direção (`Positive`/`Negative`/`Both`) um Habit registra, via dois
 botões dedicados no editor.
 
-**Comportamento atual:** os dois botões (`+ Positive`, `− Negative`) alternam a classe CSS `active`
-para comunicar qual(is) direção(ões) está(ão) habilitada(s) — por padrão, um novo Habit tem ambos
-`active` (`HabitDirection.Both`, confirmado via `docs/web/04-feature-components.md` §5). Nenhum dos
-dois botões possui `aria-pressed` ou qualquer outro atributo ARIA de estado.
+**Comportamento anterior:** os dois botões (`+ Positive`, `− Negative`) alternavam a classe CSS
+`active` para comunicar qual(is) direção(ões) está(ão) habilitada(s) — por padrão, um novo Habit tem
+ambos `active` (`HabitDirection.Both`, confirmado via `docs/web/04-feature-components.md` §5). Nenhum
+dos dois botões possuía `aria-pressed` ou qualquer outro atributo ARIA de estado.
 
-**Problema:** um usuário de leitor de tela não tem como saber, a partir do próprio botão, se
-"Positive" e/ou "Negative" está atualmente habilitado — a única fonte de verdade é uma classe CSS
-visual (`.habit-editor__direction-button.active`). Isso é inconsistente com o restante do inventário
-de estado do Design System (`docs/design-system/02-components.md` §2, que lista `aria-pressed`/
-`aria-expanded` como o padrão para toggles como `.beeday-icon-toggle` e `CardMenu`).
+**Problema:** um usuário de leitor de tela não tinha como saber, a partir do próprio botão, se
+"Positive" e/ou "Negative" estava atualmente habilitado — a única fonte de verdade era uma classe CSS
+visual (`.habit-editor__direction-button.active`). Isso era inconsistente com o restante do
+inventário de estado do Design System (`docs/design-system/02-components.md` §2, que lista
+`aria-pressed`/`aria-expanded` como o padrão para toggles como `.beeday-icon-toggle` e `CardMenu`).
 
-**Evidência (navegador, nesta Sprint):** `document.querySelectorAll('button')` dentro do dialog do
+**Evidência (navegador, Sprint 32.1):** `document.querySelectorAll('button')` dentro do dialog do
 editor retornou os dois botões com `ariaPressed: null` em ambos; `outerHTML` confirmou
 `class="habit-editor__direction-button active"` em ambos por padrão, sem nenhum atributo `aria-*`
 de estado.
 
-**Resolution:** não aplicável — `DISCOVERED`.
+**Resolution:** `HabitEditorModal.razor` agora declara `aria-pressed="@PositiveAriaPressed"` /
+`aria-pressed="@NegativeAriaPressed"` nos dois botões, com `PositiveAriaPressed`/`NegativeAriaPressed`
+(`HabitEditorModal.razor.cs`) derivados diretamente de `AllowsPositive`/`AllowsNegative` — a mesma
+fonte que já controlava a classe CSS `active` — seguindo o padrão canônico já estabelecido em
+`DashboardColumn.AriaPressed` (`beeday-icon-toggle`, string `"true"`/`"false"`). Nenhuma mudança
+visual: apenas o atributo ARIA foi adicionado, a classe CSS `active` permanece a única fonte de
+estilo.
 
-**Regression Protection:** a definir pela Sprint 32.4 ao corrigir (candidato: teste bUnit/E2E
-afirmando `aria-pressed="true"/"false"` sincronizado com `HabitDirection`).
+**Evidência (E2E, Sprint 32.4):** `HabitAndTaskTests.HabitDirectionButtons_ExposeAriaPressedAndStayInSyncAfterToggling`
+(Chromium real via Playwright) abre o editor "Create Habit", confirma `aria-pressed="true"` em ambos
+os botões no estado inicial (`HabitDirection.Both`), clica Positive e confirma
+`aria-pressed="false"`/`"true"`, clica Positive novamente e confirma o retorno a `"true"`/`"true"`, e
+finalmente clica Negative a partir de `Both` confirmando `"true"`/`"false"` — prova end-to-end de que
+o atributo permanece sincronizado com `HabitDirection` através de toda transição, não apenas na
+renderização inicial.
+
+**Regression Protection:**
+- `HabitEditorModalTests.DirectionButtons_AriaPressed_MatchesHabitDirectionOnInitialRender` (bUnit,
+  `[Theory]` cobrindo `Both`/`Positive`/`Negative`).
+- `HabitEditorModalTests.TogglePositive_OnABothDirectionHabit_UpdatesAriaPressedOnBothButtons` /
+  `ToggleNegative_OnABothDirectionHabit_UpdatesAriaPressedOnBothButtons` (bUnit).
+- `HabitAndTaskTests.HabitDirectionButtons_ExposeAriaPressedAndStayInSyncAfterToggling` (E2E, Chromium
+  real).
 
 ---
 
@@ -950,7 +969,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 |---|---|
 | 32.2 — Application Shell & Navigation Fluidity | EXP32-F014, EXP32-F015 — ambos `FIXED` nesta Sprint |
 | 32.3 — Page Layout Consistency | EXP32-F016, EXP32-F017 — ambos `FIXED` nesta Sprint; EXP32-F018, EXP32-F019 — `ACCEPTED` (exceções documentadas); EXP32-F020 — novo, roteado para 32.13; EXP32-F009 — evidência adicional (`/profile`) |
-| 32.4 — Buttons & Action Hierarchy | EXP32-F001 |
+| 32.4 — Buttons & Action Hierarchy | EXP32-F001 — `FIXED` nesta Sprint |
 | 32.5 — Forms & Input Experience | EXP32-F005, EXP32-F006 (cross-ref), EXP32-F007, EXP32-F011 (cross-ref), EXP32-F012 (cross-ref) |
 | 32.6 — Modal & Dialog Experience | EXP32-F002 (cross-ref) |
 | 32.7 — Lists, Cards & Collection Patterns | EXP32-F003, EXP32-F004 |

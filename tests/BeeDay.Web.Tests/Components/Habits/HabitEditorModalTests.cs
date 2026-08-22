@@ -168,6 +168,53 @@ public sealed class HabitEditorModalTests : BunitContext
         Assert.DoesNotContain("active", cut.Find(".habit-editor__direction-button:nth-child(2)").GetAttribute("class"), StringComparison.Ordinal);
     }
 
+    // EPIC 32 Sprint 32.4 (EXP32-F001): the direction buttons only communicated their toggled state
+    // via the CSS "active" class — a screen reader had no way to know whether Positive/Negative was
+    // currently enabled. Proves aria-pressed stays synchronized with HabitDirection through every
+    // toggle transition, not just at initial render.
+    [Theory]
+    [InlineData(HabitDirection.Both, "true", "true")]
+    [InlineData(HabitDirection.Positive, "true", "false")]
+    [InlineData(HabitDirection.Negative, "false", "true")]
+    public void DirectionButtons_AriaPressed_MatchesHabitDirectionOnInitialRender(HabitDirection direction, string expectedPositive, string expectedNegative)
+    {
+        var model = new HabitEditorModel { Title = "Study", Direction = direction };
+        var cut = Render<HabitEditorModal>(parameters => parameters
+            .Add(component => component.Model, model)
+            .Add(component => component.IsEditing, true));
+
+        Assert.Equal(expectedPositive, cut.Find(".habit-editor__direction-button:nth-child(1)").GetAttribute("aria-pressed"));
+        Assert.Equal(expectedNegative, cut.Find(".habit-editor__direction-button:nth-child(2)").GetAttribute("aria-pressed"));
+    }
+
+    [Fact]
+    public void TogglePositive_OnABothDirectionHabit_UpdatesAriaPressedOnBothButtons()
+    {
+        var model = new HabitEditorModel { Title = "Study", Direction = HabitDirection.Both };
+        var cut = Render<HabitEditorModal>(parameters => parameters
+            .Add(component => component.Model, model)
+            .Add(component => component.IsEditing, true));
+
+        cut.Find(".habit-editor__direction-button:nth-child(1)").Click();
+
+        Assert.Equal("false", cut.Find(".habit-editor__direction-button:nth-child(1)").GetAttribute("aria-pressed"));
+        Assert.Equal("true", cut.Find(".habit-editor__direction-button:nth-child(2)").GetAttribute("aria-pressed"));
+    }
+
+    [Fact]
+    public void ToggleNegative_OnABothDirectionHabit_UpdatesAriaPressedOnBothButtons()
+    {
+        var model = new HabitEditorModel { Title = "Study", Direction = HabitDirection.Both };
+        var cut = Render<HabitEditorModal>(parameters => parameters
+            .Add(component => component.Model, model)
+            .Add(component => component.IsEditing, true));
+
+        cut.Find(".habit-editor__direction-button:nth-child(2)").Click();
+
+        Assert.Equal("true", cut.Find(".habit-editor__direction-button:nth-child(1)").GetAttribute("aria-pressed"));
+        Assert.Equal("false", cut.Find(".habit-editor__direction-button:nth-child(2)").GetAttribute("aria-pressed"));
+    }
+
     [Fact]
     public void UnderPortugueseUiCulture_DeleteConfirmationIsLocalized()
     {
