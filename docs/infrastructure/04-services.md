@@ -43,7 +43,7 @@ Nenhuma rotação ou limite de tamanho — o arquivo cresce indefinidamente.
 | `SystemClock` | `IClock` | Singleton | `UtcNow => DateTimeOffset.UtcNow` — único membro, existe para tornar o tempo testável (injeção em vez de chamada estática) |
 | `SecureUserTokenService` | `IUserTokenService` | Singleton | Gera token (32 bytes CSPRNG, Base64Url) e hash (SHA-256, hex maiúsculo) para tokens de e-mail/reset de senha |
 | `MemoryIdentityRequestThrottle` | `IIdentityRequestThrottle` | Singleton | `ConcurrentDictionary<string, DateTimeOffset>` — throttle em memória (não distribuído), chave `"{operation}:{subject normalizado}"`, CAS lock-free via `TryAdd`/`TryUpdate` |
-| `IdentityEmailComposer` | `IIdentityEmailComposer` | Singleton | Monta o HTML dos e-mails de confirmação/reset (template inline, tema escuro, `#7A4FCB`), usando `IdentityEmailOptions` para montar a URL |
+| `IdentityEmailComposer` | `IIdentityEmailComposer` | Singleton | Monta o HTML dos e-mails de confirmação/reset (template inline, tema claro, cor de marca `#5247F9`), recebendo `UserLanguage` e resolvendo strings via `System.Resources.ResourceManager`/catálogo `EmailResources.*.resx` (ADR-006), usando `IdentityEmailOptions` para montar a URL — ver [`06-transactional-email.md`](06-transactional-email.md) |
 
 **Achado sobre `MemoryIdentityRequestThrottle`:** por ser em memória e singleton por processo, o
 throttle não sobrevive a um restart nem é compartilhado entre múltiplas instâncias da aplicação —
@@ -64,10 +64,10 @@ descartada por engano. Sem lock global, sem `BackgroundService`/`Timer` novo, se
 | | `ResendEmailSender` | `DevelopmentEmailSender` |
 |---|---|---|
 | Interface | `IEmailSender` | `IEmailSender` |
-| Lifetime | Typed `HttpClient` (`AddHttpClient<IEmailSender, ResendEmailSender>`) | Singleton |
+| Lifetime | Typed `HttpClient` (`AddHttpClient<ResendEmailSender>`, tipo concreto — `IEmailSender` é implementado por `HmgRecipientGuardedEmailSender`, que envolve este via decorator, ver Sprint 26.4 abaixo) | Singleton |
 | Registrado quando | `BeeDay:Email:Resend:Enabled = true` | Caso contrário (padrão) |
 | Mecanismo | `POST https://api.resend.com/emails`, `Authorization: Bearer {ApiKey}`, `User-Agent: BeeDay/1.0`, `Idempotency-Key` novo por request, timeout 30s, campo `text` opcional (`EmailMessage.PlainTextBody`). Lança `HttpRequestException` em falha (não engolida) | Escreve 2 ou 3 arquivos por e-mail em `{ContentRoot}/{Directory}` (padrão `Data/Emails`): `{timestamp}-{hex}.html` (corpo), `.txt` opcional (texto plano, só se `PlainTextBody` presente) e `.json` (metadados: destinatário, assunto, `HtmlFile`, `PlainTextFile`, timestamp) |
-| Proteção | — | Guarda contra path traversal — lança `InvalidOperationException` se o diretório resolvido escapar da raiz de conteúdo |
+| Proteção | — | Guarda contra path traversal para `Directory` **relativo**: lança `InvalidOperationException` se escapar da raiz de conteúdo. Um `Directory` **absoluto** (Sprint 26.9 — ex. `C:\Apps\BeeDay-Data\Emails` em HMG) é confiado como escolha deliberada do operador e não passa por essa checagem — a proteção nunca foi enfraquecida para o caso relativo, apenas não se aplica ao caso absoluto |
 
 A escolha entre os dois acontece inteiramente em tempo de DI (`InfrastructureServiceCollectionExtensions`),
 nunca em runtime por requisição.

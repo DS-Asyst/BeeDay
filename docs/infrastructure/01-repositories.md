@@ -60,7 +60,7 @@ mutar e salvar na mesma chamada garante que o token capturado é sempre o vigent
 |---|---|---|---|
 | `EfHabitRepository` | Sim (escopo `UserId`) | Sim | Padrão de referência |
 | `EfRecurringTaskRepository` | Sim (escopo `UserId`) | Sim | Estruturalmente idêntico ao de Habit |
-| `EfProjectRepository` | Sim (`ReorderAsync` por `UserId`; `ReorderTodosAsync` por `ProjectId`) | Sim (Todos removidos por cascade de banco, não por código) | O maior — 13 métodos; `AddTodoAsync` tem uma pegadinha documentada (ver abaixo) |
+| `EfProjectRepository` | Sim (`ReorderAsync` por `UserId`; `ReorderTodosAsync` por `ProjectId`) | Sim (Todos removidos por cascade de banco, não por código) | O maior — 12 métodos; `AddTodoAsync` tem uma pegadinha documentada (ver abaixo) |
 | `EfTransactionRepository` | Não | Sim | `ClearTagReferencesAsync` desvincula (não deleta) transações de uma tag removida |
 | `EfUserRepository` | Não (Users não são ordenados) | **Não existe** | `UpdateAsync` é a implementação de referência citada por todas as demais (RowVersion), mas tem um passo extra só seu (ver abaixo) |
 | `EfUserTokenRepository` | Não | **Não existe** — só `RevokeActiveAsync` (mudança de estado suave, via `token.Revoke(...)` do Domain) | Revogação é sempre soft-state, nunca hard delete |
@@ -133,9 +133,11 @@ internal sealed class EfUnitOfWork : IUnitOfWork
 consulta é `AsNoTracking()`: `Users` (lança `InvalidDomainStateException` se usuário não existe —
 único read service que lança em vez de retornar nulo/vazio), `Habits`/`RecurringTasks` (ordenadas
 por `EF.Property<int>(x, "Position")`), `Projects` (com `.Include(p => p.Todos.OrderBy(...Position))`
-aninhado), `Wallets`+`Transactions` (resumo calculado via os métodos de Domain
-`Wallet.CalculateBalance`/`CalculateTotalIncome`/`CalculateTotalExpenses` — nunca recalculado
-manualmente em Infrastructure). Retorna `WalletSummary = null` se o usuário não tiver Wallet
+aninhado), `Wallets`+`Transactions` (resumo calculado via agregação SQL — `SumAsync` direto por
+tipo de transação — em vez dos métodos de Domain `Wallet.CalculateBalance`/`CalculateTotalIncome`/
+`CalculateTotalExpenses`, deliberadamente para não carregar toda transação pela rede só para somar
+em memória; mesma abordagem em `EfWalletReadService` abaixo). Retorna `WalletSummary = null` se o
+usuário não tiver Wallet
 (diferente do comportamento de "usuário não encontrado", que lança).
 
 ### `EfWalletReadService`

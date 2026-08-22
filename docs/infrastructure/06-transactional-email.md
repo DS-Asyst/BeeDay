@@ -77,9 +77,11 @@ BeeDay.Application     — IEmailSender, IIdentityEmailComposer, IEmailConfirmat
                           IIdentityRequestThrottle contracts (Common/Identity/). Handlers in
                           Features/Users and Features/Identity depend only on these interfaces.
     ↑
-BeeDay.Infrastructure  — ResendEmailSender, DevelopmentEmailSender (both IEmailSender),
+BeeDay.Infrastructure  — ResendEmailSender wrapped by HmgRecipientGuardedEmailSender (both behind
+                          IEmailSender), DevelopmentEmailSender (also IEmailSender),
                           IdentityEmailComposer (IIdentityEmailComposer), MemoryIdentityRequestThrottle,
-                          5 Options classes bound in InfrastructureServiceCollectionExtensions.
+                          6 Options classes bound in InfrastructureServiceCollectionExtensions
+                          (including HmgRecipientGuardOptions, Sprint 26.4).
     ↑
 BeeDay.Web             — composition root only (AddBeeDayInfrastructure(configuration) call in
                           Program.cs); appsettings*.json carry the per-environment values; Identity

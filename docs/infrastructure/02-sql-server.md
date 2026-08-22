@@ -34,13 +34,15 @@ duração, e `DbContext` não é thread-safe nem seguro para viver pela duraçã
 de vida curta — usado por todos os 8 repositórios (via `EfRepositoryBase`), os 2 read services, e
 `SqlServerHealthCheck`.
 
-## Ciclo de vida do banco — só uma migration, aplicada manualmente
+## Ciclo de vida do banco — migrations aplicadas manualmente
 
 Não existe nenhuma lógica de `Database.Migrate()`/`EnsureCreated()` automática no startup de
 `BeeDay.Web` (confirmado: não encontrado em `Program.cs` nem em `InfrastructureServiceCollectionExtensions.cs`)
-— aplicar a migration `InitialCreate` ao banco é uma etapa manual/operacional
-(`dotnet ef database update`), fora do escopo desta Sprint documentar o procedimento exato (não
-verificado em nenhum script nesta Sprint).
+— aplicar as migrations ao banco é uma etapa manual/operacional (`dotnet ef database update`), fora
+do escopo desta Sprint documentar o procedimento exato (não verificado em nenhum script nesta
+Sprint). Duas migrations existem hoje: `20260803111144_InitialCreate.cs` (schema inicial completo)
+e `20260821054442_AddTransactionAmountUpperBoundCheckConstraint.cs` (adicionada em 2026-08-21, ver
+[`01-relational-model.md`](../persistence/01-relational-model.md)).
 
 **Em testes**, o ciclo de vida é gerenciado explicitamente por `EfLocalDbTestBase`
 (`tests/BeeDay.Infrastructure.Tests/Persistence/SqlServer/Repositories/`): cada classe de teste de

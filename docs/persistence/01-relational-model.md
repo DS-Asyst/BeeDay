@@ -157,7 +157,8 @@ padrão `#7A4FCB`).
 Colunas: `WalletId` (obrigatório), `Description` (`HasMaxLength(120)`, obrigatório), `Amount`
 (`decimal`), `Type` (byte), `TransactionDate` (`DateOnly`), `WalletTagId` (`Guid?`), `Notes`
 (`HasMaxLength(500)`, obrigatório — string vazia por padrão).
-**Checks:** `CK_Transactions_Type` (`IN (1,2)`), `CK_Transactions_Amount` (`> 0`).
+**Checks:** `CK_Transactions_Type` (`IN (1,2)`), `CK_Transactions_Amount` (`> 0 AND <= 999999999999`
+— teto superior adicionado pela migration `20260821054442_AddTransactionAmountUpperBoundCheckConstraint.cs`, 2026-08-21).
 **Índices:** `IX_Transactions_Wallet_Date` (`WalletId`+`TransactionDate`); `IX_Transactions_Tag`
 (`WalletTagId`).
 **FKs:** `FK_Transactions_Wallets_WalletId` — `Cascade`; `FK_Transactions_WalletTags_WalletTagId`
@@ -204,7 +205,8 @@ polimórfica deliberada — pode apontar para um `Habit`, `RecurringTask`, `Todo
 **Arquivos consultados:** todos os 11 arquivos em
 `src/BeeDay.Infrastructure/Persistence/SqlServer/Configurations/`,
 `Migrations/20260803111144_InitialCreate.cs` (`Up()`/`Down()` completos),
-`Migrations/BeeDayDbContextModelSnapshot.cs` (verificação pontual).
+`Migrations/20260821054442_AddTransactionAmountUpperBoundCheckConstraint.cs` (`Up()`/`Down()`
+completos), `Migrations/BeeDayDbContextModelSnapshot.cs` (verificação pontual).
 **Testes consultados:** `tests/BeeDay.Infrastructure.Tests/BeeDayDbContextTests.cs`
 (`EachEntity_MapsToItsOwnTableWithTheExpectedName`, `ForeignKeys_HaveTheApprovedDeleteBehavior`,
 `Users_HaveFilteredUniqueIndexOnNickname`, `ExperienceEntry_HasNoRowVersion`).
