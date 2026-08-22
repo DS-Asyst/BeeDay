@@ -1474,3 +1474,107 @@ reverificação.
 `docs/brand/02-writing-voice-localization.md`), e Documentation Ledger atualizado.
 
 ---
+## Sprint 31.9 — Testing & Quality Engineering Documentation Reconciliation
+
+**GitHub Issue:** [#237](https://github.com/tiagoarrigoni/BeeDay/issues/237)
+**Branch:** `sprint/31.9-testing-quality-engineering-documentation-reconciliation`
+**Depende de:** #236 (concluída, ver seção acima)
+
+> Segue `CLAUDE.md`, o padrão de planejamento beeday e o Global Execution Contract da EPIC 31 em
+> #228.
+
+### Objetivo da Sprint
+
+Reconciliar os 4 documentos de `docs/testing/` com a arquitetura de testes e as práticas de
+qualidade reais.
+
+### Validação aplicada nesta Sprint (política aprovada pelo owner)
+
+Sprint documental — nenhum código-fonte foi alterado. Suíte completa de testes **não** reexecutada
+nesta Sprint — os números corrigidos usam a execução real já registrada no início da Sprint 31.1
+desta mesma EPIC (`dotnet test BeeDay.slnx`, Debug, 1.557/1.557), por política aprovada em
+2026-08-21.
+
+### Método
+
+Levantamento inicial delegado (agente de exploração, somente leitura), usando como verdade
+fundamental a execução real de testes já registrada nesta EPIC (Sprint 31.1): 121 Domain / 119
+Application / 216 Infrastructure / 880 Web / 221 E2E = 1.557 total. Todo achado foi reverificado
+nesta sessão com `grep`/leitura direta (contagem de arquivos por diretório, existência de classes,
+conteúdo de workflow) antes de qualquer edição.
+
+### Achados corrigidos (Required work #2/#4)
+
+| Documento | Achado | Correção |
+|---|---|---|
+| `README.md`, `01-testing-strategy.md` (6 ocorrências) | Contagem total de testes desatualizada: 1.554 (121/119/216/**879**/**219**) — a baseline da Sprint 30.23, já 3 testes velha por crescimento orgânico de Web (+1) e E2E (+2) desde então. | Corrigido para 1.557 (121/119/216/**880**/**221**) nas 6 ocorrências, preservando a nota histórica sobre a baseline anterior (mesmo padrão já usado no documento para a baseline da Sprint 25.16). |
+| `01-testing-strategy.md` §2 | `Domain.Tests`: "12 arquivos" — real: 13. | Corrigido. |
+| `01-testing-strategy.md` §3 | `Application.Tests`: "18 arquivos" — real: 19 (excluindo os 2 fakes e `Usings.cs`). | Corrigido, com nota explícita excluindo os fakes da contagem. |
+| `01-testing-strategy.md` §4 | `Infrastructure.Tests`: "19 arquivos (5 na raiz + 1 + 13)" — real: **27 arquivos** (13 na raiz + 1 + 13). Faltavam 7 arquivos de teste de e-mail/guarda HMG e o guarda arquitetural de Infrastructure. | Lista completa reescrita com os 13 arquivos reais da raiz. |
+| `01-testing-strategy.md` §6 | "2 guardas de fronteira" — existe um terceiro: `InfrastructureAssemblyBoundaryTests.cs` (Sprint 30.9, `BD30-F009`), que verifica que `BeeDay.Infrastructure` nunca referencia `BeeDay.Web`/Blazor Components. | Adicionado à tabela; título e texto de fechamento da seção atualizados de "2" para "3". |
+| `01-testing-strategy.md` §5 | "`BeeDayWebApplicationFactory` e as 4 variantes especializadas" — só existem 3: `EmailCaptureWebApplicationFactory`, `ProductionLikeWebApplicationFactory`, `RateLimitingWebApplicationFactory`. | Corrigido para 3, nomeando as três. |
+| `01-testing-strategy.md` §7 | Seção "CI" invertia as responsabilidades reais: atribuía a `ci.yml` a instalação do Playwright e a execução de todos os 5 projetos, quando é `release-quality-gate.yml` quem faz isso (`ci.yml` roda só Domain+Application, movidos para lá desde a Sprint 19.8.5); citava `deploy-prd.yml` como parte do fluxo de teste, mas esse workflow não roda nenhum teste; citava um nome de arquivo `.trx` fixo que não existe em nenhum dos dois workflows reais (ambos usam nome dinâmico por projeto). | Seção reescrita descrevendo a divisão real de responsabilidade entre os dois workflows, confirmada por leitura direta de `ci.yml`/`release-quality-gate.yml`. |
+
+### Conteúdo já correto, confirmado sem reescrita (Required work #4)
+
+A pirâmide de testes (§1), a mecânica de `EfLocalDbTestBase`/`EfLocalDbCollection` (LocalDB real,
+nunca InMemory/SQLite — confirmado por busca zero-resultado), a infraestrutura E2E (Kestrel real,
+Chromium único, banco isolado por instância, screenshot+trace só em falha), a suíte bUnit +
+`WebApplicationFactory`, a narrativa de causa raiz de `BD30-F042` sobre concorrência entre projetos
+em `dotnet test` de solução inteira, e a cobertura via `coverlet.collector` nos 5 projetos — todos
+conferiram sem nenhum mismatch. `02-design-system-quality-gates.md` e
+`03-functional-journey-matrix.md` conferiram 100% corretos: todo nome de classe/arquivo citado nos
+dois documentos existe exatamente como descrito, incluindo os detalhes de `AccessibilityQualityTests`
+(rotas exatas testadas por axe) e `E2ETestBase.GotoAsync`/`SubmitLoginAsync`.
+
+### Ownership canônico de contagem (Required work #4)
+
+Confirmado: nenhum outro documento desta EPIC duplica a contagem total de testes — `docs/web/
+06-testing.md` (Sprint 31.8) já usa contagem qualitativa por design, apontando para cá; `02-design-
+system-quality-gates.md` e `03-functional-journey-matrix.md` também não repetem o total global.
+`README.md`/`01-testing-strategy.md` continuam sendo os dois únicos owners autorizados do número
+(por design, conforme o próprio texto do documento), agora sincronizados entre si.
+
+### Critérios de aceite (Issue #237)
+
+- [x] Test-project responsibilities match repository structure — confirmado; contagens de arquivo
+      corrigidas para 3 dos 5 projetos.
+- [x] Integration-test database strategy is accurately documented — `EfLocalDbTestBase` confirmado
+      sem mismatch.
+- [x] E2E runtime/browser setup is accurate — confirmado sem mismatch.
+- [x] Commands shown in current testing docs are verified — todos os comandos rodáveis como
+      escritos, confirmados contra caminhos reais.
+- [x] Test-count information is not duplicated across maintained docs — confirmado, ownership único
+      preservado.
+- [x] Known limitations are explicit rather than hidden — `BD30-F042` permanece descrito com
+      evidência real, não removido nem suavizado.
+
+### Sprint-specific boundary respeitado
+
+Nenhuma mudança de arquitetura de teste foi feita para simplificar a documentação — todas as 9
+correções alinham a documentação ao que já existe em `tests/` e nos workflows.
+
+### Riscos residuais
+
+Nenhum. Todos os achados do levantamento inicial foram verificados de forma independente e
+corrigidos nesta Sprint.
+
+### Validação executada
+
+```bash
+git status
+dotnet format BeeDay.slnx --verify-no-changes
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+git diff --check
+```
+
+Resultados registrados na seção "Quality/Validation" do relatório final da Sprint enviado ao owner
+nesta conversa. Toda contagem/citação corrigida foi reverificada com `grep`/leitura direta desta
+sessão (incluindo leitura completa de `ci.yml`/`release-quality-gate.yml`) antes de ser escrita.
+
+### Deliverable
+
+2 arquivos corrigidos (`docs/testing/README.md`, `01-testing-strategy.md`), e Documentation Ledger
+atualizado.
+
+---
