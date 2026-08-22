@@ -403,6 +403,21 @@ Mesma dívida já registrada em `09-pipeline-performance.md` §27.10 — `dotnet
 -c Release` não propaga a configuração Release para os 4 projetos de `src/`. Reconfirmada nesta
 Sprint, não corrigida, continua candidata a investigação dedicada futura.
 
+**Resolvido em 2026-08-22:** esta dívida bloqueou de forma concreta a promoção `hmg → main` (PR
+#316) ao fazer `ProductionOriginGuardTests` (`tests/BeeDay.Web.Tests/Integration/`, introduzido na
+Sprint 26.5 — posterior a esta Sprint 19.7.1, portanto sem o acoplamento Publish-antes-do-teste
+considerado aqui) falhar por não encontrar `BeeDay.Web.dll` em `bin/Release`, já que "Run full test
+suite" roda **antes** de "Publish BeeDay" na ordem real do gate (§23.2). Causa raiz identificada por
+reprodução determinística: não é `src/` vs. `tests/`, é profundidade de aninhamento de pasta lógica
+no `.slnx` — qualquer projeto em pasta aninhada em 2+ níveis (`/src/` → `/src/Core/` → projeto)
+resolve para `Debug`; pastas de nível único sempre resolveram `Release` corretamente. Corrigido
+achatando as subpastas lógicas de `/src/` (`Core`/`Infrastructure`/`Presentation`) em um único nível,
+igual a `/tests/` — ver `docs/architecture/02-solution-structure.md` §1 para a evidência completa.
+Com a causa raiz corrigida, "Build solution (Release)" agora produz `BeeDay.Web.dll` em
+`bin/Release` diretamente; o acoplamento documentado em §23.4-23.8 (Publish/EF steps dependendo da
+ordem pós-Publish) permanece válido e não foi alterado — nenhum step foi reordenado, apenas a causa
+raiz da configuração incorreta foi eliminada.
+
 ### 23.10 Local Validation Results
 
 | Comando | Executado | Resultado |
