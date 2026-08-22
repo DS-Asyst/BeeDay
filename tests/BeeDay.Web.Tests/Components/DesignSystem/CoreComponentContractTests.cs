@@ -18,9 +18,9 @@ public sealed class CoreComponentContractTests
             .ToArray();
         var expected = new[]
         {
-            "BeeDayBrand", "BeeDayButton", "BeeDayCard", "BeeDayCardMenu", "BeeDayCheckbox",
+            "BeeDayBrand", "BeeDayButton", "BeeDayCard", "BeeDayCheckbox",
             "BeeDayConfirmDialog", "BeeDayDashboardSkeleton", "BeeDayDateInput", "BeeDayEmptyState",
-            "BeeDayHero", "BeeDayIcon", "BeeDayInput", "BeeDayLoading", "BeeDayPageHeader",
+            "BeeDayErrorBoundary", "BeeDayHero", "BeeDayIcon", "BeeDayInput", "BeeDayLoading", "BeeDayPageHeader",
             "BeeDayProgressBar", "BeeDaySectionHeader", "BeeDaySelect", "BeeDaySettingsForm",
             "BeeDaySettingsSection", "BeeDaySkeleton", "BeeDayTextArea", "BeeDayToastHost",
             "BeeDayValidationMessage", "EditorModalShell", "SearchHighlight"
@@ -60,11 +60,18 @@ public sealed class CoreComponentContractTests
             filesWithNativeControls += fileContainsNativeControl ? 1 : 0;
         }
 
-        Assert.Equal(29, counts["button"]);
-        Assert.Equal(14, counts["input"]);
+        // EPIC 27 Sprint 27.11: TagFormModal's native <input type="color"> (plus its paired
+        // <InputText>, which this regex never counted) was replaced by a single looped native
+        // <button> rendering the 10-swatch COR0-COR9 picker — one fewer input, one more button.
+        // Sprint 29.4: EditorialFooter.razor adds one native <button> (Back to Top).
+        // EPIC 30 Sprint 30.19: BeeDayCardMenu.razor (3 native <button>s, zero production
+        // consumers, superseded by click-to-edit cards) was removed as dead code — one fewer file
+        // with native controls, three fewer buttons.
+        Assert.Equal(28, counts["button"]);
+        Assert.Equal(13, counts["input"]);
         Assert.Equal(0, counts["select"]);
         Assert.Equal(0, counts["textarea"]);
-        Assert.Equal(43, counts.Values.Sum());
+        Assert.Equal(41, counts.Values.Sum());
         Assert.Equal(20, filesWithNativeControls);
     }
 

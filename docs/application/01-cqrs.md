@@ -23,7 +23,7 @@ puramente por convenção de nome (sufixo `Command` ou `Query`) e por assinatura
 
 | | `IRequest` (sem retorno) | `IRequest<T>` (com retorno) |
 |---|---|---|
-| **Command** | 24 comandos — ex. `CreateHabitCommand`, `ToggleTaskCommand`, `UpdateProjectCommand` | 6 comandos — ex. `AuthenticateUserCommand→AuthenticatedUserResponse`, `CreateUserCommand→Guid`, `EnsureCurrentWalletCommand→Guid` |
+| **Command** | 31 comandos — ex. `CreateHabitCommand`, `ToggleTaskCommand`, `UpdateProjectCommand` | 6 comandos — ex. `AuthenticateUserCommand→AuthenticatedUserResponse`, `CreateUserCommand→Guid`, `EnsureCurrentWalletCommand→Guid` |
 | **Query** | — (nenhuma Query sem retorno faria sentido) | 6 queries — `GetDashboardQuery`, `GetCurrentUserQuery`, `GetWalletSummaryQuery`, `GetWalletTagsQuery`, `GetTransactionByIdQuery`, `GetTransactionsQuery` |
 
 **Padrão observado:** a maioria dos Commands de mutação pura (`Update*`, `Toggle*`, `Delete*`,
@@ -121,7 +121,7 @@ sequenceDiagram
 
 ## Fontes de verdade
 
-**Arquivos consultados:** todos os arquivos `Commands/*.cs`, `Queries/*.cs` das 9 Features,
+**Arquivos consultados:** todos os arquivos `Commands/*.cs`, `Queries/*.cs` das 10 Features,
 `src/BeeDay.Application/DependencyInjection/ApplicationServiceCollectionExtensions.cs`,
 `src/BeeDay.Web/Services/BeeDayWebService.cs` (para confirmar o único ponto de chamada de
 `ISender.Send`), `Features/Habits/Handlers/HabitCommandHandlers.cs` (exemplo de Handler citado).

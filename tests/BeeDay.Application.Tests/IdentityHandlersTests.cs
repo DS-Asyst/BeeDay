@@ -61,6 +61,126 @@ public sealed class IdentityHandlersTests
         Assert.Single(fixture.Email.Messages);
     }
 
+    // EPIC 28, Sprint 28.2 (ADR-006): the handler must forward the recipient's own persisted
+    // User.Language to the composer, never a hardcoded/default value — proven here by setting a
+    // non-default language on the user before triggering the flow.
+    [Fact]
+    public async Task ResendConfirmation_PassesTheUsersOwnLanguageToTheComposer()
+    {
+        var fixture = new Fixture();
+        var user = fixture.AddUser(confirmed: false);
+        user.UpdatePreferences(UserLanguage.Portuguese, user.Theme);
+        var handler = new ResendEmailConfirmationCommandHandler(
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+
+        await handler.Handle(
+            new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest(user.Email)),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal([UserLanguage.Portuguese], fixture.Composer.ConfirmationLanguages);
+    }
+
+    // Epic 26, Sprint 26.8 cross-sprint audit finding: unlike registration (§3.1/§12.3 — one
+    // transaction, then the email send outside it), ResendEmailConfirmationCommandHandler has no
+    // transaction at all. IUserTokenRepository.RevokeActiveAsync/AddAsync are each their own
+    // auto-committing call (EfUserTokenRepository.cs — every method acquires its own short-lived
+    // DbContext and calls SaveChanges immediately). By the time emailSender.SendAsync runs, the old
+    // token is already revoked and the new one already persisted — both independently of whether the
+    // send succeeds. This test proves that real behavior using the fake repository, which mutates its
+    // in-memory lists synchronously on each call, matching the real EF repository's per-call-commit
+    // semantics for this purpose.
+    [Fact]
+    public async Task ResendConfirmation_WhenEmailSendFails_TokenMutationsArePersistedDespiteTheFailure()
+    {
+        var fixture = new Fixture();
+        fixture.Email.ThrowOnSend = true;
+        var user = fixture.AddUser(confirmed: false);
+        var previous = fixture.AddToken(user, UserTokenType.EmailConfirmation, "old-token", Now.AddHours(1));
+        var handler = new ResendEmailConfirmationCommandHandler(
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => handler.Handle(
+            new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest(user.Email)),
+            TestContext.Current.CancellationToken));
+
+        Assert.True(previous.IsRevoked);
+        Assert.Equal(2, fixture.Repository.UserTokensData.Count);
+        Assert.Empty(fixture.Email.Messages);
+    }
+
+    [Fact]
+    public async Task ResendConfirmation_WhenThrottled_ThrowsAndDoesNotSendEmail()
+    {
+        var fixture = new Fixture();
+        fixture.Throttle.AllowNextAcquire = false;
+        var user = fixture.AddUser(confirmed: false);
+        var handler = new ResendEmailConfirmationCommandHandler(
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+
+        var exception = await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
+            new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest(user.Email)),
+            TestContext.Current.CancellationToken));
+
+        Assert.Contains("wait", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(fixture.Email.Messages);
+    }
+
+    [Fact]
+    public async Task ResendConfirmation_WhenThrottled_BehavesIdenticallyForAnUnknownEmail()
+    {
+        // Throttle is keyed by the submitted email string alone (Sprint 26.5 audit finding), never by
+        // whether an account exists — so this scenario is indistinguishable from the confirmed-user
+        // case above from the caller's perspective, closing the user-enumeration question for this path.
+        var fixture = new Fixture();
+        fixture.Throttle.AllowNextAcquire = false;
+        var handler = new ResendEmailConfirmationCommandHandler(
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+
+        var exception = await Assert.ThrowsAsync<InvalidDomainStateException>(() => handler.Handle(
+            new ResendEmailConfirmationCommand(new ResendEmailConfirmationRequest("unknown@beeday.invalid")),
+            TestContext.Current.CancellationToken));
+
+        Assert.Contains("wait", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(fixture.Email.Messages);
+    }
+
+    [Fact]
+    public async Task RequestPasswordReset_WhenThrottled_ReturnsSilentlyWithoutSendingEmail()
+    {
+        var fixture = new Fixture();
+        fixture.Throttle.AllowNextAcquire = false;
+        var user = fixture.AddUser(confirmed: true);
+        var handler = new RequestPasswordResetCommandHandler(
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+
+        await handler.Handle(
+            new RequestPasswordResetCommand(new RequestPasswordResetRequest(user.Email)),
+            TestContext.Current.CancellationToken);
+
+        Assert.Empty(fixture.Repository.UserTokensData);
+        Assert.Empty(fixture.Email.Messages);
+    }
+
+    // Same finding as ResendConfirmation_WhenEmailSendFails_TokenMutationsArePersistedDespiteTheFailure
+    // above, for RequestPasswordResetCommandHandler.
+    [Fact]
+    public async Task RequestPasswordReset_WhenEmailSendFails_NewTokenIsPersistedDespiteTheFailure()
+    {
+        var fixture = new Fixture();
+        fixture.Email.ThrowOnSend = true;
+        var user = fixture.AddUser(confirmed: true);
+        var handler = new RequestPasswordResetCommandHandler(
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => handler.Handle(
+            new RequestPasswordResetCommand(new RequestPasswordResetRequest(user.Email)),
+            TestContext.Current.CancellationToken));
+
+        var token = Assert.Single(fixture.Repository.UserTokensData);
+        Assert.Equal(UserTokenType.PasswordReset, token.Type);
+        Assert.Empty(fixture.Email.Messages);
+    }
+
     [Fact]
     public async Task RequestPasswordReset_DoesNotRevealMissingEmail()
     {
@@ -92,6 +212,23 @@ public sealed class IdentityHandlersTests
         Assert.Equal(UserTokenType.PasswordReset, token.Type);
         Assert.Equal(Now.AddHours(1), token.ExpiresAtUtc);
         Assert.Single(fixture.Email.Messages);
+    }
+
+    // EPIC 28, Sprint 28.2 (ADR-006): same contract as ResendConfirmation above, for the reset flow.
+    [Fact]
+    public async Task RequestPasswordReset_PassesTheUsersOwnLanguageToTheComposer()
+    {
+        var fixture = new Fixture();
+        var user = fixture.AddUser(confirmed: true);
+        user.UpdatePreferences(UserLanguage.Portuguese, user.Theme);
+        var handler = new RequestPasswordResetCommandHandler(
+            fixture.Repository.Users, fixture.Repository.UserTokens, fixture.Tokens, fixture.Composer, fixture.Email, fixture.Throttle, fixture.Clock);
+
+        await handler.Handle(
+            new RequestPasswordResetCommand(new RequestPasswordResetRequest(user.Email)),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal([UserLanguage.Portuguese], fixture.Composer.ResetLanguages);
     }
 
     [Fact]
@@ -171,26 +308,45 @@ public sealed class IdentityHandlersTests
 
     private sealed class FakeIdentityRequestThrottle : IIdentityRequestThrottle
     {
+        public bool AllowNextAcquire { get; set; } = true;
+
         public bool TryAcquire(string operation, string subject, TimeSpan cooldown, out TimeSpan retryAfter)
         {
-            retryAfter = TimeSpan.Zero;
-            return true;
+            retryAfter = AllowNextAcquire ? TimeSpan.Zero : TimeSpan.FromSeconds(42);
+            return AllowNextAcquire;
         }
     }
 
     private sealed class FakeEmailComposer : IIdentityEmailComposer
     {
-        public EmailMessage ComposeEmailConfirmation(string recipient, string displayName, string rawToken) =>
-            new(recipient, "Confirm email", rawToken);
-        public EmailMessage ComposePasswordReset(string recipient, string displayName, string rawToken) =>
-            new(recipient, "Reset password", rawToken);
+        public List<UserLanguage> ConfirmationLanguages { get; } = [];
+        public List<UserLanguage> ResetLanguages { get; } = [];
+
+        public EmailMessage ComposeEmailConfirmation(string recipient, string displayName, string rawToken, UserLanguage language)
+        {
+            ConfirmationLanguages.Add(language);
+            return new(recipient, "Confirm email", rawToken);
+        }
+
+        public EmailMessage ComposePasswordReset(string recipient, string displayName, string rawToken, UserLanguage language)
+        {
+            ResetLanguages.Add(language);
+            return new(recipient, "Reset password", rawToken);
+        }
     }
 
     private sealed class FakeEmailSender : IEmailSender
     {
         public List<EmailMessage> Messages { get; } = [];
+        public bool ThrowOnSend { get; set; }
+
         public Task SendAsync(EmailMessage message, CancellationToken cancellationToken = default)
         {
+            if (ThrowOnSend)
+            {
+                throw new InvalidOperationException("Simulated provider failure.");
+            }
+
             Messages.Add(message);
             return Task.CompletedTask;
         }

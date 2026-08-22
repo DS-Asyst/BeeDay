@@ -22,6 +22,7 @@ public sealed class ProductionLikeWebApplicationFactory : BeeDayWebApplicationFa
         Path.Combine(Path.GetTempPath(), "beeday-web-tests-dp", Guid.NewGuid().ToString("N"));
 
     private readonly string?[] previousValues;
+    private readonly IDisposable environmentVariableLock = ProductionEnvironmentVariableTestLock.Acquire();
 
     public ProductionLikeWebApplicationFactory()
     {
@@ -35,7 +36,10 @@ public sealed class ProductionLikeWebApplicationFactory : BeeDayWebApplicationFa
             ("BeeDay__Hosting__DataProtectionKeysDirectory", dataProtectionKeysDirectory),
             // appsettings.Production.json enables Resend (real email delivery, needs secrets we
             // don't have here); the Development-capture sender is enough for these tests.
-            ("BeeDay__Email__Resend__Enabled", "false")
+            // EmailProviderSelector (Epic 26, Sprint 26.2) requires exactly one of the two flags —
+            // Production.json sets Development:Enabled=false, so it must be forced true here too.
+            ("BeeDay__Email__Resend__Enabled", "false"),
+            ("BeeDay__Email__Development__Enabled", "true")
         ];
 
         previousValues = new string?[requiredEnvironmentVariables.Length];
@@ -70,6 +74,8 @@ public sealed class ProductionLikeWebApplicationFactory : BeeDayWebApplicationFa
                     // Best-effort cleanup only.
                 }
             }
+
+            environmentVariableLock.Dispose();
         }
     }
 }

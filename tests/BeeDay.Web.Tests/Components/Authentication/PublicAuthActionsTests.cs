@@ -16,5 +16,6 @@ public sealed class PublicAuthActionsTests
         Assert.Equal("/", cut.Find("a.public-auth-actions__close").GetAttribute("href"));
         Assert.Equal("Close create account and return to Home", cut.Find("a.public-auth-actions__close").GetAttribute("aria-label"));
         Assert.Equal("/login", cut.Find("a.public-auth-actions__destination").GetAttribute("href"));
+        Assert.Contains("beeday-button--important-white", cut.Find("a.public-auth-actions__destination").ClassList);
     }
 }

@@ -112,6 +112,7 @@
   <data name="ProjectsCompletedEmptyTitle" xml:space="preserve"><value>No completed projects</value></data>
   <data name="ProjectsCompletedEmptyDescription" xml:space="preserve"><value>Completed projects will appear here.</value></data>
   <data name="ReorderActiveProjectsAriaLabel" xml:space="preserve"><value>Reorder active projects</value></data>
+  <data name="ReorderItemAriaLabel" xml:space="preserve"><value>Hold and drag this card to reorder it. Use the arrow keys when focused.</value></data>
   <data name="ActivityCardMarkIncompleteAriaLabel" xml:space="preserve"><value>Mark {0} as incomplete</value></data>
   <data name="ActivityCardCompleteAriaLabel" xml:space="preserve"><value>Complete {0}</value></data>
   <data name="ProjectProgressAutoLabel" xml:space="preserve"><value>Project progress is calculated automatically</value></data>

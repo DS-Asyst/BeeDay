@@ -60,12 +60,26 @@ mutar e salvar na mesma chamada garante que o token capturado é sempre o vigent
 |---|---|---|---|
 | `EfHabitRepository` | Sim (escopo `UserId`) | Sim | Padrão de referência |
 | `EfRecurringTaskRepository` | Sim (escopo `UserId`) | Sim | Estruturalmente idêntico ao de Habit |
-| `EfProjectRepository` | Sim (`ReorderAsync` por `UserId`; `ReorderTodosAsync` por `ProjectId`) | Sim (Todos removidos por cascade de banco, não por código) | O maior — 13 métodos; `AddTodoAsync` tem uma pegadinha documentada (ver abaixo) |
+| `EfProjectRepository` | Sim (`ReorderAsync` por `UserId`; `ReorderTodosAsync` por `ProjectId`) | Sim (Todos removidos por cascade de banco, não por código) | O maior — 12 métodos; `AddTodoAsync` tem uma pegadinha documentada (ver abaixo) |
 | `EfTransactionRepository` | Não | Sim | `ClearTagReferencesAsync` desvincula (não deleta) transações de uma tag removida |
-| `EfUserRepository` | Não (Users não são ordenados) | **Não existe** | `UpdateAsync` é a implementação de referência citada por todas as demais |
+| `EfUserRepository` | Não (Users não são ordenados) | **Não existe** | `UpdateAsync` é a implementação de referência citada por todas as demais (RowVersion), mas tem um passo extra só seu (ver abaixo) |
 | `EfUserTokenRepository` | Não | **Não existe** — só `RevokeActiveAsync` (mudança de estado suave, via `token.Revoke(...)` do Domain) | Revogação é sempre soft-state, nunca hard delete |
 | `EfWalletRepository` | Não (1 Wallet por usuário) | **Não existe** | O mais simples — 3 métodos |
 | `EfWalletTagRepository` | Não | Sim | `ListAsync` não ordena por Position (WalletTags não têm essa shadow property) |
+
+**Passo extra de `EfUserRepository.UpdateAsync` (Sprint 30.7):** `UserExperience.Entries` não é uma
+navegação mapeada pelo EF Core (`ExperienceEntry` já é entidade top-level relacionada a `User`
+diretamente — mapear de novo sob `UserExperience` duplicaria o relacionamento), então nada mais no
+model a preenche automaticamente. Antes de invocar a `mutation`, `UpdateAsync` carrega as
+`ExperienceEntries` existentes do usuário (`WHERE UserId = @userId`, coberta por
+`IX_ExperienceEntries_User_Time`) e chama `user.Experience.Hydrate(...)` — um hook `internal` novo,
+visível a `BeeDay.Infrastructure` via `InternalsVisibleTo` em `BeeDay.Domain.csproj` — para que
+`UserExperience.TryAdd` compare a concessão de XP contra histórico real, não uma coleção sempre
+vazia. Depois da `mutation`, qualquer `ExperienceEntry` cujo `Id` não estava no conjunto pré-
+carregado é adicionada ao `DbSet` (nada mais no código fazia isso; sem esse passo as linhas de
+`ExperienceEntries` nunca eram persistidas — confirmado por teste real contra LocalDB, ver
+`docs/epics/30-system-integrity/README.md` §14.2). Único repositório com esse passo — nenhum outro
+Aggregate tem uma coleção de histórico irmã mapeada como entidade separada.
 
 ### `AddTodoAsync` — bug real evitado, documentado no código
 
@@ -119,9 +133,11 @@ internal sealed class EfUnitOfWork : IUnitOfWork
 consulta é `AsNoTracking()`: `Users` (lança `InvalidDomainStateException` se usuário não existe —
 único read service que lança em vez de retornar nulo/vazio), `Habits`/`RecurringTasks` (ordenadas
 por `EF.Property<int>(x, "Position")`), `Projects` (com `.Include(p => p.Todos.OrderBy(...Position))`
-aninhado), `Wallets`+`Transactions` (resumo calculado via os métodos de Domain
-`Wallet.CalculateBalance`/`CalculateTotalIncome`/`CalculateTotalExpenses` — nunca recalculado
-manualmente em Infrastructure). Retorna `WalletSummary = null` se o usuário não tiver Wallet
+aninhado), `Wallets`+`Transactions` (resumo calculado via agregação SQL — `SumAsync` direto por
+tipo de transação — em vez dos métodos de Domain `Wallet.CalculateBalance`/`CalculateTotalIncome`/
+`CalculateTotalExpenses`, deliberadamente para não carregar toda transação pela rede só para somar
+em memória; mesma abordagem em `EfWalletReadService` abaixo). Retorna `WalletSummary = null` se o
+usuário não tiver Wallet
 (diferente do comportamento de "usuário não encontrado", que lança).
 
 ### `EfWalletReadService`

@@ -63,8 +63,9 @@ carregada.
   unifica markup ou significado dos dialogs. A lista de focusables é recalculada a cada Tab para
   respeitar busy/disabled. Sem controles, o painel recebe foco; se o trigger saiu do DOM, close não
   lança erro e restaura o próximo scope ativo quando houver.
-- `Escape` continua passando pelos busy guards de Confirm/Editor. `BeeDayCardMenu` e drawer mantêm
-  seus lifecycles próprios porque são menu/navigation, não dialogs.
+- `Escape` continua passando pelos busy guards de Confirm/Editor. O drawer de navegação mantém seu
+  lifecycle próprio porque é navigation, não dialog (`BeeDayCardMenu`, que tinha o mesmo tratamento,
+  foi removido por falta de consumidores na Sprint 30.19 — ver `docs/design-system/02-components.md`).
 - `:focus-visible` é estilizado globalmente (`theme.css`:
   `:where(button, a, input, select, textarea, [tabindex]):focus-visible { box-shadow:
   var(--beeday-focus-ring); }`) e complementado por `polish.css` com `scroll-margin: 5rem`. O ring

@@ -10,6 +10,17 @@ presentation concerns. The gamification is intentionally light — inspired by p
 Duolingo rather than by RPG mechanics — and exists only to encourage consistency and visible
 progress.
 
+## Engineering priorities
+
+When trade-offs arise, priority order is: correctness, repository integrity, architectural
+integrity, security and data safety, backward compatibility, beeday Experience System and Design
+System consistency, maintainability and testability, minimal scope and reversibility, delivery
+efficiency. Speed never overrides correctness, architecture, security, or repository integrity.
+The full engineering governance contract (architecture layering, authorization model, Git
+workflow, mandatory validation, and review standards) is maintained locally as AI-agent operating
+context and is not part of this public repository — see the "Documentation" section below for
+what is tracked here.
+
 ## Current capabilities
 
 - user registration with full name, cookie authentication, email confirmation, and password
@@ -61,13 +72,13 @@ compatibility layer — the database starts empty for every new environment. See
 
 ```text
 BeeDay/
-├── CLAUDE.md
 ├── README.md
 ├── LICENSE
 ├── .editorconfig
 ├── .gitattributes
 ├── .gitignore
 ├── .github/
+├── design/
 ├── docs/
 ├── scripts/
 ├── src/
@@ -83,8 +94,14 @@ BeeDay/
 │   └── BeeDay.E2E.Tests/
 ├── Directory.Build.props
 ├── Directory.Packages.props
+├── dotnet-tools.json
 └── BeeDay.slnx
 ```
+
+`design/` holds source icon assets and the provider-mapping catalog consumed by
+`scripts/New-IconSprite.ps1` — see [`docs/design-system/03-icons.md`](docs/design-system/03-icons.md).
+`dotnet-tools.json` pins the local `dotnet-ef` tool version used by the Entity Framework Core
+commands below.
 
 ## Requirements
 
@@ -184,5 +201,3 @@ use the same versioned source of truth.
 Proprietary — see [`LICENSE`](LICENSE). No license is granted to copy, modify, distribute,
 publish, sublicense, or use this software except with the copyright holder's prior written
 permission.
-
-<!-- CI/CD validation after default branch migration -->

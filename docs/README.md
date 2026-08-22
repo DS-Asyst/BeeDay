@@ -38,20 +38,23 @@ testes em `tests/BeeDay.Web.Tests`". Ver [`CONVENTIONS.md`](CONVENTIONS.md).
 | [`infrastructure/`](infrastructure/README.md) | Repositories, Unit of Work, SQL Server, Concurrency, Event Journal, Identity/Email/Health/Background, Dependency Injection | Correto — reconstruído por completo na Sprint 16.6 a partir do código atual; cache de aplicação removido na Sprint 18.6 (código morto) |
 | [`web/`](web/README.md) | Composition root, páginas Blazor Server, Feature components, layouts, integração com Design System, localização en-US/pt-BR | Correto — reconstruído por completo na Sprint 16.7 a partir do código atual; `07-localization.md` adicionado na Sprint 23.9 (EPIC 23) |
 | [`persistence/`](persistence/README.md) | Modelo relacional, estratégia EF Core | Correto — reconstruído por completo na Sprint 16.6 a partir do código atual |
-| [`authentication/`](authentication/README.md) | Cookies, confirmação de e-mail, rate limiting | Reservado — ver `security/` enquanto isso |
+| [`authentication/`](authentication/README.md) | Cookies, confirmação de e-mail, rate limiting | Redirecionamento permanente por design (Sprint 31.10) — `security/` é o owner canônico |
 | [`security/`](security/README.md) | Baseline de segurança, segurança operacional | Correto — `02-operational-security.md` reconstruído na Sprint 16.9; nomenclatura residual de `01-security-baseline.md` corrigida na Sprint 16.10 |
 | [`deployment/`](deployment/README.md) | Deploy, GitHub Actions, runtime configuration, observabilidade, operações | Correto — reconstruído por completo na Sprint 16.9 a partir do código atual |
 | [`testing/`](testing/README.md) | Estratégia e infraestrutura de testes | Correto — reconstruído por completo na Sprint 16.9 a partir do código atual |
 | [`design-system/`](design-system/README.md) | Design System Blazor, BeeDay Icon System, Foundations, Componentes, Forms | Atual — governança e contratos revalidados na EPIC 25 |
 | [`brand/`](brand/README.md) | Brand System: identidade, personagens, ilustração, escrita e localização | Atual — Character/Illustration e Writing/Voice/Tone formalizados na EPIC 25 |
 | [`ux/`](ux/README.md) | Diretrizes de UX, acessibilidade, responsividade | Correto — reconstruído por completo na Sprint 16.8 a partir do código atual |
-| [`api/`](api/README.md) | Especificação OpenAPI | Não reauditado quanto ao conteúdo |
-| [`adr/`](adr/README.md) | Registros de decisão arquitetural | Correto (histórico, imutável) |
-| [`developer/`](developer/README.md) | Guia de contribuição, setup de ambiente | Reservado — ver `README.md` da raiz enquanto isso |
+| [`api/`](api/README.md) | Rascunho especulativo de API REST futura | `NOT IMPLEMENTED` (Sprint 31.14) — 0% corresponde a rota real do BeeDay atual; mantido como planejamento futuro, não como documentação de estado atual |
+| [`adr/`](adr/README.md) | Registros de decisão arquitetural | Correto (histórico, imutável) — baseline de validade atual dos 6 ADRs aplicada na Sprint 31.13 |
+| [`developer/`](developer/README.md) | Guia de contribuição, setup de ambiente | Redirecionamento permanente por design (Sprint 31.14) — `README.md` da raiz é o owner canônico |
 | [`history/`](history/README.md) | Diários de sprint e transições já concluídas | Correto (histórico, congelado) |
 | [`epics/20-home-visual-experience/`](epics/20-home-visual-experience/README.md) | EPIC 20 — Home & Visual Experience: decisões aprovadas, discovery transversal, Visual Adoption Map, roadmap de Sprints | Histórico concluído |
 | [`epics/21-lingo-product-experience/`](epics/21-lingo-product-experience/README.md) | EPIC 21 — Lingo-Based Product Experience & Design System: especificação de migração Lingo → BeeDay, component mapping, gamification capability matrix | Histórico concluído |
 | [`epics/25-design-system-brand-evolution/`](epics/25-design-system-brand-evolution/README.md) | EPIC 25 — beeday Design System & Brand System Evolution: contrato de marca, governança, implementação e gate final | Concluída na Sprint 25.16 |
+| [`epics/28-transactional-email-experience/`](epics/28-transactional-email-experience/README.md) | EPIC 28 — Transactional Email Experience, Deliverability & Observability: baseline, contrato de localização, composição, deliverability e fechamento consolidado | Deployment/config reverificados e live em HMG (2026-08-22, evidência real via `gh run view`) — único item pendente é o smoke test de inbox real, que exige acesso do owner a uma caixa de entrada alocada; ver `docs/deployment/14-transactional-email-runbook.md` §6 |
+| [`epics/30-system-integrity/`](epics/30-system-integrity/README.md) | EPIC 30 — System Integrity & Complete Engineering Audit: inventário versionado, Audit Ledger, findings e ownership por Sprint | Histórico concluído — EPIC 30 declarada `COMPLETE` (release readiness `READY`); reclassificada na Sprint 31.13 |
+| [`epics/31-documentation-knowledge-consolidation/`](epics/31-documentation-knowledge-consolidation/README.md) | EPIC 31 — Repository Documentation & Knowledge Consolidation: Documentation Ledger, ADR validity baseline, reconciliação por área | Concluída — as 15 Sprints (31.1–31.15) finalizadas; 185 artefatos de documentação em estado terminal válido |
 
 ## Templates
 

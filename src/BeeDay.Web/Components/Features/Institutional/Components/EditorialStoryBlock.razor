@@ -1,0 +1,12 @@
+@* Sprint 29.4: one editorial story block — a short headline plus short support copy, replacing the
+   "H2 + paragraph, thrown vertically" pattern. No image slot: Sprint 29.4 does not introduce or
+   generate any new illustration/photography asset, and every page's real content works as pure
+   typographic composition (see the Sprint 29.4 report). Centered is the closing-statement variant
+   used once per page, without support copy. *@
+<section class="editorial-story-block@(Centered ? " editorial-story-block--centered" : "")">
+    <p class="editorial-story-block__headline">@Headline</p>
+    @if (!string.IsNullOrWhiteSpace(Support))
+    {
+        <p class="editorial-story-block__support">@Support</p>
+    }
+</section>

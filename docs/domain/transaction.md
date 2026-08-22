@@ -15,7 +15,7 @@ por uma `WalletTag`.
 |---|---|---|
 | `WalletId` | `Guid` | |
 | `Description` | `string` | Normalizada, máx. `MaximumDescriptionLength = 120` |
-| `Amount` | `decimal` | Sempre positivo — sinal vem de `Type`, não de `Amount` |
+| `Amount` | `decimal` | Positivo, até `MaximumAmount = 999999999999`, com no máximo 2 casas |
 | `Type` | `TransactionType` | `Income` ou `Expense` |
 | `TransactionDate` | `DateOnly` | |
 | `WalletTagId` | `Guid?` | Opcional |
@@ -42,11 +42,13 @@ Herda diretamente de `Entity`.
    nunca de `Amount` negativo.
 4. **`Amount` não pode ter mais de 2 casas decimais**: verificado comparando
    `decimal.Round(amount, 2, MidpointRounding.AwayFromZero)` contra o valor original.
-5. **`Type` deve ser um enum válido** (`EnumValidation.Defined`).
-6. **`TransactionDate` obrigatória**: `default` (i.e. `DateOnly` não inicializado) lança.
-7. **`WalletTagId`, se fornecido, não pode ser `Guid.Empty`** — `null` é aceito (sem tag), mas
+5. **`Amount` não pode exceder `MaximumAmount = 999999999999`**, alinhado ao contrato público do
+   formulário financeiro e protegido novamente no Domain.
+6. **`Type` deve ser um enum válido** (`EnumValidation.Defined`).
+7. **`TransactionDate` obrigatória**: `default` (i.e. `DateOnly` não inicializado) lança.
+8. **`WalletTagId`, se fornecido, não pode ser `Guid.Empty`** — `null` é aceito (sem tag), mas
    `Guid.Empty` explicitamente lança (distinção entre "nenhuma tag" e "tag inválida").
-8. **`Notes` limitada a 500 caracteres**, sem outra validação de conteúdo.
+9. **`Notes` limitada a 500 caracteres**, sem outra validação de conteúdo.
 
 ## Ownership
 

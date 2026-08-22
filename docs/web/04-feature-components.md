@@ -133,7 +133,9 @@ mostra toast de sucesso/erro individualmente — uma seção falhando não bloqu
   fora do escopo de apresentação desta Sprint.
 - `Tutorial.razor` (`/onboarding/tutorial`): 5 slides estáticos (`TutorialSlide[]` hardcoded no
   `@code`), sem nenhuma leitura de Application até o último slide, quando `NextAsync` chama
-  `Store.CompleteOnboardingAsync()` e navega para `/daily`.
+  `Store.CompleteOnboardingAsync()` e navega para `/profile` (mesmo destino usado por
+  `LoginDestinationResolver.Resolve` para um usuário já onboarded — não `/daily`; corrigido na
+  Sprint 30.11, ver BD30-F046 no Audit Ledger).
 - `ProfileCreationState` (`/profile/create`) é a única state class de Feature que atende **dois
   fluxos ao mesmo tempo**: cadastro anônimo completo (`CreateAccountAsync`, sem sessão) e
   completar perfil de um usuário já autenticado sem perfil (`CompleteUserProfileAsync`) —

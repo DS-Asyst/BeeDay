@@ -6,6 +6,8 @@ namespace BeeDay.Domain.Entities;
 
 public sealed class UserToken : Entity
 {
+    private UserToken() { }
+
     public Guid UserId { get; private set; }
     public UserTokenType Type { get; private set; }
     public string TokenHash { get; private set; } = string.Empty;
@@ -35,6 +37,11 @@ public sealed class UserToken : Entity
         }
 
         ArgumentException.ThrowIfNullOrWhiteSpace(tokenHash);
+
+        if (createdAtUtc == default)
+        {
+            throw new DomainValidationException(nameof(createdAtUtc), "Token creation time is required.");
+        }
 
         if (expiresAtUtc <= createdAtUtc)
         {
@@ -68,6 +75,11 @@ public sealed class UserToken : Entity
         if (IsRevoked)
         {
             throw new InvalidDomainStateException("Token has been revoked.");
+        }
+
+        if (nowUtc < CreatedAtUtc)
+        {
+            throw new InvalidDomainStateException("Token cannot be used before its creation time.");
         }
 
         if (IsExpired(nowUtc))

@@ -11,7 +11,12 @@ internal sealed class TransactionConfiguration : IEntityTypeConfiguration<Transa
         builder.ToTable("Transactions", table =>
         {
             table.HasCheckConstraint("CK_Transactions_Type", "[Type] IN (1, 2)");
-            table.HasCheckConstraint("CK_Transactions_Amount", "[Amount] > 0");
+            // EPIC 30 Sprint 30.15 / BD30-F058: the upper bound was previously enforced only in
+            // Domain (Transaction.ValidateAmount) and the Web Range attribute — a direct SQL/EF write
+            // bypassing Domain (bulk import, admin tool, future migration) was not blocked. The
+            // decimal(19,2) column type already makes ">2 decimal places" structurally impossible at
+            // the DB level, so only the upper bound needed adding here.
+            table.HasCheckConstraint("CK_Transactions_Amount", "[Amount] > 0 AND [Amount] <= 999999999999");
         });
 
         builder.HasKey(transaction => transaction.Id);

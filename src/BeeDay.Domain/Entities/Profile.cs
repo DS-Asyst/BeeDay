@@ -8,11 +8,8 @@ namespace BeeDay.Domain.Entities;
 /// preferences, and progress. Carries no authentication or security state.
 /// </summary>
 /// <remarks>
-/// Physically still backed by fields stored on <see cref="User"/> for JSON persistence
-/// compatibility — splitting Profile into a separately-persisted aggregate would change the
-/// current JSON document shape, which is out of scope while JSON remains the temporary
-/// adapter. That physical split becomes natural once relational persistence introduces
-/// separate tables for Identity and Profile.
+/// This projection remains backed by fields stored on <see cref="User"/> so profile-facing code
+/// cannot acquire or mutate authentication and security state through a separate aggregate.
 /// </remarks>
 public sealed class Profile
 {

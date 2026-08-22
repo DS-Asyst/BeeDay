@@ -60,9 +60,9 @@ agregado" neste código, já que Domain não usa nenhum marcador explícito de `
   `GetByTodoIdAsync`). Confirmado: o único ponto do código que chama `Todo.Create(...)` entrega o
   resultado imediatamente a `repository.AddTodoAsync(...)` — nunca existe um `Todo` fora da
   fronteira de `Project`.
-- `UserExperience`/`ExperienceEntry` vivem dentro da fronteira de `User` — `UserExperience` é um
-  Owned Type do EF Core mapeado com a mesma PK de `User` (confirmado na Sprint 16.3); não têm
-  repositório próprio.
+- `UserExperience` pertence à fronteira lógica de `User`; `ExperienceEntry` é criada por essa
+  fronteira, mas hoje é mapeada como entidade relacional separada. A coleção `Entries` não é
+  hidratada pelo mapping atual; a divergência está registrada como `BD30-F030` para a Sprint 30.7.
 - `Wallet`, `WalletTag` e `Transaction` são 3 Aggregate Roots **separados**, não um agregado
   composto — cada um com seu próprio repositório e seu próprio ciclo de vida, ainda que
   logicamente relacionados (uma `Transaction` referencia `WalletId` e opcionalmente
@@ -74,6 +74,7 @@ Ver [`relationships.md`](relationships.md) para o mapa completo de relacionament
 
 | Documento | Conteúdo |
 |---|---|
+| [`audit-inventory.md`](audit-inventory.md) | Estado auditado dos 47 arquivos de Domain, decisões e limites explícitos |
 | [`entities.md`](entities.md) | Entidades que não são Aggregate Roots: `Todo`, `Activity`, `Profile`, `ExperienceEntry` |
 | [`value-objects.md`](value-objects.md) | Os 6 Value Objects + `ExperienceReward`/`ExperienceSource` |
 | [`domain-events.md`](domain-events.md) | Os 3 Domain Events, quem publica, quem consome, diagrama de fluxo |
@@ -93,12 +94,10 @@ Ver [`relationships.md`](relationships.md) para o mapa completo de relacionament
 6. Consulte [`business-rules.md`](business-rules.md) como referência cruzada de toda invariante,
    independentemente de a qual agregado ela pertence.
 
-## Achado relevante (reportado, não corrigido)
+## Auditoria atual
 
-Comentários XML doc em `Entities/Profile.cs` e `Entities/User.cs` (propriedade `Profile`) ainda
-justificam a modelagem atual ("`Profile` embutido em `User`, não uma tabela própria") citando
-"compatibilidade com persistência JSON" e "documento JSON único" — mas o pipeline JSON foi
-completamente removido do repositório desde a Sprint 14.7 (ver ADR-005). O comentário está
-desatualizado; a decisão de manter `Profile` como view computada sobre campos de `User` (em vez de
-uma tabela própria) pode ainda ser correta hoje, mas não pelo motivo que o comentário afirma — o
-motivo real, se houver, não está documentado em código. Ver [`entities.md`](entities.md) §`Profile`.
+A Sprint 30.5 auditou integralmente os 47 arquivos rastreados de Domain. O inventário por artefato,
+as invariantes corrigidas e os estados deliberadamente documentados estão em
+[`audit-inventory.md`](audit-inventory.md). Os comentários obsoletos que atribuíam `Profile` ao
+antigo adapter JSON foram corrigidos; a projeção permanece sobre `User` para manter autenticação e
+segurança fora da superfície de perfil.

@@ -126,14 +126,71 @@
   <data name="FooterLinksAriaLabel" xml:space="preserve">
     <value>Links do beeday</value>
   </data>
-  <data name="FooterGitHubLink" xml:space="preserve">
-    <value>Projeto no GitHub</value>
-  </data>
-  <data name="FooterExperienceSystemLink" xml:space="preserve">
-    <value>beeday Experience System</value>
-  </data>
   <data name="FooterCopyright" xml:space="preserve">
     <value>© 2026 beeday. Todos os direitos reservados.</value>
+  </data>
+  <data name="FooterAboutUsGroup" xml:space="preserve">
+    <value>Sobre nós</value>
+  </data>
+  <data name="FooterMissionLink" xml:space="preserve">
+    <value>Missão</value>
+  </data>
+  <data name="FooterEfficacyLink" xml:space="preserve">
+    <value>Eficácia</value>
+  </data>
+  <data name="FooterBrandGuidelinesLink" xml:space="preserve">
+    <value>Diretrizes de marca</value>
+  </data>
+  <data name="FooterContactLink" xml:space="preserve">
+    <value>Fale conosco</value>
+  </data>
+  <data name="FooterProductsGroup" xml:space="preserve">
+    <value>Produtos</value>
+  </data>
+  <data name="FooterProductLink" xml:space="preserve">
+    <value>beeday</value>
+  </data>
+  <data name="FooterProductPlusLink" xml:space="preserve">
+    <value>beeday Plus</value>
+  </data>
+  <data name="FooterAppsGroup" xml:space="preserve">
+    <value>Aplicativos</value>
+  </data>
+  <data name="FooterAndroidLink" xml:space="preserve">
+    <value>beeday para Android</value>
+  </data>
+  <data name="FooterIosLink" xml:space="preserve">
+    <value>beeday para iOS</value>
+  </data>
+  <data name="FooterHelpGroup" xml:space="preserve">
+    <value>Ajuda e suporte</value>
+  </data>
+  <data name="FooterFaqsLink" xml:space="preserve">
+    <value>Perguntas frequentes</value>
+  </data>
+  <data name="FooterLegalGroup" xml:space="preserve">
+    <value>Privacidade e termos</value>
+  </data>
+  <data name="FooterCommunityGuidelinesLink" xml:space="preserve">
+    <value>Diretrizes da comunidade</value>
+  </data>
+  <data name="FooterTermsLink" xml:space="preserve">
+    <value>Termos</value>
+  </data>
+  <data name="FooterPrivacyLink" xml:space="preserve">
+    <value>Privacidade</value>
+  </data>
+  <data name="FooterSocialGroup" xml:space="preserve">
+    <value>Social</value>
+  </data>
+  <data name="FooterLinkedInLabel" xml:space="preserve">
+    <value>LinkedIn</value>
+  </data>
+  <data name="FooterInstagramComingSoon" xml:space="preserve">
+    <value>Instagram (em breve)</value>
+  </data>
+  <data name="FooterXComingSoon" xml:space="preserve">
+    <value>X (em breve)</value>
   </data>
   <data name="PublicHeaderHomeAriaLabel" xml:space="preserve">
     <value>Página inicial do beeday</value>
@@ -218,5 +275,14 @@
   </data>
   <data name="DomainErrorGeneric" xml:space="preserve">
     <value>Algo deu errado. Tente novamente em instantes.</value>
+  </data>
+  <data name="EditorialSectionNavAriaLabel" xml:space="preserve">
+    <value>Páginas da seção</value>
+  </data>
+  <data name="EditorialFooterBackToTopLabel" xml:space="preserve">
+    <value>Voltar ao topo</value>
+  </data>
+  <data name="EditorialFooterBuyMeACoffee" xml:space="preserve">
+    <value>BUY ME A COFFEE</value>
   </data>
 </root>

@@ -223,6 +223,32 @@ jobs:
           & ".\scripts\iis-control\Request-BeeDayIisControlPromotion.ps1" `
               -CommitSha "${{ github.sha }}"
 
+      # Hotfix 26.9.2: two consecutive real deployments (runs 31986772973 and 31993611105) failed
+      # inside Deploy-BeeDay.ps1's own recipient-enumeration logic - both times after IIS had
+      # already been stopped. This runs the deploy script's own regression suite, on this exact
+      # runner (SERV3WEB, Windows PowerShell 5.1 - the same engine that exposed both defects and
+      # the only place that engine is available in this pipeline), BEFORE "Deploy to IIS with
+      # rollback" so a regression of this kind fails closed here instead of stopping the site
+      # again. Read-only: no IIS, no SQL, no application files touched, no secrets required or
+      # read (the suite uses only synthetic parameter values) - see
+      # scripts/tests/Test-DeployBeeDayRecovery.ps1 for what it proves.
+      #
+      # Hotfix 26.9.3: a THIRD real deployment (run 32009214798) failed after IIS STOP - not from
+      # a Deploy-BeeDay.ps1 defect this time, but from a contract mismatch with the privileged
+      # Invoke-BeeDayIisControl.ps1's own CONFIGURE allow-list, which the suite above cannot catch
+      # because it stubs the privileged call entirely rather than exercising the real validator on
+      # the other side of that boundary. Test-InvokeBeeDayIisControlContract.ps1 closes that gap:
+      # also read-only (pure string/regex validation against the extracted real allow-list/
+      # validator - no IIS, no SQL, no C:\Ops\BeeDay file touched), so both suites belong in the
+      # same preflight, before the same "Deploy to IIS with rollback" step.
+      - name: Validate deployment script regression suite
+        shell: powershell
+        run: |
+          & ".\scripts\tests\Test-DeployBeeDayRecovery.ps1"
+          & ".\scripts\tests\Test-InvokeBeeDayIisControlContract.ps1"
+          & ".\scripts\tests\Test-ClearBeeDayStdoutLogs.ps1"
+          & ".\scripts\tests\Test-ClearBeeDayBackups.ps1"
+
       - name: Deploy to IIS with rollback
         shell: powershell
         env:
@@ -230,6 +256,14 @@ jobs:
           BEEDAY_RESEND_API_KEY: ${{ secrets.BEEDAY_RESEND_API_KEY }}
           BEEDAY_RESEND_FROM_ADDRESS: ${{ secrets.BEEDAY_RESEND_FROM_ADDRESS }}
           BEEDAY_RESEND_FROM_NAME: ${{ secrets.BEEDAY_RESEND_FROM_NAME }}
+          # Epic 26, Sprint 26.9: the HMG recipient safety guard's allowlist (Sprint 26.4),
+          # semicolon-separated. Not yet defined as a repository secret as of this sprint — reads as
+          # empty until the owner adds BEEDAY_HMG_ALLOWED_RECIPIENTS, at which point
+          # Deploy-BeeDay.ps1 picks it up with no further workflow change. Sprint 30.25 (BD30-F006):
+          # Homologation has since flipped to the Resend provider (Resend.Enabled=true,
+          # appsettings.Homologation.json) - this guard is live, not dormant, whenever the secret
+          # above is populated.
+          BEEDAY_HMG_ALLOWED_RECIPIENTS: ${{ secrets.BEEDAY_HMG_ALLOWED_RECIPIENTS }}
           BEEDAY_ALLOWED_HOSTS: ${{ secrets.BEEDAY_ALLOWED_HOSTS }}
           BEEDAY_APP_CONNECTION: ${{ secrets.BEEDAY_APP_CONNECTION }}
           BEEDAY_MIGRATOR_CONNECTION: ${{ secrets.BEEDAY_MIGRATOR_CONNECTION }}
@@ -243,6 +277,7 @@ jobs:
               -ResendApiKey $env:BEEDAY_RESEND_API_KEY `
               -ResendFromAddress $env:BEEDAY_RESEND_FROM_ADDRESS `
               -ResendFromName $env:BEEDAY_RESEND_FROM_NAME `
+              -HmgAllowedRecipients $env:BEEDAY_HMG_ALLOWED_RECIPIENTS `
               -AllowedHosts $env:BEEDAY_ALLOWED_HOSTS `
               -SiteName "BeeDay-HMG" `
               -AppPoolName "BeeDay-Web-AppPool" `

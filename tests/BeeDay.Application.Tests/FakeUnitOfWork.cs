@@ -6,7 +6,7 @@ namespace BeeDay.Application.Tests;
 
 /// <summary>
 /// Shared in-memory double for the 8 per-Aggregate persistence contracts plus <see cref="IUnitOfWork"/>
-/// (docs/architecture/07-persistence-contracts.md), replacing the Sprint 13.4-era
+/// (docs/history/persistence-contracts.md), replacing the Sprint 13.4-era
 /// <c>FakeLevelUpRepository</c> now that no production handler depends on <c>ILevelUpRepository</c>
 /// (Sprint 14.6). Backed by 8 independent <c>List&lt;T&gt;</c> collections, one per Aggregate — no type
 /// aggregates them together (Sprint 14.7 removed <c>LevelUpData</c>, the last such type, precisely to

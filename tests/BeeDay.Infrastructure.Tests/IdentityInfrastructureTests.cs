@@ -2,8 +2,11 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using BeeDay.Application.Common.Identity;
+using BeeDay.Domain.Enums;
 using BeeDay.Infrastructure.Configuration;
+using BeeDay.Infrastructure.Diagnostics;
 using BeeDay.Infrastructure.Identity;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Xunit;
@@ -45,7 +48,7 @@ public sealed class IdentityInfrastructureTests
     {
         var composer = CreateComposer();
 
-        var message = composer.ComposeEmailConfirmation("player@example.com", "Tiago <Admin>", "a+b/c=");
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Tiago <Admin>", "a+b/c=", UserLanguage.English);
 
         Assert.Equal("player@example.com", message.Recipient);
         Assert.Equal("Confirm your beeday email", message.Subject);
@@ -59,11 +62,305 @@ public sealed class IdentityInfrastructureTests
     {
         var composer = CreateComposer();
 
-        var message = composer.ComposePasswordReset("player@example.com", "Tiago", "reset-token");
+        var message = composer.ComposePasswordReset("player@example.com", "Tiago", "reset-token", UserLanguage.English);
 
         Assert.Equal("Reset your beeday password", message.Subject);
         Assert.Contains("https://beeday.example/account/reset-password?token=reset-token", message.HtmlBody, StringComparison.Ordinal);
-        Assert.Contains("expires in 1 hour", message.HtmlBody, StringComparison.Ordinal);
+        Assert.Contains("valid for 1 hour", message.HtmlBody, StringComparison.Ordinal);
+    }
+
+    // Epic 26, Sprint 26.6: #5247F9 is the single officially approved beeday Brand Color
+    // (docs/design-system/01-foundations.md §2.2; CLAUDE.md §13) — the CTA button must use it, and
+    // the stale pre-EPIC-25 purple (#7A4FCB) this template used before must be fully gone.
+    [Theory]
+    [InlineData("ComposeEmailConfirmation")]
+    [InlineData("ComposePasswordReset")]
+    public void EmailComposer_UsesTheCurrentBrandColorForTheCallToAction(string method)
+    {
+        var composer = CreateComposer();
+
+        var message = method == "ComposeEmailConfirmation"
+            ? composer.ComposeEmailConfirmation("player@example.com", "Tiago", "token", UserLanguage.English)
+            : composer.ComposePasswordReset("player@example.com", "Tiago", "token", UserLanguage.English);
+
+        Assert.Contains("#5247F9", message.HtmlBody, StringComparison.Ordinal);
+        Assert.DoesNotContain("#7A4FCB", message.HtmlBody, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void EmailComposer_IncludesAPlainTextAlternativeWithTheSameLink()
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Tiago", "a+b/c=", UserLanguage.English);
+
+        Assert.NotNull(message.PlainTextBody);
+        Assert.DoesNotContain('<', message.PlainTextBody);
+        Assert.Contains("https://beeday.example/account/confirm-email?token=a%2Bb%2Fc%3D", message.PlainTextBody, StringComparison.Ordinal);
+        Assert.Contains("Tiago", message.PlainTextBody, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void EmailComposer_PasswordResetPlainTextMatchesTheHtmlLinkAndExpiry()
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposePasswordReset("player@example.com", "Tiago", "reset-token", UserLanguage.English);
+
+        Assert.NotNull(message.PlainTextBody);
+        Assert.DoesNotContain('<', message.PlainTextBody);
+        Assert.Contains("https://beeday.example/account/reset-password?token=reset-token", message.PlainTextBody, StringComparison.Ordinal);
+        Assert.Contains("valid for 1 hour", message.PlainTextBody, StringComparison.Ordinal);
+    }
+
+    // EPIC 28, Sprint 28.2 (ADR-006): the composer must render each recipient's own persisted
+    // UserLanguage, never a shared/ambient culture — these tests exercise both approved languages and
+    // both flows to prove that.
+    [Theory]
+    [InlineData(UserLanguage.English, "Confirm your beeday email", "Hello, Ana!", "en-US")]
+    [InlineData(UserLanguage.Portuguese, "Confirme seu e-mail beeday", "Olá, Ana!", "pt-BR")]
+    public void EmailComposer_ComposesConfirmationInTheRequestedLanguage(UserLanguage language, string expectedSubject, string expectedGreeting, string expectedHtmlLang)
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", language);
+
+        Assert.Equal(expectedSubject, message.Subject);
+        // WebUtility.HtmlEncode converts non-ASCII characters (e.g. the pt-BR "á") to numeric HTML
+        // entities, which is correct/safe markup but not a literal substring match — decode first.
+        Assert.Contains(expectedGreeting, WebUtility.HtmlDecode(message.HtmlBody), StringComparison.Ordinal);
+        Assert.Contains(expectedGreeting, message.PlainTextBody, StringComparison.Ordinal);
+        Assert.Contains($"<html lang=\"{expectedHtmlLang}\">", message.HtmlBody, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(UserLanguage.English, "Reset your beeday password", "Hello, Ana!")]
+    [InlineData(UserLanguage.Portuguese, "Redefina sua senha beeday", "Olá, Ana!")]
+    public void EmailComposer_ComposesPasswordResetInTheRequestedLanguage(UserLanguage language, string expectedSubject, string expectedGreeting)
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposePasswordReset("player@example.com", "Ana", "token", language);
+
+        Assert.Equal(expectedSubject, message.Subject);
+        Assert.Contains(expectedGreeting, WebUtility.HtmlDecode(message.HtmlBody), StringComparison.Ordinal);
+        Assert.Contains(expectedGreeting, message.PlainTextBody, StringComparison.Ordinal);
+    }
+
+    // Every language passed through the boundary must resolve every key the composer needs — a
+    // missing pt-BR translation must fail loudly (InvalidOperationException from IdentityEmailComposer),
+    // never silently fall back to English content under a pt-BR subject/lang tag.
+    [Theory]
+    [InlineData(UserLanguage.English)]
+    [InlineData(UserLanguage.Portuguese)]
+    public void EmailComposer_NeverThrowsForAnyApprovedLanguage(UserLanguage language)
+    {
+        var composer = CreateComposer();
+
+        var confirmation = Record.Exception(() => composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", language));
+        var reset = Record.Exception(() => composer.ComposePasswordReset("player@example.com", "Ana", "token", language));
+
+        Assert.Null(confirmation);
+        Assert.Null(reset);
+    }
+
+    // EPIC 28, Sprint 28.3 (Composition Foundation): the display name is user-controlled input that
+    // reaches HTML unescaped unless encoded — this proves every HTML-significant character survives
+    // as inert text, never as markup, across the full set WebUtility.HtmlEncode is relied upon for.
+    [Theory]
+    [InlineData("<script>alert(1)</script>")]
+    [InlineData("Tom & Jerry")]
+    [InlineData("She said \"hi\"")]
+    public void EmailComposer_EncodesEveryHtmlSignificantCharacterInDisplayName(string displayName)
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", displayName, "token", UserLanguage.English);
+
+        Assert.DoesNotContain(displayName, message.HtmlBody, StringComparison.Ordinal);
+        Assert.Contains(displayName, WebUtility.HtmlDecode(message.HtmlBody), StringComparison.Ordinal);
+    }
+
+    // WebUtility.HtmlEncode also encodes the apostrophe (to a numeric entity) — proven here rather
+    // than assumed, since this composer relies on WebUtility's exact encoding set rather than
+    // reimplementing one.
+    [Fact]
+    public void EmailComposer_PreservesApostrophesAcrossHtmlEncodingAndPlainText()
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "O'Brien", "token", UserLanguage.English);
+
+        Assert.Contains("O'Brien", WebUtility.HtmlDecode(message.HtmlBody), StringComparison.Ordinal);
+        Assert.Contains("O'Brien", message.PlainTextBody, StringComparison.Ordinal);
+    }
+
+    // A raw <script> tag in the display name must never appear as live markup in the HTML body — this
+    // is the concrete injection scenario the encoding above defends against.
+    [Fact]
+    public void EmailComposer_NeverEmitsUnescapedScriptTagsFromDisplayName()
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "<script>alert(1)</script>", "token", UserLanguage.English);
+
+        Assert.DoesNotContain("<script>", message.HtmlBody, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // A very long token (e.g. a future token format change, or a client that pads/wraps values) must
+    // still produce a single, correctly-encoded, unbroken URL in both bodies — no truncation, no
+    // accidental line wrap inside the URL itself.
+    [Fact]
+    public void EmailComposer_HandlesLongTokensWithoutTruncatingOrBreakingTheUrl()
+    {
+        var composer = CreateComposer();
+        var longToken = new string('a', 512);
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Ana", longToken, UserLanguage.English);
+
+        var expectedUrl = $"https://beeday.example/account/confirm-email?token={longToken}";
+        Assert.Contains(expectedUrl, message.HtmlBody, StringComparison.Ordinal);
+        Assert.Contains(expectedUrl, message.PlainTextBody, StringComparison.Ordinal);
+    }
+
+    // HTML and plain text are independently rendered strings (§ "Resend..." comment on
+    // BuildPlainTextTemplate) — this proves they still carry the same essential facts (same subject
+    // title, same callback URL) without requiring byte-for-byte identical output.
+    [Theory]
+    [InlineData("ComposeEmailConfirmation")]
+    [InlineData("ComposePasswordReset")]
+    public void EmailComposer_HtmlAndPlainTextCarryTheSameEssentialFacts(string method)
+    {
+        var composer = CreateComposer();
+
+        var message = method == "ComposeEmailConfirmation"
+            ? composer.ComposeEmailConfirmation("player@example.com", "Ana", "token-value", UserLanguage.English)
+            : composer.ComposePasswordReset("player@example.com", "Ana", "token-value", UserLanguage.English);
+
+        Assert.NotNull(message.PlainTextBody);
+        Assert.NotEqual(message.HtmlBody, message.PlainTextBody);
+        Assert.Contains(message.Subject, WebUtility.HtmlDecode(message.HtmlBody), StringComparison.Ordinal);
+        Assert.Contains(message.Subject, message.PlainTextBody, StringComparison.Ordinal);
+        Assert.Contains("token-value", message.HtmlBody, StringComparison.Ordinal);
+        Assert.Contains("token-value", message.PlainTextBody, StringComparison.Ordinal);
+    }
+
+    // Composition is pure computation over its inputs — running it twice for the same inputs must
+    // produce byte-identical output (no timestamps, random ids, or other hidden nondeterminism baked
+    // into the template), which is what lets 28.9's snapshot-style client-compatibility tests trust a
+    // captured render.
+    [Fact]
+    public void EmailComposer_ProducesDeterministicOutputForTheSameInputs()
+    {
+        var composer = CreateComposer();
+
+        var first = composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", UserLanguage.Portuguese);
+        var second = composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", UserLanguage.Portuguese);
+
+        Assert.Equal(first.HtmlBody, second.HtmlBody);
+        Assert.Equal(first.PlainTextBody, second.PlainTextBody);
+        Assert.Equal(first.Subject, second.Subject);
+    }
+
+    // EPIC 28, Sprint 28.4 (Identity Transactional Email Experience): the beeday wordmark must appear
+    // in both bodies, lowercase, matching the brand contract (CLAUDE.md §13) — never "Bee day"/"BeeDay"
+    // as a visible brand element.
+    [Theory]
+    [InlineData("ComposeEmailConfirmation")]
+    [InlineData("ComposePasswordReset")]
+    public void EmailComposer_ShowsTheBrandWordmarkInLowercase(string method)
+    {
+        var composer = CreateComposer();
+
+        var message = method == "ComposeEmailConfirmation"
+            ? composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", UserLanguage.English)
+            : composer.ComposePasswordReset("player@example.com", "Ana", "token", UserLanguage.English);
+
+        Assert.Contains(">beeday<", message.HtmlBody, StringComparison.Ordinal);
+        Assert.DoesNotContain("BeeDay", message.HtmlBody, StringComparison.Ordinal);
+        Assert.Contains("beeday", message.PlainTextBody, StringComparison.Ordinal);
+    }
+
+    // The preheader is the hidden preview text most clients show next to the subject in the inbox
+    // list — it must exist, be culture-aware, and never repeat the subject verbatim (that would waste
+    // the extra context a preheader is for).
+    [Theory]
+    [InlineData(UserLanguage.English, "Confirm your email to finish setting up your beeday account.")]
+    [InlineData(UserLanguage.Portuguese, "Confirme seu e-mail para concluir a configuração da sua conta beeday.")]
+    public void EmailComposer_IncludesACultureAwarePreheaderDistinctFromTheSubject(UserLanguage language, string expectedPreheader)
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", language);
+
+        Assert.Contains(expectedPreheader, WebUtility.HtmlDecode(message.HtmlBody), StringComparison.Ordinal);
+        Assert.NotEqual(message.Subject, expectedPreheader);
+    }
+
+    // The callback URL must appear twice in the HTML body: once as the CTA's href (for clients that
+    // render the button) and once as visible, clickable text (for clients/policies that strip
+    // buttons or render only plain links) — this is the "fallback link" the EPIC package's content
+    // checklist names explicitly.
+    [Fact]
+    public void EmailComposer_ShowsTheCallbackUrlAsVisibleFallbackTextInAdditionToTheButton()
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", UserLanguage.English);
+        var url = "https://beeday.example/account/confirm-email?token=token";
+
+        var occurrences = message.HtmlBody.Split(url).Length - 1;
+        Assert.True(occurrences >= 2, $"Expected the callback URL to appear at least twice (CTA href + visible fallback link), found {occurrences}.");
+    }
+
+    // Product/UI text (headings, body, CTA, footer) must stay on the Nunito stack; Coiny is reserved
+    // for the brand wordmark only (docs/design-system/01-foundations.md §3 — "Coiny não é fonte de
+    // produto"). This is a structural check, not a rendering one: it proves the two font stacks are
+    // assigned to the right elements, not that a browser renders them a particular way.
+    [Fact]
+    public void EmailComposer_UsesNunitoForProductTextAndReservesCoinyForTheBrandWordmark()
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", UserLanguage.English);
+
+        Assert.Contains("'Coiny','Nunito','Segoe UI',sans-serif", message.HtmlBody, StringComparison.Ordinal);
+        Assert.Contains("'Nunito','Segoe UI',Arial,sans-serif", message.HtmlBody, StringComparison.Ordinal);
+        // The Coiny-first stack must be scoped to the wordmark span only, not the whole document body.
+        var coinyOccurrences = message.HtmlBody.Split("'Coiny'").Length - 1;
+        Assert.Equal(1, coinyOccurrences);
+    }
+
+    // Email clients (Outlook desktop especially) require table-based layout for predictable rendering
+    // and cannot depend on remote images being loaded — this proves both structural constraints hold.
+    [Fact]
+    public void EmailComposer_UsesTableBasedLayoutAndNoRemoteImages()
+    {
+        var composer = CreateComposer();
+
+        var message = composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", UserLanguage.English);
+
+        Assert.Contains("role=\"presentation\"", message.HtmlBody, StringComparison.Ordinal);
+        Assert.DoesNotContain("<img", message.HtmlBody, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // The footer must instruct the recipient to ignore the email if they didn't initiate the request
+    // (CLAUDE.md-adjacent product requirement named explicitly by the EPIC 28 content checklist) —
+    // for both flows, in both languages.
+    [Theory]
+    [InlineData("ComposeEmailConfirmation", UserLanguage.English, "ignore")]
+    [InlineData("ComposeEmailConfirmation", UserLanguage.Portuguese, "ignorar")]
+    [InlineData("ComposePasswordReset", UserLanguage.English, "ignore")]
+    [InlineData("ComposePasswordReset", UserLanguage.Portuguese, "ignorar")]
+    public void EmailComposer_InstructsTheRecipientToIgnoreAnUnrequestedEmail(string method, UserLanguage language, string expectedWord)
+    {
+        var composer = CreateComposer();
+
+        var message = method == "ComposeEmailConfirmation"
+            ? composer.ComposeEmailConfirmation("player@example.com", "Ana", "token", language)
+            : composer.ComposePasswordReset("player@example.com", "Ana", "token", language);
+
+        Assert.Contains(expectedWord, message.PlainTextBody, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -77,6 +374,20 @@ public sealed class IdentityInfrastructureTests
             TestContext.Current.CancellationToken);
 
         Assert.Equal(0, handler.CallCount);
+    }
+
+    // EPIC 28, Sprint 28.6 (Evidence-Based Deliverability Remediation): the Sprint 28.5 audit found
+    // this class-level default was the only place still using the wrong brand casing ("BeeDay") for
+    // a visible, marketing-adjacent surface (every recipient's inbox "From" display name) — every
+    // real committed environment already overrode it to "beeday" via appsettings, so this default was
+    // unreachable in practice, but a future environment omitting the override would have silently
+    // regressed brand casing. Locks the correct default in so that can't happen.
+    [Fact]
+    public void ResendOptions_DefaultFromNameMatchesTheBrandContract()
+    {
+        var options = new ResendOptions();
+
+        Assert.Equal("beeday", options.FromName);
     }
 
     [Fact]
@@ -96,7 +407,7 @@ public sealed class IdentityInfrastructureTests
         var sender = CreateSender(handler, EnabledOptions());
 
         await sender.SendAsync(
-            new EmailMessage("player@example.com", "Confirm", "<p>Hello</p>"),
+            new EmailMessage("player@example.com", "Confirm", "<p>Hello</p>", "Hello"),
             TestContext.Current.CancellationToken);
 
         Assert.NotNull(captured);
@@ -114,6 +425,27 @@ public sealed class IdentityInfrastructureTests
         Assert.Equal("player@example.com", root.GetProperty("to")[0].GetString());
         Assert.Equal("Confirm", root.GetProperty("subject").GetString());
         Assert.Equal("<p>Hello</p>", root.GetProperty("html").GetString());
+        Assert.Equal("Hello", root.GetProperty("text").GetString());
+    }
+
+    [Fact]
+    public async Task ResendSender_WhenPlainTextBodyIsAbsent_OmitsItAsNull()
+    {
+        string? payload = null;
+        var handler = new StubHttpMessageHandler(async request =>
+        {
+            payload = await request.Content!.ReadAsStringAsync(TestContext.Current.CancellationToken);
+            return new HttpResponseMessage(HttpStatusCode.OK);
+        });
+        var sender = CreateSender(handler, EnabledOptions());
+
+        await sender.SendAsync(
+            new EmailMessage("player@example.com", "Subject", "<p>Body</p>"),
+            TestContext.Current.CancellationToken);
+
+        Assert.NotNull(payload);
+        using var document = JsonDocument.Parse(payload);
+        Assert.Equal(JsonValueKind.Null, document.RootElement.GetProperty("text").ValueKind);
     }
 
     [Fact]
@@ -134,6 +466,99 @@ public sealed class IdentityInfrastructureTests
         Assert.DoesNotContain("re_test", exception.Message, StringComparison.Ordinal);
     }
 
+    // Epic 26, Sprint 26.7: observable state model — "provider request attempted" and "provider
+    // accepted" (with Resend's own message id, a safe, non-secret correlation identifier) must both
+    // be logged; success was previously entirely silent.
+    [Fact]
+    public async Task ResendSender_OnSuccess_LogsAttemptedThenAcceptedWithProviderMessageId()
+    {
+        var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("{\"id\":\"resend-message-id\"}", Encoding.UTF8, "application/json")
+        });
+        var logger = new RecordingLogger<ResendEmailSender>();
+        var sender = CreateSender(handler, EnabledOptions(), logger);
+
+        await sender.SendAsync(
+            new EmailMessage("player@example.com", "Confirm", "<p>Hello</p>"),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, logger.Entries.Count);
+        Assert.Contains(logger.Entries, e => e.Level == LogLevel.Information && e.Message.Contains("attempted", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(logger.Entries, e => e.Level == LogLevel.Information && e.Message.Contains("accepted", StringComparison.OrdinalIgnoreCase) && e.Message.Contains("resend-message-id", StringComparison.Ordinal));
+        Assert.All(logger.Entries, e =>
+        {
+            Assert.DoesNotContain("player@example.com", e.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("re_test", e.Message, StringComparison.Ordinal);
+        });
+    }
+
+    [Fact]
+    public async Task ResendSender_WhenApiRejectsRequest_LogsRejectionWithStatusCodeButNoRecipientOrApiKey()
+    {
+        var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.Unauthorized)
+        {
+            Content = new StringContent("invalid_api_key")
+        });
+        var logger = new RecordingLogger<ResendEmailSender>();
+        var sender = CreateSender(handler, EnabledOptions(), logger);
+
+        await Assert.ThrowsAsync<HttpRequestException>(() =>
+            sender.SendAsync(
+                new EmailMessage("player@example.com", "Subject", "Body"),
+                TestContext.Current.CancellationToken));
+
+        var rejection = Assert.Single(logger.Entries, e => e.Level == LogLevel.Error);
+        Assert.Contains("401", rejection.Message, StringComparison.Ordinal);
+        Assert.All(logger.Entries, e =>
+        {
+            Assert.DoesNotContain("player@example.com", e.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("re_test", e.Message, StringComparison.Ordinal);
+        });
+    }
+
+    // Distinguishes a transient network failure (no HTTP response ever received) from a provider
+    // rejection (a real HTTP response with a non-2xx status) — both must be classified/logged
+    // distinctly, per the sprint's required state model, without adding an automatic retry.
+    [Fact]
+    public async Task ResendSender_WhenNetworkFails_LogsTransientFailureAndRethrowsWithoutRetrying()
+    {
+        var attempts = 0;
+        var handler = new StubHttpMessageHandler((Func<HttpRequestMessage, HttpResponseMessage>)(_ =>
+        {
+            attempts++;
+            throw new HttpRequestException("Simulated DNS/connection failure.");
+        }));
+        var logger = new RecordingLogger<ResendEmailSender>();
+        var sender = CreateSender(handler, EnabledOptions(), logger);
+
+        await Assert.ThrowsAsync<HttpRequestException>(() =>
+            sender.SendAsync(
+                new EmailMessage("player@example.com", "Subject", "Body"),
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal(1, attempts);
+        var failure = Assert.Single(logger.Entries, e => e.Level == LogLevel.Error);
+        Assert.NotNull(failure.Exception);
+        Assert.DoesNotContain("player@example.com", failure.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task ResendSender_WhenCallerCancels_PropagatesWithoutLoggingAFailure()
+    {
+        var handler = new StubHttpMessageHandler((Func<HttpRequestMessage, HttpResponseMessage>)(_ =>
+            throw new NotImplementedException("Should never be reached: cancellation must be observed first.")));
+        var logger = new RecordingLogger<ResendEmailSender>();
+        var sender = CreateSender(handler, EnabledOptions(), logger);
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            sender.SendAsync(new EmailMessage("player@example.com", "Subject", "Body"), cts.Token));
+
+        Assert.DoesNotContain(logger.Entries, e => e.Level == LogLevel.Error);
+    }
+
     private static IdentityEmailComposer CreateComposer() => new(Options.Create(new IdentityEmailOptions
     {
         PublicBaseUrl = "https://beeday.example",
@@ -141,11 +566,11 @@ public sealed class IdentityInfrastructureTests
         PasswordResetPath = "/account/reset-password"
     }));
 
-    private static ResendEmailSender CreateSender(HttpMessageHandler handler, ResendOptions options) =>
+    private static ResendEmailSender CreateSender(HttpMessageHandler handler, ResendOptions options, ILogger<ResendEmailSender>? logger = null) =>
         new(
             new HttpClient(handler) { BaseAddress = new Uri("https://api.resend.com/") },
             Options.Create(options),
-            NullLogger<ResendEmailSender>.Instance);
+            logger ?? NullLogger<ResendEmailSender>.Instance);
 
     private static ResendOptions EnabledOptions() => new()
     {
@@ -166,8 +591,96 @@ public sealed class IdentityInfrastructureTests
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             CallCount++;
             return await responder(request);
+        }
+    }
+
+    // EPIC 28, Sprint 28.7: an operator must be able to filter Resend's four log states
+    // (attempted/accepted/rejected/timed-out) by a stable EventId, not just message text.
+    [Fact]
+    public async Task ResendSender_OnSuccess_LogsTheAttemptedAndAcceptedEventIds()
+    {
+        var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("{\"id\":\"resend-message-id\"}", Encoding.UTF8, "application/json")
+        });
+        var logger = new RecordingLogger<ResendEmailSender>();
+        var sender = CreateSender(handler, EnabledOptions(), logger);
+
+        await sender.SendAsync(
+            new EmailMessage("player@example.com", "Confirm", "<p>Hello</p>"),
+            TestContext.Current.CancellationToken);
+
+        Assert.Contains(logger.Entries, e => e.EventId.Id == EmailEventIds.ProviderAttempted.Id);
+        Assert.Contains(logger.Entries, e => e.EventId.Id == EmailEventIds.ProviderAccepted.Id);
+    }
+
+    [Fact]
+    public async Task ResendSender_WhenApiRejectsRequest_LogsTheRejectedEventId()
+    {
+        var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.Unauthorized)
+        {
+            Content = new StringContent("invalid_api_key")
+        });
+        var logger = new RecordingLogger<ResendEmailSender>();
+        var sender = CreateSender(handler, EnabledOptions(), logger);
+
+        await Assert.ThrowsAsync<HttpRequestException>(() =>
+            sender.SendAsync(
+                new EmailMessage("player@example.com", "Subject", "Body"),
+                TestContext.Current.CancellationToken));
+
+        Assert.Contains(logger.Entries, e => e.EventId.Id == EmailEventIds.ProviderRejected.Id);
+    }
+
+    [Fact]
+    public async Task ResendSender_WhenNetworkFails_LogsTheNetworkFailureEventId()
+    {
+        var handler = new StubHttpMessageHandler((Func<HttpRequestMessage, HttpResponseMessage>)(_ =>
+            throw new HttpRequestException("Simulated DNS/connection failure.")));
+        var logger = new RecordingLogger<ResendEmailSender>();
+        var sender = CreateSender(handler, EnabledOptions(), logger);
+
+        await Assert.ThrowsAsync<HttpRequestException>(() =>
+            sender.SendAsync(
+                new EmailMessage("player@example.com", "Subject", "Body"),
+                TestContext.Current.CancellationToken));
+
+        Assert.Contains(logger.Entries, e => e.EventId.Id == EmailEventIds.ProviderNetworkFailure.Id);
+    }
+
+    [Fact]
+    public async Task ResendSender_WhenDisabled_LogsTheDisabledEventId()
+    {
+        var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK));
+        var logger = new RecordingLogger<ResendEmailSender>();
+        var sender = CreateSender(handler, new ResendOptions { Enabled = false }, logger);
+
+        await sender.SendAsync(
+            new EmailMessage("player@example.com", "Subject", "<p>Body</p>"),
+            TestContext.Current.CancellationToken);
+
+        Assert.Contains(logger.Entries, e => e.EventId.Id == EmailEventIds.ProviderDisabled.Id);
+    }
+
+    private sealed class RecordingLogger<T> : ILogger<T>
+    {
+        public List<(LogLevel Level, EventId EventId, Exception? Exception, string Message)> Entries { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            Entries.Add((logLevel, eventId, exception, formatter(state, exception)));
         }
     }
 }

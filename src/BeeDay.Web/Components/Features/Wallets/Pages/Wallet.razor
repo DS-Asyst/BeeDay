@@ -1,6 +1,7 @@
 @page "/wallet"
 @attribute [Authorize]
 @rendermode InteractiveServer
+@implements IDisposable
 @using BeeDay.Application.Features.Wallets.Commands
 @using BeeDay.Application.Features.Wallets.Queries
 @using BeeDay.Application.Features.Wallets.Requests
@@ -23,17 +24,23 @@
 else
 {
     <div class="wallet-page beeday-fade-in" aria-busy="@_interaction.IsBusy.ToString().ToLowerInvariant()">
-        <BeeDayPageHeader Class="wallet-page__header"
-                          Eyebrow="@Localizer["PersonalFinanceEyebrow"]"
-                          Title="@Localizer["WalletHeading"]"
-                          Description="@Localizer["WalletDescription"]">
-            <Actions>
-                <BeeDayButton Variant="BeeDayButtonVariant.Primary"
+        @* EPIC 27 Sprint 27.11: a solid, compact hero — roughly half the height of the Brand
+           guidelines hero (BeeDayHero.razor.cs's Compact parameter was added specifically for
+           this). The illustration slot is intentionally left empty: no final asset exists yet
+           (06_ASSETS_AND_OPEN_ITEMS.md), and BeeDayHero already renders correctly without one. *@
+        <BeeDayHero Compact="true"
+                    Surface="BeeDayPaletteToken.Cor0"
+                    Class="wallet-page__hero"
+                    Eyebrow="@Localizer["PersonalFinanceEyebrow"]"
+                    Title="@Localizer["WalletHeading"]"
+                    Subtitle="@Localizer["WalletDescription"]">
+            <PrimaryAction>
+                <BeeDayButton Variant="BeeDayButtonVariant.ImportantWhite"
                                Icon="BeeDayIconName.Add"
                                Disabled="_interaction.IsBusy"
                                OnClick="OpenCreateTransaction">@Localizer["NewTransactionButton"]</BeeDayButton>
-            </Actions>
-        </BeeDayPageHeader>
+            </PrimaryAction>
+        </BeeDayHero>
 
         @if (!string.IsNullOrWhiteSpace(_errorMessage))
         {
@@ -119,6 +126,15 @@ else
     private Guid? _editingTagId;
     private WalletTagFormModel _tagForm = new();
     private WalletTagResponse? _pendingDeleteTag;
+    // Cancels every in-flight request this page started once Blazor's router disposes it on
+    // navigate-away, instead of letting abandoned work run to completion server-side.
+    private readonly CancellationTokenSource _cts = new();
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -132,8 +148,11 @@ else
         _errorMessage = null;
         try
         {
-            await Sender.Send(new EnsureCurrentWalletCommand());
+            await Sender.Send(new EnsureCurrentWalletCommand(), _cts.Token);
             await LoadDataAsync();
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
         }
         catch
         {
@@ -157,8 +176,8 @@ else
         TransactionType? type = Enum.TryParse<TransactionType>(_state.TypeFilter, out var parsedType) ? parsedType : null;
         Guid? tagId = Guid.TryParse(_state.TagFilter, out var parsedTagId) ? parsedTagId : null;
 
-        var summaryTask = Sender.Send(new GetWalletSummaryQuery());
-        var tagsTask = Sender.Send(new GetWalletTagsQuery());
+        var summaryTask = Sender.Send(new GetWalletSummaryQuery(), _cts.Token);
+        var tagsTask = Sender.Send(new GetWalletTagsQuery(), _cts.Token);
         var transactionsTask = Sender.Send(new GetTransactionsQuery(
             Search: string.IsNullOrWhiteSpace(_state.Search) ? null : _state.Search.Trim(),
             Type: type,
@@ -168,7 +187,7 @@ else
             SortBy: sortField,
             SortDirection: sortDirection,
             Page: _state.Page,
-            PageSize: 20));
+            PageSize: 20), _cts.Token);
 
         await Task.WhenAll(summaryTask, tagsTask, transactionsTask);
         _summary = await summaryTask;
@@ -194,6 +213,10 @@ else
         {
             await LoadDataAsync();
             return true;
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
+            return false;
         }
         catch
         {
@@ -255,13 +278,16 @@ else
         try
         {
             var request = new SaveTransactionRequest(_transactionForm.Description, _transactionForm.Amount, _transactionForm.Type, DateOnly.FromDateTime(_transactionForm.TransactionDate), _transactionForm.WalletTagId, _transactionForm.Notes);
-            if (_editingTransactionId is Guid id) await Sender.Send(new UpdateTransactionCommand(id, request));
-            else await Sender.Send(new CreateTransactionCommand(request));
+            if (_editingTransactionId is Guid id) await Sender.Send(new UpdateTransactionCommand(id, request), _cts.Token);
+            else await Sender.Send(new CreateTransactionCommand(request), _cts.Token);
 
             _isTransactionEditorOpen = false;
             _editingTransactionId = null;
             await RefreshAfterMutationAsync();
             Toast.ShowSuccess(wasEditing ? Localizer["TransactionUpdatedMessage"] : Localizer["TransactionCreatedMessage"]);
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
         }
         catch
         {
@@ -289,11 +315,14 @@ else
         if (_pendingDeleteTransaction is null || !_interaction.TryBegin("delete-transaction")) return;
         try
         {
-            await Sender.Send(new DeleteTransactionCommand(_pendingDeleteTransaction.Id));
+            await Sender.Send(new DeleteTransactionCommand(_pendingDeleteTransaction.Id), _cts.Token);
             _pendingDeleteTransaction = null;
             await RefreshAfterMutationAsync();
             if (_transactions.Items.Count == 0 && _state.Page > 1) { _state.Page--; await RefreshAsync(); }
             Toast.ShowSuccess(Localizer["TransactionDeletedMessage"]);
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
         }
         catch
         {
@@ -334,13 +363,16 @@ else
         try
         {
             var request = new SaveWalletTagRequest(_tagForm.Name, _tagForm.Color);
-            if (_editingTagId is Guid id) await Sender.Send(new UpdateWalletTagCommand(id, request));
-            else await Sender.Send(new CreateWalletTagCommand(request));
+            if (_editingTagId is Guid id) await Sender.Send(new UpdateWalletTagCommand(id, request), _cts.Token);
+            else await Sender.Send(new CreateWalletTagCommand(request), _cts.Token);
 
             _isTagEditorOpen = false;
             _editingTagId = null;
             await RefreshAfterMutationAsync();
             Toast.ShowSuccess(wasEditing ? Localizer["TagUpdatedMessage"] : Localizer["TagCreatedMessage"]);
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
         }
         catch
         {
@@ -368,10 +400,13 @@ else
         if (_pendingDeleteTag is null || !_interaction.TryBegin("delete-tag")) return;
         try
         {
-            await Sender.Send(new DeleteWalletTagCommand(_pendingDeleteTag.Id));
+            await Sender.Send(new DeleteWalletTagCommand(_pendingDeleteTag.Id), _cts.Token);
             _pendingDeleteTag = null;
             await RefreshAfterMutationAsync();
             Toast.ShowSuccess(Localizer["TagDeletedMessage"]);
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
         }
         catch
         {
@@ -394,5 +429,6 @@ else
         StateHasChanged();
         await Task.Delay(700);
         _highlightBalance = false;
+        StateHasChanged();
     }
 }

@@ -3,16 +3,26 @@
 **Fonte da verdade:** verificado diretamente, linha a linha, em
 `src/BeeDay.Infrastructure/DependencyInjection/InfrastructureServiceCollectionExtensions.cs`.
 
-**Última verificação:** 2026-08-09 (Sprint 18.6) — `AddMemoryCache()`, `MemoryApplicationCache` e
-`IApplicationCache` removidos (código morto comprovado, ver `04-services.md`); contagem de
-registros atualizada de 32 para 29.
+**Última verificação:** 2026-08-16 (Epic 26, Sprint 26.4) — o ramo `Resend` do `if`/`else` de e-mail
+agora registra dois serviços em vez de um (`ResendEmailSender` como si mesmo, mais
+`HmgRecipientGuardedEmailSender` como `IEmailSender` envolvendo-o) e uma 6ª classe `Options`
+condicional, `HmgRecipientGuardOptions`, só registrada dentro desse mesmo ramo (ver §1). Sprint 26.2
+introduziu `EmailProviderSelector.Resolve`, que lança `InvalidOperationException` no registro de DI
+para as duas combinações ambíguas dos antigos dois booleanos independentes (ver `04-services.md`
+§Email); verificação anterior em 2026-08-09 (Sprint 18.6) — `AddMemoryCache()`,
+`MemoryApplicationCache` e `IApplicationCache` removidos (código morto comprovado, ver
+`04-services.md`); contagem de registros atualizada de 32 para 29.
 
 ## `AddBeeDayInfrastructure(IServiceCollection, IConfiguration)`
 
 Único método de extensão desta camada, chamado uma vez em `BeeDay.Web/Program.cs`. 29 registros
-distintos, em uma sequência não ramificada exceto por um `if`/`else` (e-mail).
+distintos incondicionais, em uma sequência não ramificada exceto por um `if`/`else` (e-mail) cuja
+condição vem de `EmailProviderSelector.Resolve` — o ramo `Resend` desse `if`/`else` contribui 2
+registros de serviço (10a + 10a-guard, §2) mais 1 `Options` condicional (§1) que só existe quando
+esse ramo é tomado; nenhum dos dois muda a contagem de 29, que sempre contou o `if`/`else` inteiro
+como uma única posição na sequência.
 
-## 1. Options (5), todas `AddOptions<T>().Bind(...).Validate(...).ValidateOnStart()`
+## 1. Options (5 incondicionais + 1 condicional), todas `AddOptions<T>().Bind(...).Validate(...).ValidateOnStart()`
 
 | Options | Seção | Validação |
 |---|---|---|
@@ -21,8 +31,10 @@ distintos, em uma sequência não ramificada exceto por um `if`/`else` (e-mail).
 | `ResendOptions` | `BeeDay:Email:Resend` | `ApiKey`/`FromAddress` obrigatórios (com `@`) se `Enabled` |
 | `SqlServerOptions` | `BeeDay:Persistence:SqlServer` | `ConnectionString` sempre obrigatória |
 | `EventJournalOptions` | `BeeDay:Auditing:EventJournal` | `Directory` obrigatório; `FileName` deve ser nome simples de arquivo |
+| `HmgRecipientGuardOptions` (condicional — só registrada dentro do ramo `Resend`, EPIC 26 Sprint 26.4) | `BeeDay:Email:HmgRecipientGuard` | `AllowedRecipients` não vazio se `Enabled` (padrão `Enabled=true`) |
 
-`ValidateOnStart()` em todas as 5 — a aplicação recusa iniciar se qualquer uma falhar sua
+`ValidateOnStart()` em todas — as 5 incondicionais sempre, mais `HmgRecipientGuardOptions` apenas
+quando o provider `Resend` é selecionado; a aplicação recusa iniciar se qualquer uma falhar sua
 validação.
 
 ## 2. Serviços, na ordem exata de registro
@@ -36,9 +48,11 @@ flowchart TD
     S1 --> S2["IWalletReadService → EfWalletReadService (Scoped)"]
     S2 --> S3["IDashboardReadService → EfDashboardReadService (Scoped)"]
     S3 --> S4["IPasswordService, IClock, IUserTokenService,<br/>IIdentityRequestThrottle, IIdentityEmailComposer (Singleton)"]
-    S4 --> E{"ResendOptions.Enabled?"}
-    E -->|sim| E1["IEmailSender → ResendEmailSender<br/>(AddHttpClient, BaseAddress=api.resend.com, timeout 30s)"]
-    E -->|não| E2["IEmailSender → DevelopmentEmailSender (Singleton)"]
+    S4 --> E{"EmailProviderSelector.Resolve<br/>(Resend.Enabled, Development.Enabled)"}
+    E -->|Resend| E1["ResendEmailSender registrado como si mesmo<br/>(AddHttpClient, BaseAddress=api.resend.com, timeout 30s)"]
+    E1 --> E1G["IEmailSender → HmgRecipientGuardedEmailSender<br/>(decorator, envolve o ResendEmailSender acima — sempre, nunca condicional)"]
+    E -->|Development| E2["IEmailSender → DevelopmentEmailSender (Singleton)"]
+    E -->|ambos true/false| EX["throw InvalidOperationException<br/>(configuração ambígua/inválida — falha no registro de DI)"]
     E1 --> B1["BackgroundTaskQueue (Singleton) + IBackgroundTaskQueue (factory)<br/>+ BackgroundTaskWorker (AddHostedService)"]
     E2 --> B1
     B1 --> D1["AddDbContextFactory&lt;BeeDayDbContext&gt;<br/>(UseSqlServer via SqlServerOptions)"]
@@ -60,8 +74,9 @@ flowchart TD
 | 7 | `SecureUserTokenService` | `IUserTokenService` | Singleton |
 | 8 | `MemoryIdentityRequestThrottle` | `IIdentityRequestThrottle` | Singleton |
 | 9 | `IdentityEmailComposer` | `IIdentityEmailComposer` | Singleton |
-| 10a | `ResendEmailSender` (se `Resend:Enabled=true`) | `IEmailSender` | Typed `HttpClient` (efetivamente Transient/gerenciado pelo `IHttpClientFactory`) |
-| 10b | `DevelopmentEmailSender` (senão) | `IEmailSender` | Singleton |
+| 10a | `ResendEmailSender` (se `EmailProviderSelector.Resolve(...) == EmailProvider.Resend`, registrado como si mesmo, não como `IEmailSender`) | (concreto) | Typed `HttpClient` (efetivamente Transient/gerenciado pelo `IHttpClientFactory`) |
+| 10a-guard | `HmgRecipientGuardedEmailSender` (mesma condição — decorator, sempre presente quando Resend é selecionado, nunca condicional a um segundo flag) | `IEmailSender` | Singleton (factory que injeta o `ResendEmailSender` de 10a) |
+| 10b | `DevelopmentEmailSender` (se `EmailProvider.Development`) | `IEmailSender` | Singleton |
 | 11 | `BackgroundTaskQueue` | (concreto) | Singleton |
 | 12 | `BackgroundTaskQueue` | `IBackgroundTaskQueue` | Singleton (factory devolvendo #11) |
 | 13 | `BackgroundTaskWorker` | `IHostedService` | `AddHostedService` |
@@ -112,10 +127,14 @@ de contexto compartilhado, não expostos à DI diretamente) reusam o único cont
 
 ## Fontes de verdade
 
-**Arquivos consultados:** `InfrastructureServiceCollectionExtensions.cs` (arquivo completo, 149
-linhas), `EfUnitOfWork.cs`, `EfRepositoryBase.cs`, `BeeDayDbContext.cs`.
+**Arquivos consultados:** `InfrastructureServiceCollectionExtensions.cs`, `EfUnitOfWork.cs`,
+`EfRepositoryBase.cs`, `BeeDayDbContext.cs`, `Configuration/EmailProvider.cs`,
+`Configuration/EmailProviderSelector.cs`.
 **Testes consultados:**
-`tests/BeeDay.Infrastructure.Tests/BeeDayDbContextTests.cs.AddBeeDayInfrastructure_ResolvesDbContextFactoryWithoutThrowing`.
+`tests/BeeDay.Infrastructure.Tests/BeeDayDbContextTests.cs.AddBeeDayInfrastructure_ResolvesDbContextFactoryWithoutThrowing`,
+`EmailProviderSelectorTests.cs`, `EmailProviderDependencyInjectionTests.cs` (EPIC 26, Sprint 26.2),
+`HmgRecipientGuardedEmailSenderTests.cs`, `HmgRecipientGuardDependencyInjectionTests.cs` (EPIC 26,
+Sprint 26.4).
 **Contratos relacionados:** todas as 17 interfaces listadas na tabela acima —
 `docs/application/04-contracts.md`.
 **Documentação relacionada:** [`01-repositories.md`](01-repositories.md) (uso do

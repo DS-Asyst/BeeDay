@@ -38,6 +38,24 @@ public sealed class FeatureServicesTests
         await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
             handler.Handle(new CompleteUserProfileCommand(new("Tiago", "tiago")), TestContext.Current.CancellationToken));
     }
+
+    // EPIC 30 Sprint 30.11: closes the one CompleteUserProfileCommandHandler branch this file's two
+    // tests above did not exercise yet — a second completion attempt against the exact "recovering a
+    // partially-onboarded, authenticated-but-profileless user" path CreateProfile.razor.cs relies on.
+    [Fact]
+    public async Task CompleteUserProfileHandler_RejectsASecondProfileCompletion()
+    {
+        var r = new FakeUnitOfWork();
+        var user = CreateCurrentUser(r);
+        user.CompleteProfile("original", null);
+        var handler = new CompleteUserProfileCommandHandler(r.Users, new FakeCurrentUserContext(user.Id));
+
+        var exception = await Assert.ThrowsAsync<InvalidDomainStateException>(() =>
+            handler.Handle(new CompleteUserProfileCommand(new("Tiago", "newnickname")), TestContext.Current.CancellationToken));
+
+        Assert.Equal("A User can only complete their profile once.", exception.Message);
+        Assert.Equal("original", user.Nickname);
+    }
     [Fact] public async Task CreateHabitHandler_AddsHabit() { var r = new FakeUnitOfWork(); var user = CreateCurrentUser(r); await new CreateHabitCommandHandler(r.Habits, new FakeCurrentUserContext(user.Id)).Handle(new(new("Study", "Study ASP.NET Core", HabitDirection.Positive, HabitDifficulty.Medium, HabitResetCounter.Daily)), TestContext.Current.CancellationToken); Assert.Equal("Study", Assert.Single(r.HabitsData).Title); }
     [Fact]
     public async Task RegisterHabitPositiveHandler_ThrowsWhenMissing()

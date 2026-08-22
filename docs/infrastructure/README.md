@@ -8,8 +8,11 @@ sprints anteriores sem reverificação direta no código.
 **Fonte da verdade:** cada documento abaixo declara individualmente as fontes exatas usadas para
 validá-lo, na seção final "Fontes de verdade".
 
-**Última verificação:** 2026-08-09 (Sprint 18.6) — `Caching/MemoryApplicationCache.cs` removido
-(código morto comprovado: seu único cache nunca era populado em produção; ver `04-services.md`).
+**Última verificação:** 2026-08-16 (Epic 26, Sprint 26.1) — `06-transactional-email.md` adicionado
+(auditoria completa da arquitetura de e-mail transacional e causa raiz comprovada do diretório
+`C:\Apps\BeeDay-Data\Emails` vazio em HMG); verificação anterior em 2026-08-09 (Sprint 18.6) —
+`Caching/MemoryApplicationCache.cs` removido (código morto comprovado: seu único cache nunca era
+populado em produção; ver `04-services.md`).
 
 ## Responsabilidade
 
@@ -25,12 +28,16 @@ fila de background, journal de auditoria, health check.
 src/BeeDay.Infrastructure/
 ├── Auditing/            JsonEventJournal (log de domain events, append-only, NDJSON)
 ├── Background/           BackgroundTaskQueue + BackgroundTaskWorker (fila + worker)
-├── Configuration/          5 classes Options (SqlServer, IdentityEmail, Resend, DevelopmentEmail, EventJournal)
+├── Configuration/          6 classes Options (SqlServer, IdentityEmail, Resend, DevelopmentEmail, EventJournal,
+│                           HmgRecipientGuard) + EmailProvider/EmailProviderSelector (seleção de provider, não Options)
 ├── DependencyInjection/     InfrastructureServiceCollectionExtensions — único ponto de registro
-├── Diagnostics/             (vazio — InfrastructureEventIds removido na Sprint 18.3, era código morto)
+├── Diagnostics/             EmailEventIds.cs (adicionado na Sprint 28.7 — `InfrastructureEventIds`
+│                            removido na Sprint 18.3 permanece removido, mas a pasta não está mais vazia)
 ├── HealthChecks/            SqlServerHealthCheck
 ├── Identity/                 SystemClock, SecureUserTokenService, MemoryIdentityRequestThrottle,
-│                              IdentityEmailComposer, ResendEmailSender, DevelopmentEmailSender
+│                              IdentityEmailComposer, ResendEmailSender, HmgRecipientGuardedEmailSender,
+│                              DevelopmentEmailSender, EmailAddressLogMasking, catálogos
+│                              EmailResources.resx/.en-US.resx/.pt-BR.resx (ADR-006)
 ├── Persistence/
 │   ├── Exceptions/           PersistenceException + ConcurrencyConflictException (ambos ativos)
 │   └── SqlServer/            BeeDayDbContext, Configurations/, Migrations/, Repositories/,
@@ -41,7 +48,7 @@ src/BeeDay.Infrastructure/
 
 ## Integração com Application
 
-Toda dependência é por interface — Infrastructure implementa 17 interfaces definidas em
+Toda dependência é por interface — Infrastructure implementa 19 interfaces definidas em
 `BeeDay.Application` (8 repositórios, `IUnitOfWork`, 2 read services, `IPasswordService`, `IClock`,
 `IUserTokenService`, `IIdentityRequestThrottle`, `IIdentityEmailComposer`, `IEmailSender`,
 `IEventJournal`, `IBackgroundTaskQueue`). Confirmado por teste real
@@ -80,6 +87,7 @@ documentado em `docs/architecture/07-security-architecture.md`, fora do escopo d
 | [`03-concurrency.md`](03-concurrency.md) | RowVersion, `DbUpdateConcurrencyException`, tradução de exceções, fluxo completo |
 | [`04-services.md`](04-services.md) | Event Journal, Identity, hashing de senha, e-mail, health check, background |
 | [`05-dependency-injection.md`](05-dependency-injection.md) | Os 29 registros de `InfrastructureServiceCollectionExtensions`, lifetimes, `IDbContextFactory` |
+| [`06-transactional-email.md`](06-transactional-email.md) | EPIC 26, Sprint 26.1 — mapa completo da arquitetura de e-mail transacional (fluxos, seleção de provider, precedência de configuração), causa raiz comprovada do diretório de e-mail de desenvolvimento vazio em HMG, gaps/riscos e arquitetura-alvo recomendada para as Sprints 26.2+ |
 
 Para o mapeamento objeto-relacional em si (DbSets, Configurations, TPC, Owned/Complex Type,
 migration strategy), ver [`docs/persistence/`](../persistence/README.md) — reconstruído nesta
@@ -95,6 +103,16 @@ mesma Sprint.
 
 ## Achados relevantes (reportados, não corrigidos)
 
+- **EPIC 26, Sprint 26.1 (ainda não corrigido nas Sprints 26.2–26.4):** `DevelopmentEmailSender`
+  recusa gravar em qualquer diretório fora da content root do host; `appsettings.Homologation.json`
+  configura `Email:Development:Directory` como um caminho absoluto externo
+  (`C:\Apps\BeeDay-Data\Emails`, fora de `C:\Apps\BeeDay.Web`) — toda chamada de `SendAsync` em HMG
+  lança `InvalidOperationException` antes de gravar qualquer arquivo. A Sprint 26.2 endereçou a
+  seleção de provider (`EmailProviderSelector`) e a Sprint 26.3 documentou o contrato de secrets —
+  nenhuma das duas tocou este guard específico. A Sprint 26.4 adicionou a guarda de destinatário de
+  HMG (`HmgRecipientGuardedEmailSender`), um problema relacionado mas distinto. Ver
+  [`06-transactional-email.md`](06-transactional-email.md) §6/§8 para a análise completa de causa
+  raiz e o status atualizado da correção planejada.
 - Comentários de código em `EfConcurrencySaveChanges.cs` e `EventJournalOptions.cs` ainda
   mencionam "o provider JSON" como referência histórica — comentários, não comportamento; fora do
   escopo alterar (código).

@@ -13,7 +13,7 @@ public interface IEmailConfirmationIssuer
     /// <c>IUserTokenRepository.AddAsync</c>/<c>IUnitOfWork</c> and sending the message. Previously took
     /// and mutated <c>LevelUpData</c> directly (including revoking prior active tokens, always a no-op
     /// for a brand-new User) — a violation of Contract-First flagged in
-    /// docs/architecture/07-persistence-contracts.md §5.1, corrected here on the Sprint 14.6 cutover.
+    /// docs/history/persistence-contracts.md §5.1, corrected here on the Sprint 14.6 cutover.
     /// </summary>
     public (UserToken Token, EmailMessage Message) Issue(User user);
 }
@@ -33,7 +33,7 @@ public sealed class EmailConfirmationIssuer(
             tokenService.HashToken(rawToken),
             now,
             now.Add(IdentityTokenLifetimes.EmailConfirmation));
-        var message = emailComposer.ComposeEmailConfirmation(user.Email, user.Name, rawToken);
+        var message = emailComposer.ComposeEmailConfirmation(user.Email, user.Name, rawToken, user.Language);
         return (token, message);
     }
 }

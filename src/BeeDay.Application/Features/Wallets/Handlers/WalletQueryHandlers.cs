@@ -53,7 +53,7 @@ public sealed class GetTransactionsQueryHandler(IWalletReadService walletReadSer
 
     // Explicit mapping, not a cast: QuerySortField/QuerySortDirection (the MediatR request shape) and
     // FilterSortField/FilterSortDirection (the read-service filter shape, in Contracts) are
-    // deliberately separate types per docs/architecture/03-dependency-rules.md §3 — they are allowed
+    // deliberately separate types per docs/architecture/04-dependency-rules.md §3 — they are allowed
     // to diverge, so nothing may assume their underlying values stay aligned.
     private static FilterSortField MapSortField(QuerySortField field) => field switch
     {

@@ -68,7 +68,9 @@ identidade) que **não** são Aggregate Roots — ou porque são uma base abstra
 
 1. **`ProjectId` nunca pode ser `Guid.Empty`** — verificado tanto em `Update` quanto em `AssignTo`
    (`internal`), ambos lançando `DomainValidationException` caso contrário.
-2. Invariantes herdadas de `Activity`.
+2. **`Update` não move um To-Do entre Projects** — a troca de `ProjectId` só é permitida pelo
+   caminho interno acionado por `Project.AddTodo`.
+3. Invariantes herdadas de `Activity`, incluindo owner imutável após a primeira atribuição.
 
 ## Profile (view computada, não uma entidade persistida)
 
@@ -87,12 +89,9 @@ identidade) que **não** são Aggregate Roots — ou porque são uma base abstra
 - **Quem pode alterá-la:** ninguém — todas as propriedades são `get`-only, sem setters.
 - **Quem a possui:** `User` (é uma projeção do próprio `User`, não uma entidade relacionada).
 
-**Achado (reportado, não corrigido):** o comentário XML doc de `Profile.cs` (e o de
-`User.Profile`) justifica essa modelagem citando "compatibilidade de persistência JSON" e "o
-documento JSON atual" — mas o pipeline JSON foi completamente removido do repositório na Sprint
-14.7 (ADR-005). O código e o comportamento atual (view computada, não uma tabela própria)
-continuam corretos e verificados; é apenas a *justificativa* escrita no comentário que ficou
-desatualizada.
+Na Sprint 30.5, o comentário XML obsoleto que justificava essa projeção pelo adapter JSON removido
+foi substituído pela fronteira atual: código de perfil não deve adquirir nem mutar estado de
+autenticação e segurança.
 
 ## ExperienceEntry (entidade dentro da fronteira de User)
 
@@ -100,13 +99,13 @@ Ver [`user.md`](user.md) §Experience para o detalhamento funcional completo. Re
 
 - **Arquivo:** `src/BeeDay.Domain/Experience/ExperienceEntry.cs`.
 - **Identidade:** `Guid Id` (herdado de `Entity`).
-- **Ciclo de vida:** criada exclusivamente por `UserExperience.Add`/`TryAdd` (chamado por
-  `User.AddExperience`/`TryAddExperience`); imutável após criação — nenhum método de mutação
-  existe além da fábrica `Create`.
-- **Quem pode criá-la:** apenas `UserExperience` (internamente, dentro de `Add`).
+- **Ciclo de vida:** construída por factory; `UserExperience.Add`/`TryAdd` é o fluxo funcional que
+  calcula e fornece a transição. A factory revalida reward, total antes/depois, níveis e timestamp.
+- **Quem pode criá-la:** qualquer consumer de Domain pode chamar a factory, mas não existe
+  construtor público e estados inconsistentes são rejeitados.
 - **Quem pode alterá-la:** ninguém — todas as propriedades são somente leitura após `Create`.
-- **Quem a possui:** `User`, via `UserExperience.Entries` (lista imutável, substituída por inteiro
-  a cada `Add` — `Entries = [.. Entries, entry]`).
+- **Quem a possui:** logicamente `User`, via `UserExperience.Entries`. No mapping relacional atual,
+  a coleção não é hidratada; a divergência está registrada como `BD30-F030` para a Sprint 30.7.
 
 ## Fontes de verdade
 

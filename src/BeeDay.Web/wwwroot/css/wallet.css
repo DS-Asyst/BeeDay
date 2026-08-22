@@ -1,15 +1,12 @@
 .wallet-page{width:min(1440px,100%);margin:0 auto;padding:2rem 1.5rem 3rem}
-.wallet-page__header{display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;margin-bottom:1.5rem}
-.wallet-page__header h1,.wallet-panel-header h2{margin:.15rem 0;font-family:var(--beeday-font-body);letter-spacing:.04em}
-.wallet-page__header h1{font-size:3.25rem;line-height:.9}.wallet-page__header p{max-width:680px;margin:.6rem 0 0}
+.wallet-panel-header h2{margin:.15rem 0;font-family:var(--beeday-font-body);letter-spacing:.04em}
 .wallet-eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;font-weight:700}
 .wallet-summary{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:1rem;margin-bottom:1rem}.wallet-summary__card span,.wallet-summary__card small{display:block}.wallet-summary__card strong{display:block;margin:.3rem 0;font-size:1.65rem}
 .wallet-workspace{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:1rem;align-items:start}.wallet-tags-panel{padding:1rem;position:sticky;top:5rem}.wallet-panel-header{display:flex;align-items:center;justify-content:space-between;gap:1rem}.wallet-panel-header--transactions{padding:1.1rem 1.2rem}.wallet-panel-header h2{font-size:2rem}.wallet-result-count{font-size:.82rem}
 .wallet-filters{display:grid;grid-template-columns:minmax(180px,1fr) repeat(3,minmax(130px,auto));gap:.6rem;padding:1rem 1.2rem}
 .wallet-tag-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .5rem;border-radius:99px;font-size:.78rem}.wallet-tag-badge i{width:.55rem;height:.55rem;border-radius:50%;background:var(--tag-color,var(--beeday-color-tag-default))}.wallet-pagination{display:flex;align-items:center;justify-content:center;gap:1rem;padding:1rem}
 .wallet-empty-state{text-align:center;padding:3.5rem 1rem}.wallet-empty-state>div{font-size:3rem}.wallet-empty-state h3{margin:.5rem 0}.wallet-alert{display:flex;justify-content:space-between;gap:1rem;margin-bottom:1rem;padding:.8rem 1rem;border-radius:8px}
-.wallet-tag-list{display:grid;gap:.45rem;margin-top:1rem}.wallet-tag-item{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:.55rem;padding:.65rem}.wallet-tag-dot{width:.7rem;height:.7rem;border-radius:50%}.wallet-tag-item strong,.wallet-tag-item small{display:block}.wallet-tag-item small{font-size:.72rem}.wallet-color-field{display:grid;grid-template-columns:1fr 48px;gap:.5rem}.wallet-color-field>span,.wallet-color-field>div{grid-column:1/-1}.wallet-color-field input[type=color]{height:42px;padding:.2rem}
-/* Sprint 4.5 — Wallet polish */
+.wallet-tag-list{display:grid;gap:.45rem;margin-top:1rem}.wallet-tag-item{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:.55rem;padding:.65rem}.wallet-tag-dot{width:.7rem;height:.7rem;border-radius:50%}.wallet-tag-item strong,.wallet-tag-item small{display:block}.wallet-tag-item small{font-size:.72rem}.wallet-color-field{border:0;margin:0;padding:0}.wallet-color-field>legend{padding:0;font-family:var(--beeday-font-body);font-size:.85rem;font-weight:600;color:var(--beeday-color-text-primary)}
 .wallet-main-panel{min-height:34rem}
 .wallet-transaction-list{display:grid;gap:.65rem;max-height:calc(100dvh - 22rem);overflow-y:auto;padding:1rem;scrollbar-gutter:stable;overscroll-behavior:contain}
 .wallet-transaction-card{position:relative;display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:.85rem;align-items:center;padding:.85rem 1rem .85rem .65rem}
@@ -27,20 +24,11 @@
     color: var(--beeday-color-text-primary);
 }
 
-.wallet-page__header {
+/* EPIC 27 Sprint 27.11: the page header is now BeeDayHero (Compact, Surface Cor0) — see
+   Wallet.razor. .wallet-page__hero only needs a bottom margin; BeeDayHero owns its own
+   typography/spacing/surface. */
+.wallet-page__hero {
     margin-bottom: 1.5rem;
-    padding: 0;
-    align-items: flex-end;
-}
-
-.wallet-page__header h1 {
-    color: var(--beeday-color-text-primary);
-    font-size: clamp(2rem, 5vw, 3.25rem);
-    line-height: 1;
-}
-
-.wallet-page__header p {
-    color: var(--beeday-color-text-secondary);
 }
 
 .wallet-eyebrow {
@@ -120,13 +108,15 @@
     margin: 0;
 }
 
+/* Matches .wallet-panel-header's own horizontal padding (1.5rem) so the body's content edge
+   lines up with the header's instead of sitting 0.25rem short of it. */
 .wallet-tags-panel > :not(.wallet-panel-header) {
-    margin-left: 1.25rem;
-    margin-right: 1.25rem;
+    margin-left: 1.5rem;
+    margin-right: 1.5rem;
 }
 
 .wallet-tags-panel > :last-child {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
 }
 
 .wallet-panel-header h2 {
@@ -199,17 +189,13 @@
     font-weight: 700;
 }
 
-.wallet-editor-grid .editor-modal__field input {
-    width: 100%;
-    min-height: 2.6rem;
-    box-sizing: border-box;
-    border: 1px solid var(--beeday-color-border);
-    border-radius: var(--beeday-radius-xs);
-    background: var(--beeday-color-surface);
-    color: var(--beeday-color-text-primary);
-    padding: .65rem .75rem;
-    font: inherit;
-}
+/* Sprint 29.3: the field-styling override that used to live here (shorter min-height, thinner
+   border, --beeday-radius-xs instead of -lg) was removed — it fought editor-modal.css's own shared
+   ".editor-modal__field input, select" rule (same shape of selector, just wallet-scoped) with higher
+   specificity, so the Transaction editor's Amount field (a raw InputNumber) and Date field (native
+   input inside the shared BeeDayDateInput) rendered shorter and more square than every other field
+   in the same modal. Removing it lets the shared foundation's contract win here too, with no
+   replacement rule needed. Layout rules below (grid columns, field/label spacing) are unaffected. */
 
 @media (max-width: 720px) {
     .wallet-editor-grid {
@@ -411,7 +397,6 @@
 }
 
 
-/* Sprint 2.4 — responsive, touch and keyboard polish */
 .wallet-page,
 .wallet-workspace,
 .wallet-main-panel,
@@ -435,16 +420,32 @@
     scrollbar-width: thin;
 }
 
+/* EPIC 27 Sprint 27.11: scrollbar-gutter/overflow used to sit on the whole panel (header +
+   body together), permanently reserving scrollbar space even under the header — which paints
+   its own edge-to-edge background, so the reserved gutter showed through as an unexplained
+   blank stripe down the right side. Scoped to .wallet-tag-list instead, mirroring how
+   .wallet-main-panel/.wallet-transaction-list already split header-vs-scrolling-body. */
 .wallet-tags-panel {
+    display: flex;
+    flex-direction: column;
     max-height: calc(100dvh - 6rem);
+    overflow: hidden;
+}
+
+.wallet-tag-list {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-gutter: stable;
 }
 
-.wallet-filter-field input:focus-visible,
-.wallet-filter-field select:focus-visible,
+/* EPIC 27 Sprint 27.11: the wallet-filter-field input/select focus ring used to be declared
+   here too, stacking a second, independent outline on top of the shared foundation ring that
+   .beeday-field__control:focus-visible (forms.css) already provides everywhere else in the app
+   — Search and every other filter field showed two rings at once. Removed; the foundation rule
+   alone is correct. */
 .wallet-alert button:focus-visible {
     outline: 3px solid var(--beeday-color-brand-primary);
     outline-offset: 3px;
@@ -643,6 +644,48 @@
 }
 
 .wallet-summary__label,.wallet-page__title,.wallet-alert>span,.wallet-transaction-card__type{display:flex;align-items:center;gap:.4rem}.wallet-summary__label .beeday-icon,.wallet-page__title .beeday-icon,.wallet-alert .beeday-icon,.wallet-transaction-card__type .beeday-icon{flex:0 0 auto}
+
+/* EPIC 27 Sprint 27.11 — Tag color is now a fixed 10-swatch COR0-COR9 grid, not a free HEX/RGB
+   picker. Every swatch keeps a visible border regardless of its own color (Cor6/Cor7 would
+   otherwise vanish against the modal's white surface), and the selected state is a halo ring
+   plus a check glyph — not color alone. */
+.wallet-color-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    margin-top: .5rem;
+}
+
+.wallet-color-swatch {
+    display: grid;
+    place-items: center;
+    width: 2.15rem;
+    height: 2.15rem;
+    padding: 0;
+    border: 2px solid var(--beeday-color-border-strong);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform var(--beeday-transition-fast), box-shadow var(--beeday-transition-fast);
+}
+
+.wallet-color-swatch:hover { transform: scale(1.08); }
+
+.wallet-color-swatch:focus-visible {
+    outline: var(--beeday-border-width) solid var(--beeday-color-brand-primary);
+    outline-offset: 2px;
+    box-shadow: var(--beeday-focus-ring);
+}
+
+.wallet-color-swatch--selected {
+    border-color: var(--beeday-color-surface);
+    box-shadow: 0 0 0 2px var(--beeday-color-brand-primary);
+}
+
+.wallet-color-swatch__check { color: currentColor; }
+.wallet-color-swatch--white-check { color: var(--beeday-color-text-inverse); }
+.wallet-color-swatch--dark-check { color: var(--beeday-palette-cor8); }
+
+.wallet-color-swatch:disabled { cursor: not-allowed; opacity: .6; }
 
 
 /* Pagination and inline "Try again"/"Clear filters"/"New tag" actions now

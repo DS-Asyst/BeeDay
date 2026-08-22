@@ -1,0 +1,15 @@
+@using BeeDay.Web.Components.DesignSystem
+@using BeeDay.Web.Components.Features.Institutional
+
+@* Help family: beeday FAQs (04_PAGES_AND_ROUTES.md). *@
+<InstitutionalPageShell PageContext="@PageContext" Title="@Title" Description="@Description" Surface="Surface" Section="EditorialSection.Help">
+    @ChildContent
+</InstitutionalPageShell>
+
+@code {
+    [Parameter, EditorRequired] public string PageContext { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public BeeDayPaletteToken Surface { get; set; } = BeeDayPaletteToken.Cor0;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

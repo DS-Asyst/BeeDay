@@ -6,7 +6,7 @@ namespace BeeDay.Application.Common.Contracts;
 /// Persistence boundary for the <c>Habit</c> Aggregate. Kept separate from
 /// <see cref="IRecurringTaskRepository"/> despite the shared <c>Activity</c> base class — Habit and
 /// RecurringTask are distinct Aggregate Roots with independent identity and lifecycle (see
-/// docs/architecture/05-domain-aggregate-map.md §2.3/§2.4), so a single combined port would tie two
+/// docs/history/domain-aggregate-map.md §2.3/§2.4), so a single combined port would tie two
 /// unrelated aggregates to one contract.
 /// </summary>
 public interface IHabitRepository

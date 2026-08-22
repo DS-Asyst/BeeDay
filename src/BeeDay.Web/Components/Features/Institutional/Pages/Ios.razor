@@ -1,0 +1,22 @@
+@page "/ios"
+@attribute [AllowAnonymous]
+@layout BeeDay.Web.Components.Layout.EditorialLayout
+@using BeeDay.Web.Components.Features.Institutional
+@using BeeDay.Web.Components.Features.Institutional.Components
+@inject IStringLocalizer<InstitutionalResources> Localizer
+
+<PageTitle>@Localizer["IosPageTitle"]</PageTitle>
+
+@* No App Store URL exists yet — an honest "coming soon" state, not a placeholder link
+   (06_ASSETS_AND_OPEN_ITEMS.md). *@
+<ProductPageTemplate PageContext="@Localizer["IosPageContext"]" Title="@Localizer["IosTitle"]" Description="@Localizer["IosIntro"]" Section="EditorialSection.Apps">
+    <PrimaryAction>
+        <a class="beeday-button beeday-button--important-white" href="/profile/create">@Localizer["TryBeedayToday"]</a>
+    </PrimaryAction>
+    <ChildContent>
+        <section aria-label="@Localizer["IosTitle"]">
+            <span class="institutional-product__status">@Localizer["IosStatus"]</span>
+            <p>@Localizer["IosBody"]</p>
+        </section>
+    </ChildContent>
+</ProductPageTemplate>

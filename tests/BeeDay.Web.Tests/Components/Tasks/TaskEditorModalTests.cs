@@ -2,6 +2,7 @@ using BeeDay.Domain.Enums;
 using BeeDay.Web.Components.Features.Tasks.Components;
 using BeeDay.Web.Components.Features.Tasks.Models;
 using BeeDay.Web.Tests.Localization;
+using Microsoft.AspNetCore.Components;
 
 namespace BeeDay.Web.Tests.Components.Tasks;
 
@@ -79,6 +80,31 @@ public sealed class TaskEditorModalTests : BunitContext
 
         Assert.Contains("Comprar presente da Ana", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Loja perto de casa", cut.Markup, StringComparison.Ordinal);
+    }
+
+    // EPIC 30 Sprint 30.13: mirrors HabitEditorModalTests.Save_PassesTheEditedFieldsToOnSave (added
+    // Sprint 30.12) — no prior test proved OnSave actually receives the edited Title/Description/
+    // Repeat, only that the callback exists and submit-label text is culture-correct.
+    [Fact]
+    public async Task Save_PassesTheEditedFieldsToOnSave()
+    {
+        TaskEditorModel? saved = null;
+        var model = new TaskEditorModel { Title = "Original", Description = "Original notes" };
+
+        var cut = Render<TaskEditorModal>(parameters => parameters
+            .Add(component => component.Model, model)
+            .Add(component => component.IsEditing, true)
+            .Add(component => component.OnSave, EventCallback.Factory.Create<TaskEditorModel>(this, m => saved = m)));
+
+        cut.Find("#task-title").Change("Renew passport");
+        cut.Find("#task-notes").Change("Bring old passport and photo");
+        cut.Find("#task-repeat").Change(nameof(TaskRepeat.Weekly));
+        await cut.Find(".editor-modal__header-save").ClickAsync();
+
+        Assert.NotNull(saved);
+        Assert.Equal("Renew passport", saved.Title);
+        Assert.Equal("Bring old passport and photo", saved.Description);
+        Assert.Equal(TaskRepeat.Weekly, saved.Repeat);
     }
 
     [Fact]

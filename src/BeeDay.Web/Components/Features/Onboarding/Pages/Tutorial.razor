@@ -1,10 +1,14 @@
 @page "/onboarding/tutorial"
 @attribute [Authorize]
 @layout BeeDay.Web.Components.Layout.OnboardingLayout
+@implements IDisposable
 @using BeeDay.Web.Components.Features.Onboarding
+@using BeeDay.Web.Localization
 @inject BeeDayWebService Store
 @inject NavigationManager Navigation
+@inject ToastService Toast
 @inject IStringLocalizer<OnboardingResources> Localizer
+@inject IStringLocalizer<SharedResources> SharedLocalizer
 
 <PageTitle>@Localizer["PageTitle"]</PageTitle>
 
@@ -57,6 +61,13 @@
 @code {
     private int _step;
     private bool _busy;
+    private readonly CancellationTokenSource _cts = new();
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+    }
 
     private TutorialSlide[] Slides => _slides ??=
     [
@@ -76,7 +87,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var user = await Store.GetCurrentUserAsync();
+        var user = await Store.GetCurrentUserAsync(_cts.Token);
         if (user?.HasProfile != true)
         {
             Navigation.NavigateTo("/profile/create", forceLoad: true, replace: true);
@@ -108,8 +119,15 @@
         _busy = true;
         try
         {
-            await Store.CompleteOnboardingAsync();
+            await Store.CompleteOnboardingAsync(_cts.Token);
             Navigation.NavigateTo("/profile", forceLoad: true, replace: true);
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
+        }
+        catch (Exception exception)
+        {
+            Toast.ShowError(DomainErrorLocalizer.Translate(exception, SharedLocalizer), Localizer["ToastCompleteErrorTitle"]);
         }
         finally
         {

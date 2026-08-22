@@ -11,16 +11,10 @@ O arquivo de solução organiza os projetos em pastas lógicas (formato `.slnx`,
 ```xml
 <Solution>
   <Folder Name="/src/">
-    <Folder Name="/src/Core/">
-      <Project Path="src/BeeDay.Domain/BeeDay.Domain.csproj" />
-      <Project Path="src/BeeDay.Application/BeeDay.Application.csproj" />
-    </Folder>
-    <Folder Name="/src/Infrastructure/">
-      <Project Path="src/BeeDay.Infrastructure/BeeDay.Infrastructure.csproj" />
-    </Folder>
-    <Folder Name="/src/Presentation/">
-      <Project Path="src/BeeDay.Web/BeeDay.Web.csproj" />
-    </Folder>
+    <Project Path="src/BeeDay.Domain/BeeDay.Domain.csproj" />
+    <Project Path="src/BeeDay.Application/BeeDay.Application.csproj" />
+    <Project Path="src/BeeDay.Infrastructure/BeeDay.Infrastructure.csproj" />
+    <Project Path="src/BeeDay.Web/BeeDay.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <!-- 5 projetos de teste, um por projeto de src/ mais BeeDay.E2E.Tests -->
@@ -31,10 +25,24 @@ O arquivo de solução organiza os projetos em pastas lógicas (formato `.slnx`,
 </Solution>
 ```
 
-As pastas lógicas `Core`, `Infrastructure` e `Presentation` são apenas organização visual no IDE —
-não geram nenhuma pasta física em disco nem afetam o build; a estrutura física real em disco é
-`src/BeeDay.Domain/`, `src/BeeDay.Application/`, `src/BeeDay.Infrastructure/`, `src/BeeDay.Web/`,
-todas irmãs sob `src/`.
+`/src/` é uma pasta lógica plana (apenas organização visual no IDE, sem pasta física
+correspondente) — a estrutura física real em disco é `src/BeeDay.Domain/`, `src/BeeDay.Application/`,
+`src/BeeDay.Infrastructure/`, `src/BeeDay.Web/`, todas irmãs sob `src/`.
+
+**Correção 2026-08-22:** até esta data, `/src/` continha três subpastas lógicas aninhadas
+(`/src/Core/`, `/src/Infrastructure/`, `/src/Presentation/`), cada uma agrupando os mesmos 4
+projetos hoje listados diretamente. Essa organização visual **afetava o build real**: reproduzido
+de forma determinística (build mínimo isolado, incrementado projeto a projeto e pasta a pasta) que
+`dotnet build BeeDay.slnx --configuration Release` mapeia incorretamente para `Debug` qualquer
+projeto hospedado em uma pasta lógica aninhada em dois ou mais níveis (`/src/` → `/src/Core/` →
+projeto), enquanto pastas lógicas de nível único (como `/tests/`, ou o `/src/` atual) mapeiam
+corretamente. O sintoma real observado: `src/BeeDay.Web/bin/Release/net10.0/BeeDay.Web.dll` nunca
+era gerado por `dotnet build ... --configuration Release`, fazendo os 3 testes de
+`ProductionOriginGuardTests` (`tests/BeeDay.Web.Tests/Integration/`, que localizam o executável já
+compilado) falharem sempre que o "Publish BeeDay" do `release-quality-gate.yml` não rodava antes —
+o que bloqueou toda tentativa de promoção `hmg → main` desde a Sprint 26.5 até esta correção. A
+pasta aninhada foi removida (achatada, igual a `/tests/`) como correção mínima e definitiva na
+origem, sem alterar nenhum projeto, teste ou arquitetura física.
 
 ## 2. Projetos e suas responsabilidades físicas
 
@@ -89,11 +97,12 @@ completa sem a referência (0 erros). Removida na Sprint 18.3.
 
 Listados no `.slnx` como itens soltos, apenas para exibição no Visual Studio:
 `.editorconfig`, `.gitattributes`, `.gitignore`, `CLAUDE.md`, `Directory.Build.props`,
-`Directory.Packages.props`, `LICENSE`, `README.md`, `docs/README.md`, mais 4 referências a
-`docs/*/README.md` — destas últimas, `docs/architecture/README.md` e `docs/domain/README.md` e
-`docs/design-system/README.md` já existem desde a Sprint 16.2; `docs/ai/README.md` e
-`docs/development/README.md` seguem inexistentes (ver achado reportado no relatório da Sprint 16.2,
-seção 12 — fora do escopo desta Sprint corrigir o `.slnx`).
+`Directory.Packages.props`, `LICENSE`, `README.md`, mais 5 referências a `docs/*/README.md`
+(`docs/README.md`, `docs/architecture/README.md`, `docs/design-system/README.md`,
+`docs/developer/README.md`, `docs/domain/README.md`) — todas existem atualmente, confirmado por
+leitura direta do `.slnx` e do disco na Sprint 30.28 (`BD30-F004`). O `.slnx` já foi corrigido desde
+o achado original da Sprint 16.2 (que citava `docs/ai/README.md`/`docs/development/README.md` como
+referências mortas); este texto só não havia sido atualizado para acompanhar essa correção.
 
 ## 5. Central Package Management
 

@@ -12,15 +12,26 @@ using Microsoft.Extensions.Localization;
 
 namespace BeeDay.Web.Components.Features.Dashboard.State;
 
-public sealed class DashboardState(BeeDayWebService store, ToastService toastService, IStringLocalizer<DashboardResources> localizer)
+public sealed class DashboardState(BeeDayWebService store, ToastService toastService, IStringLocalizer<DashboardResources> localizer) : IDisposable
 {
     private static readonly UserProfileSummary EmptyProfile = new(
         Guid.Empty, string.Empty, string.Empty, string.Empty, UserLanguage.English, UserTheme.System, 0, 1, 0, 0);
+
+    // Scoped to this circuit's lifetime (DashboardState itself is AddScoped) — cancels every
+    // in-flight mutation/query this instance started once the circuit ends, instead of letting
+    // abandoned work run to completion server-side with nothing left to observe the result.
+    private readonly CancellationTokenSource cancellation = new();
 
     private DashboardResponse? data;
     private string search = string.Empty;
     private Guid? selectedProjectId;
     private Task? initializationTask;
+
+    public void Dispose()
+    {
+        cancellation.Cancel();
+        cancellation.Dispose();
+    }
 
     public DashboardModalState Modals { get; } = new();
     public DashboardResponse? Data => data;
@@ -31,7 +42,7 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
     public long ExperienceFeedbackVersion { get; private set; }
     public Guid? RemovingItemId { get; private set; }
     public event Action? Changed;
-    public Task<DashboardResponse> GetDataAsync() => store.LoadDashboardAsync();
+    public Task<DashboardResponse> GetDataAsync() => store.LoadDashboardAsync(cancellation.Token);
 
     public bool HasProfile => data?.Profile.HasProfile == true;
     public Guid? OpenProjectId { get; private set; }
@@ -132,17 +143,17 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
 
     public Task SaveHabitAsync(HabitEditorModel model) =>
         SaveEditorAsync(
-            () => Modals.EditingId is Guid id ? store.UpdateHabitAsync(id, model) : store.AddHabitAsync(model),
+            () => Modals.EditingId is Guid id ? store.UpdateHabitAsync(id, model, cancellation.Token) : store.AddHabitAsync(model, cancellation.Token),
             Modals.IsEditing ? localizer["HabitUpdatedMessage"] : localizer["HabitCreatedMessage"]);
 
     public Task SaveTaskAsync(TaskEditorModel model) =>
         SaveEditorAsync(
-            () => Modals.EditingId is Guid id ? store.UpdateTaskAsync(id, model) : store.AddTaskAsync(model),
+            () => Modals.EditingId is Guid id ? store.UpdateTaskAsync(id, model, cancellation.Token) : store.AddTaskAsync(model, cancellation.Token),
             Modals.IsEditing ? localizer["TaskUpdatedMessage"] : localizer["TaskCreatedMessage"]);
 
     public Task SaveTodoAsync(TodoEditorModel model) =>
         SaveEditorAsync(
-            () => Modals.EditingId is Guid id ? store.UpdateTodoAsync(id, model) : store.AddTodoAsync(model),
+            () => Modals.EditingId is Guid id ? store.UpdateTodoAsync(id, model, cancellation.Token) : store.AddTodoAsync(model, cancellation.Token),
             Modals.IsEditing ? localizer["TodoUpdatedMessage"] : localizer["TodoCreatedMessage"]);
 
 
@@ -150,7 +161,7 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
         ExecuteAsync(
             async () =>
             {
-                await store.AddTodoAsync(model);
+                await store.AddTodoAsync(model, cancellation.Token);
                 await ReloadAsync();
             },
             localizer["TodoCreatedMessage"],
@@ -158,7 +169,7 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
 
     public Task SaveProjectAsync(ProjectEditorModel model) =>
         SaveEditorAsync(
-            () => Modals.EditingId is Guid id ? store.UpdateProjectAsync(id, model) : store.AddProjectAsync(model),
+            () => Modals.EditingId is Guid id ? store.UpdateProjectAsync(id, model, cancellation.Token) : store.AddProjectAsync(model, cancellation.Token),
             Modals.IsEditing ? localizer["ProjectUpdatedMessage"] : localizer["ProjectCreatedMessage"]);
 
     public Task DeleteCurrentHabitAsync() => DeleteCurrentEditorItemAsync(ActivityType.Habit, localizer["HabitDeletedMessage"]);
@@ -167,16 +178,16 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
     public Task DeleteCurrentProjectAsync() => DeleteCurrentEditorItemAsync(ActivityType.Project, localizer["ProjectDeletedMessage"]);
 
     public Task RegisterPositiveAsync(Guid id) =>
-        ExecuteExperienceOperationAsync(() => store.RegisterHabitPositiveAsync(id));
+        ExecuteExperienceOperationAsync(() => store.RegisterHabitPositiveAsync(id, cancellation.Token));
 
     public Task RegisterNegativeAsync(Guid id) =>
-        ExecuteAsync(async () => { await store.RegisterHabitNegativeAsync(id); await ReloadAsync(); });
+        ExecuteAsync(async () => { await store.RegisterHabitNegativeAsync(id, cancellation.Token); await ReloadAsync(); });
 
     public Task ToggleTaskAsync(Guid id) =>
-        ExecuteExperienceOperationAsync(() => store.ToggleTaskAsync(id));
+        ExecuteExperienceOperationAsync(() => store.ToggleTaskAsync(id, cancellation.Token));
 
     public Task ToggleTodoAsync(Guid id) =>
-        ExecuteExperienceOperationAsync(() => store.ToggleTodoAsync(id));
+        ExecuteExperienceOperationAsync(() => store.ToggleTodoAsync(id, cancellation.Token));
 
     public Task ReorderHabitsAsync(SortableReorderEvent reorder) =>
         ReorderAsync(ActivityCollection.Habits, FilteredHabits.Select(item => item.Id).ToList(), reorder);
@@ -223,12 +234,20 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
 
     private async Task ReloadAsync()
     {
-        data = await store.LoadDashboardAsync();
+        data = await store.LoadDashboardAsync(cancellation.Token);
         IsUnavailable = false;
 
         if (selectedProjectId is Guid projectId && !data.Projects.Any(project => project.Id == projectId))
         {
             selectedProjectId = null;
+        }
+
+        // EPIC 30 Sprint 30.14: OpenProject already re-derives from data.Projects on every read, so a
+        // stale OpenProjectId here has no observable effect — this only keeps the two "current
+        // project" ids symmetric, matching selectedProjectId's own reset above.
+        if (OpenProjectId is Guid openProjectId && !data.Projects.Any(project => project.Id == openProjectId))
+        {
+            OpenProjectId = null;
         }
 
         Changed?.Invoke();
@@ -254,7 +273,7 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
         return ExecuteAsync(
             async () =>
             {
-                await store.ReorderAsync(collection, reorderedIds);
+                await store.ReorderAsync(collection, reorderedIds, cancellation.Token);
                 await ReloadAsync();
             },
             errorMessage: localizer["ReorderErrorMessage"]);
@@ -325,22 +344,27 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
         await ExecuteAsync(
             async () =>
             {
-                await AnimateRemovalAsync(id);
-                await DeleteAsync(id, expectedType);
-                Modals.CloseEditor();
-                await ReloadAsync();
+                RemovingItemId = id;
+                Changed?.Invoke();
+                await Task.Delay(170);
+
+                try
+                {
+                    await DeleteAsync(id, expectedType);
+                    Modals.CloseEditor();
+                    await ReloadAsync();
+                }
+                finally
+                {
+                    // Only clear once the outcome is known: on success the list has already been
+                    // reloaded without this item by the time this runs, so there is no flash; on
+                    // failure the card reappears exactly when the error toast fires, instead of
+                    // snapping back to normal before the delete attempt even completed.
+                    RemovingItemId = null;
+                }
             },
             successMessage,
             localizer["DeleteErrorMessage"]);
-    }
-
-
-    private async Task AnimateRemovalAsync(Guid id)
-    {
-        RemovingItemId = id;
-        Changed?.Invoke();
-        await Task.Delay(170);
-        RemovingItemId = null;
     }
 
     private async Task ExecuteAsync(
@@ -364,6 +388,11 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
                 toastService.ShowSuccess(successMessage);
             }
         }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+        {
+            // The circuit is tearing down (Dispose already cancelled this token) — nothing left to
+            // show a toast to.
+        }
         catch
         {
             toastService.ShowError(errorMessage ?? localizer["GenericOperationErrorMessage"]);
@@ -376,10 +405,10 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
 
     private Task DeleteAsync(Guid id, ActivityType type) => type switch
     {
-        ActivityType.Habit => store.DeleteHabitAsync(id),
-        ActivityType.Task => store.DeleteTaskAsync(id),
-        ActivityType.Todo => store.DeleteTodoAsync(id),
-        ActivityType.Project => store.DeleteProjectAsync(id),
+        ActivityType.Habit => store.DeleteHabitAsync(id, cancellation.Token),
+        ActivityType.Task => store.DeleteTaskAsync(id, cancellation.Token),
+        ActivityType.Todo => store.DeleteTodoAsync(id, cancellation.Token),
+        ActivityType.Project => store.DeleteProjectAsync(id, cancellation.Token),
         _ => Task.CompletedTask
     };
 }

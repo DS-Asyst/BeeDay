@@ -7,6 +7,7 @@
 
   <!-- Navegação compartilhada -->
   <data name="PillarNavAriaLabel" xml:space="preserve"><value>Pilares do beeday Experience System</value></data>
+  <data name="SidebarToggleLabel" xml:space="preserve"><value>Explorar tópicos</value></data>
   <data name="PillarNavHome" xml:space="preserve"><value>beeday Experience System</value></data>
   <data name="PillarNavBrand" xml:space="preserve"><value>Brand System</value></data>
   <data name="PillarNavUi" xml:space="preserve"><value>UI Design System</value></data>
@@ -36,7 +37,7 @@
   <data name="RootPageTitle" xml:space="preserve"><value>beeday Experience System</value></data>
   <data name="RootEyebrow" xml:space="preserve"><value>EXPERIENCE SYSTEM</value></data>
   <data name="RootTitle" xml:space="preserve"><value>beeday Experience System</value></data>
-  <data name="RootIntro" xml:space="preserve"><value>O registro público e navegável de como o beeday se parece, se comporta e se comunica — o Brand System, o UI Design System e o UX System formalizados durante a EPIC 25, mantidos em sincronia com o próprio produto.</value></data>
+  <data name="RootIntro" xml:space="preserve"><value>O beeday Experience System — o registro público e navegável de como o beeday se parece, se comporta e se comunica. O Brand System, o UI Design System e o UX System formalizados durante a EPIC 25, mantidos em sincronia com o próprio produto.</value></data>
   <data name="RootGridAriaLabel" xml:space="preserve"><value>Pilares do beeday Experience System</value></data>
   <data name="RootBrandCardDescription" xml:space="preserve"><value>Identidade, wordmark, cor, tipografia, ilustração, personagens e escrita.</value></data>
   <data name="RootUiCardDescription" xml:space="preserve"><value>Fundamentos, componentes, padrões de produto, interação e layout.</value></data>
@@ -303,7 +304,7 @@
   <data name="UiProductPatternsTitle" xml:space="preserve"><value>Padrões de Produto</value></data>
   <data name="UiProductPatternsIntro" xml:space="preserve"><value>Um Product Pattern é uma especialização específica de uma feature, construída a partir de primitives compartilhadas — não um atalho ao redor delas. Ele permanece especializado quando a diferença que codifica é semanticamente real, e converge quando a diferença se mostra acidental.</value></data>
   <data name="UiProductPatternsWalletTitle" xml:space="preserve"><value>Wallet — um padrão financeiro</value></data>
-  <data name="UiProductPatternsWalletText" xml:space="preserve"><value>A Wallet compõe PageHeader, cards, botões, empty states e os dialogs compartilhados de editor e confirmação, enquanto mantém formatação monetária, semântica de receita e despesa, e cores de tag persistidas pelo usuário como especializações específicas de produto — nenhuma delas virou token global nem variant de componente.</value></data>
+  <data name="UiProductPatternsWalletText" xml:space="preserve"><value>A Wallet compõe um BeeDayHero compacto, cards, botões, empty states e os dialogs compartilhados de editor e confirmação. Formatação monetária e semântica de receita e despesa continuam como especializações específicas de produto, enquanto a cor de Tag agora usa o mesmo token de paleta COR0-COR9 compartilhado pelos heroes, em vez de um seletor livre.</value></data>
   <data name="UiProductPatternsDailyTitle" xml:space="preserve"><value>Daily e ProjectWorkspace — padrões operacionais</value></data>
   <data name="UiProductPatternsDailyText" xml:space="preserve"><value>O Daily preserva quatro conceitos distintos — Habit, Task, To-Do e Project — com cores, métricas e ações próprias; igualdade física entre dois valores nunca autoriza colapsar seu significado. A ordem manual é possuída pelo BeeDaySortable, não por um sort implícito.</value></data>
   <data name="UiProductPatternsEmptyTitle" xml:space="preserve"><value>Adapters de empty state</value></data>

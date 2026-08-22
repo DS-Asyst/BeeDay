@@ -72,4 +72,16 @@ public abstract class E2ETestBase(PlaywrightAppFixture fixture) : IAsyncLifetime
         await Page.GotoAsync(path);
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
     }
+
+    /// <summary>
+    /// Submits the shared login form without asserting the destination. The calling journey keeps
+    /// ownership of its navigation and outcome assertions so failures remain explicit.
+    /// </summary>
+    protected async Task SubmitLoginAsync(string email, string password)
+    {
+        await GotoAsync("/login");
+        await Page.GetByLabel("Email").FillAsync(email);
+        await Page.GetByLabel("Password").FillAsync(password);
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
+    }
 }

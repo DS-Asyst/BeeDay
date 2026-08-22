@@ -1,0 +1,19 @@
+@using BeeDay.Web.Components.DesignSystem.Icons
+@using BeeDay.Web.Resources
+@inject IStringLocalizer<SharedResources> Localizer
+
+@* Sprint 29.4: the editorial microsite's own minimal footer — white background, no columns, no
+   mascot, no language switcher, no duplicated links (Sprint 29.4 §26/§27). Back to Top sits at the
+   START of the row (left in LTR), independent from the centered Buy Me a Coffee link, per the
+   approved reference composition. *@
+<footer class="editorial-footer">
+    <div class="editorial-footer__content beeday-container">
+        <button type="button" class="editorial-footer__back-to-top" @onclick="ScrollToTopAsync" aria-label="@Localizer["EditorialFooterBackToTopLabel"]">
+            @* ChevronDown rotated 180deg in CSS — the existing "Expand" chevron re-used as "up",
+               avoiding a new icon asset for a single-direction affordance. *@
+            <BeeDayIcon Name="BeeDayIconName.ChevronDown" Decorative="true" Class="editorial-footer__back-to-top-icon" />
+        </button>
+        <a class="editorial-footer__coffee" href="/buy-me-a-coffee">@Localizer["EditorialFooterBuyMeACoffee"]</a>
+        <p class="editorial-footer__copyright">@Localizer["FooterCopyright"]</p>
+    </div>
+</footer>

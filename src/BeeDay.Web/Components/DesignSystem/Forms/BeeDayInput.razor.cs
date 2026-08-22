@@ -22,6 +22,8 @@ public partial class BeeDayInput
     [Parameter, EditorRequired] public Expression<Func<string?>> ValueExpression { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
+    private string ValidationMessageId => $"{Id}-validation";
+
     private Task HandleInputAsync(ChangeEventArgs args) =>
         ValueChanged.InvokeAsync(args.Value?.ToString());
 }

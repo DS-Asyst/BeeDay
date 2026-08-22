@@ -34,6 +34,7 @@ linkado a partir daqui onde relevante em vez de duplicado.
 | [`11-release-quality-gate.md`](11-release-quality-gate.md) | Workflow `BeeDay — Release Quality Gate` para `hmg → main` (Sprint 19.7), correção de compatibilidade com Windows PowerShell 5.1 (Sprint 19.8.2), e a ativação real do Ruleset — mutação de `main` (`BeeDay CI` → `Release Quality Gate` como required check) com read-back confirmado e remoção de `pull_request:main` de `BeeDay CI` (Sprint 19.8.4) — EPIC 19 |
 | [`12-artifact-provenance.md`](12-artifact-provenance.md) | Eliminação da segunda execução completa de `BeeDay CI` após todo merge em `hmg` (Sprint 19.8), correção de compatibilidade com Windows PowerShell 5.1 no bookkeeping pós-deploy (Sprint 19.8.1), e o endurecimento do gatilho de `BeeDay — HMG Verification` contra deployments legados após o incidente real da primeira promoção `hmg → main` (Sprint 19.8.3) — EPIC 19 |
 | [`13-epic19-final-architecture-report.md`](13-epic19-final-architecture-report.md) | Relatório final de encerramento da EPIC 19 — inventário final de workflows/Rulesets, AS-IS × TO-BE, métricas reais before/after, auditoria de duplicação/cache/observabilidade/proveniência com evidência remota, os 17 critérios de aceite da EPIC (todos `PASS`), e veredito final `EPIC 19 — COMPLETE` — Sprint 19.9 |
+| [`14-transactional-email-runbook.md`](14-transactional-email-runbook.md) | Runbook operacional de e-mail transacional — índice sobre `docs/infrastructure/06-transactional-email.md`: seleção de provider por ambiente, contrato de injeção de secrets, política de segurança de HMG, procedimento de deploy/rollback/rotação de chave, troubleshooting, checklist de smoke test controlado e status de Production Readiness (não ativado) — EPIC 26, Sprint 26.10 |
 
 ## Ordem de leitura recomendada
 
@@ -82,3 +83,10 @@ nenhum Runtime State existente.
   checklists prescritivos escritos antes da infraestrutura real (`Deploy-BeeDay.ps1`, os workflows
   de deploy) existir — movidos para [`docs/history/`](../history/README.md), substituídos pelos
   documentos acima.
+- **EPIC 26, Sprint 26.1:** o valor de `Email:Development:Directory` em
+  `appsettings.Homologation.json` (`C:\Apps\BeeDay-Data\Emails`, ver §5.2 de
+  `02-runtime-configuration.md`) é externo à content root de HMG (`C:\Apps\BeeDay.Web`) — o guard de
+  `DevelopmentEmailSender` contra esse tipo de caminho impede toda gravação de e-mail capturado em
+  HMG hoje. Causa raiz completa em
+  [`docs/infrastructure/06-transactional-email.md`](../infrastructure/06-transactional-email.md) §6;
+  correção planejada para as Sprints 26.2/26.3 do EPIC 26.

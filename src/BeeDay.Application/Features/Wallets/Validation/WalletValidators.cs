@@ -11,7 +11,8 @@ public sealed class SaveTransactionRequestValidator : AbstractValidator<SaveTran
     public SaveTransactionRequestValidator()
     {
         RuleFor(x => x.Description).NotEmpty().MaximumLength(Transaction.MaximumDescriptionLength);
-        RuleFor(x => x.Amount).GreaterThan(0).Must(value => decimal.Round(value, 2, MidpointRounding.AwayFromZero) == value)
+        RuleFor(x => x.Amount).GreaterThan(0).LessThanOrEqualTo(Transaction.MaximumAmount)
+            .Must(value => decimal.Round(value, 2, MidpointRounding.AwayFromZero) == value)
             .WithMessage("Amount cannot have more than two decimal places.");
         RuleFor(x => x.Type).IsInEnum();
         RuleFor(x => x.TransactionDate).NotEqual(default(DateOnly));

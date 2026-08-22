@@ -17,4 +17,6 @@ public partial class BeeDayDateInput<TValue>
     [Parameter] public EventCallback<TValue> ValueChanged { get; set; }
     [Parameter, EditorRequired] public Expression<Func<TValue>> ValueExpression { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string ValidationMessageId => $"{Id}-validation";
 }

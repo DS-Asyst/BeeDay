@@ -6,10 +6,10 @@ namespace BeeDay.Application.Common.Contracts;
 /// <summary>
 /// Persistence boundary for the <c>UserToken</c> Aggregate (email confirmation and password reset
 /// tokens). Deliberately independent from <see cref="IUserRepository"/> — see
-/// docs/architecture/05-domain-aggregate-map.md §2.2 for why token revocation does not require
+/// docs/history/domain-aggregate-map.md §2.2 for why token revocation does not require
 /// <c>User</c> containment. The password-reset consumption flow is the one place this port and
 /// <see cref="IUserRepository"/> need to be written together — documented, not implemented, in
-/// docs/architecture/07-persistence-contracts.md.
+/// docs/history/persistence-contracts.md.
 /// </summary>
 public interface IUserTokenRepository
 {
@@ -34,7 +34,7 @@ public interface IUserTokenRepository
 
     /// <summary>
     /// Revokes every currently-active token of <paramref name="type"/> for <paramref name="userId"/> —
-    /// approved in docs/architecture/07-persistence-contracts.md §10, implemented here. Used before
+    /// approved in docs/history/persistence-contracts.md §10, implemented here. Used before
     /// issuing a fresh token of the same type, so no two tokens of that type are ever simultaneously
     /// active for the same User.
     /// </summary>

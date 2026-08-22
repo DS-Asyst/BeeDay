@@ -4,8 +4,10 @@ using BeeDay.Domain.Exceptions;
 
 namespace BeeDay.Domain.Experience;
 
-public sealed class ExperienceSource
+public sealed record ExperienceSource
 {
+    private ExperienceSource() { }
+
     public const int MaximumDescriptionLength = 160;
 
     public ExperienceSourceType Type { get; private set; }

@@ -52,6 +52,33 @@ public sealed class TransactionTests
             new DateOnly(2026, 7, 24)));
     }
 
+    // EPIC 30 Sprint 30.15: the upper Amount boundary (Transaction.MaximumAmount) had no test
+    // anywhere in the suite — Domain/Application/Web all separately enforce it, but nothing proved
+    // the boundary value itself (accepted at exactly the max, rejected one cent over).
+    [Fact]
+    public void Create_acceptsAmountExactlyAtTheMaximum()
+    {
+        var transaction = Transaction.Create(
+            Guid.NewGuid(),
+            "At the limit",
+            Transaction.MaximumAmount,
+            TransactionType.Income,
+            new DateOnly(2026, 7, 24));
+
+        Assert.Equal(Transaction.MaximumAmount, transaction.Amount);
+    }
+
+    [Fact]
+    public void Create_rejectsAmountOneCentAboveTheMaximum()
+    {
+        Assert.Throws<DomainValidationException>(() => Transaction.Create(
+            Guid.NewGuid(),
+            "Over the limit",
+            Transaction.MaximumAmount + 0.01m,
+            TransactionType.Income,
+            new DateOnly(2026, 7, 24)));
+    }
+
     [Fact]
     public void Create_rejects_empty_description_invalid_type_and_date()
     {

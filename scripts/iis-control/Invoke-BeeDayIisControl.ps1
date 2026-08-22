@@ -131,6 +131,25 @@ $allowedEnvironmentVariableNames = @(
     'BeeDay__Email__Resend__FromName'
 )
 
+# Hotfix 26.9.3 (GitHub Actions run 32009214798): the fixed exact-name list above cannot express
+# "one variable per configured HMG recipient" - Deploy-BeeDay.ps1 emits
+# BeeDay__Email__HmgRecipientGuard__AllowedRecipients__0, __1, ... (one per entry in
+# -HmgAllowedRecipients, Hotfix 26.9.2's foreach loop), and CONFIGURE rejected the very first one
+# outright (VALIDATE_VARIABLES/VARIABLE_NOT_ALLOWED, siteState/poolState left "Unknown" since
+# nothing had been read yet), taking the whole deployment down with it - rollback then ran exactly
+# as designed and restored the previous version. A prefix/wildcard match was deliberately rejected
+# in favor of this exact regex: it accepts only the precise indexed shape Deploy-BeeDay.ps1 can
+# actually produce (a non-negative integer in canonical form - "0", "1", "25", never "01", never
+# empty, never non-numeric), so an unrelated key under the same or a different prefix still fails
+# closed exactly as before.
+$allowedHmgRecipientVariablePattern = '^BeeDay__Email__HmgRecipientGuard__AllowedRecipients__(0|[1-9]\d*)$'
+
+function Test-BeeDayAllowedEnvironmentVariableName {
+    param([Parameter(Mandatory = $true)][string]$Name)
+
+    return ($Name -in $allowedEnvironmentVariableNames) -or ($Name -match $allowedHmgRecipientVariablePattern)
+}
+
 function Assert-BeeDayNotReparsePoint {
     param([Parameter(Mandatory = $true)][string]$Path)
 
@@ -241,7 +260,7 @@ function Set-BeeDayAppPoolEnvironmentVariables {
     $script:currentStage = 'VALIDATE_VARIABLES'
     $script:currentErrorCode = 'VARIABLE_NOT_ALLOWED'
     foreach ($key in $Variables.Keys) {
-        if ($key -notin $allowedEnvironmentVariableNames) {
+        if (-not (Test-BeeDayAllowedEnvironmentVariableName -Name $key)) {
             throw "Rejected environment variable name: '$key' is not in the allowed list."
         }
     }

@@ -10,15 +10,27 @@ public sealed class ProfileCreationState(
     BeeDayWebService store,
     ToastService toastService,
     IStringLocalizer<ProfileCreationResources> localizer,
-    IStringLocalizer<SharedResources> sharedLocalizer)
+    IStringLocalizer<SharedResources> sharedLocalizer) : IDisposable
 {
+    // Scoped to this circuit's lifetime (ProfileCreationState itself is AddScoped) — cancels every
+    // in-flight request this instance started once the circuit ends, matching DashboardState's
+    // pattern (Sprint 30.8 / BD30-F035). This file was missed by that Sprint's survey because it is
+    // a plain .cs state class, not a .razor/.razor.cs component.
+    private readonly CancellationTokenSource cancellation = new();
+
     public ProfileCreationFormModel Model { get; } = new();
     public ProfileCreationStep Step { get; private set; } = ProfileCreationStep.Account;
     public bool IsBusy { get; private set; }
     public string? ValidationError { get; private set; }
     public bool HasAuthenticatedSession { get; private set; }
 
-    public Task<BeeDay.Application.Features.Users.Responses.CurrentUserResponse?> LoadDataAsync() => store.GetCurrentUserAsync();
+    public void Dispose()
+    {
+        cancellation.Cancel();
+        cancellation.Dispose();
+    }
+
+    public Task<BeeDay.Application.Features.Users.Responses.CurrentUserResponse?> LoadDataAsync() => store.GetCurrentUserAsync(cancellation.Token);
 
     public string NormalizedName => Model.Name.Trim();
     public string NormalizedNickname => Model.Nickname.Trim().TrimStart('@');
@@ -60,7 +72,7 @@ public sealed class ProfileCreationState(
             return new OnboardingStatus(false, false);
         }
 
-        var user = await store.GetCurrentUserAsync();
+        var user = await store.GetCurrentUserAsync(cancellation.Token);
         if (user is not null)
         {
             Model.Name = user.Name;
@@ -68,12 +80,6 @@ public sealed class ProfileCreationState(
             Step = ProfileCreationStep.Profile;
         }
 
-        return new OnboardingStatus(user is not null, user?.HasProfile == true);
-    }
-
-    public async Task<OnboardingStatus> GetStatusAsync()
-    {
-        var user = await store.GetCurrentUserAsync();
         return new OnboardingStatus(user is not null, user?.HasProfile == true);
     }
 
@@ -142,18 +148,24 @@ public sealed class ProfileCreationState(
                     Model.Email.Trim(),
                     Model.Password,
                     NormalizedNickname,
-                    string.Empty);
+                    string.Empty,
+                    cancellation.Token);
             }
             else
             {
                 await store.CompleteUserProfileAsync(
                     NormalizedName,
                     NormalizedNickname,
-                    string.Empty);
+                    string.Empty,
+                    cancellation.Token);
             }
 
             toastService.ShowSuccess(localizer["WelcomeToast"]);
             return true;
+        }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+        {
+            return false;
         }
         catch (Exception exception)
         {

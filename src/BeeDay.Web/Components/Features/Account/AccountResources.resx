@@ -85,6 +85,12 @@
   <data name="ToastProfileErrorTitle" xml:space="preserve">
     <value>Profile was not saved</value>
   </data>
+  <data name="ToastProfileCurrentPasswordRequiredMessage" xml:space="preserve">
+    <value>Enter your current password to change your email address.</value>
+  </data>
+  <data name="ToastProfileEmailChangedMessage" xml:space="preserve">
+    <value>Your profile has been updated. Check your new email address to confirm it.</value>
+  </data>
   <data name="ToastPasswordChangedMessage" xml:space="preserve">
     <value>Your password has been changed.</value>
   </data>
@@ -127,6 +133,9 @@
   <data name="ProfileHint" xml:space="preserve">
     <value>Your nickname is permanent after your profile is created.</value>
   </data>
+  <data name="ProfileEmailChangeHint" xml:space="preserve">
+    <value>Changing your email requires your current password. We'll send a new confirmation link to the new address.</value>
+  </data>
   <data name="SecurityEyebrow" xml:space="preserve">
     <value>PASSWORD</value>
   </data>
@@ -149,7 +158,7 @@
     <value>Change Password</value>
   </data>
   <data name="SecurityHint" xml:space="preserve">
-    <value>Use at least 8 characters, including one letter and one number.</value>
+    <value>Use at least 8 characters, including one letter and one number. You'll be signed out of every device, including this one, after the change.</value>
   </data>
   <data name="PreferencesEyebrow" xml:space="preserve">
     <value>EXPERIENCE</value>

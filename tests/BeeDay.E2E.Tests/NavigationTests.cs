@@ -96,6 +96,24 @@ public sealed class NavigationTests(PlaywrightAppFixture fixture) : E2ETestBase(
         await Expect(Page.Locator("#mobile-navigation")).ToBeHiddenAsync();
     }
 
+    // EPIC 30 Sprint 30.20: the drawer already moves focus to its own close button on open, but
+    // nothing previously returned focus to the hamburger trigger when it closed — via Escape, the
+    // backdrop, or the close button — leaving keyboard/screen-reader focus lost to <body>.
+    [Fact]
+    public async Task Mobile_ClosingTheDrawerReturnsFocusToTheHamburgerTrigger()
+    {
+        await Page.SetViewportSizeAsync(390, 844);
+        await LoginToDailyAsync();
+
+        var trigger = Page.GetByRole(AriaRole.Button, new() { Name = "Open navigation menu" });
+        await trigger.ClickAsync();
+        await Expect(Page.Locator("#mobile-navigation")).ToBeVisibleAsync();
+
+        await Page.Keyboard.PressAsync("Escape");
+        await Expect(Page.Locator("#mobile-navigation")).ToBeHiddenAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Open navigation menu" })).ToBeFocusedAsync();
+    }
+
     [Fact]
     public async Task Mobile_CloseButtonCloses()
     {
@@ -109,6 +127,17 @@ public sealed class NavigationTests(PlaywrightAppFixture fixture) : E2ETestBase(
         // The drawer's own dedicated close control (distinct from the header's toggle button).
         await drawer.GetByRole(AriaRole.Button, new() { Name = "Close", Exact = true }).ClickAsync();
         await Expect(drawer).ToBeHiddenAsync();
+    }
+
+    // EPIC 30 Sprint 30.17: NotFoundTests.cs (bUnit) already renders the NotFound component
+    // directly, bypassing the router entirely. Nothing previously proved a genuinely nonexistent
+    // URL actually reaches Routes.razor's NotFoundPage fallback in a real browser.
+    [Fact]
+    public async Task NonexistentRoute_RendersTheNotFoundPage()
+    {
+        await GotoAsync("/this-route-does-not-exist-e2e");
+
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Not Found" })).ToBeVisibleAsync();
     }
 
     [Fact]
@@ -131,10 +160,7 @@ public sealed class NavigationTests(PlaywrightAppFixture fixture) : E2ETestBase(
 
     private async Task LoginAsync(string email)
     {
-        await GotoAsync("/login");
-        await Page.GetByLabel("Email").FillAsync(email);
-        await Page.GetByLabel("Password").FillAsync(Password);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
+        await SubmitLoginAsync(email, Password);
         await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
         await GotoAsync("/daily");
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);

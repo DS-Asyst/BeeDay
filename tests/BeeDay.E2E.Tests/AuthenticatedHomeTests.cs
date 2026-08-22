@@ -55,6 +55,18 @@ public sealed class AuthenticatedHomeTests(PlaywrightAppFixture fixture) : E2ETe
     }
 
     [Fact]
+    public async Task OnlyOneOpenDailyControlRemainsOnProfile()
+    {
+        // EPIC 27 Sprint 27.9: the redundant "Open Daily" link next to "Weekly activity" was
+        // removed; the header CTA is the sole surviving control.
+        await Page.SetViewportSizeAsync(1280, 800);
+        await LoginAsync();
+
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Open Daily" })).ToHaveCountAsync(1);
+        await Expect(Page.Locator(".product-home__section-heading a")).ToHaveCountAsync(0);
+    }
+
+    [Fact]
     public async Task LegacyHomeRouteRedirectsToProfile()
     {
         await Page.SetViewportSizeAsync(1280, 800);
@@ -69,10 +81,7 @@ public sealed class AuthenticatedHomeTests(PlaywrightAppFixture fixture) : E2ETe
     {
         var email = $"e2e-home-{Guid.NewGuid():N}@beeday.invalid";
         await Fixture.Factory.SeedUserAsync(email, Password, onboardingCompleted: true);
-        await GotoAsync("/login");
-        await Page.GetByLabel("Email").FillAsync(email);
-        await Page.GetByLabel("Password").FillAsync(Password);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Sign In" }).ClickAsync();
+        await SubmitLoginAsync(email, Password);
         await Expect(Page).ToHaveURLAsync(new Regex("/profile$"));
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
     }

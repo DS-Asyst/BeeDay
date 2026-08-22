@@ -8,9 +8,6 @@
 .product-home__section { display: grid; gap: var(--beeday-spacing-lg); margin-top: var(--beeday-spacing-2xl); }
 .product-home__section-heading { display: flex; align-items: end; justify-content: space-between; gap: var(--beeday-spacing-md); }
 .product-home__section-heading h2 { margin: .2rem 0 0; color: var(--beeday-color-text-primary); font-size: var(--beeday-font-size-xl); }
-.product-home__section-heading a { color: var(--beeday-color-brand-primary); font-weight: 800; text-decoration: none; }
-.product-home__section-heading a:hover { text-decoration: underline; }
-.product-home__section-heading a:focus-visible { outline: var(--beeday-border-width) solid var(--beeday-color-brand-primary); outline-offset: 3px; }
 .product-home__project { display: grid; gap: var(--beeday-spacing-lg); }
 .product-home__project-header { display: flex; align-items: flex-start; gap: var(--beeday-spacing-md); }
 .product-home__project h3 { margin: 0 0 var(--beeday-spacing-xs); color: var(--beeday-color-text-primary); font-size: var(--beeday-font-size-lg); }

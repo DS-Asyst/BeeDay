@@ -7,6 +7,64 @@
     --beeday-color-brand-primary-light: #827afc;
     --beeday-color-brand-primary-soft: #f8f7ff;
 
+    /* Palette — COR0-COR9 (EPIC 27, Design & Experience; official HEX values and page-header
+       eligibility rule formally documented in docs/brand/03-color-palette.md as of Sprint 29.2). The
+       only authorized source for new hero surfaces and Tag colors going forward. COR0 aliases the
+       existing Brand Primary value instead of repeating the literal, so the two never drift; COR1-
+       COR9 are net-new physical values scoped to hero-surface/tag usage, not additional brand
+       colors. Foreground pairings are WCAG-checked and centralized here so hero/tag consumers never
+       pick an ad hoc foreground. */
+    --beeday-palette-cor0: var(--beeday-color-brand-primary);
+    --beeday-palette-cor1: #ce82ff;
+    --beeday-palette-cor2: #58cc02;
+    --beeday-palette-cor3: #1cb0f6;
+    --beeday-palette-cor4: #ffb100;
+    --beeday-palette-cor5: #ff7878;
+    --beeday-palette-cor6: #ffffff;
+    --beeday-palette-cor7: #ececed;
+    --beeday-palette-cor8: #100f3e;
+    --beeday-palette-cor9: #defff7;
+
+    --beeday-palette-cor0-foreground: #ffffff;
+    --beeday-palette-cor1-foreground: var(--beeday-palette-cor8);
+    --beeday-palette-cor2-foreground: var(--beeday-palette-cor8);
+    --beeday-palette-cor3-foreground: var(--beeday-palette-cor8);
+    --beeday-palette-cor4-foreground: var(--beeday-palette-cor8);
+    --beeday-palette-cor5-foreground: var(--beeday-palette-cor8);
+    --beeday-palette-cor6-foreground: var(--beeday-palette-cor8);
+    --beeday-palette-cor7-foreground: var(--beeday-palette-cor8);
+    --beeday-palette-cor8-foreground: #ffffff;
+    --beeday-palette-cor9-foreground: var(--beeday-palette-cor8);
+
+    /* Accent secondary — COR3/#1CB0F6. Approved roles only (03_DESIGN_DECISIONS.md §4): important-
+       white button text, the authenticated sidebar Account item, and moderate marketing highlights.
+       Not a second brand color. */
+    --beeday-color-accent-secondary: var(--beeday-palette-cor3);
+
+    /* Accent secondary, text-safe — the same hue/identity as COR3, darkened for use as TEXT on a
+       light/white surface. Raw COR3 (#1CB0F6) measures ~2.44:1 against white, failing WCAG AA's
+       4.5:1 normal-text minimum (confirmed by the repo's automated axe-core scan); this token
+       measures ~5.29:1. Use this for text/icons on light surfaces; raw --beeday-color-accent-
+       secondary remains correct for non-text uses (borders, depth, surfaces) where the stricter
+       text-contrast ratio does not apply.
+       Sprint 29.3: the important-white CTA's requested design reference moved to #2CBAFF, a
+       marginally brighter/more saturated blue in the same ~200° hue family as COR3/#1CB0F6 (verified
+       by HSL conversion: #2CBAFF is H199.6° S100% L58.6%, #1CB0F6 is H199.3° S92% L53.7%, this token
+       is H200.1° S88% L34.7% — same hue, just darker). #2CBAFF itself measures ~2.19:1 against
+       white, also failing WCAG AA as text — this token remains the correct accessible representative
+       of that same blue family for TEXT use; no new literal or token was introduced. */
+    --beeday-color-accent-secondary-on-light: #0b72a6;
+
+    /* Dark/content-strong — COR8/#100F3E. A stronger dark than --beeday-color-text-primary, used as
+       the foreground paired with light/mid palette surfaces (see the palette foreground pairings
+       above) and wherever the Epic 27 brand surfaces need the strong-dark role. */
+    --beeday-color-content-strong: var(--beeday-palette-cor8);
+
+    /* Hero surface — the centralized default for institutional/marketing solid-color heroes when a
+       page does not select one of COR0-COR9 explicitly (docs/brand/03-color-palette.md). */
+    --beeday-hero-surface-default: var(--beeday-palette-cor0);
+    --beeday-hero-surface-default-foreground: var(--beeday-palette-cor0-foreground);
+
     /* Surfaces */
     --beeday-color-background: #ffffff;
     --beeday-color-surface: #ffffff;
@@ -93,6 +151,19 @@
     --beeday-color-button-warning-outline: #9b6508;
     --beeday-color-button-warning-depth: #c9820d;
     --beeday-color-button-warning-shadow: #5f410d;
+
+    /* Important White — a plain white-surface button (neutral border/depth, same family as
+       --secondary and --back below) whose TEXT is Accent Secondary (COR3, text-safe variant), for
+       the explicit "important white button" cases (e.g. I ALREADY HAVE AN ACCOUNT, CREATE ACCOUNT).
+       Sprint 29.1: EPIC 27 Sprint 27.1 originally colored outline/depth/shadow with raw Accent
+       Secondary too, which painted the button's border and pressed edge in blue and read as a
+       colored surface rather than a white one — the requested change was the text color only. */
+    --beeday-color-button-important-white-bg: var(--beeday-color-surface);
+    --beeday-color-button-important-white-bg-hover: var(--beeday-color-surface-muted);
+    --beeday-color-button-important-white-fg: var(--beeday-color-accent-secondary-on-light);
+    --beeday-color-button-important-white-outline: var(--beeday-color-border-strong);
+    --beeday-color-button-important-white-depth: var(--beeday-color-border-strong);
+    --beeday-color-button-important-white-shadow: var(--beeday-color-border-strong);
 
     --beeday-color-button-back-bg: var(--beeday-color-surface);
     --beeday-color-button-back-bg-hover: var(--beeday-color-surface-muted);

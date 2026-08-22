@@ -9,7 +9,9 @@ grep de implementações em `src/BeeDay.Infrastructure`/`src/BeeDay.Web`.
 Diferente do que a documentação antiga (removida nesta Sprint) descrevia, não existe um projeto
 `BeeDay.Contracts` — "contrato" aqui significa **interface definida em Application, implementada
 em outra camada**. Há 3 categorias: repositórios de Aggregate (8), read services (2), e
-`IUnitOfWork` (1).
+`IUnitOfWork` (1). Esta é a forma final documentada por [ADR-007](../adr/ADR-007-in-process-application-contracts.md)
+(`VALID`) — o projeto `Contracts` separado que [ADR-001](../adr/ADR-001-contract-first.md) havia
+originalmente decidido nunca foi criado; o ADR-007 formaliza a estrutura real.
 
 ## Repositórios por Aggregate (8)
 
@@ -42,7 +44,7 @@ otimista é implementada.
 
 ### Particularidades por repositório
 
-- **`IProjectRepository`** é o maior (13 métodos) — inclui `AddTodoAsync`, `UpdateTodoAsync`,
+- **`IProjectRepository`** é o maior (12 métodos) — inclui `AddTodoAsync`, `UpdateTodoAsync`,
   `RemoveTodoAsync`, `MoveTodoAsync`, `GetByTodoIdAsync`, porque **não existe `ITodoRepository`**.
   O XML doc é explícito: "Não existe deliberadamente um `ITodoRepository`... Todo só é alcançável
   através desta porta."
@@ -107,10 +109,17 @@ dos repositórios já chama isso internamente. `BeginTransactionAsync` só é ne
 mais chamadas de `SaveChangesAsync` precisam ser atômicas juntas — uma única escrita já é atômica
 por si só.
 
-**Quem usa `IUnitOfWork` em vez de um repositório isolado:** confirmado em
-`UpdateTodoCommandHandler` (movimentação de Todo entre Projects, via
-`unitOfWork.Projects.MoveTodoAsync`) — os demais Handlers, na maioria dos casos observados,
-injetam diretamente o repositório específico de que precisam, não `IUnitOfWork` inteiro.
+**Quem usa `IUnitOfWork` em vez de um repositório isolado:** é o padrão comum, não a exceção — 13
+Handlers em 6 Features injetam `IUnitOfWork` inteiro (a maioria com `BeginTransactionAsync`/
+`CommitTransactionAsync` explícitos coordenando 2+ Aggregates): `RegisterHabitPositiveCommandHandler`
+(Habits), `ToggleTaskCommandHandler` (Tasks), `UpdateTodoCommandHandler`/`ToggleTodoCommandHandler`
+(Todos), `CreateTransactionCommandHandler`/`UpdateTransactionCommandHandler`/
+`DeleteTransactionCommandHandler`/`DeleteWalletTagCommandHandler` (Wallets),
+`ConfirmEmailCommandHandler`/`ResetPasswordCommandHandler` (Identity), e
+`CreateUserCommandHandler`/`CreateAccountCommandHandler`/`UpdateCurrentUserAccountCommandHandler`
+(Users). Handlers que só precisam de uma única escrita atômica (ex.:
+`CreateHabitCommandHandler`, `CreateProjectCommandHandler`, `CreateWalletTagCommandHandler`)
+continuam injetando diretamente o repositório específico, sem `IUnitOfWork`.
 
 ## Requests e Responses
 

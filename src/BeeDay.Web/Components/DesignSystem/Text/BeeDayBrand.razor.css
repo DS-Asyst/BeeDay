@@ -12,8 +12,18 @@
     line-height: 1;
 }
 
+.beeday-brand__icon {
+    height: 1em;
+    width: auto;
+    margin-right: .16em;
+    object-fit: contain;
+    flex: none;
+}
+
 .beeday-brand__bee,
 .beeday-brand__day { color: var(--beeday-color-brand-primary); }
 
+/* Inverse is the real white lockup used on brand/dark surfaces (Footer, brand-surface heroes),
+   not a no-op alias of the default primary color. */
 .beeday-brand--inverse .beeday-brand__bee,
-.beeday-brand--inverse .beeday-brand__day { color: var(--beeday-color-brand-primary); }
+.beeday-brand--inverse .beeday-brand__day { color: var(--beeday-color-text-inverse); }

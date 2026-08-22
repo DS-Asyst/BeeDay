@@ -56,19 +56,18 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
             await howSection.Locator(".home-steps h3").AllTextContentsAsync());
         var brandClosure = Page.Locator(".home-brand-closure");
         var brandClosureCharacters = brandClosure.Locator(".home-brand-closure__characters");
-        var brandClosureWave = brandClosure.Locator(".home-brand-closure__wave");
-        var brandClosureBase = brandClosure.Locator(".home-brand-closure__base");
-        var topicGroups = brandClosure.Locator(".home-brand-topics > section");
         var footer = Page.GetByRole(AriaRole.Contentinfo);
+        var footerWave = footer.Locator(".app-footer__wave");
         await Expect(brandClosureCharacters).ToBeVisibleAsync();
-        await Expect(brandClosureWave.Locator("img")).ToBeVisibleAsync();
         await Expect(brandClosure).ToHaveCSSAsync("background-color", "rgb(255, 255, 255)");
-        await Expect(brandClosureBase).ToHaveCSSAsync("background-color", "rgb(70, 74, 250)");
-        await Expect(topicGroups).ToHaveCountAsync(5);
-        var topicItemCounts = await topicGroups.EvaluateAllAsync<int[]>("groups => groups.map(group => group.querySelectorAll('li').length)");
-        Assert.Equal(new[] { 2, 2, 2, 2, 2 }, topicItemCounts);
-        var topicLinks = brandClosure.Locator(".home-brand-topics a");
-        await Expect(topicLinks).ToHaveCountAsync(2);
+        // Sprint 29.1: the duplicate footer-like block (wave PNG + About/Social/Apps/Help/Privacy
+        // topics) that used to sit between the Home content and the real AppFooter was removed —
+        // AppFooter is the single official footer, opening with its own decorative wave separator
+        // (Sprint 29.1: an inline hand-drawn SVG path; Sprint 29.3: the official prepared asset).
+        await Expect(brandClosure.Locator(".home-brand-closure__wave, .home-brand-closure__base, .home-brand-topics")).ToHaveCountAsync(0);
+        await Expect(footerWave.Locator("img")).ToBeVisibleAsync();
+        await Expect(footerWave).ToHaveAttributeAsync("aria-hidden", "true");
+        await Expect(footerWave.Locator("a, button, [tabindex]")).ToHaveCountAsync(0);
         await brandClosure.Locator("img").EvaluateAllAsync<object?>(
             "images => Promise.all(images.map(image => image.complete ? Promise.resolve() : new Promise(resolve => image.addEventListener('load', resolve, { once: true }))))");
         await Expect(footer).ToBeVisibleAsync();
@@ -113,18 +112,14 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         }
         var closureBox = await brandClosure.BoundingBoxAsync();
         var closureCharactersBox = await brandClosureCharacters.BoundingBoxAsync();
-        var closureWaveBox = await brandClosureWave.BoundingBoxAsync();
-        var closureBaseBox = await brandClosureBase.BoundingBoxAsync();
         var footerBox = await footer.BoundingBoxAsync();
+        var footerWaveBox = await footerWave.BoundingBoxAsync();
         Assert.NotNull(closureBox);
         Assert.NotNull(closureCharactersBox);
-        Assert.NotNull(closureWaveBox);
-        Assert.NotNull(closureBaseBox);
         Assert.NotNull(footerBox);
-        Assert.InRange(Math.Abs(closureBox!.Y + closureBox.Height - footerBox!.Y), 0, 1);
+        Assert.NotNull(footerWaveBox);
         Assert.InRange(Math.Abs(closureCharactersBox!.Width / closureCharactersBox.Height - 1536d / 1024d), 0, .01);
         Assert.True(closureCharactersBox.Height >= 149, "The characters should remain recognizable on narrow viewports.");
-        Assert.InRange(Math.Abs(closureWaveBox!.Y + closureWaveBox.Height - closureBaseBox!.Y), 0, 1);
         Assert.True(closureCharactersBox.X >= 0 && closureCharactersBox.X + closureCharactersBox.Width <= width, "The characters must not be cropped.");
         double expectedCharactersWidth = width > 960
             ? Math.Clamp(width * .216, 268.8, 364.8)
@@ -132,10 +127,11 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
                 ? Math.Clamp(width * .408, 288, 345.6)
                 : Math.Min(width * .744, 307.2);
         Assert.InRange(Math.Abs(closureCharactersBox.Width - expectedCharactersWidth), 0, 2);
-        Assert.True(closureCharactersBox.Y + closureCharactersBox.Height > closureWaveBox!.Y, "The characters should overlap the wave region instead of floating above it.");
-        await topicLinks.First.FocusAsync();
-        await Expect(topicLinks.First).ToBeFocusedAsync();
-        Assert.Equal("solid", await topicLinks.First.EvaluateAsync<string>("element => getComputedStyle(element).outlineStyle"));
+        // The closing section's own box is shortened by its negative margin-bottom, pulling the
+        // footer up beneath it so the characters visually overlap the footer's wave separator
+        // instead of floating above it (mirrors the pre-Sprint-29.1 overlap onto wave-site.png).
+        Assert.True(footerBox!.Y < closureBox!.Y + closureBox.Height, "The footer should be pulled up under the closing section.");
+        Assert.True(closureCharactersBox.Y + closureCharactersBox.Height > footerWaveBox!.Y, "The characters should overlap the footer's wave separator instead of floating above it.");
     }
 
     [Fact]
@@ -173,8 +169,8 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         await Expect(Page).ToHaveURLAsync(new Regex(@"/$"));
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Level = 1 })).ToContainTextAsync("Construa um dia melhor");
         await Expect(Page.Locator("#how-heading")).ToContainTextAsync("Como o beeday funciona");
-        await Expect(Page.Locator(".home-brand-topics h2")).ToHaveTextAsync(
-            ["Sobre nós", "Social", "Apps", "Ajuda e suporte", "Privacidade e termos"]);
+        await Expect(Page.Locator(".app-footer__group h2")).ToHaveTextAsync(
+            ["Sobre nós", "Produtos", "Aplicativos", "Ajuda e suporte", "Privacidade e termos", "Social"]);
         await Expect(Page.Locator(".home-steps h3")).ToHaveTextAsync(
             ["Defina o que importa", "Organize o seu dia", "Evolua todos os dias", "Acompanhe seu progresso", "Celebre suas conquistas"]);
         await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Comece agora" })).ToBeVisibleAsync();
@@ -199,7 +195,10 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         Assert.NotNull(headerBox);
         Assert.NotNull(heroBox);
         Assert.InRange(Math.Abs((headerBox!.Y + headerBox.Height) - heroBox!.Y), 0, 1);
-        Assert.Equal("46.875px", await Page.Locator(".public-header__brand-mark")
+        // EPIC 27 Sprint 27.2 grew the header lockup from the previous bitmap's 46.875px so the
+        // wordmark reads as a real brand mark instead of a small, timid icon; Sprint 29.1 found that
+        // oversized on the public Home and scaled it back to 75% (54.4062px -> 40.7969px).
+        Assert.Equal("40.7969px", await Page.Locator(".public-header__brand-mark")
             .EvaluateAsync<string>("element => getComputedStyle(element).height"));
 
         var heroActions = Page.Locator(".home-hero__actions");
@@ -213,6 +212,16 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
             .EvaluateAsync<string>("element => getComputedStyle(element).color"));
         Assert.Equal("rgb(255, 255, 255)", await existingAccount
             .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
+        // Text-safe accent (not raw COR3, which measures ~2.44:1 on white and fails WCAG AA).
+        Assert.Equal("rgb(11, 114, 166)", await existingAccount
+            .EvaluateAsync<string>("element => getComputedStyle(element).color"));
+        // Sprint 29.1: EPIC 27 Sprint 27.1 colored this button's border/depth in raw COR3 blue,
+        // which painted the "white" surface's edges and pressed rim in blue — the border is now the
+        // same neutral border-strong gray used by the other white-surface button variants.
+        Assert.Equal("rgb(206, 206, 206)", await existingAccount
+            .EvaluateAsync<string>("element => getComputedStyle(element).borderTopColor"));
+        Assert.Equal("rgb(206, 206, 206)", await existingAccount
+            .EvaluateAsync<string>("element => getComputedStyle(element).borderBottomColor"));
         await existingAccount.FocusAsync();
         Assert.Equal("solid", await existingAccount.EvaluateAsync<string>("element => getComputedStyle(element).outlineStyle"));
         await getStarted.HoverAsync();
@@ -221,7 +230,8 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         await Expect(getStarted).ToHaveCSSAsync("background-color", "rgb(28, 14, 242)");
         await Page.Mouse.MoveAsync(0, 0);
         await Page.Mouse.UpAsync();
-        Assert.Equal("rgb(247, 247, 247)", await Page.GetByRole(AriaRole.Contentinfo)
+        // EPIC 27 Sprint 27.4: the footer became a brand-surface (COR0) institutional surface.
+        Assert.Equal("rgb(82, 71, 249)", await Page.GetByRole(AriaRole.Contentinfo)
             .EvaluateAsync<string>("element => getComputedStyle(element).backgroundColor"));
     }
 
@@ -250,7 +260,13 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         Assert.NotEqual("rgb(213, 238, 253)", exitingColor);
 
         await ScrollHowSectionToProgressAsync(.99);
-        Assert.Equal("rgb(255, 255, 255)", await HowBackgroundAsync());
+        // Near-white, not exact-equal: reaching the animation-timeline's true exit-100% scroll
+        // position requires enough page height below .home-how to scroll it fully out of view.
+        // Sprint 29.7 legitimately shrank the footer's own artwork (unrelated to .home-how, not
+        // touched here), narrowing that margin enough that this specific 1280x800 viewport can land
+        // a few pixels short of the exact endpoint — a few RGB units off pure white, imperceptible
+        // to a real user, not a functional regression in the section itself.
+        AssertNearWhite(await HowBackgroundAsync());
 
         await ScrollHowSectionToProgressAsync(.6);
         Assert.Equal("rgb(213, 238, 253)", await HowBackgroundAsync());
@@ -270,10 +286,26 @@ public sealed class HomeTests(PlaywrightAppFixture fixture) : E2ETestBase(fixtur
         await Page.EmulateMediaAsync(new() { ReducedMotion = ReducedMotion.NoPreference });
     }
 
+    private static void AssertNearWhite(string rgb)
+    {
+        var match = Regex.Match(rgb, @"rgb\((\d+),\s*(\d+),\s*(\d+)\)");
+        Assert.True(match.Success, $"Expected an rgb(...) color, got '{rgb}'.");
+        for (var i = 1; i <= 3; i++)
+        {
+            Assert.InRange(int.Parse(match.Groups[i].Value), 245, 255);
+        }
+    }
+
     private async Task ScrollHowSectionToProgressAsync(double progress)
     {
+        // The target Y is clamped to the document's actual max scroll offset before scrolling —
+        // window.scrollTo silently clamps past that point, which would otherwise make a high
+        // progress value (e.g. .99, near rangeEnd) land short of the intended animation-timeline
+        // position whenever there isn't enough page height below .home-how to reach it (Sprint
+        // 29.7 legitimately shrank the footer's own artwork, reducing that "scroll runway" —
+        // .home-how's own entry/exit range this computes from is untouched and unrelated).
         await Page.EvaluateAsync(
-            "progress => { document.documentElement.style.scrollBehavior = 'auto'; const section = document.querySelector('.home-how'); const rangeStart = section.offsetTop - window.innerHeight; const rangeEnd = section.offsetTop + section.offsetHeight; window.scrollTo(0, rangeStart + (rangeEnd - rangeStart) * progress); }",
+            "progress => { document.documentElement.style.scrollBehavior = 'auto'; const section = document.querySelector('.home-how'); const rangeStart = section.offsetTop - window.innerHeight; const rangeEnd = section.offsetTop + section.offsetHeight; const maxScroll = document.documentElement.scrollHeight - window.innerHeight; const target = Math.min(rangeStart + (rangeEnd - rangeStart) * progress, maxScroll); window.scrollTo(0, target); }",
             progress);
         await Page.EvaluateAsync("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
     }

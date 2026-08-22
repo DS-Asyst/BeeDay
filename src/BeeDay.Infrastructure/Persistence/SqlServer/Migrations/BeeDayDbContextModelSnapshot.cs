@@ -125,7 +125,7 @@ namespace BeeDay.Infrastructure.Persistence.SqlServer.Migrations
 
                     b.ToTable("Transactions", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Transactions_Amount", "[Amount] > 0");
+                            t.HasCheckConstraint("CK_Transactions_Amount", "[Amount] > 0 AND [Amount] <= 999999999999");
 
                             t.HasCheckConstraint("CK_Transactions_Type", "[Type] IN (1, 2)");
                         });

@@ -1,0 +1,22 @@
+@page "/contact"
+@attribute [AllowAnonymous]
+@layout BeeDay.Web.Components.Layout.EditorialLayout
+@using BeeDay.Web.Components.Features.Institutional.Components
+@inject IStringLocalizer<InstitutionalResources> Localizer
+
+<PageTitle>@Localizer["ContactPageTitle"]</PageTitle>
+
+@* Both channels below are the same existing, approved links used by AppFooter.razor — no new
+   endpoints are invented here. *@
+<EditorialPageTemplate PageContext="@Localizer["ContactPageContext"]" Title="@Localizer["ContactTitle"]" Description="@Localizer["ContactIntro"]">
+    <section aria-labelledby="contact-support-heading">
+        <h2 id="contact-support-heading">@Localizer["ContactSupportTitle"]</h2>
+        <p>@Localizer["ContactSupportBody"]</p>
+        <p><a class="beeday-link" href="https://github.com/tiagoarrigoni/BeeDay">@Localizer["ContactSupportLinkLabel"]</a></p>
+    </section>
+    <section aria-labelledby="contact-direct-heading">
+        <h2 id="contact-direct-heading">@Localizer["ContactDirectTitle"]</h2>
+        <p>@Localizer["ContactDirectBody"]</p>
+        <p><a class="beeday-link" href="https://www.linkedin.com/in/tiago-a-arrigoni-335b9413b/">@Localizer["ContactDirectLinkLabel"]</a></p>
+    </section>
+</EditorialPageTemplate>

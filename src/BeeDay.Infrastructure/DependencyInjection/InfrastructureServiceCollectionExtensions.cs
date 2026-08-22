@@ -71,14 +71,37 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<BeeDay.Application.Common.Identity.IUserTokenService, SecureUserTokenService>();
         services.AddSingleton<BeeDay.Application.Common.Identity.IIdentityRequestThrottle, MemoryIdentityRequestThrottle>();
         services.AddSingleton<BeeDay.Application.Common.Identity.IIdentityEmailComposer, IdentityEmailComposer>();
-        var resendEnabled = configuration.GetValue<bool>($"{ResendOptions.SectionName}:Enabled");
-        if (resendEnabled)
+        // Falls back to each Options class's own declared default (not bool's default false) when the
+        // key is absent, matching exactly what .Bind() would have produced — an omitted key must
+        // resolve the same way here as it does for every other consumer of these Options classes.
+        var resendEnabled = configuration.GetValue($"{ResendOptions.SectionName}:Enabled", new ResendOptions().Enabled);
+        var developmentEmailEnabled = configuration.GetValue($"{DevelopmentEmailOptions.SectionName}:Enabled", new DevelopmentEmailOptions().Enabled);
+        var emailProvider = EmailProviderSelector.Resolve(resendEnabled, developmentEmailEnabled);
+        if (emailProvider == EmailProvider.Resend)
         {
-            services.AddHttpClient<BeeDay.Application.Common.Identity.IEmailSender, ResendEmailSender>(client =>
+            // HmgRecipientGuardOptions is only registered/validated here — never unconditionally for
+            // every environment — because it exists solely to guard Resend delivery. Registering its
+            // ValidateOnStart outside this branch would fail startup for the Development provider too,
+            // which never consults it. See HmgRecipientGuardedEmailSender and
+            // docs/infrastructure/06-transactional-email.md §10 for the fail-closed contract this
+            // enforces: Enabled defaults to true, so an environment that switches to Resend without ever
+            // configuring this section refuses to start rather than sending unprotected.
+            services
+                .AddOptions<HmgRecipientGuardOptions>()
+                .Bind(configuration.GetSection(HmgRecipientGuardOptions.SectionName))
+                .Validate(options => !options.Enabled || options.AllowedRecipients.Count > 0, "At least one allowed recipient is required while the HMG recipient guard is enabled.")
+                .ValidateOnStart();
+
+            services.AddHttpClient<ResendEmailSender>(client =>
             {
                 client.BaseAddress = new Uri("https://api.resend.com/");
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
+            services.AddSingleton<BeeDay.Application.Common.Identity.IEmailSender, HmgRecipientGuardedEmailSender>(sp =>
+                new HmgRecipientGuardedEmailSender(
+                    sp.GetRequiredService<ResendEmailSender>(),
+                    sp.GetRequiredService<IOptions<HmgRecipientGuardOptions>>(),
+                    sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<HmgRecipientGuardedEmailSender>>()));
         }
         else
         {
@@ -100,7 +123,7 @@ public static class InfrastructureServiceCollectionExtensions
         });
 
         // The 8 per-Aggregate persistence contracts defined in EPIC 13
-        // (docs/architecture/07-persistence-contracts.md), adapted against SQL Server (EPIC 14). Every
+        // (docs/history/persistence-contracts.md), adapted against SQL Server (EPIC 14). Every
         // production handler depends on one of these (or IUnitOfWork below) as of Sprint 14.6 — SQL
         // Server is the only active runtime provider.
         services.AddScoped<IUserRepository, EfUserRepository>();

@@ -5,8 +5,12 @@
 `HealthChecks/SqlServerHealthCheck.cs`, `Background/*.cs`, `Configuration/*.cs`, e
 `InfrastructureServiceCollectionExtensions.cs` (para lifetime/registro).
 
-**Última verificação:** 2026-08-09 (Sprint 18.6) — `Caching/MemoryApplicationCache.cs` removido
-(ver achado abaixo).
+**Última verificação:** 2026-08-16 (Epic 26, Sprint 26.7) — seção Email atualizada com observabilidade
+(logs de estado, classificação de falha, mascaramento de destinatário) e o throttle de registro;
+Sprint 26.6 atualizou a mesma seção com a alternativa em texto plano e a correção da cor de marca;
+Sprint 26.4 atualizou a mesma seção com `HmgRecipientGuardedEmailSender`; Sprint 26.2 atualizou a
+mesma seção com `EmailProviderSelector`; verificação anterior em 2026-08-09 (Sprint 18.6) —
+`Caching/MemoryApplicationCache.cs` removido (ver achado abaixo).
 
 ## Event Journal — `JsonEventJournal`
 
@@ -39,7 +43,7 @@ Nenhuma rotação ou limite de tamanho — o arquivo cresce indefinidamente.
 | `SystemClock` | `IClock` | Singleton | `UtcNow => DateTimeOffset.UtcNow` — único membro, existe para tornar o tempo testável (injeção em vez de chamada estática) |
 | `SecureUserTokenService` | `IUserTokenService` | Singleton | Gera token (32 bytes CSPRNG, Base64Url) e hash (SHA-256, hex maiúsculo) para tokens de e-mail/reset de senha |
 | `MemoryIdentityRequestThrottle` | `IIdentityRequestThrottle` | Singleton | `ConcurrentDictionary<string, DateTimeOffset>` — throttle em memória (não distribuído), chave `"{operation}:{subject normalizado}"`, CAS lock-free via `TryAdd`/`TryUpdate` |
-| `IdentityEmailComposer` | `IIdentityEmailComposer` | Singleton | Monta o HTML dos e-mails de confirmação/reset (template inline, tema escuro, `#7A4FCB`), usando `IdentityEmailOptions` para montar a URL |
+| `IdentityEmailComposer` | `IIdentityEmailComposer` | Singleton | Monta o HTML dos e-mails de confirmação/reset (template inline, tema claro, cor de marca `#5247F9`), recebendo `UserLanguage` e resolvendo strings via `System.Resources.ResourceManager`/catálogo `EmailResources.*.resx` (ADR-006), usando `IdentityEmailOptions` para montar a URL — ver [`06-transactional-email.md`](06-transactional-email.md) |
 
 **Achado sobre `MemoryIdentityRequestThrottle`:** por ser em memória e singleton por processo, o
 throttle não sobrevive a um restart nem é compartilhado entre múltiplas instâncias da aplicação —
@@ -60,13 +64,62 @@ descartada por engano. Sem lock global, sem `BackgroundService`/`Timer` novo, se
 | | `ResendEmailSender` | `DevelopmentEmailSender` |
 |---|---|---|
 | Interface | `IEmailSender` | `IEmailSender` |
-| Lifetime | Typed `HttpClient` (`AddHttpClient<IEmailSender, ResendEmailSender>`) | Singleton |
+| Lifetime | Typed `HttpClient` (`AddHttpClient<ResendEmailSender>`, tipo concreto — `IEmailSender` é implementado por `HmgRecipientGuardedEmailSender`, que envolve este via decorator, ver Sprint 26.4 abaixo) | Singleton |
 | Registrado quando | `BeeDay:Email:Resend:Enabled = true` | Caso contrário (padrão) |
-| Mecanismo | `POST https://api.resend.com/emails`, `Authorization: Bearer {ApiKey}`, `User-Agent: BeeDay/1.0`, `Idempotency-Key` novo por request, timeout 30s. Lança `HttpRequestException` em falha (não engolida) | Escreve 2 arquivos por e-mail em `{ContentRoot}/{Directory}` (padrão `Data/Emails`): `{timestamp}-{hex}.html` (corpo) e `.json` (metadados: destinatário, assunto, arquivo, timestamp) |
-| Proteção | — | Guarda contra path traversal — lança `InvalidOperationException` se o diretório resolvido escapar da raiz de conteúdo |
+| Mecanismo | `POST https://api.resend.com/emails`, `Authorization: Bearer {ApiKey}`, `User-Agent: BeeDay/1.0`, `Idempotency-Key` novo por request, timeout 30s, campo `text` opcional (`EmailMessage.PlainTextBody`). Lança `HttpRequestException` em falha (não engolida) | Escreve 2 ou 3 arquivos por e-mail em `{ContentRoot}/{Directory}` (padrão `Data/Emails`): `{timestamp}-{hex}.html` (corpo), `.txt` opcional (texto plano, só se `PlainTextBody` presente) e `.json` (metadados: destinatário, assunto, `HtmlFile`, `PlainTextFile`, timestamp) |
+| Proteção | — | Guarda contra path traversal para `Directory` **relativo**: lança `InvalidOperationException` se escapar da raiz de conteúdo. Um `Directory` **absoluto** (Sprint 26.9 — ex. `C:\Apps\BeeDay-Data\Emails` em HMG) é confiado como escolha deliberada do operador e não passa por essa checagem — a proteção nunca foi enfraquecida para o caso relativo, apenas não se aplica ao caso absoluto |
 
 A escolha entre os dois acontece inteiramente em tempo de DI (`InfrastructureServiceCollectionExtensions`),
 nunca em runtime por requisição.
+
+**EPIC 26, Sprint 26.7 — observabilidade e classificação de falha:** `ResendEmailSender` agora
+registra "attempted" (antes da chamada HTTP) e "accepted" (com o `id` da resposta do Resend, quando
+disponível) — sucesso era completamente silencioso antes. Falhas são classificadas em 3 causas
+distintas antes de propagar sem retry automático: erro de rede/conexão (`HttpRequestException` da
+própria chamada), timeout do `HttpClient` (distinto de cancelamento pelo chamador, que propaga sem
+log) e rejeição do provider (resposta HTTP não-2xx). `DevelopmentEmailSender` passou a mascarar o
+destinatário em seus 2 logs (`EmailAddressLogMasking`, novo) — o arquivo `.json`/`.html` capturado em
+disco continua com o endereço completo (necessário para diagnóstico local); só a linha de log é
+mascarada. Ver [`06-transactional-email.md`](06-transactional-email.md) §14 para o modelo de estados
+completo e a auditoria de controles de abuso (throttle agora também em `CreateAccountCommandHandler`/
+`CreateUserCommandHandler`, reaproveitando `IIdentityRequestThrottle` sem criar mecanismo novo).
+
+**EPIC 26, Sprint 26.6 — alternativa em texto plano:** `EmailMessage` ganhou um 4º membro posicional
+opcional, `PlainTextBody` (padrão `null`, não quebra nenhum call site de 3 argumentos existente).
+`IdentityEmailComposer` (`Identity/IdentityEmailComposer.cs`) agora produz esse texto para os dois
+fluxos (`ComposeEmailConfirmation`/`ComposePasswordReset`), junto com a correção da cor de marca
+usada no botão de call-to-action — de `#7A4FCB` (roxo pré-EPIC-25) para `#5247F9`, a única Brand
+Color oficialmente aprovada (`docs/design-system/01-foundations.md` §2.2). Ver
+[`06-transactional-email.md`](06-transactional-email.md) §13 para a análise completa, incluindo a
+decisão documentada de não localizar o conteúdo dos e-mails (fronteira arquitetural preservada com
+`docs/web/07-localization.md` §9).
+
+**EPIC 26, Sprint 26.4 — `HmgRecipientGuardedEmailSender`:** whenever `EmailProviderSelector`
+resolves `EmailProvider.Resend`, `IEmailSender` is registered as `HmgRecipientGuardedEmailSender`
+wrapping `ResendEmailSender` — never the raw `ResendEmailSender` directly. The guard
+(`Configuration/HmgRecipientGuardOptions.cs`) defaults to `Enabled=true` with an empty
+`AllowedRecipients`, which fails `ValidateOnStart()` — an environment that switches to Resend
+without configuring the guard refuses to start rather than sending unprotected. When `Enabled`, only
+listed recipients reach `ResendEmailSender` (others are silently suppressed, subject gets the
+`SubjectPrefix` — default `"[HMG] "` — prepended once); when explicitly `Enabled=false`
+(`appsettings.Production.json`'s deliberate opt-out), every recipient passes through unmodified. The
+`Development` branch of the same `if`/`else` never binds `HmgRecipientGuardOptions` at all. See
+[`06-transactional-email.md`](06-transactional-email.md) §10 for the full contract.
+
+**EPIC 26, Sprint 26.2 — `EmailProviderSelector`:** `ResendOptions.Enabled` e
+`DevelopmentEmailOptions.Enabled` continuam sendo dois booleanos independentes (mesmas chaves de
+configuração já implantadas, nenhuma renomeada), mas a escolha do `IEmailSender` efetivo agora passa
+por `EmailProviderSelector.Resolve(resendEnabled, developmentEnabled)`
+(`Configuration/EmailProviderSelector.cs`), uma função pura que devolve `EmailProvider.Resend` ou
+`EmailProvider.Development` para as duas combinações não ambíguas, e lança
+`InvalidOperationException` no próprio registro de DI (antes de `builder.Build()`, mesmo momento em
+que `resendEnabled` já era lido hoje) para as duas combinações ambíguas: ambos `true` (a antiga
+lógica silenciosamente ignorava `Development:Enabled` e escolhia Resend) e ambos `false` (a antiga
+lógica registrava `DevelopmentEmailSender`, que então suprimia todo e-mail silenciosamente, só com
+log `Information`). Nenhum arquivo `appsettings*.json` precisou mudar — nenhuma das 4 configurações
+já commitadas (base, Homologation, Production; Development herda do base) está em um dos dois
+estados ambíguos. Ver [`docs/infrastructure/06-transactional-email.md`](06-transactional-email.md)
+§4.1/§8 para a análise completa que motivou esta mudança.
 
 ## `Pbkdf2PasswordService` — hashing de senha
 
@@ -140,6 +193,7 @@ típico do pipeline JSON removido (ADR-005). Confirmado código morto e removido
 `ResendEmailSender.cs`, `DevelopmentEmailSender.cs`, `Security/Pbkdf2PasswordService.cs`,
 `HealthChecks/SqlServerHealthCheck.cs`,
 `Background/BackgroundTaskQueue.cs`, `BackgroundTaskWorker.cs`,
+`Configuration/EmailProvider.cs`, `Configuration/EmailProviderSelector.cs` (EPIC 26, Sprint 26.2),
 os 5 arquivos de `Configuration/`,
 `DependencyInjection/InfrastructureServiceCollectionExtensions.cs` (para lifetime de cada
 registro).

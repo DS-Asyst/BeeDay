@@ -81,7 +81,7 @@ public sealed class ResendEmailConfirmationCommandHandler(
                 now.Add(IdentityTokenLifetimes.EmailConfirmation)),
             cancellationToken);
 
-        var message = emailComposer.ComposeEmailConfirmation(user.Email, user.Name, rawToken);
+        var message = emailComposer.ComposeEmailConfirmation(user.Email, user.Name, rawToken, user.Language);
         await emailSender.SendAsync(message, cancellationToken);
     }
 }
@@ -122,7 +122,7 @@ public sealed class RequestPasswordResetCommandHandler(
                 now.Add(IdentityTokenLifetimes.PasswordReset)),
             cancellationToken);
 
-        var message = emailComposer.ComposePasswordReset(user.Email, user.Name, rawToken);
+        var message = emailComposer.ComposePasswordReset(user.Email, user.Name, rawToken, user.Language);
         await emailSender.SendAsync(message, cancellationToken);
     }
 }

@@ -227,6 +227,23 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+      # EPIC 30 Sprint 30.24 (test-engineering audit): E2ETestBase already captures a screenshot +
+      # Playwright trace on every failing E2E test (tests/BeeDay.E2E.Tests/E2ETestBase.cs), saved
+      # under the test project's own build output, not under ${{ runner.temp }}\TestResults above -
+      # so this is the only workflow that runs E2E.Tests (ci.yml's Fast PR gate does not) and, until
+      # now, the only place a real CI-triggered E2E failure's diagnostic artifacts were silently
+      # discarded when the runner was torn down. Passing tests produce no files here at all, so
+      # if-no-files-found is ignore, not warn - an empty upload on a fully green run is expected, not
+      # a problem to flag.
+      - name: Upload E2E failure artifacts (screenshots/traces)
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: beeday-e2e-failure-artifacts
+          path: tests\BeeDay.E2E.Tests\bin\Release\net10.0\e2e-artifacts
+          if-no-files-found: ignore
+          retention-days: 14
+
       # Minimal summary (Sprint 19.7, Fase 27) - not the full observability platform reserved for
       # Sprint 19.9. Written last, after every prior step already succeeded (a step never runs
       # after an earlier one throws), so reaching here means the whole gate passed.

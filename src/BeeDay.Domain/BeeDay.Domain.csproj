@@ -3,4 +3,11 @@
     <AssemblyName>BeeDay.Domain</AssemblyName>
     <RootNamespace>BeeDay.Domain</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- Grants Infrastructure's EF Core adapters access to internal materialization hooks (e.g.
+         UserExperience.Hydrate) that must stay out of Domain's public surface. This is a one-way
+         visibility grant, not an assembly reference — Domain still has zero dependency on
+         Infrastructure, confirmed by DomainAssemblyBoundaryTests. -->
+    <InternalsVisibleTo Include="BeeDay.Infrastructure" />
+  </ItemGroup>
 </Project>

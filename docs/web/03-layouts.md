@@ -1,23 +1,24 @@
 # Layouts
 
-**Última verificação:** 2026-08-13 — Sprint 21.12, EPIC 21.
-
 ## Layouts ativos
 
 | Layout | Uso | Estrutura |
 |---|---|---|
 | `MainLayout` | Rotas autenticadas | `MobileHeader` + (`DesktopSidebar` + Workspace) + `MobileSidebar` + `BeeDayToastHost` |
-| `PublicLayout` | Home pública `/` | `PublicHeader` + conteúdo + `AppFooter` |
+| `PublicLayout` | Home pública `/`, `/experience-system/*`, `/brand/typography` | `PublicHeader` + conteúdo + `AppFooter` |
+| `EditorialLayout` | As 12 páginas editoriais do footer (§9 de `02-routing-and-pages.md`) | `@Body` (hero+corpo, sem header separado) + `EditorialFooter` + `BeeDayToastHost` |
 | `OnboardingLayout` | Login, identidade, perfil inicial e tutorial | Conteúdo focado sem navegação de produto |
 
 O shell autenticado possui somente duas regiões permanentes no desktop: Navigation e Workspace.
 `RightRail`, `ProfileSidePanel` e `AccountSidePanel` foram aposentados e removidos. O footer
-institucional continua legítimo no `PublicLayout`, aparecendo em Home, `/brand/typography` e, desde
-a Sprint 25.17, em toda rota `/experience-system/*` (`beeday Experience System`, ver
-[`docs/web/02-routing-and-pages.md`](02-routing-and-pages.md) §9), mas não nas rotas autenticadas
-Daily, Wallet ou Account. O link do footer para Typography foi substituído por um link para
-`/experience-system` nesta Sprint — `/brand/typography` continua acessível diretamente e a partir da
-navegação interna do Experience System, apenas deixou de ter um link próprio no footer.
+institucional (`AppFooter`) continua legítimo no `PublicLayout`, aparecendo em Home, `/brand/typography`
+e em toda rota `/experience-system/*`, mas não nas rotas autenticadas Daily, Wallet ou Account, nem
+— desde a Sprint 29.4 — nas 12 páginas editoriais do footer, que usam `EditorialFooter` em vez disso
+(ver "`EditorialLayout` (Sprint 29.4)" abaixo). O link do footer para Typography foi substituído por
+um link para `/experience-system` na Sprint 25.17 — `/brand/typography` continua acessível
+diretamente e a partir da navegação interna do Experience System, apenas deixou de ter um link
+próprio no footer.
+
 
 ## Navegação autenticada
 

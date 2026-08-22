@@ -79,6 +79,11 @@ public sealed class UpdateCurrentUserAccountCommandValidator : AbstractValidator
     {
         RuleFor(command => command.Request.Name).NotEmpty().MaximumLength(UserName.MaximumLength);
         RuleFor(command => command.Request.Email).NotEmpty().EmailAddress().MaximumLength(EmailAddress.MaximumLength);
+
+        // Not NotEmpty(): only required when Email actually changes, a check
+        // UpdateCurrentUserAccountCommandHandler makes (it needs the current user's stored Email to
+        // know that), not something this validator can express on the request alone.
+        RuleFor(command => command.Request.CurrentPassword).MaximumLength(PasswordPolicy.MaximumLength);
     }
 }
 

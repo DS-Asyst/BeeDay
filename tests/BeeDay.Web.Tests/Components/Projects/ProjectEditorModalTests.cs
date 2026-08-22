@@ -1,6 +1,7 @@
 using BeeDay.Web.Components.Features.Projects.Components;
 using BeeDay.Web.Components.Features.Projects.Models;
 using BeeDay.Web.Tests.Localization;
+using Microsoft.AspNetCore.Components;
 
 namespace BeeDay.Web.Tests.Components.Projects;
 
@@ -30,17 +31,21 @@ public sealed class ProjectEditorModalTests : BunitContext
     }
 
     [Fact]
-    public void OpenProjectAction_MatchesNewTagsVisualWeight()
+    public void OpenProjectAction_MatchesTheSharedFooterActionScaleNotACompactVariant()
     {
-        // Compact + the comic border/shadow treatment, no icon — same size and shape family
-        // as WalletTagManager's "New tag" button, not the larger plain pixel-button style.
+        // Sprint 29.3: this button previously opted into Compact="true" specifically to match
+        // WalletTagManager's smaller "New tag" button — but it sits in the same
+        // .editor-modal__footer-actions row as the shell's own Cancel button (EditorModalShell.razor),
+        // which is never Compact, so Open Project read as visibly undersized next to it. Compact is
+        // removed: Open Project now shares the same height/typography contract as every other footer
+        // action across every editor, while its width still varies with the label like any button.
         var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => Render<ProjectEditorModal>(parameters => parameters
             .Add(component => component.Model, new ProjectEditorModel { Title = "Kitchen remodel" })
             .Add(component => component.IsEditing, true)));
 
         var button = cut.FindAll("button").First(element => element.TextContent.Contains("Open Project", StringComparison.Ordinal));
 
-        Assert.Contains("beeday-button--compact", button.ClassList);
+        Assert.DoesNotContain("beeday-button--compact", button.ClassList);
         Assert.Contains("beeday-button--secondary", button.ClassList);
         Assert.DoesNotContain("beeday-button--comic", button.ClassList);
         Assert.Empty(button.QuerySelectorAll("svg"));
@@ -102,6 +107,48 @@ public sealed class ProjectEditorModalTests : BunitContext
             .Add(component => component.IsEditing, true)));
 
         Assert.Contains("Reforma da cozinha", cut.Markup, StringComparison.Ordinal);
+    }
+
+    // EPIC 30 Sprint 30.14: mirrors HabitEditorModalTests.Save_PassesTheEditedFieldsToOnSave (Sprint
+    // 30.12) and its Task/Todo equivalents (Sprint 30.13) — no prior test proved OnSave actually
+    // receives the edited Title/Description/ExpectedDate, only that the callback exists.
+    [Fact]
+    public async Task Save_PassesTheEditedFieldsToOnSave()
+    {
+        ProjectEditorModel? saved = null;
+        var model = new ProjectEditorModel { Title = "Original", Description = "Original notes" };
+
+        var cut = Render<ProjectEditorModal>(parameters => parameters
+            .Add(component => component.Model, model)
+            .Add(component => component.IsEditing, true)
+            .Add(component => component.OnSave, EventCallback.Factory.Create<ProjectEditorModel>(this, m => saved = m)));
+
+        cut.Find("#project-title").Change("Kitchen remodel");
+        cut.Find("#project-notes").Change("Cabinets and countertop");
+        cut.Find("#project-expected-date").Change("2026-06-15");
+        await cut.Find(".editor-modal__header-save").ClickAsync();
+
+        Assert.NotNull(saved);
+        Assert.Equal("Kitchen remodel", saved.Title);
+        Assert.Equal("Cabinets and countertop", saved.Description);
+        Assert.Equal(new DateTime(2026, 6, 15), saved.ExpectedDate);
+    }
+
+    // EPIC 30 Sprint 30.14 / BD30-F056: makes the Finding explicit and regression-proof — Archived
+    // round-trips correctly at the Domain/Application/persistence layers (EfProjectRepositoryTests),
+    // but the rendered form has no control for it at all, so it can never be set to true through the
+    // running application. This proves the absence, rather than merely relying on "the razor file
+    // has no such element" being true by omission.
+    [Fact]
+    public void ArchivedField_HasNoRenderedControlToSetIt()
+    {
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => Render<ProjectEditorModal>(parameters => parameters
+            .Add(component => component.Model, new ProjectEditorModel { Title = "Kitchen remodel" })
+            .Add(component => component.IsEditing, true)));
+
+        Assert.Empty(cut.FindAll("#project-archived"));
+        Assert.Empty(cut.FindAll("input[type='checkbox']"));
+        Assert.DoesNotContain("Archived", cut.Markup, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

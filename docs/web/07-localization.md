@@ -9,6 +9,14 @@ código.
 **Última verificação:** 2026-08-16 (Sprint 25.14 — 17 catálogos, paridade/fallback/
 placeholders automatizados). Verificação anterior: Sprint 23.9, EPIC 23.
 
+**Update (2026-08-17, EPIC 28 Sprint 28.1 — Repository Baseline & Owner Map):** recontagem direta de
+`src/BeeDay.Web/**/*.resx` encontrou **19 catálogos** (1181 chaves por cultura em `.en-US.resx`), não
+17/650 como registrado acima — `ExperienceSystemResources` e `InstitutionalResources` foram
+adicionados por trabalho posterior à Sprint 25.14 (Institutional pages, Experience System), e o
+volume de chaves cresceu nas features tocadas desde então. §8 abaixo foi corrigido para refletir o
+estado atual; o texto histórico de "17 catálogos... 650 chaves" permanece como estava escrito na
+Sprint 25.14 e não foi reescrito além da correção pontual do inventário em §8.
+
 ## 1. Objetivo
 
 Descrever como o BeeDay resolve, persiste e aplica o idioma de apresentação (en-US/pt-BR): a fonte
@@ -143,14 +151,17 @@ por conveniência:
 └── <Área>Resources.pt-BR.resx    tradução
 ```
 
-17 catálogos existem hoje (650 chaves por cultura):
+**19 catálogos existem hoje (1181 chaves por cultura em `.en-US.resx`, verificado 2026-08-17, EPIC 28
+Sprint 28.1)**, dois a mais que os 17 registrados na Sprint 25.14 — `ExperienceSystemResources` e
+`InstitutionalResources` foram adicionados por trabalho posterior a essa verificação:
 
 `SharedResources` (`Resources/`, cross-cutting — toasts genéricos, rodapé, 404, Error e mensagens de
 `DomainErrorLocalizer`, ver §9), `LayoutResources`, `DesignSystemResources` (inclui as mensagens de
 `ValidationMessageLocalizer`, ver §9), `AccountResources`, `AuthenticationResources`,
-`BrandTypographyResources`, `DashboardResources`, `ExperienceResources`, `HabitResources`,
-`HomeResources`, `IdentityResources`, `OnboardingResources`, `ProfileCreationResources`,
-`ProjectResources`, `TaskResources`, `TodoResources`, `WalletResources`.
+`BrandTypographyResources`, `DashboardResources`, `ExperienceResources`, `ExperienceSystemResources`,
+`HabitResources`, `HomeResources`, `IdentityResources`, `InstitutionalResources`,
+`OnboardingResources`, `ProfileCreationResources`, `ProjectResources`, `TaskResources`,
+`TodoResources`, `WalletResources`.
 
 Regras observadas de forma consistente em todos os catálogos (auditadas nesta Sprint — zero exceção
 encontrada):
@@ -227,7 +238,7 @@ tradução perder/alterar placeholders de composite formatting.
 - `src/BeeDay.Web/Program.cs` (bloco `AddLocalization`/`RequestLocalizationOptions`, ordem do
   pipeline, endpoint `/culture/set`)
 - `src/BeeDay.Web/Components/DesignSystem/Forms/BeeDayValidationMessage.razor(.cs)`
-- Os 17 catálogos `.resx`/`.en-US.resx`/`.pt-BR.resx` sob `src/BeeDay.Web/`
+- Os 19 catálogos `.resx`/`.en-US.resx`/`.pt-BR.resx` sob `src/BeeDay.Web/` (§8)
 - `tests/BeeDay.Web.Tests/Localization/BunitLocalizationSupport.cs`,
   `DomainErrorLocalizerTests.cs`, `ValidationMessageLocalizerTests.cs`,
   `ResourceCatalogContractTests.cs`

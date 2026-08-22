@@ -133,9 +133,12 @@ Adicionada via loop no passo 3 do `OnModelCreating`, a **todas** as entidades co
 
 ## Migration Strategy
 
-Exatamente **uma** migration existe: `20260803111144_InitialCreate.cs` — o schema nasceu completo
-em um único arquivo, consistente com a política de banco vazio (ver `docs/domain/` e ADRs, fora do
-escopo desta Sprint). `Up()` cria as 11 tabelas; `Down()` reverte em ordem segura de dependência.
+Duas migrations existem hoje: `20260803111144_InitialCreate.cs` — o schema nasceu completo em um
+único arquivo, consistente com a política de banco vazio (ver `docs/domain/` e ADRs, fora do escopo
+desta Sprint) — `Up()` cria as 11 tabelas, `Down()` reverte em ordem segura de dependência; e
+`20260821054442_AddTransactionAmountUpperBoundCheckConstraint.cs` (2026-08-21), que substitui
+`CK_Transactions_Amount` por uma versão com teto superior (ver
+[`01-relational-model.md`](01-relational-model.md)).
 
 **Única linha de SQL bruto em toda a migration** (`Up()`, citada verbatim):
 ```sql
@@ -165,6 +168,7 @@ tem prioridade se definida; senão usa um valor hardcoded
 
 **Arquivos consultados:** `BeeDayDbContext.cs`, `BeeDayDbContextFactory.cs`, os 11 arquivos de
 `Configurations/`, `Migrations/20260803111144_InitialCreate.cs`,
+`Migrations/20260821054442_AddTransactionAmountUpperBoundCheckConstraint.cs`,
 `Migrations/BeeDayDbContextModelSnapshot.cs`.
 **Testes consultados:** `tests/BeeDay.Infrastructure.Tests/BeeDayDbContextTests.cs` (todos os 11
 testes, especialmente `Model_BuildsWithoutThrowing`, `MutableEntities_HaveARowVersionConcurrencyToken`,

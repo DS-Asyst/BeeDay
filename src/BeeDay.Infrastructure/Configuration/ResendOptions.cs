@@ -6,6 +6,6 @@ public sealed class ResendOptions
 
     public bool Enabled { get; set; }
     public string ApiKey { get; set; } = string.Empty;
-    public string FromName { get; set; } = "BeeDay";
+    public string FromName { get; set; } = "beeday";
     public string FromAddress { get; set; } = string.Empty;
 }

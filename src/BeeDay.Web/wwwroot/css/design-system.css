@@ -34,6 +34,13 @@
     cursor: pointer;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    /* .beeday-button is applied to both real <button> elements (never underlined) and <a> elements
+       used as buttons (PublicAuthActions, Home's hero CTAs, and the institutional hero's
+       PrimaryAction slot) — anchors default to underlined text, so the base rule must reset it once
+       instead of relying on every consumer to add its own local override, as the previous
+       consumers did (discovered in Sprint 27.6: the institutional hero's CTA rendered underlined
+       because no such override existed for it). */
+    text-decoration: none;
     text-transform: uppercase;
     text-align: center;
     overflow-wrap: anywhere;
@@ -97,6 +104,21 @@
     --beeday-button-outline: var(--beeday-color-button-danger-outline);
     --beeday-button-depth: var(--beeday-color-button-danger-depth);
     --beeday-button-shadow: var(--beeday-color-button-danger-shadow);
+}
+
+/* Important White — white surface, neutral border, Accent Secondary (COR3, text-safe) text.
+   Reserved for the explicit "important white button" cases (e.g. I ALREADY HAVE AN ACCOUNT, CREATE
+   ACCOUNT), not a general secondary replacement. See --beeday-color-button-important-white-* in
+   variables.css for why the border/depth/shadow are neutral rather than colored, and for Sprint
+   29.3's #2CBAFF design-reference note (text stays the accessible --accent-secondary-on-light token
+   — #2CBAFF itself fails WCAG AA as text on white, same as the COR3 it was already using). */
+.beeday-button--important-white {
+    --beeday-button-background: var(--beeday-color-button-important-white-bg);
+    --beeday-button-background-hover: var(--beeday-color-button-important-white-bg-hover);
+    --beeday-button-foreground: var(--beeday-color-button-important-white-fg);
+    --beeday-button-outline: var(--beeday-color-button-important-white-outline);
+    --beeday-button-depth: var(--beeday-color-button-important-white-depth);
+    --beeday-button-shadow: var(--beeday-color-button-important-white-shadow);
 }
 
 /* Cancel actions are deliberately neutral: white surface and black text. */
@@ -293,8 +315,7 @@
 .beeday-hero__content { min-width: 0; }
 
 .beeday-page-header__eyebrow,
-.beeday-section-header__eyebrow,
-.beeday-hero__eyebrow {
+.beeday-section-header__eyebrow {
     display: block;
     margin-bottom: var(--beeday-spacing-xs);
     color: var(--beeday-color-brand-primary);
@@ -369,8 +390,6 @@
     border-radius: var(--beeday-radius-lg);
     background: var(--beeday-color-brand-primary-soft);
 }
-
-.beeday-hero--onboarding .beeday-hero__eyebrow { color: var(--beeday-color-brand-primary-active); }
 
 @media (max-width: 30rem) {
     .beeday-hero__illustration { min-width: 3rem; min-height: 3rem; }

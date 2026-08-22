@@ -45,8 +45,14 @@ Na validação do cookie (`OnValidatePrincipal`):
 Incrementado via `User.InvalidateSessions()` quando:
 
 - senha muda (`ChangeCurrentUserPasswordCommandHandler`);
-- reset de senha ocorre (`ResetPasswordCommandHandler`);
-- conta é desativada (`User.SetActive(false)`).
+- reset de senha ocorre (`ResetPasswordCommandHandler`).
+
+`User.SetActive(false)` também dispara `InvalidateSessions()` no Domain, mas nenhum Command/Handler
+de Application ou fluxo de UI chama `SetActive(false)` hoje — os únicos call sites do repositório
+inteiro são fixtures de teste (`UserSessionHardeningTests`, `AuthenticationHandlersTests`,
+`BeeDayWebApplicationFactory`). Desativação de conta não é, portanto, um gatilho de invalidação de
+sessão alcançável em produção nesta Sprint — mecanismo de Domain pronto, sem caso de uso que o
+acione.
 
 Logout global por solicitação do usuário e revogação por incidente de segurança **não** têm
 acionador de UI nesta Sprint (nenhuma funcionalidade nova foi introduzida) — o mecanismo já
@@ -67,7 +73,9 @@ em todos os handlers de Application que resolvem o usuário autenticado. `LevelU
 
 `/auth/login` e `/auth/logout` vinculam parâmetros via `[FromForm]`, o que exige validação
 antiforgery automaticamente nos Minimal APIs do ASP.NET Core; os formulários Razor correspondentes
-(`Login.razor`, `AccountSidePanel.razor`) renderizam `<AntiforgeryToken />`.
+(`Login.razor`, `NavigationItems.razor` — o formulário de logout do shell autenticado, movido de
+`AccountSidePanel.razor` quando esse componente foi removido no redesign da Sprint de 2026-08-13)
+renderizam `<AntiforgeryToken />`.
 
 Testes de integração reais (`WebApplicationFactory<Program>`,
 `tests/BeeDay.Web.Tests/Integration/`) cobrem, contra uma instância real da aplicação com um banco
@@ -101,6 +109,19 @@ apontando para esse usuário; com `LevelUpData` removido, o teste (renomeado
 sem precisar de um campo ambiente para apontar — a ausência desse campo em qualquer lugar do código é,
 em si, parte da garantia.
 
+### Isolamento de propriedade (ownership) — implementado
+
+Nenhuma verificação de posse separada existe como camada própria — a fronteira é estrutural: toda
+consulta de leitura em cada um dos 8 repositórios (`IHabitRepository`, `IProjectRepository`, etc.)
+recebe o `userId` do usuário autenticado como parâmetro obrigatório e filtra por ele na query, então
+um recurso de outro usuário nunca é retornado, nem por engano. Handlers que precisam confirmar posse
+antes de mutar (ex. `ReorderActivitiesCommandHandler.EnsureOwned`,
+`WalletLookup.RequireOwnedTagAsync`/`RequireOwnedTransactionAsync`) lançam
+`InvalidDomainStateException` quando o lookup escopado por `userId` não encontra o recurso — ver
+[`docs/application/04-contracts.md`](../application/04-contracts.md). `CurrentUserGuard` resolve
+apenas a identidade do usuário; a checagem de posse em si é responsabilidade de cada repositório
+Aggregate, nunca centralizada. Coberto por `MultiUserIsolationIntegrationTests`.
+
 ## 2. Password policy — implementado
 
 - PBKDF2 mantido (`Pbkdf2PasswordService`, 120.000 iterações);
@@ -110,6 +131,17 @@ em si, parte da garantia.
 - nenhuma senha ou hash é registrado em log;
 - custo (iterações) permanece o mesmo desta Sprint — revisão periódica é um item operacional
   contínuo, não uma mudança de código.
+
+## 2.1 Tokens de e-mail/reset (confirmação de conta, redefinição de senha)
+
+`SecureUserTokenService` (`src/BeeDay.Infrastructure/Identity/SecureUserTokenService.cs`,
+implementa `IUserTokenService`) gera 32 bytes aleatórios (`RandomNumberGenerator.Fill`, CSPRNG),
+codificados em Base64Url para o token enviado por e-mail, e armazena apenas o hash SHA-256
+(hexadecimal maiúsculo) — nunca o token em claro. Usado por `ConfirmEmailCommandHandler` e
+`ResetPasswordCommandHandler` (`src/BeeDay.Application/Features/Identity/Handlers/
+IdentityHandlers.cs`). As invariantes de janela temporal e uso único (`expiresAtUtc >
+createdAtUtc`, revogação idempotente, `EnsureCanBeUsed`) pertencem ao Domain — ver
+[`docs/domain/user-token.md`](../domain/user-token.md), não duplicadas aqui.
 
 ## 3. Dados
 
@@ -133,8 +165,13 @@ em si, parte da garantia.
 - CSP — uma CSP completa (script-src etc.) ainda está planejada; o framework Razor Components já
   envia `Content-Security-Policy: frame-ancestors 'self'` e `X-Frame-Options: SAMEORIGIN`
   automaticamente em toda resposta renderizada, independentemente de qualquer configuração desta
-  aplicação — confirmado via teste de integração (`SecurityHeadersIntegrationTests`).
-  Referrer-Policy, X-Content-Type-Options e Permissions-Policy continuam ausentes;
+  aplicação — confirmado via teste de integração (`SecurityHeadersIntegrationTests`);
+- Referrer-Policy (`strict-origin-when-cross-origin`), X-Content-Type-Options (`nosniff`) e
+  Permissions-Policy (`camera=(), microphone=(), geolocation=()`) — implementados na Sprint 30.22
+  da EPIC 30 (`SecurityHeadersMiddleware`, `src/BeeDay.Web/Diagnostics/SecurityHeadersMiddleware.cs`),
+  registrado logo após `CorrelationIdMiddleware` em `Program.cs`, aplicado a toda resposta.
+  Deliberadamente não define `X-Frame-Options` nem CSP — o framework Razor Components já os
+  controla, e sobrescrevê-los aqui arriscaria um header conflitante ou silenciosamente substituído;
 - headers de segurança testados — `SecurityHeadersIntegrationTests` cobre o estado real acima.
 
 ## 5. LGPD

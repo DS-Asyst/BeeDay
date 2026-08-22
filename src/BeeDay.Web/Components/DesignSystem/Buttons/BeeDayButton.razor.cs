@@ -33,6 +33,7 @@ public partial class BeeDayButton
                 BeeDayButtonVariant.Danger => "beeday-button--danger",
                 BeeDayButtonVariant.ConfirmationDanger => "beeday-button--confirmation-danger",
                 BeeDayButtonVariant.ConfirmationCancel => "beeday-button--confirmation-cancel",
+                BeeDayButtonVariant.ImportantWhite => "beeday-button--important-white",
                 _ => "beeday-button--primary"
             };
 

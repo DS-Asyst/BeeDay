@@ -2,6 +2,7 @@
 @attribute [AllowAnonymous]
 @layout BeeDay.Web.Components.Layout.OnboardingLayout
 @using BeeDay.Web.Components.Features.Authentication
+@using BeeDay.Web.Services.Authentication
 @inject NavigationManager Navigation
 @inject IStringLocalizer<AuthenticationResources> Localizer
 
@@ -78,7 +79,7 @@
                         </span>
                         <span class="beeday-checkbox__label">@Localizer["RememberMe"]</span>
                     </label>
-                    <a class="auth-action-link" href="/account/forgot-password">@Localizer["ForgotPassword"]</a>
+                    <a class="beeday-link" href="/account/forgot-password">@Localizer["ForgotPassword"]</a>
                 </div>
 
                 <BeeDayButton Type="submit" FullWidth="true" Class="auth-submit">
@@ -112,10 +113,12 @@
     private bool WasConfirmed => Confirmed;
     private bool WasReset => Reset;
     private bool SessionExpired => Expired;
-    private string ReturnUrl => IsLocalPath(RequestedReturnUrl) ? RequestedReturnUrl! : string.Empty;
-
-    private static bool IsLocalPath(string? value) =>
-        !string.IsNullOrWhiteSpace(value) && value.StartsWith('/') && !value.StartsWith("//");
+    // Reuses LoginDestinationResolver's open-redirect guard rather than a locally-duplicated
+    // check — a prior local copy here only rejected "//" and missed the "/\" backslash variant
+    // some browsers normalize into a scheme-relative URL, which the canonical implementation
+    // (already used by POST /auth/login's own redirect decision and /culture/set) correctly
+    // rejects.
+    private string ReturnUrl => LoginDestinationResolver.IsLocalPath(RequestedReturnUrl) ? RequestedReturnUrl! : string.Empty;
 
     /// <summary>
     /// The only resource value interpolated directly into inline JavaScript on this page — HTML

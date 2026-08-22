@@ -3,11 +3,14 @@
 Sistema de escrita para superfícies de marca e produto do beeday. Ele torna avaliável a copy nova
 sem exigir que o texto existente seja reescrito apenas por novidade.
 
-**Fonte da verdade:** amostra representativa dos 17 catálogos `.resx` e seus consumers em Home,
+**Fonte da verdade:** amostra representativa dos catálogos `.resx` e seus consumers em Home,
 onboarding/auth/Identity, Daily, Wallet, Account, Design System feedback, Experience e e-mail de
-Identity, auditada em 2026-08-16. Os catálogos atuais possuem 650 chaves por cultura e 1.950 valores
-entre neutro, `en-US` e `pt-BR`; o teste `ResourceCatalogContractTests` protege paridade, fallback e
-placeholders. O pipeline técnico continua documentado em
+Identity, auditada em 2026-08-16 (17 catálogos, 650 chaves por cultura, na contagem daquela
+Sprint). O teste `ResourceCatalogContractTests` protege paridade, fallback e placeholders. **Sprint
+31.8 (2026-08-21):** recontagem confirma **19 catálogos hoje** (1181 chaves por cultura), a mesma
+contagem já corrigida em [`docs/web/07-localization.md`](../web/07-localization.md) §8 — o texto de
+"17/650" acima é preservado como registro do que a amostra qualitativa de 2026-08-16 cobria, não
+como contagem atual. O pipeline técnico continua documentado em
 [`docs/web/07-localization.md`](../web/07-localization.md).
 
 ## Narrativa de marca

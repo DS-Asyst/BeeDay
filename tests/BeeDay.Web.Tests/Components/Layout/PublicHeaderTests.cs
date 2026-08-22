@@ -22,7 +22,7 @@ public sealed class PublicHeaderTests
         var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<PublicHeader>());
 
         Assert.NotNull(cut.Find("header.public-header"));
-        Assert.NotNull(cut.Find(".public-header__brand img.public-header__brand-mark"));
+        Assert.NotNull(cut.Find(".public-header__brand .beeday-brand.public-header__brand-mark"));
 
         Assert.Empty(cut.FindAll("a.public-header__login"));
         Assert.Empty(cut.FindAll("a[href='/profile/create']"));

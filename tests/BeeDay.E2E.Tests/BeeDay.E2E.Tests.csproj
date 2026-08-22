@@ -16,9 +16,17 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="coverlet.collector">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../../src/BeeDay.Web/BeeDay.Web.csproj" />
+    <!-- EPIC 28, Sprint 28.9: EmailClientCompatibilityTests renders raw IdentityEmailComposer output
+         directly (no live app/route involved) - needs the composer type itself, which BeeDay.Web
+         only exposes transitively through DI, not as a directly usable type. -->
+    <ProjectReference Include="../../src/BeeDay.Infrastructure/BeeDay.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@
 @page "/settings"
 @attribute [Authorize]
 @rendermode InteractiveServer
+@implements IDisposable
 @using BeeDay.Web.Components.Features.Account.Components
 @using BeeDay.Web.Components.Features.Account.Models
 @using BeeDay.Web.Localization
@@ -51,19 +52,27 @@
     private readonly ProfileFormModel _profile = new();
     private readonly SecurityFormModel _security = new();
     private readonly PreferencesFormModel _preferences = new();
+    private readonly CancellationTokenSource _cts = new();
     private UserLanguage _initialLanguage;
+    private string _initialEmail = string.Empty;
     private bool _isLoading = true;
     private bool _profileBusy;
     private bool _securityBusy;
     private bool _preferencesBusy;
     private bool IsAnyBusy => _profileBusy || _securityBusy || _preferencesBusy;
 
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+
     protected override async Task OnInitializedAsync()
     {
         try
         {
             await UserInitializer.EnsureInitializedAsync();
-            var user = await Store.GetCurrentUserAsync();
+            var user = await Store.GetCurrentUserAsync(_cts.Token);
             if (user is not { HasProfile: true })
             {
                 Navigation.NavigateTo("/profile/create", true);
@@ -73,9 +82,13 @@
             _profile.Name = user.Name;
             _profile.Email = user.Email;
             _profile.Nickname = user.Nickname;
+            _initialEmail = user.Email;
             _preferences.Language = user.Language;
             _preferences.Theme = user.Theme;
             _initialLanguage = user.Language;
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
         }
         catch (Exception ex)
         {
@@ -90,11 +103,35 @@
     private async Task SaveProfileAsync()
     {
         if (IsAnyBusy) return;
+
+        var trimmedEmail = _profile.Email.Trim();
+        var emailChanged = !string.Equals(trimmedEmail, _initialEmail, StringComparison.OrdinalIgnoreCase);
+        if (emailChanged && string.IsNullOrWhiteSpace(_profile.CurrentPassword))
+        {
+            // BD30-F044: caught here so the field reads "required", not the misleading "incorrect
+            // password" the server would otherwise return for an empty CurrentPassword.
+            Toast.ShowError(Localizer["ToastProfileCurrentPasswordRequiredMessage"], Localizer["ToastProfileErrorTitle"]);
+            return;
+        }
+
         _profileBusy = true;
         try
         {
-            await Store.UpdateUserAsync(_profile.Name.Trim(), _profile.Email.Trim());
-            Toast.ShowSuccess(Localizer["ToastProfileSavedMessage"], Localizer["ToastProfileSavedTitle"]);
+            await Store.UpdateUserAsync(_profile.Name.Trim(), trimmedEmail, _profile.CurrentPassword, _cts.Token);
+            _profile.CurrentPassword = string.Empty;
+
+            if (emailChanged)
+            {
+                _initialEmail = trimmedEmail;
+                Toast.ShowSuccess(Localizer["ToastProfileEmailChangedMessage"], Localizer["ToastProfileSavedTitle"]);
+            }
+            else
+            {
+                Toast.ShowSuccess(Localizer["ToastProfileSavedMessage"], Localizer["ToastProfileSavedTitle"]);
+            }
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
         }
         catch (Exception ex)
         {
@@ -112,9 +149,12 @@
         _securityBusy = true;
         try
         {
-            await Store.ChangePasswordAsync(_security.CurrentPassword, _security.NewPassword, _security.ConfirmNewPassword);
+            await Store.ChangePasswordAsync(_security.CurrentPassword, _security.NewPassword, _security.ConfirmNewPassword, _cts.Token);
             _security.Clear();
             Toast.ShowSuccess(Localizer["ToastPasswordChangedMessage"], Localizer["ToastPasswordChangedTitle"]);
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
         }
         catch (Exception ex)
         {
@@ -132,7 +172,7 @@
         _preferencesBusy = true;
         try
         {
-            await Store.UpdatePreferencesAsync(_preferences.Language, _preferences.Theme);
+            await Store.UpdatePreferencesAsync(_preferences.Language, _preferences.Theme, _cts.Token);
 
             if (_preferences.Language != _initialLanguage)
             {
@@ -145,6 +185,9 @@
             }
 
             Toast.ShowSuccess(Localizer["ToastPreferencesSavedMessage"], Localizer["ToastPreferencesSavedTitle"]);
+        }
+        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+        {
         }
         catch (Exception ex)
         {

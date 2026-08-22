@@ -3,9 +3,14 @@
 @layout BeeDay.Web.Components.Layout.PublicLayout
 @inject IStringLocalizer<ExperienceSystemResources> Localizer
 
+@* Sprint 29.4: "/brand-guidelines" moved off this component to its own page
+   (Institutional/Pages/BrandGuidelines.razor), using the editorial microsite shell instead of this
+   page's own card-grid ExperienceSystemPage shell — Brand guidelines is a real footer/editorial page
+   now (AppFooter.razor "About us"), while this route stays the Brand/UI/UX pillar entry point it was
+   before, unaffected. *@
 <PageTitle>@Localizer["RootPageTitle"]</PageTitle>
 
-<ExperienceSystemPage Eyebrow="@Localizer["RootEyebrow"]" Title="@Localizer["RootTitle"]" Description="@Localizer["RootIntro"]">
+<ExperienceSystemPage Eyebrow="@Localizer["RootEyebrow"]" Title="@Localizer["RootTitle"]" Description="@Localizer["RootIntro"]" ShowBrandGuidelinesHero="true">
     <ExperienceSystemTopicGrid AriaLabel="@Localizer["RootGridAriaLabel"]" Items="PillarLinks" />
 
     <section class="experience-system-section" aria-labelledby="root-closing-heading">

@@ -120,6 +120,10 @@
   <data name="OrderLabel" xml:space="preserve"><value>Ordem</value></data>
   <data name="NewestFirstOption" xml:space="preserve"><value>Mais recentes primeiro</value></data>
   <data name="OldestFirstOption" xml:space="preserve"><value>Mais antigas primeiro</value></data>
+  <data name="AmountHighestFirstOption" xml:space="preserve"><value>Valor (maior primeiro)</value></data>
+  <data name="AmountLowestFirstOption" xml:space="preserve"><value>Valor (menor primeiro)</value></data>
+  <data name="DescriptionAToZOption" xml:space="preserve"><value>Descrição (A-Z)</value></data>
+  <data name="DescriptionZToAOption" xml:space="preserve"><value>Descrição (Z-A)</value></data>
   <data name="ActiveFilterCountSingular" xml:space="preserve"><value>{0} filtro ativo</value></data>
   <data name="ActiveFilterCountPlural" xml:space="preserve"><value>{0} filtros ativos</value></data>
   <data name="SummaryAriaLabel" xml:space="preserve"><value>Resumo da carteira</value></data>
@@ -154,7 +158,8 @@
   <data name="TagSummaryHeading" xml:space="preserve"><value>Tag</value></data>
   <data name="TagSummaryDescription" xml:space="preserve"><value>Organize suas receitas e despesas.</value></data>
   <data name="ColorLabel" xml:space="preserve"><value>Cor</value></data>
-  <data name="SelectTagColorAriaLabel" xml:space="preserve"><value>Selecionar cor da tag</value></data>
+  <data name="TagColorSwatchLabel" xml:space="preserve"><value>Cor {0}</value></data>
+  <data name="TagColorSelectedLabel" xml:space="preserve"><value>Selecionada</value></data>
   <data name="SaveButtonLabel" xml:space="preserve"><value>Salvar</value></data>
   <data name="CreateButtonLabel" xml:space="preserve"><value>Criar</value></data>
 </root>

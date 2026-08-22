@@ -1,11 +1,21 @@
 # EPIC 19 — Final CI/CD Architecture & Observability Report
 
-**Fonte da verdade:** leitura integral de todos os 6 workflows em `.github/workflows/`; `gh api`
-em Rulesets reais (`hmg`, `main`, `prd`); `gh run list`/`gh run view` em amostras reais recentes de
-todas as categorias de workflow; `docs/deployment/06-cicd-pipeline-discovery-baseline.md` (baseline
-histórico da Sprint 19.1, não reescrito); todos os documentos `docs/deployment/07-12`.
+**Fonte da verdade:** leitura integral de todos os 6 workflows em `.github/workflows/` existentes à
+época; `gh api` em Rulesets reais (`hmg`, `main`, `prd`); `gh run list`/`gh run view` em amostras
+reais recentes de todas as categorias de workflow; `docs/deployment/06-cicd-pipeline-discovery-baseline.md`
+(baseline histórico da Sprint 19.1, não reescrito); todos os documentos `docs/deployment/07-12`.
 
 **Última verificação:** 2026-08-11 (Sprint 19.9, encerramento da EPIC 19).
+
+**Natureza deste documento (nota da Sprint 31.11, EPIC 31):** este é o relatório de fechamento da
+EPIC 19 — um retrato histórico do estado da arquitetura de CI/CD em 2026-08-11, não uma referência
+viva. As tabelas de inventário abaixo (§5-11) já não cobrem `.github/workflows/codeql.yml`,
+adicionado pela EPIC 30 (Sprint 30.25) — a EPIC 19 encerrou antes desse workflow existir. Para o
+estado atual de qualquer workflow, consulte diretamente `.github/workflows/`,
+[`06`](06-cicd-pipeline-discovery-baseline.md)–[`12`](12-artifact-provenance.md) (mantidos como
+histórico com notas de atualização pontuais) ou [`docs/testing/01-testing-strategy.md`](../testing/01-testing-strategy.md)
+§7. Este documento não é reescrito para acompanhar mudanças posteriores ao fechamento da EPIC 19,
+exceto correções pontuais de erros factuais internos (ver histórico de commits).
 
 **Escopo:** consolidação final — não redesenho. Nenhuma alteração de arquitetura, artifact
 provenance, Ruleset, ou Release Quality Gate foi feita nesta Sprint.
@@ -118,8 +128,9 @@ main
 |---|---|---|---|
 | `beeday-publish` | `ci.yml` | `deploy-hmg.yml`, `deploy-prd.yml` | 7 dias |
 | `beeday-migrations` | `ci.yml` | `deploy-hmg.yml` | 7 dias |
-| `beeday-test-results` | `ci.yml`, `release-quality-gate.yml` | nenhum (inspeção manual) | 14 dias |
+| `beeday-test-results` | `ci.yml` | nenhum (inspeção manual) | 14 dias |
 | `beeday-release-gate-test-results` | `release-quality-gate.yml` | nenhum (inspeção manual) | 14 dias |
+| `beeday-e2e-failure-artifacts` | `release-quality-gate.yml` | nenhum (inspeção manual) | 14 dias |
 | `beeday-hmg-deployment-info` | `deploy-hmg.yml` | `verify-hmg.yml` | 14 dias |
 
 ## 6. Ruleset Matrix

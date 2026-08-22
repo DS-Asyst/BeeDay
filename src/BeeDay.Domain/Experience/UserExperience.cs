@@ -5,6 +5,8 @@ namespace BeeDay.Domain.Experience;
 
 public sealed class UserExperience
 {
+    private UserExperience() { }
+
     public long TotalExperience { get; private set; }
 
     public IReadOnlyList<ExperienceEntry> Entries { get; private set; } = [];
@@ -18,6 +20,18 @@ public sealed class UserExperience
     public long ExperienceForNextLevel => ExperienceRequiredForCurrentLevel - CurrentLevelExperience;
 
     public static UserExperience Create() => new();
+
+    /// <summary>
+    /// Materialization-only hook for Infrastructure: assigns previously-persisted entries without
+    /// re-running the <c>Add</c> factory (which would double-count <see cref="TotalExperience"/> —
+    /// that column is already loaded independently from its own row). Required because
+    /// <see cref="Entries"/> is intentionally not an EF Core-mapped navigation (it would duplicate the
+    /// real ExperienceEntry-to-User relationship); the caller is expected to load matching entries
+    /// itself and hydrate this instance before granting further experience, so
+    /// <see cref="TryAdd"/>'s duplicate check has real history to compare against instead of always
+    /// seeing an empty collection.
+    /// </summary>
+    internal void Hydrate(IReadOnlyList<ExperienceEntry> entries) => Entries = entries;
 
     public ExperienceEntry Add(
         ExperienceReward reward,

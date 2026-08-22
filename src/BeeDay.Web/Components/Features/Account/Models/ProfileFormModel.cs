@@ -14,4 +14,10 @@ public sealed class ProfileFormModel
     public string Email { get; set; } = string.Empty;
 
     public string Nickname { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Only required when Email actually changes — enforced in Account.razor.cs before submit, not
+    /// via a DataAnnotations [Required] here, since a Name-only save must not force this field.
+    /// </summary>
+    public string CurrentPassword { get; set; } = string.Empty;
 }

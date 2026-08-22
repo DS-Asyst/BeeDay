@@ -49,7 +49,8 @@ public sealed class WalletComponentTests : BunitContext
     }
 
     [Theory]
-    [InlineData("#7A4FCB", true)]
+    [InlineData("#5247F9", true)] // Cor0 — one of the 10 official palette colors (EPIC 27 Sprint 27.11).
+    [InlineData("#7A4FCB", false)] // A real hex color, but not one of the 10 — no longer accepted.
     [InlineData("purple", false)]
     public void TagForm_ValidatesHexColor(string color, bool expected)
     {

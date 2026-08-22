@@ -45,16 +45,195 @@ public sealed class VisualFoundationTests
     }
 
     [Fact]
-    public void SharedBrandUsesTheOfficialPrimaryInEverySupportedMode()
+    public void SharedBrandUsesOfficialPrimaryByDefaultAndRealWhiteOnDarkSurfaces()
     {
+        // EPIC 27 Sprint 27.1: the inverse lockup used on brand/dark surfaces (Footer, brand-surface
+        // heroes) now renders real white instead of repeating Brand Primary as a historical no-op.
         var brand = ReadWebFile("Components", "DesignSystem", "Text", "BeeDayBrand.razor.css");
 
         Assert.Contains(".beeday-brand__bee,", brand, StringComparison.Ordinal);
         Assert.Contains(".beeday-brand__day { color: var(--beeday-color-brand-primary); }", brand, StringComparison.Ordinal);
         Assert.Contains(".beeday-brand--inverse .beeday-brand__bee,", brand, StringComparison.Ordinal);
-        Assert.Contains(".beeday-brand--inverse .beeday-brand__day { color: var(--beeday-color-brand-primary); }", brand, StringComparison.Ordinal);
+        Assert.Contains(".beeday-brand--inverse .beeday-brand__day { color: var(--beeday-color-text-inverse); }", brand, StringComparison.Ordinal);
+        Assert.Contains(".beeday-brand__icon {", brand, StringComparison.Ordinal);
         Assert.DoesNotContain("--beeday-color-brand-yellow", brand, StringComparison.Ordinal);
-        Assert.DoesNotContain("--beeday-color-text-inverse", brand, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AuthenticatedSidebarCentersItsBrandAndGivesAccountATextSafeAccentOnlyWhenInactive()
+    {
+        // EPIC 27 Sprint 27.9: the sidebar's brand lockup is centered and sized for the shell chrome
+        // (was left-aligned at the bare 1.75rem component default before this sprint); Account uses
+        // the text-safe COR3 accent (03_DESIGN_DECISIONS.md §4) but only in its resting state, so it
+        // never borrows the active-route pill it isn't entitled to when it isn't the current page.
+        var desktopSidebar = ReadWebFile("Components", "Layout", "DesktopSidebar.razor.css");
+        var navigationItems = ReadWebFile("Components", "Layout", "NavigationItems.razor.css");
+
+        Assert.Contains("justify-content: center;", desktopSidebar, StringComparison.Ordinal);
+        Assert.Contains("--beeday-brand-height: 2.25rem;", desktopSidebar, StringComparison.Ordinal);
+
+        Assert.Contains(".navigation-items__account ::deep .navigation-item:not(.is-active) { color: var(--beeday-color-accent-secondary-on-light); }", navigationItems, StringComparison.Ordinal);
+        Assert.DoesNotContain(".navigation-items__account ::deep .navigation-item.is-active", navigationItems, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ActivityCardCheckboxIsATrueEmptyBoxAtRestAndNeverPreviewsTheCheckBeforeCompletion()
+    {
+        // EPIC 27 Sprint 27.10 made pending/default a real empty box (no visible check, but a
+        // visible border) — that part still holds. Sprint 29.3 removed the hover/focus/active
+        // "preview" it also introduced (glyph fading to opacity .62 on hover alone): a task/to-do
+        // hovered before being completed visually suggested a check mark, which read as a false
+        // completed affordance. The glyph now appears only once the item is actually completed;
+        // hover/focus/active may still change surface/border/scale for affordance, just not the
+        // glyph's own opacity.
+        var cards = ReadWebFile("wwwroot", "css", "cards.css");
+
+        Assert.Contains("border: 2px solid currentColor;", cards, StringComparison.Ordinal);
+        Assert.Contains(".activity-card__checkbox-glyph { opacity: 0; }", cards, StringComparison.Ordinal);
+        Assert.Contains(".activity-card--completed .activity-card__checkbox-glyph { opacity: 1; }", cards, StringComparison.Ordinal);
+        Assert.Contains(".activity-card__checkbox:focus-visible {", cards, StringComparison.Ordinal);
+        Assert.Contains("transform: scale(.92);", cards, StringComparison.Ordinal);
+        Assert.DoesNotContain(":hover .activity-card__checkbox-glyph", cards, StringComparison.Ordinal);
+        Assert.DoesNotContain(":focus-visible .activity-card__checkbox-glyph", cards, StringComparison.Ordinal);
+        Assert.DoesNotContain(":active .activity-card__checkbox-glyph", cards, StringComparison.Ordinal);
+        Assert.DoesNotContain("opacity: .62", cards, StringComparison.Ordinal);
+        Assert.DoesNotContain("opacity:.62", cards, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ActivityCardProjectBadgeReusesTheExistingBeeIllustrationOnTheProjectAccent()
+    {
+        // EPIC 27 Sprint 27.10: no new bee character was generated — project-bee.png is a cropped
+        // presentation of the same source art as assets/brand/bee-color-neutral.png (renamed from
+        // assets/home/how-beeday-works-bee.png in Sprint 29.1; see 06_ASSETS_AND_OPEN_ITEMS.md).
+        var cards = ReadWebFile("wwwroot", "css", "cards.css");
+        var component = ReadWebFile("Components", "Features", "Dashboard", "Components", "ActivityCard.razor");
+
+        Assert.Contains("src=\"/assets/dashboard/project-bee.png\"", component, StringComparison.Ordinal);
+        Assert.DoesNotContain("BeeDayIconName.Project", component, StringComparison.Ordinal);
+        Assert.Contains(".activity-card--project .activity-card__project-status {", cards, StringComparison.Ordinal);
+        Assert.Contains("background: var(--beeday-color-project);", cards, StringComparison.Ordinal);
+        Assert.True(File.Exists(Path.Combine(RepoRoot, "src", "BeeDay.Web", "wwwroot", "assets", "dashboard", "project-bee.png")));
+    }
+
+    [Fact]
+    public void MobileHeaderAndDrawerBrandLinksAreReachableThroughDeepSelectors()
+    {
+        // EPIC 27 Sprint 27.12 (epic hardening): DesktopSidebar's brand link had the exact same
+        // bug when it was fixed in Sprint 27.9 — NavLink wraps a child component (BeeDayBrand),
+        // so its rendered <a> never receives the file's own CSS-isolation scope attribute, and an
+        // un-::deep'd rule targeting it is a silent no-op. That sprint's own commit flagged
+        // MobileSidebar as a known, deferred instance of the same bug; MobileHeader had the
+        // identical bug too, undiagnosed until this hardening pass. Both rendered their wordmark
+        // with the browser's default underline instead of beeday-brand's own styling.
+        var mobileHeader = ReadWebFile("Components", "Layout", "MobileHeader.razor.css");
+        var mobileSidebar = ReadWebFile("Components", "Layout", "MobileSidebar.razor.css");
+
+        Assert.Contains(".mobile-header ::deep .mobile-header__brand", mobileHeader, StringComparison.Ordinal);
+        Assert.Contains(".mobile-nav-drawer__header ::deep .mobile-nav-drawer__brand", mobileSidebar, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Epic27PaletteFoundationsAreCentralizedAndPairedWithAForeground()
+    {
+        var variables = ReadWebFile("wwwroot", "css", "variables.css");
+        var utilities = ReadWebFile("wwwroot", "css", "utilities.css");
+        var designSystem = ReadWebFile("wwwroot", "css", "design-system.css");
+
+        Assert.Contains("--beeday-palette-cor0: var(--beeday-color-brand-primary);", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-palette-cor1: #ce82ff;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-palette-cor2: #58cc02;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-palette-cor3: #1cb0f6;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-palette-cor4: #ffb100;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-palette-cor5: #ff7878;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-palette-cor6: #ffffff;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-palette-cor7: #ececed;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-palette-cor8: #100f3e;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-palette-cor9: #defff7;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-color-accent-secondary: var(--beeday-palette-cor3);", variables, StringComparison.Ordinal);
+        Assert.Contains("--beeday-hero-surface-default: var(--beeday-palette-cor0);", variables, StringComparison.Ordinal);
+        // The button text uses the text-safe accent variant, not raw COR3: raw COR3 on white measures
+        // ~2.44:1 (fails WCAG AA's 4.5:1 normal-text minimum, confirmed by the repo's axe-core E2E scan).
+        Assert.Contains("--beeday-color-accent-secondary-on-light: #0b72a6;", variables, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--beeday-color-button-important-white-fg: var(--beeday-color-accent-secondary-on-light);", variables, StringComparison.Ordinal);
+
+        Assert.Contains(".beeday-link {", utilities, StringComparison.Ordinal);
+        Assert.Contains("text-decoration: none;", utilities, StringComparison.Ordinal);
+        for (var i = 0; i <= 9; i++)
+        {
+            Assert.Contains($".beeday-surface-cor{i} {{ background: var(--beeday-palette-cor{i}); color: var(--beeday-palette-cor{i}-foreground); }}", utilities, StringComparison.Ordinal);
+        }
+
+        Assert.Contains(".beeday-button--important-white {", designSystem, StringComparison.Ordinal);
+        // .beeday-button is applied to real <button>s (never underlined) and <a>s used as buttons
+        // (PublicAuthActions, Home's hero CTAs, the institutional hero's PrimaryAction). Anchors
+        // default to underlined text; the base rule must reset it once instead of relying on every
+        // consumer to add its own local override (the institutional hero's CTA rendered underlined
+        // in Sprint 27.6 because no such override existed for that new consumer).
+        var baseButtonRuleHasNoUnderline = System.Text.RegularExpressions.Regex.IsMatch(
+            designSystem, @"\.beeday-button\s*\{[^}]*text-decoration:\s*none", System.Text.RegularExpressions.RegexOptions.Singleline);
+        Assert.True(baseButtonRuleHasNoUnderline, "The base .beeday-button rule must reset text-decoration for anchor consumers.");
+    }
+
+    [Fact]
+    public void HeroSurfacePairingsAreDefinedInsideTheIsolatedStylesheetNotThePlainUtilityClass()
+    {
+        // Blazor CSS isolation adds a scope attribute to .beeday-hero, which outranks a plain
+        // .beeday-surface-corN utility class regardless of load order (discovered in Sprint 27.3 —
+        // the institutional hero silently rendered white instead of its chosen COR surface until
+        // fixed). The pairing must be re-declared as a compound selector inside BeeDayHero.razor.css.
+        var hero = ReadWebFile("Components", "DesignSystem", "Layout", "BeeDayHero.razor.css");
+
+        Assert.Contains("background: var(--beeday-hero-surface-bg, var(--beeday-color-surface));", hero, StringComparison.Ordinal);
+        for (var i = 0; i <= 9; i++)
+        {
+            Assert.Contains($".beeday-hero.beeday-surface-cor{i} {{ --beeday-hero-surface-bg: var(--beeday-palette-cor{i}); --beeday-hero-surface-fg: var(--beeday-palette-cor{i}-foreground); }}", hero, StringComparison.Ordinal);
+        }
+
+        // BeeDayBrand's own fixed default/inverse colors do not reliably contrast against every
+        // COR0-COR9 surface (brand-primary purple text failed WCAG color-contrast against COR3/COR4
+        // in a real axe-core E2E run); the hero's brand-context slot must force the lockup text to
+        // inherit the surface's own paired foreground instead.
+        Assert.Contains(".beeday-hero__brand-context ::deep .beeday-brand__bee,", hero, StringComparison.Ordinal);
+        Assert.Contains(".beeday-hero__brand-context ::deep .beeday-brand__day,", hero, StringComparison.Ordinal);
+        // Sprint 29.1: InstitutionalPageShell passes OnDarkSurface="true" so BeeDayBrand selects its
+        // non-white-background icon, which also applies .beeday-brand--inverse (fixed white text) —
+        // a plain 2-class-selector rule only outranks BeeDayBrand's *default* text rule (0,2,0), not
+        // --inverse's own scoped rule (0,4,0); this more specific pair (0,5,0) is required to also
+        // outrank --inverse regardless of the two scoped files' bundling order.
+        Assert.Contains(".beeday-hero__brand-context ::deep .beeday-brand.beeday-brand--inverse .beeday-brand__bee,", hero, StringComparison.Ordinal);
+        Assert.Contains(".beeday-hero__brand-context ::deep .beeday-brand.beeday-brand--inverse .beeday-brand__day { color: inherit; }", hero, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void FooterSocialListOverridesTheGroupListDisplayWithSufficientSpecificity()
+    {
+        // Plain CSS specificity, no Blazor isolation involved: the base ".app-footer__group ul {
+        // display: grid; }" rule (class+type selector) silently beat a same-file ".app-footer__
+        // social-list { display: flex; }" override (class-only selector, same file, later source
+        // order — order does not matter once specificity differs) — social icons rendered stacked
+        // vertically instead of in a row until this was corrected (Sprint 27.4).
+        var footer = ReadWebFile("Components", "Layout", "AppFooter.razor.css");
+        Assert.Contains(".app-footer__group ul.app-footer__social-list { display: flex;", footer, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void FooterTextDoesNotDimAlreadyPairedWhiteBelowWcagAaAndSocialPlaceholdersHaveAValidAriaRole()
+    {
+        // White text opacity-dimmed to .82/.78 over the COR0 background measured ~4.42:1/~4.15:1,
+        // under WCAG AA's 4.5:1 minimum — caught live by the repo's axe-core E2E scan on every
+        // public route (the footer is global). Hierarchy must come from size/weight, not opacity,
+        // for any footer text that is always rendered (not just a :hover/:focus transient state).
+        var footerCss = ReadWebFile("Components", "Layout", "AppFooter.razor.css");
+        Assert.Contains(".app-footer__identity p { margin: 0; color: inherit; }", footerCss, StringComparison.Ordinal);
+        var copyrightBlockHasNoOpacity = !System.Text.RegularExpressions.Regex.IsMatch(
+            footerCss, @"\.app-footer__copyright\s*\{[^}]*opacity", System.Text.RegularExpressions.RegexOptions.Singleline);
+        Assert.True(copyrightBlockHasNoOpacity, "app-footer__copyright must not dim its text via opacity.");
+
+        // aria-label alone is prohibited on a bare <span> (role "generic") per the ARIA spec — axe
+        // flagged this as aria-prohibited-attr. role="img" makes it a valid target for aria-label.
+        var footerRazor = ReadWebFile("Components", "Layout", "AppFooter.razor");
+        Assert.Contains("class=\"app-footer__social-unavailable\" role=\"img\" aria-label=", footerRazor, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -113,6 +292,8 @@ public sealed class VisualFoundationTests
         var feedback = ReadWebFile("wwwroot", "css", "feedback.css");
         var editorModal = ReadWebFile("wwwroot", "css", "editor-modal.css");
         var projectWorkspace = ReadWebFile("Components", "Features", "Projects", "Components", "ProjectWorkspace.razor.css");
+        var beeDayFeedbackModal = ReadWebFile("Components", "Features", "Experience", "Feedback", "BeeDayFeedbackModal.razor.css");
+        var mobileSidebar = ReadWebFile("Components", "Layout", "MobileSidebar.razor.css");
 
         Assert.Contains("--beeday-border-width-subtle: 1px;", variables, StringComparison.Ordinal);
         Assert.Contains("--beeday-border-width: 2px;", variables, StringComparison.Ordinal);
@@ -144,6 +325,19 @@ public sealed class VisualFoundationTests
         Assert.DoesNotMatch("#[0-9a-fA-F]{3,8}", projectWorkspace);
         Assert.DoesNotContain("--beeday-radius-control", variables, StringComparison.Ordinal);
         Assert.DoesNotContain("--beeday-shadow-activity", variables, StringComparison.Ordinal);
+
+        // Sprint 29.3: every full-viewport modal/drawer scrim now shares the same canonical
+        // --beeday-color-overlay token instead of each hardcoding its own purple/violet literal
+        // (four different rgb() values existed before this Sprint) — a light/neutral/translucent
+        // backdrop is the approved contract; it must not compete visually with the modal itself.
+        Assert.Contains("background: var(--beeday-color-overlay);", editorModal, StringComparison.Ordinal);
+        Assert.Contains("background: var(--beeday-color-overlay);", feedback, StringComparison.Ordinal);
+        Assert.Contains("background: var(--beeday-color-overlay);", beeDayFeedbackModal, StringComparison.Ordinal);
+        Assert.Contains("background: var(--beeday-color-overlay);", mobileSidebar, StringComparison.Ordinal);
+        Assert.DoesNotContain("rgb(35 25 45", editorModal, StringComparison.Ordinal);
+        Assert.DoesNotContain("rgb(47 27 72", feedback, StringComparison.Ordinal);
+        Assert.DoesNotContain("rgb(35 18 56", beeDayFeedbackModal, StringComparison.Ordinal);
+        Assert.DoesNotContain("rgb(35 25 45", mobileSidebar, StringComparison.Ordinal);
     }
 
     [Fact]

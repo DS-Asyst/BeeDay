@@ -7,15 +7,25 @@ param(
     [ValidatePattern("^https://")]
     [string]$PublicBaseUrl,
 
-    # Resend is optional: an environment that doesn't send transactional email through it (e.g.
-    # Homologation today, which runs Resend.Enabled=false / Development.Enabled=true) simply
+    # Resend is optional: an environment that doesn't send transactional email through it simply
     # doesn't pass these. Leaving both ApiKey and FromAddress empty means Set-BeeDayEnvironmentVariables
     # skips the Resend variables entirely rather than overwriting the App Pool with blanks — the
-    # existing IIS configuration for Resend is left exactly as it is. Passing them (as
-    # deploy-prd.yml already does) enables Resend the same way it always has.
+    # existing IIS configuration for Resend is left exactly as it is. Passing them (as both
+    # deploy-hmg.yml and deploy-prd.yml already do — Sprint 30.25, BD30-F006: Homologation flipped
+    # to Resend.Enabled=true / Development.Enabled=false) enables Resend the same way it always has.
     [string]$ResendApiKey,
     [string]$ResendFromAddress,
-    [string]$ResendFromName = "BeeDay",
+    [string]$ResendFromName = "beeday",
+
+    # Epic 26, Sprint 26.9: the HMG recipient safety guard's allowlist (HmgRecipientGuardOptions,
+    # Sprint 26.4) — semicolon-separated, matching this script's own AllowedHosts convention below
+    # (.NET's Microsoft.Extensions.Configuration array-binding needs one indexed env var per entry,
+    # unlike AllowedHosts, which ASP.NET Core reads as a single semicolon-delimited string itself).
+    # Optional and empty by default, same graceful-absence pattern as Resend above: Homologation
+    # today runs Resend.Enabled=false, so the guard is never even bound, and leaving this empty
+    # means Set-BeeDayEnvironmentVariables skips these variables entirely. Real addresses only ever
+    # flow through this parameter at deploy time — never hardcoded in this script or in Git.
+    [string]$HmgAllowedRecipients,
 
     [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
@@ -95,6 +105,38 @@ if (-not [string]::IsNullOrWhiteSpace($AppConnectionString) `
     throw "AppConnectionString and MigrationConnectionString must not be the same value - the application must never use the migrator credential."
 }
 
+# Hotfix 26.9.1 (GitHub Actions run 31986772973): a PowerShell pipeline that filters out every
+# emitted object returns $null, not an empty array - "" -split ';' still yields one empty-string
+# element, which Where-Object then filters away entirely. Under Set-StrictMode -Version Latest,
+# $null.Count later throws "The property 'Count' cannot be found on this object", which is exactly
+# what crashed both attempts of that run. @() around the pipeline guards the function's OWN use of
+# the result, but a zero-object function return still collapses to $null again at the call site -
+# confirmed empirically - so the call below must independently wrap the call itself in @() too.
+function ConvertTo-BeeDayRecipientList {
+    param([AllowEmptyString()][Parameter(Mandatory = $true)][string]$RecipientsRaw)
+
+    return @($RecipientsRaw -split ';' |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+}
+
+# Hotfix 26.9.2 (GitHub Actions run 31993611105): named $script:hmgRecipientList, NOT
+# $script:hmgAllowedRecipients - PowerShell variable names are case-insensitive, and
+# "hmgAllowedRecipients" collides with the -HmgAllowedRecipients parameter above (same name, only
+# the leading letter's case differs). When this script runs as the top-level invocation - exactly
+# how deploy-hmg.yml's wrapper invokes it via `&` - a script parameter and a same-named (modulo
+# case) $script:-scoped variable do not reliably behave as one stable, array-typed slot: proven
+# empirically (see PR description) that reading $script:hmgAllowedRecipients back after this exact
+# assignment returned a raw System.String, not the array actually produced by the right-hand side,
+# which is what made .Count throw two sprints in a row despite Hotfix 26.9.1's array-shape fix
+# being correct in isolation. Renamed here to a name that cannot collide with any parameter.
+#
+# Parsed once here (not inline in Set-BeeDayEnvironmentVariables) so the same list backs both the
+# redaction list immediately below and the App Pool variables later — real recipient addresses are
+# PII, not merely operational data, so they are redacted from $deployLogsPath exactly like the
+# connection strings and the Resend API key are.
+$script:hmgRecipientList = @(ConvertTo-BeeDayRecipientList -RecipientsRaw $HmgAllowedRecipients)
+
 # Exception messages can echo back raw parameter values verbatim (e.g. a malformed connection
 # string thrown by SqlConnectionStringBuilder, or a driver error that embeds its input). GitHub
 # Actions masks known secrets in the runner's own log capture, but that masking never reaches
@@ -102,7 +144,7 @@ if (-not [string]::IsNullOrWhiteSpace($AppConnectionString) `
 # any log pipeline GitHub controls. Every message that reaches Write-DeployMessage or Write-Error
 # is scrubbed of these literal values first, so the real error text is preserved but a credential
 # can never end up persisted on disk in the clear.
-$script:secretValuesToRedact = @($MigrationConnectionString, $AppConnectionString, $ResendApiKey) |
+$script:secretValuesToRedact = @($MigrationConnectionString, $AppConnectionString, $ResendApiKey) + $script:hmgRecipientList |
     Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
 
 function Protect-DeploySecret {
@@ -722,14 +764,33 @@ function Set-BeeDayEnvironmentVariables {
     }
 
     # Resend stays fully out of the App Pool config when either value is absent, instead of
-    # writing blanks over whatever is already configured there — that's what lets Homologation
-    # (Resend.Enabled=false / Development.Enabled=true, committed in appsettings.Homologation.json)
-    # go untouched today, and lets the exact same parameters turn Resend on later without any
-    # script change.
+    # writing blanks over whatever is already configured there — the same parameters both turned
+    # Resend on for Homologation (Sprint 30.25, BD30-F006: appsettings.Homologation.json now
+    # committed with Resend.Enabled=true / Development.Enabled=false) and would let a future
+    # environment stay untouched without any script change.
     if (-not [string]::IsNullOrWhiteSpace($ResendApiKey) -and -not [string]::IsNullOrWhiteSpace($ResendFromAddress)) {
         $variables["BeeDay__Email__Resend__ApiKey"] = $ResendApiKey
         $variables["BeeDay__Email__Resend__FromAddress"] = $ResendFromAddress
         $variables["BeeDay__Email__Resend__FromName"] = $ResendFromName
+    }
+
+    # HmgRecipientGuardOptions.AllowedRecipients (Epic 26, Sprint 26.4/26.9) — only bound/validated
+    # at all when the Resend provider is selected (EmailProviderSelector), so leaving this empty is
+    # always safe: Homologation today (Resend.Enabled=false) never even reaches that code path.
+    # Left empty, the guard's default (Enabled=true, no recipients) fails closed at startup rather
+    # than the App Pool silently keeping a stale allowlist from a previous deploy.
+    #
+    # Hotfix 26.9.2: foreach instead of a .Count-indexed for loop, on top of the rename above -
+    # not because foreach alone would have fixed the collision (it would not: iterating a bare
+    # string still iterates its characters, silently, which is worse than the crash this replaces),
+    # but because a .Count/index dependency on a $script:-scoped collection has now bitten this
+    # exact variable twice. The @() here is defensive, not speculative: if $script:hmgRecipientList
+    # were ever a bare string again (e.g. a future collision), foreach over @($string) enumerates
+    # it as the one element it is, rather than looping per character.
+    $i = 0
+    foreach ($recipient in @($script:hmgRecipientList)) {
+        $variables["BeeDay__Email__HmgRecipientGuard__AllowedRecipients__$i"] = $recipient
+        $i++
     }
 
     if (Test-BeeDayUsesPrivilegedIisControl) {
@@ -924,7 +985,18 @@ try {
 }
 catch {
     $deploymentError = Protect-DeploySecret $_.Exception.Message
-    Write-Error "Deployment failed: $deploymentError"
+
+    # Hotfix 26.9.1 (GitHub Actions run 31986772973): under the script-wide
+    # $ErrorActionPreference = "Stop" (line 87), a bare Write-Error escalates to a terminating
+    # error and unwinds out of this catch block immediately - it never even reaches
+    # "Starting rollback...", let alone the rollback attempt itself. That is exactly what both
+    # attempts of that run did: the failure was logged, and the entire rollback silently never
+    # ran. -ErrorAction Continue keeps this call non-terminating (it still writes to the error
+    # stream and is still visible in the log - nothing here is swallowed), so execution reliably
+    # reaches the rollback attempt and, afterward, the explicit throw below. The same escalation
+    # risk applies to the inner "Rollback also failed" Write-Error, so it gets the same treatment
+    # - a failed rollback must not skip the final throw either.
+    Write-Error "Deployment failed: $deploymentError" -ErrorAction Continue
 
     Write-DeployMessage "Starting rollback to the previous application version..."
 
@@ -938,7 +1010,7 @@ catch {
         Write-DeployMessage "Rollback completed and previous version is healthy."
     }
     catch {
-        Write-Error "Rollback also failed: $(Protect-DeploySecret $_.Exception.Message)"
+        Write-Error "Rollback also failed: $(Protect-DeploySecret $_.Exception.Message)" -ErrorAction Continue
     }
 
     throw "Deployment failed and rollback was attempted. Original error: $deploymentError"

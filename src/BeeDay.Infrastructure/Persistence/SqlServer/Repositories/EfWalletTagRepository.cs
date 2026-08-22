@@ -60,7 +60,10 @@ internal sealed class EfWalletTagRepository : EfRepositoryBase, IWalletTagReposi
     {
         await using var lease = await AcquireContextAsync(cancellationToken);
 
-        var tracked = await lease.Context.WalletTags.SingleAsync(existing => existing.Id == tag.Id, cancellationToken);
+        // UserId filter is defense-in-depth (EPIC 30 Sprint 30.22, BD30-F053) — see
+        // EfHabitRepository.RemoveAsync for the full rationale.
+        var tracked = await lease.Context.WalletTags.SingleAsync(
+            existing => existing.Id == tag.Id && existing.UserId == tag.UserId, cancellationToken);
         lease.Context.WalletTags.Remove(tracked);
         await EfConcurrencySaveChanges.ExecuteAsync(lease.Context, cancellationToken);
     }

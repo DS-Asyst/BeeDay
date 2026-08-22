@@ -111,7 +111,8 @@ sequenceDiagram
     Runner->>Runner: Promove script privilegiado de controle IIS se mudou (ver 05-privileged-iis-control.md)
     Runner->>Runner: Deploy-BeeDay.ps1 -RunMigrations -MigrationBundlePath efbundle.exe ...
     Runner->>FS: Backup aplicação + dados persistentes
-    Runner->>IIS: Stop -> aplica migration bundle -> configura env vars -> copia publish -> Start
+    Runner->>Runner: aplica migration bundle (site IIS ainda no ar)
+    Runner->>IIS: Stop -> configura env vars -> copia publish -> Start
     Runner->>IIS: GET https://h-beeday.com.br/health/ready — até 6 tentativas, 5s entre elas
     alt saudável
         Runner-->>GH: Deployment completed successfully
@@ -175,8 +176,10 @@ evidência completa dessa distinção.
 ## 5. Secrets
 
 Tabela abaixo é do ponto de vista de `deploy-prd.yml` (5 secrets, todos checados em "Validate
-deployment secrets"). `deploy-hmg.yml` usa os mesmos 5 **mais** `BEEDAY_APP_CONNECTION` e
-`BEEDAY_MIGRATOR_CONNECTION` (necessários porque só HMG roda `-RunMigrations`, ver §4.1) — esses 2
+deployment secrets"). `deploy-hmg.yml` usa os mesmos 5 **mais** `BEEDAY_APP_CONNECTION`,
+`BEEDAY_MIGRATOR_CONNECTION` (necessários porque só HMG roda `-RunMigrations`, ver §4.1) e
+`BEEDAY_HMG_ALLOWED_RECIPIENTS` (EPIC 26, Sprint 26.9 — allowlist do
+`HmgRecipientGuardedEmailSender`, ver `docs/infrastructure/06-transactional-email.md` §10) — esses 3
 não passam por nenhuma checagem explícita de secret ausente antes de `Deploy-BeeDay.ps1` ser
 chamado.
 
@@ -185,20 +188,21 @@ chamado.
 | `BEEDAY_PUBLIC_BASE_URL` | `BeeDay__IdentityEmail__PublicBaseUrl` | Sim — também checa prefixo `https://` |
 | `BEEDAY_RESEND_API_KEY` | `BeeDay__Email__Resend__ApiKey` | Sim |
 | `BEEDAY_RESEND_FROM_ADDRESS` | `BeeDay__Email__Resend__FromAddress` | Sim |
-| `BEEDAY_RESEND_FROM_NAME` | `BeeDay__Email__Resend__FromName` | **Não** — usado no step seguinte sem checagem prévia |
+| `BEEDAY_RESEND_FROM_NAME` | `BeeDay__Email__Resend__FromName` | Sim — corrigido, ver nota abaixo |
 | `BEEDAY_ALLOWED_HOSTS` | `AllowedHosts` | Sim |
 | `BEEDAY_APP_CONNECTION` (só `deploy-hmg.yml`) | connection string da aplicação | Não — sem step de validação de secrets em `deploy-hmg.yml` |
 | `BEEDAY_MIGRATOR_CONNECTION` (só `deploy-hmg.yml`) | connection string do migration bundle | Não — idem |
+| `BEEDAY_HMG_ALLOWED_RECIPIENTS` (só `deploy-hmg.yml`) | `BeeDay__Email__HmgRecipientGuard__AllowedRecipients__0`, `__1`, ... (uma variável por destinatário, `Deploy-BeeDay.ps1` faz o split por `;`) | Não — idem; ainda não existe como secret no GitHub nesta Sprint (§6). **Correção (Hotfix 26.9.1):** lido como vazio, isto na verdade **derrubava** `Deploy-BeeDay.ps1` (não pulava as variáveis graciosamente como descrito originalmente aqui) — causa raiz e correção real em §6 |
 
-`Deploy-BeeDay.ps1` declara `[string]$ResendFromName = "BeeDay"` como valor padrão do parâmetro —
-então, mesmo sem o secret `BEEDAY_RESEND_FROM_NAME` configurado no GitHub (que faria a variável de
-ambiente do workflow resolver para string vazia), o script recebe `""` como argumento explícito, o
-que **sobrescreve o padrão do parâmetro** (PowerShell só aplica o valor padrão quando o parâmetro
-não é passado, não quando é passado vazio) — resultado prático: `BeeDay__Email__Resend__FromName`
-seria configurado como string vazia no IIS, não `"BeeDay"`, se o secret realmente não existir. Não
-confirmado nesta auditoria se o secret existe de fato no ambiente `production` do GitHub (não é
-visível a partir do código-fonte) — apenas que, se não existir, a lacuna de validação deixaria isso
-passar silenciosamente até o e-mail de fato ser enviado com remetente em branco.
+**Correção (Sprint 31.12, EPIC 31):** os dois riscos descritos originalmente aqui já foram
+fechados. `Deploy-BeeDay.ps1` hoje declara `[string]$ResendFromName = "beeday"` (minúsculo, Sprint
+30.25 — não mais `"BeeDay"`), e o step "Validate deployment secrets" de `deploy-prd.yml` já inclui
+`BEEDAY_RESEND_FROM_NAME` em seu hashtable `$required`, falhando o workflow com "Required GitHub
+secret is missing" antes mesmo de `Deploy-BeeDay.ps1` ser invocado, caso o secret esteja ausente ou
+em branco — igual aos outros 4 secrets validados. Não é mais possível o cenário descrito
+originalmente (remetente configurado como string vazia silenciosamente). Este achado já estava
+corretamente fechado em [`docs/deployment/README.md`](README.md) "Achados relevantes" — este
+documento não havia sido sincronizado até agora.
 
 ## 6. Achados
 
@@ -227,6 +231,33 @@ passar silenciosamente até o e-mail de fato ser enviado com remetente em branco
   de rollback do binário, deixa o schema na versão nova enquanto o código volta à versão antiga —
   risco reconhecido pela própria estrutura do script (comentário equivalente já existia nos
   documentos anteriores, ver [`04-operations.md`](04-operations.md) §2).
+- **EPIC 26, Sprint 26.9:** `BEEDAY_HMG_ALLOWED_RECIPIENTS` foi adicionado a `deploy-hmg.yml`/
+  `Deploy-BeeDay.ps1` nesta Sprint, preparando a automação para quando Resend for de fato ativado em
+  HMG — mas o secret em si **não foi criado no GitHub por esta Sprint** (Claude Code não tem acesso
+  para configurar secrets do repositório, e o valor é PII de destinatário, não deve entrar no
+  código-fonte). Esta seção originalmente afirmava que, com o secret ausente, `Deploy-BeeDay.ps1`
+  "pula essas variáveis do App Pool inteiramente — comportamento idêntico ao já estabelecido para
+  Resend" e que "esta lacuna não tem efeito prático". **Essa afirmação estava errada e foi
+  desmentida por um incidente real**: a primeira execução real de `deploy-hmg.yml` após o merge
+  desta Sprint (GitHub Actions run `31986772973`, ambas as tentativas) falhou em "Deploy to IIS with
+  rollback" com `The property 'Count' cannot be found on this object` — uma pipeline PowerShell que
+  filtra todos os elementos retorna `$null`, não um array vazio, e `$null.Count` sob
+  `Set-StrictMode -Version Latest` lança exceção. O rollback documentado abaixo também não executou
+  nesse incidente, por um segundo defeito independente: o próprio `Write-Error` que registrava a
+  falha herdava `$ErrorActionPreference = "Stop"` e se tornava terminante, abortando o bloco `catch`
+  antes de "Starting rollback...". Ambos os defeitos foram corrigidos no **Hotfix 26.9.1**
+  (`fix/epic-26-hmg-deploy-recovery`, branch dedicada a partir de `hmg`) — `ConvertTo-BeeDayRecipientList`
+  agora sempre retorna uma coleção real (mesmo vazia) e ambos os `Write-Error` do bloco de
+  rollback usam `-ErrorAction Continue`. Com o hotfix aplicado, a ausência do secret volta a ter o
+  comportamento graciosamente-vazio originalmente pretendido (nenhuma variável
+  `AllowedRecipients__N` é emitida, sem exceção) — mas isso só passou a ser verdade a partir do
+  hotfix, não desde a Sprint 26.9 original. Homologation estava no provider Development na época
+  deste incidente (Sprint 26.9, `Resend:Enabled=false`); nenhum e-mail de fato foi enviado durante
+  o incidente, pois o processo da aplicação nunca chegou a reiniciar em nenhuma das duas tentativas.
+  **Esse estado foi invertido posteriormente** — o `appsettings.Homologation.json` atual tem
+  `Resend:Enabled=true`/`Development:Enabled=false` (confirmado por `BD30-F006`, Sprint 30.25); ver
+  [`14-transactional-email-runbook.md`](14-transactional-email-runbook.md) §2 para o estado real
+  vigente, não reproduzido aqui para não duplicar uma fonte que já pode mudar de novo.
 
 ## 7. Fontes consultadas
 

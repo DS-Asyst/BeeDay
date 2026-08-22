@@ -29,6 +29,19 @@ public sealed class NavigationItemsTests
     }
 
     [Fact]
+    public void AccountItemIsScopedForItsOwnAccentColorSeparatelyFromLogout()
+    {
+        // EPIC 27 Sprint 27.9: Account gets a dedicated wrapper (mirroring the logout form's own
+        // wrapper) so its resting-state COR3 accent (NavigationItems.razor.css) can be scoped
+        // without touching Profile/Daily/Wallet or Logout's own colors.
+        using var context = new BunitContext().WithLocalization();
+        var cut = context.Render<NavigationItems>();
+
+        var accountLink = cut.Find(".navigation-items__account a.navigation-item[href='/settings']");
+        Assert.NotNull(accountLink);
+    }
+
+    [Fact]
     public void EveryRouteInvokesMobileCloseCallback()
     {
         using var context = new BunitContext().WithLocalization();

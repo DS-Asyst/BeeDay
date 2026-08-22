@@ -7,8 +7,11 @@
 `src/BeeDay.Infrastructure/DependencyInjection/InfrastructureServiceCollectionExtensions.cs`, e
 Runtime State real de SERV3WEB/HMG verificado diretamente no servidor na Sprint 18.4.
 
-**Última verificação:** 2026-08-09 (Sprint 18.4 — inclui os 4 arquivos `appsettings*.json` e
-verificação de Runtime State em HMG; seções anteriores a esta data cobriam só 3 arquivos).
+**Última verificação:** 2026-08-16 (Epic 26, Sprint 26.3) — §6 adicionado: contrato oficial de
+secrets/configuração de e-mail transacional, formalizando o mecanismo já existente
+(`Deploy-BeeDay.ps1` + GitHub Environment secrets + Scheduled Task privilegiado). Verificação
+anterior em 2026-08-09 (Sprint 18.4 — inclui os 4 arquivos `appsettings*.json` e verificação de
+Runtime State em HMG; seções anteriores a esta data cobriam só 3 arquivos).
 
 ## 1. Objetivo
 
@@ -34,18 +37,15 @@ exatamente o pipeline padrão de `WebApplication.CreateBuilder(args)`, sem `AddA
 
 | Arquivo | `SqlServer:ConnectionString` | Propósito |
 |---|---|---|
-| `appsettings.json` (base) | `Server=(localdb)\mssqllocaldb;Database=BeeDayDev;...` (valor commitado — ver nota abaixo) | Valores de desenvolvimento local por padrão |
+| `appsettings.json` (base) | `""` (vazio, commitado — Sprint 31.12: valor de LocalDB anteriormente commitado aqui não existe mais neste arquivo) | Valores de desenvolvimento local por padrão |
 | `appsettings.Development.json` | (não definido — herda do base) | Só ajusta `Logging:LogLevel` (mais verboso para `Microsoft.AspNetCore`, silencia `Circuits`) |
-| `appsettings.Homologation.json` | `Server=SERV4SQL;Database=BeeDay_HMG;Trusted_Connection=True;...` (commitado; `deploy-hmg.yml` sobrescreve via `BEEDAY_APP_CONNECTION`) | **É o arquivo que HMG realmente carrega hoje** — `ASPNETCORE_ENVIRONMENT=Homologation` é fixado em `web.config` e passado explicitamente por `deploy-hmg.yml`, confirmado por Runtime State real (Sprint 18.4). `AllowedHosts=h-beeday.com.br`, `Resend:Enabled=false`, `Email:Development:Enabled=true` |
+| `appsettings.Homologation.json` | `Server=SERV4SQL;Database=BeeDay_HMG;Trusted_Connection=True;...` (commitado; `deploy-hmg.yml` sobrescreve via `BEEDAY_APP_CONNECTION`) | **É o arquivo que HMG realmente carrega hoje** — `ASPNETCORE_ENVIRONMENT=Homologation` é fixado em `web.config` e passado explicitamente por `deploy-hmg.yml`, confirmado por Runtime State real (Sprint 18.4). `AllowedHosts=h-beeday.com.br`, `Resend:Enabled=true`, `Email:Development:Enabled=false` (invertido desde a ativação do Resend em HMG — corrigido pela `BD30-F006`, Sprint 30.25; ver [`14-transactional-email-runbook.md`](14-transactional-email-runbook.md) §2) |
 | `appsettings.Production.json` | `""` (vazio — **deve** ser injetado via variável de ambiente/secret) | **Não corresponde a nenhum ambiente provisionado hoje** — ver §5. `Hosting:ForwardedHeaders` habilitado, `Resend:Enabled: true` |
 
-**Nota sobre o arquivo local no momento desta auditoria:** o `appsettings.json` neste checkout tem
-uma modificação não commitada (`git diff` confirma) — `ConnectionString` aponta para
-`Server=SERV4SQL;Database=BeeDay_HMG;...` em vez do valor commitado acima. Isso foi identificado e
-reportado ao usuário na Sprint 16.8; **não é uma configuração alterada por esta Sprint** (nenhum
-arquivo de configuração foi editado nesta auditoria) e não deve ser incluído em nenhum commit desta
-área de trabalho sem confirmação explícita — ver `CLAUDE.md`, "Safety and Git" (nunca commitar
-configuração local).
+**Nota (Sprint 31.12, EPIC 31):** a modificação local não commitada descrita originalmente aqui
+(Sprint 16.8) não existe mais — `git status`/`git diff` sobre `appsettings.json` estão limpos nesta
+Sprint, e o valor commitado do arquivo é `""`, não o valor de LocalDB anteriormente citado. Nota
+histórica mantida apenas para registro; não reflete o estado atual do checkout.
 
 ## 4. Variáveis de ambiente
 
@@ -78,14 +78,25 @@ primeira requisição. Isso significa que um deploy com configuração quebrada 
 
 ### 4.3 Formato de variável de ambiente (IIS Application Pool)
 
-`Deploy-BeeDay.ps1` grava as variáveis diretamente no Application Pool via
-`Add-WebConfigurationProperty` (não em `web.config`) usando o separador `__` (duplo underscore) do
-`Microsoft.Extensions.Configuration` — ex.: `BeeDay__IdentityEmail__PublicBaseUrl` mapeia para
-`BeeDay:IdentityEmail:PublicBaseUrl`. 6 variáveis são definidas: `ASPNETCORE_ENVIRONMENT`,
-`DOTNET_ENVIRONMENT` (ambas fixas em `"Production"`), `AllowedHosts`,
-`BeeDay__IdentityEmail__PublicBaseUrl`, `BeeDay__Email__Resend__ApiKey`,
-`BeeDay__Email__Resend__FromAddress`, `BeeDay__Email__Resend__FromName` — 7 no total, contando as 2
-de ambiente.
+**Correção (Sprint 31.12, EPIC 31):** esta seção foi verificada pela última vez na Sprint 26.3,
+antes da guarda de destinatário de HMG (Sprint 26.4/26.9) e antes de `Set-BeeDayEnvironmentVariables`
+passar a rotear por controle privilegiado de IIS. Três correções:
+
+1. `ASPNETCORE_ENVIRONMENT`/`DOTNET_ENVIRONMENT` **não** são fixas em `"Production"` — ambas
+   recebem o parâmetro `$Environment` do script, cujo padrão é `"Homologation"`; `deploy-hmg.yml`
+   passa explicitamente `-Environment "Homologation"`. Para o único ambiente real hoje (HMG), o
+   valor gravado é `"Homologation"`.
+2. `Add-WebConfigurationProperty` só é usado no ramo **não privilegiado** de
+   `Set-BeeDayEnvironmentVariables`. Para `BeeDay-HMG`/`BeeDay-Web-AppPool` — o único alvo real —
+   `Test-BeeDayUsesPrivilegedIisControl` é verdadeiro, então a função chama
+   `Invoke-BeeDayPrivilegedIisControl -Operation "CONFIGURE"` em vez disso, passando pela fronteira
+   documentada em [`05-privileged-iis-control.md`](05-privileged-iis-control.md) — nunca grava
+   diretamente via `Add-WebConfigurationProperty` no caso real.
+3. A contagem de variáveis está incompleta: além das citadas, `Set-BeeDayEnvironmentVariables`
+   também define `BeeDay__Persistence__SqlServer__ConnectionString` (quando `-AppConnectionString`
+   é fornecido — sempre o caso em `deploy-hmg.yml`) e, desde a Sprint 26.4/26.9,
+   `BeeDay__Email__HmgRecipientGuard__AllowedRecipients__0`, `__1`, ... (uma por destinatário
+   configurado) — ver [`14-transactional-email-runbook.md`](14-transactional-email-runbook.md) §6.
 
 ## 5. `LevelUp-Data` vs. `BeeDay-Data` e o estado real de HMG/PRD (Sprint 18.4)
 
@@ -128,7 +139,112 @@ padrão de nomenclatura já usado em `Deploy-BeeDay.ps1`/`appsettings.Homologati
 §5.1 estabelece, isso é reconciliação de nomenclatura em um arquivo hoje inerte, não uma correção de
 comportamento observável (nada muda em runtime, pois nada carrega este arquivo).
 
-## 6. Fontes consultadas
+## 6. Contrato oficial de secrets e configuração de e-mail transacional (EPIC 26, Sprint 26.3)
+
+**Fonte da verdade desta seção:** verificado diretamente em `scripts/Deploy-BeeDay.ps1`,
+`.github/workflows/deploy-hmg.yml`, `.github/workflows/deploy-prd.yml`, os 4 arquivos
+`appsettings*.json`, `InfrastructureServiceCollectionExtensions.cs`, e
+`tests/BeeDay.Infrastructure.Tests/EmailSecretsConfigurationTests.cs`. Não requereu nem inspecionou
+o valor real de nenhum secret — apenas a mecânica que os transporta.
+
+Formaliza o mecanismo já existente (não uma nova infraestrutura) que decide o que é secret,
+onde ele vive, como chega a cada ambiente, e o que acontece quando está ausente ou inválido.
+
+### 6.1 Configuração versionada × secret
+
+| Chave | Versionada em `appsettings*.json`? | Valor commitado |
+|---|---|---|
+| `BeeDay:Email:Resend:Enabled` | Sim | `false` (base/Homologation), `true` (Production) |
+| `BeeDay:Email:Resend:FromName` | Sim | `"beeday"` |
+| `BeeDay:Email:Resend:ApiKey` | Sim, mas **sempre vazio ou ausente** | `""` (base/Production) ou chave ausente (Homologation) |
+| `BeeDay:Email:Resend:FromAddress` | Sim, mas **sempre vazio** | `""` |
+
+Apenas `ApiKey`/`FromAddress` são secret — nunca um valor real chega ao Git. `Enabled`/`FromName`
+são configuração normal versionada, sem risco de exposição.
+`EmailSecretsConfigurationTests.CommittedAppsettings_NeverCarriesAResendApiKeyValue` (Sprint 26.3)
+varre os 4 arquivos e falha caso qualquer um passe a commitar um `ApiKey` não vazio — regressão
+detectada no `dotnet test` normal, sem depender de revisão manual de PR para pegar o vazamento.
+
+### 6.2 Canal de entrega do secret — já existente, não uma nova escolha desta Sprint
+
+```text
+GitHub Environment secret (escopo "homologation" ou "production", MESMO nome BEEDAY_RESEND_API_KEY)
+  → env: do job em deploy-hmg.yml / deploy-prd.yml
+    → parâmetro -ResendApiKey de Deploy-BeeDay.ps1
+      → Set-BeeDayEnvironmentVariables monta o hashtable de variáveis
+        → HMG: Invoke-BeeDayPrivilegedIisControl -Operation CONFIGURE (Scheduled Task \BeeDay\HMG-IisControl, SYSTEM)
+          → variável de App Pool BeeDay__Email__Resend__ApiKey (nunca appsettings*.json)
+        → Produção (não-HMG): Add-WebConfigurationProperty direto (sem a boundary privilegiada — ver docs/deployment/05-privileged-iis-control.md)
+```
+
+`deploy-hmg.yml` e `deploy-prd.yml` leem o **mesmo nome** de secret (`secrets.BEEDAY_RESEND_API_KEY`
+etc.), mas cada workflow declara um `environment:` do GitHub Actions diferente (`homologation` vs.
+`production`) — o mecanismo padrão do GitHub Environments para ter o mesmo nome de secret com
+valores diferentes por ambiente. **Isso satisfaz o invariante "HMG e Produção nunca compartilham
+credencial" apenas se o dono do repositório efetivamente configurou valores distintos nos dois
+GitHub Environments** — um pré-requisito externo, do lado do GitHub, que este código não pode
+verificar nem substituir; não foi (e não pode ser) confirmado nesta Sprint a partir do repositório.
+
+`Deploy-BeeDay.ps1` só inclui as 3 variáveis de Resend no payload quando `ResendApiKey` **e**
+`ResendFromAddress` chegam não vazios (`Set-BeeDayEnvironmentVariables`, guarda em
+`if (-not [string]::IsNullOrWhiteSpace(...))`) — se os secrets do GitHub Environment nunca foram
+preenchidos, a variável de App Pool simplesmente não é tocada, preservando o que já estiver
+configurado manualmente, em vez de sobrescrever com uma string vazia.
+
+### 6.3 Comportamento de startup quando Resend está selecionado mas o secret está ausente
+
+`ResendOptions` já falha via `.ValidateOnStart()` (`InfrastructureServiceCollectionExtensions.cs`)
+se `Enabled=true` e `ApiKey`/`FromAddress` estiverem vazios — o processo nunca sobe, IIS reporta
+502.5/503, nunca uma falha silenciosa em produção. Provado ponta a ponta (não apenas lido no
+código) por `EmailSecretsConfigurationTests.Host_WhenResendSelectedWithoutApiKey_FailsToStartPredictably`
+e `..._WithoutFromAddress_...` (Sprint 26.3): um `Microsoft.Extensions.Hosting.Host` real,
+`ConfigureServices` chamando `AddBeeDayInfrastructure`, `StartAsync()` lança
+`OptionsValidationException`. O provider `Development` nunca depende de nenhum secret de Resend —
+provado pelo teste irmão `..._StartsWithoutRequiringAnyResendSecret`.
+
+### 6.4 Nunca vaza para logs/artefatos
+
+`Deploy-BeeDay.ps1` mantém `$script:secretValuesToRedact` (inclui `$ResendApiKey`) e todo
+`Write-DeployMessage`/mensagem de erro passa por `Protect-DeploySecret`, que substitui qualquer
+ocorrência literal do valor por `[REDACTED]` antes de gravar no arquivo de log em
+`C:\Apps\BeeDay-Data\DeployLogs\` — nunca apenas confiando na mascaração automática de secrets do
+GitHub Actions (que não alcança esse arquivo, escrito direto em disco no runner). O payload da
+operação CONFIGURE (`env-config.secret`) nunca passa por `Write-DeployMessage`/`Write-Host` — só a
+contagem de variáveis é logada, nunca nomes ou valores (`Invoke-BeeDayPrivilegedIisControl`).
+
+### 6.5 Rollback quando a configuração é inválida
+
+Se qualquer etapa falhar após `Set-BeeDayEnvironmentVariables` já ter rodado (CONFIGURE já
+aplicado), o bloco `catch` de `Deploy-BeeDay.ps1` chama `Restore-BeeDayIisEnvironmentVariables`, que
+dispara a operação `RESTORE` do mesmo Scheduled Task privilegiado, devolvendo as variáveis de
+ambiente do App Pool ao snapshot anterior ao CONFIGURE desta tentativa — inclusive um eventual
+`BeeDay__Email__Resend__ApiKey` que já estivesse configurado antes do deploy. Se CONFIGURE nunca
+chegou a rodar nesta tentativa (`$script:lastConfigureRequestId` continua `$null`), nada é
+restaurado — não há o que desfazer.
+
+### 6.6 Rotação do secret
+
+Não há mecanismo de rotação automática — é operacional, fora do escopo de código: substituir o
+valor do secret no GitHub Environment (`homologation` ou `production`) correspondente, depois
+disparar um novo deploy (`workflow_dispatch` em `deploy-hmg.yml`/`deploy-prd.yml`, ou um push normal
+em `hmg`/`prd`) para que `Set-BeeDayEnvironmentVariables`/CONFIGURE grave o novo valor na variável
+de App Pool. Nenhuma etapa do código precisa mudar para uma rotação — o mecanismo do §6.2 já é
+genérico o suficiente.
+
+### 6.7 Produção permanece não ativada por esta Sprint
+
+Nada nesta Sprint habilita `Resend:Enabled=true` em `appsettings.Homologation.json` nem executa
+`deploy-prd.yml` contra um ambiente real. Na época desta Sprint, `appsettings.Homologation.json`
+continuava com `Resend:Enabled=false`/`Development:Enabled=true` — a mesma seleção de provider
+documentada em [`06-transactional-email.md`](../infrastructure/06-transactional-email.md) §5.1,
+inalterada por esta Sprint. Ligar Resend em HMG dependia da guarda de destinatário centralizada da
+Sprint 26.4 (Gate B do roadmap do EPIC 26) — não deste contrato de secrets isoladamente. **Esse
+estado foi invertido posteriormente**: o `appsettings.Homologation.json` atual tem
+`Resend:Enabled=true`/`Development:Enabled=false` (corrigido pela `BD30-F006`, Sprint 30.25); ver
+[`14-transactional-email-runbook.md`](14-transactional-email-runbook.md) §2 para o estado real
+vigente.
+
+## 7. Fontes consultadas
 
 - `src/BeeDay.Web/appsettings.json`, `appsettings.Development.json`, `appsettings.Homologation.json`,
   `appsettings.Production.json`.
@@ -137,6 +253,7 @@ comportamento observável (nada muda em runtime, pois nada carrega este arquivo)
   `DependencyInjection/InfrastructureServiceCollectionExtensions.cs`.
 - `scripts/Deploy-BeeDay.ps1`.
 - `.github/workflows/deploy-hmg.yml`, `deploy-prd.yml`.
+- `tests/BeeDay.Infrastructure.Tests/EmailSecretsConfigurationTests.cs` (EPIC 26, Sprint 26.3 — §6).
 - `git diff`/`git show HEAD` sobre `src/BeeDay.Web/appsettings.json` (confirmação do valor
   commitado vs. o valor local não commitado).
 - Runtime State real de SERV3WEB/HMG, verificado diretamente no servidor (Sprint 18.4): Site, App

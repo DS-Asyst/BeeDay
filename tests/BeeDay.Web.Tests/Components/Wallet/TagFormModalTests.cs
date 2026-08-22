@@ -48,8 +48,8 @@ public sealed class TagFormModalTests : BunitContext
     }
 
     [Theory]
-    [InlineData("en-US", "Use a valid hexadecimal color.")]
-    [InlineData("pt-BR", "Use uma cor hexadecimal válida.")]
+    [InlineData("en-US", "Choose one of the 10 official colors.")]
+    [InlineData("pt-BR", "Escolha uma das 10 cores oficiais.")]
     public async Task InvalidColor_ShowsALocalizedValidationMessage(string culture, string expected)
     {
         await BunitLocalizationSupport.WithUiCultureAsync(culture, async () =>
@@ -83,14 +83,52 @@ public sealed class TagFormModalTests : BunitContext
     }
 
     [Fact]
-    public void KeepsTheNativeColorPickerAsASpecializedDataControl()
+    public void OffersExactlyTheTenOfficialPaletteSwatchesAndNoFreeColorInput()
     {
+        // EPIC 27 Sprint 27.11: no free HEX/RGB input — only the 10 COR0-COR9 swatches.
         var cut = Render<TagFormModal>(parameters => parameters
             .Add(component => component.IsOpen, true)
+            .Add(component => component.Model, new WalletTagFormModel()));
+
+        Assert.Empty(cut.FindAll("input[type='color']"));
+        Assert.Empty(cut.FindAll("input[type='text'].wallet-color-field"));
+        var swatches = cut.FindAll(".wallet-color-swatch");
+        Assert.Equal(10, swatches.Count);
+        Assert.All(swatches, swatch => Assert.False(string.IsNullOrWhiteSpace(swatch.GetAttribute("aria-label"))));
+    }
+
+    [Fact]
+    public void ClickingASwatchSelectsItAndMarksItWithACheckNotJustColor()
+    {
+        var model = new WalletTagFormModel();
+        var cut = Render<TagFormModal>(parameters => parameters
+            .Add(component => component.IsOpen, true)
+            .Add(component => component.Model, model));
+
+        var swatches = cut.FindAll(".wallet-color-swatch");
+        var target = swatches[2];
+        target.Click();
+
+        cut.WaitForAssertion(() =>
+        {
+            var refreshedSwatches = cut.FindAll(".wallet-color-swatch");
+            var selected = refreshedSwatches.Single(swatch => swatch.ClassList.Contains("wallet-color-swatch--selected"));
+            Assert.Equal("true", selected.GetAttribute("aria-checked"));
+            Assert.NotNull(selected.QuerySelector(".beeday-icon"));
+            Assert.Equal(1, refreshedSwatches.Count(swatch => swatch.GetAttribute("aria-checked") == "true"));
+        });
+    }
+
+    [Fact]
+    public void APreExistingOutOfPaletteColorLeavesEverySwatchUnselectedInsteadOfGuessing()
+    {
+        // Sprint 25.11 already declared user-persisted tag colors PRODUCT-SPECIFIC and out of
+        // scope for migration — editing such a tag must not silently snap it to a nearby swatch.
+        var cut = Render<TagFormModal>(parameters => parameters
+            .Add(component => component.IsOpen, true)
+            .Add(component => component.IsEditing, true)
             .Add(component => component.Model, new WalletTagFormModel { Color = "#12AB34" }));
 
-        var colorPicker = cut.Find("input[type='color']");
-        Assert.Equal("#12AB34", colorPicker.GetAttribute("value"));
-        Assert.False(string.IsNullOrWhiteSpace(colorPicker.GetAttribute("aria-label")));
+        Assert.Empty(cut.FindAll(".wallet-color-swatch--selected"));
     }
 }

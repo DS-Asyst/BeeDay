@@ -7,6 +7,7 @@
 
   <!-- Shared navigation -->
   <data name="PillarNavAriaLabel" xml:space="preserve"><value>beeday Experience System pillars</value></data>
+  <data name="SidebarToggleLabel" xml:space="preserve"><value>Browse topics</value></data>
   <data name="PillarNavHome" xml:space="preserve"><value>beeday Experience System</value></data>
   <data name="PillarNavBrand" xml:space="preserve"><value>Brand System</value></data>
   <data name="PillarNavUi" xml:space="preserve"><value>UI Design System</value></data>
@@ -36,7 +37,7 @@
   <data name="RootPageTitle" xml:space="preserve"><value>beeday Experience System</value></data>
   <data name="RootEyebrow" xml:space="preserve"><value>EXPERIENCE SYSTEM</value></data>
   <data name="RootTitle" xml:space="preserve"><value>beeday Experience System</value></data>
-  <data name="RootIntro" xml:space="preserve"><value>The public, browsable record of how beeday looks, behaves, and communicates — the Brand System, the UI Design System, and the UX System formalized during EPIC 25, kept in sync with the product itself.</value></data>
+  <data name="RootIntro" xml:space="preserve"><value>The beeday Experience System — the public, browsable record of how beeday looks, behaves, and communicates. The Brand System, the UI Design System, and the UX System formalized during EPIC 25, kept in sync with the product itself.</value></data>
   <data name="RootGridAriaLabel" xml:space="preserve"><value>beeday Experience System pillars</value></data>
   <data name="RootBrandCardDescription" xml:space="preserve"><value>Identity, wordmark, color, typography, illustration, characters, and writing.</value></data>
   <data name="RootUiCardDescription" xml:space="preserve"><value>Foundations, components, product patterns, interaction, and layout.</value></data>
@@ -303,7 +304,7 @@
   <data name="UiProductPatternsTitle" xml:space="preserve"><value>Product Patterns</value></data>
   <data name="UiProductPatternsIntro" xml:space="preserve"><value>A Product Pattern is a feature-specific specialization built from shared primitives — not a shortcut around them. It stays specialized when the difference it encodes is semantically real, and it converges when the difference turns out to be accidental.</value></data>
   <data name="UiProductPatternsWalletTitle" xml:space="preserve"><value>Wallet — a financial pattern</value></data>
-  <data name="UiProductPatternsWalletText" xml:space="preserve"><value>Wallet composes PageHeader, cards, buttons, empty states, and the shared editor and confirm dialogs, while keeping monetary formatting, income and expense semantics, and user-persisted tag colors as product-specific specializations — none of these became global tokens or component variants.</value></data>
+  <data name="UiProductPatternsWalletText" xml:space="preserve"><value>Wallet composes a compact BeeDayHero, cards, buttons, empty states, and the shared editor and confirm dialogs. Monetary formatting and income/expense semantics remain product-specific specializations, while Tag color now draws from the same shared COR0-COR9 palette token hero surfaces use, instead of a free-form picker.</value></data>
   <data name="UiProductPatternsDailyTitle" xml:space="preserve"><value>Daily and ProjectWorkspace — operational patterns</value></data>
   <data name="UiProductPatternsDailyText" xml:space="preserve"><value>Daily preserves four distinct concepts — Habit, Task, To-Do, and Project — with their own colors, metrics, and actions; physical equality between two values never authorizes collapsing their meaning. Manual ordering is owned by BeeDaySortable, not by an implicit sort.</value></data>
   <data name="UiProductPatternsEmptyTitle" xml:space="preserve"><value>Empty state adapters</value></data>

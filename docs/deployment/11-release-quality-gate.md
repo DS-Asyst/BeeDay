@@ -71,7 +71,7 @@ Ambos independentes — nenhum decide a responsabilidade do outro (§5).
 | Validar publish | DEPLOYMENT VERIFICATION | MEDIUM | poucos s | Sim |
 | Bundle EF + validar | STATIC/ARTIFACT | MEDIUM | ~26s | Sim |
 | `has-pending-model-changes` | STATIC (GAP) | HIGH (potencial) | medido nesta Sprint, ver §6 | **Sim — GAP fechado** |
-| Ferramenta de segurança (SAST/dependência) | — | — | — | `NOT CURRENTLY IMPLEMENTED` — nenhuma existe no repositório (confirmado de novo nesta Sprint, `.github/` sem CodeQL/Dependabot); não inventada |
+| ~~Ferramenta de segurança (SAST/dependência)~~ | — | — | — | `NOT CURRENTLY IMPLEMENTED` à época desta Sprint (19.7) — **fechado na EPIC 30** (Sprints 30.22/30.25: `dependabot.yml`/`codeql.yml`) |
 
 Nenhum item foi copiado sem verificar se existe/é aplicável — a lista acima é exatamente o que
 `release-quality-gate.yml` implementa, nem mais nem menos.
@@ -144,9 +144,10 @@ Nenhum dos dois foi removido em favor do outro.
   está configurada no repositório (`actionlint` etc. — ausência já confirmada na Sprint 19.2).
 - **Repository hygiene:** nenhum check dedicado de "arquivo gerado inesperado" existe ou está
   documentado como previsto; não introduzido.
-- **Security:** `NOT CURRENTLY IMPLEMENTED` — sem CodeQL/Dependabot no repositório (reconfirmado).
-  Registrado como GAP, não implementado nesta Sprint (fora do princípio de não inventar
-  ferramentas).
+- **Security:** `NOT CURRENTLY IMPLEMENTED` à época desta Sprint (19.7) — não implementado nesta
+  Sprint (fora do princípio de não inventar ferramentas). **Atualização (Sprint 31.11, EPIC 31):**
+  fechado pela EPIC 30 — `.github/dependabot.yml` (Sprint 30.22) e `.github/workflows/codeql.yml`
+  (Sprint 30.25, `BD30-F008`) existem hoje; nenhum dos dois é required check.
 
 ## 9. Job Structure Decision
 
@@ -401,6 +402,21 @@ explicitamente a dependência de que rodem **depois** de `Publish BeeDay`.
 Mesma dívida já registrada em `09-pipeline-performance.md` §27.10 — `dotnet build BeeDay.slnx
 -c Release` não propaga a configuração Release para os 4 projetos de `src/`. Reconfirmada nesta
 Sprint, não corrigida, continua candidata a investigação dedicada futura.
+
+**Resolvido em 2026-08-22:** esta dívida bloqueou de forma concreta a promoção `hmg → main` (PR
+#316) ao fazer `ProductionOriginGuardTests` (`tests/BeeDay.Web.Tests/Integration/`, introduzido na
+Sprint 26.5 — posterior a esta Sprint 19.7.1, portanto sem o acoplamento Publish-antes-do-teste
+considerado aqui) falhar por não encontrar `BeeDay.Web.dll` em `bin/Release`, já que "Run full test
+suite" roda **antes** de "Publish BeeDay" na ordem real do gate (§23.2). Causa raiz identificada por
+reprodução determinística: não é `src/` vs. `tests/`, é profundidade de aninhamento de pasta lógica
+no `.slnx` — qualquer projeto em pasta aninhada em 2+ níveis (`/src/` → `/src/Core/` → projeto)
+resolve para `Debug`; pastas de nível único sempre resolveram `Release` corretamente. Corrigido
+achatando as subpastas lógicas de `/src/` (`Core`/`Infrastructure`/`Presentation`) em um único nível,
+igual a `/tests/` — ver `docs/architecture/02-solution-structure.md` §1 para a evidência completa.
+Com a causa raiz corrigida, "Build solution (Release)" agora produz `BeeDay.Web.dll` em
+`bin/Release` diretamente; o acoplamento documentado em §23.4-23.8 (Publish/EF steps dependendo da
+ordem pós-Publish) permanece válido e não foi alterado — nenhum step foi reordenado, apenas a causa
+raiz da configuração incorreta foi eliminada.
 
 ### 23.10 Local Validation Results
 

@@ -20,6 +20,7 @@
                      ValueChanged="ValueChanged"
                      ValueExpression="ValueExpression"
                      disabled="@Disabled"
+                     aria-describedby="@(ShowValidationMessage ? ValidationMessageId : null)"
                      @attributes="AdditionalAttributes">
             @ChildContent
         </InputSelect>
@@ -28,5 +29,5 @@
 </label>
 @if (ShowValidationMessage)
 {
-    <BeeDayValidationMessage For="ValueExpression" />
+    <BeeDayValidationMessage For="ValueExpression" Id="@ValidationMessageId" />
 }

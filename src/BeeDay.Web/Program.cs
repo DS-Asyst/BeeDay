@@ -220,7 +220,6 @@ builder.Services.AddScoped<DashboardState>();
 builder.Services.AddScoped<BeeDayFeedbackStore>();
 builder.Services.AddScoped<INotificationHandler<DomainEventNotification>, BeeDayFeedbackEventHandler>();
 builder.Services.AddScoped<ProfileCreationState>();
-builder.Services.AddScoped<CardActionMenuCoordinator>();
 
 var app = builder.Build();
 
@@ -238,7 +237,15 @@ if (!app.Environment.IsDevelopment() && productionHosting.ForwardedHeaders.Enabl
 }
 
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseExceptionHandler();
+
+// MapRazorComponents only registers an endpoint for each discovered @page route — it does not
+// add an implicit catch-all fallback, so a request to a URL matching no @page (a typo, a stale
+// external link, a bookmark) terminates routing with a bare, empty 404 before Blazor's own
+// Router/NotFoundPage ever runs. Re-executing against the real /not-found page (itself a normal
+// @page route) reuses the same styled, localized NotFound component instead of duplicating it.
+app.UseStatusCodePagesWithReExecute("/not-found");
 
 if (!app.Environment.IsDevelopment())
 {
@@ -298,11 +305,15 @@ app.MapPost("/auth/login", async (
     try
     {
         var user = await sender.Send(new AuthenticateUserCommand(new AuthenticateUserRequest(email, password)));
+        // EPIC 30 Sprint 30.22 (BD30-F048): Name/Email were previously also written here, but
+        // nothing anywhere in the app ever reads ClaimTypes.Name/Email back (confirmed by repo-wide
+        // search, including the implicit ClaimsPrincipal.Identity.Name property, which no code
+        // touches either) — they only ever sat as increasingly-stale PII in the up-to-14-day
+        // "remember me" cookie. Removed rather than kept in sync on every Name/Email edit, since no
+        // code path needs them at all.
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Name),
-            new Claim(ClaimTypes.Email, user.Email),
             new Claim(BeeDayClaimTypes.SessionVersion, user.SessionVersion.ToString(System.Globalization.CultureInfo.InvariantCulture))
         };
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

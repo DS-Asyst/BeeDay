@@ -130,6 +130,40 @@ public sealed class LoginIntegrationTests(BeeDayWebApplicationFactory factory)
         Assert.Equal("/profile", response.Headers.Location!.ToString());
     }
 
+    // EPIC 30 Sprint 30.17: completes the round trip that AuthorizationIntegrationTests
+    // .Anonymous_ProtectedPageRedirect_CarriesTheOriginalPathAsReturnUrl only proves half of — an
+    // anonymous hit on a protected page carries a correct returnUrl, but nothing previously proved
+    // a subsequent login actually lands back on that originally requested page instead of the
+    // default post-login destination.
+    [Fact]
+    public async Task Login_WithLocalReturnUrl_RedirectsToTheOriginallyRequestedPage()
+    {
+        var cancellationToken = Xunit.TestContext.Current.CancellationToken;
+        var user = await factory.SeedConfirmedUserAsync("return-url-round-trip@beeday.invalid", "Password123!");
+        using (var scope = factory.Services.CreateScope())
+        {
+            var repository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+            await repository.UpdateAsync(user.Id, u => u.CompleteOnboarding(), cancellationToken);
+        }
+
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        var token = await AntiforgeryTestHelper.GetTokenAsync(client, "/login", cancellationToken);
+
+        var response = await client.PostAsync(
+            "/auth/login",
+            new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["email"] = "return-url-round-trip@beeday.invalid",
+                ["password"] = "Password123!",
+                ["__RequestVerificationToken"] = token,
+                ["returnUrl"] = "/wallet"
+            }),
+            cancellationToken);
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/wallet", response.Headers.Location!.ToString());
+    }
+
     [Fact]
     public async Task Login_ResponseBody_NeverContainsPasswordOrHash()
     {

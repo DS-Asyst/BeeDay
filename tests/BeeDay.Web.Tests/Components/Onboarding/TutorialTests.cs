@@ -1,9 +1,13 @@
+using BeeDay.Application.Features.Users.Commands;
 using BeeDay.Application.Features.Users.Queries;
 using BeeDay.Application.Features.Users.Responses;
 using BeeDay.Domain.Enums;
+using BeeDay.Domain.Exceptions;
+using BeeDay.Web.Resources;
 using BeeDay.Web.Services;
 using BeeDay.Web.Tests.Localization;
 using MediatR;
+using Microsoft.Extensions.Localization;
 using TutorialPage = BeeDay.Web.Components.Features.Onboarding.Pages.Tutorial;
 
 namespace BeeDay.Web.Tests.Components.Onboarding;
@@ -73,7 +77,39 @@ public sealed class TutorialTests
         });
     }
 
-    private static BunitContext CreateContext()
+    // BD30-F045 (EPIC 30 Sprint 30.11): NextAsync's final CompleteOnboardingAsync call had no
+    // try/catch and Tutorial.razor injected no ToastService — a failure (network blip, transient
+    // 5xx, expired session) propagated unhandled into the circuit with zero user feedback, unlike
+    // every other save path in the app. Proves the now-added catch surfaces a localized toast
+    // instead, and that the user stays on the last slide (no unhandled navigation/crash).
+    [Theory]
+    [InlineData("en-US", "NEXT", "ENTER beeday")]
+    [InlineData("pt-BR", "PRÓXIMO", "ENTRAR NO beeday")]
+    public async Task WhenCompletingOnboardingFails_ShowsALocalizedToast_InsteadOfAnUnhandledException(
+        string culture, string nextButtonText, string enterButtonText)
+    {
+        await BunitLocalizationSupport.WithUiCultureAsync(culture, async () =>
+        {
+            using var context = CreateContext(throwOnComplete: true);
+            var cut = context.Render<TutorialPage>();
+            var toastService = context.Services.GetRequiredService<ToastService>();
+
+            for (var step = 0; step < 4; step++)
+            {
+                var next = cut.FindAll("button").First(button => button.TextContent.Trim() == nextButtonText);
+                await next.ClickAsync();
+            }
+
+            var enter = cut.FindAll("button").First(button => button.TextContent.Trim() == enterButtonText);
+            await enter.ClickAsync();
+
+            var toast = Assert.Single(toastService.Messages);
+            Assert.DoesNotContain("Simulated", toast.Message, StringComparison.Ordinal);
+            Assert.Contains(cut.FindAll("button"), button => button.TextContent.Trim() == enterButtonText);
+        });
+    }
+
+    private static BunitContext CreateContext(bool throwOnComplete = false)
     {
         var context = new BunitContext().WithLocalization();
         context.AddAuthorization().SetAuthorized("test-user");
@@ -81,12 +117,13 @@ public sealed class TutorialTests
         var response = new CurrentUserResponse(
             Guid.NewGuid(), "Test User", "test@beeday.invalid", "tester",
             UserLanguage.English, UserTheme.System, true, false, true, true);
-        context.Services.AddSingleton(new BeeDayWebService(new StubSender(response)));
+        context.Services.AddSingleton(new BeeDayWebService(new StubSender(response, throwOnComplete)));
+        context.Services.AddSingleton(sp => new ToastService(sp.GetRequiredService<IStringLocalizer<SharedResources>>()));
 
         return context;
     }
 
-    private sealed class StubSender(CurrentUserResponse response) : ISender
+    private sealed class StubSender(CurrentUserResponse response, bool throwOnComplete = false) : ISender
     {
         public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
         {
@@ -107,7 +144,14 @@ public sealed class TutorialTests
         public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
 
-        public Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default) where TRequest : IRequest =>
-            Task.CompletedTask;
+        public Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default) where TRequest : IRequest
+        {
+            if (throwOnComplete && request is CompleteCurrentUserOnboardingCommand)
+            {
+                throw new InvalidDomainStateException("Simulated provider failure.");
+            }
+
+            return Task.CompletedTask;
+        }
     }
 }

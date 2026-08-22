@@ -78,11 +78,21 @@ responsabilidades legítimas distintas.
 
 ### 2.2 Brand
 
-`#5247F9` é a única cor oficialmente aprovada da marca. `--beeday-color-brand-primary` é o token
+`#5247F9` é a única cor de marca aprovada antes da EPIC 27. `--beeday-color-brand-primary` é o token
 canônico; hover `#3F33F1`, active `#1C0EF2`, light `#827AFC` e soft `#F8F7FF` são states derivados,
 não novas cores de marca. O nome visual `beeday`, inclusive quando `BeeDayBrand.OnDarkSurface` está
 ativo, usa Brand Primary. O parâmetro e a classe inverse permanecem por backward compatibility, mas
 não mudam a cor; não existe consumer real de produto desse modo no snapshot da Sprint 25.3.
+
+A EPIC 27 Sprint 27.1 introduziu, em código, uma segunda camada: dez cores físicas `COR0`-`COR9`
+(`--beeday-palette-cor0`-`-cor9` em `variables.css`, `BeeDayPaletteToken` em C#), usadas por
+superfícies de Hero/page-header e cores de Tag da Wallet. `COR0` é o mesmo físico que Brand Primary
+(alias, não um segundo valor). Essa paleta nunca havia sido documentada como decisão de Brand até a
+Sprint 29.2 corrigir a omissão — ver [`brand/03-color-palette.md`](../brand/03-color-palette.md) para
+os dez HEX exatos, a arquitetura base→semantic→component e a regra de elegibilidade de page header
+(restrita a `COR0`/`COR8`, os únicos dois tokens cujo contraste com texto branco passa WCAG AA). Este
+documento continua sendo o owner da camada de tokens *semânticos* derivados da paleta (foreground
+pairing, hero-surface tokens); o `brand/` é o owner da paleta física em si, por ser decisão de marca.
 
 ### 2.3 Reward e aliases legados de Brand Yellow
 
@@ -443,8 +453,8 @@ semelhança numérica. Token global não deve ser usado para corrigir um stackin
 
 ## 9. Duas camadas de CSS: global e isolado por componente
 
-Além das 17 folhas em `wwwroot/css/` e de `wwwroot/app.css` (18 folhas globais carregadas por
-`<link>` em `App.razor`
+Além das 18 folhas em `wwwroot/css/` (inclui `institutional.css`) e de `wwwroot/app.css` (19 folhas
+globais carregadas por `<link>` em `App.razor`
 — ver [`docs/web/05-design-system-integration.md`](../web/05-design-system-integration.md) §3),
 o repositório também usa CSS isolado por componente (`*.razor.css`), compilado pelo SDK Blazor em
 `BeeDay.Web.styles.css` — o bundle que `App.razor` carrega por último (ver

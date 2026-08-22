@@ -126,14 +126,14 @@
   <data name="LoadingDefaultLabel" xml:space="preserve">
     <value>Saving changes...</value>
   </data>
-  <data name="CardMenuEditLabel" xml:space="preserve">
-    <value>EDIT</value>
+  <data name="ErrorBoundaryTitle" xml:space="preserve">
+    <value>Something went wrong</value>
   </data>
-  <data name="CardMenuDeleteLabel" xml:space="preserve">
-    <value>DELETE</value>
+  <data name="ErrorBoundaryMessage" xml:space="preserve">
+    <value>This page ran into an unexpected problem. Reloading usually fixes it.</value>
   </data>
-  <data name="CardMenuOptionsForAriaLabel" xml:space="preserve">
-    <value>Options for {0}</value>
+  <data name="ErrorBoundaryReloadButton" xml:space="preserve">
+    <value>Reload page</value>
   </data>
   <data name="EditorModalDeleteButton" xml:space="preserve">
     <value>Delete</value>
@@ -188,6 +188,9 @@
   </data>
   <data name="ValidationHexColorFormat" xml:space="preserve">
     <value>Use a valid hexadecimal color.</value>
+  </data>
+  <data name="ValidationTagColorPalette" xml:space="preserve">
+    <value>Choose one of the 10 official colors.</value>
   </data>
   <data name="ValidationTitleRequired" xml:space="preserve">
     <value>Title is required.</value>

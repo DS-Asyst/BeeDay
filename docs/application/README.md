@@ -17,7 +17,7 @@ esse handler invalidava nunca era populado em produção).
 `BeeDay.Application` orquestra casos de uso: recebe um Command ou Query (via MediatR), aplica
 validação (FluentValidation), carrega/muta um Aggregate do Domain através de uma interface de
 repositório, e devolve uma Response — sem nunca conhecer EF Core, SQL Server, ou HTTP diretamente.
-É a camada onde vivem as 9 Features do produto (Authentication, Dashboard, Habits, Identity,
+É a camada onde vivem as 10 Features do produto (Authentication, Dashboard, Habits, Identity,
 Ordering, Projects, Tasks, Todos, Users, Wallets).
 
 ## Organização
@@ -31,11 +31,11 @@ src/BeeDay.Application/
 │   ├── Contracts/        8 interfaces de repositório + IUnitOfWork
 │   ├── Events/            DomainEventNotification + 1 INotificationHandler genérico
 │   ├── Experience/         Motor de concessão de XP (Service + Policy)
-│   ├── Identity/           IClock, IEmailSender, IIdentityEmailComposer, IIdentityRequestThrottle, IUserTokenService
+│   ├── Identity/           IClock, IEmailConfirmationIssuer, IEmailSender, IIdentityEmailComposer, IIdentityRequestThrottle, IUserTokenService
 │   └── Security/            ICurrentUserContext, IPasswordService, PasswordPolicy, CurrentUserGuard
 ├── DependencyInjection/    AddBeeDayApplication() — único ponto de registro DI desta camada
 ├── Exceptions/              ApplicationValidationException
-└── Features/                 9 pastas, cada uma com Commands/, Queries/ (se houver),
+└── Features/                 10 pastas, cada uma com Commands/, Queries/ (se houver),
                                 Handlers/, Requests/, Responses/ (se houver), Validation/
 ```
 
@@ -95,16 +95,23 @@ classe `internal` em `BeeDay.Infrastructure` e injetada via `AddBeeDayInfrastruc
 5. `05-exceptions.md` — o que pode dar errado e como se propaga.
 6. `06-dependency-flow.md` — visão consolidada de ponta a ponta.
 
-## Achado relevante (reportado, não corrigido)
+## Achado relevante (`BD30-F005`, corrigido na Sprint 30.26)
 
-Vários comentários XML doc em `Common/Contracts/I*Repository.cs` citam caminhos de documentação
-que não existem mais no local citado — por exemplo, `docs/architecture/05-domain-aggregate-map.md`
-(movido para `docs/history/domain-aggregate-map.md` na Sprint 16.2),
-`docs/architecture/07-persistence-contracts.md` (idem, para `docs/history/persistence-contracts.md`),
-`docs/architecture/02-target-architecture.md` (idem, para `docs/history/target-architecture-sprint-log.md`),
-e `docs/data/01-relational-model.md` (movido para `docs/persistence/01-relational-model.md`). Esses
-comentários são código-fonte, não documentação — fora do escopo desta Sprint corrigir
-(`código` está na lista de "não alterar"). `IWalletTagRepository.cs` também contém uma nota de
-débito técnico própria, ainda válida: seu comentário afirma que `docs/data/01-relational-model.md`
-"modela este agregado incorretamente" — não verificado nesta Sprint (fora do escopo, é conteúdo de
-`docs/persistence/`, não `docs/application/`).
+Vários comentários XML doc em `Common/Contracts/I*Repository.cs` (e outros arquivos de Application/
+Infrastructure) citavam caminhos de documentação que não existiam mais no local citado — por
+exemplo, `docs/architecture/05-domain-aggregate-map.md` (movido para
+`docs/history/domain-aggregate-map.md` na Sprint 16.2), `docs/architecture/07-persistence-contracts.md`
+(idem, para `docs/history/persistence-contracts.md`), `docs/architecture/02-target-architecture.md`
+(idem, para `docs/history/target-architecture-sprint-log.md`), e `docs/data/01-relational-model.md`
+(movido para `docs/persistence/01-relational-model.md`). Fora do escopo corrigir quando este achado
+foi reportado (`código` estava na lista de "não alterar" daquela Sprint).
+
+**Corrigido na Sprint 30.26** (`BD30-F005`, Sprint dedicada a hygiene de código): os caminhos foram
+repontados para a localização real e atual de cada documento — confirmado, antes de cada correção,
+que a numeração de seção original (`§2.3`, `§5.1`, `§10`, etc.) foi preservada intacta nos arquivos
+arquivados em `docs/history/`, então nenhuma citação de seção precisou mudar, só o caminho do
+arquivo. `IWalletTagRepository.cs` também contém uma nota de débito técnico própria, ainda válida:
+seu comentário afirma que `docs/persistence/01-relational-model.md` "modela este agregado
+incorretamente" — não reverificado nesta Sprint (fora do escopo, é conteúdo de `docs/persistence/`,
+não `docs/application/`; a correção desta Sprint foi só o caminho, não uma reverificação do
+conteúdo).

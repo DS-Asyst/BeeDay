@@ -89,7 +89,8 @@ Blazor):
 | `DashboardState` | Estado agregado compartilhado por `/profile` e `/daily` — ver `04-feature-components.md` |
 | `BeeDayFeedbackStore` + `INotificationHandler<DomainEventNotification>` → `BeeDayFeedbackEventHandler` | Escuta `UserLeveledUpDomainEvent` via pipeline MediatR e alimenta o feedback visual de level-up |
 | `ProfileCreationState` | Estado do fluxo de criação de conta/perfil (`/profile/create`) |
-| `CardActionMenuCoordinator` | Coordena `BeeDayCardMenu` para que abrir um menu feche qualquer outro já aberto no mesmo circuito |
+| `AuthenticatedEntryDestinationResolver` | Resolve para onde um visitante já autenticado deve ir ao continuar além da Home pública, reaproveitando a política de `LoginDestinationResolver` — evita duplicar a árvore profile/onboarding/destino entre `PublicHeader` e `Home` |
+| `AuthenticatedCultureSynchronizer` | Aplica, uma vez por login, a precedência de cultura da EPIC 23 (cookie explícito da sessão → `User.Language` persistido → fallback padrão), convergindo a conta para o cookie quando eles divergem |
 
 `BeeDayFeedbackEventHandler` é o único ponto em que `BeeDay.Web` participa do pipeline de
 notificações do MediatR (não apenas `ISender.Send`) — qualquer `UserLeveledUpDomainEvent`
@@ -101,10 +102,13 @@ no mesmo circuito que originou a requisição, sem endpoint HTTP ou polling envo
 ```text
 UseForwardedHeaders (se produção + habilitado)
 → CorrelationIdMiddleware
+→ SecurityHeadersMiddleware
 → UseExceptionHandler (→ GlobalExceptionHandler)
+→ UseStatusCodePagesWithReExecute("/not-found")
 → UseHsts + UseHttpsRedirection (se não-Development)
 → UseAuthentication
 → UseAuthorization
+→ UseRequestLocalization
 → UseAntiforgery
 → MapStaticAssets
 ```
@@ -123,6 +127,7 @@ UseForwardedHeaders (se produção + habilitado)
   | `DomainValidationException` | 400 | Inclui `field` como extension |
   | `InvalidDomainStateException` | 409 | — |
   | `AntiforgeryValidationException` / `BadHttpRequestException` | 400 | Mensagem técnica só em `IsDevelopment()` |
+  | `ConcurrencyConflictException` | 409 | Verificado antes de `PersistenceException` — `ConcurrencyConflictException` É UM `PersistenceException`, então precisa do arm mais específico primeiro |
   | `PersistenceException` | 503 | Mensagem genérica sempre |
   | `OperationCanceledException` (request abortada) | 499 | — |
   | qualquer outra | 500 | Mensagem técnica só em `IsDevelopment()` |
