@@ -1704,3 +1704,111 @@ final).
 registrada, e Documentation Ledger atualizado.
 
 ---
+## Sprint 31.11 — CI/CD & GitHub Engineering Documentation Reconciliation
+
+**GitHub Issue:** [#239](https://github.com/tiagoarrigoni/BeeDay/issues/239)
+**Branch:** `sprint/31.11-cicd-github-engineering-documentation-reconciliation`
+**Depende de:** #238 (concluída, ver seção acima)
+
+> Segue `CLAUDE.md`, o padrão de planejamento beeday e o Global Execution Contract da EPIC 31 em
+> #228.
+
+### Objetivo da Sprint
+
+Reconciliar a documentação de engenharia de CI/CD/GitHub com o modelo real de workflows,
+validação, promoção de branch e proveniência de artefato.
+
+### Validação aplicada nesta Sprint (política aprovada pelo owner)
+
+Sprint documental — nenhum código-fonte ou workflow foi alterado. Suíte completa de testes **não**
+executada, por política aprovada em 2026-08-21.
+
+### Método
+
+Levantamento inicial delegado (agente de exploração, somente leitura) cobrindo os 7 documentos de
+`docs/deployment/` que tratam de CI/CD (`06`–`09`, `11`–`13`) contra os 7 workflows reais de
+`.github/workflows/`, `dependabot.yml` e `pull_request_template.md`. Este conjunto de documentos é
+estruturalmente diferente dos anteriores: a maioria foi escrita como diário de Sprint da EPIC 19
+(2026-08-10/11), com seções que já se autocorrigem via anotações "Atualização (Sprint X)" apontando
+para frente. Antes de corrigir qualquer achado, cada um foi classificado como (a) desatualização
+esperada e já corretamente enquadrada como histórica, (b) uma alegação de fato atual sem a mesma
+ressalva histórica de seções vizinhas — um mismatch real — ou (c) um erro interno de fato,
+independente de estar ou não enquadrado como histórico. Todo achado foi reverificado nesta sessão
+antes de qualquer edição.
+
+### Achados corrigidos (Required work #2)
+
+| Documento | Achado | Classificação | Correção |
+|---|---|---|---|
+| `07-validation-matrix.md` (2 ocorrências), `11-release-quality-gate.md` (2 ocorrências) | Afirmavam categoricamente "nenhuma ferramenta de scanning de segurança existe" — verdadeiro na Sprint 19.7, mas `.github/dependabot.yml` (Sprint 30.22) e `.github/workflows/codeql.yml` (Sprint 30.25, `BD30-F008`) existem hoje. | (b) alegação de fato atual sem ressalva | As 4 ocorrências corrigidas com nota "Atualização (Sprint 31.11)" apontando para os dois arquivos reais, seguindo o mesmo padrão de anotação já usado no resto do documento. |
+| `07-validation-matrix.md` §4 ("Current CI Execution Map") | Descrevia `ci.yml` como um único job sequencial de 5 projetos + Playwright — verdadeiro na Sprint 19.1, mas a Sprint 19.8.5 moveu Format/Infrastructure/Web/E2E+Playwright para `release-quality-gate.yml`. Diferente de seções vizinhas do mesmo documento, esta não carregava nenhuma ressalva de desatualização. | (b) | Nota de atualização adicionada no início da seção, apontando para `08-fast-pr-validation-decision.md` §12.4 e `docs/testing/01-testing-strategy.md` §7 (já corrigido na Sprint 31.9); conteúdo histórico preservado abaixo da nota, não reescrito. |
+| `13-epic19-final-architecture-report.md` (tabela de artefatos) | Listava `beeday-test-results` como produzido tanto por `ci.yml` quanto por `release-quality-gate.yml` — este último na verdade produz `beeday-release-gate-test-results` (nome diferente); a tabela também omitia `beeday-e2e-failure-artifacts`. | (c) erro interno de fato, não apenas desatualização | Tabela corrigida: `beeday-test-results` atribuído só a `ci.yml`; `beeday-e2e-failure-artifacts` adicionado como linha própria. |
+| `13-epic19-final-architecture-report.md` (documento inteiro) | Apresenta suas tabelas de inventário (§5-11) como referência viva e autoritativa, duplicando estrutura já coberta por `06`/`08`/`11`/`12` — e já mostrou drift real (achado acima) por não ter a mesma disciplina de "Atualização" que os outros documentos. Omite `codeql.yml` (7º workflow, adicionado após o fechamento da EPIC 19). | Duplicação identificada pelo próprio objetivo desta Sprint | Nota adicionada no cabeçalho declarando explicitamente este documento como **retrato histórico do fechamento da EPIC 19**, não referência viva, apontando para as fontes vivas corretas (`.github/workflows/` diretamente, `06`–`12`, `docs/testing/01-testing-strategy.md` §7). Resolve a causa raiz da duplicação sem reescrever as ~10 seções de inventário. |
+
+### Achado intencionalmente não corrigido (respeito à convenção de histórico congelado)
+
+`06-cicd-pipeline-discovery-baseline.md` linha 77 enumera os secrets de `deploy-hmg.yml` sem
+`BEEDAY_HMG_ALLOWED_RECIPIENTS` (adicionado pela EPIC 26, posterior a este documento). Este
+documento já está marcado `HISTORICAL — KEEP, não reescrito` por anotações de Sprints posteriores
+(`08`/`09`) — corrigir este fato pontual violaria essa convenção já estabelecida no próprio corpus.
+Nenhuma ação tomada; desatualização esperada e já coberta pela própria natureza do documento.
+
+### Verificação de rastreabilidade (Required work #1/#5)
+
+Todo nome/caminho de workflow citado nos 7 documentos foi confirmado existente: os 7 arquivos de
+`.github/workflows/`, `dependabot.yml`, `pull_request_template.md`. Nenhum caminho inventado ou
+referenciando arquivo inexistente foi encontrado. Alegações sobre Rulesets/branch protection do
+GitHub (não visíveis em arquivo algum do checkout, apenas via `gh api`) já são corretamente
+citadas como tal em todos os 7 documentos — nenhuma se apresenta como derivada de YAML quando na
+verdade vem de configuração externa. Essas alegações permanecem `UNVERIFIABLE` nesta sessão (sem
+acesso à API do GitHub) e não foram alteradas.
+
+### Critérios de aceite (Issue #239)
+
+- [x] Every documented workflow name/path exists — confirmado, 100%.
+- [x] Branch/promotion documentation matches current repository policy — `validate-promotion.yml`
+      (hmg→main, main→prd) conferiu sem mismatch em todos os documentos que o citam.
+- [x] Build/artifact provenance is accurately described — corrigido o único erro encontrado (tabela
+      de `13`); `12-artifact-provenance.md` conferiu como o documento mais preciso do conjunto, sem
+      mismatch.
+- [x] External GitHub configuration is clearly distinguished from repository code — confirmado, já
+      era prática consistente nos 7 documentos.
+- [x] No stale branch-policy narrative remains current — nenhuma encontrada (o fluxo
+      Sprint→hmg→main→prd permanece correto em todos os documentos).
+- [x] CI/CD details are not unnecessarily duplicated across multiple documents — a duplicação
+      identificada (`13` vs. `06`/`08`/`11`/`12`) foi resolvida por reenquadramento explícito, não
+      por exclusão de conteúdo histórico.
+
+### Sprint-specific boundary respeitado
+
+Nenhuma configuração externa do GitHub foi alterada como efeito colateral desta reconciliação
+documental. Documentos explicitamente históricos (`06`) foram deixados intactos mesmo onde
+desatualizados, por já carregarem essa classificação por decisão de Sprints anteriores.
+
+### Riscos residuais
+
+- As alegações de Ruleset/branch-protection nos 7 documentos (contexto de required check, revisores
+  obrigatórios, etc.) não foram reverificadas ao vivo nesta Sprint — permanecem como estavam,
+  citando `gh api` como fonte, sem acesso a essa API nesta sessão.
+- Números de duração/performance de execução histórica (`gh run list`/`gh run view`) também não
+  foram reverificados — fora do escopo de uma reconciliação baseada em arquivos.
+
+### Validação executada
+
+```bash
+git status
+dotnet format BeeDay.slnx --verify-no-changes
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+git diff --check
+```
+
+Resultados registrados na seção "Quality/Validation" do relatório final da Sprint enviado ao owner
+nesta conversa. Toda alegação corrigida foi verificada contra o YAML real (`codeql.yml`,
+`dependabot.yml`, `ci.yml`, `release-quality-gate.yml`) nesta sessão antes de ser escrita.
+
+### Deliverable
+
+3 arquivos corrigidos (`docs/deployment/07-validation-matrix.md`, `11-release-quality-gate.md`,
+`13-epic19-final-architecture-report.md`), e Documentation Ledger atualizado.
+
+---

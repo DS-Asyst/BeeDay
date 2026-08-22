@@ -90,16 +90,28 @@ dotnet test <projeto>.csproj --configuration Release --no-build --verbosity norm
 |---|---|---|
 | `dotnet ef migrations has-pending-model-changes` | `README.md` "Quality gate" (passo manual pré-PR) | **Não roda em nenhum workflow** — confirmado por busca em `ci.yml`/`deploy-hmg.yml`/`deploy-prd.yml`; depende de execução manual do desenvolvedor |
 
-**Nenhuma ferramenta de scanning de segurança automatizado existe** (`FACT` — `.github/` só contém
-`pull_request_template.md` e `workflows/`; nenhum CodeQL, nenhum Dependabot, nenhuma outra
-integração de segurança versionada). Não invente uma nesta Sprint — apenas registrado como GAP.
+**Nenhuma ferramenta de scanning de segurança automatizado existe** (`FACT` à época desta Sprint,
+19.7 — `.github/` só continha `pull_request_template.md` e `workflows/`; nenhum CodeQL, nenhum
+Dependabot, nenhuma outra integração de segurança versionada). Não invente uma nesta Sprint — apenas
+registrado como GAP. **Atualização (Sprint 31.11, EPIC 31):** este GAP foi fechado pela EPIC 30 —
+`.github/dependabot.yml` (Sprint 30.22, ecossistemas `nuget`+`github-actions`, semanal) e
+`.github/workflows/codeql.yml` (Sprint 30.25, `BD30-F008`, PR para `hmg` + cron semanal,
+deliberadamente não um required check) existem hoje. Ver
+[`11-release-quality-gate.md`](11-release-quality-gate.md) §8.
 
 ---
 
 ## 4. Current CI Execution Map
 
-`FACT` — `ci.yml` tem 1 job só (`ci`), sequencial, sem paralelismo interno (confirmado na Sprint
-19.1). Ordem real de execução:
+**Atualização (Sprint 31.11, EPIC 31):** esta seção descreve `ci.yml` como era na Sprint 19.1, antes
+da Sprint 19.8.5 separar Format/Infrastructure.Tests/Web.Tests/E2E.Tests para
+`release-quality-gate.yml`. O `ci.yml` atual roda só 2 projetos (`Domain.Tests`, `Application.Tests`),
+sem `format`, sem instalação de Playwright — ver [`08-fast-pr-validation-decision.md`](08-fast-pr-validation-decision.md)
+§12.4 e [`docs/testing/01-testing-strategy.md`](../testing/01-testing-strategy.md) §7 para o estado
+atual. Mantido abaixo como registro histórico do baseline original, não reescrito.
+
+`FACT` (à época, Sprint 19.1) — `ci.yml` tinha 1 job só (`ci`), sequencial, sem paralelismo interno.
+Ordem real de execução então:
 
 ```
 checkout → setup-dotnet → dotnet --info → restore → format → build (warnaserror)
@@ -518,7 +530,7 @@ smoke (GAP, §19).
 | ~~`dotnet ef migrations has-pending-model-changes` não roda em CI~~ | Ausente em `ci.yml`/`deploy-hmg.yml`/`deploy-prd.yml`, só documentado como passo manual em `README.md` | 19.7 — **FECHADO**: automatizado em `release-quality-gate.yml`, ver [`11-release-quality-gate.md`](11-release-quality-gate.md) §6 |
 | ~~Nenhuma suite de smoke pós-deploy real~~ | Nenhum step aponta para URL de HMG além do health check embutido no deploy | 19.6 — **FECHADO**, ver [`10-hmg-deployment-verification.md`](10-hmg-deployment-verification.md) |
 | ~~Readiness não é um step/check distinto e observável~~ | Embutido dentro de `Deploy-BeeDay.ps1`, sem check próprio no GitHub | 19.6 — **FECHADO**, ver [`10-hmg-deployment-verification.md`](10-hmg-deployment-verification.md) |
-| Nenhuma ferramenta de scanning de segurança (SAST/dependência) | `.github/` sem CodeQL/Dependabot | 19.7 — reavaliado, permanece `NOT CURRENTLY IMPLEMENTED` (nenhuma ferramenta inventada), ver [`11-release-quality-gate.md`](11-release-quality-gate.md) §8 |
+| ~~Nenhuma ferramenta de scanning de segurança (SAST/dependência)~~ | `.github/` sem CodeQL/Dependabot à época | EPIC 30, Sprints 30.22/30.25 — **FECHADO**: `dependabot.yml` e `codeql.yml` existem hoje |
 | Artifact provenance em HMG é implícito (só log), não um step de verificação distinto | `deploy-hmg.yml` não tem step equivalente ao de `deploy-prd.yml` que resolve/prova a cadeia | 19.8 |
 | Nenhuma medição contínua de duração/flakiness (só amostras pontuais desta Sprint) | Sem dashboard/histórico agregado | 19.9 |
 | Nenhum teste de integração dedicado a `/health*` (achado já registrado em `docs/web/06-testing.md`) | Confirmado por essa mesma fonte | fora da EPIC 19 — é lacuna de teste de produto, não de pipeline |
