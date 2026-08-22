@@ -6,11 +6,11 @@ E2E), banco de teste real (LocalDB), testes arquiteturais de fronteira, e fluxo 
 **Fonte da verdade:** reconstruído por completo na Sprint 16.9 a partir de `tests/*`, `BeeDay.slnx`
 e execução real de `dotnet test BeeDay.slnx --configuration Release --no-build`.
 
-**Última verificação:** 2026-08-21 (Sprint 30.24, EPIC 30 — `BD30-F001`) — **1.554 testes, 0 falhas**
-(121 Domain, 119 Application, 216 Infrastructure, 879 Web, 219 E2E), confirmado por execução real de
-`dotnet test BeeDay.slnx` completa em Debug e Release ao final da Sprint 30.23. O baseline de
-1.116 (93/73/129/741/80) registrado desde a Sprint 25.16 estava desatualizado em ~40% — a suíte
-cresceu organicamente ao longo das Sprints 26–30 sem que este contador fosse revisitado. O inventário
+**Última verificação:** 2026-08-21 (Sprint 31.9, EPIC 31) — **1.557 testes, 0 falhas**
+(121 Domain, 119 Application, 216 Infrastructure, 880 Web, 221 E2E), confirmado por execução real de
+`dotnet test BeeDay.slnx` completa em Debug ao início da Sprint 31.1. O baseline de 1.554
+(121/119/216/879/219), registrado ao final da Sprint 30.23, já estava 3 testes desatualizado
+(Web +1, E2E +2) — a suíte continuou crescendo organicamente nos dias seguintes. O inventário
 histórico detalhado por arquivo em [`01-testing-strategy.md`](01-testing-strategy.md) foi reconciliado
 para o mesmo total.
 
