@@ -2348,6 +2348,51 @@ ou `prd` foi realizada ou necessária — todo o trabalho ficou dentro do limite
 | 31.12 | `sprint/31.12-hmg-iis-deployment-operations-documentation-reconciliation` | #311 | `fa17a83` |
 | 31.13 | `sprint/31.13-adr-historical-documentation-consolidation` | #312 | `cc758fa` |
 | 31.14 | `sprint/31.14-root-readme-docs-index-residual-documentation-consolidation` | #313 | `016b23f` |
-| 31.15 | `sprint/31.15-documentation-integrity-final-knowledge-gate` | (esta Sprint — ver PR de fechamento no GitHub, Issue #243) | (ver PR de fechamento) |
+| 31.15 | `sprint/31.15-documentation-integrity-final-knowledge-gate` | #314 | `1b762c5` |
 
 ---
+
+## Correções pós-fechamento (2026-08-22, autorização específica do owner)
+
+Após o fechamento da EPIC 31, o owner solicitou explicitamente a resolução dos dois riscos
+residuais registrados na Sprint 31.15, antes do início da EPIC 32 e como pré-condição para a
+promoção `hmg` → `main`. Trabalho realizado no branch `chore/post-epic31-adr-and-hmg-verification`,
+fora da numeração de Sprint da EPIC 31 (que já está fechada) mas documentado aqui para manter o
+rastro de auditoria completo.
+
+### ADR-001 resolvido
+
+Criado [ADR-007](../../adr/ADR-007-in-process-application-contracts.md), documentando formalmente a
+forma final e já implementada dos contratos (interfaces internas de `BeeDay.Application`, não um
+projeto `Contracts` separado). O corpo do ADR-001 permanece intocado — apenas seu campo "Status"
+recebeu a nota de supersessão parcial, seguindo exatamente o mesmo padrão já usado pelo ADR-004
+para o ADR-005. `docs/adr/README.md`, `docs/architecture/03-clean-architecture.md` e
+`docs/application/04-contracts.md` atualizados com a referência cruzada. `ADR-001` passa de
+`CONFLICTING` para `SUPERSEDED` (quanto ao mecanismo) no índice de validade.
+
+### Gap operacional da EPIC 28 investigado com evidência real
+
+Verificado diretamente contra GitHub Actions e GitHub Secrets (`gh run view`, `gh secret list --env
+homologation`) — não a partir de suposição:
+
+- os 4 secrets de Resend + `BEEDAY_HMG_ALLOWED_RECIPIENTS` existem no ambiente `homologation`;
+- a ativação do Resend está deployada e live em HMG — confirmado pelo log real da execução mais
+  recente de `deploy-hmg.yml` (run `32565296101`), mostrando a configuração das variáveis de
+  ambiente do App Pool e o health check pós-deploy passando;
+- o único item que permanece genuinamente pendente é o smoke test de inbox real
+  (`docs/deployment/14-transactional-email-runbook.md` §11, passo 6) — que exige checar uma caixa de
+  entrada real alocada na allowlist. Confirmado que nenhuma ferramenta disponível (incluindo este
+  agente) tem esse acesso: `verify-hmg.yml` executa apenas health checks HTTP, nunca lê log de
+  aplicação do SERV3WEB. Este item **não foi fabricado como resolvido** — permanece pendente,
+  documentado como exigindo ação pessoal do owner, seguindo a própria regra do runbook (§11.1) de
+  "não inventar" uma forma insegura de verificação quando uma segura não está disponível.
+
+`docs/deployment/14-transactional-email-runbook.md` (§6, §19 e nota de topo) e
+`docs/epics/28-transactional-email-experience/README.md` (nota de atualização, sem reescrever o
+status original da Sprint 28.10) atualizados com essa evidência.
+
+### Validação e promoção `hmg` → `main`
+
+Ver relatório de execução na conversa com o owner para o resultado da validação completa e da
+promoção autorizada de `hmg` para `main` (autorização pontual, não uma mudança permanente de
+governança — `main`/`prd` continuam owner-only por padrão).
