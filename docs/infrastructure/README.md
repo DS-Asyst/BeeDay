@@ -31,10 +31,13 @@ src/BeeDay.Infrastructure/
 ├── Configuration/          6 classes Options (SqlServer, IdentityEmail, Resend, DevelopmentEmail, EventJournal,
 │                           HmgRecipientGuard) + EmailProvider/EmailProviderSelector (seleção de provider, não Options)
 ├── DependencyInjection/     InfrastructureServiceCollectionExtensions — único ponto de registro
-├── Diagnostics/             (vazio — InfrastructureEventIds removido na Sprint 18.3, era código morto)
+├── Diagnostics/             EmailEventIds.cs (adicionado na Sprint 28.7 — `InfrastructureEventIds`
+│                            removido na Sprint 18.3 permanece removido, mas a pasta não está mais vazia)
 ├── HealthChecks/            SqlServerHealthCheck
 ├── Identity/                 SystemClock, SecureUserTokenService, MemoryIdentityRequestThrottle,
-│                              IdentityEmailComposer, ResendEmailSender, DevelopmentEmailSender
+│                              IdentityEmailComposer, ResendEmailSender, HmgRecipientGuardedEmailSender,
+│                              DevelopmentEmailSender, EmailAddressLogMasking, catálogos
+│                              EmailResources.resx/.en-US.resx/.pt-BR.resx (ADR-006)
 ├── Persistence/
 │   ├── Exceptions/           PersistenceException + ConcurrencyConflictException (ambos ativos)
 │   └── SqlServer/            BeeDayDbContext, Configurations/, Migrations/, Repositories/,
@@ -45,7 +48,7 @@ src/BeeDay.Infrastructure/
 
 ## Integração com Application
 
-Toda dependência é por interface — Infrastructure implementa 17 interfaces definidas em
+Toda dependência é por interface — Infrastructure implementa 19 interfaces definidas em
 `BeeDay.Application` (8 repositórios, `IUnitOfWork`, 2 read services, `IPasswordService`, `IClock`,
 `IUserTokenService`, `IIdentityRequestThrottle`, `IIdentityEmailComposer`, `IEmailSender`,
 `IEventJournal`, `IBackgroundTaskQueue`). Confirmado por teste real

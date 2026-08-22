@@ -1270,3 +1270,108 @@ sessão antes de ser escrita.
 `04-contracts.md`, `README.md`), e Documentation Ledger atualizado.
 
 ---
+## Sprint 31.7 — Infrastructure & Persistence Documentation Reconciliation
+
+**GitHub Issue:** [#235](https://github.com/tiagoarrigoni/BeeDay/issues/235)
+**Branch:** `sprint/31.7-infrastructure-persistence-documentation-reconciliation`
+**Depende de:** #234 (concluída, ver seção acima)
+
+> Segue `CLAUDE.md`, o padrão de planejamento beeday e o Global Execution Contract da EPIC 31 em
+> #228.
+
+### Objetivo da Sprint
+
+Reconciliar os 10 documentos de `docs/infrastructure/` e `docs/persistence/` com a implementação
+real de EF Core/SQL Server e os adaptores externos.
+
+### Validação aplicada nesta Sprint (política aprovada pelo owner)
+
+Sprint documental — nenhum código-fonte foi alterado. Suíte completa de testes **não** executada,
+por política aprovada em 2026-08-21.
+
+### Método
+
+Levantamento inicial delegado (agente de exploração, somente leitura), explicitamente informado dos
+achados já confirmados nas Sprints 31.4/31.6 sobre esta mesma área de código (2 migrations, contagem
+de métodos de `IProjectRepository`, padrão de uso de `IUnitOfWork`, contagem de testes) para
+verificar se os mesmos fatos desatualizados se repetiam nestes 10 documentos. Todo achado foi
+reverificado nesta sessão com `grep`/leitura direta antes de qualquer edição.
+
+### Achados corrigidos (Required work #2)
+
+| Documento | Achado | Correção |
+|---|---|---|
+| `02-sql-server.md`, `docs/persistence/01-relational-model.md`, `docs/persistence/02-ef-core-strategy.md` | Repetiam a mesma alegação já corrigida na Sprint 31.4/31.6 em outros documentos: "exatamente uma migration"/`CK_Transactions_Amount > 0`. Hoje existem 2 migrations e o check tem teto superior. | As 3 seções reescritas citando `20260821054442_AddTransactionAmountUpperBoundCheckConstraint.cs`; "Fontes de verdade" dos 2 documentos de persistence atualizadas para citar a segunda migration. |
+| `01-repositories.md` | `IProjectRepository` citado com 13 métodos (mesmo achado já corrigido em `docs/architecture/`/`docs/application/`). | Corrigido para 12. |
+| `01-repositories.md` | Afirmava que `EfDashboardReadService`/`EfWalletReadService` calculam resumos via os métodos de Domain `Wallet.Calculate*`. Na realidade ambos usam agregação SQL (`SumAsync`) diretamente, contornando o Domain deliberadamente para não carregar toda transação pela rede. | Reescrito para descrever o mecanismo real. |
+| `README.md` (infrastructure) | `Diagnostics/` descrita como vazia; hoje contém `EmailEventIds.cs` (Sprint 28.7). | Corrigido. |
+| `README.md` (infrastructure) | Listagem de `Identity/` (6 arquivos) omitia `HmgRecipientGuardedEmailSender`, `EmailAddressLogMasking` e os 3 catálogos `EmailResources.*.resx`. | Listagem completada (10 itens reais). |
+| `README.md` (infrastructure) | "17 interfaces" — a própria enumeração da frase soma 19. | Corrigido para 19. |
+| `04-services.md` | `ResendEmailSender` descrito como registrado diretamente como `IEmailSender`; desde a Sprint 26.4, `IEmailSender` real é `HmgRecipientGuardedEmailSender` (decorator), `ResendEmailSender` é registrado como tipo concreto. | Célula da tabela corrigida com a cadeia real. |
+| `04-services.md` | `IdentityEmailComposer` descrito com tema escuro/`#7A4FCB`, sem parâmetro de idioma — desatualizado desde a Sprint 26.6 (cor) e 28.2/ADR-006 (localização). | Corrigido para tema claro/`#5247F9`/`UserLanguage`/`ResourceManager`, com link para `06-transactional-email.md`. |
+| `04-services.md` | Guarda de path traversal de `DevelopmentEmailSender` descrita como uniforme; desde a Sprint 26.9, um `Directory` absoluto contorna a checagem deliberadamente (só o caso relativo continua protegido). | Célula reescrita distinguindo os dois casos. |
+| `06-transactional-email.md` | §2 (mapa de arquitetura) citava "5 Options classes"; hoje são 6 (`HmgRecipientGuardOptions`, Sprint 26.4, nunca anotada como atualização nesta seção específica, embora o resto do documento a descreva corretamente em outras seções). | Corrigido para 6, com a peça do decorator de e-mail também adicionada ao mesmo diagrama. |
+
+Nenhuma referência a persistência JSON legada (`LevelUpData`, `JsonLevelUpDocumentStore`) foi
+encontrada apresentada como estado atual em nenhum dos 10 documentos — todas as menções
+encontradas já são corretamente históricas ou são comentários de código (fora do escopo documental
+desta Sprint, conforme já registrado no próprio `README.md` como achado aceito). Nenhum valor de
+segredo (connection string, API key) aparece em nenhum dos 10 documentos — apenas nomes de
+seção/chave de configuração.
+
+### Conteúdo já correto, confirmado sem reescrita (Required work #4)
+
+`docs/infrastructure/03-concurrency.md` e `05-dependency-injection.md` conferiram 100% sem nenhum
+mismatch — o mecanismo de RowVersion/tradução de exceção de concorrência e as 29 registrações de DI
+(incluindo o decorator de e-mail já corretamente descrito neste último) já estavam corretos.
+`docs/persistence/01-relational-model.md`/`02-ef-core-strategy.md` também conferiram corretos em
+praticamente todo o resto do conteúdo (11 tabelas, TPC, Owned Types, Complex Types, conversores de
+enum, RowVersion shadow property) — apenas os 2 achados de migration acima precisaram de correção.
+
+### Critérios de aceite (Issue #235)
+
+- [x] SQL Server/EF Core documentation matches current runtime — 10 achados corrigidos.
+- [x] Repository/UoW responsibilities match implementation — contagens e mecanismos de cálculo
+      corrigidos.
+- [x] Migration and transaction documentation is accurate — 3 documentos atualizados para as 2
+      migrations reais.
+- [x] No legacy JSON persistence path is presented as current — confirmado, nenhum encontrado.
+- [x] Configuration contracts are documented without sensitive values — confirmado.
+- [x] Historical persistence material is preserved appropriately — nenhum conteúdo histórico foi
+      removido; apenas fatos de estado atual foram corrigidos.
+
+### Sprint-specific boundary respeitado
+
+Nenhuma mudança de arquitetura de persistência foi feita para simplificar a documentação — todas as
+10 correções alinham a documentação ao código já existente.
+
+### Riscos residuais
+
+- Comentários de código (não documentação) em `EfConcurrencySaveChanges.cs` e
+  `EventJournalOptions.cs` ainda mencionam "o provider JSON" como referência histórica — já
+  registrado como achado aceito e fora de escopo em `docs/infrastructure/README.md`; nenhuma ação
+  nova necessária.
+- `docs/infrastructure/06-transactional-email.md` tem um volume grande de narrativa de
+  deployment/HMG (§5.1, §6, §15-17) fora do escopo desta Sprint (pertence a 31.11/31.12) — não
+  reverificado aqui.
+
+### Validação executada
+
+```bash
+git status
+dotnet format BeeDay.slnx --verify-no-changes
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+git diff --check
+```
+
+Resultados registrados na seção "Quality/Validation" do relatório final da Sprint enviado ao owner
+nesta conversa. Toda contagem/citação corrigida foi reverificada com `grep`/leitura direta nesta
+sessão antes de ser escrita.
+
+### Deliverable
+
+7 arquivos corrigidos (`docs/infrastructure/README.md`, `01-repositories.md`, `02-sql-server.md`,
+`04-services.md`, `06-transactional-email.md`, `docs/persistence/01-relational-model.md`,
+`02-ef-core-strategy.md`), e Documentation Ledger atualizado.
+
+---
