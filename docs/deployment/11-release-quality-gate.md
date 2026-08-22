@@ -71,7 +71,7 @@ Ambos independentes — nenhum decide a responsabilidade do outro (§5).
 | Validar publish | DEPLOYMENT VERIFICATION | MEDIUM | poucos s | Sim |
 | Bundle EF + validar | STATIC/ARTIFACT | MEDIUM | ~26s | Sim |
 | `has-pending-model-changes` | STATIC (GAP) | HIGH (potencial) | medido nesta Sprint, ver §6 | **Sim — GAP fechado** |
-| Ferramenta de segurança (SAST/dependência) | — | — | — | `NOT CURRENTLY IMPLEMENTED` — nenhuma existe no repositório (confirmado de novo nesta Sprint, `.github/` sem CodeQL/Dependabot); não inventada |
+| ~~Ferramenta de segurança (SAST/dependência)~~ | — | — | — | `NOT CURRENTLY IMPLEMENTED` à época desta Sprint (19.7) — **fechado na EPIC 30** (Sprints 30.22/30.25: `dependabot.yml`/`codeql.yml`) |
 
 Nenhum item foi copiado sem verificar se existe/é aplicável — a lista acima é exatamente o que
 `release-quality-gate.yml` implementa, nem mais nem menos.
@@ -144,9 +144,10 @@ Nenhum dos dois foi removido em favor do outro.
   está configurada no repositório (`actionlint` etc. — ausência já confirmada na Sprint 19.2).
 - **Repository hygiene:** nenhum check dedicado de "arquivo gerado inesperado" existe ou está
   documentado como previsto; não introduzido.
-- **Security:** `NOT CURRENTLY IMPLEMENTED` — sem CodeQL/Dependabot no repositório (reconfirmado).
-  Registrado como GAP, não implementado nesta Sprint (fora do princípio de não inventar
-  ferramentas).
+- **Security:** `NOT CURRENTLY IMPLEMENTED` à época desta Sprint (19.7) — não implementado nesta
+  Sprint (fora do princípio de não inventar ferramentas). **Atualização (Sprint 31.11, EPIC 31):**
+  fechado pela EPIC 30 — `.github/dependabot.yml` (Sprint 30.22) e `.github/workflows/codeql.yml`
+  (Sprint 30.25, `BD30-F008`) existem hoje; nenhum dos dois é required check.
 
 ## 9. Job Structure Decision
 
