@@ -118,6 +118,43 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Habit: {title}" })).ToHaveCountAsync(0);
     }
 
+    // EPIC 32 Sprint 32.4 (EXP32-F001): the direction toggle buttons only communicated their
+    // enabled/disabled state via the CSS "active" class, so a screen reader user had no way to
+    // know whether Positive/Negative was currently on. bUnit already proves aria-pressed tracks
+    // HabitDirection at the component level (HabitEditorModalTests); this proves it renders
+    // correctly end-to-end in a real running app, not just from source inspection.
+    [Fact]
+    public async Task HabitDirectionButtons_ExposeAriaPressedAndStayInSyncAfterToggling()
+    {
+        await LoginToDailyAsync();
+
+        await OpenActivityMenuAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Habit" }).ClickAsync();
+
+        var dialog = Page.GetByRole(AriaRole.Dialog);
+        var positiveButton = dialog.Locator(".habit-editor__direction-button").First;
+        var negativeButton = dialog.Locator(".habit-editor__direction-button").Nth(1);
+
+        // A brand-new Habit defaults to HabitDirection.Both — both toggles start pressed.
+        await Expect(positiveButton).ToHaveAttributeAsync("aria-pressed", "true");
+        await Expect(negativeButton).ToHaveAttributeAsync("aria-pressed", "true");
+
+        // Turning Positive off leaves Negative as the only enabled direction.
+        await positiveButton.ClickAsync();
+        await Expect(positiveButton).ToHaveAttributeAsync("aria-pressed", "false");
+        await Expect(negativeButton).ToHaveAttributeAsync("aria-pressed", "true");
+
+        // Turning Positive back on returns to Both.
+        await positiveButton.ClickAsync();
+        await Expect(positiveButton).ToHaveAttributeAsync("aria-pressed", "true");
+        await Expect(negativeButton).ToHaveAttributeAsync("aria-pressed", "true");
+
+        // Turning Negative off from Both leaves Positive as the only enabled direction.
+        await negativeButton.ClickAsync();
+        await Expect(positiveButton).ToHaveAttributeAsync("aria-pressed", "true");
+        await Expect(negativeButton).ToHaveAttributeAsync("aria-pressed", "false");
+    }
+
     [Fact]
     public async Task CreateAndCompleteTask_TogglesCompletion()
     {
