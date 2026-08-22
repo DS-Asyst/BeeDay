@@ -78,6 +78,7 @@ BeeDay/
 ├── .gitattributes
 ├── .gitignore
 ├── .github/
+├── design/
 ├── docs/
 ├── scripts/
 ├── src/
@@ -93,8 +94,14 @@ BeeDay/
 │   └── BeeDay.E2E.Tests/
 ├── Directory.Build.props
 ├── Directory.Packages.props
+├── dotnet-tools.json
 └── BeeDay.slnx
 ```
+
+`design/` holds source icon assets and the provider-mapping catalog consumed by
+`scripts/New-IconSprite.ps1` — see [`docs/design-system/03-icons.md`](docs/design-system/03-icons.md).
+`dotnet-tools.json` pins the local `dotnet-ef` tool version used by the Entity Framework Core
+commands below.
 
 ## Requirements
 
@@ -194,5 +201,3 @@ use the same versioned source of truth.
 Proprietary — see [`LICENSE`](LICENSE). No license is granted to copy, modify, distribute,
 publish, sublicense, or use this software except with the copyright holder's prior written
 permission.
-
-<!-- CI/CD validation after default branch migration -->
