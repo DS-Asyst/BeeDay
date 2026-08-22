@@ -12,10 +12,24 @@ abaixo vem de memória do pacote da Epic — cada uma foi reverificada no checko
 **Última verificação:** 2026-08-17 (Sprint 28.10 — Final Quality Gate, HMG Validation Readiness &
 Epic Closure Preparation — closes the autonomous execution of this Epic).
 
-**EPIC STATUS: `IMPLEMENTATION READY — POST-MERGE HMG VALIDATION PENDING`** — see the Consolidated
-Closure Report immediately below for the full picture, including PRs already merged mid-Epic and a
-currently-failed HMG redeploy discovered during closure (transient GitHub infrastructure issue, not
-a code defect).
+**EPIC STATUS (na Sprint 28.10, 2026-08-17): `IMPLEMENTATION READY — POST-MERGE HMG VALIDATION
+PENDING`** — see the Consolidated Closure Report immediately below for the full picture, including
+PRs already merged mid-Epic and a currently-failed HMG redeploy discovered during closure (transient
+GitHub infrastructure issue, not a code defect).
+
+**Atualização (2026-08-22, pós-fechamento da EPIC 31):** reverificado diretamente contra GitHub
+Actions e secrets reais (`gh run view`/`gh secret list --env homologation`) — o "post-merge HMG
+validation pending" ficou mais estreito do que em 2026-08-17. Confirmado com evidência real: os 4
+secrets de Resend + `BEEDAY_HMG_ALLOWED_RECIPIENTS` existem no ambiente `homologation`; Hotfix 26.9.3
+está deployado; a ativação do Resend está live em HMG (run
+[`32565296101`](https://github.com/tiagoarrigoni/BeeDay/actions/runs/32565296101) e todo merge em
+`hmg` desde então mostram `Configuring IIS application-pool environment variables
+(Environment=Homologation)...` seguido de `Deployment completed successfully.`). O único item
+genuinamente pendente é o smoke test de inbox real (`docs/deployment/14-transactional-email-runbook.md`
+§11 passo 6) — que exige checar uma caixa de entrada real alocada na allowlist, algo que nenhuma
+ferramenta de automação deste repositório (incluindo este agente) tem acesso para fazer;
+`verify-hmg.yml` só executa health checks HTTP, nunca lê log de aplicação do SERV3WEB. Ver detalhe
+completo em `14-transactional-email-runbook.md` §6.
 
 **Escopo da Epic:** evoluir os e-mails transacionais entregues pela EPIC 26 (transporte funcional
 validado) para uma superfície oficial do beeday Experience System: identidade visual, copy,

@@ -9,7 +9,9 @@ grep de implementações em `src/BeeDay.Infrastructure`/`src/BeeDay.Web`.
 Diferente do que a documentação antiga (removida nesta Sprint) descrevia, não existe um projeto
 `BeeDay.Contracts` — "contrato" aqui significa **interface definida em Application, implementada
 em outra camada**. Há 3 categorias: repositórios de Aggregate (8), read services (2), e
-`IUnitOfWork` (1).
+`IUnitOfWork` (1). Esta é a forma final documentada por [ADR-007](../adr/ADR-007-in-process-application-contracts.md)
+(`VALID`) — o projeto `Contracts` separado que [ADR-001](../adr/ADR-001-contract-first.md) havia
+originalmente decidido nunca foi criado; o ADR-007 formaliza a estrutura real.
 
 ## Repositórios por Aggregate (8)
 
