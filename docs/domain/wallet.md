@@ -7,7 +7,8 @@
 ## Responsabilidade
 
 Representa a carteira financeira pessoal de um usuário. É o Aggregate Root mais simples do Domain
-(3 métodos), com uma particularidade: ele **não guarda a lista de `Transaction`** — calcula
+(3 métodos de cálculo além de `Create`/`Touch` — ver tabela de Operações públicas abaixo), com uma
+particularidade: ele **não guarda a lista de `Transaction`** — calcula
 saldo/totais recebendo uma coleção de transações como parâmetro, filtrando por `WalletId`.
 
 ## Estado

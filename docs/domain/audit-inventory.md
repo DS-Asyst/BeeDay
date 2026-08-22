@@ -5,6 +5,14 @@ Sprint 30.5. `VERIFIED` significa que responsabilidade, dependências, construç
 foram confrontadas com o código e os testes atuais. `FIXED` identifica um defeito confirmado e
 corrigido nesta Sprint. O inventário não antecipa auditorias de Application ou Infrastructure.
 
+**Canonicidade (Sprint 31.5):** este arquivo é a referência viva e canônica deste inventário. O
+mesmo conteúdo também aparece dentro do relatório da Sprint 30.5 em
+[`docs/epics/30-system-integrity/README.md`](../epics/30-system-integrity/README.md) — aquela
+cópia é o registro histórico congelado de como a Sprint foi entregue (EPIC 30 está concluída) e não
+é atualizada; esta é a versão que evolui se o Domain mudar. Reverificado integralmente na Sprint
+31.5: todos os 47 arquivos listados abaixo continuam existindo e correspondendo ao código atual —
+nenhuma adição, remoção ou divergência encontrada.
+
 ## Inventário por artefato
 
 | Artefato | Categoria | Estado | Evidência/decisão |
