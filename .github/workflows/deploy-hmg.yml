@@ -76,7 +76,7 @@ jobs:
       # failure-semantics analysis.
       - name: Resolve validated source commit and BeeDay CI run
         id: resolve-provenance
-        uses: actions/github-script@v9.0.0
+        uses: actions/github-script@v9
         with:
           result-encoding: string
           script: |

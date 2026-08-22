@@ -75,7 +75,7 @@ jobs:
       # pattern already proven in deploy-hmg.yml's own "Resolve BeeDay CI run to deploy" step.
       - name: Resolve HMG Deployment run to verify
         id: resolve-run
-        uses: actions/github-script@v9.0.0
+        uses: actions/github-script@v9
         with:
           result-encoding: string
           script: |

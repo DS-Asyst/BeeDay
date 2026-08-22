@@ -69,7 +69,7 @@ jobs:
       # it is already forward-compatible with v9's breaking changes whenever the bump happens.
       - name: Resolve validated BeeDay CI run for this production commit
         id: resolve-run
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           result-encoding: string
           script: |
