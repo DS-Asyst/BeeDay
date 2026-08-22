@@ -20,7 +20,7 @@ CSS), não uma referência exaustiva de cada Parameter de cada componente.
 | Pasta | Componentes | Papel |
 |---|---|---|
 | `Buttons/` | `BeeDayButton` | Único botão estilizado do sistema — 8 `BeeDayButtonVariant` |
-| `Cards/` | `BeeDayCard`, `BeeDayCardMenu` | Container genérico; menu de ações posicionado dinamicamente (interop) |
+| `Cards/` | `BeeDayCard` | Container genérico |
 | `Forms/` | `BeeDayInput`, `BeeDayCheckbox`, `BeeDayDateInput`, `BeeDaySelect`, `BeeDayTextArea`, `BeeDayValidationMessage<TValue>` | Wrappers de `InputBase`/`EditForm`, todos com `Expression<Func<...>>` para bind a `EditContext` |
 | `Feedback/` | `BeeDayToastHost`, `BeeDayLoading`, `BeeDaySkeleton`, `BeeDayDashboardSkeleton`, `BeeDayEmptyState`, `BeeDayConfirmDialog` | Estados assíncronos e vazios |
 | `Icons/` | `BeeDayIcon`, `BeeDayIconRegistry` | Sprite SVG único (`/icons/sprite.svg`) — ver §4 |
@@ -49,6 +49,7 @@ app.css
 → css/polish.css
 → css/wallet.css
 → css/identity.css
+→ css/institutional.css
 → BeeDay.Web.styles.css          (bundle isolado, gerado pelo SDK a partir de todo *.razor.css)
 → css/typography-policy.css
 ```
@@ -79,14 +80,12 @@ Todo componente com JS interop segue o mesmo padrão: import dinâmico de módul
 | Componente | Módulo | Direção da chamada | Propósito |
 |---|---|---|---|
 | `Behaviors/DragDrop/BeeDaySortable.razor` | `js/beeday-sortable.js?v=20260721-f13-dragfix` | JS → C# (`[JSInvokable] NotifyReorderAsync`) | Drag-and-drop de cards; C# nunca lê posição do mouse, só recebe o resultado final (`itemId`, `targetItemId`, `placeAfter`) |
-| `DesignSystem/Cards/BeeDayCardMenu.razor` | `js/beeday-card-menu.js?v=20260729-1` | C# → JS (`measureGeometry`) e JS → C# (`[JSInvokable] NotifyOutsideClickAsync`) | Mede `getBoundingClientRect` do trigger/painel para decidir abrir para cima/baixo e deslocamento horizontal (`CardMenuPlacementCalculator`, lógica pura, testável sem DOM); detecta clique fora do menu |
-Os dois módulos usam sufixo de versão hardcoded na própria string de import
-(`?v=20260721-f13-dragfix`, `?v=20260729-1`) como cache-busting manual.
-Nenhum dos 2 módulos é auditado linha a linha nesta Sprint (escopo: código C#/Razor, não os
-arquivos `.js` em si).
-
-`CardActionMenuCoordinator` (ver `01-composition-root.md` §6) é o que faz múltiplos
-`BeeDayCardMenu` num mesmo circuito se fecharem mutuamente — um evento C#-para-C#, não JS.
+O módulo usa sufixo de versão hardcoded na própria string de import
+(`?v=20260721-f13-dragfix`) como cache-busting manual. Não é auditado linha a linha nesta Sprint
+(escopo: código C#/Razor, não o arquivo `.js` em si). (`DesignSystem/Cards/BeeDayCardMenu.razor` e
+seu módulo `beeday-card-menu.js`, que também apareciam aqui, foram removidos por falta de
+consumidores na Sprint 30.19 — junto com `CardActionMenuCoordinator`, ver
+`docs/design-system/02-components.md`.)
 
 ## 6. Formulários
 

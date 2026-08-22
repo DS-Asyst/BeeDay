@@ -19,10 +19,10 @@ um zero significa primitive preservada/testada sem consumer runtime atual.
 
 | Primitive | Responsabilidade e contrato público | Consumers | Estados, a11y, responsive, teste e CSS |
 |---|---|---:|---|
-| `BeeDayButton` | Ação canônica. `Variant`, `Type`, `Disabled`, `IsLoading`, `FullWidth`, `Compact`, `Icon`, `IconSize`, `Class`, `OnClick`, `ChildContent`, attributes | 22 | 8 variants; default/hover/pressed/focus/disabled/loading. `<button>`, `disabled`, `aria-busy`; loading preserva o label acessível. `BeeDayButtonTests`; `design-system.css` |
+| `BeeDayButton` | Ação canônica. `Variant`, `Type`, `Disabled`, `IsLoading`, `FullWidth`, `Compact`, `Icon`, `IconSize`, `Class`, `OnClick`, `ChildContent`, attributes | 23 | 8 variants; default/hover/pressed/focus/disabled/loading. `<button>`, `disabled`, `aria-busy`; loading preserva o label acessível. `BeeDayButtonTests`; `design-system.css` |
 | `BeeDayCard` | Surface sem estado interno. `Class`, `Padded`, `Muted`, `Prominent`, `Interactive`, `ChildContent`, attributes | 9 | `<article>`; interactive oferece chrome/focus, mas semântica/teclado pertencem ao consumer. `BeeDayCardTests`; `design-system.css` |
-| `BeeDayCardMenu` | Menu Edit/Delete posicionado. `Title`, `Class`, `TriggerClass`, `Disabled`, `OnEdit`, `OnDelete`, `OpenChanged` | 0 | trigger nativo, `aria-expanded`, `role=menu/menuitem`, Escape/outside click, medição JS. Mantido por contrato/testes. `BeeDayCardMenuTests`/placement tests; CSS isolado |
 | `BeeDayConfirmDialog` | Confirmação destrutiva. `IsOpen`, `IsBusy`, `Title`, `Message`, textos opcionais, labels opcionais, callbacks | 5 | open/busy; `alertdialog`, modal, labelled/described/busy; foco inicial em Cancel, trap, Escape/backdrop e restore. Backdrop `--beeday-color-overlay` (claro/neutro/translúcido, canônico desde a Sprint 29.3 — não mais um roxo hardcoded). `BeeDayConfirmDialogTests` + E2E; `feedback.css`/focus scope |
+| `BeeDayErrorBoundary` | Envolve `@Body` do layout; captura exceção não tratada da árvore de renderização sem derrubar o circuito SignalR. Sem parâmetros públicos além de `ChildContent` | 4 layouts | `LoggingErrorBoundary` (logging server-side via `OnErrorAsync`) + fallback `BeeDayEmptyState`/`BeeDayButton` de recarregar (`NavigateTo(forceLoad: true)`), `role=alert`. Adicionado Sprint 30.23 (EPIC 30, BD30-F065); `feedback.css` |
 | `BeeDayToastHost` | Host da fila de `ToastService`; sem parâmetros | 3 layouts | `status`/`alert`, live region e dismiss nativo com target 44px. `BeeDayToastHostTests`; `feedback.css` |
 | `BeeDayLoading` | Feedback global controlado por `IsVisible`, `Label?` | 4 | `role=status`, polite live, label localizada; reduced motion mantém conteúdo. `FeedbackComponentTests`; `feedback.css` |
 | `BeeDaySkeleton` | Placeholder com `Lines`, `Class?` | 2 | busy visual, não interativo; shimmer reduzido. `FeedbackComponentTests`; `feedback.css` |
@@ -39,7 +39,7 @@ um zero significa primitive preservada/testada sem consumer runtime atual.
 | `BeeDayDateInput<T>` | `Id`, `Label`, classes, `Required`, `Disabled`, validation flag, bind + attributes | 3 | date nativo com label/invalid. `BeeDayFormTests`; `forms.css` |
 | `BeeDayCheckbox` | `Id`, `Label`, classes, `Disabled`, validation flag, bind + attributes | 0 | input checkbox real, checked/focus/disabled/invalid; preservado/testado. `BeeDayFormTests`; `forms.css` |
 | `BeeDayValidationMessage<T>` | `For` obrigatório | 10, incluindo wrappers | mensagem associada ao EditContext. `BeeDayFormTests`; `forms.css` |
-| `BeeDayIcon` | `Name`, `Size`, `Color`, `Decorative`, `Label?`, `Class?`, attributes | 32 | 5 sizes, 8 color roles; decorative usa `aria-hidden`, semântico usa `role=img` + label. `BeeDayIconTests`; sprite registry + CSS isolado |
+| `BeeDayIcon` | `Name`, `Size`, `Color`, `Decorative`, `Label?`, `Class?`, attributes | 37 | 5 sizes, 8 color roles; decorative usa `aria-hidden`, semântico usa `role=img` + label. `BeeDayIconTests`; sprite registry + CSS isolado |
 | `BeeDayPageHeader` | `Title`, `Eyebrow?`, `Description?`, `Actions?`, `Class?`, attributes | 1 | h1, actions refluem em 42rem. `BeeDayHeaderTests`; `design-system.css`/`polish.css` |
 | `BeeDaySectionHeader` | Mesmo shape do PageHeader em escala h2 | 1 direto | heading de seção; responsive compartilhado. `BeeDayHeaderTests`; `design-system.css`/`polish.css` |
 | `BeeDayHero` | `Title`, `Eyebrow?`, `Subtitle?`, `Surface?` (`BeeDayPaletteToken`, restrito a `Cor0`/`Cor8` para o papel de page header — [`brand/03-color-palette.md`](../brand/03-color-palette.md)), `HeaderNav?` (Sprint 29.4 — navegação contextual na mesma linha de `BrandContext`, extremidade oposta), illustration/action/support slots, `Variant`, `Compact`, `Class?`, attributes | 13 (InstitutionalPageShell × 12 rotas incluindo Brand guidelines, ExperienceSystemHome) + Wallet | `Default`/`Onboarding`; illustration some no compacto; full-bleed via `--beeday-hero-bleed-inset` (margin-inline negativo, sem `width` explícito — opt-in por container: `.editorial-layout__main` em `polish.css`, Sprint 29.4). `BeeDayHeroTests`, `InstitutionalPageShellTests`; `BeeDayHero.razor.css` |
@@ -89,8 +89,6 @@ Regras transversais:
 - Use Button para ações; links continuam links quando navegam.
 - Card é content surface, não substitui panel/dialog. `Interactive` não inventa `role` ou teclado:
   o consumer deve fornecer semântica coerente ou usar um controle interno.
-- Menu é uma ação contextual e não um select. Seu estado aberto é coordenado por
-  `CardActionMenuCoordinator` e posicionado por medição real.
 - Headers possuem hierarquia h1/h2; Hero é composição rica, não cabeçalho default.
 - Feedback vazio/loading/skeleton não calcula regra de domínio.
 - Progress recebe valores prontos; não calcula XP/task completion.
