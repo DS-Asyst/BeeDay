@@ -1,0 +1,758 @@
+# EPIC 32 — beeday Code Refinement & Product Experience Polish
+
+Este documento é o **Experience Ledger** canônico da EPIC 32, criado pela Sprint 32.1 conforme
+exigido pela Issue #244 §5. A Issue #244 (EPIC) e as Issues de cada Sprint continuam sendo a fonte
+operacional de escopo, ordem e autorização. O Ledger registra evidência versionada de comportamento
+de interação/experiência real do produto, encaminhando cada achado para exatamente uma Sprint
+proprietária dentro da EPIC 32 (32.2–32.19).
+
+**Fonte da verdade:** inventário construído a partir de `docs/web/02-routing-and-pages.md`,
+`docs/web/03-layouts.md`, `docs/web/04-feature-components.md`, `docs/design-system/02-components.md`,
+`docs/ux/01-guidelines.md`, `docs/ux/02-accessibility.md`, `docs/ux/03-responsive.md`,
+`docs/testing/03-functional-journey-matrix.md`, leitura direta de código sob
+`src/BeeDay.Web/Components/`, e execução real da aplicação (`dotnet run`, SQL Server LocalDB local,
+`BeeDay_Sprint32_Baseline`) navegada via automação de browser Chromium real (não simulação) em
+2026-08-22. O snapshot começou em `a68d0f135f1b537433397d1e55503ea1f28e4c75` (`hmg` = `origin/hmg`),
+na branch `sprint/32.1-experience-baseline-interaction-inventory`, criada a partir de `hmg`
+sincronizada com `origin/hmg`.
+
+## 1. Finalidade e regras do Ledger
+
+O Ledger é a fonte operacional de achados de experiência de produto durante toda a EPIC 32. Ele não
+substitui a auditoria profunda que pertence a cada Sprint 32.2–32.19 — a Sprint 32.1 inventaria e
+estabelece a baseline, não corrige.
+
+Estados usados durante a EPIC (definidos pela Issue #244 §5):
+
+```text
+DISCOVERED
+IN_REVIEW
+FIXED
+VERIFIED
+ACCEPTED
+```
+
+Estados terminais: `FIXED`, `VERIFIED`, `ACCEPTED`. `ACCEPTED` exige evidência e justificativa
+explícitas e nunca é usado para aceitar risco material de produto/segurança/usuário em nome do
+proprietário sem aprovação dele.
+
+Todos os achados registrados nesta Sprint estão em `DISCOVERED` — nenhuma correção foi aplicada
+nesta Sprint além do que o próprio §5.1 permite (nenhum bloqueio foi encontrado que exigisse
+correção para permitir a análise da baseline, então nenhuma exceção foi usada).
+
+### 1.1 Por que nenhuma correção foi aplicada nesta Sprint
+
+A Issue #245 (Sprint-Specific Boundary) autoriza corrigir um blocker apenas quando ele impede a
+análise confiável da baseline, e exige registrar essa exceção explicitamente. Nenhum achado listado
+abaixo impediu a inventariação — todos foram observados e documentados normalmente. Por isso nenhum
+código de produto foi alterado nesta Sprint; a única mudança desta entrega é este documento (mais a
+reconciliação de Issue/Project).
+
+## 2. Ambiente do baseline
+
+| Item | Evidência |
+|---|---|
+| Branch base | `hmg` = `origin/hmg` = `a68d0f135f1b537433397d1e55503ea1f28e4c75` (inclui a remoção do Dependabot, `chore: remove Dependabot automation per owner decision`) |
+| Branch da Sprint | `sprint/32.1-experience-baseline-interaction-inventory` |
+| SDK | .NET SDK (mesma toolchain fixada em `dotnet-tools.json`/`global.json` do repositório) |
+| Banco local | SQL Server LocalDB (`MSSQLLocalDB`), database `BeeDay_Sprint32_Baseline`, migrada via `dotnet ef database update` com `BEEDAY_DESIGNTIME_CONNECTION` (ver `src/BeeDay.Infrastructure/Persistence/SqlServer/BeeDayDbContextFactory.cs`) |
+| Execução da aplicação | `dotnet run --project src/BeeDay.Web/BeeDay.Web.csproj`, `ASPNETCORE_ENVIRONMENT=Development`, `http://localhost:5059`, conexão via `BeeDay__Persistence__SqlServer__ConnectionString` apontando para o LocalDB acima |
+| E-mail de desenvolvimento | `DevelopmentEmailSender` (`src/BeeDay.Web/Data/Emails/`, `.gitignore` linha 55) — usado para obter o link real de confirmação de e-mail durante o cadastro do usuário de teste |
+| Usuário de teste | conta real criada via fluxo de cadastro completo (`sprint32-baseline@example.com` / nickname `sprint32baseline`), e-mail confirmado por link real, onboarding completo até `/daily` |
+| Evidência de navegador | Chromium real controlado via automação de browser (não simulação/snapshot estático) — navegação, cliques, digitação, leitura de DOM/acessibilidade e inspeção de `document.activeElement`/estilos computados |
+| Limitação desta sessão | redimensionamento de viewport para larguras móveis (`resize_window`) não teve efeito no navegador desta sessão (`window.innerWidth` permaneceu no tamanho físico do monitor, 2552px, mesmo após a chamada reportar sucesso) — nenhuma evidência de navegador em viewport móvel real foi coletada nesta Sprint; ver §9 |
+
+## 3. Metodologia e evidência
+
+Cada achado abaixo é uma de duas classes:
+
+- **Evidência de navegador nesta Sprint** — observado ao vivo nesta sessão: clique, digitação,
+  inspeção de `document.activeElement`, `getComputedStyle`, atributos ARIA reais via
+  `document.querySelectorAll` sobre o DOM renderizado. Marcado como tal no campo Evidência de cada
+  achado.
+- **Evidência de código/documentação já verificada** — extraída de documentação mantida
+  (`docs/ux/`, `docs/web/`, `docs/design-system/`) cuja própria fonte de verdade já declara ter sido
+  verificada diretamente em código/CSS/testes em Sprints anteriores (16.7, 16.8, 25.6, 25.10,
+  25.15/25.16). A Sprint 32.1 não reexecutou essas varreduras — ela reencaminha o achado, ainda
+  aberto, para dentro do vocabulário e do fluxo de Sprint da EPIC 32, porque ele é escopo de
+  interação/experiência que a EPIC 32 existe para resolver e ainda não foi corrigido por nenhuma
+  Sprint anterior.
+
+Fluxos exercitados ao vivo nesta Sprint (usuário real, dados reais, sem mocks):
+
+1. Home pública (`/`) → cadastro (`/profile/create`, 3 passos: dados, senha, nickname) → confirmação
+   de e-mail por link real → login → onboarding (`/onboarding/tutorial`, 5 slides) → `/profile`.
+2. `/daily`: menu de criação (Habit/Task/To-Do/Project), criação de 1 Habit, 1 Task e 1 Project;
+   abertura do `ProjectWorkspace`, criação de 1 To-Do dentro do projeto; alternância de conclusão via
+   checkbox da coluna To-Dos do board; verificação do filtro "Show completed projects"; busca por
+   texto no board (`water`) com `SearchHighlight` e recontagem das 4 colunas.
+   validação de campo obrigatório (`Title is required.`) no editor de Habit; teste de fechamento via
+   `Escape`.
+3. `/wallet`: criação de 1 transação (Expense, `$4.50`), edição, abertura do diálogo de exclusão
+   (`BeeDayConfirmDialog`) e cancelamento (transação preservada); inspeção de formatação de valor e
+   data.
+4. `/settings` (`/account`): seções Profile e Security (Password) renderizadas e inspecionadas.
+5. `/login`: validação nativa do formulário HTML (campo vazio).
+6. Páginas públicas: `/faqs` (acordeão nativo `<details>/<summary>`), `/experience-system`
+   (overview + grid de pilares).
+
+Áreas do escopo da Issue #245 cobertas apenas por evidência de código nesta Sprint (sem interação de
+navegador própria desta sessão), com razão explícita — ver §9 para o detalhamento completo:
+
+- responsivo/mobile em qualquer rota (limitação de ferramenta, §2);
+- estados de carregamento com atraso visível (`BeeDayLoading`, atraso de 350ms) — todas as mutações
+  desta sessão completaram rápido demais localmente para observar o overlay renderizado;
+- seção Preferences (tema/idioma) de `/settings` — Profile e Security foram alcançadas; Preferences
+  não foi revisitada nesta sessão após uma instabilidade de renderização do navegador de automação
+  (não do produto — ver nota abaixo) ter tornado a rolagem da página pouco confiável;
+- filtros/tags do Wallet (busca, tipo, tag, intervalo de data) — apenas o formulário de criação foi
+  testado ao vivo; os filtros têm cobertura de teste automatizado existente (`WalletTests`,
+  `WalletValidatorTests`) citada pela Matriz de Jornadas Funcionais (`docs/testing/03-functional-journey-matrix.md`).
+
+**Nota sobre instabilidade de ferramenta descartada.** Durante a inspeção de `/settings`, duas
+tentativas de rolar a página via roda do mouse produziram capturas de tela com zoom/deslocamento
+inconsistentes e dois timeouts de `Page.captureScreenshot` ("renderer may be frozen"); uma terceira
+tentativa, em uma aba nova, com o mesmo fluxo, renderizou corretamente sem nenhuma anomalia. Como o
+comportamento não foi reproduzível de forma consistente e a única evidência de JavaScript coletada
+(`window.scrollY`, ausência de `transform`/`filter` em toda a cadeia de ancestrais) contradisse o que
+as capturas de tela mostravam, esta Sprint trata isso como artefato da ferramenta de automação de
+browser, não como achado de produto — nenhum `EXP32-Fxxx` foi aberto para isso. Registrado aqui por
+transparência, não como achado.
+
+## 4. Cobertura por área do produto
+
+| Área (Issue #245) | Rotas/componentes relevantes | Evidência coletada nesta Sprint | Novos achados |
+|---|---|---|---|
+| Rotas autenticadas e públicas | 54 rotas, `docs/web/02-routing-and-pages.md` | Documento revalidado (Sprint 30.17); navegação real por 9 rotas representativas | — |
+| Shell de aplicação e navegação | `MainLayout`, `DesktopSidebar`, `MobileHeader`, `MobileSidebar`, `docs/web/03-layouts.md` | Shell desktop (`/profile`, `/daily`, `/wallet`, `/settings`) navegado ao vivo; shell mobile não verificado ao vivo (§9) | — |
+| Layouts de página | `PublicLayout`, `EditorialLayout`, `OnboardingLayout`, `MainLayout` | Todos os 4 layouts visitados ao vivo (Home, FAQs, cadastro/login/onboarding, shell autenticado) | — |
+| Botões e hierarquia de ação | `BeeDayButton`, botões especializados (`habit-editor__direction-button`) | `BeeDayButton` observado em uso extensivo; botão de toggle especializado inspecionado via DOM | EXP32-F001 |
+| Formulários e inputs | `BeeDayInput`/`Date`/`Select`, `InputNumber` monetário, formulário nativo de Login | Formulários de Habit/Task/Project/Transaction preenchidos e submetidos ao vivo; Login testado com campo vazio | EXP32-F005, EXP32-F007, EXP32-F011 |
+| Diálogos/modais | `EditorModalShell`, `BeeDayConfirmDialog` | Criação e exclusão (cancelada) testadas ao vivo com `Escape` | EXP32-F002 |
+| Listas, cards e coleções | `DashboardColumn`, `ActivityCard`/`HabitCard`, `ProjectWorkspace` To-Do list | Cards de Habit/Task/Project e lista de To-Do do workspace inspecionados ao vivo | EXP32-F003, EXP32-F004 |
+| Busca, filtros e ordenação | Busca do Daily (`filter-bar__input`), filtros do Wallet | Busca do Daily testada ao vivo (filtragem + `SearchHighlight` + recontagem); filtros do Wallet não exercitados nesta sessão (cobertura de teste existente citada) | EXP32-F013 |
+| Carregamento e performance percebida | `BeeDayLoading` (atraso de 350ms), `BeeDayDashboardSkeleton` | Apenas evidência de código (`docs/ux/01-guidelines.md` §3/§8) — mutações desta sessão completaram antes do atraso de 350ms | — |
+| Estados vazios/primeiro uso | `BeeDayEmptyState`, colunas do Daily, Wallet, Tags | 4 colunas vazias do Daily e Wallet sem transações observados ao vivo; ambiguidade vazio-vs-sem-resultados descoberta ao vivo | EXP32-F013 |
+| Erros e recuperação | Banner inline, `BeeDayValidationMessage`, validação nativa do Login | Validação de campo obrigatório (Habit) e validação nativa (Login) testadas ao vivo | EXP32-F007 |
+| Toasts/notificações/confirmações | `BeeDayToastHost`/`ToastService`, `BeeDayConfirmDialog` | 4 toasts de sucesso observados ao vivo (Habit/Task/Project/Transaction); diálogo de exclusão observado ao vivo | — |
+| Teclado/foco/acessibilidade | `DialogFocusScope`, `FocusOnNavigate`, ARIA | `Escape` testado em 2 modais; `aria-pressed` ausente confirmado via DOM; foco pós-fechamento confirmado via `document.activeElement` | EXP32-F001, EXP32-F002, EXP32-F008, EXP32-F009, EXP32-F010 |
+| Responsivo/mobile | Breakpoint 1200px do shell; breakpoints do Daily (900/620px) | Apenas evidência de código/documentação (`docs/ux/03-responsive.md`) — sem evidência de navegador nesta sessão (§9) | — |
+| Daily, Habits, Tasks, To-Dos, Projects | `Features/Dashboard`, `Habits`, `Tasks`, `Todos`, `Projects` | Um de cada entidade criado, editado (Project) e um To-Do concluído ao vivo | EXP32-F001–F004, F013 |
+| Wallet | `Features/Wallets` | Transação criada, editada, exclusão cancelada; formatação de moeda/data inspecionada | EXP32-F005, EXP32-F006 |
+| Settings/Profile/Account | `Features/Account` (Profile, Security, Preferences) | Profile e Security verificados ao vivo; Preferences apenas por código (§9) | — |
+| Superfícies públicas e de marca | Home, `/faqs`, `/experience-system`, `docs/web/02-routing-and-pages.md` §9/§10 | 3 rotas públicas representativas verificadas ao vivo; as 9 restantes das 12 editoriais cobertas apenas por documentação já verificada (Sprint 29.4) | — |
+
+Nenhuma área do escopo da Issue #245 ficou sem revisão — as marcadas "apenas por código/documentação"
+têm razão explícita registrada em §3/§9, conforme exigido pelo critério de aceite "No major product
+area remains unreviewed without an explicit evidence-backed reason."
+
+## 5. Inventário de rotas
+
+O inventário completo e verificado das 54 rotas vive em
+[`docs/web/02-routing-and-pages.md`](../../web/02-routing-and-pages.md) (última verificação: Sprint
+30.17) e não é duplicado aqui. Esta Sprint confirmou por navegação real: `/`, `/login`,
+`/profile/create`, `/account/email-confirmation-sent`, `/account/confirm-email`,
+`/onboarding/tutorial`, `/profile`, `/daily`, `/wallet`, `/settings`, `/faqs`,
+`/experience-system`. Nenhuma rota indocumentada ou quebrada foi encontrada nessa amostra; todos os
+links internos usados nesses fluxos (cadastro → confirmação → login → onboarding → Daily; navegação
+lateral Profile/Daily/Wallet/Account) resolveram corretamente.
+
+## 6. Experience Ledger — achados
+
+Todos os achados abaixo estão em estado `DISCOVERED`. Resolução e proteção de regressão pertencem à
+Sprint proprietária listada; nenhuma foi aplicada nesta Sprint (§1.1).
+
+### EXP32-F001 — Botões de direção do Habit não expõem estado via ARIA
+
+| Campo | Valor |
+|---|---|
+| Área | Botões e hierarquia de ação / Daily |
+| Rota/Página | `/daily` — editor "Create Habit" / "Edit Habit" |
+| Componente | `HabitEditorModal` (`.habit-editor__direction-button`, botões "Positive"/"Negative") |
+| Severidade | HIGH |
+| Device | Shared (afeta qualquer input method, mas o impacto prático é maior para leitor de tela) |
+| Accessibility Impact | Yes |
+| Owning Sprint | 32.4 (Buttons & Action Hierarchy) — cross-ref 32.13 (Focus, Keyboard & Interaction Accessibility) |
+| State | DISCOVERED |
+
+**Interação:** alternar qual direção (`Positive`/`Negative`/`Both`) um Habit registra, via dois
+botões dedicados no editor.
+
+**Comportamento atual:** os dois botões (`+ Positive`, `− Negative`) alternam a classe CSS `active`
+para comunicar qual(is) direção(ões) está(ão) habilitada(s) — por padrão, um novo Habit tem ambos
+`active` (`HabitDirection.Both`, confirmado via `docs/web/04-feature-components.md` §5). Nenhum dos
+dois botões possui `aria-pressed` ou qualquer outro atributo ARIA de estado.
+
+**Problema:** um usuário de leitor de tela não tem como saber, a partir do próprio botão, se
+"Positive" e/ou "Negative" está atualmente habilitado — a única fonte de verdade é uma classe CSS
+visual (`.habit-editor__direction-button.active`). Isso é inconsistente com o restante do inventário
+de estado do Design System (`docs/design-system/02-components.md` §2, que lista `aria-pressed`/
+`aria-expanded` como o padrão para toggles como `.beeday-icon-toggle` e `CardMenu`).
+
+**Evidência (navegador, nesta Sprint):** `document.querySelectorAll('button')` dentro do dialog do
+editor retornou os dois botões com `ariaPressed: null` em ambos; `outerHTML` confirmou
+`class="habit-editor__direction-button active"` em ambos por padrão, sem nenhum atributo `aria-*`
+de estado.
+
+**Resolution:** não aplicável — `DISCOVERED`.
+
+**Regression Protection:** a definir pela Sprint 32.4 ao corrigir (candidato: teste bUnit/E2E
+afirmando `aria-pressed="true"/"false"` sincronizado com `HabitDirection`).
+
+---
+
+### EXP32-F002 — Foco não é restaurado após fechar um editor aberto pelo menu de criação
+
+| Campo | Valor |
+|---|---|
+| Área | Teclado/foco/acessibilidade / Daily |
+| Rota/Página | `/daily` |
+| Componente | `HabitEditorModal`/`TaskEditorModal`/etc. sobre `EditorModalShell` + `DialogFocusScope`, acionados pelo menu "+ Activity" |
+| Severidade | MEDIUM |
+| Device | Shared (teclado) |
+| Accessibility Impact | Yes |
+| Owning Sprint | 32.13 (Focus, Keyboard & Interaction Accessibility) — cross-ref 32.6 (Modal & Dialog Experience) |
+| State | DISCOVERED |
+
+**Interação:** abrir "+ Activity" → escolher "Habit" no menu (que fecha o menu e abre o editor) →
+fechar o editor com `Escape`.
+
+**Comportamento atual:** `document.activeElement` após o `Escape` é `<body>` — nenhum elemento da
+página recebe foco.
+
+**Problema:** `docs/ux/02-accessibility.md` §5 documenta que o ciclo de vida canônico dos diálogos
+(`DialogFocusScope`) restaura o foco no elemento que abriu o diálogo ("trigger"), e degrada
+silenciosamente (sem erro) quando esse trigger não existe mais no DOM. Aqui o "trigger" real do
+editor é o item de menu "Habit" — que já foi desmontado no instante em que o menu fechou, antes
+mesmo do editor abrir. Como não há nenhum trigger persistente registrado (ex.: o próprio botão
+"+ Activity"), o usuário de teclado perde completamente sua posição de navegação e precisa recomeçar
+a tabulação do topo da página a cada vez que cria uma atividade pelo menu — isso é consistente com o
+comportamento documentado (degradação sem erro), mas é uma lacuna real de experiência de teclado que
+a documentação já antecipava sem propor destino.
+
+**Evidência (navegador, nesta Sprint):** `document.activeElement.outerHTML` imediatamente após
+`Escape` retornou `<body>...` (a raiz do documento), confirmado duas vezes (criação de Habit e
+sequência completa de criação de Task/Project).
+
+**Resolution:** não aplicável — `DISCOVERED`.
+
+**Regression Protection:** a definir pela Sprint 32.13 (candidato: `DialogFocusScope` aceitar/registrar
+o botão "+ Activity" como trigger persistente do menu de criação, já que ele sobrevive ao fechamento
+do menu).
+
+---
+
+### EXP32-F003 — Anel de foco em cascata do botão até a coluna inteira do board
+
+| Campo | Valor |
+|---|---|
+| Área | Listas, cards e coleções / Daily |
+| Rota/Página | `/daily` |
+| Componente | `DashboardColumn` + `HabitCard`/`ActivityCard` (`.habit-card__score-button`) |
+| Severidade | MEDIUM |
+| Device | Shared |
+| Accessibility Impact | Partial (não bloqueia, mas confunde qual elemento está de fato focado) |
+| Owning Sprint | 32.7 (Lists, Cards & Collection Patterns) |
+| State | DISCOVERED |
+
+**Interação:** clicar/focar o botão "+" de um Habit card para registrar comportamento positivo.
+
+**Comportamento atual:** ao focar o botão (`habit-card__score-button`, com `aria-label` correto,
+"Register positive for Drink water"), o navegador desenha visualmente **dois** contornos de foco
+sobrepostos: um ao redor do card individual do Habit e outro, mais fino, ao redor de toda a coluna
+"Habits" (do cabeçalho até a base da coluna).
+
+**Problema:** o segundo contorno (coluna inteira) não corresponde a nenhum conceito real de "coluna
+focada" em nenhum outro lugar do produto — é uma cascata de estilo `:focus-within` que se propagou
+do botão, para o card, para o container da coluna. Isso é redundante e pode confundir um usuário de
+baixa visão sobre qual elemento específico está focado.
+
+**Evidência (navegador, nesta Sprint):** captura de tela ampliada (`zoom`) da região do card após
+focar o botão mostra os dois contornos distintos e aninhados; `document.activeElement` confirmado
+como o próprio `<button class="habit-card__score-button">`, não o card nem a coluna.
+
+**Resolution:** não aplicável — `DISCOVERED`.
+
+**Regression Protection:** a definir pela Sprint 32.7 (candidato: teste de regressão visual ou
+asserção de que `:focus-within` não é declarado no seletor do container de coluna).
+
+---
+
+### EXP32-F004 — To-Do dentro do ProjectWorkspace não tem controle de conclusão inline
+
+| Campo | Valor |
+|---|---|
+| Área | Listas, cards e coleções / Daily / Projects |
+| Rota/Página | `/daily` — painel `ProjectWorkspace` |
+| Componente | `ProjectWorkspace.razor` (`.project-workspace__todo`) vs. coluna "To-Dos" do board (`DashboardColumn`) |
+| Severidade | HIGH |
+| Device | Shared |
+| Accessibility Impact | Partial (a ação existe em outro lugar da UI, mas não é descobrível a partir do workspace) |
+| Owning Sprint | 32.7 (Lists, Cards & Collection Patterns) — cross-ref 32.15 (Daily Experience Polish) |
+| State | DISCOVERED |
+
+**Interação:** dentro de um projeto aberto (`ProjectWorkspace`), tentar marcar um To-Do como
+concluído a partir da própria linha do To-Do no workspace.
+
+**Comportamento atual:** a linha do To-Do dentro do `ProjectWorkspace`
+(`<article class="project-workspace__todo">`) contém apenas o título — nenhum checkbox, botão ou
+controle de conclusão. A mesma entidade, quando exibida na coluna "To-Dos" do board principal do
+Daily, tem um checkbox visível e funcional (confirmado: cliclar nele conclui o To-Do, atualiza o
+progresso do Project para 100% e o filtra da lista de projetos ativos).
+
+**Problema:** um usuário que abre o workspace de um projeto para trabalhar nos seus To-Dos não
+consegue concluir nenhum a partir dali — precisa fechar o workspace e usar a coluna "To-Dos" do board
+principal, ou abrir o editor completo do To-Do. Isso é uma inconsistência de affordance para a mesma
+ação sobre a mesma entidade, dependendo de onde ela é vista.
+
+**Evidência (navegador, nesta Sprint):** `outerHTML` do `<article class="project-workspace__todo">`
+não contém nenhum `<button>`/`<input>`; captura de tela ampliada confirma apenas o título e uma barra
+de destaque colorida à esquerda. Em contraste, captura de tela ampliada da coluna "To-Dos" do board
+mostra um checkbox quadrado explícito ao lado do mesmo título; clicá-lo concluiu o To-Do e atualizou
+o Project para "Completed 100%" (confirmado revelando-o via o toggle "Show completed projects").
+
+**Resolution:** não aplicável — `DISCOVERED`.
+
+**Regression Protection:** a definir pela Sprint 32.7 (candidato: teste de componente garantindo que
+o `ProjectWorkspace` exponha o mesmo controle de conclusão da coluna To-Dos).
+
+---
+
+### EXP32-F005 — Inputs nativos de data/número seguem o locale do SO/navegador, não o idioma escolhido no beeday
+
+| Campo | Valor |
+|---|---|
+| Área | Formulários e inputs (transversal) |
+| Rota/Página | `/daily` (Project "Expected date", To-Do "Due date"), `/wallet` (campo "Amount" e "Date" do formulário de transação) |
+| Componente | `BeeDayDateInput<T>` (nativo `type="date"`), `InputNumber` monetário do Wallet |
+| Severidade | HIGH |
+| Device | Desktop (confirmado); comportamento depende do locale do SO, não do dispositivo |
+| Accessibility Impact | No (não é falha WCAG técnica), mas risco de erro de entrada de dados financeiros |
+| Owning Sprint | 32.5 (Forms & Input Experience) — cross-ref 32.16 (Wallet), 32.15 (Daily/Projects) |
+| State | DISCOVERED |
+
+**Interação:** abrir o editor "Create Project" (campo "Expected date") e o editor "Edit Transaction"
+do Wallet (campo "Amount").
+
+**Comportamento atual:** o placeholder nativo do campo de data renderiza como `dd/mm/aaaa`
+(formato/idioma português), mesmo com a interface do beeday inteiramente em inglês ("Create Project",
+"Title", etc.) — o navegador/SO desta máquina está configurado em `pt-BR`, e o `<input type="date">`
+nativo herda esse locale independentemente da cultura selecionada dentro do beeday. O mesmo ocorre
+com o valor monetário: uma transação criada digitando `4.50` (ponto decimal, exibida corretamente
+como `$4.50` em toda a UI do Wallet) é **redisplayed** no campo "Amount" do formulário de edição como
+`4,50` (vírgula decimal) — o `<input type="number">` nativo formata o valor gravado usando o locale
+do navegador ao renderizá-lo de volta.
+
+**Problema:** dois formatos de decimal diferentes para o mesmo valor monetário na mesma tela
+(`$4.50` no resumo/lista vs. `4,50` no campo editável) podem levar a erro de leitura ou de digitação
+por parte do usuário — um risco real em um campo financeiro. O mesmo padrão afeta qualquer consumidor
+de `BeeDayDateInput` (Project, To-Do, Wallet).
+
+**Evidência (navegador, nesta Sprint):** captura de tela do formulário "Create Project" mostrando
+`dd/mm/aaaa`; captura de tela do formulário "Create Transaction" (valor digitado `4.50`, salvo e
+exibido como `$4.50` na lista); captura de tela do mesmo registro reaberto em "Edit Transaction"
+mostrando `4,50` no campo Amount.
+
+**Resolution:** não aplicável — `DISCOVERED`.
+
+**Regression Protection:** a definir pela Sprint 32.5 (candidato: normalizar exibição/entrada usando
+a cultura selecionada do beeday em vez do locale do navegador, ou documentar a limitação como
+aceita com uma máscara de entrada explícita).
+
+---
+
+### EXP32-F006 — Data da lista de transações do Wallet não usa o mesmo formato do próprio input de data
+
+| Campo | Valor |
+|---|---|
+| Área | Wallet |
+| Rota/Página | `/wallet` |
+| Componente | Linha da lista `Transactions` vs. campo "Date" do editor de transação |
+| Severidade | MEDIUM |
+| Device | Desktop (confirmado) |
+| Accessibility Impact | No |
+| Owning Sprint | 32.16 (Wallet Experience Polish) — cross-ref 32.5 (Forms & Input Experience, EXP32-F005) |
+| State | DISCOVERED |
+
+**Interação:** criar uma transação hoje e observar sua data tanto no formulário quanto na lista.
+
+**Comportamento atual:** o campo "Date" do formulário mostra `22/08/2026` (dia/mês/ano); a mesma
+transação, na lista de "Transactions", mostra `8/22/2026` (mês/dia/ano).
+
+**Problema:** dentro da mesma feature, para o mesmo registro, dois formatos de data diferentes
+coexistem — um herdado do locale do navegador (EXP32-F005) e outro aparentemente formatado
+explicitamente pelo código em `en-US`. Isso é inconsistente mesmo sem considerar o locale do
+navegador.
+
+**Evidência (navegador, nesta Sprint):** captura de tela do card "Coffee" na lista de transações
+mostrando `8/22/2026`, lado a lado com a mesma transação reaberta em edição mostrando `22/08/2026`
+no campo Date.
+
+**Resolution:** não aplicável — `DISCOVERED`.
+
+**Regression Protection:** a definir pela Sprint 32.16 (candidato: teste de componente fixando o
+formato de data usado na lista e sua paridade com o formato do input, coordenado com a correção de
+EXP32-F005).
+
+---
+
+### EXP32-F007 — Login depende de validação nativa do navegador, não do padrão localizado do Design System
+
+| Campo | Valor |
+|---|---|
+| Área | Formulários e inputs / Errors, Recovery & User Feedback |
+| Rota/Página | `/login` |
+| Componente | `Login.razor` (`<form method="post" action="/auth/login">`, não `EditForm`) |
+| Severidade | LOW |
+| Device | Shared |
+| Accessibility Impact | No (validação nativa do navegador é, por si, acessível) |
+| Owning Sprint | 32.5 (Forms & Input Experience) |
+| State | DISCOVERED |
+
+**Interação:** submeter o formulário de login com o campo Email vazio.
+
+**Comportamento atual:** o navegador foca o campo Email e mostra seu balão de validação nativo (não
+localizado pelo beeday, sem o estilo de `BeeDayValidationMessage`/`.identity-feedback--error` usado
+no resto do produto) — confirmado em `docs/web/04-feature-components.md` §7: `Login.razor` é
+formulário HTML puro (não `EditForm`) porque o POST vai direto para o endpoint minimal API, não para
+um handler Blazor.
+
+**Problema:** a mensagem de validação do navegador não segue o idioma/estilo do beeday (ela usa o
+idioma do navegador/SO, não a cultura `pt-BR`/`en-US` selecionada no app), diferente de todo outro
+formulário do produto, que usa `BeeDayValidationMessage` localizado.
+
+**Evidência (navegador, nesta Sprint):** captura de tela mostrando o campo Email focado com o anel de
+validação nativo do Chromium após clicar "Sign in" com o formulário vazio.
+
+**Resolution:** não aplicável — `DISCOVERED`.
+
+**Regression Protection:** a definir pela Sprint 32.5 (candidato: decidir explicitamente se a
+validação nativa é aceita como suficiente para este formulário específico, documentando o porquê, ou
+migrar para validação client-side localizada consistente com o resto do produto).
+
+---
+
+### EXP32-F008 — Nenhum mecanismo de "pular para o conteúdo" dentro de uma página já carregada
+
+| Campo | Valor |
+|---|---|
+| Área | Teclado/foco/acessibilidade (transversal) |
+| Rota/Página | Todas |
+| Componente | `Routes.razor` (`FocusOnNavigate Selector="h1"`) |
+| Severidade | MEDIUM |
+| Device | Shared (teclado/leitor de tela) |
+| Accessibility Impact | Yes |
+| Owning Sprint | 32.13 (Focus, Keyboard & Interaction Accessibility) |
+| State | DISCOVERED |
+
+**Interação:** um usuário de teclado, já em uma página carregada com navegação lateral (shell
+autenticado) ou cabeçalho público, tenta pular diretamente para o conteúdo principal sem tabular por
+toda a navegação.
+
+**Comportamento atual:** `FocusOnNavigate` move o foco para o `<h1>` apenas na navegação entre
+páginas (cobrindo parcialmente o problema); não existe um "skip to content"/`skip-link` equivalente
+para pular painéis laterais/navegação *dentro* de uma página já carregada.
+
+**Problema:** confirmado como achado ainda aberto em `docs/ux/02-accessibility.md` §4 (busca
+repo-wide por "skip to content"/"skip-link" sem nenhuma ocorrência). Roteado para dentro da EPIC 32
+porque é exatamente o tipo de defeito de interação que o Interaction Quality Contract da Issue #244
+§6 e o Accessibility Contract §9 exigem cobrir.
+
+**Evidência:** achado de código/documentação já verificado — `docs/ux/02-accessibility.md` §4,
+verificação original por busca direta em `src/BeeDay.Web/`.
+
+**Resolution:** não aplicável — `DISCOVERED`.
+
+**Regression Protection:** a definir pela Sprint 32.13.
+
+---
+
+### EXP32-F009 — `text-muted` sobre superfície branca abaixo do limiar AA para texto normal
+
+| Campo | Valor |
+|---|---|
+| Área | Teclado/foco/acessibilidade (transversal — contraste de cor) |
+| Rota/Página | Onde `--beeday-color-text-muted` for usado em texto normal sobre `--beeday-color-surface` |
+| Componente | Token `--beeday-color-text-muted` (`#817789`) |
+| Severidade | MEDIUM |
+| Device | Shared |
+| Accessibility Impact | Yes |
+| Owning Sprint | 32.13 (Focus, Keyboard & Interaction Accessibility) |
+| State | DISCOVERED |
+
+**Interação:** leitura de texto auxiliar/meta-informação/estado vazio que usa o token `text-muted`.
+
+**Comportamento atual:** `DesignSystemContrastTests` calcula `text-muted` (`#817789`) sobre
+`--beeday-color-surface` (`#fff`) em **≈4.26:1** — abaixo do limiar AA de 4.5:1 para texto normal
+(passa apenas o limiar de 3:1 para texto grande/UI).
+
+**Problema:** confirmado já aberto em `docs/ux/02-accessibility.md` §9: a varredura axe já migrou os
+consumers pequenos identificados (EmptyState, Footer, Login, Wallet, editor modal) para
+`text-secondary`, mas o token `text-muted` em si permanece abaixo do limiar e "outros usos precisam
+ser avaliados no contexto renderizado" — ou seja, o inventário completo de onde `text-muted` ainda é
+usado em texto normal (não grande/UI) não está fechado.
+
+**Evidência:** achado de código/documentação já verificado —
+`docs/ux/02-accessibility.md` §9, `DesignSystemContrastTests`.
+
+**Resolution:** não aplicável — `DISCOVERED`.
+
+**Regression Protection:** a definir pela Sprint 32.13 (candidato: inventário completo de usos
+restantes de `text-muted` em texto normal e migração ou promoção documentada do token).
+
+---
+
+### EXP32-F010 — Cobertura incompleta de fallback local para `prefers-reduced-motion`
+
+| Campo | Valor |
+|---|---|
+| Área | Teclado/foco/acessibilidade (transversal — movimento) |
+| Rota/Página | Auth/ProfileCreation, Habit, ProjectWorkspace, DashboardColumn, activity cards |
+| Componente | 8 dos 31 stylesheets com `animation`/`transition`/`@keyframes` |
+| Severidade | LOW |
+| Device | Shared |
+| Accessibility Impact | Yes |
+| Owning Sprint | 32.13 (Focus, Keyboard & Interaction Accessibility) — cross-ref 32.15 (Daily), 32.5 (Auth/ProfileCreation) |
+| State | DISCOVERED |
+
+**Interação:** usuário com `prefers-reduced-motion: reduce` habilitado no sistema operacional
+interagindo com Habit cards, o workspace de projeto, colunas do Dashboard ou telas de
+Auth/ProfileCreation.
+
+**Comportamento atual:** o safety net global (`animations.css`, `*, *::before, *::after`) reduz a
+duração de toda animação para `.01ms`, mas 8 dos 31 stylesheets de produção com `animation`/
+`transition`/`@keyframes` não têm fallback local — o que significa que delay/opacity/transform ainda
+podem ocultar feedback nesses 8 casos mesmo com o safety net ativo.
+
+**Problema:** confirmado já aberto em `docs/ux/02-accessibility.md` §6 (inventário direto da Sprint
+25.6: 23/31 com fallback após a Sprint; os 8 restantes — Auth/ProfileCreation, Habit,
+ProjectWorkspace, DashboardColumn, motion interno dos activity cards — ficaram atribuídos aos seus
+owners de convergência, ainda sem Sprint que os feche).
+
+**Evidência:** achado de código/documentação já verificado — `docs/ux/02-accessibility.md` §6.
+
+**Resolution:** não aplicável — `DISCOVERED`.
+
+**Regression Protection:** a definir pela Sprint 32.13 (candidato: fallback local nos 8 stylesheets
+restantes, com teste de regressão por stylesheet).
+
+---
+
+### EXP32-F011 — Quatro implementações CSS independentes do mesmo padrão visual de campo de formulário
+
+| Campo | Valor |
+|---|---|
+| Área | Formulários e inputs (transversal) |
+| Rota/Página | Editor de atividade, Identity, Wallet |
+| Componente | `.beeday-field__control`, `.editor-modal__field input`, `.identity-field input`, `.wallet-filters input` |
+| Severidade | MEDIUM |
+| Device | Shared |
+| Accessibility Impact | No |
+| Owning Sprint | 32.19 (Front-End Code Refinement & Component Consolidation) — cross-ref 32.5 (Forms & Input Experience) |
+| State | DISCOVERED |
+
+**Interação:** N/A (achado estrutural de CSS, não uma interação isolada — afeta a consistência visual
+percebida entre formulários de áreas diferentes).
+
+**Comportamento atual:** quatro seletores CSS distintos implementam separadamente a mesma aparência
+visual de campo de input, em vez de compartilhar uma única declaração.
+
+**Problema:** confirmado já aberto em `docs/ux/01-guidelines.md` §4 ("Não existe (achados, não
+corrigidos)"). Risco de drift visual entre áreas quando um dos quatro for ajustado sem replicar a
+mudança nos outros três.
+
+**Evidência:** achado de código/documentação já verificado — `docs/ux/01-guidelines.md` §4,
+referenciando `docs/design-system/04-forms.md` §5.
+
+**Resolution:** não aplicável — `DISCOVERED`.
+
+**Regression Protection:** a definir pela Sprint 32.19 (candidato: consolidar em um único seletor/
+classe compartilhada, com teste de regressão visual ou snapshot de CSS).
+
+---
+
+### EXP32-F012 — Cooldown de reenvio de confirmação duplicado em vez de compartilhado
+
+| Campo | Valor |
+|---|---|
+| Área | Formulários e inputs / Identity (transversal) |
+| Rota/Página | `/account/resend-confirmation`, `/account/email-confirmation-sent` |
+| Componente | `ResendConfirmation.razor`, `EmailConfirmationSent.razor` (cada um com seu próprio `PeriodicTimer` de 60s) |
+| Severidade | LOW |
+| Device | Shared |
+| Accessibility Impact | No |
+| Owning Sprint | 32.19 (Front-End Code Refinement & Component Consolidation) — cross-ref 32.5 (Forms & Input Experience) |
+| State | DISCOVERED |
+
+**Interação:** N/A (achado estrutural de código, não uma interação isolada).
+
+**Comportamento atual:** as duas páginas implementam de forma independente o mesmo cooldown de 60
+segundos via `PeriodicTimer`, sem compartilhar um componente/serviço comum.
+
+**Problema:** confirmado já aberto em `docs/web/04-feature-components.md` §7, explicitamente marcado
+como "candidato a duplicação, fora do escopo de apresentação" da Sprint que o descreveu — cabe à EPIC
+32 (que possui explicitamente uma Sprint de consolidação de front-end, 32.19) decidir se consolida.
+
+**Evidência:** achado de código/documentação já verificado — `docs/web/04-feature-components.md` §7.
+
+**Resolution:** não aplicável — `DISCOVERED`.
+
+**Regression Protection:** a definir pela Sprint 32.19 (candidato: extrair um componente/hook
+`CooldownTimer` compartilhado, com teste cobrindo os dois consumidores).
+
+---
+
+### EXP32-F013 — Busca do Daily não distingue "sem resultados" de "nunca teve itens"
+
+| Campo | Valor |
+|---|---|
+| Área | Busca, filtros e ordenação / Estados vazios |
+| Rota/Página | `/daily` |
+| Componente | `DashboardColumn` (`BeeDayEmptyState`/`EmptyLabel` por coluna) + busca (`filter-bar__input`) |
+| Severidade | MEDIUM |
+| Device | Shared |
+| Accessibility Impact | Partial (a mesma mensagem de "vazio" é lida pelo leitor de tela em dois contextos semanticamente diferentes) |
+| Owning Sprint | 32.8 (Search, Filters & Sorting) — cross-ref 32.10 (Empty States & First-Use Experience) |
+| State | DISCOVERED |
+
+**Interação:** digitar um termo de busca no campo de busca do Daily que corresponda a itens em apenas
+uma das 4 colunas.
+
+**Comportamento atual:** buscando por `water` (correspondendo apenas ao Habit "Drink water"), as
+colunas Tasks/To-Dos/Projects (que tinham itens antes da busca, agora filtrados a zero) mostram
+exatamente o mesmo texto de estado vazio ("No tasks yet" / "Create a recurring task to organize work
+that repeats over time.") que mostrariam se o usuário nunca tivesse criado nenhum item nelas.
+
+**Problema:** não há nenhuma indicação textual de que uma busca está ativa e filtrando a lista para
+zero resultados — o usuário pode concluir erroneamente que não tem nenhuma Task/To-Do/Project
+cadastrada, quando na verdade tem, apenas não correspondem ao termo buscado. `docs/ux/01-guidelines.md`
+§7 confirma que cada coluna gera seu próprio texto de estado vazio a partir de um único `EmptyLabel`
+por coluna, sem um segundo texto para o caso "zero resultados de busca/filtro".
+
+**Evidência (navegador, nesta Sprint):** captura de tela com a busca "water" ativa (campo com "×" de
+limpar, contagem "1" em Habits) mostrando as colunas Tasks ("0"), To-Dos ("0") e Projects ("0") com o
+texto de estado vazio idêntico ao observado antes de qualquer item existir.
+
+**Resolution:** não aplicável — `DISCOVERED`.
+
+**Regression Protection:** a definir pela Sprint 32.8 (candidato: `EmptyLabel` condicional por coluna
+quando um filtro/busca está ativo, com teste de componente cobrindo os dois textos).
+
+## 7. Achados pré-existentes roteados para dentro da EPIC 32
+
+| ID original | Ledger de origem | Achado | Sprint EPIC 32 |
+|---|---|---|---|
+| `BD30-F021` | `docs/epics/30-system-integrity/README.md` | Nenhuma prova de navegador para tema, alteração de senha e recuperação visível dos demais saves de `/settings` (`docs/testing/03-functional-journey-matrix.md` §2/§3.4) — ainda `OPEN` | 32.17 (Settings, Profile & Account Experience Polish) |
+
+Este item não recebeu um novo ID `EXP32-Fxxx` — ele permanece com sua identidade original na EPIC 30,
+e é roteado aqui porque fechar a lacuna de evidência de navegador para as seções de Preferences/
+Security de `/settings` é exatamente o tipo de trabalho que a Sprint 32.17 existe para fazer.
+
+## 8. Jornadas críticas que exigirão evidência de navegador no gate final
+
+Conforme exigido pela Issue #245, item 7 ("Identify critical journeys that will require browser/E2E
+coverage at the final gate"):
+
+1. Cadastro → confirmação de e-mail por link real → login → onboarding → `/daily` (já E2E, ver
+   `docs/testing/03-functional-journey-matrix.md` §2 — manter).
+2. Criar → concluir → editar → excluir um Habit, uma Task, um To-Do (dentro e fora do workspace) e um
+   Project, incluindo o ciclo de conclusão de To-Do a partir de **ambos** os pontos de entrada
+   identificados em EXP32-F004, uma vez corrigido.
+3. Ciclo de vida completo de uma transação do Wallet (criar, editar, excluir com confirmação real,
+   não cancelada como nesta Sprint) em `pt-BR` e `en-US`, incluindo os dois formatos de data/número
+   observados em EXP32-F005/EXP32-F006, uma vez corrigidos.
+4. Salvar Profile, alterar senha e alterar Preferences (tema/idioma) em `/settings`, fechando
+   `BD30-F021` (§7) dentro do escopo da Sprint 32.17.
+5. Navegação completa por teclado do menu "+ Activity" (Daily) até salvar e fechar um editor,
+   incluindo a correção de EXP32-F001 e EXP32-F002.
+6. As 12 páginas editoriais do footer institucional e o `beeday Experience System` completo, em
+   viewport mobile real (bloqueado nesta Sprint por limitação de ferramenta — ver §9).
+7. Shell autenticado (`DesktopSidebar`/`MobileHeader`/`MobileSidebar`) e o board do Daily nos
+   breakpoints 620/900/1199/1200px, em viewport mobile real (mesmo bloqueio).
+
+## 9. Riscos residuais e limitações desta sessão
+
+- **Viewport móvel não testado ao vivo.** A ferramenta `resize_window` reportou sucesso, mas
+  `window.innerWidth` permaneceu no tamanho físico do monitor (2552px) em todas as tentativas
+  (inclusive isolando a chamada, sem nenhuma outra ação no mesmo lote, e tentando novamente em uma
+  aba nova). Uma tentativa de simular a largura via `document.documentElement.style.zoom` confirmou
+  que o `zoom` do Chromium escala apenas a renderização visual, sem alterar `window.innerWidth` nem
+  o resultado de `matchMedia`, portanto não é um substituto válido. Nenhum achado de responsividade
+  novo foi criado nesta Sprint — o contrato de breakpoints documentado (`docs/ux/03-responsive.md`) e
+  a cobertura de teste E2E existente (citada em `docs/web/03-layouts.md` e no Ledger da EPIC 30) são a
+  evidência disponível. **Isto é um risco residual explícito para a Sprint 32.14** (Responsive &
+  Mobile Interaction Polish): ela deve resolver ou contornar esta limitação de ferramenta antes de
+  poder declarar qualquer achado de responsividade como `VERIFIED` — o Evidence Model da Issue #244
+  §7.3 proíbe declarar um achado visual/responsivo como `FIXED`/`VERIFIED` apenas por inspeção de
+  código.
+- **Seção Preferences de `/settings` não revisitada ao vivo** nesta sessão, após a instabilidade de
+  ferramenta descrita em §3 ter tornado a rolagem da página pouco confiável para captura de tela
+  fiel. As seções Profile e Security foram verificadas normalmente. Sem achado associado — apenas
+  gap de cobertura explícito para quem herdar 32.17.
+- **Filtros do Wallet (busca, tipo, tag, intervalo de data) não exercitados ao vivo** nesta Sprint —
+  apenas o formulário de criação/edição de transação foi testado. Cobertura de teste automatizado
+  existente (`WalletTests`, `WalletValidatorTests`) foi usada como evidência de que os filtros têm
+  contrato coberto, sem substituir a inspeção de interação da Sprint 32.16.
+- **Estados de carregamento com atraso visível não observados ao vivo** — todas as mutações desta
+  sessão (ambiente local, LocalDB, sem latência de rede real) completaram antes do atraso documentado
+  de 350ms do `BeeDayLoading`. Nenhum achado foi criado; a Sprint 32.9 (Loading & Perceived
+  Performance) deve reproduzir latência real (throttling de rede) para validar o overlay ao vivo.
+
+Nenhum destes riscos bloqueou a criação do Ledger — cada um está registrado com a Sprint futura que
+deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one owning later Sprint").
+
+## 10. Roteamento por Sprint futura (resumo)
+
+| Sprint | Achados herdados desta Sprint |
+|---|---|
+| 32.2 — Application Shell & Navigation Fluidity | nenhum achado novo; shell desktop revalidado sem defeito |
+| 32.3 — Page Layout Consistency | nenhum achado novo; 4 layouts revalidados sem defeito |
+| 32.4 — Buttons & Action Hierarchy | EXP32-F001 |
+| 32.5 — Forms & Input Experience | EXP32-F005, EXP32-F006 (cross-ref), EXP32-F007, EXP32-F011 (cross-ref), EXP32-F012 (cross-ref) |
+| 32.6 — Modal & Dialog Experience | EXP32-F002 (cross-ref) |
+| 32.7 — Lists, Cards & Collection Patterns | EXP32-F003, EXP32-F004 |
+| 32.8 — Search, Filters & Sorting | EXP32-F013 |
+| 32.9 — Loading & Perceived Performance | gap de evidência registrado em §9 (sem achado novo) |
+| 32.10 — Empty States & First-Use Experience | EXP32-F013 (cross-ref) |
+| 32.11 — Errors, Recovery & User Feedback | EXP32-F007 (cross-ref) |
+| 32.12 — Toasts, Notifications & Confirmation Feedback | nenhum achado novo |
+| 32.13 — Focus, Keyboard & Interaction Accessibility | EXP32-F001 (cross-ref), EXP32-F002, EXP32-F008, EXP32-F009, EXP32-F010 |
+| 32.14 — Responsive & Mobile Interaction Polish | risco residual de §9 (evidência de navegador móvel pendente) |
+| 32.15 — Daily Experience Polish | EXP32-F004 (cross-ref), EXP32-F010 (cross-ref) |
+| 32.16 — Wallet Experience Polish | EXP32-F005 (cross-ref), EXP32-F006 |
+| 32.17 — Settings, Profile & Account Experience Polish | `BD30-F021` (§7), gap de Preferences (§9) |
+| 32.18 — Public Pages & Brand Experience Polish | nenhum achado novo; 3 rotas públicas revalidadas sem defeito |
+| 32.19 — Front-End Code Refinement & Component Consolidation | EXP32-F011, EXP32-F012 |
+| 32.20 — Full Product Polish & Final Experience Gate | consome o estado final de todo o Ledger |
+
+## 11. Validação desta Sprint
+
+Esta Sprint não alterou nenhum arquivo de produto — apenas criou este documento e atualizou
+`docs/README.md` (linha de índice) — portanto a validação obrigatória confirma que nenhuma mudança
+de código foi introduzida:
+
+```text
+dotnet format BeeDay.slnx --verify-no-changes   -> PASS (sem alterações a formatar)
+dotnet build BeeDay.slnx --configuration Release --warnaserror -> PASS (0 avisos, 0 erros)
+git diff --check                                -> PASS (sem problemas de whitespace)
+git status                                       -> apenas os arquivos desta entrega staged
+```
+
+`dotnet test` não foi executado com foco nesta Sprint porque nenhum comportamento executável mudou
+(apenas documentação) — consistente com a política de validação proporcional já usada em entregas
+anteriores de documentação pura (ver, por exemplo, o histórico de PRs da EPIC 31). Os achados
+`EXP32-Fxxx` acima são, eles próprios, a evidência de comportamento desta Sprint — obtida executando
+a aplicação real, não simulada.
+
+## 12. Fontes consultadas
+
+- `docs/web/02-routing-and-pages.md`, `03-layouts.md`, `04-feature-components.md`.
+- `docs/design-system/02-components.md`.
+- `docs/ux/01-guidelines.md`, `02-accessibility.md`, `03-responsive.md`.
+- `docs/testing/03-functional-journey-matrix.md`.
+- `src/BeeDay.Web/Components/Features/Dashboard/`, `Wallets/`, `Account/`, `Authentication/`,
+  `Institutional/`, `ExperienceSystem/`.
+- `src/BeeDay.Infrastructure/Persistence/SqlServer/BeeDayDbContextFactory.cs`,
+  `src/BeeDay.Infrastructure/Identity/DevelopmentEmailSender.cs`.
+- Execução real de `dotnet run --project src/BeeDay.Web/BeeDay.Web.csproj` contra SQL Server LocalDB
+  local, navegada via automação de browser Chromium real em 2026-08-22.
