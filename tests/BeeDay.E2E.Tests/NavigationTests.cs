@@ -140,6 +140,73 @@ public sealed class NavigationTests(PlaywrightAppFixture fixture) : E2ETestBase(
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Not Found" })).ToBeVisibleAsync();
     }
 
+    // Sprint 32.2 (EPIC 32, EXP32-F014): a genuinely nonexistent route used to reach NotFound via
+    // UseStatusCodePagesWithReExecute, which kept the broken URL in the address bar. Once the
+    // interactive circuit booted, Blazor's own client-side Router independently re-resolved that
+    // same unmatched URL and rendered its NotFoundPage fallback a second time with no HttpContext
+    // to source a fresh antiforgery token from — silently clobbering the correctly-prerendered
+    // Logout form with one missing its token, so Logout failed with a raw 400 ProblemDetails page
+    // for any authenticated user who landed on a broken link. Redirecting to the real /not-found
+    // route (Program.cs now redirects 404s specifically instead of re-executing) puts the same,
+    // matching URL in front of both the server render and the client Router, so no fallback
+    // re-render happens.
+    [Fact]
+    public async Task NonexistentRoute_WhileAuthenticated_LogoutStillWorks()
+    {
+        await Page.SetViewportSizeAsync(1280, 800);
+        await LoginToDailyAsync();
+
+        await GotoAsync("/route-that-genuinely-does-not-exist-e2e");
+        await Expect(Page).ToHaveURLAsync(new Regex("/not-found$"));
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Log out of beeday" }).First.ClickAsync();
+
+        await Expect(Page).ToHaveURLAsync(new Regex("/login"));
+    }
+
+    // Sprint 32.2 (EPIC 32, EXP32-F015): NavigationItem only ever matched its own Href, so the
+    // sidebar's Account entry (Href="/settings") never showed as current for /account — the same
+    // page's pre-existing compatibility alias (docs/web/02-routing-and-pages.md §3).
+    [Fact]
+    public async Task Desktop_VisitingTheAccountAliasStillMarksAccountAsCurrent()
+    {
+        await Page.SetViewportSizeAsync(1280, 800);
+        await LoginToDailyAsync();
+
+        await GotoAsync("/account");
+
+        await Expect(Page.Locator(".desktop-sidebar a[href='/settings']")).ToHaveAttributeAsync("aria-current", "page");
+    }
+
+    // Sprint 32.2 (EPIC 32): nothing previously proved the browser's own Back/Forward buttons
+    // actually work against Blazor Server's client-side navigation (as opposed to a full page
+    // reload) — active-route state must track the real current URL, not just the URL clicked last.
+    [Fact]
+    public async Task Desktop_BrowserBackAndForwardNavigateAndKeepActiveStateInSync()
+    {
+        await Page.SetViewportSizeAsync(1280, 800);
+        await LoginToDailyAsync();
+
+        var dailyLink = Page.Locator(".desktop-sidebar nav.navigation-items a[href='/daily']");
+        var walletLink = Page.Locator(".desktop-sidebar nav.navigation-items a[href='/wallet']");
+
+        await walletLink.ClickAsync();
+        await Expect(Page).ToHaveURLAsync(new Regex("/wallet$"));
+        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        await Page.GoBackAsync();
+        await Expect(Page).ToHaveURLAsync(new Regex("/daily$"));
+        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Expect(dailyLink).ToHaveAttributeAsync("aria-current", "page");
+        await Expect(walletLink).Not.ToHaveAttributeAsync("aria-current", "page");
+
+        await Page.GoForwardAsync();
+        await Expect(Page).ToHaveURLAsync(new Regex("/wallet$"));
+        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Expect(walletLink).ToHaveAttributeAsync("aria-current", "page");
+        await Expect(dailyLink).Not.ToHaveAttributeAsync("aria-current", "page");
+    }
+
     [Fact]
     public async Task Desktop_LogoutRemainsDirectlyAccessibleInSecondaryNavigation()
     {

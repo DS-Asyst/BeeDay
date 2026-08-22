@@ -638,6 +638,100 @@ texto de estado vazio idêntico ao observado antes de qualquer item existir.
 **Regression Protection:** a definir pela Sprint 32.8 (candidato: `EmptyLabel` condicional por coluna
 quando um filtro/busca está ativo, com teste de componente cobrindo os dois textos).
 
+---
+
+### EXP32-F014 — Logout falha com 400 para qualquer usuário autenticado que caia em uma rota quebrada
+
+| Campo | Valor |
+|---|---|
+| Área | Shell de aplicação e navegação / Redirects / Dead ends |
+| Rota/Página | Qualquer rota inexistente (ex.: `/route-that-does-not-exist`) enquanto autenticado |
+| Componente | `Program.cs` (`UseStatusCodePagesWithReExecute`), `NotFound.razor`, `NavigationItems.razor` (formulário de Logout, `<AntiforgeryToken />`) |
+| Severidade | HIGH |
+| Device | Shared |
+| Accessibility Impact | Yes (usuário fica sem rota de recuperação clara de teclado/leitor de tela: uma página JSON crua, fora do chrome do produto) |
+| Owning Sprint | 32.2 (Application Shell & Navigation Fluidity) |
+| State | **FIXED** — Sprint 32.2 |
+
+**Interação:** estar autenticado, navegar para uma URL que não corresponde a nenhuma rota (link
+quebrado, favorito obsoleto, erro de digitação), depois clicar em "Logout" na barra lateral
+renderizada sobre o `NotFound` resultante.
+
+**Comportamento anterior:** `POST /auth/logout` retornava HTTP 400 com um `ProblemDetails` JSON cru
+("Unexpected request without body, failed to bind parameter \"string returnUrl\"..."), fora do chrome
+visual do produto, sem forma de recuperação a não ser o botão Voltar do navegador.
+
+**Causa raiz confirmada:** `Program.cs` usava `UseStatusCodePagesWithReExecute("/not-found")`, que
+mantém a URL quebrada original na barra de endereço enquanto o servidor renderiza o markup de
+`/not-found` para aquela resposta (confirmado com `curl`: o HTML bruto contém o
+`__RequestVerificationToken` corretamente). Assim que o circuito interativo conecta, o Router
+client-side do Blazor resolve **de novo, independentemente**, essa mesma URL (ainda sem
+correspondência) e invoca seu próprio fallback `NotFoundPage` — desta vez sem nenhum `HttpContext`
+para obter um token de antiforgery, então `<AntiforgeryToken />` renderiza vazio e o Router
+silenciosamente sobrescreve o formulário de Logout corretamente pré-renderizado por um sem token.
+Confirmado via `document.querySelectorAll('form[action="/auth/logout"] input')` retornando `[]` após
+o circuito conectar, apesar do HTML inicial (via `curl`) conter o campo.
+
+**Resolution:** `Program.cs` agora usa `app.UseStatusCodePages(...)`, redirecionando explicitamente
+**somente** quando `Response.StatusCode == 404` para `/not-found` — nunca reexecutando. Um redirect
+real muda a URL da barra de endereço para `/not-found` antes do circuito conectar, então tanto o
+render do servidor quanto o Router client-side resolvem a mesma rota real via o caminho normal
+`RouteView`, sem fallback duplicado. Uma tentativa inicial de usar o método de conveniência
+`UseStatusCodePagesWithRedirects("/not-found")` (que reage a toda a faixa 400–599 com corpo vazio, não
+só 404) quebrou `CultureCookieIntegrationTests.SetCulture_WithUnsupportedCulture_IsRejected` (400
+genuíno virou 302) — corrigido restringindo o redirect explicitamente a 404 via a sobrecarga baseada
+em delegate. `NotFound.razor` também recebeu `<PageTitle>`, `@rendermode InteractiveServer` (explícito,
+consistente com Profile/Daily/Wallet/Account) e `<h3>` → `<h1>` (a página não tinha heading nível 1,
+quebrando o próprio contrato de `FocusOnNavigate Selector="h1"` do Router).
+
+**Regression Protection:**
+- `NavigationTests.NonexistentRoute_WhileAuthenticated_LogoutStillWorks` (E2E, Chromium real) —
+  reproduz o cenário exato (rota inexistente → circuito conecta → clicar Logout) e prova o fim a fim,
+  já que o bug só se manifesta com um circuito interativo real, irreproduzível via
+  `WebApplicationFactory`.
+- `NotFoundRedirectIntegrationTests` (2 testes) — guarda determinística de que a rota inexistente
+  redireciona (302) para `/not-found`, e que essa rota carrega um token de antiforgery válido quando
+  autenticado.
+- `CultureCookieIntegrationTests.SetCulture_WithUnsupportedCulture_IsRejected` (pré-existente,
+  revalidado) — prova que a correção não regrediu respostas 4xx genuínas de outros endpoints.
+- `NotFoundTests` (bUnit, pré-existente) atualizado para `h1`.
+
+---
+
+### EXP32-F015 — Item de navegação "Account" nunca mostra current-route no alias `/account`
+
+| Campo | Valor |
+|---|---|
+| Área | Shell de aplicação e navegação / Active-route state |
+| Rota/Página | `/account` (alias de compatibilidade de `/settings`, `docs/web/02-routing-and-pages.md` §3) |
+| Componente | `NavigationItem.razor(.cs)`, `NavigationItems.razor` |
+| Severidade | MEDIUM |
+| Device | Shared |
+| Accessibility Impact | Yes (`aria-current="page"` nunca aparece nesse alias, então um leitor de tela não confirma em qual item da navegação o usuário está) |
+| Owning Sprint | 32.2 (Application Shell & Navigation Fluidity) |
+| State | **FIXED** — Sprint 32.2 |
+
+**Interação:** navegar para `/account` (em vez de `/settings`) e observar o item "Account" da barra
+lateral.
+
+**Comportamento anterior:** nem a classe CSS `is-active` nem `aria-current="page"` eram aplicados —
+`NavigationItem.IsCurrentRouteActive()` (e o próprio `NavLink` interno do Blazor) só compara a rota
+atual contra o único `Href` recebido (`/settings`); `/account` não começa com `/settings`, então a
+comparação por prefixo falha. Confirmado ao vivo: `document.querySelectorAll('a[href="/settings"]')`
+em `/account` retornava `isActive: false, ariaCurrent: null` nos dois (desktop e mobile).
+
+**Resolution:** novo parâmetro opcional `AlternateHref` em `NavigationItem` — o chamador (que conhece
+o alias, não o componente genérico) passa `AlternateHref="/account"` no item Account de
+`NavigationItems.razor`. `IsCurrentRouteActive()` agora verifica `Href` OU `AlternateHref`; a classe
+`is-active` do `<NavLink>` (que só conhece `Href`) deixou de ser a única fonte da classe visual — o
+markup agora também aplica a classe manualmente a partir do mesmo método que já decide
+`aria-current`, então os dois nunca mais podem divergir entre si.
+
+**Regression Protection:**
+- `NavigationItemTests.RouteMode_AlternateHrefAlsoCountsAsCurrent` /
+  `RouteMode_AlternateHrefDoesNotMatchUnrelatedRoutes` (bUnit).
+- `NavigationTests.Desktop_VisitingTheAccountAliasStillMarksAccountAsCurrent` (E2E, Chromium real).
+
 ## 7. Achados pré-existentes roteados para dentro da EPIC 32
 
 | ID original | Ledger de origem | Achado | Sprint EPIC 32 |
@@ -705,7 +799,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 
 | Sprint | Achados herdados desta Sprint |
 |---|---|
-| 32.2 — Application Shell & Navigation Fluidity | nenhum achado novo; shell desktop revalidado sem defeito |
+| 32.2 — Application Shell & Navigation Fluidity | EXP32-F014, EXP32-F015 — ambos `FIXED` nesta Sprint |
 | 32.3 — Page Layout Consistency | nenhum achado novo; 4 layouts revalidados sem defeito |
 | 32.4 — Buttons & Action Hierarchy | EXP32-F001 |
 | 32.5 — Forms & Input Experience | EXP32-F005, EXP32-F006 (cross-ref), EXP32-F007, EXP32-F011 (cross-ref), EXP32-F012 (cross-ref) |

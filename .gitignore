@@ -67,7 +67,7 @@ coverage-report/
 *.trx
 *.coverage
 *.coveragexml
-src/BeeDay.Web/App_Data/test-email-capture/
+src/BeeDay.Web/App_Data/
 
 #####################################################
 # NuGet

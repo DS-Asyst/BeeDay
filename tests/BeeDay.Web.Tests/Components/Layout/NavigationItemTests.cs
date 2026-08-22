@@ -94,6 +94,40 @@ public sealed class NavigationItemTests
     }
 
     [Fact]
+    public void RouteMode_AlternateHrefAlsoCountsAsCurrent()
+    {
+        using var context = new BunitContext();
+        context.Services.GetRequiredService<NavigationManager>().NavigateTo("/account");
+
+        var cut = context.Render<NavigationItem>(parameters => parameters
+            .Add(component => component.Icon, BeeDayIconName.Account)
+            .Add(component => component.Label, "Account")
+            .Add(component => component.Href, "/settings")
+            .Add(component => component.AlternateHref, "/account"));
+
+        var link = cut.Find("a");
+        Assert.Equal("page", link.GetAttribute("aria-current"));
+        Assert.Contains("is-active", link.GetAttribute("class"));
+    }
+
+    [Fact]
+    public void RouteMode_AlternateHrefDoesNotMatchUnrelatedRoutes()
+    {
+        using var context = new BunitContext();
+        context.Services.GetRequiredService<NavigationManager>().NavigateTo("/daily");
+
+        var cut = context.Render<NavigationItem>(parameters => parameters
+            .Add(component => component.Icon, BeeDayIconName.Account)
+            .Add(component => component.Label, "Account")
+            .Add(component => component.Href, "/settings")
+            .Add(component => component.AlternateHref, "/account"));
+
+        var link = cut.Find("a");
+        Assert.Null(link.GetAttribute("aria-current"));
+        Assert.DoesNotContain("is-active", link.GetAttribute("class"));
+    }
+
+    [Fact]
     public void RouteMode_PrefixMatchStaysActiveOnSubRoutes()
     {
         using var context = new BunitContext();

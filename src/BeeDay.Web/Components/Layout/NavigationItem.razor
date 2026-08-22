@@ -3,7 +3,7 @@
     {
         <NavLink href="@Href"
                  Match="Match"
-                 class="navigation-item"
+                 class="@("navigation-item " + ActiveClassValue)"
                  ActiveClass="is-active"
                  aria-current="@AriaCurrentValue"
                  @onclick="HandleNavigate">
