@@ -3,8 +3,8 @@
 **Fonte da verdade:** verificado diretamente em
 `src/BeeDay.Infrastructure/Persistence/SqlServer/BeeDayDbContext.cs`, todas as classes
 `*Configuration.cs` em `src/BeeDay.Infrastructure/Persistence/SqlServer/Configurations/`, os 8
-repositórios e implementações, `EfUnitOfWork.cs`, e a migration
-`20260803111144_InitialCreate.cs`.
+repositórios e implementações, `EfUnitOfWork.cs`, e as migrations `20260803111144_InitialCreate.cs`
+e `20260821054442_AddTransactionAmountUpperBoundCheckConstraint.cs`.
 
 ## 1. `BeeDayDbContext`
 
@@ -73,10 +73,11 @@ Esta é a única linha de SQL bruto em toda a migration — todo o restante usa
 
 ## 5. Migrations
 
-Exatamente **uma** migration existe hoje:
-`20260803111144_InitialCreate.cs` (+ `.Designer.cs` + `BeeDayDbContextModelSnapshot.cs`). Não há
-histórico de migrations incrementais — o schema nasceu completo em um único arquivo, consistente
-com a política de "banco novo, sem importação" (ver ADR-002).
+Duas migrations existem hoje: `20260803111144_InitialCreate.cs` (schema inicial completo,
+consistente com a política de "banco novo, sem importação" — ver ADR-002) e
+`20260821054442_AddTransactionAmountUpperBoundCheckConstraint.cs` (substitui
+`CK_Transactions_Amount` por um teto superior — ver §6). `BeeDayDbContextModelSnapshot.cs`
+reflete o schema após ambas.
 
 ## 6. Constraints e índices notáveis por tabela
 
@@ -88,10 +89,14 @@ com a política de "banco novo, sem importação" (ver ADR-002).
 | `Todos` | FK para `Users` é `DeleteBehavior.NoAction` (evita múltiplos caminhos de cascade — erro SQL Server 1785) |
 | `Wallets` | Unique `UX_Wallets_User` (uma wallet por usuário); FK para `Users` `NoAction` (mesmo motivo) |
 | `WalletTags` | Unique `UX_WalletTags_User_Name`; check de `Color` |
-| `Transactions` | Check `Amount > 0`; FK para `Wallet` CASCADE; FK para `WalletTag` `SetNull` |
+| `Transactions` | Check `Amount > 0 AND Amount <= 999999999999` (teto adicionado na migration `20260821054442`); FK para `Wallet` CASCADE; FK para `WalletTag` `SetNull` |
 | `ExperienceEntries` | Unique filtrado `UX_ExperienceEntries_Dedup` (via SQL bruto, ver acima); checks de `SourceType`/`RewardType` |
 
 ## 7. Repositórios (8) e read services (2)
+
+Ver [ADR-003](../adr/ADR-003-aggregate-repositories.md) para a decisão original de repositórios
+por Aggregate Root + read services (classificada `VALID` na Sprint 31.2 — a lista abaixo é a
+adoção final, incluindo os repositórios criados fora da lista ilustrativa original do ADR).
 
 | Interface (`Application`) | Implementação (`Infrastructure`) |
 |---|---|
@@ -99,7 +104,7 @@ com a política de "banco novo, sem importação" (ver ADR-002).
 | `IUserTokenRepository` | `EfUserTokenRepository` |
 | `IHabitRepository` | `EfHabitRepository` |
 | `IRecurringTaskRepository` | `EfRecurringTaskRepository` |
-| `IProjectRepository` (13 métodos — o maior, inclui Todos como entidade filha) | `EfProjectRepository` |
+| `IProjectRepository` (12 métodos — o maior, inclui Todos como entidade filha) | `EfProjectRepository` |
 | `IWalletRepository` (3 métodos — o menor) | `EfWalletRepository` |
 | `IWalletTagRepository` | `EfWalletTagRepository` |
 | `ITransactionRepository` | `EfTransactionRepository` |
@@ -138,7 +143,7 @@ string configurada.
 
 ## 10. Cobertura de teste (verificado por contagem de arquivos, não por execução nesta seção)
 
-`tests/BeeDay.Infrastructure.Tests/Persistence/SqlServer/`: 65 testes (`[Fact]`/`[Theory]`)
+`tests/BeeDay.Infrastructure.Tests/Persistence/SqlServer/`: 68 testes (`[Fact]`/`[Theory]`)
 cobrindo os 8 repositórios, `EfUnitOfWork`, `EfDashboardReadService`, `EfWalletReadService`.
 `tests/BeeDay.Infrastructure.Tests/BeeDayDbContextTests.cs`: 11 testes adicionais, cobrindo
 especificamente as decisões de mapeamento TPC/Owned Type/Complex Type contra um SQL Server

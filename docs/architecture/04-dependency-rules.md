@@ -26,7 +26,7 @@ por grep de namespaces cruzando camadas, e por leitura direta dos arquivos citad
 
 ### 3.1 Domain não conhece infraestrutura
 
-`src/BeeDay.Domain/Entities/Habit.cs:18`:
+`src/BeeDay.Domain/Entities/Habit.cs:20`:
 
 ```csharp
 public static Habit Create(string title, string? description, HabitDirection direction,

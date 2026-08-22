@@ -919,3 +919,133 @@ regra de agente reconciliado, `README.md` raiz atualizado (nova seção + corre�
 `.agents/skills/beeday-ui-ux/SKILL.md` criado, e Documentation Ledger sincronizado.
 
 ---
+## Sprint 31.4 — Architecture Documentation Reconciliation
+
+**GitHub Issue:** [#232](https://github.com/tiagoarrigoni/BeeDay/issues/232)
+**Branch:** `sprint/31.4-architecture-documentation-reconciliation`
+**Depende de:** #231 (concluída, ver seção acima)
+
+> Segue `CLAUDE.md`, o padrão de planejamento beeday e o Global Execution Contract da EPIC 31 em
+> #228.
+
+### Objetivo da Sprint
+
+Reconciliar os 9 documentos de `docs/architecture/` com o sistema real pós-EPIC-30, sem inventar
+camadas, padrões ou responsabilidades.
+
+### Validação aplicada nesta Sprint (política aprovada pelo owner)
+
+Sprint documental — nenhum código-fonte foi alterado (apenas `docs/architecture/*.md`). Suíte
+completa de testes **não** executada, por política aprovada em 2026-08-21.
+
+### Método
+
+Comparação linha a linha entre os 9 documentos e evidência real: os 4 `.csproj` de `src/*`
+(`ProjectReference`/`PackageReference`), `Program.cs`, `BeeDayDbContext.cs` e `Configurations/*`,
+os 8 repositórios + 2 read services + `IUnitOfWork`, `User.cs`/`Habit.cs`, e os 6 ADRs. Um
+levantamento inicial abrangente foi delegado (agente de exploração, somente leitura, sem edição) e
+todo achado de discrepância relatado foi **reverificado de forma independente nesta sessão** antes
+de qualquer edição — `grep`/leitura direta confirmaram cada mismatch abaixo antes da correção.
+
+### Achados corrigidos (Required work #3)
+
+| Documento | Achado | Correção aplicada |
+|---|---|---|
+| `03-clean-architecture.md` (tabela §1, linha `BeeDay.Web`) | Claim "`IStringLocalizer`/`ResourceManager` fora de `BeeDay.Web` → 0 ocorrências" estava incorreta: `src/BeeDay.Infrastructure/Identity/IdentityEmailComposer.cs:21` usa `ResourceManager` puro (não `IStringLocalizer`) deliberadamente, para localizar e-mail transacional sem depender de Web (ADR-006). | Claim dividida: `IStringLocalizer` continua exclusivo de Web (confirmado, 0 ocorrências); `ResourceManager` em Infrastructure agora citado como exceção documentada, com link para ADR-006 e `docs/infrastructure/06-transactional-email.md`. |
+| `04-dependency-rules.md` (linha 29) | `Habit.cs:18` citado para `Habit.Create(...)` — assinatura real está na linha 20. | Corrigido para `Habit.cs:20` (verificado via `grep -n`). |
+| `05-runtime-flows.md` (linha 85) | `/auth/login` citado como `Program.cs:247-316` — endpoint real começa em 295 e termina em 381 (arquivo cresceu desde a última verificação). | Corrigido para `Program.cs:295-381`. |
+| `06-persistence-architecture.md` §5 (Migrations) | Afirmava "exatamente uma migration"; hoje existem 2 — `20260821054442_AddTransactionAmountUpperBoundCheckConstraint.cs` foi adicionada em 2026-08-21 (mesmo dia desta Sprint, commit `06b5b49`). | Seção reescrita citando as 2 migrations e o que a segunda faz; cabeçalho "Fonte da verdade" do documento também atualizado. |
+| `06-persistence-architecture.md` §6 (tabela `Transactions`) | Check constraint documentado como `Amount > 0`; a migration acima o substituiu por `Amount > 0 AND Amount <= 999999999999`. | Tabela atualizada com o teto superior e referência à migration. |
+| `06-persistence-architecture.md` §7 | `IProjectRepository` citado com 13 métodos; contagem real (`grep -c "Task"` no arquivo de interface) é 12. | Corrigido para 12 métodos (continua sendo o maior repositório, conclusão não muda). |
+| `06-persistence-architecture.md` §10 | Contagem de testes de `Persistence/SqlServer/` citada como 65; contagem real de `[Fact]`/`[Theory]` é 68. | Corrigido para 68 — este é exatamente o tipo de "stale test count" que a Sprint 31.1 pediu para localizar (Issue #229, item 5). |
+| `07-security-architecture.md` (5 citações de linha) | `Program.cs:124-171` (cookie auth), `Program.cs:144-170` (`OnValidatePrincipal`), `User.cs:33` (`SessionVersion`), linha 131 (`InvalidateSessions()`), `Program.cs:302-316` (rate limiter), `Program.cs:219` (`UseAntiforgery()`) — todas desatualizadas por crescimento do arquivo desde a última verificação. | Todas as 6 corrigidas para os números de linha reais, verificados nesta sessão: `127-183`, `146-183`, `35`, `150`, `367-381`, `267`, respectivamente. Nenhuma mudança de conteúdo/lógica — apenas rastreabilidade. |
+
+Nenhuma correção alterou uma conclusão arquitetural — todas preservam exatamente o que o documento
+já afirmava sobre comportamento, apenas corrigindo onde encontrar a evidência no código atual.
+
+### Lacuna de citação de ADR fechada (Required work #5)
+
+Nenhum dos 9 documentos citava [ADR-003](../adr/ADR-003-aggregate-repositories.md) — a decisão
+mais diretamente relacionada ao §7-8 de `06-persistence-architecture.md` (repositórios por
+Aggregate + read services + `IUnitOfWork`), classificada `VALID` na Sprint 31.2. Adicionada uma
+citação explícita no início do §7, evitando duplicar o conteúdo do ADR (apenas um link + uma frase
+de contexto).
+
+Confirmado: nenhum dos 9 documentos cita ADR-001 (`CONFLICTING`, Sprint 31.2) como autoridade —
+eles simplesmente não o mencionam, então não há "confiança indevida em ADR inválido" para corrigir
+aqui (Required work #8/acceptance criterion correspondente já satisfeito por omissão, não por
+correção).
+
+### Conteúdo já correto, confirmado sem reescrita (Required work #4)
+
+A grande maioria das afirmações verificadas already estava correta e não foi tocada, incluindo:
+estrutura de 4 projetos e grafo de `ProjectReference` (`02-solution-structure.md`), isolamento do
+Domain (zero `using` EF Core/AspNetCore), os 8 repositórios + `IUnitOfWork` e seus registros DI
+(`AddScoped`/`AddTransient`), o pipeline de behaviors do MediatR, a configuração de cookie/rate
+limit/antiforgery em si (apenas os números de linha estavam desatualizados, não a lógica
+descrita), os 5 segredos de `deploy-prd.yml`, e o `web.config` de HMG. Nenhum destes foi reescrito
+por estilo — permanecem `CURRENT` no Ledger sem alteração de conteúdo.
+
+### Confirmação: nenhuma camada/padrão inventado (acceptance criterion)
+
+Nenhum documento descreve uma camada, projeto `Contracts` separado, ou padrão que não existe no
+código — confirmado por busca (`find -iname "*Contracts*"`) que não há nenhum `.csproj` de nome
+`Contracts` em lugar nenhum da solução; os "contratos" são pastas dentro de `BeeDay.Application`,
+exatamente como os 9 documentos já descreviam.
+
+### Documentation Ledger — atualização
+
+| ID | Path | Atualização |
+|---|---|---|
+| DOC-041–049 | `docs/architecture/*` (9 arquivos) | `Current state` permanece `CURRENT`; achados de linha/contagem desatualizados corrigidos (tabela acima); evidência de reconciliação registrada. |
+
+### Critérios de aceite (Issue #232)
+
+- [x] Architecture docs match actual project references — confirmado e já correto antes desta
+      Sprint.
+- [x] Domain/Application/Infrastructure/Web responsibilities match repository truth — 1 correção
+      aplicada (`ResourceManager` em Infrastructure).
+- [x] No undocumented invented layer or pattern appears — confirmado, nenhum projeto `Contracts`
+      inventado nem em código nem em documentação.
+- [x] Current architecture docs do not rely on invalid/superseded ADRs as current authority —
+      nenhum dos 9 documentos cita ADR-001 (`CONFLICTING`); ADR-002/003/006 citados são todos
+      `VALID`.
+- [x] Duplicate architecture explanations are consolidated or linked — nenhuma duplicação nova
+      introduzida; lacuna de citação ADR-003 fechada por link, não por cópia de conteúdo.
+- [x] Already-correct architecture content may be marked CURRENT without rewrite — aplicado (seção
+      acima).
+
+### Sprint-specific boundary respeitado
+
+Nenhuma mudança de arquitetura de software foi feita para facilitar a documentação — todas as 8
+correções são fatos (números de linha, contagens, uma migration nova, uma exceção documentada já
+existente no código) sendo alinhados à documentação, nunca o inverso.
+
+### Riscos residuais
+
+- Itens marcados `UNVERIFIABLE` pelo levantamento inicial (ex.: comportamento interno de
+  `Deploy-BeeDay.ps1`, conteúdo de `appsettings*.json`, histórico de execução de `deploy-prd.yml`)
+  não foram reverificados nesta Sprint — pertencem ao escopo de 31.11/31.12, não de arquitetura.
+- Novas migrations/mudanças de schema futuras podem voltar a desatualizar §5/§6 de
+  `06-persistence-architecture.md` — sem mecanismo automático de detecção; próxima Sprint que tocar
+  Infrastructure deve reverificar.
+
+### Validação executada
+
+```bash
+git status
+dotnet format BeeDay.slnx --verify-no-changes
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+git diff --check
+```
+
+Resultados registrados na seção "Quality/Validation" do relatório final da Sprint enviado ao owner
+nesta conversa. Todo número de linha citado nas correções acima foi verificado com `grep -n`/leitura
+direta nesta sessão antes de ser escrito.
+
+### Deliverable
+
+5 arquivos de `docs/architecture/` corrigidos (`03`, `04`, `05`, `06`, `07`), lacuna de citação
+ADR-003 fechada, e Documentation Ledger atualizado.
+
+---
