@@ -4,15 +4,41 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     labels:
       - "dependencies"
+    groups:
+      # Bundles all compatible patch/minor NuGet bumps into a single weekly PR. Major bumps are
+      # deliberately excluded from this group (update-types below) so they keep landing as their
+      # own individual PR, requiring explicit review before adoption - see
+      # docs/deployment/09-pipeline-performance.md for the review method applied to this repo's
+      # .NET 10 / EF Core / Blazor / bUnit / Playwright stack.
+      nuget-patch-minor:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     labels:
       - "dependencies"
       - "ci"
+    groups:
+      # Same policy as nuget-patch-minor, scoped to GitHub Actions. Major bumps stay individual -
+      # deploy-prd.yml deliberately pins several actions below their latest major (production
+      # self-hosted runner Node-version compatibility not yet confirmed; see the comments on the
+      # relevant steps in that workflow), so every major bump needs its own explicit review before
+      # it can be adopted repo-wide.
+      actions-patch-minor:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
