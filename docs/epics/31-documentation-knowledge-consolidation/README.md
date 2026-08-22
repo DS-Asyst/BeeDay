@@ -749,3 +749,173 @@ separação formal de responsabilidade root `README.md`/`docs/README.md`, e deci
 `docs/` (nenhuma mudança estrutural justificada).
 
 ---
+## Sprint 31.3 — AI Governance Extraction & Repository Cleanup
+
+**GitHub Issue:** [#231](https://github.com/tiagoarrigoni/BeeDay/issues/231)
+**Branch:** `sprint/31.3-ai-governance-extraction-repository-cleanup`
+**Depende de:** #230 (concluída, ver seção acima)
+
+> Segue `CLAUDE.md`, o padrão de planejamento beeday e o Global Execution Contract da EPIC 31 em
+> #228.
+
+### Objetivo da Sprint
+
+Separar governança de projeto durável de configuração específica de agente, sem perder nenhuma
+regra de repositório, e fechar achados de higiene já identificados nas Sprints 31.1/31.2 sobre os
+próprios artefatos de governança de IA.
+
+### Validação aplicada nesta Sprint (política aprovada pelo owner)
+
+Sprint estritamente documental/de configuração local — nenhum artefato executável de produção foi
+alterado (todos os arquivos tocados são `.md` rastreados ou arquivos locais-apenas fora do Git).
+Suíte completa de testes **não** executada, por política aprovada em 2026-08-21.
+
+### 1. Método
+
+Lidos integralmente nesta sessão: `CLAUDE.md` (já presente no contexto do sistema), `AGENTS.md`,
+`.claude/README.md`, `.claude/settings.json`, `.claude/settings.local.json`,
+`.claude/skills/beeday-quality/SKILL.md` e `beeday-ui-ux/SKILL.md` (amostra representativa),
+`.agents/README.md`, `.agents/settings.local.json`, `.codex/README.md`, `.codex/config.toml`,
+`.codex/rules/beeday.rules`. Comparados contra `docs/` rastreado via `Grep` para achar duplicação
+real (não presumida).
+
+### 2. Classificação de instruções (Required work #1)
+
+| Artefato | Classificação predominante | Evidência / racional |
+|---|---|---|
+| `CLAUDE.md` §1 (Missão, 9 prioridades) | **`PROJECT_RULE`** — sem lar canônico rastreado até esta Sprint | Busca (`Grep`) por essa ordenação específica em `docs/` não encontrou nenhuma ocorrência antes desta Sprint. **Migrado nesta Sprint** para o `README.md` raiz, nova seção "Engineering priorities" (rastreada). Outcome: `CORRECTED`. |
+| `CLAUDE.md` §2 (ordem de leitura, hierarquia de autoridade) | `AGENT_RULE` | Procedimento de como abordar uma tarefa — não um fato sobre o sistema; não precisa de cópia rastreada. |
+| `CLAUDE.md` §3 (comportamento de engenharia: reuse-first, sem placeholder) | `AGENT_RULE` | Disciplina de processo, não um fato verificável sobre `src/`. |
+| `CLAUDE.md` §4 (Contrato de arquitetura: Domain/Application/Infrastructure/Web) | `DUPLICATED_RULE` | Lar canônico rastreado já existe: `docs/architecture/03-clean-architecture.md`, `04-dependency-rules.md` (ambos `CURRENT` no Ledger). |
+| `CLAUDE.md` §5 (beeday Experience System e marca: `beeday` minúsculo, `#5247F9`, marca≠identidade técnica) | `DUPLICATED_RULE` | `docs/brand/03-color-palette.md` já documenta `#5247F9`; `docs/brand/README.md` e `CLAUDE.md` do próprio repositório (linha "Unless a specific technical rename is explicitly approved") já expressam a regra marca≠identidade técnica em ambos os lugares. |
+| `CLAUDE.md` §6 (roteamento de Skills) | `AGENT_RULE` | Específico de como um agente de IA seleciona procedimento — sem equivalente humano necessário. |
+| `CLAUDE.md` §7–8 (Autorização: Level 0-3, Classes A-E) | `AGENT_RULE` | Modelo de autonomia de agente de IA — não uma regra de negócio ou arquitetura do produto. |
+| `CLAUDE.md` §9 (Git workflow: `hmg`→`main`→`prd`, branches protegidas) | `DUPLICATED_RULE` (fato central) + `AGENT_RULE` (procedimento) | O fato central (fluxo de branches, `main`/`prd` protegidas) já está em `README.md` raiz, seção "Branch strategy" — `DUPLICATED_RULE`, correto. O detalhe procedural (Class C/D, quando comitar) é `AGENT_RULE`. |
+| `CLAUDE.md` §10 (Segurança e segredos) | `AGENT_RULE`/prática geral | Nenhuma regra de segredo específica do produto (não é uma política de segurança do produto beeday, é uma disciplina universal de qualquer engenharia) — nenhuma duplicação necessária. |
+| `CLAUDE.md` §11–12 (Disciplina de mudança, contrato de documentação) | `AGENT_RULE` | Refletido em espírito por `docs/CONVENTIONS.md`, mas como processo de IA, não como fato do produto. |
+| `CLAUDE.md` §13 (Testes e validação obrigatória: comandos `dotnet format/build/test`) | `DUPLICATED_RULE` | `README.md` raiz, seção "Quality gate", tem exatamente os mesmos comandos. |
+| `CLAUDE.md` §13.1 (classificação de falha: `CHANGE-CAUSED` etc.) | `DUPLICATED_RULE` | `docs/testing/01-testing-strategy.md` já usa e explica `CHANGE-CAUSED` no contexto real de flakiness conhecida. |
+| `CLAUDE.md` §14 (revisão em duas passadas) | `AGENT_RULE` | Processo de revisão de IA — nenhum documento de produto rastreado precisa disso. |
+| `CLAUDE.md` §15 (modelo de qualidade: `PASS`/`BLOCKER`/`MAJOR`/`MINOR`) | `AGENT_RULE` | Vocabulário de relatório de agente — `BLOCKER`/`MAJOR`/`MINOR` em `docs/design-system/02-components.md` e `docs/deployment/11-release-quality-gate.md` são usos textualmente coincidentes, não o mesmo modelo formal; não constitui duplicação real. |
+| `CLAUDE.md` §16 (Repository State vs Environment State) | `AGENT_RULE`/conceitual | Modelo mental para relatório de agente; não é uma regra de negócio do produto. |
+| `CLAUDE.md` §17 (condições de parada autônoma) | `AGENT_RULE` | Específico de execução autônoma de IA. |
+| `CLAUDE.md` §18 (Definition of Done) | `AGENT_RULE` | Checklist de conclusão de tarefa de IA. |
+| `CLAUDE.md` §19 (relatório de fim de tarefa) | `AGENT_RULE` | Formato de relatório de IA. |
+| `CLAUDE.md` §20 (princípios operacionais) | `AGENT_RULE` | Heurísticas de decisão de IA. |
+| `AGENTS.md` (documento inteiro, 21 seções paralelas) | `DUPLICATED_RULE` — **intencional e necessária** | `AGENTS.md` é o adaptador equivalente de `CLAUDE.md` para OpenAI Codex — cada ferramenta de IA só carrega automaticamente seu próprio arquivo (`CLAUDE.md` para Claude Code, `AGENTS.md` para Codex). `AGENTS.md` já reconhece isso explicitamente em sua própria Seção 2.1, item 2: "`CLAUDE.md` when it exists, because it contains shared BeeDay engineering governance". Reduzir `AGENTS.md` a um ponteiro fino para `CLAUDE.md` regrediria a autossuficiência de governança do Codex caso a leitura cruzada falhe — **não recomendado**, mantido como duplicação intencional. |
+| `.claude/skills/*` (9 arquivos), `.agents/skills/*` (8→9 arquivos após esta Sprint) | `AGENT_RULE` | Procedimentos reutilizáveis de execução, por definição — nenhum contém fato de produto não já coberto acima. |
+| `.claude/README.md`, `.agents/README.md`, `.codex/README.md` | `AGENT_RULE` | Documentação do próprio adaptador (por que Skills existem, filosofia de permissão) — não fatos do produto. |
+| `.claude/settings.json`, `.claude/settings.local.json`, `.agents/settings.local.json` | `AGENT_RULE` | Configuração técnica de ferramenta (allowlist de comandos, variáveis de ambiente). Verificado nesta Sprint: nenhum segredo, token, senha ou credencial presente em nenhum dos três arquivos — apenas padrões de permissão de comando e caminhos temporários locais da máquina (esperado, ver `.claude/README.md`: "`settings.local.json` — local session behavior only"). |
+| `.codex/config.toml`, `.codex/rules/beeday.rules` | `AGENT_RULE` | Postura de sandbox/aprovação e portões de escalonamento por comando — mecanismo técnico do Codex, sem fato de produto. |
+
+Nenhum `OBSOLETE_RULE` foi encontrado — nenhuma instrução morta ou contraditória com o estado atual
+do repositório foi identificada em nenhum dos artefatos de governança de IA.
+
+### 3. Ação tomada: migração da regra genuína sem lar rastreado (Required work #2)
+
+Único `PROJECT_RULE` sem cópia rastreada encontrado: a ordem de prioridades de engenharia
+(Correctness → Repository integrity → Architectural integrity → Security → Backward compatibility
+→ Experience/Design System consistency → Maintainability → Minimal scope → Delivery efficiency).
+
+Adicionada nesta Sprint como nova seção **"Engineering priorities"** no `README.md` raiz (arquivo
+rastreado), imediatamente após a introdução do produto — consistente com a responsabilidade de
+`README.md` como ponto de entrada conciso, formalizada na Sprint 31.2. A seção linka de volta ao
+fato de que o contrato de governança completo permanece local (não expõe conteúdo de IA no
+repositório público, respeitando a política do commit `869b57e`).
+
+Também corrigida, na mesma edição, a árvore "Repository structure" do `README.md` raiz — removida
+a linha `├── CLAUDE.md`, que listava um arquivo não rastreado como se fizesse parte da árvore real
+do repositório (achado `DOC-010`/`PARTIALLY_CURRENT`, Sprint 31.1). Outcome: `CORRECTED`.
+
+### 4. Ação tomada: paridade entre adaptadores de agente (achado da Sprint 31.1, `DOC-164`/`DOC-174`)
+
+Confirmado por `diff` byte-a-byte (ignorando final de linha) que `.agents/skills/*` é cópia
+integral de `.claude/skills/*` (mesmo conteúdo, apenas CRLF em vez de LF) — os dois adaptadores
+devem permanecer sincronizados por design. `.agents/skills/beeday-ui-ux/SKILL.md` estava
+genuinamente ausente (8 de 9 arquivos espelhados). Criado nesta Sprint como cópia byte-idêntica
+(CRLF, consistente com os demais arquivos de `.agents/skills/`) de
+`.claude/skills/beeday-ui-ux/SKILL.md`. Arquivo local-apenas — não rastreado pelo Git, portanto
+sem impacto no diff desta Sprint nem necessidade de aprovação de remoção/untracking. Outcome:
+`CREATED`.
+
+`.codex/rules/beeday.rules` foi verificado e é um arquivo de portões de escalonamento de comando
+(technical gate), não um espelho de `.agents/skills/` — não tem lacuna equivalente a preencher;
+`.codex/README.md` já documenta corretamente que `.agents/skills/` (não `.codex/`) é onde os
+procedimentos do Codex vivem.
+
+### 5. Artefatos rastreados a remover/untrackear (Required work #5)
+
+Nenhum. `CLAUDE.md`, `AGENTS.md`, `.claude/`, `.agents/`, `.codex/` já estão totalmente
+untracked desde o commit `869b57e` (2026-08-20) — não existe nenhum artefato de governança de IA
+atualmente rastreado pelo Git para remover. A cláusula "Owner decision required" da Issue #231 não
+se aplica nesta Sprint por ausência de artefato-alvo.
+
+### 6. Achados não resolvidos, mantidos como estão (por decisão explícita de não agir sem confirmação do owner)
+
+- `.github/upgrades/scenarios/dotnet-version-upgrade/*` (6 arquivos, `DOC-178`–`183`) e
+  `scripts/iis-control/Provision-BeeDayHmgIisControl.ps1.orig` (`DOC-184`) permanecem no disco,
+  não rastreados, classificados `REMOVED (candidate)` desde a Sprint 31.2. Nenhuma exclusão foi
+  executada nesta Sprint: são arquivos fora do escopo desta tarefa cuja origem/necessidade futura
+  não pode ser confirmada com certeza a partir de evidência de repositório — exclusão de arquivos
+  de disco que não pertencem à tarefa atual, mesmo não rastreados, requer confirmação explícita do
+  owner antes de ser executada, por prudência operacional (não uma regra formal do Global
+  Contract, mas consistente com `CLAUDE.md` §9.1 "never silently discard... work"). Permanecem
+  pendentes de decisão do owner.
+
+### Documentation Ledger — atualização (Required work: manter Ledger sincronizado)
+
+| ID | Path | Outcome desta Sprint |
+|---|---|---|
+| DOC-151–177 | `CLAUDE.md`, `AGENTS.md`, `.claude/*`, `.agents/*` (exceto o novo arquivo abaixo), `.codex/*` | Classificados (tabela seção 2); nenhum removido/untracked; nenhum segredo encontrado. |
+| DOC-178–184 | `.github/upgrades/*`, `scripts/iis-control/*.orig` | Sem mudança — permanecem `REMOVED (candidate)`, pendente decisão explícita do owner (seção 6). |
+| **DOC-185** (novo) | `.agents/skills/beeday-ui-ux/SKILL.md` | **`CREATED`** nesta Sprint — cópia byte-idêntica de `.claude/skills/beeday-ui-ux/SKILL.md`; local-apenas, não rastreado; categoria `AI/Project Governance`; Owner topic `AI/Project Governance`; Owning Sprint 31.3 (concluído); Final state `CURRENT`. |
+| DOC-010 (`README.md` raiz) | — | Estado corrigido nesta Sprint: linha `CLAUDE.md` removida da árvore e seção "Engineering priorities" adicionada. Estado do Ledger atualizado de `PARTIALLY_CURRENT` para `CURRENT`. |
+
+### Critérios de aceite (Issue #231)
+
+- [x] No critical project rule exists only in an untracked/local agent file — o único item
+      encontrado (ordem de prioridades) foi migrado para `README.md` raiz nesta Sprint.
+- [x] Project rules and agent-specific behavior have clear ownership — tabela da seção 2.
+- [x] No tracked governance artifact is removed without required owner approval — nenhum artefato
+      rastreado existia para remover; nada foi removido.
+- [x] Tooling dependencies are verified before file removal/untracking — não aplicável (nenhuma
+      remoção/untracking de arquivo rastreado ocorreu); a criação de `.agents/skills/beeday-ui-
+      ux/SKILL.md` foi verificada por `diff` contra o par existente antes da criação.
+- [x] Duplicate governance text is reduced where safe — `AGENTS.md` mantido integralmente por ser
+      duplicação intencional e necessária (seção 2); a única duplicação removível (ordem de
+      prioridades sem lar rastreado) foi resolvida por migração, não por redução de texto duplicado
+      entre `CLAUDE.md`/`AGENTS.md`.
+
+### Sprint-specific boundary respeitado
+
+"Agent-specific file" não foi tratado como sinônimo de "deve ser removido do Git" — nenhum arquivo
+de governança de IA foi proposto para remoção; a única ação de arquivo foi uma criação (fechamento
+de paridade) e duas edições em `README.md` (migração de regra + correção factual pontual).
+
+### Riscos residuais
+
+- `.github/upgrades/*` e o arquivo `.orig` órfão permanecem no disco local, sem decisão do owner.
+- A duplicação intencional entre `CLAUDE.md`/`AGENTS.md` significa que uma futura mudança de
+  governança precisa ser replicada manualmente nos dois arquivos — risco de deriva já mitigado pela
+  leitura cruzada instruída em `AGENTS.md` §2.1, mas não eliminado.
+
+### Validação executada
+
+```bash
+git status
+dotnet format BeeDay.slnx --verify-no-changes
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+git diff --check
+```
+
+Resultados registrados na seção "Quality/Validation" do relatório final da Sprint enviado ao owner
+nesta conversa. Nenhum segredo introduzido (verificado por leitura direta dos 3 arquivos de
+settings). Nenhum código-fonte, projeto, script, workflow, migration ou teste alterado.
+
+### Deliverable
+
+Relatório de classificação de governança (tabela da seção 2), ownership de regra de projeto vs.
+regra de agente reconciliado, `README.md` raiz atualizado (nova seção + correção factual),
+`.agents/skills/beeday-ui-ux/SKILL.md` criado, e Documentation Ledger sincronizado.
+
+---
