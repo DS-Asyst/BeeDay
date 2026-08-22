@@ -10,6 +10,17 @@ presentation concerns. The gamification is intentionally light — inspired by p
 Duolingo rather than by RPG mechanics — and exists only to encourage consistency and visible
 progress.
 
+## Engineering priorities
+
+When trade-offs arise, priority order is: correctness, repository integrity, architectural
+integrity, security and data safety, backward compatibility, beeday Experience System and Design
+System consistency, maintainability and testability, minimal scope and reversibility, delivery
+efficiency. Speed never overrides correctness, architecture, security, or repository integrity.
+The full engineering governance contract (architecture layering, authorization model, Git
+workflow, mandatory validation, and review standards) is maintained locally as AI-agent operating
+context and is not part of this public repository — see the "Documentation" section below for
+what is tracked here.
+
 ## Current capabilities
 
 - user registration with full name, cookie authentication, email confirmation, and password
@@ -61,7 +72,6 @@ compatibility layer — the database starts empty for every new environment. See
 
 ```text
 BeeDay/
-├── CLAUDE.md
 ├── README.md
 ├── LICENSE
 ├── .editorconfig
