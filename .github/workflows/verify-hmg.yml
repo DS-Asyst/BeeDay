@@ -102,7 +102,7 @@ jobs:
             return `${runId}`;
 
       - name: Download deployment info
-        uses: actions/download-artifact@v8.0.1
+        uses: actions/download-artifact@v8
         with:
           name: beeday-hmg-deployment-info
           path: ${{ runner.temp }}\DeploymentInfo
