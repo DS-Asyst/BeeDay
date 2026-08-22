@@ -1,7 +1,7 @@
 # EPIC 31 — beeday Repository Documentation & Knowledge Consolidation
 
 **GitHub Issue:** [#228](https://github.com/tiagoarrigoni/BeeDay/issues/228)
-**Status:** Em andamento — Sprint 31.1 concluída
+**Status:** Em andamento — Sprints 31.1 e 31.2 concluídas
 
 ## Objetivo
 
@@ -65,10 +65,12 @@ conhecimento durável do repositório, antes de qualquer mudança estrutural.
 - **150 arquivos rastreados pelo Git** em `docs/`, `.github/`, `scripts/` e `README.md` da raiz
   (`git ls-files docs .github scripts README.md`, executado nesta sessão).
 - **34 artefatos locais-apenas** (untracked por design ou por natureza) também inventariados:
-  - `CLAUDE.md`, `AGENTS.md`, `.claude/` (11 arquivos), `.agents/` (10 arquivos), `.codex/`
+  - `CLAUDE.md`, `AGENTS.md`, `.claude/` (12 arquivos), `.agents/` (10 arquivos), `.codex/`
     (3 arquivos) — governança de IA, untracked desde o commit `869b57e`
     ("chore(governance): stop tracking CLAUDE.md in the product repository", 2026-08-20) — total
-    26 arquivos.
+    27 arquivos. (Corrigido na Sprint 31.2 — a contagem original da Sprint 31.1 dizia 11 arquivos em
+    `.claude/`, mas a tabela do Ledger sempre teve as 12 linhas corretas; apenas este texto
+    narrativo estava com a soma errada.)
   - `.github/upgrades/scenarios/dotnet-version-upgrade/` — 6 arquivos gerados por uma ferramenta de
     upgrade assessment do .NET (`net11.0`), datados de 2026-08-20, não rastreados.
   - `scripts/iis-control/Provision-BeeDayHmgIisControl.ps1.orig` — 1 arquivo órfão não rastreado,
@@ -400,5 +402,350 @@ criada).
 ### Deliverable
 
 Documentation Ledger canônico (acima, 184 entradas) e este relatório de inventário da Sprint 31.1.
+
+---
+## Sprint 31.2 — Canonical Documentation Architecture & ADR Validity Baseline
+
+**GitHub Issue:** [#230](https://github.com/tiagoarrigoni/BeeDay/issues/230)
+**Branch:** `sprint/31.2-canonical-architecture-adr-baseline`
+**Depende de:** #229 (concluída, ver seção acima)
+
+> Segue `CLAUDE.md`, o padrão de planejamento beeday e o Global Execution Contract da EPIC 31 em
+> #228.
+
+### Objetivo da Sprint
+
+Definir a arquitetura de informação final da documentação, o modelo de ownership canônico e o
+baseline de validade de ADR, antes que Sprints especialistas reconciliem cada assunto.
+
+### Correção de evidência da Sprint 31.1
+
+Ao revisar o Ledger para atribuir ownership, uma inconsistência de contagem foi encontrada na
+própria narrativa da Sprint 31.1 (não na tabela do Ledger, que está correta): o texto de "Cobertura"
+dizia `.claude/` (11 arquivos), mas a contagem real (`awk -F'`' '{print $2}' sobre as 34 linhas
+locais-apenas) é **12 arquivos** (`README.md`, `settings.json`, `settings.local.json` e 9 arquivos
+`skills/*/SKILL.md`, incluindo `beeday-ui-ux`). O total geral de 184 entradas permanece correto — o
+erro estava apenas na subdivisão narrativa (11+10+3+2=26 vs. o correto 12+10+3+2=27, artefatos
+locais-apenas). Corrigido nesta Sprint (ver diff em `docs/epics/31-documentation-knowledge-
+consolidation/README.md`, seção "Cobertura" da Sprint 31.1) — outcome: `CORRECTED`, per Global
+Contract §2.
+
+### 1. Ownership canônico e Sprint responsável (Required work #1–#3)
+
+Usando o Ledger da Sprint 31.1 (184 entradas, `DOC-001`–`DOC-184`) como inventário completo de
+planejamento, toda entrada recebe nesta Sprint um `Owner topic`, uma `Owning Sprint` e um `Intended
+final state` — nenhuma entrada permanece sem dono após esta Sprint, conforme Global Contract §3.
+
+A atribuição segue diretamente o escopo já aprovado de cada Sprint especialista na Issue #228
+("Sprint Roadmap") — nenhum escopo novo foi inventado; onde um assunto atravessa duas Sprints
+declaradas (ex.: `docs/deployment/*` contém tanto conteúdo de IIS/HMG/operações quanto de pipeline
+CI/CD), o arquivo foi atribuído à Sprint cujo escopo declarado corresponde ao conteúdo real do
+arquivo, mesmo vivendo fisicamente na mesma pasta — nenhuma movimentação de arquivo é implicada por
+essa atribuição de ownership; mover fisicamente arquivos entre pastas, se necessário, é decisão da
+Sprint especialista, não desta.
+
+Colunas: `ID` (referencia a mesma linha do Ledger da Sprint 31.1) · `Owner topic` · `Owning Sprint` ·
+`Intended final state` · `Rationale`.
+
+| ID | Owner topic | Owning Sprint | Intended final state | Rationale |
+|---|---|---|---|---|
+| DOC-001 | CI/CD & GitHub Engineering | 31.11 | CURRENT | In-scope evidence source for 31.11 ("Inspect actual workflow files and names"). |
+| DOC-002 | CI/CD & GitHub Engineering | 31.11 | CURRENT | In-scope evidence source for 31.11 ("Inspect actual workflow files and names"). |
+| DOC-003 | CI/CD & GitHub Engineering | 31.11 | CURRENT | In-scope evidence source for 31.11 ("Inspect actual workflow files and names"). |
+| DOC-004 | CI/CD & GitHub Engineering | 31.11 | CURRENT | In-scope evidence source for 31.11 ("Inspect actual workflow files and names"). |
+| DOC-005 | CI/CD & GitHub Engineering | 31.11 | CURRENT | In-scope evidence source for 31.11 ("Inspect actual workflow files and names"). |
+| DOC-006 | CI/CD & GitHub Engineering | 31.11 | CURRENT | In-scope evidence source for 31.11 ("Inspect actual workflow files and names"). |
+| DOC-007 | CI/CD & GitHub Engineering | 31.11 | CURRENT | In-scope evidence source for 31.11 ("Inspect actual workflow files and names"). |
+| DOC-008 | CI/CD & GitHub Engineering | 31.11 | CURRENT | In-scope evidence source for 31.11 ("Inspect actual workflow files and names"). |
+| DOC-009 | CI/CD & GitHub Engineering | 31.11 | CURRENT | In-scope evidence source for 31.11 ("Inspect actual workflow files and names"). |
+| DOC-010 | Repository Entry Points | 31.14 | CURRENT | 31.14 owns root README as "concise entry point"; must correct the CLAUDE.md tracking-status line found in 31.1. |
+| DOC-011 | Documentation Governance | 31.2 (this Sprint) | CURRENT | Verified this Sprint: remains the normative convention; no evidenced change required. |
+| DOC-012 | Documentation Governance | 31.14 | CURRENT | 31.14 rebuilds this as "the accurate index of the final documentation architecture"; must also correct the stale EPIC 30 status row found in 31.1. |
+| DOC-013 | Documentation Governance | 31.2 (this Sprint) | CURRENT | Verified this Sprint: all 12 templates have exactly one H1 (docs/CONVENTIONS.md §4); no structural defect found. |
+| DOC-014 | Documentation Governance | 31.2 (this Sprint) | CURRENT | Verified this Sprint: all 12 templates have exactly one H1 (docs/CONVENTIONS.md §4); no structural defect found. |
+| DOC-015 | Documentation Governance | 31.2 (this Sprint) | CURRENT | Verified this Sprint: all 12 templates have exactly one H1 (docs/CONVENTIONS.md §4); no structural defect found. |
+| DOC-016 | Documentation Governance | 31.2 (this Sprint) | CURRENT | Verified this Sprint: all 12 templates have exactly one H1 (docs/CONVENTIONS.md §4); no structural defect found. |
+| DOC-017 | Documentation Governance | 31.2 (this Sprint) | CURRENT | Verified this Sprint: all 12 templates have exactly one H1 (docs/CONVENTIONS.md §4); no structural defect found. |
+| DOC-018 | Documentation Governance | 31.2 (this Sprint) | CURRENT | Verified this Sprint: all 12 templates have exactly one H1 (docs/CONVENTIONS.md §4); no structural defect found. |
+| DOC-019 | Documentation Governance | 31.2 (this Sprint) | CURRENT | Verified this Sprint: all 12 templates have exactly one H1 (docs/CONVENTIONS.md §4); no structural defect found. |
+| DOC-020 | Documentation Governance | 31.2 (this Sprint) | CURRENT | Verified this Sprint: all 12 templates have exactly one H1 (docs/CONVENTIONS.md §4); no structural defect found. |
+| DOC-021 | Documentation Governance | 31.2 (this Sprint) | CURRENT | Verified this Sprint: all 12 templates have exactly one H1 (docs/CONVENTIONS.md §4); no structural defect found. |
+| DOC-022 | Documentation Governance | 31.2 (this Sprint) | CURRENT | Verified this Sprint: all 12 templates have exactly one H1 (docs/CONVENTIONS.md §4); no structural defect found. |
+| DOC-023 | Documentation Governance | 31.2 (this Sprint) | CURRENT | Verified this Sprint: all 12 templates have exactly one H1 (docs/CONVENTIONS.md §4); no structural defect found. |
+| DOC-024 | Documentation Governance | 31.2 (this Sprint) | CURRENT | Verified this Sprint: all 12 templates have exactly one H1 (docs/CONVENTIONS.md §4); no structural defect found. |
+| DOC-025 | Architecture Decision Records | 31.13 | HISTORICAL | Validity classified this Sprint (see ADR Validity Baseline table); 31.13 applies supersession metadata/links without rewriting ADR bodies. |
+| DOC-026 | Architecture Decision Records | 31.13 | HISTORICAL | Validity classified this Sprint (see ADR Validity Baseline table); 31.13 applies supersession metadata/links without rewriting ADR bodies. |
+| DOC-027 | Architecture Decision Records | 31.13 | HISTORICAL | Validity classified this Sprint (see ADR Validity Baseline table); 31.13 applies supersession metadata/links without rewriting ADR bodies. |
+| DOC-028 | Architecture Decision Records | 31.13 | HISTORICAL | Validity classified this Sprint (see ADR Validity Baseline table); 31.13 applies supersession metadata/links without rewriting ADR bodies. |
+| DOC-029 | Architecture Decision Records | 31.13 | HISTORICAL | Validity classified this Sprint (see ADR Validity Baseline table); 31.13 applies supersession metadata/links without rewriting ADR bodies. |
+| DOC-030 | Architecture Decision Records | 31.13 | HISTORICAL | Validity classified this Sprint (see ADR Validity Baseline table); 31.13 applies supersession metadata/links without rewriting ADR bodies. |
+| DOC-031 | Architecture Decision Records | 31.13 | HISTORICAL | Validity classified this Sprint (see ADR Validity Baseline table); 31.13 applies supersession metadata/links without rewriting ADR bodies. |
+| DOC-032 | API Contract | 31.14 | CURRENT | Reserved/incomplete-area disposition folded into 31.14's residual-documentation closure. |
+| DOC-033 | API Contract | 31.14 | CURRENT | Reserved/incomplete-area disposition folded into 31.14's residual-documentation closure. |
+| DOC-034 | Application / CQRS | 31.6 | CURRENT | Matches Sprint 31.6 declared scope (commands/queries/handlers/contracts). |
+| DOC-035 | Application / CQRS | 31.6 | CURRENT | Matches Sprint 31.6 declared scope (commands/queries/handlers/contracts). |
+| DOC-036 | Application / CQRS | 31.6 | CURRENT | Matches Sprint 31.6 declared scope (commands/queries/handlers/contracts). |
+| DOC-037 | Application / CQRS | 31.6 | CURRENT | Matches Sprint 31.6 declared scope (commands/queries/handlers/contracts). |
+| DOC-038 | Application / CQRS | 31.6 | CURRENT | Matches Sprint 31.6 declared scope (commands/queries/handlers/contracts). |
+| DOC-039 | Application / CQRS | 31.6 | CURRENT | Matches Sprint 31.6 declared scope (commands/queries/handlers/contracts). |
+| DOC-040 | Application / CQRS | 31.6 | CURRENT | Matches Sprint 31.6 declared scope (commands/queries/handlers/contracts). |
+| DOC-041 | Architecture | 31.4 | CURRENT | Matches Sprint 31.4 declared scope (solution structure, dependency direction, composition root). |
+| DOC-042 | Architecture | 31.4 | CURRENT | Matches Sprint 31.4 declared scope (solution structure, dependency direction, composition root). |
+| DOC-043 | Architecture | 31.4 | CURRENT | Matches Sprint 31.4 declared scope (solution structure, dependency direction, composition root). |
+| DOC-044 | Architecture | 31.4 | CURRENT | Matches Sprint 31.4 declared scope (solution structure, dependency direction, composition root). |
+| DOC-045 | Architecture | 31.4 | CURRENT | Matches Sprint 31.4 declared scope (solution structure, dependency direction, composition root). |
+| DOC-046 | Architecture | 31.4 | CURRENT | Matches Sprint 31.4 declared scope (solution structure, dependency direction, composition root). |
+| DOC-047 | Architecture | 31.4 | CURRENT | Matches Sprint 31.4 declared scope (solution structure, dependency direction, composition root). |
+| DOC-048 | Architecture | 31.4 | CURRENT | Matches Sprint 31.4 declared scope (solution structure, dependency direction, composition root). |
+| DOC-049 | Architecture | 31.4 | CURRENT | Matches Sprint 31.4 declared scope (solution structure, dependency direction, composition root). |
+| DOC-050 | Authentication & Identity | 31.10 | CURRENT | 31.10 must give this reserved area an explicit final disposition: dedicated content, or formal fold into docs/security/ — either outcome lands as CURRENT, not left reserved. |
+| DOC-051 | Brand System | 31.8 | CURRENT | Matches Sprint 31.8 declared scope (Brand System ownership alongside Web/Design System/UX). |
+| DOC-052 | Brand System | 31.8 | CURRENT | Matches Sprint 31.8 declared scope (Brand System ownership alongside Web/Design System/UX). |
+| DOC-053 | Brand System | 31.8 | CURRENT | Matches Sprint 31.8 declared scope (Brand System ownership alongside Web/Design System/UX). |
+| DOC-054 | Brand System | 31.8 | CURRENT | Matches Sprint 31.8 declared scope (Brand System ownership alongside Web/Design System/UX). |
+| DOC-055 | Deployment & Operations | 31.12 | CURRENT | IIS/HMG/runtime/ops subset per Sprint 31.12 declared scope. |
+| DOC-056 | Deployment & Operations | 31.12 | CURRENT | IIS/HMG/runtime/ops subset per Sprint 31.12 declared scope. |
+| DOC-057 | Deployment & Operations | 31.12 | CURRENT | IIS/HMG/runtime/ops subset per Sprint 31.12 declared scope. |
+| DOC-058 | Deployment & Operations | 31.12 | CURRENT | IIS/HMG/runtime/ops subset per Sprint 31.12 declared scope. |
+| DOC-059 | Deployment & Operations | 31.12 | CURRENT | IIS/HMG/runtime/ops subset per Sprint 31.12 declared scope. |
+| DOC-060 | CI/CD & GitHub Engineering | 31.11 | CURRENT | CI/CD-pipeline subset per Sprint 31.11 declared scope, despite living under docs/deployment/ physically — cross-reference only, no file move implied. |
+| DOC-061 | CI/CD & GitHub Engineering | 31.11 | CURRENT | CI/CD-pipeline subset per Sprint 31.11 declared scope, despite living under docs/deployment/ physically — cross-reference only, no file move implied. |
+| DOC-062 | CI/CD & GitHub Engineering | 31.11 | CURRENT | CI/CD-pipeline subset per Sprint 31.11 declared scope, despite living under docs/deployment/ physically — cross-reference only, no file move implied. |
+| DOC-063 | CI/CD & GitHub Engineering | 31.11 | CURRENT | CI/CD-pipeline subset per Sprint 31.11 declared scope, despite living under docs/deployment/ physically — cross-reference only, no file move implied. |
+| DOC-064 | Deployment & Operations | 31.12 | CURRENT | IIS/HMG/runtime/ops subset per Sprint 31.12 declared scope. |
+| DOC-065 | CI/CD & GitHub Engineering | 31.11 | CURRENT | CI/CD-pipeline subset per Sprint 31.11 declared scope, despite living under docs/deployment/ physically — cross-reference only, no file move implied. |
+| DOC-066 | CI/CD & GitHub Engineering | 31.11 | CURRENT | CI/CD-pipeline subset per Sprint 31.11 declared scope, despite living under docs/deployment/ physically — cross-reference only, no file move implied. |
+| DOC-067 | CI/CD & GitHub Engineering | 31.11 | CURRENT | CI/CD-pipeline subset per Sprint 31.11 declared scope, despite living under docs/deployment/ physically — cross-reference only, no file move implied. |
+| DOC-068 | Deployment & Operations | 31.12 | CURRENT | IIS/HMG/runtime/ops subset per Sprint 31.12 declared scope. |
+| DOC-069 | Deployment & Operations | 31.12 | CURRENT | IIS/HMG/runtime/ops subset per Sprint 31.12 declared scope. |
+| DOC-070 | Design System | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-071 | Design System | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-072 | Design System | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-073 | Design System | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-074 | Design System | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-075 | Developer Guide | 31.14 | CURRENT | 31.14 must give this reserved area an explicit final disposition (own content, or formal pointer to root README) — folded into residual-documentation closure. |
+| DOC-076 | Domain Model | 31.5 | CURRENT | Matches Sprint 31.5 declared scope. |
+| DOC-077 | Domain Model | 31.5 | SUPERSEDED | Candidate merge/supersession into docs/epics/30-system-integrity/README.md (Sprint 30.5 section) — final decision (merge vs. formal supersession note) made in 31.5, not assumed here. |
+| DOC-078 | Domain Model | 31.5 | CURRENT | Matches Sprint 31.5 declared scope. |
+| DOC-079 | Domain Model | 31.5 | CURRENT | Matches Sprint 31.5 declared scope. |
+| DOC-080 | Domain Model | 31.5 | CURRENT | Matches Sprint 31.5 declared scope. |
+| DOC-081 | Domain Model | 31.5 | CURRENT | Matches Sprint 31.5 declared scope. |
+| DOC-082 | Domain Model | 31.5 | CURRENT | Matches Sprint 31.5 declared scope. |
+| DOC-083 | Domain Model | 31.5 | CURRENT | Matches Sprint 31.5 declared scope. |
+| DOC-084 | Domain Model | 31.5 | CURRENT | Matches Sprint 31.5 declared scope. |
+| DOC-085 | Domain Model | 31.5 | CURRENT | Matches Sprint 31.5 declared scope. |
+| DOC-086 | Domain Model | 31.5 | CURRENT | Matches Sprint 31.5 declared scope. |
+| DOC-087 | Domain Model | 31.5 | CURRENT | Matches Sprint 31.5 declared scope. |
+| DOC-088 | Domain Model | 31.5 | CURRENT | Matches Sprint 31.5 declared scope. |
+| DOC-089 | Domain Model | 31.5 | CURRENT | Matches Sprint 31.5 declared scope. |
+| DOC-090 | Domain Model | 31.5 | CURRENT | Matches Sprint 31.5 declared scope. |
+| DOC-091 | Epic History | 31.13 | HISTORICAL | Already self-declared closed/historical in docs/README.md; 31.13 confirms no current-state doc silently depends on it as live evidence. |
+| DOC-092 | Epic History | 31.13 | HISTORICAL | Already self-declared closed/historical in docs/README.md; 31.13 confirms no current-state doc silently depends on it as live evidence. |
+| DOC-093 | Epic History | 31.13 | HISTORICAL | Already self-declared closed/historical in docs/README.md; 31.13 confirms no current-state doc silently depends on it as live evidence. |
+| DOC-094 | Epic History | 31.13 | HISTORICAL | Already self-declared closed/historical in docs/README.md; 31.13 confirms no current-state doc silently depends on it as live evidence. |
+| DOC-095 | Epic History | 31.13 | HISTORICAL | Already self-declared closed/historical in docs/README.md; 31.13 confirms no current-state doc silently depends on it as live evidence. |
+| DOC-096 | Epic History | 31.11 (status verify), then 31.13 (reclassify) | HISTORICAL | Status "POST-MERGE HMG VALIDATION PENDING" predates EPIC 30's CI/CD/HMG audit — 31.11 confirms current accuracy before 31.13 folds it in alongside the other closed Epics. |
+| DOC-097 | Epic History | 31.13/31.14 | HISTORICAL | EPIC 30 is formally COMPLETE; 31.13/31.14 correct the stale docs/README.md "Em andamento" row and reclassify alongside sibling closed Epics. |
+| DOC-098 | Historical Documentation | 31.13 | HISTORICAL | Already frozen per docs/CONVENTIONS.md §13; 31.13 confirms nothing current-state relies on it silently. |
+| DOC-099 | Historical Documentation | 31.13 | HISTORICAL | Already frozen per docs/CONVENTIONS.md §13; 31.13 confirms nothing current-state relies on it silently. |
+| DOC-100 | Historical Documentation | 31.13 | HISTORICAL | Already frozen per docs/CONVENTIONS.md §13; 31.13 confirms nothing current-state relies on it silently. |
+| DOC-101 | Historical Documentation | 31.13 | HISTORICAL | Already frozen per docs/CONVENTIONS.md §13; 31.13 confirms nothing current-state relies on it silently. |
+| DOC-102 | Historical Documentation | 31.13 | HISTORICAL | Already frozen per docs/CONVENTIONS.md §13; 31.13 confirms nothing current-state relies on it silently. |
+| DOC-103 | Historical Documentation | 31.13 | HISTORICAL | Already frozen per docs/CONVENTIONS.md §13; 31.13 confirms nothing current-state relies on it silently. |
+| DOC-104 | Historical Documentation | 31.13 | HISTORICAL | Already frozen per docs/CONVENTIONS.md §13; 31.13 confirms nothing current-state relies on it silently. |
+| DOC-105 | Historical Documentation | 31.13 | HISTORICAL | Already frozen per docs/CONVENTIONS.md §13; 31.13 confirms nothing current-state relies on it silently. |
+| DOC-106 | Historical Documentation | 31.13 | HISTORICAL | Already frozen per docs/CONVENTIONS.md §13; 31.13 confirms nothing current-state relies on it silently. |
+| DOC-107 | Historical Documentation | 31.13 | HISTORICAL | Already frozen per docs/CONVENTIONS.md §13; 31.13 confirms nothing current-state relies on it silently. |
+| DOC-108 | Infrastructure & Persistence | 31.7 | CURRENT | Matches Sprint 31.7 declared scope. |
+| DOC-109 | Infrastructure & Persistence | 31.7 | CURRENT | Matches Sprint 31.7 declared scope. |
+| DOC-110 | Infrastructure & Persistence | 31.7 | CURRENT | Matches Sprint 31.7 declared scope. |
+| DOC-111 | Infrastructure & Persistence | 31.7 | CURRENT | Matches Sprint 31.7 declared scope. |
+| DOC-112 | Infrastructure & Persistence | 31.7 | CURRENT | Matches Sprint 31.7 declared scope. |
+| DOC-113 | Infrastructure & Persistence | 31.7 | CURRENT | Matches Sprint 31.7 declared scope. |
+| DOC-114 | Infrastructure & Persistence | 31.7 | CURRENT | Matches Sprint 31.7 declared scope. |
+| DOC-115 | Infrastructure & Persistence | 31.7 | CURRENT | Matches Sprint 31.7 declared scope. |
+| DOC-116 | Infrastructure & Persistence | 31.7 | CURRENT | Matches Sprint 31.7 declared scope. |
+| DOC-117 | Infrastructure & Persistence | 31.7 | CURRENT | Matches Sprint 31.7 declared scope. |
+| DOC-118 | Security | 31.10 | CURRENT | Matches Sprint 31.10 declared scope; canonical boundary vs. docs/authentication/ resolved there. |
+| DOC-119 | Security | 31.10 | CURRENT | Matches Sprint 31.10 declared scope; canonical boundary vs. docs/authentication/ resolved there. |
+| DOC-120 | Security | 31.10 | CURRENT | Matches Sprint 31.10 declared scope; canonical boundary vs. docs/authentication/ resolved there. |
+| DOC-121 | Testing & Quality Engineering | 31.9 | CURRENT | Matches Sprint 31.9 declared scope. |
+| DOC-122 | Testing & Quality Engineering | 31.9 | CURRENT | Matches Sprint 31.9 declared scope. |
+| DOC-123 | Testing & Quality Engineering | 31.9 | CURRENT | Matches Sprint 31.9 declared scope. |
+| DOC-124 | Testing & Quality Engineering | 31.9 | CURRENT | Matches Sprint 31.9 declared scope. |
+| DOC-125 | Web / UX / Presentation | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-126 | Web / UX / Presentation | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-127 | Web / UX / Presentation | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-128 | Web / UX / Presentation | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-129 | Web / UX / Presentation | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-130 | Web / UX / Presentation | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-131 | Web / UX / Presentation | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-132 | Web / UX / Presentation | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-133 | Web / UX / Presentation | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-134 | Web / UX / Presentation | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-135 | Web / UX / Presentation | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-136 | Web / UX / Presentation | 31.8 | CURRENT | Matches Sprint 31.8 declared scope. |
+| DOC-137 | Deployment & Operations | 31.12 | CURRENT | Operational scripts cross-referenced by Sprint 31.12's IIS/deployment runbook reconciliation. |
+| DOC-138 | Deployment & Operations | 31.12 | CURRENT | Operational scripts cross-referenced by Sprint 31.12's IIS/deployment runbook reconciliation. |
+| DOC-139 | Deployment & Operations | 31.12 | CURRENT | Operational scripts cross-referenced by Sprint 31.12's IIS/deployment runbook reconciliation. |
+| DOC-140 | Deployment & Operations | 31.12 | CURRENT | Operational scripts cross-referenced by Sprint 31.12's IIS/deployment runbook reconciliation. |
+| DOC-141 | Deployment & Operations | 31.12 | CURRENT | Operational scripts cross-referenced by Sprint 31.12's IIS/deployment runbook reconciliation. |
+| DOC-142 | Deployment & Operations | 31.12 | CURRENT | Operational scripts cross-referenced by Sprint 31.12's IIS/deployment runbook reconciliation. |
+| DOC-143 | Deployment & Operations | 31.12 | CURRENT | Operational scripts cross-referenced by Sprint 31.12's IIS/deployment runbook reconciliation. |
+| DOC-144 | Deployment & Operations | 31.12 | CURRENT | Operational scripts cross-referenced by Sprint 31.12's IIS/deployment runbook reconciliation. |
+| DOC-145 | Deployment & Operations | 31.12 | CURRENT | Operational scripts cross-referenced by Sprint 31.12's IIS/deployment runbook reconciliation. |
+| DOC-146 | Deployment & Operations | 31.12 | CURRENT | Operational scripts cross-referenced by Sprint 31.12's IIS/deployment runbook reconciliation. |
+| DOC-147 | Deployment & Operations | 31.12 | CURRENT | Operational scripts cross-referenced by Sprint 31.12's IIS/deployment runbook reconciliation. |
+| DOC-148 | Deployment & Operations | 31.12 | CURRENT | Operational scripts cross-referenced by Sprint 31.12's IIS/deployment runbook reconciliation. |
+| DOC-149 | Deployment & Operations | 31.12 | CURRENT | Operational scripts cross-referenced by Sprint 31.12's IIS/deployment runbook reconciliation. |
+| DOC-150 | Deployment & Operations | 31.12 | CURRENT | Operational scripts cross-referenced by Sprint 31.12's IIS/deployment runbook reconciliation. |
+| DOC-151 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-152 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-153 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-154 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-155 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-156 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-157 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-158 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-159 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-160 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-161 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-162 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-163 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-164 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-165 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-166 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-167 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-168 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-169 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-170 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-171 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-172 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-173 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-174 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-175 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-176 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-177 | AI/Project Governance | 31.3 | CURRENT | Classification into PROJECT_RULE/AGENT_RULE/DUPLICATED_RULE/OBSOLETE_RULE is 31.3's required work; disposition target is "kept and reconciled", not removal, absent owner approval. |
+| DOC-178 | Repository Hygiene / Tooling Artifacts | 31.3 | REMOVED (candidate) | Untracked .NET-upgrade-assistant scratch output, no product-documentation value; deletion requires owner confirmation in 31.3, not assumed here. |
+| DOC-179 | Repository Hygiene / Tooling Artifacts | 31.3 | REMOVED (candidate) | Untracked .NET-upgrade-assistant scratch output, no product-documentation value; deletion requires owner confirmation in 31.3, not assumed here. |
+| DOC-180 | Repository Hygiene / Tooling Artifacts | 31.3 | REMOVED (candidate) | Untracked .NET-upgrade-assistant scratch output, no product-documentation value; deletion requires owner confirmation in 31.3, not assumed here. |
+| DOC-181 | Repository Hygiene / Tooling Artifacts | 31.3 | REMOVED (candidate) | Untracked .NET-upgrade-assistant scratch output, no product-documentation value; deletion requires owner confirmation in 31.3, not assumed here. |
+| DOC-182 | Repository Hygiene / Tooling Artifacts | 31.3 | REMOVED (candidate) | Untracked .NET-upgrade-assistant scratch output, no product-documentation value; deletion requires owner confirmation in 31.3, not assumed here. |
+| DOC-183 | Repository Hygiene / Tooling Artifacts | 31.3 | REMOVED (candidate) | Untracked .NET-upgrade-assistant scratch output, no product-documentation value; deletion requires owner confirmation in 31.3, not assumed here. |
+| DOC-184 | Repository Hygiene / Tooling Artifacts | 31.3 | REMOVED (candidate) | Untracked stray backup/merge artifact with no tracked counterpart pattern; deletion requires owner confirmation in 31.3, not assumed here. |
+
+### 2. ADR Validity Baseline (Required work #6–#8)
+
+Cada ADR foi lido integralmente nesta Sprint e comparado contra evidência atual (root `README.md`,
+`docs/architecture/02-solution-structure.md`, `src/` real via `ls`, e o texto já autodeclarado em
+`docs/adr/README.md` e nos próprios ADRs). Nenhum corpo de ADR foi reescrito — apenas classificado.
+
+| ADR | Decisão | Classificação | Evidência / racional |
+|---|---|---|---|
+| [ADR-001](../../adr/ADR-001-contract-first.md) — Contract-First | Criar `LevelUp.Contracts` como projeto independente para todas as fronteiras. | **`CONFLICTING`** | `src/` real (via `ls`) tem exatamente 4 projetos de produção — `BeeDay.Domain`, `BeeDay.Application`, `BeeDay.Infrastructure`, `BeeDay.Web` — nenhum projeto `Contracts` separado jamais existiu ou existe hoje; `docs/architecture/02-solution-structure.md` confirma a mesma estrutura de 4 projetos. O objetivo arquitetural (Application depende de abstrações, nunca de Infrastructure diretamente) **foi** alcançado, mas por um meio diferente do decidido (interfaces dentro do próprio `BeeDay.Application`, não um projeto `Contracts` externo) — já reconhecido honestamente em `docs/adr/README.md` linha 21 ("adoção parcial em código — nenhum projeto Contracts separado foi criado"). Nenhum ADR posterior supera formalmente esta divergência. Candidata a `NEW ADR REQUIRED` (documentar formalmente a forma final adotada) ou a uma nota de supersessão — decisão final não tomada aqui, apenas classificada; roteada para 31.4 (Arquitetura) e 31.13 (aplicação da nota de supersessão). |
+| [ADR-002](../../adr/ADR-002-greenfield-database.md) — Banco novo sem importar JSON | Não implementar importação/dual-write entre JSON e SQL Server. | **`VALID`** | Root `README.md`: "SQL Server is the only persistence provider... no JSON storage, no legacy import, and no compatibility layer — the database starts empty for every new environment." Coincide exatamente com a decisão. |
+| [ADR-003](../../adr/ADR-003-aggregate-repositories.md) — Repositórios por Aggregate + read services | Repositórios orientados a Aggregate em vez de repositório genérico. | **`VALID`** | O próprio cabeçalho do ADR já foi atualizado (não reescrito — nota de status) para "totalmente implementado e adotado desde a Sprint 14.6", listando exatamente os 8 contratos + `IUnitOfWork` que o root `README.md` confirma hoje (`IUserRepository`, `IUserTokenRepository`, `IHabitRepository`, `IRecurringTaskRepository`, `IProjectRepository`, `IWalletRepository`, `ITransactionRepository`, `IWalletTagRepository`, `IUnitOfWork`). |
+| [ADR-004](../../adr/ADR-004-sql-server-runtime-cutover.md) — SQL Server como único provider de runtime | Migrar todo handler de produção de JSON para os 8 contratos + `IUnitOfWork`, em corte único. | **`VALID`** (com nota de supersessão parcial já registrada no próprio ADR) | O corte de runtime em si permanece válido e é a realidade atual (root `README.md`). O próprio ADR já documenta, em seu cabeçalho, que um parágrafo específico (manter `LevelUpData`/pipeline JSON como código legado não registrado) foi revertido e formalmente superado por ADR-005 — exemplo correto de nota de supersessão sem reescrita de corpo, conforme `docs/CONVENTIONS.md` §13. |
+| [ADR-005](../../adr/ADR-005-json-legacy-removal.md) — Remoção do pipeline JSON legado e `LevelUpData` | Remover fisicamente o código JSON legado e `LevelUpData`, não apenas desregistrar. | **`VALID`** | Root `README.md` confirma: "There is no JSON storage... no compatibility layer." Nenhuma referência a `JsonLevelUpDocumentStore`/`LevelUpData` em código de produção atual (fora do escopo desta Sprint verificar arquivo-por-arquivo, mas a ausência de qualquer menção nos documentos de arquitetura/persistência atuais — `CURRENT` no Ledger — corrobora). |
+| [ADR-006](../../adr/ADR-006-transactional-email-localization-boundary.md) — Culture de e-mail transacional via `User.Language` | Contrato `IIdentityEmailComposer` recebe `UserLanguage`; catálogo `.resx` estreito Infrastructure-owned; sem `IStringLocalizer`/estado global. | **`VALID`** | `docs/infrastructure/06-transactional-email.md` está marcado `CURRENT` no Ledger (Sprint 16.6, estendido EPIC 26/28); a decisão é recente (EPIC 28, Sprint 28.2, 2026-08-17) e nenhuma evidência posterior a contradiz. |
+
+Nenhum ADR foi classificado `SUPERSEDED`, `OBSOLETE` ou `NEW ADR REQUIRED` de forma definitiva nesta
+Sprint isoladamente — `ADR-001` é a única exceção material, marcada `CONFLICTING` com uma
+recomendação (não uma decisão) de `NEW ADR REQUIRED` a ser confirmada em 31.4/31.13. Isso cumpre o
+Required work #8: nenhuma Sprint futura poderá depender de um ADR cuja validade atual seja
+desconhecida — todos os 6 têm uma classificação explícita e evidenciada.
+
+### 3. Responsabilidade: root `README.md` vs. `docs/README.md` (Required work #5)
+
+Formalizando o que a estrutura atual já pratica implicitamente (nenhuma mudança de conteúdo feita
+nesta Sprint — apenas a regra é tornada explícita para orientar a Sprint 31.14):
+
+- **Root `README.md`** é o ponto de entrada conciso para qualquer colaborador ou ferramenta externa
+  (GitHub, IDEs, humanos clonando o repositório pela primeira vez): o que o produto é, stack,
+  capacidades atuais em alto nível, como rodar localmente, quality gate, estratégia de branch, e um
+  único link de saída para `docs/README.md`. Não deve conter detalhe de nível de implementação que já
+  vive em `docs/<área>/`.
+- **`docs/README.md`** é o índice completo e navegável de toda a documentação técnica sob `docs/`:
+  taxonomia por área, status por área, ordem de leitura recomendada, e a ponte explícita para o
+  `beeday Experience System` público.
+- Nenhum documento deve duplicar por cópia manual o que o outro já cobre — cada um linka para o
+  outro exatamente uma vez no ponto de entrada/saída natural (root `README.md` linka para
+  `docs/README.md` na seção "Documentation"; `docs/README.md` linka de volta para o root `README.md`
+  como item 1 da "Ordem de leitura recomendada").
+
+Esta responsabilidade já está satisfeita pela estrutura atual dos dois arquivos — nenhuma
+reestruturação foi necessária. A única divergência encontrada (root `README.md` listando `CLAUDE.md`
+como rastreado, achado da Sprint 31.1) é um erro factual pontual, não uma violação da separação de
+responsabilidades, e permanece roteada para 31.3/31.14.
+
+### 4. Hierarquia final de `docs/` (Required work #4)
+
+Nenhuma mudança estrutural de pastas é justificada por evidência nesta Sprint. A taxonomia atual
+(uma pasta por área, espelhando a arquitetura real do sistema, fixada na Sprint 16.2) permanece
+canônica. A única exceção concreta encontrada é `docs/domain/audit-inventory.md`, cuja disposição
+final (merge em `docs/epics/30-system-integrity/README.md` vs. nota de supersessão formal) é
+decidida em 31.5 — não é uma mudança de hierarquia, é a resolução de um duplicado dentro da mesma
+pasta.
+
+### Sprint-specific validation (Issue #230)
+
+- **Colisão de caminhos canônicos planejados:** nenhuma — nenhum novo caminho/pasta foi proposto
+  nesta Sprint (seção 4 acima).
+- **Referências e alvos de supersessão de ADR existem:** `ADR-004` → `ADR-005` (referência cruzada
+  já existente em ambos os arquivos, verificada nesta Sprint); `ADR-001` candidata a uma futura nota
+  de supersessão/novo ADR — alvo ainda não existe, registrado como pendência, não como link quebrado.
+- **Revisão de duplicação entre ownership planejado:** nenhum assunto recebeu dois Owner topics
+  conflitantes nesta atribuição (verificado por inspeção da tabela de 184 linhas — cada `DOC-ID`
+  aparece exatamente uma vez).
+
+### Critérios de aceite (Issue #230)
+
+- [x] Every maintained subject has exactly one canonical owner — 184/184 entradas com `Owner topic`
+      único.
+- [x] Every Ledger item has an owning Sprint or justified terminal disposition — 184/184.
+- [x] No ADR remains with unknown current validity — 6/6 classificados.
+- [x] Root README and docs/README.md responsibilities are explicitly separated — seção 3 acima.
+- [x] Proposed hierarchy contains no unnecessary folder or duplicate topic ownership — nenhuma
+      hierarquia nova proposta; duplicado único conhecido (`audit-inventory.md`) já roteado.
+- [x] Later Sprints can identify which ADRs are valid current evidence — tabela da seção 2.
+
+### Sprint-specific boundary respeitado
+
+Nenhuma reescrita especialista de documentação (Domain, Application, Infrastructure, etc.) foi
+realizada nesta Sprint — apenas o modelo de ownership e o baseline de validade de ADR, conforme
+`CLAUDE.md`. Nenhum corpo de ADR foi alterado.
+
+### Riscos residuais
+
+- A classificação `CONFLICTING` de ADR-001 é uma constatação factual (o projeto `Contracts` nunca
+  existiu); a decisão sobre se isso exige um novo ADR formal, uma nota de supersessão, ou nenhuma
+  ação além de já estar documentado em `docs/adr/README.md`, cabe à Sprint 31.4/31.13 ou ao owner.
+- `docs/deployment/*` teve seu ownership dividido entre 31.11 (CI/CD) e 31.12 (IIS/HMG/operações)
+  sem mover nenhum arquivo fisicamente — se uma Sprint especialista decidir que a divisão física por
+  pasta é necessária, isso é uma decisão de arquitetura de informação nova, fora do escopo desta
+  Sprint.
+
+### Validação executada
+
+Sprint estritamente documental (nenhum código-fonte, projeto, configuração de runtime, script,
+workflow, migration ou teste alterado) — aplicada a política de validação proporcional ao risco da
+EPIC 31 aprovada pelo owner em 2026-08-21: suíte completa de testes **não** executada nesta Sprint.
+
+```bash
+git status
+dotnet format BeeDay.slnx --verify-no-changes
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+git diff --check
+```
+
+Resultados registrados na seção "Quality/Validation" do relatório final da Sprint enviado ao owner
+nesta conversa. Validação de link/caminho: todo link relativo inserido nesta Sprint (`../../adr/ADR-
+00N-*.md`) foi verificado apontando para arquivo existente.
+
+### Deliverable
+
+Modelo de ownership canônico (184 entradas), ADR Validity Baseline (6 ADRs classificados),
+separação formal de responsabilidade root `README.md`/`docs/README.md`, e decisão de hierarquia de
+`docs/` (nenhuma mudança estrutural justificada).
 
 ---
