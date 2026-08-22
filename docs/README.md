@@ -54,7 +54,7 @@ testes em `tests/BeeDay.Web.Tests`". Ver [`CONVENTIONS.md`](CONVENTIONS.md).
 | [`epics/25-design-system-brand-evolution/`](epics/25-design-system-brand-evolution/README.md) | EPIC 25 — beeday Design System & Brand System Evolution: contrato de marca, governança, implementação e gate final | Concluída na Sprint 25.16 |
 | [`epics/28-transactional-email-experience/`](epics/28-transactional-email-experience/README.md) | EPIC 28 — Transactional Email Experience, Deliverability & Observability: baseline, contrato de localização, composição, deliverability e fechamento consolidado | `IMPLEMENTATION READY — POST-MERGE HMG VALIDATION PENDING` (status próprio da Epic, na Sprint 28.10) |
 | [`epics/30-system-integrity/`](epics/30-system-integrity/README.md) | EPIC 30 — System Integrity & Complete Engineering Audit: inventário versionado, Audit Ledger, findings e ownership por Sprint | Em andamento — baseline criado na Sprint 30.1 |
-| [`epics/31-documentation-knowledge-consolidation/`](epics/31-documentation-knowledge-consolidation/README.md) | EPIC 31 — Repository Documentation & Knowledge Consolidation: Documentation Ledger, ADR validity baseline, reconciliação por área | Em andamento — Ledger, ownership canônico, ADR Validity Baseline, governança de IA e reconciliação de `docs/architecture/` (Sprints 31.1–31.4) concluídos |
+| [`epics/31-documentation-knowledge-consolidation/`](epics/31-documentation-knowledge-consolidation/README.md) | EPIC 31 — Repository Documentation & Knowledge Consolidation: Documentation Ledger, ADR validity baseline, reconciliação por área | Em andamento — reconciliação de `docs/architecture/` e `docs/domain/` concluída (Sprints 31.1–31.5) |
 
 ## Templates
 

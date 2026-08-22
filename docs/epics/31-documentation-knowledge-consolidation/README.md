@@ -1049,3 +1049,121 @@ direta nesta sessão antes de ser escrito.
 ADR-003 fechada, e Documentation Ledger atualizado.
 
 ---
+## Sprint 31.5 — Domain & Functional Model Documentation Reconciliation
+
+**GitHub Issue:** [#233](https://github.com/tiagoarrigoni/BeeDay/issues/233)
+**Branch:** `sprint/31.5-domain-functional-model-documentation-reconciliation`
+**Depende de:** #232 (concluída, ver seção acima)
+
+> Segue `CLAUDE.md`, o padrão de planejamento beeday e o Global Execution Contract da EPIC 31 em
+> #228.
+
+### Objetivo da Sprint
+
+Reconciliar os 15 documentos de `docs/domain/` com o Domain atual, sem converter documentação em
+cópia de assinaturas C#.
+
+### Validação aplicada nesta Sprint (política aprovada pelo owner)
+
+Sprint documental — nenhum código-fonte foi alterado. Suíte completa de testes **não** executada,
+por política aprovada em 2026-08-21.
+
+### Método
+
+Comparação exaustiva entre os 15 documentos de `docs/domain/` e o código atual: os 47 arquivos de
+`src/BeeDay.Domain/` (todas as 8 entidades Aggregate Root lidas por completo — construtor,
+invariantes, mutações, eventos), os 12 enums, os 6 Value Objects + 2 tipos VO-like em `Experience/`,
+os 5 arquivos de `Events/`, e o subsistema de XP/Level (`UserExperience`, `ExperienceEntry`,
+`ExperienceCurve`, `ExperienceRewardPolicy`, `ExperienceRewardEventPublisher`). Levantamento inicial
+delegado a um agente de exploração somente-leitura; toda conclusão relevante foi cruzada contra
+citações de arquivo/linha antes de qualquer edição.
+
+### Resultado: nenhuma divergência de conteúdo encontrada
+
+Diferente das Sprints 31.4 (8 correções), a comparação desta Sprint não encontrou nenhum mismatch
+de fato entre os 15 documentos e o código atual — nenhum conceito de negócio obsoleto, nenhuma
+contagem incorreta, nenhum método/classe inexistente, nenhuma assinatura desatualizada. Verificado
+especificamente e confirmado correto:
+
+- os 8 Aggregate Roots (`User`, `Habit`, `RecurringTask`, `Project`, `Wallet`, `WalletTag`,
+  `Transaction`, `UserToken`) e que `Todo` é corretamente descrito como entidade filha de `Project`
+  (sem `ITodoRepository`), não um Aggregate Root;
+- `Profile` como projeção sem identidade computada a cada leitura de `User.Profile`, sem estado
+  próprio persistido — descrito de forma idêntica em `entities.md`/`user.md`;
+- o subsistema de XP/Level: nenhum evento de domínio é construído dentro de `Domain` (apenas
+  definidos lá) — `ExperienceGrantedDomainEvent`/`UserLeveledUpDomainEvent` são publicados por
+  `Application/Common/Experience/ExperienceRewardEventPublisher.cs`, exatamente como
+  `domain-events.md` descreve; valores de recompensa (Habit 1 XP, Task 5 XP, Todo 7 XP, Project 20
+  XP) conferem com `ExperienceRewardPolicy.cs`;
+- `relationships.md`: todo relacionamento (referência por Guid vs. composição real, único caso de
+  navegação de coleção sendo `Project.Todos`) confere com os campos reais de cada entidade;
+- os 47 arquivos de `docs/domain/audit-inventory.md` (Sprint 30.5) continuam existindo e
+  correspondendo ao código — nenhuma adição/remoção desde então.
+
+### Achados menores corrigidos (Required work #3)
+
+| Documento | Achado | Correção |
+|---|---|---|
+| `wallet.md` | Frase de resumo dizia "(3 métodos)" para o Aggregate Root, mas a própria tabela de Operações públicas do mesmo documento lista 5 (`Create`, 3×`Calculate*`, `Touch`) — inconsistência interna de redação, não um erro contra o código. | Reescrita para "(3 métodos de cálculo além de `Create`/`Touch`)", removendo a ambiguidade sem mudar nenhuma afirmação factual. |
+
+### Resolução do achado de duplicação (`DOC-077`, Sprints 31.1/31.2)
+
+`docs/domain/audit-inventory.md` foi identificado na Sprint 31.1 como possível duplicata do
+inventário de Sprint 30.5 embutido em `docs/epics/30-system-integrity/README.md`, com decisão final
+explicitamente atribuída a esta Sprint (31.2, ownership map). Decisão: **manter ambas as cópias,
+com ownership canônico declarado** — `docs/domain/audit-inventory.md` é a referência viva
+(atualizada se o Domain mudar; reverificada e confirmada 100% atual nesta Sprint), a cópia dentro do
+relatório da Sprint 30.5 é o registro histórico congelado de como a Sprint foi entregue (EPIC 30 já
+está `HISTORICAL`, documentos de Epic concluída não são reescritos por convenção). Nenhum conteúdo
+foi removido — decisão registrada como nota explícita no topo de `audit-inventory.md`. Outcome do
+Ledger: `DOC-077` muda de `DUPLICATED` (estado de trabalho, Sprint 31.1) para `CURRENT`
+(disposição final: mantido, não mesclado nem removido).
+
+### Critérios de aceite (Issue #233)
+
+- [x] Every documented Domain concept exists in current repository evidence — 100% confirmado, 0
+      conceitos inventados.
+- [x] Aggregate boundaries match implementation — 8 Aggregate Roots confirmados via interfaces de
+      repositório reais; `Todo` corretamente descrito como filho de `Project`.
+- [x] Important invariants are documented from verifiable evidence — todas as invariantes citadas
+      nos 15 documentos foram verificadas linha a linha contra o código.
+- [x] No obsolete business concept remains presented as current — nenhum encontrado.
+- [x] Documentation does not duplicate raw implementation signatures unnecessarily — confirmado;
+      os documentos descrevem comportamento/invariante em nível conceitual, não colam assinaturas
+      C# completas.
+
+### Sprint-specific boundary respeitado
+
+Nenhuma preocupação de UI/Application foi movida para a documentação de Domain. Nenhum
+comportamento de Domain foi alterado para casar com documentação antiga — nesta Sprint a
+documentação já estava correta, então nenhuma mudança de código foi sequer cogitada.
+
+### Riscos residuais
+
+- Duas pequenas inconsistências de **código** (não de documentação) foram confirmadas durante a
+  verificação, ambas já corretamente documentadas como tal pelos próprios arquivos e não corrigidas
+  nesta Sprint (fora de escopo — reconciliação documental, não correção de código):
+  - `UserToken.Create` valida seu enum via `Enum.IsDefined` bruto em vez do helper compartilhado
+    `EnumValidation.Defined` usado por toda outra entidade (`user-token.md` já sinaliza isso como
+    "inconsistência menor, não corrigida").
+  - Nenhuma ação necessária — ambas já são conhecidas e documentadas; mencionadas aqui apenas para
+    rastreabilidade caso uma Sprint de engenharia futura queira endereçá-las.
+
+### Validação executada
+
+```bash
+git status
+dotnet format BeeDay.slnx --verify-no-changes
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+git diff --check
+```
+
+Resultados registrados na seção "Quality/Validation" do relatório final da Sprint enviado ao owner
+nesta conversa.
+
+### Deliverable
+
+`docs/domain/wallet.md` (correção de redação) e `docs/domain/audit-inventory.md` (nota de
+canonicidade) atualizados; Documentation Ledger sincronizado (`DOC-077` → `CURRENT`).
+
+---
