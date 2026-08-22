@@ -1578,3 +1578,129 @@ sessão (incluindo leitura completa de `ci.yml`/`release-quality-gate.yml`) ante
 atualizado.
 
 ---
+## Sprint 31.10 — Security, Identity & Privacy Documentation Reconciliation
+
+**GitHub Issue:** [#238](https://github.com/tiagoarrigoni/BeeDay/issues/238)
+**Branch:** `sprint/31.10-security-identity-privacy-documentation-reconciliation`
+**Depende de:** #237 (concluída, ver seção acima)
+
+> Segue `CLAUDE.md`, o padrão de planejamento beeday e o Global Execution Contract da EPIC 31 em
+> #228.
+
+### Objetivo da Sprint
+
+Criar um modelo único e seguro de documentação para segurança, autenticação, identidade,
+isolamento de propriedade e fronteiras sensíveis de privacidade — resolvendo a sobreposição entre
+`docs/security/` e `docs/authentication/`.
+
+### Validação aplicada nesta Sprint (política aprovada pelo owner)
+
+Sprint documental — nenhum código-fonte foi alterado. Suíte completa de testes **não** executada,
+por política aprovada em 2026-08-21.
+
+### Verificação de segurança desta Sprint (obrigatória para este assunto)
+
+Nenhum valor de segredo real (connection string, chave de API, senha/hash) foi encontrado em nenhum
+dos 4 documentos revisados — apenas nomes de chave/seção de configuração e um valor vazio
+propositalmente documentado (`appsettings.Production.json`). Confirmado antes e depois de todas as
+edições desta Sprint.
+
+### Método
+
+Levantamento inicial delegado (agente de exploração, somente leitura) cobrindo os 4 documentos
+(`docs/security/README.md`, `01-security-baseline.md`, `02-operational-security.md`,
+`docs/authentication/README.md`) contra `Program.cs`, os serviços de `Identity`/`Security`, os
+workflows de deploy e os testes de integração relevantes. Todo achado foi reverificado nesta sessão
+antes de qualquer edição — incluindo a leitura completa de `SecurityHeadersMiddleware.cs` e
+`SecureUserTokenService.cs`, e busca direta por call sites de `SetActive(false)` em todo o
+repositório.
+
+### Achados corrigidos (Required work #2)
+
+| Documento | Achado | Correção |
+|---|---|---|
+| `docs/security/02-operational-security.md` §5 | Afirmava categoricamente que **nenhum** middleware de headers de segurança existia além do framework — contradição direta com `01-security-baseline.md` §4 no mesmo corpus, que já documentava corretamente `SecurityHeadersMiddleware` (adicionado Sprint 30.22, mesmo dia 2026-08-21 mas nunca propagado para este segundo documento). | §5 reescrito descrevendo o middleware real (3 headers: `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`); data de "última verificação" atualizada. |
+| `docs/security/01-security-baseline.md` | Citava `AccountSidePanel.razor` como um dos formulários com `<AntiforgeryToken />` — componente removido em 2026-08-13 (redesign do shell autenticado); o formulário de logout está hoje em `NavigationItems.razor`. | Referência corrigida com nota da migração. |
+| `docs/security/01-security-baseline.md` | Listava desativação de conta (`User.SetActive(false)`) como gatilho de invalidação de sessão implementado, em pé de igualdade com troca/reset de senha — mas nenhum Handler de Application ou fluxo de UI chama `SetActive(false)` em produção; os únicos call sites de todo o repositório são fixtures de teste. | Reescrito para deixar explícito que o mecanismo de Domain existe mas não tem caso de uso que o acione hoje. |
+
+### Ownership canônico resolvido e disposição final de `docs/authentication/` (Required work #1/#5)
+
+`docs/authentication/README.md` estava listada desde Sprint 31.1 como área reservada/incompleta,
+com decisão final atribuída a esta Sprint (ownership map da Sprint 31.2). Decisão: **`docs/security/`
+é o dono canônico definitivo de todo o conteúdo de autenticação, sessão, rate limiting e proteções
+operacionais.** `docs/authentication/README.md` deixa de ser "reservada aguardando Sprint futura" e
+passa a ser um redirecionamento permanente e intencional — o assunto nunca teve um Aggregate,
+Command ou camada própria que justificasse um documento técnico separado; autenticação é uma das
+superfícies de segurança da aplicação, não um domínio à parte. `docs/security/README.md` documenta
+essa decisão de ownership explicitamente. Nenhum conteúdo foi duplicado ou fragmentado entre as duas
+pastas — a redação foi consolidada, não copiada.
+
+### Lacunas de cobertura fechadas (Required work #2/#3, escopo: tokens, PII, ownership isolation)
+
+Três mecanismos reais e de segurança, sem contradição com o texto existente mas totalmente ausentes
+dos 4 documentos, foram documentados nesta Sprint (adição, não correção de erro):
+
+1. **Tokens de e-mail/reset** (`SecureUserTokenService`): 32 bytes CSPRNG, Base64Url para o token
+   enviado, hash SHA-256 armazenado — nunca o token em claro. Adicionado como nova seção 2.1 em
+   `01-security-baseline.md`, cruzando com `docs/domain/user-token.md` (Sprint 31.5) para as
+   invariantes de janela temporal, sem duplicá-las.
+2. **Isolamento de propriedade (ownership)**: mecanismo estrutural (toda query de repositório
+   escopada por `userId`) já confirmado em Sprints anteriores da EPIC (31.6), mas nunca explicado
+   como controle de segurança nomeado nestes documentos — só aparecia como rótulo de categoria de
+   teste. Adicionado como nova subseção em `01-security-baseline.md`.
+3. **Mascaramento de PII em log de e-mail** (`EmailAddressLogMasking`): usado apenas por
+   `DevelopmentEmailSender` (nunca em produção); preserva 2 caracteres da parte local do endereço.
+   Adicionado a `02-operational-security.md` §3, ao lado da afirmação existente "nenhum segredo é
+   logado".
+
+Nenhuma dessas adições expõe segredo, token real ou detalhe operacional sensível — apenas o
+mecanismo e a localização do código.
+
+### Critérios de aceite (Issue #238)
+
+- [x] Authentication and security documentation have explicit canonical ownership — `docs/security/`
+      declarado dono canônico; decisão registrada nos dois READMEs.
+- [x] No reserved Authentication area remains without a final disposition — `docs/authentication/`
+      recebeu disposição final definitiva (redirecionamento permanente por design).
+- [x] Security claims are supported by current evidence — 3 achados corrigidos, todos verificados
+      contra código nesta sessão.
+- [x] No credentials/tokens/secrets are introduced — confirmado antes e depois das edições.
+- [x] Ownership/session/rate-limit behavior is accurately documented where implemented — corrigido
+      (desativação de conta) e expandido (ownership isolation).
+- [x] Privacy-sensitive logging boundaries are accurately described — `EmailAddressLogMasking`
+      documentado; nenhuma alegação de "nada é logado" era imprecisa, apenas incompleta.
+
+### Sprint-specific boundary respeitado
+
+Nenhuma garantia de segurança foi inventada, e nenhum dado sensível foi publicado. A decisão de
+ownership entre `docs/security/`/`docs/authentication/` foi tomada com evidência (ambas as pastas já
+concordavam implicitamente sobre a divisão antes desta Sprint) e documentada explicitamente, não
+apenas assumida.
+
+### Riscos residuais
+
+Nenhum novo. O mecanismo de desativação de conta (`User.SetActive(false)`) existe no Domain mas não
+tem caso de uso de Application/UI — isso não é um defeito de documentação (agora corretamente
+descrito), mas pode ser um gap de produto genuíno fora do escopo desta EPIC de documentação.
+
+### Validação executada
+
+```bash
+git status
+dotnet format BeeDay.slnx --verify-no-changes
+dotnet build BeeDay.slnx --configuration Release --warnaserror
+git diff --check
+```
+
+Resultados registrados na seção "Quality/Validation" do relatório final da Sprint enviado ao owner
+nesta conversa. Toda alegação corrigida ou adicionada foi verificada contra código-fonte real nesta
+sessão antes de ser escrita; nenhum segredo foi introduzido (verificado por leitura direta do diff
+final).
+
+### Deliverable
+
+4 arquivos atualizados (`docs/security/README.md`, `01-security-baseline.md`,
+`02-operational-security.md`, `docs/authentication/README.md`), decisão de ownership canônico
+registrada, e Documentation Ledger atualizado.
+
+---
