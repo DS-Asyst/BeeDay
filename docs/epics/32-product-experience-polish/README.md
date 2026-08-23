@@ -259,6 +259,13 @@ sequência completa de criação de Task/Project).
 o botão "+ Activity" como trigger persistente do menu de criação, já que ele sobrevive ao fechamento
 do menu).
 
+**Nota da Sprint 32.6 (cross-ref, sem fix):** confirmado por leitura de código que o contrato atual não
+tem como o chamador comunicar "não há trigger persistente" a `DialogFocusScope` — `deactivate(id)` em
+`beeday-dialog-focus.js` só sabe degradar para o escopo pai na pilha (`stack`) quando
+`previouslyFocused` deixa de estar `.isConnected`; não existe um segundo parâmetro para um trigger de
+fallback explícito. Isso é consistente com o candidato de correção já registrado acima e não foi
+alterado nesta Sprint — a mudança de contrato pertence à 32.13, não a esta.
+
 ---
 
 ### EXP32-F003 — Anel de foco em cascata do botão até a coluna inteira do board
@@ -967,6 +974,176 @@ runtime JS real).
 
 ---
 
+### EXP32-F022 — `BeeDayConfirmDialog` sem affordance de scroll em nenhuma largura de viewport
+
+| Campo | Valor |
+|---|---|
+| Área | Modais e diálogos (transversal — todo consumidor de `BeeDayConfirmDialog`) |
+| Rota/Página | Qualquer fluxo de exclusão com `Warning`/`WarningDetails` (ex.: `/daily` → excluir Habit) |
+| Componente | `BeeDayConfirmDialog` / `.delete-confirmation` (`feedback.css`) |
+| Severidade | MEDIUM |
+| Device | Shared, mais provável em viewport curto (mobile/landscape) |
+| Accessibility Impact | Yes (ações inalcançáveis por teclado/mouse) |
+| Owning Sprint | 32.6 (Modal & Dialog Experience) |
+| State | FIXED |
+
+**Interação:** abrir "Edit Habit" de um Habit existente, clicar "Delete" (o único fluxo de exclusão do
+produto que popula `Warning` + `WarningDetails`, via `HabitEditorModal.razor`), em um viewport baixo.
+
+**Comportamento atual (antes da correção):** `.delete-confirmation` tinha `overflow: hidden` e nenhum
+`max-height`, em nenhum breakpoint — apenas a largura era ajustada em `@media (max-width: 520px)`. Um
+diálogo cujo conteúdo (ícone + título + mensagem + item + aviso + ações) excedesse a altura do
+viewport era cortado sem nenhuma forma de rolar até os botões "Cancel"/"Delete".
+
+**Problema:** viola o contrato de "mobile height/scroll behavior... predictable" desta Sprint (Issue
+#250) e o Interaction Quality Contract da Issue #244 §6 — uma confirmação destrutiva cujas ações não
+podem ser alcançadas é pior do que apenas inconsistente, é uma ação bloqueada.
+
+**Evidência (navegador, nesta Sprint):** `HabitAndTaskTests.
+DeleteHabitConfirmation_RemainsScrollableAndActionableAtConstrainedViewportHeight` (Playwright) força
+um viewport de 390×320 (menor que o conteúdo do diálogo com Warning), confirma via
+`BoundingBoxAsync()` que o botão "Delete Habit" permanece dentro dos limites verticais do viewport, e
+clica nele com sucesso — provando que a rolagem interna funciona de ponta a ponta, não apenas por
+inspeção do CSS.
+
+**Resolution:** `FIXED` nesta Sprint. `.delete-confirmation` recebeu `max-height: calc(100vh -
+1.25rem); overflow: hidden auto;` — o mesmo idioma já usado por `.editor-modal`
+(`editor-modal.css`), ativo em todas as larguras (não apenas mobile), consistente com o padrão que
+`EditorModalShell` já seguia.
+
+**Regression Protection:** `HabitAndTaskTests.
+DeleteHabitConfirmation_RemainsScrollableAndActionableAtConstrainedViewportHeight` (acima).
+
+---
+
+### EXP32-F023 — `BeeDayFeedbackModal` sem affordance de scroll no desktop
+
+| Campo | Valor |
+|---|---|
+| Área | Modais e diálogos / Feedback de experiência (level-up) |
+| Rota/Página | Qualquer conclusão de Habit/Task/To-Do/Project que dispare o modal de level-up |
+| Componente | `BeeDayFeedbackModal` / `.beeday-feedback` (`BeeDayFeedbackModal.razor.css`) |
+| Severidade | LOW |
+| Device | Desktop (o breakpoint `max-width: 560px` já cobria mobile) |
+| Accessibility Impact | No (risco teórico — `History` está limitado a `.Take(3)` na prática) |
+| Owning Sprint | 32.6 (Modal & Dialog Experience) |
+| State | FIXED |
+
+**Comportamento atual (antes da correção):** `.beeday-feedback` só ganhava `max-height`/`overflow-y:
+auto` dentro de `@media (max-width: 560px)` — em telas maiores, `overflow: hidden` sem `max-height`
+algum. Como `History.Take(3)` limita o conteúdo hoje, isso nunca reproduziu na prática, mas é o mesmo
+padrão estrutural do EXP32-F022 (achado por evidência de código, não por reprodução observada — ver
+§9 sobre o limite entre achado codificado e achado verificado ao vivo).
+
+**Resolution:** `FIXED` nesta Sprint. `.beeday-feedback` recebeu o mesmo `max-height: calc(100vh -
+1.25rem); overflow: hidden auto;` na regra base (não mais restrito ao breakpoint mobile), alinhando
+com `.editor-modal` e o `.delete-confirmation` corrigido acima.
+
+**Regression Protection:** nenhum teste novo — `History.Take(3)` já garante que o conteúdo atual nunca
+excede o `max-height` corrigido; nenhuma regressão de comportamento observável a proteger sem um
+cenário reprodutível. Se um `History` maior for exposto no futuro, o comportamento de scroll já está
+correto por construção (mesmo CSS que `EXP32-F022` prova em browser).
+
+---
+
+### EXP32-F024 — Camadas de z-index dos diálogos não seguem um único nível
+
+| Campo | Valor |
+|---|---|
+| Área | Modais e diálogos (transversal) |
+| Componente | `BeeDayFeedbackModal`/`ProjectWorkspace` (`--beeday-z-modal`, 900) vs. `EditorModalShell` (`--beeday-z-modal-raised`, 1200) vs. `BeeDayConfirmDialog` (`--beeday-z-confirmation`, 1400) |
+| Severidade | LOW |
+| Device | Shared |
+| Accessibility Impact | No |
+| Owning Sprint | não roteada — nenhum empilhamento incorreto foi observado na prática |
+| State | DISCOVERED |
+
+**Comportamento atual:** os quatro diálogos do produto usam três níveis diferentes da escala de
+z-index (`variables.css`), sem uma regra explícita de "qual camada é a camada modal". Na prática, a
+única combinação de empilhamento realmente exercitada hoje é editor → confirmação de exclusão
+(`EditorModalShell` 1200 sob `BeeDayConfirmDialog` 1400, ordem correta) e não existe hoje nenhum fluxo
+que abra `BeeDayFeedbackModal`/`ProjectWorkspace` (900) sobre um editor aberto.
+
+**Problema:** é uma inconsistência latente, não um defeito reproduzido — se um fluxo futuro precisar
+abrir o feedback de level-up por cima de um editor aberto, ele ficaria atrás (900 < 1200), não na
+frente. Registrado como achado de código (não de comportamento observado em navegador) para que uma
+Sprint futura que introduza esse fluxo não precise redescobrir a causa.
+
+**Resolution:** não aplicável — `DISCOVERED`, sem correção especulativa (nenhuma evidência de
+empilhamento incorreto observado nesta Sprint; ver Issue #244 sobre não introduzir "otimizações
+especulativas").
+
+**Regression Protection:** nenhuma — nada foi alterado.
+
+---
+
+### EXP32-F025 — `ReconnectModal` fora do contrato compartilhado de diálogo (exceção aceita)
+
+| Campo | Valor |
+|---|---|
+| Área | Modais e diálogos / conectividade |
+| Componente | `ReconnectModal` (`Components/Layout/`) |
+| Severidade | N/A — não é um defeito |
+| Owning Sprint | não roteada — exceção documentada, não um achado a corrigir |
+| State | ACCEPTED |
+
+**Comportamento atual:** `ReconnectModal` é o template padrão de Blazor Web App para o modal de
+reconexão do SignalR (`<dialog>` HTML nativo, `showModal()`/`.close()`), não uma implementação do
+Design System — não usa `EditorModalShell`, `BeeDayConfirmDialog`, `DialogFocusScope` nem
+`beeday-dialog-focus.js`. Escape/backdrop/foco vêm nativamente do elemento `<dialog>` do navegador, não
+de código do beeday. Não tem breakpoint mobile próprio (`width: 20rem; margin: 20vh auto` fixo), mas
+reutiliza os tokens de cor do Design System.
+
+**Por que é uma exceção aceita e não um achado a corrigir:** é UI de infraestrutura (perda de conexão
+SignalR do próprio framework Blazor Server), não uma superfície de produto — dobrá-la no contrato de
+diálogo do Design System exigiria reimplementar comportamento nativo do navegador (Escape/foco/trap)
+que já funciona corretamente, por um ganho de consistência puramente cosmético em um componente que o
+usuário só vê durante uma falha de conectividade. Consistente com "Não redesenhar o beeday. Refinar o
+beeday" (Issue #244 §2.2).
+
+**Resolution:** `ACCEPTED` — documentado nesta Sprint como exceção intencional ao contrato
+`DialogFocusScope`/`beeday-dialog-focus.js` que os outros quatro diálogos do produto seguem.
+
+**Regression Protection:** não aplicável.
+
+---
+
+### Reconciliação dos shells de diálogo (Sprint 32.6, Required Work #2 da Issue #250)
+
+A Issue #250 pede explicitamente para "encontrar e consolidar shells de modal duplicados onde a
+evidência mostrar responsabilidades equivalentes". Os quatro diálogos do produto
+(`EditorModalShell`, `BeeDayConfirmDialog`, `BeeDayFeedbackModal`, `ProjectWorkspace`) foram lidos
+por completo nesta Sprint para essa avaliação.
+
+**Conclusão: já estão consolidados no nível correto — o primitivo compartilhado
+(`DialogFocusScope` + `beeday-dialog-focus.js`) — e não devem ser fundidos em um único componente
+visual.** Os quatro já compartilham exatamente o mesmo ciclo de vida (`docs/design-system/
+02-components.md` §2: OPEN → foco inicial → contenção de Tab/Shift+Tab → Escape/close com busy
+guard → restore), confirmado por leitura de código e pelos testes E2E existentes
+(`InteractiveComponentsTests.NestedDialogsTrapKeyboardAndRestoreFocusAcrossEscapeClosures`,
+`HabitAndTaskTests.ProjectWorkspace_UsesSharedProgressFocusAndResponsiveContracts`). O que
+diverge entre eles não é o ciclo de vida — é o **propósito de cada um**: `EditorModalShell` é um
+formulário (`Model`+`EditForm`, `role="dialog"`), `BeeDayConfirmDialog` é uma confirmação
+destrutiva de duas ações (`role="alertdialog"`, ícone + aviso), `BeeDayFeedbackModal` é um resumo
+celebratório de leitura única (`InitialFocusSelector="self"`, sem ações de formulário) e
+`ProjectWorkspace` é um painel de navegação/leitura (sem `Model`/submit, com sua própria barra de
+progresso e lista de To-Dos). Forçar essas quatro formas visuais em um único componente exigiria uma
+árvore de parâmetros condicionais maior do que o problema real (duplicação de ~10 linhas de
+`@onclick`/`@onkeydown` por componente) justifica — inconsistente com "Não redesenhar o beeday.
+Refinar o beeday" (Issue #244 §2.2) e com o limite explícito da Issue #250: "Do not introduce a new
+modal framework if existing foundations can be reconciled".
+
+O único candidato real a shell duplicado fora do padrão (`ProjectWorkspace` reimplementando sua
+própria estrutura de cabeçalho/backdrop em vez de estender `EditorModalShell`) foi avaliado e
+descartado como duplicação indevida pelo mesmo motivo: `ProjectWorkspace` não tem `Model`/`EditForm`
+nem botão de submit — não é um editor, é um painel de leitura, então não é uma instância de
+"responsabilidade equivalente" a `EditorModalShell` apesar da semelhança de chrome.
+
+O trabalho de consolidação real e seguro encontrado nesta Sprint foi a inconsistência de affordance
+de scroll móvel entre os quatro (EXP32-F022/F023 acima, ambos `FIXED`) — não uma fusão de shells.
+
+---
+
 ## 7. Achados pré-existentes roteados para dentro da EPIC 32
 
 | ID original | Ledger de origem | Achado | Sprint EPIC 32 |
@@ -1038,7 +1215,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.3 — Page Layout Consistency | EXP32-F016, EXP32-F017 — ambos `FIXED` nesta Sprint; EXP32-F018, EXP32-F019 — `ACCEPTED` (exceções documentadas); EXP32-F020 — novo, roteado para 32.13; EXP32-F009 — evidência adicional (`/profile`) |
 | 32.4 — Buttons & Action Hierarchy | EXP32-F001 — `FIXED` nesta Sprint |
 | 32.5 — Forms & Input Experience | EXP32-F005 — `FIXED` nesta Sprint; EXP32-F007 — `FIXED` nesta Sprint; EXP32-F021 — novo, `FIXED` nesta Sprint; EXP32-F006 (cross-ref), EXP32-F011 (cross-ref), EXP32-F012 (cross-ref) |
-| 32.6 — Modal & Dialog Experience | EXP32-F002 (cross-ref) |
+| 32.6 — Modal & Dialog Experience | EXP32-F022, EXP32-F023 — ambos novos, `FIXED` nesta Sprint; EXP32-F024 — novo, `DISCOVERED` (não roteada — latente, sem Sprint dona); EXP32-F025 — novo, `ACCEPTED` (exceção documentada); EXP32-F002 (cross-ref, não corrigido — pertence à 32.13) |
 | 32.7 — Lists, Cards & Collection Patterns | EXP32-F003, EXP32-F004 |
 | 32.8 — Search, Filters & Sorting | EXP32-F013 |
 | 32.9 — Loading & Perceived Performance | gap de evidência registrado em §9 (sem achado novo) |

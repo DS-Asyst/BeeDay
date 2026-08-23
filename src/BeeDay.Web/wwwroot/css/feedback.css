@@ -14,7 +14,13 @@
 .delete-confirmation {
     position: relative;
     width: min(31rem, calc(100vw - 2rem));
-    overflow: hidden;
+    /* Sprint 32.6 (EPIC 32): was `overflow: hidden` with no max-height at any breakpoint - a
+       Warning/WarningDetails-bearing confirmation (see HabitEditorModal's delete flow) could clip
+       the Cancel/Confirm actions below the fold on short viewports with no way to reach them.
+       Same overflow idiom as .editor-modal in editor-modal.css: hidden on x (keeps the rounded
+       corners clipping .delete-confirmation__top-border), auto on y. */
+    max-height: calc(100vh - 1.25rem);
+    overflow: hidden auto;
     border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-lg);
     background: var(--beeday-color-surface);
