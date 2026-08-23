@@ -133,6 +133,41 @@ public sealed class EditorModalShellTests : BunitContext
         Assert.True(submitted);
     }
 
+    // EPIC 32 Sprint 32.6: EditorModalShell is the most widely consumed dialog shell (Habit, Task,
+    // To-Do, Project, Transaction, Tag), but unlike BeeDayConfirmDialogTests.EscapeKeyInvokesCancel
+    // it had no bUnit-level Escape coverage of its own - the only prior coverage was end-to-end,
+    // via InteractiveComponentsTests.NestedDialogsTrapKeyboardAndRestoreFocusAcrossEscapeClosures.
+    [Fact]
+    public void EscapeKeyInvokesCancel()
+    {
+        var cancelled = false;
+        var cut = Render<EditorModalShell>(parameters => parameters
+            .Add(component => component.Model, new object())
+            .Add(component => component.Title, "Edit Habit")
+            .Add(component => component.TitleId, "habit-editor-title")
+            .Add(component => component.OnCancel, EventCallback.Factory.Create(this, () => cancelled = true)));
+
+        cut.Find(".editor-modal-backdrop").KeyDown("Escape");
+
+        Assert.True(cancelled);
+    }
+
+    [Fact]
+    public void EscapeKeyDoesNothingWhileBusy()
+    {
+        var cancelled = false;
+        var cut = Render<EditorModalShell>(parameters => parameters
+            .Add(component => component.Model, new object())
+            .Add(component => component.Title, "Edit Habit")
+            .Add(component => component.TitleId, "habit-editor-title")
+            .Add(component => component.IsBusy, true)
+            .Add(component => component.OnCancel, EventCallback.Factory.Create(this, () => cancelled = true)));
+
+        cut.Find(".editor-modal-backdrop").KeyDown("Escape");
+
+        Assert.False(cancelled);
+    }
+
     private sealed class RequiredFieldModel
     {
         [Required]
