@@ -204,4 +204,7 @@
   <data name="SessionCheckingLabel" xml:space="preserve">
     <value>Checking your session...</value>
   </data>
+  <data name="ValidationLoginPasswordRequired" xml:space="preserve">
+    <value>Password is required.</value>
+  </data>
 </root>

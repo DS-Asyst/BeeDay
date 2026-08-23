@@ -100,6 +100,14 @@ export function activate(id, initialFocusSelector) {
     return true;
 }
 
+export function focusFirstInvalid(id) {
+    queueMicrotask(() => {
+        const container = document.getElementById(id);
+        const target = container?.querySelector('.invalid, [aria-invalid="true"]');
+        target?.focus({ preventScroll: true });
+    });
+}
+
 export function deactivate(id) {
     const state = scopes.get(id);
     if (!state) {

@@ -119,7 +119,12 @@ mostra toast de sucesso/erro individualmente — uma seção falhando não bloqu
   (ver [`01-composition-root.md`](01-composition-root.md) §8), não para um handler Blazor. O
   `onsubmit` inline desabilita o botão via JS vanilla (sem componente/JS interop dedicado) para
   evitar duplo submit. Os nomes/inputs nativos permanecem por esse contrato, mas o chrome consome
-  `.beeday-field*`/`.beeday-checkbox*` e o submit continua sendo `BeeDayButton`.
+  `.beeday-field*`/`.beeday-checkbox*` e o submit continua sendo `BeeDayButton`. **Sprint 32.5
+  (EXP32-F005/EXP32-F007):** os campos `email`/`password` continuam usando a validação nativa do
+  navegador (`required`, `type="email"`) — migrar para `EditForm` redesenharia este fluxo, fora do
+  escopo "Polish, Not Redesign" da EPIC 32 — mas `oninvalid`/`setCustomValidity(...)` agora localiza
+  a mensagem do balão nativo usando `DesignSystemResources` (mesmas chaves que todo outro formulário
+  do produto), em vez de deixá-la no idioma do navegador/SO.
 - `RedirectToLogin.razor` (usado só por `Routes.razor`'s `NotAuthorized`): preserva o path atual
   como `returnUrl`.
 - As 5 páginas de `Identity` (`ConfirmEmail`, `ResetPassword`, `ForgotPassword`,

@@ -5,7 +5,7 @@ namespace BeeDay.Web.Components.DesignSystem.Modals;
 
 public sealed class DialogFocusScope : ComponentBase, IAsyncDisposable
 {
-    private const string ModulePath = "./js/beeday-dialog-focus.js?v=20260816-1";
+    private const string ModulePath = "./js/beeday-dialog-focus.js?v=20260822-1";
 
     [Inject] private IJSRuntime JS { get; set; } = default!;
 

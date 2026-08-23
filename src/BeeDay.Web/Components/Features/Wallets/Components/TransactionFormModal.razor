@@ -1,3 +1,4 @@
+@using System.Globalization
 @using BeeDay.Application.Features.Wallets.Responses
 @using BeeDay.Web.Components.Features.Wallets.Models
 @inject IStringLocalizer<WalletResources> Localizer
@@ -56,7 +57,7 @@
 
                 <label class="editor-modal__field">
                     <span>@Localizer["AmountLabel"]</span>
-                    <InputNumber @bind-Value="Model.Amount" step="0.01" min="0.01" />
+                    <InputNumber @bind-Value="Model.Amount" step="0.01" min="0.01" lang="@CultureInfo.CurrentCulture.Name" />
                     <BeeDayValidationMessage For="@(() => Model.Amount)" />
                 </label>
 
