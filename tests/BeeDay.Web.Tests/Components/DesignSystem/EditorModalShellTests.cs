@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using BeeDay.Web.Components.DesignSystem.Modals;
 using BeeDay.Web.Tests.Localization;
 using Microsoft.AspNetCore.Components;
@@ -94,5 +95,47 @@ public sealed class EditorModalShellTests : BunitContext
 
         Assert.NotEmpty(cut.FindAll(".test-secondary-action"));
         Assert.Contains("Open Project", cut.Find(".test-secondary-action").TextContent);
+    }
+
+    // EPIC 32 Sprint 32.5: a failed submit previously left focus wherever it already was (the
+    // submit button, per Blazor's default OnInvalidSubmit) instead of moving it to the invalid
+    // field - the actual DOM focus effect is proven live-in-browser (WalletTests.
+    // InvalidSubmit_MovesFocusToFirstInvalidField), since bUnit does not execute real focus/JS.
+    // This test protects the surrounding contract: an invalid model must never reach OnSubmit, and
+    // wiring OnInvalidSubmit must not throw even without a real JS runtime behind the interop call.
+    [Fact]
+    public async Task InvalidSubmit_NeverInvokesOnSubmit_AndDoesNotThrow()
+    {
+        var submitted = false;
+        var cut = Render<EditorModalShell>(parameters => parameters
+            .Add(component => component.Model, new RequiredFieldModel())
+            .Add(component => component.Title, "Create Habit")
+            .Add(component => component.TitleId, "habit-editor-title")
+            .Add(component => component.OnSubmit, EventCallback.Factory.Create(this, () => submitted = true)));
+
+        await cut.Find("form").SubmitAsync();
+
+        Assert.False(submitted);
+    }
+
+    [Fact]
+    public async Task ValidSubmit_StillInvokesOnSubmit()
+    {
+        var submitted = false;
+        var cut = Render<EditorModalShell>(parameters => parameters
+            .Add(component => component.Model, new RequiredFieldModel { Title = "Drink water" })
+            .Add(component => component.Title, "Create Habit")
+            .Add(component => component.TitleId, "habit-editor-title")
+            .Add(component => component.OnSubmit, EventCallback.Factory.Create(this, () => submitted = true)));
+
+        await cut.Find("form").SubmitAsync();
+
+        Assert.True(submitted);
+    }
+
+    private sealed class RequiredFieldModel
+    {
+        [Required]
+        public string Title { get; set; } = string.Empty;
     }
 }

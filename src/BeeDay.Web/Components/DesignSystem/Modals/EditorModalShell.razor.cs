@@ -1,12 +1,23 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.JSInterop;
 
 namespace BeeDay.Web.Components.DesignSystem.Modals;
 
-public partial class EditorModalShell
+public partial class EditorModalShell : IAsyncDisposable
 {
+    // Same module DialogFocusScope already loads for this dialog's focus-trap behavior - reused
+    // here rather than a second JS file, since both are "move focus somewhere sensible within this
+    // dialog" concerns. Sprint 32.5 (EXP32 Ledger): failed validation left focus on the submit
+    // button instead of the first invalid field.
+    private const string FocusModulePath = "./js/beeday-dialog-focus.js?v=20260822-1";
+
     private readonly string _dialogId = $"beeday-editor-dialog-{Guid.NewGuid():N}";
+
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
+    private IJSObjectReference? _focusModule;
 
     [Parameter, EditorRequired] public object Model { get; set; } = default!;
     [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
@@ -29,4 +40,39 @@ public partial class EditorModalShell
 
     private Task HandleKeyDown(KeyboardEventArgs args)
         => args.Key == "Escape" ? Cancel() : Task.CompletedTask;
+
+    private async Task HandleInvalidSubmit()
+    {
+        // Yields so the renders StateHasChanged already queued for the now-invalid fields (raised
+        // synchronously by EditContext.Validate() before this callback runs) reach the client
+        // first - otherwise the .invalid marker this looks for would not exist in the DOM yet.
+        await Task.Yield();
+
+        try
+        {
+            _focusModule ??= await JS.InvokeAsync<IJSObjectReference>("import", FocusModulePath);
+            await _focusModule.InvokeVoidAsync("focusFirstInvalid", DialogId);
+        }
+        catch (JSException)
+        {
+            // Focus management is progressive enhancement and must never break dialog content.
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_focusModule is not null)
+        {
+            try
+            {
+                await _focusModule.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+            }
+        }
+    }
 }

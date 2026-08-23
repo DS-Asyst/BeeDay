@@ -9,7 +9,7 @@
              aria-busy="@IsBusy.ToString().ToLowerInvariant()"
              tabindex="-1"
              @onclick:stopPropagation>
-        <EditForm Model="Model" OnValidSubmit="Submit">
+        <EditForm Model="Model" OnValidSubmit="Submit" OnInvalidSubmit="HandleInvalidSubmit">
             <DataAnnotationsValidator />
 
             <header class="editor-modal__header">

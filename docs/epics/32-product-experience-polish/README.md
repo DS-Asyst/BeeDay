@@ -348,7 +348,7 @@ o `ProjectWorkspace` exponha o mesmo controle de conclusão da coluna To-Dos).
 | Device | Desktop (confirmado); comportamento depende do locale do SO, não do dispositivo |
 | Accessibility Impact | No (não é falha WCAG técnica), mas risco de erro de entrada de dados financeiros |
 | Owning Sprint | 32.5 (Forms & Input Experience) — cross-ref 32.16 (Wallet), 32.15 (Daily/Projects) |
-| State | DISCOVERED |
+| State | FIXED |
 
 **Interação:** abrir o editor "Create Project" (campo "Expected date") e o editor "Edit Transaction"
 do Wallet (campo "Amount").
@@ -372,11 +372,18 @@ de `BeeDayDateInput` (Project, To-Do, Wallet).
 exibido como `$4.50` na lista); captura de tela do mesmo registro reaberto em "Edit Transaction"
 mostrando `4,50` no campo Amount.
 
-**Resolution:** não aplicável — `DISCOVERED`.
+**Resolution:** `FIXED` nesta Sprint. `BeeDayDateInput` (`<InputDate>`) e o `InputNumber` monetário do
+Wallet agora recebem `lang="@CultureInfo.CurrentCulture.Name"` — Chromium usa o atributo `lang` do
+próprio elemento (não o locale do SO/navegador) para formatar `<input type="date">`/
+`<input type="number">` quando presente. Verificado ao vivo no navegador (pt-BR): o placeholder do
+campo de data passou a exibir `dd/mm/aaaa` de forma consistente com a cultura selecionada, e uma
+transação de `$4,50` reaberta em "Edit Transaction" agora mostra `4,50` no campo Amount — mesmo
+formato de decimal usado pelo `WalletCurrencyFormatter` na lista, eliminando a divergência.
 
-**Regression Protection:** a definir pela Sprint 32.5 (candidato: normalizar exibição/entrada usando
-a cultura selecionada do beeday em vez do locale do navegador, ou documentar a limitação como
-aceita com uma máscara de entrada explícita).
+**Regression Protection:** `BeeDayFormTests.DateInput_LangAttributeFollowsCurrentCulture_NotTheMachineDefault`
+(en-US/pt-BR) e `TransactionFormModalTests.AmountInput_LangAttributeFollowsCurrentCulture_NotTheMachineDefault`
+(en-US/pt-BR) assert `lang` on the rendered `<input>` matches the pinned culture, not the machine
+default.
 
 ---
 
@@ -426,7 +433,7 @@ EXP32-F005).
 | Device | Shared |
 | Accessibility Impact | No (validação nativa do navegador é, por si, acessível) |
 | Owning Sprint | 32.5 (Forms & Input Experience) |
-| State | DISCOVERED |
+| State | FIXED |
 
 **Interação:** submeter o formulário de login com o campo Email vazio.
 
@@ -443,11 +450,23 @@ formulário do produto, que usa `BeeDayValidationMessage` localizado.
 **Evidência (navegador, nesta Sprint):** captura de tela mostrando o campo Email focado com o anel de
 validação nativo do Chromium após clicar "Sign in" com o formulário vazio.
 
-**Resolution:** não aplicável — `DISCOVERED`.
+**Resolution:** `FIXED` nesta Sprint, mantendo a validação nativa (decisão explícita — ver abaixo) mas
+corrigindo o problema real relatado: o idioma da mensagem. `Login.razor` não pode migrar para
+`EditForm`/`BeeDayValidationMessage` sem reintroduzir a discussão arquitetural já resolvida em
+`docs/web/04-feature-components.md` §7 (o POST precisa ir direto ao endpoint minimal API, não a um
+handler Blazor) — isso seria redesenhar o fluxo de login, fora do escopo de "Polish, Not Redesign"
+(Issue #244 §2.2) para um achado `LOW`. Em vez disso, os campos `login-email`/`login-password` agora
+localizam a própria mensagem de validação nativa via `oninvalid`/`setCustomValidity(...)`, usando as
+chaves já existentes `DesignSystemResources.ValidationEmailRequired`/`ValidationEmailFormat` (reuso
+exato — mesmo texto já usado por todo outro formulário do produto) e a nova
+`ValidationLoginPasswordRequired`. Verificado ao vivo no navegador sob cultura pt-BR:
+`email.validationMessage` retorna "O e-mail é obrigatório."/"Informe um endereço de e-mail válido." e
+`password.validationMessage` retorna "A senha é obrigatória." — mesmo balão nativo do Chromium,
+agora no idioma selecionado do beeday em vez do idioma do navegador/SO.
 
-**Regression Protection:** a definir pela Sprint 32.5 (candidato: decidir explicitamente se a
-validação nativa é aceita como suficiente para este formulário específico, documentando o porquê, ou
-migrar para validação client-side localizada consistente com o resto do produto).
+**Regression Protection:** `LoginTests.EmailAndPasswordFields_HaveLocalizedNativeValidationMessages`
+(en-US) e `LoginTests.UnderPortugueseUiCulture_NativeValidationMessagesAreLocalized` (pt-BR) assert
+the `oninvalid` handler's localized message text for both fields.
 
 ---
 
@@ -900,6 +919,54 @@ markup agora também aplica a classe manualmente a partir do mesmo método que j
 
 ---
 
+### EXP32-F021 — Falha de validação em `EditorModalShell` não move o foco para o campo inválido
+
+| Campo | Valor |
+|---|---|
+| Área | Formulários e inputs (transversal — todo consumidor de `EditorModalShell`) |
+| Rota/Página | Qualquer editor: Habit, Task, To-Do, Project, Transaction, Tag |
+| Componente | `EditorModalShell` (`<EditForm>` só tratava `OnValidSubmit`) |
+| Severidade | MEDIUM |
+| Device | Shared (teclado/leitor de tela) |
+| Accessibility Impact | Yes |
+| Owning Sprint | 32.5 (Forms & Input Experience) |
+| State | FIXED |
+
+**Interação:** abrir "Create Habit", deixar "Título" vazio e clicar em "Criar".
+
+**Comportamento atual (antes da correção):** o `BeeDayValidationMessage` inline aparecia corretamente
+abaixo do campo, mas o foco do teclado permanecia onde já estava — no botão de submit — em vez de ir
+para o campo `#habit-title` agora inválido. Confirmado via `document.activeElement` no navegador
+(retornava o `BUTTON`, não o `INPUT`).
+
+**Problema:** um usuário de teclado/leitor de tela que submete um formulário inválido não é levado ao
+campo que precisa corrigir — precisa navegar manualmente até encontrá-lo. Isso viola o "predictable
+recovery" exigido pelo Interaction Quality Contract da Issue #244 §6, e afeta sistemicamente todo
+formulário do produto que usa `EditorModalShell` (Habit, Task, To-Do, Project, Transaction, Tag).
+
+**Evidência (navegador, nesta Sprint):** `document.activeElement.tagName`/`.id` confirmados via
+DevTools antes e depois da correção, em `/daily` → "Create Habit" com "Título" vazio.
+
+**Resolution:** `FIXED` nesta Sprint. `EditorModalShell`'s `<EditForm>` agora trata `OnInvalidSubmit`
+além de `OnValidSubmit`: após um `Task.Yield()` (deixa os re-renders que `EditContext.Validate()` já
+disparou para os campos agora inválidos chegarem ao cliente primeiro), reutiliza o módulo JS que
+`DialogFocusScope` já carrega para este mesmo diálogo (`beeday-dialog-focus.js`, bumped to
+`?v=20260822-1`) e chama a nova função exportada `focusFirstInvalid(dialogId)`, que foca o primeiro
+elemento `.invalid`/`[aria-invalid="true"]` dentro do diálogo — `.invalid` é a classe que os
+componentes `Input*` do Blazor já aplicam automaticamente ao campo malsucedido, então nenhum
+consumidor de `EditorModalShell` precisou de qualquer mudança. Verificado ao vivo no navegador:
+`document.activeElement.id` passou a retornar `"habit-title"` após o submit inválido; submit válido
+subsequente não regrediu (foco/toast normais).
+
+**Regression Protection:** `WalletTests.InvalidSubmit_MovesFocusToFirstInvalidField` (E2E, prova o
+efeito real de foco no DOM — Notes é focado antes do submit para que a asserção não possa ser
+confundida com o `autofocus` inicial de Description); `EditorModalShellTests.
+InvalidSubmit_NeverInvokesOnSubmit_AndDoesNotThrow`/`ValidSubmit_StillInvokesOnSubmit` (bUnit, prova
+o contrato ao redor — um modelo inválido nunca chega a `OnSubmit`, e o novo interop não lança sem um
+runtime JS real).
+
+---
+
 ## 7. Achados pré-existentes roteados para dentro da EPIC 32
 
 | ID original | Ledger de origem | Achado | Sprint EPIC 32 |
@@ -970,7 +1037,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.2 — Application Shell & Navigation Fluidity | EXP32-F014, EXP32-F015 — ambos `FIXED` nesta Sprint |
 | 32.3 — Page Layout Consistency | EXP32-F016, EXP32-F017 — ambos `FIXED` nesta Sprint; EXP32-F018, EXP32-F019 — `ACCEPTED` (exceções documentadas); EXP32-F020 — novo, roteado para 32.13; EXP32-F009 — evidência adicional (`/profile`) |
 | 32.4 — Buttons & Action Hierarchy | EXP32-F001 — `FIXED` nesta Sprint |
-| 32.5 — Forms & Input Experience | EXP32-F005, EXP32-F006 (cross-ref), EXP32-F007, EXP32-F011 (cross-ref), EXP32-F012 (cross-ref) |
+| 32.5 — Forms & Input Experience | EXP32-F005 — `FIXED` nesta Sprint; EXP32-F007 — `FIXED` nesta Sprint; EXP32-F021 — novo, `FIXED` nesta Sprint; EXP32-F006 (cross-ref), EXP32-F011 (cross-ref), EXP32-F012 (cross-ref) |
 | 32.6 — Modal & Dialog Experience | EXP32-F002 (cross-ref) |
 | 32.7 — Lists, Cards & Collection Patterns | EXP32-F003, EXP32-F004 |
 | 32.8 — Search, Filters & Sorting | EXP32-F013 |

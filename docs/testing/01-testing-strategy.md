@@ -196,6 +196,77 @@ executado contra a solução inteira é consistente com este padrão conhecido �
 projeto(s) afetado(s) isoladamente (`dotnet test tests/BeeDay.E2E.Tests/...`) ou em
 `--configuration Release` antes de classificar como `CHANGE-CAUSED`.
 
+### Hang determinístico em `AccountLifecycleTests.Login_CompletesOnboarding_ReachesDashboard` — descoberto na Sprint 32.5, `UNRESOLVED`
+
+Distinto de `BD30-F042` acima, apesar da semelhança superficial (ambos envolvem Playwright/E2E). `BD30-F042`
+é uma `TimeoutException` de navegação/screenshot causada por concorrência entre projetos, nunca repete no
+mesmo teste, nunca em execução isolada. O achado desta seção é um **hang indefinido real** (sem exceção —
+exige `--blame-hang` para ser encerrado), **determinístico no mesmo teste**, e **reproduzido em isolamento
+total** (projeto único, teste único filtrado, sem nenhuma concorrência), portanto não é uma instância de
+`BD30-F042` e não deve ser classificado como tal.
+
+**Evidência (4 reproduções independentes, mesma assinatura):**
+
+1. Execução isolada do projeto `BeeDay.E2E.Tests` inteiro (sem filtro), instrumentada com `--blame-hang
+   --blame-hang-timeout 3m`: 86 testes aprovados em sequência (`NavigationTests`, `EmailClientCompatibilityTests`,
+   `ProjectLifecycleTests`, `InstitutionalPagesTests`, `Epic21ConsolidationTests`, dois `AccountLifecycleTests`
+   anteriores) e trava exatamente em `Login_CompletesOnboarding_ReachesDashboard`. `Sequence_*.xml` do Blame
+   Collector confirma `Completed="False"` apenas para este teste.
+2. Execução isolada do mesmo projeto completo, sem instrumentação: mesmo teste trava; processo confirmado
+   sem progresso (CPU acumulada desprezível ao longo de ~45 min) e encerrado manualmente.
+3. Execução com filtro restrito a **apenas este teste** (`--filter
+   "FullyQualifiedName~AccountLifecycleTests.Login_CompletesOnboarding_ReachesDashboard"`), sem nenhum outro
+   teste antes: trava do mesmo jeito, do início ao fim da execução — descarta contenção por acúmulo de
+   estado de testes anteriores como causa.
+4. Repetição da execução (3) após uma tentativa de correção (ver abaixo): trava novamente, idêntico.
+
+**Causa raiz confirmada por análise de memory dump** (`dotnet-dump analyze` sobre os `.dmp` gerados pelo
+Blame Collector — `clrstack -all`, `dumpasync`, `dumpobj`/`dumpvc`): em três dumps independentes (execuções
+1, 3 e 4), a continuação assíncrona do teste (`AccountLifecycleTests+<Login_CompletesOnboarding_ReachesDashboard>d__4`,
+estado `4`) está suspensa aguardando uma chamada de API do Playwright presa em
+`Microsoft.Playwright.Transport.Connection.WrapApiCallAsync` → `InnerSendMessageToServerAsync` →
+`StdIOTransport.GetResponseAsync` — ou seja, uma mensagem JSON-RPC foi enviada ao processo driver Node.js
+embutido do Playwright e a resposta correspondente nunca chega. `clrstack -all` confirma que **nenhuma
+thread do processo está bloqueada** em lock, I/O síncrono ou chamada SQL — todas as threads do pool estão
+ociosas (`LowLevelLifoSemaphore.Wait`) e as únicas threads ativas pertencentes à aplicação hospedada
+(`Program.<Main>$` do `BeeDay.Web`, via `WebApplicationFactory`) também estão ociosas. Isso descarta deadlock
+gerenciado, lock de LocalDB e wait síncrono sem timeout no código de produção — é uma resposta de protocolo
+genuinamente perdida na comunicação stdio entre o cliente .NET do Playwright e seu driver Node.js.
+
+**Não é regressão da Sprint 32.5.** O diff da Sprint 32.5 contra `hmg` toca apenas
+`Components/Features/Authentication/Pages/Login.razor` (atributos `oninvalid`/`oninput` de `EXP32-F007` —
+nunca disparam neste teste, que sempre submete credenciais válidas) e `EditorModalShell`/`DialogFocusScope`
+(foco pós-validação de `EXP32-F021`, exclusivo do fluxo de Wallet). `Tutorial.razor`,
+`BeeDayWebService.CompleteOnboardingAsync`, `PlaywrightAppFixture` e `E2ETestBase` — todo o caminho real
+percorrido por este teste — permanecem inalterados nesta Sprint.
+
+**Tentativa de correção investigada e descartada**: o único padrão estruturalmente incomum deste teste frente
+aos demais é seu laço de retry (`NEXT`/`ENTER beeday`) combinando `ClickAsync` repetido com um
+`WaitForAsync` de timeout curto (800 ms). Aumentar esse timeout para 2000 ms (mudança mínima, só no arquivo
+de teste) foi testado isoladamente e **não** resolveu o hang (reprodução 4 acima) — revertido. Isso descarta
+o laço de retry como gatilho e reforça que a causa é externa ao código do teste, no próprio transporte do
+Playwright.
+
+**Classificação**: `ENVIRONMENT` — defeito pré-existente na infraestrutura de teste E2E (camada de
+transporte cliente Playwright ↔ driver Node.js), determinístico neste teste/ambiente, ortogonal ao código
+de produção do beeday e à Sprint 32.5.
+
+**Contrato de repetibilidade** (inverso ao de `BD30-F042`): ao contrário de `BD30-F042` — que exige
+concorrência entre projetos e nunca repete no mesmo teste —, este hang é determinístico mesmo em isolamento
+total de processo único. Uma futura ocorrência de hang indefinido (não `TimeoutException`) especificamente
+em `Login_CompletesOnboarding_ReachesDashboard`, que exija `--blame-hang` para ser encerrado, é consistente
+com este padrão e não deve ser atribuída a `BD30-F042` nem a uma regressão de Sprint sem evidência adicional.
+
+**Status: `ACCEPTED RISK` (decisão do proprietário do repositório, Sprint 32.5, 2026-08-23).** Causa raiz
+não resolvida — corrigi-la exigiria investigação no próprio cliente/driver Playwright (possível bug
+conhecido, downgrade/upgrade de versão, ou mudança de ambiente), fora do escopo de "menor correção
+coerente" disponível nesta Sprint. O teste **não** foi marcado `Skip`; permanece na suíte como está. A
+validação obrigatória da Sprint 32.5 trata este achado como `PASS WITH FINDINGS`, não como bloqueador —
+uma futura execução de `dotnet test BeeDay.slnx` ou de `BeeDay.E2E.Tests` isolado que trave exatamente
+neste teste, exigindo `--blame-hang`, é consistente com este achado já registrado e não deve, por si só,
+impedir a conclusão de uma Sprint. Investigação da causa raiz no transporte do Playwright permanece como
+item de acompanhamento separado, sem Sprint dona atribuída.
+
 ### Cobertura formal (`dotnet test --collect:"XPlat Code Coverage"`)
 
 `coverlet.collector` adicionado aos 5 projetos de teste na Sprint 30.24 (`BD30-F007`) — rodar com
@@ -219,6 +290,10 @@ calculada — o número de linha/branch agora disponível é um sinal complement
   limitações de `WebApplicationFactory`/TestServer, §5).
 - `dotnet test BeeDay.slnx` (Debug), executado no início da Sprint 31.1 (1.557/1.557) — saída bruta
   usada como evidência direta da concorrência entre projetos documentada em `BD30-F042` acima.
+- Sprint 32.5: 4 execuções isoladas de `dotnet test tests/BeeDay.E2E.Tests/...` (com e sem `--blame-hang`,
+  com e sem filtro), `Sequence_*.xml` do Blame Collector, e análise de memory dump via `dotnet-dump analyze`
+  (`clrstack -all`, `dumpasync`, `dumpobj`/`dumpvc`) sobre os `.dmp` gerados — evidência do hang documentado
+  na seção acima.
 - `.github/workflows/ci.yml`, `release-quality-gate.yml` (fluxo de execução em CI).
 - [`docs/web/06-testing.md`](../web/06-testing.md) e
   [`02-design-system-quality-gates.md`](02-design-system-quality-gates.md).

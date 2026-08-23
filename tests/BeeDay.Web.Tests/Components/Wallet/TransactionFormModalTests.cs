@@ -60,6 +60,24 @@ public sealed class TransactionFormModalTests : BunitContext
         Assert.DoesNotContain("◇", cut.Markup, StringComparison.Ordinal);
     }
 
+    // EPIC 32 Sprint 32.5 (EXP32-F005): a transaction saved as "$4.50" (en-US) redisplayed as
+    // "4,50" in this native number input under a pt-BR browser/OS, even while the rest of the
+    // Wallet UI (WalletCurrencyFormatter) correctly showed "$4,50" for the same pt-BR culture —
+    // two different decimal separators for one value on the same screen. Pinning `lang` to the
+    // app's current culture keeps the input's own formatting aligned with the culture actually
+    // driving every other rendered amount.
+    [Theory]
+    [InlineData("en-US")]
+    [InlineData("pt-BR")]
+    public void AmountInput_LangAttributeFollowsCurrentCulture_NotTheMachineDefault(string culture)
+    {
+        var cut = BunitLocalizationSupport.WithUiCulture(culture, () => Render<TransactionFormModal>(parameters => parameters
+            .Add(component => component.IsOpen, true)
+            .Add(component => component.Model, new TransactionFormModel())));
+
+        Assert.Equal(culture, cut.Find("input[type='number']").GetAttribute("lang"));
+    }
+
     [Theory]
     [InlineData("en-US")]
     [InlineData("pt-BR")]

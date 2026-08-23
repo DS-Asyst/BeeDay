@@ -76,3 +76,13 @@ src/BeeDay.Web/App_Data/
 *.nupkg
 *.snupkg
 packages/
+
+#####################################################
+# AI Agent Tooling (local-only, not repository content)
+#####################################################
+
+.claude/
+.agents/
+.codex/
+AGENTS.md
+CLAUDE.md

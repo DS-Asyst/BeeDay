@@ -1,4 +1,5 @@
 @typeparam TValue
+@using System.Globalization
 @using System.Linq.Expressions
 
 <label class="@FieldCssClass" for="@Id">
@@ -20,6 +21,7 @@
                    ValueChanged="ValueChanged"
                    ValueExpression="ValueExpression"
                    disabled="@Disabled"
+                   lang="@CultureInfo.CurrentCulture.Name"
                    aria-describedby="@(ShowValidationMessage ? ValidationMessageId : null)"
                    @attributes="AdditionalAttributes" />
         <BeeDayIcon Name="BeeDayIconName.Calendar" Size="BeeDayIconSize.Small" Color="BeeDayIconColor.Muted" Class="beeday-field__control-icon" />
