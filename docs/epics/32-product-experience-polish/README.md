@@ -1606,6 +1606,44 @@ mudança de breakpoint/estrutura foi feita especulativamente.
 
 ---
 
+### Auditoria de Settings, Profile & Account (Sprint 32.17, Issue #261)
+
+Nenhum achado `EXP32-Fxxx` novo foi atribuído a esta Sprint — apenas `BD30-F021` (achado
+pré-existente da EPIC 30, roteado aqui — ver §7 abaixo) e o gap de cobertura de Preferences já
+registrado em §9, ambos lacunas de **evidência de navegador**, não defeitos de código. Consistente
+com o limite explícito da Issue #244 §5.6/§5.7 (Claude não executa passeios de navegador/Chromium
+como gate autônomo), esta Sprint auditou o código de `/settings`/`/profile`/`/account` em busca de
+defeito real, sem encontrar nenhum:
+
+- **Feedback de salvamento (Required Work #2/#3)** — `Account.razor` já expõe `IsBusy` por seção
+  (Profile/Security/Preferences) mais o overlay global `BeeDayLoading` (auditado na Sprint 32.9);
+  toasts de sucesso/erro consistentes nas três seções.
+- **Mudança de idioma (Required Work #4)** — `SavePreferencesAsync` já trata a mudança de idioma
+  como um caso especial deliberado: em vez de tentar re-renderizar recursos localizados
+  client-side (risco real de estado obsoleto), submete o formulário oculto
+  `#culture-sync-form` para `/culture/set` e recarrega a página pelo mesmo mecanismo oficial do
+  seletor de idioma da Home — comentário no próprio código já documenta por que um toast ali nunca
+  seria visto (a página está navegando para longe). Nenhum defeito de sincronização encontrado.
+- **Feedback sem vazamento de detalhe sensível (Required Work #5, limite explícito da Sprint)** —
+  `DomainErrorLocalizer.Translate` (já usado por Account/ProfileCreation/Identity) nunca renderiza
+  `exception.Message` bruto — mapeia por tipo/texto conhecido para mensagens localizadas seguras e
+  cai para uma mensagem genérica localizada em qualquer exceção não reconhecida. Já documentado no
+  próprio código como decisão deliberada; nenhuma mudança necessária.
+- **Ações destrutivas de conta (Required Work #5)** — nenhuma ação destrutiva de conta (ex.:
+  exclusão de conta) existe hoje em `/account`; requisito não aplicável ao estado atual do produto.
+
+**Lista de verificação visual/funcional para o proprietário (HMG), não executável pelo Claude:**
+
+1. `BD30-F021` — salvar Profile, alterar senha e alterar Preferences (tema/idioma) em `/settings`,
+   confirmando visualmente o resultado de cada save (já listado como jornada crítica na §8, item 4).
+2. Seção Preferences de `/settings` revisitada ao vivo (gap explícito de §9, nunca fechado desde a
+   Sprint 32.1 — instabilidade de ferramenta impediu a rolagem confiável da página naquela sessão).
+
+**Regression Protection:** nenhuma mudança de código foi necessária; nenhum teste novo. `BD30-F021`
+e o gap de Preferences permanecem `OPEN`/registrados até confirmação de navegador real.
+
+---
+
 ## 7. Achados pré-existentes roteados para dentro da EPIC 32
 
 | ID original | Ledger de origem | Achado | Sprint EPIC 32 |
@@ -1688,7 +1726,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.14 — Responsive & Mobile Interaction Polish | risco residual de §9 (evidência de navegador móvel pendente); auditoria de código confirmou contrato responsivo/touch-target já coerente — ver §"Responsive & mobile interaction audit"; lista de verificação HMG entregue |
 | 32.15 — Daily Experience Polish | EXP32-F004 (cross-ref); EXP32-F010 — porção Daily `FIXED` nesta Sprint (Auth/ProfileCreation permanece com a 32.5) |
 | 32.16 — Wallet Experience Polish | EXP32-F005 (cross-ref); EXP32-F006 — `FIXED` (efeito colateral de F005, confirmado nesta Sprint) |
-| 32.17 — Settings, Profile & Account Experience Polish | `BD30-F021` (§7), gap de Preferences (§9) |
+| 32.17 — Settings, Profile & Account Experience Polish | `BD30-F021` (§7), gap de Preferences (§9) — ambos permanecem `OPEN`/gap de evidência de navegador; auditoria de código não encontrou defeito — ver §"Auditoria de Settings, Profile & Account" |
 | 32.18 — Public Pages & Brand Experience Polish | nenhum achado novo; 3 rotas públicas revalidadas sem defeito |
 | 32.19 — Front-End Code Refinement & Component Consolidation | EXP32-F011, EXP32-F012 |
 | 32.20 — Full Product Polish & Final Experience Gate | consome o estado final de todo o Ledger |
