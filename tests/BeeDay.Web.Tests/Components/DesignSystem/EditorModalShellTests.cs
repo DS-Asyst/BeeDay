@@ -133,6 +133,27 @@ public sealed class EditorModalShellTests : BunitContext
         Assert.True(submitted);
     }
 
+    // Release Quality Gate remediation: WalletTests.InvalidSubmit_MovesFocusToFirstInvalidField
+    // (E2E, live-in-browser) proved that a native HTML5-constrained field (TransactionFormModal's
+    // <InputNumber min="0.01"/>) makes the browser run its own constraint validation on the submit
+    // button click - BEFORE the form's submit event, and therefore EditContext.Validate()/
+    // OnInvalidSubmit, ever fires. The browser's native tooltip/focus won outright; Description
+    // (genuinely empty and [Required]) never even got marked invalid, because EditContext.Validate()
+    // was never reached. bUnit cannot reproduce a real browser's native constraint validation UI, so
+    // this protects the one thing it can: the rendered <form> actually carries `novalidate`, making
+    // EditContext the sole validation authority for every current and future consumer of this shell,
+    // not just the one that first exposed the gap.
+    [Fact]
+    public void Form_HasNovalidate_SoNativeBrowserValidationNeverPreemptsEditContext()
+    {
+        var cut = Render<EditorModalShell>(parameters => parameters
+            .Add(component => component.Model, new object())
+            .Add(component => component.Title, "Edit Transaction")
+            .Add(component => component.TitleId, "transaction-editor-title"));
+
+        Assert.True(cut.Find("form").HasAttribute("novalidate"));
+    }
+
     // EPIC 32 Sprint 32.6: EditorModalShell is the most widely consumed dialog shell (Habit, Task,
     // To-Do, Project, Transaction, Tag), but unlike BeeDayConfirmDialogTests.EscapeKeyInvokesCancel
     // it had no bUnit-level Escape coverage of its own - the only prior coverage was end-to-end,

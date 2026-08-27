@@ -67,11 +67,21 @@ public sealed class CoreComponentContractTests
         // EPIC 30 Sprint 30.19: BeeDayCardMenu.razor (3 native <button>s, zero production
         // consumers, superseded by click-to-edit cards) was removed as dead code — one fewer file
         // with native controls, three fewer buttons.
-        Assert.Equal(28, counts["button"]);
+        // EPIC 32 Sprint 32.7 (EXP32-F004, Release Quality Gate remediation): ProjectWorkspace.razor
+        // gained one native <button> — an inline complete-toggle for To-Dos rendered inside a
+        // Project workspace, reusing the exact same .activity-card__checkbox/__checkbox-glyph
+        // markup ActivityCard.razor already uses for its own toggle-complete control (same class,
+        // type="button", title/aria-label wiring, BeeDayIconName.Complete glyph) — a deliberate
+        // second call site of the established native-button checkbox pattern, not an accidental
+        // duplicate of a Design System component and not a new visual pattern. This database-free
+        // test was never included in the narrow per-Sprint filters run across Sprints 32.7–32.20 (it
+        // lives outside the Dashboard/Projects/Wallet areas those Sprints targeted), so the stale
+        // count first surfaced here, at this Release Quality Gate.
+        Assert.Equal(29, counts["button"]);
         Assert.Equal(13, counts["input"]);
         Assert.Equal(0, counts["select"]);
         Assert.Equal(0, counts["textarea"]);
-        Assert.Equal(41, counts.Values.Sum());
+        Assert.Equal(42, counts.Values.Sum());
         Assert.Equal(20, filesWithNativeControls);
     }
 

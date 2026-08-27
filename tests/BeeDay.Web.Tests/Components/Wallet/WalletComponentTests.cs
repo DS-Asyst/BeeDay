@@ -146,6 +146,43 @@ public sealed class WalletComponentTests : BunitContext
     {
         Assert.Equal(expected, BeeDay.Web.Components.Features.Wallets.Services.TagContrastCalculator.GetTextColor(color));
     }
+
+    // Release Quality Gate remediation: Sprint 32.13's TransactionFormModal_ForwardsTheActualErrorMessageValue
+    // test above proves the child component correctly forwards an ErrorMessage value it is GIVEN -
+    // but it never exercised the actual page-level call site. Wallet.razor's own
+    // `ErrorMessage="_transactionFormError"`/`"_tagFormError"` bindings (no `@`) on
+    // TransactionFormModal/TagFormModal and both BeeDayConfirmDialog instances were the exact same
+    // literal-string mistake Sprint 32.13 had already fixed elsewhere, live in production, caught
+    // only by the axe scan in AccessibilityQualityTests.DailyWalletAndCanonicalDialog_HaveNoAutomaticallyDetectableViolations
+    // rendering the literal text "_transactionFormError" to real users. A full bUnit render of
+    // Wallet.razor needs MediatR/auth/toast DI mocking disproportionate to this defect class -
+    // this asserts the source contract directly instead, at the same file/line precision a code
+    // reviewer would use.
+    [Fact]
+    public void WalletPage_BindsErrorMessageAsAnExpressionNotALiteralStringAtEveryCallSite()
+    {
+        var repoRoot = ResolveRepoRoot();
+        var wallet = File.ReadAllText(Path.Combine(
+            repoRoot, "src", "BeeDay.Web", "Components", "Features", "Wallets", "Pages", "Wallet.razor"));
+
+        Assert.Contains("ErrorMessage=\"@_transactionFormError\"", wallet, StringComparison.Ordinal);
+        Assert.Contains("ErrorMessage=\"@_tagFormError\"", wallet, StringComparison.Ordinal);
+        Assert.DoesNotContain("ErrorMessage=\"_transactionFormError\"", wallet, StringComparison.Ordinal);
+        Assert.DoesNotContain("ErrorMessage=\"_tagFormError\"", wallet, StringComparison.Ordinal);
+    }
+
+    private static string ResolveRepoRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "BeeDay.slnx")))
+        {
+            directory = directory.Parent;
+        }
+
+        return directory?.FullName
+            ?? throw new InvalidOperationException("Could not locate the repository root from the test output directory.");
+    }
 }
 
 public sealed class WalletPageStateTests
