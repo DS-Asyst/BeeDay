@@ -37,9 +37,10 @@
     gap: var(--beeday-spacing-md);
 }
 
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast (text-muted is ~4.26:1, below 4.5:1). */
 .beeday-settings-form__hint {
     margin: 0;
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     font-size: var(--beeday-font-size-sm);
 }
 

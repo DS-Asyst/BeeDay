@@ -634,8 +634,8 @@ visual/teclado permanece evidência de navegador/HMG.
 | Severidade | MEDIUM |
 | Device | Shared |
 | Accessibility Impact | Yes |
-| Owning Sprint | 32.13 (Focus, Keyboard & Interaction Accessibility) |
-| State | DISCOVERED |
+| Owning Sprint | 32.13 (Focus, Keyboard & Interaction Accessibility) — fechado na 32.20 (Full Product Polish & Final Experience Gate) |
+| State | **FIXED** — Sprint 32.20 |
 
 **Interação:** leitura de texto auxiliar/meta-informação/estado vazio que usa o token `text-muted`.
 
@@ -677,6 +677,57 @@ demais achados desta Sprint (F002/F008/F020), que tinham um candidato de correç
 já identificado. Priorizado abaixo desses três dentro do tempo desta sessão; permanece roteado a
 32.13 até ser fechado por uma execução futura desta mesma Sprint/Epic.
 
+**Resolution (Sprint 32.20):** inventário completo executado via `grep` de
+`--beeday-color-text-muted` em todo `src/BeeDay.Web/` (excluindo `variables.css`, onde o token é só
+definido, e `obj/` gerado) — 27 ocorrências em 21 arquivos. Cada uma classificada por contexto
+renderizado, não por suposição:
+
+- **14 sites eram texto normal genuíno** (parágrafo/label/valor renderizado em `font-size` entre
+  `.72rem` e `1rem`, nenhum atingindo o limiar de "texto grande" de 18pt/24px regular ou 14pt/18.66px
+  bold exigido pela AA para aceitar o piso de 3:1 em vez de 4.5:1) — migrados para `text-secondary`
+  (`#514858`, confirmado **≈8.69:1** sobre `--beeday-color-surface` por `DesignSystemContrastTests`,
+  e recalculado aqui **≈7.49:1** sobre `--beeday-color-surface-subtle` e **≈8.17:1** sobre
+  `--beeday-color-brand-primary-soft` — os três backgrounds reais onde `text-muted` aparecia,
+  confirmando que a substituição passa AA em todos eles, não só sobre branco puro):
+  `IconCatalog.razor.css` (`dt`), `BeeDayProgressBar.razor.css` (`__heading`),
+  `DashboardColumn.razor.css` (badge de contagem — recalculado **≈4.00:1** sobre
+  `brand-primary-soft`, também abaixo do limiar, confirmando que não era um falso positivo por
+  background diferente do par testado), `DashboardHome.razor.css` (as 3 ocorrências já confirmadas
+  por varredura axe ao vivo contra `/profile` na Sprint 32.3 — cabeçalho do projeto/status e card
+  "Weekly activity unavailable"), `ExperienceBar.razor.css` (label "Level" e valor de XP, idem, já
+  confirmados por axe), `ProgressMetricCard.razor.css`, `ExperienceSystemPage.razor.css`,
+  `Tutorial.razor.css` (progresso do onboarding e corpo de texto), `CreateProfile.razor.css`
+  (introdução e dica de senha), `ProjectWorkspace.razor.css` (4 sites — cabeçalho, resumo, toolbar e
+  estado vazio), `design-system.css` (`.beeday-page-header p`/`.beeday-section-header p`/
+  `.beeday-hero__subtitle` — o seletor compartilhado por trás do próprio cabeçalho de `/profile` já
+  citado na evidência original), `identity.css` (`.identity-header p`, consumido por
+  `ConfirmEmail`/`EmailConfirmationSent`/`ForgotPassword`/`ResendConfirmation`/`ResetPassword` sem
+  override próprio — alinhado ao tratamento que `Login.razor.css` já usava isoladamente para o mesmo
+  papel semântico), `settings.css` (`.beeday-settings-form__hint`) e `forms.css`
+  (`::placeholder` de `.beeday-field__control`).
+- **13 ocorrências restantes são exceções legítimas, não lacunas:** cor de glifo de ícone
+  (`BeeDayIcon.razor.css`, `.activity-card__checkbox`/`__project-status` e
+  `.habit-card__metrics-icon` em `cards.css`, botão de fechar do toast em `feedback.css`) — não é
+  "texto", cai no limiar de 3:1 do SC 1.4.11 para objetos gráficos/componentes de UI, que
+  `text-muted` já cumpre; e estado desabilitado/somente-leitura de controles
+  (`.beeday-button:disabled` em `design-system.css`, `.beeday-checkbox:has(:disabled)` e
+  `.beeday-field__control:disabled,[readonly]` em `forms.css`) — exceção documentada de "inactive
+  user interface components" do próprio WCAG (Understanding SC 1.4.3/1.4.11), consistente com o
+  sinal visual deliberado de "não editável" já usado em todo o Design System. A classe utilitária
+  `.beeday-text-muted` (`utilities.css`) não tem nenhum consumidor `.razor` vivo (confirmado por
+  busca exaustiva) — nenhum defeito renderizado existe para ela hoje; nenhuma mudança especulativa
+  feita.
+- Token `--beeday-color-text-muted` em si **não foi alterado** — mantido em `#817789` para os usos
+  legitimamente exemptos, consistente com a decisão já registrada em
+  `docs/ux/02-accessibility.md` §9 de não promovê-lo globalmente.
+
+**Regression Protection:**
+`VisualFoundationTests.TextMutedNoLongerStylesNormalTextAndOnlyRemainsOnExemptIconOrDisabledContexts`
+— confirma, para cada um dos 14 sites migrados, que a regra usa `text-secondary` e não mais
+`text-muted`; e confirma que os usos exemptos (ícone/desabilitado) permanecem presentes e
+inalterados, para que uma reversão futura de qualquer uma das duas categorias seja detectada.
+Database-free, leitura de arquivo fonte.
+
 ---
 
 ### EXP32-F010 — Cobertura incompleta de fallback local para `prefers-reduced-motion`
@@ -689,8 +740,8 @@ já identificado. Priorizado abaixo desses três dentro do tempo desta sessão; 
 | Severidade | LOW |
 | Device | Shared |
 | Accessibility Impact | Yes |
-| Owning Sprint | 32.13 (Focus, Keyboard & Interaction Accessibility) — cross-ref 32.15 (Daily), 32.5 (Auth/ProfileCreation) |
-| State | **PARTIALLY FIXED** — Sprint 32.15 (porção Daily); Auth/ProfileCreation (32.5) permanece `DISCOVERED` |
+| Owning Sprint | 32.13 (Focus, Keyboard & Interaction Accessibility) — cross-ref 32.15 (Daily), 32.18 (Public Pages), 32.5/32.20 (Auth/ProfileCreation) |
+| State | **FIXED** — Sprint 32.15 (Daily) + 32.18 (Public Pages) + 32.20 (Auth/ProfileCreation, closing the inventory) |
 
 **Interação:** usuário com `prefers-reduced-motion: reduce` habilitado no sistema operacional
 interagindo com Habit cards, o workspace de projeto, colunas do Dashboard ou telas de
@@ -725,15 +776,32 @@ inventário atual mostra:
 - **Achado adicional descoberto nesta Sprint:** `utilities.css` ganhou uma transição própria
   (`.skip-to-content-link`) na Sprint 32.13, sem fallback local — um gap introduzido pela própria
   EPIC 32 depois do inventário original de 25.6, fechado aqui também.
-- **Auth/ProfileCreation** (`PublicAuthActions.razor.css`, `CreateProfile.razor.css`) permanece
+- **Auth/ProfileCreation** (`PublicAuthActions.razor.css`, `CreateProfile.razor.css`) permanecia
   `DISCOVERED` — fora da jornada Daily, pertence à Sprint 32.5 (já entregue), fora do escopo desta
-  Sprint.
+  Sprint. **Fechado na Sprint 32.20** — ver Resolution abaixo.
 - `EditorialSectionNav.razor.css` (achado não listado originalmente pelo texto da Sprint 25.6, mas
   presente no inventário atual) pertence a Páginas Públicas/Institucional, não a Daily nem a Auth —
   roteamento correto é 32.18, não tocado aqui. **Fechado na Sprint 32.18** — ver seção própria
   abaixo.
 
-**Regression Protection:** `VisualFoundationTests.DailyJourneyStylesheetsHaveLocalReducedMotionFallbacks`
+**Resolution (Sprint 32.20, fechando o inventário original de 8):** `PublicAuthActions.razor.css`
+(`.public-auth-actions__close`, transição de `color`/`background-color`/`transform` no botão de
+fechar) e `CreateProfile.razor.css` (`.profile-nickname-field`, transição de `border-color`/
+`box-shadow` no campo de foco) ganharam fallback local (`transition: none`) no mesmo padrão já usado
+pelos demais 7 arquivos do inventário. Re-varredura completa de todo `src/BeeDay.Web/` (excluindo
+`obj/` gerado) confirma que os únicos arquivos reais restantes sem fallback local
+(`Dashboard/Pages/Home.razor.css`, `editor-modal.css`, `variables.css`) são falsos positivos —
+a palavra "transition" aparece só em comentário/nome de variável CSS, nunca em uma declaração real
+de `transition`/`animation`/`@keyframes` aplicada a um elemento. Inventário original de 8/31
+fechado integralmente entre as Sprints 32.15, 32.18 e 32.20.
+
+**Regression Protection:**
+`VisualFoundationTests.AuthAndProfileCreationStylesheetsHaveLocalReducedMotionFallbacks` (Sprint
+32.20) — confirma `@media (prefers-reduced-motion: reduce)` presente em `PublicAuthActions.razor.css`
+e `CreateProfile.razor.css`, junto com o seletor real que cada bloco neutraliza. Database-free,
+leitura de arquivo fonte.
+
+**Regression Protection (Sprint 32.15, porção Daily):** `VisualFoundationTests.DailyJourneyStylesheetsHaveLocalReducedMotionFallbacks`
 — confirma `@media (prefers-reduced-motion: reduce)` presente em `cards.css`,
 `ProjectWorkspace.razor.css`, `HabitEditorModal.razor.css` e `utilities.css`, junto com a
 transição real que cada bloco neutraliza. Database-free, leitura de arquivo fonte.
@@ -1300,7 +1368,7 @@ correto por construção (mesmo CSS que `EXP32-F022` prova em browser).
 | Device | Shared |
 | Accessibility Impact | No |
 | Owning Sprint | não roteada — nenhum empilhamento incorreto foi observado na prática |
-| State | DISCOVERED |
+| State | **ACCEPTED** — Sprint 32.20 |
 
 **Comportamento atual:** os quatro diálogos do produto usam três níveis diferentes da escala de
 z-index (`variables.css`), sem uma regra explícita de "qual camada é a camada modal". Na prática, a
@@ -1313,11 +1381,22 @@ abrir o feedback de level-up por cima de um editor aberto, ele ficaria atrás (9
 frente. Registrado como achado de código (não de comportamento observado em navegador) para que uma
 Sprint futura que introduza esse fluxo não precise redescobrir a causa.
 
-**Resolution:** não aplicável — `DISCOVERED`, sem correção especulativa (nenhuma evidência de
-empilhamento incorreto observado nesta Sprint; ver Issue #244 sobre não introduzir "otimizações
-especulativas").
+**Resolution:** não aplicável — sem correção especulativa (nenhuma evidência de empilhamento
+incorreto observado; ver Issue #244 sobre não introduzir "otimizações especulativas").
 
-**Regression Protection:** nenhuma — nada foi alterado.
+**Decisão de fechamento (Sprint 32.20):** classificado `ACCEPTED` em vez de deixado `DISCOVERED`
+indefinidamente. Reavaliado nesta Sprint de fechamento — nenhum fluxo novo introduzido por qualquer
+Sprint da EPIC 32 (32.14–32.19) passou a empilhar `BeeDayFeedbackModal`/`ProjectWorkspace` sobre um
+editor aberto; a única combinação de diálogos realmente exercitada no produto continua editor →
+confirmação de exclusão, na ordem correta. Introduzir uma regra explícita de camada única hoje seria
+uma correção para um cenário não observado, não uma correção de defeito — exatamente o tipo de
+"otimização especulativa" que a Issue #244 instrui a não fazer. Aceito como risco latente e
+documentado, não como lacuna sem decisão: se uma Sprint futura introduzir um fluxo que empilhe esses
+diálogos, a causa (três níveis de z-index diferentes sem uma regra explícita) já está registrada
+aqui, evitando redescoberta.
+
+**Regression Protection:** nenhuma — nada foi alterado; risco aceito e documentado, não uma
+proteção de regressão de código.
 
 ---
 
@@ -1706,6 +1785,57 @@ confirmando o trabalho já fechado pela EPIC 25.
 
 ---
 
+### Fechamento final do Ledger (Sprint 32.20, Issue #264)
+
+Sprint de reconciliação final, não de redesign — escopo limitado a fechar todo achado `DISCOVERED`/
+`IN_REVIEW` remanescente e reauditar o estado integrado final contra os contratos canônicos
+estabelecidos pela EPIC 32, sem iniciar melhorias não relacionadas.
+
+**Estado do Ledger no início desta Sprint:** 3 achados ainda não terminais —
+`EXP32-F009` (`DISCOVERED`), `EXP32-F010` (`PARTIALLY FIXED`, porção Auth/ProfileCreation
+`DISCOVERED`) e `EXP32-F024` (`DISCOVERED`). Todos os demais 22 achados já estavam `FIXED` ou
+`ACCEPTED`.
+
+**EXP32-F009** — fechado com inventário completo e migração de 14 sites de texto normal para
+`text-secondary`; token em si preservado (ver Resolution completa na seção do achado).
+
+**EXP32-F010** — fechado com fallback local de `prefers-reduced-motion` em
+`PublicAuthActions.razor.css` e `CreateProfile.razor.css`, os 2 últimos arquivos do inventário
+original de 8; re-varredura confirma que os 3 "positivos" restantes em `src/BeeDay.Web/` (excluindo
+`obj/`) são falsos positivos de comentário/token, não declarações reais.
+
+**EXP32-F024** — reavaliado e fechado como `ACCEPTED`: nenhuma Sprint desde o achado original (32.6)
+introduziu um fluxo real que empilhe `BeeDayFeedbackModal`/`ProjectWorkspace` sobre um editor aberto;
+corrigir hoje seria especulativo, não correção de defeito observado (ver decisão completa na seção
+do achado).
+
+**Reauditoria do estado integrado final (Required Work #2):** os contratos canônicos estabelecidos
+pela EPIC 32 — botões (32.4), formulários (32.5), diálogos (32.6), listas/cards (32.7), busca/
+filtros (32.8), loading (32.9), estados vazios (32.10), erros/recuperação (32.11), toasts (32.12),
+foco/teclado (32.13), responsivo (32.14), Daily (32.15), Wallet (32.16), Settings/Profile/Account
+(32.17), Public Pages (32.18) e a consolidação de componentes (32.19) — já foram cada um auditados e
+testados diretamente em suas Sprints donas, com evidência de código e/ou navegador registrada em
+cada seção própria deste documento. Nenhuma auditoria adicional de código encontrou um achado novo
+não coberto pelos 25 já registrados; esta Sprint não reabre auditorias já concluídas, apenas fecha
+os 3 achados que restavam não-terminais.
+
+**Sincronização de documentação e testes (Required Work #5):** este documento (a fonte de verdade
+do Ledger) foi atualizado nos próprios achados fechados, no resumo de roteamento (§10) e nesta
+seção; nenhum outro `docs/` ficou desatualizado por esta mudança — `docs/ux/02-accessibility.md` §9
+já documentava a decisão de não promover `text-muted` globalmente, preservada aqui.
+
+**E2E preservado (Required Work #7):** `BeeDay.E2E.Tests` permanece com seus 37 arquivos de teste;
+nenhum arquivo removido, desabilitado (`[Skip]`) ou enfraquecido por esta Sprint — confirmado por
+`git status`/`git diff` restritos a esta branch, sem tocar `tests/BeeDay.E2E.Tests/`.
+
+**Regression Protection:**
+`VisualFoundationTests.TextMutedNoLongerStylesNormalTextAndOnlyRemainsOnExemptIconOrDisabledContexts`
+e `VisualFoundationTests.AuthAndProfileCreationStylesheetsHaveLocalReducedMotionFallbacks` (ambos
+novos nesta Sprint) fecham `EXP32-F009`/`EXP32-F010`; `EXP32-F024` não teve mudança de código, logo
+nenhuma proteção de regressão nova. Database-free.
+
+---
+
 ## 7. Achados pré-existentes roteados para dentro da EPIC 32
 
 | ID original | Ledger de origem | Achado | Sprint EPIC 32 |
@@ -1777,21 +1907,21 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.3 — Page Layout Consistency | EXP32-F016, EXP32-F017 — ambos `FIXED` nesta Sprint; EXP32-F018, EXP32-F019 — `ACCEPTED` (exceções documentadas); EXP32-F020 — novo, roteado para 32.13; EXP32-F009 — evidência adicional (`/profile`) |
 | 32.4 — Buttons & Action Hierarchy | EXP32-F001 — `FIXED` nesta Sprint |
 | 32.5 — Forms & Input Experience | EXP32-F005 — `FIXED` nesta Sprint; EXP32-F007 — `FIXED` nesta Sprint; EXP32-F021 — novo, `FIXED` nesta Sprint; EXP32-F006 (cross-ref), EXP32-F011 (cross-ref), EXP32-F012 (cross-ref) |
-| 32.6 — Modal & Dialog Experience | EXP32-F022, EXP32-F023 — ambos novos, `FIXED` nesta Sprint; EXP32-F024 — novo, `DISCOVERED` (não roteada — latente, sem Sprint dona); EXP32-F025 — novo, `ACCEPTED` (exceção documentada); EXP32-F002 (cross-ref, não corrigido — pertence à 32.13) |
+| 32.6 — Modal & Dialog Experience | EXP32-F022, EXP32-F023 — ambos novos, `FIXED` nesta Sprint; EXP32-F024 — novo, `DISCOVERED` (não roteada — latente, sem Sprint dona; `ACCEPTED` na 32.20); EXP32-F025 — novo, `ACCEPTED` (exceção documentada); EXP32-F002 (cross-ref, não corrigido — pertence à 32.13) |
 | 32.7 — Lists, Cards & Collection Patterns | EXP32-F003, EXP32-F004 — ambos `FIXED` nesta Sprint |
 | 32.8 — Search, Filters & Sorting | EXP32-F013 — `FIXED` nesta Sprint |
 | 32.9 — Loading & Perceived Performance | gap de evidência registrado em §9 (sem achado novo); auditoria de código confirmou nenhum defeito de feedback ausente — ver §"Auditoria de loading & perceived performance" |
 | 32.10 — Empty States & First-Use Experience | EXP32-F013 (cross-ref) — CTA "Clear filter" adicionado ao estado sem-resultados |
 | 32.11 — Errors, Recovery & User Feedback | EXP32-F007 (cross-ref); achado novo — mensagem de erro de mutação órfã em `EditorModalShell`/`BeeDayConfirmDialog`, `FIXED` nesta Sprint |
 | 32.12 — Toasts, Notifications & Confirmation Feedback | nenhum achado `EXP32-Fxxx` novo — duplicação toast+inline (introduzida pela própria 32.11) removida do Wallet |
-| 32.13 — Focus, Keyboard & Interaction Accessibility | EXP32-F001 (cross-ref); EXP32-F002, EXP32-F008, EXP32-F020 — `FIXED` nesta Sprint; EXP32-F009, EXP32-F010 — permanecem `DISCOVERED`, escopo maior que o restante desta Sprint |
+| 32.13 — Focus, Keyboard & Interaction Accessibility | EXP32-F001 (cross-ref); EXP32-F002, EXP32-F008, EXP32-F020 — `FIXED` nesta Sprint; EXP32-F009, EXP32-F010 — permaneceram `DISCOVERED`/parcial, escopo maior que o restante desta Sprint (ambos `FIXED` na 32.20) |
 | 32.14 — Responsive & Mobile Interaction Polish | risco residual de §9 (evidência de navegador móvel pendente); auditoria de código confirmou contrato responsivo/touch-target já coerente — ver §"Responsive & mobile interaction audit"; lista de verificação HMG entregue |
-| 32.15 — Daily Experience Polish | EXP32-F004 (cross-ref); EXP32-F010 — porção Daily `FIXED` nesta Sprint (Auth/ProfileCreation permanece com a 32.5) |
+| 32.15 — Daily Experience Polish | EXP32-F004 (cross-ref); EXP32-F010 — porção Daily `FIXED` nesta Sprint (Auth/ProfileCreation fechado na 32.20) |
 | 32.16 — Wallet Experience Polish | EXP32-F005 (cross-ref); EXP32-F006 — `FIXED` (efeito colateral de F005, confirmado nesta Sprint) |
 | 32.17 — Settings, Profile & Account Experience Polish | `BD30-F021` (§7), gap de Preferences (§9) — ambos permanecem `OPEN`/gap de evidência de navegador; auditoria de código não encontrou defeito — ver §"Auditoria de Settings, Profile & Account" |
 | 32.18 — Public Pages & Brand Experience Polish | nenhum achado novo; 3 rotas públicas revalidadas sem defeito; `EditorialSectionNav.razor.css` reduced-motion fallback (adiado pela 32.15) `FIXED` nesta Sprint |
 | 32.19 — Front-End Code Refinement & Component Consolidation | EXP32-F011, EXP32-F012 — ambos `FIXED` nesta Sprint |
-| 32.20 — Full Product Polish & Final Experience Gate | consome o estado final de todo o Ledger |
+| 32.20 — Full Product Polish & Final Experience Gate | EXP32-F009, EXP32-F010 — `FIXED` (fecham o Ledger); EXP32-F024 — `ACCEPTED`; nenhum `DISCOVERED`/`IN_REVIEW` remanescente |
 
 ## 11. Validação desta Sprint
 

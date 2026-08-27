@@ -22,7 +22,8 @@
     transition: border-color var(--beeday-transition-fast), background-color var(--beeday-transition-fast), box-shadow var(--beeday-transition-fast);
 }
 
-.beeday-field__control::placeholder { color: var(--beeday-color-text-muted); opacity: 1; }
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast (text-muted is ~4.26:1, below 4.5:1). */
+.beeday-field__control::placeholder { color: var(--beeday-color-text-secondary); opacity: 1; }
 .beeday-field__control:hover:not(:disabled):not([readonly]) { border-color: var(--beeday-color-border-strong); }
 
 /* Sprint 29.3: min-height/line-height moved here from polish.css, which redeclared this same

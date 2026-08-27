@@ -18,8 +18,10 @@
     gap: var(--beeday-spacing-sm);
 }
 
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast - confirmed by a live axe
+   scan against /profile that the "Level" label failed color-contrast (serious). */
 .experience-card__label {
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     font-size: .72rem;
     font-weight: 800;
     letter-spacing: .1em;
@@ -49,8 +51,10 @@
     font-size: var(--beeday-font-size-sm);
 }
 
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast - confirmed by a live axe
+   scan against /profile that the "X of 100 experience points" value failed color-contrast (serious). */
 .experience-card__values span:last-child {
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     font-size: var(--beeday-font-size-xs);
 }
 

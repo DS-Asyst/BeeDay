@@ -45,6 +45,8 @@
     white-space: nowrap;
 }
 
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast (text-muted over this
+   badge's brand-primary-soft background is ~4.0:1, below 4.5:1). */
 .dashboard-column__count {
     display: grid;
     place-items: center;
@@ -52,7 +54,7 @@
     height: 1.65rem;
     padding: 0 .42rem;
     border-radius: var(--beeday-radius-sm);
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     background: var(--beeday-color-brand-primary-soft);
     font-size: .75rem;
     font-weight: 700;
