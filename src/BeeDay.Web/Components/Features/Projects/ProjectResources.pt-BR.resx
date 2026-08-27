@@ -66,6 +66,8 @@
   <data name="TodosHeading" xml:space="preserve"><value>Pendências</value></data>
   <data name="TodosSubtitle" xml:space="preserve"><value>Divida este projeto em etapas claras e executáveis.</value></data>
   <data name="AddTodoAriaLabel" xml:space="preserve"><value>Adicionar pendência</value></data>
+  <data name="TodoCompleteAriaLabel" xml:space="preserve"><value>Concluir {0}</value></data>
+  <data name="TodoMarkIncompleteAriaLabel" xml:space="preserve"><value>Marcar {0} como não concluído</value></data>
   <data name="HideTodosButton" xml:space="preserve"><value>Ocultar</value></data>
   <data name="ShowTodosButton" xml:space="preserve"><value>Mostrar</value></data>
   <data name="NoTodosYetTitle" xml:space="preserve"><value>Nenhuma pendência ainda</value></data>

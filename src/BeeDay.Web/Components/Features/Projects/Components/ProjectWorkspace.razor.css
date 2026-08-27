@@ -232,6 +232,23 @@
     text-decoration: line-through;
 }
 
+.project-workspace__todo-toggle {
+    position: absolute;
+    top: 50%;
+    right: .6rem;
+    transform: translateY(-50%);
+}
+
+.project-workspace__todo--done .project-workspace__todo-toggle {
+    color: var(--beeday-color-success);
+    background: transparent;
+}
+
+.project-workspace__todo--done .project-workspace__todo-toggle .activity-card__checkbox-glyph {
+    opacity: 1;
+    transform: scale(1);
+}
+
 
 
 @media (max-width: 700px) {
@@ -344,4 +361,8 @@
     .project-workspace__list-toggle {
         min-height: var(--beeday-control-height-md);
     }
+}
+
+.project-workspace__todo-body {
+    padding-right: 2.6rem;
 }

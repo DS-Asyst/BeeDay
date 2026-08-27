@@ -181,7 +181,8 @@ else if (State.Data?.Profile.HasProfile == true)
     {
         <ProjectWorkspace Project="State.OpenProject"
                           OnClose="State.CloseProjectWorkspace"
-                          OnAddTodo="State.OpenTodoForProject" />
+                          OnAddTodo="State.OpenTodoForProject"
+                          OnToggleTodo="@(todo => State.ToggleTodoAsync(todo.Id))" />
     }
 
     @if (State.Modals.IsHabitEditorOpen) { <HabitEditorModal Model="State.Modals.HabitForm" IsEditing="State.Modals.IsEditing" OnSave="State.SaveHabitAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentHabitAsync" /> }
