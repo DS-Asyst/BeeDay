@@ -639,3 +639,80 @@ escopo da Issue #372 ("Use shared scenario engine only where state variation is 
 `FE33-053`–`FE33-076` movidos de `MAPPED` para `VERIFIED`.
 
 **Disposição:** GO. Sprint 33.12 (Identity & Account Visual States) pode prosseguir.
+
+## 16. Sprint 33.12 — Identity & Account Visual States (FE33-077..087)
+
+**Entregue no repositório Lab:** PR #7 (`DS-Asyst/beeday-frontend-lab`), branch
+`sprint/33.12-identity-account-visual-states`, merge `4f1168d`. `Lab CI` verde antes do merge. A
+primeira Sprint a efetivamente consumir o motor de cenário da Sprint 33.10 — 11 itens do Ledger, 71
+arquivos, 6 novos `IScenarioProvider<TData>`.
+
+**Interrupção e retomada:** a execução original desta Sprint foi interrompida no meio do trabalho
+(reinício do processo do harness) — o agente já tinha criado o endpoint `/auth/login` em
+`Program.cs`, os 6 pares de scenario provider, e os catálogos `.resx`/CSS, mas nenhum arquivo
+`.razor` de página existia ainda e nada estava commitado. O trabalho não foi perdido nem reiniciado
+do zero: o mesmo agente foi retomado com seu contexto original via mensagem direta, terminou as
+páginas/testes restantes, e só então seguiu o fluxo normal de commit/push/PR. Nenhuma decisão de
+arquitetura foi refeita nessa retomada.
+
+**Padrão central desta Sprint:** toda chamada real a `MediatR.ISender.Send(...)`/`BeeDayWebService`
+foi substituída por um provider de cenário próprio da página (`XxxScenarioData` + `XxxScenarioProvider
+: IScenarioProvider<XxxScenarioData>`, registrado `Singleton`, mesmo padrão de
+`DemoCardListScenarioProvider` da Sprint 33.10) — a chamada real vira `await Task.Delay(...)` (preserva
+a UX do estado "loading" sem I/O real) seguido de `provider.GetScenario(scenarioSelection.Context)`.
+6 providers novos: `ForgotPasswordScenarioProvider`, `ResendConfirmationScenarioProvider`,
+`ResetPasswordScenarioProvider`, `ProfileCreationScenarioProvider` (todos: `ScenarioState.Error` →
+falha sintética, demais → sucesso), `ConfirmEmailScenarioProvider` (mapeamento 8→6 estados
+documentado em código, ver linha FE33-083 do Ledger acima), `AccountScenarioProvider` (perfil
+sintético realista + flag de sucesso/falha independente por seção de salvamento).
+
+**Exclusão deliberada, registrada, não silenciosa, com guarda de arquitetura dedicada:**
+`BeeDay.Web.Localization.DomainErrorLocalizer.cs` (`using BeeDay.Application.Exceptions;`/
+`using BeeDay.Domain.Exceptions;`) **não foi portado** — mesmo tratamento de
+`ValidationMessageLocalizer.cs` na Sprint 33.8. Nenhum arquivo desta Sprint o chama; uma nova
+verificação de arquitetura (`ScenarioAndLocalizationBoundaryTests.cs`, estendida) prova isso em
+código para toda a pasta `Components/Pages/Identity/`, não apenas por convenção.
+
+**Endpoint `POST /auth/login` novo (Program.cs):** mesmo padrão de `POST /culture/set` (Sprint
+33.10) — determinístico, **não grava cookie nem cria sessão** (limite explícito da Issue #373).
+Credencial sintética fixa e documentada em código: `demo@beeday.app` / `BeeDayLab!2026`. Sucesso
+redireciona para `returnUrl` (guarda open-redirect `IsLocalPath` reaproveitada) ou `/profile/create`
+como fallback; falha redireciona para `/login?error=invalid`, o mesmo branch de feedback dirigido
+por query string que `Login.razor` já renderizava na produção. Testado com round-trips HTTP reais via
+`Microsoft.AspNetCore.Mvc.Testing`/`WebApplicationFactory<Program>` — nova dependência de teste
+(`Directory.Packages.props`), sem precedente anterior de testar uma rota mapeada diretamente em
+`Program.cs`; justificada em vez de reimplementar a lógica do endpoint no teste.
+
+**Outras correções/decisões registradas:**
+
+1. **`PreferencesFormModel.cs` (FE33-086)** — reclassificado de COPY para ADAPT: `Language`/`Theme`
+   eram tipados `BeeDay.Domain.Enums.UserLanguage`/`UserTheme`; retipados para os enums Lab-local
+   `AccountLanguage`/`AccountTheme` (`Scenarios/AccountScenarioData.cs`), mesmo tratamento de
+   `LabCultures.cs` (33.10) e `PublicLanguageSwitcher.razor` (33.9).
+2. **Troca de idioma no Account** mantida funcional de verdade (não apenas visual): `Account.razor`
+   copia o formulário oculto `culture-sync-form` + `beeday-culture-sync.js` (JS genérico,
+   presentation-only, já reaproveitava `/culture/set` na produção) e reusa o mecanismo real que já
+   existe no Lab desde a Sprint 33.10.
+3. **`RedirectToLogin.razor` (FE33-087, MOCK)** — o `Navigation.NavigateTo(forceLoad:true)` real foi
+   removido por completo (dispará-lo navegaria o revisor para longe da própria pré-visualização, não
+   apenas "sem sessão real" como as demais páginas). Alcançável só via nova rota de demonstração
+   dedicada `/identity/redirect-to-login-preview`, nunca ligada a um trigger real de autenticação.
+4. **`@attribute [Authorize]` em `Account.razor`** removido — mesma razão de `[AllowAnonymous]` já
+   removido em Sprints anteriores: nenhum pipeline de autorização existe no Lab (`Program.cs` não
+   chama `AddAuthorization`/`UseAuthorization`) para qualquer um dos dois atributos significar algo.
+
+**Validação (Lab, sem LocalDB):**
+
+- `dotnet format BeeDayLab.slnx --verify-no-changes` — limpo.
+- `dotnet build BeeDayLab.slnx -c Release --warnaserror` — 0 avisos/erros.
+- `dotnet test BeeDayLab.slnx -c Release` — 317/317 aprovados (7 guardas de arquitetura + 310
+  Web.Tests, incluindo `LoginAndAuthTests.cs`, `ProfileCreationTests.cs`, `IdentityRecoveryTests.cs`,
+  `AccountPageTests.cs`, `OnboardingAndRedirectTests.cs`).
+- `dotnet run` verificado localmente: `/login`, `/welcome`, `/profile/create` (+`?authenticated=true`),
+  `/account/forgot-password`, `/account/resend-confirmation`, `/account/confirm-email`,
+  `/account/reset-password`, `/onboarding/tutorial`, `/account`, `/settings` todos `HTTP 200`;
+  `POST /auth/login` verificado para sucesso/falha/guarda open-redirect/ausência de cookie.
+
+`FE33-077`–`FE33-087` movidos de `MAPPED` para `VERIFIED`.
+
+**Disposição:** GO. Sprint 33.13 (Daily / Productivity Visual States) pode prosseguir.
