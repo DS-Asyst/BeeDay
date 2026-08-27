@@ -47,6 +47,14 @@
     top: var(--beeday-spacing-md);
 }
 
+/* EXP32-F010 (Sprint 32.15): local fallback - the global safety net only shortens duration, it
+   does not remove the position transition itself (the link still becomes visible on focus). */
+@media (prefers-reduced-motion: reduce) {
+    .skip-to-content-link {
+        transition: none;
+    }
+}
+
 /* Link foundation — no underline by default (03_DESIGN_DECISIONS.md §6); states stay identifiable
    through color/weight and a visible focus-visible outline instead of text-decoration. */
 .beeday-link {

@@ -397,6 +397,32 @@ public sealed class VisualFoundationTests
         Assert.Contains("background: #d5eefd;", home, StringComparison.Ordinal);
     }
 
+    // EXP32-F010 (Sprint 32.15): 4 of the 8 stylesheets identified in Sprint 25.6 as depending only
+    // on the global .01ms safety net (docs/ux/02-accessibility.md §6) were Daily-journey owned -
+    // Habit, ProjectWorkspace, and the shared activity/habit card foundation - plus a 4th gap this
+    // same Sprint 32.13 introduced (the skip link's own transition). Each now has a local
+    // transition:none fallback alongside the transition it neutralizes.
+    [Fact]
+    public void DailyJourneyStylesheetsHaveLocalReducedMotionFallbacks()
+    {
+        var cards = ReadWebFile("wwwroot", "css", "cards.css");
+        var projectWorkspace = ReadWebFile("Components", "Features", "Projects", "Components", "ProjectWorkspace.razor.css");
+        var habitEditorModal = ReadWebFile("Components", "Features", "Habits", "Components", "HabitEditorModal.razor.css");
+        var utilities = ReadWebFile("wwwroot", "css", "utilities.css");
+
+        Assert.Contains("transition:transform .12s ease,background-color .12s ease,color .12s ease", cards, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", cards, StringComparison.Ordinal);
+
+        Assert.Contains("transition: color .12s ease, border-color .12s ease, background-color .12s ease;", projectWorkspace, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", projectWorkspace, StringComparison.Ordinal);
+
+        Assert.Contains("transition: transform 140ms ease, background-color 140ms ease;", habitEditorModal, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", habitEditorModal, StringComparison.Ordinal);
+
+        Assert.Contains(".skip-to-content-link", utilities, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", utilities, StringComparison.Ordinal);
+    }
+
     private static string ReadWebFile(params string[] segments) =>
         File.ReadAllText(Path.Combine([RepoRoot, "src", "BeeDay.Web", .. segments]));
 
