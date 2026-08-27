@@ -15,23 +15,24 @@
 @if (_resent) { <div class="identity-feedback identity-feedback--success" role="status">@Localizer["ResendSubmittedMessage"]</div> }
 @if (!string.IsNullOrWhiteSpace(_error)) { <div class="identity-feedback identity-feedback--error" role="alert">@_error</div> }
 <div class="identity-note"><strong>@DisplayEmail</strong><span>@Localizer["ConfirmationNote"]</span></div>
-<BeeDayButton FullWidth="true" IsLoading="@_busy" Disabled="@(_busy || _secondsRemaining > 0)" OnClick="ResendAsync">@ButtonText</BeeDayButton>
+<BeeDayButton FullWidth="true" IsLoading="@_busy" Disabled="@(_busy || _cooldown.SecondsRemaining > 0)" OnClick="ResendAsync">@ButtonText</BeeDayButton>
 <a class="identity-navigation-link" href="/login">@Localizer["BackToSignIn"]</a>
 </div></div></section>
 @code {
     [SupplyParameterFromQuery(Name = "email")] public string? Email { get; set; }
-    private bool _busy; private bool _resent; private string? _error; private int _secondsRemaining; private PeriodicTimer? _timer; private CancellationTokenSource? _cts;
-    // Separate from _cts above (which is the countdown-only token, cancelled/recreated every
-    // StartCountdown call) — this one spans the page's whole lifetime and only cancels on Dispose,
-    // so the mutation call itself is cancelled if the user navigates away mid-request.
+    private bool _busy; private bool _resent; private string? _error;
+    private readonly ResendCooldownTimer _cooldown;
+    // Separate from _cooldown above (cancelled/recreated every Start call) — this one spans the
+    // page's whole lifetime and only cancels on Dispose, so the mutation call itself is cancelled
+    // if the user navigates away mid-request.
     private readonly CancellationTokenSource _pageCts = new();
+    public EmailConfirmationSent() => _cooldown = new ResendCooldownTimer(() => InvokeAsync(StateHasChanged));
     private string DisplayEmail => string.IsNullOrWhiteSpace(Email) ? Localizer["YourEmailAddressFallback"] : Email.Trim();
     private string ButtonText => _busy
         ? Localizer["SendingButton"]
-        : _secondsRemaining > 0
-            ? Localizer["ResendAvailableInSeconds", _secondsRemaining]
+        : _cooldown.SecondsRemaining > 0
+            ? Localizer["ResendAvailableInSeconds", _cooldown.SecondsRemaining]
             : Localizer["ResendConfirmationButton"];
-    private async Task ResendAsync() { if (_busy || _secondsRemaining>0 || string.IsNullOrWhiteSpace(Email)) return; _busy=true; _error=null; try { await Sender.Send(new BeeDay.Application.Features.Identity.Commands.ResendEmailConfirmationCommand(new(Email.Trim())), _pageCts.Token); _resent=true; StartCountdown(); } catch(OperationCanceledException) when (_pageCts.IsCancellationRequested) { } catch(Exception ex) { _error=DomainErrorLocalizer.Translate(ex, SharedLocalizer); } finally { _busy=false; } }
-    private void StartCountdown(){_secondsRemaining=60;_cts?.Cancel();_cts?.Dispose();_timer?.Dispose();_cts=new();_timer=new(TimeSpan.FromSeconds(1));_=RunAsync(_cts.Token);} private async Task RunAsync(CancellationToken token){try{while(_secondsRemaining>0&&await _timer!.WaitForNextTickAsync(token)){_secondsRemaining--;await InvokeAsync(StateHasChanged);}}catch(OperationCanceledException){}}
-    public void Dispose(){_cts?.Cancel();_cts?.Dispose();_timer?.Dispose();_pageCts.Cancel();_pageCts.Dispose();}
+    private async Task ResendAsync() { if (_busy || _cooldown.SecondsRemaining>0 || string.IsNullOrWhiteSpace(Email)) return; _busy=true; _error=null; try { await Sender.Send(new BeeDay.Application.Features.Identity.Commands.ResendEmailConfirmationCommand(new(Email.Trim())), _pageCts.Token); _resent=true; _cooldown.Start(); } catch(OperationCanceledException) when (_pageCts.IsCancellationRequested) { } catch(Exception ex) { _error=DomainErrorLocalizer.Translate(ex, SharedLocalizer); } finally { _busy=false; } }
+    public void Dispose(){_cooldown.Dispose();_pageCts.Cancel();_pageCts.Dispose();}
 }

@@ -105,24 +105,16 @@
     gap: var(--beeday-spacing-smd);
 }
 
-.editor-modal__hero input,
-.editor-modal__hero textarea,
-.editor-modal__field input,
-.editor-modal__field select {
-    width: 100%;
-    min-height: 3rem;
-    box-sizing: border-box;
-    padding: .65rem .75rem;
-    border: var(--beeday-border-width) solid var(--beeday-color-border);
-    border-radius: var(--beeday-radius-lg);
-    background: var(--beeday-color-surface);
-    color: var(--beeday-color-text-primary);
-    box-shadow: none;
-    font: var(--beeday-type-body);
-    outline: none;
-    transition: border-color var(--beeday-transition-fast), box-shadow var(--beeday-transition-fast), background-color var(--beeday-transition-fast);
-}
-
+/* EXP32-F011 (Sprint 32.19): the base rest-state styling that used to live here (width, min-height,
+   padding, border, background, color, transition, etc.) was a byte-for-byte duplicate of
+   forms.css's .beeday-field__control - every input/select/textarea rendered inside an editor modal
+   already carries that exact class by default (BeeDayInput/BeeDaySelect/BeeDayDateInput/
+   BeeDayTextArea's own InputCssClass default), confirmed by direct code reading: no editor modal
+   across Habit/Task/To-Do/Project/Transaction/Tag renders a raw <input>/<select>/<textarea> outside
+   those shared components. Removed here rather than duplicated; the hover/focus overrides below are
+   intentionally left untouched, since they render a genuinely different color treatment inside
+   editor modals than plain .beeday-field__control fields elsewhere - not proven accidental, so not
+   collapsed without visual evidence. */
 .editor-modal__hero textarea {
     min-height: 5rem;
     resize: vertical;
@@ -268,11 +260,6 @@
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .editor-modal__hero input,
-    .editor-modal__hero textarea,
-    .editor-modal__field input,
-    .editor-modal__field select {
-        transition: none;
-    }
-}
+/* EXP32-F011 (Sprint 32.19): the reduced-motion override that used to live here neutralized the
+   base transition removed above - now dead with nothing to neutralize. forms.css's own
+   .beeday-field__control fallback (every field here already carries that class) already covers it. */
