@@ -50,6 +50,14 @@
     .habit-editor__direction { gap: 1.5rem; }
 }
 
+/* EXP32-F010 (Sprint 32.15): local fallback - the global safety net only shortens duration, it
+   does not remove the transform/background-color transition itself. */
+@media (prefers-reduced-motion: reduce) {
+    .habit-editor__direction-button span {
+        transition: none;
+    }
+}
+
 /* Sprint 6.2 — preserve the current Habit visual state while editing. */
 .habit-editor--white { --habit-editor-accent: var(--beeday-habit-color-white); --habit-editor-accent-strong: var(--beeday-habit-color-white-dark); }
 .habit-editor--yellow { --habit-editor-accent: var(--beeday-habit-color-yellow); --habit-editor-accent-strong: var(--beeday-habit-color-yellow-dark); }

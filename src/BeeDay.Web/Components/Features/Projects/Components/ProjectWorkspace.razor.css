@@ -366,3 +366,11 @@
 .project-workspace__todo-body {
     padding-right: 2.6rem;
 }
+
+/* EXP32-F010 (Sprint 32.15): local fallback - the global safety net only shortens duration, it
+   does not remove the color/border transition itself. */
+@media (prefers-reduced-motion: reduce) {
+    .project-workspace__list-toggle {
+        transition: none;
+    }
+}

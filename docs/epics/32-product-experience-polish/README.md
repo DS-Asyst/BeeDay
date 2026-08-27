@@ -680,7 +680,7 @@ já identificado. Priorizado abaixo desses três dentro do tempo desta sessão; 
 | Device | Shared |
 | Accessibility Impact | Yes |
 | Owning Sprint | 32.13 (Focus, Keyboard & Interaction Accessibility) — cross-ref 32.15 (Daily), 32.5 (Auth/ProfileCreation) |
-| State | DISCOVERED |
+| State | **PARTIALLY FIXED** — Sprint 32.15 (porção Daily); Auth/ProfileCreation (32.5) permanece `DISCOVERED` |
 
 **Interação:** usuário com `prefers-reduced-motion: reduce` habilitado no sistema operacional
 interagindo com Habit cards, o workspace de projeto, colunas do Dashboard ou telas de
@@ -698,15 +698,49 @@ owners de convergência, ainda sem Sprint que os feche).
 
 **Evidência:** achado de código/documentação já verificado — `docs/ux/02-accessibility.md` §6.
 
-**Resolution:** não aplicável — `DISCOVERED`.
+**Resolution (Sprint 32.15, porção Daily):** re-inventariado com evidência exata (a Sprint 32.13
+não tinha, na época, feito o `grep` completo — corrigido aqui). Dos 8 stylesheets originais, o
+inventário atual mostra:
 
-**Regression Protection:** a definir pela Sprint 32.13 (candidato: fallback local nos 8 stylesheets
-restantes, com teste de regressão por stylesheet).
+- `DashboardColumn.razor.css` — **já resolvido como efeito colateral da Sprint 32.7**
+  (EXP32-F003 removeu as duas únicas declarações `transition` do arquivo junto com o
+  `:focus-within` duplicado); nada resta para dar fallback.
+- `cards.css` (Habit + activity cards, os dois owners cobertos por um único arquivo
+  compartilhado), `ProjectWorkspace.razor.css` e `HabitEditorModal.razor.css` — fallback local
+  (`transition: none`) adicionado nos seletores animados reais.
+- `Dashboard/Pages/Home.razor.css` **não** tinha nenhuma declaração `animation`/`transition` real —
+  o grep original da Sprint 25.6 (e o repetido nesta Sprint antes da correção) capturava a palavra
+  "transition" dentro de um comentário ("Align the Daily board transition with..."), não uma
+  propriedade CSS. Falso positivo corrigido nesta auditoria; nenhuma mudança necessária.
+- **Achado adicional descoberto nesta Sprint:** `utilities.css` ganhou uma transição própria
+  (`.skip-to-content-link`) na Sprint 32.13, sem fallback local — um gap introduzido pela própria
+  EPIC 32 depois do inventário original de 25.6, fechado aqui também.
+- **Auth/ProfileCreation** (`PublicAuthActions.razor.css`, `CreateProfile.razor.css`) permanece
+  `DISCOVERED` — fora da jornada Daily, pertence à Sprint 32.5 (já entregue), fora do escopo desta
+  Sprint.
+- `EditorialSectionNav.razor.css` (achado não listado originalmente pelo texto da Sprint 25.6, mas
+  presente no inventário atual) pertence a Páginas Públicas/Institucional, não a Daily nem a Auth —
+  roteamento correto é 32.18, não tocado aqui.
 
-**Nota da Sprint 32.13 (permanece `DISCOVERED`):** não corrigido nesta Sprint — mesma razão de
-proporcionalidade de escopo registrada em `EXP32-F009`: exige tocar 8 stylesheets individualmente
-(um por área do produto, cross-ref 32.15/32.5) mais um teste de regressão por arquivo, um escopo
-mecânico maior que os achados já fechados nesta Sprint. Permanece roteado a 32.13.
+**Regression Protection:** `VisualFoundationTests.DailyJourneyStylesheetsHaveLocalReducedMotionFallbacks`
+— confirma `@media (prefers-reduced-motion: reduce)` presente em `cards.css`,
+`ProjectWorkspace.razor.css`, `HabitEditorModal.razor.css` e `utilities.css`, junto com a
+transição real que cada bloco neutraliza. Database-free, leitura de arquivo fonte.
+
+---
+
+### Auditoria da jornada Daily (Sprint 32.15, Issue #259, Required Work #2–7)
+
+Além de `EXP32-F010`, o restante do Required Work desta Sprint (traçar a jornada Daily por
+Habits/Tasks/To-Dos/Projects, confirmar consumo de botões/formulários/diálogos/coleções/filtros/
+carregamento/erros/feedback canônicos, sincronização de estado, estados vazio/populado) já estava
+substancialmente coberto pelo próprio trabalho desta sessão da EPIC 32 — as Sprints 32.7–32.13
+implementaram e testaram exatamente esses contratos diretamente nos componentes do Dashboard/Daily
+(`DashboardColumn`, `Home.razor`, `DashboardState`, `ProjectWorkspace`, `EditorModalShell`,
+`BeeDayConfirmDialog`) que compõem a jornada, não em componentes paralelos. Nenhuma duplicação de
+regra de negócio de Domain/Application foi introduzida; a apresentação de recorrência continua
+delegada a `DashboardState.FormatRepeat`/`FormatDueDate` (Application/localização), não
+reimplementada. Nenhum novo achado adicional foi identificado nesta auditoria além de `EXP32-F010`.
 
 ---
 
@@ -1616,7 +1650,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.12 — Toasts, Notifications & Confirmation Feedback | nenhum achado `EXP32-Fxxx` novo — duplicação toast+inline (introduzida pela própria 32.11) removida do Wallet |
 | 32.13 — Focus, Keyboard & Interaction Accessibility | EXP32-F001 (cross-ref); EXP32-F002, EXP32-F008, EXP32-F020 — `FIXED` nesta Sprint; EXP32-F009, EXP32-F010 — permanecem `DISCOVERED`, escopo maior que o restante desta Sprint |
 | 32.14 — Responsive & Mobile Interaction Polish | risco residual de §9 (evidência de navegador móvel pendente); auditoria de código confirmou contrato responsivo/touch-target já coerente — ver §"Responsive & mobile interaction audit"; lista de verificação HMG entregue |
-| 32.15 — Daily Experience Polish | EXP32-F004 (cross-ref), EXP32-F010 (cross-ref) |
+| 32.15 — Daily Experience Polish | EXP32-F004 (cross-ref); EXP32-F010 — porção Daily `FIXED` nesta Sprint (Auth/ProfileCreation permanece com a 32.5) |
 | 32.16 — Wallet Experience Polish | EXP32-F005 (cross-ref), EXP32-F006 |
 | 32.17 — Settings, Profile & Account Experience Polish | `BD30-F021` (§7), gap de Preferences (§9) |
 | 32.18 — Public Pages & Brand Experience Polish | nenhum achado novo; 3 rotas públicas revalidadas sem defeito |
