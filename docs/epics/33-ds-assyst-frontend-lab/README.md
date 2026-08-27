@@ -366,3 +366,77 @@ temporário usado para bootstrap/Sprints 33.5–33.7 não é mais necessário; t
 usa esse clone real.
 
 **Disposição:** GO. Sprint 33.8 (Shared Components Extraction) pode prosseguir.
+
+## 12. Sprint 33.8 — Shared Components Extraction (FE33-013..038, FE33-105..107)
+
+**Entregue no repositório Lab:** PR #3 (`DS-Asyst/beeday-frontend-lab`), branch
+`sprint/33.8-shared-components-extraction`, merge `f87e498`. `Lab CI` verde antes do merge.
+
+26 componentes de presentation do Design System + 3 itens de JS interop (menos um, ver drift
+abaixo) copiados/adaptados de `acce26a`: `Buttons/BeeDayButton`, `Cards/BeeDayCard`,
+`Feedback/{BeeDayConfirmDialog,BeeDayDashboardSkeleton,BeeDayEmptyState,BeeDayErrorBoundary,
+BeeDayLoading,BeeDaySkeleton,BeeDayToastHost}`, `Forms/{BeeDayCheckbox,BeeDayDateInput,BeeDayInput,
+BeeDaySelect,BeeDayTextArea,BeeDayValidationMessage}`, `Icons/BeeDayIcon` (wrapper Razor — os tipos
+de registry já vieram da Sprint 33.7), `Layout/{BeeDayHero,BeeDayPageHeader,BeeDaySectionHeader,
+BeeDaySettingsForm,BeeDaySettingsSection}`, `Modals/{DialogFocusScope,EditorModalShell}`,
+`Progress/BeeDayProgressBar`, `Text/{BeeDayBrand,SearchHighlight}`,
+`Behaviors/DragDrop/BeeDaySortable` (+ `SortableOrder`, `SortableReorderEvent`).
+
+**Correções de classificação Strategy aplicadas ao Ledger nesta Sprint** (não à Seção 1 nem a
+qualquer leitura histórica de Sprint anterior — apenas às células Strategy/State das linhas
+FE33-013..038/105..107, que descrevem trabalho desta própria Sprint):
+
+1. `BeeDayConfirmDialog`, `BeeDayErrorBoundary`, `BeeDayLoading`, `BeeDayProgressBar` (FE33-015,
+   018, 019, 035) estavam classificados como COPY no inventário original (Sprint 33.4); a leitura
+   completa do código-fonte nesta Sprint encontrou injeção de `IStringLocalizer<DesignSystemResources>`
+   não prevista em nenhum dos quatro. Reclassificados para ADAPT — o Lab não tem pipeline de
+   localização (`Program.cs` não chama `AddLocalization`, e `BeeDayIcon`, já copiado na Sprint 33.7,
+   também não depende de localizer), então a dependência foi removida e substituída por strings
+   padrão em inglês hardcoded, mesma abordagem já usada em FE33-021/027.
+2. `BeeDaySortable` (FE33-038) estava classificado como ADAPT com a nota "a chamada real a
+   `store.ReorderAsync` vira handler local no Lab" — a leitura completa mostrou que o componente já
+   é presentation-only: expõe apenas `OnReorder` (`EventCallback<SortableReorderEvent>`) e não
+   contém nenhuma chamada direta a `DashboardState`/`store.ReorderAsync`. Reclassificado para COPY
+   (apenas rename de namespace); a nota original descrevia como um *consumidor* futuro do Lab deveria
+   se ligar ao evento, não uma adaptação do componente em si.
+3. `beeday-dialog-focus.js` (FE33-106) estava classificado como COPY — o arquivo `.js` em si
+   permanece verbatim, mas o caminho de import hardcoded com sufixo de cache-busting (`?v=...`) usado
+   pelos consumidores (`DialogFocusScope.cs`, `EditorModalShell.razor.cs`) foi removido nesta Sprint;
+   reclassificado para ADAPT para refletir essa mudança no ponto de consumo.
+4. A referência cruzada de FE33-034 ("`DialogFocusScope`, `beeday-dialog-focus.js` (ver FE33-109)")
+   continha um erro de digitação do inventário original — FE33-109 é a página de galeria
+   `HeroCatalog` (Sprint 33.16, sem relação); a dependência real é FE33-106. Corrigido na tabela.
+
+**Dependência transitiva descoberta, não fabricada:** `BeeDayHero.Surface` é tipado pelo enum
+`BeeDayPaletteToken` (`Components/DesignSystem/BeeDayPaletteToken.cs`), não inventariado
+individualmente no FE33-001..109 original. Copiado junto como COPY simples — seus tokens CSS
+(paleta/utility classes) já existiam no Lab desde a foundation extraction (Sprint 33.6), então não
+há novo token introduzido, apenas o tipo C# que referencia os já existentes.
+
+**Drift de documentação encontrado, não corrigido silenciosamente:** `beeday-card-menu.js`
+(FE33-107) não existe em `src/BeeDay.Web/wwwroot/js/` no estado atual de `acce26a` — apenas
+`beeday-sortable.js`, `beeday-culture-sync.js`, `beeday-editorial-footer.js` e
+`beeday-dialog-focus.js` estão presentes. O arquivo foi removido da produção em algum ponto após o
+inventário da Sprint 33.4 ter sido escrito. Nenhum arquivo foi fabricado para preencher a lacuna;
+FE33-107 foi movido para `EXCLUDED` com a nota registrada na tabela — mesmo padrão do drift de fonte
+(Inter/Jersey-25 → Coiny/Nunito) já documentado na Sprint 33.6.
+
+**Exclusão deliberada, registrada, não silenciosa:** `ValidationMessageLocalizer.cs` (referenciado
+por FE33-027) **não foi portado** — mapeia mensagens de validação de negócio reais do BeeDay (regras
+de senha, tamanho de nome/título, etc.) que não existem no Lab; portar essa tabela seria exatamente
+o "mock de lógica de negócio real" que a ADR-008 proíbe. `BeeDayValidationMessage` no Lab renderiza
+`EditContext.GetValidationMessages(...)` diretamente, sem tradução.
+
+**Validação (Lab, sem LocalDB):**
+
+- `dotnet format BeeDayLab.slnx --verify-no-changes` — limpo.
+- `dotnet build BeeDayLab.slnx -c Release --warnaserror` — 0 avisos/erros.
+- `dotnet test BeeDayLab.slnx -c Release` — 171/171 aprovados (2 guardas de arquitetura + 169
+  Web.Tests, incluindo as novas `SharedComponentsParityTests.cs`, `FormsAccessibilityTests.cs` e
+  `ModalAndSortableTests.cs`).
+- `dotnet run` verificado localmente: Home `HTTP 200`.
+
+`FE33-013`–`FE33-038` e `FE33-105`–`FE33-106` movidos de `MAPPED` para `VERIFIED`. `FE33-107`
+movido de `MAPPED` para `EXCLUDED` (drift, ver acima).
+
+**Disposição:** GO. Sprint 33.9 (Layout Extraction) pode prosseguir.
