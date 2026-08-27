@@ -1391,6 +1391,42 @@ Database-free, bUnit.
 
 ---
 
+### Toasts, notifications & confirmation feedback (Sprint 32.12, Issue #256)
+
+Nenhum achado `EXP32-Fxxx` novo foi necessário — o Required Work #2/#3 desta Sprint ("reconcile
+transient toast vs inline/persistent feedback"; "remove contradictory or duplicate messages for
+the same operation") aponta diretamente para uma duplicação introduzida pela própria correção da
+Sprint 32.11: com o novo `ErrorMessage` de `EditorModalShell`/`BeeDayConfirmDialog` já cobrindo as
+quatro falhas de mutação do Wallet (salvar/excluir Transaction/Tag) de forma persistente e
+associada ao diálogo, o `Toast.ShowError(...)` que também disparava para a mesma falha tornou-se
+uma segunda notificação transitória e redundante para o mesmo evento — exatamente o padrão que o
+Required Work #3 pede para remover.
+
+**Correção:** os quatro `Toast.ShowError(Localizer["...ErrorToast"])` em `Wallet.razor` (save/delete
+de Transaction/Tag) foram removidos; o alerta inline dentro do diálogo (Sprint 32.11) é agora o
+único canal para essas quatro falhas — mais persistente e melhor associado que o toast que
+substituiu. As quatro chaves de recurso `*ErrorToast` (agora sem nenhum uso) foram removidas dos
+três `WalletResources*.resx`; `*ErrorInline` permanecem em uso. `Toast.ShowSuccess` nas mesmas
+quatro operações não foi tocado — o diálogo já fecha no sucesso, então o toast transitório continua
+sendo o canal correto ali (nenhuma duplicação a remover).
+
+**Auditoria de consistência mais ampla (Required Work #6, reuso das fundações existentes):**
+`BeeDayConfirmDialog` já é o único mecanismo de confirmação destrutiva do produto — usado
+identicamente por Habit/Task/To-Do/Project (`*EditorModal.razor`) e por Wallet
+(`Wallet.razor`), nenhuma implementação paralela. O fluxo de exclusão do Dashboard diverge
+deliberadamente do Wallet (fecha o diálogo de confirmação imediatamente ao confirmar, antes do
+resultado da exclusão ser conhecido — `ConfirmDelete()` em `HabitEditorModal.razor.cs` e
+equivalentes — dependendo só do toast em caso de falha) — um padrão diferente, mas não
+contraditório/duplicado, e sem evidência de defeito relatado; unificá-lo ao padrão do Wallet
+alteraria o comportamento de fechamento de 4 editores sem uma falha concreta que justifique o
+risco, fora do escopo desta Sprint.
+
+**Regression Protection:** `WalletLocalizationTests`/`WalletComponentTests` já existentes
+reconfirmados verdes após a remoção dos recursos (23/23) — nenhum teste dependia das chaves/toasts
+removidos.
+
+---
+
 ## 7. Achados pré-existentes roteados para dentro da EPIC 32
 
 | ID original | Ledger de origem | Achado | Sprint EPIC 32 |
@@ -1468,7 +1504,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.9 — Loading & Perceived Performance | gap de evidência registrado em §9 (sem achado novo); auditoria de código confirmou nenhum defeito de feedback ausente — ver §"Auditoria de loading & perceived performance" |
 | 32.10 — Empty States & First-Use Experience | EXP32-F013 (cross-ref) — CTA "Clear filter" adicionado ao estado sem-resultados |
 | 32.11 — Errors, Recovery & User Feedback | EXP32-F007 (cross-ref); achado novo — mensagem de erro de mutação órfã em `EditorModalShell`/`BeeDayConfirmDialog`, `FIXED` nesta Sprint |
-| 32.12 — Toasts, Notifications & Confirmation Feedback | nenhum achado novo |
+| 32.12 — Toasts, Notifications & Confirmation Feedback | nenhum achado `EXP32-Fxxx` novo — duplicação toast+inline (introduzida pela própria 32.11) removida do Wallet |
 | 32.13 — Focus, Keyboard & Interaction Accessibility | EXP32-F001 (cross-ref), EXP32-F002, EXP32-F008, EXP32-F009, EXP32-F010, EXP32-F020 |
 | 32.14 — Responsive & Mobile Interaction Polish | risco residual de §9 (evidência de navegador móvel pendente) |
 | 32.15 — Daily Experience Polish | EXP32-F004 (cross-ref), EXP32-F010 (cross-ref) |

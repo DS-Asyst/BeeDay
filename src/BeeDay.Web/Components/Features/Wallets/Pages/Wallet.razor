@@ -303,7 +303,6 @@ else
         catch
         {
             _transactionFormError = Localizer["TransactionSaveErrorInline"];
-            Toast.ShowError(Localizer["TransactionSaveErrorToast"]);
         }
         finally { _interaction.End(); }
     }
@@ -339,7 +338,6 @@ else
         catch
         {
             _transactionFormError = Localizer["TransactionDeleteErrorInline"];
-            Toast.ShowError(Localizer["TransactionDeleteErrorToast"]);
         }
         finally { _interaction.End(); }
     }
@@ -392,7 +390,6 @@ else
         catch
         {
             _tagFormError = Localizer["TagSaveErrorInline"];
-            Toast.ShowError(Localizer["TagSaveErrorToast"]);
         }
         finally { _interaction.End(); }
     }
@@ -427,7 +424,6 @@ else
         catch
         {
             _tagFormError = Localizer["TagDeleteErrorInline"];
-            Toast.ShowError(Localizer["TagDeleteErrorToast"]);
         }
         finally { _interaction.End(); }
     }

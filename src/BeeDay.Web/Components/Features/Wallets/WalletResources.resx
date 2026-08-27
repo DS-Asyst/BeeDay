@@ -76,17 +76,13 @@
   <data name="TransactionUpdatedMessage" xml:space="preserve"><value>Transaction updated successfully.</value></data>
   <data name="TransactionCreatedMessage" xml:space="preserve"><value>Transaction created successfully.</value></data>
   <data name="TransactionSaveErrorInline" xml:space="preserve"><value>We could not save the transaction. Review the information and try again.</value></data>
-  <data name="TransactionSaveErrorToast" xml:space="preserve"><value>Could not save the transaction.</value></data>
   <data name="TransactionDeletedMessage" xml:space="preserve"><value>Transaction deleted successfully.</value></data>
   <data name="TransactionDeleteErrorInline" xml:space="preserve"><value>We could not delete the transaction. Please try again.</value></data>
-  <data name="TransactionDeleteErrorToast" xml:space="preserve"><value>Could not delete the transaction.</value></data>
   <data name="TagUpdatedMessage" xml:space="preserve"><value>Tag updated successfully.</value></data>
   <data name="TagCreatedMessage" xml:space="preserve"><value>Tag created successfully.</value></data>
   <data name="TagSaveErrorInline" xml:space="preserve"><value>We could not save the tag. Review the information and try again.</value></data>
-  <data name="TagSaveErrorToast" xml:space="preserve"><value>Could not save the tag.</value></data>
   <data name="TagDeletedMessage" xml:space="preserve"><value>Tag deleted successfully.</value></data>
   <data name="TagDeleteErrorInline" xml:space="preserve"><value>We could not delete the tag. Please try again.</value></data>
-  <data name="TagDeleteErrorToast" xml:space="preserve"><value>Could not delete the tag.</value></data>
   <data name="RefreshFailedAfterSuccessMessage" xml:space="preserve"><value>The operation succeeded, but the wallet could not be refreshed.</value></data>
   <data name="BalanceUpdatedAnnouncement" xml:space="preserve"><value>Balance updated to {0}.</value></data>
   <data name="HistoryEyebrow" xml:space="preserve"><value>History</value></data>
