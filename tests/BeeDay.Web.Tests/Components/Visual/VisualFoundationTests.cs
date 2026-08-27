@@ -423,6 +423,19 @@ public sealed class VisualFoundationTests
         Assert.Contains("@media (prefers-reduced-motion: reduce)", utilities, StringComparison.Ordinal);
     }
 
+    // Sprint 32.18: EditorialSectionNav.razor.css (the 12 institutional/footer pages' section nav)
+    // was the remaining stylesheet from the current 8-file inventory not owned by Daily (32.15),
+    // Wallet, or Auth/ProfileCreation (32.5, out of this Sprint's Public Pages scope) - a genuine
+    // Public Pages gap, fixed here.
+    [Fact]
+    public void EditorialSectionNavHasALocalReducedMotionFallback()
+    {
+        var editorialSectionNav = ReadWebFile("Components", "Features", "Institutional", "Components", "EditorialSectionNav.razor.css");
+
+        Assert.Contains("transition: border-color var(--beeday-transition-fast);", editorialSectionNav, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", editorialSectionNav, StringComparison.Ordinal);
+    }
+
     private static string ReadWebFile(params string[] segments) =>
         File.ReadAllText(Path.Combine([RepoRoot, "src", "BeeDay.Web", .. segments]));
 
