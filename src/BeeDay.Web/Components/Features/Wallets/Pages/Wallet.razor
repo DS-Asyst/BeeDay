@@ -324,6 +324,7 @@ else
     private async Task DeleteTransactionAsync()
     {
         if (_pendingDeleteTransaction is null || !_interaction.TryBegin("delete-transaction")) return;
+        _transactionFormError = null;
         try
         {
             await Sender.Send(new DeleteTransactionCommand(_pendingDeleteTransaction.Id), _cts.Token);
@@ -412,6 +413,7 @@ else
     private async Task DeleteTagAsync()
     {
         if (_pendingDeleteTag is null || !_interaction.TryBegin("delete-tag")) return;
+        _tagFormError = null;
         try
         {
             await Sender.Send(new DeleteWalletTagCommand(_pendingDeleteTag.Id), _cts.Token);
