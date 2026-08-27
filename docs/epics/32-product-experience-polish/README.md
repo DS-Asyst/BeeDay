@@ -730,7 +730,8 @@ inventário atual mostra:
   Sprint.
 - `EditorialSectionNav.razor.css` (achado não listado originalmente pelo texto da Sprint 25.6, mas
   presente no inventário atual) pertence a Páginas Públicas/Institucional, não a Daily nem a Auth —
-  roteamento correto é 32.18, não tocado aqui.
+  roteamento correto é 32.18, não tocado aqui. **Fechado na Sprint 32.18** — ver seção própria
+  abaixo.
 
 **Regression Protection:** `VisualFoundationTests.DailyJourneyStylesheetsHaveLocalReducedMotionFallbacks`
 — confirma `@media (prefers-reduced-motion: reduce)` presente em `cards.css`,
@@ -1644,6 +1645,31 @@ e o gap de Preferences permanecem `OPEN`/registrados até confirmação de naveg
 
 ---
 
+### Auditoria de Public Pages & Brand (Sprint 32.18, Issue #262)
+
+Nenhum achado `EXP32-Fxxx` foi atribuído a esta Sprint — a auditoria original da EPIC 32 já havia
+revalidado 3 rotas públicas sem defeito. Um item concreto, já identificado mas explicitamente
+adiado pela própria Sprint 32.15 ("roteamento correto é 32.18, não tocado aqui"), foi fechado aqui:
+
+**`EditorialSectionNav.razor.css`** (navegação compartilhada pelas 12 páginas editoriais do rodapé
+institucional) tinha uma `transition: border-color` sem fallback local para
+`prefers-reduced-motion` — o último stylesheet do inventário atual de 8 sem fallback que não
+pertence a Auth/ProfileCreation (32.5, fora de escopo). Fallback local (`transition: none`)
+adicionado. Com esta correção, o inventário atual de stylesheets sem fallback fica reduzido
+exclusivamente aos 2 arquivos de Auth/ProfileCreation (`PublicAuthActions.razor.css`,
+`CreateProfile.razor.css`) — deliberadamente fora do escopo de toda a EPIC 32 até agora, owned pela
+já entregue Sprint 32.5.
+
+**Verificação de marca (Required Work #2)** — busca por "BeeDay" (grafia técnica) em texto visível
+de recursos localizados públicos (`HomeResources*.resx`, recursos de `Institutional/`) não encontrou
+nenhuma ocorrência — a marca pública `beeday` (minúscula) já está consistente nessas superfícies,
+confirmando o trabalho já fechado pela EPIC 25.
+
+**Regression Protection:** `VisualFoundationTests.EditorialSectionNavHasALocalReducedMotionFallback`
+— database-free, leitura de arquivo fonte.
+
+---
+
 ## 7. Achados pré-existentes roteados para dentro da EPIC 32
 
 | ID original | Ledger de origem | Achado | Sprint EPIC 32 |
@@ -1727,7 +1753,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.15 — Daily Experience Polish | EXP32-F004 (cross-ref); EXP32-F010 — porção Daily `FIXED` nesta Sprint (Auth/ProfileCreation permanece com a 32.5) |
 | 32.16 — Wallet Experience Polish | EXP32-F005 (cross-ref); EXP32-F006 — `FIXED` (efeito colateral de F005, confirmado nesta Sprint) |
 | 32.17 — Settings, Profile & Account Experience Polish | `BD30-F021` (§7), gap de Preferences (§9) — ambos permanecem `OPEN`/gap de evidência de navegador; auditoria de código não encontrou defeito — ver §"Auditoria de Settings, Profile & Account" |
-| 32.18 — Public Pages & Brand Experience Polish | nenhum achado novo; 3 rotas públicas revalidadas sem defeito |
+| 32.18 — Public Pages & Brand Experience Polish | nenhum achado novo; 3 rotas públicas revalidadas sem defeito; `EditorialSectionNav.razor.css` reduced-motion fallback (adiado pela 32.15) `FIXED` nesta Sprint |
 | 32.19 — Front-End Code Refinement & Component Consolidation | EXP32-F011, EXP32-F012 |
 | 32.20 — Full Product Polish & Final Experience Gate | consome o estado final de todo o Ledger |
 
