@@ -151,5 +151,42 @@ reescritos para refletir estado posterior.
 - `git diff --check` — limpo.
 
 **Disposição:** GO. `DS-Asyst/BeeDay` é a coordenada canônica operacionalmente comprovada após o
-ciclo normal branch → PR → `hmg` → HMG Deployment → HMG Verification (evidência registrada abaixo
-após o merge desta Sprint).
+ciclo normal branch → PR → `hmg` → HMG Deployment → HMG Verification. PR #382 (`45a795d`), HMG
+Deployment e HMG Verification confirmados verdes em 2026-08-27T12:11–12:13Z.
+
+## 7. Sprint 33.3 — Frontend Lab Architecture & Contracts
+
+**Decisão registrada em [`ADR-008`](../../adr/ADR-008-frontend-lab-architecture-boundaries.md)**,
+fundamentada em inspeção direta de `src/BeeDay.Web/BeeDay.Web.csproj`, `docs/web/README.md` e
+`docs/design-system/README.md` (2026-08-27), não em suposição:
+
+- `BeeDay.Web` não tem fronteira de assembly entre `DesignSystem`/`Features`/composition root —
+  todos compartilham um único `.csproj` com `ProjectReference` para `Application`/`Domain`/
+  `Infrastructure`. Consequência: o Lab **não pode** reusar o Design System via
+  `ProjectReference`/pacote sem trazer o backend inteiro — o único mecanismo compatível com o
+  escopo autorizado da EPIC 33 é cópia/adaptação de código-fonte, nunca reuso binário. Isso confirma
+  (com evidência concreta, não apenas por diretriz do pacote de planejamento) a regra
+  COPY/ADAPT/MOCK/EXCLUDE já prevista em `04_MOCK_STATE_POLICY.md` /
+  `02_FRONTEND_LAB_ARCHITECTURE_AND_BOUNDARIES.md`.
+- Stack confirmada: Blazor/Razor, igual à produção — nenhuma evidência aponta outra abordagem mais
+  segura.
+- Precedente direto já existente em produção para as galerias futuras (Sprints 33.16/33.17):
+  `DesignSystem/Pages/{IconCatalog,HeroCatalog}.razor`, páginas de catálogo roteáveis dentro do
+  próprio `BeeDay.Web`.
+- Contrato de fonte da verdade, drift e promoção adotado integralmente de
+  `05_PROMOTION_AND_DRIFT_CONTRACT.md` — `DS-Asyst/BeeDay` nunca deixa de ser a verdade de
+  runtime/negócio; `beeday-frontend-lab:prd` é fonte visual validada, nunca produção implantada;
+  nenhuma sincronização automática em qualquer direção.
+- Validação sem banco de dados confirmada como arquiteturalmente exigida (nenhuma dependência de
+  SQL Server/LocalDB/EF Core/autenticação real em nenhuma camada do Lab).
+
+**Sprint-Specific Boundary respeitado:** nenhum código de frontend foi copiado nesta Sprint; nenhum
+redesenho de UI; o repositório Lab não foi inicializado (permanece vazio, `DS-Asyst/beeday-frontend-lab`,
+criado em 2026-08-18 pelo proprietário, `size:0`, sem branches/conteúdo — confirmado por
+`gh api repos/DS-Asyst/beeday-frontend-lab`) — bootstrap é escopo da Sprint 33.5.
+
+**Validação (Claude-safe, sem LocalDB):** apenas análise de documentação/código-fonte, conforme
+exigido pela Sprint 33.3; nenhum código de produto foi alterado; `git diff --check` limpo.
+
+**Disposição:** GO. Arquitetura do Lab aprovada e registrada em ADR-008; Sprint 33.4 (Inventário) e
+33.5 (Bootstrap) podem prosseguir sobre esta decisão.
