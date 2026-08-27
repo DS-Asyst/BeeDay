@@ -498,7 +498,7 @@ default.
 | Device | Desktop (confirmado) |
 | Accessibility Impact | No |
 | Owning Sprint | 32.16 (Wallet Experience Polish) — cross-ref 32.5 (Forms & Input Experience, EXP32-F005) |
-| State | DISCOVERED |
+| State | **FIXED** — resolvido como efeito colateral da Sprint 32.5, confirmado nesta Sprint |
 
 **Interação:** criar uma transação hoje e observar sua data tanto no formulário quanto na lista.
 
@@ -514,11 +514,21 @@ navegador.
 mostrando `8/22/2026`, lado a lado com a mesma transação reaberta em edição mostrando `22/08/2026`
 no campo Date.
 
-**Resolution:** não aplicável — `DISCOVERED`.
+**Resolution (Sprint 32.16, confirmação de causa raiz já resolvida):** a raiz do descompasso era o
+`<input type="date">` nativo (`BeeDayDateInput`) seguindo o locale do SO/navegador em vez da cultura
+selecionada no beeday — exatamente o defeito já corrigido pela Sprint 32.5 (`EXP32-F005`) via
+`lang="@CultureInfo.CurrentCulture.Name"`, forçando o Chromium a formatar o campo de data pela
+cultura do app, não do SO. O lado da lista (`TransactionCard.razor`,
+`@Transaction.TransactionDate.ToString("d")`) já usava `CultureInfo.CurrentCulture` desde a Sprint
+23.6, antes mesmo deste achado existir — nunca foi o lado errado. Com os dois lados agora
+consumindo a mesma cultura ambiente, nenhuma mudança de código foi necessária nesta Sprint; a
+correção de `EXP32-F005` já fechou este achado por completo, como já registrado na própria evidência
+de resolução de F005 ("dd/mm/aaaa... consistente com a cultura selecionada").
 
-**Regression Protection:** a definir pela Sprint 32.16 (candidato: teste de componente fixando o
-formato de data usado na lista e sua paridade com o formato do input, coordenado com a correção de
-EXP32-F005).
+**Regression Protection:** já existente antes desta Sprint —
+`TransactionCardTests.TransactionDate_UsesTheStandardShortDatePatternForTheCurrentCulture`
+(en-US/pt-BR) e a evidência de navegador já registrada em `EXP32-F005`. Nenhum teste novo foi
+necessário.
 
 ---
 
@@ -741,6 +751,32 @@ implementaram e testaram exatamente esses contratos diretamente nos componentes 
 regra de negócio de Domain/Application foi introduzida; a apresentação de recorrência continua
 delegada a `DashboardState.FormatRepeat`/`FormatDueDate` (Application/localização), não
 reimplementada. Nenhum novo achado adicional foi identificado nesta auditoria além de `EXP32-F010`.
+
+---
+
+### Auditoria da jornada Wallet (Sprint 32.16, Issue #260)
+
+Além da resolução de `EXP32-F006` documentada acima, o restante do Required Work desta Sprint foi
+verificado com evidência de código, sem exigir mudança:
+
+- **Formatação de moeda (Required Work #5)** — `WalletCurrencyFormatter` é o único formatador de
+  valores monetários consumido em toda a feature (`TransactionCard`, `WalletSummary`, o anúncio
+  acessível de saldo em `Wallet.razor`) — nenhuma implementação paralela de formatação de decimal
+  encontrada.
+- **Confirmação destrutiva (Required Work #6)** — já reconciliada nas Sprints 32.11/32.12 desta
+  mesma sessão: `BeeDayConfirmDialog` é o único mecanismo de confirmação de exclusão de
+  Transaction/Tag, com o alerta inline de falha (`ErrorMessage`) e o toast já racionalizados para
+  não duplicar a mesma mensagem.
+- **Sincronização de estado save/delete (Required Work #4)** — `WalletInteractionState`
+  (`TryBegin`/`End`) já garante que toda mutação passa por um único caminho antes de atualizar
+  lista/saldo (`RefreshAfterMutationAsync`), auditado em detalhe na Sprint 32.11.
+- **Padrões canônicos (Required Work #3)** — formulários (`BeeDayInput`/`BeeDayDateInput`/
+  `BeeDayTextArea`), diálogos (`EditorModalShell`/`BeeDayConfirmDialog`), filtros
+  (`TransactionList`/`WalletEmptyState`, reconciliados na Sprint 32.10) e feedback (Sprints
+  32.11/32.12) já são os mesmos usados pelo restante do produto — nenhuma cópia local encontrada.
+
+Nenhum achado novo foi identificado além de `EXP32-F006`. Nenhuma mudança de precisão/constraint de
+domínio foi feita ou necessária.
 
 ---
 
@@ -1651,7 +1687,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.13 — Focus, Keyboard & Interaction Accessibility | EXP32-F001 (cross-ref); EXP32-F002, EXP32-F008, EXP32-F020 — `FIXED` nesta Sprint; EXP32-F009, EXP32-F010 — permanecem `DISCOVERED`, escopo maior que o restante desta Sprint |
 | 32.14 — Responsive & Mobile Interaction Polish | risco residual de §9 (evidência de navegador móvel pendente); auditoria de código confirmou contrato responsivo/touch-target já coerente — ver §"Responsive & mobile interaction audit"; lista de verificação HMG entregue |
 | 32.15 — Daily Experience Polish | EXP32-F004 (cross-ref); EXP32-F010 — porção Daily `FIXED` nesta Sprint (Auth/ProfileCreation permanece com a 32.5) |
-| 32.16 — Wallet Experience Polish | EXP32-F005 (cross-ref), EXP32-F006 |
+| 32.16 — Wallet Experience Polish | EXP32-F005 (cross-ref); EXP32-F006 — `FIXED` (efeito colateral de F005, confirmado nesta Sprint) |
 | 32.17 — Settings, Profile & Account Experience Polish | `BD30-F021` (§7), gap de Preferences (§9) |
 | 32.18 — Public Pages & Brand Experience Polish | nenhum achado novo; 3 rotas públicas revalidadas sem defeito |
 | 32.19 — Front-End Code Refinement & Component Consolidation | EXP32-F011, EXP32-F012 |
