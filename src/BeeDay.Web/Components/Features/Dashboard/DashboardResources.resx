@@ -79,6 +79,7 @@
   <data name="HabitsEmptyDescription" xml:space="preserve"><value>Create a habit to build routines and track your daily consistency.</value></data>
   <data name="NoFilterResultsTitle" xml:space="preserve"><value>No matches</value></data>
   <data name="NoFilterResultsDescription" xml:space="preserve"><value>Nothing here matches your current search or filter. Try a different term, or clear it to see everything.</value></data>
+  <data name="ClearFilterButton" xml:space="preserve"><value>Clear filter</value></data>
   <data name="HabitsActiveStateLabel" xml:space="preserve"><value>active habits</value></data>
   <data name="ReorderHabitsAriaLabel" xml:space="preserve"><value>Reorder habits</value></data>
   <data name="TasksColumnTitle" xml:space="preserve"><value>Tasks</value></data>

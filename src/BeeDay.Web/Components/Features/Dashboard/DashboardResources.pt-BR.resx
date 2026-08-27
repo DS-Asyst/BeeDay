@@ -79,6 +79,7 @@
   <data name="HabitsEmptyDescription" xml:space="preserve"><value>Crie um hábito para construir rotinas e acompanhar sua consistência diária.</value></data>
   <data name="NoFilterResultsTitle" xml:space="preserve"><value>Nenhum resultado</value></data>
   <data name="NoFilterResultsDescription" xml:space="preserve"><value>Nada aqui corresponde à busca ou ao filtro atual. Tente outro termo ou limpe-o para ver tudo.</value></data>
+  <data name="ClearFilterButton" xml:space="preserve"><value>Limpar filtro</value></data>
   <data name="HabitsActiveStateLabel" xml:space="preserve"><value>hábitos ativos</value></data>
   <data name="ReorderHabitsAriaLabel" xml:space="preserve"><value>Reordenar hábitos</value></data>
   <data name="TasksColumnTitle" xml:space="preserve"><value>Tarefas</value></data>

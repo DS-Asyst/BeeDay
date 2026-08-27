@@ -80,6 +80,9 @@
     margin: .75rem;
 }
 
+.dashboard-column__clear-filter {
+    margin: 0 auto .75rem;
+}
 
 .dashboard-column__actions {
     display: flex;

@@ -1322,6 +1322,41 @@ requiring HMG/release evidence rather than forcing Claude browser execution"). N
 
 ---
 
+### Empty states & first-use experience (Sprint 32.10, Issue #254)
+
+Nenhum achado novo foi atribuído a esta Sprint além do cross-ref já registrado a `EXP32-F013`
+(`FIXED` na Sprint 32.8). O Required Work #6 da Issue #254 exige manter "filtered no-results
+recovery connected to the 32.8 filter contract" — a 32.8 já distinguia corretamente
+vazio-genuíno de sem-resultados-de-filtro, mas só com texto descritivo ("tente outro termo, ou
+limpe-o"), sem uma ação real. Esta Sprint fecha essa lacuna reusando o padrão canônico já
+estabelecido pelo Wallet (`WalletEmptyState`: `BeeDayEmptyState` + `BeeDayButton` de "Clear
+Filters" logo abaixo, variante `ConfirmationCancel`) em vez de inventar um sistema de empty-state
+paralelo para o Dashboard:
+
+- `DashboardState.ClearFilters()` (novo) — reset único e determinístico de `Search` e
+  `SelectedProjectId` juntos, já que qualquer um dos dois pode ter causado o resultado zerado na
+  coluna To-Dos; nenhuma das quatro colunas precisa saber qual filtro foi a causa real.
+- `DashboardColumn` ganha dois parâmetros novos, `ShowClearFilterAction`/`OnClearFilter` — quando
+  verdadeiro, renderiza um `BeeDayButton` (`Variant="ConfirmationCancel"`, `Compact="true"`) logo
+  abaixo do `BeeDayEmptyState` existente. Nenhuma mudança na fundação `BeeDayEmptyState` em si
+  (permanece agnóstica a ação, reusada por Wallet/Dashboard/`BeeDayErrorBoundary` sem
+  divergência).
+- `Home.razor` passa `ShowClearFilterAction="@State.XxxFilteredToZero"` e
+  `OnClearFilter="State.ClearFilters"` nas quatro colunas — a mesma condição já usada para a
+  escolha de texto na Sprint 32.8, agora também decidindo a presença do CTA.
+
+Classificação dos quatro estados exigida pelo Required Work #2 já está completa desde a 32.8/32.9:
+`DISCOVERED`→vazio genuíno (texto/CTA de criação já existente por coluna), sem-resultados-de-filtro
+(`NoFilterResultsTitle`/`Description` + o novo CTA "Clear filter"), e erro (`_errorMessage`/`BeeDayEmptyState`
+não é usado para mascarar falhas — confirmado por leitura de `Home.razor`/`DashboardState`, que não
+têm um caminho de erro renderizado como estado vazio).
+
+**Regression Protection:** `DashboardColumnTests.ShowClearFilterAction_RendersAClearButtonThatInvokesOnClearFilter`,
+`WhenShowClearFilterActionIsFalse_RendersNoClearButton`, e `DashboardStateTests.ClearFilters_ResetsSearchAndSelectedProjectContext`
+— todos database-free.
+
+---
+
 ## 7. Achados pré-existentes roteados para dentro da EPIC 32
 
 | ID original | Ledger de origem | Achado | Sprint EPIC 32 |
@@ -1397,7 +1432,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.7 — Lists, Cards & Collection Patterns | EXP32-F003, EXP32-F004 — ambos `FIXED` nesta Sprint |
 | 32.8 — Search, Filters & Sorting | EXP32-F013 — `FIXED` nesta Sprint |
 | 32.9 — Loading & Perceived Performance | gap de evidência registrado em §9 (sem achado novo); auditoria de código confirmou nenhum defeito de feedback ausente — ver §"Auditoria de loading & perceived performance" |
-| 32.10 — Empty States & First-Use Experience | EXP32-F013 (cross-ref) |
+| 32.10 — Empty States & First-Use Experience | EXP32-F013 (cross-ref) — CTA "Clear filter" adicionado ao estado sem-resultados |
 | 32.11 — Errors, Recovery & User Feedback | EXP32-F007 (cross-ref) |
 | 32.12 — Toasts, Notifications & Confirmation Feedback | nenhum achado novo |
 | 32.13 — Focus, Keyboard & Interaction Accessibility | EXP32-F001 (cross-ref), EXP32-F002, EXP32-F008, EXP32-F009, EXP32-F010, EXP32-F020 |
