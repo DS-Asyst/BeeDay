@@ -190,3 +190,29 @@ exigido pela Sprint 33.3; nenhum código de produto foi alterado; `git diff --ch
 
 **Disposição:** GO. Arquitetura do Lab aprovada e registrada em ADR-008; Sprint 33.4 (Inventário) e
 33.5 (Bootstrap) podem prosseguir sobre esta decisão.
+
+## 8. Sprint 33.4 — Frontend Inventory & Extraction Map
+
+**Ledger canônico:** [`03-frontend-inventory-ledger.md`](03-frontend-inventory-ledger.md) —
+109 itens (`FE33-001`–`FE33-109`), cobrindo as 54 rotas `@page` verificadas em
+`docs/web/02-routing-and-pages.md`, os 25 primitives + `BeeDaySortable` do Design System, 14 peças
+de layout/shell, 8 categorias de foundation, 4 categorias de asset, 3 módulos JS de interação, os 2
+templates de e-mail transacional reais (`ComposeEmailConfirmation`/`ComposePasswordReset`) mais o
+shell HTML/plain-text compartilhado, e o contrato de localização — todos com estratégia
+COPY/ADAPT/MOCK/EXCLUDE, caminho Lab (sob o placeholder `<LabWeb>`, já que o projeto exato só nasce
+na Sprint 33.5), Sprint proprietária única, e evidência de origem.
+
+**Achado relevante desta Sprint:** o produto tem hoje apenas **2 templates de e-mail transacional
+reais** (confirmação de e-mail e redefinição de senha, `IIdentityEmailComposer`), não uma família
+maior — corrigindo qualquer suposição de que a Sprint 33.15 lidaria com um catálogo grande. Ambos
+compartilham um único shell HTML + alternativa plain-text.
+
+**Sprint-Specific Boundary respeitado:** nenhuma extração em massa foi iniciada; nenhum item foi
+tratado como `VERIFIED` (Sprint 33.4 é inventário, não extração); nenhum dado privado de usuário de
+produção foi copiado para o Ledger (todos os exemplos usados são nomes de arquivo/rota, não dados).
+
+**Validação (Claude-safe, sem LocalDB):** análise de documentação/código-fonte + listagem direta de
+diretórios; nenhum código de produto foi alterado; `git diff --check` limpo.
+
+**Disposição:** GO. Inventário completo (nenhuma rota/componente/template real deixado de fora);
+Sprint 33.5 (Bootstrap do repositório Lab) pode prosseguir.
