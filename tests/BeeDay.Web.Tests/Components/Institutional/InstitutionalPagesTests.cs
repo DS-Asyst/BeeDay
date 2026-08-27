@@ -55,7 +55,7 @@ public sealed class InstitutionalPagesTests
         var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Contact>());
 
         Assert.Equal("Contact us", cut.Find("h1").TextContent.Trim());
-        Assert.NotNull(cut.Find("a[href='https://github.com/tiagoarrigoni/BeeDay']"));
+        Assert.NotNull(cut.Find("a[href='https://github.com/DS-Asyst/BeeDay']"));
         Assert.NotNull(cut.Find("a[href='https://www.linkedin.com/in/tiago-a-arrigoni-335b9413b/']"));
         Assert.DoesNotContain("mailto:", cut.Markup, StringComparison.Ordinal);
     }

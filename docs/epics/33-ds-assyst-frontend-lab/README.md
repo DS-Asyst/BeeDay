@@ -68,3 +68,88 @@ permissão de "Owner" ou equivalente nela para autorizar/realizar a transferênc
 Conforme o limite da Sprint 33.1 (`github-issues/Sprint-33.1.md`): nenhum código de produto foi
 alterado; nenhum valor de secret foi exposto; a transferência de repositório não foi iniciada; a
 extração de frontend não foi iniciada.
+
+## 5. Correção — nome da organização e estado real de `main`
+
+Duas correções de evidência, registradas aqui em vez de reescrever as Seções 1–4 (que descrevem
+fielmente o que foi observado e executado na Sprint 33.1 no momento em que foi executada):
+
+1. **Nome da organização.** O pacote de planejamento da EPIC 33 (e portanto o texto acima e as
+   Issues #361–#380 originalmente criadas) referenciava a organização de destino como `DS-Assyst`
+   (com "ss" duplo). Essa grafia estava incorreta — um erro de digitação do pacote de planejamento,
+   não um fato sobre o GitHub. A organização real, já existente desde 2026-08-18 e da qual
+   `tiagoarrigoni` é membro `admin`, é **`DS-Asyst`** (um único "s"). O proprietário confirmou a
+   grafia correta e todas as Issues #361–#380 (títulos e corpos) foram corrigidas via `gh issue
+   edit` para usar `DS-Asyst`. A disposição **BLOCKED** registrada na Seção 3 permanece verdadeira
+   como registro histórico do que a Sprint 33.1 observou ao consultar literalmente `DS-Assyst`
+   (404) — o bloqueio foi real para aquele nome; não foi um bloqueio real do repositório.
+2. **Estado de `main`.** A Seção 1 registra `main` (`origin/main`) como `3fffc30`, desatualizado
+   desde a era da EPIC 19. Essa leitura usou a branch local `main` do workspace (que estava
+   defasada), não `origin/main`. O estado real de `origin/main` no momento da Sprint 33.1 já era
+   `a3c7dbe` ("Merge pull request #359 from tiagoarrigoni/hmg"), ou seja, `main` já incorporava a
+   EPIC 32 completa (`acce26a`) através do pipeline de promoção automatizado do repositório
+   (`BeeDay — Promotion Policy` + `BeeDay — Release Quality Gate`, ambos verdes) — nenhuma ação do
+   Claude. Isso não invalida a disposição da Sprint 33.1 (o único item de risco real era a
+   organização inexistente), mas corrige a leitura de estado registrada.
+
+## 6. Sprint 33.2 — Transferência para DS-Asyst & Reconciliação de Governança
+
+**Execução da transferência:** realizada manualmente pelo proprietário (ação de conta GitHub fora
+da autoridade de repositório/Sprint do Claude — CLAUDE.md §6.6 Classe E). Confirmado por evidência
+direta nesta Sprint.
+
+**Estado pré-transferência (registrado na Sprint 33.1, reconfirmado aqui):** `hmg` = `acce26a`
+(depois `fc8fd03` após o merge da Sprint 33.1), `main` = `a3c7dbe`, `prd` = `5da0001`. Nenhum PR
+aberto, nenhum workflow run ativo no momento da verificação.
+
+**Verificação pós-transferência (evidência via `gh api`, 2026-08-27):**
+
+| Item | Resultado |
+|---|---|
+| Coordenada canônica | `gh api repos/DS-Asyst/BeeDay` → `full_name: DS-Asyst/BeeDay`, `default_branch: main`, `visibility: public`, `archived: false` |
+| Redirecionamento da coordenada antiga | `gh api repos/tiagoarrigoni/BeeDay` resolve para `DS-Asyst/BeeDay` (redirect padrão do GitHub) |
+| Branches/SHAs | `hmg=fc8fd03…`, `main=a3c7dbe…`, `prd=5da0001…` — idênticos aos SHAs pré-transferência; nenhuma perda de histórico |
+| Tags | `v1.0.0-foundation` presente |
+| Issues/PRs da EPIC 33 | #361 (EPIC), #362–#380 (Sprints), PR #381 (merged) — todos presentes e íntegros sob `DS-Asyst/BeeDay` |
+| Rulesets | `Protect HMG` (20580759) e `Protect Main` (20608232), `enforcement: active`, `source: DS-Asyst/BeeDay`, mesmos required status checks (`Pull Request Validation`; `Release Quality Gate` + `Validate Promotion`) |
+| Actions policy | `enabled: true`, `allowed_actions: all` — idêntico |
+| Workflows registrados | `ci.yml`, `codeql.yml`, `deploy-hmg.yml`, `deploy-prd.yml`, `release-quality-gate.yml`, `validate-promotion.yml`, `verify-hmg.yml` — todos `active` |
+| Environments | `homologation` (8 secrets pelo nome, idênticos: `BEEDAY_ALLOWED_HOSTS`, `BEEDAY_APP_CONNECTION`, `BEEDAY_HMG_ALLOWED_RECIPIENTS`, `BEEDAY_MIGRATOR_CONNECTION`, `BEEDAY_PUBLIC_BASE_URL`, `BEEDAY_RESEND_API_KEY`, `BEEDAY_RESEND_FROM_ADDRESS`, `BEEDAY_RESEND_FROM_NAME`), `copilot` — nenhum valor foi lido |
+| Webhooks / Deploy keys | Nenhum em ambos (`[]`) |
+
+Nenhum valor de secret foi lido ou exposto em nenhuma etapa desta verificação.
+
+**Remote local:** `origin` atualizado de `https://github.com/tiagoarrigoni/BeeDay.git` para
+`https://github.com/DS-Asyst/BeeDay.git`.
+
+**Referências de coordenada corrigidas no código rastreado** (link público real, não documentação
+histórica de Sprint/ADR — que permanece imutável por registrar evidência do estado no momento em
+que foi coletada):
+
+- `src/BeeDay.Web/Components/Features/Institutional/Pages/Contact.razor` — link de suporte do
+  GitHub atualizado para `https://github.com/DS-Asyst/BeeDay`.
+- `tests/BeeDay.Web.Tests/Components/Institutional/InstitutionalPagesTests.cs`,
+  `tests/BeeDay.Web.Tests/Components/Layout/AppFooterTests.cs`,
+  `tests/BeeDay.E2E.Tests/InstitutionalPagesTests.cs` — asserções de `href` atualizadas para
+  acompanhar o link real da página (nenhuma asserção foi enfraquecida).
+
+Documentação histórica de Sprints/ADRs anteriores (`docs/epics/20-*`, `docs/epics/25-*`,
+`docs/epics/28-*`, `docs/deployment/06,08,11,12-*`) que referencia `tiagoarrigoni/BeeDay` em
+comandos `gh api` executados no passado ou em links de PR históricos **não foi alterada** —
+constitui evidência histórica imutável (o GitHub redireciona as URLs antigas) e reescrevê-la
+apenas para refletir a nova coordenada violaria a regra de que registros históricos não são
+reescritos para refletir estado posterior.
+
+**Validação (Claude-safe, sem LocalDB):**
+
+- `dotnet format BeeDay.slnx --verify-no-changes` — limpo.
+- `dotnet build BeeDay.slnx -c Release` — sucesso, 0 avisos/erros.
+- `dotnet test tests/BeeDay.Domain.Tests` — 121 aprovados.
+- `dotnet test tests/BeeDay.Application.Tests` — 119 aprovados.
+- `dotnet test tests/BeeDay.Web.Tests --filter InstitutionalPagesTests|AppFooterTests` — 29
+  aprovados (cobre diretamente as asserções alteradas).
+- `git diff --check` — limpo.
+
+**Disposição:** GO. `DS-Asyst/BeeDay` é a coordenada canônica operacionalmente comprovada após o
+ciclo normal branch → PR → `hmg` → HMG Deployment → HMG Verification (evidência registrada abaixo
+após o merge desta Sprint).
