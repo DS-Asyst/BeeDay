@@ -1506,12 +1506,17 @@ CSS inspection").
   `min-height: 3rem` (48px) sob `@media (pointer: coarse)`, e `docs/design-system/04-forms.md` §4
   confirma o mesmo padrão para inputs de formulário via `--beeday-control-height-md`. Cobertura
   ampla, não um fork por página.
-- **Achado secundário, fora do escopo desta Sprint:** `--beeday-control-height-sm` (2.5rem/40px,
-  declarado em `polish.css`) não é consumido em nenhum lugar do código (`grep` por
-  `var(--beeday-control-height-sm)` sem nenhuma ocorrência) — token morto, não um defeito
-  responsivo/touch-target (nada o usa, então nada viola 44px por causa dele). Candidato de limpeza
-  para a Sprint 32.19 (Front-End Code Refinement & Component Consolidation), não corrigido aqui —
-  fora do escopo desta Sprint e do tipo de achado que ela cobre.
+- **Correção pós-review (Sourcery, PR #352):** o rascunho original desta auditoria classificou
+  `--beeday-control-height-sm` como "token morto" por `grep` não ter encontrado consumidor em
+  `src/BeeDay.Web/wwwroot/css/*.css` — busca incompleta, restrita aos stylesheets globais e cega a
+  CSS *scoped* de componente (`.razor.css`). `--beeday-control-height-sm` (2.5rem/40px) **é**
+  consumido por `ProjectWorkspace.razor.css` em `.project-workspace__list-toggle`, cujo
+  `min-height` padrão de desktop é 40px — sob `@media (pointer: coarse)` o mesmo arquivo já eleva
+  esse valor para `--beeday-control-height-md` (3rem/48px), seguindo exatamente o mesmo padrão de
+  elevação por ponteiro já confirmado em `polish.css`/`forms.css`. Não é token morto nem defeito de
+  touch-target — reforça a conclusão da auditoria (estratégia de touch-target ainda mais
+  amplamente aplicada do que o primeiro levantamento mostrou), só a alegação de "não usado" estava
+  errada. Nenhuma limpeza é candidata aqui; nada a rotear para 32.19.
 
 **Conclusão:** nenhum defeito de código/CSS responsivo foi encontrado com evidência suficiente para
 correção segura sem verificação visual real. Consistente com o limite explícito da Sprint, nenhuma
