@@ -33,9 +33,11 @@ no momento da decisão. Reescrever essas referências destruiria o valor de regi
 | [`ADR-005-json-legacy-removal.md`](ADR-005-json-legacy-removal.md) | Remoção completa do pipeline JSON legado e de `LevelUpData`. | `VALID` — supersede parte de [ADR-004](ADR-004-sql-server-runtime-cutover.md) (ver acima); confirmado sem nenhuma referência a JSON legado em código de produção atual. |
 | [`ADR-006-transactional-email-localization-boundary.md`](ADR-006-transactional-email-localization-boundary.md) | Culture de e-mail transacional transportada via `User.Language`, catálogo `.resx` estreito Infrastructure-owned, sem `IStringLocalizer`/estado global. | `VALID` — confirmado contra `docs/infrastructure/06-transactional-email.md` e `IdentityEmailComposer.cs` atual. |
 | [`ADR-007-in-process-application-contracts.md`](ADR-007-in-process-application-contracts.md) | Contratos (repositórios + read services) são interfaces internas de `BeeDay.Application`, não um projeto `Contracts` separado — forma final que substitui o mecanismo do ADR-001. | `VALID` — documenta a implementação já em produção desde a Sprint 14.6; confirmado contra os 4 `.csproj` de `src/*` e `PersistenceContractBoundaryTests`. |
+| [`ADR-008-frontend-lab-architecture-boundaries.md`](ADR-008-frontend-lab-architecture-boundaries.md) | `DS-Asyst/beeday-frontend-lab` (EPIC 33) é repositório/solução separados de `DS-Asyst/BeeDay`, sem `ProjectReference`/pacote/submodule compartilhado; extração é sempre cópia/adaptação de código-fonte (COPY/ADAPT/MOCK/EXCLUDE), nunca reuso binário. | `VALID` — decisão nova, ainda não implementada em código (Sprint 33.3, extração começa na Sprint 33.6). |
 
 ## Ordem de leitura recomendada
 
-Ordem numérica (001 → 007) — cada ADR referencia explicitamente os anteriores que ainda são
+Ordem numérica (001 → 008) — cada ADR referencia explicitamente os anteriores que ainda são
 válidos. O ADR-007 deve ser lido em conjunto com o ADR-001: juntos registram a decisão original e a
-forma final efetivamente adotada.
+forma final efetivamente adotada. O ADR-008 é independente dos demais — regula um repositório
+separado (`DS-Asyst/beeday-frontend-lab`, EPIC 33), não uma decisão interna ao `BeeDay.Web`.
