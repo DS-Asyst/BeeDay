@@ -70,9 +70,10 @@ Nenhum achado `EXP32-Fxxx` foi consumido ou alterado; nenhum código de produto 
   Único ajuste necessário: `#251` referenciava esta Sprint só pelo título (`Depends on: Sprint
   32.6.1 — Autonomous Validation & E2E Gate Separation`), sem número — corrigido para `(#342)` após
   esta Issue ser criada.
-- O split de CI já é exatamente o exigido: `ci.yml` (Fast Gate, PRs `sprint/*→hmg`) roda somente
-  `Domain.Tests`+`Application.Tests`; `release-quality-gate.yml` (fronteira `hmg→main`) roda os 5
-  projetos completos, incluindo `BeeDay.E2E.Tests` e Format — confirmado por leitura direta dos dois
+- O split de CI já é exatamente o exigido: `ci.yml` (Fast Gate — `pull_request: branches: [hmg]`,
+  sem filtro de branch de origem, portanto todo PR destinado a `hmg`, não só `sprint/*→hmg`) roda
+  somente `Domain.Tests`+`Application.Tests`; `release-quality-gate.yml` (fronteira `hmg→main`) roda
+  os 5 projetos completos, incluindo `BeeDay.E2E.Tests` e Format — confirmado por leitura direta dos dois
   workflows e por `docs/testing/01-testing-strategy.md` §7 (reconciliado na Sprint 31.11). Nenhuma
   mudança de workflow foi necessária ou aplicada.
 - `CLAUDE.md` é um ativo de governança **local ao ambiente**, não rastreado neste repositório desde
