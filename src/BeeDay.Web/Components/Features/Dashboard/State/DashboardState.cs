@@ -99,6 +99,26 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
 
     public int FilteredItems => FilteredHabits.Count() + FilteredTasks.Count() + FilteredTodos.Count() + FilteredProjects.Count();
 
+    private bool IsSearchActive => !string.IsNullOrWhiteSpace(search);
+
+    // EXP32-F013 (Sprint 32.8): distinguishes "the search/filter narrowed an active collection to
+    // zero" from "this collection genuinely never had any active items" — the two previously
+    // rendered the identical empty-state text, so a user searching for an unmatched term could
+    // wrongly conclude they had no Tasks/To-Dos/Projects/Habits at all.
+    public bool HabitsFilteredToZero =>
+        IsSearchActive && !FilteredHabits.Any() && (data?.Habits.Count ?? 0) > 0;
+
+    public bool ActiveTasksFilteredToZero =>
+        IsSearchActive && !FilteredTasks.Any(item => !item.Completed) && (data?.Tasks.Count(item => !item.Completed) ?? 0) > 0;
+
+    public bool ActiveTodosFilteredToZero =>
+        (IsSearchActive || selectedProjectId is not null)
+            && !FilteredTodos.Any(item => !item.Completed)
+            && AllTodos.Count(item => !item.Completed) > 0;
+
+    public bool ActiveProjectsFilteredToZero =>
+        IsSearchActive && !FilteredProjects.Any(item => !item.Completed) && (data?.Projects.Count(item => !item.Completed) ?? 0) > 0;
+
     public Task InitializeAsync() => initializationTask ??= InitializeCoreAsync();
 
     private async Task InitializeCoreAsync()

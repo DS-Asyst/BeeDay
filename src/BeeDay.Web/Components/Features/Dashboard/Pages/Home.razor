@@ -23,8 +23,8 @@ else if (State.Data?.Profile.HasProfile == true)
             <div class="dashboard-grid">
                 @{ var habits = State.FilteredHabits.ToList(); }
                 <DashboardColumn Title="@Localizer["HabitsColumnTitle"]"
-                                 EmptyTitle="@Localizer["HabitsEmptyTitle"]"
-                                 EmptyDescription="@Localizer["HabitsEmptyDescription"]"
+                                 EmptyTitle="@(State.HabitsFilteredToZero ? Localizer["NoFilterResultsTitle"] : Localizer["HabitsEmptyTitle"])"
+                                 EmptyDescription="@(State.HabitsFilteredToZero ? Localizer["NoFilterResultsDescription"] : Localizer["HabitsEmptyDescription"])"
                                  EmptyIcon="BeeDayIconName.Habit"
                                  SingularLabel="@Localizer["HabitSingular"]"
                                  ActiveStateLabel="@Localizer["HabitsActiveStateLabel"]"
@@ -53,8 +53,8 @@ else if (State.Data?.Profile.HasProfile == true)
                     var completedTasks = filteredTasks.Where(item => item.Completed).ToList();
                 }
                 <DashboardColumn Title="@Localizer["TasksColumnTitle"]"
-                                 EmptyTitle="@Localizer["TasksEmptyTitle"]"
-                                 EmptyDescription="@Localizer["TasksEmptyDescription"]"
+                                 EmptyTitle="@(State.ActiveTasksFilteredToZero ? Localizer["NoFilterResultsTitle"] : Localizer["TasksEmptyTitle"])"
+                                 EmptyDescription="@(State.ActiveTasksFilteredToZero ? Localizer["NoFilterResultsDescription"] : Localizer["TasksEmptyDescription"])"
                                  EmptyIcon="BeeDayIconName.RecurringTask"
                                  SingularLabel="@Localizer["TaskSingular"]"
                                  ActiveStateLabel="@Localizer["TasksActiveStateLabel"]"
@@ -94,8 +94,8 @@ else if (State.Data?.Profile.HasProfile == true)
                     var completedTodos = filteredTodos.Where(item => item.Completed).ToList();
                 }
                 <DashboardColumn Title="@Localizer["TodosColumnTitle"]"
-                                 EmptyTitle="@Localizer["TodosEmptyTitle"]"
-                                 EmptyDescription="@Localizer["TodosEmptyDescription"]"
+                                 EmptyTitle="@(State.ActiveTodosFilteredToZero ? Localizer["NoFilterResultsTitle"] : Localizer["TodosEmptyTitle"])"
+                                 EmptyDescription="@(State.ActiveTodosFilteredToZero ? Localizer["NoFilterResultsDescription"] : Localizer["TodosEmptyDescription"])"
                                  EmptyIcon="BeeDayIconName.Todo"
                                  SingularLabel="@Localizer["TodoSingular"]"
                                  ActiveStateLabel="@Localizer["TodosActiveStateLabel"]"
@@ -134,8 +134,8 @@ else if (State.Data?.Profile.HasProfile == true)
                     var completedProjects = filteredProjects.Where(item => item.Completed).ToList();
                 }
                 <DashboardColumn Title="@Localizer["ProjectsColumnTitle"]"
-                                 EmptyTitle="@Localizer["ProjectsEmptyTitle"]"
-                                 EmptyDescription="@Localizer["ProjectsEmptyDescription"]"
+                                 EmptyTitle="@(State.ActiveProjectsFilteredToZero ? Localizer["NoFilterResultsTitle"] : Localizer["ProjectsEmptyTitle"])"
+                                 EmptyDescription="@(State.ActiveProjectsFilteredToZero ? Localizer["NoFilterResultsDescription"] : Localizer["ProjectsEmptyDescription"])"
                                  EmptyIcon="BeeDayIconName.Project"
                                  SingularLabel="@Localizer["ProjectSingular"]"
                                  ActiveStateLabel="@Localizer["ProjectsActiveStateLabel"]"

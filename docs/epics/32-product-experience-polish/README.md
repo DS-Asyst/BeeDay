@@ -738,7 +738,7 @@ como "candidato a duplicação, fora do escopo de apresentação" da Sprint que 
 | Device | Shared |
 | Accessibility Impact | Partial (a mesma mensagem de "vazio" é lida pelo leitor de tela em dois contextos semanticamente diferentes) |
 | Owning Sprint | 32.8 (Search, Filters & Sorting) — cross-ref 32.10 (Empty States & First-Use Experience) |
-| State | DISCOVERED |
+| State | **FIXED** — Sprint 32.8 |
 
 **Interação:** digitar um termo de busca no campo de busca do Daily que corresponda a itens em apenas
 uma das 4 colunas.
@@ -758,10 +758,24 @@ por coluna, sem um segundo texto para o caso "zero resultados de busca/filtro".
 limpar, contagem "1" em Habits) mostrando as colunas Tasks ("0"), To-Dos ("0") e Projects ("0") com o
 texto de estado vazio idêntico ao observado antes de qualquer item existir.
 
-**Resolution:** não aplicável — `DISCOVERED`.
+**Resolution (Sprint 32.8):** `DashboardState` ganhou quatro propriedades computadas
+(`HabitsFilteredToZero`, `ActiveTasksFilteredToZero`, `ActiveTodosFilteredToZero`,
+`ActiveProjectsFilteredToZero`) que distinguem "a coleção ativa tem itens, mas o
+filtro/busca atual não corresponde a nenhum" de "a coleção nunca teve nenhum item ativo" —
+comparando a contagem pós-filtro (`FilteredHabits`/`FilteredTasks`/etc.) contra a contagem
+não-filtrada equivalente (`data.Habits`/`data.Tasks`/etc.). `ActiveTodosFilteredToZero` cobre tanto
+a busca textual quanto o `ProjectContextFilter` (`selectedProjectId`), já que ambos narrowam a
+mesma coluna To-Dos. `Home.razor` consome essas propriedades para escolher entre o par
+`EmptyTitle`/`EmptyDescription` original da coluna e o novo par compartilhado
+`NoFilterResultsTitle`/`NoFilterResultsDescription` (localizado en-US/pt-BR/neutro) — nenhum novo
+parâmetro foi adicionado a `DashboardColumn`, que continua agnóstico a filtro/busca.
 
-**Regression Protection:** a definir pela Sprint 32.8 (candidato: `EmptyLabel` condicional por coluna
-quando um filtro/busca está ativo, com teste de componente cobrindo os dois textos).
+**Regression Protection:** `DashboardStateTests` — `HabitsFilteredToZero_IsTrueOnlyWhenSearchHidesAnExistingHabit`,
+`HabitsFilteredToZero_IsFalseWhenThereWasNeverAnyHabitAtAll`,
+`ActiveTasksFilteredToZero_IsTrueOnlyWhenSearchHidesAnExistingActiveTask`,
+`ActiveTodosFilteredToZero_IsTrueWhenTheProjectContextFilterHidesEveryActiveTodo`,
+`ActiveProjectsFilteredToZero_IsTrueOnlyWhenSearchHidesAnExistingActiveProject` — todos
+database-free, exercitando `DashboardState` diretamente via um `ISender` fake.
 
 ---
 
@@ -1325,7 +1339,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.5 — Forms & Input Experience | EXP32-F005 — `FIXED` nesta Sprint; EXP32-F007 — `FIXED` nesta Sprint; EXP32-F021 — novo, `FIXED` nesta Sprint; EXP32-F006 (cross-ref), EXP32-F011 (cross-ref), EXP32-F012 (cross-ref) |
 | 32.6 — Modal & Dialog Experience | EXP32-F022, EXP32-F023 — ambos novos, `FIXED` nesta Sprint; EXP32-F024 — novo, `DISCOVERED` (não roteada — latente, sem Sprint dona); EXP32-F025 — novo, `ACCEPTED` (exceção documentada); EXP32-F002 (cross-ref, não corrigido — pertence à 32.13) |
 | 32.7 — Lists, Cards & Collection Patterns | EXP32-F003, EXP32-F004 — ambos `FIXED` nesta Sprint |
-| 32.8 — Search, Filters & Sorting | EXP32-F013 |
+| 32.8 — Search, Filters & Sorting | EXP32-F013 — `FIXED` nesta Sprint |
 | 32.9 — Loading & Perceived Performance | gap de evidência registrado em §9 (sem achado novo) |
 | 32.10 — Empty States & First-Use Experience | EXP32-F013 (cross-ref) |
 | 32.11 — Errors, Recovery & User Feedback | EXP32-F007 (cross-ref) |
