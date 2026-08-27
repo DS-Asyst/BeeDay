@@ -2,13 +2,14 @@
 @inherits LayoutComponentBase
 
 <div class="beeday-app">
+    <SkipToContentLink />
     <MobileHeader IsNavOpen="@_isMobileNavOpen" OnToggleNav="ToggleMobileNav" />
 
     <div class="beeday-shell">
         <DesktopSidebar />
 
         <div class="beeday-workspace">
-            <main class="beeday-main beeday-main--authenticated">
+            <main id="main-content" class="beeday-main beeday-main--authenticated">
                 <BeeDayErrorBoundary>@Body</BeeDayErrorBoundary>
             </main>
         </div>

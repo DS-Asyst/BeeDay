@@ -5,6 +5,7 @@
                   TitleId="todo-editor-title"
                   SubmitLabel="@(IsEditing ? Localizer["SaveButtonLabel"] : Localizer["CreateButtonLabel"])"
                   ShowDelete="IsEditing"
+                  FallbackFocusSelector="@FallbackFocusSelector"
                   OnSubmit="Save"
                   OnCancel="Cancel"
                   OnDelete="RequestDelete">

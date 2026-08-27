@@ -27,6 +27,26 @@
     border: 0;
 }
 
+/* EXP32-F008 (Sprint 32.13): hidden the same way as .beeday-visually-hidden until focused - a
+   skip link only needs to exist for keyboard users, who reveal it by tabbing to it first. */
+.skip-to-content-link {
+    position: absolute;
+    top: -3rem;
+    left: var(--beeday-spacing-md);
+    z-index: var(--beeday-z-modal-raised);
+    padding: var(--beeday-spacing-sm) var(--beeday-spacing-smd);
+    border-radius: var(--beeday-radius-md);
+    background: var(--beeday-color-brand-primary);
+    color: var(--beeday-color-text-inverse);
+    font-weight: var(--beeday-font-weight-bold);
+    text-decoration: none;
+    transition: top var(--beeday-transition-fast);
+}
+
+.skip-to-content-link:focus-visible {
+    top: var(--beeday-spacing-md);
+}
+
 /* Link foundation — no underline by default (03_DESIGN_DECISIONS.md §6); states stay identifiable
    through color/weight and a visible focus-visible outline instead of text-decoration. */
 .beeday-link {

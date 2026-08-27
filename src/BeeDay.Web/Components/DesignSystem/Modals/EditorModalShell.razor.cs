@@ -11,7 +11,7 @@ public partial class EditorModalShell : IAsyncDisposable
     // here rather than a second JS file, since both are "move focus somewhere sensible within this
     // dialog" concerns. Sprint 32.5 (EXP32 Ledger): failed validation left focus on the submit
     // button instead of the first invalid field.
-    private const string FocusModulePath = "./js/beeday-dialog-focus.js?v=20260822-1";
+    private const string FocusModulePath = "./js/beeday-dialog-focus.js?v=20260827-1";
 
     private readonly string _dialogId = $"beeday-editor-dialog-{Guid.NewGuid():N}";
 
@@ -26,6 +26,7 @@ public partial class EditorModalShell : IAsyncDisposable
     [Parameter] public bool ShowDelete { get; set; }
     [Parameter] public bool IsBusy { get; set; }
     [Parameter] public string? ErrorMessage { get; set; }
+    [Parameter] public string? FallbackFocusSelector { get; set; }
     [Parameter] public RenderFragment? HeroContent { get; set; }
     [Parameter] public RenderFragment? BodyContent { get; set; }
     [Parameter] public RenderFragment? SecondaryAction { get; set; }

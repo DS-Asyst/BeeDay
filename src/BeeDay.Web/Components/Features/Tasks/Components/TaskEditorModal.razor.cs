@@ -15,6 +15,7 @@ public partial class TaskEditorModal
     [Parameter] public EventCallback<TaskEditorModel> OnSave { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public EventCallback OnDelete { get; set; }
+    [Parameter] public string? FallbackFocusSelector { get; set; }
     private bool showDeleteConfirmation;
     private Task Save() => OnSave.InvokeAsync(Model);
     private Task Cancel() { showDeleteConfirmation = false; return OnCancel.InvokeAsync(); }
