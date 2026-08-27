@@ -503,4 +503,11 @@ copiado, nenhum circuit-handler real é acionado.
 
 `FE33-039`–`FE33-052` movidos de `MAPPED` para `VERIFIED`.
 
-**Disposição:** GO. Sprint 33.10 (Localization Contract) pode prosseguir.
+**Correção nesta Sprint:** a disposição original registrada aqui nomeava a próxima Sprint como
+"Sprint 33.10 (Localization Contract)" — título incorreto. O título canônico real, confirmado pela
+Issue #371 (`DS-Asyst/BeeDay`), é **Sprint 33.10 — Mock Data & UI State Engine**. Isso não invalida a
+atribuição de `FE33-104` (Localization) a 33.10 no Ledger — a Issue #371 lista explicitamente "Support
+locale selection ... where useful" entre seu Required Work, então a extração de localização é parte
+legítima do escopo mais amplo do motor de cenário/estado, não uma Sprint separada mal-numerada.
+
+**Disposição:** GO. Sprint 33.10 (Mock Data & UI State Engine) pode prosseguir.
