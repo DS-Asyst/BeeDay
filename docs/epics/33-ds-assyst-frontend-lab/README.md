@@ -579,3 +579,63 @@ Português do switcher como `aria-pressed="true"`.
 `FE33-104` movido de `MAPPED` para `VERIFIED`.
 
 **Disposição:** GO. Sprint 33.11 (Public Pages Extraction) pode prosseguir.
+
+## 15. Sprint 33.11 — Public Pages Extraction (FE33-053..076)
+
+**Entregue no repositório Lab:** PR #6 (`DS-Asyst/beeday-frontend-lab`), branch
+`sprint/33.11-public-pages-extraction`, merge `d86dfa9`. `Lab CI` verde antes do merge. A maior
+Sprint de extração da EPIC até aqui — 24 itens do Ledger, ~40 arquivos reais (12 páginas
+institucionais + 4 templates + shell/nav compartilhados, a Home pública, Typography Guidelines, e a
+árvore de 20 rotas `/experience-system/*`).
+
+**Reversão de política de localização, só para os arquivos novos desta Sprint:** as Sprints 33.8/33.9
+estabeleceram "remover todo `IStringLocalizer`" porque o Lab não tinha pipeline de localização. A
+Issue #372 desta Sprint pede explicitamente (item 3) "Represent current localized content" — o
+pipeline já existe desde a Sprint 33.10. Portanto, todo arquivo novo desta Sprint **mantém**
+`IStringLocalizer<T>` exatamente como a produção injeta, e 4 novas famílias de catálogo `.resx` foram
+copiadas verbatim, espelhando a convenção da Sprint 33.10 (classe marcadora + `.resx`/`.en-US.resx`/
+`.pt-BR.resx`, na mesma pasta relativa da produção): `HomeResources`, `BrandTypographyResources`
+(ambas em `Components/Pages/Public/`), `InstitutionalResources` (`Components/Pages/Institutional/`),
+`ExperienceSystemResources` (`Components/Pages/ExperienceSystem/`). Nenhum arquivo das Sprints
+33.8/33.9/33.10 foi retroadaptado — a reversão vale só para o que esta Sprint entrega.
+
+**Retirada do shell bootstrap da Sprint 33.5:** `Components/Pages/Home.razor` (e seu
+`HomePageTests.cs`), o placeholder cujo próprio comentário dizia "exists to become" conteúdo real,
+foi removido e substituído pela Home real (`Components/Pages/Public/Home.razor`) — mantê-lo teria
+gerado conflito de rota `@page "/"` em tempo de compilação.
+
+**Correções aplicadas ao Ledger nesta Sprint** (apenas às linhas FE33-053..076):
+
+1. **FE33-057 (`Contact.razor`)** — reclassificado de COPY para ADAPT: confirma que o link GitHub
+   real (`https://github.com/DS-Asyst/BeeDay`) vive de fato aqui — validando a suposição de drift já
+   registrada em FE33-048 (Sprint 33.9), que apontava este arquivo (fora de escopo naquela Sprint)
+   como a origem provável. Renderizado como `<span>` inerte, mesmo tratamento de FE33-048.
+2. **FE33-076 (composição `ExperienceSystem`)** — reclassificado de ADAPT para COPY: a dependência
+   `NavigationManager` listada originalmente não corresponde ao código real — nenhum componente sob
+   `Components/Features/ExperienceSystem/` injeta `NavigationManager`; o destaque de navegação ativa
+   usa parâmetros `Current`/`CurrentHref` explícitos fixados por cada página, não resolução em tempo
+   real pelo router.
+3. **FE33-067 (`InstitutionalPageShell` e afins)** — dependência `NavigationManager` confirmada como
+   real e precisa (ao contrário de FE33-076) — `InstitutionalPageShell` de fato a injeta para computar
+   o href ativo. Nenhuma correção necessária aqui, registrado por contraste com o item 2.
+
+**Cenário engine:** não utilizado nesta Sprint. Nenhuma das ~40 páginas tem estados Empty/Loading/
+Error/NoResults na produção — é conteúdo editorial/institucional fixo, conforme o próprio limite de
+escopo da Issue #372 ("Use shared scenario engine only where state variation is needed").
+
+**Validação (Lab, sem LocalDB):**
+
+- `dotnet format BeeDayLab.slnx --verify-no-changes` — limpo.
+- `dotnet build BeeDayLab.slnx -c Release --warnaserror` — 0 avisos/erros.
+- `dotnet test BeeDayLab.slnx -c Release` — 259/259 aprovados (6 guardas de arquitetura + 253
+  Web.Tests, incluindo as novas `PublicPagesTests.cs`, `InstitutionalPagesTests.cs`,
+  `ExperienceSystemPagesTests.cs`, 4 novas teorias de resx em `LocalizationResourceTests.cs`, e a
+  nova `TestCultureScope.cs`; `HomePageTests.cs` retirado junto com o shell bootstrap).
+- `dotnet run` verificado localmente: `/`, `/mission`, `/contact`, `/experience-system`,
+  `/experience-system/brand`, `/brand/typography` e amostragem das demais rotas institucionais/
+  ExperienceSystem, todos `HTTP 200`; `/?authenticated=true` confirmado renderizando o CTA
+  autenticado da Home; `/contact` confirmado sem emitir a URL real do GitHub.
+
+`FE33-053`–`FE33-076` movidos de `MAPPED` para `VERIFIED`.
+
+**Disposição:** GO. Sprint 33.12 (Identity & Account Visual States) pode prosseguir.
