@@ -275,7 +275,7 @@ renderização inicial.
 | Device | Shared (teclado) |
 | Accessibility Impact | Yes |
 | Owning Sprint | 32.13 (Focus, Keyboard & Interaction Accessibility) — cross-ref 32.6 (Modal & Dialog Experience) |
-| State | DISCOVERED |
+| State | **FIXED** — Sprint 32.13 |
 
 **Interação:** abrir "+ Activity" → escolher "Habit" no menu (que fecha o menu e abre o editor) →
 fechar o editor com `Escape`.
@@ -297,13 +297,38 @@ a documentação já antecipava sem propor destino.
 `Escape` retornou `<body>...` (a raiz do documento), confirmado duas vezes (criação de Habit e
 sequência completa de criação de Task/Project).
 
-**Resolution:** não aplicável — `DISCOVERED`.
+**Resolution (Sprint 32.13):** `DialogFocusScope` (e o módulo `beeday-dialog-focus.js` que ele
+carrega) ganham um terceiro parâmetro opcional, `FallbackFocusSelector` — um seletor CSS resolvido
+em `deactivate()` só quando `previouslyFocused` não está mais `.isConnected` **e** não existe escopo
+pai na pilha (a mesma condição que hoje cai silenciosamente para `<body>`). `EditorModalShell` repassa
+o parâmetro; os quatro editores do Dashboard (`HabitEditorModal`/`TaskEditorModal`/`TodoEditorModal`/
+`ProjectEditorModal`) o expõem e `Home.razor` passa `.filter-bar__create-button` — o próprio botão "+
+Activity", que sobrevive ao fechamento do menu de criação. Editar um item existente continua
+restaurando o foco no card real (não afetado — `previouslyFocused` permanece conectado nesse caso;
+o fallback só age quando o trigger real já foi desmontado).
 
-**Regression Protection:** a definir pela Sprint 32.13 (candidato: `DialogFocusScope` aceitar/registrar
-o botão "+ Activity" como trigger persistente do menu de criação, já que ele sobrevive ao fechamento
-do menu).
+**Bug real encontrado durante a implementação (fora do achado original):** o primeiro rascunho desta
+correção escreveu `FallbackFocusSelector="FallbackFocusSelector"` (sem `@`) nos cinco arquivos que
+repassam o parâmetro — em Razor, um atributo de componente do tipo `string` sem `@` é um **literal**,
+não uma expressão C#; o JS teria recebido a string literal `"FallbackFocusSelector"` em vez do
+seletor real. Um teste (`FallbackFocusSelector_IsPassedThroughToTheFocusScopeActivateCall`, via
+`bunit`'s `JSInterop.Invocations`) capturou o erro antes do merge. Auditoria adicional encontrou o
+**mesmo erro já mesclado em `hmg` pela Sprint 32.11** — `TransactionFormModal`/`TagFormModal` escreviam
+`ErrorMessage="ErrorMessage"`, então o alerta inline do Wallet (32.11) nunca mostrava a mensagem real,
+só o texto literal "ErrorMessage". Corrigido nos sete locais nesta mesma Sprint, com dois testes de
+regressão dedicados (`WalletComponentTests.TransactionFormModal_ForwardsTheActualErrorMessageValue_NotTheLiteralParameterName`
+e o equivalente de Tag) — correção de correção legítima dentro da mesma sessão autônoma, não
+invenção de escopo (Issue #244 §4.5 exige restaurar entrega verde antes de continuar quando um
+defeito causado pela própria EPIC é encontrado).
 
-**Nota da Sprint 32.6 (cross-ref, sem fix):** confirmado por leitura de código que o contrato atual não
+**Regression Protection:** `EditorModalShellTests.FallbackFocusSelector_IsPassedThroughToTheFocusScopeActivateCall`;
+`WalletComponentTests.TransactionFormModal_ForwardsTheActualErrorMessageValue_NotTheLiteralParameterName`,
+`TagFormModal_ForwardsTheActualErrorMessageValue_NotTheLiteralParameterName` — todos database-free,
+via `bunit`'s rastreamento de invocações JS Interop. O comportamento de foco real em runtime
+(`document.activeElement` após `Escape`) permanece evidência de navegador/HMG, não executável pelo
+Claude — consistente com o Required Work #8 desta Issue.
+
+**Nota da Sprint 32.6 (cross-ref, histórico):** confirmado por leitura de código que o contrato atual não
 tem como o chamador comunicar "não há trigger persistente" a `DialogFocusScope` — `deactivate(id)` em
 `beeday-dialog-focus.js` só sabe degradar para o escopo pai na pilha (`stack`) quando
 `previouslyFocused` deixa de estar `.isConnected`; não existe um segundo parâmetro para um trigger de
@@ -556,7 +581,7 @@ the `oninvalid` handler's localized message text for both fields.
 | Device | Shared (teclado/leitor de tela) |
 | Accessibility Impact | Yes |
 | Owning Sprint | 32.13 (Focus, Keyboard & Interaction Accessibility) |
-| State | DISCOVERED |
+| State | **FIXED** — Sprint 32.13 |
 
 **Interação:** um usuário de teclado, já em uma página carregada com navegação lateral (shell
 autenticado) ou cabeçalho público, tenta pular diretamente para o conteúdo principal sem tabular por
@@ -574,9 +599,18 @@ porque é exatamente o tipo de defeito de interação que o Interaction Quality 
 **Evidência:** achado de código/documentação já verificado — `docs/ux/02-accessibility.md` §4,
 verificação original por busca direta em `src/BeeDay.Web/`.
 
-**Resolution:** não aplicável — `DISCOVERED`.
+**Resolution (Sprint 32.13):** novo componente compartilhado `SkipToContentLink` (link para
+`#main-content`, oculto via a mesma técnica de `.beeday-visually-hidden` até receber foco, exibido
+via `.skip-to-content-link:focus-visible`) adicionado como primeiro elemento focável de
+`MainLayout`/`PublicLayout` — os dois layouts com navegação persistente real a pular
+(`DesktopSidebar`/`PublicHeader`); `EditorialLayout`/`OnboardingLayout` não têm navegação persistente
+equivalente (nav embutida na própria hero ou inexistente) e não foram alterados. `id="main-content"`
+adicionado ao `<main>` de ambos os layouts alterados. Rótulo localizado en-US/pt-BR/neutro via
+`LayoutResources` (mesmo padrão de `DesktopSidebar`/`MobileHeader`).
 
-**Regression Protection:** a definir pela Sprint 32.13.
+**Regression Protection:** `PublicLayoutTests.SkipLinkTargetsTheRenderedMainContentRegion` — confirma
+`href="#main-content"` e `<main id="main-content">` no mesmo render. Comportamento real de foco
+visual/teclado permanece evidência de navegador/HMG.
 
 ---
 
@@ -625,6 +659,14 @@ primeira vez.
 restantes de `text-muted` em texto normal e migração ou promoção documentada do token; incluir
 `/profile` no inventário e, se prático, na cobertura axe existente).
 
+**Nota da Sprint 32.13 (permanece `DISCOVERED`):** não corrigido nesta Sprint. O candidato de
+correção exige um inventário completo — não amostral — de todo uso de `text-muted` em texto normal
+(não grande/UI) através de todo `src/BeeDay.Web/`, seguido de decisão por local (migrar para
+`text-secondary` ou promover o próprio token) — um escopo de auditoria genuinamente maior que os
+demais achados desta Sprint (F002/F008/F020), que tinham um candidato de correção único e sistêmico
+já identificado. Priorizado abaixo desses três dentro do tempo desta sessão; permanece roteado a
+32.13 até ser fechado por uma execução futura desta mesma Sprint/Epic.
+
 ---
 
 ### EXP32-F010 — Cobertura incompleta de fallback local para `prefers-reduced-motion`
@@ -660,6 +702,11 @@ owners de convergência, ainda sem Sprint que os feche).
 
 **Regression Protection:** a definir pela Sprint 32.13 (candidato: fallback local nos 8 stylesheets
 restantes, com teste de regressão por stylesheet).
+
+**Nota da Sprint 32.13 (permanece `DISCOVERED`):** não corrigido nesta Sprint — mesma razão de
+proporcionalidade de escopo registrada em `EXP32-F009`: exige tocar 8 stylesheets individualmente
+(um por área do produto, cross-ref 32.15/32.5) mais um teste de regressão por arquivo, um escopo
+mecânico maior que os achados já fechados nesta Sprint. Permanece roteado a 32.13.
 
 ---
 
@@ -992,7 +1039,7 @@ markup agora também aplica a classe manualmente a partir do mesmo método que j
 | Device | Shared |
 | Accessibility Impact | Yes |
 | Owning Sprint | 32.13 (Focus, Keyboard & Interaction Accessibility) |
-| State | DISCOVERED |
+| State | **FIXED** — Sprint 32.13 |
 
 **Interação:** leitor de tela navegando pelo card "Weekly activity" quando o histórico semanal está indisponível (e, pelo mesmo padrão, o card de status de "Profile unavailable").
 
@@ -1002,9 +1049,17 @@ markup agora também aplica a classe manualmente a partir do mesmo método que j
 
 **Evidência (navegador, nesta Sprint):** resultado do axe-core contra `/profile` (Chromium real, `Deque.AxeCore.Playwright`) listando a violação `aria-allowed-role` para o node exato acima.
 
-**Resolution:** não aplicável — `DISCOVERED`.
+**Resolution (Sprint 32.13):** `BeeDayCard` agora renderiza `<div>` em vez de `<article>` quando
+`AdditionalAttributes` contém `role="status"` ou `role="alert"` — correção sistêmica na fundação
+compartilhada (Required Work #6), não um fork por consumidor; `DashboardHome.razor` (e qualquer
+outro consumidor futuro de `BeeDayCard` com um desses dois papéis) fica corrigido automaticamente,
+sem mudança própria. Adicionar `/profile` à cobertura axe de `AccessibilityQualityTests` **não** foi
+feito — exigiria Claude executar Playwright/E2E localmente, proibido pela política de validação da
+Issue #244 §5; permanece candidato para a fronteira de Release Quality Gate.
 
-**Regression Protection:** a definir pela Sprint 32.13 (candidato: `BeeDayCard` oferecer uma variante que renderiza `<div>` em vez de `<article>` quando `role="status"`/`role="alert"` é passado, ou os consumidores pararem de usar `role="status"` sobre `<article>`; adicionar `/profile` à cobertura axe de `AccessibilityQualityTests` como parte da correção).
+**Regression Protection:** `BeeDayCardTests.WhenRoleIsALiveRegion_RendersADivInsteadOfAnArticle`
+(`status`/`alert`), `WhenRoleIsNotALiveRegion_StillRendersAnArticle` — database-free, bUnit. A
+ausência real da violação `aria-allowed-role` no axe permanece evidência de navegador/HMG.
 
 ---
 
@@ -1505,7 +1560,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.10 — Empty States & First-Use Experience | EXP32-F013 (cross-ref) — CTA "Clear filter" adicionado ao estado sem-resultados |
 | 32.11 — Errors, Recovery & User Feedback | EXP32-F007 (cross-ref); achado novo — mensagem de erro de mutação órfã em `EditorModalShell`/`BeeDayConfirmDialog`, `FIXED` nesta Sprint |
 | 32.12 — Toasts, Notifications & Confirmation Feedback | nenhum achado `EXP32-Fxxx` novo — duplicação toast+inline (introduzida pela própria 32.11) removida do Wallet |
-| 32.13 — Focus, Keyboard & Interaction Accessibility | EXP32-F001 (cross-ref), EXP32-F002, EXP32-F008, EXP32-F009, EXP32-F010, EXP32-F020 |
+| 32.13 — Focus, Keyboard & Interaction Accessibility | EXP32-F001 (cross-ref); EXP32-F002, EXP32-F008, EXP32-F020 — `FIXED` nesta Sprint; EXP32-F009, EXP32-F010 — permanecem `DISCOVERED`, escopo maior que o restante desta Sprint |
 | 32.14 — Responsive & Mobile Interaction Polish | risco residual de §9 (evidência de navegador móvel pendente) |
 | 32.15 — Daily Experience Polish | EXP32-F004 (cross-ref), EXP32-F010 (cross-ref) |
 | 32.16 — Wallet Experience Polish | EXP32-F005 (cross-ref), EXP32-F006 |

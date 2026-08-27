@@ -13,6 +13,11 @@ public partial class BeeDayCard
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
+    private bool HostsLiveRegionRole =>
+        AdditionalAttributes?.TryGetValue("role", out var role) == true
+        && role is string roleValue
+        && (roleValue == "status" || roleValue == "alert");
+
     private string CssClass => string.Join(' ', new[]
     {
         "beeday-card",

@@ -69,7 +69,7 @@ function handleFocusIn(state, event) {
     }
 }
 
-export function activate(id, initialFocusSelector) {
+export function activate(id, initialFocusSelector, fallbackFocusSelector) {
     const container = document.getElementById(id);
     if (!container) {
         return false;
@@ -82,7 +82,7 @@ export function activate(id, initialFocusSelector) {
     const previouslyFocused = document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
-    const state = { id, container, initialFocusSelector, previouslyFocused };
+    const state = { id, container, initialFocusSelector, fallbackFocusSelector, previouslyFocused };
     state.keyDownHandler = event => handleKeyDown(state, event);
     state.focusInHandler = event => handleFocusIn(state, event);
 
@@ -131,5 +131,17 @@ export function deactivate(id) {
     const parentScope = scopes.get(stack.at(-1));
     if (parentScope) {
         focusTarget(parentScope);
+        return;
+    }
+
+    // EXP32-F002 (Sprint 32.13): the real trigger for a dialog opened from a menu item (e.g. "+
+    // Activity" -> "Habit") is already unmounted by the time this runs, because selecting the item
+    // both closes the menu and opens the dialog - previouslyFocused is never connected again, and
+    // there is no parent scope either, so focus would otherwise silently fall back to <body>. A
+    // caller-supplied fallback (typically the menu's own persistent trigger button, which survives
+    // the menu closing) recovers a sane keyboard position instead of losing it entirely.
+    const fallback = state.fallbackFocusSelector ? document.querySelector(state.fallbackFocusSelector) : null;
+    if (fallback && isVisible(fallback)) {
+        fallback.focus({ preventScroll: true });
     }
 }

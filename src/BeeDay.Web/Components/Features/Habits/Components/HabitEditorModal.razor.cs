@@ -15,6 +15,7 @@ public partial class HabitEditorModal
     [Parameter] public EventCallback<HabitEditorModel> OnSave { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public EventCallback OnDelete { get; set; }
+    [Parameter] public string? FallbackFocusSelector { get; set; }
     private bool showDeleteConfirmation;
     private string VisualStateClass => HabitVisualState.GetEditorClass(Model.VisualBalance);
     private bool AllowsPositive => Model.Direction is HabitDirection.Positive or HabitDirection.Both;

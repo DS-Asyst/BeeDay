@@ -11,7 +11,7 @@
                       SubmitLabel="@(IsEditing ? Localizer["SaveButtonLabel"] : Localizer["CreateButtonLabel"])"
                       ShowDelete="IsEditing"
                       IsBusy="IsBusy"
-                      ErrorMessage="ErrorMessage"
+                      ErrorMessage="@ErrorMessage"
                       OnSubmit="SaveAsync"
                       OnCancel="CancelAsync"
                       OnDelete="DeleteAsync">

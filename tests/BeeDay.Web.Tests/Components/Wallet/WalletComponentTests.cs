@@ -14,6 +14,40 @@ public sealed class WalletComponentTests : BunitContext
         Services.AddLocalization();
     }
 
+    // Sprint 32.13: a plain `ErrorMessage="ErrorMessage"` attribute (no `@`) on a component tag
+    // binds the RHS as a literal C# string, not an expression - it does NOT reference the
+    // component's own ErrorMessage property. Sprint 32.11's fix carried exactly this mistake in
+    // TransactionFormModal/TagFormModal, silently rendering the literal text "ErrorMessage"
+    // instead of the actual failure message. Proves the caller-supplied value now actually reaches
+    // the rendered alert.
+    [Fact]
+    public void TransactionFormModal_ForwardsTheActualErrorMessageValue_NotTheLiteralParameterName()
+    {
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        var cut = Render<TransactionFormModal>(parameters => parameters
+            .Add(component => component.IsOpen, true)
+            .Add(component => component.Model, new TransactionFormModel())
+            .Add(component => component.ErrorMessage, "Could not save the transaction."));
+
+        var alert = cut.Find(".editor-modal__error");
+        Assert.Contains("Could not save the transaction.", alert.TextContent);
+        Assert.DoesNotContain("ErrorMessage", alert.TextContent, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TagFormModal_ForwardsTheActualErrorMessageValue_NotTheLiteralParameterName()
+    {
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        var cut = Render<TagFormModal>(parameters => parameters
+            .Add(component => component.IsOpen, true)
+            .Add(component => component.Model, new WalletTagFormModel())
+            .Add(component => component.ErrorMessage, "Could not save the tag."));
+
+        var alert = cut.Find(".editor-modal__error");
+        Assert.Contains("Could not save the tag.", alert.TextContent);
+        Assert.DoesNotContain(">ErrorMessage<", alert.TextContent, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void Summary_RendersWalletTotals()
     {

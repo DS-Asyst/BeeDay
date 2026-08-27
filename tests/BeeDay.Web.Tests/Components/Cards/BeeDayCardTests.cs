@@ -33,6 +33,38 @@ public sealed class BeeDayCardTests
         Assert.Contains("beeday-card--interactive", article.ClassList);
     }
 
+    // EXP32-F020 (Sprint 32.13): role="status"/"alert" is not an ARIA-allowed role on <article>
+    // (axe: aria-allowed-role) - a consumer requesting one of these live-region roles gets a plain
+    // <div> host instead, since that is what the role actually requires.
+    [Theory]
+    [InlineData("status")]
+    [InlineData("alert")]
+    public void WhenRoleIsALiveRegion_RendersADivInsteadOfAnArticle(string role)
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<BeeDayCard>(parameters => parameters
+            .AddUnmatched("role", role)
+            .AddChildContent("Weekly activity unavailable"));
+
+        Assert.Empty(cut.FindAll("article"));
+        var div = cut.Find("div");
+        Assert.Contains("beeday-card", div.ClassList);
+        Assert.Equal(role, div.GetAttribute("role"));
+        Assert.Equal("Weekly activity unavailable", div.TextContent);
+    }
+
+    [Fact]
+    public void WhenRoleIsNotALiveRegion_StillRendersAnArticle()
+    {
+        using var context = new BunitContext();
+        var cut = context.Render<BeeDayCard>(parameters => parameters
+            .AddUnmatched("role", "button")
+            .AddChildContent("Habit card"));
+
+        Assert.NotEmpty(cut.FindAll("article"));
+        Assert.Empty(cut.FindAll("div"));
+    }
+
     [Fact]
     public void AppendsCustomClassAndAttributes()
     {

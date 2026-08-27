@@ -196,6 +196,26 @@ public sealed class EditorModalShellTests : BunitContext
         Assert.Empty(cut.FindAll(".editor-modal__error"));
     }
 
+    // EXP32-F002 (Sprint 32.13): when this dialog's real opener (e.g. a create-menu item) is
+    // already unmounted by the time focus would be restored, DialogFocusScope's JS module falls
+    // back to a caller-supplied selector instead of silently losing keyboard focus to <body> - the
+    // JS-side fallback behavior itself is proven live-in-browser (bUnit does not execute real
+    // focus/JS, same rationale as InvalidSubmit_NeverInvokesOnSubmit_AndDoesNotThrow above); this
+    // test protects the surrounding contract: the selector is actually threaded through to the JS
+    // "activate" call, not silently dropped.
+    [Fact]
+    public void FallbackFocusSelector_IsPassedThroughToTheFocusScopeActivateCall()
+    {
+        Render<EditorModalShell>(parameters => parameters
+            .Add(component => component.Model, new object())
+            .Add(component => component.Title, "Create Habit")
+            .Add(component => component.TitleId, "habit-editor-title")
+            .Add(component => component.FallbackFocusSelector, ".filter-bar__create-button"));
+
+        var activateCall = JSInterop.Invocations.Single(invocation => invocation.Identifier == "activate");
+        Assert.Equal(".filter-bar__create-button", activateCall.Arguments[2]);
+    }
+
     private sealed class RequiredFieldModel
     {
         [Required]
