@@ -1357,6 +1357,40 @@ têm um caminho de erro renderizado como estado vazio).
 
 ---
 
+### Errors, recovery & user feedback (Sprint 32.11, Issue #255) — novo achado: mensagem de erro de mutação órfã em dois diálogos do Wallet
+
+Nenhum achado `EXP32-Fxxx` prévio foi atribuído a esta Sprint além do cross-ref a `EXP32-F007`
+(já `FIXED` na 32.5). A auditoria de código exigida pelo Required Work #1/#2 encontrou um defeito
+real e concreto, não presumido:
+
+**Comportamento anterior:** ao falhar `SaveTransactionAsync`/`DeleteTransactionAsync`/
+`SaveTagFormAsync`/`DeleteTagAsync` em `Wallet.razor`, o código já computava uma mensagem de erro
+inline específica (`TransactionSaveErrorInline` etc.) e a atribuía a `_errorMessage` — mas esse
+campo só é renderizado no banner `role="alert"` no **topo da página**, e as quatro falhas ocorrem
+exatamente enquanto `TransactionFormModal`/`TagFormModal` (`EditorModalShell`, `z-index: 1200`) ou
+`BeeDayConfirmDialog` (`z-index: 1400`) permanecem **abertos** — nenhum dos dois fecha no caminho de
+erro (`catch`), de propósito, para preservar o formulário preenchido. O banner de página fica assim
+fisicamente coberto pelo backdrop do diálogo, e `DialogFocusScope` prende o foco de
+teclado/leitor-de-tela dentro do diálogo — a mensagem nunca é vista nem anunciada. Só o toast
+(`Toast.ShowError`, `z-index: 1700`, transitório) chegava ao usuário.
+
+**Correção:** `EditorModalShell` e `BeeDayConfirmDialog` (ambos fundações compartilhadas — o
+primeiro usado por Habit/Task/To-Do/Project/Transaction/Tag, ver comentário no próprio
+`editor-modal.css`) ganham um parâmetro `ErrorMessage` opcional, renderizado como `role="alert"`
+dentro do próprio diálogo quando presente — nenhum novo componente, nenhuma implementação paralela.
+`TransactionFormModal`/`TagFormModal` repassam o parâmetro. `Wallet.razor` ganha dois campos novos,
+`_transactionFormError`/`_tagFormError`, distintos do `_errorMessage` de página (agora reservado
+para falhas de load/refresh, quando nenhum diálogo está aberto) — zerados na abertura/fechamento de
+cada diálogo e nas quatro tentativas de mutação, preenchidos apenas no `catch`. Nenhuma tentativa de
+retry automática foi adicionada (fora do limite explícito da Sprint); nenhum detalhe de exceção é
+exposto (mensagens permanecem localizadas e genéricas, como já eram).
+
+**Regression Protection:** `EditorModalShellTests.ErrorMessage_RendersAsAnAlertInsideTheDialog`,
+`WhenErrorMessageIsNotSet_RendersNoErrorAlert`; `BeeDayConfirmDialogTests` — mesmos dois casos.
+Database-free, bUnit.
+
+---
+
 ## 7. Achados pré-existentes roteados para dentro da EPIC 32
 
 | ID original | Ledger de origem | Achado | Sprint EPIC 32 |
@@ -1433,7 +1467,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.8 — Search, Filters & Sorting | EXP32-F013 — `FIXED` nesta Sprint |
 | 32.9 — Loading & Perceived Performance | gap de evidência registrado em §9 (sem achado novo); auditoria de código confirmou nenhum defeito de feedback ausente — ver §"Auditoria de loading & perceived performance" |
 | 32.10 — Empty States & First-Use Experience | EXP32-F013 (cross-ref) — CTA "Clear filter" adicionado ao estado sem-resultados |
-| 32.11 — Errors, Recovery & User Feedback | EXP32-F007 (cross-ref) |
+| 32.11 — Errors, Recovery & User Feedback | EXP32-F007 (cross-ref); achado novo — mensagem de erro de mutação órfã em `EditorModalShell`/`BeeDayConfirmDialog`, `FIXED` nesta Sprint |
 | 32.12 — Toasts, Notifications & Confirmation Feedback | nenhum achado novo |
 | 32.13 — Focus, Keyboard & Interaction Accessibility | EXP32-F001 (cross-ref), EXP32-F002, EXP32-F008, EXP32-F009, EXP32-F010, EXP32-F020 |
 | 32.14 — Responsive & Mobile Interaction Polish | risco residual de §9 (evidência de navegador móvel pendente) |
