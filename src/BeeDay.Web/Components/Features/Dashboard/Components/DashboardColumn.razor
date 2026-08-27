@@ -62,6 +62,15 @@
                                    Icon="@EmptyIcon"
                                    Title="@EmptyTitle"
                                    Description="@EmptyDescription" />
+                @if (ShowClearFilterAction)
+                {
+                    <BeeDayButton Variant="BeeDayButtonVariant.ConfirmationCancel"
+                                   Compact="true"
+                                   Class="dashboard-column__clear-filter"
+                                   OnClick="OnClearFilter">
+                        @Localizer["ClearFilterButton"]
+                    </BeeDayButton>
+                }
             }
             else
             {

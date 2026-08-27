@@ -230,6 +230,30 @@ public sealed class DashboardStateTests
         Assert.True(state.ActiveProjectsFilteredToZero);
     }
 
+    // Sprint 32.10 (EXP32-F013 follow-up): the "clear filter" action offered from a filtered-to-
+    // zero empty state must reset every filter that can cause it — search text and the Todos-only
+    // project context — regardless of which one actually triggered the empty result, so the
+    // recovery action is always deterministic.
+    [Fact]
+    public async Task ClearFilters_ResetsSearchAndSelectedProjectContext()
+    {
+        var todo = new TodoSummary(Guid.NewGuid(), "Pick the flooring", "", Guid.NewGuid(), false, null, null, false, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
+        var project = new ProjectSummary(todo.ProjectId, "Kitchen remodel", "", "#7A4FCB", false, null, null, false, ProjectStatus.InProgress, 0, [todo]);
+        var (state, _) = CreateState(new FixedDashboardSender(projects: [project]));
+        await state.InitializeAsync();
+
+        state.Search = "no such thing";
+        state.SelectProjectContext(project.Id);
+        Assert.Equal("no such thing", state.Search);
+        Assert.Equal(project.Id, state.SelectedProjectId);
+
+        state.ClearFilters();
+
+        Assert.Equal(string.Empty, state.Search);
+        Assert.Null(state.SelectedProjectId);
+        Assert.False(state.ActiveTodosFilteredToZero);
+    }
+
     private static (DashboardState State, ToastService Toasts) CreateState(ISender sender)
     {
         var services = new ServiceCollection();

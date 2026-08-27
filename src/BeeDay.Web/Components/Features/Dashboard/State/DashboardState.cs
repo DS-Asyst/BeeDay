@@ -65,6 +65,16 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
         Changed?.Invoke();
     }
 
+    // Sprint 32.10 (EXP32-F013 follow-up): a single reset for every filter that can narrow the
+    // board to zero — search text and the Todos-only project context — so a column's "clear
+    // filter" action always recovers fully, regardless of which one caused the empty result.
+    public void ClearFilters()
+    {
+        search = string.Empty;
+        selectedProjectId = null;
+        Changed?.Invoke();
+    }
+
     private IEnumerable<TodoSummary> AllTodos => data?.Projects.SelectMany(project => project.Todos) ?? [];
 
     public int CompletedItems => data is null

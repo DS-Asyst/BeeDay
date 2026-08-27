@@ -33,6 +33,8 @@ public partial class DashboardColumn
     [Parameter] public string? CompletedEmptyTitle { get; set; }
     [Parameter] public string? CompletedEmptyDescription { get; set; }
     [Parameter] public EventCallback OnCreate { get; set; }
+    [Parameter] public bool ShowClearFilterAction { get; set; }
+    [Parameter] public EventCallback OnClearFilter { get; set; }
     [Parameter] public RenderFragment? HeaderContent { get; set; }
     [Parameter] public RenderFragment? ActiveContent { get; set; }
     [Parameter] public RenderFragment? CompletedContent { get; set; }
