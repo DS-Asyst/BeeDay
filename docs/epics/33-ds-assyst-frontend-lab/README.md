@@ -216,3 +216,72 @@ diretórios; nenhum código de produto foi alterado; `git diff --check` limpo.
 
 **Disposição:** GO. Inventário completo (nenhuma rota/componente/template real deixado de fora);
 Sprint 33.5 (Bootstrap do repositório Lab) pode prosseguir.
+
+## 9. Sprint 33.5 — DS-Asyst Frontend Lab Repository Bootstrap
+
+**Entregue:** `DS-Asyst/beeday-frontend-lab` deixou de estar vazio. Commit raiz `3f2e391` ("chore:
+bootstrap beeday Frontend Lab (Sprint 33.5)") empurrado diretamente para `hmg` — não há Sprint
+anterior nesse repositório para basear um PR normal; a partir de agora, todo trabalho segue o ciclo
+branch → PR → `hmg` exigido pelo contrato da EPIC.
+
+**Solução mínima e independente:** `BeeDayLab.slnx` (.NET 10), `src/BeeDayLab.Web` (Blazor Server,
+`Microsoft.NET.Sdk.Web`, **zero** `ProjectReference`/`PackageReference` a qualquer projeto
+`BeeDay.*`, EF Core ou driver SQL) + `tests/BeeDayLab.ArchitectureTests` (2 testes reais, não
+placeholder, que leem os `.csproj`/`appsettings*.json` do próprio repositório e falham se qualquer
+referência proibida ou `ConnectionStrings` aparecer) + `tests/BeeDayLab.Web.Tests` (bUnit). Validado
+nesta Sprint, com evidência real, não suposição:
+
+- `dotnet format BeeDayLab.slnx --verify-no-changes` — limpo.
+- `dotnet build BeeDayLab.slnx -c Release --warnaserror` — 0 avisos/erros.
+- `dotnet test BeeDayLab.slnx -c Release` — 3/3 aprovados (2 guardas de arquitetura + 1 bUnit).
+- `dotnet run --project src/BeeDayLab.Web` — aplicação real subiu e respondeu `HTTP 200` na Home
+  (`http://localhost:5180/`), confirmado por `curl` antes de encerrar o processo.
+
+**Governança do repositório:**
+
+- Branch padrão: `hmg` (confirmado via `gh api repos/DS-Asyst/beeday-frontend-lab`).
+- `prd` criada a partir de `hmg` (mesmo commit `3f2e391`).
+- Rulesets `Protect HMG` (id `21652764`) e `Protect PRD` (id `21652766`), `enforcement: active`:
+  bloqueiam deleção e non-fast-forward, exigem PR, exigem o check obrigatório `Lab CI`
+  (`.github/workflows/ci.yml`, job `Lab CI` — format + build `--warnaserror` + testes, sem LocalDB
+  por arquitetura). Regras efetivas confirmadas por leitura direta do GitHub após a criação, não
+  apenas pela chamada de criação.
+- `Lab CI` provado executável **antes** de se tornar check obrigatório: `workflow_dispatch` manual
+  em `hmg` (run `33075335907`) passou 100% verde — mesma disciplina que `docs/deployment/08-fast-pr-validation-decision.md`
+  documenta para `DS-Asyst/BeeDay` (nunca deixar um Ruleset exigir um contexto ainda não provado).
+
+**Decisão operacional explícita da EPIC — visibilidade temporária do Lab:**
+
+```text
+TEMPORARY LAB VISIBILITY: PUBLIC
+PLANNED FUTURE STATE AFTER LAB STABILIZATION / PRD: GitHub Team + PRIVATE repository
+```
+
+`DS-Asyst/beeday-frontend-lab` foi tornado **público** nesta Sprint por decisão explícita do
+proprietário: a organização `DS-Asyst` está no plano GitHub Free, que não permite Rulesets/branch
+protection em repositório privado (`403 "Upgrade to GitHub Pro or make this repository public to
+enable this feature"`, confirmado tanto na API de Rulesets quanto na API legada de branch
+protection antes de qualquer mudança). Sem proteção de branch, `hmg`/`prd` ficariam sem o requisito
+"protections are configured" da Sprint 33.5 — o proprietário escolheu tornar o Lab público agora,
+em vez de aceitar esse gap ou pagar por um plano superior imediatamente.
+
+**Verificação de segurança de publicação (antes de confiar na mudança já aplicada — executada e
+registrada aqui por completude, já que a instrução do proprietário e a mudança de visibilidade
+chegaram na mesma janela de execução):** o repositório continha, no momento da publicação,
+exatamente 1 commit (`3f2e391`), 24 arquivos, todos escritos nesta própria Sprint — nenhum arquivo
+foi copiado de `DS-Asyst/BeeDay` ou de qualquer fonte externa. Busca (`git grep`) nos arquivos
+efetivamente versionados por padrões de secret/credencial/connection string
+(`password=`, `api[_-]?key=`, `secret=`, `connectionstring`, `bearer `, `-----BEGIN`,
+`AKIA[0-9A-Z]{16}`, `Data Source=`, `Server=...Database=`) encontrou apenas o nome de um método de
+teste e uma string literal `"ConnectionStrings"` dentro de uma asserção que verifica a **ausência**
+dela — nenhum valor de secret real. `src/BeeDayLab.Web/appsettings.json` contém apenas `Logging` e
+`AllowedHosts`. Nenhum asset de terceiros, dado de usuário real, ou documentação confidencial foi
+incluído (nenhum asset foi copiado nesta Sprint — Sprint 33.7). **Nenhum bloqueador de publicação
+encontrado.** `DS-Asyst/BeeDay` permanece privado — esta decisão não se aplica a ele.
+
+**Sprint-Specific Boundary respeitado:** nenhuma página de Feature foi copiada (extração começa na
+Sprint 33.6); nenhuma autenticação/banco de dados/e-mail real foi adicionado; `prd` não é tratada
+como branch de experimentação.
+
+**Disposição:** GO. `DS-Asyst/beeday-frontend-lab` operacional, protegido, e provado buildável/
+testável/executável sem banco de dados. Sprint 33.6 (Foundations Extraction) pode prosseguir.
