@@ -329,3 +329,40 @@ Sprints 33.7-33.14.
 Todos os 8 itens `FE33-001`–`FE33-008` do Ledger movidos de `MAPPED` para `VERIFIED`.
 
 **Disposição:** GO. Sprint 33.7 (Icon & Asset System Extraction) pode prosseguir.
+
+## 11. Sprint 33.7 — Icon & Asset System Extraction (FE33-009..012)
+
+**Entregue no repositório Lab:** PR #2 (`DS-Asyst/beeday-frontend-lab`), branch
+`sprint/33.7-icon-asset-extraction`, merge `c4df0ad`. `Lab CI` verde antes do merge.
+
+Copiados verbatim de `acce26a`: `wwwroot/icons/sprite.svg` (59 símbolos), o manifesto
+`design/icons/catalog/icon-mapping.csv`, e os 6 tipos C# puros do sistema de ícones
+(`BeeDayIconName`, `BeeDayIconCategory`, `BeeDayIconColor`, `BeeDayIconSize`,
+`BeeDayIconDefinition`, `BeeDayIconRegistry`) — sem `BeeDayIcon.razor` em si, que permanece
+FE33-028/Sprint 33.8, junto dos outros 25 primitives do Design System.
+
+Também copiados, byte-a-byte (confirmado `Bin` no diff do Git — não corrompidos como texto), os 10
+assets de ilustração/logo mapeados (`wwwroot/assets/{brand,dashboard,flags,footer,hero,home}/`,
+4.9MB). **Auditoria de licença desta Sprint** (`docs/brand/01-character-illustration.md`): nenhuma
+menção de licenciamento restritivo — são artes originais do próprio produto BeeDay (mascote "bee",
+ilustrações Home/Dashboard/Hero, bandeiras, onda do footer), sem consumidor de terceiro a proteger.
+
+**Validação (Lab, sem LocalDB):**
+
+- `dotnet format BeeDayLab.slnx --verify-no-changes` — limpo.
+- `dotnet build BeeDayLab.slnx -c Release --warnaserror` — 0 avisos/erros.
+- `dotnet test BeeDayLab.slnx -c Release` — 122/122 aprovados (2 guardas de arquitetura + 120
+  Web.Tests, incluindo as 67 novas asserções de `IconSystemParityTests` — uma definição de registry
+  por valor de enum, todo `symbolId` resolvido verificado presente no sprite copiado, comportamento
+  de fallback, e spot-checks de categoria — e as 10 de `AssetExistenceTests`).
+- `dotnet run` verificado localmente: Home, `sprite.svg`, `bee.png`, `footer-wave.svg` todos
+  `HTTP 200`.
+
+`FE33-009`–`FE33-012` movidos de `MAPPED` para `VERIFIED`.
+
+**Reconciliação de ambiente de trabalho:** a partir desta Sprint, o proprietário clonou
+`DS-Asyst/beeday-frontend-lab` localmente em `C:\DevOps\MyHub\beeday-frontend-lab` — o scratchpad
+temporário usado para bootstrap/Sprints 33.5–33.7 não é mais necessário; toda Sprint futura do Lab
+usa esse clone real.
+
+**Disposição:** GO. Sprint 33.8 (Shared Components Extraction) pode prosseguir.
