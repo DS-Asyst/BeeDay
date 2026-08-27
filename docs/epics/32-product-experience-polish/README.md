@@ -48,6 +48,50 @@ abaixo impediu a inventariação — todos foram observados e documentados norma
 código de produto foi alterado nesta Sprint; a única mudança desta entrega é este documento (mais a
 reconciliação de Issue/Project).
 
+### 1.2 Sprint 32.6.1 — Autonomous Validation & E2E Gate Separation (Issue #342, governança, sem achado de produto)
+
+Sprint de emenda de governança inserida antes da 32.7 (roadmap atualizado da Issue #244), motivada
+pelo hang determinístico de `AccountLifecycleTests.Login_CompletesOnboarding_ReachesDashboard`
+registrado como `ACCEPTED RISK` em `docs/testing/01-testing-strategy.md` §7 (Sprint 32.5) — o
+proprietário decidiu que Claude nunca deve depender de LocalDB/E2E como gate de validação autônomo.
+Nenhum achado `EXP32-Fxxx` foi consumido ou alterado; nenhum código de produto mudou.
+
+**Reconciliação verificada (evidência, não suposição):**
+
+- A Issue #244 já continha, no início desta Sprint, o **EPIC 32 Global Execution Contract**
+  atualizado (§4 execução autônoma sem parada entre Sprints; §5 política de validação code-first —
+  proibição de LocalDB, `BeeDay.E2E.Tests` preservado mas não executado pelo Claude, proibição de
+  `dotnet test BeeDay.slnx`; §6 preservação do split de CI) — nada precisou ser escrito de novo ali.
+- As 14 Issues de Sprint restantes (`#251`–`#264`, Sprints 32.7–32.20) já referenciam "The updated
+  EPIC 32 Global Execution Contract in #244 applies in full" e já contêm, cada uma, sua própria
+  seção "Sprint-Specific Validation" proibindo LocalDB/`BeeDay.E2E.Tests`/`dotnet test BeeDay.slnx`
+  e nenhuma exige `CONTEXT RESET REQUIRED` — confirmado por leitura direta via `gh issue view` em
+  `#251`, `#252`, `#253`, `#258` e `#264` (amostra cobrindo início, meio e fim do intervalo restante).
+  Único ajuste necessário: `#251` referenciava esta Sprint só pelo título (`Depends on: Sprint
+  32.6.1 — Autonomous Validation & E2E Gate Separation`), sem número — corrigido para `(#342)` após
+  esta Issue ser criada.
+- O split de CI já é exatamente o exigido: `ci.yml` (Fast Gate — `pull_request: branches: [hmg]`,
+  sem filtro de branch de origem, portanto todo PR destinado a `hmg`, não só `sprint/*→hmg`) roda
+  somente `Domain.Tests`+`Application.Tests`; `release-quality-gate.yml` (fronteira `hmg→main`) roda
+  os 5 projetos completos, incluindo `BeeDay.E2E.Tests` e Format — confirmado por leitura direta dos dois
+  workflows e por `docs/testing/01-testing-strategy.md` §7 (reconciliado na Sprint 31.11). Nenhuma
+  mudança de workflow foi necessária ou aplicada.
+- `CLAUDE.md` é um ativo de governança **local ao ambiente**, não rastreado neste repositório desde
+  `869b57e` ("chore(governance): stop tracking CLAUDE.md in the product repository", Sprint anterior
+  a esta) — está fora do escopo de qualquer commit/PR desta Sprint. O proprietário atualizou esse
+  arquivo local separadamente durante esta própria Sprint para remover o mandato de
+  `dotnet test BeeDay.slnx` do gate obrigatório do Claude (§9.1), substituindo-o pelas invocações
+  explícitas de `Domain.Tests`/`Application.Tests` e por uma proibição explícita de LocalDB —
+  consistente com a política já registrada na Issue #244.
+- Nenhum teste `BeeDay.E2E.Tests` foi removido, pulado ou enfraquecido nesta Sprint.
+
+**Conclusão:** o contrato de validação/execução já estava reconciliado na cadeia de Issues antes
+desta Sprint existir formalmente; o trabalho desta Sprint foi verificar essa reconciliação com
+evidência, criar o registro formal (Issue #342, sub-issue de #244), corrigir a única referência
+desatualizada (`#251`) e documentar o estado aqui. Nenhuma correção de código/workflow foi
+necessária — consistente com `Required Work #5` da Issue #342 ("preserve... unless a real defect is
+found").
+
 ## 2. Ambiente do baseline
 
 | Item | Evidência |
