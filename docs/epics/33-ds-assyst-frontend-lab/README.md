@@ -440,3 +440,74 @@ o "mock de lógica de negócio real" que a ADR-008 proíbe. `BeeDayValidationMes
 movido de `MAPPED` para `EXCLUDED` (drift, ver acima).
 
 **Disposição:** GO. Sprint 33.9 (Layout Extraction) pode prosseguir.
+
+## 13. Sprint 33.9 — Layout & Navigation Extraction (FE33-039..052)
+
+**Entregue no repositório Lab:** PR #4 (`DS-Asyst/beeday-frontend-lab`), branch
+`sprint/33.9-layout-navigation-extraction`, merge `01ad2f4`. `Lab CI` verde antes do merge.
+
+14 componentes de layout/navegação + `SkipToContentLink` + `Components/Pages/{NotFound,Error}.razor`
+copiados/adaptados de `acce26a`, seguindo a regra geral de remoção de `IStringLocalizer` já
+estabelecida na Sprint 33.8 (o Lab não tem pipeline de localização) — aplicada de forma uniforme a
+todo arquivo tocado nesta Sprint, independentemente de a classificação original do inventário dizer
+COPY ou ADAPT.
+
+**Correções de classificação Strategy aplicadas ao Ledger nesta Sprint** (apenas às linhas
+FE33-039..052, que descrevem o trabalho desta própria Sprint):
+
+1. **FE33-039 (`MainLayout.razor`)** — a dependência original listada ("`CascadingAuthenticationState`,
+   `AuthorizeRouteView`") não corresponde ao arquivo real; essas duas pertencem a `Routes.razor`/
+   `App.razor` (shell de roteamento), não a `MainLayout.razor`. A dependência real é
+   `AuthenticatedUserInitializer` (serviço de backend real, removido por completo).
+2. **FE33-046 (`NavigationItem(s).razor`)** — dividido na correção: `NavigationItem.razor` (item
+   individual) é COPY puro; `NavigationItems.razor` (container com a lista real de nav) injeta
+   `IStringLocalizer<LayoutResources>` e passa a ser ADAPT. Formulário de logout
+   (`action="/auth/logout"` + `<AntiforgeryToken />`) mantido exatamente como está — nenhum endpoint
+   real foi fabricado, apenas presentation parity.
+3. **FE33-048 (`AppFooter.razor`)** — reclassificado de COPY para ADAPT (localizer). Mais
+   importante: **drift de documentação encontrado**, não corrigido silenciosamente — a nota original
+   ("link GitHub de suporte aponta para `DS-Asyst/BeeDay` real") não corresponde ao arquivo lido em
+   `acce26a`; nenhum link do GitHub existe em `AppFooter.razor`. Provavelmente descreve um link que
+   vive em uma página Institucional `Contact.razor`, fora do escopo desta Sprint. Nada foi
+   inventado para "corrigir" a nota — o footer foi copiado fielmente.
+4. **FE33-049 (`EditorialFooter.razor`)** — reclassificado de COPY para ADAPT: além do localizer,
+   depende de `wwwroot/js/beeday-editorial-footer.js`, não listado originalmente. Verificado que o
+   arquivo existe de fato em `acce26a` (ao contrário do drift de FE33-107/Sprint 33.8) — copiado sem
+   o sufixo de cache-busting `?v=...`, mesma convenção já estabelecida.
+5. **FE33-051 (`NotFound.razor`)** — reclassificado de COPY para ADAPT (localizer); `[AllowAnonymous]`
+   também removido (sem pipeline de autorização no Lab).
+
+**Dependência transitiva descoberta nesta Sprint, tratada com ADAPT (não apenas COPY) por tocar
+código de produção fora do escopo permitido:** `PublicLanguageSwitcher.razor` (dependência de
+FE33-047) referenciava `BeeDay.Web.Localization.BeeDayCultures`, que por sua vez referencia
+`BeeDay.Domain.Enums.UserLanguage` — uma dependência de `BeeDay.Domain` proibida pela ADR-008.
+Substituído por dois literais de código de cultura inline (`"pt-BR"`/`"en-US"`); o formulário
+`/culture/set` e a leitura de `CultureInfo.CurrentUICulture` foram mantidos verbatim (nenhum pipeline
+real de localização de requisição existe no Lab — mesmo padrão do formulário de logout).
+
+**Novo, não fabricado, sem dependência de produção real:** `ReconnectDisplayState` (enum) dá a
+`ReconnectModal.razor` (FE33-050, MOCK) um `[Parameter]` para definir diretamente qual dos 5 estados
+visuais reais (espelhados das classes CSS `components-reconnect-show/retrying/failed/paused/
+resume-failed`) mostrar, sem `ReconnectModal.razor.js` (JS interop de reconexão SignalR real) — não
+copiado, nenhum circuit-handler real é acionado.
+
+**Validação (Lab, sem LocalDB):**
+
+- `dotnet format BeeDayLab.slnx --verify-no-changes` — limpo.
+- `dotnet build BeeDayLab.slnx -c Release --warnaserror` — 0 avisos/erros.
+- `dotnet test BeeDayLab.slnx -c Release` — 202/202 aprovados (2 guardas de arquitetura + 200
+  Web.Tests, incluindo as novas `LayoutShellTests.cs`, `NavigationTests.cs` e
+  `FootersAndPagesTests.cs`; asserções de gerenciamento de foco real via log de invocação JSInterop
+  do bUnit, não apenas presença de markup).
+- `dotnet run` verificado localmente: `/`, `/not-found`, `/Error` todos `HTTP 200`.
+
+`FE33-039`–`FE33-052` movidos de `MAPPED` para `VERIFIED`.
+
+**Correção nesta Sprint:** a disposição original registrada aqui nomeava a próxima Sprint como
+"Sprint 33.10 (Localization Contract)" — título incorreto. O título canônico real, confirmado pela
+Issue #371 (`DS-Asyst/BeeDay`), é **Sprint 33.10 — Mock Data & UI State Engine**. Isso não invalida a
+atribuição de `FE33-104` (Localization) a 33.10 no Ledger — a Issue #371 lista explicitamente "Support
+locale selection ... where useful" entre seu Required Work, então a extração de localização é parte
+legítima do escopo mais amplo do motor de cenário/estado, não uma Sprint separada mal-numerada.
+
+**Disposição:** GO. Sprint 33.10 (Mock Data & UI State Engine) pode prosseguir.
