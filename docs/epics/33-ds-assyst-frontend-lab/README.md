@@ -285,3 +285,47 @@ como branch de experimentação.
 
 **Disposição:** GO. `DS-Asyst/beeday-frontend-lab` operacional, protegido, e provado buildável/
 testável/executável sem banco de dados. Sprint 33.6 (Foundations Extraction) pode prosseguir.
+
+## 10. Sprint 33.6 — Foundations Extraction (FE33-001..008)
+
+**Entregue no repositório Lab** (não em `DS-Asyst/BeeDay`): PR #1
+(`DS-Asyst/beeday-frontend-lab`), branch `sprint/33.6-foundations-extraction`, merge `10ebc0e`.
+Primeiro ciclo normal branch → PR → `hmg` do Lab (a Sprint 33.5 fez commit raiz direto, sem PR, por
+não existir Sprint anterior para basear um). `Lab CI` verde antes do merge.
+
+Os 7 arquivos CSS de foundation (`variables.css`, `typography.css`, `typography-policy.css`,
+`theme.css`, `utilities.css`, `animations.css`, `polish.css`) mais o `wwwroot/app.css` raiz foram
+copiados **verbatim** de `src/BeeDay.Web/wwwroot/` (baseline `acce26a`) — nenhum valor de token
+mudou. `App.razor` do Lab replica a mesma ordem relativa de cascata da produção e o link real do
+Google Fonts (`Coiny`+`Nunito`).
+
+**Duas correções de evidência aplicadas ao Ledger nesta Sprint** (não à Seção 1 do documento, que
+permanece registro histórico do que a Sprint 33.4 observou):
+
+1. O caminho de produção real dos tokens é `variables.css`, não `design-system.css` (aproximação
+   do momento do inventário) — `design-system.css` é component-scoped (Sprint 33.8).
+2. A fonte de marca real é `Coiny`+`Nunito` (confirmado em `src/BeeDay.Web/Components/App.razor`),
+   não `Inter`/`Jersey 25` — que `docs/web/02-routing-and-pages.md` §2 ainda cita de forma
+   desatualizada (retirados nas Sprints 20.6/21.4/21.9, drift de documentação do próprio
+   `DS-Asyst/BeeDay`, fora do escopo da EPIC 33 corrigir).
+
+**Exclusão deliberada, registrada, não silenciosa:** a cauda de `app.css` que referencia classes de
+componentes/features ainda não extraídos (`.card-action-menu__panel`, `.editor-modal__*`,
+`.beeday-field__control`, `.activity-card__checkbox`, `.profile-panel__brand`) e o keyframe
+`card-menu-enter` foram deixados de fora — sem markup correspondente no Lab ainda, pertencem às
+Sprints 33.7-33.14.
+
+**Validação (Lab, sem LocalDB):**
+
+- `dotnet format BeeDayLab.slnx --verify-no-changes` — limpo.
+- `dotnet build BeeDayLab.slnx -c Release --warnaserror` — 0 avisos/erros.
+- `dotnet test BeeDayLab.slnx -c Release` — 46/46 aprovados (2 guardas de arquitetura + 44
+  Web.Tests, incluindo as 43 novas asserções de `FoundationTokenParityTests` cobrindo as 4 famílias
+  de cor de marca, 4 semantic feedback, os 9 degraus de spacing, 7 de radius, 4 de shadow, 5 tokens
+  de motion e as 9 camadas de z-index).
+- `dotnet run` verificado localmente: Home, `variables.css`, `typography.css`, `app.css`,
+  `lab-shell.css` todos `HTTP 200`.
+
+Todos os 8 itens `FE33-001`–`FE33-008` do Ledger movidos de `MAPPED` para `VERIFIED`.
+
+**Disposição:** GO. Sprint 33.7 (Icon & Asset System Extraction) pode prosseguir.
