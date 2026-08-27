@@ -323,7 +323,7 @@ alterado nesta Sprint — a mudança de contrato pertence à 32.13, não a esta.
 | Device | Shared |
 | Accessibility Impact | Partial (não bloqueia, mas confunde qual elemento está de fato focado) |
 | Owning Sprint | 32.7 (Lists, Cards & Collection Patterns) |
-| State | DISCOVERED |
+| State | FIXED |
 
 **Interação:** clicar/focar o botão "+" de um Habit card para registrar comportamento positivo.
 
@@ -341,10 +341,18 @@ baixa visão sobre qual elemento específico está focado.
 focar o botão mostra os dois contornos distintos e aninhados; `document.activeElement` confirmado
 como o próprio `<button class="habit-card__score-button">`, não o card nem a coluna.
 
-**Resolution:** não aplicável — `DISCOVERED`.
+**Resolution (Sprint 32.7):** removidas as duas declarações `.dashboard-column:focus-within`
+(`DashboardColumn.razor.css`) responsáveis pelo contorno duplicado. Nenhum elemento interativo da
+coluna dependia desse contorno para indicação de foco: os cards já têm o seu próprio
+(`.habit-card:focus-within`/`.activity-card:focus-within`) e os botões do cabeçalho da coluna
+(`.beeday-icon-toggle:focus-visible`) também. Verificado ao vivo em `/daily` — após a correção,
+focar `.habit-card__score-button` deixa `document.activeElement` no próprio botão, o card exibe seu
+contorno normal, e `getComputedStyle` da coluna confirma borda/box-shadow neutros (sem o anel de
+foco secundário).
 
-**Regression Protection:** a definir pela Sprint 32.7 (candidato: teste de regressão visual ou
-asserção de que `:focus-within` não é declarado no seletor do container de coluna).
+**Regression Protection:** `DashboardColumnTests.DoesNotDeclareFocusWithinOnTheColumnItself`
+(`tests/BeeDay.Web.Tests/Components/Dashboard/DashboardColumnTests.cs`) — asserção de que
+`.dashboard-column:focus-within` não reaparece em `DashboardColumn.razor.css`.
 
 ---
 
@@ -359,7 +367,7 @@ asserção de que `:focus-within` não é declarado no seletor do container de c
 | Device | Shared |
 | Accessibility Impact | Partial (a ação existe em outro lugar da UI, mas não é descobrível a partir do workspace) |
 | Owning Sprint | 32.7 (Lists, Cards & Collection Patterns) — cross-ref 32.15 (Daily Experience Polish) |
-| State | DISCOVERED |
+| State | FIXED |
 
 **Interação:** dentro de um projeto aberto (`ProjectWorkspace`), tentar marcar um To-Do como
 concluído a partir da própria linha do To-Do no workspace.
@@ -381,10 +389,26 @@ de destaque colorida à esquerda. Em contraste, captura de tela ampliada da colu
 mostra um checkbox quadrado explícito ao lado do mesmo título; clicá-lo concluiu o To-Do e atualizou
 o Project para "Completed 100%" (confirmado revelando-o via o toggle "Show completed projects").
 
-**Resolution:** não aplicável — `DISCOVERED`.
+**Resolution (Sprint 32.7):** `ProjectWorkspace` agora expõe um novo parâmetro
+`EventCallback<TodoSummary> OnToggleTodo`, wired em `Home.razor` para o mesmo
+`State.ToggleTodoAsync(todo.Id)` já usado pela coluna "To-Dos" do board. Cada linha de To-Do no
+workspace renderiza (quando o parâmetro tem delegate) o mesmo botão de conclusão reutilizado da
+coluna do board — classe compartilhada `activity-card__checkbox`/`activity-card__checkbox-glyph`
+(`cards.css`), não uma implementação paralela — posicionado de forma absoluta dentro da linha
+(`.project-workspace__todo-toggle`) porque uma regra de CSS pré-existente e incondicional mais
+abaixo no mesmo arquivo (`display: block` sobre `.project-workspace__todo`) já neutralizava o
+`display: grid`/`grid-template-columns` original; posicionamento absoluto contorna essa divergência
+sem tocar nela, já que está fora do escopo desta Sprint. Rótulos acessíveis localizados adicionados
+(`TodoCompleteAriaLabel`/`TodoMarkIncompleteAriaLabel`, pt-BR/en-US/neutro). Verificado ao vivo:
+criado um Project com dois To-Dos em `/daily`, aberto o workspace, clicado o novo checkbox — o
+título ganhou risco, o glyph ficou verde/preenchido, `aria-label` mudou para "Mark … as incomplete",
+e o cabeçalho do workspace atualizou Status/Progress em tempo real (1/2 · 50% → depois 2/2 · 100%
+quando ambos concluídos), idêntico ao comportamento já existente da coluna To-Dos do board.
 
-**Regression Protection:** a definir pela Sprint 32.7 (candidato: teste de componente garantindo que
-o `ProjectWorkspace` exponha o mesmo controle de conclusão da coluna To-Dos).
+**Regression Protection:** três testes novos em `ProjectWorkspaceTests`
+(`WhenOnToggleTodoHasNoDelegate_RendersNoCompletionControl`,
+`TodoToggle_InvokesOnToggleTodoWithTheTappedTodo`,
+`TodoToggle_ExposesCompletionStateThroughItsAccessibleName`).
 
 ---
 
@@ -1188,6 +1212,46 @@ de scroll móvel entre os quatro (EXP32-F022/F023 acima, ambos `FIXED`) — não
 
 ---
 
+### Classificação de arquétipos de coleção (Sprint 32.7, Required Work #2 da Issue #251)
+
+Os quatro tipos de coleção recorrentes do produto (Habits, Tasks/To-Dos, Projects e o próprio
+`ProjectWorkspace`) foram lidos por completo para confirmar se compartilham um contrato de
+apresentação coerente sem forçar um único componente genérico sobre eles.
+
+**Conclusão: dois arquétipos reais, já compartilhados corretamente — não três/quatro implementações
+paralelas.** `HabitCard` e `ActivityCard` (Tasks/To-Dos/Projects) compartilham toda a semântica
+estrutural de card — grid de 3 colunas, corpo abrível (`role="button"`, `tabindex="0"`,
+`@onkeydown`), foco (`:focus-within`/`:focus-visible`), touch target de 44px e tipografia — via
+seletores agrupados em `cards.css` (`.activity-card, .habit-card { ... }`), divergindo apenas onde a
+entidade realmente diverge: Habits têm dois botões de pontuação (`+`/`−`) em vez de um único
+checkbox de conclusão, porque "pontuar um hábito" e "concluir uma tarefa" não são a mesma ação.
+Forçar os dois em um único componente exigiria condicionais para a divergência mais visível do
+produto (dois botões vs. um checkbox) sem eliminar duplicação real. `BeeDaySortable` já fornece o
+contrato de coleção compartilhado (`role="list"`/`role="listitem"`, reordenação, virtualização
+opcional) consumido identicamente pelas quatro colunas do board (`Home.razor`).
+
+O `ProjectWorkspace` é um arquétipo à parte, não uma variação de card: é uma lista compacta de
+linhas (`.project-workspace__todo`) dentro de um painel de navegação, não uma grade de cards. Antes
+desta Sprint, essa lista não compartilhava a affordance de conclusão do arquétipo de card
+(EXP32-F004, corrigido acima) — a correção reutiliza deliberadamente o mesmo par de classes de
+checkbox do arquétipo de card (`activity-card__checkbox`/`activity-card__checkbox-glyph`) em vez de
+criar um terceiro estilo de checkbox, sem forçar a linha inteira a virar um `ActivityCard`,
+respeitando a divergência genuína de layout (linha compacta vs. card).
+
+Nenhum shell de coleção órfão ou duplicado foi encontrado além do já corrigido em EXP32-F003/F004.
+
+**Transactions e tags (Wallet), lidos por completo para fechar o restante do Scope da Issue #251:**
+`TransactionCard.razor` e `WalletTagManager.razor` já usam `BeeDayCard` com o mesmo contrato de
+interação (`role="button"`, `tabindex="0"`, `@onkeydown` com Enter/Space, foco visível herdado do
+componente compartilhado) — nenhuma implementação paralela de card. Divergem legitimamente do
+arquétipo Habit/Activity: a ação primária é abrir um editor (não concluir/pontuar), então nenhum dos
+dois expõe checkbox/botão de pontuação — um terceiro arquétipo de card genuíno ("card que abre
+editor"), não uma inconsistência a corrigir. Ambos já reusam foundations existentes
+(`BeeDayEmptyState` para a lista vazia de tags, `BeeDayButton` para a ação de criar). Nenhuma
+normalização adicional de metadata/status/action placement foi necessária nessas duas coleções.
+
+---
+
 ## 7. Achados pré-existentes roteados para dentro da EPIC 32
 
 | ID original | Ledger de origem | Achado | Sprint EPIC 32 |
@@ -1260,7 +1324,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.4 — Buttons & Action Hierarchy | EXP32-F001 — `FIXED` nesta Sprint |
 | 32.5 — Forms & Input Experience | EXP32-F005 — `FIXED` nesta Sprint; EXP32-F007 — `FIXED` nesta Sprint; EXP32-F021 — novo, `FIXED` nesta Sprint; EXP32-F006 (cross-ref), EXP32-F011 (cross-ref), EXP32-F012 (cross-ref) |
 | 32.6 — Modal & Dialog Experience | EXP32-F022, EXP32-F023 — ambos novos, `FIXED` nesta Sprint; EXP32-F024 — novo, `DISCOVERED` (não roteada — latente, sem Sprint dona); EXP32-F025 — novo, `ACCEPTED` (exceção documentada); EXP32-F002 (cross-ref, não corrigido — pertence à 32.13) |
-| 32.7 — Lists, Cards & Collection Patterns | EXP32-F003, EXP32-F004 |
+| 32.7 — Lists, Cards & Collection Patterns | EXP32-F003, EXP32-F004 — ambos `FIXED` nesta Sprint |
 | 32.8 — Search, Filters & Sorting | EXP32-F013 |
 | 32.9 — Loading & Perceived Performance | gap de evidência registrado em §9 (sem achado novo) |
 | 32.10 — Empty States & First-Use Experience | EXP32-F013 (cross-ref) |

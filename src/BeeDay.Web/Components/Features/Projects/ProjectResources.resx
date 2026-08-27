@@ -66,6 +66,8 @@
   <data name="TodosHeading" xml:space="preserve"><value>To-Dos</value></data>
   <data name="TodosSubtitle" xml:space="preserve"><value>Break this project into clear, executable steps.</value></data>
   <data name="AddTodoAriaLabel" xml:space="preserve"><value>Add To-Do</value></data>
+  <data name="TodoCompleteAriaLabel" xml:space="preserve"><value>Complete {0}</value></data>
+  <data name="TodoMarkIncompleteAriaLabel" xml:space="preserve"><value>Mark {0} as incomplete</value></data>
   <data name="HideTodosButton" xml:space="preserve"><value>Hide</value></data>
   <data name="ShowTodosButton" xml:space="preserve"><value>Show</value></data>
   <data name="NoTodosYetTitle" xml:space="preserve"><value>No To-Dos yet</value></data>

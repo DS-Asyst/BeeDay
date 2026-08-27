@@ -5,6 +5,31 @@ namespace BeeDay.Web.Tests.Components.Dashboard;
 
 public sealed class DashboardColumnTests
 {
+    private static string Root
+    {
+        get
+        {
+            var directory = new DirectoryInfo(AppContext.BaseDirectory);
+            while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "BeeDay.slnx")))
+            {
+                directory = directory.Parent;
+            }
+            return directory?.FullName ?? throw new InvalidOperationException("Repository root not found.");
+        }
+    }
+
+    // EXP32-F003 (Sprint 32.7): focusing a card's own interactive element (e.g. a Habit's score
+    // button) must not also draw a second, redundant focus ring around the whole column via
+    // :focus-within — every interactive descendant already carries its own focus indication
+    // (.habit-card/.activity-card:focus-within, .beeday-icon-toggle:focus-visible).
+    [Fact]
+    public void DoesNotDeclareFocusWithinOnTheColumnItself()
+    {
+        var css = File.ReadAllText(Path.Combine(Root, "src", "BeeDay.Web", "Components", "Features", "Dashboard", "Components", "DashboardColumn.razor.css"));
+
+        Assert.DoesNotContain(".dashboard-column:focus-within", css, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void RendersActiveViewByDefaultWithoutLegacyCompletedSection()
     {
