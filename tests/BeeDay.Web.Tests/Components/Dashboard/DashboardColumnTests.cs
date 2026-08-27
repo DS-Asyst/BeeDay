@@ -100,7 +100,7 @@ public sealed class DashboardColumnTests
             .Add(component => component.OnClearFilter, () => cleared = true)));
 
         var button = cut.Find(".dashboard-column__clear-filter");
-        Assert.Equal("Clear search", button.TextContent.Trim());
+        Assert.Equal("Clear filter", button.TextContent.Trim());
 
         await button.ClickAsync();
 

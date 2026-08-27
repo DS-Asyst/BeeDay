@@ -1347,7 +1347,7 @@ paralelo para o Dashboard:
 
 Classificação dos quatro estados exigida pelo Required Work #2 já está completa desde a 32.8/32.9:
 `DISCOVERED`→vazio genuíno (texto/CTA de criação já existente por coluna), sem-resultados-de-filtro
-(`NoFilterResultsTitle`/`Description` + o novo CTA "Clear search"), e erro (`_errorMessage`/`BeeDayEmptyState`
+(`NoFilterResultsTitle`/`Description` + o novo CTA "Clear filter"), e erro (`_errorMessage`/`BeeDayEmptyState`
 não é usado para mascarar falhas — confirmado por leitura de `Home.razor`/`DashboardState`, que não
 têm um caminho de erro renderizado como estado vazio).
 
@@ -1432,7 +1432,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.7 — Lists, Cards & Collection Patterns | EXP32-F003, EXP32-F004 — ambos `FIXED` nesta Sprint |
 | 32.8 — Search, Filters & Sorting | EXP32-F013 — `FIXED` nesta Sprint |
 | 32.9 — Loading & Perceived Performance | gap de evidência registrado em §9 (sem achado novo); auditoria de código confirmou nenhum defeito de feedback ausente — ver §"Auditoria de loading & perceived performance" |
-| 32.10 — Empty States & First-Use Experience | EXP32-F013 (cross-ref) — CTA "Clear search" adicionado ao estado sem-resultados |
+| 32.10 — Empty States & First-Use Experience | EXP32-F013 (cross-ref) — CTA "Clear filter" adicionado ao estado sem-resultados |
 | 32.11 — Errors, Recovery & User Feedback | EXP32-F007 (cross-ref) |
 | 32.12 — Toasts, Notifications & Confirmation Feedback | nenhum achado novo |
 | 32.13 — Focus, Keyboard & Interaction Accessibility | EXP32-F001 (cross-ref), EXP32-F002, EXP32-F008, EXP32-F009, EXP32-F010, EXP32-F020 |
