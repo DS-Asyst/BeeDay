@@ -80,6 +80,24 @@
     white-space: nowrap;
 }
 
+/* Sprint 32.11: a delete-mutation failure must be visible/announced inside this dialog itself —
+   focus stays trapped here (DialogFocusScope) while the dialog remains open on failure. */
+.delete-confirmation__error {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 1.45rem;
+    padding: .95rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--beeday-color-danger) 30%, white);
+    border-radius: var(--beeday-radius-sm);
+    background: color-mix(in srgb, var(--beeday-color-danger) 7%, white);
+    color: var(--beeday-color-danger);
+    font-weight: var(--beeday-font-weight-bold);
+    text-align: left;
+}
+
 .delete-confirmation__warning {
     display: flex;
     align-items: flex-start;

@@ -25,6 +25,7 @@ public partial class EditorModalShell : IAsyncDisposable
     [Parameter] public string? SubmitLabel { get; set; }
     [Parameter] public bool ShowDelete { get; set; }
     [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public string? ErrorMessage { get; set; }
     [Parameter] public RenderFragment? HeroContent { get; set; }
     [Parameter] public RenderFragment? BodyContent { get; set; }
     [Parameter] public RenderFragment? SecondaryAction { get; set; }

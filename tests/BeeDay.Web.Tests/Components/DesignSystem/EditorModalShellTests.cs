@@ -168,6 +168,34 @@ public sealed class EditorModalShellTests : BunitContext
         Assert.False(cancelled);
     }
 
+    // Sprint 32.11: a mutation failure while this modal is open must be visible/announced *inside*
+    // it - the page behind the backdrop is unreachable to sighted users, and DialogFocusScope traps
+    // keyboard/screen-reader focus here regardless.
+    [Fact]
+    public void ErrorMessage_RendersAsAnAlertInsideTheDialog()
+    {
+        var cut = Render<EditorModalShell>(parameters => parameters
+            .Add(component => component.Model, new object())
+            .Add(component => component.Title, "Edit Transaction")
+            .Add(component => component.TitleId, "transaction-editor-title")
+            .Add(component => component.ErrorMessage, "Could not save the transaction."));
+
+        var alert = cut.Find(".editor-modal__error");
+        Assert.Equal("alert", alert.GetAttribute("role"));
+        Assert.Contains("Could not save the transaction.", alert.TextContent);
+    }
+
+    [Fact]
+    public void WhenErrorMessageIsNotSet_RendersNoErrorAlert()
+    {
+        var cut = Render<EditorModalShell>(parameters => parameters
+            .Add(component => component.Model, new object())
+            .Add(component => component.Title, "Edit Transaction")
+            .Add(component => component.TitleId, "transaction-editor-title"));
+
+        Assert.Empty(cut.FindAll(".editor-modal__error"));
+    }
+
     private sealed class RequiredFieldModel
     {
         [Required]

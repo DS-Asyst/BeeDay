@@ -66,6 +66,22 @@
     background: var(--beeday-color-surface);
 }
 
+/* Sprint 32.11: a mutation failure while this modal is open must be visible/announced *inside*
+   the dialog boundary (focus is trapped here via DialogFocusScope) — a page-level error banner
+   behind the backdrop is unreachable to sighted and keyboard/screen-reader users alike. */
+.editor-modal__error {
+    display: flex;
+    align-items: center;
+    gap: var(--beeday-spacing-sm);
+    margin: 0 1.4rem;
+    padding: .65rem .9rem;
+    border-radius: var(--beeday-radius-md);
+    background: var(--beeday-color-danger-soft);
+    color: var(--beeday-color-danger);
+    font-size: .85rem;
+    font-weight: 600;
+}
+
 .editor-modal__hero {
     display: grid;
     gap: .9rem;

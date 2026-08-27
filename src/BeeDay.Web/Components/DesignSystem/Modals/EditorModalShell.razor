@@ -22,6 +22,14 @@
                                Class="editor-modal__submit-action editor-modal__header-save">@(SubmitLabel ?? Localizer["EditorModalSubmitDefault"])</BeeDayButton>
             </header>
 
+            @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+            {
+                <div class="editor-modal__error" role="alert">
+                    <BeeDayIcon Name="BeeDayIconName.Warning" Size="BeeDayIconSize.Small" Color="BeeDayIconColor.Danger" Decorative="true" />
+                    <span>@ErrorMessage</span>
+                </div>
+            }
+
             <div class="editor-modal__content">
                 @HeroContent
                 @BodyContent

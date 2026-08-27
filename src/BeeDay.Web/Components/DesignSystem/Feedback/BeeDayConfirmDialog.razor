@@ -26,6 +26,14 @@
                     <p class="delete-confirmation__item-title">“@ItemTitle”</p>
                 }
 
+                @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+                {
+                    <div class="delete-confirmation__error" role="alert">
+                        <BeeDayIcon Name="BeeDayIconName.Warning" Size="BeeDayIconSize.Small" Color="BeeDayIconColor.Danger" Decorative="true" />
+                        <span>@ErrorMessage</span>
+                    </div>
+                }
+
                 @if (!string.IsNullOrWhiteSpace(Warning))
                 {
                     <div class="delete-confirmation__warning">
@@ -72,6 +80,7 @@
     [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
     [Parameter, EditorRequired] public string Message { get; set; } = string.Empty;
     [Parameter] public string? ItemTitle { get; set; }
+    [Parameter] public string? ErrorMessage { get; set; }
     [Parameter] public string? Warning { get; set; }
     [Parameter] public string? WarningDetails { get; set; }
     [Parameter] public string? ConfirmLabel { get; set; }
