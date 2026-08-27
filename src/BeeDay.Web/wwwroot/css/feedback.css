@@ -14,7 +14,13 @@
 .delete-confirmation {
     position: relative;
     width: min(31rem, calc(100vw - 2rem));
-    overflow: hidden;
+    /* Sprint 32.6 (EPIC 32): was `overflow: hidden` with no max-height at any breakpoint - a
+       Warning/WarningDetails-bearing confirmation (see HabitEditorModal's delete flow) could clip
+       the Cancel/Confirm actions below the fold on short viewports with no way to reach them.
+       Same overflow idiom as .editor-modal in editor-modal.css: hidden on x (keeps the rounded
+       corners clipping .delete-confirmation__top-border), auto on y. */
+    max-height: calc(100vh - 1.25rem);
+    overflow: hidden auto;
     border: var(--beeday-border-width-subtle) solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-lg);
     background: var(--beeday-color-surface);
@@ -72,6 +78,24 @@
     font-weight: var(--beeday-font-weight-bold);
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+/* Sprint 32.11: a delete-mutation failure must be visible/announced inside this dialog itself —
+   focus stays trapped here (DialogFocusScope) while the dialog remains open on failure. */
+.delete-confirmation__error {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 1.45rem;
+    padding: .95rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--beeday-color-danger) 30%, white);
+    border-radius: var(--beeday-radius-sm);
+    background: color-mix(in srgb, var(--beeday-color-danger) 7%, white);
+    color: var(--beeday-color-danger);
+    font-weight: var(--beeday-font-weight-bold);
+    text-align: left;
 }
 
 .delete-confirmation__warning {

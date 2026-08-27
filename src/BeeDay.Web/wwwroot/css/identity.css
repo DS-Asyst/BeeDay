@@ -28,9 +28,13 @@
     line-height: 1;
 }
 
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast (text-muted is ~4.26:1,
+   below 4.5:1) - aligns every identity page (ConfirmEmail, EmailConfirmationSent, ForgotPassword,
+   ResendConfirmation, ResetPassword) with Login.razor.css's own scoped override, which already used
+   text-secondary for this same header-intro role. */
 .identity-header p {
     margin: .75rem 0 0;
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     line-height: 1.5;
 }
 

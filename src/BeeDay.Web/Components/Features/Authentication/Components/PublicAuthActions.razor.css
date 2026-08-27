@@ -34,3 +34,11 @@
 @media (max-width: 28rem) {
     .public-auth-actions__destination { min-height: 2.6rem; padding-inline: var(--beeday-spacing-sm); font-size: var(--beeday-font-size-xs); }
 }
+
+/* EXP32-F010 (Sprint 32.20): local fallback - the global safety net only shortens duration, it
+   does not remove the color/background/transform transition itself. */
+@media (prefers-reduced-motion: reduce) {
+    .public-auth-actions__close {
+        transition: none;
+    }
+}

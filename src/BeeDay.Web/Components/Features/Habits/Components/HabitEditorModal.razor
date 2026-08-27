@@ -5,6 +5,7 @@
                   TitleId="habit-editor-title"
                   SubmitLabel="@(IsEditing ? Localizer["SaveButtonLabel"] : Localizer["CreateButtonLabel"])"
                   ShowDelete="IsEditing"
+                  FallbackFocusSelector="@FallbackFocusSelector"
                   OnSubmit="Save"
                   OnCancel="Cancel"
                   OnDelete="RequestDelete">
@@ -33,8 +34,8 @@
     <BodyContent>
         <div class="editor-modal__body">
             <div class="habit-editor__direction" aria-label="@Localizer["DirectionAriaLabel"]">
-                <button type="button" class="habit-editor__direction-button @(AllowsPositive ? "active" : string.Empty)" @onclick="TogglePositive"><span>+</span><strong>@Localizer["DirectionPositive"]</strong></button>
-                <button type="button" class="habit-editor__direction-button @(AllowsNegative ? "active" : string.Empty)" @onclick="ToggleNegative"><span>−</span><strong>@Localizer["DirectionNegative"]</strong></button>
+                <button type="button" class="habit-editor__direction-button @(AllowsPositive ? "active" : string.Empty)" aria-pressed="@PositiveAriaPressed" @onclick="TogglePositive"><span>+</span><strong>@Localizer["DirectionPositive"]</strong></button>
+                <button type="button" class="habit-editor__direction-button @(AllowsNegative ? "active" : string.Empty)" aria-pressed="@NegativeAriaPressed" @onclick="ToggleNegative"><span>−</span><strong>@Localizer["DirectionNegative"]</strong></button>
             </div>
             <BeeDaySelect TValue="HabitDifficulty"
                            Id="habit-difficulty"

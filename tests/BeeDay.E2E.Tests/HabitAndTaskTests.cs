@@ -118,6 +118,91 @@ public sealed class HabitAndTaskTests(PlaywrightAppFixture fixture) : E2ETestBas
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Habit: {title}" })).ToHaveCountAsync(0);
     }
 
+    // EPIC 32 Sprint 32.6 (Modal & Dialog Experience): BeeDayConfirmDialog's `.delete-confirmation`
+    // had `overflow: hidden` with no max-height at any breakpoint (feedback.css) - Warning +
+    // WarningDetails content (as rendered here, HabitEditorModal's delete flow) could push the
+    // Cancel/Confirm actions below the fold on a short viewport with no way to reach them. Forces
+    // an unusually short viewport to guarantee overflow would occur without the fix, then proves
+    // the Confirm action is both within the viewport bounds and actually clickable - not just
+    // present in the DOM - which source inspection of the CSS alone cannot establish.
+    [Fact]
+    public async Task DeleteHabitConfirmation_RemainsScrollableAndActionableAtConstrainedViewportHeight()
+    {
+        await LoginToDailyAsync();
+        var title = $"E2E Habit Scroll {Guid.NewGuid():N}"[..24];
+
+        await OpenActivityMenuAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Habit" }).ClickAsync();
+        var dialog = Page.GetByRole(AriaRole.Dialog);
+        await dialog.GetByLabel("Title").FillAsync(title);
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
+        await Expect(dialog).ToBeHiddenAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Habit: {title}" }).ClickAsync();
+        await Expect(dialog).ToBeVisibleAsync();
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Delete", Exact = true }).ClickAsync();
+
+        var confirmation = Page.GetByRole(AriaRole.Alertdialog);
+        await Expect(confirmation).ToBeVisibleAsync();
+
+        await Page.SetViewportSizeAsync(390, 320);
+
+        // Confirms the 320px viewport genuinely forces overflow inside the panel itself (not just
+        // that the button happens to already fit) - this is what `overflow: hidden` (no max-height)
+        // would have made impossible to recover from before the fix.
+        var overflows = await confirmation.EvaluateAsync<bool>("el => el.scrollHeight > el.clientHeight");
+        Assert.True(overflows, "Expected the confirmation panel content to exceed its own box at a 320px viewport - test setup no longer reproduces the original clipping scenario.");
+
+        var confirmButton = confirmation.GetByRole(AriaRole.Button, new() { Name = "Delete Habit" });
+        await confirmButton.ScrollIntoViewIfNeededAsync();
+
+        var box = await confirmButton.BoundingBoxAsync();
+        Assert.NotNull(box);
+        Assert.True(box!.Y >= 0 && box.Y + box.Height <= 320, $"Confirm action (top {box.Y}, bottom {box.Y + box.Height}) is not fully within the 320px viewport after scrolling - not reachable without the scroll fix.");
+
+        await confirmButton.ClickAsync();
+
+        await Expect(dialog).ToBeHiddenAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = $"Edit Habit: {title}" })).ToHaveCountAsync(0);
+    }
+
+    // EPIC 32 Sprint 32.4 (EXP32-F001): the direction toggle buttons only communicated their
+    // enabled/disabled state via the CSS "active" class, so a screen reader user had no way to
+    // know whether Positive/Negative was currently on. bUnit already proves aria-pressed tracks
+    // HabitDirection at the component level (HabitEditorModalTests); this proves it renders
+    // correctly end-to-end in a real running app, not just from source inspection.
+    [Fact]
+    public async Task HabitDirectionButtons_ExposeAriaPressedAndStayInSyncAfterToggling()
+    {
+        await LoginToDailyAsync();
+
+        await OpenActivityMenuAsync();
+        await Page.GetByRole(AriaRole.Menuitem, new() { Name = "Habit" }).ClickAsync();
+
+        var dialog = Page.GetByRole(AriaRole.Dialog);
+        var positiveButton = dialog.Locator(".habit-editor__direction-button").First;
+        var negativeButton = dialog.Locator(".habit-editor__direction-button").Nth(1);
+
+        // A brand-new Habit defaults to HabitDirection.Both — both toggles start pressed.
+        await Expect(positiveButton).ToHaveAttributeAsync("aria-pressed", "true");
+        await Expect(negativeButton).ToHaveAttributeAsync("aria-pressed", "true");
+
+        // Turning Positive off leaves Negative as the only enabled direction.
+        await positiveButton.ClickAsync();
+        await Expect(positiveButton).ToHaveAttributeAsync("aria-pressed", "false");
+        await Expect(negativeButton).ToHaveAttributeAsync("aria-pressed", "true");
+
+        // Turning Positive back on returns to Both.
+        await positiveButton.ClickAsync();
+        await Expect(positiveButton).ToHaveAttributeAsync("aria-pressed", "true");
+        await Expect(negativeButton).ToHaveAttributeAsync("aria-pressed", "true");
+
+        // Turning Negative off from Both leaves Positive as the only enabled direction.
+        await negativeButton.ClickAsync();
+        await Expect(positiveButton).ToHaveAttributeAsync("aria-pressed", "true");
+        await Expect(negativeButton).ToHaveAttributeAsync("aria-pressed", "false");
+    }
+
     [Fact]
     public async Task CreateAndCompleteTask_TogglesCompletion()
     {

@@ -11,6 +11,7 @@ public partial class ProjectEditorModal
     [Parameter] public EventCallback<ProjectEditorModel> OnSave { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public EventCallback OnDelete { get; set; }
+    [Parameter] public string? FallbackFocusSelector { get; set; }
     [Parameter] public EventCallback OnOpenProject { get; set; }
     private bool showDeleteConfirmation;
     private Task Save() => OnSave.InvokeAsync(Model);

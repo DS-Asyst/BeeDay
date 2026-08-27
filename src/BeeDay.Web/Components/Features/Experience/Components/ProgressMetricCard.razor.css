@@ -1,5 +1,6 @@
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast (text-muted is ~4.26:1, below 4.5:1). */
 .progress-metric-card { display: grid; gap: var(--beeday-spacing-md); }
 .progress-metric-card__header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--beeday-spacing-smd); }
-.progress-metric-card__header span { color: var(--beeday-color-text-muted); font-size: var(--beeday-font-size-sm); font-weight: 700; }
+.progress-metric-card__header span { color: var(--beeday-color-text-secondary); font-size: var(--beeday-font-size-sm); font-weight: 700; }
 .progress-metric-card__header strong { color: var(--beeday-color-text); font-size: var(--beeday-font-size-lg); }
-.progress-metric-card p { margin: 0; color: var(--beeday-color-text-muted); font-size: var(--beeday-font-size-sm); }
+.progress-metric-card p { margin: 0; color: var(--beeday-color-text-secondary); font-size: var(--beeday-font-size-sm); }

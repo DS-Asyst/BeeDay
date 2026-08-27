@@ -105,8 +105,11 @@
     gap: 0.5rem;
 }
 
+/* EXP32-F009 (Sprint 32.20): text-muted (#817789) over surface (#fff) is ~4.26:1, below the 4.5:1
+   AA threshold for normal text - this 12px/regular-weight label does not qualify for the 3:1
+   large-text exemption. text-secondary (#514858, ~8.69:1) is the established AA-safe replacement. */
 .icon-catalog__card dt {
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     font-size: 0.75rem;
     text-transform: uppercase;
 }

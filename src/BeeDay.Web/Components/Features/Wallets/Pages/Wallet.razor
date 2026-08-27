@@ -83,15 +83,16 @@ else
     </div>
 }
 
-<TransactionFormModal IsOpen="_isTransactionEditorOpen" IsEditing="@(_editingTransactionId is not null)" IsBusy="_interaction.IsBusy" Model="_transactionForm" Tags="_tags" OnSave="SaveTransactionAsync" OnCancel="CloseTransactionEditor" OnDeleteRequested="RequestDeleteCurrentTransaction" />
+<TransactionFormModal IsOpen="_isTransactionEditorOpen" IsEditing="@(_editingTransactionId is not null)" IsBusy="_interaction.IsBusy" ErrorMessage="@_transactionFormError" Model="_transactionForm" Tags="_tags" OnSave="SaveTransactionAsync" OnCancel="CloseTransactionEditor" OnDeleteRequested="RequestDeleteCurrentTransaction" />
 
-<TagFormModal IsOpen="_isTagEditorOpen" IsEditing="@(_editingTagId is not null)" IsBusy="_interaction.IsBusy" Model="_tagForm" OnSave="SaveTagFormAsync" OnCancel="CloseTagEditor" OnDeleteRequested="RequestDeleteCurrentTag" />
+<TagFormModal IsOpen="_isTagEditorOpen" IsEditing="@(_editingTagId is not null)" IsBusy="_interaction.IsBusy" ErrorMessage="@_tagFormError" Model="_tagForm" OnSave="SaveTagFormAsync" OnCancel="CloseTagEditor" OnDeleteRequested="RequestDeleteCurrentTag" />
 
 <BeeDayConfirmDialog IsOpen="@(_pendingDeleteTransaction is not null)"
                       IsBusy="_interaction.IsBusy"
                       Title="@Localizer["DeleteTransactionTitle"]"
                       Message="@Localizer["DeleteTransactionMessage"]"
                       ItemTitle="@_pendingDeleteTransaction?.Description"
+                      ErrorMessage="@_transactionFormError"
                       Warning="@Localizer["DeleteTransactionWarning"]"
                       ConfirmLabel="@Localizer["DeleteTransactionTitle"]"
                       OnConfirm="DeleteTransactionAsync"
@@ -102,6 +103,7 @@ else
                       Title="@Localizer["DeleteTagTitle"]"
                       Message="@Localizer["DeleteTagMessage"]"
                       ItemTitle="@_pendingDeleteTag?.Name"
+                      ErrorMessage="@_tagFormError"
                       Warning="@Localizer["DeleteTagWarning"]"
                       ConfirmLabel="@Localizer["DeleteTagTitle"]"
                       OnConfirm="DeleteTagAsync"
@@ -116,6 +118,12 @@ else
     private bool _highlightBalance;
     private string _statusAnnouncement = string.Empty;
     private string? _errorMessage;
+    // Sprint 32.11: distinct from _errorMessage above, which renders in the page-level banner —
+    // that banner sits behind the transaction/tag editor and delete-confirmation dialogs (both
+    // full-screen overlays with trapped focus), so a mutation failure while either is open must
+    // be surfaced through it instead, or it is never seen/announced at all.
+    private string? _transactionFormError;
+    private string? _tagFormError;
     private readonly WalletPageState _state = new();
     private readonly WalletInteractionState _interaction = new();
     private bool _isTransactionEditorOpen;
@@ -244,6 +252,7 @@ else
         if (_interaction.IsBusy) return;
         _editingTransactionId = null;
         _transactionForm = new() { TransactionDate = DateTime.Today, Type = TransactionType.Expense };
+        _transactionFormError = null;
         _isTransactionEditorOpen = true;
     }
 
@@ -260,6 +269,7 @@ else
             WalletTagId = transaction.WalletTagId,
             Notes = transaction.Notes
         };
+        _transactionFormError = null;
         _isTransactionEditorOpen = true;
     }
 
@@ -268,12 +278,13 @@ else
         if (_interaction.IsBusy) return;
         _isTransactionEditorOpen = false;
         _editingTransactionId = null;
+        _transactionFormError = null;
     }
 
     private async Task SaveTransactionAsync()
     {
         if (!_interaction.TryBegin("save-transaction")) return;
-        _errorMessage = null;
+        _transactionFormError = null;
         var wasEditing = _editingTransactionId is not null;
         try
         {
@@ -291,13 +302,12 @@ else
         }
         catch
         {
-            _errorMessage = Localizer["TransactionSaveErrorInline"];
-            Toast.ShowError(Localizer["TransactionSaveErrorToast"]);
+            _transactionFormError = Localizer["TransactionSaveErrorInline"];
         }
         finally { _interaction.End(); }
     }
 
-    private void RequestDeleteTransaction(TransactionResponse transaction) { if (!_interaction.IsBusy) _pendingDeleteTransaction = transaction; }
+    private void RequestDeleteTransaction(TransactionResponse transaction) { if (!_interaction.IsBusy) { _transactionFormError = null; _pendingDeleteTransaction = transaction; } }
 
     private void RequestDeleteCurrentTransaction()
     {
@@ -308,11 +318,12 @@ else
         _editingTransactionId = null;
         RequestDeleteTransaction(transaction);
     }
-    private void CancelDeleteTransaction() { if (!_interaction.IsBusy) _pendingDeleteTransaction = null; }
+    private void CancelDeleteTransaction() { if (!_interaction.IsBusy) { _pendingDeleteTransaction = null; _transactionFormError = null; } }
 
     private async Task DeleteTransactionAsync()
     {
         if (_pendingDeleteTransaction is null || !_interaction.TryBegin("delete-transaction")) return;
+        _transactionFormError = null;
         try
         {
             await Sender.Send(new DeleteTransactionCommand(_pendingDeleteTransaction.Id), _cts.Token);
@@ -326,8 +337,7 @@ else
         }
         catch
         {
-            _errorMessage = Localizer["TransactionDeleteErrorInline"];
-            Toast.ShowError(Localizer["TransactionDeleteErrorToast"]);
+            _transactionFormError = Localizer["TransactionDeleteErrorInline"];
         }
         finally { _interaction.End(); }
     }
@@ -337,6 +347,7 @@ else
         if (_interaction.IsBusy) return;
         _editingTagId = null;
         _tagForm = new();
+        _tagFormError = null;
         _isTagEditorOpen = true;
     }
 
@@ -345,6 +356,7 @@ else
         if (_interaction.IsBusy) return;
         _editingTagId = tag.Id;
         _tagForm = new() { Name = tag.Name, Color = tag.Color };
+        _tagFormError = null;
         _isTagEditorOpen = true;
     }
 
@@ -353,12 +365,13 @@ else
         if (_interaction.IsBusy) return;
         _isTagEditorOpen = false;
         _editingTagId = null;
+        _tagFormError = null;
     }
 
     private async Task SaveTagFormAsync()
     {
         if (!_interaction.TryBegin("save-tag")) return;
-        _errorMessage = null;
+        _tagFormError = null;
         var wasEditing = _editingTagId is not null;
         try
         {
@@ -376,13 +389,12 @@ else
         }
         catch
         {
-            _errorMessage = Localizer["TagSaveErrorInline"];
-            Toast.ShowError(Localizer["TagSaveErrorToast"]);
+            _tagFormError = Localizer["TagSaveErrorInline"];
         }
         finally { _interaction.End(); }
     }
 
-    private void RequestDeleteTag(WalletTagResponse tag) { if (!_interaction.IsBusy) _pendingDeleteTag = tag; }
+    private void RequestDeleteTag(WalletTagResponse tag) { if (!_interaction.IsBusy) { _tagFormError = null; _pendingDeleteTag = tag; } }
 
     private void RequestDeleteCurrentTag()
     {
@@ -393,11 +405,12 @@ else
         _editingTagId = null;
         RequestDeleteTag(tag);
     }
-    private void CancelDeleteTag() { if (!_interaction.IsBusy) _pendingDeleteTag = null; }
+    private void CancelDeleteTag() { if (!_interaction.IsBusy) { _pendingDeleteTag = null; _tagFormError = null; } }
 
     private async Task DeleteTagAsync()
     {
         if (_pendingDeleteTag is null || !_interaction.TryBegin("delete-tag")) return;
+        _tagFormError = null;
         try
         {
             await Sender.Send(new DeleteWalletTagCommand(_pendingDeleteTag.Id), _cts.Token);
@@ -410,8 +423,7 @@ else
         }
         catch
         {
-            _errorMessage = Localizer["TagDeleteErrorInline"];
-            Toast.ShowError(Localizer["TagDeleteErrorToast"]);
+            _tagFormError = Localizer["TagDeleteErrorInline"];
         }
         finally { _interaction.End(); }
     }

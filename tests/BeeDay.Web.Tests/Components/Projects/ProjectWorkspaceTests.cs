@@ -128,6 +128,49 @@ public sealed class ProjectWorkspaceTests : BunitContext
             cut.FindAll(".project-workspace__todo strong").Select(element => element.TextContent));
     }
 
+    // EXP32-F004 (Sprint 32.7): the ProjectWorkspace's To-Do row must expose the same inline
+    // completion affordance already available for the same entity on the Daily board's To-Dos
+    // column, instead of requiring the workspace to be closed to mark a To-Do done.
+    [Fact]
+    public void WhenOnToggleTodoHasNoDelegate_RendersNoCompletionControl()
+    {
+        var todo = CreateTodo("Escolher piso");
+        var project = CreateProject("Kitchen remodel", string.Empty, ProjectStatus.InProgress, [todo]);
+        var cut = Render<ProjectWorkspace>(parameters => parameters.Add(component => component.Project, project));
+
+        Assert.Empty(cut.FindAll(".project-workspace__todo-toggle"));
+    }
+
+    [Fact]
+    public void TodoToggle_InvokesOnToggleTodoWithTheTappedTodo()
+    {
+        TodoSummary? toggled = null;
+        var todo = CreateTodo("Escolher piso");
+        var project = CreateProject("Kitchen remodel", string.Empty, ProjectStatus.InProgress, [todo]);
+        var cut = Render<ProjectWorkspace>(parameters => parameters
+            .Add(component => component.Project, project)
+            .Add(component => component.OnToggleTodo, tapped => toggled = tapped));
+
+        cut.Find(".project-workspace__todo-toggle").Click();
+
+        Assert.Equal(todo, toggled);
+    }
+
+    [Theory]
+    [InlineData(false, "Complete Escolher piso")]
+    [InlineData(true, "Mark Escolher piso as incomplete")]
+    public void TodoToggle_ExposesCompletionStateThroughItsAccessibleName(bool completed, string expectedAriaLabel)
+    {
+        var todo = CreateTodo("Escolher piso", completed: completed);
+        var project = CreateProject("Kitchen remodel", string.Empty, ProjectStatus.InProgress, [todo]);
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => Render<ProjectWorkspace>(parameters => parameters
+            .Add(component => component.Project, project)
+            .Add(component => component.OnToggleTodo, _ => { })));
+
+        var toggle = cut.Find(".project-workspace__todo-toggle");
+        Assert.Equal(expectedAriaLabel, toggle.GetAttribute("aria-label"));
+    }
+
     [Fact]
     public void EscapeClosesTheWorkspaceThroughTheSharedDialogLifecycle()
     {

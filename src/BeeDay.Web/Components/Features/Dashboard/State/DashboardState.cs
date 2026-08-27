@@ -65,6 +65,16 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
         Changed?.Invoke();
     }
 
+    // Sprint 32.10 (EXP32-F013 follow-up): a single reset for every filter that can narrow the
+    // board to zero — search text and the Todos-only project context — so a column's "clear
+    // filter" action always recovers fully, regardless of which one caused the empty result.
+    public void ClearFilters()
+    {
+        search = string.Empty;
+        selectedProjectId = null;
+        Changed?.Invoke();
+    }
+
     private IEnumerable<TodoSummary> AllTodos => data?.Projects.SelectMany(project => project.Todos) ?? [];
 
     public int CompletedItems => data is null
@@ -98,6 +108,26 @@ public sealed class DashboardState(BeeDayWebService store, ToastService toastSer
         : data.Habits.Count + data.Tasks.Count + AllTodos.Count() + data.Projects.Count;
 
     public int FilteredItems => FilteredHabits.Count() + FilteredTasks.Count() + FilteredTodos.Count() + FilteredProjects.Count();
+
+    private bool IsSearchActive => !string.IsNullOrWhiteSpace(search);
+
+    // EXP32-F013 (Sprint 32.8): distinguishes "the search/filter narrowed an active collection to
+    // zero" from "this collection genuinely never had any active items" — the two previously
+    // rendered the identical empty-state text, so a user searching for an unmatched term could
+    // wrongly conclude they had no Tasks/To-Dos/Projects/Habits at all.
+    public bool HabitsFilteredToZero =>
+        IsSearchActive && !FilteredHabits.Any() && (data?.Habits.Count ?? 0) > 0;
+
+    public bool ActiveTasksFilteredToZero =>
+        IsSearchActive && !FilteredTasks.Any(item => !item.Completed) && (data?.Tasks.Count(item => !item.Completed) ?? 0) > 0;
+
+    public bool ActiveTodosFilteredToZero =>
+        (IsSearchActive || selectedProjectId is not null)
+            && !FilteredTodos.Any(item => !item.Completed)
+            && AllTodos.Count(item => !item.Completed) > 0;
+
+    public bool ActiveProjectsFilteredToZero =>
+        IsSearchActive && !FilteredProjects.Any(item => !item.Completed) && (data?.Projects.Count(item => !item.Completed) ?? 0) > 0;
 
     public Task InitializeAsync() => initializationTask ??= InitializeCoreAsync();
 

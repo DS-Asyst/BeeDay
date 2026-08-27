@@ -67,7 +67,7 @@ coverage-report/
 *.trx
 *.coverage
 *.coveragexml
-src/BeeDay.Web/App_Data/test-email-capture/
+src/BeeDay.Web/App_Data/
 
 #####################################################
 # NuGet
@@ -76,3 +76,13 @@ src/BeeDay.Web/App_Data/test-email-capture/
 *.nupkg
 *.snupkg
 packages/
+
+#####################################################
+# AI Agent Tooling (local-only, not repository content)
+#####################################################
+
+.claude/
+.agents/
+.codex/
+AGENTS.md
+CLAUDE.md

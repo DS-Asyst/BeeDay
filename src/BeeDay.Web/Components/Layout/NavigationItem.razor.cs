@@ -21,6 +21,14 @@ public partial class NavigationItem : IDisposable
     [Parameter] public string? Href { get; set; }
     [Parameter] public NavLinkMatch Match { get; set; } = NavLinkMatch.Prefix;
 
+    /// <summary>
+    /// Route mode only — an extra path that should also count as "current" for this item, for a page
+    /// reachable at more than one route (e.g. Account's <c>/account</c> compatibility alias for
+    /// <c>/settings</c>). <see cref="NavLink"/> itself only ever matches against <see cref="Href"/>,
+    /// so this only affects <see cref="AriaCurrentValue"/> and the manually-applied active class.
+    /// </summary>
+    [Parameter] public string? AlternateHref { get; set; }
+
     /// <summary>Route mode only — invoked in addition to normal navigation (e.g. to close a mobile drawer).</summary>
     [Parameter] public EventCallback OnNavigate { get; set; }
 
@@ -33,6 +41,8 @@ public partial class NavigationItem : IDisposable
     private string? AriaExpandedValue => AriaExpanded is null ? null : (AriaExpanded.Value ? "true" : "false");
 
     private string? AriaCurrentValue => Href is not null && IsCurrentRouteActive() ? "page" : null;
+
+    private string? ActiveClassValue => IsCurrentRouteActive() ? "is-active" : null;
 
     protected override void OnInitialized() => NavigationManager.LocationChanged += HandleLocationChanged;
 
@@ -49,7 +59,14 @@ public partial class NavigationItem : IDisposable
         }
 
         var relativePath = NormalizePath(NavigationManager.ToBaseRelativePath(NavigationManager.Uri));
-        var hrefPath = NormalizePath(Href);
+
+        return MatchesPath(relativePath, Href) ||
+            (AlternateHref is not null && MatchesPath(relativePath, AlternateHref));
+    }
+
+    private bool MatchesPath(string relativePath, string href)
+    {
+        var hrefPath = NormalizePath(href);
 
         return Match == NavLinkMatch.All
             ? string.Equals(relativePath, hrefPath, StringComparison.OrdinalIgnoreCase)

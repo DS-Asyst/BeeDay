@@ -1,7 +1,10 @@
 @page "/not-found"
 @attribute [AllowAnonymous]
 @layout MainLayout
+@rendermode InteractiveServer
 @inject IStringLocalizer<SharedResources> Localizer
 
-<h3>@Localizer["NotFoundTitle"]</h3>
+<PageTitle>@Localizer["NotFoundTitle"]</PageTitle>
+
+<h1>@Localizer["NotFoundTitle"]</h1>
 <p>@Localizer["NotFoundMessage"]</p>

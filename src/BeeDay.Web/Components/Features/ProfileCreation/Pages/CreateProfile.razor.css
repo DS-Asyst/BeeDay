@@ -19,9 +19,10 @@
     text-align: center;
 }
 
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast (text-muted is ~4.26:1, below 4.5:1). */
 .profile-panel__intro {
     margin: var(--beeday-spacing-sm) 0 var(--beeday-spacing-xl);
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     line-height: 1.5;
     text-align: center;
 }
@@ -29,7 +30,7 @@
 .profile-form { display: grid; gap: var(--beeday-spacing-md); }
 .profile-password-hint {
     margin: calc(-1 * var(--beeday-spacing-sm)) 0 0;
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     font-size: var(--beeday-font-size-sm);
     line-height: 1.45;
 }
@@ -63,4 +64,12 @@
 @media (max-width: 28rem) {
     .profile-panel__global-brand { margin-bottom: var(--beeday-spacing-lg); }
     .profile-panel__intro { margin-bottom: var(--beeday-spacing-lg); }
+}
+
+/* EXP32-F010 (Sprint 32.20): local fallback - the global safety net only shortens duration, it
+   does not remove the border-color/box-shadow transition itself. */
+@media (prefers-reduced-motion: reduce) {
+    .profile-nickname-field {
+        transition: none;
+    }
 }

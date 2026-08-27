@@ -45,6 +45,8 @@
     white-space: nowrap;
 }
 
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast (text-muted over this
+   badge's brand-primary-soft background is ~4.0:1, below 4.5:1). */
 .dashboard-column__count {
     display: grid;
     place-items: center;
@@ -52,7 +54,7 @@
     height: 1.65rem;
     padding: 0 .42rem;
     border-radius: var(--beeday-radius-sm);
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     background: var(--beeday-color-brand-primary-soft);
     font-size: .75rem;
     font-weight: 700;
@@ -80,21 +82,15 @@
     margin: .75rem;
 }
 
+.dashboard-column__clear-filter {
+    margin: 0 auto .75rem;
+}
 
 .dashboard-column__actions {
     display: flex;
     align-items: center;
     gap: .45rem;
     flex: 0 0 auto;
-}
-
-.dashboard-column {
-    transition: border-color var(--beeday-transition-normal), box-shadow var(--beeday-transition-normal);
-}
-
-.dashboard-column:focus-within {
-    border-color: var(--beeday-color-border-strong);
-    box-shadow: var(--beeday-shadow-sm);
 }
 
 .dashboard-column__header {
@@ -141,11 +137,6 @@
     border: 1px solid var(--beeday-color-border-strong) !important;
     border-radius: var(--beeday-radius-sm) !important;
     box-shadow: 0 1px 2px rgb(47 36 56 / 8%), 0 4px 12px rgb(47 36 56 / 7%) !important;
-}
-
-.dashboard-column:focus-within {
-    border-color: var(--beeday-color-brand-primary-light) !important;
-    box-shadow: var(--beeday-focus-ring), var(--beeday-shadow-sm) !important;
 }
 
 .dashboard-column__header {

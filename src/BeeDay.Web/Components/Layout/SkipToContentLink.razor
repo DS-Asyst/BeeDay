@@ -1,0 +1,7 @@
+@inject IStringLocalizer<LayoutResources> Localizer
+
+@* EXP32-F008 (Sprint 32.13): the first focusable element on every authenticated/public page,
+   letting a keyboard user jump straight to the main content region instead of tabbing through the
+   full sidebar/header navigation on every page load. Hidden until it receives focus (`.beeday-visually-hidden`
+   would hide it permanently, which defeats the purpose of a skip link). *@
+<a href="#main-content" class="skip-to-content-link">@Localizer["SkipToContentLabel"]</a>

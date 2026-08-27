@@ -27,8 +27,9 @@
     border-bottom: 2px solid rgb(51 40 58 / 12%);
 }
 
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast (text-muted is ~4.26:1, below 4.5:1). */
 .tutorial-progress {
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     font-family: var(--beeday-font-family);
     font-size: .72rem;
     font-weight: 700;
@@ -72,10 +73,11 @@
     line-height: .9;
 }
 
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast (text-muted is ~4.26:1, below 4.5:1). */
 .tutorial-copy {
     max-width: 34rem;
     margin: 1.25rem auto 1.75rem;
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     font-size: 1rem;
     line-height: 1.6;
 }

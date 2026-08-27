@@ -132,6 +132,12 @@ validações independentes (`DataAnnotations` no Blazor, `FluentValidation` no h
 delegando para a outra. Um erro só de Application aparece como feedback geral da feature
 (toast ou banner inline), não como `BeeDayValidationMessage` de campo.
 
+**Sprint 32.5 (EXP32-F021):** `EditorModalShell` também trata `OnInvalidSubmit` — um submit que falha
+`DataAnnotationsValidator` move o foco para o primeiro campo `.invalid` do diálogo (classe que os
+componentes `Input*` do Blazor já aplicam automaticamente), em vez de deixá-lo onde já estava (o
+botão de submit). Reutiliza o módulo JS que `DialogFocusScope` já carrega para o mesmo diálogo
+(`beeday-dialog-focus.js`); nenhum consumidor de `EditorModalShell` precisou de mudança.
+
 ## 8. Fontes consultadas
 
 - `src/BeeDay.Web/Components/DesignSystem/Forms/BeeDayInput.razor(.cs)`, `BeeDayCheckbox.razor(.cs)`,

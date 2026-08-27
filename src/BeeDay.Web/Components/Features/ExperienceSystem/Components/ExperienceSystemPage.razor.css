@@ -78,7 +78,8 @@
 ::deep .experience-system-swatch { display: grid; gap: var(--beeday-spacing-xs); width: 9rem; }
 ::deep .experience-system-swatch__chip { height: 4rem; border: var(--beeday-border-width-subtle) solid var(--beeday-color-border); border-radius: var(--beeday-radius-lg); }
 ::deep .experience-system-swatch__name { color: var(--beeday-color-text-primary); font-weight: var(--beeday-font-weight-bold); font-size: var(--beeday-font-size-sm); }
-::deep .experience-system-swatch__value { color: var(--beeday-color-text-muted); font-size: var(--beeday-font-size-xs); }
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast (text-muted is ~4.26:1, below 4.5:1). */
+::deep .experience-system-swatch__value { color: var(--beeday-color-text-secondary); font-size: var(--beeday-font-size-xs); }
 
 @media (max-width: 40rem) {
     ::deep .experience-system-callouts { grid-template-columns: 1fr; }

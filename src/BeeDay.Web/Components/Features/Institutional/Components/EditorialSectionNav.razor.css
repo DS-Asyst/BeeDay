@@ -41,3 +41,11 @@
 @media (max-width: 30rem) {
     .editorial-section-nav ul { gap: var(--beeday-spacing-sm) var(--beeday-spacing-md); }
 }
+
+/* Sprint 32.18: local fallback - the global safety net only shortens duration, it does not remove
+   the border-color transition itself. */
+@media (prefers-reduced-motion: reduce) {
+    .editorial-section-nav__link {
+        transition: none;
+    }
+}

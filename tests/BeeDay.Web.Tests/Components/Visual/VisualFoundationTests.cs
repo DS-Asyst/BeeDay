@@ -397,6 +397,145 @@ public sealed class VisualFoundationTests
         Assert.Contains("background: #d5eefd;", home, StringComparison.Ordinal);
     }
 
+    // EXP32-F010 (Sprint 32.15): 4 of the 8 stylesheets identified in Sprint 25.6 as depending only
+    // on the global .01ms safety net (docs/ux/02-accessibility.md §6) were Daily-journey owned -
+    // Habit, ProjectWorkspace, and the shared activity/habit card foundation - plus a 4th gap this
+    // same Sprint 32.13 introduced (the skip link's own transition). Each now has a local
+    // transition:none fallback alongside the transition it neutralizes.
+    [Fact]
+    public void DailyJourneyStylesheetsHaveLocalReducedMotionFallbacks()
+    {
+        var cards = ReadWebFile("wwwroot", "css", "cards.css");
+        var projectWorkspace = ReadWebFile("Components", "Features", "Projects", "Components", "ProjectWorkspace.razor.css");
+        var habitEditorModal = ReadWebFile("Components", "Features", "Habits", "Components", "HabitEditorModal.razor.css");
+        var utilities = ReadWebFile("wwwroot", "css", "utilities.css");
+
+        Assert.Contains("transition:transform .12s ease,background-color .12s ease,color .12s ease", cards, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", cards, StringComparison.Ordinal);
+
+        Assert.Contains("transition: color .12s ease, border-color .12s ease, background-color .12s ease;", projectWorkspace, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", projectWorkspace, StringComparison.Ordinal);
+
+        Assert.Contains("transition: transform 140ms ease, background-color 140ms ease;", habitEditorModal, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", habitEditorModal, StringComparison.Ordinal);
+
+        Assert.Contains(".skip-to-content-link", utilities, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", utilities, StringComparison.Ordinal);
+    }
+
+    // Sprint 32.18: EditorialSectionNav.razor.css (the 12 institutional/footer pages' section nav)
+    // was the remaining stylesheet from the current 8-file inventory not owned by Daily (32.15),
+    // Wallet, or Auth/ProfileCreation (32.5, out of this Sprint's Public Pages scope) - a genuine
+    // Public Pages gap, fixed here.
+    [Fact]
+    public void EditorialSectionNavHasALocalReducedMotionFallback()
+    {
+        var editorialSectionNav = ReadWebFile("Components", "Features", "Institutional", "Components", "EditorialSectionNav.razor.css");
+
+        Assert.Contains("transition: border-color var(--beeday-transition-fast);", editorialSectionNav, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", editorialSectionNav, StringComparison.Ordinal);
+    }
+
+    // EXP32-F011 (Sprint 32.19): editor-modal.css used to duplicate .beeday-field__control's exact
+    // rest-state properties (width/min-height/padding/border/background/color/transition) under
+    // .editor-modal__hero input/.editor-modal__field input/select - byte-for-byte redundant, since
+    // every field inside an editor modal already carries .beeday-field__control by default
+    // (BeeDayInput/BeeDaySelect/BeeDayDateInput/BeeDayTextArea's own InputCssClass default). Proves
+    // the duplicate rule is gone while forms.css remains the single owner of that base styling; the
+    // hover/focus overrides (a genuinely different, currently-live color treatment) are deliberately
+    // left alone and not asserted against here.
+    [Fact]
+    public void EditorModalFieldsNoLongerDuplicateTheSharedFieldControlBaseStyling()
+    {
+        var editorModal = ReadWebFile("wwwroot", "css", "editor-modal.css");
+        var forms = ReadWebFile("wwwroot", "css", "forms.css");
+
+        Assert.Contains(".beeday-field__control {", forms, StringComparison.Ordinal);
+        Assert.DoesNotContain(".editor-modal__hero input,", editorModal, StringComparison.Ordinal);
+        Assert.DoesNotContain(".editor-modal__field input,", editorModal, StringComparison.Ordinal);
+        Assert.DoesNotContain(".editor-modal__field select {", editorModal, StringComparison.Ordinal);
+        // The editor-modal-specific textarea height override is an intentional divergence from
+        // forms.css's 7rem default, not duplication - must survive the consolidation.
+        Assert.Contains(".editor-modal__hero textarea {", editorModal, StringComparison.Ordinal);
+        Assert.Contains("min-height: 5rem;", editorModal, StringComparison.Ordinal);
+        // Hover/focus color treatment is intentionally untouched by this consolidation.
+        Assert.Contains(".editor-modal__hero input:hover,", editorModal, StringComparison.Ordinal);
+        Assert.Contains(".editor-modal__hero input:focus,", editorModal, StringComparison.Ordinal);
+    }
+
+    // EXP32-F010 (Sprint 32.20, closing the last of the original 8-file inventory): the
+    // Auth/ProfileCreation portion was routed to 32.5 and left DISCOVERED after 32.15 closed the
+    // Daily portion. PublicAuthActions.razor.css's close-button transition and
+    // CreateProfile.razor.css's nickname-field focus transition had no local fallback.
+    [Fact]
+    public void AuthAndProfileCreationStylesheetsHaveLocalReducedMotionFallbacks()
+    {
+        var publicAuthActions = ReadWebFile("Components", "Features", "Authentication", "Components", "PublicAuthActions.razor.css");
+        var createProfile = ReadWebFile("Components", "Features", "ProfileCreation", "Pages", "CreateProfile.razor.css");
+
+        Assert.Contains(".public-auth-actions__close {", publicAuthActions, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", publicAuthActions, StringComparison.Ordinal);
+        Assert.Contains(".profile-nickname-field {", createProfile, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", createProfile, StringComparison.Ordinal);
+    }
+
+    // EXP32-F009 (Sprint 32.20): full-repository inventory of --beeday-color-text-muted
+    // (~4.26:1 over surface, below the 4.5:1 AA threshold for normal text) found 14 rule sites
+    // rendering genuine normal text with it, migrated here to --beeday-color-text-secondary
+    // (~8.69:1, confirmed AA-safe by DesignSystemContrastTests). The remaining text-muted usages
+    // are deliberately preserved - icon glyph colors (1.4.11 graphical-object threshold, 3:1,
+    // already met) and disabled/readonly control state (WCAG's inactive-UI-component exemption) -
+    // asserted below so a future revert of either category is caught.
+    [Fact]
+    public void TextMutedNoLongerStylesNormalTextAndOnlyRemainsOnExemptIconOrDisabledContexts()
+    {
+        var migrated = new (string Label, string[] Segments, string Selector)[]
+        {
+            ("IconCatalog", ["Components", "DesignSystem", "Pages", "IconCatalog.razor.css"], ".icon-catalog__card dt {"),
+            ("BeeDayProgressBar", ["Components", "DesignSystem", "Progress", "BeeDayProgressBar.razor.css"], ".beeday-progress__heading {"),
+            ("DashboardColumn", ["Components", "Features", "Dashboard", "Components", "DashboardColumn.razor.css"], ".dashboard-column__count {"),
+            ("DashboardHome", ["Components", "Features", "Dashboard", "Pages", "DashboardHome.razor.css"], ".product-home__project p, .product-home__status p {"),
+            ("ExperienceBar", ["Components", "Features", "Experience", "Components", "ExperienceBar.razor.css"], ".experience-card__label {"),
+            ("ProgressMetricCard", ["Components", "Features", "Experience", "Components", "ProgressMetricCard.razor.css"], ".progress-metric-card__header span {"),
+            ("ExperienceSystemPage", ["Components", "Features", "ExperienceSystem", "Components", "ExperienceSystemPage.razor.css"], "::deep .experience-system-swatch__value {"),
+            ("Tutorial", ["Components", "Features", "Onboarding", "Pages", "Tutorial.razor.css"], ".tutorial-progress {"),
+            ("CreateProfile", ["Components", "Features", "ProfileCreation", "Pages", "CreateProfile.razor.css"], ".profile-panel__intro {"),
+            ("ProjectWorkspaceHeader", ["Components", "Features", "Projects", "Components", "ProjectWorkspace.razor.css"], ".project-workspace__header p {"),
+            ("ProjectWorkspaceEmpty", ["Components", "Features", "Projects", "Components", "ProjectWorkspace.razor.css"], ".project-workspace__empty {"),
+            ("DesignSystemPageHeader", ["wwwroot", "css", "design-system.css"], ".beeday-page-header p,"),
+            ("IdentityHeader", ["wwwroot", "css", "identity.css"], ".identity-header p {"),
+            ("SettingsHint", ["wwwroot", "css", "settings.css"], ".beeday-settings-form__hint {"),
+            ("FormsPlaceholder", ["wwwroot", "css", "forms.css"], ".beeday-field__control::placeholder {"),
+        };
+
+        foreach (var (label, segments, selector) in migrated)
+        {
+            var css = ReadWebFile(segments);
+            var selectorIndex = css.IndexOf(selector, StringComparison.Ordinal);
+            Assert.True(selectorIndex >= 0, $"{label}: expected to find selector '{selector}'.");
+            var ruleEnd = css.IndexOf('}', selectorIndex);
+            var rule = css[selectorIndex..ruleEnd];
+            Assert.Contains("--beeday-color-text-secondary", rule, StringComparison.Ordinal);
+            Assert.DoesNotContain("--beeday-color-text-muted", rule, StringComparison.Ordinal);
+        }
+
+        // Exempt: icon glyph colors, not text (1.4.11 threshold already met).
+        var icon = ReadWebFile("Components", "DesignSystem", "Icons", "BeeDayIcon.razor.css");
+        Assert.Contains(".beeday-icon--color-muted { color: var(--beeday-color-text-muted); }", icon, StringComparison.Ordinal);
+
+        var cards = ReadWebFile("wwwroot", "css", "cards.css");
+        Assert.Contains(".activity-card__project-status {", cards, StringComparison.Ordinal);
+        Assert.Contains(".habit-card__metrics-icon {", cards, StringComparison.Ordinal);
+
+        // Exempt: disabled/readonly control state (WCAG inactive-UI-component exemption).
+        var designSystem = ReadWebFile("wwwroot", "css", "design-system.css");
+        Assert.Contains(".beeday-button:disabled {", designSystem, StringComparison.Ordinal);
+
+        var forms = ReadWebFile("wwwroot", "css", "forms.css");
+        Assert.Contains(".beeday-checkbox:has(.beeday-checkbox__control:disabled)", forms, StringComparison.Ordinal);
+        Assert.Contains(".beeday-field__control:disabled,", forms, StringComparison.Ordinal);
+    }
+
     private static string ReadWebFile(params string[] segments) =>
         File.ReadAllText(Path.Combine([RepoRoot, "src", "BeeDay.Web", .. segments]));
 

@@ -61,6 +61,41 @@ public sealed class LoginTests
         Assert.DoesNotContain("Forgot password?", cut.Markup, StringComparison.Ordinal);
     }
 
+    // EPIC 32 Sprint 32.5 (EXP32-F007): Login posts through a plain HTML form (not EditForm), so
+    // an empty/invalid field falls back to the browser's native validation bubble, which showed
+    // the browser/OS language instead of beeday's selected culture. Proves the bubble's message
+    // now comes from the localized DesignSystemResources catalog (matching every other form's
+    // validation copy) rather than the browser default, for both required fields and email format.
+    [Fact]
+    public void EmailAndPasswordFields_HaveLocalizedNativeValidationMessages()
+    {
+        using var context = new BunitContext().WithLocalization();
+        var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<Login>());
+
+        var email = cut.Find("#login-email");
+        var password = cut.Find("#login-password");
+
+        Assert.Contains("Email is required.", email.GetAttribute("oninvalid"), StringComparison.Ordinal);
+        Assert.Contains("Enter a valid email address.", email.GetAttribute("oninvalid"), StringComparison.Ordinal);
+        Assert.Contains("Password is required.", password.GetAttribute("oninvalid"), StringComparison.Ordinal);
+        Assert.Equal("this.setCustomValidity('')", email.GetAttribute("oninput"));
+        Assert.Equal("this.setCustomValidity('')", password.GetAttribute("oninput"));
+    }
+
+    [Fact]
+    public void UnderPortugueseUiCulture_NativeValidationMessagesAreLocalized()
+    {
+        using var context = new BunitContext().WithLocalization();
+        var cut = BunitLocalizationSupport.WithUiCulture("pt-BR", () => context.Render<Login>());
+
+        var email = cut.Find("#login-email");
+        var password = cut.Find("#login-password");
+
+        Assert.Contains("O e-mail é obrigatório.", email.GetAttribute("oninvalid"), StringComparison.Ordinal);
+        Assert.Contains("Informe um endereço de e-mail válido.", email.GetAttribute("oninvalid"), StringComparison.Ordinal);
+        Assert.Contains("A senha é obrigatória.", password.GetAttribute("oninvalid"), StringComparison.Ordinal);
+    }
+
     [Fact]
     public void SigningInResource_WithApostrophesAndBackslashes_IsSafelyEscapedInTheInlineHandler()
     {

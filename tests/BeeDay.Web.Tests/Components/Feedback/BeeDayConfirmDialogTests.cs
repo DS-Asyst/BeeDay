@@ -168,6 +168,36 @@ public sealed class BeeDayConfirmDialogTests
         Assert.NotNull(actions.QuerySelector(".delete-confirmation__confirm-action"));
     }
 
+    // Sprint 32.11: a delete-mutation failure must be visible/announced inside this dialog itself
+    // - it stays open on failure (the caller never clears IsOpen from a catch block), and
+    // DialogFocusScope keeps keyboard/screen-reader focus trapped here regardless.
+    [Fact]
+    public void ErrorMessage_RendersAsAnAlertInsideTheDialog()
+    {
+        using var context = CreateContext();
+        var cut = context.Render<BeeDayConfirmDialog>(parameters => parameters
+            .Add(component => component.IsOpen, true)
+            .Add(component => component.Title, "Delete transaction")
+            .Add(component => component.Message, "Are you sure?")
+            .Add(component => component.ErrorMessage, "Could not delete the transaction."));
+
+        var alert = cut.Find(".delete-confirmation__error");
+        Assert.Equal("alert", alert.GetAttribute("role"));
+        Assert.Contains("Could not delete the transaction.", alert.TextContent);
+    }
+
+    [Fact]
+    public void WhenErrorMessageIsNotSet_RendersNoErrorAlert()
+    {
+        using var context = CreateContext();
+        var cut = context.Render<BeeDayConfirmDialog>(parameters => parameters
+            .Add(component => component.IsOpen, true)
+            .Add(component => component.Title, "Delete transaction")
+            .Add(component => component.Message, "Are you sure?"));
+
+        Assert.Empty(cut.FindAll(".delete-confirmation__error"));
+    }
+
     private static BunitContext CreateContext()
     {
         var context = new BunitContext().WithLocalization();

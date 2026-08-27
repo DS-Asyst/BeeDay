@@ -256,6 +256,31 @@ public sealed class WalletTests(PlaywrightAppFixture fixture) : E2ETestBase(fixt
         await Expect(transactionCard.GetByText("No tag")).ToBeVisibleAsync();
     }
 
+    // EPIC 32 Sprint 32.5 (Forms & Input Experience): discovered while auditing focus handling
+    // after validation errors - EditorModalShell's failed submit left focus on the Create button
+    // itself (Blazor's default OnInvalidSubmit behavior), never moving it to the invalid field.
+    // Notes is filled/focused first so the assertion proves the fix actively moves focus back to
+    // Description - Description's own `autofocus` on dialog-open would otherwise make a stale,
+    // never-lost focus indistinguishable from a real fix.
+    [Fact]
+    public async Task InvalidSubmit_MovesFocusToFirstInvalidField()
+    {
+        await LoginToWalletAsync();
+
+        var transactionDialog = Page.GetByRole(AriaRole.Dialog);
+        await Page.GetByRole(AriaRole.Button, new() { Name = "New transaction" }).ClickAsync();
+        await Expect(transactionDialog).ToBeVisibleAsync();
+
+        var notes = transactionDialog.GetByLabel("Notes");
+        await notes.ClickAsync();
+        await Expect(notes).ToBeFocusedAsync();
+
+        await transactionDialog.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
+
+        await Expect(transactionDialog.GetByLabel("Description")).ToBeFocusedAsync();
+        await Expect(transactionDialog).ToBeVisibleAsync();
+    }
+
     [Fact]
     public async Task Hero_IsRoughlyHalfTheHeightOfTheBrandGuidelinesHeroAndWorksWithoutAnIllustration()
     {

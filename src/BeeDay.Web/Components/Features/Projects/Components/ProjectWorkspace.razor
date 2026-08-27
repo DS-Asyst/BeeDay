@@ -69,6 +69,18 @@
                                     <div class="project-workspace__todo-body">
                                         <strong title="@todo.Title">@todo.Title</strong>
                                     </div>
+                                    @if (OnToggleTodo.HasDelegate)
+                                    {
+                                        <button class="activity-card__checkbox project-workspace__todo-toggle"
+                                                type="button"
+                                                title="@ToggleTodoAriaLabel(todo)"
+                                                aria-label="@ToggleTodoAriaLabel(todo)"
+                                                @onclick="@(() => OnToggleTodo.InvokeAsync(todo))">
+                                            <span class="activity-card__checkbox-glyph">
+                                                <BeeDayIcon Name="BeeDayIconName.Complete" Size="BeeDayIconSize.Small" Decorative="true" />
+                                            </span>
+                                        </button>
+                                    }
                                 </article>
                             }
                         }

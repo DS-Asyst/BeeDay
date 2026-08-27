@@ -519,3 +519,17 @@
     box-sizing: border-box;
     object-fit: contain;
 }
+
+/* EXP32-F010 (Sprint 32.15): local fallback for the transitions above - the global safety net
+   (animations.css) only shortens duration to .01ms, it does not remove transform/opacity as a
+   feedback-hiding mechanism the way an explicit `none` does. */
+@media (prefers-reduced-motion: reduce) {
+    .activity-card__checkbox,
+    .activity-card__checkbox-glyph,
+    .habit-card__side,
+    .habit-card__score-button,
+    .activity-card,
+    .habit-card {
+        transition: none;
+    }
+}

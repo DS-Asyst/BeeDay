@@ -155,6 +155,105 @@ public sealed class DashboardStateTests
         Assert.Equal("The item could not be deleted.", toastService.Messages.Single().Message);
     }
 
+    // EXP32-F013 (Sprint 32.8): a search/filter that narrows an *existing* active collection to
+    // zero must be distinguishable from that collection genuinely never having had any active item
+    // — the two used to render the identical empty-state text.
+    [Fact]
+    public async Task HabitsFilteredToZero_IsTrueOnlyWhenSearchHidesAnExistingHabit()
+    {
+        var habit = new HabitSummary(
+            Guid.NewGuid(), "Drink water", "", false, null,
+            HabitDirection.Positive, HabitDifficulty.Easy, HabitResetCounter.Daily,
+            0, 0, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
+        var (state, _) = CreateState(new FixedDashboardSender(habits: [habit]));
+        await state.InitializeAsync();
+
+        Assert.False(state.HabitsFilteredToZero);
+
+        state.Search = "no such habit";
+        Assert.True(state.HabitsFilteredToZero);
+
+        state.Search = "water";
+        Assert.False(state.HabitsFilteredToZero);
+    }
+
+    [Fact]
+    public async Task HabitsFilteredToZero_IsFalseWhenThereWasNeverAnyHabitAtAll()
+    {
+        var (state, _) = CreateState(new FixedDashboardSender());
+        await state.InitializeAsync();
+
+        state.Search = "anything";
+
+        Assert.False(state.HabitsFilteredToZero);
+    }
+
+    [Fact]
+    public async Task ActiveTasksFilteredToZero_IsTrueOnlyWhenSearchHidesAnExistingActiveTask()
+    {
+        var task = new TaskSummary(Guid.NewGuid(), "Water the plants", "", false, null, TaskRepeat.Daily, false, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
+        var (state, _) = CreateState(new FixedDashboardSender(tasks: [task]));
+        await state.InitializeAsync();
+
+        Assert.False(state.ActiveTasksFilteredToZero);
+
+        state.Search = "no such task";
+        Assert.True(state.ActiveTasksFilteredToZero);
+    }
+
+    [Fact]
+    public async Task ActiveTodosFilteredToZero_IsTrueWhenTheProjectContextFilterHidesEveryActiveTodo()
+    {
+        var todo = new TodoSummary(Guid.NewGuid(), "Pick the flooring", "", Guid.NewGuid(), false, null, null, false, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
+        var project = new ProjectSummary(todo.ProjectId, "Kitchen remodel", "", "#7A4FCB", false, null, null, false, ProjectStatus.InProgress, 0, [todo]);
+        var otherProject = new ProjectSummary(Guid.NewGuid(), "Other project", "", "#7A4FCB", false, null, null, false, ProjectStatus.InProgress, 0, []);
+        var (state, _) = CreateState(new FixedDashboardSender(projects: [project, otherProject]));
+        await state.InitializeAsync();
+
+        Assert.False(state.ActiveTodosFilteredToZero);
+
+        state.SelectProjectContext(otherProject.Id);
+
+        Assert.True(state.ActiveTodosFilteredToZero);
+    }
+
+    [Fact]
+    public async Task ActiveProjectsFilteredToZero_IsTrueOnlyWhenSearchHidesAnExistingActiveProject()
+    {
+        var project = new ProjectSummary(Guid.NewGuid(), "Kitchen remodel", "", "#7A4FCB", false, null, null, false, ProjectStatus.InProgress, 0, []);
+        var (state, _) = CreateState(new FixedDashboardSender(projects: [project]));
+        await state.InitializeAsync();
+
+        Assert.False(state.ActiveProjectsFilteredToZero);
+
+        state.Search = "no such project";
+        Assert.True(state.ActiveProjectsFilteredToZero);
+    }
+
+    // Sprint 32.10 (EXP32-F013 follow-up): the "clear filter" action offered from a filtered-to-
+    // zero empty state must reset every filter that can cause it — search text and the Todos-only
+    // project context — regardless of which one actually triggered the empty result, so the
+    // recovery action is always deterministic.
+    [Fact]
+    public async Task ClearFilters_ResetsSearchAndSelectedProjectContext()
+    {
+        var todo = new TodoSummary(Guid.NewGuid(), "Pick the flooring", "", Guid.NewGuid(), false, null, null, false, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
+        var project = new ProjectSummary(todo.ProjectId, "Kitchen remodel", "", "#7A4FCB", false, null, null, false, ProjectStatus.InProgress, 0, [todo]);
+        var (state, _) = CreateState(new FixedDashboardSender(projects: [project]));
+        await state.InitializeAsync();
+
+        state.Search = "no such thing";
+        state.SelectProjectContext(project.Id);
+        Assert.Equal("no such thing", state.Search);
+        Assert.Equal(project.Id, state.SelectedProjectId);
+
+        state.ClearFilters();
+
+        Assert.Equal(string.Empty, state.Search);
+        Assert.Null(state.SelectedProjectId);
+        Assert.False(state.ActiveTodosFilteredToZero);
+    }
+
     private static (DashboardState State, ToastService Toasts) CreateState(ISender sender)
     {
         var services = new ServiceCollection();
@@ -250,6 +349,40 @@ public sealed class DashboardStateTests
                 var projects = dashboardQueryCount == 1 ? first : second;
                 var profile = new UserProfileSummary(Guid.NewGuid(), "tester", "Test User", "", UserLanguage.English, UserTheme.System, 0, 1, 0, 100);
                 return Task.FromResult((TResponse)(object)new DashboardResponse(profile, [], [], projects, null));
+            }
+
+            throw new NotSupportedException($"Unexpected request: {request.GetType().Name}");
+        }
+
+        public Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default) where TRequest : IRequest =>
+            Task.CompletedTask;
+
+        public Task<object?> Send(object request, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
+        public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IStreamRequest<TResponse> request, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
+        public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+    }
+
+    /// <summary>
+    /// Serves a fixed, caller-supplied set of Habits/Tasks/Projects on every GetDashboardQuery — no
+    /// mutation command is exercised by the tests that use this sender, so every command is a no-op
+    /// success rather than modeling any particular Application-layer effect.
+    /// </summary>
+    private sealed class FixedDashboardSender(
+        IReadOnlyList<HabitSummary>? habits = null,
+        IReadOnlyList<TaskSummary>? tasks = null,
+        IReadOnlyList<ProjectSummary>? projects = null) : ISender
+    {
+        public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
+        {
+            if (request is GetDashboardQuery)
+            {
+                var profile = new UserProfileSummary(Guid.NewGuid(), "tester", "Test User", "", UserLanguage.English, UserTheme.System, 0, 1, 0, 100);
+                return Task.FromResult((TResponse)(object)new DashboardResponse(profile, habits ?? [], tasks ?? [], projects ?? [], null));
             }
 
             throw new NotSupportedException($"Unexpected request: {request.GetType().Name}");

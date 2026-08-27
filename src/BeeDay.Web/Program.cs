@@ -243,9 +243,37 @@ app.UseExceptionHandler();
 // MapRazorComponents only registers an endpoint for each discovered @page route — it does not
 // add an implicit catch-all fallback, so a request to a URL matching no @page (a typo, a stale
 // external link, a bookmark) terminates routing with a bare, empty 404 before Blazor's own
-// Router/NotFoundPage ever runs. Re-executing against the real /not-found page (itself a normal
-// @page route) reuses the same styled, localized NotFound component instead of duplicating it.
-app.UseStatusCodePagesWithReExecute("/not-found");
+// Router/NotFoundPage ever runs. Redirecting to the real /not-found page (itself a normal @page
+// route) reuses the same styled, localized NotFound component instead of duplicating it.
+//
+// Deliberately a redirect scoped to 404 only, not UseStatusCodePagesWithReExecute/WithRedirects
+// (EXP32-F014, Sprint 32.2):
+//
+// - Not ReExecute: with ReExecute the browser's address bar keeps the original, unmatched URL
+//   while the server renders /not-found's markup for that request. Once the interactive circuit
+//   boots, Blazor's own client-side Router independently re-resolves that same (still-unmatched)
+//   address-bar URL and, finding no route either, invokes its NotFoundPage fallback a second time
+//   — this time with no HttpContext to source a fresh antiforgery token from, so it silently
+//   re-renders NotFound's antiforgery-protected Logout form without a token, breaking Logout (400
+//   "Malformed request") for any user who lands on a broken link. A redirect changes the address
+//   bar to the real /not-found route before the circuit ever boots, so both the server render and
+//   the client Router resolve the same matching route through the normal RouteView path — no
+//   fallback re-render, no missing antiforgery state.
+// - Not the built-in UseStatusCodePagesWithRedirects("/not-found") convenience method either: it
+//   applies to the whole 400-599 range (any empty-bodied response), not just 404 — confirmed live
+//   by CultureCookieIntegrationTests.SetCulture_WithUnsupportedCulture_IsRejected turning from a
+//   real 400 into a 302 once that convenience method was tried. Genuinely-intentional 4xx
+//   responses elsewhere (culture rejection, antiforgery validation, rate limiting) must keep their
+//   real status code and body untouched — only a true 404 should ever become /not-found.
+app.UseStatusCodePages(statusCodeContext =>
+{
+    if (statusCodeContext.HttpContext.Response.StatusCode == StatusCodes.Status404NotFound)
+    {
+        statusCodeContext.HttpContext.Response.Redirect("/not-found");
+    }
+
+    return Task.CompletedTask;
+});
 
 if (!app.Environment.IsDevelopment())
 {

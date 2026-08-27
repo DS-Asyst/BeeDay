@@ -13,6 +13,7 @@ public partial class ProjectWorkspace
     [Parameter, EditorRequired] public ProjectSummary? Project { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public EventCallback OnAddTodo { get; set; }
+    [Parameter] public EventCallback<TodoSummary> OnToggleTodo { get; set; }
     [Parameter] public EventCallback<TodoSummary> OnEditTodo { get; set; }
     [Parameter] public EventCallback<TodoSummary> OnDeleteTodo { get; set; }
 
@@ -27,6 +28,10 @@ public partial class ProjectWorkspace
         ProjectStatus.Completed => Localizer["StatusCompleted"],
         _ => Localizer["StatusPlanned"]
     };
+
+    private string ToggleTodoAriaLabel(TodoSummary todo) => todo.Completed
+        ? Localizer["TodoMarkIncompleteAriaLabel", todo.Title]
+        : Localizer["TodoCompleteAriaLabel", todo.Title];
 
     private void ToggleTodos()
     {

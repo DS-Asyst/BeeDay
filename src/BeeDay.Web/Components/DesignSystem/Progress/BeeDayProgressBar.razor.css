@@ -1,5 +1,6 @@
 .beeday-progress { display: grid; gap: var(--beeday-spacing-sm); }
-.beeday-progress__heading { display: flex; justify-content: space-between; gap: var(--beeday-spacing-smd); color: var(--beeday-color-text-muted); font-size: var(--beeday-font-size-xs); font-weight: 700; }
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast (text-muted is ~4.26:1, below 4.5:1). */
+.beeday-progress__heading { display: flex; justify-content: space-between; gap: var(--beeday-spacing-smd); color: var(--beeday-color-text-secondary); font-size: var(--beeday-font-size-xs); font-weight: 700; }
 .beeday-progress__value { color: var(--beeday-color-text); }
 .beeday-progress__track { height: .875rem; overflow: hidden; background: var(--beeday-color-surface-muted); border: var(--beeday-border-width-subtle) solid var(--beeday-color-border); border-radius: var(--beeday-radius-pill); }
 .beeday-progress__fill { position: relative; min-width: 0; height: 100%; background: var(--beeday-color-brand-primary); border-radius: inherit; transition: width 240ms ease; }

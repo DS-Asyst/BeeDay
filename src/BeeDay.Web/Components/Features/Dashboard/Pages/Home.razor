@@ -23,8 +23,10 @@ else if (State.Data?.Profile.HasProfile == true)
             <div class="dashboard-grid">
                 @{ var habits = State.FilteredHabits.ToList(); }
                 <DashboardColumn Title="@Localizer["HabitsColumnTitle"]"
-                                 EmptyTitle="@Localizer["HabitsEmptyTitle"]"
-                                 EmptyDescription="@Localizer["HabitsEmptyDescription"]"
+                                 EmptyTitle="@(State.HabitsFilteredToZero ? Localizer["NoFilterResultsTitle"] : Localizer["HabitsEmptyTitle"])"
+                                 EmptyDescription="@(State.HabitsFilteredToZero ? Localizer["NoFilterResultsDescription"] : Localizer["HabitsEmptyDescription"])"
+                                 ShowClearFilterAction="@State.HabitsFilteredToZero"
+                                 OnClearFilter="State.ClearFilters"
                                  EmptyIcon="BeeDayIconName.Habit"
                                  SingularLabel="@Localizer["HabitSingular"]"
                                  ActiveStateLabel="@Localizer["HabitsActiveStateLabel"]"
@@ -53,8 +55,10 @@ else if (State.Data?.Profile.HasProfile == true)
                     var completedTasks = filteredTasks.Where(item => item.Completed).ToList();
                 }
                 <DashboardColumn Title="@Localizer["TasksColumnTitle"]"
-                                 EmptyTitle="@Localizer["TasksEmptyTitle"]"
-                                 EmptyDescription="@Localizer["TasksEmptyDescription"]"
+                                 EmptyTitle="@(State.ActiveTasksFilteredToZero ? Localizer["NoFilterResultsTitle"] : Localizer["TasksEmptyTitle"])"
+                                 EmptyDescription="@(State.ActiveTasksFilteredToZero ? Localizer["NoFilterResultsDescription"] : Localizer["TasksEmptyDescription"])"
+                                 ShowClearFilterAction="@State.ActiveTasksFilteredToZero"
+                                 OnClearFilter="State.ClearFilters"
                                  EmptyIcon="BeeDayIconName.RecurringTask"
                                  SingularLabel="@Localizer["TaskSingular"]"
                                  ActiveStateLabel="@Localizer["TasksActiveStateLabel"]"
@@ -94,8 +98,10 @@ else if (State.Data?.Profile.HasProfile == true)
                     var completedTodos = filteredTodos.Where(item => item.Completed).ToList();
                 }
                 <DashboardColumn Title="@Localizer["TodosColumnTitle"]"
-                                 EmptyTitle="@Localizer["TodosEmptyTitle"]"
-                                 EmptyDescription="@Localizer["TodosEmptyDescription"]"
+                                 EmptyTitle="@(State.ActiveTodosFilteredToZero ? Localizer["NoFilterResultsTitle"] : Localizer["TodosEmptyTitle"])"
+                                 EmptyDescription="@(State.ActiveTodosFilteredToZero ? Localizer["NoFilterResultsDescription"] : Localizer["TodosEmptyDescription"])"
+                                 ShowClearFilterAction="@State.ActiveTodosFilteredToZero"
+                                 OnClearFilter="State.ClearFilters"
                                  EmptyIcon="BeeDayIconName.Todo"
                                  SingularLabel="@Localizer["TodoSingular"]"
                                  ActiveStateLabel="@Localizer["TodosActiveStateLabel"]"
@@ -134,8 +140,10 @@ else if (State.Data?.Profile.HasProfile == true)
                     var completedProjects = filteredProjects.Where(item => item.Completed).ToList();
                 }
                 <DashboardColumn Title="@Localizer["ProjectsColumnTitle"]"
-                                 EmptyTitle="@Localizer["ProjectsEmptyTitle"]"
-                                 EmptyDescription="@Localizer["ProjectsEmptyDescription"]"
+                                 EmptyTitle="@(State.ActiveProjectsFilteredToZero ? Localizer["NoFilterResultsTitle"] : Localizer["ProjectsEmptyTitle"])"
+                                 EmptyDescription="@(State.ActiveProjectsFilteredToZero ? Localizer["NoFilterResultsDescription"] : Localizer["ProjectsEmptyDescription"])"
+                                 ShowClearFilterAction="@State.ActiveProjectsFilteredToZero"
+                                 OnClearFilter="State.ClearFilters"
                                  EmptyIcon="BeeDayIconName.Project"
                                  SingularLabel="@Localizer["ProjectSingular"]"
                                  ActiveStateLabel="@Localizer["ProjectsActiveStateLabel"]"
@@ -181,13 +189,14 @@ else if (State.Data?.Profile.HasProfile == true)
     {
         <ProjectWorkspace Project="State.OpenProject"
                           OnClose="State.CloseProjectWorkspace"
-                          OnAddTodo="State.OpenTodoForProject" />
+                          OnAddTodo="State.OpenTodoForProject"
+                          OnToggleTodo="@(todo => State.ToggleTodoAsync(todo.Id))" />
     }
 
-    @if (State.Modals.IsHabitEditorOpen) { <HabitEditorModal Model="State.Modals.HabitForm" IsEditing="State.Modals.IsEditing" OnSave="State.SaveHabitAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentHabitAsync" /> }
-    @if (State.Modals.IsTaskEditorOpen) { <TaskEditorModal Model="State.Modals.TaskForm" IsEditing="State.Modals.IsEditing" OnSave="State.SaveTaskAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentTaskAsync" /> }
-    @if (State.Modals.IsTodoEditorOpen) { <TodoEditorModal Model="State.Modals.TodoForm" Projects="@(State.Data?.Projects ?? [])" IsEditing="State.Modals.IsEditing" OnSave="State.SaveTodoAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentTodoAsync" /> }
-    @if (State.Modals.IsProjectEditorOpen) { <ProjectEditorModal Model="State.Modals.ProjectForm" IsEditing="State.Modals.IsEditing" OnSave="State.SaveProjectAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentProjectAsync" OnOpenProject="State.OpenProjectFromEditor" /> }
+    @if (State.Modals.IsHabitEditorOpen) { <HabitEditorModal Model="State.Modals.HabitForm" IsEditing="State.Modals.IsEditing" FallbackFocusSelector=".filter-bar__create-button" OnSave="State.SaveHabitAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentHabitAsync" /> }
+    @if (State.Modals.IsTaskEditorOpen) { <TaskEditorModal Model="State.Modals.TaskForm" IsEditing="State.Modals.IsEditing" FallbackFocusSelector=".filter-bar__create-button" OnSave="State.SaveTaskAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentTaskAsync" /> }
+    @if (State.Modals.IsTodoEditorOpen) { <TodoEditorModal Model="State.Modals.TodoForm" Projects="@(State.Data?.Projects ?? [])" IsEditing="State.Modals.IsEditing" FallbackFocusSelector=".filter-bar__create-button" OnSave="State.SaveTodoAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentTodoAsync" /> }
+    @if (State.Modals.IsProjectEditorOpen) { <ProjectEditorModal Model="State.Modals.ProjectForm" IsEditing="State.Modals.IsEditing" FallbackFocusSelector=".filter-bar__create-button" OnSave="State.SaveProjectAsync" OnCancel="State.CloseEditor" OnDelete="State.DeleteCurrentProjectAsync" OnOpenProject="State.OpenProjectFromEditor" /> }
 
     <BeeDayLoading IsVisible="State.IsBusy" />
     <BeeDayFeedbackHost />

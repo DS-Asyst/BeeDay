@@ -49,9 +49,10 @@
     font-size: clamp(1.25rem, 4vw, 1.55rem);
 }
 
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast (text-muted is ~4.26:1, below 4.5:1). */
 .project-workspace__header p {
     margin: .42rem 0 0;
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     font: var(--beeday-type-small);
     line-height: 1.45;
 }
@@ -76,8 +77,9 @@
     background: var(--beeday-color-surface);
 }
 
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast (text-muted is ~4.26:1, below 4.5:1). */
 .project-workspace__summary span {
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     font: var(--beeday-type-label);
 }
 
@@ -105,9 +107,10 @@
     font: var(--beeday-type-card-title);
 }
 
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast (text-muted is ~4.26:1, below 4.5:1). */
 .project-workspace__toolbar p {
     margin: .2rem 0 0;
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     font: var(--beeday-type-small);
 }
 
@@ -177,12 +180,13 @@
     background-clip: padding-box;
 }
 
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast (text-muted is ~4.26:1, below 4.5:1) - inherited by the description span below. */
 .project-workspace__empty {
     display: grid;
     place-items: center;
     gap: .35rem;
     min-height: 8rem;
-    color: var(--beeday-color-text-muted);
+    color: var(--beeday-color-text-secondary);
     text-align: center;
 }
 
@@ -230,6 +234,23 @@
 
 .project-workspace__todo--done strong {
     text-decoration: line-through;
+}
+
+.project-workspace__todo-toggle {
+    position: absolute;
+    top: 50%;
+    right: .6rem;
+    transform: translateY(-50%);
+}
+
+.project-workspace__todo--done .project-workspace__todo-toggle {
+    color: var(--beeday-color-success);
+    background: transparent;
+}
+
+.project-workspace__todo--done .project-workspace__todo-toggle .activity-card__checkbox-glyph {
+    opacity: 1;
+    transform: scale(1);
 }
 
 
@@ -343,5 +364,17 @@
 @media (pointer: coarse) {
     .project-workspace__list-toggle {
         min-height: var(--beeday-control-height-md);
+    }
+}
+
+.project-workspace__todo-body {
+    padding-right: 2.6rem;
+}
+
+/* EXP32-F010 (Sprint 32.15): local fallback - the global safety net only shortens duration, it
+   does not remove the color/border transition itself. */
+@media (prefers-reduced-motion: reduce) {
+    .project-workspace__list-toggle {
+        transition: none;
     }
 }

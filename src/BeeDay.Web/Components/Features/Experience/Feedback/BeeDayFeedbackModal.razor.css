@@ -14,7 +14,12 @@
 .beeday-feedback {
     position: relative;
     width: min(34rem, calc(100vw - 2rem));
-    overflow: hidden;
+    /* Sprint 32.6 (EPIC 32): the scroll affordance below (@media max-width: 560px) previously only
+       applied at mobile widths - a History list long enough to overflow the viewport at desktop
+       width had no way to scroll to the Continue button. Same overflow idiom as .editor-modal in
+       editor-modal.css, always on rather than mobile-gated. */
+    max-height: calc(100vh - 1.25rem);
+    overflow: hidden auto;
     border: 1px solid var(--beeday-color-border);
     border-radius: var(--beeday-radius-lg);
     background: var(--beeday-color-surface);

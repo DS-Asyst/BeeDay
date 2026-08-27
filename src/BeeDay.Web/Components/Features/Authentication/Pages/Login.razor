@@ -5,6 +5,7 @@
 @using BeeDay.Web.Services.Authentication
 @inject NavigationManager Navigation
 @inject IStringLocalizer<AuthenticationResources> Localizer
+@inject IStringLocalizer<BeeDay.Web.Components.DesignSystem.DesignSystemResources> ValidationLocalizer
 
 <PageTitle>@Localizer["PageTitle"]</PageTitle>
 
@@ -57,7 +58,9 @@
                            value="@Email"
                            autocomplete="email"
                            required
-                           autofocus />
+                           autofocus
+                           oninvalid="this.setCustomValidity(this.validity.valueMissing ? '@JsSingleQuoteEscape(ValidationLocalizer["ValidationEmailRequired"])' : '@JsSingleQuoteEscape(ValidationLocalizer["ValidationEmailFormat"])')"
+                           oninput="this.setCustomValidity('')" />
                 </label>
 
                 <label class="auth-field beeday-field" for="login-password">
@@ -67,7 +70,9 @@
                            class="beeday-field__control"
                            name="password"
                            autocomplete="current-password"
-                           required />
+                           required
+                           oninvalid="this.setCustomValidity('@JsSingleQuoteEscape(ValidationLocalizer["ValidationLoginPasswordRequired"])')"
+                           oninput="this.setCustomValidity('')" />
                 </label>
 
                 <div class="auth-form__options">

@@ -1,4 +1,5 @@
 using BeeDay.Web.Components.DesignSystem.Forms;
+using BeeDay.Web.Tests.Localization;
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace BeeDay.Web.Tests.Components.Forms;
@@ -206,6 +207,30 @@ public sealed class BeeDayFormTests
         cut.Find("input").Change("2026-08-10");
 
         Assert.Equal(new DateTime(2026, 8, 10), model.DateValue);
+    }
+
+    // EPIC 32 Sprint 32.5 (EXP32-F005): the native <input type="date"> picker/placeholder follows
+    // the browser/OS locale by default, not beeday's selected culture — a pt-BR OS showed
+    // "dd/mm/aaaa" even with the rest of the UI in English. Chromium honors an element's own `lang`
+    // attribute for this formatting, so pinning it to the app's current culture keeps the date
+    // control consistent with the rest of the localized page.
+    [Theory]
+    [InlineData("en-US")]
+    [InlineData("pt-BR")]
+    public void DateInput_LangAttributeFollowsCurrentCulture_NotTheMachineDefault(string culture)
+    {
+        using var context = new BunitContext();
+        context.Services.AddLocalization();
+        var model = new FormTestModel();
+
+        var cut = BunitLocalizationSupport.WithUiCulture(culture, () => RenderInsideEditContext<BeeDayDateInput<DateTime?>>(context, model, parameters => parameters
+            .Add(component => component.Id, "due-date")
+            .Add(component => component.Label, "Due date")
+            .Add(component => component.Value, model.DateValue)
+            .Add(component => component.ValueChanged, value => model.DateValue = value)
+            .Add(component => component.ValueExpression, () => model.DateValue)));
+
+        Assert.Equal(culture, cut.Find("input").GetAttribute("lang"));
     }
 
     [Fact]
