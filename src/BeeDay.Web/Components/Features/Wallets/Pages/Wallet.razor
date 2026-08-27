@@ -83,16 +83,16 @@ else
     </div>
 }
 
-<TransactionFormModal IsOpen="_isTransactionEditorOpen" IsEditing="@(_editingTransactionId is not null)" IsBusy="_interaction.IsBusy" ErrorMessage="_transactionFormError" Model="_transactionForm" Tags="_tags" OnSave="SaveTransactionAsync" OnCancel="CloseTransactionEditor" OnDeleteRequested="RequestDeleteCurrentTransaction" />
+<TransactionFormModal IsOpen="_isTransactionEditorOpen" IsEditing="@(_editingTransactionId is not null)" IsBusy="_interaction.IsBusy" ErrorMessage="@_transactionFormError" Model="_transactionForm" Tags="_tags" OnSave="SaveTransactionAsync" OnCancel="CloseTransactionEditor" OnDeleteRequested="RequestDeleteCurrentTransaction" />
 
-<TagFormModal IsOpen="_isTagEditorOpen" IsEditing="@(_editingTagId is not null)" IsBusy="_interaction.IsBusy" ErrorMessage="_tagFormError" Model="_tagForm" OnSave="SaveTagFormAsync" OnCancel="CloseTagEditor" OnDeleteRequested="RequestDeleteCurrentTag" />
+<TagFormModal IsOpen="_isTagEditorOpen" IsEditing="@(_editingTagId is not null)" IsBusy="_interaction.IsBusy" ErrorMessage="@_tagFormError" Model="_tagForm" OnSave="SaveTagFormAsync" OnCancel="CloseTagEditor" OnDeleteRequested="RequestDeleteCurrentTag" />
 
 <BeeDayConfirmDialog IsOpen="@(_pendingDeleteTransaction is not null)"
                       IsBusy="_interaction.IsBusy"
                       Title="@Localizer["DeleteTransactionTitle"]"
                       Message="@Localizer["DeleteTransactionMessage"]"
                       ItemTitle="@_pendingDeleteTransaction?.Description"
-                      ErrorMessage="_transactionFormError"
+                      ErrorMessage="@_transactionFormError"
                       Warning="@Localizer["DeleteTransactionWarning"]"
                       ConfirmLabel="@Localizer["DeleteTransactionTitle"]"
                       OnConfirm="DeleteTransactionAsync"
@@ -103,7 +103,7 @@ else
                       Title="@Localizer["DeleteTagTitle"]"
                       Message="@Localizer["DeleteTagMessage"]"
                       ItemTitle="@_pendingDeleteTag?.Name"
-                      ErrorMessage="_tagFormError"
+                      ErrorMessage="@_tagFormError"
                       Warning="@Localizer["DeleteTagWarning"]"
                       ConfirmLabel="@Localizer["DeleteTagTitle"]"
                       OnConfirm="DeleteTagAsync"

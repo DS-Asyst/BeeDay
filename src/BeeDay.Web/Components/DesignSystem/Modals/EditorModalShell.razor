@@ -9,7 +9,14 @@
              aria-busy="@IsBusy.ToString().ToLowerInvariant()"
              tabindex="-1"
              @onclick:stopPropagation>
-        <EditForm Model="Model" OnValidSubmit="Submit" OnInvalidSubmit="HandleInvalidSubmit">
+        @* Release Quality Gate remediation: a native HTML5-constrained input (e.g. <InputNumber
+           min="..."/>) makes the browser run its own constraint validation on submit-button click,
+           BEFORE the form's submit event (and therefore EditContext.Validate()/OnInvalidSubmit)
+           ever fires - the browser's native tooltip/focus wins instead of HandleInvalidSubmit's
+           focusFirstInvalid, silently bypassing the whole custom invalid-focus contract this shell
+           exists to guarantee. novalidate makes EditContext the sole validation authority for every
+           consumer of this shell, not just the one that first exposed the gap. *@
+        <EditForm Model="Model" OnValidSubmit="Submit" OnInvalidSubmit="HandleInvalidSubmit" novalidate>
             <DataAnnotationsValidator />
 
             <header class="editor-modal__header">
