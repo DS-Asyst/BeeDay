@@ -97,7 +97,7 @@ public sealed class AppFooterTests
         using var context = new BunitContext().WithLocalization();
         var cut = BunitLocalizationSupport.WithUiCulture("en-US", () => context.Render<AppFooter>());
 
-        Assert.Empty(cut.FindAll("a[href='https://github.com/tiagoarrigoni/BeeDay']"));
+        Assert.Empty(cut.FindAll("a[href='https://github.com/DS-Asyst/BeeDay']"));
         Assert.Empty(cut.FindAll("a[href='/experience-system']"));
         Assert.Empty(cut.FindAll("a[href='#']"));
         Assert.All(cut.FindAll("a"), link =>

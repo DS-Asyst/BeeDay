@@ -178,7 +178,7 @@ public sealed class InstitutionalPagesTests(PlaywrightAppFixture fixture) : E2ET
         await GotoAsync("/contact");
 
         await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Open an issue on GitHub" }))
-            .ToHaveAttributeAsync("href", "https://github.com/tiagoarrigoni/BeeDay");
+            .ToHaveAttributeAsync("href", "https://github.com/DS-Asyst/BeeDay");
         await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Connect on LinkedIn" }))
             .ToHaveAttributeAsync("href", "https://www.linkedin.com/in/tiago-a-arrigoni-335b9413b/");
     }
