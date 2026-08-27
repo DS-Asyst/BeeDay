@@ -1266,6 +1266,62 @@ normalização adicional de metadata/status/action placement foi necessária nes
 
 ---
 
+### Auditoria de loading & perceived performance (Sprint 32.9, Issue #253)
+
+Nenhum achado `EXP32-Fxxx` foi atribuído a esta Sprint — apenas o gap de evidência já registrado em
+§9 ("Estados de carregamento com atraso visível não observados ao vivo"). Por isso o trabalho desta
+Sprint foi auditar, com evidência de código direta, se mutações relevantes do produto expõem um
+estado de processamento proporcional antes de assumir que existe um defeito a corrigir — conforme a
+própria Issue #253 exige ("differentiate real latency from missing feedback before changing
+behavior"; "do not add skeletons/spinners merely for visual uniformity").
+
+**Superfícies auditadas (leitura direta do código, cinco contextos arquiteturais distintos):**
+
+- **Dashboard (`/daily`)** — toda mutação de `DashboardState` (save/delete/toggle/register/reorder
+  dos quatro tipos de coleção) já converge para um único wrapper privado, `ExecuteAsync`, que seta
+  `IsBusy=true` antes de chamar a operação e `IsBusy=false` no `finally`, ignorando reentrância
+  (`if (IsBusy) return`). `IsBusy` alimenta o overlay global `BeeDayLoading`, cujo CSS
+  (`feedback.css`) já atrasa deliberadamente a revelação em 350ms (`animation: beeday-loading-reveal
+  .16s ease .35s forwards`) especificamente para evitar flicker em operações rápidas — o padrão
+  "delayed overlay" já existe e já é a fonte única, não uma implementação paralela.
+- **Wallet (`/wallet`)** — `WalletInteractionState` (`TryBegin`/`End`) cobre as 4 mutações
+  (salvar/excluir transação, salvar/excluir tag), desabilitando os botões relevantes via `IsBusy`
+  enquanto em voo. Busca/filtro/ordenação/paginação (`RefreshAsync`) usam um flag distinto,
+  `_isRefreshing`, propagado como `aria-busy` até `TransactionList` — `wallet.css`
+  (`.wallet-transaction-list[aria-busy="true"]{opacity:.62;pointer-events:none}`) já traduz isso em
+  feedback visual real (esmaecimento + bloqueio de interação), não apenas um atributo de
+  acessibilidade sem efeito visual. Nenhuma mutação encontrada sem o par begin/end.
+- **Account/Settings (`/account`)** — `Account.razor` já expõe um `IsBusy` por seção
+  (Profile/Security/Preferences) mais o overlay global compartilhado
+  (`<BeeDayLoading IsVisible="@IsAnyBusy" .../>`) — mesmo padrão do Dashboard, reutilizado, não
+  duplicado.
+- **`EditorModalShell`** (fundação compartilhada por todos os editores de Habit/Task/Todo/Project) —
+  `IsBusy` já desabilita Save/Cancel/Delete e aciona o estado `IsLoading` do próprio botão de salvar;
+  `Submit`/`Cancel` já são no-op enquanto `IsBusy`, prevenindo duplo-submit no nível do handler, não
+  só visualmente.
+- **Login (`/login`)** — página não-interativa (POST HTML tradicional para `/auth/login`, sem
+  circuito Blazor), portanto não pode reusar `IsBusy`/`BeeDayLoading`. O padrão equivalente já existe
+  via `onsubmit` inline: desabilita o botão de submit e troca seu texto para "Signing in..." no
+  instante do POST — feedback imediato e verídico, adaptado à natureza estática desta página
+  específica.
+
+**Conclusão:** nenhum defeito de "feedback ausente" foi encontrado nas cinco superfícies auditadas —
+o contrato de estado de processamento já está normalizado (um padrão compartilhado por contexto
+arquitetural: `IsBusy`/`ExecuteAsync` + `BeeDayLoading` para circuitos interativos, `aria-busy` +
+CSS de esmaecimento para refresh não-bloqueante, JS inline mínimo para a página estática de login).
+Consistente com o limite explícito da Sprint, nenhum spinner/skeleton foi adicionado por uniformidade
+visual e nenhuma otimização especulativa de rerender foi introduzida — não havia claim de redução a
+provar (Required Work #4/#6 ficam vacuamente satisfeitos: nada foi reduzido porque nada precisava
+ser).
+
+**Risco residual não fechável pelo Claude:** a observação ao vivo do overlay `BeeDayLoading` sob
+latência de rede real (throttling), registrada em §9, permanece como evidência de runtime/HMG —
+consistente com o Required Work #7 desta própria Issue ("record runtime-only observations as
+requiring HMG/release evidence rather than forcing Claude browser execution"). Não promovida a
+`VERIFIED`/`FIXED` por inspeção de código apenas, conforme a Issue #244 §3.1 exige.
+
+---
+
 ## 7. Achados pré-existentes roteados para dentro da EPIC 32
 
 | ID original | Ledger de origem | Achado | Sprint EPIC 32 |
@@ -1340,7 +1396,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.6 — Modal & Dialog Experience | EXP32-F022, EXP32-F023 — ambos novos, `FIXED` nesta Sprint; EXP32-F024 — novo, `DISCOVERED` (não roteada — latente, sem Sprint dona); EXP32-F025 — novo, `ACCEPTED` (exceção documentada); EXP32-F002 (cross-ref, não corrigido — pertence à 32.13) |
 | 32.7 — Lists, Cards & Collection Patterns | EXP32-F003, EXP32-F004 — ambos `FIXED` nesta Sprint |
 | 32.8 — Search, Filters & Sorting | EXP32-F013 — `FIXED` nesta Sprint |
-| 32.9 — Loading & Perceived Performance | gap de evidência registrado em §9 (sem achado novo) |
+| 32.9 — Loading & Perceived Performance | gap de evidência registrado em §9 (sem achado novo); auditoria de código confirmou nenhum defeito de feedback ausente — ver §"Auditoria de loading & perceived performance" |
 | 32.10 — Empty States & First-Use Experience | EXP32-F013 (cross-ref) |
 | 32.11 — Errors, Recovery & User Feedback | EXP32-F007 (cross-ref) |
 | 32.12 — Toasts, Notifications & Confirmation Feedback | nenhum achado novo |
