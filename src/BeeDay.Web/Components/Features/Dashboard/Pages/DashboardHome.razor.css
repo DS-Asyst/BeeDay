@@ -1,5 +1,7 @@
 .product-home { width: 100%; max-width: 64rem; margin-inline: auto; padding: var(--beeday-spacing-2xl) var(--beeday-spacing-xl) var(--beeday-spacing-3xl); }
-.product-home__project p, .product-home__status p { margin: 0; color: var(--beeday-color-text-muted); }
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast - confirmed by a live axe
+   scan against /profile that text-muted here failed color-contrast (serious). */
+.product-home__project p, .product-home__status p { margin: 0; color: var(--beeday-color-text-secondary); }
 .product-home__section-heading span { color: var(--beeday-color-brand-primary); font-size: var(--beeday-font-size-xs); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 .product-home ::deep .beeday-card--padded { padding: var(--beeday-spacing-xl); }
 .product-home__progress { margin-top: var(--beeday-spacing-xl); }
@@ -13,7 +15,9 @@
 .product-home__status { display: flex; align-items: center; gap: var(--beeday-spacing-md); margin-top: var(--beeday-spacing-xl); }
 .product-home__weekly-unavailable { display: flex; min-height: 8rem; align-items: center; gap: var(--beeday-spacing-lg); }
 .product-home__weekly-unavailable strong { color: var(--beeday-color-text-primary); font-size: var(--beeday-font-size-md); }
-.product-home__weekly-unavailable p { margin: .25rem 0 0; color: var(--beeday-color-text-muted); }
+/* EXP32-F009 (Sprint 32.20): text-secondary for AA normal-text contrast - confirmed by a live axe
+   scan against /profile that text-muted here failed color-contrast (serious). */
+.product-home__weekly-unavailable p { margin: .25rem 0 0; color: var(--beeday-color-text-secondary); }
 .product-home__skeleton { border-radius: var(--beeday-radius-lg); background: var(--beeday-color-surface-muted); animation: home-pulse 1.2s ease-in-out infinite alternate; }
 .product-home__skeleton--header { height: 7rem; }
 .product-home__skeleton--feature { height: 13rem; margin-top: var(--beeday-spacing-xl); }

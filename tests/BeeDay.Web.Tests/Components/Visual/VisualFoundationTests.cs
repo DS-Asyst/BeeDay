@@ -463,6 +463,79 @@ public sealed class VisualFoundationTests
         Assert.Contains(".editor-modal__hero input:focus,", editorModal, StringComparison.Ordinal);
     }
 
+    // EXP32-F010 (Sprint 32.20, closing the last of the original 8-file inventory): the
+    // Auth/ProfileCreation portion was routed to 32.5 and left DISCOVERED after 32.15 closed the
+    // Daily portion. PublicAuthActions.razor.css's close-button transition and
+    // CreateProfile.razor.css's nickname-field focus transition had no local fallback.
+    [Fact]
+    public void AuthAndProfileCreationStylesheetsHaveLocalReducedMotionFallbacks()
+    {
+        var publicAuthActions = ReadWebFile("Components", "Features", "Authentication", "Components", "PublicAuthActions.razor.css");
+        var createProfile = ReadWebFile("Components", "Features", "ProfileCreation", "Pages", "CreateProfile.razor.css");
+
+        Assert.Contains(".public-auth-actions__close {", publicAuthActions, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", publicAuthActions, StringComparison.Ordinal);
+        Assert.Contains(".profile-nickname-field {", createProfile, StringComparison.Ordinal);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", createProfile, StringComparison.Ordinal);
+    }
+
+    // EXP32-F009 (Sprint 32.20): full-repository inventory of --beeday-color-text-muted
+    // (~4.26:1 over surface, below the 4.5:1 AA threshold for normal text) found 14 rule sites
+    // rendering genuine normal text with it, migrated here to --beeday-color-text-secondary
+    // (~8.69:1, confirmed AA-safe by DesignSystemContrastTests). The remaining text-muted usages
+    // are deliberately preserved - icon glyph colors (1.4.11 graphical-object threshold, 3:1,
+    // already met) and disabled/readonly control state (WCAG's inactive-UI-component exemption) -
+    // asserted below so a future revert of either category is caught.
+    [Fact]
+    public void TextMutedNoLongerStylesNormalTextAndOnlyRemainsOnExemptIconOrDisabledContexts()
+    {
+        var migrated = new (string Label, string[] Segments, string Selector)[]
+        {
+            ("IconCatalog", ["Components", "DesignSystem", "Pages", "IconCatalog.razor.css"], ".icon-catalog__card dt {"),
+            ("BeeDayProgressBar", ["Components", "DesignSystem", "Progress", "BeeDayProgressBar.razor.css"], ".beeday-progress__heading {"),
+            ("DashboardColumn", ["Components", "Features", "Dashboard", "Components", "DashboardColumn.razor.css"], ".dashboard-column__count {"),
+            ("DashboardHome", ["Components", "Features", "Dashboard", "Pages", "DashboardHome.razor.css"], ".product-home__project p, .product-home__status p {"),
+            ("ExperienceBar", ["Components", "Features", "Experience", "Components", "ExperienceBar.razor.css"], ".experience-card__label {"),
+            ("ProgressMetricCard", ["Components", "Features", "Experience", "Components", "ProgressMetricCard.razor.css"], ".progress-metric-card__header span {"),
+            ("ExperienceSystemPage", ["Components", "Features", "ExperienceSystem", "Components", "ExperienceSystemPage.razor.css"], "::deep .experience-system-swatch__value {"),
+            ("Tutorial", ["Components", "Features", "Onboarding", "Pages", "Tutorial.razor.css"], ".tutorial-progress {"),
+            ("CreateProfile", ["Components", "Features", "ProfileCreation", "Pages", "CreateProfile.razor.css"], ".profile-panel__intro {"),
+            ("ProjectWorkspaceHeader", ["Components", "Features", "Projects", "Components", "ProjectWorkspace.razor.css"], ".project-workspace__header p {"),
+            ("ProjectWorkspaceEmpty", ["Components", "Features", "Projects", "Components", "ProjectWorkspace.razor.css"], ".project-workspace__empty {"),
+            ("DesignSystemPageHeader", ["wwwroot", "css", "design-system.css"], ".beeday-page-header p,"),
+            ("IdentityHeader", ["wwwroot", "css", "identity.css"], ".identity-header p {"),
+            ("SettingsHint", ["wwwroot", "css", "settings.css"], ".beeday-settings-form__hint {"),
+            ("FormsPlaceholder", ["wwwroot", "css", "forms.css"], ".beeday-field__control::placeholder {"),
+        };
+
+        foreach (var (label, segments, selector) in migrated)
+        {
+            var css = ReadWebFile(segments);
+            var selectorIndex = css.IndexOf(selector, StringComparison.Ordinal);
+            Assert.True(selectorIndex >= 0, $"{label}: expected to find selector '{selector}'.");
+            var ruleEnd = css.IndexOf('}', selectorIndex);
+            var rule = css[selectorIndex..ruleEnd];
+            Assert.Contains("--beeday-color-text-secondary", rule, StringComparison.Ordinal);
+            Assert.DoesNotContain("--beeday-color-text-muted", rule, StringComparison.Ordinal);
+        }
+
+        // Exempt: icon glyph colors, not text (1.4.11 threshold already met).
+        var icon = ReadWebFile("Components", "DesignSystem", "Icons", "BeeDayIcon.razor.css");
+        Assert.Contains(".beeday-icon--color-muted { color: var(--beeday-color-text-muted); }", icon, StringComparison.Ordinal);
+
+        var cards = ReadWebFile("wwwroot", "css", "cards.css");
+        Assert.Contains(".activity-card__project-status {", cards, StringComparison.Ordinal);
+        Assert.Contains(".habit-card__metrics-icon {", cards, StringComparison.Ordinal);
+
+        // Exempt: disabled/readonly control state (WCAG inactive-UI-component exemption).
+        var designSystem = ReadWebFile("wwwroot", "css", "design-system.css");
+        Assert.Contains(".beeday-button:disabled {", designSystem, StringComparison.Ordinal);
+
+        var forms = ReadWebFile("wwwroot", "css", "forms.css");
+        Assert.Contains(".beeday-checkbox:has(.beeday-checkbox__control:disabled)", forms, StringComparison.Ordinal);
+        Assert.Contains(".beeday-field__control:disabled,", forms, StringComparison.Ordinal);
+    }
+
     private static string ReadWebFile(params string[] segments) =>
         File.ReadAllText(Path.Combine([RepoRoot, "src", "BeeDay.Web", .. segments]));
 
