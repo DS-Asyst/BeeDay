@@ -792,13 +792,14 @@ domínio foi feita ou necessária.
 | Device | Shared |
 | Accessibility Impact | No |
 | Owning Sprint | 32.19 (Front-End Code Refinement & Component Consolidation) — cross-ref 32.5 (Forms & Input Experience) |
-| State | DISCOVERED |
+| State | **FIXED** — Sprint 32.19 |
 
 **Interação:** N/A (achado estrutural de CSS, não uma interação isolada — afeta a consistência visual
 percebida entre formulários de áreas diferentes).
 
-**Comportamento atual:** quatro seletores CSS distintos implementam separadamente a mesma aparência
-visual de campo de input, em vez de compartilhar uma única declaração.
+**Comportamento atual (na época do achado):** quatro seletores CSS distintos implementavam
+separadamente a mesma aparência visual de campo de input, em vez de compartilhar uma única
+declaração.
 
 **Problema:** confirmado já aberto em `docs/ux/01-guidelines.md` §4 ("Não existe (achados, não
 corrigidos)"). Risco de drift visual entre áreas quando um dos quatro for ajustado sem replicar a
@@ -807,10 +808,34 @@ mudança nos outros três.
 **Evidência:** achado de código/documentação já verificado — `docs/ux/01-guidelines.md` §4,
 referenciando `docs/design-system/04-forms.md` §5.
 
-**Resolution:** não aplicável — `DISCOVERED`.
+**Resolution (Sprint 32.19):** dos 4 seletores originais, 2 já não existiam mais no código
+(`.identity-field input`, `.wallet-filters input`) — Identity e os filtros do Wallet já convergiram
+para `BeeDayInput`/`BeeDaySelect`/`BeeDayDateInput`, cujo `InputCssClass` padrão já é
+`beeday-field__control`, em algum ponto entre o achado original e esta Sprint; `.wallet-filters` em
+si é só um container de grid, nunca foi um seletor de aparência de input. O terceiro,
+`.editor-modal__field input`/`.editor-modal__hero input`/`textarea`/`select`
+(`editor-modal.css`), era uma duplicação real e ainda viva — confirmado byte a byte quase idêntico
+a `.beeday-field__control` (forms.css), com pequenas divergências de padding (`.65rem` vs
+`.625rem`) sem nenhuma razão documentada, consistentes com drift acidental, não decisão de design.
+Removido: nenhum editor modal (Habit/Task/To-Do/Project/Transaction/Tag, os 6 consumidores de
+`.editor-modal__hero`/`.editor-modal__field`, confirmado por busca exaustiva) renderiza um
+`<input>`/`<select>`/`<textarea>` nativo fora de `BeeDayInput`/`BeeDaySelect`/`BeeDayDateInput`/
+`BeeDayTextArea` — todo campo já carregava `.beeday-field__control` por padrão, tornando a regra
+duplicada redundante, não complementar. O bloco `@media (prefers-reduced-motion: reduce)` que
+neutralizava a transição duplicada também foi removido — `forms.css` já cobre isso para
+`.beeday-field__control`. **Preservado deliberadamente, sem evidência de que seja acidental:** o
+override `.editor-modal__hero textarea { min-height: 5rem; ... }` (diverge do padrão de `7rem` de
+`.beeday-field__control--textarea` por especificidade mais alta — parece intencional, campos de
+"Notes"/"Description" em modal têm menos espaço) e os overrides de `:hover`/`:focus` de
+`editor-modal.css`, que usam tokens de cor genuinamente diferentes de `.beeday-field__control`
+(`color-mix` com brand-primary vs. `border-strong`/`border-interactive`) — sem confirmação visual ao
+vivo de que essa diferença é acidental, mantida como está, consistente com o limite explícito desta
+Sprint ("No previously established UX contract is knowingly regressed").
 
-**Regression Protection:** a definir pela Sprint 32.19 (candidato: consolidar em um único seletor/
-classe compartilhada, com teste de regressão visual ou snapshot de CSS).
+**Regression Protection:**
+`VisualFoundationTests.EditorModalFieldsNoLongerDuplicateTheSharedFieldControlBaseStyling` —
+confirma a remoção da duplicação de base e a preservação do override intencional de textarea e dos
+overrides de hover/focus. Database-free, leitura de arquivo fonte.
 
 ---
 
@@ -825,12 +850,12 @@ classe compartilhada, com teste de regressão visual ou snapshot de CSS).
 | Device | Shared |
 | Accessibility Impact | No |
 | Owning Sprint | 32.19 (Front-End Code Refinement & Component Consolidation) — cross-ref 32.5 (Forms & Input Experience) |
-| State | DISCOVERED |
+| State | **FIXED** — Sprint 32.19 |
 
 **Interação:** N/A (achado estrutural de código, não uma interação isolada).
 
-**Comportamento atual:** as duas páginas implementam de forma independente o mesmo cooldown de 60
-segundos via `PeriodicTimer`, sem compartilhar um componente/serviço comum.
+**Comportamento atual (na época do achado):** as duas páginas implementavam de forma independente o
+mesmo cooldown de 60 segundos via `PeriodicTimer`, sem compartilhar um componente/serviço comum.
 
 **Problema:** confirmado já aberto em `docs/web/04-feature-components.md` §7, explicitamente marcado
 como "candidato a duplicação, fora do escopo de apresentação" da Sprint que o descreveu — cabe à EPIC
@@ -838,10 +863,21 @@ como "candidato a duplicação, fora do escopo de apresentação" da Sprint que 
 
 **Evidência:** achado de código/documentação já verificado — `docs/web/04-feature-components.md` §7.
 
-**Resolution:** não aplicável — `DISCOVERED`.
+**Resolution (Sprint 32.19):** nova classe `ResendCooldownTimer` (`Components/Features/Identity/`) —
+um helper `IDisposable` simples, não um componente de UI, já que as duas páginas renderizam marcações
+próprias e distintas ao redor do contador compartilhado; não há markup em comum para extrair, só o
+timer. Encapsula exatamente o par `PeriodicTimer`/`CancellationTokenSource` antes duplicado
+verbatim, com `SecondsRemaining` e `Start(seconds)`. `ResendConfirmation.razor` e
+`EmailConfirmationSent.razor` agora instanciam um `_cooldown` cada um (contadores independentes por
+página, como já eram — nenhuma mudança de comportamento observável, só a implementação
+compartilhada) e delegam a ele; contrato público de ambas as páginas (rotas, formulário, mensagens)
+preservado integralmente.
 
-**Regression Protection:** a definir pela Sprint 32.19 (candidato: extrair um componente/hook
-`CooldownTimer` compartilhado, com teste cobrindo os dois consumidores).
+**Regression Protection:** `ResendCooldownTimerTests` — 4 casos cobrindo início imediato de
+`SecondsRemaining`, contagem regressiva completa com callback por tick, reinício antes da conclusão
+e `Dispose()` seguro sem `Start()` prévio; usa durações curtas (2–10s reais, não os 60s de produção)
+para permanecer rápido e determinístico sem mockar tempo. `IdentityFormConvergenceTests` (6 casos)
+reconfirmados verdes após o refactor. Database-free.
 
 ---
 
@@ -1754,7 +1790,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.16 — Wallet Experience Polish | EXP32-F005 (cross-ref); EXP32-F006 — `FIXED` (efeito colateral de F005, confirmado nesta Sprint) |
 | 32.17 — Settings, Profile & Account Experience Polish | `BD30-F021` (§7), gap de Preferences (§9) — ambos permanecem `OPEN`/gap de evidência de navegador; auditoria de código não encontrou defeito — ver §"Auditoria de Settings, Profile & Account" |
 | 32.18 — Public Pages & Brand Experience Polish | nenhum achado novo; 3 rotas públicas revalidadas sem defeito; `EditorialSectionNav.razor.css` reduced-motion fallback (adiado pela 32.15) `FIXED` nesta Sprint |
-| 32.19 — Front-End Code Refinement & Component Consolidation | EXP32-F011, EXP32-F012 |
+| 32.19 — Front-End Code Refinement & Component Consolidation | EXP32-F011, EXP32-F012 — ambos `FIXED` nesta Sprint |
 | 32.20 — Full Product Polish & Final Experience Gate | consome o estado final de todo o Ledger |
 
 ## 11. Validação desta Sprint

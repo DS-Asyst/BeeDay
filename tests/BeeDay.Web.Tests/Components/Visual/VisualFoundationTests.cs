@@ -436,6 +436,33 @@ public sealed class VisualFoundationTests
         Assert.Contains("@media (prefers-reduced-motion: reduce)", editorialSectionNav, StringComparison.Ordinal);
     }
 
+    // EXP32-F011 (Sprint 32.19): editor-modal.css used to duplicate .beeday-field__control's exact
+    // rest-state properties (width/min-height/padding/border/background/color/transition) under
+    // .editor-modal__hero input/.editor-modal__field input/select - byte-for-byte redundant, since
+    // every field inside an editor modal already carries .beeday-field__control by default
+    // (BeeDayInput/BeeDaySelect/BeeDayDateInput/BeeDayTextArea's own InputCssClass default). Proves
+    // the duplicate rule is gone while forms.css remains the single owner of that base styling; the
+    // hover/focus overrides (a genuinely different, currently-live color treatment) are deliberately
+    // left alone and not asserted against here.
+    [Fact]
+    public void EditorModalFieldsNoLongerDuplicateTheSharedFieldControlBaseStyling()
+    {
+        var editorModal = ReadWebFile("wwwroot", "css", "editor-modal.css");
+        var forms = ReadWebFile("wwwroot", "css", "forms.css");
+
+        Assert.Contains(".beeday-field__control {", forms, StringComparison.Ordinal);
+        Assert.DoesNotContain(".editor-modal__hero input,", editorModal, StringComparison.Ordinal);
+        Assert.DoesNotContain(".editor-modal__field input,", editorModal, StringComparison.Ordinal);
+        Assert.DoesNotContain(".editor-modal__field select {", editorModal, StringComparison.Ordinal);
+        // The editor-modal-specific textarea height override is an intentional divergence from
+        // forms.css's 7rem default, not duplication - must survive the consolidation.
+        Assert.Contains(".editor-modal__hero textarea {", editorModal, StringComparison.Ordinal);
+        Assert.Contains("min-height: 5rem;", editorModal, StringComparison.Ordinal);
+        // Hover/focus color treatment is intentionally untouched by this consolidation.
+        Assert.Contains(".editor-modal__hero input:hover,", editorModal, StringComparison.Ordinal);
+        Assert.Contains(".editor-modal__hero input:focus,", editorModal, StringComparison.Ordinal);
+    }
+
     private static string ReadWebFile(params string[] segments) =>
         File.ReadAllText(Path.Combine([RepoRoot, "src", "BeeDay.Web", .. segments]));
 
