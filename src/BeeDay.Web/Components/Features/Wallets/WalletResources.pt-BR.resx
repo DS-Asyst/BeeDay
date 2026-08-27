@@ -76,17 +76,13 @@
   <data name="TransactionUpdatedMessage" xml:space="preserve"><value>Transação atualizada com sucesso.</value></data>
   <data name="TransactionCreatedMessage" xml:space="preserve"><value>Transação criada com sucesso.</value></data>
   <data name="TransactionSaveErrorInline" xml:space="preserve"><value>Não foi possível salvar a transação. Revise as informações e tente novamente.</value></data>
-  <data name="TransactionSaveErrorToast" xml:space="preserve"><value>Não foi possível salvar a transação.</value></data>
   <data name="TransactionDeletedMessage" xml:space="preserve"><value>Transação excluída com sucesso.</value></data>
   <data name="TransactionDeleteErrorInline" xml:space="preserve"><value>Não foi possível excluir a transação. Tente novamente.</value></data>
-  <data name="TransactionDeleteErrorToast" xml:space="preserve"><value>Não foi possível excluir a transação.</value></data>
   <data name="TagUpdatedMessage" xml:space="preserve"><value>Tag atualizada com sucesso.</value></data>
   <data name="TagCreatedMessage" xml:space="preserve"><value>Tag criada com sucesso.</value></data>
   <data name="TagSaveErrorInline" xml:space="preserve"><value>Não foi possível salvar a tag. Revise as informações e tente novamente.</value></data>
-  <data name="TagSaveErrorToast" xml:space="preserve"><value>Não foi possível salvar a tag.</value></data>
   <data name="TagDeletedMessage" xml:space="preserve"><value>Tag excluída com sucesso.</value></data>
   <data name="TagDeleteErrorInline" xml:space="preserve"><value>Não foi possível excluir a tag. Tente novamente.</value></data>
-  <data name="TagDeleteErrorToast" xml:space="preserve"><value>Não foi possível excluir a tag.</value></data>
   <data name="RefreshFailedAfterSuccessMessage" xml:space="preserve"><value>A operação foi concluída, mas não foi possível atualizar a carteira.</value></data>
   <data name="BalanceUpdatedAnnouncement" xml:space="preserve"><value>Saldo atualizado para {0}.</value></data>
   <data name="HistoryEyebrow" xml:space="preserve"><value>Histórico</value></data>
