@@ -511,3 +511,71 @@ locale selection ... where useful" entre seu Required Work, então a extração 
 legítima do escopo mais amplo do motor de cenário/estado, não uma Sprint separada mal-numerada.
 
 **Disposição:** GO. Sprint 33.10 (Mock Data & UI State Engine) pode prosseguir.
+
+## 14. Sprint 33.10 — Mock Data & UI State Engine (FE33-104)
+
+**Entregue no repositório Lab:** PR #5 (`DS-Asyst/beeday-frontend-lab`), branch
+`sprint/33.10-mock-data-ui-state-engine`, merge `046e85e`. `Lab CI` verde antes do merge.
+
+Diferente das Sprints 33.6–33.9, esta Sprint é majoritariamente **código novo, próprio do Lab** —
+não extração de arquivo de produção. A Issue #371 (título canônico: "Mock Data & UI State Engine",
+não "Localization Contract" como uma disposição anterior deste documento nomeou incorretamente —
+ver correção na Seção 13) pede o motor único de cenário determinístico que toda Sprint de superfície
+futura (Public/Identity/Daily/Wallet/Email — Sprints 33.11–33.15) deve consumir em vez de inventar
+seu próprio mock local, conforme a ADR-008 já previa nas categorias ADAPT/MOCK.
+
+**Motor de cenário** (`src/BeeDayLab.Web/Scenarios/`, sem equivalente em produção — infraestrutura
+nova do Lab): `ScenarioState` (8 estados nomeados da Issue #371: `Empty`, `Populated`, `Loading`,
+`Error`, `NoResults`, `Disabled`, `LargeContent`, `Selected`), `ViewportPreset` (`Desktop`/`Tablet`/
+`Mobile`, opcional), `ScenarioContext` (record imutável: estado + cultura + viewport),
+`IScenarioProvider<TData>` (o ponto de extensão único — doc XML com exemplo completo
+`WalletScenarioProvider` para as Sprints 33.11–33.15 seguirem, mais o contrato de determinismo:
+função pura de `ScenarioContext`, proibido `Random`/`Guid.NewGuid()`/relógio de parede),
+`ScenarioSelection` (serviço `Scoped` por circuito, mesmo padrão de lifetime do `ToastService` da
+Sprint 33.8, com evento `Changed` para uma futura página de galeria com seletor de cenário —
+Sprint 33.16/33.17 — se ligar). `DemoCardListScenarioProvider` prova o mecanismo fim-a-fim contra os
+primitives do Design System já existentes (`BeeDayEmptyState`, `BeeDaySkeleton`, `BeeDayCard`) —
+ilustrativo, sem página real consumindo ainda.
+
+**Localização (FE33-104)** — ver linha atualizada no Ledger acima para o detalhe completo. Resumo:
+`LabCultures.cs` substitui `BeeDayCultures` (mantendo só as partes livres de `BeeDay.Domain`);
+`AuthenticatedAccountCultureProvider` não foi portado (infraestrutura de backend real);
+`Program.cs` ganhou um pipeline de localização real porém mínimo (`AddLocalization()`,
+`UseRequestLocalization()` só com `CookieRequestCultureProvider`, sem sniffing de header/query
+string) e um endpoint `POST /culture/set` — genérico, sem autenticação real, que faz o
+`PublicLanguageSwitcher.razor` já entregue na Sprint 33.9 funcionar de fato (ele já postava para essa
+rota, que retornava 404 até agora) **sem alterar aquele arquivo**. Catálogos `.resx` reais
+(`SharedResources`, `LayoutResources`, `DesignSystemResources`, en-US+pt-BR) copiados verbatim.
+
+**Decisão de escopo deliberada, registrada, não silenciosa:** nenhum componente das Sprints 33.8
+(PR #3) ou 33.9 (PR #4) foi retroadaptado para consumir `IStringLocalizer` de novo — essas ~40
+componentes hardcodaram strings em inglês deliberadamente pela regra estabelecida naquelas Sprints
+já entregues/verificadas. Reescrever todas elas não foi pedido pela Issue #371 (que é sobre o motor,
+com seleção de locale como uma capacidade de suporte) e constituiria retrabalho não limitado sobre
+duas Sprints já encerradas. O mecanismo de localização criado aqui fica disponível para Sprints
+futuras (33.11+) optarem por usá-lo em páginas novas.
+
+**Prova de integração fim-a-fim:** verificado manualmente que `POST /culture/set` com token de
+antiforgery real (obtido renderizando temporariamente o `PublicLanguageSwitcher.razor` já existente,
+página removida antes do commit — não faz parte do diff) retorna `302` com
+`Set-Cookie: BeeDayLab.Culture=c%3Dpt-BR%7Cuic%3Dpt-BR`, e uma requisição seguinte mostra o botão
+Português do switcher como `aria-pressed="true"`.
+
+**Validação (Lab, sem LocalDB):**
+
+- `dotnet format BeeDayLab.slnx --verify-no-changes` — limpo.
+- `dotnet build BeeDayLab.slnx -c Release --warnaserror` — 0 avisos/erros.
+- `dotnet test BeeDayLab.slnx -c Release` — 232/232 aprovados (6 guardas de arquitetura + 226
+  Web.Tests, incluindo as novas `ScenarioEngineTests.cs` — lookup determinístico, forma de dado por
+  estado, `Changed` disparando só em mudança real —, `LocalizationResourceTests.cs` — resolução real
+  de string en-US/pt-BR dos `.resx` copiados — e a nova guarda de arquitetura
+  `ScenarioAndLocalizationBoundaryTests.cs`, provando em código que nada sob `Scenarios/` referencia
+  `BeeDay.Domain`/`Application`/`Infrastructure`, EF Core, SQL, `ISender`/`BeeDayWebService`, ou usa
+  primitivos não-determinísticos, e que `AuthenticatedAccountCultureProvider` não foi portado).
+- `dotnet run` verificado localmente: Home `HTTP 200`; `POST /culture/set` sem token de antiforgery
+  válido retorna `400` (mesmo comportamento da produção); fluxo completo com token real confirmado
+  acima.
+
+`FE33-104` movido de `MAPPED` para `VERIFIED`.
+
+**Disposição:** GO. Sprint 33.11 (Public Pages Extraction) pode prosseguir.
