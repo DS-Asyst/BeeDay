@@ -1482,6 +1482,60 @@ removidos.
 
 ---
 
+### Responsive & mobile interaction audit (Sprint 32.14, Issue #258)
+
+Nenhum achado `EXP32-Fxxx` foi atribuído a esta Sprint — apenas o risco residual já registrado em
+§9 ("viewport móvel não testado ao vivo", limitação de ferramenta, não um defeito de código). O
+Required Work desta Sprint permite explicitamente um resultado de auditoria mais entrega de uma
+lista de verificação visual para o proprietário ("Produce a concise HMG visual-check list only for
+behavior that cannot be proven deterministically"), consistente com o próprio limite da Sprint ("Do
+not require Chromium screenshots from Claude"; "Do not claim subjective visual verification from
+CSS inspection").
+
+**Auditoria realizada (leitura direta de código/documentação, sem suposição):**
+
+- **Contrato de breakpoints (`docs/ux/03-responsive.md`)** já foi auditado por completo na Sprint
+  25.7 (revalidado 2026-08-16, ~2 Sprints antes do início da EPIC 32) — inventário dos 55
+  stylesheets de produção, classificação explícita `SHARED STRUCTURAL` vs. `LEGITIMATE FEATURE
+  LOCAL` vs. `REDUNDANT/CONSOLIDATE`, com o único breakpoint verdadeiramente estrutural (1200px,
+  troca de paradigma do shell) já coordenado e testado (source-level + E2E) em `MainLayout.razor.css`,
+  `DesktopSidebar.razor.css`, `MobileHeader.razor.css`, `MobileSidebar.razor.css`,
+  `Dashboard/Pages/Home.razor.css`. Nenhuma divergência encontrada entre o documento e o CSS real.
+- **Touch target (44px)** — confirmado que a estratégia já é robusta e não pontual: `polish.css`
+  eleva `.beeday-button`, `.top-navigation__menu-button` e `.beeday-checkbox` para
+  `min-height: 3rem` (48px) sob `@media (pointer: coarse)`, e `docs/design-system/04-forms.md` §4
+  confirma o mesmo padrão para inputs de formulário via `--beeday-control-height-md`. Cobertura
+  ampla, não um fork por página.
+- **Correção pós-review (Sourcery, PR #352):** o rascunho original desta auditoria classificou
+  `--beeday-control-height-sm` como "token morto" por `grep` não ter encontrado consumidor em
+  `src/BeeDay.Web/wwwroot/css/*.css` — busca incompleta, restrita aos stylesheets globais e cega a
+  CSS *scoped* de componente (`.razor.css`). `--beeday-control-height-sm` (2.5rem/40px) **é**
+  consumido por `ProjectWorkspace.razor.css` em `.project-workspace__list-toggle`, cujo
+  `min-height` padrão de desktop é 40px — sob `@media (pointer: coarse)` o mesmo arquivo já eleva
+  esse valor para `--beeday-control-height-md` (3rem/48px), seguindo exatamente o mesmo padrão de
+  elevação por ponteiro já confirmado em `polish.css`/`forms.css`. Não é token morto nem defeito de
+  touch-target — reforça a conclusão da auditoria (estratégia de touch-target ainda mais
+  amplamente aplicada do que o primeiro levantamento mostrou), só a alegação de "não usado" estava
+  errada. Nenhuma limpeza é candidata aqui; nada a rotear para 32.19.
+
+**Conclusão:** nenhum defeito de código/CSS responsivo foi encontrado com evidência suficiente para
+correção segura sem verificação visual real. Consistente com o limite explícito da Sprint, nenhuma
+mudança de breakpoint/estrutura foi feita especulativamente.
+
+**Lista de verificação visual para o proprietário (HMG), não executável pelo Claude:**
+
+1. Viewports de regressão já documentados em `docs/ux/03-responsive.md` §6 (390/430 mobile;
+   768/900/1024/1199 tablet; 1200 fronteira; 1280/1440/1920 desktop) — confirmar visualmente que a
+   troca de paradigma do shell (`DesktopSidebar` ↔ `MobileHeader`/`MobileSidebar`) ocorre exatamente
+   em 1199/1200px em produção, não só no CSS-fonte.
+2. Confirmar ausência de overflow horizontal no board Daily na faixa intermediária (scroll interno
+   esperado, `documentElement` não deve ampliar — já documentado em §5, não observado ao vivo desde
+   a Sprint 32.1 devido à limitação de ferramenta de viewport móvel registrada em §9).
+
+**Regression Protection:** nenhuma mudança de código foi necessária; nenhum teste novo.
+
+---
+
 ## 7. Achados pré-existentes roteados para dentro da EPIC 32
 
 | ID original | Ledger de origem | Achado | Sprint EPIC 32 |
@@ -1561,7 +1615,7 @@ deve fechá-lo, conforme a Issue #245 exige ("map each finding to exactly one ow
 | 32.11 — Errors, Recovery & User Feedback | EXP32-F007 (cross-ref); achado novo — mensagem de erro de mutação órfã em `EditorModalShell`/`BeeDayConfirmDialog`, `FIXED` nesta Sprint |
 | 32.12 — Toasts, Notifications & Confirmation Feedback | nenhum achado `EXP32-Fxxx` novo — duplicação toast+inline (introduzida pela própria 32.11) removida do Wallet |
 | 32.13 — Focus, Keyboard & Interaction Accessibility | EXP32-F001 (cross-ref); EXP32-F002, EXP32-F008, EXP32-F020 — `FIXED` nesta Sprint; EXP32-F009, EXP32-F010 — permanecem `DISCOVERED`, escopo maior que o restante desta Sprint |
-| 32.14 — Responsive & Mobile Interaction Polish | risco residual de §9 (evidência de navegador móvel pendente) |
+| 32.14 — Responsive & Mobile Interaction Polish | risco residual de §9 (evidência de navegador móvel pendente); auditoria de código confirmou contrato responsivo/touch-target já coerente — ver §"Responsive & mobile interaction audit"; lista de verificação HMG entregue |
 | 32.15 — Daily Experience Polish | EXP32-F004 (cross-ref), EXP32-F010 (cross-ref) |
 | 32.16 — Wallet Experience Polish | EXP32-F005 (cross-ref), EXP32-F006 |
 | 32.17 — Settings, Profile & Account Experience Polish | `BD30-F021` (§7), gap de Preferences (§9) |
