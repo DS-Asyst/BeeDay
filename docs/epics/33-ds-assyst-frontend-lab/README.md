@@ -1229,3 +1229,81 @@ Este SHA é candidato à nova revisão visual do proprietário — **não** foi 
 **Disposição real:** Gate estrutural/de código: **GO**. Aprovação visual do proprietário: **PENDING**
 — aguardando o proprietário efetivamente rodar/revisar o Lab corrigido (SHA `5df4f24`) e aprovar
 explicitamente. **EPIC 33 permanece ABERTA.**
+
+## 25. APROVAÇÃO DO PROPRIETÁRIO (SHA `5df4f24`) + Refinamento do Email Gallery
+
+**O proprietário rodou e revisou pessoalmente `DS-Asyst/beeday-frontend-lab@5df4f24`** (a correção de
+composição de CSS da Seção 24) e confirmou: *"After the CSS composition remediation, the Frontend Lab
+now visually matches the BeeDay baseline. I approve this corrected visual baseline."* — aprovação
+visual explícita, registrada aqui textualmente, não inferida.
+
+Antes do fechamento final da EPIC 33, o proprietário pediu um refinamento adicional, de escopo
+estreito, ao Email Gallery: uma forma de inspecionar cada e-mail transacional real exatamente como um
+usuário final recebe o corpo HTML — não dentro do chrome do Lab, não recriado via componentes Razor.
+
+### 25.1 Entregue
+
+PR #15 (`DS-Asyst/beeday-frontend-lab`), branch `sprint/33.18-r-email-review-refinement`, merge
+`357dc9d` em `hmg`. `Lab CI` verde antes do merge.
+
+- **2 rotas standalone** mapeadas como endpoints de API mínima em `Program.cs` (não `@page` — o único
+  mecanismo capaz de contornar totalmente o pipeline de renderização Blazor/shell do `App.razor`):
+  `GET /emails/confirmation/rendered?culture=pt-BR|en-US` e
+  `GET /emails/password-reset/rendered?culture=pt-BR|en-US`. Ambas chamam diretamente o
+  `TransactionalEmailTemplateCatalog.Compose(...)` já existente (Sprint 33.15) — nenhuma
+  reimplementação independente do HTML do e-mail.
+- `/emails` ganhou: uma linha "Quick review" com link direto para as 4 combinações reais de
+  template × idioma; um painel de "modo de revisão de cliente de e-mail" (From/To/Subject — chrome
+  exclusivo do Lab, vivendo fora do iframe, verificado por teste como nunca vazando para o HTML/texto
+  simples real do e-mail); e um link "Open full email preview" para a rota standalone
+  correspondente. O iframe `srcdoc` existente e a alternativa em texto simples foram preservados
+  como estavam.
+- `TransactionalEmailPreview` ganhou campos `From`/`To` (populados a partir das mesmas constantes
+  sintéticas já existentes no catálogo) para que a página e os testes leiam exatamente os mesmos
+  valores, sem duplicar literais.
+- Nenhum template transacional adicional foi inventado — `TransactionalEmailKind` continua com
+  exatamente 2 valores, correspondendo a `ComposeEmailConfirmation`/`ComposePasswordReset` de
+  produção; guardado por teste dedicado.
+
+### 25.2 Correção de processo registrada, não escondida
+
+A implementação inicial desta Sprint foi novamente commitada por engano diretamente em `hmg` local
+(sem branch) — o mesmo erro de processo já registrado na Seção 20 para a Sprint 33.16. Detectado
+antes de qualquer `git push`; nenhum commit chegou a `origin/hmg`. Corrigido pelo mesmo procedimento:
+`git branch` apontando para o commit (`sprint/33.18-r-email-review-refinement`), depois
+`git reset --hard origin/hmg` no local. Nenhuma perda de trabalho, nenhum impacto no repositório
+remoto. O ciclo normal branch → PR → `hmg` foi seguido a partir daí.
+
+### 25.3 Validação
+
+- `dotnet format BeeDayLab.slnx --verify-no-changes` — limpo.
+- `dotnet build BeeDayLab.slnx -c Release --warnaserror` — 0 avisos/erros.
+- `dotnet test BeeDayLab.slnx -c Release` — **533/533** aprovados (30 guardas de arquitetura + 503
+  Web.Tests, incluindo a nova `EmailRenderedRouteTests.cs` via `WebApplicationFactory<Program>` —
+  mesmo padrão que `LoginAndAuthTests` estabeleceu na Sprint 33.12 — e 4 novos testes em
+  `EmailPreviewPageTests.cs`).
+- `dotnet run` verificado localmente: as 9 superfícies representativas + as 4 rotas standalone
+  renderizadas, todas `HTTP 200`, sem erros no log.
+- `git diff --check` — limpo.
+- Testes provam: as rotas standalone servem HTML byte-idêntico ao catálogo; padrão para en-US sem
+  `culture`; nunca carregam marcadores de shell/nav/CSS do Lab (`blazor.web.js`, `beeday-app`,
+  classes de chrome de página ausentes; resposta começa com `<!doctype html>`); só referenciam
+  `beeday-lab.invalid`; guarda dedicada em `Program.cs` confirma ausência de
+  `IEmailSender`/`SmtpClient`/`MailKit`/`SendGrid`/referência à API do Resend.
+
+### 25.4 Nova coordenada candidata, explicitamente NÃO promovida (conforme instrução do proprietário)
+
+```text
+DS-Asyst/beeday-frontend-lab
+Branch: hmg
+SHA:    357dc9db59a665bc324d281ce374bb63e058779f
+```
+
+**O que esta Sprint NÃO fez**, exatamente conforme instruído: não promoveu `hmg` → `prd`; não criou
+nova tag de baseline; não re-fechou a Issue #379, #380 ou #361 (todas seguem **abertas**).
+
+**Disposição:** Gate estrutural/de código: **GO** no SHA `357dc9d`. A aprovação visual já concedida
+pelo proprietário (Seção 25, para `5df4f24`) cobre a composição de CSS; o refinamento do Email
+Gallery desta Seção aguarda a revisão do proprietário antes do fechamento final da EPIC 33.
+**EPIC 33 permanece ABERTA**, aguardando o proprietário revisar `357dc9d` e decidir sobre promoção/
+fechamento.
