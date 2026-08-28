@@ -898,3 +898,68 @@ Lab-only da EPIC (ex.: motor de cenário em si, Sprint 33.10).
 
 **Disposição:** GO. Sprint 33.16 (Component Gallery) pode prosseguir a partir do `hmg` atualizado do
 Lab (`39c0251`).
+
+## 20. Sprint 33.16 — Component Gallery (FE33-013..038/105)
+
+**Entregue no repositório Lab:** PR #11 (`DS-Asyst/beeday-frontend-lab`), branch
+`sprint/33.16-component-gallery`, merge `1176f83`. `Lab CI` verde antes do merge.
+
+**Sem item de Ledger próprio, por desenho:** a galeria em si não recebeu `FE33-XXX` — o inventário
+original (Sprint 33.4) já registrou as duas páginas de catálogo de produção
+(`/design-system/icons`, `/design-system/hero` — FE33-108/109) como `EXCLUDED`, com a nota "precedente
+de composição para a Component Gallery do Lab (33.16), não copiada 1:1 — o Lab constrói sua própria
+galeria a partir dos componentes já extraídos". Esta Sprint cumpre exatamente essa nota: nenhum
+componente novo foi criado, apenas composição/consumo dos 26 componentes já `VERIFIED` (FE33-013..038,
+FE33-105) pelas Sprints 33.8/33.9.
+
+**Entregue:** rota única `/design-system`, com navegação interna por âncora para as 10
+famílias de componentes reutilizáveis (Buttons, Cards, Feedback, Forms, Icons, Layout, Modals,
+Progress, Text, Behaviors) — todas renderizando instâncias reais dos componentes já extraídos, não
+capturas de tela. Metadados da galeria (variantes de botão, tamanhos/cores/nomes de ícone) são
+gerados a partir dos enums canônicos dos próprios componentes via `Enum.GetValues<T>()`, não listas
+hardcoded — cumprindo literalmente o item 5 do Required Work da Issue #377 ("keep gallery metadata
+generated from canonical component/state registrations where practical").
+
+**Cobertura de estado acessível (item 4 da Issue #377):** toggles reais de disabled/loading em
+`BeeDayButton`; overlay real de `BeeDayLoading`; um erro de renderização genuíno disparado sob
+demanda (`GalleryThrowOnDemand.razor`) que atravessa o `BeeDayErrorBoundary` real e renderiza seu
+fallback verdadeiro (não uma simulação visual); toasts reais via `ToastService` injetado;
+`BeeDayConfirmDialog` nas variantes padrão/ocupado/erro; um `BeeDaySettingsForm` real cujo envio com
+o campo obrigatório vazio produz uma mensagem de validação real via `BeeDayValidationMessage`
+(`DataAnnotationsValidator` de verdade, não texto fixo); `BeeDaySortable` com 3 cartões reais e
+`OnReorder` funcional usando `SortableOrder.Move`.
+
+**Erro de digitação corrigido durante a implementação, não silenciosamente:** `SearchHighlight`
+inicialmente recebeu `SearchTerm="_highlightTerm"` (string literal, sem `@`) em vez de
+`SearchTerm="@_highlightTerm"` (referência ao campo) — o bug foi pego pelos próprios testes bUnit
+desta Sprint (nenhum `<mark>` aparecia mesmo com o termo padrão "wallet" já presente no texto de
+amostra) antes do commit, não depois.
+
+**Guarda de arquitetura nova:** `TheGalleryConsumesExactlyTheAlreadyVerifiedDesignSystemComponentSetNoMoreNoLess`
+enumera literalmente os arquivos `.razor` sob `Components/DesignSystem/` + `Components/Behaviors/DragDrop/`
+e compara contra a lista exata dos 26 componentes esperados — prova em código, não por convenção, que
+esta Sprint (ou qualquer futura) não introduziu um componente novo "só para completar a galeria",
+conforme o limite explícito da Issue #377.
+
+**Correção de processo registrada, não escondida:** a implementação inicial desta Sprint foi
+commitada por engano diretamente em `hmg` local (sem branch), violando CLAUDE.md §7.2. O erro foi
+detectado antes de qualquer `git push` — nenhum commit chegou a `origin/hmg`. Corrigido mudando o
+commit para a branch `sprint/33.16-component-gallery` (`git branch` apontando para o commit) e
+resetando o `hmg` local de volta para `origin/hmg` (`git reset --hard`), sem perda de trabalho e sem
+qualquer impacto no repositório remoto. O ciclo normal branch → PR → `hmg` foi seguido a partir daí.
+
+**Validação (Lab, sem LocalDB):**
+
+- `dotnet format BeeDayLab.slnx --verify-no-changes` — limpo.
+- `dotnet build BeeDayLab.slnx -c Release --warnaserror` — 0 avisos/erros.
+- `dotnet test BeeDayLab.slnx -c Release` — 502/502 aprovados (19 guardas de arquitetura + 483
+  Web.Tests, incluindo as 15 novas `ComponentGalleryTests.cs`).
+- `dotnet run` verificado localmente: `/`, `/wallet`, `/emails`, `/design-system` todos `HTTP 200`;
+  os 9 `beeday-button--*` de variante, a contagem de `.gallery-page__icon-swatch` e o `<mark>` real de
+  `SearchHighlight` confirmados no HTML renderizado.
+- `git diff --check` — limpo.
+- Varredura de segredo (mesmos padrões das Sprints 33.5/33.14/33.15) sobre os arquivos novos da
+  Gallery — nenhum valor real encontrado.
+
+**Disposição:** GO. Sprint 33.17 (Page + Email Gallery & Responsive Preview) pode prosseguir a partir
+do `hmg` atualizado do Lab (`1176f83`).
