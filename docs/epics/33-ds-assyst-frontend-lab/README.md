@@ -836,3 +836,65 @@ são determinísticos por seed fixo.
 
 **Disposição:** GO. Sprint 33.15 (Transactional Email Visual Templates) pode prosseguir a partir do
 `hmg` atualizado do Lab (`38f8ffa`).
+
+## 19. Sprint 33.15 — Transactional Email Visual Templates (FE33-101..103)
+
+**Entregue no repositório Lab:** PR #10 (`DS-Asyst/beeday-frontend-lab`), branch
+`sprint/33.15-transactional-email-visual-templates`, merge `39c0251`. `Lab CI` verde antes do merge.
+Sessão iniciada limpa (sem interrupção/retomada, ao contrário das Sprints 33.12/33.14) — o produto
+tem exatamente 2 templates de e-mail transacional reais, conforme já confirmado pela Sprint 33.4
+(§8 do README).
+
+**Escopo entregue:** `TransactionalEmailTemplateCatalog` (`src/BeeDayLab.Web/Emails/`) — a adaptação
+Lab de `BeeDay.Infrastructure.Identity.IdentityEmailComposer` — mais a página de preview `/emails`
+(`Components/Pages/Emails/EmailPreview.razor`) e o catálogo `EmailResources` (en-US/pt-BR) copiado
+verbatim, chave a chave, do catálogo real de produção.
+
+**Padrão central desta Sprint:** o shell HTML/plain-text e todo token de design (`BuildHtmlTemplate`/
+`BuildPlainTextTemplate`, cor de marca `#5247F9`, font stacks, layout tabular `role="presentation"`
+exigido pelo Outlook) foram copiados verbatim (FE33-103, COPY) — e-mail clients não consomem CSS
+custom properties, então os mesmos literais hex que a produção rastreia contra
+`docs/design-system/01-foundations.md` se aplicam sem alteração. O que não foi portado (FE33-101/102,
+MOCK): `IdentityEmailOptions` (config real de `PublicBaseUrl`/`ConfirmationPath`/`PasswordResetPath`)
+e `BeeDay.Domain.Enums.UserLanguage`. Recipiente, nome de exibição e token são valores fixos e
+obviamente sintéticos (`demo.reader@beeday-lab.invalid` / "Alex Rivera" / `lab-preview-token-not-real`);
+a URL de ação sempre resolve para `beeday-lab.invalid` — TLD reservado IANA/RFC 2606 que nunca
+resolve de verdade — para que nenhum link de preview possa ser confundido com, ou alcançar, um
+endpoint real do beeday.
+
+**Página `/emails`:** seletor de template (confirmação/redefinição de senha), de locale (en-US/pt-BR)
+e de largura (375px estreita / 640px padrão), todos deep-linkable via query string
+(`?template=&culture=&width=`) — mesma convenção de estado diretamente selecionável já usada pelo
+parâmetro `dialog=` da Sprint 33.14. O HTML composto é renderizado em um `<iframe srcdoc>` isolado
+(sem requisição de rede alguma); a alternativa em texto simples é exibida logo abaixo. Diferente das
+demais superfícies da EPIC, esta página não usa o motor de cenário (`IScenarioProvider`/
+`ScenarioSelection`) — não há estado de app (Empty/Loading/Error) a variar, apenas composição estática
+de conteúdo já resolvido; uma nova guarda de arquitetura prova essa ausência deliberada.
+
+**Decisão de escopo deliberada, registrada, não silenciosa:** a página de chrome (`/emails`) ganhou
+seu próprio catálogo `EmailPreviewResources` (rótulos "Template"/"Locale"/"Width" etc.) — distinto do
+`EmailResources` que espelha o conteúdo real do e-mail — porque não tem equivalente de produção; é
+infraestrutura de preview exclusiva do Lab, mesma razão de escopo já usada para outras páginas
+Lab-only da EPIC (ex.: motor de cenário em si, Sprint 33.10).
+
+**Validação (Lab, sem LocalDB):**
+
+- `dotnet format BeeDayLab.slnx --verify-no-changes` — limpo.
+- `dotnet build BeeDayLab.slnx -c Release --warnaserror` — 0 avisos/erros.
+- `dotnet test BeeDayLab.slnx -c Release` — 485/485 aprovados (17 guardas de arquitetura + 468
+  Web.Tests, incluindo as novas `EmailTemplateCatalogTests.cs` e `EmailPreviewPageTests.cs`, e 2 novas
+  guardas de arquitetura provando ausência de infraestrutura de entrega real e de host real de
+  produção na URL de ação).
+- `dotnet run` verificado localmente: `/`, `/wallet`, `/emails`,
+  `/emails?template=confirmation&culture=en-US&width=narrow`,
+  `/emails?template=reset&culture=pt-BR&width=standard` todos `HTTP 200`; assunto localizado pt-BR
+  ("Redefina sua senha beeday") e o host sintético `beeday-lab.invalid` confirmados no HTML
+  renderizado.
+- `git diff --check` — limpo.
+- Varredura de segredo (mesmos padrões das Sprints 33.5/33.14) sobre os arquivos novos de Email —
+  nenhum valor real encontrado.
+
+`FE33-101`–`FE33-103` movidos de `MAPPED` para `VERIFIED`.
+
+**Disposição:** GO. Sprint 33.16 (Component Gallery) pode prosseguir a partir do `hmg` atualizado do
+Lab (`39c0251`).
