@@ -963,3 +963,63 @@ qualquer impacto no repositório remoto. O ciclo normal branch → PR → `hmg` 
 
 **Disposição:** GO. Sprint 33.17 (Page + Email Gallery & Responsive Preview) pode prosseguir a partir
 do `hmg` atualizado do Lab (`1176f83`).
+
+## 21. Sprint 33.17 — Page + Email Gallery & Responsive Preview
+
+**Entregue no repositório Lab:** PR #12 (`DS-Asyst/beeday-frontend-lab`), branch
+`sprint/33.17-page-email-gallery-responsive-preview`, merge `bdcbea9`. `Lab CI` verde antes do merge.
+
+**Sem item de Ledger próprio, mesmo racional da Sprint 33.16:** a rota `/preview` em si não recebeu
+`FE33-XXX` — é infraestrutura de revisão exclusiva do Lab, sem equivalente de produção, assim como
+`/design-system` (Sprint 33.16). O que esta Sprint entrega é a superfície que **consome** e **integra**
+tudo que já foi extraído (54 rotas reais + 2 templates de e-mail), não um novo componente de produto.
+
+**Entregue:** rota `/preview` com:
+
+1. `PreviewPageRegistry` — índice canônico de todas as 53 rotas reais já extraídas, agrupadas por
+   área (Public, Identity, Account, Daily, Wallet, Email, System), cada uma um `<a href>` real — não
+   captura de tela. Uma nova guarda de arquitetura (`PreviewPageRegistryTests`, texto-scanning, sem
+   `ProjectReference` a `BeeDayLab.Web`, mesmo estilo dos demais guards deste projeto) cruza o
+   registro contra toda diretiva `@page` real declarada no repositório **nas duas direções** — pegou e
+   corrigiu uma lacuna real durante a implementação: `TypographyGuidelines.razor` tem 2 rotas
+   (`/brand/typography` e `/experience-system/brand/typography`, já documentado como "mesmo
+   componente, 2 rotas" em FE33-068), e apenas a primeira havia sido listada inicialmente.
+2. Seletor compartilhado de cenário/viewport — vinculado diretamente ao `ScenarioSelection` já
+   existente desde a Sprint 33.10 (nenhum motor novo criado; a XML doc de `ScenarioSelection.cs` já
+   previa literalmente "a future scenario-picker gallery page (Sprint 33.16/33.17) binds its
+   controls to State/Culture/Viewport"). Como a navegação normal dentro do app mantém o mesmo
+   circuito Blazor Server, uma seleção feita aqui já está ativa em qualquer página que o revisor abra
+   em seguida na mesma aba.
+3. Seletor de idioma compartilhado — reaproveita o `PublicLanguageSwitcher` real (Sprint 33.9) sem
+   nenhuma alteração, postando para o `/culture/set` já existente (Sprint 33.10).
+4. Preview responsivo — o revisor escolhe qualquer página do registro e a vê ao vivo em 3 iframes
+   reais de mesma origem, em 375px/768px/1280px, larguras escolhidas para atravessar os breakpoints
+   reais do próprio Design System (`polish.css`, 30rem/42rem/60rem — FE33-006).
+5. Integração com a Email Gallery da Sprint 33.15 — os 2 templates reais linkados diretamente
+   (`/emails?template=confirmation`, `/emails?template=reset`).
+
+**Decisão de arquitetura registrada:** avaliada e descartada a ideia de renderizar as páginas do
+preview responsivo inline via `DynamicComponent` (mesmo circuito, propagação automática de estado) em
+vez de iframes — descartada porque várias páginas já extraídas dependem de
+`[SupplyParameterFromQuery]` (Home, Wallet, CreateProfile, ConfirmEmail, etc.), que só é preenchido
+pelo Router real durante navegação de verdade; instanciar via `DynamicComponent` fora do Router
+arriscava quebrar exatamente essas páginas. Iframes de mesma origem apontando para a rota real
+evitam esse risco por completo, ao custo de cada preset assumir seu próprio circuito (estado de
+cenário no valor padrão dentro do iframe) — troca aceitável e documentada, não uma limitação
+escondida.
+
+**Validação (Lab, sem LocalDB):**
+
+- `dotnet format BeeDayLab.slnx --verify-no-changes` — limpo.
+- `dotnet build BeeDayLab.slnx -c Release --warnaserror` — 0 avisos/erros.
+- `dotnet test BeeDayLab.slnx -c Release` — 509/509 aprovados (22 guardas de arquitetura + 487
+  Web.Tests, incluindo as novas `PreviewPageRegistryTests.cs` e `PreviewHubTests.cs`).
+- `dotnet run` verificado localmente: `/`, `/wallet`, `/design-system`, `/emails`, `/preview` todos
+  `HTTP 200`; amostragem de 7 rotas do registro (institucionais, experience-system, identity) todas
+  `HTTP 200`.
+- `git diff --check` — limpo.
+- Varredura de segredo (mesmos padrões das Sprints anteriores) sobre os arquivos novos do Preview —
+  nenhum valor real encontrado.
+
+**Disposição:** GO. Sprint 33.18 (Complete Frontend Baseline Parity Gate) pode prosseguir a partir do
+`hmg` atualizado do Lab (`bdcbea9`).
