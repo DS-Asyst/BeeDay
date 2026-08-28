@@ -62,8 +62,24 @@ A EPIC 33 (19 Sprints, Fases A–F):
 - Novo Ledger ou mecanismo de rastreamento para trabalho visual futuro no Lab pós-EPIC-33 — decisão
   de uma Epic/Sprint futura.
 
-## Disposição final
+## Disposição final (conforme registrada no momento desta Sprint)
 
-**EPIC 33 — CONCLUÍDA.** Todos os 8 critérios de "Completion" da Issue #361 satisfeitos com evidência
-direta, não suposição. Nenhuma Sprint permanece com trabalho pendente. Nenhum bloqueio real
-remanescente.
+~~**EPIC 33 — CONCLUÍDA.** Todos os 8 critérios de "Completion" da Issue #361 satisfeitos com
+evidência direta, não suposição. Nenhuma Sprint permanece com trabalho pendente. Nenhum bloqueio real
+remanescente.~~
+
+**REVOGADA pela Sprint 33.18-R — ver [`README.md`](README.md) §24.** O proprietário rodou o Lab
+localmente e observou diferença visual substancial em relação ao BeeDay original, invalidando o
+critério 6 ("Owner visual baseline approval explicitly recorded") — a aprovação que esta Sprint
+tratou como satisfeita não se sustentou diante da revisão real. EPIC 33 (`#361`), Sprint 33.18
+(`#379`) e Sprint 33.19 (`#380`) foram reabertas no GitHub.
+
+Causa raiz (composição de CSS incompleta no Lab) identificada e corrigida na Sprint 33.18-R (Lab PR
+#14, merge `5df4f24` em `hmg`, **não** promovido para `prd`). Novo SHA candidato aguardando revisão
+visual real do proprietário. Este documento é mantido como registro histórico do que foi declarado
+nesta Sprint — não apagado nem reescrito; a correção completa vive em `README.md` §24 e em
+`04-baseline-parity-report.md` §9.
+
+**Estado real após a correção de Sprint 33.18-R:** EPIC 33 **ABERTA**. Critérios 1–5, 7 e 8 seguem
+satisfeitos com evidência (nada nesses itens foi invalidado). Critério 6 (aprovação visual) volta a
+**PENDING**, agora contra `DS-Asyst/beeday-frontend-lab@5df4f24`.

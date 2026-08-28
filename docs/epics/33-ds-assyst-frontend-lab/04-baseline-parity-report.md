@@ -152,3 +152,33 @@ registrado de forma imutável, zero defeitos de extração encontrados, zero red
 antes de qualquer promoção adicional do baseline. Sprint 33.19 (Frontend Lab Workflow, Promotion
 Contract & EPIC Closure) pode prosseguir com o trabalho de workflow/contrato de promoção que não
 dependa da aprovação visual em si, mas o fechamento final da EPIC 33 depende desta aprovação.
+
+## 9. CORREÇÃO — Falha de paridade visual descoberta pós-promoção (Sprint 33.18-R)
+
+**Este relatório, tal como escrito nas Seções 1–8, refletiu evidência real de gate estrutural/de
+código no momento em que foi produzido — mas a aprovação visual que a Sprint 33.19 tratou como
+satisfeita não se sustentou.** O proprietário rodou o Lab localmente e observou diferença visual
+substancial em relação ao BeeDay original. Detalhe completo, auditoria de causa-raiz e correção em
+[`README.md`](README.md) §24.
+
+**Causa raiz identificada:** `App.razor` do Lab nunca referenciava o bundle de CSS isolation
+(`BeeDayLab.Web.styles.css`, 44 arquivos/3262 linhas gerados no build mas nunca linkados) e 6 arquivos
+CSS globais de produção nunca haviam sido copiados para o Lab (`activity-design-system.css`,
+`settings.css`, `cards.css`, `dragdrop.css`, `identity.css`, `institutional.css` — nunca catalogados
+pelo inventário original da Sprint 33.4, agora `FE33-110`–`FE33-115`). Nenhum dos 509/516 testes
+anteriores capturava esta classe de defeito — todos validam estrutura/comportamento de DOM, não
+aplicação real de CSS no navegador.
+
+**Correção aplicada** (Lab PR #14, merge `5df4f24` em `hmg`, não promovido para `prd`): os 6 arquivos
+copiados verbatim, o bundle de CSS isolation linkado, `<ReconnectModal />` adicionado, `lab-shell.css`
+obsoleto removido. Nova suíte `StylesheetCompositionTests.cs` (7 testes) como proteção de regressão
+determinística — verificada como capaz de detectar exatamente esta classe de defeito (5/7 falham
+contra a composição anterior, 7/7 passam contra a correção).
+
+**Nova coordenada candidata:** `DS-Asyst/beeday-frontend-lab@5df4f24` (branch `hmg`) — explicitamente
+**não** promovida para `prd`, nenhuma tag nova criada, `v1.0.0-lab-baseline` não alterada.
+
+**Disposição corrigida:** gate estrutural/de código GO no novo SHA candidato; aprovação visual do
+proprietário permanece **PENDING**, agora contra o SHA `5df4f24`. As Seções 1–8 acima permanecem
+como registro histórico do que foi observado no momento em que foram escritas — não foram apagadas
+nem reescritas.

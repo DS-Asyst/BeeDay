@@ -1097,5 +1097,135 @@ publicada apontando para `923bee3`, marcando a baseline visual aprovada — não
   Sprints — nenhum código de produto foi alterado por esta Sprint, apenas a promoção `hmg` → `prd`).
 - `git diff --check` — limpo em ambos os repositórios.
 
-**Disposição:** **EPIC 33 CONCLUÍDA.** Ver [`06-epic-closure-report.md`](06-epic-closure-report.md)
-para a reconciliação completa dos 8 critérios de fechamento.
+**Disposição registrada no momento:** ~~EPIC 33 CONCLUÍDA~~ — **ver Seção 24, que corrige esta
+disposição.** Este texto é mantido como registro histórico fiel do que foi declarado nesta Sprint,
+não apagado nem reescrito.
+
+## 24. CORREÇÃO DE ESTADO — Falha de Paridade Visual (Sprint 33.18-R)
+
+**A disposição "EPIC 33 CONCLUÍDA" registrada na Seção 23 estava incorreta e é revogada por esta
+Seção.** O proprietário rodou `DS-Asyst/beeday-frontend-lab` localmente e observou diretamente que o
+Lab estava visualmente substancialmente diferente do frontend original do BeeDay — o oposto da
+aprovação visual presumida pela Sprint 33.19. Isso invalida a conclusão anterior de "paridade visual
+completa / baseline aprovada pelo proprietário".
+
+**Reaberto no GitHub:** EPIC 33 (`#361`), Sprint 33.18 (`#379`), Sprint 33.19 (`#380`) — todos com
+comentário de correção de estado registrando o motivo exato da reabertura.
+
+**Correção de estado explícita:**
+
+- Gate estrutural/de código: **passou** e continua válido como sinal de correção de código — não é
+  invalidado por este episódio.
+- Revisão visual ao vivo do proprietário: **falhou**. Este é o sinal de maior autoridade, e esta
+  Sprint reconhece que a sessão anterior errou ao tratar o gate automatizado como suficiente para
+  aprovação visual.
+- `beeday-frontend-lab:prd@923bee3` **não é atualmente** uma baseline de paridade visual aceita.
+- A tag `v1.0.0-lab-baseline` **não deve ser tratada como baseline de paridade confiável** enquanto o
+  proprietário não decidir mantê-la, substituí-la ou removê-la. A tag **não foi deletada nem
+  reescrita** — permanece exatamente onde estava, apontando para `923bee3`, como registro histórico
+  do que foi promovido e quando.
+
+### 24.1 Auditoria de causa-raiz
+
+Realizada uma auditoria completa de composição de renderização contra `DS-Asyst/BeeDay@acce26a`,
+cobrindo os 10 pontos exigidos pelo proprietário (grafo/ordem de stylesheets do `App.razor`, CSS
+globais, inclusão do bundle de CSS isolation, todo `*.razor.css`, assets estáticos, módulos JS,
+composição de layout, carregamento de fonte, classes de body/root, e CSS Lab-only capaz de
+sobrescrever apresentação de produção).
+
+**Ledger de discrepância concreta encontrado:**
+
+1. **CRÍTICO** — `App.razor` do Lab nunca referenciava `BeeDayLab.Web.styles.css`, o bundle de
+   CSS isolation gerado no build a partir de todo `*.razor.css` (44 arquivos, 3262 linhas). O bundle
+   era gerado corretamente pelo SDK, mas nunca linkado — todo estilo component-scoped esteve
+   silenciosamente inerte desde a Sprint 33.9.
+2. **CRÍTICO** — 6 arquivos CSS globais reais de produção nunca foram copiados para o Lab:
+   `activity-design-system.css`, `settings.css`, `cards.css` (535 linhas — todo `.activity-card`/
+   `.habit-card` do Daily), `dragdrop.css` (`.beeday-sortable*`), `identity.css` (páginas de
+   recuperação de identidade), `institutional.css` (as 12 páginas institucionais). Nenhum destes 6
+   jamais recebeu um `FE33-*` no inventário original da Sprint 33.4 — lacuna de cobertura do
+   inventário, não um item que estava `MAPPED`/`VERIFIED` incorretamente. Registrados agora como
+   `FE33-110`–`FE33-115` (ver [`03-frontend-inventory-ledger.md`](03-frontend-inventory-ledger.md)).
+3. **ESTRUTURAL, menor** — `<ReconnectModal />` nunca era instanciado em lugar algum do Lab; produção
+   sempre o renderiza em `App.razor`. Estado padrão (`Hidden`) é visualmente inerte, mas a lacuna de
+   composição em si foi corrigida.
+4. **OBSOLETO, confirmado e removido** — `css/lab-shell.css`, cujo próprio comentário dizia ser um
+   placeholder temporário de bootstrap das Sprints 33.5/33.6, explicitamente substituído pela
+   extração real de layout da Sprint 33.9. Confirmado sem nenhum uso de suas classes em qualquer
+   markup (`grep` de `.lab-shell*` não encontrou nenhuma referência fora do próprio `App.razor`) —
+   removido.
+5. **Não-problema, confirmado, não corrigido** — `ProgressMetricCard.razor(.css)` de produção não é
+   referenciado por nenhum outro arquivo em `acce26a` — código morto na própria produção; sua
+   ausência no Lab não é um defeito.
+6. **Não-problema** — `ResourcePreloader`/`ImportMap`/sintaxe `@Assets[...]` de produção são
+   infraestrutura de fingerprinting de Static Web Assets do ASP.NET Core (otimização de
+   cache/preload), não conteúdo visual — a ausência no Lab não afeta aparência; os caminhos relativos
+   simples do Lab já resolviam corretamente (confirmado por `HTTP 200` em toda Sprint anterior).
+
+### 24.2 Correção aplicada
+
+PR #14 (`DS-Asyst/beeday-frontend-lab`), branch `sprint/33.18-r-css-composition-remediation`, merge
+`5df4f24` em `hmg` — **não** promovido para `prd`, conforme exigido pelo proprietário. `Lab CI` verde
+antes do merge.
+
+- Os 6 arquivos CSS copiados verbatim de `acce26a` (0 referências `url()`, 0 propriedades customizadas
+  não definidas — todos os 76 tokens `--beeday-*` que usam já existiam em `variables.css`/
+  `design-system.css` do Lab) e linkados no `App.razor` na mesma ordem relativa de cascata do
+  `App.razor` de produção.
+- `BeeDayLab.Web.styles.css` linkado na mesma posição de `BeeDay.Web.styles.css` na produção.
+- `<ReconnectModal />` adicionado ao body.
+- `css/lab-shell.css` removido (arquivo + link).
+
+**Verificação de que a correção realmente teve efeito** (não apenas "arquivo linkado"):
+`.beeday-settings-section` confirmado presente 22× em `/design-system`; `.activity-card`/
+`.habit-card`/`.dashboard-column` confirmados em `/daily`; `.identity-card`/`.identity-form`
+confirmados em `/account/forgot-password`; `.institutional-page__body` confirmado em `/mission`.
+
+### 24.3 Proteção de regressão adicionada
+
+`StylesheetCompositionTests.cs` (Lab, `BeeDayLab.ArchitectureTests`) — 7 testes determinísticos:
+todo stylesheet equivalente à produção está carregado; a ordem de cascata bate com a ordem relativa
+de produção; o bundle de CSS isolation está referenciado; todo stylesheet referenciado existe em
+disco; o bootstrap obsoleto não está carregado nem presente; nenhum `*.razor.css` vazio;
+`<ReconnectModal />` está instanciado.
+
+**Prova de que os testes realmente pegam esta classe de defeito:** executados contra o `App.razor`
+revertido ao estado pré-correção (via `git stash`, sem afetar os arquivos novos) — **5 de 7 falharam**,
+confirmando dentes reais antes de confirmar 7/7 aprovados contra a correção.
+
+### 24.4 Validação
+
+- `dotnet format BeeDayLab.slnx --verify-no-changes` — limpo.
+- `dotnet build BeeDayLab.slnx -c Release --warnaserror` — 0 avisos/erros.
+- `dotnet test BeeDayLab.slnx -c Release` — **516/516** aprovados (29 guardas de arquitetura + 487
+  Web.Tests).
+- `dotnet run` verificado localmente: os 6 novos CSS + `BeeDayLab.Web.styles.css` todos `HTTP 200`;
+  `lab-shell.css` agora `404`; superfícies representativas exigidas pelo proprietário (`/`, `/login`,
+  `/profile`, `/daily`, `/wallet`, `/design-system`, `/preview`, `/emails`, `/mission`) todas
+  `HTTP 200`, sem erros no log.
+- `git diff --check` — limpo.
+
+### 24.5 Nova coordenada candidata (SHA), explicitamente NÃO promovida
+
+```text
+DS-Asyst/beeday-frontend-lab
+Branch: hmg
+SHA:    5df4f240d021ec1b62d1b04656f101b8394419ac
+```
+
+Este SHA é candidato à nova revisão visual do proprietário — **não** foi promovido para `prd`,
+**nenhuma** tag nova foi criada, e a tag `v1.0.0-lab-baseline` **não** foi movida/reescrita/removida.
+
+### 24.6 O que esta Sprint NÃO fez (limites do proprietário respeitados integralmente)
+
+- Não promoveu `hmg` → `prd`.
+- Não criou nova tag de baseline aprovada.
+- Não presumiu nem inferiu aprovação visual do proprietário.
+- Não re-fechou a Issue #379, #380 ou #361 — todas permanecem **abertas**.
+- Não deletou nem reescreveu a tag `v1.0.0-lab-baseline`.
+- Não apagou nem reescreveu nenhum registro histórico anterior (Seções 1–23 permanecem como estavam,
+  com a correção de estado desta Seção adicionada, não substituindo o texto anterior).
+
+**Disposição real:** Gate estrutural/de código: **GO**. Aprovação visual do proprietário: **PENDING**
+— aguardando o proprietário efetivamente rodar/revisar o Lab corrigido (SHA `5df4f24`) e aprovar
+explicitamente. **EPIC 33 permanece ABERTA.**
