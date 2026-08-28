@@ -716,3 +716,64 @@ por query string que `Login.razor` já renderizava na produção. Testado com ro
 `FE33-077`–`FE33-087` movidos de `MAPPED` para `VERIFIED`.
 
 **Disposição:** GO. Sprint 33.13 (Daily / Productivity Visual States) pode prosseguir.
+
+## 17. Sprint 33.13 — Daily / Productivity Visual States (FE33-088..097)
+
+**Entregue no repositório Lab:** PR #8 (`DS-Asyst/beeday-frontend-lab`), branch
+`sprint/33.13-daily-productivity-visual-states`, head `01f7525`, merge `def365c`. `Lab CI` permaneceu
+verde no head validado e o merge ocorreu pelo fluxo protegido normal, sem bypass. Foram entregues
+78 arquivos e 8.639 linhas para `/profile`, `/daily`, quatro editores de atividade, Project
+Workspace, Experience Bar e feedback visual de level-up.
+
+**Contrato único de apresentação:** quase toda a superfície de produção era tipada contra responses
+de `BeeDay.Application` e enums de `BeeDay.Domain`. A Sprint criou uma única tradução central em
+`Scenarios/DailyDashboardScenarioData.cs`: 8 enums Lab-local e os records de Profile, Habit, Task,
+Todo e Project. Nenhuma página ou componente redefiniu contratos próprios. A forma real do
+`DashboardResponse` foi preservada: todos aninhados sob Project, sem lista top-level concorrente.
+
+**Provider determinístico:** `DailyDashboardScenarioProvider` cobre Empty, Populated e LargeContent
+com ids derivados de seed e instante de referência fixo. Loading/Error são tratados pelos callers;
+NoResults é produzido pelos filtros reais sobre o dataset Populated. O cenário LargeContent coloca
+as quatro coleções acima do threshold de virtualização (30) e o cenário Populated cobre todas as 7
+faixas de `HabitVisualState`. Não há `Random`, `Guid.NewGuid()`, relógio de parede, rede ou
+persistência.
+
+**Estado e interação:** `LabDashboardState` preserva busca, filtro por atributo/projeto, contadores,
+modais, workspace e reorder via `SortableOrder.Move`. `BeeDayWebService`/handlers/reload foram
+substituídos por mutações locais após atraso sintético curto, mantendo os estados busy/toast. Os
+valores de domínio já resolvidos — particularmente `ProgressPercentage` — não são recalculados após
+interações locais.
+
+**XP/level-up (MOCK):** a transição positiva anuncia o `XpGainPerAction` fixo do cenário (10);
+desmarcar Task/Todo e registrar Habit negativo não anunciam ganho. `BeeDayFeedbackEventHandler`
+(`MediatR` + Domain Event) foi excluído. Para tornar o estado visual diretamente exercitável, cada
+3ª ação positiva adiciona ao `BeeDayFeedbackStore` um payload sintético com avanço de um nível —
+comportamento determinístico de apresentação, sem curva, threshold ou regra de recompensa.
+
+**Correções do Ledger confirmadas contra a fonte real:**
+
+1. FE33-097 `DashboardColumn`: ADAPT → COPY — não depende de `DashboardState`; recebe fragments e
+   contadores já resolvidos.
+2. FE33-092 `TaskEditorModal`: COPY → ADAPT — renderiza o enum Domain `TaskRepeat`, substituído por
+   `DailyTaskRepeat` no contrato central.
+3. FE33-093 `TodoEditorModal`: COPY → ADAPT — recebe `ProjectSummary` de Application, substituído
+   por `DailyProjectSummary`.
+4. FE33-089 `LegacyHomeRedirect`: EXCLUDE confirmado — redirect puro `/home` → `/profile`, sem
+   superfície visual.
+5. `ExperienceViewModel.From(UserExperience)` não foi portado por depender de Domain; apenas o
+   overload sobre o resumo de apresentação foi mantido.
+
+**Validação (Lab, sem LocalDB), executada no head `01f7525` e preservada por estar inalterado:**
+
+- `dotnet format BeeDayLab.slnx --verify-no-changes` — limpo.
+- `dotnet build BeeDayLab.slnx -c Release --warnaserror` — 0 avisos/erros.
+- `dotnet test BeeDayLab.slnx -c Release` — 437/437 aprovados (10 Architecture + 427 Web), 0 falhas,
+  0 ignorados.
+- Smoke local: `/profile` e `/daily` retornaram HTTP 200 com conteúdo real do cenário Populated.
+- GitHub `Lab CI` — verde no mesmo head `01f7525` antes do merge.
+
+`FE33-088`, `FE33-090`–`FE33-097` movidos de `MAPPED` para `VERIFIED`; `FE33-089` permanece
+`EXCLUDED` por não possuir superfície visual.
+
+**Disposição:** GO. Sprint 33.14 (Wallet Visual States) pode prosseguir a partir do `hmg` atualizado
+do Lab (`def365c`).
