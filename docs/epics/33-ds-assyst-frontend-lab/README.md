@@ -1061,3 +1061,41 @@ para a aprovação visual do proprietário — pré-requisito da Issue #379 ante
 adicional do baseline. Sprint 33.19 (Frontend Lab Workflow, Promotion Contract & EPIC Closure) pode
 prosseguir com o trabalho de workflow/contrato que não dependa da aprovação visual em si; o
 fechamento final da EPIC 33 depende dela.
+
+## 23. Sprint 33.19 — Frontend Lab Workflow, Promotion Contract & EPIC Closure
+
+**Aprovação visual do proprietário concedida em 2026-08-28**, na própria sessão de execução da EPIC
+33, para o SHA candidato `bdcbea9` registrado pela Sprint 33.18 — condição que desbloqueia esta
+Sprint conforme seu próprio limite ("Do not promote Lab baseline if owner visual approval is
+pending").
+
+**Entregue no repositório Lab:** PR #13 (`DS-Asyst/beeday-frontend-lab`), `hmg` → `prd`, merge
+`923bee3`. `Lab CI` verde antes do merge — mesmo Ruleset "Protect PRD" (id `21652766`) já confirmado
+na Sprint 33.5, agora exercitado pela primeira vez. Tag anotada `v1.0.0-lab-baseline` criada e
+publicada apontando para `923bee3`, marcando a baseline visual aprovada — não uma implantação;
+`beeday-frontend-lab:prd` permanece fonte visual validada, nunca produção.
+
+**Entregue no `DS-Asyst/BeeDay`:**
+
+- [`05-workflow-and-promotion-contract.md`](05-workflow-and-promotion-contract.md) — consolida em um
+  único documento o branching/PR do Lab (já em vigor desde a Sprint 33.5), o gate de aprovação visual
+  antes de qualquer promoção `hmg` → `prd` (Sprint 33.18), o procedimento manual e rastreável de
+  integração `beeday-frontend-lab:prd` → `DS-Asyst/BeeDay` (novo — nenhuma integração desse tipo foi
+  necessária durante a EPIC 33, que fluiu apenas produção → Lab), o procedimento de reconciliação de
+  drift (mesmo padrão "registrar, não corrigir silenciosamente" já usado repetidamente ao longo da
+  EPIC), e a tabela de coordenadas cruzadas.
+- [`06-epic-closure-report.md`](06-epic-closure-report.md) — reconcilia os 8 critérios de
+  "Completion" da Issue #361 (a própria EPIC) contra evidência direta; todos os 8 satisfeitos.
+- Higiene de Issues do GitHub: as 19 Issues de Sprint (#362–#380) reconciliadas para `CLOSED` — as
+  Sprints 33.7–33.12 já estavam concluídas com evidência registrada em Sprints anteriores mas
+  permaneciam abertas no GitHub (lacuna de higiene não corrigida na época); fechadas nesta Sprint com
+  o mesmo comentário de evidência das demais.
+
+**Validação:**
+
+- Lab: `Lab CI` verde na PR #13 antes do merge (mesmo gate de formatação/build/testes das demais
+  Sprints — nenhum código de produto foi alterado por esta Sprint, apenas a promoção `hmg` → `prd`).
+- `git diff --check` — limpo em ambos os repositórios.
+
+**Disposição:** **EPIC 33 CONCLUÍDA.** Ver [`06-epic-closure-report.md`](06-epic-closure-report.md)
+para a reconciliação completa dos 8 critérios de fechamento.
