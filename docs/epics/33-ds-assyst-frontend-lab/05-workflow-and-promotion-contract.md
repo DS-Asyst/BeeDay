@@ -141,3 +141,18 @@ Workflow, contrato de promoção e reconciliação de drift documentados e conso
 promovido (PR #13, merge `923bee3`) sob aprovação visual explícita do proprietário para o SHA
 `bdcbea9`. Nenhuma sincronização automática foi introduzida; nenhuma promoção de `DS-Asyst/BeeDay`
 para `main`/`prd` foi realizada ou é autorizada por esta Sprint.
+
+## 9. CORREÇÃO (Sprint 33.18-R) — status da promoção da Seção 7/8 revogado
+
+**A promoção `923bee3`/tag `v1.0.0-lab-baseline` registrada acima não é mais tratada como baseline de
+paridade visual confiável.** O proprietário rodou o Lab localmente após esta Sprint e observou
+diferença visual substancial em relação à produção — detalhe completo em
+[`README.md`](README.md) §24 e [`04-baseline-parity-report.md`](04-baseline-parity-report.md) §9. A
+tag **não foi deletada nem reescrita**; permanece exatamente como estava, como registro histórico do
+que foi promovido e quando — apenas não deve mais ser tratada como a baseline de paridade atual
+enquanto o proprietário não decidir mantê-la, substituí-la ou removê-la.
+
+A causa raiz (composição de CSS incompleta) foi corrigida na Sprint 33.18-R (Lab PR #14, merge
+`5df4f24` em `hmg`) seguindo exatamente o ciclo branch → PR → `hmg` desta Seção 2 — **sem** nova
+promoção `hmg → prd`, conforme instrução explícita do proprietário. O novo SHA candidato
+(`5df4f24`) aguarda revisão visual real antes de qualquer promoção futura.
