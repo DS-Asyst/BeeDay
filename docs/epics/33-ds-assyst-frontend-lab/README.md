@@ -777,3 +777,62 @@ comportamento determinístico de apresentação, sem curva, threshold ou regra d
 
 **Disposição:** GO. Sprint 33.14 (Wallet Visual States) pode prosseguir a partir do `hmg` atualizado
 do Lab (`def365c`).
+
+## 18. Sprint 33.14 — Wallet Visual States (FE33-098..100)
+
+**Entregue no repositório Lab:** PR #9 (`DS-Asyst/beeday-frontend-lab`), branch
+`sprint/33.14-wallet-visual-states`, merge `38f8ffa`. `Lab CI` verde antes do merge.
+
+**Interrupção e retomada:** exatamente como registrado para a Sprint 33.12 (§16), a execução original
+desta Sprint foi interrompida no meio do trabalho (reinício do processo do harness). Ao retomar, o
+branch local já continha `Wallet.razor` completo, os 8 componentes/serviços/estados de suporte, os 6
+providers/dados de cenário, os 5 arquivos CSS component-scoped e os 3 arquivos de teste — tudo
+implementado, porém nada commitado e nenhuma validação registrada ainda. Nenhuma decisão de
+arquitetura foi refeita: o trabalho existente foi lido integralmente, verificado contra o Ledger e a
+Issue #375, validado (build/test/`dotnet run`), e só então commitado/enviado pelo fluxo normal.
+
+**Escopo entregue:** `Wallet.razor` + `WalletPageState`/`WalletInteractionState` (FE33-098),
+`TransactionFormModal.razor` (FE33-099), `TagFormModal.razor` (FE33-100), mais os componentes
+diretamente dependentes de `Wallet.razor` não listados individualmente no inventário original —
+`WalletSummary`, `TransactionList`, `TransactionCard`, `WalletFilters`, `WalletTagManager`,
+`WalletEmptyState` — e os serviços de apresentação `WalletCurrencyFormatter`/`TagContrastCalculator`.
+Catálogo `WalletResources` (en-US/pt-BR) copiado/adaptado seguindo a mesma política de localização já
+revertida para conteúdo novo desde a Sprint 33.11 (o Lab mantém `IStringLocalizer` real onde a
+produção o injeta, pois o pipeline de localização já existe desde a Sprint 33.10).
+
+**Padrão central desta Sprint:** toda a superfície `ISender` direta da produção (9
+comandos/queries — a maior superfície de ADAPT da EPIC, conforme já registrado no Ledger original) foi
+substituída por um único `WalletScenarioProvider : IScenarioProvider<WalletScenarioData>`
+(`Empty`/`Populated`/`LargeContent`, valores de resumo explícitos — nunca somados a partir da lista de
+transações, conforme comentário no próprio provider) somado a mutações locais em memória (`Task.Delay`
+sintético + `ToastService`, mesmo padrão das Sprints 33.12/33.13) para create/edit/delete de
+transação e tag. Nenhum `Random`/`Guid.NewGuid()`/relógio de parede — todos os ids/datas do provider
+são determinísticos por seed fixo.
+
+**Correções de classificação aplicadas ao Ledger nesta Sprint** (apenas às linhas FE33-098..100):
+
+1. **FE33-099/FE33-100** (`TransactionFormModal`/`TagFormModal`) — reclassificados de COPY para
+   ADAPT: ambos injetam `IStringLocalizer<WalletResources>`, não previsto no inventário original —
+   mesma descoberta/tratamento já aplicado a diversos componentes desde a Sprint 33.8.
+2. **FE33-098** — Lab path corrigido de `<LabWeb>/Components/Pages/Wallet/` (placeholder genérico) para
+   os caminhos reais de arquivo; nota estendida para registrar os 6 componentes filhos diretos não
+   individualizados no inventário original, seguindo o mesmo padrão de FE33-076 (Sprint 33.11:
+   composição documentada sob o item pai, não fragmentada).
+
+**Validação (Lab, sem LocalDB):**
+
+- `dotnet format BeeDayLab.slnx --verify-no-changes` — limpo.
+- `dotnet build BeeDayLab.slnx -c Release --warnaserror` — 0 avisos/erros.
+- `dotnet test BeeDayLab.slnx -c Release` — 465/465 aprovados (14 guardas de arquitetura + 451
+  Web.Tests, incluindo as novas `WalletComponentTests.cs`, `WalletPageTests.cs` e
+  `WalletScenarioAndStateTests.cs`).
+- `dotnet run` verificado localmente: `/`, `/wallet`, `/wallet?state=loading`, `/wallet?state=empty`,
+  `/wallet?dialog=transaction-create`, `css/wallet.css`, `css/design-system.css` todos `HTTP 200`.
+- `git diff --check` — limpo.
+- Varredura de segredo (mesmos padrões da Sprint 33.5) sobre os arquivos novos do Wallet — nenhum
+  valor real encontrado.
+
+`FE33-098`–`FE33-100` movidos de `MAPPED` para `VERIFIED`.
+
+**Disposição:** GO. Sprint 33.15 (Transactional Email Visual Templates) pode prosseguir a partir do
+`hmg` atualizado do Lab (`38f8ffa`).
