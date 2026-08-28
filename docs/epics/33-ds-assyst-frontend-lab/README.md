@@ -1023,3 +1023,41 @@ escondida.
 
 **Disposição:** GO. Sprint 33.18 (Complete Frontend Baseline Parity Gate) pode prosseguir a partir do
 `hmg` atualizado do Lab (`bdcbea9`).
+
+## 22. Sprint 33.18 — Complete Frontend Baseline Parity Gate
+
+**Sem PR no repositório Lab — nenhum código de produto foi alterado.** Esta Sprint é de fechamento/
+verificação, não de extração. Entregável completo em
+[`04-baseline-parity-report.md`](04-baseline-parity-report.md), produzido diretamente nesta PR do
+`DS-Asyst/BeeDay`.
+
+**Resumo do relatório** (detalhe completo no documento):
+
+- Matriz de estado terminal do Ledger: **109/109** itens `FE33-*` em estado terminal (105
+  `VERIFIED` + 4 `EXCLUDED`), **zero** em estado de trabalho — confirmado por contagem direta, não
+  suposição.
+- Coordenada candidata do Lab registrada de forma imutável: `DS-Asyst/beeday-frontend-lab@hmg`,
+  SHA `bdcbea9ee5381611f41201384c27e5be423edc47` (idêntico ao head da Sprint 33.17 — esta Sprint não
+  moveu o `hmg` do Lab).
+- Gate de regressão completo executado no SHA candidato: `dotnet format`/`build --warnaserror`/`test`
+  — **509/509** aprovados (22 guardas de arquitetura + 487 Web.Tests), cobrindo cumulativamente toda
+  suíte de paridade já construída pelas 12 Sprints de extração anteriores.
+- Amostragem dirigida de paridade byte-a-byte contra `acce26a`: tokens de `variables.css` (197/197
+  declarações `--beeday-*` idênticas, comparação ordem-independente), `BeeDayButton.razor` (idêntico
+  byte-a-byte, ignorando apenas fim-de-linha), sprite de ícones (60/60 símbolos idênticos). Nenhuma
+  diferença não classificada encontrada.
+- **Zero defeitos de extração encontrados** — nada a resolver, nenhum redesign realizado (limite
+  explícito da Issue #379 respeitado).
+- **Aprovação visual do proprietário: `PENDING`**, registrada explicitamente como tal — não inferida,
+  não presumida, nenhuma automação de captura de tela usada como substituto. Superfícies vivas para
+  revisão: `/preview`, `/design-system`, `/emails` no SHA candidato acima.
+
+**Sprint-Specific Boundary respeitado:** nenhuma automação de captura de tela em massa usada como
+aprovação autônoma; nenhuma paridade visual subjetiva marcada como aprovada pelo proprietário sem
+confirmação real; nenhum redesign intencional antes da aprovação do baseline.
+
+**Disposição:** GO para todo o trabalho mecânico/verificável em código desta Sprint. **PENDING**
+para a aprovação visual do proprietário — pré-requisito da Issue #379 antes de qualquer promoção
+adicional do baseline. Sprint 33.19 (Frontend Lab Workflow, Promotion Contract & EPIC Closure) pode
+prosseguir com o trabalho de workflow/contrato que não dependa da aprovação visual em si; o
+fechamento final da EPIC 33 depende dela.
