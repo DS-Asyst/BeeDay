@@ -156,3 +156,39 @@ A causa raiz (composição de CSS incompleta) foi corrigida na Sprint 33.18-R (L
 `5df4f24` em `hmg`) seguindo exatamente o ciclo branch → PR → `hmg` desta Seção 2 — **sem** nova
 promoção `hmg → prd`, conforme instrução explícita do proprietário. O novo SHA candidato
 (`5df4f24`) aguarda revisão visual real antes de qualquer promoção futura.
+
+## 10. FECHAMENTO FINAL — Promoção `hmg` → `prd` executada (SHA `357dc9d`)
+
+O proprietário aprovou explicitamente `5df4f24` (README.md §25) e, após o refinamento adicional do
+Email Gallery (Lab PR #15, merge `357dc9d`), aprovou explicitamente também `357dc9d` em 2026-09-04
+(README.md §26; `04-baseline-parity-report.md` §10). Com o pré-requisito desta Seção 4 satisfeito
+para o SHA final, a promoção foi executada seguindo exatamente o ciclo desta Seção 2:
+
+```text
+PR #16 (DS-Asyst/beeday-frontend-lab), hmg → prd
+ ↓ Lab CI verde (Ruleset "Protect PRD", id 21652766)
+ ↓ merge
+prd atualizado: a0f380e0542392874df6b780062a685a3c314800
+ ↓
+Nova tag anotada: v1.1.0-lab-baseline → a0f380e
+```
+
+`v1.0.0-lab-baseline` (→ `923bee3`) **não** foi apagada, movida ou reescrita — permanece como registro
+histórico do baseline promovido pela Sprint 33.19 original e posteriormente invalidado pela revisão
+visual real do proprietário (Seção 9). `v1.1.0-lab-baseline` é a baseline visual atualmente aprovada.
+
+**Coordenadas finais (substituem a Seção 7 como estado corrente; a Seção 7 permanece como registro
+histórico do que foi verdade no momento em que a Sprint 33.19 original a escreveu):**
+
+| Coordenada | Valor |
+|---|---|
+| Baseline de produção fixa | `DS-Asyst/BeeDay@acce26a` (imutável) |
+| `beeday-frontend-lab` — `hmg` (aprovado pelo proprietário) | `357dc9db59a665bc324d281ce374bb63e058779f` |
+| `beeday-frontend-lab` — `prd` (promovido, PR #16) | `a0f380e0542392874df6b780062a685a3c314800` |
+| Tag da baseline aprovada (atual) | `v1.1.0-lab-baseline` → `a0f380e` |
+| Tag da baseline aprovada (histórica, superada) | `v1.0.0-lab-baseline` → `923bee3` (preservada, não confiável para paridade atual) |
+| Ledger canônico | `03-frontend-inventory-ledger.md` — 115/115 itens em estado terminal |
+
+**Disposição:** Workflow e contrato de promoção executados sem exceção ao processo documentado nesta
+Seção 2/4. Nenhuma sincronização automática introduzida. Nenhuma promoção de `DS-Asyst/BeeDay` para
+`main`/`prd` foi realizada ou é autorizada por este fechamento.

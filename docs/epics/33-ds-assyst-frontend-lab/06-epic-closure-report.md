@@ -83,3 +83,48 @@ nesta Sprint — não apagado nem reescrito; a correção completa vive em `READ
 **Estado real após a correção de Sprint 33.18-R:** EPIC 33 **ABERTA**. Critérios 1–5, 7 e 8 seguem
 satisfeitos com evidência (nada nesses itens foi invalidado). Critério 6 (aprovação visual) volta a
 **PENDING**, agora contra `DS-Asyst/beeday-frontend-lab@5df4f24`.
+
+## FECHAMENTO FINAL — Critério 6 satisfeito para o SHA final (`357dc9d`), EPIC 33 concluída
+
+O proprietário aprovou explicitamente `5df4f24` (README.md §25) e, após o refinamento adicional do
+Email Gallery entregue pela Lab PR #15 (merge `357dc9d`), completou a revisão visual ao vivo desse
+novo SHA e registrou, em 2026-09-04:
+
+> *"I have completed the live OWNER review of DS-Asyst/beeday-frontend-lab@357dc9d. I explicitly
+> APPROVE 357dc9d as the final EPIC 33 visual baseline."*
+
+Este é o registro de aprovação explícita exigido pelo Critério 6 — não inferido da aprovação anterior
+de `5df4f24`, não inferido de testes passando, não inferido de ausência de defeitos reportados.
+
+**Reconciliação final dos 8 critérios (Issue #361):**
+
+| # | Critério | Estado | Evidência |
+|---|---|---|---|
+| 1 | `DS-Asyst/BeeDay` operacionalmente comprovado como repositório canônico | ✅ Satisfeito | Inalterado desde a Sprint 33.2/33.19 original — nunca invalidado. |
+| 2 | Entrega HMG pós-transferência bem-sucedida | ✅ Satisfeito | Inalterado — nunca invalidado. |
+| 3 | `DS-Asyst/beeday-frontend-lab` independente, executável e sem banco de dados | ✅ Satisfeito | Reconfirmado no SHA final `357dc9d`/`a0f380e` (guardas de arquitetura, `dotnet run` sem LocalDB). |
+| 4 | Ledger sem itens em estado de trabalho | ✅ Satisfeito | **115/115** itens `FE33-001`–`FE33-115` em estado terminal (111 `VERIFIED` + 4 `EXCLUDED`) — ver `03-frontend-inventory-ledger.md`. |
+| 5 | Paridade estrutural/de código documentada contra a baseline de produção fixa | ✅ Satisfeito | `04-baseline-parity-report.md` §§1–9 (gate original + correção de causa-raiz da Sprint 33.18-R); nenhum novo defeito estrutural encontrado pelo refinamento do Email Gallery (rotas standalone servem o mesmo `TransactionalEmailTemplateCatalog.Compose(...)`, sem reimplementação). |
+| 6 | Aprovação visual do proprietário explicitamente registrada **para o SHA final** | ✅ **Satisfeito** | Aprovação textual explícita acima, para `357dc9d`, registrada em `README.md` §26 e `04-baseline-parity-report.md` §10 — usada para autorizar a PR #16 (`hmg` → `prd`) do Lab. |
+| 7 | Contratos de promoção/drift completos | ✅ Satisfeito | `05-workflow-and-promotion-contract.md` §10 registra a promoção final executada sem exceção ao processo documentado. |
+| 8 | Nenhum segredo/backend/lógica de negócio de produção duplicado no Lab | ✅ Satisfeito | Reconfirmado para PR #15 (`Program.cs` guarda dedicada: ausência de `IEmailSender`/`SmtpClient`/`MailKit`/`SendGrid`/Resend nas rotas standalone). |
+
+**Todos os 8 critérios de fechamento estão satisfeitos, com evidência direta sobre o SHA final
+efetivamente aprovado pelo proprietário — não sobre um SHA anterior.**
+
+### Coordenadas finais imutáveis (substituem as da revogação acima como estado corrente)
+
+| Coordenada | Valor |
+|---|---|
+| Baseline de produção fixa | `DS-Asyst/BeeDay@acce26a` |
+| Lab — `hmg` (aprovado pelo proprietário) | `357dc9db59a665bc324d281ce374bb63e058779f` |
+| Lab — `prd` (promovido, PR #16) | `a0f380e0542392874df6b780062a685a3c314800` |
+| Tag da baseline aprovada (atual) | `v1.1.0-lab-baseline` → `a0f380e` |
+| Tag histórica (superada, preservada) | `v1.0.0-lab-baseline` → `923bee3` |
+| Ledger canônico | `03-frontend-inventory-ledger.md` — 115/115 terminal |
+
+**Disposição final: EPIC 33 — CONCLUÍDA.** Todos os 8 critérios de "Completion" da Issue #361
+satisfeitos com evidência direta sobre o SHA final aprovado pelo proprietário. Nenhuma Sprint permanece
+com trabalho pendente. Nenhum bloqueio remanescente. As seções anteriores deste documento (incluindo a
+disposição revogada) permanecem como registro histórico fiel do que foi declarado em cada momento —
+não foram apagadas nem reescritas.

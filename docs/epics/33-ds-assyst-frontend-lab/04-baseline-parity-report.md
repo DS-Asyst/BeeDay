@@ -182,3 +182,31 @@ contra a composição anterior, 7/7 passam contra a correção).
 proprietário permanece **PENDING**, agora contra o SHA `5df4f24`. As Seções 1–8 acima permanecem
 como registro histórico do que foi observado no momento em que foram escritas — não foram apagadas
 nem reescritas.
+
+## 10. FECHAMENTO FINAL — Aprovação do Proprietário (`357dc9d`) e Promoção
+
+**Estado final, não mais `PENDING`.** O proprietário completou a revisão visual ao vivo de
+`DS-Asyst/beeday-frontend-lab@357dc9d` (SHA candidato registrado em `README.md` §25.4, refinamento do
+Email Gallery sobre a correção de composição de CSS de `5df4f24`) e registrou aprovação explícita em
+2026-09-04:
+
+> *"I have completed the live OWNER review of DS-Asyst/beeday-frontend-lab@357dc9d. I explicitly
+> APPROVE 357dc9d as the final EPIC 33 visual baseline."*
+
+**Coordenada final promovida:**
+
+```text
+DS-Asyst/beeday-frontend-lab
+Branch hmg (aprovado) : 357dc9db59a665bc324d281ce374bb63e058779f
+Branch prd (promovido): a0f380e0542392874df6b780062a685a3c314800  (PR #16, hmg → prd)
+Tag                    : v1.1.0-lab-baseline → a0f380e (nova; v1.0.0-lab-baseline → 923bee3 preservada,
+                         não reescrita, registro histórico do baseline invalidado na Seção 9)
+```
+
+**Ledger final:** 115/115 itens `FE33-001`–`FE33-115` em estado terminal (111 `VERIFIED` + 4
+`EXCLUDED`), zero em estado de trabalho.
+
+**Disposição final:** **GO.** Gate estrutural/de código GO, aprovação visual do proprietário
+explícita e registrada para o SHA final promovido, Ledger em estado terminal completo. Critério 6
+("Owner visual baseline approval explicitly recorded") da Issue #361 satisfeito para o SHA final. Este
+relatório está encerrado — nenhuma seção anterior foi apagada ou reescrita.
