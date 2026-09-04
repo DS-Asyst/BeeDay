@@ -1307,3 +1307,63 @@ pelo proprietário (Seção 25, para `5df4f24`) cobre a composição de CSS; o r
 Gallery desta Seção aguarda a revisão do proprietário antes do fechamento final da EPIC 33.
 **EPIC 33 permanece ABERTA**, aguardando o proprietário revisar `357dc9d` e decidir sobre promoção/
 fechamento.
+
+## 26. FECHAMENTO FINAL — Aprovação do Proprietário (SHA `357dc9d`) + Promoção `hmg` → `prd`
+
+**O proprietário completou a revisão visual ao vivo de `DS-Asyst/beeday-frontend-lab@357dc9d`** e
+registrou, em 2026-09-04, aprovação explícita textual:
+
+> *"I have completed the live OWNER review of DS-Asyst/beeday-frontend-lab@357dc9d. I explicitly
+> APPROVE 357dc9d as the final EPIC 33 visual baseline."*
+
+Esta aprovação cobre especificamente o refinamento do Email Gallery (Seção 25 — rotas standalone
+`/emails/confirmation/rendered` e `/emails/password-reset/rendered`, painel de revisão de cliente de
+e-mail), que permanecia `PENDING` desde a Seção 25.4. Não é uma reafirmação da aprovação já concedida
+para `5df4f24` (Seção 25) — é uma aprovação distinta, explícita, sobre o SHA candidato atual, exigida
+pelo limite "nunca inferir aprovação de um SHA a partir da aprovação de um SHA anterior" (Issue #379,
+Issue #380).
+
+### 26.1 Promoção executada
+
+PR #16 (`DS-Asyst/beeday-frontend-lab`), `hmg` → `prd`, sem alteração de código-fonte (promoção pura,
+mesmo padrão da PR #13). `Lab CI` verde antes do merge (Ruleset "Protect PRD", id `21652766`). Merge
+commit `a0f380e0542392874df6b780062a685a3c314800`.
+
+```text
+DS-Asyst/beeday-frontend-lab
+hmg (aprovado)  : 357dc9db59a665bc324d281ce374bb63e058779f
+prd (promovido) : a0f380e0542392874df6b780062a685a3c314800  (PR #16)
+```
+
+### 26.2 Baseline tag
+
+Nova tag anotada `v1.1.0-lab-baseline` criada apontando para `a0f380e` — **não** reaproveita nem
+reescreve `v1.0.0-lab-baseline` (permanece intacta em `923bee3`, registro histórico do baseline que
+foi posteriormente invalidado pela revisão visual real do proprietário, Seção 24). A nova tag marca o
+baseline visual atualmente aprovado; a antiga permanece como registro do que foi promovido e quando,
+conforme a política "não apagar nem reescrever registro histórico" já seguida em toda a EPIC 33.
+
+### 26.3 Ledger — estado terminal final
+
+`03-frontend-inventory-ledger.md`: **115/115** itens `FE33-001`–`FE33-115` em estado terminal (111
+`VERIFIED` + 4 `EXCLUDED`), **zero** em estado de trabalho — contagem final após a adição dos 6 itens
+`FE33-110`–`FE33-115` pela Sprint 33.18-R (Seção 24.1). Nenhum item novo foi necessário para o
+refinamento do Email Gallery (PR #15): as rotas standalone e o chrome de revisão são infraestrutura de
+galeria do próprio Lab (`Lab host / gallery`, ADR-008 §Decisão 2), não superfície de produção extraída
+— consistente com o precedente já registrado para FE33-108/109 (Component/Page Gallery não são cópias
+1:1 de página de produção).
+
+### 26.4 Critérios de fechamento da EPIC (Issue #361) — reconciliação final
+
+Os 8 critérios (ver também `06-epic-closure-report.md`): 1–5, 7 e 8 seguem satisfeitos sem alteração
+desde a Seção 24 (nunca foram invalidados pela falha de paridade visual). Critério 6 (aprovação visual
+do proprietário) está agora satisfeito **para o SHA final `357dc9d`**, promovido a `prd` como
+`a0f380e` — ver Seção 26.1. Todos os 8 critérios estão satisfeitos com evidência direta.
+
+### 26.5 Disposição final
+
+**GO.** Aprovação visual do proprietário explícita e registrada para o SHA final `357dc9d`; promoção
+`hmg` → `prd` executada sob o fluxo de PR protegido existente; `Lab CI` verde; nova tag de baseline
+criada sem apagar/reescrever a anterior; Ledger em estado terminal completo (115/115); nenhum critério
+de fechamento da EPIC pendente. **EPIC 33 está formalmente concluída.** Reconciliação de Issues
+(`#379` → `#380` → `#361`) registrada nos comentários de fechamento de cada Issue no GitHub.
